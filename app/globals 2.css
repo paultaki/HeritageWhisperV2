@@ -1,0 +1,2376 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Phase 5-7 Design System Colors */
+  --primary-coral: hsl(0, 77%, 64%); /* #E85D5D */
+  --bg-cream: hsl(30, 57%, 98%); /* #FDF6F0 */
+  
+  --background: hsl(30, 57%, 98%); /* Cream background */
+  --foreground: hsl(210, 10%, 23%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(210, 10%, 23%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(210, 10%, 23%);
+  --primary: hsl(0, 77%, 64%); /* Coral for main CTAs */
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(34, 55%, 53%); /* Gold/Bronze accent */
+  --secondary-foreground: hsl(210, 10%, 23%);
+  --muted: hsl(45, 15%, 85%);
+  --muted-foreground: hsl(45, 5%, 55%);
+  --accent: hsl(0, 77%, 64%); /* Coral accent */
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(356, 90%, 54%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(45, 20%, 82%);
+  --input: hsl(45, 20%, 88%);
+  --ring: hsl(0, 77%, 64%); /* Coral for focus states */
+  --chart-1: hsl(210, 29%, 24%);
+  --chart-2: hsl(34, 55%, 53%);
+  --chart-3: hsl(0, 77%, 64%);
+  --chart-4: hsl(210, 10%, 23%);
+  --chart-5: hsl(30, 57%, 98%);
+  --sidebar: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(210, 10%, 23%);
+  --sidebar-primary: hsl(0, 77%, 64%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(45, 15%, 85%);
+  --sidebar-accent-foreground: hsl(210, 29%, 24%);
+  --sidebar-border: hsl(45, 20%, 82%);
+  --sidebar-ring: hsl(0, 77%, 64%);
+  --font-sans: "Inter", sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 24px; /* Updated button radius */
+  /* Character trait colors */
+  --trait-resilience: #6B9BD1;
+  --trait-forgiveness: #81C784;
+  --trait-courage: #B39DDB;
+  --trait-legacy: #FFB74D;
+  --trait-wisdom: #FF8A95;
+  --trait-compassion: #64B5F6;
+  --trait-determination: #A1887F;
+  --trait-gratitude: #FFD54F;
+  --trait-patience: #AED581;
+}
+
+/* Pulse shadow animation for wisdom clip play button */
+@keyframes pulse-shadow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4), 0 20px 50px -10px rgba(168, 85, 247, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(168, 85, 247, 0), 0 25px 60px -5px rgba(168, 85, 247, 0.3);
+  }
+}
+
+.pulse-shadow {
+  animation: pulse-shadow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Enhanced waveform animation */
+@keyframes waveform {
+  0%, 100% { 
+    transform: scaleY(0.5);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* Utility for hiding scrollbars */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Global scrollbar styling - subtle but visible */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+html::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.dark {
+  --background: hsl(210, 10%, 8%);
+  --foreground: hsl(48, 50%, 96%);
+  --card: hsl(210, 10%, 12%);
+  --card-foreground: hsl(48, 50%, 96%);
+  --popover: hsl(210, 10%, 12%);
+  --popover-foreground: hsl(48, 50%, 96%);
+  --primary: hsl(210, 29%, 24%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(34, 55%, 53%);
+  --secondary-foreground: hsl(210, 10%, 23%);
+  --muted: hsl(210, 10%, 20%);
+  --muted-foreground: hsl(45, 5%, 65%);
+  --accent: hsl(351, 83%, 71%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(356, 90%, 54%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 10%, 18%);
+  --input: hsl(210, 10%, 16%);
+  --ring: hsl(210, 29%, 24%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    background: linear-gradient(135deg, hsl(30, 57%, 98%) 0%, hsl(30, 47%, 96%) 100%);
+    min-height: 100vh;
+    /* Minimum font size for senior readability */
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  
+  /* Ensure minimum font sizes for seniors */
+  p {
+    font-size: max(1rem, 18px);
+    line-height: 1.6;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  
+  button {
+    font-size: max(1.125rem, 20px);
+  }
+  
+  /* Better touch targets for mobile - 44px minimum */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Typography hierarchy refinements */
+  h1 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+  
+  h2 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+  }
+  
+  h3 {
+    font-weight: 600;
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+  }
+}
+
+/* Animation utilities for HomePage components */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-up.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+
+.animation-delay-800 {
+  animation-delay: 800ms;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1000ms;
+}
+
+/* Loading skeleton animation */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Button microinteractions */
+.btn-press {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-press:active {
+  transform: scale(0.98);
+}
+
+/* Premium shadow effects */
+.shadow-3xl {
+  box-shadow: 
+    0 10px 20px rgba(0,0,0,0.15),
+    0 20px 40px rgba(0,0,0,0.10),
+    0 30px 60px rgba(0,0,0,0.05);
+}
+
+.hover\:shadow-3xl:hover {
+  box-shadow: 
+    0 12px 24px rgba(0,0,0,0.18),
+    0 24px 48px rgba(0,0,0,0.12),
+    0 36px 72px rgba(0,0,0,0.08);
+}
+
+/* Typewriter effect - simplified for mobile */
+.typewriter-text {
+  display: inline-block;
+  animation: fadeIn 1.5s ease-out;
+  overflow: visible;
+  white-space: normal;
+  animation-fill-mode: forwards;
+}
+
+.typewriter-cursor {
+  animation: blink 1s infinite;
+}
+
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+
+/* Animation delays */
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+
+.animation-delay-800 {
+  animation-delay: 800ms;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1000ms;
+}
+
+/* Count-up animation for numbers */
+.count-up {
+  display: inline-block;
+  animation: countUp 1.5s ease-out;
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Underline animation for links */
+.underline-animate {
+  position: relative;
+  display: inline-block;
+}
+
+.underline-animate::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width 0.3s ease-out;
+}
+
+.underline-animate:hover::after {
+  width: 100%;
+}
+
+/* Loading skeleton animation */
+.skeleton-loader {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Enhanced focus states for accessibility - updated with coral */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(232, 93, 93, 0.2); /* Coral shadow */
+  transition: all 0.2s ease;
+}
+
+/* Slide in from right animation */
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Drifting animations for floating elements */
+.drift-diagonal {
+  animation: driftDiagonal 60s infinite linear;
+}
+
+.drift-diagonal-reverse {
+  animation: driftDiagonalReverse 65s infinite linear;
+}
+
+.drift-horizontal {
+  animation: driftHorizontal 45s infinite linear;
+}
+
+.drift-horizontal-reverse {
+  animation: driftHorizontalReverse 50s infinite linear;
+}
+
+.drift-vertical {
+  animation: driftVertical 55s infinite linear;
+}
+
+@keyframes driftDiagonal {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(100px, 50px);
+  }
+  50% {
+    transform: translate(200px, 100px);
+  }
+  75% {
+    transform: translate(100px, 150px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes driftDiagonalReverse {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-80px, 60px);
+  }
+  50% {
+    transform: translate(-160px, 120px);
+  }
+  75% {
+    transform: translate(-80px, 180px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes driftHorizontal {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(150px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes driftHorizontalReverse {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-150px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes driftVertical {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(100px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Premium Floating animations for background elements */
+.float-diagonal-slow {
+  animation: floatDiagonalSlow 45s infinite linear;
+}
+
+.float-diagonal-reverse {
+  animation: floatDiagonalReverse 50s infinite linear;
+}
+
+.float-horizontal {
+  animation: floatHorizontal 35s infinite linear;
+}
+
+.float-horizontal-reverse {
+  animation: floatHorizontalReverse 38s infinite linear;
+}
+
+.float-vertical {
+  animation: floatVertical 40s infinite linear;
+}
+
+.float-vertical-slow {
+  animation: floatVerticalSlow 55s infinite linear;
+}
+
+/* Floating animations with smooth continuous movement */
+@keyframes floatDiagonalSlow {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(120px, 60px) rotate(1deg);
+  }
+  50% {
+    transform: translate(80px, 120px) rotate(-1deg);
+  }
+  75% {
+    transform: translate(-40px, 80px) rotate(0.5deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes floatDiagonalReverse {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-100px, 80px) rotate(-0.5deg);
+  }
+  50% {
+    transform: translate(-60px, 160px) rotate(0.5deg);
+  }
+  75% {
+    transform: translate(40px, 100px) rotate(-0.5deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes floatHorizontal {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(200px) translateY(-10px);
+  }
+  50% {
+    transform: translateX(100px) translateY(10px);
+  }
+  75% {
+    transform: translateX(-100px) translateY(-5px);
+  }
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+}
+
+@keyframes floatHorizontalReverse {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(-150px) translateY(15px);
+  }
+  50% {
+    transform: translateX(-100px) translateY(-10px);
+  }
+  75% {
+    transform: translateX(50px) translateY(5px);
+  }
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+}
+
+@keyframes floatVertical {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(150px) translateX(10px);
+  }
+  50% {
+    transform: translateY(100px) translateX(-10px);
+  }
+  75% {
+    transform: translateY(-50px) translateX(5px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+@keyframes floatVerticalSlow {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+  }
+  33% {
+    transform: translateY(120px) translateX(-20px) scale(1.05);
+  }
+  66% {
+    transform: translateY(80px) translateX(20px) scale(0.95);
+  }
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+  }
+}
+
+/* Glassmorphism utility classes */
+.glassmorphism {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.glass-card {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Wave dance animation for audio visualizer */
+.animate-wave-dance {
+  animation: waveDance 0.8s ease-in-out infinite;
+}
+
+@keyframes waveDance {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.3);
+  }
+}
+
+/* Smooth page transitions */
+.page-enter {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Decade bubble animations */
+.decade-bubble {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.decade-bubble:hover {
+  transform: scale(1.1);
+}
+
+.decade-bubble.active {
+  animation: rotateIn 0.4s ease-out;
+}
+
+/* Recording button pulse */
+.record-btn-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Floating elements */
+.float-element {
+  animation: gentleFloat 4s ease-in-out infinite;
+}
+
+/* Accessibility improvements for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-delay: -1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    background-attachment: initial !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+  
+  /* Keep essential animations but make them subtle */
+  .typewriter-text {
+    animation: none;
+    width: 100%;
+  }
+  
+  .typewriter-cursor {
+    animation: none;
+    opacity: 1;
+  }
+  
+  .drift-diagonal,
+  .drift-diagonal-reverse,
+  .drift-horizontal,
+  .drift-horizontal-reverse,
+  .drift-vertical {
+    animation: none;
+  }
+  
+  .animate-bounce {
+    animation: none;
+  }
+  
+  .animate-ping {
+    animation: none;
+  }
+}
+
+@layer components {
+  /* Button Hierarchy Styles */
+  .btn-primary {
+    background: var(--primary-coral);
+    color: white;
+    border-radius: 24px;
+    font-weight: 600;
+    padding: 12px 24px;
+    min-height: 44px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(232, 93, 93, 0.2);
+  }
+  
+  .btn-primary:hover {
+    background: hsl(0, 77%, 58%);
+    box-shadow: 0 4px 16px rgba(232, 93, 93, 0.3);
+    transform: translateY(-2px);
+  }
+  
+  .btn-secondary {
+    background: white;
+    color: var(--primary-coral);
+    border: 2px solid var(--primary-coral);
+    border-radius: 24px;
+    font-weight: 500;
+    padding: 10px 22px;
+    min-height: 44px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-secondary:hover {
+    background: var(--primary-coral);
+    color: white;
+    box-shadow: 0 2px 8px rgba(232, 93, 93, 0.2);
+  }
+  
+  .memory-card {
+    background: white;
+    padding: 12px;
+    box-shadow: 
+      0 2px 4px rgba(0,0,0,0.18),
+      0 6px 12px rgba(0,0,0,0.12),
+      0 16px 32px rgba(0,0,0,0.08),
+      0 24px 48px rgba(0,0,0,0.04);
+    transform: rotate(-0.3deg);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: var(--radius);
+    animation: fadeInUp 0.6s ease-out backwards;
+    /* Ensure readable font size for memory cards */
+    font-size: max(1rem, 18px);
+  }
+  
+  /* Stagger animation for memory cards */
+  .memory-card:nth-child(1) { animation-delay: 0.1s; }
+  .memory-card:nth-child(2) { animation-delay: 0.2s; }
+  .memory-card:nth-child(3) { animation-delay: 0.3s; }
+  .memory-card:nth-child(4) { animation-delay: 0.4s; }
+  .memory-card:nth-child(5) { animation-delay: 0.5s; }
+  .memory-card:nth-child(6) { animation-delay: 0.6s; }
+  
+  .memory-card:nth-child(even) {
+    transform: rotate(0.2deg);
+  }
+  
+  .memory-card:hover {
+    transform: rotate(0deg) scale(1.03) translateY(-4px);
+    z-index: 10;
+    box-shadow: 
+      0 4px 8px rgba(0,0,0,0.22),
+      0 8px 16px rgba(0,0,0,0.16),
+      0 20px 40px rgba(0,0,0,0.12),
+      0 32px 64px rgba(0,0,0,0.08);
+  }
+  
+  /* Audio player loading pulse animation */
+  .audio-loading-pulse {
+    animation: audioPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes audioPulse {
+    0%, 100% {
+      opacity: 0.8;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.4;
+      transform: scale(0.95);
+    }
+  }
+
+  /* Audio playhead animation */
+  .audio-playhead {
+    animation: playheadPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes playheadPulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(212, 133, 58, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgba(212, 133, 58, 0);
+    }
+  }
+
+  /* Smooth progress bar transition */
+  .audio-progress-smooth {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Audio error state animation */
+  .audio-error-shake {
+    animation: errorShake 0.5s ease-out;
+  }
+
+  @keyframes errorShake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-2px);
+    }
+    75% {
+      transform: translateX(2px);
+    }
+  }
+
+  /* Return highlight animation for smart navigation */
+  .return-highlight-animation {
+    animation: returnHighlight 2.5s ease-out forwards;
+  }
+  
+  @keyframes returnHighlight {
+    0% {
+      box-shadow: 0 0 0 0 rgba(212, 133, 58, 0.7);
+      transform: scale(1);
+    }
+    25% {
+      box-shadow: 0 0 20px 10px rgba(212, 133, 58, 0.5);
+      transform: scale(1.02);
+    }
+    50% {
+      box-shadow: 0 0 30px 15px rgba(212, 133, 58, 0.3);
+      transform: scale(1.01);
+    }
+    75% {
+      box-shadow: 0 0 15px 5px rgba(212, 133, 58, 0.1);
+      transform: scale(1.005);
+    }
+    100% {
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transform: scale(1);
+    }
+  }
+  
+  .highlight-animation {
+    ring: 2px solid #D4853A;
+    box-shadow: 0 4px 12px rgba(212, 133, 58, 0.3);
+    transform: scale(1.01);
+  }
+  
+  .ghost-prompt {
+    color: hsl(45, 15%, 70%);
+    font-style: italic;
+    opacity: 0.8;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeInScale 0.5s ease-out backwards;
+    /* Ensure readable font size */
+    font-size: max(1rem, 18px);
+  }
+  
+  /* Stagger animation for ghost prompts */
+  .ghost-prompt:nth-child(1) { animation-delay: 0.15s; }
+  .ghost-prompt:nth-child(2) { animation-delay: 0.25s; }
+  .ghost-prompt:nth-child(3) { animation-delay: 0.35s; }
+  
+  .ghost-prompt:hover {
+    opacity: 1;
+    color: hsl(45, 15%, 60%);
+    transform: translateY(-2px);
+    border-color: var(--primary);
+  }
+  
+  .timeline-spine {
+    background: linear-gradient(to bottom, 
+      transparent 0%, 
+      #2c3e50 5%, 
+      #2c3e50 95%, 
+      transparent 100%);
+    width: 6px;
+    position: relative;
+    border-radius: 3px;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+    margin-left: 32px;
+  }
+  
+  /* Timeline markers will be added as separate elements */
+  .timeline-marker {
+    position: absolute;
+    left: 0; /* No additional offset needed */
+    width: 16px;
+    height: 16px;
+    background-color: #f5a623;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 1;
+  }
+  
+  .timeline-marker.current-year {
+    width: 20px;
+    height: 20px;
+    left: -2px; /* Adjust for larger marker to stay centered */
+    animation: pulse-marker 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-marker {
+    0%, 100% { 
+      transform: scale(1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    50% { 
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(245,166,35,0.4);
+    }
+  }
+  
+  /* Hide year labels - we don't want text next to dots */
+  .timeline-year-label {
+    display: none;
+  }
+  
+  /* Hide connector lines */
+  .timeline-connector {
+    display: none;
+  }
+  
+  /* Timeline Connection Points */
+  .memory-card,
+  .ghost-prompt,
+  .blank-memory {
+    position: relative;
+  }
+  
+  /* Connection line from card to dot */
+  .memory-card::before,
+  .ghost-prompt::before,
+  .blank-memory::before {
+    content: "";
+    position: absolute;
+    left: -32px;
+    top: 24px;
+    width: 24px;
+    height: 2px;
+    background: #D4B5A0;
+    z-index: 0;
+    transition: width 0.3s ease;
+  }
+  
+  /* Extend connection line on hover */
+  .memory-card:hover::before,
+  .ghost-prompt:hover::before,
+  .blank-memory:hover::before {
+    width: 28px;
+  }
+  
+  /* Connection dot for completed memories */
+  .memory-card::after {
+    content: "";
+    position: absolute;
+    left: -41px;
+    top: 18px;
+    width: 12px;
+    height: 12px;
+    background: #C68A2B;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 2;
+  }
+  
+  /* Hollow dashed dot for ghost prompts */
+  .ghost-prompt::after {
+    content: "";
+    position: absolute;
+    left: -41px;
+    top: 18px;
+    width: 12px;
+    height: 12px;
+    background: transparent;
+    border: 2px dashed #C8BDB0;
+    border-radius: 50%;
+    z-index: 2;
+  }
+  
+  /* Hollow solid dot for blank memory card */
+  .blank-memory::after {
+    content: "";
+    position: absolute;
+    left: -41px;
+    top: 18px;
+    width: 12px;
+    height: 12px;
+    background: rgba(212, 133, 58, 0.1);
+    border: 2px solid #D4853A;
+    border-radius: 50%;
+    z-index: 2;
+  }
+  
+  /* Pulse animation for recently added memories */
+  @keyframes pulse-dot {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    50% {
+      transform: scale(1.2);
+      box-shadow: 0 2px 8px rgba(198,138,43,0.4);
+    }
+  }
+  
+  /* Apply pulse to newly recorded memory (add .new-memory class via JS if needed) */
+  .memory-card.new-memory::after {
+    animation: pulse-dot 2s ease-in-out 3;
+  }
+  
+  /* Hover effect for timeline dots */
+  .memory-card:hover::after,
+  .ghost-prompt:hover::after,
+  .blank-memory:hover::after {
+    transform: scale(1.3);
+    transition: transform 0.2s ease;
+  }
+  
+  /* Mobile-First Responsive Adjustments */
+  @media (max-width: 640px) {
+    /* Connection lines for saved memories */
+    .memory-card::before,
+    .blank-memory::before {
+      left: -28px;  /* Extend further left to meet dot */
+      width: 20px;  /* Longer line to reach centered dot */
+    }
+    
+    /* Mobile button styles */
+    button {
+      width: 100%;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    /* Mobile timeline card adjustments */
+    .memory-card {
+      margin: 0 8px;
+      padding: 16px;
+    }
+    
+    /* Mobile wisdom quote */
+    .wisdom {
+      padding: 16px;
+      margin: 24px 0;
+    }
+    
+    .wisdom blockquote {
+      font-size: 16px;
+    }
+  }
+  
+  /* Tablet Responsive (768px+) */
+  @media (min-width: 768px) {
+    /* Timeline container constraint */
+    .timeline-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* Grid layout for related prompts */
+    .related-prompts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    
+    /* Buttons responsive */
+    button {
+      width: auto;
+    }
+  }
+  
+  /* Desktop Responsive (1024px+) */
+  @media (min-width: 1024px) {
+    /* Book pages max width */
+    .book-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    /* Desktop grid for prompts */
+    .related-prompts-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    
+    /* Desktop wisdom quote */
+    .wisdom {
+      padding: 32px;
+      margin: 40px 0;
+    }
+    
+    /* Dotted connection line for ghost prompts */
+    .ghost-prompt::before {
+      left: -32px;  /* Ghost prompts extend further */
+      width: 24px;  /* Longer line for ghost prompts */
+      border-bottom: 2px dotted #D4B5A0;  /* Make it dotted */
+      background: transparent;  /* Remove solid background */
+      height: 0;  /* Use border instead of background */
+      top: 25px;  /* Adjust vertical position */
+    }
+    
+    /* Dots for saved memories */
+    .memory-card::after,
+    .blank-memory::after {
+      left: -37px;  /* Center on timeline spine */
+      width: 10px;  /* Slightly smaller dots on mobile */
+      height: 10px;
+      top: 19px;
+    }
+    
+    /* Dots for ghost prompts - positioned further left */
+    .ghost-prompt::after {
+      left: -41px;  /* Ghost prompts further left */
+      width: 10px;
+      height: 10px;
+      top: 19px;
+    }
+    
+    /* Keep small margin for timeline spine on mobile */
+    .timeline-spine {
+      margin-left: 8px;
+    }
+  }
+  
+  .voice-circle {
+    transition: all 0.2s ease;
+    background: linear-gradient(135deg, hsl(210, 29%, 24%) 0%, hsl(210, 35%, 30%) 100%);
+    border-radius: 50%;
+  }
+  
+  .voice-circle.active {
+    animation: pulse 1.5s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  /* Entrance animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Fade up animation for scroll-triggered elements */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .fade-up.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Animate fade in up */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+  
+  /* Homepage specific animations */
+  @keyframes float-in {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 0.2;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  
+  .animate-float-in {
+    animation: float-in 1.5s ease-out forwards;
+  }
+  
+  .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out;
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+  
+  .animation-delay-200 {
+    animation-delay: 0.2s;
+  }
+  
+  .animation-delay-400 {
+    animation-delay: 0.4s;
+  }
+  
+  .animation-delay-600 {
+    animation-delay: 0.6s;
+  }
+  
+  .animation-delay-800 {
+    animation-delay: 0.8s;
+  }
+  
+  .animation-delay-1000 {
+    animation-delay: 1s;
+  }
+  
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+  
+  @keyframes gentleFloat {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  @keyframes rotateIn {
+    from {
+      opacity: 0;
+      transform: rotate(-10deg) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: rotate(0) scale(1);
+    }
+  }
+  
+  .decade-section {
+    position: relative;
+  }
+  
+  .decade-marker-container {
+    position: absolute;
+    left: -41px; /* Position to center marker on 6px spine with 32px margin */
+    top: 8px; /* Align with header text baseline */
+    display: flex;
+    align-items: center;
+    height: 40px;
+  }
+  
+  .album-texture {
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.03) 0%, transparent 50%),
+      linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 100%);
+  }
+
+  .recording-button {
+    background: linear-gradient(135deg, hsl(351, 83%, 71%) 0%, hsl(351, 90%, 65%) 100%);
+    transition: all 0.3s ease;
+  }
+
+  .recording-button:hover {
+    background: linear-gradient(135deg, hsl(351, 90%, 65%) 0%, hsl(351, 83%, 71%) 100%);
+    transform: scale(1.05);
+  }
+
+  .wisdom-glow {
+    background: linear-gradient(135deg, hsl(351, 83%, 71%) 0%, hsl(351, 70%, 75%) 100%);
+    box-shadow: 0 0 20px hsl(351, 83%, 71%, 0.3);
+  }
+
+  /* Homepage floating particles animation */
+  @keyframes float {
+    0%, 100% { 
+      transform: translateY(0px) rotate(0deg); 
+      opacity: 0.3; 
+    }
+    25% { 
+      transform: translateY(-10px) rotate(90deg); 
+      opacity: 0.7; 
+    }
+    50% { 
+      transform: translateY(-5px) rotate(180deg); 
+      opacity: 0.5; 
+    }
+    75% { 
+      transform: translateY(-12px) rotate(270deg); 
+      opacity: 0.8; 
+    }
+  }
+
+  .animate-float {
+    animation: float linear infinite;
+  }
+  
+  /* Book View Styles - Premium Memory Book */
+
+  /* Book container with leather binding effect */
+  .book-container {
+    background: #2c2416; /* Dark leather color */
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 
+      inset 0 0 30px rgba(0,0,0,0.3),
+      0 10px 40px rgba(0,0,0,0.2);
+    perspective: 1500px;
+  }
+
+  /* Spread container */
+  .book-spread {
+    position: relative;
+    display: grid;
+    gap: 28px;
+    background: #faf8f5;
+    min-height: 600px;
+    box-shadow: 
+      0 0 40px rgba(0,0,0,0.1) inset,
+      0 0 2px rgba(0,0,0,0.1);
+  }
+
+  @media (min-width: 900px) {
+    .book-spread {
+      grid-template-columns: 1fr 1fr;
+      padding: 28px;
+    }
+    
+    /* Enhanced center spine with book binding effect */
+    .book-spread::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(90deg, 
+        rgba(0,0,0,0.05) 0%, 
+        rgba(0,0,0,0.08) 50%, 
+        rgba(0,0,0,0.05) 100%);
+      box-shadow: 
+        -10px 0 20px rgba(0,0,0,0.03),
+        10px 0 20px rgba(0,0,0,0.03);
+      z-index: 10;
+      transform: translateX(-1px);
+    }
+  }
+
+  /* Page cards with paper texture */
+  .page {
+    position: relative;
+    background:
+      linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%),
+      #faf8f5;
+    border-radius: 18px;
+    box-shadow:
+      0 1px 0 #e8e6e3,
+      0 2px 0 #e5e3e0,
+      0 3px 0 #e2e0dd,
+      0 4px 0 #dfddd9,
+      0 5px 10px rgba(0,0,0,0.1);
+    outline: 1px solid rgba(0,0,0,.05);
+    overflow: hidden;
+    padding: 40px;
+  }
+
+  /* Ensure right page uses flexbox for proper layout */
+  .page--right {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-content, .page-left, .page-right {
+    background: 
+      linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%),
+      #faf8f5;
+    padding: 40px;
+  }
+
+  /* Page corner effect */
+  .page--right::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 50px;
+    height: 50px;
+    background: 
+      linear-gradient(135deg, 
+        transparent 50%, 
+        #f5f3f0 50%, 
+        #f5f3f0 60%, 
+        #e8e6e3 100%);
+    box-shadow: -2px -2px 3px rgba(0,0,0,0.05);
+    pointer-events: none;
+  }
+
+  /* Page numbers and running headers */
+  .running-header {
+    position: absolute;
+    top: 20px;
+    left: 40px;
+    right: 40px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #8B6F47;
+    opacity: 0.7;
+    font-family: 'Crimson Text', serif;
+  }
+
+  .page-numbers {
+    position: absolute;
+    bottom: 30px;
+    left: 40px;
+    right: 40px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Crimson Text', serif;
+    color: #8B6F47;
+    font-size: 14px;
+  }
+
+  .page-number {
+    position: absolute;
+    bottom: 22px;
+    font-family: 'Crimson Text', serif;
+    color: #8B6F47;
+    font-size: 14px;
+    opacity: .8;
+  }
+  
+  .page--left .page-number, .page-number-left { left: 40px; }
+  .page--right .page-number, .page-number-right { right: 40px; }
+
+  /* Title + year with elegant serif */
+  .memory-title { 
+    font-family: 'Playfair Display', Georgia, serif; 
+    font-weight: 700; 
+    font-size: clamp(22px, 3vw, 32px); 
+    margin: 12px 0 6px;
+    color: #2c2416;
+  }
+
+  h1, h2, .story-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: #2c2416;
+    font-weight: 700;
+  }
+
+  .memory-year { 
+    letter-spacing: .06em; 
+    text-transform: uppercase; 
+    opacity: .6; 
+    font-size: .92rem;
+    color: #6B5D4F;
+  }
+
+  /* Body text with book typography */
+  .memory-body, .story-text, p {
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.8;
+    text-align: justify;
+    hyphens: auto;
+    color: #3a3a3a;
+    margin: 20px 0;
+    white-space: pre-wrap;
+  }
+  
+  /* Specific styles for left page text */
+  .memory-body--left {
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
+  
+  /* Specific styles for right page text */
+  .memory-body--right {
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+
+  /* Drop cap ONLY for first letter of story on left page */
+  .memory-body--left::first-letter {
+    float: left;
+    font-size: 4em;
+    line-height: 0.8;
+    margin: 0.1em 0.1em 0 0;
+    font-weight: 700;
+    color: #8B6F47;
+    font-family: 'Playfair Display', serif;
+  }
+  
+  /* For old story-text class, keep drop cap */
+  .story-text::first-letter {
+    float: left;
+    font-size: 4em;
+    line-height: 0.8;
+    margin: 0.1em 0.1em 0 0;
+    font-weight: 700;
+    color: #8B6F47;
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* Audio wrapper and controls */
+  .audio-wrapper {
+    margin: 20px 0;
+  }
+
+  .audio-wrap { 
+    transition: all 0.3s ease;
+  }
+
+  .audio--compact {
+    cursor: pointer;
+  }
+
+  .audio-bar { 
+    height: 6px; 
+    border-radius: 999px; 
+    background: rgba(0,0,0,.10);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .audio--expanded .audio-bar { 
+    height: 10px; 
+  }
+
+  .audio-fill { 
+    height: 100%; 
+    border-radius: inherit; 
+    background: #C68A2B;
+    transition: width 0.1s ease;
+  }
+
+  .audio-time { 
+    font-size: .85rem; 
+    opacity: .7;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 40px 0 40px;
+  }
+
+  /* Wisdom Moment - Premium Quote Treatment */
+  .wisdom, .wisdom-moment {
+    position: relative;
+    margin: 32px 0;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(232, 93, 93, 0.03), rgba(232, 93, 93, 0.01));
+    border-left: 4px solid var(--primary-coral);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .wisdom:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .wisdom::before, .wisdom-moment::before {
+    content: '"';
+    position: absolute;
+    left: -8px;
+    top: -12px;
+    font-size: 72px;
+    color: var(--primary-coral);
+    opacity: 0.15;
+    font-family: var(--font-serif);
+    font-weight: 700;
+  }
+
+  .wisdom-label { 
+    font-variant: small-caps; 
+    letter-spacing: 0.08em; 
+    opacity: 0.7; 
+    margin-bottom: 12px; 
+    display: block;
+    font-size: 14px;
+    color: var(--primary-coral);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .wisdom blockquote { 
+    margin: 0; 
+    font-style: italic;
+    font-size: clamp(18px, 2.5vw, 22px);
+    line-height: 1.6;
+    color: var(--foreground);
+    font-family: var(--font-serif);
+    font-weight: 400;
+  }
+
+  /* Character trait badge - NEW */
+  /* Character trait badge refinement */
+  .character-badge, .character-trait {
+    display: inline-flex; 
+    align-items: center; 
+    gap: 10px;
+    background: linear-gradient(135deg, #f5f3f0 0%, #e8e6e3 100%);
+    border: 1px solid #d4c5b9;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-family: 'Crimson Text', serif;
+    color: #8B6F47;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    margin-top: 16px;
+  }
+
+  .character-badge .trait { 
+    font-weight: 600;
+    color: #8B6F47;
+  }
+
+  .character-badge .confidence, .confidence-score { 
+    color: #8B6F47;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .character-badge .proof-link { 
+    border: 0; 
+    background: none; 
+    text-decoration: underline; 
+    cursor: pointer;
+    color: #C68A2B;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  /* Emotion tags */
+  .emotion-tags { 
+    display: flex; 
+    gap: 8px; 
+    margin-top: 20px;
+    position: absolute;
+    bottom: 60px;
+    left: 28px;
+  }
+
+  @media (min-width: 900px) {
+    .emotion-tags {
+      position: absolute; 
+      bottom: 40px; 
+      right: -40px;
+      left: auto;
+      transform: rotate(-90deg); 
+      transform-origin: bottom right;
+      margin: 0;
+    }
+  }
+
+  .emotion-tags .tag {
+    padding: 6px 12px; 
+    border-radius: 999px;
+    background: #EEE4D6; 
+    color: #5C4A3B; 
+    font-size: .85rem;
+    font-weight: 500;
+  }
+
+  /* Navigation */
+  .book-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+    padding: 0 28px;
+  }
+
+  .book-nav button {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #D4A574;
+    background: white;
+    color: #8B6914;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .book-nav button:hover {
+    background: #FFF7EC;
+  }
+
+  .book-nav button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Photo styling */
+  /* Vintage photo styling - only for memory photos in book view */
+  .memory-photo {
+    width: 85%;
+    max-width: 400px;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    filter: sepia(15%) contrast(95%);
+    border: 8px solid white;
+    box-shadow:
+      0 0 0 1px #e8e6e3,
+      0 2px 10px rgba(0,0,0,0.1);
+    margin: 20px auto;
+    display: block;
+    border-radius: 0;
+  }
+
+  /* Background override for book view */
+  .book-background {
+    background: linear-gradient(135deg, #F5E6D3 0%, #FFF9F0 100%);
+  }
+
+  .book-container {
+    perspective: 1500px;
+  }
+  
+  .book-page-container {
+    flex: 1;
+    min-height: 60vh;
+    background: linear-gradient(to right, hsl(38, 46%, 95%), hsl(38, 40%, 93%));
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .book-page-container-left {
+    border-radius: 8px 0 0 8px;
+    box-shadow: inset -3px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .book-page-container-right {
+    border-radius: 0 8px 8px 0;
+    box-shadow: inset 3px 0 5px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(to left, hsl(38, 46%, 95%), hsl(38, 40%, 93%));
+  }
+  
+  .book-spine {
+    width: 2px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+    position: relative;
+    z-index: 10;
+  }
+  
+  .book-page {
+    height: 100%;
+    position: relative;
+  }
+  
+  .book-page-left {
+    background: linear-gradient(135deg, hsl(38, 46%, 95%) 0%, hsl(38, 42%, 92%) 100%);
+  }
+  
+  .book-page-right {
+    background: linear-gradient(135deg, hsl(38, 42%, 93%) 0%, hsl(38, 46%, 95%) 100%);
+  }
+  
+  .book-page h2 {
+    color: hsl(30, 25%, 25%);
+  }
+  
+  .book-page p {
+    color: hsl(30, 20%, 35%);
+  }
+  
+  .book-page .prose {
+    color: hsl(30, 20%, 30%);
+    line-height: 1.8;
+  }
+  
+  /* Remove old mobile styles - now using grid layout */
+  
+  /* Mobile adjustments for premium book view */
+  @media (max-width: 899px) {
+    .book-spread {
+      grid-template-columns: 1fr;
+      padding: 16px;
+      gap: 20px;
+    }
+    
+    .page {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+    
+    /* Reduce spacing on left page (image/audio) for mobile */
+    .page--left {
+      padding-bottom: 30px; /* Reduce bottom padding */
+    }
+    
+    .page::after {
+      display: none; /* Hide stack hint on mobile */
+    }
+    
+    /* Reduce photo height and margins on mobile */
+    .memory-photo {
+      width: 90%;
+      max-width: 300px;
+      max-height: 180px; /* Smaller on mobile */
+      margin: 12px auto; /* Center and reduce margin */
+    }
+    
+    .memory-title {
+      font-size: 24px;
+      margin-bottom: 8px; /* Reduce margin */
+    }
+    
+    .memory-date {
+      margin-bottom: 12px; /* Reduce margin */
+    }
+    
+    /* Reduce audio wrapper spacing on mobile */
+    .audio-wrapper {
+      margin-top: 12px; /* Reduce top margin */
+      margin-bottom: 12px; /* Reduce bottom margin */
+    }
+    
+    .audio-wrap {
+      padding: 10px 12px; /* Smaller padding */
+    }
+    
+    .emotion-tags {
+      position: relative !important;
+      transform: none !important;
+      margin-top: 20px;
+      bottom: auto !important;
+      left: auto !important;
+      right: auto !important;
+    }
+    
+    .page-number {
+      display: none; /* Hide page numbers on mobile single-column view */
+    }
+    
+    .wisdom {
+      margin-top: 20px;
+      padding: 16px 16px 16px 20px;
+    }
+    
+    .character-badge {
+      margin-top: 12px;
+      font-size: .875rem;
+    }
+    
+    .memory-body {
+      font-size: 15px;
+      line-height: 1.65;
+    }
+    
+    /* Fix navigation buttons alignment */
+    .book-nav {
+      padding: 0;
+      margin-top: 20px;
+      position: relative;
+      width: 100%;
+      max-width: 600px; /* Match page width */
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .book-nav button {
+      padding: 8px 12px;
+      font-size: .9rem;
+    }
+    
+    /* Ensure buttons don't overlap with text and center vertically */
+    .book-nav > div.text-center {
+      flex: 0 1 auto;
+      text-align: center;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    /* Keep old mobile fallback for anything else that needs it */
+    .book-page-container {
+      min-height: 40vh;
+    }
+    
+    .book-page-container-left {
+      border-radius: 8px 8px 0 0;
+      box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .book-page-container-right {
+      border-radius: 0 0 8px 8px;
+      box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .book-spine {
+      width: 100%;
+      height: 2px;
+    }
+
+    /* Fix navigation buttons being cut off by footer on mobile */
+    .book-container {
+      padding-bottom: 80px; /* Add space for mobile footer nav */
+    }
+
+    /* Ensure book navigation is visible above footer */
+    .book-nav {
+      margin-bottom: 20px; /* Additional margin for safety */
+    }
+  }
+}
+
+/* Enhanced Animation Library */
+/* Premium floating animations */
+@keyframes float-diagonal {
+  0%, 100% {
+    transform: translate(0, 0) rotate(-2deg);
+  }
+  25% {
+    transform: translate(100px, -60px) rotate(1deg);
+  }
+  50% {
+    transform: translate(-50px, -120px) rotate(-1deg);
+  }
+  75% {
+    transform: translate(-100px, -60px) rotate(2deg);
+  }
+}
+
+@keyframes float-horizontal {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateX(150px) rotate(2deg);
+  }
+}
+
+@keyframes float-vertical {
+  0%, 100% {
+    transform: translateY(0) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-100px) rotate(-1deg);
+  }
+}
+
+/* Ripple effect for CTA */
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* Waveform animation */
+@keyframes wave-dance {
+  0%, 100% {
+    transform: scaleY(0.5);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* Typewriter effect */
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+/* Fill animation for confidence bars */
+@keyframes fillBar {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--target-width);
+  }
+}
+
+/* Glow effect */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(245, 166, 35, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(245, 166, 35, 0.6);
+  }
+}
+
+/* Slide up with fade */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInBottom {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading animation for async content */
+.loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Enhanced focus states */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  transition: outline-offset 0.2s ease;
+}
+
+/* Interactive element scale on press */
+.interactive-scale {
+  transition: transform 0.1s ease;
+}
+
+.interactive-scale:active {
+  transform: scale(0.97);
+}
+
+/* Custom shadow classes */
+.shadow-3xl {
+  box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
+}
+
+.shadow-glow {
+  box-shadow: 0 0 40px rgba(245, 166, 35, 0.4);
+}
+
+/* Floating memory cards */
+.floating-card {
+  position: absolute;
+  opacity: 0.1;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.floating-card-1 {
+  animation: float-diagonal 40s ease-in-out infinite;
+}
+
+.floating-card-2 {
+  animation: float-horizontal 35s ease-in-out infinite;
+  animation-delay: -10s;
+}
+
+.floating-card-3 {
+  animation: float-vertical 50s ease-in-out infinite;
+  animation-delay: -20s;
+}
+
+.floating-card-4 {
+  animation: float-diagonal 45s ease-in-out infinite reverse;
+  animation-delay: -15s;
+}
+
+.floating-card-5 {
+  animation: float-horizontal 38s ease-in-out infinite;
+  animation-delay: -25s;
+}
+
+/* Typewriter text */
+.typewriter-text {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typewriter 2s steps(30) 0.5s forwards;
+  border-right: 3px solid;
+  animation-fill-mode: forwards;
+}
+
+.typewriter-cursor {
+  animation: blink 1s infinite;
+}
+
+/* Animated confidence bars */
+.confidence-bar {
+  animation: fillBar 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Scroll triggered animations */
+.scroll-fade-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-fade-up.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Waveform bars */
+.wave-bar {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wave-bar:hover {
+  animation: wave-dance 1s ease-in-out infinite;
+}
+
+/* Premium button hover */
+.premium-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-button:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile text overflow fixes */
+@media (max-width: 640px) {
+  /* Prevent text cutoff on small screens */
+  h1, h2, h3, .break-words {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+  
+  /* Ensure animations don't cause overflow */
+  .animate-fade-in-up {
+    animation-duration: 0.6s;
+  }
+  
+  /* Much larger text sizing for better readability */
+  .text-5xl {
+    font-size: clamp(2.5rem, 7vw, 3rem);
+  }
+  
+  .text-4xl {
+    font-size: clamp(2rem, 6vw, 2.25rem);
+  }
+  
+  .text-3xl {
+    font-size: clamp(1.875rem, 5vw, 2rem);
+  }
+  
+  .text-2xl {
+    font-size: clamp(1.5rem, 4vw, 1.75rem);
+  }
+  
+  /* Prevent horizontal scroll from animations */
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* Go Deeper Accordion Enhanced Hover Effects */
+.gd-acc__item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.gd-acc__item:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 251, 247, 0.95));
+  border-color: var(--primary-coral);
+  box-shadow: 0 8px 24px rgba(232, 93, 93, 0.15);
+  transform: translateY(-2px);
+}
+
+.gd-acc__item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(232, 93, 93, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.gd-acc__item:hover::before {
+  opacity: 1;
+}

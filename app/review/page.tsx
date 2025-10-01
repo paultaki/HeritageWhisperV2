@@ -1,0 +1,37 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+export default function ReviewRedirect() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // If there's a nav parameter, this is coming from recording
+    // If there's an edit parameter, redirect to that story
+    const editId = searchParams.get('edit');
+    const navId = searchParams.get('nav');
+
+    if (editId) {
+      // Redirect to the dynamic route with edit mode
+      const params = new URLSearchParams(searchParams);
+      router.replace(`/review/${editId}?${params.toString()}`);
+    } else if (navId) {
+      // This is a new story from recording, redirect to create route
+      router.replace(`/review/create?nav=${navId}`);
+    } else {
+      // No parameters, redirect to timeline
+      router.replace('/timeline');
+    }
+  }, [router, searchParams]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  );
+}
