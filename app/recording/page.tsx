@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -161,7 +161,7 @@ function PostRecordingFollowUp({
   );
 }
 
-export default function Recording() {
+function RecordingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -880,5 +880,20 @@ export default function Recording() {
         />
       </div>
     </div>
+  );
+}
+
+export default function Recording() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background album-texture pb-20 md:pb-0 md:pl-20 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading recording interface...</p>
+        </div>
+      </div>
+    }>
+      <RecordingContent />
+    </Suspense>
   );
 }

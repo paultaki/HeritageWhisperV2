@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ import { AudioRecorder } from "@/components/AudioRecorder";
 import { Badge } from "@/components/ui/badge";
 import { navCache } from "@/lib/navCache";
 
-export default function Review() {
+function ReviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params = useParams();
@@ -1322,5 +1322,20 @@ export default function Review() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function Review() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background album-texture pb-20 md:pb-0 md:pl-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading review...</p>
+        </div>
+      </div>
+    }>
+      <ReviewContent />
+    </Suspense>
   );
 }
