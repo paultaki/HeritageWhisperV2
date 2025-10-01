@@ -63,9 +63,9 @@ export default function Login() {
       <div className="w-full max-w-md">
         <div className="text-center mb-12">
           {/* Heritage Whisper Logo */}
-          <div 
+          <div
             className="w-40 h-40 mx-auto mb-8 cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => setLocation("/")}
+            onClick={() => router.push("/")}
           >
             <img src={logoUrl} alt="HeritageWhisper Logo" className="w-full h-full object-contain" />
           </div>
@@ -121,7 +121,7 @@ export default function Login() {
                 </div>
                 {!isRegistering && (
                   <div className="mt-2 text-right">
-                    <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                    <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
                       Forgot password?
                     </Link>
                   </div>

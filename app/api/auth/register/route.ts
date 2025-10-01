@@ -19,7 +19,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if it's development or production environment
-    const requireEmailConfirmation = process.env.NODE_ENV === "production";
+    // For now, disable email confirmation in all environments to test
+    const requireEmailConfirmation = false;
 
     // Create user in Supabase Auth
     const { data, error } = await supabase.auth.signUp({
