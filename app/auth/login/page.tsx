@@ -89,6 +89,7 @@ export default function Login() {
                   className="mt-3 text-lg py-4"
                   placeholder="your@email.com"
                   required
+                  autoComplete="email"
                   data-testid="input-email"
                 />
               </div>
@@ -104,6 +105,7 @@ export default function Login() {
                     className="text-lg py-4 pr-12 w-full"
                     placeholder="••••••••"
                     required
+                    autoComplete="current-password"
                     data-testid="input-password"
                   />
                   <button
