@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { db, stories, users } from "@/lib/db";
-import { eq, desc } from "drizzle-orm";
-import { logger } from "@/lib/logger";
 
-// Initialize Supabase Admin client for token verification
+// Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -41,82 +38,56 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch real stories from PostgreSQL database (Neon)
-    logger.api("Fetching stories for user:", user.id);
+    // Fetch stories from Supabase
+    const { data: stories, error: storiesError } = await supabaseAdmin
+      .from("stories")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("story_year", { ascending: false })
+      .order("created_at", { ascending: false });
 
-    // First, check if user exists in our database
-    let dbUser = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, user.id))
-      .limit(1);
-
-    if (!dbUser || dbUser.length === 0) {
-      logger.api("User not found in database, creating user:", user.id);
-
-      // Create user in database if they don't exist
-      try {
-        const newUser = await db
-          .insert(users)
-          .values({
-            id: user.id,
-            email: user.email || '',
-            name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-            birthYear: new Date().getFullYear() - 50, // Default birth year
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        dbUser = newUser;
-        logger.api("User created in database:", user.id);
-      } catch (createError) {
-        logger.error("Error creating user:", createError);
-        // User might already exist or there's another issue
-        // Continue to try fetching stories anyway
-      }
+    if (storiesError) {
+      console.error("Error fetching stories:", storiesError);
+      return NextResponse.json(
+        { error: "Failed to fetch stories" },
+        { status: 500 }
+      );
     }
 
-    // Fetch stories from the actual PostgreSQL database
-    const userStories = await db
-      .select()
-      .from(stories)
-      .where(eq(stories.userId, user.id))
-      .orderBy(desc(stories.storyYear), desc(stories.createdAt));
-
-    logger.api("Database response:", {
-      storiesCount: userStories.length,
-      userId: user.id,
-    });
-
     // Transform snake_case to camelCase for frontend compatibility
-    const transformedStories = userStories.map((story) => ({
+    const transformedStories = (stories || []).map((story) => ({
       id: story.id,
       title: story.title,
-      content: story.content,
-      createdAt: story.createdAt,
-      updatedAt: story.updatedAt,
-      age: story.age,
-      year: story.storyYear, // Note: database uses storyYear
-      storyYear: story.storyYear,
-      includeInTimeline: story.includeInTimeline ?? true,
-      includeInBook: story.includeInBook ?? true,
-      isFavorite: story.isFavorite ?? false,
-      photoUrl: story.photoUrl,
-      hasPhotos: story.hasPhotos ?? false,
-      formattedContent: story.formattedContent,
+      content: story.content || story.transcription,
+      createdAt: story.created_at,
+      updatedAt: story.updated_at,
+      age: story.age || story.life_age,
+      year: story.story_year,
+      storyYear: story.story_year,
+      includeInTimeline: story.include_in_timeline ?? true,
+      includeInBook: story.include_in_book ?? true,
+      isFavorite: story.is_favorite ?? false,
+      photoUrl: story.photo_url,
+      hasPhotos: story.has_photos ?? false,
+      formattedContent: story.formatted_content || story.transcription,
       photos: story.photos || [],
-      audioUrl: story.audioUrl,
+      audioUrl: story.audio_url,
       transcription: story.transcription,
-      wisdomTranscription: story.wisdomTranscription,
-      followUpQuestions: story.followUpQuestions,
+      wisdomTranscription: story.wisdom_transcription || story.wisdom_clip_text,
+      followUpQuestions: story.follow_up_questions,
+      wisdomClipUrl: story.wisdom_clip_url,
+      durationSeconds: story.duration_seconds,
+      emotions: story.emotions,
+      pivotalCategory: story.pivotal_category,
+      storyDate: story.story_date,
+      photoTransform: story.photo_transform,
     }));
 
     return NextResponse.json({ stories: transformedStories });
   } catch (error) {
-    logger.error("Stories fetch error:", error);
+    console.error("Stories fetch error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch stories", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Failed to fetch stories" },
       { status: 500 }
     );
   }
@@ -150,57 +121,105 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Save the story to the database
-    const [newStory] = await db
-      .insert(stories)
-      .values({
-        userId: user.id,
-        title: body.title,
-        content: body.content,
-        age: body.age,
-        storyYear: body.year || body.storyYear,
-        includeInTimeline: body.includeInTimeline ?? true,
-        includeInBook: body.includeInBook ?? true,
-        isFavorite: body.isFavorite ?? false,
-        photoUrl: body.photoUrl,
-        hasPhotos: body.hasPhotos ?? false,
-        formattedContent: body.formattedContent,
-        photos: body.photos || [],
-        audioUrl: body.audioUrl,
-        transcription: body.transcription,
-        wisdomTranscription: body.wisdomTranscription,
-        followUpQuestions: body.followUpQuestions,
-      })
-      .returning();
+    // Prepare story data for Supabase (using snake_case)
+    const storyData = {
+      user_id: user.id,
+      title: body.title,
+      content: body.content || body.transcription,
+      transcription: body.transcription,
+      age: body.age,
+      life_age: body.age,
+      story_year: body.year || body.storyYear,
+      include_in_timeline: body.includeInTimeline ?? true,
+      include_in_book: body.includeInBook ?? true,
+      is_favorite: body.isFavorite ?? false,
+      photo_url: body.photoUrl,
+      has_photos: body.hasPhotos ?? false,
+      formatted_content: body.formattedContent || body.transcription,
+      photos: body.photos || [],
+      audio_url: body.audioUrl,
+      wisdom_transcription: body.wisdomTranscription,
+      wisdom_clip_text: body.wisdomTranscription,
+      wisdom_clip_url: body.wisdomClipUrl,
+      follow_up_questions: body.followUpQuestions,
+      duration_seconds: body.durationSeconds,
+      emotions: body.emotions,
+      pivotal_category: body.pivotalCategory,
+      story_date: body.storyDate,
+      photo_transform: body.photoTransform,
+    };
+
+    // Save the story to Supabase
+    const { data: newStory, error: insertError } = await supabaseAdmin
+      .from("stories")
+      .insert(storyData)
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("Error creating story:", insertError);
+      return NextResponse.json(
+        { error: "Failed to create story", details: insertError.message },
+        { status: 500 }
+      );
+    }
+
+    // Update user's story count - first get current count
+    const { data: userData, error: getUserError } = await supabaseAdmin
+      .from("users")
+      .select("story_count")
+      .eq("id", user.id)
+      .single();
+
+    if (!getUserError && userData) {
+      const { error: updateError } = await supabaseAdmin
+        .from("users")
+        .update({
+          story_count: (userData.story_count || 0) + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", user.id);
+
+      if (updateError) {
+        console.error("Error updating story count:", updateError);
+        // Don't fail the request, story was created successfully
+      }
+    }
 
     // Transform the response to camelCase
     const transformedStory = {
       id: newStory.id,
       title: newStory.title,
-      content: newStory.content,
-      createdAt: newStory.createdAt,
-      updatedAt: newStory.updatedAt,
-      age: newStory.age,
-      year: newStory.storyYear,
-      storyYear: newStory.storyYear,
-      includeInTimeline: newStory.includeInTimeline,
-      includeInBook: newStory.includeInBook,
-      isFavorite: newStory.isFavorite,
-      photoUrl: newStory.photoUrl,
-      hasPhotos: newStory.hasPhotos,
-      formattedContent: newStory.formattedContent,
+      content: newStory.content || newStory.transcription,
+      createdAt: newStory.created_at,
+      updatedAt: newStory.updated_at,
+      age: newStory.age || newStory.life_age,
+      year: newStory.story_year,
+      storyYear: newStory.story_year,
+      includeInTimeline: newStory.include_in_timeline,
+      includeInBook: newStory.include_in_book,
+      isFavorite: newStory.is_favorite,
+      photoUrl: newStory.photo_url,
+      hasPhotos: newStory.has_photos,
+      formattedContent: newStory.formatted_content,
       photos: newStory.photos || [],
-      audioUrl: newStory.audioUrl,
+      audioUrl: newStory.audio_url,
       transcription: newStory.transcription,
-      wisdomTranscription: newStory.wisdomTranscription,
-      followUpQuestions: newStory.followUpQuestions,
+      wisdomTranscription: newStory.wisdom_transcription || newStory.wisdom_clip_text,
+      followUpQuestions: newStory.follow_up_questions,
+      wisdomClipUrl: newStory.wisdom_clip_url,
+      durationSeconds: newStory.duration_seconds,
+      emotions: newStory.emotions,
+      pivotalCategory: newStory.pivotal_category,
+      storyDate: newStory.story_date,
+      photoTransform: newStory.photo_transform,
     };
 
     return NextResponse.json({ story: transformedStory });
   } catch (error) {
-    logger.error("Story creation error:", error);
+    console.error("Story creation error:", error);
     return NextResponse.json(
-      { error: "Failed to create story", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Failed to create story" },
       { status: 500 }
     );
   }

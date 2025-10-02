@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { db, users } from "@/lib/db";
-import { eq } from "drizzle-orm";
-import { logger } from "@/lib/logger";
 
-// Initialize Supabase Admin client for token verification
+// Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error(
-    "Supabase configuration missing. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables."
-  );
-}
 
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
@@ -29,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     if (!token) {
       return NextResponse.json(
-        { error: "Authentication required. Please sign in again." },
+        { error: "Authentication required" },
         { status: 401 }
       );
     }
@@ -40,93 +31,78 @@ export async function GET(request: NextRequest) {
       error,
     } = await supabaseAdmin.auth.getUser(token);
 
-    if (error) {
-      // Check if it's an expired token error
-      if (error.message.includes("expired") || error.message.includes("JWT")) {
-        return NextResponse.json(
-          {
-            error: "Session expired",
-            details: "Your session has expired. Please sign in again.",
-            code: "SESSION_EXPIRED",
-          },
-          { status: 401 }
-        );
-      }
-
+    if (error || !user) {
       return NextResponse.json(
-        {
-          error: "Invalid authentication",
-          details: error.message,
-        },
+        { error: "Invalid authentication" },
         { status: 401 }
       );
     }
 
-    if (!user) {
-      return NextResponse.json(
-        {
-          error: "Invalid token",
-          details: "Token does not correspond to a valid user",
-        },
-        { status: 401 }
-      );
-    }
+    // Get user from Supabase public.users table
+    const { data: dbUser, error: dbError } = await supabaseAdmin
+      .from("users")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-    // Get user from PostgreSQL database
-    let dbUser = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, user.id))
-      .limit(1);
+    if (dbError || !dbUser) {
+      // If user doesn't exist in public.users, create them
+      const userData = {
+        id: user.id,
+        email: user.email || '',
+        name: user.user_metadata?.name || user.email?.split("@")[0] || "User",
+        birth_year: user.user_metadata?.birthYear || new Date().getFullYear() - 50,
+        story_count: 0,
+        is_paid: false,
+      };
 
-    if (!dbUser || dbUser.length === 0) {
-      logger.api("User not found in database, creating:", user.id);
+      // Try to create the user
+      const { data: newUser, error: insertError } = await supabaseAdmin
+        .from("users")
+        .insert(userData)
+        .select()
+        .single();
 
-      // Create user in database if they don't exist
-      try {
-        const newUser = await db
-          .insert(users)
-          .values({
+      if (insertError) {
+        console.error("Error creating user in public.users:", insertError);
+        // Return basic data even if insert fails
+        return NextResponse.json({
+          user: {
             id: user.id,
-            email: user.email || '',
-            name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+            email: user.email,
+            name: user.user_metadata?.name || user.email?.split("@")[0] || "User",
             birthYear: user.user_metadata?.birthYear || new Date().getFullYear() - 50,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        dbUser = newUser;
-        logger.api("User created successfully:", user.id);
-      } catch (createError) {
-        logger.error("Error creating user:", createError);
-        // Return basic user data if database creation fails
-        const userData = {
-          id: user.id,
-          email: user.email,
-          name: user.user_metadata?.name || user.email?.split("@")[0] || "User",
-          birthYear: user.user_metadata?.birthYear || new Date().getFullYear() - 50,
-          storyCount: 0,
-          isPaid: false,
-        };
-        return NextResponse.json({ user: userData });
+            storyCount: 0,
+            isPaid: false,
+          }
+        });
       }
+
+      return NextResponse.json({
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          name: newUser.name,
+          birthYear: newUser.birth_year,
+          storyCount: newUser.story_count || 0,
+          isPaid: newUser.is_paid || false,
+        }
+      });
     }
 
-    // Return user data from database
-    const userFromDb = dbUser[0];
+    // Return user data from Supabase
     const userData = {
-      id: userFromDb.id,
-      email: userFromDb.email,
-      name: userFromDb.name,
-      birthYear: userFromDb.birthYear,
-      storyCount: userFromDb.storyCount || 0,
-      isPaid: userFromDb.isPaid || false,
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name,
+      birthYear: dbUser.birth_year,
+      storyCount: dbUser.story_count || 0,
+      isPaid: dbUser.is_paid || false,
     };
 
     return NextResponse.json({ user: userData });
   } catch (error) {
-    logger.error("Auth verification error:", error);
+    console.error("Auth verification error:", error);
     return NextResponse.json(
       { error: "Authentication failed" },
       { status: 500 }
