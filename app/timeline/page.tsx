@@ -271,20 +271,6 @@ function MemoryCard({
     return null;
   };
 
-  // Normalize photo URL to include API base for /objects paths
-  const normalizePhotoUrl = (url: string) => {
-    if (!url) return url;
-
-    // If it's already a full URL (signed URL from server), use it as-is
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return url;
-    }
-
-    // For any other path, the server should have provided a signed URL
-    // If not, return as-is and let the server handle it
-    return url;
-  };
-
   const displayPhoto = getDisplayPhoto();
   const photoCount = story.photos?.length || (story.photoUrl ? 1 : 0);
 
@@ -569,7 +555,7 @@ function MemoryCard({
       {/* Image container with audio overlay */}
       <div className="retro-tv relative aspect-[3/2] mb-3 rounded-lg overflow-hidden bg-gray-100">
         <Image
-          src={normalizePhotoUrl(displayPhoto.url)}
+          src={displayPhoto.url}
           alt={story.title}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

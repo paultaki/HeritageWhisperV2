@@ -54,32 +54,70 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Helper function to generate signed URLs for photos
+    const getSignedPhotoUrl = async (photoUrl: string) => {
+      if (!photoUrl) return photoUrl;
+
+      // If already a full URL (starts with http/https), use as-is
+      if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) {
+        return photoUrl;
+      }
+
+      // Generate signed URL for storage path (valid for 1 hour)
+      try {
+        const { data: signedUrlData } = await supabaseAdmin.storage
+          .from('photos')
+          .createSignedUrl(photoUrl, 3600);
+
+        return signedUrlData?.signedUrl || photoUrl;
+      } catch (error) {
+        console.error('Error generating signed URL for photo:', photoUrl, error);
+        return photoUrl;
+      }
+    };
+
     // Transform snake_case to camelCase for frontend compatibility
-    const transformedStories = (stories || []).map((story) => ({
-      id: story.id,
-      title: story.title,
-      content: story.content || story.transcription,
-      createdAt: story.created_at,
-      updatedAt: story.updated_at,
-      age: story.age || story.life_age,
-      year: story.story_year,
-      storyYear: story.story_year,
-      includeInTimeline: story.include_in_timeline ?? true,
-      includeInBook: story.include_in_book ?? true,
-      isFavorite: story.is_favorite ?? false,
-      photoUrl: story.photo_url,
-      hasPhotos: story.has_photos ?? false,
-      photos: story.photos || [],
-      audioUrl: story.audio_url,
-      transcription: story.transcription,
-      wisdomTranscription: story.wisdom_transcription || story.wisdom_clip_text,
-      followUpQuestions: story.follow_up_questions,
-      wisdomClipUrl: story.wisdom_clip_url,
-      durationSeconds: story.duration_seconds,
-      emotions: story.emotions,
-      pivotalCategory: story.pivotal_category,
-      storyDate: story.story_date,
-      photoTransform: story.photo_transform,
+    // Also generate signed URLs for all photos
+    const transformedStories = await Promise.all((stories || []).map(async (story) => {
+      // Process photos array to add signed URLs
+      const photosWithSignedUrls = await Promise.all(
+        (story.photos || []).map(async (photo: any) => ({
+          ...photo,
+          url: await getSignedPhotoUrl(photo.url)
+        }))
+      );
+
+      // Process legacy photoUrl if exists
+      const signedPhotoUrl = story.photo_url ? await getSignedPhotoUrl(story.photo_url) : undefined;
+
+      return {
+        id: story.id,
+        title: story.title,
+        content: story.content || story.transcription,
+        createdAt: story.created_at,
+        updatedAt: story.updated_at,
+        age: story.age || story.life_age,
+        year: story.story_year,
+        storyYear: story.story_year,
+        lifeAge: story.life_age,
+        includeInTimeline: story.include_in_timeline ?? true,
+        includeInBook: story.include_in_book ?? true,
+        isFavorite: story.is_favorite ?? false,
+        photoUrl: signedPhotoUrl,
+        hasPhotos: story.has_photos ?? false,
+        photos: photosWithSignedUrls,
+        audioUrl: story.audio_url,
+        transcription: story.transcription,
+        wisdomTranscription: story.wisdom_transcription || story.wisdom_clip_text,
+        wisdomClipText: story.wisdom_clip_text,
+        followUpQuestions: story.follow_up_questions,
+        wisdomClipUrl: story.wisdom_clip_url,
+        durationSeconds: story.duration_seconds,
+        emotions: story.emotions,
+        pivotalCategory: story.pivotal_category,
+        storyDate: story.story_date,
+        photoTransform: story.photo_transform,
+      };
     }));
 
     return NextResponse.json({ stories: transformedStories });

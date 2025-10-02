@@ -31,26 +31,15 @@ interface MultiPhotoUploaderProps {
   loading?: boolean;
 }
 
-// Normalize photo URL to handle Supabase storage paths
+// Normalize photo URL to handle local blob URLs
 const normalizePhotoUrl = (url: string) => {
   if (!url) return url;
 
-  // Handle blob URLs (for temporary local previews)
+  // Handle blob URLs (for temporary local previews) - keep as-is
   if (url.startsWith('blob:')) return url;
 
-  // If it's already a full URL (signed URL from server), use it as-is
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
-  }
-
-  // For paths starting with /objects/, fetch through our API proxy
-  if (url.startsWith('/objects/')) {
-    return `${getApiUrl()}${url}`;
-  }
-
-  // For storage paths without /objects/ prefix, add it and fetch through API
-  // This handles photos stored without the prefix
-  return `${getApiUrl()}/objects/${url}`;
+  // All other URLs (including signed URLs from server) are used as-is
+  return url;
 };
 
 export function MultiPhotoUploader({

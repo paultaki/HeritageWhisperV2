@@ -76,32 +76,20 @@ interface Story {
   createdAt: string;
 }
 
-// Normalize photo URL to handle storage paths
-const normalizePhotoUrl = (url: string) => {
-  if (!url) return url;
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
-  }
-  return url;
-};
-
 const getSortedPhotos = (story: Story) => {
   if (story.photos && story.photos.length > 0) {
     const sorted = [...story.photos].sort((a, b) => {
       if (a.isHero) return -1;
       if (b.isHero) return 1;
       return 0;
-    }).map(photo => ({
-      ...photo,
-      url: normalizePhotoUrl(photo.url)
-    }));
+    });
     return sorted;
   }
   if (story.photoUrl) {
     return [
       {
         id: "legacy",
-        url: normalizePhotoUrl(story.photoUrl),
+        url: story.photoUrl,
         transform: story.photoTransform,
       },
     ];
