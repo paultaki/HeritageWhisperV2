@@ -99,7 +99,7 @@ function BookStyleReviewContent() {
         formattedContent: transcription,
         year: parseInt(storyYear) || new Date().getFullYear(),
         storyYear: parseInt(storyYear) || new Date().getFullYear(),
-        age,
+        lifeAge: age, // Use lifeAge instead of age
         includeInTimeline: true,
         includeInBook: true,
         isFavorite: false,
@@ -108,6 +108,7 @@ function BookStyleReviewContent() {
         audioUrl: finalAudioUrl,
         wisdomTranscription: wisdomText,
         wisdomClipText: wisdomText,
+        durationSeconds: 0, // Add duration
       };
 
       console.log("Saving story with data:", storyData);

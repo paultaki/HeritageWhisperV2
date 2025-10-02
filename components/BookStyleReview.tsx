@@ -165,13 +165,13 @@ export function BookStyleReview({
       </div>
 
       {/* Book Container */}
-      <div className="book-container max-w-6xl mx-auto p-4 md:p-8">
-        <div className="book-spread bg-[#faf8f5] rounded-lg shadow-2xl overflow-hidden">
+      <div className="max-w-7xl mx-auto p-4 md:p-8">
+        <div className="bg-[#faf8f5] rounded-lg shadow-2xl overflow-hidden" style={{ aspectRatio: '2/1.4' }}>
           {/* Two-page layout - always show both pages side by side */}
-          <div className="grid grid-cols-2 min-h-[800px]">
+          <div className="flex min-h-[700px]">
 
             {/* Left Page - Photo and Basic Info */}
-            <div className="page page--left p-6 md:p-8 lg:p-12 border-r border-gray-200 flex flex-col">
+            <div className="w-1/2 p-6 md:p-8 lg:p-12 border-r border-gray-200 flex flex-col bg-[#faf8f5]">
               {/* Running header */}
               <div className="running-header text-xs text-gray-500 uppercase tracking-wider mb-6">
                 Your Heritage Story
@@ -377,7 +377,7 @@ export function BookStyleReview({
             </div>
 
             {/* Right Page - Story Content */}
-            <div className="page page--right p-6 md:p-8 lg:p-12">
+            <div className="w-1/2 p-6 md:p-8 lg:p-12 bg-[#faf8f5]">
               {/* Running header */}
               <div className="running-header text-xs text-gray-500 uppercase tracking-wider mb-6 text-right">
                 {storyYear || new Date().getFullYear()}
