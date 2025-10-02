@@ -350,12 +350,38 @@ export function BookStyleReview({
                           const input = document.createElement('input');
                           input.type = 'file';
                           input.accept = 'audio/*';
-                          input.onchange = (e) => {
+                          input.onchange = async (e) => {
                             const file = (e.target as HTMLInputElement).files?.[0];
                             if (file) {
                               const url = URL.createObjectURL(file);
                               if (onAudioChange) {
                                 onAudioChange(url, file);
+                              }
+
+                              // Trigger transcription
+                              const formData = new FormData();
+                              formData.append('audio', file);
+
+                              try {
+                                const response = await fetch('/api/transcribe', {
+                                  method: 'POST',
+                                  body: formData
+                                });
+
+                                if (response.ok) {
+                                  const { transcription: newTranscription, wisdomSuggestion } = await response.json();
+                                  if (newTranscription && onTranscriptionChange) {
+                                    // If there's no existing transcription, set the new one
+                                    if (!transcription) {
+                                      onTranscriptionChange(newTranscription);
+                                    }
+                                  }
+                                  if (wisdomSuggestion && !wisdomText && onWisdomChange) {
+                                    onWisdomChange(wisdomSuggestion);
+                                  }
+                                }
+                              } catch (error) {
+                                console.error('Transcription failed:', error);
                               }
                             }
                           };

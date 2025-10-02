@@ -98,22 +98,29 @@ function BookStyleReviewContent() {
         }
       }
 
-      // Prepare story data
+      // Prepare story data - matching the database schema
       const storyData = {
         title: title || `Memory from ${storyYear || 'the past'}`,
-        content: transcription,
-        transcription,
-        formattedContent: transcription,
-        year: parseInt(storyYear) || new Date().getFullYear(),
+        transcription, // This is the main text content
+        formattedContent: {
+          fullText: transcription,
+          paragraphs: transcription.split('\n\n').filter(p => p.trim()),
+          pages: {
+            left: transcription.substring(0, Math.floor(transcription.length / 2)),
+            right: transcription.substring(Math.floor(transcription.length / 2)),
+            splitIndex: Math.floor(transcription.length / 2)
+          },
+          questions: [],
+          processedAt: new Date().toISOString(),
+          version: '1.0'
+        },
         storyYear: parseInt(storyYear) || new Date().getFullYear(),
         lifeAge: age, // Use lifeAge instead of age
         includeInTimeline: true,
         includeInBook: true,
         isFavorite: false,
-        hasPhotos: photos.length > 0,
-        photos: photos,
+        photos: photos.length > 0 ? photos : null,
         audioUrl: finalAudioUrl,
-        wisdomTranscription: wisdomText,
         wisdomClipText: wisdomText,
         durationSeconds: 0, // Add duration
       };

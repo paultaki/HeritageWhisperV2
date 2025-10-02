@@ -72,6 +72,37 @@ Return ONLY the cleaned and formatted text with no explanations or commentary.`;
   }
 }
 
+// Helper function to generate wisdom/lesson learned suggestion
+async function generateWisdomSuggestion(transcription: string): Promise<string | null> {
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4-turbo-preview",
+      messages: [
+        {
+          role: "system",
+          content: "You are a thoughtful helper extracting life lessons and wisdom from personal stories."
+        },
+        {
+          role: "user",
+          content: `Based on this personal story, suggest a brief lesson learned or piece of wisdom (1-2 sentences) that captures the essence of what this memory teaches:
+
+Story: "${transcription}"
+
+Provide only the lesson/wisdom, no explanations or preamble.`
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 100
+    });
+
+    const wisdom = completion.choices[0]?.message?.content;
+    return wisdom ? wisdom.trim() : null;
+  } catch (error) {
+    logger.error("Wisdom generation error:", error);
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Get the Authorization header
