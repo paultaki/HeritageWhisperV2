@@ -1014,7 +1014,7 @@ export default function Timeline() {
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <button
                 type="button"
-                className="w-16 h-16 sm:w-20 sm:h-20 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 -ml-2 -mt-8 sm:-mt-10 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--primary-coral)] bg-transparent border-none p-0"
+                className="w-16 h-16 sm:w-20 sm:h-20 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 -ml-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--primary-coral)] bg-transparent border-none p-0"
                 onClick={() => router.push("/")}
                 aria-label="Home"
                 data-testid="button-home-logo"
