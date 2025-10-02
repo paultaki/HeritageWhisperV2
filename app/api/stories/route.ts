@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
 
     // Prepare story data for Supabase (using snake_case)
     // Note: The database schema has 'transcription' field, not 'content'
-    const storyData = {
+    const storyData: any = {
       user_id: user.id,
       title: body.title,
       transcription: body.transcription || body.content, // Main text field
@@ -133,7 +133,6 @@ export async function POST(request: NextRequest) {
       include_in_book: body.includeInBook ?? true,
       is_favorite: body.isFavorite ?? false,
       photo_url: body.photoUrl,
-      formatted_content: body.formattedContent || body.transcription,
       photos: body.photos || [],
       audio_url: body.audioUrl,
       wisdom_clip_text: body.wisdomClipText || body.wisdomTranscription,
@@ -144,6 +143,11 @@ export async function POST(request: NextRequest) {
       story_date: body.storyDate,
       photo_transform: body.photoTransform,
     };
+
+    // Only add formatted_content if it's provided and properly structured
+    if (body.formattedContent && typeof body.formattedContent === 'object') {
+      storyData.formatted_content = body.formattedContent;
+    }
 
     // Save the story to Supabase
     const { data: newStory, error: insertError } = await supabaseAdmin

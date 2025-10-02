@@ -70,7 +70,15 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Supabase upload error:", error);
-      return NextResponse.json({ error: "Failed to upload audio" }, { status: 500 });
+      console.error("Error details:", {
+        message: error.message,
+        statusCode: error.statusCode,
+        details: error.details,
+      });
+      return NextResponse.json({
+        error: "Failed to upload audio",
+        details: error.message
+      }, { status: 500 });
     }
 
     // Get public URL
@@ -84,8 +92,12 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Audio upload error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to upload audio" },
+      {
+        error: "Failed to upload audio",
+        details: errorMessage
+      },
       { status: 500 }
     );
   }
