@@ -139,7 +139,7 @@ export function BookStyleReview({
       </div>
 
       {/* Book Container */}
-      <div className="max-w-7xl mx-auto p-4 md:p-8">
+      <div className="max-w-7xl mx-auto p-4 md:p-8 pb-12 md:pb-16">
         <div className="bg-[#faf8f5] rounded-lg shadow-2xl overflow-hidden" style={{ aspectRatio: '2/1.4' }}>
           {/* Two-page layout - always show both pages side by side */}
           <div className="flex min-h-[700px]">
@@ -166,7 +166,7 @@ export function BookStyleReview({
               </div>
 
               {/* Title - Inline Editable - SECOND */}
-              <div className="mb-4 group relative">
+              <div className="mb-2 group relative">
                 {!editingTitle ? (
                   <h2
                     className="memory-title text-3xl font-serif text-gray-900 cursor-pointer hover:bg-amber-50 rounded px-2 -mx-2 py-1 transition-colors flex items-center gap-2"
@@ -179,41 +179,21 @@ export function BookStyleReview({
                     <Edit2 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </h2>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      ref={titleInputRef}
-                      value={tempTitle}
-                      onChange={(e) => setTempTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleTitleSave();
-                        if (e.key === "Escape") {
-                          setTempTitle(title);
-                          setEditingTitle(false);
-                        }
-                      }}
-                      className="text-3xl font-serif"
-                      placeholder="Give your memory a title..."
-                    />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleTitleSave}
-                      className="text-green-600"
-                    >
-                      <Check className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
+                  <Input
+                    ref={titleInputRef}
+                    value={tempTitle}
+                    onChange={(e) => setTempTitle(e.target.value)}
+                    onBlur={handleTitleSave}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleTitleSave();
+                      if (e.key === "Escape") {
                         setTempTitle(title);
                         setEditingTitle(false);
-                      }}
-                      className="text-red-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
+                      }
+                    }}
+                    className="text-3xl font-serif"
+                    placeholder="Give your memory a title..."
+                  />
                 )}
               </div>
 
@@ -240,6 +220,7 @@ export function BookStyleReview({
                       type="number"
                       value={tempYear}
                       onChange={(e) => setTempYear(e.target.value)}
+                      onBlur={handleYearSave}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleYearSave();
                         if (e.key === "Escape") {
@@ -252,25 +233,6 @@ export function BookStyleReview({
                       min="1900"
                       max={new Date().getFullYear()}
                     />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleYearSave}
-                      className="text-green-600"
-                    >
-                      <Check className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setTempYear(storyYear);
-                        setEditingYear(false);
-                      }}
-                      className="text-red-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
                   </div>
                 )}
               </div>
