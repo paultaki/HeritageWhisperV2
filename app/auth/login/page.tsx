@@ -96,32 +96,34 @@ export default function Login() {
               
               <div>
                 <Label htmlFor="password" className="text-lg font-medium">Password</Label>
-                <div className="relative mt-3" dir="ltr">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="text-lg py-4 pr-12 w-full"
-                    placeholder="••••••••"
-                    required
-                    autoComplete="current-password"
-                    data-testid="input-password"
-                    style={{ paddingRight: '3rem' }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 transition-colors"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                    style={{ right: '0.75rem' }}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </button>
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="text-lg py-4 pr-12 w-full"
+                      placeholder="••••••••"
+                      required
+                      autoComplete="current-password"
+                      data-testid="input-password"
+                    />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 transition-colors"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 {!isRegistering && (
                   <div className="mt-2 text-right">
