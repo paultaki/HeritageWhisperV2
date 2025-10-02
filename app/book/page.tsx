@@ -985,7 +985,7 @@ export default function BookView() {
                 variant="ghost"
                 size="sm"
                 className="glassmorphism backdrop-blur-sm hover:bg-white/20 transition-all rounded-3xl"
-                onClick={() => router.push(`/review/${currentStory.id}`)}
+                onClick={() => router.push(`/review?edit=${currentStory.id}`)}
               >
                 <Pencil className="w-4 h-4 mr-2" />
                 Edit Story

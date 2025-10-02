@@ -14,9 +14,8 @@ function ReviewRedirectContent() {
     const navId = searchParams.get('nav');
 
     if (editId) {
-      // Redirect to the dynamic route with edit mode
-      const params = new URLSearchParams(searchParams);
-      router.replace(`/review/${editId}?${params.toString()}`);
+      // Redirect to book-style route with edit mode
+      router.replace(`/review/book-style?edit=${editId}`);
     } else if (navId) {
       // This is a new story from recording, redirect to book-style route
       router.replace(`/review/book-style?nav=${navId}`);

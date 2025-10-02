@@ -15,6 +15,10 @@ function BookStyleReviewContent() {
   const { user } = useAuth();
   const { toast } = useToast();
 
+  // Check if we're editing an existing story
+  const editId = searchParams.get("edit");
+  const isEditing = !!editId;
+
   // Get data from URL params (passed from recording page)
   const [title, setTitle] = useState("");
   const [storyYear, setStoryYear] = useState("");
@@ -23,6 +27,7 @@ function BookStyleReviewContent() {
   const [wisdomText, setWisdomText] = useState("");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [mainAudioBlob, setMainAudioBlob] = useState<Blob | null>(null);
+  const [isLoading, setIsLoading] = useState(isEditing);
 
   const handleAudioChange = (url: string | null, blob?: Blob | null) => {
     setAudioUrl(url);
@@ -32,35 +37,78 @@ function BookStyleReviewContent() {
   };
 
   useEffect(() => {
-    // Load data from search params or session storage
-    const urlTranscription = searchParams.get("transcription");
-    const urlAudioUrl = searchParams.get("audioUrl");
-    const urlTitle = searchParams.get("title");
-    const urlYear = searchParams.get("year");
-    const urlDuration = searchParams.get("duration");
+    const fetchStoryData = async () => {
+      if (!editId) return;
 
-    if (urlTranscription) {
-      setTranscription(decodeURIComponent(urlTranscription));
-    }
-    if (urlAudioUrl) {
-      setAudioUrl(decodeURIComponent(urlAudioUrl));
-    }
-    if (urlTitle) {
-      setTitle(decodeURIComponent(urlTitle));
-    }
-    if (urlYear) {
-      setStoryYear(urlYear);
-    }
+      setIsLoading(true);
+      try {
+        const response = await apiRequest('GET', `/api/stories/${editId}`);
+        if (response.ok) {
+          const { story } = await response.json();
 
-    // Try to retrieve audio blob from session storage
-    const storedAudioData = sessionStorage.getItem("recordedAudio");
-    if (storedAudioData) {
-      fetch(storedAudioData)
-        .then(res => res.blob())
-        .then(blob => setMainAudioBlob(blob))
-        .catch(console.error);
+          // Populate form with existing story data
+          setTitle(story.title || '');
+          setTranscription(story.transcription || story.content || '');
+          setStoryYear(story.storyYear?.toString() || story.year?.toString() || '');
+          setWisdomText(story.wisdomClipText || story.wisdomTranscription || '');
+          setAudioUrl(story.audioUrl || null);
+
+          // Handle photos
+          if (story.photos && Array.isArray(story.photos)) {
+            setPhotos(story.photos);
+          } else if (story.photoUrl) {
+            setPhotos([{
+              id: 'legacy',
+              url: story.photoUrl,
+              transform: story.photoTransform
+            }]);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch story:', error);
+        toast({
+          title: "Error loading story",
+          description: "Failed to load the story data.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (isEditing) {
+      fetchStoryData();
+    } else {
+      // Load data from search params or session storage for new stories
+      const urlTranscription = searchParams.get("transcription");
+      const urlAudioUrl = searchParams.get("audioUrl");
+      const urlTitle = searchParams.get("title");
+      const urlYear = searchParams.get("year");
+      const urlDuration = searchParams.get("duration");
+
+      if (urlTranscription) {
+        setTranscription(decodeURIComponent(urlTranscription));
+      }
+      if (urlAudioUrl) {
+        setAudioUrl(decodeURIComponent(urlAudioUrl));
+      }
+      if (urlTitle) {
+        setTitle(decodeURIComponent(urlTitle));
+      }
+      if (urlYear) {
+        setStoryYear(urlYear);
+      }
+
+      // Try to retrieve audio blob from session storage
+      const storedAudioData = sessionStorage.getItem("recordedAudio");
+      if (storedAudioData) {
+        fetch(storedAudioData)
+          .then(res => res.blob())
+          .then(blob => setMainAudioBlob(blob))
+          .catch(console.error);
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, editId, isEditing, toast]);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -121,19 +169,23 @@ function BookStyleReviewContent() {
 
       console.log("Saving story with data:", storyData);
 
-      const response = await apiRequest('POST', '/api/stories', storyData);
+      // Use PUT for update, POST for create
+      const url = isEditing ? `/api/stories/${editId}` : '/api/stories';
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const response = await apiRequest(method, url, storyData);
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to save story');
+        throw new Error(error.error || `Failed to ${isEditing ? 'update' : 'save'} story`);
       }
 
       return response.json();
     },
     onSuccess: (data) => {
       toast({
-        title: "Story saved successfully!",
-        description: "Your memory has been added to your timeline.",
+        title: `Story ${isEditing ? 'updated' : 'saved'} successfully!`,
+        description: `Your memory has been ${isEditing ? 'updated' : 'added to your timeline'}.`,
       });
 
       // Clear session storage
@@ -201,6 +253,17 @@ function BookStyleReviewContent() {
 
   if (!user) {
     return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading memory...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

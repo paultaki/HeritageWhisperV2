@@ -464,7 +464,7 @@ function MemoryCard({
     const isBirthYearStory = story.title?.toLowerCase().includes('born') || story.title?.toLowerCase().includes('birth');
     if (isBirthYearStory) {
       // Navigate directly to edit/review page for birth year story
-      router.push(`/review/${story.id}`);
+      router.push(`/review?edit=${story.id}`);
     } else {
       // Navigate to book view for regular stories
       router.push(`/book?storyId=${story.id}`);
