@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MultiPhotoUploader, type StoryPhoto } from "@/components/MultiPhotoUploader";
+import { supabase } from "@/lib/supabase";
 
 interface BookStyleReviewProps {
   title: string;
@@ -363,9 +364,18 @@ export function BookStyleReview({
                               formData.append('audio', file);
 
                               try {
+                                // Get auth token from Supabase session
+                                const { data: { session } } = await supabase.auth.getSession();
+                                const headers: HeadersInit = {};
+
+                                if (session?.access_token) {
+                                  headers['Authorization'] = `Bearer ${session.access_token}`;
+                                }
+
                                 const response = await fetch('/api/transcribe', {
                                   method: 'POST',
-                                  body: formData
+                                  body: formData,
+                                  headers
                                 });
 
                                 if (response.ok) {
@@ -379,6 +389,8 @@ export function BookStyleReview({
                                   if (wisdomSuggestion && !wisdomText && onWisdomChange) {
                                     onWisdomChange(wisdomSuggestion);
                                   }
+                                } else {
+                                  console.error('Transcription failed:', response.status, await response.text());
                                 }
                               } catch (error) {
                                 console.error('Transcription failed:', error);
