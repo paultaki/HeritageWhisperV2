@@ -407,10 +407,44 @@ export function BookStyleReview({
                 )}
               </div>
 
-              {/* Spacer to push lesson learned to bottom */}
-              <div className="flex-grow"></div>
+              {/* Story Content - Preview on left page */}
+              <div className="story-content flex-grow">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Your Story</h3>
+                <div className="text-gray-800 leading-relaxed font-serif text-base">
+                  {transcription ? (
+                    // Display preview of text on left page
+                    <p className="line-clamp-[20]">{transcription}</p>
+                  ) : (
+                    <p className="text-gray-400 italic">Your story will appear here...</p>
+                  )}
+                </div>
+              </div>
+            </div>
 
-              {/* Lesson Learned - Inline Editable */}
+            {/* Right Page - Story Content Editable + Lesson Learned */}
+            <div className="w-1/2 p-6 md:p-8 lg:p-12 bg-[#faf8f5] flex flex-col">
+              {/* Running header */}
+              <div className="running-header text-xs text-gray-500 uppercase tracking-wider mb-6 text-right">
+                {storyYear || new Date().getFullYear()}
+              </div>
+
+              {/* Story Content - Full editable area */}
+              <div className="story-content flex-grow">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Your Story (continued)</h3>
+                <Textarea
+                  value={transcription}
+                  onChange={(e) => onTranscriptionChange(e.target.value)}
+                  className="w-full min-h-[350px] resize-none border-0 bg-transparent p-0 text-gray-800 leading-relaxed font-serif text-base focus:outline-none focus:ring-0 placeholder:text-gray-400"
+                  placeholder="Type or paste your story here. This is how it will appear in your book..."
+                />
+                {transcription && (
+                  <p className="text-xs text-gray-500 mt-2 text-right">
+                    {transcription.split(' ').length} words
+                  </p>
+                )}
+              </div>
+
+              {/* Lesson Learned - At bottom of right page */}
               <div className="mt-6">
                 <div className="group relative">
                   <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
@@ -471,30 +505,6 @@ export function BookStyleReview({
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
-
-            {/* Right Page - Story Content */}
-            <div className="w-1/2 p-6 md:p-8 lg:p-12 bg-[#faf8f5]">
-              {/* Running header */}
-              <div className="running-header text-xs text-gray-500 uppercase tracking-wider mb-6 text-right">
-                {storyYear || new Date().getFullYear()}
-              </div>
-
-              {/* Story Content - Editable */}
-              <div className="story-content">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Your Story</h3>
-                <Textarea
-                  value={transcription}
-                  onChange={(e) => onTranscriptionChange(e.target.value)}
-                  className="w-full min-h-[600px] resize-none border-0 bg-transparent p-0 text-gray-800 leading-relaxed font-serif text-base focus:outline-none focus:ring-0 placeholder:text-gray-400"
-                  placeholder="Type or paste your story here. This is how it will appear in your book..."
-                />
-                {transcription && (
-                  <p className="text-xs text-gray-500 mt-4 text-right">
-                    {transcription.split(' ').length} words
-                  </p>
-                )}
               </div>
             </div>
           </div>
