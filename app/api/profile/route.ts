@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { logger } from "@/lib/logger";
-import { db, users, profiles } from "@/lib/db";
-import { eq } from "drizzle-orm";
 
-// Initialize Supabase Admin client for token verification
+// Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -42,25 +39,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    logger.api("Fetching profile for user:", user.id);
+    // Get user data from Supabase public.users table
+    const { data: dbUser, error: userError } = await supabaseAdmin
+      .from("users")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-    // Get profile from database
-    const [profile] = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.userId, user.id))
-      .limit(1);
-
-    if (!profile) {
-      // Return default profile data if none exists
-      const [dbUser] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, user.id))
-        .limit(1);
-
+    if (userError || !dbUser) {
+      console.error("Error fetching user:", userError);
+      // Return default profile data
       return NextResponse.json({
-        birthYear: dbUser?.birthYear || 1950,
+        birthYear: user.user_metadata?.birthYear || 1950,
         majorLifePhases: {
           childhood: { start: 0, end: 12 },
           youngAdult: { start: 13, end: 25 },
@@ -79,30 +69,31 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Transform database format to frontend format
+    // Return profile data from user metadata and defaults
+    // Note: In a full implementation, you might want to create a separate profiles table
     return NextResponse.json({
-      birthYear: profile.birthYear,
-      majorLifePhases: profile.majorLifePhases || {
+      birthYear: dbUser.birth_year || 1950,
+      majorLifePhases: user.user_metadata?.majorLifePhases || {
         childhood: { start: 0, end: 12 },
         youngAdult: { start: 13, end: 25 },
         midLife: { start: 26, end: 60 },
         senior: { start: 61, end: 100 }
       },
-      workEthic: profile.workEthic || 5,
-      riskTolerance: profile.riskTolerance || 5,
-      familyOrientation: profile.familyOrientation || 5,
-      spirituality: profile.spirituality || 5,
-      preferredStyle: profile.preferredStyle || 'gentle',
-      emotionalComfort: profile.emotionalComfort || 5,
-      detailLevel: profile.detailLevel || 'moderate',
-      followUpFrequency: profile.followUpFrequency || 'occasional',
-      completionPercentage: profile.completionPercentage || 0
+      workEthic: user.user_metadata?.workEthic || 5,
+      riskTolerance: user.user_metadata?.riskTolerance || 5,
+      familyOrientation: user.user_metadata?.familyOrientation || 5,
+      spirituality: user.user_metadata?.spirituality || 5,
+      preferredStyle: user.user_metadata?.preferredStyle || 'gentle',
+      emotionalComfort: user.user_metadata?.emotionalComfort || 5,
+      detailLevel: user.user_metadata?.detailLevel || 'moderate',
+      followUpFrequency: user.user_metadata?.followUpFrequency || 'occasional',
+      completionPercentage: user.user_metadata?.completionPercentage || 0
     });
 
   } catch (error) {
-    logger.error("Profile fetch error:", error);
+    console.error("Profile fetch error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch profile", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Failed to fetch profile" },
       { status: 500 }
     );
   }
@@ -137,11 +128,9 @@ export async function PATCH(request: NextRequest) {
 
     const profileData = await request.json();
 
-    logger.api("Updating profile for user:", user.id);
-
     // Calculate completion percentage
     let fieldsCompleted = 0;
-    const totalFields = 12; // Total number of profile fields
+    const totalFields = 10; // Total number of profile fields
 
     if (profileData.birthYear) fieldsCompleted++;
     if (profileData.majorLifePhases) fieldsCompleted++;
@@ -156,52 +145,55 @@ export async function PATCH(request: NextRequest) {
 
     const completionPercentage = Math.round((fieldsCompleted / totalFields) * 100);
 
-    // Check if profile exists
-    const [existingProfile] = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.userId, user.id))
-      .limit(1);
-
-    if (existingProfile) {
-      // Update existing profile
-      const [updatedProfile] = await db
-        .update(profiles)
-        .set({
+    // Update user metadata in Supabase Auth
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+      user.id,
+      {
+        user_metadata: {
+          ...user.user_metadata,
           ...profileData,
-          completionPercentage,
-          updatedAt: new Date(),
-        })
-        .where(eq(profiles.userId, user.id))
-        .returning();
+          completionPercentage
+        }
+      }
+    );
 
-      return NextResponse.json({
-        success: true,
-        completionPercentage,
-        profile: updatedProfile
-      });
-    } else {
-      // Create new profile
-      const [newProfile] = await db
-        .insert(profiles)
-        .values({
-          userId: user.id,
-          ...profileData,
-          completionPercentage,
-        })
-        .returning();
-
-      return NextResponse.json({
-        success: true,
-        completionPercentage,
-        profile: newProfile
-      });
+    if (updateError) {
+      console.error("Error updating user metadata:", updateError);
+      return NextResponse.json(
+        { error: "Failed to update profile" },
+        { status: 500 }
+      );
     }
 
+    // Update birth_year in users table if provided
+    if (profileData.birthYear) {
+      const { error: userUpdateError } = await supabaseAdmin
+        .from("users")
+        .update({
+          birth_year: profileData.birthYear,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", user.id);
+
+      if (userUpdateError) {
+        console.error("Error updating user birth year:", userUpdateError);
+        // Don't fail the request, metadata was updated successfully
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      completionPercentage,
+      profile: {
+        ...profileData,
+        completionPercentage
+      }
+    });
+
   } catch (error) {
-    logger.error("Profile update error:", error);
+    console.error("Profile update error:", error);
     return NextResponse.json(
-      { error: "Failed to save profile", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Failed to save profile" },
       { status: 500 }
     );
   }
