@@ -177,7 +177,21 @@ export function BookStyleReview({
                 Your Heritage Story
               </div>
 
-              {/* Title - Inline Editable */}
+              {/* Photo Section - FIRST */}
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                  <Camera className="w-4 h-4" />
+                  Photos (Optional)
+                </h3>
+                <MultiPhotoUploader
+                  photos={photos}
+                  onPhotosChange={onPhotosChange}
+                  disabled={false}
+                  loading={false}
+                />
+              </div>
+
+              {/* Title - Inline Editable - SECOND */}
               <div className="mb-4 group relative">
                 {!editingTitle ? (
                   <h2
@@ -230,7 +244,7 @@ export function BookStyleReview({
               </div>
 
               {/* Year - Inline Editable */}
-              <div className="mb-6 group relative">
+              <div className="mb-4 group relative">
                 {!editingYear ? (
                   <p
                     className="text-sm text-gray-600 cursor-pointer hover:bg-amber-50 rounded px-2 -mx-2 py-1 transition-colors inline-flex items-center gap-2"
@@ -287,23 +301,9 @@ export function BookStyleReview({
                 )}
               </div>
 
-              {/* Photo Section */}
-              <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                  <Camera className="w-4 h-4" />
-                  Photos (Optional)
-                </h3>
-                <MultiPhotoUploader
-                  photos={photos}
-                  onPhotosChange={onPhotosChange}
-                  disabled={false}
-                  loading={false}
-                />
-              </div>
-
-              {/* Audio Player (if exists) */}
+              {/* Audio Player - Below year, before text */}
               {audioUrl && (
-                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200">
                   <p className="text-sm text-gray-600 mb-2">Audio Recording</p>
                   <audio controls src={audioUrl} className="w-full" />
                 </div>
