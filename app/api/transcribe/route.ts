@@ -105,42 +105,77 @@ Provide only the lesson/wisdom, no explanations or preamble.`
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the Authorization header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
+    // Check if the request is FormData or JSON
+    const contentType = request.headers.get("content-type");
+    const isFormData = contentType?.includes("multipart/form-data");
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+    // For FormData (from BookStyleReview), auth is optional
+    // For JSON (from recording page), auth is required
+    let user = null;
+    let audioBuffer: Buffer;
+
+    if (isFormData) {
+      // Handle FormData upload
+      const formData = await request.formData();
+      const audioFile = formData.get("audio") as File;
+
+      if (!audioFile) {
+        return NextResponse.json(
+          { error: "No audio file provided" },
+          { status: 400 }
+        );
+      }
+
+      // Convert File to Buffer
+      const arrayBuffer = await audioFile.arrayBuffer();
+      audioBuffer = Buffer.from(arrayBuffer);
+
+      // Try to get auth if available
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
+      if (token) {
+        const { data } = await supabaseAdmin.auth.getUser(token);
+        user = data.user;
+      }
+    } else {
+      // Handle JSON upload (existing flow)
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
+
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 }
+        );
+      }
+
+      // Verify the JWT token with Supabase
+      const {
+        data: { user: authUser },
+        error: authError,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (authError || !authUser) {
+        return NextResponse.json(
+          { error: "Invalid authentication" },
+          { status: 401 }
+        );
+      }
+      user = authUser;
+
+      const body = await request.json();
+      const { audioBase64, mimeType, title } = body;
+
+      if (!audioBase64) {
+        return NextResponse.json(
+          { error: "No audio data provided" },
+          { status: 400 }
+        );
+      }
+
+      // Convert base64 to buffer
+      audioBuffer = Buffer.from(audioBase64, 'base64');
     }
-
-    // Verify the JWT token with Supabase
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseAdmin.auth.getUser(token);
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 }
-      );
-    }
-
-    const body = await request.json();
-    const { audioBase64, mimeType, title } = body;
-
-    if (!audioBase64) {
-      return NextResponse.json(
-        { error: "No audio data provided" },
-        { status: 400 }
-      );
-    }
-
-    // Convert base64 to buffer
-    const audioBuffer = Buffer.from(audioBase64, 'base64');
 
     // Check size limits (25MB max for OpenAI Whisper)
     const MAX_SIZE = 25 * 1024 * 1024;
@@ -170,7 +205,7 @@ export async function POST(request: NextRequest) {
     fs.writeFileSync(tempFilePath, audioBuffer);
 
     try {
-      logger.api("Transcribing audio for user:", user.id);
+      logger.api("Transcribing audio for user:", user?.id || "anonymous");
 
       // Create a readable stream from the file
       const audioReadStream = fs.createReadStream(tempFilePath);
@@ -195,15 +230,24 @@ export async function POST(request: NextRequest) {
         logger.warn("Failed to format transcription, using raw text:", formatError);
       }
 
+      // Generate wisdom suggestion
+      let wisdomSuggestion = null;
+      try {
+        wisdomSuggestion = await generateWisdomSuggestion(formattedText);
+      } catch (wisdomError) {
+        logger.warn("Failed to generate wisdom suggestion:", wisdomError);
+      }
+
       // Clean up temp file
       if (fs.existsSync(tempFilePath)) {
         fs.unlinkSync(tempFilePath);
       }
 
-      // Return the transcription
+      // Return the transcription and wisdom suggestion
       return NextResponse.json({
         transcription: formattedText,
         duration: estimatedDuration,
+        wisdomSuggestion: wisdomSuggestion
       });
 
     } catch (error) {
