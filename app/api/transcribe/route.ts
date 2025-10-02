@@ -123,8 +123,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Save to temp file for OpenAI processing
-    const tempDir = path.join(process.cwd(), 'temp');
-    if (!fs.existsSync(tempDir)) {
+    // Use /tmp in production (Vercel), or local temp directory in development
+    const tempDir = process.env.NODE_ENV === 'production'
+      ? '/tmp'
+      : path.join(process.cwd(), 'temp');
+
+    if (process.env.NODE_ENV !== 'production' && !fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
     }
 
