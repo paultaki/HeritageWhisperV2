@@ -32,7 +32,7 @@ import StoryTraits from "@/components/StoryTraits";
 import { getTopTraits } from "@/utils/getTopTraits";
 import { Palette } from "lucide-react";
 
-const logoUrl = "/hw_logo_icon.png";
+const logoUrl = "/logo_mic_circle.webp";
 
 // Color scheme options for testing
 type ColorScheme = 'original' | 'white' | 'inverted' | 'soft' | 'cool' | 'dark';

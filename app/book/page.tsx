@@ -37,7 +37,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
 import { groupStoriesByDecade, getAgeRangeForDecade, getDecadeDisplayName, normalizeYear, formatYear } from "@/lib/utils";
 
-const logoUrl = "/hw_logo_icon.png";
+const logoUrl = "/logo_mic_circle.webp";
 
 // Book layout configuration - single place to adjust text splitting
 const BOOK_LAYOUT_CONFIG = {
