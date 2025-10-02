@@ -151,7 +151,10 @@ export function BookStyleReview({
               Cancel
             </Button>
             <Button
-              onClick={onSave}
+              onClick={() => {
+                console.log("BookStyleReview: Save button clicked, calling onSave");
+                onSave();
+              }}
               disabled={isSaving}
               className="bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full px-6"
             >
@@ -164,11 +167,11 @@ export function BookStyleReview({
       {/* Book Container */}
       <div className="book-container max-w-6xl mx-auto p-4 md:p-8">
         <div className="book-spread bg-[#faf8f5] rounded-lg shadow-2xl overflow-hidden">
-          {/* Two-page layout on desktop, single page on mobile */}
-          <div className="grid grid-cols-1 md:grid-cols-2 min-h-[800px]">
+          {/* Two-page layout - always show both pages side by side */}
+          <div className="grid grid-cols-2 min-h-[800px]">
 
             {/* Left Page - Photo and Basic Info */}
-            <div className="page page--left p-8 md:p-12 border-b md:border-b-0 md:border-r border-gray-200">
+            <div className="page page--left p-6 md:p-8 lg:p-12 border-r border-gray-200 flex flex-col">
               {/* Running header */}
               <div className="running-header text-xs text-gray-500 uppercase tracking-wider mb-6">
                 Your Heritage Story
@@ -306,8 +309,11 @@ export function BookStyleReview({
                 </div>
               )}
 
+              {/* Spacer to push lesson learned to bottom */}
+              <div className="flex-grow"></div>
+
               {/* Lesson Learned - Inline Editable */}
-              <div className="mt-auto pt-6">
+              <div className="mt-6">
                 <div className="group relative">
                   <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-amber-500" />
@@ -371,7 +377,7 @@ export function BookStyleReview({
             </div>
 
             {/* Right Page - Story Content */}
-            <div className="page page--right p-8 md:p-12">
+            <div className="page page--right p-6 md:p-8 lg:p-12">
               {/* Running header */}
               <div className="running-header text-xs text-gray-500 uppercase tracking-wider mb-6 text-right">
                 {storyYear || new Date().getFullYear()}

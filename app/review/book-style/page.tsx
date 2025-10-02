@@ -145,6 +145,9 @@ function BookStyleReviewContent() {
   });
 
   const handleSave = () => {
+    console.log("Save button clicked!");
+    console.log("Current data:", { title, storyYear, transcription: transcription?.substring(0, 50) });
+
     if (!transcription?.trim()) {
       toast({
         title: "Story content required",
@@ -154,6 +157,7 @@ function BookStyleReviewContent() {
       return;
     }
 
+    console.log("Calling saveMutation.mutate()");
     saveMutation.mutate();
   };
 
