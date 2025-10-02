@@ -18,8 +18,8 @@ function ReviewRedirectContent() {
       const params = new URLSearchParams(searchParams);
       router.replace(`/review/${editId}?${params.toString()}`);
     } else if (navId) {
-      // This is a new story from recording, redirect to create route
-      router.replace(`/review/create?nav=${navId}`);
+      // This is a new story from recording, redirect to book-style route
+      router.replace(`/review/book-style?nav=${navId}`);
     } else {
       // No parameters, redirect to timeline
       router.replace('/timeline');

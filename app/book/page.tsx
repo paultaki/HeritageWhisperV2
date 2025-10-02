@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/carousel";
 import { useSwipeable } from "react-swipeable";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { DecadeIntroPage, DecadeFactsPage } from "@/components/BookDecadePages";
+import { DecadeIntroPage } from "@/components/BookDecadePages";
 import { groupStoriesByDecade, getAgeRangeForDecade, getDecadeDisplayName, normalizeYear, formatYear } from "@/lib/utils";
 
 const logoUrl = "/hw_logo_icon.png";
@@ -435,14 +435,17 @@ export default function BookView() {
     return allStories.filter((story: Story) => story.includeInBook !== false);
   }, [allStories]);
 
-  type PageType = 'decade-chapter' | 'story';
+  type PageType = 'decade-intro' | 'story-left' | 'story-right' | 'story-continuation';
 
   interface BookPage {
     type: PageType;
     data: any;
+    storyIndex?: number;  // Index of the story being displayed
+    pageOfStory?: number; // Which page of this story (1st, 2nd, etc)
     decade?: string;
     ageRange?: string;
     storiesInDecade?: number;
+    isFirstInDecade?: boolean;
   }
 
   const bookPages = React.useMemo(() => {
@@ -456,43 +459,94 @@ export default function BookView() {
       return normalizedStoryYear === normalizedBirthYear;
     });
 
+    // Helper function to determine if we're on a left or right page
+    const isLeftPage = (pageIndex: number) => pageIndex % 2 === 0;
+
+    let globalPageIndex = 0;
+    let storyIndex = 0;
+
+    // Process birth year stories
     if (birthYearStories.length > 0) {
+      // Add decade intro on left page
       pages.push({
-        type: 'decade-chapter',
+        type: 'decade-intro',
         data: 'birth-year',
         decade: 'birth-year',
         ageRange: `${normalizedBirthYear} • The Beginning`,
         storiesInDecade: birthYearStories.length
       });
+      globalPageIndex++;
 
-      birthYearStories.forEach((story: Story) => {
-        pages.push({
-          type: 'story',
-          data: story,
-          decade: 'birth-year'
-        });
+      // Process each story in birth year
+      birthYearStories.forEach((story: Story, idx: number) => {
+        // First story of decade starts immediately on right page (if on left) or continues on current page
+        if (idx === 0 && isLeftPage(globalPageIndex - 1)) {
+          // We're on the right side after decade intro, perfect for first story
+          pages.push({
+            type: 'story-right',
+            data: story,
+            storyIndex,
+            pageOfStory: 1,
+            decade: 'birth-year',
+            isFirstInDecade: true
+          });
+        } else {
+          // Continue with normal story flow
+          pages.push({
+            type: isLeftPage(globalPageIndex) ? 'story-left' : 'story-right',
+            data: story,
+            storyIndex,
+            pageOfStory: 1,
+            decade: 'birth-year',
+            isFirstInDecade: idx === 0
+          });
+        }
+        globalPageIndex++;
+        storyIndex++;
       });
     }
 
+    // Process other decades
     const decadeGroups = groupStoriesByDecade(stories, user.birthYear);
 
     decadeGroups.forEach(group => {
       const { decade, ageRange, stories: decadeStories } = group;
 
+      // Add decade intro
       pages.push({
-        type: 'decade-chapter',
+        type: 'decade-intro',
         data: decade,
         decade: decade,
         ageRange: ageRange,
         storiesInDecade: decadeStories.length
       });
+      globalPageIndex++;
 
-      decadeStories.forEach((story: Story) => {
-        pages.push({
-          type: 'story',
-          data: story,
-          decade: decade
-        });
+      // Process each story in this decade
+      decadeStories.forEach((story: Story, idx: number) => {
+        // Stories flow continuously
+        if (idx === 0 && isLeftPage(globalPageIndex - 1)) {
+          // First story of decade on right page after intro
+          pages.push({
+            type: 'story-right',
+            data: story,
+            storyIndex,
+            pageOfStory: 1,
+            decade,
+            isFirstInDecade: true
+          });
+        } else {
+          pages.push({
+            type: isLeftPage(globalPageIndex) ? 'story-left' : 'story-right',
+            data: story,
+            storyIndex,
+            pageOfStory: 1,
+            decade,
+            isFirstInDecade: idx === 0
+          });
+        }
+        globalPageIndex++;
+        storyIndex++;
       });
     });
 
@@ -501,12 +555,12 @@ export default function BookView() {
 
   const totalPages = bookPages.length;
   const currentPageData = bookPages[currentPage];
-  const currentStory = currentPageData?.type === 'story' ? currentPageData.data : null;
+  const currentStory = (currentPageData?.type === 'story-left' || currentPageData?.type === 'story-right' || currentPageData?.type === 'story-continuation') ? currentPageData.data : null;
 
   const formattedContent = currentStory?.formattedContent;
 
   const [dynamicLeftText, dynamicRightText] = useDynamicTextBalancer(
-    currentPageData?.type === 'story' ? (currentStory?.transcription || formattedContent?.formattedText || '') : null,
+    currentStory ? (currentStory?.transcription || formattedContent?.formattedText || '') : null,
     currentStory,
     audioExpanded,
     pageContainerRef,
@@ -570,7 +624,7 @@ export default function BookView() {
 
     if (initialStoryId && bookPages.length > 0) {
       const pageIndex = bookPages.findIndex(
-        (page) => page.type === 'story' && page.data?.id === initialStoryId
+        (page) => (page.type === 'story-left' || page.type === 'story-right' || page.type === 'story-continuation') && page.data?.id === initialStoryId
       );
       if (pageIndex !== -1) {
         setCurrentPage(pageIndex);
@@ -925,7 +979,7 @@ export default function BookView() {
 
       <div className="flex-1 flex items-center justify-center p-4 md:p-8 overflow-hidden relative">
         <div className="book-container max-w-6xl w-full" ref={pageContainerRef}>
-          {currentPageData?.type === 'story' && currentStory && (
+          {currentStory && (
             <div className="absolute top-4 right-4 z-20">
               <Button
                 variant="ghost"
@@ -940,7 +994,7 @@ export default function BookView() {
           )}
 
           <div className="book-spread">
-            {currentPageData?.type === 'decade-chapter' && (
+            {currentPageData?.type === 'decade-intro' && (
               <>
                 <article className="page page--left">
                   <DecadeIntroPage
@@ -950,15 +1004,18 @@ export default function BookView() {
                   />
                 </article>
                 <article className="page page--right">
-                  <DecadeFactsPage
-                    decade={currentPageData.decade!}
-                    ageRange={currentPageData.ageRange!}
-                  />
+                  <div className="running-header">
+                    <span className="header-right">Family Memories</span>
+                  </div>
+                  <div className="flex-1 flex items-center justify-center">
+                    {/* Empty right page after decade intro, next story will appear here */}
+                  </div>
+                  <div className="page-number">{currentPage * 2 + 2}</div>
                 </article>
               </>
             )}
 
-            {currentPageData?.type === 'story' && currentStory && (
+            {currentPageData?.type === 'story-left' && currentStory && (
               <>
                 <article className="page page--left" ref={leftPageRef}>
                   <div className="running-header">
@@ -1022,37 +1079,97 @@ export default function BookView() {
                     </div>
                   )}
 
-                  {leftPageText && (
-                    <p className="memory-body memory-body--left">
-                      {leftPageText}
-                    </p>
-                  )}
+                  <p className="memory-body memory-body--left">
+                    {currentStory.transcription || 'No transcription available for this memory.'}
+                  </p>
 
                   <div className="page-number">{currentPage * 2 + 1}</div>
                 </article>
 
-                <article className="page page--right" ref={rightPageRef} style={{ display: 'flex', flexDirection: 'column' }}>
+                {/* Empty right page */}
+                <article className="page page--right">
                   <div className="running-header">
                     <span className="header-right">Family Memories</span>
                   </div>
+                  <div className="flex-1"></div>
+                  <div className="page-number">{currentPage * 2 + 2}</div>
+                </article>
+              </>
+            )}
 
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    {rightPageText ? (
-                      <p className="memory-body memory-body--right" style={{ marginBottom: 'auto' }}>
-                        {rightPageText}
-                      </p>
-                    ) : (
-                      !leftPageText && (
-                        <p className="memory-body memory-body--right" style={{ marginBottom: 'auto' }}>
-                          No transcription available for this memory.
-                        </p>
-                      )
+            {currentPageData?.type === 'story-right' && currentStory && (
+              <>
+                {/* Check if there's a previous page that's a decade intro */}
+                {currentPage > 0 && bookPages[currentPage - 1]?.type === 'decade-intro' ? (
+                  /* Previous page already rendered, just show this story on the right */
+                  <article className="page page--right" ref={rightPageRef}>
+                    <div className="running-header">
+                      <span className="header-right">Family Memories</span>
+                    </div>
+
+                    <PhotoCarousel story={currentStory} photoRef={photoRef} />
+
+                    <div ref={titleDateRef}>
+                      <h2 className="memory-title">
+                        {currentStory.title}
+                      </h2>
+                      <div className="memory-year">
+                        {formatDate(currentStory)}
+                        {currentStory.lifeAge !== null && currentStory.lifeAge !== undefined && ` • Age ${currentStory.lifeAge}`}
+                      </div>
+                    </div>
+
+                    {currentStory.audioUrl && (
+                      <div className="audio-wrapper" ref={audioWrapperRef}>
+                        <div className={`audio-wrap ${audioExpanded ? "audio--expanded" : "audio--compact"}`}>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={toggleAudio}
+                              className="p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+                            >
+                              {isPlaying ? (
+                                <Pause className="w-4 h-4 text-primary" />
+                              ) : (
+                                <Play className="w-4 h-4 text-primary" />
+                              )}
+                            </button>
+                            <div className="flex-1" onClick={toggleAudio}>
+                              <div
+                                className="audio-bar"
+                                style={{
+                                  background: "rgba(0,0,0,0.1)",
+                                  height: "6px",
+                                  borderRadius: "999px",
+                                  position: "relative",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                <div
+                                  className="audio-fill"
+                                  style={{
+                                    width: `${playbackProgress}%`,
+                                    height: "100%",
+                                    background: "linear-gradient(90deg, var(--primary-coral), #FF935F)",
+                                    borderRadius: "999px",
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="audio-time mt-2">
+                            <span>{formatTime(currentTime)}</span>
+                            <span>{formatTime(duration)}</span>
+                          </div>
+                        </div>
+                      </div>
                     )}
-                  </div>
 
-                  <div style={{ marginTop: 'auto' }}>
+                    <p className="memory-body memory-body--right">
+                      {currentStory.transcription || 'No transcription available for this memory.'}
+                    </p>
+
                     {(currentStory.wisdomClipText || currentStory.wisdomClipUrl) && (
-                      <div className="wisdom" ref={wisdomRef} style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                      <div className="wisdom" ref={wisdomRef} style={{ textAlign: 'center', marginTop: '2rem' }}>
                         <div className="flex items-center justify-center gap-2 mb-3">
                           <span className="wisdom-label text-amber-700 font-semibold">Lesson Learned</span>
                         </div>
@@ -1062,40 +1179,106 @@ export default function BookView() {
                             &quot;{currentStory.wisdomClipText}&quot;
                           </blockquote>
                         )}
+                      </div>
+                    )}
 
-                        {currentStory.wisdomClipUrl && (
-                          <div className="mt-3">
-                            <audio
-                              controls
-                              src={currentStory.wisdomClipUrl}
-                              className="w-full max-w-md mx-auto"
-                              style={{ height: '40px' }}
-                            >
-                              Your browser does not support the audio element.
-                            </audio>
-                            {currentStory.wisdomClipText && (
-                              <p className="text-sm text-gray-600 mt-2 italic">
-                                Audio lesson available above
-                              </p>
-                            )}
+                    <div className="page-number">{currentPage * 2 + 2}</div>
+                  </article>
+                ) : (
+                  /* Show normal two-page spread */
+                  <>
+                    <article className="page page--left">
+                      <div className="running-header">
+                        <span className="header-left">Heritage Whisper</span>
+                      </div>
+                      <div className="flex-1"></div>
+                      <div className="page-number">{currentPage * 2 + 1}</div>
+                    </article>
+
+                    <article className="page page--right" ref={rightPageRef}>
+                      <div className="running-header">
+                        <span className="header-right">Family Memories</span>
+                      </div>
+
+                      <PhotoCarousel story={currentStory} photoRef={photoRef} />
+
+                      <div ref={titleDateRef}>
+                        <h2 className="memory-title">
+                          {currentStory.title}
+                        </h2>
+                        <div className="memory-year">
+                          {formatDate(currentStory)}
+                          {currentStory.lifeAge !== null && currentStory.lifeAge !== undefined && ` • Age ${currentStory.lifeAge}`}
+                        </div>
+                      </div>
+
+                      {currentStory.audioUrl && (
+                        <div className="audio-wrapper" ref={audioWrapperRef}>
+                          <div className={`audio-wrap ${audioExpanded ? "audio--expanded" : "audio--compact"}`}>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={toggleAudio}
+                                className="p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+                              >
+                                {isPlaying ? (
+                                  <Pause className="w-4 h-4 text-primary" />
+                                ) : (
+                                  <Play className="w-4 h-4 text-primary" />
+                                )}
+                              </button>
+                              <div className="flex-1" onClick={toggleAudio}>
+                                <div
+                                  className="audio-bar"
+                                  style={{
+                                    background: "rgba(0,0,0,0.1)",
+                                    height: "6px",
+                                    borderRadius: "999px",
+                                    position: "relative",
+                                    overflow: "hidden",
+                                  }}
+                                >
+                                  <div
+                                    className="audio-fill"
+                                    style={{
+                                      width: `${playbackProgress}%`,
+                                      height: "100%",
+                                      background: "linear-gradient(90deg, var(--primary-coral), #FF935F)",
+                                      borderRadius: "999px",
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="audio-time mt-2">
+                              <span>{formatTime(currentTime)}</span>
+                              <span>{formatTime(duration)}</span>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    )}
+                        </div>
+                      )}
 
-                    {currentStory.emotions && currentStory.emotions.length > 0 && (
-                      <div className="emotion-tags" ref={emotionRef} style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                        {currentStory.emotions.map((emotion: string, index: number) => (
-                          <span key={index} className="tag">
-                            {emotion}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                      <p className="memory-body memory-body--right">
+                        {currentStory.transcription || 'No transcription available for this memory.'}
+                      </p>
 
-                  <div className="page-number">{currentPage * 2 + 2}</div>
-                </article>
+                      {(currentStory.wisdomClipText || currentStory.wisdomClipUrl) && (
+                        <div className="wisdom" ref={wisdomRef} style={{ textAlign: 'center', marginTop: '2rem' }}>
+                          <div className="flex items-center justify-center gap-2 mb-3">
+                            <span className="wisdom-label text-amber-700 font-semibold">Lesson Learned</span>
+                          </div>
+
+                          {currentStory.wisdomClipText && (
+                            <blockquote className="text-lg italic text-gray-800 leading-relaxed mx-auto" style={{ maxWidth: '90%', paddingLeft: '1rem', borderLeft: '4px solid #fbbf24' }}>
+                              &quot;{currentStory.wisdomClipText}&quot;
+                            </blockquote>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="page-number">{currentPage * 2 + 2}</div>
+                    </article>
+                  </>
+                )}
               </>
             )}
           </div>

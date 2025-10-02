@@ -114,37 +114,6 @@ export function BookStyleReview({
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-serif text-gray-800">Review Your Memory</h1>
-            {/* Classic View Toggle */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                // Navigate back to classic review with all data preserved
-                const params = new URLSearchParams();
-                if (title) params.set('title', encodeURIComponent(title));
-                if (storyYear) params.set('year', storyYear);
-                if (transcription) params.set('transcription', encodeURIComponent(transcription));
-                if (audioUrl) params.set('audioUrl', encodeURIComponent(audioUrl));
-
-                // Store current data in session storage
-                sessionStorage.setItem('reviewData', JSON.stringify({
-                  title,
-                  storyYear,
-                  transcription,
-                  photos,
-                  wisdomText,
-                  audioUrl
-                }));
-
-                window.location.href = `/review/create?${params.toString()}`;
-              }}
-              className="hidden sm:flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Classic View
-            </Button>
           </div>
           <div className="flex gap-3">
             <Button
