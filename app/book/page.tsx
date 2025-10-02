@@ -331,7 +331,7 @@ const useDynamicTextBalancer = (
     }
     isCalculatingRef.current = true;
 
-    if (!measurementRef.current) {
+    if (!measurementRef.current && typeof document !== 'undefined') {
       const measureDiv = document.createElement("div");
       measureDiv.style.cssText = `
         position: absolute;
@@ -400,7 +400,7 @@ export default function BookView() {
   const router = useRouter();
   const recordModal = useRecordModal();
 
-  const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null;
+  const [urlParams, setUrlParams] = useState<URLSearchParams | null>(null);
   const initialStoryId = urlParams?.get("storyId");
 
   const [currentPage, setCurrentPage] = useState(0);
@@ -525,6 +525,13 @@ export default function BookView() {
 
   const [aiPrompts, setAiPrompts] = useState<Array<{ icon: React.ReactNode; title: string; text: string }>>([]);
 
+  // Initialize URL params on client
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUrlParams(new URLSearchParams(window.location.search));
+    }
+  }, []);
+
   useEffect(() => {
     if (!currentStory) {
       setAiPrompts([]);
@@ -572,7 +579,7 @@ export default function BookView() {
         setInitialPageSet(true);
       }
 
-      if (typeof window !== 'undefined' && window.location) {
+      if (typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.delete("storyId");
         const newUrl = window.location.pathname + (urlParams.toString() ? "?" + urlParams.toString() : "");
@@ -711,7 +718,7 @@ export default function BookView() {
   }
 
   if (totalPages === 0) {
-    const shareUrl = typeof window !== 'undefined' && window.location ? `${window.location.origin}/share/${user.id}` : '';
+    const shareUrl = typeof window !== 'undefined' ? `${window.location?.origin || ''}/share/${user.id}` : '';
 
     return (
       <div className="min-h-screen book-background flex flex-col md:pl-20">
@@ -817,7 +824,7 @@ export default function BookView() {
   }
 
   const playbackProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
-  const shareUrl = typeof window !== 'undefined' && window.location ? `${window.location.origin}/share/${user.id}` : '';
+  const shareUrl = typeof window !== 'undefined' ? `${window.location?.origin || ''}/share/${user.id}` : '';
 
   return (
     <div className="min-h-screen book-background flex flex-col pb-20 md:pb-0 md:pl-20">
@@ -1135,3 +1142,6 @@ export default function BookView() {
     </div>
   );
 }
+
+// Force dynamic rendering to avoid SSG issues with window.location
+export const dynamic = 'force-dynamic';

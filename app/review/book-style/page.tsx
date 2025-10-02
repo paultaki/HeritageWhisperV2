@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +9,7 @@ import { type StoryPhoto } from "@/components/MultiPhotoUploader";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 
-export default function BookStyleReviewPage() {
+function BookStyleReviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -194,5 +194,20 @@ export default function BookStyleReviewPage() {
       isSaving={saveMutation.isPending}
       userBirthYear={user.birthYear}
     />
+  );
+}
+
+export default function BookStyleReviewPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading book view...</p>
+        </div>
+      </div>
+    }>
+      <BookStyleReviewContent />
+    </Suspense>
   );
 }
