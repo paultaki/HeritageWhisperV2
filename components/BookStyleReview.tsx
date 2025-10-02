@@ -354,10 +354,18 @@ export function BookStyleReview({
                           input.onchange = async (e) => {
                             const file = (e.target as HTMLInputElement).files?.[0];
                             if (file) {
+                              console.log('Audio file selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+
                               const url = URL.createObjectURL(file);
                               if (onAudioChange) {
                                 onAudioChange(url, file);
                               }
+
+                              // Show loading state
+                              const uploadButton = e.target as HTMLElement;
+                              const originalText = uploadButton?.textContent;
+
+                              console.log('Starting transcription...');
 
                               // Trigger transcription
                               const formData = new FormData();
@@ -366,34 +374,52 @@ export function BookStyleReview({
                               try {
                                 // Get auth token from Supabase session
                                 const { data: { session } } = await supabase.auth.getSession();
+                                console.log('Session available:', !!session);
+
                                 const headers: HeadersInit = {};
 
                                 if (session?.access_token) {
                                   headers['Authorization'] = `Bearer ${session.access_token}`;
+                                  console.log('Auth header added');
                                 }
 
+                                console.log('Sending transcription request...');
                                 const response = await fetch('/api/transcribe', {
                                   method: 'POST',
                                   body: formData,
                                   headers
                                 });
 
+                                console.log('Transcription response status:', response.status);
+
                                 if (response.ok) {
-                                  const { transcription: newTranscription, wisdomSuggestion } = await response.json();
+                                  const data = await response.json();
+                                  console.log('Transcription response:', data);
+
+                                  const { transcription: newTranscription, wisdomSuggestion } = data;
+
                                   if (newTranscription && onTranscriptionChange) {
+                                    console.log('Setting transcription:', newTranscription.substring(0, 100) + '...');
                                     // If there's no existing transcription, set the new one
                                     if (!transcription) {
                                       onTranscriptionChange(newTranscription);
+                                    } else {
+                                      console.log('Transcription already exists, not overwriting');
                                     }
                                   }
+
                                   if (wisdomSuggestion && !wisdomText && onWisdomChange) {
+                                    console.log('Setting wisdom suggestion:', wisdomSuggestion);
                                     onWisdomChange(wisdomSuggestion);
                                   }
                                 } else {
-                                  console.error('Transcription failed:', response.status, await response.text());
+                                  const errorText = await response.text();
+                                  console.error('Transcription failed:', response.status, errorText);
+                                  alert('Transcription failed: ' + errorText);
                                 }
                               } catch (error) {
-                                console.error('Transcription failed:', error);
+                                console.error('Transcription error:', error);
+                                alert('Failed to transcribe audio: ' + (error as Error).message);
                               }
                             }
                           };

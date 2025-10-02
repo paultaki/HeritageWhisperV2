@@ -122,27 +122,23 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Prepare story data for Supabase (using snake_case)
+    // Note: The database schema has 'transcription' field, not 'content'
     const storyData = {
       user_id: user.id,
       title: body.title,
-      content: body.content || body.transcription,
-      transcription: body.transcription,
-      age: body.age,
-      life_age: body.age,
+      transcription: body.transcription || body.content, // Main text field
+      life_age: body.lifeAge || body.age,
       story_year: body.year || body.storyYear,
       include_in_timeline: body.includeInTimeline ?? true,
       include_in_book: body.includeInBook ?? true,
       is_favorite: body.isFavorite ?? false,
       photo_url: body.photoUrl,
-      has_photos: body.hasPhotos ?? false,
       formatted_content: body.formattedContent || body.transcription,
       photos: body.photos || [],
       audio_url: body.audioUrl,
-      wisdom_transcription: body.wisdomTranscription,
-      wisdom_clip_text: body.wisdomTranscription,
+      wisdom_clip_text: body.wisdomClipText || body.wisdomTranscription,
       wisdom_clip_url: body.wisdomClipUrl,
-      follow_up_questions: body.followUpQuestions,
-      duration_seconds: body.durationSeconds,
+      duration_seconds: body.durationSeconds || 0,
       emotions: body.emotions,
       pivotal_category: body.pivotalCategory,
       story_date: body.storyDate,

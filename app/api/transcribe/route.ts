@@ -105,9 +105,13 @@ Provide only the lesson/wisdom, no explanations or preamble.`
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('[Transcribe] Request received');
+
     // Check if the request is FormData or JSON
     const contentType = request.headers.get("content-type");
     const isFormData = contentType?.includes("multipart/form-data");
+
+    console.log('[Transcribe] Content-Type:', contentType, 'IsFormData:', isFormData);
 
     // For FormData (from BookStyleReview), auth is optional
     // For JSON (from recording page), auth is required
@@ -115,16 +119,25 @@ export async function POST(request: NextRequest) {
     let audioBuffer: Buffer;
 
     if (isFormData) {
+      console.log('[Transcribe] Processing FormData upload');
+
       // Handle FormData upload
       const formData = await request.formData();
       const audioFile = formData.get("audio") as File;
 
       if (!audioFile) {
+        console.error('[Transcribe] No audio file in FormData');
         return NextResponse.json(
           { error: "No audio file provided" },
           { status: 400 }
         );
       }
+
+      console.log('[Transcribe] Audio file received:', {
+        name: audioFile.name,
+        size: audioFile.size,
+        type: audioFile.type
+      });
 
       // Convert File to Buffer
       const arrayBuffer = await audioFile.arrayBuffer();
