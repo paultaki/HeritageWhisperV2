@@ -702,7 +702,10 @@ export default function BookView() {
   }, []);
 
   if (!user) {
-    router.push("/auth/login");
+    // Only redirect on client side
+    if (typeof window !== 'undefined') {
+      router.push("/auth/login");
+    }
     return null;
   }
 

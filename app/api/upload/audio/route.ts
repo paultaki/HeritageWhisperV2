@@ -1,13 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-import { getSession } from "@/lib/auth-utils";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase Admin client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
+
+// Initialize regular Supabase client for storage
+const supabase = createClient(
+  supabaseUrl,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+);
 
 export async function POST(request: NextRequest) {
   try {
-    // Get session
-    const session = await getSession();
-    if (!session?.userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Get the Authorization header
+    const authHeader = request.headers.get("authorization");
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    // Verify the JWT token with Supabase
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseAdmin.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: "Invalid authentication" },
+        { status: 401 }
+      );
     }
 
     // Get the audio file from the request
@@ -20,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename
     const timestamp = Date.now();
-    const filename = `audio/${session.userId}/${timestamp}-recording.webm`;
+    const filename = `audio/${user.id}/${timestamp}-recording.webm`;
 
     // Convert File to ArrayBuffer then to Buffer
     const arrayBuffer = await audioFile.arrayBuffer();
