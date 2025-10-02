@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Calendar, BookOpen, User, Users, LogOut, Mic } from 'lucide-react';
+import { Calendar, BookOpen, Mic } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -65,7 +65,7 @@ interface DesktopNavigationProps {
 
 export default function DesktopNavigation({ onRecordClick }: DesktopNavigationProps) {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   // Don't show navigation on auth pages or home page
   const shouldShow = user && !['/auth/login', '/auth/register', '/'].includes(pathname);
@@ -89,7 +89,7 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
         </div>
       </div>
 
-      {/* Navigation Items */}
+      {/* Navigation Items - Only 3 main buttons */}
       <div className="flex-1 flex flex-col items-center space-y-4">
         <DesktopNavItem
           icon={Calendar}
@@ -98,47 +98,25 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
           isActive={pathname === '/timeline'}
         />
 
+        {/* Record Button - Moved to middle */}
+        <button
+          onClick={onRecordClick}
+          className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 my-2"
+          style={{
+            background: 'linear-gradient(135deg, hsl(0, 77%, 64%) 0%, hsl(0, 77%, 54%) 100%)',
+            boxShadow: '0 4px 12px rgba(232, 93, 93, 0.3)',
+          }}
+        >
+          <Mic className="w-6 h-6 text-white" />
+        </button>
+
         <DesktopNavItem
           icon={BookOpen}
           label="Book View"
           href="/book"
           isActive={pathname.startsWith('/book')}
         />
-
-        <DesktopNavItem
-          icon={Users}
-          label="Family"
-          href="/family"
-          isActive={pathname === '/family'}
-        />
-
-        <DesktopNavItem
-          icon={User}
-          label="Profile"
-          href="/profile"
-          isActive={pathname === '/profile'}
-        />
       </div>
-
-      {/* Record Button */}
-      <button
-        onClick={onRecordClick}
-        className="mb-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95"
-        style={{
-          background: 'linear-gradient(135deg, hsl(0, 77%, 64%) 0%, hsl(0, 77%, 54%) 100%)',
-          boxShadow: '0 4px 12px rgba(232, 93, 93, 0.3)',
-        }}
-      >
-        <Mic className="w-6 h-6 text-white" />
-      </button>
-
-      {/* Logout at Bottom */}
-      <DesktopNavItem
-        icon={LogOut}
-        label="Logout"
-        href="/auth/login"
-        onClick={logout}
-      />
     </motion.nav>
   );
 }

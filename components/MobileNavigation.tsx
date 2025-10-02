@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Calendar, BookOpen, User, Users, Mic } from 'lucide-react';
+import { Calendar, BookOpen, Mic } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion } from 'framer-motion';
 
@@ -74,14 +74,6 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
           isActive={pathname === '/timeline'}
         />
 
-        {/* Book View */}
-        <NavItem
-          icon={BookOpen}
-          label="Book"
-          href="/book"
-          isActive={pathname.startsWith('/book')}
-        />
-
         {/* Record Button - Hero Center Element */}
         <div className="relative flex-1 flex justify-center">
           <button
@@ -112,20 +104,12 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
           </button>
         </div>
 
-        {/* Family */}
+        {/* Book View */}
         <NavItem
-          icon={Users}
-          label="Family"
-          href="/family"
-          isActive={pathname === '/family'}
-        />
-
-        {/* Profile */}
-        <NavItem
-          icon={User}
-          label="Profile"
-          href="/profile"
-          isActive={pathname === '/profile'}
+          icon={BookOpen}
+          label="Book"
+          href="/book"
+          isActive={pathname.startsWith('/book')}
         />
       </div>
     </motion.nav>
