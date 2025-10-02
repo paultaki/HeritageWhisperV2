@@ -843,58 +843,60 @@ function ReviewContent() {
     <div className="min-h-screen bg-background album-texture pb-20 md:pb-0 md:pl-20">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            {!isEditMode && (
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/timeline")}
-                className="p-2"
-                data-testid="button-back-to-timeline"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            )}
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                {isEditMode ? "Edit Your Memory" : "Review Your Memory"}
-              </h1>
-              <p className="text-muted-foreground">
-                {isEditMode ? "Make changes to your story" : "Add details to make this story shine"}
-              </p>
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              {!isEditMode && (
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/timeline")}
+                  className="p-2"
+                  data-testid="button-back-to-timeline"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+              )}
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">
+                  {isEditMode ? "Edit Your Memory" : "Review Your Memory"}
+                </h1>
+                <p className="text-muted-foreground">
+                  {isEditMode ? "Make changes to your story" : "Add details to make this story shine"}
+                </p>
+              </div>
             </div>
-          </div>
-          {/* Book View Toggle */}
-          <Button
-            variant="outline"
-            onClick={() => {
-              // Prepare data for book-style view
-              const params = new URLSearchParams();
-              if (title) params.set('title', encodeURIComponent(title));
-              if (storyYear) params.set('year', storyYear);
-              if (transcription) params.set('transcription', encodeURIComponent(transcription));
-              if (audioUrl) params.set('audioUrl', encodeURIComponent(audioUrl));
-              if (audioDuration) params.set('duration', audioDuration.toString());
+            {/* Book View Toggle - Made more prominent */}
+            <Button
+              variant="secondary"
+              onClick={() => {
+                // Prepare data for book-style view
+                const params = new URLSearchParams();
+                if (title) params.set('title', encodeURIComponent(title));
+                if (storyYear) params.set('year', storyYear);
+                if (transcription) params.set('transcription', encodeURIComponent(transcription));
+                if (audioUrl) params.set('audioUrl', encodeURIComponent(audioUrl));
+                if (audioDuration) params.set('duration', audioDuration.toString());
 
-              // Store audio blob in session storage if it exists
-              if (mainAudioBlob && audioUrl?.startsWith('blob:')) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                  sessionStorage.setItem('recordedAudio', reader.result as string);
+                // Store audio blob in session storage if it exists
+                if (mainAudioBlob && audioUrl?.startsWith('blob:')) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    sessionStorage.setItem('recordedAudio', reader.result as string);
+                    router.push(`/review/book-style?${params.toString()}`);
+                  };
+                  reader.readAsDataURL(mainAudioBlob);
+                } else {
                   router.push(`/review/book-style?${params.toString()}`);
-                };
-                reader.readAsDataURL(mainAudioBlob);
-              } else {
-                router.push(`/review/book-style?${params.toString()}`);
-              }
-            }}
-            className="flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-            <span className="hidden sm:inline">Book View</span>
-          </Button>
+                }
+              }}
+              className="bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              Preview as Book
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-6">
