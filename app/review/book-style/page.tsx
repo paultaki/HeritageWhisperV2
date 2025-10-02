@@ -76,6 +76,8 @@ function BookStyleReviewContent() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      console.log("Starting save mutation...");
+
       // Calculate age at the time of the story
       const age = user?.birthYear && storyYear
         ? parseInt(storyYear) - user.birthYear
@@ -84,6 +86,7 @@ function BookStyleReviewContent() {
       // Upload audio if we have a blob
       let finalAudioUrl = audioUrl;
       if (mainAudioBlob && audioUrl?.startsWith("blob:")) {
+        console.log("Uploading audio blob...");
         try {
           const formData = new FormData();
           formData.append("audio", mainAudioBlob, "recording.webm");
@@ -92,6 +95,9 @@ function BookStyleReviewContent() {
           if (uploadResponse.ok) {
             const { url } = await uploadResponse.json();
             finalAudioUrl = url;
+            console.log("Audio uploaded successfully:", url);
+          } else {
+            console.error("Audio upload failed:", uploadResponse.status);
           }
         } catch (error) {
           console.error("Failed to upload audio:", error);
@@ -159,9 +165,23 @@ function BookStyleReviewContent() {
     }
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log("Save button clicked!");
     console.log("Current data:", { title, storyYear, transcription: transcription?.substring(0, 50) });
+
+    // Check for authentication first
+    const { supabase } = await import("@/lib/supabase");
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to save your story.",
+        variant: "destructive",
+      });
+      router.push("/auth/login");
+      return;
+    }
 
     if (!transcription?.trim()) {
       toast({
