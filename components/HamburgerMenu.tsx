@@ -53,12 +53,15 @@ export default function HamburgerMenu() {
     { icon: HelpCircle, label: 'Help', href: '/help' },
   ];
 
-  if (!user) {
+  // Don't show on auth pages
+  const shouldShow = !['/auth/login', '/auth/register'].includes(pathname);
+
+  if (!shouldShow) {
     return null;
   }
 
   return (
-    <div ref={menuRef} className="fixed top-4 right-4 z-50">
+    <div ref={menuRef} className="fixed top-4 right-4 z-[100]">
       {/* Hamburger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -83,10 +86,12 @@ export default function HamburgerMenu() {
             className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden"
           >
             {/* User Info */}
-            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-              <p className="text-sm font-medium text-gray-900">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
-            </div>
+            {user && (
+              <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                <p className="text-sm font-medium text-gray-900">{user.name || 'User'}</p>
+                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              </div>
+            )}
 
             {/* Menu Items */}
             <div className="py-1">
