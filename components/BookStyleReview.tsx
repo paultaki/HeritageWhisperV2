@@ -12,6 +12,8 @@ import {
   Check,
   X,
   Plus,
+  Mic,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MultiPhotoUploader, type StoryPhoto } from "@/components/MultiPhotoUploader";
@@ -28,6 +30,7 @@ interface BookStyleReviewProps {
   onTranscriptionChange: (text: string) => void;
   onPhotosChange: (photos: StoryPhoto[]) => void;
   onWisdomChange: (wisdom: string) => void;
+  onAudioChange?: (audioUrl: string | null, audioBlob?: Blob | null) => void;
   onSave: () => void;
   onCancel: () => void;
   isSaving?: boolean;
@@ -46,6 +49,7 @@ export function BookStyleReview({
   onTranscriptionChange,
   onPhotosChange,
   onWisdomChange,
+  onAudioChange,
   onSave,
   onCancel,
   isSaving = false,
@@ -301,13 +305,74 @@ export function BookStyleReview({
                 )}
               </div>
 
-              {/* Audio Player - Below year, before text */}
-              {audioUrl && (
-                <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200">
-                  <p className="text-sm text-gray-600 mb-2">Audio Recording</p>
-                  <audio controls src={audioUrl} className="w-full" />
-                </div>
-              )}
+              {/* Audio Section - Below year, before text */}
+              <div className="mb-6">
+                {audioUrl ? (
+                  <div className="p-4 bg-white rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
+                      <Mic className="w-4 h-4" />
+                      Audio Recording
+                    </p>
+                    <audio controls src={audioUrl} className="w-full" />
+                  </div>
+                ) : (
+                  <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <p className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <Mic className="w-4 h-4" />
+                      Audio Recording (Optional)
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Navigate to recording page to record audio
+                          sessionStorage.setItem('reviewData', JSON.stringify({
+                            title,
+                            storyYear,
+                            transcription,
+                            photos,
+                            wisdomText,
+                            audioUrl
+                          }));
+                          window.location.href = '/recording';
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <Mic className="w-4 h-4" />
+                        Record Audio
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Trigger file upload for audio
+                          const input = document.createElement('input');
+                          input.type = 'file';
+                          input.accept = 'audio/*';
+                          input.onchange = (e) => {
+                            const file = (e.target as HTMLInputElement).files?.[0];
+                            if (file) {
+                              const url = URL.createObjectURL(file);
+                              if (onAudioChange) {
+                                onAudioChange(url, file);
+                              }
+                            }
+                          };
+                          input.click();
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Upload Audio
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Add an audio recording to preserve your voice with this memory
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {/* Spacer to push lesson learned to bottom */}
               <div className="flex-grow"></div>

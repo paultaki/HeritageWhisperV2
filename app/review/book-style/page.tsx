@@ -24,6 +24,13 @@ function BookStyleReviewContent() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [mainAudioBlob, setMainAudioBlob] = useState<Blob | null>(null);
 
+  const handleAudioChange = (url: string | null, blob?: Blob | null) => {
+    setAudioUrl(url);
+    if (blob) {
+      setMainAudioBlob(blob);
+    }
+  };
+
   useEffect(() => {
     // Load data from search params or session storage
     const urlTranscription = searchParams.get("transcription");
@@ -194,6 +201,7 @@ function BookStyleReviewContent() {
       onTranscriptionChange={setTranscription}
       onPhotosChange={setPhotos}
       onWisdomChange={setWisdomText}
+      onAudioChange={handleAudioChange}
       onSave={handleSave}
       onCancel={handleCancel}
       isSaving={saveMutation.isPending}
