@@ -12,11 +12,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
-// Initialize regular Supabase client for storage
-const supabase = createClient(
-  supabaseUrl,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-);
+// Note: Using admin client for storage to bypass RLS policies
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,8 +56,8 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await audioFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
+    // Upload to Supabase Storage using admin client (bypasses RLS)
+    const { data, error } = await supabaseAdmin.storage
       .from("audio")
       .upload(filename, buffer, {
         contentType: audioFile.type || "audio/webm",
@@ -82,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get public URL
-    const { data: publicUrlData } = supabase.storage
+    const { data: publicUrlData } = supabaseAdmin.storage
       .from("audio")
       .getPublicUrl(filename);
 

@@ -69,7 +69,6 @@ export async function GET(request: NextRequest) {
       isFavorite: story.is_favorite ?? false,
       photoUrl: story.photo_url,
       hasPhotos: story.has_photos ?? false,
-      formattedContent: story.formatted_content || story.transcription,
       photos: story.photos || [],
       audioUrl: story.audio_url,
       transcription: story.transcription,
@@ -123,6 +122,7 @@ export async function POST(request: NextRequest) {
 
     // Prepare story data for Supabase (using snake_case)
     // Note: The database schema has 'transcription' field, not 'content'
+    // Also note: formatted_content column doesn't exist in production DB
     const storyData: any = {
       user_id: user.id,
       title: body.title,
@@ -144,10 +144,8 @@ export async function POST(request: NextRequest) {
       photo_transform: body.photoTransform,
     };
 
-    // Only add formatted_content if it's provided and properly structured
-    if (body.formattedContent && typeof body.formattedContent === 'object') {
-      storyData.formatted_content = body.formattedContent;
-    }
+    // Don't add formatted_content - column doesn't exist in production
+    // This data can be generated on the fly when needed
 
     // Save the story to Supabase
     const { data: newStory, error: insertError } = await supabaseAdmin

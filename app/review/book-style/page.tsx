@@ -108,18 +108,6 @@ function BookStyleReviewContent() {
       const storyData = {
         title: title || `Memory from ${storyYear || 'the past'}`,
         transcription, // This is the main text content
-        formattedContent: {
-          fullText: transcription,
-          paragraphs: transcription.split('\n\n').filter(p => p.trim()),
-          pages: {
-            left: transcription.substring(0, Math.floor(transcription.length / 2)),
-            right: transcription.substring(Math.floor(transcription.length / 2)),
-            splitIndex: Math.floor(transcription.length / 2)
-          },
-          questions: [],
-          processedAt: new Date().toISOString(),
-          version: '1.0'
-        },
         storyYear: parseInt(storyYear) || new Date().getFullYear(),
         lifeAge: age, // Use lifeAge instead of age
         includeInTimeline: true,
