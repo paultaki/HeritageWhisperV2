@@ -1037,49 +1037,6 @@ export default function Timeline() {
               </div>
             </div>
 
-            {/* Right side: Action buttons - better responsive design */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <Button
-                className="bg-heritage-coral hover:bg-heritage-coral/90 text-white px-3 py-2 btn-press transition-all hover:shadow-lg hover:shadow-heritage-coral/20 rounded-3xl"
-                size="sm"
-                onClick={recordModal.openModal}
-                data-testid="button-add-memory"
-              >
-                <Plus className="w-4 h-4" />
-                <span className="hidden lg:inline ml-1">Memory</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                className="px-3 py-2 btn-press transition-all hover:shadow-md hover:shadow-heritage-orange/20 rounded-3xl border-heritage-coral text-heritage-coral hover:bg-heritage-coral hover:text-white"
-                onClick={() => {
-                  // Use the correct user ID from the database
-                  const correctShareUrl = `${window.location.origin}/share/0c685253-2af3-430e-9200-12fdb526a468`;
-                  navigator.clipboard.writeText(correctShareUrl);
-                  toast({
-                    title: "Share link copied!",
-                    description: "The link has been copied to your clipboard. Share it with anyone to show your timeline.",
-                  });
-                  console.log("Share URL:", correctShareUrl);
-                }}
-                data-testid="button-share"
-              >
-                <Share2 className="w-4 h-4" />
-                <span className="hidden lg:inline ml-1">Share</span>
-              </Button>
-
-              <Button
-                variant="destructive"
-                size="sm"
-                className="px-3 py-2"
-                onClick={handleLogout}
-                data-testid="button-logout"
-              >
-                <span className="hidden sm:inline">Logout</span>
-                <span className="sm:hidden">Exit</span>
-              </Button>
-            </div>
           </div>
         </div>
       </header>

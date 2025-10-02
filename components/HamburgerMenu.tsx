@@ -2,9 +2,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, User, Users, LogOut, Settings, HelpCircle, Home } from 'lucide-react';
+import { Menu, X, User, Users, LogOut, Settings, HelpCircle, Home, Plus, Share2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRecordModal } from '@/hooks/use-record-modal';
+import { useToast } from '@/hooks/use-toast';
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +14,8 @@ export default function HamburgerMenu() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const recordModal = useRecordModal();
+  const { toast } = useToast();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -45,12 +49,34 @@ export default function HamburgerMenu() {
     setIsOpen(false);
   };
 
+  const handleNewMemory = () => {
+    recordModal.openModal();
+    setIsOpen(false);
+  };
+
+  const handleShare = () => {
+    if (user?.id) {
+      const shareUrl = `${window.location.origin}/share/${user.id}`;
+      navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Share link copied!",
+        description: "The link has been copied to your clipboard. Share it with anyone to show your timeline.",
+      });
+    }
+    setIsOpen(false);
+  };
+
   const menuItems = [
     { icon: Home, label: 'Home', href: '/' },
     { icon: User, label: 'Profile', href: '/profile' },
     { icon: Users, label: 'Family', href: '/family' },
     { icon: Settings, label: 'Settings', href: '/settings' },
     { icon: HelpCircle, label: 'Help', href: '/help' },
+  ];
+
+  const actionItems = [
+    { icon: Plus, label: 'New Memory', onClick: handleNewMemory, color: 'text-heritage-coral hover:bg-heritage-coral/10' },
+    { icon: Share2, label: 'Share', onClick: handleShare, color: 'text-blue-600 hover:bg-blue-50' },
   ];
 
   // Don't show on auth pages
@@ -92,6 +118,23 @@ export default function HamburgerMenu() {
                 <p className="text-xs text-gray-500 truncate">{user.email}</p>
               </div>
             )}
+
+            {/* Action Items (New Memory, Share) */}
+            <div className="py-1 border-b border-gray-100">
+              {actionItems.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={index}
+                    onClick={item.onClick}
+                    className={`w-full flex items-center px-4 py-2.5 text-sm transition-colors ${item.color}`}
+                  >
+                    <Icon className="w-4 h-4 mr-3" />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
 
             {/* Menu Items */}
             <div className="py-1">

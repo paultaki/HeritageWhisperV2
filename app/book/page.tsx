@@ -807,25 +807,6 @@ export default function BookView() {
 
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <Button
-                  className="bg-heritage-coral hover:bg-heritage-coral/90 text-white px-3 py-2 btn-press transition-all hover:shadow-lg hover:shadow-heritage-coral/20 rounded-3xl"
-                  size="sm"
-                  onClick={recordModal.openModal}
-                >
-                  <Plus className="w-4 h-4" />
-                  <span className="hidden lg:inline ml-1">Memory</span>
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="px-3 py-2 btn-press transition-all hover:shadow-md hover:shadow-heritage-orange/20 rounded-3xl border-heritage-coral text-heritage-coral hover:bg-heritage-coral hover:text-white"
-                  onClick={() => window.open(shareUrl, "_blank")}
-                >
-                  <Share2 className="w-4 h-4" />
-                  <span className="hidden lg:inline ml-1">Share</span>
-                </Button>
-
-                <Button
                   variant="outline"
                   size="sm"
                   className="px-3 py-2 btn-press transition-all hover:shadow-md hover:shadow-heritage-orange/20 rounded-3xl border-heritage-coral text-heritage-coral hover:bg-heritage-coral hover:text-white"
@@ -912,25 +893,6 @@ export default function BookView() {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <Button
-                className="bg-heritage-coral hover:bg-heritage-coral/90 text-white px-3 py-2 btn-press transition-all hover:shadow-lg hover:shadow-heritage-coral/20 rounded-3xl"
-                size="sm"
-                onClick={recordModal.openModal}
-              >
-                <Plus className="w-4 h-4" />
-                <span className="hidden lg:inline ml-1">Memory</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                className="px-3 py-2 btn-press transition-all hover:shadow-md hover:shadow-heritage-orange/20 rounded-3xl border-heritage-coral text-heritage-coral hover:bg-heritage-coral hover:text-white"
-                onClick={() => window.open(shareUrl, "_blank")}
-              >
-                <Share2 className="w-4 h-4" />
-                <span className="hidden lg:inline ml-1">Share</span>
-              </Button>
-
               <Button
                 variant="outline"
                 size="sm"
