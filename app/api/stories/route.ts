@@ -56,7 +56,13 @@ export async function GET(request: NextRequest) {
 
     // Helper function to generate public URLs for photos
     const getPhotoUrl = (photoUrl: string) => {
-      if (!photoUrl) return photoUrl;
+      if (!photoUrl) return null;
+
+      // Skip blob URLs - these are invalid temporary URLs
+      if (photoUrl.startsWith('blob:')) {
+        console.warn('Blob URL found in database - this should not happen:', photoUrl);
+        return null;
+      }
 
       // If already a full URL (starts with http/https), use as-is
       if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) {
@@ -75,11 +81,13 @@ export async function GET(request: NextRequest) {
     // Transform snake_case to camelCase for frontend compatibility
     // Also generate public URLs for all photos
     const transformedStories = (stories || []).map((story) => {
-      // Process photos array to add public URLs
-      const photosWithUrls = (story.photos || []).map((photo: any) => ({
-        ...photo,
-        url: getPhotoUrl(photo.url)
-      }));
+      // Process photos array to add public URLs and filter out invalid ones
+      const photosWithUrls = (story.photos || [])
+        .map((photo: any) => ({
+          ...photo,
+          url: getPhotoUrl(photo.url)
+        }))
+        .filter((photo: any) => photo.url !== null); // Remove photos with invalid URLs
 
       // Process legacy photoUrl if exists
       const publicPhotoUrl = story.photo_url ? getPhotoUrl(story.photo_url) : undefined;

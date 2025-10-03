@@ -157,15 +157,10 @@ export async function POST(
       );
     }
 
-    // Generate signed URL for the uploaded photo
-    const { data: signedUrlData } = await supabaseAdmin.storage
-      .from('photos')
-      .createSignedUrl(filePath, 3600); // 1 hour expiry
-
-    // Create new photo object
+    // Create new photo object - store the PATH, not the signed URL
     const newPhoto = {
       id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      url: signedUrlData?.signedUrl || filePath,
+      url: filePath, // Store the path, not a signed URL
       transform: { zoom: 1, position: { x: 0, y: 0 } },
       isHero: isHero || false,
       caption: ""

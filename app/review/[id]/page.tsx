@@ -814,6 +814,7 @@ export default function Review() {
       wisdomClipUrl: wisdomAudioUrl && !wisdomAudioUrl.startsWith('blob:') ? wisdomAudioUrl : null,
       wisdomClipText: wisdomMode === 'text' ? wisdomText : null,
       wisdomClipDuration: wisdomAudioUrl ? wisdomRecordingDuration : null,
+      photos: photos, // Photos are already uploaded in edit mode
     };
 
     console.log('Final save data:', {

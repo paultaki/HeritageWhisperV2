@@ -800,6 +800,67 @@ function ReviewContent() {
 
     const lifeAge = parseInt(storyYear) - (user.birthYear || 0);
 
+    // For new stories, we need to upload pending photos first
+    const uploadedPhotos: any[] = [];
+
+    if (!isEditMode) {
+      // Upload pending photo files to Supabase storage
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+        const pendingFile = (window as any)[`__pendingPhotoFile_${i}`];
+
+        if (pendingFile && photo.url.startsWith('blob:')) {
+          try {
+            // Get upload URL from server
+            const fileExtension = pendingFile.name.split('.').pop() || 'jpg';
+            const uploadUrlResponse = await apiRequest('POST', '/api/objects/upload', {
+              fileType: 'photo',
+              storyId: 'pending', // Use 'pending' for new stories
+              fileExtension: fileExtension
+            });
+
+            if (uploadUrlResponse.ok) {
+              const { uploadURL, filePath } = await uploadUrlResponse.json();
+
+              // Upload file to storage
+              const uploadResponse = await fetch(uploadURL, {
+                method: 'PUT',
+                body: pendingFile,
+                headers: {
+                  'Content-Type': pendingFile.type || 'application/octet-stream'
+                }
+              });
+
+              if (uploadResponse.ok) {
+                // Store the file path instead of blob URL
+                uploadedPhotos.push({
+                  ...photo,
+                  url: filePath // Store the path, not the blob URL
+                });
+
+                // Clean up the pending file
+                delete (window as any)[`__pendingPhotoFile_${i}`];
+                // Revoke the blob URL
+                URL.revokeObjectURL(photo.url);
+              } else {
+                console.error('Failed to upload photo:', pendingFile.name);
+                // Skip this photo if upload failed
+              }
+            }
+          } catch (error) {
+            console.error('Error uploading photo:', error);
+            // Skip this photo if upload failed
+          }
+        } else if (!photo.url.startsWith('blob:')) {
+          // Keep photos that already have proper URLs
+          uploadedPhotos.push(photo);
+        }
+      }
+    } else {
+      // For edit mode, photos are already uploaded, just filter out blob URLs
+      uploadedPhotos.push(...photos.filter(p => !p.url.startsWith('blob:')));
+    }
+
     const storyData = {
       title,
       audioUrl: audioUrl && !audioUrl.startsWith('blob:') ? audioUrl : null,
@@ -814,11 +875,13 @@ function ReviewContent() {
       wisdomClipUrl: wisdomAudioUrl && !wisdomAudioUrl.startsWith('blob:') ? wisdomAudioUrl : null,
       wisdomClipText: wisdomMode === 'text' ? wisdomText : null,
       wisdomClipDuration: wisdomAudioUrl ? wisdomRecordingDuration : null,
+      photos: uploadedPhotos, // Include properly uploaded photos
     };
 
     console.log('Final save data:', {
       ...storyData,
       transcriptionLength: storyData.transcription?.length,
+      photosCount: uploadedPhotos.length,
       isEditMode
     });
 
