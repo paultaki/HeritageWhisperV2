@@ -324,17 +324,29 @@ export default function BookViewNew() {
       return { pages: [], spreads: [] };
     }
 
+    // Ensure stories is an array
+    const storiesArray = Array.isArray(stories) ? stories : [];
+
     // Group stories by decade - groupStoriesByDecade returns an array!
     const decadeGroups: DecadeGroup[] = [];
-    const groupedStories = groupStoriesByDecade(stories, user?.birthYear || 1950);
+    const groupedStories = groupStoriesByDecade(storiesArray, user?.birthYear || 1950);
+
+    // Defensive check - ensure groupedStories is an array
+    if (!Array.isArray(groupedStories)) {
+      console.error('groupStoriesByDecade did not return an array:', groupedStories);
+      return { pages: [], spreads: [] };
+    }
 
     // groupedStories is already an array of { decade, displayName, ageRange, stories }
     groupedStories.forEach(group => {
-      decadeGroups.push({
-        decade: group.displayName,
-        title: group.ageRange,
-        stories: group.stories.map(convertToPaginationStory),
-      });
+      // Additional defensive check for each group
+      if (group && Array.isArray(group.stories)) {
+        decadeGroups.push({
+          decade: group.displayName || group.decade || 'Unknown',
+          title: group.ageRange || '',
+          stories: group.stories.map(convertToPaginationStory),
+        });
+      }
     });
 
     // Paginate the entire book
