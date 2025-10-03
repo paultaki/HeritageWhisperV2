@@ -180,6 +180,10 @@ export async function POST(request: NextRequest) {
     });
 
     // Prepare story data for Supabase using actual schema
+    // Note: duration_seconds has a check constraint (must be between 1 and 120)
+    const duration = body.durationSeconds || 30; // Default to 30 seconds if not provided
+    const constrainedDuration = Math.max(1, Math.min(120, duration)); // Ensure between 1-120
+
     const storyData = {
       user_id: user.id,
       title: body.title || "Untitled Story",
@@ -188,7 +192,7 @@ export async function POST(request: NextRequest) {
       audio_url: body.audioUrl && !body.audioUrl.startsWith('blob:') ? body.audioUrl : undefined,
       wisdom_text: body.wisdomClipText || body.wisdomTranscription,
       wisdom_clip_url: body.wisdomClipUrl,
-      duration_seconds: body.durationSeconds || 0,
+      duration_seconds: constrainedDuration,
       emotions: body.emotions,
       photo_url: body.photoUrl && !body.photoUrl.startsWith('blob:') ? body.photoUrl : undefined,
       is_saved: true,
@@ -201,6 +205,7 @@ export async function POST(request: NextRequest) {
         pivotal_category: body.pivotalCategory,
         story_date: body.storyDate,
         photo_transform: body.photoTransform,
+        actual_duration: body.durationSeconds, // Store actual duration in metadata
       }
     };
 
