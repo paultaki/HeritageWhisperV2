@@ -54,15 +54,16 @@ export async function POST(request: NextRequest) {
     const randomId = Math.random().toString(36).substring(2, 15);
     const fileName = `${timestamp}-${randomId}.${fileExtension}`;
 
+    // Use single bucket with subfolders for paultaki project structure
+    const bucketName = 'heritage-whisper-files';
     let filePath: string;
-    let bucketName: string;
 
     if (fileType === 'photo') {
-      bucketName = 'photos';
-      filePath = `${user.id}/${storyId || 'temp'}/${fileName}`;
+      // Photos go in photo/ subfolder
+      filePath = `photo/${user.id}/${storyId || 'temp'}/${fileName}`;
     } else if (fileType === 'audio') {
-      bucketName = 'audio';
-      filePath = `${user.id}/${storyId || 'temp'}/${fileName}`;
+      // Audio goes in audio/ subfolder
+      filePath = `audio/${user.id}/${storyId || 'temp'}/${fileName}`;
     } else {
       return NextResponse.json(
         { error: "Invalid file type" },

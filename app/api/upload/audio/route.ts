@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
     }
 
-    // Generate unique filename
+    // Generate unique filename with audio/ prefix for heritage-whisper-files bucket
     const timestamp = Date.now();
     const filename = `audio/${user.id}/${timestamp}-recording.webm`;
 
@@ -57,8 +57,9 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
 
     // Upload to Supabase Storage using admin client (bypasses RLS)
+    // Using heritage-whisper-files bucket (paultaki project structure)
     const { data, error } = await supabaseAdmin.storage
-      .from("audio")
+      .from("heritage-whisper-files")
       .upload(filename, buffer, {
         contentType: audioFile.type || "audio/webm",
         upsert: false,
@@ -77,9 +78,9 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Get public URL
+    // Get public URL from heritage-whisper-files bucket
     const { data: publicUrlData } = supabaseAdmin.storage
-      .from("audio")
+      .from("heritage-whisper-files")
       .getPublicUrl(filename);
 
     return NextResponse.json({

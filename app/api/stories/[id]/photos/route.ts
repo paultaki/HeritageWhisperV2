@@ -75,9 +75,11 @@ export async function GET(
         }
 
         // Generate signed URL for storage path
+        // Photos are stored with 'photo/' prefix in heritage-whisper-files bucket
+        const photoPath = photo.url.startsWith('photo/') ? photo.url : `photo/${photo.url}`;
         const { data: signedUrlData } = await supabaseAdmin.storage
-          .from('photos')
-          .createSignedUrl(photo.url, 3600); // 1 hour expiry
+          .from('heritage-whisper-files')
+          .createSignedUrl(photoPath, 3600); // 1 hour expiry
 
         return {
           ...photo,
@@ -190,9 +192,11 @@ export async function POST(
     }
 
     // Generate a signed URL for the photo so it can be displayed immediately
+    // Photos are stored with 'photo/' prefix in heritage-whisper-files bucket
+    const photoPath = filePath.startsWith('photo/') ? filePath : `photo/${filePath}`;
     const { data: signedUrlData } = await supabaseAdmin.storage
-      .from('photos')
-      .createSignedUrl(filePath, 604800); // 1 week expiry
+      .from('heritage-whisper-files')
+      .createSignedUrl(photoPath, 604800); // 1 week expiry
 
     const photoWithSignedUrl = {
       ...newPhoto,
