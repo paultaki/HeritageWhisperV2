@@ -317,6 +317,32 @@ npm run type-check
 
 ## 📝 Recent Updates (January 3, 2025)
 
+### Migration to paultaki Supabase Project (10:00 PM PST)
+- ✅ **Successfully migrated from Neon to Supabase database**:
+  - Switched from external Neon database to Supabase's built-in PostgreSQL
+  - Updated DATABASE_URL to use paultaki project's database
+  - Resolved "Tenant or user not found" errors
+- ✅ **Fixed authentication and storage integration**:
+  - Using paultaki Supabase project for auth, database, and storage
+  - Single unified backend instead of mixed services
+  - heritage-whisper-files bucket working for audio and photos
+- ✅ **Adapted to existing Supabase schema**:
+  - Modified API routes to work with existing table structure
+  - Stories table uses `transcript` instead of `transcription`
+  - Metadata stored in JSONB column for flexibility
+  - Fixed duration_seconds constraint (must be 1-120)
+- ✅ **Stories now saving successfully**:
+  - Audio uploads working
+  - Transcription via OpenAI working
+  - Stories persisting to Supabase database
+  - Timeline and Book views functional
+- ⚠️ **Known issue - Photos not uploading**:
+  - Photos are blob URLs that need upload before save
+  - Created /api/upload/photo endpoint
+  - Frontend needs update to upload photos before story save
+
+## 📝 Recent Updates (January 3, 2025)
+
 ### Complete Photo Persistence Fix (4:35 PM PST)
 - ✅ **Fixed Critical Photo Storage Issue**:
   - Photos were stored as blob URLs instead of actual files in Supabase
@@ -465,7 +491,7 @@ npm run type-check
 *Development server running successfully on port 3006*
 *Ready for production deployment to Vercel*
 
-*Last Updated: January 3, 2025 at 4:35 PM PST*
+*Last Updated: January 3, 2025 at 10:30 PM PST*
 
 ## ✅ Today's Accomplishments (January 3, 2025)
 1. **Fixed Critical Photo Persistence Bug** - Photos now properly upload to Supabase and persist after refresh
@@ -473,9 +499,15 @@ npm run type-check
 3. **Added Audio Controls** - Delete and re-record functionality for audio recordings
 4. **Updated Branding** - New logo (HW_logo_mic_clean.png) across all pages
 5. **Fixed Edit Navigation** - Edit button in book view navigates to book-style review page
+6. **Migrated to paultaki Supabase** - Consolidated auth, database, and storage into single Supabase project
+7. **Fixed Story Saving** - Stories now save successfully with audio and transcription
+8. **Resolved Database Issues** - Adapted to existing Supabase schema and constraints
 
-## 🚀 Ready for Production
-- All features working
-- Photos persisting correctly
-- Development server stable on port 3006
-- Ready for Vercel deployment
+## 🚀 Current Status
+- ✅ Authentication working (paultaki Supabase)
+- ✅ Stories saving to database
+- ✅ Audio recording and upload working
+- ✅ Transcription via OpenAI working
+- ⚠️ Photos need frontend update to upload before save
+- Development server stable on port 3000
+- Ready for production with minor photo fix needed
