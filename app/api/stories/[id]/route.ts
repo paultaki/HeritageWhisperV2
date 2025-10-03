@@ -87,12 +87,20 @@ export async function GET(
     // Process photos array from metadata
     let photos = [];
     if (story.metadata?.photos) {
+      console.log('[GET /api/stories/[id]] Raw photos from DB:', story.metadata.photos);
       photos = await Promise.all(
-        (story.metadata.photos || []).map(async (photo: any) => ({
-          ...photo,
-          url: await getPhotoUrl(photo.url || photo.filePath)
-        }))
+        (story.metadata.photos || []).map(async (photo: any) => {
+          const photoPath = photo.url || photo.filePath;
+          const signedUrl = await getPhotoUrl(photoPath);
+          console.log('[GET /api/stories/[id]] Photo path:', photoPath, '-> Signed URL:', signedUrl);
+          return {
+            ...photo,
+            url: signedUrl,
+            filePath: photoPath // Preserve the storage path
+          };
+        })
       );
+      console.log('[GET /api/stories/[id]] Processed photos:', photos);
     }
 
     // Process legacy photoUrl if exists

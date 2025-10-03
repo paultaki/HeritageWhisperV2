@@ -43,9 +43,11 @@ function BookStyleReviewContent() {
 
       setIsLoading(true);
       try {
+        console.log('[Edit Mode] Fetching story data for ID:', editId);
         const response = await apiRequest('GET', `/api/stories/${editId}`);
         if (response.ok) {
           const { story } = await response.json();
+          console.log('[Edit Mode] Received story data:', story);
 
           // Populate form with existing story data
           setTitle(story.title || '');
@@ -56,13 +58,17 @@ function BookStyleReviewContent() {
 
           // Handle photos
           if (story.photos && Array.isArray(story.photos)) {
+            console.log('[Edit Mode] Setting photos from API:', story.photos);
             setPhotos(story.photos);
           } else if (story.photoUrl) {
+            console.log('[Edit Mode] Setting legacy photo:', story.photoUrl);
             setPhotos([{
               id: 'legacy',
               url: story.photoUrl,
               transform: story.photoTransform
             }]);
+          } else {
+            console.log('[Edit Mode] No photos found in story');
           }
         }
       } catch (error) {
