@@ -79,8 +79,8 @@ export default function HamburgerMenu() {
     { icon: Share2, label: 'Share', onClick: handleShare, color: 'text-blue-600 hover:bg-blue-50' },
   ];
 
-  // Don't show on auth pages
-  const shouldShow = !['/auth/login', '/auth/register'].includes(pathname);
+  // Don't show on auth pages or home page
+  const shouldShow = !['/auth/login', '/auth/register', '/'].includes(pathname);
 
   if (!shouldShow) {
     return null;
