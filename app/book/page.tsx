@@ -311,73 +311,59 @@ export default function BookViewNew() {
   const { isOpen, open, close } = useRecordModal();
 
   // Fetch stories
-  const { data: stories = [], isLoading } = useQuery<Story[]>({
+  const { data: stories = [], isLoading, error } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
     enabled: !!user,
   });
 
+  // Debug logging
+  useEffect(() => {
+    console.log("Book View Debug:", {
+      user: !!user,
+      isLoading,
+      storiesCount: stories?.length,
+      error,
+    });
+  }, [user, isLoading, stories, error]);
+
   // Convert to book data structure
   const { pages, spreads } = useMemo(() => {
-    // Only run pagination on client side
-    if (typeof window === 'undefined' || !stories || stories.length === 0) {
+    if (!stories || stories.length === 0) {
       return { pages: [], spreads: [] };
     }
 
-    // Ensure stories is an array
-    const storiesArray = Array.isArray(stories) ? stories : [];
-    console.log('Stories array length:', storiesArray.length);
-    console.log('User birth year:', user?.birthYear);
-    console.log('Sample story years:', storiesArray.slice(0, 3).map((s: any) => s.storyYear));
+    // Group stories by decade
+    const decadeMap = new Map<string, Story[]>();
 
-    // Group stories by decade - groupStoriesByDecade returns an array!
-    // BUT it filters out stories from birth year and unknown decades
-    // For now, let's include ALL stories grouped by decade
-    const decadeGroups: DecadeGroup[] = [];
-
-    // Create our own grouping that includes all stories
-    const storiesByDecade = new Map<string, Story[]>();
-
-    storiesArray.forEach((story: Story) => {
+    stories.forEach((story) => {
       const year = parseInt(story.storyYear?.toString() || '0');
       if (year > 0) {
-        const decade = Math.floor(year / 10) * 10;
-        const decadeKey = `${decade}s`;
-
-        if (!storiesByDecade.has(decadeKey)) {
-          storiesByDecade.set(decadeKey, []);
+        const decadeKey = `${Math.floor(year / 10) * 10}s`;
+        if (!decadeMap.has(decadeKey)) {
+          decadeMap.set(decadeKey, []);
         }
-        storiesByDecade.get(decadeKey)!.push(story);
+        decadeMap.get(decadeKey)!.push(story);
       }
     });
 
     // Convert to DecadeGroup array
-    Array.from(storiesByDecade.entries())
+    const decadeGroups: DecadeGroup[] = Array.from(decadeMap.entries())
       .sort(([a], [b]) => parseInt(a) - parseInt(b))
-      .forEach(([decade, decadeStories]) => {
-        decadeGroups.push({
-          decade: decade.replace('s', '') + 's', // e.g., "1970s"
-          title: `The ${decade}`, // e.g., "The 1970s"
-          stories: decadeStories.map(convertToPaginationStory),
-        });
-      });
-
-    console.log('Decade groups created:', decadeGroups);
+      .map(([decade, storyList]) => ({
+        decade,
+        title: `The ${decade}`,
+        stories: storyList.map(convertToPaginationStory),
+      }));
 
     // Paginate the entire book
     const bookPages = paginateBook(decadeGroups);
     const bookSpreads = getPageSpreads(bookPages);
 
-    console.log('Total pages generated:', bookPages.length);
-    console.log('Total spreads:', bookSpreads.length);
-
     return {
       pages: bookPages,
       spreads: bookSpreads,
     };
-  }, [stories, user]);
-
-  console.log('Pages length outside useMemo:', pages.length);
-  console.log('Stories length:', stories?.length);
+  }, [stories]);
 
   // Navigation
   const totalSpreads = spreads.length;
@@ -428,8 +414,7 @@ export default function BookViewNew() {
     );
   }
 
-  // Show "No Stories" only if we have loaded but truly have no stories
-  if (!isLoading && stories && stories.length === 0) {
+  if (!stories || stories.length === 0) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -442,22 +427,6 @@ export default function BookViewNew() {
           </Button>
         </div>
         <RecordModal isOpen={isOpen} onClose={close} />
-      </div>
-    );
-  }
-
-  // If we have stories but no pages generated yet, show loading
-  if (!isLoading && stories && stories.length > 0 && pages.length === 0) {
-    console.warn('Have stories but no pages generated - check pagination logic');
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Processing your stories...</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Found {stories.length} stories, generating pages...
-          </p>
-        </div>
       </div>
     );
   }
