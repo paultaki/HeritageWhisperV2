@@ -54,8 +54,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Helper function to generate signed URLs for photos
-    const getSignedPhotoUrl = async (photoUrl: string) => {
+    // Helper function to generate public URLs for photos
+    const getPhotoUrl = (photoUrl: string) => {
       if (!photoUrl) return photoUrl;
 
       // If already a full URL (starts with http/https), use as-is
@@ -63,32 +63,26 @@ export async function GET(request: NextRequest) {
         return photoUrl;
       }
 
-      // Generate signed URL for storage path (valid for 1 hour)
-      try {
-        const { data: signedUrlData } = await supabaseAdmin.storage
-          .from('photos')
-          .createSignedUrl(photoUrl, 3600);
+      // Generate public URL for storage path
+      // This assumes photos bucket has public access or RLS policies set up
+      const { data } = supabaseAdmin.storage
+        .from('photos')
+        .getPublicUrl(photoUrl);
 
-        return signedUrlData?.signedUrl || photoUrl;
-      } catch (error) {
-        console.error('Error generating signed URL for photo:', photoUrl, error);
-        return photoUrl;
-      }
+      return data?.publicUrl || photoUrl;
     };
 
     // Transform snake_case to camelCase for frontend compatibility
-    // Also generate signed URLs for all photos
-    const transformedStories = await Promise.all((stories || []).map(async (story) => {
-      // Process photos array to add signed URLs
-      const photosWithSignedUrls = await Promise.all(
-        (story.photos || []).map(async (photo: any) => ({
-          ...photo,
-          url: await getSignedPhotoUrl(photo.url)
-        }))
-      );
+    // Also generate public URLs for all photos
+    const transformedStories = (stories || []).map((story) => {
+      // Process photos array to add public URLs
+      const photosWithUrls = (story.photos || []).map((photo: any) => ({
+        ...photo,
+        url: getPhotoUrl(photo.url)
+      }));
 
       // Process legacy photoUrl if exists
-      const signedPhotoUrl = story.photo_url ? await getSignedPhotoUrl(story.photo_url) : undefined;
+      const publicPhotoUrl = story.photo_url ? getPhotoUrl(story.photo_url) : undefined;
 
       return {
         id: story.id,
@@ -103,9 +97,9 @@ export async function GET(request: NextRequest) {
         includeInTimeline: story.include_in_timeline ?? true,
         includeInBook: story.include_in_book ?? true,
         isFavorite: story.is_favorite ?? false,
-        photoUrl: signedPhotoUrl,
+        photoUrl: publicPhotoUrl,
         hasPhotos: story.has_photos ?? false,
-        photos: photosWithSignedUrls,
+        photos: photosWithUrls,
         audioUrl: story.audio_url,
         transcription: story.transcription,
         wisdomTranscription: story.wisdom_transcription || story.wisdom_clip_text,
@@ -118,7 +112,7 @@ export async function GET(request: NextRequest) {
         storyDate: story.story_date,
         photoTransform: story.photo_transform,
       };
-    }));
+    });
 
     return NextResponse.json({ stories: transformedStories });
   } catch (error) {
