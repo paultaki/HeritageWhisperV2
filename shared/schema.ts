@@ -4,31 +4,32 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid("id").primaryKey(),
   email: text("email").notNull().unique(),
   password: text("password"), // Made optional for OAuth users
   name: text("name").notNull().default("User"),
   birthYear: integer("birth_year").notNull(),
-  bio: text("bio"), // User bio/about section
-  profilePhotoUrl: text("profile_photo_url"), // Profile photo
-  storyCount: integer("story_count").default(0),
-  isPaid: boolean("is_paid").default(false),
-  subscriptionExpires: timestamp("subscription_expires"),
-  stripeCustomerId: text("stripe_customer_id"),
-  stripeSubscriptionId: text("stripe_subscription_id"),
-  oauthProvider: text("oauth_provider"), // 'google', 'facebook', etc.
-  oauthId: text("oauth_id"), // Provider's user ID
-  lifeGraph: jsonb("life_graph").$type<{
-    facts: {
-      people: any[];
-      places: any[];
-      events: any[];
-      patterns: any[];
-    };
-    patterns: any;
-    gaps: any;
-    lastUpdated: string;
-  }>(),
+  // Commented out fields that don't exist in the database yet
+  // bio: text("bio"), // User bio/about section
+  // profilePhotoUrl: text("profile_photo_url"), // Profile photo
+  // storyCount: integer("story_count").default(0),
+  // isPaid: boolean("is_paid").default(false),
+  // subscriptionExpires: timestamp("subscription_expires"),
+  // stripeCustomerId: text("stripe_customer_id"),
+  // stripeSubscriptionId: text("stripe_subscription_id"),
+  // oauthProvider: text("oauth_provider"), // 'google', 'facebook', etc.
+  // oauthId: text("oauth_id"), // Provider's user ID
+  // lifeGraph: jsonb("life_graph").$type<{
+  //   facts: {
+  //     people: any[];
+  //     places: any[];
+  //     events: any[];
+  //     patterns: any[];
+  //   };
+  //   patterns: any;
+  //   gaps: any;
+  //   lastUpdated: string;
+  // }>(),
   createdAt: timestamp("created_at").default(sql`NOW()`),
 });
 
