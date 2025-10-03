@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Debug: Log the attempt (without password)
-    logger.log(`Login attempt for email: ${email}`);
-    logger.log(`Supabase URL: ${supabaseUrl}`);
-    logger.log(`Anon key present: ${!!supabaseAnonKey}`);
+    logger.info(`Login attempt for email: ${email}`);
+    logger.info(`Supabase URL: ${supabaseUrl}`);
+    logger.info(`Anon key present: ${!!supabaseAnonKey}`);
 
     // Sign in with Supabase
     const { data, error } = await supabase.auth.signInWithPassword({
