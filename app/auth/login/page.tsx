@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { signInWithGoogle } from "@/lib/supabase";
 import { Eye, EyeOff } from "lucide-react";
 
-const logoUrl = "/hw_logo_icon.png";
+const logoUrl = "/HW_logo_circle_new_trans.webp";
 
 export default function Login() {
   const [email, setEmail] = useState("");

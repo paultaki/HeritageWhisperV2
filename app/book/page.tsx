@@ -39,7 +39,7 @@ import {
   MEASUREMENTS,
 } from "@/lib/bookPagination";
 
-const logoUrl = "/logo_mic_circle.webp";
+const logoUrl = "/HW_logo_circle_new_trans.webp";
 
 // Map the existing Story interface to our pagination Story type
 interface Story {
@@ -135,6 +135,7 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
 
 // Single page renderer
 const BookPageRenderer = ({ page }: { page: BookPage }) => {
+  const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -216,10 +217,24 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
         {/* Title and date - only on first page */}
         {(page.type === 'story-start' || page.type === 'story-complete') && (
           <div className="memory-header">
-            <h2 className="memory-title">{page.title}</h2>
-            <div className="memory-year">
-              {page.year}
-              {page.date && ` • ${page.date}`}
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1">
+                <h2 className="memory-title">{page.title}</h2>
+                <div className="memory-year">
+                  {page.year}
+                  {page.date && ` • ${page.date}`}
+                </div>
+              </div>
+              {/* Edit button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push(`/review/${page.storyId}`)}
+                className="p-1.5 hover:bg-primary/10"
+                title="Edit this memory"
+              >
+                <Pencil className="w-4 h-4 text-primary" />
+              </Button>
             </div>
           </div>
         )}
