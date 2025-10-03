@@ -29,34 +29,42 @@ const openai = new OpenAI({
 // Helper function to format transcription
 async function formatTranscription(rawText: string): Promise<string> {
   try {
-    const systemInstructions = `You are a professional editor helping to clean up and format transcribed speech into readable text.
+    const systemInstructions = `You are a professional editor helping to clean up and format transcribed speech into a beautifully readable story for a memory book.
 
 Guidelines for formatting:
 1. Remove filler words like "um", "uh", "uhh", "umm", "er", "ah" etc.
 2. Fix obvious grammar mistakes while preserving the speaker's authentic voice
 3. Add proper punctuation and capitalization
-4. Break into natural paragraphs where topic or thought shifts occur
+4. CREATE CLEAR PARAGRAPHS:
+   - Start a new paragraph when the topic changes
+   - Start a new paragraph when the time period shifts
+   - Start a new paragraph when describing different people or places
+   - Start a new paragraph for dialogue or quotes
+   - Aim for 3-5 sentences per paragraph on average
+   - Single-sentence paragraphs are fine for emphasis
 5. Remove repeated words or false starts (e.g., "I was, I was going" → "I was going")
 6. Keep all important content and meaning intact
 7. Preserve emotional tone and personal expressions
-8. DO NOT add any new content or change the meaning
+8. Make sure the story flows naturally, like reading from a memoir
+9. DO NOT add any new content or change the meaning
+10. Ensure proper spacing between paragraphs (use double line breaks)
 
-Return ONLY the cleaned and formatted text with no explanations or commentary.`;
+Return ONLY the cleaned and formatted text with proper paragraph breaks. No explanations or commentary.`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
       messages: [
         {
           role: "system",
-          content: "You are a skilled transcription editor who cleans up speech-to-text while preserving authenticity."
+          content: "You are a skilled memoir editor who transforms transcribed speech into beautifully formatted stories while preserving the speaker's authentic voice."
         },
         {
           role: "user",
-          content: `${systemInstructions}\n\nText to format:\n"${rawText}"`
+          content: `${systemInstructions}\n\nTranscribed speech to format:\n"${rawText}"`
         }
       ],
       temperature: 0.3,
-      max_tokens: 2000
+      max_tokens: 3000
     });
 
     const formatted = completion.choices[0]?.message?.content;
@@ -80,15 +88,20 @@ async function generateWisdomSuggestion(transcription: string): Promise<string |
       messages: [
         {
           role: "system",
-          content: "You are a thoughtful helper extracting life lessons and wisdom from personal stories."
+          content: "You are a wise elder reflecting on life experiences to extract meaningful lessons that can guide future generations."
         },
         {
           role: "user",
-          content: `Based on this personal story, suggest a brief lesson learned or piece of wisdom (1-2 sentences) that captures the essence of what this memory teaches:
+          content: `Based on this personal story, write a thoughtful "Lesson Learned" that captures the wisdom from this experience. It should be:
+- Personal and authentic to the story
+- 1-2 sentences maximum
+- Something valuable to pass on to family
+- Written in first person if appropriate
+- Meaningful but not preachy
 
 Story: "${transcription}"
 
-Provide only the lesson/wisdom, no explanations or preamble.`
+Provide only the lesson learned text, no explanations or labels.`
         }
       ],
       temperature: 0.7,
