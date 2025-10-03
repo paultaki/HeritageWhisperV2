@@ -428,7 +428,8 @@ export default function BookViewNew() {
     );
   }
 
-  if (pages.length === 0) {
+  // Show "No Stories" only if we have loaded but truly have no stories
+  if (!isLoading && stories && stories.length === 0) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -441,6 +442,22 @@ export default function BookViewNew() {
           </Button>
         </div>
         <RecordModal isOpen={isOpen} onClose={close} />
+      </div>
+    );
+  }
+
+  // If we have stories but no pages generated yet, show loading
+  if (!isLoading && stories && stories.length > 0 && pages.length === 0) {
+    console.warn('Have stories but no pages generated - check pagination logic');
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Processing your stories...</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Found {stories.length} stories, generating pages...
+          </p>
+        </div>
       </div>
     );
   }
