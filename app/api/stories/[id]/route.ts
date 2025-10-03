@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { db, stories, users } from "@/lib/db";
-import { eq, and } from "drizzle-orm";
 
-// Initialize Supabase Admin client (for auth and storage only)
+// Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -44,13 +42,15 @@ export async function GET(
       );
     }
 
-    // Fetch the story from Neon database using Drizzle
-    const [story] = await db
-      .select()
-      .from(stories)
-      .where(and(eq(stories.id, params.id), eq(stories.userId, user.id)));
+    // Fetch the story from Supabase database
+    const { data: story, error: fetchError } = await supabaseAdmin
+      .from("stories")
+      .select("*")
+      .eq("id", params.id)
+      .eq("user_id", user.id)
+      .single();
 
-    if (!story) {
+    if (fetchError || !story) {
       return NextResponse.json(
         { error: "Story not found" },
         { status: 404 }
@@ -58,67 +58,72 @@ export async function GET(
     }
 
     // Helper function to generate signed URLs for photos
-    const getSignedPhotoUrl = async (photoUrl: string) => {
-      if (!photoUrl) return photoUrl;
+    const getPhotoUrl = async (photoUrl: string) => {
+      if (!photoUrl) return null;
+
+      // Skip blob URLs
+      if (photoUrl.startsWith('blob:')) {
+        return null;
+      }
 
       // If already a full URL (starts with http/https), use as-is
       if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) {
         return photoUrl;
       }
 
-      // Generate signed URL for storage path (valid for 1 hour)
-      // Photos are stored with 'photo/' prefix in heritage-whisper-files bucket
-      try {
-        const { data: signedUrlData } = await supabaseAdmin.storage
-          .from('heritage-whisper-files')
-          .createSignedUrl(photoUrl.startsWith('photo/') ? photoUrl : `photo/${photoUrl}`, 3600);
+      // Generate signed URL for storage path (valid for 1 week)
+      const { data, error } = await supabaseAdmin.storage
+        .from('heritage-whisper-files')
+        .createSignedUrl(photoUrl.startsWith('photo/') ? photoUrl : `photo/${photoUrl}`, 604800);
 
-        return signedUrlData?.signedUrl || photoUrl;
-      } catch (error) {
-        console.error('Error generating signed URL for photo:', photoUrl, error);
-        return photoUrl;
+      if (error) {
+        console.error('Error creating signed URL for photo:', photoUrl, error);
+        return null;
       }
+
+      return data?.signedUrl || null;
     };
 
-    // Process photos array to add signed URLs
-    const photosWithSignedUrls = await Promise.all(
-      (story.photos || []).map(async (photo: any) => ({
-        ...photo,
-        url: await getSignedPhotoUrl(photo.url)
-      }))
-    );
+    // Process photos array from metadata
+    let photos = [];
+    if (story.metadata?.photos) {
+      photos = await Promise.all(
+        (story.metadata.photos || []).map(async (photo: any) => ({
+          ...photo,
+          url: await getPhotoUrl(photo.url || photo.filePath)
+        }))
+      );
+    }
 
     // Process legacy photoUrl if exists
-    const signedPhotoUrl = story.photoUrl ? await getSignedPhotoUrl(story.photoUrl) : undefined;
+    const photoUrl = story.photo_url ? await getPhotoUrl(story.photo_url) : null;
 
-    // Transform to frontend-compatible format (fields already in camelCase from Drizzle)
+    // Transform to frontend-compatible format (from Supabase snake_case to camelCase)
     const transformedStory = {
       id: story.id,
-      title: story.title,
-      content: story.content || story.transcription,
-      createdAt: story.createdAt,
-      updatedAt: story.updatedAt,
-      age: story.age || story.lifeAge,
-      year: story.storyYear,
-      storyYear: story.storyYear,
-      lifeAge: story.lifeAge,
-      includeInTimeline: story.includeInTimeline ?? true,
-      includeInBook: story.includeInBook ?? true,
-      isFavorite: story.isFavorite ?? false,
-      photoUrl: signedPhotoUrl,
-      hasPhotos: story.hasPhotos ?? false,
-      photos: photosWithSignedUrls,
-      audioUrl: story.audioUrl,
-      transcription: story.transcription,
-      wisdomTranscription: story.wisdomTranscription || story.wisdomClipText,
-      wisdomClipText: story.wisdomClipText,
-      followUpQuestions: story.followUpQuestions,
-      wisdomClipUrl: story.wisdomClipUrl,
-      durationSeconds: story.durationSeconds,
+      title: story.title || "Untitled Story",
+      content: story.transcript,
+      transcription: story.transcript,
+      createdAt: story.created_at,
+      updatedAt: story.updated_at,
+      age: story.metadata?.life_age || story.metadata?.age,
+      year: story.year,
+      storyYear: story.year,
+      lifeAge: story.metadata?.life_age,
+      includeInTimeline: story.metadata?.include_in_timeline ?? true,
+      includeInBook: story.metadata?.include_in_book ?? true,
+      isFavorite: story.metadata?.is_favorite ?? false,
+      photoUrl: photoUrl,
+      photos: photos,
+      audioUrl: story.audio_url,
+      wisdomTranscription: story.wisdom_text,
+      wisdomClipText: story.wisdom_text,
+      wisdomClipUrl: story.wisdom_clip_url,
+      durationSeconds: story.duration_seconds,
       emotions: story.emotions,
-      pivotalCategory: story.pivotalCategory,
-      storyDate: story.storyDate,
-      photoTransform: story.photoTransform,
+      pivotalCategory: story.metadata?.pivotal_category,
+      storyDate: story.metadata?.story_date,
+      photoTransform: story.metadata?.photo_transform,
     };
 
     return NextResponse.json({ story: transformedStory });
@@ -185,12 +190,12 @@ export async function PUT(
       if (photo.url && photo.url.includes('supabase.co/storage/v1/object/sign/')) {
         // Extract the path from the signed URL
         const urlParts = photo.url.split('/');
-        const pathStartIndex = urlParts.indexOf('photos') + 1;
+        const pathStartIndex = urlParts.indexOf('photo') + 1;
         if (pathStartIndex > 0 && pathStartIndex < urlParts.length) {
           const filePath = urlParts.slice(pathStartIndex).join('/').split('?')[0];
           return {
             ...photo,
-            url: `${decodeURIComponent(filePath)}` // Store the extracted path
+            url: decodeURIComponent(filePath) // Store the extracted path
           };
         }
       }
@@ -199,33 +204,41 @@ export async function PUT(
       return photo;
     });
 
-    // Update the story in Neon database using Drizzle
-    const [updatedStory] = await db
-      .update(stories)
-      .set({
-        title: body.title,
-        transcription: body.transcription || body.content,
-        lifeAge: body.lifeAge || body.age,
-        storyYear: body.year || body.storyYear,
-        includeInTimeline: body.includeInTimeline ?? true,
-        includeInBook: body.includeInBook ?? true,
-        isFavorite: body.isFavorite ?? false,
-        photoUrl: body.photoUrl && !body.photoUrl.startsWith('blob:') ? body.photoUrl : undefined,
+    // Prepare story data for Supabase (snake_case schema)
+    const storyData: any = {
+      title: body.title || "Untitled Story",
+      transcript: body.transcription || body.content,
+      year: body.year || body.storyYear,
+      audio_url: body.audioUrl && !body.audioUrl.startsWith('blob:') ? body.audioUrl : undefined,
+      wisdom_text: body.wisdomClipText || body.wisdomTranscription,
+      wisdom_clip_url: body.wisdomClipUrl,
+      duration_seconds: Math.max(1, Math.min(120, body.durationSeconds || 30)),
+      emotions: body.emotions,
+      photo_url: body.photoUrl && !body.photoUrl.startsWith('blob:') ? body.photoUrl : undefined,
+      is_saved: true,
+      metadata: {
+        life_age: body.lifeAge || body.age,
+        include_in_timeline: body.includeInTimeline ?? true,
+        include_in_book: body.includeInBook ?? true,
+        is_favorite: body.isFavorite ?? false,
         photos: processedPhotos,
-        audioUrl: body.audioUrl,
-        wisdomClipText: body.wisdomClipText || body.wisdomTranscription,
-        wisdomClipUrl: body.wisdomClipUrl,
-        durationSeconds: body.durationSeconds || 0,
-        emotions: body.emotions,
-        pivotalCategory: body.pivotalCategory,
-        storyDate: body.storyDate,
-        photoTransform: body.photoTransform,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(stories.id, params.id), eq(stories.userId, user.id)))
-      .returning();
+        pivotal_category: body.pivotalCategory,
+        story_date: body.storyDate,
+        photo_transform: body.photoTransform,
+      }
+    };
 
-    if (!updatedStory) {
+    // Update the story in Supabase database
+    const { data: updatedStory, error: updateError } = await supabaseAdmin
+      .from("stories")
+      .update(storyData)
+      .eq("id", params.id)
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+    if (updateError || !updatedStory) {
+      console.error("Story update error:", updateError);
       return NextResponse.json(
         { error: "Story not found or unauthorized" },
         { status: 404 }
@@ -236,9 +249,8 @@ export async function PUT(
     const getPhotoUrl = async (photoUrl: string) => {
       if (!photoUrl) return null;
 
-      // Skip blob URLs - these are invalid temporary URLs
+      // Skip blob URLs
       if (photoUrl.startsWith('blob:')) {
-        console.warn('Blob URL found in database - this should not happen:', photoUrl);
         return null;
       }
 
@@ -248,61 +260,58 @@ export async function PUT(
       }
 
       // Generate signed URL for storage path (valid for 1 week)
-      // Photos are stored with 'photo/' prefix in heritage-whisper-files bucket
       const { data, error } = await supabaseAdmin.storage
         .from('heritage-whisper-files')
-        .createSignedUrl(photoUrl.startsWith('photo/') ? photoUrl : `photo/${photoUrl}`, 604800); // 1 week in seconds
+        .createSignedUrl(photoUrl.startsWith('photo/') ? photoUrl : `photo/${photoUrl}`, 604800);
 
       if (error) {
         console.error('Error creating signed URL for photo:', photoUrl, error);
-        // Fallback to public URL
-        const { data: publicData } = supabaseAdmin.storage
-          .from('heritage-whisper-files')
-          .getPublicUrl(photoUrl.startsWith('photo/') ? photoUrl : `photo/${photoUrl}`);
-        return publicData?.publicUrl || null;
+        return null;
       }
 
       return data?.signedUrl || null;
     };
 
-    // Process photos array to add signed URLs
-    const photosWithUrls = await Promise.all(
-      (updatedStory.photos || []).map(async (photo: any) => ({
-        ...photo,
-        url: await getPhotoUrl(photo.url)
-      }))
-    );
-    const filteredPhotos = photosWithUrls.filter((photo: any) => photo.url !== null);
+    // Process photos array from metadata
+    let photos = [];
+    if (updatedStory.metadata?.photos) {
+      photos = await Promise.all(
+        (updatedStory.metadata.photos || []).map(async (photo: any) => ({
+          ...photo,
+          url: await getPhotoUrl(photo.url || photo.filePath)
+        }))
+      );
+    }
 
     // Process legacy photoUrl if exists
-    const publicPhotoUrl = updatedStory.photoUrl ? await getPhotoUrl(updatedStory.photoUrl) : undefined;
+    const photoUrl = updatedStory.photo_url ? await getPhotoUrl(updatedStory.photo_url) : null;
 
-    // Transform the response (fields already in camelCase from Drizzle)
+    // Transform the response (from Supabase snake_case to camelCase)
     const transformedStory = {
       id: updatedStory.id,
-      title: updatedStory.title,
-      content: updatedStory.content || updatedStory.transcription,
-      createdAt: updatedStory.createdAt,
-      updatedAt: updatedStory.updatedAt,
-      age: updatedStory.age || updatedStory.lifeAge,
-      year: updatedStory.storyYear,
-      storyYear: updatedStory.storyYear,
-      includeInTimeline: updatedStory.includeInTimeline,
-      includeInBook: updatedStory.includeInBook,
-      isFavorite: updatedStory.isFavorite,
-      photoUrl: publicPhotoUrl,
-      hasPhotos: updatedStory.hasPhotos,
-      photos: filteredPhotos, // Use photos with signed URLs
-      audioUrl: updatedStory.audioUrl,
-      transcription: updatedStory.transcription,
-      wisdomTranscription: updatedStory.wisdomTranscription || updatedStory.wisdomClipText,
-      followUpQuestions: updatedStory.followUpQuestions,
-      wisdomClipUrl: updatedStory.wisdomClipUrl,
-      durationSeconds: updatedStory.durationSeconds,
+      title: updatedStory.title || "Untitled Story",
+      content: updatedStory.transcript,
+      transcription: updatedStory.transcript,
+      createdAt: updatedStory.created_at,
+      updatedAt: updatedStory.updated_at,
+      age: updatedStory.metadata?.life_age || updatedStory.metadata?.age,
+      year: updatedStory.year,
+      storyYear: updatedStory.year,
+      lifeAge: updatedStory.metadata?.life_age,
+      includeInTimeline: updatedStory.metadata?.include_in_timeline ?? true,
+      includeInBook: updatedStory.metadata?.include_in_book ?? true,
+      isFavorite: updatedStory.metadata?.is_favorite ?? false,
+      photoUrl: photoUrl,
+      photos: photos,
+      audioUrl: updatedStory.audio_url,
+      wisdomTranscription: updatedStory.wisdom_text,
+      wisdomClipText: updatedStory.wisdom_text,
+      wisdomClipUrl: updatedStory.wisdom_clip_url,
+      durationSeconds: updatedStory.duration_seconds,
       emotions: updatedStory.emotions,
-      pivotalCategory: updatedStory.pivotalCategory,
-      storyDate: updatedStory.storyDate,
-      photoTransform: updatedStory.photoTransform,
+      pivotalCategory: updatedStory.metadata?.pivotal_category,
+      storyDate: updatedStory.metadata?.story_date,
+      photoTransform: updatedStory.metadata?.photo_transform,
     };
 
     return NextResponse.json({ story: transformedStory });
@@ -345,21 +354,20 @@ export async function DELETE(
       );
     }
 
-    // Delete the story from Neon database using Drizzle
-    const deletedStories = await db
-      .delete(stories)
-      .where(and(eq(stories.id, params.id), eq(stories.userId, user.id)))
-      .returning();
+    // Delete the story from Supabase database
+    const { error: deleteError } = await supabaseAdmin
+      .from("stories")
+      .delete()
+      .eq("id", params.id)
+      .eq("user_id", user.id);
 
-    if (!deletedStories || deletedStories.length === 0) {
+    if (deleteError) {
+      console.error("Story deletion error:", deleteError);
       return NextResponse.json(
         { error: "Story not found or already deleted" },
         { status: 404 }
       );
     }
-
-    // Note: User story count update removed since users are in Neon DB
-    // This could be added back using Drizzle if needed
 
     return NextResponse.json({ success: true });
   } catch (error) {
