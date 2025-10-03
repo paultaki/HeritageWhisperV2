@@ -740,6 +740,57 @@ function ReviewContent() {
     }
   };
 
+  // Helper function to upload audio to Supabase storage
+  const uploadAudioToStorage = async (blob: Blob, storyId: string): Promise<string> => {
+    console.log('Getting upload URL for audio...');
+
+    // Determine file extension based on blob type
+    const fileExtension = blob.type.includes('ogg') ? 'ogg' : 'webm';
+
+    // Get upload URL from backend
+    const uploadUrlResponse = await apiRequest('POST', '/api/objects/upload', {
+      fileType: 'audio',
+      storyId: storyId,
+      fileExtension: fileExtension
+    });
+
+    if (!uploadUrlResponse.ok) {
+      throw new Error('Failed to get upload URL for audio');
+    }
+
+    const { uploadURL, filePath } = await uploadUrlResponse.json();
+
+    console.log('Uploading audio to:', uploadURL, 'file path:', filePath);
+
+    // Clean MIME type - remove codec information
+    let mimeType = blob.type || 'audio/webm';
+    if (mimeType.includes(';')) {
+      mimeType = mimeType.split(';')[0];
+    }
+
+    // Upload audio blob to storage using signed URL
+    const uploadResponse = await fetch(uploadURL, {
+      method: 'PUT',
+      body: blob,
+      headers: {
+        'Content-Type': mimeType
+      }
+    });
+
+    console.log('Audio upload response:', uploadResponse.status, uploadResponse.statusText);
+
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      console.error('Audio upload failed:', errorText);
+      throw new Error(`Failed to upload audio: ${uploadResponse.status} ${errorText}`);
+    }
+
+    console.log('Audio uploaded successfully to:', filePath);
+
+    // Return the file path for the story update
+    return filePath;
+  };
+
   const handleGoToRecording = async () => {
     try {
       const navData: any = {
@@ -800,26 +851,73 @@ function ReviewContent() {
 
     const lifeAge = parseInt(storyYear) - (user.birthYear || 0);
 
-    // For new stories, we need to upload pending photos first
-    const uploadedPhotos: any[] = [];
+    // Handle new stories that need media uploads (photos and/or audio)
+    if (!isEditMode && (photos.some(p => p.url.startsWith('blob:')) || mainAudioBlob)) {
+      console.log('New story with media detected, will create story and upload media...');
 
-    if (!isEditMode) {
-      // Upload pending photo files to Supabase storage
-      for (let i = 0; i < photos.length; i++) {
-        const photo = photos[i];
-        const pendingFile = (window as any)[`__pendingPhotoFile_${i}`];
+      // Create the story first to get an ID
+      const tempStoryData = {
+        title,
+        audioUrl: null, // Will be set after audio upload
+        transcription,
+        formattedContent,
+        storyYear: parseInt(storyYear),
+        storyDate: storyDate || null,
+        lifeAge,
+        emotions: [],
+        durationSeconds: audioDuration || 0,
+        wisdomQuote: wisdomQuote || null,
+      };
 
-        if (pendingFile && photo.url.startsWith('blob:')) {
+      // Save story first to get an ID
+      const tempSaveResponse = await apiRequest("POST", "/api/stories", tempStoryData);
+      const tempSave = await tempSaveResponse.json();
+
+      const newStoryId = tempSave?.story?.id;
+      if (newStoryId) {
+        let finalAudioUrl: string | null = null;
+
+        // Upload main audio if available
+        if (mainAudioBlob) {
           try {
-            // Get upload URL from server
-            const fileExtension = pendingFile.name.split('.').pop() || 'jpg';
-            const uploadUrlResponse = await apiRequest('POST', '/api/objects/upload', {
-              fileType: 'photo',
-              storyId: 'pending', // Use 'pending' for new stories
-              fileExtension: fileExtension
+            console.log('Uploading main audio...');
+            const audioPath = await uploadAudioToStorage(mainAudioBlob, newStoryId);
+            // Generate signed URL for the audio
+            const { data } = await import('@/lib/supabase').then(m => m.supabase.storage
+              .from('heritage-whisper-files')
+              .createSignedUrl(audioPath, 604800));
+            finalAudioUrl = data?.signedUrl || audioPath;
+          } catch (error) {
+            console.error('Audio upload failed:', error);
+            toast({
+              title: "Audio upload failed",
+              description: "Story saved but audio could not be uploaded.",
+              variant: "destructive",
             });
+          }
+        }
 
-            if (uploadUrlResponse.ok) {
+        // Upload photos if available
+        for (let i = 0; i < photos.length; i++) {
+          const photo = photos[i];
+          const pendingFile = (window as any)[`__pendingPhotoFile_${i}`];
+
+          if (pendingFile && photo.url.startsWith('blob:')) {
+            try {
+              console.log(`Uploading photo ${i} to permanent storage...`);
+              const fileExtension = pendingFile.name.split('.').pop() || 'jpg';
+
+              // Get upload URL
+              const uploadUrlResponse = await apiRequest('POST', '/api/objects/upload', {
+                fileType: 'photo',
+                storyId: newStoryId,
+                fileExtension: fileExtension
+              });
+
+              if (!uploadUrlResponse.ok) {
+                throw new Error('Failed to get upload URL');
+              }
+
               const { uploadURL, filePath } = await uploadUrlResponse.json();
 
               // Upload file to storage
@@ -831,36 +929,98 @@ function ReviewContent() {
                 }
               });
 
-              if (uploadResponse.ok) {
-                // Store the file path instead of blob URL
-                uploadedPhotos.push({
-                  ...photo,
-                  url: filePath // Store the path, not the blob URL
-                });
-
-                // Clean up the pending file
-                delete (window as any)[`__pendingPhotoFile_${i}`];
-                // Revoke the blob URL
-                URL.revokeObjectURL(photo.url);
-              } else {
-                console.error('Failed to upload photo:', pendingFile.name);
-                // Skip this photo if upload failed
+              if (!uploadResponse.ok) {
+                throw new Error('Failed to upload photo');
               }
+
+              // Add photo to story using the API
+              const addPhotoResponse = await apiRequest('POST', `/api/stories/${newStoryId}/photos`, {
+                filePath,
+                isHero: photo.isHero,
+                transform: photo.transform
+              });
+
+              if (addPhotoResponse.ok) {
+                console.log(`Photo ${i} added successfully`);
+              }
+
+              // Clean up
+              URL.revokeObjectURL(photo.url);
+              delete (window as any)[`__pendingPhotoFile_${i}`];
+            } catch (error) {
+              console.error(`Photo ${i} upload failed:`, error);
+              toast({
+                title: "Photo upload failed",
+                description: "Story saved but some photos could not be uploaded.",
+                variant: "destructive",
+              });
             }
-          } catch (error) {
-            console.error('Error uploading photo:', error);
-            // Skip this photo if upload failed
           }
-        } else if (!photo.url.startsWith('blob:')) {
-          // Keep photos that already have proper URLs
-          uploadedPhotos.push(photo);
         }
+
+        // Upload wisdom audio if available
+        let finalWisdomUrl: string | null = null;
+        if (wisdomMode === 'recorded' && wisdomAudioBlob) {
+          try {
+            console.log('Uploading wisdom audio...');
+            finalWisdomUrl = await uploadAudioToStorage(wisdomAudioBlob, newStoryId);
+          } catch (error) {
+            console.error('Wisdom audio upload failed:', error);
+            toast({
+              title: "Wisdom audio upload failed",
+              description: "Story saved but wisdom audio could not be uploaded.",
+              variant: "destructive",
+            });
+          }
+        }
+
+        // Update story with all URLs if any media was uploaded
+        if (finalAudioUrl || finalWisdomUrl || (wisdomMode === 'text' && wisdomText)) {
+          const updateData: any = {
+            title: tempStoryData.title,
+            transcription: tempStoryData.transcription,
+            storyYear: tempStoryData.storyYear,
+            storyDate: tempStoryData.storyDate,
+            lifeAge: tempStoryData.lifeAge,
+            emotions: [],
+            durationSeconds: tempStoryData.durationSeconds,
+            wisdomQuote: tempStoryData.wisdomQuote,
+            audioUrl: finalAudioUrl || tempStoryData.audioUrl,
+            wisdomClipUrl: finalWisdomUrl,
+            wisdomClipText: wisdomMode === 'text' ? wisdomText : null,
+            wisdomClipDuration: finalWisdomUrl ? wisdomRecordingDuration : null,
+          };
+
+          console.log('Updating story with uploaded media URLs:', updateData);
+          try {
+            await apiRequest("PUT", `/api/stories/${newStoryId}`, updateData);
+            console.log('Story updated successfully with media');
+          } catch (error) {
+            console.error('Failed to update story with media URLs:', error);
+            toast({
+              title: "Media update failed",
+              description: "Story saved but some media couldn't be linked. Please try editing the story.",
+              variant: "destructive",
+            });
+          }
+        }
+
+        // Clean up
+        if (audioUrl) URL.revokeObjectURL(audioUrl);
+
+        // Refresh queries and navigate
+        await queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+        await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        toast({
+          title: "Story saved!",
+          description: "Your memory has been added to your timeline.",
+        });
+        router.push(`/timeline?highlight=${newStoryId}`);
+        return; // Exit early, story is saved
       }
-    } else {
-      // For edit mode, photos are already uploaded, just filter out blob URLs
-      uploadedPhotos.push(...photos.filter(p => !p.url.startsWith('blob:')));
     }
 
+    // For edit mode or stories without new media, use standard save
     const storyData = {
       title,
       audioUrl: audioUrl && !audioUrl.startsWith('blob:') ? audioUrl : null,
@@ -875,13 +1035,11 @@ function ReviewContent() {
       wisdomClipUrl: wisdomAudioUrl && !wisdomAudioUrl.startsWith('blob:') ? wisdomAudioUrl : null,
       wisdomClipText: wisdomMode === 'text' ? wisdomText : null,
       wisdomClipDuration: wisdomAudioUrl ? wisdomRecordingDuration : null,
-      photos: uploadedPhotos, // Include properly uploaded photos
     };
 
     console.log('Final save data:', {
       ...storyData,
       transcriptionLength: storyData.transcription?.length,
-      photosCount: uploadedPhotos.length,
       isEditMode
     });
 
