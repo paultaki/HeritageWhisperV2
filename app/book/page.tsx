@@ -310,21 +310,13 @@ export default function BookViewNew() {
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
   const { isOpen, open, close } = useRecordModal();
 
-  // Fetch stories
-  const { data: stories = [], isLoading, error } = useQuery<Story[]>({
+  // Fetch stories - API returns { stories: [...] }
+  const { data, isLoading } = useQuery<{ stories: Story[] }>({
     queryKey: ["/api/stories"],
     enabled: !!user,
   });
 
-  // Debug logging
-  useEffect(() => {
-    console.log("Book View Debug:", {
-      user: !!user,
-      isLoading,
-      storiesCount: stories?.length,
-      error,
-    });
-  }, [user, isLoading, stories, error]);
+  const stories = data?.stories || [];
 
   // Convert to book data structure
   const { pages, spreads } = useMemo(() => {
