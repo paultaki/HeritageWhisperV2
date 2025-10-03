@@ -123,7 +123,9 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { filePath, isHero } = body;
+    const { filePath, isHero, transform } = body;
+
+    console.log('[POST /api/stories/[id]/photos] Request body:', body);
 
     if (!filePath) {
       return NextResponse.json(
@@ -141,29 +143,38 @@ export async function POST(
       .single();
 
     if (fetchError || !story) {
+      console.error('[POST /api/stories/[id]/photos] Story fetch error:', fetchError);
       return NextResponse.json(
         { error: "Story not found or unauthorized" },
         { status: 404 }
       );
     }
 
+    console.log('[POST /api/stories/[id]/photos] Current story metadata:', story.metadata);
+
     // Create new photo object - store the PATH, not the signed URL
     const newPhoto = {
       id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       url: filePath, // Store the path, not a signed URL
       filePath: filePath, // Also store as filePath for clarity
-      transform: { zoom: 1, position: { x: 0, y: 0 } },
+      transform: transform || { zoom: 1, position: { x: 0, y: 0 } },
       isHero: isHero || false,
       caption: ""
     };
 
+    console.log('[POST /api/stories/[id]/photos] New photo object:', newPhoto);
+
     // Get current photos from metadata
     const currentPhotos = story.metadata?.photos || [];
+    console.log('[POST /api/stories/[id]/photos] Current photos count:', currentPhotos.length);
 
     // If this is marked as hero, unmark other photos
     const updatedPhotos = isHero
       ? [...currentPhotos.map((p: any) => ({ ...p, isHero: false })), newPhoto]
       : [...currentPhotos, newPhoto];
+
+    console.log('[POST /api/stories/[id]/photos] Updated photos count:', updatedPhotos.length);
+    console.log('[POST /api/stories/[id]/photos] Updated photos array:', updatedPhotos);
 
     // Update story metadata with new photos array in Supabase database
     const { data: updatedStory, error: updateError } = await supabaseAdmin
@@ -180,12 +191,14 @@ export async function POST(
       .single();
 
     if (updateError || !updatedStory) {
-      console.error("Error updating story with photo:", updateError);
+      console.error('[POST /api/stories/[id]/photos] Update error:', updateError);
       return NextResponse.json(
         { error: "Failed to add photo to story" },
         { status: 500 }
       );
     }
+
+    console.log('[POST /api/stories/[id]/photos] Story updated successfully. New metadata:', updatedStory.metadata);
 
     // Generate a signed URL for the photo so it can be displayed immediately
     // Photos are stored with 'photo/' prefix in heritage-whisper-files bucket

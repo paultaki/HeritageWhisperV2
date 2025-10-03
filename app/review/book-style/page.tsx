@@ -273,10 +273,20 @@ function BookStyleReviewContent() {
         // Step 4: Update story with audio URL if uploaded
         if (finalAudioUrl) {
           console.log("Updating story with audio URL...");
-          await apiRequest('PUT', `/api/stories/${newStoryId}`, {
-            ...tempStoryData,
-            audioUrl: finalAudioUrl
-          });
+          // IMPORTANT: Only update the audioUrl field, don't overwrite entire metadata
+          const updateResponse = await apiRequest('GET', `/api/stories/${newStoryId}`);
+          if (updateResponse.ok) {
+            const { story: currentStory } = await updateResponse.json();
+            console.log('[Audio Update] Current story before audio update:', currentStory);
+
+            await apiRequest('PUT', `/api/stories/${newStoryId}`, {
+              ...tempStoryData,
+              audioUrl: finalAudioUrl,
+              // Preserve the photos that were just added
+              photos: currentStory.photos || []
+            });
+            console.log('[Audio Update] Story updated with audio URL, photos preserved');
+          }
         }
 
         return { story: { id: newStoryId } };
