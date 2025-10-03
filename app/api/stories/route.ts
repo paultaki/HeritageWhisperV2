@@ -217,13 +217,26 @@ export async function POST(request: NextRequest) {
         .where(eq(users.id, user.id));
 
       if (existingUsers.length === 0) {
-        // Create user if doesn't exist - only with required fields
-        await db.insert(users).values({
-          id: user.id,
-          email: user.email || '',
-          name: user.user_metadata?.name || 'User',
-          birthYear: 1950, // Default value, should be updated in profile
-        });
+        try {
+          // Create user if doesn't exist - only with required fields
+          await db.insert(users).values({
+            id: user.id,
+            email: user.email || '',
+            name: user.user_metadata?.name || 'User',
+            birthYear: 1950, // Default value, should be updated in profile
+          });
+        } catch (insertError: any) {
+          // If email already exists with different ID, update it
+          if (insertError?.cause?.code === '23505' && user.email) {
+            console.log("User exists with different ID, updating...");
+            await db
+              .update(users)
+              .set({ id: user.id })
+              .where(eq(users.email, user.email));
+          } else {
+            throw insertError;
+          }
+        }
       }
     } catch (error) {
       console.warn("User check/creation skipped - table might not exist:", error);
