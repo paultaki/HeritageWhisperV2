@@ -132,7 +132,151 @@ function BookStyleReviewContent() {
         ? parseInt(storyYear) - user.birthYear
         : null;
 
-      // Upload audio if we have a blob
+      // For NEW stories with blob photos or audio, we need to create the story first, then upload media
+      const hasNewPhotos = !isEditing && photos.some(p => p.url.startsWith('blob:'));
+      const hasNewAudio = mainAudioBlob && audioUrl?.startsWith("blob:");
+
+      if (!isEditing && (hasNewPhotos || hasNewAudio)) {
+        console.log("=== NEW STORY WITH MEDIA ===");
+        console.log("Photos with blob URLs:", photos.filter(p => p.url.startsWith('blob:')).length);
+        console.log("Has audio blob:", !!hasNewAudio);
+
+        // Step 1: Create the story WITHOUT media to get an ID
+        const tempStoryData = {
+          title: title || `Memory from ${storyYear || 'the past'}`,
+          transcription,
+          storyYear: parseInt(storyYear) || new Date().getFullYear(),
+          lifeAge: age,
+          includeInTimeline: true,
+          includeInBook: true,
+          isFavorite: false,
+          audioUrl: null, // Will be set after upload
+          wisdomClipText: wisdomText,
+          durationSeconds: 0,
+        };
+
+        console.log("Creating story first...");
+        const createResponse = await apiRequest('POST', '/api/stories', tempStoryData);
+        if (!createResponse.ok) {
+          const error = await createResponse.json();
+          throw new Error(error.error || 'Failed to create story');
+        }
+
+        const { story: createdStory } = await createResponse.json();
+        const newStoryId = createdStory.id;
+        console.log("Story created with ID:", newStoryId);
+
+        let finalAudioUrl = null;
+
+        // Step 2: Upload audio if available
+        if (hasNewAudio) {
+          console.log("Uploading audio...");
+          try {
+            const formData = new FormData();
+            formData.append("audio", mainAudioBlob!, "recording.webm");
+
+            const uploadResponse = await apiRequest('POST', '/api/upload/audio', formData);
+            if (uploadResponse.ok) {
+              const { url } = await uploadResponse.json();
+              finalAudioUrl = url;
+              console.log("✅ Audio uploaded successfully:", url);
+            }
+          } catch (error) {
+            console.error("Audio upload failed:", error);
+          }
+        }
+
+        // Step 3: Upload photos if available
+        console.log("=== PHOTO UPLOAD DEBUG ===");
+        console.log("Total photos in array:", photos.length);
+
+        for (let i = 0; i < photos.length; i++) {
+          const photo = photos[i];
+          const pendingFile = (window as any)[`__pendingPhotoFile_${i}`];
+
+          console.log(`Photo ${i}:`, {
+            hasPhoto: !!photo,
+            photoUrl: photo?.url,
+            hasPendingFile: !!pendingFile,
+            isBlobUrl: photo?.url?.startsWith('blob:'),
+            pendingFileName: pendingFile?.name
+          });
+
+          if (pendingFile && photo.url.startsWith('blob:')) {
+            try {
+              console.log(`✅ Uploading photo ${i} to permanent storage...`);
+              const fileExtension = pendingFile.name.split('.').pop() || 'jpg';
+
+              // Get upload URL
+              const uploadUrlResponse = await apiRequest('POST', '/api/objects/upload', {
+                fileType: 'photo',
+                storyId: newStoryId,
+                fileExtension: fileExtension
+              });
+
+              if (!uploadUrlResponse.ok) {
+                throw new Error('Failed to get upload URL');
+              }
+
+              const { uploadURL, filePath } = await uploadUrlResponse.json();
+              console.log(`Got upload URL for photo ${i}:`, { uploadURL, filePath });
+
+              // Upload file to storage
+              const uploadResponse = await fetch(uploadURL, {
+                method: 'PUT',
+                body: pendingFile,
+                headers: {
+                  'Content-Type': pendingFile.type || 'application/octet-stream'
+                }
+              });
+
+              console.log(`Upload response for photo ${i}:`, uploadResponse.status, uploadResponse.statusText);
+
+              if (!uploadResponse.ok) {
+                const errorText = await uploadResponse.text();
+                console.error(`Photo upload failed with status ${uploadResponse.status}:`, errorText);
+                throw new Error(`Failed to upload photo: ${uploadResponse.status}`);
+              }
+
+              console.log(`Photo ${i} uploaded to storage successfully, now adding to story metadata...`);
+
+              // Add photo to story using the API
+              const addPhotoResponse = await apiRequest('POST', `/api/stories/${newStoryId}/photos`, {
+                filePath,
+                isHero: photo.isHero,
+                transform: photo.transform
+              });
+
+              if (addPhotoResponse.ok) {
+                const photoResult = await addPhotoResponse.json();
+                console.log(`✅ Photo ${i} added successfully to story metadata:`, photoResult);
+              } else {
+                const errorText = await addPhotoResponse.text();
+                console.error(`Failed to add photo ${i} to story:`, addPhotoResponse.status, errorText);
+              }
+
+              // Clean up
+              URL.revokeObjectURL(photo.url);
+              delete (window as any)[`__pendingPhotoFile_${i}`];
+            } catch (error) {
+              console.error(`Photo ${i} upload failed:`, error);
+            }
+          }
+        }
+
+        // Step 4: Update story with audio URL if uploaded
+        if (finalAudioUrl) {
+          console.log("Updating story with audio URL...");
+          await apiRequest('PUT', `/api/stories/${newStoryId}`, {
+            ...tempStoryData,
+            audioUrl: finalAudioUrl
+          });
+        }
+
+        return { story: { id: newStoryId } };
+      }
+
+      // For EDITING or stories without new media, use standard save
       let finalAudioUrl = audioUrl;
       if (mainAudioBlob && audioUrl?.startsWith("blob:")) {
         console.log("Uploading audio blob...");
@@ -153,24 +297,22 @@ function BookStyleReviewContent() {
         }
       }
 
-      // Prepare story data - matching the database schema
       const storyData = {
         title: title || `Memory from ${storyYear || 'the past'}`,
-        transcription, // This is the main text content
+        transcription,
         storyYear: parseInt(storyYear) || new Date().getFullYear(),
-        lifeAge: age, // Use lifeAge instead of age
+        lifeAge: age,
         includeInTimeline: true,
         includeInBook: true,
         isFavorite: false,
-        photos: photos.length > 0 ? photos : null,
+        photos: photos.filter(p => !p.url.startsWith('blob:')),
         audioUrl: finalAudioUrl,
         wisdomClipText: wisdomText,
-        durationSeconds: 0, // Add duration
+        durationSeconds: 0,
       };
 
       console.log("Saving story with data:", storyData);
 
-      // Use PUT for update, POST for create
       const url = isEditing ? `/api/stories/${editId}` : '/api/stories';
       const method = isEditing ? 'PUT' : 'POST';
 

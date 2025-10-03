@@ -898,13 +898,25 @@ function ReviewContent() {
         }
 
         // Upload photos if available
+        console.log('=== PHOTO UPLOAD DEBUG ===');
+        console.log('Total photos in array:', photos.length);
+        console.log('Photos array:', photos);
+
         for (let i = 0; i < photos.length; i++) {
           const photo = photos[i];
           const pendingFile = (window as any)[`__pendingPhotoFile_${i}`];
 
+          console.log(`Photo ${i}:`, {
+            hasPhoto: !!photo,
+            photoUrl: photo?.url,
+            hasPendingFile: !!pendingFile,
+            isBlobUrl: photo?.url?.startsWith('blob:'),
+            pendingFileName: pendingFile?.name
+          });
+
           if (pendingFile && photo.url.startsWith('blob:')) {
             try {
-              console.log(`Uploading photo ${i} to permanent storage...`);
+              console.log(`✅ Uploading photo ${i} to permanent storage...`);
               const fileExtension = pendingFile.name.split('.').pop() || 'jpg';
 
               // Get upload URL
@@ -919,6 +931,7 @@ function ReviewContent() {
               }
 
               const { uploadURL, filePath } = await uploadUrlResponse.json();
+              console.log(`Got upload URL for photo ${i}:`, { uploadURL, filePath });
 
               // Upload file to storage
               const uploadResponse = await fetch(uploadURL, {
@@ -929,9 +942,15 @@ function ReviewContent() {
                 }
               });
 
+              console.log(`Upload response for photo ${i}:`, uploadResponse.status, uploadResponse.statusText);
+
               if (!uploadResponse.ok) {
-                throw new Error('Failed to upload photo');
+                const errorText = await uploadResponse.text();
+                console.error(`Photo upload failed with status ${uploadResponse.status}:`, errorText);
+                throw new Error(`Failed to upload photo: ${uploadResponse.status}`);
               }
+
+              console.log(`Photo ${i} uploaded to storage successfully, now adding to story metadata...`);
 
               // Add photo to story using the API
               const addPhotoResponse = await apiRequest('POST', `/api/stories/${newStoryId}/photos`, {
@@ -941,7 +960,11 @@ function ReviewContent() {
               });
 
               if (addPhotoResponse.ok) {
-                console.log(`Photo ${i} added successfully`);
+                const photoResult = await addPhotoResponse.json();
+                console.log(`✅ Photo ${i} added successfully to story metadata:`, photoResult);
+              } else {
+                const errorText = await addPhotoResponse.text();
+                console.error(`Failed to add photo ${i} to story:`, addPhotoResponse.status, errorText);
               }
 
               // Clean up
