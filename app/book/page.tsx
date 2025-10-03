@@ -30,7 +30,6 @@ import FloatingInsightCard from "@/components/FloatingInsightCard";
 import { useSwipeable } from "react-swipeable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
-import { groupStoriesByDecade } from "@/lib/utils";
 import {
   paginateBook,
   getPageSpreads,
@@ -327,41 +326,58 @@ export default function BookViewNew() {
     // Ensure stories is an array
     const storiesArray = Array.isArray(stories) ? stories : [];
     console.log('Stories array length:', storiesArray.length);
+    console.log('User birth year:', user?.birthYear);
+    console.log('Sample story years:', storiesArray.slice(0, 3).map((s: any) => s.storyYear));
 
     // Group stories by decade - groupStoriesByDecade returns an array!
+    // BUT it filters out stories from birth year and unknown decades
+    // For now, let's include ALL stories grouped by decade
     const decadeGroups: DecadeGroup[] = [];
-    const groupedStories = groupStoriesByDecade(storiesArray, user?.birthYear || 1950);
-    console.log('Grouped stories:', groupedStories);
 
-    // Defensive check - ensure groupedStories is an array
-    if (!Array.isArray(groupedStories)) {
-      console.error('groupStoriesByDecade did not return an array:', groupedStories);
-      return { pages: [], spreads: [] };
-    }
+    // Create our own grouping that includes all stories
+    const storiesByDecade = new Map<string, Story[]>();
 
-    // groupedStories is already an array of { decade, displayName, ageRange, stories }
-    groupedStories.forEach(group => {
-      console.log('Processing group:', group);
-      // Additional defensive check for each group
-      if (group && Array.isArray(group.stories)) {
-        decadeGroups.push({
-          decade: group.displayName || group.decade || 'Unknown',
-          title: group.ageRange || '',
-          stories: group.stories.map(convertToPaginationStory),
-        });
+    storiesArray.forEach((story: Story) => {
+      const year = parseInt(story.storyYear?.toString() || '0');
+      if (year > 0) {
+        const decade = Math.floor(year / 10) * 10;
+        const decadeKey = `${decade}s`;
+
+        if (!storiesByDecade.has(decadeKey)) {
+          storiesByDecade.set(decadeKey, []);
+        }
+        storiesByDecade.get(decadeKey)!.push(story);
       }
     });
-    console.log('Decade groups:', decadeGroups);
+
+    // Convert to DecadeGroup array
+    Array.from(storiesByDecade.entries())
+      .sort(([a], [b]) => parseInt(a) - parseInt(b))
+      .forEach(([decade, decadeStories]) => {
+        decadeGroups.push({
+          decade: decade.replace('s', '') + 's', // e.g., "1970s"
+          title: `The ${decade}`, // e.g., "The 1970s"
+          stories: decadeStories.map(convertToPaginationStory),
+        });
+      });
+
+    console.log('Decade groups created:', decadeGroups);
 
     // Paginate the entire book
     const bookPages = paginateBook(decadeGroups);
     const bookSpreads = getPageSpreads(bookPages);
+
+    console.log('Total pages generated:', bookPages.length);
+    console.log('Total spreads:', bookSpreads.length);
 
     return {
       pages: bookPages,
       spreads: bookSpreads,
     };
   }, [stories, user]);
+
+  console.log('Pages length outside useMemo:', pages.length);
+  console.log('Stories length:', stories?.length);
 
   // Navigation
   const totalSpreads = spreads.length;
