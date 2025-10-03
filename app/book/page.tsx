@@ -30,7 +30,7 @@ import FloatingInsightCard from "@/components/FloatingInsightCard";
 import { useSwipeable } from "react-swipeable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
-import { groupStoriesByDecade, getAgeRangeForDecade, getDecadeDisplayName, formatYear } from "@/lib/utils";
+import { groupStoriesByDecade } from "@/lib/utils";
 import {
   paginateBook,
   getPageSpreads,
@@ -324,16 +324,16 @@ export default function BookViewNew() {
       return { pages: [], spreads: [] };
     }
 
-    // Group stories by decade
+    // Group stories by decade - groupStoriesByDecade returns an array!
     const decadeGroups: DecadeGroup[] = [];
-    const storiesByDecade = groupStoriesByDecade(stories);
+    const groupedStories = groupStoriesByDecade(stories, user?.birthYear || 1950);
 
-    Object.entries(storiesByDecade).forEach(([decade, decadeStories]) => {
-      const ageRange = getAgeRangeForDecade(decade, user?.birthYear || 1950);
+    // groupedStories is already an array of { decade, displayName, ageRange, stories }
+    groupedStories.forEach(group => {
       decadeGroups.push({
-        decade: getDecadeDisplayName(decade),
-        title: ageRange,
-        stories: decadeStories.map(convertToPaginationStory),
+        decade: group.displayName,
+        title: group.ageRange,
+        stories: group.stories.map(convertToPaginationStory),
       });
     });
 
