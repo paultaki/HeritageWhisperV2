@@ -319,7 +319,8 @@ export default function BookViewNew() {
 
   // Convert to book data structure
   const { pages, spreads } = useMemo(() => {
-    if (!stories || stories.length === 0) {
+    // Only run pagination on client side
+    if (typeof window === 'undefined' || !stories || stories.length === 0) {
       return { pages: [], spreads: [] };
     }
 

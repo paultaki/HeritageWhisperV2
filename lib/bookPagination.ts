@@ -120,6 +120,13 @@ export function measureJustifiedText(
     return 0;
   }
 
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    // Fallback estimation for SSR
+    const avgCharsPerLine = CAPACITIES.CHARS_PER_LINE;
+    return Math.ceil(text.length / avgCharsPerLine);
+  }
+
   // Create hidden measurement div
   const measureDiv = document.createElement('div');
   measureDiv.style.cssText = `
@@ -157,6 +164,13 @@ export function measureMultipleTexts(
   texts: string[],
   containerWidth: number = MEASUREMENTS.PAGE_WIDTH_DESKTOP
 ): number[] {
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    // Fallback estimation for SSR
+    const avgCharsPerLine = CAPACITIES.CHARS_PER_LINE;
+    return texts.map(text => Math.ceil(text.length / avgCharsPerLine));
+  }
+
   const container = document.createElement('div');
   container.style.cssText = `
     position: absolute;
