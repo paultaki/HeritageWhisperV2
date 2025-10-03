@@ -985,20 +985,20 @@ function ReviewContent() {
               {/* Transcription text area */}
               <div className="space-y-2">
                 <Label htmlFor="transcription">
-                  {isTranscribing ? "Transcribing..." : "Story Text"}
+                  {isTranscribing ? "Transcribing..." : "Your Story"}
                 </Label>
                 <Textarea
                   id="transcription"
-                  placeholder={isTranscribing ? "Transcribing your audio..." : "Type or edit your story here..."}
+                  placeholder={isTranscribing ? "Transcribing your audio..." : "Type or edit your story here...\n\nPress Enter twice to create a new paragraph."}
                   value={transcription}
                   onChange={(e) => setTranscription(e.target.value)}
-                  className="min-h-[200px] font-serif text-base leading-relaxed"
+                  className="min-h-[300px] font-serif text-base leading-relaxed whitespace-pre-wrap"
                   disabled={isTranscribing}
                   data-testid="textarea-transcription"
                 />
                 {transcription && (
                   <p className="text-sm text-muted-foreground text-right">
-                    {transcription.split(' ').length} words
+                    {transcription.split(' ').filter(w => w.length > 0).length} words • {transcription.split('\n\n').filter(p => p.trim()).length} paragraphs
                   </p>
                 )}
               </div>
@@ -1018,7 +1018,7 @@ function ReviewContent() {
             </CardContent>
           </Card>
 
-          {/* Wisdom Clip Section */}
+          {/* Lesson Learned Section */}
           <Card>
             <CardHeader
               className={`cursor-pointer transition-colors ${isWisdomCollapsed ? 'hover:bg-gray-50' : ''}`}
@@ -1027,8 +1027,8 @@ function ReviewContent() {
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-amber-500" />
-                  <span>Leave a Lesson</span>
-                  <Badge variant="secondary" className="ml-2">Optional</Badge>
+                  <span>Lesson Learned</span>
+                  <Badge variant="secondary" className="ml-2">AI Suggested</Badge>
                 </div>
                 {isWisdomCollapsed && (
                   <ChevronDown className="w-5 h-5 text-gray-400" />

@@ -1029,9 +1029,19 @@ export default function BookView() {
                     </div>
                   )}
 
-                  <p className="memory-body memory-body--left">
-                    {currentStory.transcription || 'No transcription available for this memory.'}
-                  </p>
+                  <div className="memory-body memory-body--left">
+                    {currentStory.transcription ? (
+                      <div className="prose prose-lg max-w-none">
+                        {currentStory.transcription.split('\n\n').map((paragraph, index) => (
+                          <p key={index} className="mb-4 last:mb-0 leading-relaxed">
+                            {paragraph}
+                          </p>
+                        ))}
+                      </div>
+                    ) : (
+                      <p>No transcription available for this memory.</p>
+                    )}
+                  </div>
 
                   <div className="page-number">{currentPage * 2 + 1}</div>
                 </article>
@@ -1114,9 +1124,19 @@ export default function BookView() {
                       </div>
                     )}
 
-                    <p className="memory-body memory-body--right">
-                      {currentStory.transcription || 'No transcription available for this memory.'}
-                    </p>
+                    <div className="memory-body memory-body--right">
+                      {currentStory.transcription ? (
+                        <div className="prose prose-lg max-w-none">
+                          {currentStory.transcription.split('\n\n').map((paragraph, index) => (
+                            <p key={index} className="mb-4 last:mb-0 leading-relaxed">
+                              {paragraph}
+                            </p>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>No transcription available for this memory.</p>
+                      )}
+                    </div>
 
                     {(currentStory.wisdomClipText || currentStory.wisdomClipUrl) && (
                       <div className="wisdom" ref={wisdomRef} style={{ textAlign: 'center', marginTop: '2rem' }}>
