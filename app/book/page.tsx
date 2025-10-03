@@ -326,10 +326,12 @@ export default function BookViewNew() {
 
     // Ensure stories is an array
     const storiesArray = Array.isArray(stories) ? stories : [];
+    console.log('Stories array length:', storiesArray.length);
 
     // Group stories by decade - groupStoriesByDecade returns an array!
     const decadeGroups: DecadeGroup[] = [];
     const groupedStories = groupStoriesByDecade(storiesArray, user?.birthYear || 1950);
+    console.log('Grouped stories:', groupedStories);
 
     // Defensive check - ensure groupedStories is an array
     if (!Array.isArray(groupedStories)) {
@@ -339,6 +341,7 @@ export default function BookViewNew() {
 
     // groupedStories is already an array of { decade, displayName, ageRange, stories }
     groupedStories.forEach(group => {
+      console.log('Processing group:', group);
       // Additional defensive check for each group
       if (group && Array.isArray(group.stories)) {
         decadeGroups.push({
@@ -348,6 +351,7 @@ export default function BookViewNew() {
         });
       }
     });
+    console.log('Decade groups:', decadeGroups);
 
     // Paginate the entire book
     const bookPages = paginateBook(decadeGroups);
