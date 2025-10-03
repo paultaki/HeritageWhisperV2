@@ -162,6 +162,42 @@ export async function PUT(
 
     const body = await request.json();
 
+    // Process photos array - use filePath if available, otherwise extract from URL
+    const processedPhotos = (body.photos || []).filter((photo: any) => {
+      if (!photo.url && !photo.filePath) return false;
+      // Skip blob URLs - these are invalid temporary URLs
+      if (photo.url && photo.url.startsWith('blob:')) {
+        console.warn('Blob URL found in photos array - filtering out:', photo.url);
+        return false;
+      }
+      return true;
+    }).map((photo: any) => {
+      // If we have a filePath, use it as the url (for storage)
+      if (photo.filePath) {
+        return {
+          ...photo,
+          url: photo.filePath // Store the path, not the signed URL
+        };
+      }
+
+      // If the URL is a signed Supabase URL, extract the path
+      if (photo.url && photo.url.includes('supabase.co/storage/v1/object/sign/')) {
+        // Extract the path from the signed URL
+        const urlParts = photo.url.split('/');
+        const pathStartIndex = urlParts.indexOf('photos') + 1;
+        if (pathStartIndex > 0 && pathStartIndex < urlParts.length) {
+          const filePath = urlParts.slice(pathStartIndex).join('/').split('?')[0];
+          return {
+            ...photo,
+            url: `${decodeURIComponent(filePath)}` // Store the extracted path
+          };
+        }
+      }
+
+      // Otherwise keep the photo as-is (might be a path already)
+      return photo;
+    });
+
     // Prepare story data for Supabase (using snake_case)
     const storyData: any = {
       title: body.title,
@@ -171,8 +207,8 @@ export async function PUT(
       include_in_timeline: body.includeInTimeline ?? true,
       include_in_book: body.includeInBook ?? true,
       is_favorite: body.isFavorite ?? false,
-      photo_url: body.photoUrl,
-      photos: body.photos || [],
+      photo_url: body.photoUrl && !body.photoUrl.startsWith('blob:') ? body.photoUrl : undefined,
+      photos: processedPhotos,
       audio_url: body.audioUrl,
       wisdom_clip_text: body.wisdomClipText || body.wisdomTranscription,
       wisdom_clip_url: body.wisdomClipUrl,

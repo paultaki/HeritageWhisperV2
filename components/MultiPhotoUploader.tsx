@@ -15,6 +15,7 @@ import {
 export interface StoryPhoto {
   id: string;
   url: string;
+  filePath?: string; // Storage path (without signed URL)
   transform?: { zoom: number; position: { x: number; y: number } };
   caption?: string;
   isHero?: boolean;
@@ -120,8 +121,9 @@ export function MultiPhotoUploader({
           transform: { zoom: 1, position: { x: 0, y: 0 } }
         };
         
-        // Store file for later upload
-        (window as any)[`__pendingPhotoFile_${slotIndex}`] = file;
+        // Store file for later upload - use the actual photo index in the array
+        const photoIndex = photos.length; // Since we're about to add this photo
+        (window as any)[`__pendingPhotoFile_${photoIndex}`] = file;
         
         const newPhotos = [...photos];
         if (photos[slotIndex]) {
@@ -187,7 +189,9 @@ export function MultiPhotoUploader({
           transform: { zoom: 1, position: { x: 0, y: 0 } }
         };
         
-        (window as any)[`__pendingPhotoFile_${slotIndex}`] = file;
+        // Store file for later upload - use the actual photo index in the array
+        const photoIndex = photos.length; // Since we're about to add this photo
+        (window as any)[`__pendingPhotoFile_${photoIndex}`] = file;
         
         const newPhotos = [...photos];
         newPhotos.push(newPhoto);

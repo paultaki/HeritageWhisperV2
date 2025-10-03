@@ -412,7 +412,7 @@ export default function Review() {
 
       // Add photo to story
       const response = await apiRequest('POST', `/api/stories/${storyId}/photos`, {
-        filePath,
+        filePath: filePath,
         isHero: !hasHeroPhoto && photos.length === 0
       });
 
@@ -800,6 +800,79 @@ export default function Review() {
 
     const lifeAge = parseInt(storyYear) - (user.birthYear || 0);
 
+    // For edit mode, we need to upload any blob URL photos first
+    const uploadedPhotos: StoryPhoto[] = [];
+
+    if (isEditMode && storyId) {
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+
+        // Check if this is a blob URL that needs uploading
+        if (photo.url.startsWith('blob:')) {
+          const pendingFile = (window as any)[`__pendingPhotoFile_${i}`];
+
+          if (pendingFile) {
+            try {
+              console.log(`Uploading blob photo ${i} to Supabase...`);
+
+              // Get upload URL from server
+              const fileExtension = pendingFile.name?.split('.').pop() || 'jpg';
+              const uploadUrlResponse = await apiRequest('POST', '/api/objects/upload', {
+                fileType: 'photo',
+                storyId: storyId,
+                fileExtension: fileExtension
+              });
+
+              if (uploadUrlResponse.ok) {
+                const { uploadURL, filePath } = await uploadUrlResponse.json();
+
+                // Upload file to storage
+                const uploadResponse = await fetch(uploadURL, {
+                  method: 'PUT',
+                  body: pendingFile,
+                  headers: {
+                    'Content-Type': pendingFile.type || 'application/octet-stream'
+                  }
+                });
+
+                if (uploadResponse.ok) {
+                  // Add the photo with the proper file path
+                  const photoResponse = await apiRequest('POST', `/api/stories/${storyId}/photos`, {
+                    url: filePath,
+                    isHero: photo.isHero || false,
+                    caption: photo.caption || '',
+                    transform: photo.transform || { zoom: 1, position: { x: 0, y: 0 } }
+                  });
+
+                  if (photoResponse.ok) {
+                    const { photo: uploadedPhoto } = await photoResponse.json();
+                    uploadedPhotos.push(uploadedPhoto);
+
+                    // Clean up
+                    delete (window as any)[`__pendingPhotoFile_${i}`];
+                    URL.revokeObjectURL(photo.url);
+                  } else {
+                    console.error('Failed to add photo to story:', filePath);
+                    // Continue with other photos even if one fails
+                  }
+                } else {
+                  console.error('Failed to upload photo to storage');
+                }
+              }
+            } catch (error) {
+              console.error('Error uploading photo:', error);
+              // Continue with other photos
+            }
+          } else {
+            console.warn(`No pending file found for blob photo ${i}, skipping`);
+          }
+        } else {
+          // Keep existing photos that are already uploaded
+          uploadedPhotos.push(photo);
+        }
+      }
+    }
+
     const storyData = {
       title,
       audioUrl: audioUrl && !audioUrl.startsWith('blob:') ? audioUrl : null,
@@ -814,13 +887,14 @@ export default function Review() {
       wisdomClipUrl: wisdomAudioUrl && !wisdomAudioUrl.startsWith('blob:') ? wisdomAudioUrl : null,
       wisdomClipText: wisdomMode === 'text' ? wisdomText : null,
       wisdomClipDuration: wisdomAudioUrl ? wisdomRecordingDuration : null,
-      photos: photos, // Photos are already uploaded in edit mode
+      photos: isEditMode ? uploadedPhotos : photos, // Use uploaded photos for edit mode
     };
 
     console.log('Final save data:', {
       ...storyData,
       transcriptionLength: storyData.transcription?.length,
-      isEditMode
+      isEditMode,
+      photosCount: storyData.photos.length
     });
 
     saveStoryMutation.mutate(storyData);

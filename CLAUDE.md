@@ -317,6 +317,36 @@ npm run type-check
 
 ## 📝 Recent Updates (January 3, 2025)
 
+### Complete Photo Persistence Fix (4:35 PM PST)
+- ✅ **Fixed Critical Photo Storage Issue**:
+  - Photos were stored as blob URLs instead of actual files in Supabase
+  - Implemented proper photo upload flow for edit mode
+  - Added blob URL filtering in API endpoints
+  - Photos now persist after hard browser refresh
+  - Added filePath tracking separate from display URLs
+- ✅ **API Improvements**:
+  - PUT `/api/stories/[id]`: Filters blob URLs and uploads pending photos
+  - POST `/api/stories`: Processes photos to extract file paths from signed URLs
+  - POST `/api/stories/[id]/photos`: Returns both signed URL and filePath
+  - Proper conversion between display URLs and storage paths
+
+### Latest Improvements (10:45 AM - 2:00 PM PST)
+- ✅ **Logo Updates**:
+  - Updated to `HW_logo_mic_clean.png` across all pages
+  - Consistent branding in navigation and authentication pages
+- ✅ **Edit Button Navigation Fix**:
+  - Edit button in book view now navigates to book-style review page
+  - Maintains visual consistency when editing from book view
+- ✅ **Audio Recording Controls**:
+  - Added audio player to review pages for playback
+  - "Remove Audio" button to delete recordings
+  - "Re-record" button for new recordings
+  - Duration display in MM:SS format
+- ✅ **Photo Loading Fix**:
+  - Switched to signed URLs with 1-week expiry for reliable photo access
+  - Added error handling with public URL fallback
+  - Async photo URL generation for proper API handling
+
 ### Book View Enhancements
 - ✅ **True Book Pagination Implemented**:
   - Stories flow naturally across pages like a real book
@@ -330,17 +360,27 @@ npm run type-check
 ### Photo Persistence Fixes
 - ✅ **Permanent Photo Storage**:
   - Fixed blob URLs being stored in database
-  - Changed from temporary signed URLs to permanent public URLs
+  - Changed from temporary signed URLs to 1-week signed URLs
   - Photos now use storage paths, not URLs in database
   - Added proper photo upload flow for new stories
 - ✅ **Upload Process Fixed**:
   - New stories upload photos to Supabase before saving
-  - Existing photos properly retrieved with public URLs
+  - Existing photos properly retrieved with signed URLs
   - Blob URL filtering prevents invalid URLs from loading
 - ✅ **API Improvements**:
   - `/api/stories/[id]/photos/route.ts`: Stores file paths instead of signed URLs
-  - `/api/stories/route.ts`: Returns public URLs that don't expire
+  - `/api/stories/route.ts`: Returns signed URLs with 1-week expiry
   - `/api/objects/upload/route.ts`: Properly generates upload URLs
+
+### Photo Storage Architecture
+- **Storage Path vs Display URL**: Photos are stored in database with file paths (e.g., `userId/storyId/filename.jpg`)
+- **Signed URLs**: Generated on-the-fly when fetching stories (1-week expiry for reliability)
+- **Upload Flow**:
+  1. Client uploads to signed upload URL
+  2. File stored in Supabase Storage
+  3. Path saved to database
+  4. Signed URL returned for immediate display
+- **Edit Mode**: Photos upload immediately when selected, blob URLs are filtered out on save
 
 ### Previous Updates (January 2, 2025)
 
@@ -394,20 +434,26 @@ npm run type-check
 
 ### Book Pagination System
 - `lib/bookPagination.ts` - Complete pagination engine with text measurement and visual balance
-- `app/book/page.tsx` - Integrated pagination system and added edit button
+- `app/book/page.tsx` - Integrated pagination system, added edit button, updated navigation
 - `app/globals.css` - Adjusted padding for wider text area
 
-### Photo Storage Fixes
+### Photo Storage & Display Fixes
 - `app/api/stories/[id]/photos/route.ts` - Fixed to store file paths instead of signed URLs
-- `app/api/stories/route.ts` - Returns permanent public URLs instead of signed URLs
-- `app/review/create/page.tsx` - Uploads photos before saving new stories
+- `app/api/stories/route.ts` - Returns signed URLs with 1-week expiry, async photo URL generation
+- `app/review/create/page.tsx` - Uploads photos before saving, added audio controls
+- `app/review/[id]/page.tsx` - Added audio player and delete/re-record functionality
 - `components/MultiPhotoUploader.tsx` - Handles temporary blob URLs properly
 - `lib/queryClient.ts` - Adjusted cache settings for better data freshness
+
+### UI/UX Updates
+- `app/review/book-style/page.tsx` - Accepts both 'edit' and 'id' parameters for compatibility
+- `components/BottomNavigation.tsx` - Updated logo reference
+- All authentication pages - Updated to new logo (HW_logo_mic_clean.png)
 
 ---
 
 **Status: MIGRATION COMPLETE ✅**
-*Development server running successfully on port 3002*
+*Development server running successfully on port 3006*
 *Ready for production deployment to Vercel*
 
-*Last Updated: January 3, 2025 at 10:45 AM PST*
+*Last Updated: January 3, 2025 at 4:30 PM PST*

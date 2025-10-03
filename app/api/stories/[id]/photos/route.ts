@@ -161,6 +161,7 @@ export async function POST(
     const newPhoto = {
       id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       url: filePath, // Store the path, not a signed URL
+      filePath: filePath, // Also store as filePath for clarity
       transform: { zoom: 1, position: { x: 0, y: 0 } },
       isHero: isHero || false,
       caption: ""
@@ -188,7 +189,18 @@ export async function POST(
       );
     }
 
-    return NextResponse.json({ photo: newPhoto });
+    // Generate a signed URL for the photo so it can be displayed immediately
+    const { data: signedUrlData } = await supabaseAdmin.storage
+      .from('photos')
+      .createSignedUrl(filePath, 604800); // 1 week expiry
+
+    const photoWithSignedUrl = {
+      ...newPhoto,
+      url: signedUrlData?.signedUrl || filePath, // Return signed URL for display
+      filePath: filePath // Always include the storage path
+    };
+
+    return NextResponse.json({ photo: photoWithSignedUrl });
   } catch (error) {
     console.error("Photo add error:", error);
     return NextResponse.json(
