@@ -58,10 +58,13 @@ export async function POST(request: NextRequest) {
 
     // Upload to Supabase Storage using admin client (bypasses RLS)
     // Using heritage-whisper-files bucket (paultaki project structure)
+    // Convert video/webm to audio/webm for Supabase compatibility
+    const contentType = audioFile.type === "video/webm" ? "audio/webm" : (audioFile.type || "audio/webm");
+
     const { data, error } = await supabaseAdmin.storage
       .from("heritage-whisper-files")
       .upload(filename, buffer, {
-        contentType: audioFile.type || "audio/webm",
+        contentType: contentType,
         upsert: false,
       });
 

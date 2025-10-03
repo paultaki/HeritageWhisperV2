@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { db, stories, users } from "@/lib/db";
+import { eq, and } from "drizzle-orm";
 
-// Initialize Supabase Admin client
+// Initialize Supabase Admin client (for auth and storage only)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -42,15 +44,13 @@ export async function GET(
       );
     }
 
-    // Fetch the story from Supabase
-    const { data: story, error: storyError } = await supabaseAdmin
-      .from("stories")
-      .select("*")
-      .eq("id", params.id)
-      .eq("user_id", user.id)
-      .single();
+    // Fetch the story from Neon database using Drizzle
+    const [story] = await db
+      .select()
+      .from(stories)
+      .where(and(eq(stories.id, params.id), eq(stories.userId, user.id)));
 
-    if (storyError || !story) {
+    if (!story) {
       return NextResponse.json(
         { error: "Story not found" },
         { status: 404 }
@@ -89,36 +89,36 @@ export async function GET(
     );
 
     // Process legacy photoUrl if exists
-    const signedPhotoUrl = story.photo_url ? await getSignedPhotoUrl(story.photo_url) : undefined;
+    const signedPhotoUrl = story.photoUrl ? await getSignedPhotoUrl(story.photoUrl) : undefined;
 
-    // Transform snake_case to camelCase for frontend compatibility
+    // Transform to frontend-compatible format (fields already in camelCase from Drizzle)
     const transformedStory = {
       id: story.id,
       title: story.title,
       content: story.content || story.transcription,
-      createdAt: story.created_at,
-      updatedAt: story.updated_at,
-      age: story.age || story.life_age,
-      year: story.story_year,
-      storyYear: story.story_year,
-      lifeAge: story.life_age,
-      includeInTimeline: story.include_in_timeline ?? true,
-      includeInBook: story.include_in_book ?? true,
-      isFavorite: story.is_favorite ?? false,
+      createdAt: story.createdAt,
+      updatedAt: story.updatedAt,
+      age: story.age || story.lifeAge,
+      year: story.storyYear,
+      storyYear: story.storyYear,
+      lifeAge: story.lifeAge,
+      includeInTimeline: story.includeInTimeline ?? true,
+      includeInBook: story.includeInBook ?? true,
+      isFavorite: story.isFavorite ?? false,
       photoUrl: signedPhotoUrl,
-      hasPhotos: story.has_photos ?? false,
+      hasPhotos: story.hasPhotos ?? false,
       photos: photosWithSignedUrls,
-      audioUrl: story.audio_url,
+      audioUrl: story.audioUrl,
       transcription: story.transcription,
-      wisdomTranscription: story.wisdom_transcription || story.wisdom_clip_text,
-      wisdomClipText: story.wisdom_clip_text,
-      followUpQuestions: story.follow_up_questions,
-      wisdomClipUrl: story.wisdom_clip_url,
-      durationSeconds: story.duration_seconds,
+      wisdomTranscription: story.wisdomTranscription || story.wisdomClipText,
+      wisdomClipText: story.wisdomClipText,
+      followUpQuestions: story.followUpQuestions,
+      wisdomClipUrl: story.wisdomClipUrl,
+      durationSeconds: story.durationSeconds,
       emotions: story.emotions,
-      pivotalCategory: story.pivotal_category,
-      storyDate: story.story_date,
-      photoTransform: story.photo_transform,
+      pivotalCategory: story.pivotalCategory,
+      storyDate: story.storyDate,
+      photoTransform: story.photoTransform,
     };
 
     return NextResponse.json({ story: transformedStory });
@@ -199,44 +199,31 @@ export async function PUT(
       return photo;
     });
 
-    // Prepare story data for Supabase (using snake_case)
-    const storyData: any = {
-      title: body.title,
-      transcription: body.transcription || body.content,
-      life_age: body.lifeAge || body.age,
-      story_year: body.year || body.storyYear,
-      include_in_timeline: body.includeInTimeline ?? true,
-      include_in_book: body.includeInBook ?? true,
-      is_favorite: body.isFavorite ?? false,
-      photo_url: body.photoUrl && !body.photoUrl.startsWith('blob:') ? body.photoUrl : undefined,
-      photos: processedPhotos,
-      audio_url: body.audioUrl,
-      wisdom_clip_text: body.wisdomClipText || body.wisdomTranscription,
-      wisdom_clip_url: body.wisdomClipUrl,
-      duration_seconds: body.durationSeconds || 0,
-      emotions: body.emotions,
-      pivotal_category: body.pivotalCategory,
-      story_date: body.storyDate,
-      photo_transform: body.photoTransform,
-      updated_at: new Date().toISOString(),
-    };
-
-    // Update the story in Supabase
-    const { data: updatedStory, error: updateError } = await supabaseAdmin
-      .from("stories")
-      .update(storyData)
-      .eq("id", params.id)
-      .eq("user_id", user.id)
-      .select()
-      .single();
-
-    if (updateError) {
-      console.error("Error updating story:", updateError);
-      return NextResponse.json(
-        { error: "Failed to update story", details: updateError.message },
-        { status: 500 }
-      );
-    }
+    // Update the story in Neon database using Drizzle
+    const [updatedStory] = await db
+      .update(stories)
+      .set({
+        title: body.title,
+        transcription: body.transcription || body.content,
+        lifeAge: body.lifeAge || body.age,
+        storyYear: body.year || body.storyYear,
+        includeInTimeline: body.includeInTimeline ?? true,
+        includeInBook: body.includeInBook ?? true,
+        isFavorite: body.isFavorite ?? false,
+        photoUrl: body.photoUrl && !body.photoUrl.startsWith('blob:') ? body.photoUrl : undefined,
+        photos: processedPhotos,
+        audioUrl: body.audioUrl,
+        wisdomClipText: body.wisdomClipText || body.wisdomTranscription,
+        wisdomClipUrl: body.wisdomClipUrl,
+        durationSeconds: body.durationSeconds || 0,
+        emotions: body.emotions,
+        pivotalCategory: body.pivotalCategory,
+        storyDate: body.storyDate,
+        photoTransform: body.photoTransform,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(stories.id, params.id), eq(stories.userId, user.id)))
+      .returning();
 
     if (!updatedStory) {
       return NextResponse.json(
@@ -288,34 +275,34 @@ export async function PUT(
     const filteredPhotos = photosWithUrls.filter((photo: any) => photo.url !== null);
 
     // Process legacy photoUrl if exists
-    const publicPhotoUrl = updatedStory.photo_url ? await getPhotoUrl(updatedStory.photo_url) : undefined;
+    const publicPhotoUrl = updatedStory.photoUrl ? await getPhotoUrl(updatedStory.photoUrl) : undefined;
 
-    // Transform the response to camelCase
+    // Transform the response (fields already in camelCase from Drizzle)
     const transformedStory = {
       id: updatedStory.id,
       title: updatedStory.title,
       content: updatedStory.content || updatedStory.transcription,
-      createdAt: updatedStory.created_at,
-      updatedAt: updatedStory.updated_at,
-      age: updatedStory.age || updatedStory.life_age,
-      year: updatedStory.story_year,
-      storyYear: updatedStory.story_year,
-      includeInTimeline: updatedStory.include_in_timeline,
-      includeInBook: updatedStory.include_in_book,
-      isFavorite: updatedStory.is_favorite,
+      createdAt: updatedStory.createdAt,
+      updatedAt: updatedStory.updatedAt,
+      age: updatedStory.age || updatedStory.lifeAge,
+      year: updatedStory.storyYear,
+      storyYear: updatedStory.storyYear,
+      includeInTimeline: updatedStory.includeInTimeline,
+      includeInBook: updatedStory.includeInBook,
+      isFavorite: updatedStory.isFavorite,
       photoUrl: publicPhotoUrl,
-      hasPhotos: updatedStory.has_photos,
+      hasPhotos: updatedStory.hasPhotos,
       photos: filteredPhotos, // Use photos with signed URLs
-      audioUrl: updatedStory.audio_url,
+      audioUrl: updatedStory.audioUrl,
       transcription: updatedStory.transcription,
-      wisdomTranscription: updatedStory.wisdom_transcription || updatedStory.wisdom_clip_text,
-      followUpQuestions: updatedStory.follow_up_questions,
-      wisdomClipUrl: updatedStory.wisdom_clip_url,
-      durationSeconds: updatedStory.duration_seconds,
+      wisdomTranscription: updatedStory.wisdomTranscription || updatedStory.wisdomClipText,
+      followUpQuestions: updatedStory.followUpQuestions,
+      wisdomClipUrl: updatedStory.wisdomClipUrl,
+      durationSeconds: updatedStory.durationSeconds,
       emotions: updatedStory.emotions,
-      pivotalCategory: updatedStory.pivotal_category,
-      storyDate: updatedStory.story_date,
-      photoTransform: updatedStory.photo_transform,
+      pivotalCategory: updatedStory.pivotalCategory,
+      storyDate: updatedStory.storyDate,
+      photoTransform: updatedStory.photoTransform,
     };
 
     return NextResponse.json({ story: transformedStory });
@@ -358,42 +345,21 @@ export async function DELETE(
       );
     }
 
-    // Delete the story from Supabase
-    const { error: deleteError } = await supabaseAdmin
-      .from("stories")
-      .delete()
-      .eq("id", params.id)
-      .eq("user_id", user.id);
+    // Delete the story from Neon database using Drizzle
+    const deletedStories = await db
+      .delete(stories)
+      .where(and(eq(stories.id, params.id), eq(stories.userId, user.id)))
+      .returning();
 
-    if (deleteError) {
-      console.error("Error deleting story:", deleteError);
+    if (!deletedStories || deletedStories.length === 0) {
       return NextResponse.json(
-        { error: "Failed to delete story", details: deleteError.message },
-        { status: 500 }
+        { error: "Story not found or already deleted" },
+        { status: 404 }
       );
     }
 
-    // Update user's story count - first get current count
-    const { data: userData, error: getUserError } = await supabaseAdmin
-      .from("users")
-      .select("story_count")
-      .eq("id", user.id)
-      .single();
-
-    if (!getUserError && userData && userData.story_count > 0) {
-      const { error: updateError } = await supabaseAdmin
-        .from("users")
-        .update({
-          story_count: userData.story_count - 1,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", user.id);
-
-      if (updateError) {
-        console.error("Error updating story count:", updateError);
-        // Don't fail the request, story was deleted successfully
-      }
-    }
+    // Note: User story count update removed since users are in Neon DB
+    // This could be added back using Drizzle if needed
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { db, stories } from "@/lib/db";
+import { eq, and } from "drizzle-orm";
 
-// Initialize Supabase Admin client
+// Initialize Supabase Admin client (for auth and storage only)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -42,21 +44,20 @@ export async function GET(
       );
     }
 
-    // Get the story first to verify ownership
-    const { data: story, error: storyError } = await supabaseAdmin
-      .from("stories")
-      .select("photos, user_id")
-      .eq("id", params.id)
-      .single();
+    // Get the story first to verify ownership from Neon database
+    const [story] = await db
+      .select({ photos: stories.photos, userId: stories.userId })
+      .from(stories)
+      .where(eq(stories.id, params.id));
 
-    if (storyError || !story) {
+    if (!story) {
       return NextResponse.json(
         { error: "Story not found" },
         { status: 404 }
       );
     }
 
-    if (story.user_id !== user.id) {
+    if (story.userId !== user.id) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 403 }
@@ -138,21 +139,20 @@ export async function POST(
       );
     }
 
-    // Get the story to verify ownership and get current photos
-    const { data: story, error: storyError } = await supabaseAdmin
-      .from("stories")
-      .select("photos, user_id")
-      .eq("id", params.id)
-      .single();
+    // Get the story to verify ownership and get current photos from Neon database
+    const [story] = await db
+      .select({ photos: stories.photos, userId: stories.userId })
+      .from(stories)
+      .where(eq(stories.id, params.id));
 
-    if (storyError || !story) {
+    if (!story) {
       return NextResponse.json(
         { error: "Story not found" },
         { status: 404 }
       );
     }
 
-    if (story.user_id !== user.id) {
+    if (story.userId !== user.id) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 403 }
@@ -175,16 +175,15 @@ export async function POST(
       ? [...currentPhotos.map((p: any) => ({ ...p, isHero: false })), newPhoto]
       : [...currentPhotos, newPhoto];
 
-    // Update story with new photos array
-    const { data: updatedStory, error: updateError } = await supabaseAdmin
-      .from("stories")
-      .update({ photos: updatedPhotos, updated_at: new Date().toISOString() })
-      .eq("id", params.id)
-      .select()
-      .single();
+    // Update story with new photos array in Neon database
+    const [updatedStory] = await db
+      .update(stories)
+      .set({ photos: updatedPhotos, updatedAt: new Date() })
+      .where(eq(stories.id, params.id))
+      .returning();
 
-    if (updateError) {
-      console.error("Error updating story with photo:", updateError);
+    if (!updatedStory) {
+      console.error("Error updating story with photo");
       return NextResponse.json(
         { error: "Failed to add photo to story" },
         { status: 500 }
