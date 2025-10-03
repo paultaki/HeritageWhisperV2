@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { db, stories } from "@/lib/db";
-import { eq, and } from "drizzle-orm";
 
-// Initialize Supabase Admin client (for auth and storage only)
+// Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -44,28 +42,23 @@ export async function GET(
       );
     }
 
-    // Get the story first to verify ownership from Neon database
-    const [story] = await db
-      .select({ photos: stories.photos, userId: stories.userId })
-      .from(stories)
-      .where(eq(stories.id, params.id));
+    // Get the story from Supabase database to verify ownership
+    const { data: story, error: fetchError } = await supabaseAdmin
+      .from("stories")
+      .select("metadata, user_id")
+      .eq("id", params.id)
+      .eq("user_id", user.id)
+      .single();
 
-    if (!story) {
+    if (fetchError || !story) {
       return NextResponse.json(
-        { error: "Story not found" },
+        { error: "Story not found or unauthorized" },
         { status: 404 }
       );
     }
 
-    if (story.userId !== user.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
-      );
-    }
-
-    // Get signed URLs for all photos
-    const photos = story.photos || [];
+    // Get signed URLs for all photos from metadata
+    const photos = story.metadata?.photos || [];
     const photosWithSignedUrls = await Promise.all(
       photos.map(async (photo: any) => {
         if (!photo.url) return photo;
@@ -139,23 +132,18 @@ export async function POST(
       );
     }
 
-    // Get the story to verify ownership and get current photos from Neon database
-    const [story] = await db
-      .select({ photos: stories.photos, userId: stories.userId })
-      .from(stories)
-      .where(eq(stories.id, params.id));
+    // Get the story from Supabase database to verify ownership and get current photos
+    const { data: story, error: fetchError } = await supabaseAdmin
+      .from("stories")
+      .select("metadata, user_id")
+      .eq("id", params.id)
+      .eq("user_id", user.id)
+      .single();
 
-    if (!story) {
+    if (fetchError || !story) {
       return NextResponse.json(
-        { error: "Story not found" },
+        { error: "Story not found or unauthorized" },
         { status: 404 }
-      );
-    }
-
-    if (story.userId !== user.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
       );
     }
 
@@ -169,21 +157,30 @@ export async function POST(
       caption: ""
     };
 
+    // Get current photos from metadata
+    const currentPhotos = story.metadata?.photos || [];
+
     // If this is marked as hero, unmark other photos
-    const currentPhotos = story.photos || [];
     const updatedPhotos = isHero
       ? [...currentPhotos.map((p: any) => ({ ...p, isHero: false })), newPhoto]
       : [...currentPhotos, newPhoto];
 
-    // Update story with new photos array in Neon database
-    const [updatedStory] = await db
-      .update(stories)
-      .set({ photos: updatedPhotos, updatedAt: new Date() })
-      .where(eq(stories.id, params.id))
-      .returning();
+    // Update story metadata with new photos array in Supabase database
+    const { data: updatedStory, error: updateError } = await supabaseAdmin
+      .from("stories")
+      .update({
+        metadata: {
+          ...story.metadata,
+          photos: updatedPhotos
+        }
+      })
+      .eq("id", params.id)
+      .eq("user_id", user.id)
+      .select()
+      .single();
 
-    if (!updatedStory) {
-      console.error("Error updating story with photo");
+    if (updateError || !updatedStory) {
+      console.error("Error updating story with photo:", updateError);
       return NextResponse.json(
         { error: "Failed to add photo to story" },
         { status: 500 }

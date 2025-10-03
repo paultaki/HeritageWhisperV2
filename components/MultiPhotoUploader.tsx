@@ -120,19 +120,23 @@ export function MultiPhotoUploader({
           isHero: photos.length === 0, // First photo becomes hero
           transform: { zoom: 1, position: { x: 0, y: 0 } }
         };
-        
-        // Store file for later upload - use the actual photo index in the array
-        const photoIndex = photos.length; // Since we're about to add this photo
-        (window as any)[`__pendingPhotoFile_${photoIndex}`] = file;
-        
+
         const newPhotos = [...photos];
+        let actualIndex: number;
+
         if (photos[slotIndex]) {
-          // Replace existing photo
+          // Replace existing photo at this slot
           newPhotos[slotIndex] = newPhoto;
+          actualIndex = slotIndex;
         } else {
-          // Add new photo
+          // Add new photo to the end
           newPhotos.push(newPhoto);
+          actualIndex = newPhotos.length - 1;
         }
+
+        // Store file for later upload - use the actual index where the photo was placed
+        (window as any)[`__pendingPhotoFile_${actualIndex}`] = file;
+
         onPhotosChange(newPhotos);
       }
     } catch (error) {
