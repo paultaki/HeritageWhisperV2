@@ -2413,9 +2413,9 @@ textarea:focus-visible {
 /* Individual page styling */
 .page {
   background: #fffef8;
-  padding: 3rem 4rem;
+  padding: 3rem 2rem;  /* Reduced horizontal padding from 4rem to 2rem for wider text area */
   min-height: 800px;
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
   border-radius: 4px;
@@ -2427,7 +2427,7 @@ textarea:focus-visible {
 
 @media (max-width: 768px) {
   .page {
-    padding: 2rem 1.5rem;
+    padding: 2rem 1rem;  /* Also reduced mobile padding for consistency */
     min-height: 600px;
   }
 }
@@ -2469,11 +2469,11 @@ textarea:focus-visible {
 }
 
 .page--left .page-number {
-  left: 4rem;
+  left: 2rem;  /* Adjusted to match new padding */
 }
 
 .page--right .page-number {
-  right: 4rem;
+  right: 2rem;  /* Adjusted to match new padding */
 }
 
 /* Memory photo styling */
