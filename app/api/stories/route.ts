@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Helper function to generate public URLs for photos
-    const getPhotoUrl = (photoUrl: string) => {
+    const getPhotoUrl = async (photoUrl: string) => {
       if (!photoUrl) return null;
 
       // Skip blob URLs - these are invalid temporary URLs
@@ -69,28 +69,38 @@ export async function GET(request: NextRequest) {
         return photoUrl;
       }
 
-      // Generate public URL for storage path
-      // This assumes photos bucket has public access or RLS policies set up
-      const { data } = supabaseAdmin.storage
+      // Generate signed URL for storage path (valid for 1 week)
+      // Using signed URLs instead of public URLs for better security
+      const { data, error } = await supabaseAdmin.storage
         .from('photos')
-        .getPublicUrl(photoUrl);
+        .createSignedUrl(photoUrl, 604800); // 1 week in seconds
 
-      return data?.publicUrl || photoUrl;
+      if (error) {
+        console.error('Error creating signed URL for photo:', photoUrl, error);
+        // Fallback to public URL
+        const { data: publicData } = supabaseAdmin.storage
+          .from('photos')
+          .getPublicUrl(photoUrl);
+        return publicData?.publicUrl || null;
+      }
+
+      return data?.signedUrl || null;
     };
 
     // Transform snake_case to camelCase for frontend compatibility
     // Also generate public URLs for all photos
-    const transformedStories = (stories || []).map((story) => {
+    const transformedStories = await Promise.all((stories || []).map(async (story) => {
       // Process photos array to add public URLs and filter out invalid ones
-      const photosWithUrls = (story.photos || [])
-        .map((photo: any) => ({
+      const photosWithUrls = await Promise.all(
+        (story.photos || []).map(async (photo: any) => ({
           ...photo,
-          url: getPhotoUrl(photo.url)
+          url: await getPhotoUrl(photo.url)
         }))
-        .filter((photo: any) => photo.url !== null); // Remove photos with invalid URLs
+      );
+      const filteredPhotos = photosWithUrls.filter((photo: any) => photo.url !== null);
 
       // Process legacy photoUrl if exists
-      const publicPhotoUrl = story.photo_url ? getPhotoUrl(story.photo_url) : undefined;
+      const publicPhotoUrl = story.photo_url ? await getPhotoUrl(story.photo_url) : undefined;
 
       return {
         id: story.id,
@@ -107,7 +117,7 @@ export async function GET(request: NextRequest) {
         isFavorite: story.is_favorite ?? false,
         photoUrl: publicPhotoUrl,
         hasPhotos: story.has_photos ?? false,
-        photos: photosWithUrls,
+        photos: filteredPhotos,
         audioUrl: story.audio_url,
         transcription: story.transcription,
         wisdomTranscription: story.wisdom_transcription || story.wisdom_clip_text,
@@ -120,7 +130,7 @@ export async function GET(request: NextRequest) {
         storyDate: story.story_date,
         photoTransform: story.photo_transform,
       };
-    });
+    }));
 
     return NextResponse.json({ stories: transformedStories });
   } catch (error) {
