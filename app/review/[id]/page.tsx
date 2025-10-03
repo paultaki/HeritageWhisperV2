@@ -971,17 +971,56 @@ export default function Review() {
                 )}
               </div>
 
-              {/* Option to re-record */}
+              {/* Audio Player and Controls */}
               {audioUrl && (
-                <Button
-                  variant="outline"
-                  onClick={handleGoToRecording}
-                  className="w-full"
-                  data-testid="button-rerecord"
-                >
-                  <Mic className="w-4 h-4 mr-2" />
-                  Re-record Story
-                </Button>
+                <div className="space-y-4">
+                  {/* Audio Player */}
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <Label className="text-sm mb-2 block">Recording</Label>
+                    <audio
+                      controls
+                      src={audioUrl}
+                      className="w-full"
+                      data-testid="audio-player"
+                    >
+                      Your browser does not support the audio element.
+                    </audio>
+                    {audioDuration > 0 && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Duration: {Math.floor(audioDuration / 60)}:{(audioDuration % 60).toString().padStart(2, '0')}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Audio Actions */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setAudioUrl(null);
+                        setAudioDuration(0);
+                        toast({
+                          title: "Audio removed",
+                          description: "The audio recording has been removed from this story.",
+                        });
+                      }}
+                      className="flex-1"
+                      data-testid="button-delete-audio"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Remove Audio
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleGoToRecording}
+                      className="flex-1"
+                      data-testid="button-rerecord"
+                    >
+                      <Mic className="w-4 h-4 mr-2" />
+                      Re-record
+                    </Button>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>

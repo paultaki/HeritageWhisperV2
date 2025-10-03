@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { HelpCircle, ChevronDown, Play, Pause } from 'lucide-react';
 
-const logoUrl = "/HW_logo_circle_new_trans.webp";
+const logoUrl = "/HW_logo_mic_clean.png";
 
 export default function HomePage() {
   const router = useRouter();

@@ -39,7 +39,7 @@ import {
   MEASUREMENTS,
 } from "@/lib/bookPagination";
 
-const logoUrl = "/HW_logo_circle_new_trans.webp";
+const logoUrl = "/HW_logo_mic_clean.png";
 
 // Map the existing Story interface to our pagination Story type
 interface Story {
