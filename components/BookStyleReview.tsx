@@ -139,13 +139,16 @@ export function BookStyleReview({
       </div>
 
       {/* Book Container */}
-      <div className="max-w-7xl mx-auto p-4 md:p-8 pb-12 md:pb-16">
-        <div className="bg-[#faf8f5] rounded-lg shadow-2xl overflow-hidden" style={{ aspectRatio: '2/1.4' }}>
-          {/* Two-page layout - always show both pages side by side */}
-          <div className="flex min-h-[700px]">
+      <div className="max-w-7xl mx-auto p-4 md:p-8">
+        <div className="bg-[#faf8f5] rounded-lg shadow-2xl" style={{
+          aspectRatio: '2/1.4',
+          minHeight: 'calc(100vh - 200px)'  // Use more of the viewport height
+        }}>
+          {/* Two-page layout - always show both pages side by side, even on mobile */}
+          <div className="flex min-h-[calc(100vh-200px)] overflow-x-auto">
 
             {/* Left Page - Photo and Basic Info */}
-            <div className="w-1/2 p-6 md:p-8 lg:p-12 border-r border-gray-200 flex flex-col bg-[#faf8f5]">
+            <div className="min-w-[350px] w-1/2 flex-shrink-0 p-6 md:p-8 lg:p-12 border-r border-gray-200 flex flex-col bg-[#faf8f5] overflow-y-auto">
               {/* Running header */}
               <div className="running-header text-xs text-gray-500 uppercase tracking-wider mb-6">
                 Your Heritage Story
@@ -369,34 +372,22 @@ export function BookStyleReview({
                 )}
               </div>
 
-              {/* Story Content - Preview on left page */}
-              <div className="story-content flex-grow">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Your Story</h3>
-                <div className="text-gray-800 leading-relaxed font-serif text-base">
-                  {transcription ? (
-                    // Display preview of text on left page
-                    <p className="line-clamp-[20]">{transcription}</p>
-                  ) : (
-                    <p className="text-gray-400 italic">Your story will appear here...</p>
-                  )}
-                </div>
-              </div>
             </div>
 
             {/* Right Page - Story Content Editable + Lesson Learned */}
-            <div className="w-1/2 p-6 md:p-8 lg:p-12 bg-[#faf8f5] flex flex-col">
+            <div className="min-w-[350px] w-1/2 flex-shrink-0 p-6 md:p-8 lg:p-12 bg-[#faf8f5] flex flex-col overflow-y-auto">
               {/* Running header */}
               <div className="running-header text-xs text-gray-500 uppercase tracking-wider mb-6 text-right">
                 {storyYear || new Date().getFullYear()}
               </div>
 
               {/* Story Content - Full editable area */}
-              <div className="story-content flex-grow">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Your Story (continued)</h3>
+              <div className="story-content flex-grow overflow-y-auto">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Your Story</h3>
                 <Textarea
                   value={transcription}
                   onChange={(e) => onTranscriptionChange(e.target.value)}
-                  className="w-full min-h-[350px] resize-none border-0 bg-transparent p-0 text-gray-800 leading-relaxed font-serif text-base focus:outline-none focus:ring-0 placeholder:text-gray-400"
+                  className="w-full min-h-[400px] resize-none border-0 bg-transparent p-2 text-gray-800 leading-relaxed font-serif text-base focus:outline-none focus:ring-0 placeholder:text-gray-400"
                   placeholder="Type or paste your story here. This is how it will appear in your book..."
                 />
                 {transcription && (
@@ -407,7 +398,7 @@ export function BookStyleReview({
               </div>
 
               {/* Lesson Learned - At bottom of right page */}
-              <div className="mt-6">
+              <div className="mt-6 pb-4">
                 <div className="group relative">
                   <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-amber-500" />
