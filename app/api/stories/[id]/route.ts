@@ -244,6 +244,50 @@ export async function PUT(
       );
     }
 
+    // Helper function to generate signed URLs for photos (reuse from GET)
+    const getPhotoUrl = async (photoUrl: string) => {
+      if (!photoUrl) return null;
+
+      // Skip blob URLs - these are invalid temporary URLs
+      if (photoUrl.startsWith('blob:')) {
+        console.warn('Blob URL found in database - this should not happen:', photoUrl);
+        return null;
+      }
+
+      // If already a full URL (starts with http/https), use as-is
+      if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) {
+        return photoUrl;
+      }
+
+      // Generate signed URL for storage path (valid for 1 week)
+      const { data, error } = await supabaseAdmin.storage
+        .from('photos')
+        .createSignedUrl(photoUrl, 604800); // 1 week in seconds
+
+      if (error) {
+        console.error('Error creating signed URL for photo:', photoUrl, error);
+        // Fallback to public URL
+        const { data: publicData } = supabaseAdmin.storage
+          .from('photos')
+          .getPublicUrl(photoUrl);
+        return publicData?.publicUrl || null;
+      }
+
+      return data?.signedUrl || null;
+    };
+
+    // Process photos array to add signed URLs
+    const photosWithUrls = await Promise.all(
+      (updatedStory.photos || []).map(async (photo: any) => ({
+        ...photo,
+        url: await getPhotoUrl(photo.url)
+      }))
+    );
+    const filteredPhotos = photosWithUrls.filter((photo: any) => photo.url !== null);
+
+    // Process legacy photoUrl if exists
+    const publicPhotoUrl = updatedStory.photo_url ? await getPhotoUrl(updatedStory.photo_url) : undefined;
+
     // Transform the response to camelCase
     const transformedStory = {
       id: updatedStory.id,
@@ -257,9 +301,9 @@ export async function PUT(
       includeInTimeline: updatedStory.include_in_timeline,
       includeInBook: updatedStory.include_in_book,
       isFavorite: updatedStory.is_favorite,
-      photoUrl: updatedStory.photo_url,
+      photoUrl: publicPhotoUrl,
       hasPhotos: updatedStory.has_photos,
-      photos: updatedStory.photos || [],
+      photos: filteredPhotos, // Use photos with signed URLs
       audioUrl: updatedStory.audio_url,
       transcription: updatedStory.transcription,
       wisdomTranscription: updatedStory.wisdom_transcription || updatedStory.wisdom_clip_text,
