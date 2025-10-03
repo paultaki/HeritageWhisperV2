@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp",
+      "args": ["filesystem"],
+      "disabled": false
+    },
+    "memory": {
+      "command": "mcp",
+      "args": ["memory"],
+      "disabled": false
+    },
+    "github": {
+      "disabled": true
+    },
+    "vercel": {
+      "disabled": true
+    }
+  }
+}
