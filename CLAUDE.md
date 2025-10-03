@@ -315,13 +315,46 @@ npm run type-check
 - **Methodical approach with agents for complex tasks**
 - **Best practices and security-first implementation**
 
+## 📝 Recent Updates (January 2, 2025)
+
+### UI/UX Improvements
+- ✅ **Navigation Simplified**: Main nav reduced to 3 buttons (Timeline, Record, Book View)
+- ✅ **Hamburger Menu Added**: Secondary options (Profile, Family, Settings, Help, Logout) moved to hamburger menu
+- ✅ **Home Page Updated**: Removed hamburger menu from home, added Sign In button
+- ✅ **Review Page Fixes**:
+  - Fixed bottom content cutoff (added pb-12 md:pb-16)
+  - Reduced title/date gap for better visual hierarchy
+  - Removed checkmark confirmations for inline edits (now auto-saves on blur)
+- ✅ **Logo Updated**: Replaced hw_logo_icon.png with logo_mic_circle.webp across all pages
+
+### Image Loading Fixes
+- ✅ Created missing API routes for photo management (`/app/api/stories/[id]/photos/route.ts`)
+- ✅ Implemented signed URL generation for Supabase Storage
+- ✅ Fixed blob URL errors for previously uploaded photos
+
+### MCP Integrations
+- ✅ **Vercel MCP Added**: Both general and project-specific configurations
+- ✅ **Supabase MCP Configured**: Added with authentication token for database management
+- ✅ **Global MCP Setup**: Supabase and other MCPs now available globally
+- ✅ **DevProjects Configuration**: All MCPs properly configured for `/Users/paul/Documents/DevProjects` directory
+
+### Authentication Issues
+- ⚠️ **Local Login Issue**: 401 errors with Supabase Auth (investigation ongoing)
+- Added debug logging to troubleshoot authentication
+
+### Helper Scripts Created
+- `update-supabase-mcp.js` - Configure Supabase MCP with access token
+- `verify-mcp-setup.js` - Verify all MCP configurations
+- `add-global-supabase-mcp.js` - Add Supabase to global MCP configuration
+
 ## 🚀 Next Steps
 
 ### Immediate
-1. Test complete user journey
-2. Deploy to Vercel
-3. Configure production environment variables
-4. Test with real users
+1. Fix local authentication 401 errors
+2. Test complete user journey
+3. Deploy to Vercel
+4. Configure production environment variables
+5. Test with real users
 
 ### Future Enhancements
 - Add rate limiting middleware
@@ -336,4 +369,4 @@ npm run type-check
 *Development server running successfully on port 3002*
 *Ready for production deployment to Vercel*
 
-*Last Updated: October 1, 2025 at 11:52 AM PST*
+*Last Updated: January 2, 2025 at 7:30 PM PST*
