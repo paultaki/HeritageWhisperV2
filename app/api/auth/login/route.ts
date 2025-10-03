@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 
-// Initialize Supabase client with service role for server-side operations
+// Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-// Use service role key for server-side auth operations
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: false,
-    persistSession: false
+    persistSession: false,
+    detectSessionInUrl: false
   }
 });
 
@@ -25,10 +25,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Debug: Log the attempt (without password)
+    logger.log(`Login attempt for email: ${email}`);
+    logger.log(`Supabase URL: ${supabaseUrl}`);
+    logger.log(`Anon key present: ${!!supabaseAnonKey}`);
+
     // Sign in with Supabase
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: email.trim(),
+      password: password.trim(),
     });
 
     if (error) {
