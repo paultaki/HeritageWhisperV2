@@ -138,9 +138,9 @@ export function BookStyleReview({
         </div>
       </div>
 
-      {/* Book Container */}
-      <div className="max-w-7xl mx-auto p-4 md:p-8">
-        <div className="bg-[#faf8f5] rounded-lg shadow-2xl" style={{
+      {/* Book Container - Left aligned with small gap from nav */}
+      <div className="pl-2 md:pl-24 pr-4 pt-4 pb-4">
+        <div className="bg-[#faf8f5] rounded-lg shadow-2xl max-w-7xl" style={{
           aspectRatio: '2/1.4',
           minHeight: 'calc(100vh - 200px)'  // Use more of the viewport height
         }}>
@@ -464,7 +464,7 @@ export function BookStyleReview({
         </div>
 
         {/* Instructions */}
-        <div className="mt-6 text-center text-sm text-gray-600">
+        <div className="mt-6 text-left text-sm text-gray-600">
           <p>Click on any element to edit it inline. This preview shows exactly how your story will appear in the book.</p>
         </div>
       </div>
