@@ -229,7 +229,7 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => router.push(`/review/${page.storyId}`)}
+                onClick={() => router.push(`/review/book-style?id=${page.storyId}`)}
                 className="p-1.5 hover:bg-primary/10"
                 title="Edit this memory"
               >

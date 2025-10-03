@@ -16,7 +16,8 @@ function BookStyleReviewContent() {
   const { toast } = useToast();
 
   // Check if we're editing an existing story
-  const editId = searchParams.get("edit");
+  // Support both 'edit' and 'id' parameters for compatibility
+  const editId = searchParams.get("edit") || searchParams.get("id");
   const isEditing = !!editId;
 
   // Get data from URL params (passed from recording page)
