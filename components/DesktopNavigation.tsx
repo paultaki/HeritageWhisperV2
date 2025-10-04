@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Calendar, BookOpen, Mic } from 'lucide-react';
+import { Calendar, BookOpen, Mic, Box } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -89,7 +89,7 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
         </div>
       </div>
 
-      {/* Navigation Items - Only 3 main buttons */}
+      {/* Navigation Items */}
       <div className="flex-1 flex flex-col items-center space-y-4">
         <DesktopNavItem
           icon={Calendar}
@@ -115,6 +115,13 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
           label="Book View"
           href="/book"
           isActive={pathname.startsWith('/book')}
+        />
+
+        <DesktopNavItem
+          icon={Box}
+          label="Memory Box"
+          href="/memory-box"
+          isActive={pathname === '/memory-box'}
         />
       </div>
     </motion.nav>

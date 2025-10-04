@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-import { db, stories, familyMembers } from "@/lib/db";
+import { db, stories } from "@/lib/db";
 import { eq, sql } from "drizzle-orm";
 
 // Initialize Supabase Admin client for token verification
@@ -55,25 +55,16 @@ export async function GET(request: NextRequest) {
       return acc + (story.durationSeconds || 0);
     }, 0);
 
-    // Count shared stories (stories in timeline or book)
-    const sharedCount = userStories.filter(
-      (story) => story.includeInTimeline || story.includeInBook
-    ).length;
-
-    // Get family members count
-    const familyMembersData = await db
-      .select()
-      .from(familyMembers)
-      .where(eq(familyMembers.userId, user.id));
-
-    const activeFamilyMembers = familyMembersData.filter(
-      (member) => member.status === "active"
-    ).length;
+    // Count shared stories (check metadata for visibility settings)
+    const sharedCount = userStories.filter((story) => {
+      const metadata = story.metadata as any;
+      return metadata?.includeInTimeline || metadata?.includeInBook;
+    }).length;
 
     return NextResponse.json({
       totalSeconds,
       sharedCount,
-      familyMembers: activeFamilyMembers,
+      familyMembers: 0, // Family members feature not yet implemented
     });
 
   } catch (error) {

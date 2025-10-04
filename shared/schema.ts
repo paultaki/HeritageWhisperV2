@@ -9,11 +9,10 @@ export const users = pgTable("users", {
   password: text("password"), // Made optional for OAuth users
   name: text("name").notNull().default("User"),
   birthYear: integer("birth_year").notNull(),
-  // Commented out fields that don't exist in the database yet
-  // bio: text("bio"), // User bio/about section
-  // profilePhotoUrl: text("profile_photo_url"), // Profile photo
-  // storyCount: integer("story_count").default(0),
-  // isPaid: boolean("is_paid").default(false),
+  bio: text("bio"), // User bio/about section
+  profilePhotoUrl: text("profile_photo_url"), // Profile photo
+  storyCount: integer("story_count").default(0),
+  isPaid: boolean("is_paid").default(false),
   // subscriptionExpires: timestamp("subscription_expires"),
   // stripeCustomerId: text("stripe_customer_id"),
   // stripeSubscriptionId: text("stripe_subscription_id"),

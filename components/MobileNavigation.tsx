@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Calendar, BookOpen, Mic } from 'lucide-react';
+import { Calendar, BookOpen, Mic, Box } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion } from 'framer-motion';
 
@@ -110,6 +110,14 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
           label="Book"
           href="/book"
           isActive={pathname.startsWith('/book')}
+        />
+
+        {/* Memory Box */}
+        <NavItem
+          icon={Box}
+          label="Memories"
+          href="/memory-box"
+          isActive={pathname === '/memory-box'}
         />
       </div>
     </motion.nav>

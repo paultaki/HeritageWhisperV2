@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-import { db, users } from "@/lib/db";
-import { eq } from "drizzle-orm";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -41,23 +39,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get user from database
-    const [dbUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, user.id))
-      .limit(1);
-
-    // Return user profile data
+    // Return user profile data from auth metadata
     const profile = {
       id: user.id,
       email: user.email,
-      name: dbUser?.name || user.user_metadata?.name || user.email?.split("@")[0] || "User",
-      birthYear: dbUser?.birthYear || user.user_metadata?.birthYear || new Date().getFullYear() - 30,
-      bio: dbUser?.bio || "",
-      profilePhotoUrl: dbUser?.profilePhotoUrl || "",
-      storyCount: dbUser?.storyCount || 0,
-      isPaid: dbUser?.isPaid || false,
+      name: user.user_metadata?.name || user.email?.split("@")[0] || "User",
+      birthYear: user.user_metadata?.birthYear || new Date().getFullYear() - 30,
+      bio: user.user_metadata?.bio || "",
+      profilePhotoUrl: user.user_metadata?.profilePhotoUrl || "",
+      storyCount: user.user_metadata?.storyCount || 0,
+      isPaid: user.user_metadata?.isPaid || false,
     };
 
     return NextResponse.json({ user: profile });
@@ -100,41 +91,41 @@ export async function PATCH(request: NextRequest) {
 
     logger.api("Updating user profile:", user.id, updates);
 
-    // Update user in database
-    const updateData: any = {};
-    if (updates.name !== undefined) updateData.name = updates.name;
-    if (updates.birthYear !== undefined) updateData.birthYear = updates.birthYear;
-    if (updates.bio !== undefined) updateData.bio = updates.bio;
-    if (updates.profilePhotoUrl !== undefined) updateData.profilePhotoUrl = updates.profilePhotoUrl;
+    // Update Supabase user metadata
+    const updatedMetadata = {
+      ...user.user_metadata,
+    };
 
-    const [updatedUser] = await db
-      .update(users)
-      .set(updateData)
-      .where(eq(users.id, user.id))
-      .returning();
+    if (updates.name !== undefined) updatedMetadata.name = updates.name;
+    if (updates.birthYear !== undefined) updatedMetadata.birthYear = updates.birthYear;
+    if (updates.bio !== undefined) updatedMetadata.bio = updates.bio;
+    if (updates.profilePhotoUrl !== undefined) updatedMetadata.profilePhotoUrl = updates.profilePhotoUrl;
 
-    // Also update Supabase metadata for consistency
-    await supabaseAdmin.auth.admin.updateUserById(
+    const { data: updatedUser, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       user.id,
       {
-        user_metadata: {
-          ...user.user_metadata,
-          name: updates.name,
-          birthYear: updates.birthYear,
-        },
+        user_metadata: updatedMetadata,
       }
     );
 
+    if (updateError) {
+      logger.error("Failed to update user metadata:", updateError);
+      return NextResponse.json(
+        { error: "Failed to update profile" },
+        { status: 500 }
+      );
+    }
+
     // Return updated profile
     const updatedProfile = {
-      id: updatedUser.id,
-      email: updatedUser.email,
-      name: updatedUser.name,
-      birthYear: updatedUser.birthYear,
-      bio: updatedUser.bio,
-      profilePhotoUrl: updatedUser.profilePhotoUrl,
-      storyCount: updatedUser.storyCount,
-      isPaid: updatedUser.isPaid,
+      id: updatedUser.user.id,
+      email: updatedUser.user.email,
+      name: updatedUser.user.user_metadata?.name || user.email?.split("@")[0] || "User",
+      birthYear: updatedUser.user.user_metadata?.birthYear || new Date().getFullYear() - 30,
+      bio: updatedUser.user.user_metadata?.bio || "",
+      profilePhotoUrl: updatedUser.user.user_metadata?.profilePhotoUrl || "",
+      storyCount: updatedUser.user.user_metadata?.storyCount || 0,
+      isPaid: updatedUser.user.user_metadata?.isPaid || false,
     };
 
     return NextResponse.json({ user: updatedProfile });

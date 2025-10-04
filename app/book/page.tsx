@@ -462,10 +462,10 @@ export default function BookViewNew() {
         {!isMobile && currentSpreadIndex > 0 && (
           <button
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/90 hover:bg-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center group"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-50 w-14 h-14 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
             aria-label="Previous page"
           >
-            <ChevronLeft className="w-6 h-6 text-gray-700 group-hover:text-coral-600 transition-colors" />
+            <ChevronLeft className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
           </button>
         )}
 
@@ -473,10 +473,10 @@ export default function BookViewNew() {
         {!isMobile && currentSpreadIndex < totalSpreads - 1 && (
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/90 hover:bg-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center group"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-50 w-14 h-14 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
             aria-label="Next page"
           >
-            <ChevronRight className="w-6 h-6 text-gray-700 group-hover:text-coral-600 transition-colors" />
+            <ChevronRight className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
           </button>
         )}
 
