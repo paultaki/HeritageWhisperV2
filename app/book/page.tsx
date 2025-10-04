@@ -102,11 +102,11 @@ const convertToPaginationStory = (story: Story): PaginationStory => {
 // Photo carousel component
 const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const hasMultiplePhotos = photos.length > 1;
 
   if (photos.length === 0) return null;
 
   const currentPhoto = photos[currentPhotoIndex];
+  const hasMultiplePhotos = photos.length > 1;
 
   return (
     <div className="photo-container" style={{ height: `${MEASUREMENTS.PHOTO_AREA}px` }}>
@@ -116,25 +116,25 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
         className="w-full h-full object-cover rounded-lg"
       />
       {hasMultiplePhotos && (
-        <div className="flex justify-center items-center mt-2 gap-3">
+        <div className="flex justify-center items-center gap-4 mt-3">
           <button
             onClick={() => setCurrentPhotoIndex(Math.max(0, currentPhotoIndex - 1))}
             disabled={currentPhotoIndex === 0}
-            className="p-1.5 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            className="p-2 rounded-full bg-white hover:bg-gray-100 disabled:opacity-0 disabled:pointer-events-none transition-all shadow-md"
             aria-label="Previous photo"
           >
-            <ChevronLeft className="w-4 h-4 text-gray-600" />
+            <ChevronLeft className="w-5 h-5 text-gray-700" />
           </button>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {photos.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentPhotoIndex(index)}
-                className={`w-2.5 h-2.5 rounded-full transition-all ${
+                className={`w-3 h-3 rounded-full transition-all ${
                   index === currentPhotoIndex
-                    ? "bg-coral-500 scale-125"
-                    : "bg-gray-300 hover:bg-gray-400"
+                    ? "bg-coral-500 scale-110"
+                    : "bg-gray-400 hover:bg-gray-500"
                 }`}
                 aria-label={`Go to photo ${index + 1}`}
               />
@@ -144,10 +144,10 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
           <button
             onClick={() => setCurrentPhotoIndex(Math.min(photos.length - 1, currentPhotoIndex + 1))}
             disabled={currentPhotoIndex === photos.length - 1}
-            className="p-1.5 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            className="p-2 rounded-full bg-white hover:bg-gray-100 disabled:opacity-0 disabled:pointer-events-none transition-all shadow-md"
             aria-label="Next photo"
           >
-            <ChevronRight className="w-4 h-4 text-gray-600" />
+            <ChevronRight className="w-5 h-5 text-gray-700" />
           </button>
         </div>
       )}
