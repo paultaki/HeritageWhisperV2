@@ -608,7 +608,7 @@ function MemoryCard({
 
       {/* Title */}
       <h3
-        className="text-lg font-semibold text-gray-900 line-clamp-2 mb-1"
+        className="text-lg font-semibold text-gray-900 line-clamp-2 mb-0.5"
         data-testid={`story-title-${story.id}`}
       >
         {story.title}
@@ -1221,18 +1221,18 @@ export default function Timeline() {
                     {/* Decade Header */}
                     <div className="mb-6">
                       <div className="flex items-center gap-3 mb-2">
-                        <Calendar className="w-5 h-5 text-gray-400" />
-                        <h2 className="text-2xl font-semibold text-gray-900">
+                        <Calendar className="w-6 h-6 text-gray-400" />
+                        <h2 className="text-3xl font-semibold text-gray-900">
                           {item.title}
                           {item.stories && item.stories.length > 0 && (
-                            <span className="ml-2 text-lg font-normal text-gray-500">
+                            <span className="ml-2 text-xl font-normal text-gray-500">
                               ({item.stories.length}{" "}
                               {item.stories.length === 1 ? "story" : "stories"})
                             </span>
                           )}
                         </h2>
                       </div>
-                      <p className="text-sm text-muted-foreground ml-9">
+                      <p className="text-base text-muted-foreground ml-9">
                         {item.subtitle}
                       </p>
                     </div>
