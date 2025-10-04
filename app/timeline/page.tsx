@@ -1186,10 +1186,15 @@ export default function Timeline() {
                   );
                   const isCurrentDecade = groupDecadeNum === currentDecade;
 
+                  // Find the earliest story year in this decade for proper chronological sorting
+                  const earliestStoryYear = Math.min(
+                    ...group.stories.map((s: any) => normalizeYear(s.storyYear))
+                  );
+
                   allTimelineItems.push({
                     type: "decade",
                     id: group.decade,
-                    year: groupDecadeNum,
+                    year: earliestStoryYear, // Use earliest story year instead of decade start
                     title: group.displayName,
                     subtitle: `${group.ageRange} • Life Chapter${isCurrentDecade ? " • Current" : ""}`,
                     stories: group.stories,
