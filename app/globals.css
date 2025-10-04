@@ -1560,12 +1560,15 @@ textarea:focus-visible {
   .page--right .page-number, .page-number-right { right: 40px; }
 
   /* Title + year with elegant serif */
-  .memory-title { 
-    font-family: 'Playfair Display', Georgia, serif; 
-    font-weight: 700; 
-    font-size: clamp(22px, 3vw, 32px); 
+  .memory-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(22px, 3vw, 32px);
     margin: 12px 0 6px;
     color: #2c2416;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 
   h1, h2, .story-title {
@@ -1923,9 +1926,9 @@ textarea:focus-visible {
     
     /* Reduce photo height and margins on mobile */
     .memory-photo {
-      width: 90%;
-      max-width: 300px;
-      max-height: 180px; /* Smaller on mobile */
+      width: 100%;
+      max-width: 100%;
+      max-height: 250px;
       margin: 12px auto; /* Center and reduce margin */
     }
     
