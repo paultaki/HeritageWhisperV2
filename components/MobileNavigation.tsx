@@ -114,8 +114,8 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
             <Image
               src="/REC_Mic.png"
               alt="Record"
-              width={28}
-              height={28}
+              width={24}
+              height={24}
               className="z-10"
             />
           </button>

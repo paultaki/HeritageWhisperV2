@@ -114,8 +114,8 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
           <Image
             src="/REC_Mic.png"
             alt="Record"
-            width={24}
-            height={24}
+            width={20}
+            height={20}
           />
         </button>
 

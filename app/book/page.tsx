@@ -490,16 +490,7 @@ export default function BookViewNew() {
     <div className="book-view min-h-screen bg-background">
       {/* Header */}
       <div className="book-header">
-        <Button variant="ghost" onClick={() => router.push("/timeline")}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Timeline
-        </Button>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={open}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Story
-          </Button>
-        </div>
+        <img src={logoUrl} alt="Heritage Whisper" className="h-10 w-auto" />
       </div>
 
       {/* Fixed Navigation Arrows - Outside of book container */}
