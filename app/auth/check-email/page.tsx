@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Mail, ArrowLeft, RefreshCw } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
-export default function CheckEmail() {
+function CheckEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -142,5 +142,17 @@ export default function CheckEmail() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function CheckEmail() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center album-texture">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    }>
+      <CheckEmailContent />
+    </Suspense>
   );
 }

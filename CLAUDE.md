@@ -1129,4 +1129,60 @@ shared_access (
 - **Security**: Token-based auth, permission validation, expiration handling
 - **Ready for**: Vercel deployment with environment variables
 
-*Last Updated: January 3, 2025 at 8:15 PM PST*
+*Last Updated: January 4, 2025 at 12:30 AM PST*
+
+---
+
+## 📝 Latest Updates (January 4, 2025 - Mobile UX Polish)
+
+### Critical Mobile Fixes (12:00-12:30 AM PST)
+- ✅ **RecordModal Header Text Wrapping Fixed**:
+  - Fixed "Ready to Share a Story?" displaying vertically on mobile
+  - Added `min-w-0` to h2 for proper text wrapping at word boundaries
+  - Added `flex-shrink-0` to close button to prevent shrinking
+  - Text now wraps naturally instead of character-by-character
+
+- ✅ **Review Page Mobile Optimization**:
+  - **Photo Menu Button**: Moved 3-dot menu from center to upper-right corner
+  - **Record Button Text**: Shortened "Record Your Memory" to "REC Memory" to prevent overflow
+  - **Header Layout**: Simplified "Review Your Memory" to "Review Memory", changed "Save Story" to "Save"
+  - **Bottom Save Button**: Added large full-width Save button at bottom of page
+  - **Instruction Text**: Removed redundant second sentence for cleaner UI
+
+- ✅ **Timeline Mobile Spacing Optimization**:
+  - **Timeline Line**: Moved from `left-6` (24px) to `left-2` (8px) on mobile - saved 16px
+  - **Timeline Dots**: Adjusted from `left-[20px]` to `left-[4px]` on mobile - properly centered
+  - **Card Content**: Reduced from `ml-14` (56px) to `ml-8` (32px) on mobile - saved 24px
+  - **Container Padding**: Reduced from `p-6` to `px-3 py-6` on mobile - saved 12px per side
+  - **Total Space Gained**: ~40px on left side, cards now ~40px wider on mobile!
+
+- ✅ **Book View Navigation Fixed**:
+  - **Page Counter**: Changed "Page 3 of 41" to "3 of 41" on mobile (removed "Page" prefix)
+  - **Button Text**: Hidden "Previous" and "Next" text on mobile, showing only arrows
+  - **Button Sizing**: Reduced padding on mobile (`px-2` vs `px-4` desktop)
+  - **No Wrapping**: Added `whitespace-nowrap` to prevent page numbers from wrapping
+  - **Proper Spacing**: Added `gap-2` and `flex-shrink-0` for better layout
+
+- ✅ **Audio Upload MIME Type Support**:
+  - Fixed `audio/mpeg` not supported error in `/api/upload/audio`
+  - Added support for MP3, WAV, OGG, M4A, and WebM audio formats
+  - Proper MIME type mapping: `audio/mpeg` → `audio/mp3` for Supabase compatibility
+  - Dynamic file extension based on actual audio format
+  - Users can now upload audio in any common format when editing stories
+
+### Technical Details
+- **Files Modified**:
+  - `components/RecordModal.tsx` - Fixed header text wrapping
+  - `components/BookStyleReview.tsx` - Optimized review page for mobile
+  - `components/MultiPhotoUploader.tsx` - Fixed photo menu button position
+  - `app/timeline/page.tsx` - Optimized timeline spacing for mobile
+  - `app/book/page.tsx` - Fixed navigation layout and text
+  - `app/api/upload/audio/route.ts` - Added comprehensive audio format support
+
+### Impact
+- **Better Mobile UX**: All text displays properly without wrapping issues
+- **More Content Space**: Timeline cards are 40px wider on mobile screens
+- **Cleaner UI**: Navigation is more compact and doesn't wrap
+- **Better Compatibility**: Audio uploads work with all common formats
+
+*Last Updated: January 4, 2025 at 12:30 AM PST*
