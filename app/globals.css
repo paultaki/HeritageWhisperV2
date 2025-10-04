@@ -1422,13 +1422,32 @@ textarea:focus-visible {
   /* Book View Styles - Premium Memory Book */
 
   /* Book container with leather binding effect */
+  /* Book view wrapper */
+  .book-view {
+    background: linear-gradient(135deg, #1a1410 0%, #2c2416 50%, #1a1410 100%);
+    min-height: 100vh;
+  }
+
+  /* Book header with logo */
+  .book-header {
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Main book container with proper constraints */
   .book-container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 2.5rem;
     background: #2c2416; /* Dark leather color */
-    padding: 20px;
-    border-radius: 4px;
-    box-shadow: 
-      inset 0 0 30px rgba(0,0,0,0.3),
-      0 10px 40px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    box-shadow:
+      inset 0 0 40px rgba(0,0,0,0.4),
+      0 20px 60px rgba(0,0,0,0.5),
+      0 0 0 1px rgba(255,255,255,0.05);
     perspective: 1500px;
   }
 
@@ -1450,40 +1469,79 @@ textarea:focus-visible {
       padding: 10px; /* Reduced from 28px for wider content area */
     }
     
-    /* Enhanced center spine with book binding effect */
+    /* Enhanced center spine with realistic book binding effect */
     .book-spread::before {
       content: '';
       position: absolute;
       left: 50%;
       top: 0;
       bottom: 0;
-      width: 2px;
-      background: linear-gradient(90deg, 
-        rgba(0,0,0,0.05) 0%, 
-        rgba(0,0,0,0.08) 50%, 
-        rgba(0,0,0,0.05) 100%);
-      box-shadow: 
-        -10px 0 20px rgba(0,0,0,0.03),
-        10px 0 20px rgba(0,0,0,0.03);
+      width: 4px;
+      background: linear-gradient(90deg,
+        rgba(0,0,0,0.12) 0%,
+        rgba(0,0,0,0.18) 50%,
+        rgba(0,0,0,0.12) 100%);
+      box-shadow:
+        /* Left page inner shadow */
+        -15px 0 25px -5px rgba(0,0,0,0.15),
+        /* Right page inner shadow */
+        15px 0 25px -5px rgba(0,0,0,0.15),
+        /* Center glow/highlight */
+        inset 0 0 1px rgba(255,255,255,0.2);
       z-index: 10;
-      transform: translateX(-1px);
+      transform: translateX(-2px);
+      border-radius: 1px;
+    }
+
+    /* Add subtle inner shadow to pages near spine */
+    .page--left::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 30px;
+      background: linear-gradient(to left,
+        rgba(0,0,0,0.08) 0%,
+        transparent 100%);
+      pointer-events: none;
+    }
+
+    .page--right::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 30px;
+      background: linear-gradient(to right,
+        rgba(0,0,0,0.08) 0%,
+        transparent 100%);
+      pointer-events: none;
+      z-index: 1;
     }
   }
 
-  /* Page cards with paper texture */
+  /* Page cards with paper texture and realistic depth */
   .page {
     position: relative;
     background:
       linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%),
       #faf8f5;
-    border-radius: 18px;
+    border-radius: 3px;
     box-shadow:
-      0 1px 0 #e8e6e3,
-      0 2px 0 #e5e3e0,
-      0 3px 0 #e2e0dd,
-      0 4px 0 #dfddd9,
-      0 5px 10px rgba(0,0,0,0.1);
-    outline: 1px solid rgba(0,0,0,.05);
+      /* Stacked paper effect */
+      0 1px 0 #ebe9e6,
+      0 2px 0 #e8e6e3,
+      0 3px 0 #e5e3e0,
+      0 4px 0 #e2e0dd,
+      0 5px 0 #dfddd9,
+      /* Main depth shadow */
+      0 8px 20px rgba(0,0,0,0.15),
+      0 12px 35px rgba(0,0,0,0.1),
+      /* Ambient shadow */
+      0 0 40px rgba(0,0,0,0.05);
+    outline: 1px solid rgba(0,0,0,.08);
     overflow: hidden;
     padding: 40px 20px; /* Reduced horizontal padding from 40px to 20px for wider content area */
   }
@@ -1901,37 +1959,172 @@ textarea:focus-visible {
   
   /* Remove old mobile styles - now using grid layout */
   
-  /* Mobile adjustments for premium book view */
+  /* Mobile adjustments for premium book view - MAXIMIZED CONTENT WIDTH */
   @media (max-width: 899px) {
+    .book-view {
+      background: #f5f5f5; /* Light background on mobile - no dark borders */
+    }
+
+    .book-header {
+      padding: 0.75rem 0.5rem;
+      background: white;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .book-header img {
+      display: none; /* Hide logo on mobile */
+    }
+
+    .book-header::before {
+      content: 'HERITAGE WHISPER';
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 16px;
+      letter-spacing: 0.05em;
+      color: #8B6F47;
+      font-weight: 600;
+    }
+
+    .book-container {
+      margin: 0; /* Remove margins for full width */
+      padding: 0; /* Remove padding for full width */
+      background: transparent; /* Remove dark background */
+      border-radius: 0; /* No rounded corners on mobile */
+      box-shadow: none; /* Remove shadows */
+    }
+
     .book-spread {
       grid-template-columns: 1fr;
-      padding: 5px; /* Reduce brown border by half */
-      gap: 20px;
+      padding: 0; /* Remove all padding for maximum width */
+      gap: 0;
+      background: transparent; /* Remove beige background */
     }
 
     .page {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px 6px 60px; /* Reduced horizontal padding from 8px to 6px for maximum content width */
+      max-width: 100%; /* Full viewport width */
+      margin: 0; /* Remove margins */
+      padding: 1rem 0.5rem 60px; /* Minimal 8px (0.5rem) side padding */
+      border-radius: 0; /* No rounded corners */
+      background: white; /* Clean white background */
+      box-shadow: none; /* Remove all shadows on mobile */
+      border: none;
+      outline: none;
     }
     
-    /* Reduce spacing on left page (image/audio) for mobile */
-    .page--left {
-      padding-bottom: 30px; /* Reduce bottom padding */
+    /* Remove all decorative effects on mobile */
+    .page--left::after,
+    .page--right::before {
+      display: none; /* Remove spine shadow gradients */
     }
-    
+
+    .book-spread::before {
+      display: none; /* Remove spine divider on mobile */
+    }
+
     .page::after {
       display: none; /* Hide stack hint on mobile */
     }
+
+    /* Reduce spacing on left page (image/audio) for mobile */
+    .page--left {
+      padding-bottom: 30px;
+    }
+
+    /* Mobile header improvements */
+    .running-header {
+      position: relative; /* Change from absolute for better control */
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 1.25rem 0.5rem 1rem; /* Increased top padding for breathing room */
+      margin-bottom: 1.5rem; /* More space below header before content */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem; /* Better spacing between text and button */
+      font-size: 14px; /* Slightly larger on mobile */
+      letter-spacing: 0.08em;
+    }
+
+    .header-left,
+    .header-right {
+      float: none; /* Remove float on mobile */
+      font-family: 'Crimson Text', Georgia, serif;
+      color: #8B6F47;
+      font-weight: 600;
+    }
+
+    /* Ensure Edit button has proper tap target */
+    .running-header button {
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1rem;
+    }
     
-    /* Landscape photo dimensions on mobile */
+    /* Larger photo on mobile - use 95% of page width */
     .memory-photo {
-      width: 100%;
-      max-width: 100%;
+      width: 95%;
+      max-width: 95%;
       aspect-ratio: 16 / 9;
       max-height: none;
-      margin: 12px auto;
+      margin: 0 auto 1.5rem; /* Center and reduce top margin */
       object-fit: cover;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Photo container - reduce padding */
+    .memory-photo-wrapper,
+    div:has(> .memory-photo) {
+      margin-bottom: 1rem;
+      padding: 0;
+    }
+
+    /* Mobile audio player optimization */
+    .audio-player,
+    div[class*="audio"] {
+      margin: 1.5rem 0;
+      padding: 1rem;
+    }
+
+    /* Larger play button for mobile */
+    .audio-player button,
+    button[aria-label*="Play"],
+    button[aria-label*="Pause"] {
+      min-width: 44px;
+      min-height: 44px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Larger timestamps */
+    .audio-time {
+      font-size: 14px !important;
+      margin-top: 0.75rem;
+      opacity: 0.85;
+    }
+
+    /* Thicker progress bar */
+    .audio-progress-container,
+    input[type="range"] {
+      height: 10px !important;
+      border-radius: 5px;
+    }
+
+    .audio-progress-bar,
+    .audio-bar {
+      height: 10px !important;
+      border-radius: 5px;
+    }
+
+    /* Better spacing after audio player */
+    .audio-player + * {
+      margin-top: 1.5rem;
     }
   }
 
@@ -2050,7 +2243,11 @@ textarea:focus-visible {
 
     /* Fix navigation buttons being cut off by footer on mobile */
     .book-container {
-      padding-bottom: 160px; /* Add space for both nav bars stacked (80px mobile nav + 60px book nav + padding) */
+      padding-bottom: 0; /* No padding needed - page handles it */
+    }
+
+    .page {
+      padding-bottom: 160px; /* Space for both nav bars stacked (80px mobile nav + 60px book nav + padding) */
     }
 
     /* Ensure book navigation is visible above footer */
@@ -2407,15 +2604,7 @@ textarea:focus-visible {
 }
 
 /* Book container - the main wrapper */
-.book-container {
-  perspective: 2000px;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
-  padding-bottom: 80px; /* Space for sticky footer */
-}
-
-/* Duplicate styles removed - using styles from lines 1436-1916 instead */
+/* Book container styles defined above at lines 1441-1452 */
 
 /* Page sides - left vs right */
 .page--left {
