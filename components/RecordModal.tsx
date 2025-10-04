@@ -472,8 +472,8 @@ export default function RecordModal({
             style={{ background: designSystem.colors.background.creamLight }}
           >
             {/* Header */}
-            <div className="px-4 py-3 border-b flex items-center justify-between">
-              <h2 className="text-lg font-bold flex-1 min-w-0" style={{ fontFamily: designSystem.typography.fontFamilies.serif }}>
+            <div className="px-4 py-3 border-b flex items-center justify-between gap-2">
+              <h2 className="text-lg font-bold flex-1" style={{ fontFamily: designSystem.typography.fontFamilies.serif, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                 {isRecording ? 'Recording Your Story' : 'Ready to Share a Story?'}
               </h2>
               <Button
