@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Calendar, BookOpen, Mic, Box } from 'lucide-react';
+import { Calendar, BookOpen, Mic, Box, User } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion } from 'framer-motion';
 
@@ -59,10 +59,11 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', damping: 20 }}
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-t-2 md:hidden"
       style={{
-        borderTopColor: 'hsl(45, 20%, 82%)',
+        borderTopColor: 'hsl(0, 77%, 64%)',
         paddingBottom: 'env(safe-area-inset-bottom)', // iOS safe area
+        boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.08)',
       }}
     >
       <div className="flex items-center justify-around h-20 relative">
@@ -74,14 +75,23 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
           isActive={pathname === '/timeline'}
         />
 
+        {/* Book View */}
+        <NavItem
+          icon={BookOpen}
+          label="Book"
+          href="/book"
+          isActive={pathname.startsWith('/book')}
+        />
+
         {/* Record Button - Hero Center Element */}
         <div className="relative flex-1 flex justify-center">
           <button
             onClick={onRecordClick}
-            className="absolute -top-6 w-16 h-16 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95"
+            className="absolute -top-8 w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
             style={{
               background: 'linear-gradient(135deg, hsl(0, 77%, 64%) 0%, hsl(0, 77%, 54%) 100%)',
-              boxShadow: '0 8px 24px rgba(232, 93, 93, 0.4)',
+              boxShadow: '0 4px 12px rgba(232, 93, 93, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
             }}
           >
             {/* Pulse animation ring */}
@@ -104,20 +114,20 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
           </button>
         </div>
 
-        {/* Book View */}
-        <NavItem
-          icon={BookOpen}
-          label="Book"
-          href="/book"
-          isActive={pathname.startsWith('/book')}
-        />
-
         {/* Memory Box */}
         <NavItem
           icon={Box}
           label="Memories"
           href="/memory-box"
           isActive={pathname === '/memory-box'}
+        />
+
+        {/* Profile */}
+        <NavItem
+          icon={User}
+          label="Profile"
+          href="/profile"
+          isActive={pathname === '/profile'}
         />
       </div>
     </motion.nav>

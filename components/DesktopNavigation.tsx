@@ -79,8 +79,11 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
       initial={{ x: -100 }}
       animate={{ x: 0 }}
       transition={{ type: 'spring', damping: 20 }}
-      className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-white/95 backdrop-blur-md border-r flex-col items-center py-8 z-40"
-      style={{ borderRightColor: 'hsl(45, 20%, 82%)' }}
+      className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-white/90 backdrop-blur-md border-r-2 flex-col items-center py-8 z-40"
+      style={{
+        borderRightColor: 'hsl(0, 77%, 64%)',
+        boxShadow: '4px 0 12px rgba(0, 0, 0, 0.08)',
+      }}
     >
       {/* Logo/Home */}
       <div className="mb-8 p-1">
@@ -101,10 +104,11 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
         {/* Record Button - Moved to middle */}
         <button
           onClick={onRecordClick}
-          className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 my-2"
+          className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 my-2"
           style={{
             background: 'linear-gradient(135deg, hsl(0, 77%, 64%) 0%, hsl(0, 77%, 54%) 100%)',
-            boxShadow: '0 4px 12px rgba(232, 93, 93, 0.3)',
+            boxShadow: '0 4px 12px rgba(232, 93, 93, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)',
+            border: '2px solid rgba(255, 255, 255, 0.3)',
           }}
         >
           <Mic className="w-6 h-6 text-white" />
