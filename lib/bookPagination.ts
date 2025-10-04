@@ -50,6 +50,7 @@ export const CAPACITIES = {
 // ============================================================================
 
 export type PageType =
+  | 'table-of-contents'
   | 'decade-marker'
   | 'story-start'
   | 'story-continuation'
@@ -74,10 +75,23 @@ export interface Story {
   lessonLearned?: string;
 }
 
+export interface TableOfContentsEntry {
+  decade: string;
+  decadeTitle: string;
+  stories: Array<{
+    title: string;
+    year: string;
+    pageNumber: number;
+  }>;
+}
+
 export interface BookPage {
   type: PageType;
   pageNumber: number;
   storyId?: string;
+
+  // For table of contents
+  tocEntries?: TableOfContentsEntry[];
 
   // For decade markers
   decade?: string;
@@ -482,16 +496,31 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
   const allPages: BookPage[] = [];
   let currentPageNumber = 1;
 
+  // First pass: Create all pages and collect TOC data
+  const tocEntries: TableOfContentsEntry[] = [];
+  const tempPages: BookPage[] = [];
+
+  // Start at page 2 to leave room for TOC on page 1
+  let tempPageNumber = 2;
+
   for (const group of decadeGroups) {
+    const tocEntry: TableOfContentsEntry = {
+      decade: group.decade,
+      decadeTitle: group.title,
+      stories: [],
+    };
+
     // Add decade marker on left (even) page
-    if (currentPageNumber % 2 === 1) {
+    if (tempPageNumber % 2 === 1) {
       // We're on a right page, need to skip to next left
-      currentPageNumber++;
+      tempPageNumber++;
     }
 
-    allPages.push({
+    const decadeMarkerPage = tempPageNumber;
+
+    tempPages.push({
       type: 'decade-marker',
-      pageNumber: currentPageNumber,
+      pageNumber: tempPageNumber,
       decade: group.decade,
       decadeTitle: group.title,
       storiesInDecade: group.stories.length,
@@ -499,15 +528,37 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
       isRightPage: false,
     });
 
-    currentPageNumber++;
+    tempPageNumber++;
 
     // Add all stories in this decade
     for (const story of group.stories) {
-      const storyPages = paginateStory(story, currentPageNumber);
-      allPages.push(...storyPages);
-      currentPageNumber += storyPages.length;
+      const storyStartPage = tempPageNumber;
+      const storyPages = paginateStory(story, tempPageNumber);
+      tempPages.push(...storyPages);
+      tempPageNumber += storyPages.length;
+
+      // Add to TOC
+      tocEntry.stories.push({
+        title: story.title,
+        year: story.year,
+        pageNumber: storyStartPage,
+      });
     }
+
+    tocEntries.push(tocEntry);
   }
+
+  // Add Table of Contents as page 1 (right page)
+  allPages.push({
+    type: 'table-of-contents',
+    pageNumber: 1,
+    tocEntries: tocEntries,
+    isLeftPage: false,
+    isRightPage: true,
+  });
+
+  // Add all other pages
+  allPages.push(...tempPages);
 
   return allPages;
 }

@@ -202,6 +202,37 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
     };
   }, []);
 
+  // Render table of contents
+  if (page.type === 'table-of-contents') {
+    return (
+      <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
+        <div className="page-content px-8 py-12">
+          <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">Table of Contents</h1>
+          <div className="space-y-6">
+            {page.tocEntries?.map((entry) => (
+              <div key={entry.decade} className="space-y-2">
+                <h2 className="text-xl font-serif font-semibold text-gray-700 border-b border-gray-300 pb-1">
+                  {entry.decadeTitle}
+                </h2>
+                <div className="space-y-1 pl-4">
+                  {entry.stories.map((story, idx) => (
+                    <div key={idx} className="flex justify-between items-baseline text-sm">
+                      <span className="text-gray-700 flex-1 pr-2">{story.title}</span>
+                      <span className="text-gray-500 text-xs whitespace-nowrap">
+                        {story.year} • p.{story.pageNumber}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="page-number">{page.pageNumber}</div>
+      </article>
+    );
+  }
+
   // Render decade marker
   if (page.type === 'decade-marker') {
     return (
