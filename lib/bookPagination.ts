@@ -70,6 +70,7 @@ export interface Story {
   content: string;
   year: string;
   date?: string;
+  age?: number;
   audioUrl?: string;
   photos: StoryPhoto[];
   lessonLearned?: string;
@@ -103,6 +104,7 @@ export interface BookPage {
   title?: string;
   year?: string;
   date?: string;
+  age?: number;
   audioUrl?: string;
   text?: string;
   lessonLearned?: string;
@@ -411,6 +413,7 @@ export function paginateStory(
       title: story.title,
       year: story.year,
       date: story.date,
+      age: story.age,
       audioUrl: story.audioUrl,
       text: story.content,
       lessonLearned: story.lessonLearned,
@@ -438,6 +441,7 @@ export function paginateStory(
     title: story.title,
     year: story.year,
     date: story.date,
+    age: story.age,
     audioUrl: story.audioUrl,
     text: firstPageExtraction.text,
     isLeftPage: startPageNumber % 2 === 0,

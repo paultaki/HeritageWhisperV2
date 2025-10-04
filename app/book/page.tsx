@@ -93,6 +93,7 @@ const convertToPaginationStory = (story: Story): PaginationStory => {
     content: story.transcription || "",
     year: story.storyYear.toString(),
     date: story.storyDate,
+    age: story.lifeAge,
     audioUrl: story.audioUrl || undefined,
     photos,
     lessonLearned: story.wisdomClipText || undefined,
@@ -260,10 +261,10 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
             variant="outline"
             size="sm"
             onClick={() => router.push(`/review/book-style?id=${page.storyId}`)}
-            className="gap-0.5 text-[10px] md:text-xs md:gap-1 px-1.5 py-0.5 md:px-2 md:py-1 h-auto"
+            className="gap-1 text-xs px-2 py-1 h-auto"
           >
             <Pencil className="w-3 h-3" />
-            <span className="hidden sm:inline">Edit</span>
+            <span>Edit</span>
           </Button>
         )}
       </div>
@@ -280,6 +281,7 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
             <h2 className="memory-title">{page.title}</h2>
             <div className="memory-year">
               {page.year}
+              {page.age !== null && page.age !== undefined && ` • Age ${page.age}`}
               {page.date && ` • ${page.date}`}
             </div>
           </div>
@@ -563,19 +565,19 @@ export default function BookViewNew() {
 
       {/* Sticky Navigation Footer */}
       <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 z-30 md:bottom-0 md:left-20 md:z-40">
-        <div className="flex items-center justify-between gap-2 px-3 py-3 max-w-7xl mx-auto md:px-6">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 max-w-7xl mx-auto md:px-6">
           <Button
             variant="ghost"
             size="sm"
             onClick={goToPrevious}
             disabled={isMobile ? currentMobilePage === 0 : currentSpreadIndex === 0}
-            className="gap-1 flex-shrink-0 px-2 md:px-4"
+            className="gap-1 flex-shrink-0 px-3 md:px-4 min-w-[44px] min-h-[44px]"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-5 h-5" />
             <span className="hidden sm:inline">Previous</span>
           </Button>
 
-          <div className="text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap">
+          <div className="text-sm text-muted-foreground font-medium whitespace-nowrap flex-shrink-0">
             {isMobile
               ? `${currentMobilePage + 1} of ${totalPages}`
               : `${currentSpreadIndex * 2 + 1}-${Math.min(
@@ -594,10 +596,10 @@ export default function BookViewNew() {
                 ? currentMobilePage === totalPages - 1
                 : currentSpreadIndex === totalSpreads - 1
             }
-            className="gap-1 flex-shrink-0 px-2 md:px-4"
+            className="gap-1 flex-shrink-0 px-3 md:px-4 min-w-[44px] min-h-[44px]"
           >
             <span className="hidden sm:inline">Next</span>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
       </div>
