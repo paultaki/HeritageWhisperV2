@@ -116,17 +116,39 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
         className="w-full h-full object-cover rounded-lg"
       />
       {hasMultiplePhotos && (
-        <div className="flex justify-center mt-2 gap-1">
-          {photos.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentPhotoIndex(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentPhotoIndex ? "bg-primary" : "bg-gray-300"
-              }`}
-              aria-label={`Go to photo ${index + 1}`}
-            />
-          ))}
+        <div className="flex justify-center items-center mt-2 gap-3">
+          <button
+            onClick={() => setCurrentPhotoIndex(Math.max(0, currentPhotoIndex - 1))}
+            disabled={currentPhotoIndex === 0}
+            className="p-1.5 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            aria-label="Previous photo"
+          >
+            <ChevronLeft className="w-4 h-4 text-gray-600" />
+          </button>
+
+          <div className="flex items-center gap-1.5">
+            {photos.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPhotoIndex(index)}
+                className={`w-2.5 h-2.5 rounded-full transition-all ${
+                  index === currentPhotoIndex
+                    ? "bg-coral-500 scale-125"
+                    : "bg-gray-300 hover:bg-gray-400"
+                }`}
+                aria-label={`Go to photo ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={() => setCurrentPhotoIndex(Math.min(photos.length - 1, currentPhotoIndex + 1))}
+            disabled={currentPhotoIndex === photos.length - 1}
+            className="p-1.5 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            aria-label="Next photo"
+          >
+            <ChevronRight className="w-4 h-4 text-gray-600" />
+          </button>
         </div>
       )}
     </div>

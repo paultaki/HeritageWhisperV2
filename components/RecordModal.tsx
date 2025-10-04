@@ -336,14 +336,43 @@ export default function RecordModal({
   };
 
   const generateGoDeeperQuestions = async (transcriptionText: string) => {
-    // In production, this would call AI to generate contextual questions
-    // For now, using simple contextual prompts
-    const questions = [
-      "Can you tell me more about how that made you feel in that moment?",
-      "What do you think that experience taught you about yourself?",
-      "Looking back now, what impact did that have on your life?",
-    ];
-    setGoDeeperQuestions(questions);
+    try {
+      // Get auth session for API call
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No auth session');
+      }
+
+      const response = await fetch('/api/followups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ transcription: transcriptionText })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate questions');
+      }
+
+      const data = await response.json();
+      const questions = [
+        data.followUps.emotional,
+        data.followUps.wisdom,
+        data.followUps.sensory
+      ];
+      setGoDeeperQuestions(questions);
+    } catch (error) {
+      console.error('Error generating Go Deeper questions:', error);
+      // Fallback to generic questions
+      const questions = [
+        "Can you tell me more about how that made you feel in that moment?",
+        "What do you think that experience taught you about yourself?",
+        "Looking back now, what impact did that have on your life?",
+      ];
+      setGoDeeperQuestions(questions);
+    }
   };
 
   const togglePlayback = () => {
@@ -698,16 +727,39 @@ export default function RecordModal({
                         </p>
                       </Card>
 
-                      <div className="flex items-center justify-center gap-2">
-                        {goDeeperQuestions.map((_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setCurrentQuestionIndex(index)}
-                            className={`w-2 h-2 rounded-full transition-colors ${
-                              index === currentQuestionIndex ? 'bg-coral-500' : 'bg-gray-300'
-                            }`}
-                          />
-                        ))}
+                      <div className="flex items-center justify-center gap-3">
+                        <button
+                          onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+                          disabled={currentQuestionIndex === 0}
+                          className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                          aria-label="Previous question"
+                        >
+                          <ChevronRight className="w-5 h-5 rotate-180 text-gray-600" />
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                          {goDeeperQuestions.map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setCurrentQuestionIndex(index)}
+                              className={`w-2.5 h-2.5 rounded-full transition-all ${
+                                index === currentQuestionIndex
+                                  ? 'bg-coral-500 scale-125'
+                                  : 'bg-gray-300 hover:bg-gray-400'
+                              }`}
+                              aria-label={`Question ${index + 1}`}
+                            />
+                          ))}
+                        </div>
+
+                        <button
+                          onClick={() => setCurrentQuestionIndex(Math.min(goDeeperQuestions.length - 1, currentQuestionIndex + 1))}
+                          disabled={currentQuestionIndex === goDeeperQuestions.length - 1}
+                          className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                          aria-label="Next question"
+                        >
+                          <ChevronRight className="w-5 h-5 text-gray-600" />
+                        </button>
                       </div>
 
                       <div className="flex gap-3">
