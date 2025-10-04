@@ -88,8 +88,9 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
         <div className="relative flex-1 flex justify-center">
           <button
             onClick={onRecordClick}
-            className="absolute -top-4 w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            className="absolute w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
             style={{
+              bottom: '-12px',
               background: 'linear-gradient(135deg, hsl(0, 77%, 64%) 0%, hsl(0, 77%, 54%) 100%)',
               boxShadow: '0 4px 12px rgba(232, 93, 93, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)',
               border: '2px solid rgba(255, 255, 255, 0.3)',
