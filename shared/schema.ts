@@ -43,7 +43,7 @@ export const stories = pgTable("stories", {
   wisdomClipUrl: text("wisdom_clip_url"),
   wisdomClipText: text("wisdom_clip_text"),
   wisdomClipDuration: integer("wisdom_clip_duration"),
-  storyYear: integer("story_year").notNull(),
+  storyYear: integer("story_year"), // Nullable to support undated memories
   storyDate: timestamp("story_date"),
   lifeAge: integer("life_age"),
   photoUrl: text("photo_url"),
@@ -182,7 +182,7 @@ export const demoStories = pgTable("demo_stories", {
   wisdomClipUrl: text("wisdom_clip_url"),
   wisdomClipText: text("wisdom_clip_text"),
   wisdomClipDuration: integer("wisdom_clip_duration"),
-  storyYear: integer("story_year").notNull(),
+  storyYear: integer("story_year"), // Nullable for undated memories
   storyDate: timestamp("story_date"),
   lifeAge: integer("life_age"),
   photoUrl: text("photo_url"),

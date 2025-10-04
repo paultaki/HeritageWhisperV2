@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
-import { Calendar, Users, FileText, User, Mic, Plus, BookOpen } from 'lucide-react';
+import { Calendar, Users, FileText, User, Mic, Plus, BookOpen, Box } from 'lucide-react';
 import RecordModal from './RecordModal';
 import designSystem from '@/lib/designSystem';
 import { useAuth } from '@/lib/auth';
@@ -179,12 +179,12 @@ export default function BottomNavigation() {
             <div className="w-14 h-8" />
           </div>
 
-          {/* Manage */}
+          {/* Memory Box */}
           <NavItem
-            icon={FileText}
-            label="Manage"
-            href="/stories"
-            isActive={currentPath === '/stories'}
+            icon={Box}
+            label="Memories"
+            href="/memory-box"
+            isActive={currentPath === '/memory-box'}
           />
 
           {/* Profile */}
@@ -239,10 +239,10 @@ export default function BottomNavigation() {
           />
 
           <DesktopNavItem
-            icon={FileText}
-            label="Manage"
-            href="/stories"
-            isActive={currentPath === '/stories'}
+            icon={Box}
+            label="Memory Box"
+            href="/memory-box"
+            isActive={currentPath === '/memory-box'}
           />
         </div>
 

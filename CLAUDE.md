@@ -440,6 +440,59 @@ npm run type-check
 - `verify-mcp-setup.js` - Verify all MCP configurations
 - `add-global-supabase-mcp.js` - Add Supabase to global MCP configuration
 
+## 🚧 V1 to V2 Migration Tracker
+
+### Pages Still to Migrate (8 pages)
+- [x] **Memory Box Page** - ✅ Migrated! Story/memory management with undated memory support
+- [ ] **Subscribe Page** - Stripe payment integration for premium subscriptions
+- [ ] **Onboarding Page** - Birth year collection for new users
+- [ ] **Auth Flow Pages** (5 pages):
+  - [ ] AuthCallback - OAuth callback handler
+  - [ ] AuthVerified - Email verification confirmation
+  - [ ] CheckEmail - Email verification instructions
+  - [ ] ResetPassword - Password reset form
+  - [ ] SetPassword - New password setup
+- [ ] **Sharing Pages** (2 pages):
+  - [ ] ShareTimeline - Share timeline with others
+  - [ ] GuestTimeline - Public guest timeline view
+  - [ ] GuestBookView - Public guest book view
+
+### Components Not Migrated (7 components)
+- [ ] **AuthStatusMonitor** - Real-time auth status monitoring
+- [ ] **GoDeeperAccordion** - Expandable AI follow-up questions
+- [ ] **GoDeeperLite** - Simplified AI follow-up UI
+- [ ] **ObjectUploader** - Generic file uploader
+- [ ] **PhotoUploader** - Single photo uploader (replaced by MultiPhotoUploader in V2)
+- [ ] **SetPasswordModal** - Modal for password setup
+
+### Major Features/Functionality Missing
+- [ ] **Go Deeper Prompts** - AI follow-up questions to expand stories
+- [ ] **Ghost Prompts** - Suggested prompts for new users (partial implementation in V2)
+- [ ] **Historical Context** - Decade-specific facts and context
+- [ ] **Follow-up Generation** - AI-powered story follow-ups (API endpoint exists, UI missing)
+
+### System Features Not Migrated
+- [ ] **Demo Mode** - Complete guest/demo experience system
+- [ ] **Story Sharing** - Public sharing with guest views
+- [ ] **OAuth Authentication** - Google/social login (Supabase supports it, not implemented in UI)
+- [ ] **Email Verification** - Complete email confirmation flow
+- [ ] **Subscription System** - Stripe payment integration
+
+### Priority Migration Order
+1. **High Priority** (Core User Flow):
+   - Onboarding Page (birth year collection)
+   - Auth Flow Pages (complete email verification)
+   - Stories Page (list/management view)
+
+2. **Medium Priority** (Enhanced Features):
+   - Go Deeper UI components (GoDeeperAccordion, GoDeeperLite)
+   - Demo Mode (guest experience)
+   - Story Sharing (ShareTimeline, GuestTimeline, GuestBookView)
+
+3. **Low Priority** (Monetization):
+   - Subscribe Page
+   - Stripe integration
+
 ## 🚀 Next Steps
 
 ### Immediate
@@ -508,6 +561,98 @@ npm run type-check
 - ✅ Stories saving to database
 - ✅ Audio recording and upload working
 - ✅ Transcription via OpenAI working
-- ⚠️ Photos need frontend update to upload before save
+- ✅ Photos fully working with proper persistence
 - Development server stable on port 3000
-- Ready for production with minor photo fix needed
+- Ready for production deployment
+
+## 📝 Latest Updates (January 3, 2025)
+
+### Memory Box Page Migration (11:00 PM PST)
+- ✅ **New Memory Box Page Created** (`/app/memory-box/page.tsx`):
+  - Migrated from V1 Stories page with all features intact
+  - Grid and list view modes with smooth animations
+  - Filter system: All, Timeline, Book, No Date, Private, Favorites
+  - Search functionality across titles and transcriptions
+  - Sort options: newest, oldest, year, title, favorites
+  - Bulk selection and actions (add to timeline/book, delete)
+  - Statistics dashboard with 8 metrics
+  - Audio playback manager (single instance playing)
+  - Export section (PDF, Print, Backup, Audio Collection)
+- ✅ **Undated Memory Support**:
+  - Made `storyYear` nullable in database schema
+  - Timeline toggle disabled for memories without dates
+  - Clear UI indicators (amber badge, icon) for undated items
+  - "No Date" filter shows all undated memories
+  - Memories without dates can still be added to Book View
+  - Stats dashboard includes undated memory count
+- ✅ **Navigation Updated**:
+  - Mobile nav: "Memories" with Box icon
+  - Desktop nav: "Memory Box" with Box icon
+  - Replaced old "Manage" navigation item
+- ✅ **Database Schema Changes**:
+  - `stories.storyYear` changed from `.notNull()` to nullable
+  - `demoStories.storyYear` also updated for consistency
+
+### Use Cases:
+- **Dated Memories**: Normal stories with years (can be in Timeline & Book)
+- **Undated Memories**: Photos, objects, general memories without specific dates
+  - Examples: childhood teddy bear, family heirloom, general reflections
+  - Can be added to Book View but NOT Timeline
+  - Perfect for "Memory Box" concept - a place to store all life memories
+
+## 📝 Latest Updates (January 3, 2025 - Evening)
+
+### BookStyleReview Single-Column Redesign (8:00 PM PST)
+- ✅ **Complete redesign of Review Your Memory page**:
+  - Changed from two-page spread to single-column layout
+  - New order: Photo → Title → Date → Audio → Story → Lessons Learned
+  - Maintained book-like aesthetic with centered, clean layout
+  - All inline editing functionality preserved
+  - Scrollable content for long stories
+- ✅ **Note**: Book View (read-only) still uses two-page spread - only review/edit page changed
+
+### Delete Story Functionality Added (7:45 PM PST)
+- ✅ **Delete button in BookStyleReview component**:
+  - Only shows when editing existing stories (not for new stories)
+  - Confirmation dialog before deletion
+  - Proper error handling and user feedback
+  - Navigates to timeline after successful deletion
+- ✅ **API integration**:
+  - DELETE `/api/stories/[id]` endpoint working
+  - Proper authentication and authorization
+
+### Timeline Photo Display Bug Fixed (8:30 PM PST)
+- ✅ **Critical Fix: Invalid URL Error Resolved**:
+  - **Root Cause**: Photos uploaded to database metadata but file upload to Supabase Storage failed (404)
+  - When signed URL generation failed, API was returning storage PATH instead of `null`
+  - Next.js Image component received relative paths (e.g., `photo/userId/storyId/file.png`) instead of valid URLs
+  - **Error**: "Failed to construct 'URL': Invalid URL" and "Failed to parse src on next/image"
+- ✅ **Fix Applied**:
+  - Modified `/app/api/stories/route.ts` `getPhotoUrl` helper function
+  - Changed lines 76-81 to return `null` instead of storage path when signed URL generation fails
+  - Added frontend null checks in timeline to gracefully handle missing photos
+  - Stories without valid photos now render in compact format instead of crashing
+- ✅ **Code Change**:
+  ```typescript
+  // In /app/api/stories/route.ts
+  if (error) {
+    console.error('Error creating signed URL for photo:', photoUrl, error);
+    return null;  // Fixed: was returning photoUrl (the path)
+  }
+  return data?.signedUrl || null;  // Fixed: was returning photoUrl as fallback
+  ```
+
+## 🔑 Files Modified (Latest Session - January 3, 2025 Evening)
+
+### BookStyleReview Redesign
+- `components/BookStyleReview.tsx` - Complete rewrite from two-page spread to single-column layout
+- `app/review/book-style/page.tsx` - Added delete handler and state management
+
+### Photo Display Error Fix
+- `app/api/stories/route.ts` - Fixed `getPhotoUrl` helper to return null on error instead of storage path
+- `app/timeline/page.tsx` - Added null checks to gracefully handle stories without valid photos
+
+### Technical Details
+- **Photo Storage Architecture**: Database stores file paths, API generates signed URLs on-demand
+- **Error Handling**: Stories with missing photos render in compact format without images
+- **User Experience**: No crashes or console errors when photos fail to load

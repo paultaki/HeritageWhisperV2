@@ -359,7 +359,9 @@ export default function BookViewNew() {
       .map(([decade, storyList]) => ({
         decade,
         title: `The ${decade}`,
-        stories: storyList.map(convertToPaginationStory),
+        stories: storyList
+          .sort((a, b) => (a.storyYear || 0) - (b.storyYear || 0)) // Sort stories within decade chronologically
+          .map(convertToPaginationStory),
       }));
 
     // Paginate the entire book
@@ -455,7 +457,29 @@ export default function BookViewNew() {
       </div>
 
       {/* Book Content */}
-      <div className="book-container" {...swipeHandlers}>
+      <div className="book-container relative" {...swipeHandlers}>
+        {/* Previous Page Arrow - Left Side */}
+        {!isMobile && currentSpreadIndex > 0 && (
+          <button
+            onClick={goToPrevious}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/90 hover:bg-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center group"
+            aria-label="Previous page"
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-700 group-hover:text-coral-600 transition-colors" />
+          </button>
+        )}
+
+        {/* Next Page Arrow - Right Side */}
+        {!isMobile && currentSpreadIndex < totalSpreads - 1 && (
+          <button
+            onClick={goToNext}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/90 hover:bg-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center group"
+            aria-label="Next page"
+          >
+            <ChevronRight className="w-6 h-6 text-gray-700 group-hover:text-coral-600 transition-colors" />
+          </button>
+        )}
+
         <div className="book-spread">
           {isMobile ? (
             // Mobile: Single page view

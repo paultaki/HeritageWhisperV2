@@ -350,59 +350,78 @@ export function BookStyleReview({
                 </div>
               ) : (
                 <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={async () => {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.accept = 'audio/*';
-                      input.onchange = async (e) => {
-                        const file = (e.target as HTMLInputElement).files?.[0];
-                        if (file) {
-                          const audioUrl = URL.createObjectURL(file);
-                          onAudioChange?.(audioUrl, file);
-
-                          // Transcribe the audio
-                          const formData = new FormData();
-                          formData.append('audio', file);
-
-                          try {
-                            const { supabase } = await import("@/lib/supabase");
-                            const { data: { session } } = await supabase.auth.getSession();
-
-                            const headers: HeadersInit = {};
-                            if (session?.access_token) {
-                              headers['Authorization'] = `Bearer ${session.access_token}`;
-                            }
-
-                            const response = await fetch('/api/transcribe', {
-                              method: 'POST',
-                              headers,
-                              body: formData,
-                            });
-
-                            if (response.ok) {
-                              const data = await response.json();
-                              if (data.transcription) {
-                                onTranscriptionChange(data.transcription);
-                              }
-                              if (data.wisdomSuggestion) {
-                                onWisdomChange(data.wisdomSuggestion);
-                              }
-                            }
-                          } catch (error) {
-                            console.error('Transcription error:', error);
-                          }
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Open the RecordModal
+                        const recordModal = (window as any).__recordModal;
+                        if (recordModal) {
+                          recordModal.open();
+                        } else {
+                          alert('Record functionality is not available. Please use the main Record button in the navigation.');
                         }
-                      };
-                      input.click();
-                    }}
-                    className="flex items-center gap-2"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Upload Audio
-                  </Button>
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <Mic className="w-4 h-4" />
+                      Record Your Memory
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'audio/*';
+                        input.onchange = async (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0];
+                          if (file) {
+                            const audioUrl = URL.createObjectURL(file);
+                            onAudioChange?.(audioUrl, file);
+
+                            // Transcribe the audio
+                            const formData = new FormData();
+                            formData.append('audio', file);
+
+                            try {
+                              const { supabase } = await import("@/lib/supabase");
+                              const { data: { session } } = await supabase.auth.getSession();
+
+                              const headers: HeadersInit = {};
+                              if (session?.access_token) {
+                                headers['Authorization'] = `Bearer ${session.access_token}`;
+                              }
+
+                              const response = await fetch('/api/transcribe', {
+                                method: 'POST',
+                                headers,
+                                body: formData,
+                              });
+
+                              if (response.ok) {
+                                const data = await response.json();
+                                if (data.transcription) {
+                                  onTranscriptionChange(data.transcription);
+                                }
+                                if (data.wisdomSuggestion) {
+                                  onWisdomChange(data.wisdomSuggestion);
+                                }
+                              }
+                            } catch (error) {
+                              console.error('Transcription error:', error);
+                            }
+                          }
+                        };
+                        input.click();
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload Audio
+                    </Button>
+                  </div>
                   <p className="text-xs text-gray-500 mt-2">
                     Add an audio recording to preserve your voice with this memory
                   </p>
