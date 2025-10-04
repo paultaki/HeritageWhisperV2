@@ -608,7 +608,7 @@ function MemoryCard({
 
       {/* Title */}
       <h3
-        className="text-lg font-semibold text-gray-900 line-clamp-2"
+        className="text-lg font-semibold text-gray-900 line-clamp-2 mb-1"
         data-testid={`story-title-${story.id}`}
       >
         {story.title}
