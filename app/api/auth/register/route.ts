@@ -74,9 +74,21 @@ export async function POST(request: NextRequest) {
                      "unknown";
     const userAgent = request.headers.get("user-agent") || "unknown";
 
-    // Record acceptance of Terms of Service and Privacy Policy
+    // Create user record in public.users and record agreements
     try {
-      // Record both agreements in parallel
+      // First, create the user record in public.users table
+      await db.insert(users).values({
+        id: data.user.id,
+        email: data.user.email!,
+        name: name,
+        birthYear: parseInt(birthYear),
+        storyCount: 0,
+        isPaid: false,
+        latestTermsVersion: CURRENT_TERMS_VERSION,
+        latestPrivacyVersion: CURRENT_PRIVACY_VERSION,
+      });
+
+      // Then record both agreements in parallel
       await Promise.all([
         db.insert(userAgreements).values({
           userId: data.user.id,
@@ -96,18 +108,9 @@ export async function POST(request: NextRequest) {
         }),
       ]);
 
-      // Update user record with latest versions
-      await db
-        .update(users)
-        .set({
-          latestTermsVersion: CURRENT_TERMS_VERSION,
-          latestPrivacyVersion: CURRENT_PRIVACY_VERSION,
-        })
-        .where(eq(users.id, data.user.id));
-
-      console.log(`[Registration] Recorded agreement acceptance for user ${data.user.id}`);
+      console.log(`[Registration] Created user record and recorded agreement acceptance for user ${data.user.id}`);
     } catch (agreementError) {
-      console.error("[Registration] Failed to record agreement acceptance:", agreementError);
+      console.error("[Registration] Failed to create user or record agreement acceptance:", agreementError);
       // Don't fail registration if agreement recording fails, but log it
     }
 
