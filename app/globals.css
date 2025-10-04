@@ -2699,28 +2699,49 @@ textarea:focus-visible {
 
   /* Sticky navigation on mobile */
   .book-navigation {
-    position: sticky;
-    bottom: 0;
+    position: fixed;
+    bottom: 70px; /* Position directly above mobile nav */
     left: 0;
     right: 0;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 2px solid hsl(0, 77%, 64%);
     padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    z-index: 40;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-    margin-bottom: calc(env(safe-area-inset-bottom) + 70px); /* Account for bottom nav */
+    z-index: 35; /* Below mobile nav (40) but above content */
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   }
 
   .page-indicator {
     font-size: 0.875rem;
     color: hsl(210, 10%, 40%);
     white-space: nowrap;
+    font-weight: 500;
+  }
+
+  /* Add padding to book content so it doesn't get covered */
+  .book-container {
+    padding-bottom: 140px; /* Space for navigation + footer */
+  }
+}
+
+/* Desktop book navigation */
+@media (min-width: 768px) {
+  .book-navigation {
+    position: static;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin: 2rem 0 1rem 0;
+    padding: 1rem;
+    z-index: auto;
+  }
+
+  .book-container {
+    padding-bottom: 0;
   }
 }
 

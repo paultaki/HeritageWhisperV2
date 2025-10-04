@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Calendar, BookOpen, Mic, Box, User } from 'lucide-react';
+import { Calendar, BookOpen, Box, User } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -110,7 +111,13 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
             />
 
             {/* Icon */}
-            <Mic className="w-7 h-7 text-white z-10" />
+            <Image
+              src="/attached_assets/REC Mic.png"
+              alt="Record"
+              width={28}
+              height={28}
+              className="z-10"
+            />
           </button>
         </div>
 
