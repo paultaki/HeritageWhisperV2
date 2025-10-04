@@ -239,24 +239,10 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
         {/* Title and date - only on first page */}
         {(page.type === 'story-start' || page.type === 'story-complete') && (
           <div className="memory-header">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1">
-                <h2 className="memory-title">{page.title}</h2>
-                <div className="memory-year">
-                  {page.year}
-                  {page.date && ` • ${page.date}`}
-                </div>
-              </div>
-              {/* Edit button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push(`/review/book-style?id=${page.storyId}`)}
-                className="p-1.5 hover:bg-primary/10"
-                title="Edit this memory"
-              >
-                <Pencil className="w-4 h-4 text-primary" />
-              </Button>
+            <h2 className="memory-title">{page.title}</h2>
+            <div className="memory-year">
+              {page.year}
+              {page.date && ` • ${page.date}`}
             </div>
           </div>
         )}
@@ -491,6 +477,22 @@ export default function BookViewNew() {
       {/* Header */}
       <div className="book-header">
         <img src={logoUrl} alt="Heritage Whisper" className="h-10 w-auto" />
+        {/* Edit button - only show if current page has a story */}
+        {(() => {
+          const currentPage = isMobile ? pages[currentMobilePage] : spreads[currentSpreadIndex]?.[0];
+          const storyId = currentPage?.storyId;
+          return storyId ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push(`/review/book-style?id=${storyId}`)}
+              className="gap-2"
+            >
+              <Pencil className="w-4 h-4" />
+              Edit
+            </Button>
+          ) : null;
+        })()}
       </div>
 
       {/* Fixed Navigation Arrows - Outside of book container */}

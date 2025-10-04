@@ -1924,12 +1924,14 @@ textarea:focus-visible {
       display: none; /* Hide stack hint on mobile */
     }
     
-    /* Reduce photo height and margins on mobile */
+    /* Landscape photo dimensions on mobile */
     .memory-photo {
       width: 100%;
       max-width: 100%;
-      max-height: 250px;
-      margin: 12px auto; /* Center and reduce margin */
+      aspect-ratio: 16 / 9;
+      max-height: none;
+      margin: 12px auto;
+      object-fit: cover;
     }
     
     .memory-title {
