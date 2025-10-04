@@ -1905,14 +1905,14 @@ textarea:focus-visible {
   @media (max-width: 899px) {
     .book-spread {
       grid-template-columns: 1fr;
-      padding: 10px;
+      padding: 5px; /* Reduce brown border by half */
       gap: 20px;
     }
 
     .page {
       max-width: 600px;
       margin: 0 auto;
-      padding: 20px 12px 60px;
+      padding: 20px 8px 60px; /* Wider content area */
     }
     
     /* Reduce spacing on left page (image/audio) for mobile */
