@@ -230,6 +230,18 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
         <span className={page.isLeftPage ? "header-left" : "header-right"}>
           {page.isLeftPage ? "Heritage Whisper" : "Family Memories"}
         </span>
+        {/* Edit button for this story */}
+        {(page.type === 'story-start' || page.type === 'story-complete') && page.storyId && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/review/book-style?id=${page.storyId}`)}
+            className="gap-1 text-xs"
+          >
+            <Pencil className="w-3 h-3" />
+            Edit
+          </Button>
+        )}
       </div>
 
       <div className="page-content">
@@ -479,22 +491,6 @@ export default function BookViewNew() {
       {/* Header */}
       <div className="book-header">
         <img src={logoUrl} alt="Heritage Whisper" className="h-10 w-auto" />
-        {/* Edit button - only show if current page has a story */}
-        {(() => {
-          const currentPage = isMobile ? pages[currentMobilePage] : spreads[currentSpreadIndex]?.[0];
-          const storyId = currentPage?.storyId;
-          return storyId ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push(`/review/book-style?id=${storyId}`)}
-              className="gap-2"
-            >
-              <Pencil className="w-4 h-4" />
-              Edit
-            </Button>
-          ) : null;
-        })()}
       </div>
 
       {/* Fixed Navigation Arrows - Outside of book container */}
