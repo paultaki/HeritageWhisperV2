@@ -2126,6 +2126,69 @@ textarea:focus-visible {
     .audio-player + * {
       margin-top: 1.5rem;
     }
+
+    /* Lesson Learned / Wisdom box optimization for mobile */
+    .wisdom,
+    .wisdom-moment {
+      margin: 1.5rem 0;
+      padding: 16px 20px; /* Balanced padding - more on sides for left border spacing */
+      border-left-width: 4px;
+      border-radius: 6px;
+      max-width: 100%; /* Prevent overflow */
+    }
+
+    /* Hide decorative quote mark on mobile */
+    .wisdom::before,
+    .wisdom-moment::before {
+      display: none;
+    }
+
+    /* Better spacing for label */
+    .wisdom-label {
+      margin-bottom: 12px; /* 12px gap between header and quote */
+      font-size: 13px;
+      letter-spacing: 0.1em;
+    }
+
+    /* Readable italic text */
+    .wisdom blockquote {
+      font-size: 16px;
+      line-height: 1.7;
+      font-style: italic;
+      margin: 0;
+      padding-left: 12px; /* Extra space from left border */
+    }
+
+    /* Hide page numbers on mobile (remove the "18") */
+    .page-number,
+    .page-numbers,
+    .page-number-left,
+    .page-number-right {
+      display: none !important;
+    }
+
+    /* Ensure wisdom box doesn't overflow */
+    .wisdom *,
+    .wisdom-moment * {
+      max-width: 100%;
+      word-wrap: break-word;
+    }
+
+    /* CRITICAL: Fix text justification on mobile - remove awkward word gaps */
+    .story-text,
+    .story-text p,
+    .story-content,
+    .story-content p,
+    .page-content,
+    .page-content p,
+    .memory-body,
+    .memory-body p,
+    article,
+    article p,
+    p {
+      text-align: left !important; /* Must be left-aligned on mobile for readability */
+      hyphens: none; /* Disable hyphenation on mobile */
+    }
   }
 
   /* Ensure landscape aspect ratio on desktop too */
