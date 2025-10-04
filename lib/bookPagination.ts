@@ -50,6 +50,7 @@ export const CAPACITIES = {
 // ============================================================================
 
 export type PageType =
+  | 'intro'
   | 'table-of-contents'
   | 'decade-marker'
   | 'story-start'
@@ -504,8 +505,8 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
   const tocEntries: TableOfContentsEntry[] = [];
   const tempPages: BookPage[] = [];
 
-  // Start at page 2 to leave room for TOC on page 1
-  let tempPageNumber = 2;
+  // Start at page 3 to leave room for intro (page 1) and TOC (page 2)
+  let tempPageNumber = 3;
 
   for (const group of decadeGroups) {
     const tocEntry: TableOfContentsEntry = {
@@ -552,13 +553,21 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
     tocEntries.push(tocEntry);
   }
 
-  // Add Table of Contents as page 1 (right page)
+  // Add Intro page as page 1 (right page)
   allPages.push({
-    type: 'table-of-contents',
+    type: 'intro',
     pageNumber: 1,
-    tocEntries: tocEntries,
     isLeftPage: false,
     isRightPage: true,
+  });
+
+  // Add Table of Contents as page 2 (left page)
+  allPages.push({
+    type: 'table-of-contents',
+    pageNumber: 2,
+    tocEntries: tocEntries,
+    isLeftPage: true,
+    isRightPage: false,
   });
 
   // Add all other pages

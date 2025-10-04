@@ -1008,20 +1008,20 @@ textarea:focus-visible {
   .blank-memory::before {
     content: "";
     position: absolute;
-    left: -32px;
+    left: -28px;
     top: 24px;
-    width: 24px;
+    width: 20px;
     height: 2px;
     background: #D4B5A0;
     z-index: 0;
     transition: width 0.3s ease;
   }
-  
+
   /* Extend connection line on hover */
   .memory-card:hover::before,
   .ghost-prompt:hover::before,
   .blank-memory:hover::before {
-    width: 28px;
+    width: 24px;
   }
   
   /* Connection dot for completed memories */
@@ -2085,18 +2085,18 @@ textarea:focus-visible {
     /* Mobile audio player optimization */
     .audio-player,
     div[class*="audio"] {
-      margin: 1.5rem 0;
-      padding: 1rem;
+      margin: 1rem 0;
+      padding: 0.75rem;
     }
 
     /* Larger play button for mobile */
     .audio-player button,
     button[aria-label*="Play"],
     button[aria-label*="Pause"] {
-      min-width: 44px;
-      min-height: 44px;
-      width: 44px;
-      height: 44px;
+      min-width: 40px;
+      min-height: 40px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -2104,27 +2104,27 @@ textarea:focus-visible {
 
     /* Larger timestamps */
     .audio-time {
-      font-size: 14px !important;
-      margin-top: 0.75rem;
+      font-size: 13px !important;
+      margin-top: 0.5rem;
       opacity: 0.85;
     }
 
     /* Thicker progress bar */
     .audio-progress-container,
     input[type="range"] {
-      height: 10px !important;
-      border-radius: 5px;
+      height: 6px !important;
+      border-radius: 3px;
     }
 
     .audio-progress-bar,
     .audio-bar {
-      height: 10px !important;
-      border-radius: 5px;
+      height: 6px !important;
+      border-radius: 3px;
     }
 
     /* Better spacing after audio player */
     .audio-player + * {
-      margin-top: 1.5rem;
+      margin-top: 1rem;
     }
 
     /* Lesson Learned / Wisdom box optimization for mobile */

@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     // Map MIME types to supported formats
     if (audioFile.type === "audio/mpeg" || audioFile.type === "audio/mp3") {
       fileExtension = "mp3";
-      contentType = "audio/mp3";
+      contentType = "audio/mpeg";
     } else if (audioFile.type === "audio/wav" || audioFile.type === "audio/wave") {
       fileExtension = "wav";
       contentType = "audio/wav";

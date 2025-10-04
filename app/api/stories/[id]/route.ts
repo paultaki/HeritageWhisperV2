@@ -217,7 +217,7 @@ export async function PUT(
       title: body.title || "Untitled Story",
       transcript: body.transcription || body.content,
       year: body.year || body.storyYear,
-      audio_url: body.audioUrl && !body.audioUrl.startsWith('blob:') ? body.audioUrl : undefined,
+      audio_url: body.audioUrl && !body.audioUrl.startsWith('blob:') ? body.audioUrl : null,
       wisdom_text: body.wisdomClipText || body.wisdomTranscription,
       wisdom_clip_url: body.wisdomClipUrl,
       duration_seconds: Math.max(1, Math.min(120, body.durationSeconds || 30)),

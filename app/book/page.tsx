@@ -203,6 +203,29 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
     };
   }, []);
 
+  // Render intro page
+  if (page.type === 'intro') {
+    return (
+      <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
+        <div className="page-content px-8 py-16 flex flex-col items-center justify-center text-center h-full">
+          <div className="space-y-8">
+            <h1 className="text-5xl font-serif text-gray-800 mb-4" style={{ fontFamily: 'Crimson Text, serif' }}>
+              Family Memories
+            </h1>
+            <div className="w-24 h-1 bg-coral-600 mx-auto"></div>
+            <p className="text-lg text-gray-600 leading-relaxed max-w-md mx-auto italic">
+              A collection of cherished moments, stories, and lessons from a life well-lived.
+            </p>
+            <p className="text-base text-gray-500 mt-8">
+              These pages hold the precious memories that shaped our family's journey.
+            </p>
+          </div>
+        </div>
+        <div className="page-number">{page.pageNumber}</div>
+      </article>
+    );
+  }
+
   // Render table of contents
   if (page.type === 'table-of-contents') {
     return (
@@ -520,6 +543,7 @@ export default function BookViewNew() {
       </div>
 
       {/* Fixed Navigation Arrows - Outside of book container */}
+      {/* Desktop arrows */}
       {!isMobile && currentSpreadIndex > 0 && (
         <button
           onClick={goToPrevious}
@@ -537,6 +561,27 @@ export default function BookViewNew() {
           aria-label="Next page"
         >
           <ChevronRight className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
+        </button>
+      )}
+
+      {/* Mobile arrows */}
+      {isMobile && currentMobilePage > 0 && (
+        <button
+          onClick={goToPrevious}
+          className="fixed left-2 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm shadow-lg active:scale-95 transition-all flex items-center justify-center border border-gray-200"
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="w-6 h-6 text-gray-700" />
+        </button>
+      )}
+
+      {isMobile && currentMobilePage < totalPages - 1 && (
+        <button
+          onClick={goToNext}
+          className="fixed right-2 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm shadow-lg active:scale-95 transition-all flex items-center justify-center border border-gray-200"
+          aria-label="Next page"
+        >
+          <ChevronRight className="w-6 h-6 text-gray-700" />
         </button>
       )}
 
@@ -565,19 +610,19 @@ export default function BookViewNew() {
 
       {/* Sticky Navigation Footer */}
       <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 z-30 md:bottom-0 md:left-20 md:z-40">
-        <div className="flex items-center justify-between gap-3 px-4 py-3 max-w-7xl mx-auto md:px-6">
+        <div className="flex items-center justify-between w-full gap-1 px-1 py-2 md:max-w-7xl md:mx-auto md:gap-2 md:px-6 md:py-2.5">
           <Button
             variant="ghost"
             size="sm"
             onClick={goToPrevious}
             disabled={isMobile ? currentMobilePage === 0 : currentSpreadIndex === 0}
-            className="gap-1 flex-shrink-0 px-3 md:px-4 min-w-[44px] min-h-[44px]"
+            className="flex-shrink-0 px-1.5 h-9 min-w-[32px] md:px-4 md:h-10 md:min-w-[44px]"
           >
-            <ChevronLeft className="w-5 h-5" />
-            <span className="hidden sm:inline">Previous</span>
+            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
+            <span className="hidden sm:inline ml-1">Previous</span>
           </Button>
 
-          <div className="text-sm text-muted-foreground font-medium whitespace-nowrap flex-shrink-0">
+          <div className="text-[10px] leading-tight md:text-sm text-muted-foreground font-medium whitespace-nowrap flex-shrink-0 mx-1">
             {isMobile
               ? `${currentMobilePage + 1} of ${totalPages}`
               : `${currentSpreadIndex * 2 + 1}-${Math.min(
@@ -596,10 +641,10 @@ export default function BookViewNew() {
                 ? currentMobilePage === totalPages - 1
                 : currentSpreadIndex === totalSpreads - 1
             }
-            className="gap-1 flex-shrink-0 px-3 md:px-4 min-w-[44px] min-h-[44px]"
+            className="flex-shrink-0 px-1.5 h-9 min-w-[32px] md:px-4 md:h-10 md:min-w-[44px]"
           >
-            <span className="hidden sm:inline">Next</span>
-            <ChevronRight className="w-5 h-5" />
+            <span className="hidden sm:inline mr-1">Next</span>
+            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
           </Button>
         </div>
       </div>
