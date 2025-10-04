@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { userAgreements, users } from "@/shared/schema";
 import { eq } from "drizzle-orm";
+import { sendVerificationEmail } from "@/lib/resend";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -25,9 +26,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if it's development or production environment
-    // For now, disable email confirmation in all environments to test
-    const requireEmailConfirmation = false;
+    // Enable email confirmation in production only
+    const requireEmailConfirmation = process.env.NODE_ENV === 'production';
 
     // Create user in Supabase Auth
     const { data, error } = await supabase.auth.signUp({
@@ -127,6 +127,23 @@ export async function POST(request: NextRequest) {
       // Don't fail registration if agreement recording fails, but log it
     }
 
+    // If no session was created (email confirmation disabled), sign in the user
+    let session = data.session;
+    if (!session && !requireEmailConfirmation) {
+      console.log('[Registration] No session from signUp, signing in user...');
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        console.error('[Registration] Sign in after registration failed:', signInError);
+      } else {
+        session = signInData.session;
+        console.log('[Registration] Successfully signed in after registration');
+      }
+    }
+
     // Create user data object
     const userData = {
       id: data.user.id,
@@ -137,8 +154,12 @@ export async function POST(request: NextRequest) {
       isPaid: false,
     };
 
-    // If email confirmation is required, return a special response
-    if (requireEmailConfirmation && !data.session) {
+    // If email confirmation is required, send verification email via Resend
+    if (requireEmailConfirmation && !session) {
+      const confirmationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/auth/verified?email=${encodeURIComponent(email)}`;
+
+      await sendVerificationEmail(email, name, confirmationUrl);
+
       return NextResponse.json({
         user: userData,
         requiresEmailConfirmation: true,
@@ -149,7 +170,7 @@ export async function POST(request: NextRequest) {
     // Otherwise return user with session
     return NextResponse.json({
       user: userData,
-      session: data.session,
+      session: session,
     });
   } catch (error) {
     console.error("Registration error:", error);

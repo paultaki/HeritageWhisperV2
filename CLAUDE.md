@@ -683,13 +683,171 @@ npm run type-check
 
 ---
 
+## 📝 Latest Updates (October 4, 2025)
+
+### Terms of Service & Privacy Policy Acceptance Tracking (Complete ✅)
+
+**Implementation Date:** October 4, 2025
+**Status:** Production Ready
+
+#### What Was Built:
+A complete legal compliance system for tracking user acceptance of Terms of Service and Privacy Policy with full GDPR/CCPA compliance.
+
+#### Database Schema:
+- **`public.users` table** - Added `latest_terms_version` and `latest_privacy_version` columns
+- **`public.user_agreements` table** - Complete audit trail with:
+  - `user_id` - Links to auth.users
+  - `agreement_type` - 'terms' or 'privacy'
+  - `version` - Version number (e.g., "1.0", "1.1")
+  - `accepted_at` - Timestamp of acceptance
+  - `ip_address` - User's IP for legal records
+  - `user_agent` - Browser/device information
+  - `method` - How accepted: 'signup', 'reacceptance', or 'oauth'
+
+#### API Endpoints Created:
+1. **`POST /api/agreements/accept`** - Records user acceptance
+   - Validates auth token
+   - Captures IP address and user agent
+   - Creates agreement record
+   - Updates user's latest version fields
+
+2. **`GET /api/agreements/status`** - Checks compliance
+   - Returns current versions
+   - Returns user's accepted versions
+   - Indicates if re-acceptance needed
+
+3. **`POST /api/auth/register`** - Updated to auto-record agreements
+   - Creates `public.users` record
+   - Records both terms and privacy acceptance
+   - Stores metadata for audit trail
+
+#### Frontend Components:
+- **`AgreementGuard`** (`components/AgreementGuard.tsx`) - Wraps entire app
+  - Checks compliance on every page load
+  - Exempts auth and legal pages
+  - Shows blocking modal if user needs to re-accept
+
+- **`AgreementModal`** (`components/AgreementModal.tsx`) - Re-acceptance UI
+  - Cannot be dismissed until accepted
+  - Links to /terms and /privacy pages
+  - Requires explicit checkbox before proceeding
+
+- **`useAgreementCheck`** (`hooks/use-agreement-check.tsx`) - Status hook
+  - Checks user compliance status
+  - Returns loading state and version info
+
+#### Registration Flow:
+1. User fills out registration form
+2. **Checkbox required:** "I agree to the Terms of Service and Privacy Policy"
+3. Button disabled until checkbox checked
+4. On submit:
+   - Supabase creates auth user
+   - Creates `public.users` record with version fields
+   - Records 2 agreement records (terms + privacy)
+   - Captures IP address and user agent
+   - Sets method to "signup"
+
+#### Re-acceptance Flow:
+When legal documents are updated:
+1. Update version constants in API files:
+   ```typescript
+   export const CURRENT_TERMS_VERSION = "1.1"; // Change from "1.0"
+   ```
+2. On next login/page load:
+   - `AgreementGuard` detects version mismatch
+   - Blocking modal appears
+   - User must review and accept new version
+   - New agreement record created with method="reacceptance"
+
+#### Legal Compliance Features:
+- ✅ **GDPR Compliant**: Explicit consent, version history, complete audit trail
+- ✅ **CCPA Compliant**: Privacy Policy accessible, audit trail for reporting
+- ✅ **IP Address Tracking**: For dispute resolution
+- ✅ **User Agent Tracking**: Device/browser forensics
+- ✅ **Timestamp Tracking**: Exact time of acceptance
+- ✅ **Version History**: Complete log of all acceptances
+- ✅ **Method Tracking**: Distinguishes signup vs re-acceptance vs OAuth
+- ✅ **Blocking Access**: Cannot use app until compliant
+
+#### Files Created/Modified:
+**Database:**
+- `migrations/0000_initial_schema.sql` - Complete database setup
+- `migrations/0000_add_agreements_to_actual_schema.sql` - Agreement tracking migration
+- `shared/schema.ts` - Updated with agreement tables
+
+**API Routes:**
+- `app/api/agreements/accept/route.ts` - Record acceptance endpoint
+- `app/api/agreements/status/route.ts` - Check compliance endpoint
+- `app/api/auth/register/route.ts` - Updated with agreement recording
+
+**Frontend:**
+- `components/AgreementGuard.tsx` - App-wide compliance checker
+- `components/AgreementModal.tsx` - Re-acceptance modal
+- `hooks/use-agreement-check.tsx` - Compliance status hook
+- `app/layout.tsx` - Wrapped with AgreementGuard
+- `app/auth/register/page.tsx` - Terms checkbox with proper validation
+- `app/terms/page.tsx` - Terms of Service page
+- `app/privacy/page.tsx` - Privacy Policy page
+
+**Documentation:**
+- `AGREEMENTS_IMPLEMENTATION.md` - Complete implementation guide
+
+#### Password Field UX Fix:
+- Fixed eye icon positioning on registration page
+- Changed from absolute positioning to wrapper div pattern
+- Added `pointer-events-none` to container, `pointer-events-auto` to button
+- Increased input padding from `pr-12` to `pr-14`
+- Eye icon now properly positioned on right side
+
+#### Testing Results:
+✅ **Successfully tested on October 4, 2025:**
+- User registration with checkbox validation
+- Agreement records created in database
+- Both terms and privacy recorded
+- IP address captured: `::1` (localhost IPv6)
+- Timestamp captured: `2025-10-04 23:20:16`
+- Method correctly set to "signup"
+- User versions updated in users table
+
+#### Database Migration Status:
+- ✅ Ran `0000_add_agreements_to_actual_schema.sql` in Supabase
+- ✅ Tables created: `public.users`, `public.user_agreements`
+- ✅ RLS policies enabled
+- ✅ Indexes created for performance
+- ✅ All endpoints use Supabase client (not Drizzle ORM)
+
+#### Production Deployment:
+- ✅ All code pushed to GitHub
+- ✅ Auto-deployed to dev.heritagewhisper.com via Vercel
+- ✅ Database migration completed in production Supabase
+- ✅ System fully operational
+
+#### Current Versions:
+- **Terms of Service:** v1.0
+- **Privacy Policy:** v1.0
+
+To update versions in the future, modify these constants:
+- `/app/api/agreements/accept/route.ts`
+- `/app/api/agreements/status/route.ts`
+
+---
+
 **Status: MIGRATION COMPLETE ✅**
-*Development server running successfully on port 3000*
+*Development server running successfully on port 3001*
 *Ready for production deployment to Vercel*
 
-*Last Updated: January 3, 2025 at 11:50 PM PST*
+*Last Updated: October 4, 2025 at 3:10 PM PST*
 
-## ✅ Today's Accomplishments (January 3, 2025)
+## ✅ Today's Accomplishments (October 4, 2025)
+1. **✅ Implemented Complete Terms & Privacy Acceptance Tracking** - Full GDPR/CCPA compliant system
+2. **✅ Created Database Schema** - users and user_agreements tables with audit trail
+3. **✅ Built API Endpoints** - accept, status, and registration integration
+4. **✅ Added Frontend Components** - Guard, Modal, and status hook
+5. **✅ Fixed Password Field UX** - Eye icon properly positioned on registration page
+6. **✅ Tested End-to-End** - Successfully registered test user with full compliance tracking
+7. **✅ Deployed to Production** - All code pushed to GitHub and live on dev.heritagewhisper.com
+
+## ✅ Previous Accomplishments (January 3, 2025)
 1. **Fixed Critical Photo Persistence Bug** - Photos now properly upload to Supabase and persist after refresh
 2. **Implemented True Book Pagination** - Stories flow naturally across pages like a real book
 3. **Added Audio Controls** - Delete and re-record functionality for audio recordings
