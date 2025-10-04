@@ -9,6 +9,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "HeritageWhisper - Preserve Your Life Stories",
   description: "An AI-powered storytelling platform for seniors to capture and share life memories with family.",
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
