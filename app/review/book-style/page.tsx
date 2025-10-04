@@ -272,17 +272,25 @@ function BookStyleReviewContent() {
 
         // Step 4: Update story with audio URL if uploaded
         if (finalAudioUrl) {
-          console.log("Updating story with audio URL...");
+          console.log("Updating story with audio URL:", finalAudioUrl);
           // IMPORTANT: Only update the audioUrl field, don't overwrite entire metadata
           const updateResponse = await apiRequest('GET', `/api/stories/${newStoryId}`);
           if (updateResponse.ok) {
             const { story: currentStory } = await updateResponse.json();
             console.log('[Audio Update] Current story before audio update:', currentStory);
 
+            // Use current story data and only update the audioUrl
             await apiRequest('PUT', `/api/stories/${newStoryId}`, {
-              ...tempStoryData,
-              audioUrl: finalAudioUrl,
-              // Preserve the photos that were just added
+              title: currentStory.title,
+              transcription: currentStory.transcription,
+              storyYear: currentStory.storyYear,
+              lifeAge: currentStory.lifeAge,
+              includeInTimeline: currentStory.includeInTimeline,
+              includeInBook: currentStory.includeInBook,
+              isFavorite: currentStory.isFavorite,
+              wisdomClipText: currentStory.wisdomClipText,
+              durationSeconds: currentStory.durationSeconds,
+              audioUrl: finalAudioUrl, // THIS is the only field we're updating
               photos: currentStory.photos || []
             });
             console.log('[Audio Update] Story updated with audio URL, photos preserved');
