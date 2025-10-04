@@ -347,6 +347,10 @@ export default function BookViewNew() {
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
   const { isOpen, open, close } = useRecordModal();
 
+  // Get storyId from URL parameters
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const storyIdFromUrl = searchParams.get('storyId');
+
   // Fetch stories - API returns { stories: [...] }
   const { data, isLoading } = useQuery<{ stories: Story[] }>({
     queryKey: ["/api/stories"],
@@ -356,9 +360,9 @@ export default function BookViewNew() {
   const stories = data?.stories || [];
 
   // Convert to book data structure
-  const { pages, spreads } = useMemo(() => {
+  const { pages, spreads, storyPageIndex } = useMemo(() => {
     if (!stories || stories.length === 0) {
-      return { pages: [], spreads: [] };
+      return { pages: [], spreads: [], storyPageIndex: -1 };
     }
 
     // Group stories by decade
@@ -390,11 +394,31 @@ export default function BookViewNew() {
     const bookPages = paginateBook(decadeGroups);
     const bookSpreads = getPageSpreads(bookPages);
 
+    // Find the page index for the story if storyId is provided
+    let pageIndex = -1;
+    if (storyIdFromUrl) {
+      pageIndex = bookPages.findIndex(page => page.storyId === storyIdFromUrl);
+    }
+
     return {
       pages: bookPages,
       spreads: bookSpreads,
+      storyPageIndex: pageIndex,
     };
-  }, [stories]);
+  }, [stories, storyIdFromUrl]);
+
+  // Navigate to story page when storyId is found
+  useEffect(() => {
+    if (storyPageIndex >= 0) {
+      if (isMobile) {
+        setCurrentMobilePage(storyPageIndex);
+      } else {
+        // For desktop, find the spread that contains this page
+        const spreadIndex = Math.floor(storyPageIndex / 2);
+        setCurrentSpreadIndex(spreadIndex);
+      }
+    }
+  }, [storyPageIndex, isMobile]);
 
   // Navigation
   const totalSpreads = spreads.length;
@@ -478,29 +502,29 @@ export default function BookViewNew() {
         </div>
       </div>
 
+      {/* Fixed Navigation Arrows - Outside of book container */}
+      {!isMobile && currentSpreadIndex > 0 && (
+        <button
+          onClick={goToPrevious}
+          className="fixed left-4 top-1/2 -translate-y-1/2 z-50 w-14 h-14 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
+        </button>
+      )}
+
+      {!isMobile && currentSpreadIndex < totalSpreads - 1 && (
+        <button
+          onClick={goToNext}
+          className="fixed right-4 top-1/2 -translate-y-1/2 z-50 w-14 h-14 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
+          aria-label="Next page"
+        >
+          <ChevronRight className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
+        </button>
+      )}
+
       {/* Book Content */}
       <div className="book-container relative" {...swipeHandlers}>
-        {/* Previous Page Arrow - Left Side */}
-        {!isMobile && currentSpreadIndex > 0 && (
-          <button
-            onClick={goToPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-50 w-14 h-14 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
-            aria-label="Previous page"
-          >
-            <ChevronLeft className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
-          </button>
-        )}
-
-        {/* Next Page Arrow - Right Side */}
-        {!isMobile && currentSpreadIndex < totalSpreads - 1 && (
-          <button
-            onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-50 w-14 h-14 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
-            aria-label="Next page"
-          >
-            <ChevronRight className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
-          </button>
-        )}
 
         <div className="book-spread">
           {isMobile ? (

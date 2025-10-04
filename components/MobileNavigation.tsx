@@ -112,7 +112,7 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
 
             {/* Icon */}
             <Image
-              src="/attached_assets/REC Mic.png"
+              src="/REC_Mic.png"
               alt="Record"
               width={28}
               height={28}

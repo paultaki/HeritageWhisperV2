@@ -656,3 +656,42 @@ npm run type-check
 - **Photo Storage Architecture**: Database stores file paths, API generates signed URLs on-demand
 - **Error Handling**: Stories with missing photos render in compact format without images
 - **User Experience**: No crashes or console errors when photos fail to load
+
+## 📝 Latest Updates (January 3, 2025 - Late Evening)
+
+### Navigation and UI Improvements (11:00 PM PST)
+- ✅ **Record Button Icon Updated**:
+  - Replaced Lucide Mic icon with custom REC Mic.png image
+  - Updated both mobile and desktop navigation components
+  - Image moved to `/public/REC_Mic.png` for proper Next.js static serving
+
+- ✅ **Book View Navigation Enhancements**:
+  - **Direct Story Navigation**: Clicking a story from timeline now navigates directly to that story's page in book view
+  - Added URL parameter support (`?storyId=xxx`) to jump to specific stories
+  - **Fixed Navigation Arrows**: Changed from `absolute` to `fixed` positioning
+  - Arrows now stay centered vertically at viewport center (not bouncing with content height)
+  - Improved user experience when navigating between stories
+
+- ✅ **Photo Carousel Navigation Fix**:
+  - Fixed navigation controls showing incorrectly for single photos
+  - Navigation (arrows + dots) now only appears when 2+ photos exist
+  - Improved visual design with white buttons and shadow effects
+  - Disabled arrows disappear completely instead of showing greyed out
+
+## 🔑 Files Modified (Latest Session - January 3, 2025 Late Evening)
+
+### Navigation Updates
+- `components/MobileNavigation.tsx` - Updated record button to use REC_Mic.png image
+- `components/DesktopNavigation.tsx` - Updated record button to use REC_Mic.png image
+- `public/REC_Mic.png` - Added custom record button icon
+
+### Book View Improvements
+- `app/book/page.tsx` - Added direct story navigation via URL parameters, fixed navigation arrow positioning
+  - Lines 350-352: Added URL parameter parsing for storyId
+  - Lines 397-407: Added logic to find page index for specific story
+  - Lines 410-421: Added useEffect to navigate to story page on load
+  - Lines 505-524: Changed navigation arrows from absolute to fixed positioning
+
+### Photo Carousel
+- `app/book/page.tsx` - Fixed photo carousel to only show navigation when multiple photos exist
+  - Lines 103-156: Improved PhotoCarousel component with proper multi-photo detection

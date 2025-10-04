@@ -112,7 +112,7 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
           }}
         >
           <Image
-            src="/attached_assets/REC Mic.png"
+            src="/REC_Mic.png"
             alt="Record"
             width={24}
             height={24}
