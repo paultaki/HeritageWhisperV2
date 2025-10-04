@@ -297,6 +297,26 @@ export const insertFamilyActivitySchema = createInsertSchema(familyActivity).omi
   createdAt: true,
 });
 
+// Shared access table for timeline/book sharing with permissions
+export const sharedAccess = pgTable("shared_access", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerUserId: uuid("owner_user_id").references(() => users.id).notNull(), // The person sharing their timeline
+  sharedWithEmail: text("shared_with_email").notNull(), // Email of person being granted access
+  sharedWithUserId: uuid("shared_with_user_id").references(() => users.id), // Populated when they sign up/sign in
+  permissionLevel: text("permission_level").notNull().default("view"), // 'view' or 'edit'
+  shareToken: text("share_token").notNull().unique(), // Unique token for the share link
+  createdAt: timestamp("created_at").default(sql`NOW()`),
+  expiresAt: timestamp("expires_at"), // Optional expiration
+  isActive: boolean("is_active").default(true).notNull(),
+  lastAccessedAt: timestamp("last_accessed_at"),
+});
+
+export const insertSharedAccessSchema = createInsertSchema(sharedAccess).omit({
+  id: true,
+  createdAt: true,
+  lastAccessedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStory = z.infer<typeof insertStorySchema>;
@@ -320,3 +340,5 @@ export type InsertFamilyMember = z.infer<typeof insertFamilyMemberSchema>;
 export type FamilyMember = typeof familyMembers.$inferSelect;
 export type InsertFamilyActivity = z.infer<typeof insertFamilyActivitySchema>;
 export type FamilyActivity = typeof familyActivity.$inferSelect;
+export type InsertSharedAccess = z.infer<typeof insertSharedAccessSchema>;
+export type SharedAccess = typeof sharedAccess.$inferSelect;
