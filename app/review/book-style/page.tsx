@@ -410,6 +410,30 @@ function BookStyleReviewContent() {
     router.push("/recording");
   };
 
+  const handleDelete = async () => {
+    if (!editId) return;
+
+    try {
+      const response = await apiRequest('DELETE', `/api/stories/${editId}`);
+      if (response.ok) {
+        toast({
+          title: "Story deleted",
+          description: "Your story has been deleted successfully.",
+        });
+        router.push("/timeline");
+      } else {
+        throw new Error("Failed to delete story");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast({
+        title: "Failed to delete story",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!user) {
     return null;
   }
@@ -441,7 +465,9 @@ function BookStyleReviewContent() {
       onAudioChange={handleAudioChange}
       onSave={handleSave}
       onCancel={handleCancel}
+      onDelete={handleDelete}
       isSaving={saveMutation.isPending}
+      isEditing={isEditing}
       userBirthYear={user.birthYear}
     />
   );

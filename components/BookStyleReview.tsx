@@ -14,6 +14,7 @@ import {
   Plus,
   Mic,
   Upload,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MultiPhotoUploader, type StoryPhoto } from "@/components/MultiPhotoUploader";
@@ -34,7 +35,9 @@ interface BookStyleReviewProps {
   onAudioChange?: (audioUrl: string | null, audioBlob?: Blob | null) => void;
   onSave: () => void;
   onCancel: () => void;
+  onDelete?: () => void;
   isSaving?: boolean;
+  isEditing?: boolean;
   userBirthYear?: number;
 }
 
@@ -53,7 +56,9 @@ export function BookStyleReview({
   onAudioChange,
   onSave,
   onCancel,
+  onDelete,
   isSaving = false,
+  isEditing = false,
   userBirthYear = 1950,
 }: BookStyleReviewProps) {
   const [editingTitle, setEditingTitle] = useState(false);
@@ -109,13 +114,28 @@ export function BookStyleReview({
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      {/* Header with Save/Cancel buttons */}
-      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      {/* Top Navigation */}
+      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-serif text-gray-800">Review Your Memory</h1>
           </div>
           <div className="flex gap-3">
+            {isEditing && onDelete && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (confirm("Are you sure you want to delete this story? This action cannot be undone.")) {
+                    onDelete();
+                  }
+                }}
+                disabled={isSaving}
+                className="rounded-full text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={onCancel}
@@ -138,335 +158,344 @@ export function BookStyleReview({
         </div>
       </div>
 
-      {/* Book Container - Left aligned with small gap from nav */}
-      <div className="pl-2 md:pl-24 pr-4 pt-4 pb-4">
-        <div className="bg-[#faf8f5] rounded-lg shadow-2xl max-w-7xl" style={{
-          aspectRatio: '2/1.4',
-          minHeight: 'calc(100vh - 200px)'  // Use more of the viewport height
-        }}>
-          {/* Two-page layout - always show both pages side by side, even on mobile */}
-          <div className="flex min-h-[calc(100vh-200px)] overflow-x-auto">
+      {/* Single Page Book View */}
+      <div className="flex justify-center px-4 py-8 pb-16">
+        <div className="bg-white rounded-lg shadow-2xl max-w-3xl w-full">
+          <div className="p-8 md:p-12 space-y-8">
 
-            {/* Left Page - Photo and Basic Info */}
-            <div className="min-w-[350px] w-1/2 flex-shrink-0 p-6 md:p-8 lg:p-12 border-r border-gray-200 flex flex-col bg-[#faf8f5] overflow-y-auto">
-              {/* Running header */}
-              <div className="running-header text-xs text-gray-500 uppercase tracking-wider mb-6">
-                Your Heritage Story
-              </div>
+            {/* 1. Photo Section */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                <Camera className="w-4 h-4" />
+                Photos (Optional)
+              </h3>
+              <MultiPhotoUploader
+                photos={photos}
+                onPhotosChange={onPhotosChange}
+                disabled={false}
+                loading={false}
+              />
+            </div>
 
-              {/* Photo Section - FIRST */}
-              <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                  <Camera className="w-4 h-4" />
-                  Photos (Optional)
-                </h3>
-                <MultiPhotoUploader
-                  photos={photos}
-                  onPhotosChange={onPhotosChange}
-                  disabled={false}
-                  loading={false}
-                />
-              </div>
-
-              {/* Title - Inline Editable - SECOND */}
-              <div className="mb-2 group relative">
-                {!editingTitle ? (
-                  <h2
-                    className="memory-title text-3xl font-serif text-gray-900 cursor-pointer hover:bg-amber-50 rounded px-2 -mx-2 py-1 transition-colors flex items-center gap-2"
-                    onClick={() => {
+            {/* 2. Title - Inline Editable */}
+            <div className="group relative">
+              {!editingTitle ? (
+                <h2
+                  className="memory-title text-4xl font-serif text-gray-900 cursor-pointer hover:bg-amber-50 rounded px-3 -mx-3 py-2 transition-colors flex items-center gap-2"
+                  onClick={() => {
+                    setTempTitle(title);
+                    setEditingTitle(true);
+                  }}
+                >
+                  {title || "Click to add title"}
+                  <Edit2 className="w-5 h-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </h2>
+              ) : (
+                <Input
+                  ref={titleInputRef}
+                  value={tempTitle}
+                  onChange={(e) => setTempTitle(e.target.value)}
+                  onBlur={handleTitleSave}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleTitleSave();
+                    if (e.key === "Escape") {
                       setTempTitle(title);
-                      setEditingTitle(true);
-                    }}
-                  >
-                    {title || "Click to add title"}
-                    <Edit2 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </h2>
-                ) : (
+                      setEditingTitle(false);
+                    }
+                  }}
+                  className="text-4xl font-serif"
+                  placeholder="Give your memory a title..."
+                />
+              )}
+            </div>
+
+            {/* 3. Date - Inline Editable */}
+            <div className="group relative">
+              {!editingYear ? (
+                <p
+                  className="text-lg text-gray-600 cursor-pointer hover:bg-amber-50 rounded px-3 -mx-3 py-1 transition-colors inline-flex items-center gap-2"
+                  onClick={() => {
+                    setTempYear(storyYear);
+                    setEditingYear(true);
+                  }}
+                >
+                  <Calendar className="w-5 h-5" />
+                  {storyYear || "Add year"}
+                  {age !== null && ` • Age ${age}`}
+                  <Edit2 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </p>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-gray-600" />
                   <Input
-                    ref={titleInputRef}
-                    value={tempTitle}
-                    onChange={(e) => setTempTitle(e.target.value)}
-                    onBlur={handleTitleSave}
+                    ref={yearInputRef}
+                    type="number"
+                    value={tempYear}
+                    onChange={(e) => setTempYear(e.target.value)}
+                    onBlur={handleYearSave}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") handleTitleSave();
+                      if (e.key === "Enter") handleYearSave();
                       if (e.key === "Escape") {
-                        setTempTitle(title);
-                        setEditingTitle(false);
+                        setTempYear(storyYear);
+                        setEditingYear(false);
                       }
                     }}
-                    className="text-3xl font-serif"
-                    placeholder="Give your memory a title..."
+                    className="w-32 text-lg"
+                    placeholder="Year"
+                    min="1900"
+                    max={new Date().getFullYear()}
                   />
-                )}
-              </div>
+                </div>
+              )}
+            </div>
 
-              {/* Year - Inline Editable */}
-              <div className="mb-4 group relative">
-                {!editingYear ? (
-                  <p
-                    className="text-sm text-gray-600 cursor-pointer hover:bg-amber-50 rounded px-2 -mx-2 py-1 transition-colors inline-flex items-center gap-2"
-                    onClick={() => {
-                      setTempYear(storyYear);
-                      setEditingYear(true);
-                    }}
-                  >
-                    <Calendar className="w-4 h-4" />
-                    {storyYear || "Add year"}
-                    {age !== null && ` • Age ${age}`}
-                    <Edit2 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </p>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-600" />
-                    <Input
-                      ref={yearInputRef}
-                      type="number"
-                      value={tempYear}
-                      onChange={(e) => setTempYear(e.target.value)}
-                      onBlur={handleYearSave}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleYearSave();
-                        if (e.key === "Escape") {
-                          setTempYear(storyYear);
-                          setEditingYear(false);
+            {/* 4. Audio Recording */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                <Mic className="w-4 h-4" />
+                Audio Recording (Optional)
+              </h3>
+              {audioUrl ? (
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <audio controls src={audioUrl} className="w-full mb-3" />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm("Are you sure you want to remove this audio?")) {
+                          onAudioChange?.(null, null);
                         }
                       }}
-                      className="w-24"
-                      placeholder="Year"
-                      min="1900"
-                      max={new Date().getFullYear()}
-                    />
-                  </div>
-                )}
-              </div>
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Remove Audio
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'audio/*';
+                        input.onchange = async (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0];
+                          if (file) {
+                            console.log('Audio file selected:', file.name, 'Size:', file.size, 'Type:', file.type);
 
-              {/* Audio Section - Below year, before text */}
-              <div className="mb-6">
-                {audioUrl ? (
-                  <div className="p-4 bg-white rounded-lg border border-gray-200">
-                    <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
-                      <Mic className="w-4 h-4" />
-                      Audio Recording
-                    </p>
-                    <audio controls src={audioUrl} className="w-full" />
-                  </div>
-                ) : (
-                  <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                    <p className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <Mic className="w-4 h-4" />
-                      Audio Recording (Optional)
-                    </p>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          // Navigate to recording page to record audio
-                          sessionStorage.setItem('reviewData', JSON.stringify({
-                            title,
-                            storyYear,
-                            transcription,
-                            photos,
-                            wisdomText,
-                            audioUrl
-                          }));
-                          window.location.href = '/recording';
-                        }}
-                        className="flex items-center gap-2"
-                      >
-                        <Mic className="w-4 h-4" />
-                        Record Audio
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          // Trigger file upload for audio
-                          const input = document.createElement('input');
-                          input.type = 'file';
-                          input.accept = 'audio/*';
-                          input.onchange = async (e) => {
-                            const file = (e.target as HTMLInputElement).files?.[0];
-                            if (file) {
-                              console.log('Audio file selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+                            const audioUrl = URL.createObjectURL(file);
+                            onAudioChange?.(audioUrl, file);
 
-                              const url = URL.createObjectURL(file);
-                              if (onAudioChange) {
-                                onAudioChange(url, file);
+                            // Transcribe the audio
+                            const formData = new FormData();
+                            formData.append('audio', file);
+
+                            try {
+                              const { supabase } = await import("@/lib/supabase");
+                              const { data: { session } } = await supabase.auth.getSession();
+
+                              console.log('Session available:', !!session);
+
+                              const headers: HeadersInit = {
+                                // Don't set Content-Type - browser will set it with boundary for FormData
+                              };
+
+                              if (session?.access_token) {
+                                headers['Authorization'] = `Bearer ${session.access_token}`;
+                                console.log('Auth header added');
                               }
 
-                              // Show loading state
-                              const uploadButton = e.target as HTMLElement;
-                              const originalText = uploadButton?.textContent;
+                              console.log('Sending transcription request...');
+                              const response = await fetch('/api/transcribe', {
+                                method: 'POST',
+                                headers,
+                                body: formData,
+                              });
 
-                              console.log('Starting transcription...');
+                              console.log('Transcription response status:', response.status);
 
-                              // Trigger transcription
-                              const formData = new FormData();
-                              formData.append('audio', file);
+                              if (response.ok) {
+                                const data = await response.json();
+                                console.log('Transcription response:', data);
 
-                              try {
-                                // Get auth token from Supabase session
-                                const { data: { session } } = await supabase.auth.getSession();
-                                console.log('Session available:', !!session);
-
-                                const headers: HeadersInit = {};
-
-                                if (session?.access_token) {
-                                  headers['Authorization'] = `Bearer ${session.access_token}`;
-                                  console.log('Auth header added');
+                                if (data.transcription) {
+                                  console.log('Setting transcription:', data.transcription.substring(0, 50));
+                                  onTranscriptionChange(data.transcription);
                                 }
 
-                                console.log('Sending transcription request...');
-                                const response = await fetch('/api/transcribe', {
-                                  method: 'POST',
-                                  body: formData,
-                                  headers
-                                });
-
-                                console.log('Transcription response status:', response.status);
-
-                                if (response.ok) {
-                                  const data = await response.json();
-                                  console.log('Transcription response:', data);
-
-                                  const { transcription: newTranscription, wisdomSuggestion } = data;
-
-                                  if (newTranscription && onTranscriptionChange) {
-                                    console.log('Setting transcription:', newTranscription.substring(0, 100) + '...');
-                                    // If there's no existing transcription, set the new one
-                                    if (!transcription) {
-                                      onTranscriptionChange(newTranscription);
-                                    } else {
-                                      console.log('Transcription already exists, not overwriting');
-                                    }
-                                  }
-
-                                  if (wisdomSuggestion && !wisdomText && onWisdomChange) {
-                                    console.log('Setting wisdom suggestion:', wisdomSuggestion);
-                                    onWisdomChange(wisdomSuggestion);
-                                  }
-                                } else {
-                                  const errorText = await response.text();
-                                  console.error('Transcription failed:', response.status, errorText);
-                                  alert('Transcription failed: ' + errorText);
+                                if (data.wisdomSuggestion) {
+                                  console.log('Setting wisdom suggestion:', data.wisdomSuggestion);
+                                  onWisdomChange(data.wisdomSuggestion);
                                 }
-                              } catch (error) {
-                                console.error('Transcription error:', error);
-                                alert('Failed to transcribe audio: ' + (error as Error).message);
+                              } else {
+                                const errorText = await response.text();
+                                console.error('Transcription failed:', response.status, errorText);
+                                alert('Transcription failed: ' + errorText);
+                              }
+                            } catch (error) {
+                              console.error('Transcription error:', error);
+                              alert('Failed to transcribe audio: ' + (error as Error).message);
+                            }
+                          }
+                        };
+                        input.click();
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Replace Audio
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'audio/*';
+                      input.onchange = async (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                          const audioUrl = URL.createObjectURL(file);
+                          onAudioChange?.(audioUrl, file);
+
+                          // Transcribe the audio
+                          const formData = new FormData();
+                          formData.append('audio', file);
+
+                          try {
+                            const { supabase } = await import("@/lib/supabase");
+                            const { data: { session } } = await supabase.auth.getSession();
+
+                            const headers: HeadersInit = {};
+                            if (session?.access_token) {
+                              headers['Authorization'] = `Bearer ${session.access_token}`;
+                            }
+
+                            const response = await fetch('/api/transcribe', {
+                              method: 'POST',
+                              headers,
+                              body: formData,
+                            });
+
+                            if (response.ok) {
+                              const data = await response.json();
+                              if (data.transcription) {
+                                onTranscriptionChange(data.transcription);
+                              }
+                              if (data.wisdomSuggestion) {
+                                onWisdomChange(data.wisdomSuggestion);
                               }
                             }
-                          };
-                          input.click();
-                        }}
-                        className="flex items-center gap-2"
+                          } catch (error) {
+                            console.error('Transcription error:', error);
+                          }
+                        }
+                      };
+                      input.click();
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload Audio
+                  </Button>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Add an audio recording to preserve your voice with this memory
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* 5. Your Story */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Your Story</h3>
+              <Textarea
+                value={transcription}
+                onChange={(e) => onTranscriptionChange(e.target.value)}
+                className="w-full min-h-[300px] resize-none border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-base focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400"
+                placeholder="Type or paste your story here. This is how it will appear in your book..."
+              />
+              {transcription && (
+                <p className="text-xs text-gray-500 mt-2">
+                  {transcription.split(' ').filter(w => w.length > 0).length} words
+                </p>
+              )}
+            </div>
+
+            {/* 6. Lesson Learned */}
+            <div>
+              <div className="group relative">
+                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  Lesson Learned
+                </h3>
+                {!editingWisdom ? (
+                  <div
+                    className="wisdom-quote p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border-l-4 border-amber-400 cursor-pointer hover:from-amber-100 hover:to-orange-100 transition-colors"
+                    onClick={() => {
+                      setTempWisdom(wisdomText);
+                      setEditingWisdom(true);
+                    }}
+                  >
+                    <p className="text-gray-700 italic">
+                      {wisdomText || "Click to add a lesson or wisdom from this memory..."}
+                    </p>
+                    <Edit2 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity mt-2" />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Textarea
+                      ref={wisdomInputRef}
+                      value={tempWisdom}
+                      onChange={(e) => setTempWisdom(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") {
+                          setTempWisdom(wisdomText);
+                          setEditingWisdom(false);
+                        }
+                      }}
+                      className="min-h-[100px]"
+                      placeholder="What lesson or wisdom would you share from this memory?"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleWisdomSave}
+                        className="text-green-600"
                       >
-                        <Upload className="w-4 h-4" />
-                        Upload Audio
+                        <Check className="w-4 h-4 mr-1" />
+                        Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setTempWisdom(wisdomText);
+                          setEditingWisdom(false);
+                        }}
+                        className="text-red-600"
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Cancel
                       </Button>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Add an audio recording to preserve your voice with this memory
-                    </p>
                   </div>
                 )}
               </div>
-
             </div>
 
-            {/* Right Page - Story Content Editable + Lesson Learned */}
-            <div className="min-w-[350px] w-1/2 flex-shrink-0 p-6 md:p-8 lg:p-12 bg-[#faf8f5] flex flex-col overflow-y-auto">
-              {/* Running header */}
-              <div className="running-header text-xs text-gray-500 uppercase tracking-wider mb-6 text-right">
-                {storyYear || new Date().getFullYear()}
-              </div>
-
-              {/* Story Content - Full editable area */}
-              <div className="story-content flex-grow overflow-y-auto">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Your Story</h3>
-                <Textarea
-                  value={transcription}
-                  onChange={(e) => onTranscriptionChange(e.target.value)}
-                  className="w-full min-h-[400px] resize-none border-0 bg-transparent p-2 text-gray-800 leading-relaxed font-serif text-base focus:outline-none focus:ring-0 placeholder:text-gray-400"
-                  placeholder="Type or paste your story here. This is how it will appear in your book..."
-                />
-                {transcription && (
-                  <p className="text-xs text-gray-500 mt-2 text-right">
-                    {transcription.split(' ').length} words
-                  </p>
-                )}
-              </div>
-
-              {/* Lesson Learned - At bottom of right page */}
-              <div className="mt-6 pb-4">
-                <div className="group relative">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                    Lesson Learned
-                  </h3>
-                  {!editingWisdom ? (
-                    <div
-                      className="wisdom-quote p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border-l-4 border-amber-400 cursor-pointer hover:from-amber-100 hover:to-orange-100 transition-colors"
-                      onClick={() => {
-                        setTempWisdom(wisdomText);
-                        setEditingWisdom(true);
-                      }}
-                    >
-                      <p className="text-gray-700 italic">
-                        {wisdomText || "Click to add a lesson or wisdom from this memory..."}
-                      </p>
-                      <Edit2 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity mt-2" />
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Textarea
-                        ref={wisdomInputRef}
-                        value={tempWisdom}
-                        onChange={(e) => setTempWisdom(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Escape") {
-                            setTempWisdom(wisdomText);
-                            setEditingWisdom(false);
-                          }
-                        }}
-                        className="min-h-[100px]"
-                        placeholder="What lesson or wisdom would you share from this memory?"
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={handleWisdomSave}
-                          className="text-green-600"
-                        >
-                          <Check className="w-4 h-4 mr-1" />
-                          Save
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setTempWisdom(wisdomText);
-                            setEditingWisdom(false);
-                          }}
-                          className="text-red-600"
-                        >
-                          <X className="w-4 h-4 mr-1" />
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
+      </div>
 
-        {/* Instructions */}
-        <div className="mt-6 text-left text-sm text-gray-600">
-          <p>Click on any element to edit it inline. This preview shows exactly how your story will appear in the book.</p>
-        </div>
+      {/* Instructions */}
+      <div className="max-w-3xl mx-auto px-4 pb-8 text-center text-sm text-gray-600">
+        <p>Click on any element to edit it inline. This preview shows how your story will appear in the book.</p>
       </div>
     </div>
   );

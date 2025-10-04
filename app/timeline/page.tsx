@@ -261,9 +261,11 @@ function MemoryCard({
   // Get the display photo - hero photo if exists, otherwise first photo, otherwise legacy photoUrl
   const getDisplayPhoto = () => {
     if (story.photos && story.photos.length > 0) {
-      const heroPhoto = story.photos.find((p) => p.isHero);
+      const heroPhoto = story.photos.find((p) => p.isHero && p.url);
       if (heroPhoto) return heroPhoto;
-      return story.photos[0];
+      // Find first photo with valid URL
+      const firstValidPhoto = story.photos.find((p) => p.url);
+      if (firstValidPhoto) return firstValidPhoto;
     }
     if (story.photoUrl) {
       return { url: story.photoUrl, transform: story.photoTransform };
@@ -472,7 +474,7 @@ function MemoryCard({
   };
 
   // Render compact format for memories without photos
-  if (!displayPhoto) {
+  if (!displayPhoto || !displayPhoto.url) {
     return (
       <div
         style={cardStyle}
