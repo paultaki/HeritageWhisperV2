@@ -113,8 +113,7 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
       <img
         src={currentPhoto.url}
         alt="Memory"
-        className="w-full h-full object-cover rounded-lg"
-        style={{ maxHeight: `${MEASUREMENTS.PHOTO_AREA}px` }}
+        className="w-full object-cover rounded-lg memory-photo"
       />
       {hasMultiplePhotos && (
         <>

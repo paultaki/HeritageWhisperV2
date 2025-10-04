@@ -1933,6 +1933,15 @@ textarea:focus-visible {
       margin: 12px auto;
       object-fit: cover;
     }
+  }
+
+  /* Ensure landscape aspect ratio on desktop too */
+  @media (min-width: 900px) {
+    .memory-photo {
+      aspect-ratio: 16 / 9;
+      max-height: 400px;
+      object-fit: cover;
+    }
     
     .memory-title {
       font-size: 24px;
