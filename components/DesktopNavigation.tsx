@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Calendar, BookOpen, Mic, Box } from 'lucide-react';
+import { Calendar, BookOpen, Box } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -111,7 +111,12 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
             border: '2px solid rgba(255, 255, 255, 0.3)',
           }}
         >
-          <Mic className="w-6 h-6 text-white" />
+          <Image
+            src="/attached_assets/REC Mic.png"
+            alt="Record"
+            width={24}
+            height={24}
+          />
         </button>
 
         <DesktopNavItem
