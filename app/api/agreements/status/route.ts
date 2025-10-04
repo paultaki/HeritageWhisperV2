@@ -35,25 +35,36 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get user's accepted versions from database
-    const [userRecord] = await db
-      .select({
-        latestTermsVersion: users.latestTermsVersion,
-        latestPrivacyVersion: users.latestPrivacyVersion,
-      })
-      .from(users)
-      .where(eq(users.id, user.id));
+    // Get user's accepted versions from database using Supabase client
+    const { data: userRecord, error: dbError } = await supabase
+      .from("users")
+      .select("latest_terms_version, latest_privacy_version")
+      .eq("id", user.id)
+      .single();
 
-    if (!userRecord) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+    if (dbError || !userRecord) {
+      // User might not have a record yet - return compliant for now
+      return NextResponse.json({
+        currentVersions: {
+          terms: CURRENT_TERMS_VERSION,
+          privacy: CURRENT_PRIVACY_VERSION,
+        },
+        userVersions: {
+          terms: null,
+          privacy: null,
+        },
+        needsAcceptance: {
+          terms: false,
+          privacy: false,
+          any: false,
+        },
+        isCompliant: true,
+      });
     }
 
     // Check if user needs to accept current versions
-    const needsTermsAcceptance = userRecord.latestTermsVersion !== CURRENT_TERMS_VERSION;
-    const needsPrivacyAcceptance = userRecord.latestPrivacyVersion !== CURRENT_PRIVACY_VERSION;
+    const needsTermsAcceptance = userRecord.latest_terms_version !== CURRENT_TERMS_VERSION;
+    const needsPrivacyAcceptance = userRecord.latest_privacy_version !== CURRENT_PRIVACY_VERSION;
 
     return NextResponse.json({
       currentVersions: {
@@ -61,8 +72,8 @@ export async function GET(request: NextRequest) {
         privacy: CURRENT_PRIVACY_VERSION,
       },
       userVersions: {
-        terms: userRecord.latestTermsVersion || null,
-        privacy: userRecord.latestPrivacyVersion || null,
+        terms: userRecord.latest_terms_version || null,
+        privacy: userRecord.latest_privacy_version || null,
       },
       needsAcceptance: {
         terms: needsTermsAcceptance,

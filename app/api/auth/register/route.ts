@@ -74,41 +74,54 @@ export async function POST(request: NextRequest) {
                      "unknown";
     const userAgent = request.headers.get("user-agent") || "unknown";
 
-    // Create user record in public.users and record agreements
+    // Create user record in public.users and record agreements using Supabase client
     try {
       // First, create the user record in public.users table
-      await db.insert(users).values({
-        id: data.user.id,
-        email: data.user.email!,
-        name: name,
-        birthYear: parseInt(birthYear),
-        storyCount: 0,
-        isPaid: false,
-        latestTermsVersion: CURRENT_TERMS_VERSION,
-        latestPrivacyVersion: CURRENT_PRIVACY_VERSION,
-      });
+      const { error: userInsertError } = await supabase
+        .from("users")
+        .insert({
+          id: data.user.id,
+          email: data.user.email!,
+          name: name,
+          birth_year: parseInt(birthYear),
+          story_count: 0,
+          is_paid: false,
+          latest_terms_version: CURRENT_TERMS_VERSION,
+          latest_privacy_version: CURRENT_PRIVACY_VERSION,
+        });
+
+      if (userInsertError) {
+        console.error("[Registration] Error creating user:", userInsertError);
+        // Don't fail registration - user exists in auth.users
+      }
 
       // Then record both agreements in parallel
-      await Promise.all([
-        db.insert(userAgreements).values({
-          userId: data.user.id,
-          agreementType: "terms",
-          version: CURRENT_TERMS_VERSION,
-          ipAddress,
-          userAgent,
-          method: "signup",
-        }),
-        db.insert(userAgreements).values({
-          userId: data.user.id,
-          agreementType: "privacy",
-          version: CURRENT_PRIVACY_VERSION,
-          ipAddress,
-          userAgent,
-          method: "signup",
-        }),
-      ]);
+      const { error: agreementsError } = await supabase
+        .from("user_agreements")
+        .insert([
+          {
+            user_id: data.user.id,
+            agreement_type: "terms",
+            version: CURRENT_TERMS_VERSION,
+            ip_address: ipAddress,
+            user_agent: userAgent,
+            method: "signup",
+          },
+          {
+            user_id: data.user.id,
+            agreement_type: "privacy",
+            version: CURRENT_PRIVACY_VERSION,
+            ip_address: ipAddress,
+            user_agent: userAgent,
+            method: "signup",
+          },
+        ]);
 
-      console.log(`[Registration] Created user record and recorded agreement acceptance for user ${data.user.id}`);
+      if (agreementsError) {
+        console.error("[Registration] Error recording agreements:", agreementsError);
+      } else {
+        console.log(`[Registration] Created user record and recorded agreement acceptance for user ${data.user.id}`);
+      }
     } catch (agreementError) {
       console.error("[Registration] Failed to create user or record agreement acceptance:", agreementError);
       // Don't fail registration if agreement recording fails, but log it

@@ -66,25 +66,39 @@ export async function POST(request: NextRequest) {
                      "unknown";
     const userAgent = request.headers.get("user-agent") || "unknown";
 
-    // Record the agreement acceptance
-    const [agreement] = await db.insert(userAgreements).values({
-      userId: user.id,
-      agreementType,
-      version,
-      ipAddress,
-      userAgent,
-      method,
-    }).returning();
+    // Record the agreement acceptance using Supabase client
+    const { data: agreement, error: insertError } = await supabase
+      .from("user_agreements")
+      .insert({
+        user_id: user.id,
+        agreement_type: agreementType,
+        version,
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        method,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("[Agreements] Error inserting agreement:", insertError);
+      throw insertError;
+    }
 
     // Update the user's latest version field for quick lookups
     const updateField = agreementType === "terms"
-      ? { latestTermsVersion: version }
-      : { latestPrivacyVersion: version };
+      ? { latest_terms_version: version }
+      : { latest_privacy_version: version };
 
-    await db
-      .update(users)
-      .set(updateField)
-      .where(eq(users.id, user.id));
+    const { error: updateError } = await supabase
+      .from("users")
+      .update(updateField)
+      .eq("id", user.id);
+
+    if (updateError) {
+      console.error("[Agreements] Error updating user:", updateError);
+      // Don't fail the request if user update fails
+    }
 
     console.log(`[Agreements] User ${user.id} accepted ${agreementType} v${version} via ${method}`);
 
@@ -92,10 +106,10 @@ export async function POST(request: NextRequest) {
       success: true,
       agreement: {
         id: agreement.id,
-        userId: agreement.userId,
-        agreementType: agreement.agreementType,
+        userId: agreement.user_id,
+        agreementType: agreement.agreement_type,
         version: agreement.version,
-        acceptedAt: agreement.acceptedAt,
+        acceptedAt: agreement.accepted_at,
         method: agreement.method,
       },
     });
