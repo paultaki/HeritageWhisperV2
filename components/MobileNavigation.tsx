@@ -60,30 +60,14 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', damping: 20 }}
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-t-2 md:hidden"
       style={{
+        borderTopColor: 'hsl(0, 77%, 64%)',
         paddingBottom: 'env(safe-area-inset-bottom)',
+        boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.08)',
       }}
     >
-      {/* Background with curved hill cutout for button */}
-      <div
-        className="absolute top-0 left-0 right-0 bg-white/90 backdrop-blur-md"
-        style={{
-          height: '100px',
-          clipPath: 'polygon(0% 30%, 35% 30%, 40% 15%, 45% 0%, 55% 0%, 60% 15%, 65% 30%, 100% 30%, 100% 100%, 0% 100%)',
-          boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.08)',
-        }}
-      />
-      {/* Top border with hill cutout */}
-      <div
-        className="absolute top-0 left-0 right-0"
-        style={{
-          height: '30px',
-          borderTop: '2px solid hsl(0, 77%, 64%)',
-          clipPath: 'polygon(0% 100%, 35% 100%, 40% 50%, 45% 0%, 55% 0%, 60% 50%, 65% 100%, 100% 100%, 100% 0%, 0% 0%)',
-        }}
-      />
-      <div className="flex items-center justify-around h-20 relative" style={{ marginTop: '30px' }}>
+      <div className="flex items-center justify-around h-20 relative">
         {/* Timeline */}
         <NavItem
           icon={Calendar}
@@ -106,7 +90,7 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
             onClick={onRecordClick}
             className="absolute w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
             style={{
-              top: '-46px',
+              top: '-16px',
               background: 'linear-gradient(135deg, hsl(0, 77%, 64%) 0%, hsl(0, 77%, 54%) 100%)',
               boxShadow: '0 4px 12px rgba(232, 93, 93, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)',
               border: '2px solid rgba(255, 255, 255, 0.3)',
