@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, User, Users, LogOut, Settings, HelpCircle, Home, Plus, Share2 } from 'lucide-react';
+import { Menu, X, User, Users, LogOut, Settings, HelpCircle, Home, Plus, Share2, FileText, Shield } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRecordModal } from '@/hooks/use-record-modal';
@@ -157,6 +157,24 @@ export default function HamburgerMenu() {
                   </button>
                 );
               })}
+            </div>
+
+            {/* Legal Links */}
+            <div className="border-t border-gray-100 py-1">
+              <button
+                onClick={() => handleNavigation('/privacy')}
+                className="w-full flex items-center px-4 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <Shield className="w-3.5 h-3.5 mr-2" />
+                Privacy Policy
+              </button>
+              <button
+                onClick={() => handleNavigation('/terms')}
+                className="w-full flex items-center px-4 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <FileText className="w-3.5 h-3.5 mr-2" />
+                Terms of Service
+              </button>
             </div>
 
             {/* Logout */}

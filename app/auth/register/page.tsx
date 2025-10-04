@@ -20,6 +20,7 @@ export default function Register() {
   const [name, setName] = useState("");
   const [birthYear, setBirthYear] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const router = useRouter();
   const { register, user } = useAuth();
   const { toast } = useToast();
@@ -152,9 +153,31 @@ export default function Register() {
                 </p>
               </div>
 
+              <div className="flex items-start space-x-2">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                  data-testid="checkbox-terms"
+                />
+                <Label htmlFor="terms" className="text-sm font-normal leading-relaxed cursor-pointer">
+                  I agree to the{" "}
+                  <Link href="/terms" className="text-primary hover:underline font-medium" target="_blank">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className="text-primary hover:underline font-medium" target="_blank">
+                    Privacy Policy
+                  </Link>
+                </Label>
+              </div>
+
               <Button
                 type="submit"
                 className="w-full text-xl font-semibold py-4"
+                disabled={!agreedToTerms}
                 data-testid="button-register"
               >
                 Create My Timeline
