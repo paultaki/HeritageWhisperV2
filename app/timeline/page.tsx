@@ -1135,11 +1135,11 @@ export default function Timeline() {
       </div>
 
       {/* Timeline Content with Vertical Timeline Design */}
-      <main className="max-w-6xl mx-auto p-6 pb-20 md:pb-6 md:pr-20">
+      <main className="max-w-6xl mx-auto px-3 py-6 pb-20 md:p-6 md:pb-6 md:pr-20">
         <div className="relative">
           {/* Vertical Timeline Line */}
           <div
-            className="absolute left-6 top-0 bottom-0 w-1"
+            className="absolute left-2 md:left-6 top-0 bottom-0 w-1"
             style={{
               background:
                 currentColorScheme === 'original' || currentColorScheme === 'inverted' ? 'linear-gradient(to bottom, #D4853A, #F08466)' :
@@ -1209,10 +1209,10 @@ export default function Timeline() {
                   className="timeline-section relative"
                 >
                   {/* Timeline Node */}
-                  <div className="absolute left-[20px] w-3 h-3 bg-heritage-coral rounded-full ring-2 ring-white shadow-md z-10"></div>
+                  <div className="absolute left-[4px] md:left-[20px] w-3 h-3 bg-heritage-coral rounded-full ring-2 ring-white shadow-md z-10"></div>
 
                   {/* Content */}
-                  <div className="ml-14">
+                  <div className="ml-8 md:ml-14">
                     {/* Decade Header */}
                     <div className="mb-6">
                       <div className="flex items-center gap-3 mb-2">

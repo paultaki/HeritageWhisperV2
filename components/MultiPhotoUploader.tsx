@@ -366,13 +366,12 @@ export function MultiPhotoUploader({
                     <DropdownMenuTrigger asChild>
                       <button
                         onClick={(e) => e.stopPropagation()}
-                        className="absolute w-10 h-10 flex items-center justify-center bg-white/95 backdrop-blur-sm rounded-full shadow-lg hover:bg-white hover:scale-105 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 ease-out border border-gray-200"
-                        style={{ top: '12px', right: '12px', zIndex: 20 }}
+                        className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-white/95 backdrop-blur-sm rounded-full shadow-lg hover:bg-white hover:scale-105 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 ease-out border border-gray-200"
                         disabled={disabled || loading}
                         data-testid={`button-menu-${index}`}
                         aria-label="Photo options menu"
                       >
-                        <MoreVertical className="w-5 h-5 text-gray-700" />
+                        <MoreVertical className="w-4 h-4 text-gray-700" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">

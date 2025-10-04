@@ -120,31 +120,14 @@ export function BookStyleReview({
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
       {/* Top Navigation */}
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-serif text-gray-800">Review Your Memory</h1>
-          </div>
-          <div className="flex gap-3">
-            {isEditing && onDelete && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (confirm("Are you sure you want to delete this story? This action cannot be undone.")) {
-                    onDelete();
-                  }
-                }}
-                disabled={isSaving}
-                className="rounded-full text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </Button>
-            )}
+        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
+          <h1 className="text-xl md:text-2xl font-serif text-gray-800 flex-shrink-0">Review Memory</h1>
+          <div className="flex gap-2 flex-shrink-0">
             <Button
               variant="outline"
               onClick={onCancel}
               disabled={isSaving}
-              className="rounded-full"
+              className="rounded-full px-4"
             >
               Cancel
             </Button>
@@ -154,9 +137,9 @@ export function BookStyleReview({
                 onSave();
               }}
               disabled={isSaving}
-              className="bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full px-6"
+              className="bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full px-4 md:px-6"
             >
-              {isSaving ? "Saving..." : "Save Story"}
+              {isSaving ? "Saving..." : "Save"}
             </Button>
           </div>
         </div>
@@ -421,7 +404,7 @@ export function BookStyleReview({
                       className="flex items-center gap-2"
                     >
                       <Mic className="w-4 h-4" />
-                      Record Your Memory
+                      REC Memory
                     </Button>
                     <Button
                       variant="outline"
@@ -572,8 +555,22 @@ export function BookStyleReview({
       </div>
 
       {/* Instructions */}
-      <div className="max-w-3xl mx-auto px-4 pb-8 text-center text-sm text-gray-600">
-        <p>Click on any element to edit it inline. This preview shows how your story will appear in the book.</p>
+      <div className="max-w-3xl mx-auto px-4 pb-4 text-center text-sm text-gray-600">
+        <p>Click on any element to edit it inline.</p>
+      </div>
+
+      {/* Bottom Save Button */}
+      <div className="max-w-3xl mx-auto px-4 pb-8">
+        <Button
+          onClick={() => {
+            console.log("BookStyleReview: Bottom Save button clicked, calling onSave");
+            onSave();
+          }}
+          disabled={isSaving}
+          className="w-full bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full py-6 text-lg font-medium"
+        >
+          {isSaving ? "Saving..." : "Save"}
+        </Button>
       </div>
     </div>
   );
