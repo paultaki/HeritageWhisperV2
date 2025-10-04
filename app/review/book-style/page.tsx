@@ -313,6 +313,76 @@ function BookStyleReviewContent() {
         }
       }
 
+      // Upload blob photos before saving
+      console.log("=== EDIT MODE PHOTO UPLOAD ===");
+      const finalPhotos = [];
+
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+        const pendingFile = (window as any)[`__pendingPhotoFile_${i}`];
+
+        console.log(`Photo ${i}:`, {
+          hasPhoto: !!photo,
+          photoUrl: photo?.url,
+          isBlobUrl: photo?.url?.startsWith('blob:'),
+          hasPendingFile: !!pendingFile
+        });
+
+        // If it's a blob URL, upload it first
+        if (photo.url.startsWith('blob:') && pendingFile) {
+          try {
+            console.log(`Uploading blob photo ${i} to storage...`);
+            const fileExtension = pendingFile.name.split('.').pop() || 'jpg';
+
+            // Get upload URL
+            const uploadUrlResponse = await apiRequest('POST', '/api/objects/upload', {
+              fileType: 'photo',
+              storyId: editId,
+              fileExtension: fileExtension
+            });
+
+            if (!uploadUrlResponse.ok) {
+              throw new Error('Failed to get upload URL');
+            }
+
+            const { uploadURL, filePath } = await uploadUrlResponse.json();
+
+            // Upload file to storage
+            const uploadResponse = await fetch(uploadURL, {
+              method: 'PUT',
+              body: pendingFile,
+              headers: {
+                'Content-Type': pendingFile.type || 'application/octet-stream'
+              }
+            });
+
+            if (!uploadResponse.ok) {
+              throw new Error(`Failed to upload photo: ${uploadResponse.status}`);
+            }
+
+            console.log(`Photo ${i} uploaded successfully, adding to story...`);
+
+            // Add photo to story using the API
+            const photoResponse = await apiRequest('POST', `/api/stories/${editId}/photos`, {
+              url: filePath,
+              caption: photo.caption || '',
+              isPrimary: photo.isPrimary || false
+            });
+
+            if (photoResponse.ok) {
+              const { photo: savedPhoto } = await photoResponse.json();
+              finalPhotos.push(savedPhoto);
+              console.log(`Photo ${i} saved to story metadata`);
+            }
+          } catch (error) {
+            console.error(`Failed to upload photo ${i}:`, error);
+          }
+        } else if (!photo.url.startsWith('blob:')) {
+          // Keep existing photos that are not blob URLs
+          finalPhotos.push(photo);
+        }
+      }
+
       const storyData = {
         title: title || `Memory from ${storyYear || 'the past'}`,
         transcription,
@@ -321,7 +391,7 @@ function BookStyleReviewContent() {
         includeInTimeline: true,
         includeInBook: true,
         isFavorite: false,
-        photos: photos.filter(p => !p.url.startsWith('blob:')),
+        photos: finalPhotos,
         audioUrl: finalAudioUrl,
         wisdomClipText: wisdomText,
         durationSeconds: 0,
