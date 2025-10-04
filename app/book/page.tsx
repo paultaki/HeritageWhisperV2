@@ -117,39 +117,32 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
       />
       {hasMultiplePhotos && (
         <>
-          {/* Side navigation arrows */}
-          <button
-            onClick={() => setCurrentPhotoIndex(Math.max(0, currentPhotoIndex - 1))}
-            disabled={currentPhotoIndex === 0}
-            className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 hover:bg-white disabled:opacity-0 disabled:pointer-events-none transition-all shadow-lg"
-            aria-label="Previous photo"
-          >
-            <ChevronLeft className="w-5 h-5 text-gray-700" />
-          </button>
+          {/* Navigation arrows with cleaner design */}
+          {currentPhotoIndex > 0 && (
+            <button
+              onClick={() => setCurrentPhotoIndex(currentPhotoIndex - 1)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg"
+              aria-label="Previous photo"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-700" />
+            </button>
+          )}
 
-          <button
-            onClick={() => setCurrentPhotoIndex(Math.min(photos.length - 1, currentPhotoIndex + 1))}
-            disabled={currentPhotoIndex === photos.length - 1}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 hover:bg-white disabled:opacity-0 disabled:pointer-events-none transition-all shadow-lg"
-            aria-label="Next photo"
-          >
-            <ChevronRight className="w-5 h-5 text-gray-700" />
-          </button>
+          {currentPhotoIndex < photos.length - 1 && (
+            <button
+              onClick={() => setCurrentPhotoIndex(currentPhotoIndex + 1)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg"
+              aria-label="Next photo"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-700" />
+            </button>
+          )}
 
-          {/* Dot indicators */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
-            {photos.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentPhotoIndex(index)}
-                className={`w-2.5 h-2.5 rounded-full transition-all ${
-                  index === currentPhotoIndex
-                    ? "bg-white scale-110"
-                    : "bg-white/60 hover:bg-white/80"
-                }`}
-                aria-label={`Go to photo ${index + 1}`}
-              />
-            ))}
+          {/* Photo counter */}
+          <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm">
+            <span className="text-white text-sm font-medium">
+              {currentPhotoIndex + 1} / {photos.length}
+            </span>
           </div>
         </>
       )}
@@ -236,10 +229,10 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
             variant="outline"
             size="sm"
             onClick={() => router.push(`/review/book-style?id=${page.storyId}`)}
-            className="gap-1 text-xs"
+            className="gap-0.5 text-[10px] md:text-xs md:gap-1 px-1.5 py-0.5 md:px-2 md:py-1 h-auto"
           >
             <Pencil className="w-3 h-3" />
-            Edit
+            <span className="hidden sm:inline">Edit</span>
           </Button>
         )}
       </div>
@@ -538,7 +531,7 @@ export default function BookViewNew() {
       </div>
 
       {/* Sticky Navigation Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 md:left-20">
+      <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 z-30 md:bottom-0 md:left-20 md:z-40">
         <div className="flex items-center justify-between px-6 py-3 max-w-7xl mx-auto">
           <Button
             variant="ghost"

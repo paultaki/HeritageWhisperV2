@@ -1447,7 +1447,7 @@ textarea:focus-visible {
   @media (min-width: 900px) {
     .book-spread {
       grid-template-columns: 1fr 1fr;
-      padding: 28px;
+      padding: 10px; /* Reduced from 28px for wider content area */
     }
     
     /* Enhanced center spine with book binding effect */
@@ -1485,7 +1485,7 @@ textarea:focus-visible {
       0 5px 10px rgba(0,0,0,0.1);
     outline: 1px solid rgba(0,0,0,.05);
     overflow: hidden;
-    padding: 40px;
+    padding: 40px 20px; /* Reduced horizontal padding from 40px to 20px for wider content area */
   }
 
   /* Ensure right page uses flexbox for proper layout */
@@ -1912,7 +1912,7 @@ textarea:focus-visible {
     .page {
       max-width: 600px;
       margin: 0 auto;
-      padding: 20px 8px 60px; /* Wider content area */
+      padding: 20px 6px 60px; /* Reduced horizontal padding from 8px to 6px for maximum content width */
     }
     
     /* Reduce spacing on left page (image/audio) for mobile */
@@ -2050,7 +2050,7 @@ textarea:focus-visible {
 
     /* Fix navigation buttons being cut off by footer on mobile */
     .book-container {
-      padding-bottom: 80px; /* Add space for mobile footer nav */
+      padding-bottom: 160px; /* Add space for both nav bars stacked (80px mobile nav + 60px book nav + padding) */
     }
 
     /* Ensure book navigation is visible above footer */
@@ -2415,44 +2415,7 @@ textarea:focus-visible {
   padding-bottom: 80px; /* Space for sticky footer */
 }
 
-/* Book spread - the two-page layout */
-.book-spread {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  position: relative;
-}
-
-@media (max-width: 768px) {
-  .book-spread {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-}
-
-/* Individual page styling */
-.page {
-  background: #fffef8;
-  padding: 3rem 2rem;  /* Reduced horizontal padding from 4rem to 2rem for wider text area */
-  min-height: 800px;
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  border-radius: 4px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  font-family: var(--font-serif), 'Georgia', serif;
-}
-
-@media (max-width: 768px) {
-  .page {
-    padding: 1.5rem 0.75rem;  /* Reduced padding for more text space on mobile */
-    min-height: 600px;
-  }
-}
+/* Duplicate styles removed - using styles from lines 1436-1916 instead */
 
 /* Page sides - left vs right */
 .page--left {
