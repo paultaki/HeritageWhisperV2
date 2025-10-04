@@ -48,18 +48,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
     }
 
+    // Determine file extension and content type
+    let fileExtension = "webm";
+    let contentType = audioFile.type || "audio/webm";
+
+    // Map MIME types to supported formats
+    if (audioFile.type === "audio/mpeg" || audioFile.type === "audio/mp3") {
+      fileExtension = "mp3";
+      contentType = "audio/mp3";
+    } else if (audioFile.type === "audio/wav" || audioFile.type === "audio/wave") {
+      fileExtension = "wav";
+      contentType = "audio/wav";
+    } else if (audioFile.type === "audio/ogg") {
+      fileExtension = "ogg";
+      contentType = "audio/ogg";
+    } else if (audioFile.type === "audio/mp4" || audioFile.type === "audio/m4a") {
+      fileExtension = "m4a";
+      contentType = "audio/mp4";
+    } else if (audioFile.type === "video/webm" || audioFile.type === "audio/webm") {
+      fileExtension = "webm";
+      contentType = "audio/webm";
+    }
+
     // Generate unique filename with audio/ prefix for heritage-whisper-files bucket
     const timestamp = Date.now();
-    const filename = `audio/${user.id}/${timestamp}-recording.webm`;
+    const filename = `audio/${user.id}/${timestamp}-recording.${fileExtension}`;
 
     // Convert File to ArrayBuffer then to Buffer
     const arrayBuffer = await audioFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-
-    // Upload to Supabase Storage using admin client (bypasses RLS)
-    // Using heritage-whisper-files bucket (paultaki project structure)
-    // Convert video/webm to audio/webm for Supabase compatibility
-    const contentType = audioFile.type === "video/webm" ? "audio/webm" : (audioFile.type || "audio/webm");
 
     const { data, error } = await supabaseAdmin.storage
       .from("heritage-whisper-files")

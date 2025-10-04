@@ -532,22 +532,22 @@ export default function BookViewNew() {
 
       {/* Sticky Navigation Footer */}
       <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 z-30 md:bottom-0 md:left-20 md:z-40">
-        <div className="flex items-center justify-between px-6 py-3 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between gap-2 px-3 py-3 max-w-7xl mx-auto md:px-6">
           <Button
             variant="ghost"
             size="sm"
             onClick={goToPrevious}
             disabled={isMobile ? currentMobilePage === 0 : currentSpreadIndex === 0}
-            className="gap-1"
+            className="gap-1 flex-shrink-0 px-2 md:px-4"
           >
             <ChevronLeft className="w-4 h-4" />
-            Previous
+            <span className="hidden sm:inline">Previous</span>
           </Button>
 
-          <div className="text-sm text-muted-foreground font-medium">
+          <div className="text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap">
             {isMobile
-              ? `Page ${currentMobilePage + 1} of ${totalPages}`
-              : `Page ${currentSpreadIndex * 2 + 1}-${Math.min(
+              ? `${currentMobilePage + 1} of ${totalPages}`
+              : `${currentSpreadIndex * 2 + 1}-${Math.min(
                   currentSpreadIndex * 2 + 2,
                   totalPages
                 )} of ${totalPages}`
@@ -563,9 +563,9 @@ export default function BookViewNew() {
                 ? currentMobilePage === totalPages - 1
                 : currentSpreadIndex === totalSpreads - 1
             }
-            className="gap-1"
+            className="gap-1 flex-shrink-0 px-2 md:px-4"
           >
-            Next
+            <span className="hidden sm:inline">Next</span>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
