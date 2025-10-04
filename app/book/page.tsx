@@ -542,39 +542,45 @@ export default function BookViewNew() {
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="book-navigation">
-        <Button
-          variant="ghost"
-          onClick={goToPrevious}
-          disabled={isMobile ? currentMobilePage === 0 : currentSpreadIndex === 0}
-        >
-          <ChevronLeft className="w-5 h-5" />
-          Previous
-        </Button>
+      {/* Sticky Navigation Footer */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 md:left-20">
+        <div className="flex items-center justify-between px-6 py-3 max-w-7xl mx-auto">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={goToPrevious}
+            disabled={isMobile ? currentMobilePage === 0 : currentSpreadIndex === 0}
+            className="gap-1"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Previous
+          </Button>
 
-        <div className="page-indicator">
-          {isMobile
-            ? `Page ${currentMobilePage + 1} of ${totalPages}`
-            : `Pages ${currentSpreadIndex * 2 + 1}-${Math.min(
-                currentSpreadIndex * 2 + 2,
-                totalPages
-              )} of ${totalPages}`
-          }
+          <div className="text-sm text-muted-foreground font-medium">
+            {isMobile
+              ? `Page ${currentMobilePage + 1} of ${totalPages}`
+              : `Page ${currentSpreadIndex * 2 + 1}-${Math.min(
+                  currentSpreadIndex * 2 + 2,
+                  totalPages
+                )} of ${totalPages}`
+            }
+          </div>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={goToNext}
+            disabled={
+              isMobile
+                ? currentMobilePage === totalPages - 1
+                : currentSpreadIndex === totalSpreads - 1
+            }
+            className="gap-1"
+          >
+            Next
+            <ChevronRight className="w-4 h-4" />
+          </Button>
         </div>
-
-        <Button
-          variant="ghost"
-          onClick={goToNext}
-          disabled={
-            isMobile
-              ? currentMobilePage === totalPages - 1
-              : currentSpreadIndex === totalSpreads - 1
-          }
-        >
-          Next
-          <ChevronRight className="w-5 h-5" />
-        </Button>
       </div>
 
       {/* Record Modal */}
