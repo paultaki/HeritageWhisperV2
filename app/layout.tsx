@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import NavigationWrapper from "@/components/NavigationWrapper";
+import AgreementGuard from "@/components/AgreementGuard";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,10 +24,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>
-          <NavigationWrapper />
-          <div className="md:pl-20 pb-20 md:pb-0">
-            {children}
-          </div>
+          <AgreementGuard>
+            <NavigationWrapper />
+            <div className="md:pl-20 pb-20 md:pb-0">
+              {children}
+            </div>
+          </AgreementGuard>
         </Providers>
       </body>
     </html>

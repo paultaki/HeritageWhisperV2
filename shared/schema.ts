@@ -13,6 +13,9 @@ export const users = pgTable("users", {
   profilePhotoUrl: text("profile_photo_url"), // Profile photo
   storyCount: integer("story_count").default(0),
   isPaid: boolean("is_paid").default(false),
+  // Legal agreement tracking (for quick lookups)
+  latestTermsVersion: text("latest_terms_version"), // e.g., "1.0"
+  latestPrivacyVersion: text("latest_privacy_version"), // e.g., "1.0"
   // subscriptionExpires: timestamp("subscription_expires"),
   // stripeCustomerId: text("stripe_customer_id"),
   // stripeSubscriptionId: text("stripe_subscription_id"),
@@ -317,6 +320,23 @@ export const insertSharedAccessSchema = createInsertSchema(sharedAccess).omit({
   lastAccessedAt: true,
 });
 
+// User agreements table for tracking Terms of Service and Privacy Policy acceptance
+export const userAgreements = pgTable("user_agreements", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  agreementType: text("agreement_type").notNull(), // 'terms' or 'privacy'
+  version: text("version").notNull(), // e.g., "1.0", "1.1", "2.0"
+  acceptedAt: timestamp("accepted_at").default(sql`NOW()`).notNull(),
+  ipAddress: text("ip_address"), // Optional: IP address at time of acceptance
+  userAgent: text("user_agent"), // Optional: User agent at time of acceptance
+  method: text("method").notNull().default("signup"), // 'signup', 'reacceptance', 'oauth'
+});
+
+export const insertUserAgreementSchema = createInsertSchema(userAgreements).omit({
+  id: true,
+  acceptedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStory = z.infer<typeof insertStorySchema>;
@@ -342,3 +362,5 @@ export type InsertFamilyActivity = z.infer<typeof insertFamilyActivitySchema>;
 export type FamilyActivity = typeof familyActivity.$inferSelect;
 export type InsertSharedAccess = z.infer<typeof insertSharedAccessSchema>;
 export type SharedAccess = typeof sharedAccess.$inferSelect;
+export type InsertUserAgreement = z.infer<typeof insertUserAgreementSchema>;
+export type UserAgreement = typeof userAgreements.$inferSelect;
