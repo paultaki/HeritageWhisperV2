@@ -1912,7 +1912,7 @@ textarea:focus-visible {
     .page {
       max-width: 600px;
       margin: 0 auto;
-      padding: 20px 16px 60px;
+      padding: 20px 12px 60px;
     }
     
     /* Reduce spacing on left page (image/audio) for mobile */
@@ -1948,9 +1948,16 @@ textarea:focus-visible {
       margin-top: 12px; /* Reduce top margin */
       margin-bottom: 12px; /* Reduce bottom margin */
     }
-    
+
     .audio-wrap {
       padding: 10px 12px; /* Smaller padding */
+    }
+
+    /* Ensure audio progress bar is visible on mobile */
+    .audio-progress-container {
+      display: block !important;
+      opacity: 1 !important;
+      visibility: visible !important;
     }
     
     .emotion-tags {

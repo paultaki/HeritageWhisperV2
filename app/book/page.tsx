@@ -109,47 +109,50 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
   const hasMultiplePhotos = photos.length > 1;
 
   return (
-    <div className="photo-container" style={{ height: `${MEASUREMENTS.PHOTO_AREA}px` }}>
+    <div className="relative mb-4">
       <img
         src={currentPhoto.url}
         alt="Memory"
         className="w-full h-full object-cover rounded-lg"
+        style={{ maxHeight: `${MEASUREMENTS.PHOTO_AREA}px` }}
       />
       {hasMultiplePhotos && (
-        <div className="flex justify-center items-center gap-4 mt-3">
+        <>
+          {/* Side navigation arrows */}
           <button
             onClick={() => setCurrentPhotoIndex(Math.max(0, currentPhotoIndex - 1))}
             disabled={currentPhotoIndex === 0}
-            className="p-2 rounded-full bg-white hover:bg-gray-100 disabled:opacity-0 disabled:pointer-events-none transition-all shadow-md"
+            className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 hover:bg-white disabled:opacity-0 disabled:pointer-events-none transition-all shadow-lg"
             aria-label="Previous photo"
           >
             <ChevronLeft className="w-5 h-5 text-gray-700" />
           </button>
 
-          <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCurrentPhotoIndex(Math.min(photos.length - 1, currentPhotoIndex + 1))}
+            disabled={currentPhotoIndex === photos.length - 1}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 hover:bg-white disabled:opacity-0 disabled:pointer-events-none transition-all shadow-lg"
+            aria-label="Next photo"
+          >
+            <ChevronRight className="w-5 h-5 text-gray-700" />
+          </button>
+
+          {/* Dot indicators */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
             {photos.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentPhotoIndex(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
+                className={`w-2.5 h-2.5 rounded-full transition-all ${
                   index === currentPhotoIndex
-                    ? "bg-coral-500 scale-110"
-                    : "bg-gray-400 hover:bg-gray-500"
+                    ? "bg-white scale-110"
+                    : "bg-white/60 hover:bg-white/80"
                 }`}
                 aria-label={`Go to photo ${index + 1}`}
               />
             ))}
           </div>
-
-          <button
-            onClick={() => setCurrentPhotoIndex(Math.min(photos.length - 1, currentPhotoIndex + 1))}
-            disabled={currentPhotoIndex === photos.length - 1}
-            className="p-2 rounded-full bg-white hover:bg-gray-100 disabled:opacity-0 disabled:pointer-events-none transition-all shadow-md"
-            aria-label="Next photo"
-          >
-            <ChevronRight className="w-5 h-5 text-gray-700" />
-          </button>
-        </div>
+        </>
       )}
     </div>
   );
@@ -254,15 +257,15 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={toggleAudio}
-                  className="p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-full border-2 border-primary/30 bg-primary/5 hover:bg-primary/15 hover:border-primary/50 transition-all"
                 >
                   {isPlaying ? (
                     <Pause className="w-4 h-4 text-primary" />
                   ) : (
-                    <Play className="w-4 h-4 text-primary" />
+                    <Play className="w-4 h-4 text-primary ml-0.5" />
                   )}
                 </button>
-                <div className="flex-1">
+                <div className="flex-1 audio-progress-container">
                   <div
                     className="audio-bar"
                     style={{
