@@ -588,10 +588,9 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
   const getLevelStatus = () => {
     if (!isRecording) return '';
     if (audioLevel > 0.8) return 'Too Loud!';
-    if (audioLevel > 0.5) return 'Good Volume';
-    if (audioLevel > 0.1) return 'Speaking Detected';
-    if (audioLevel > 0.01) return 'Very Quiet';
-    return 'No Audio Detected';
+    if (audioLevel > 0.3) return 'Good Volume';
+    if (audioLevel > 0.05) return 'Speaking Detected';
+    return 'Listening...';
   };
 
   return (
@@ -600,12 +599,12 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
       {isRecording && (
         <div className="mb-6 px-4">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Volume2 className={`w-5 h-5 ${audioLevel > 0.1 ? 'text-green-500' : 'text-gray-400'} transition-colors`} />
+            <Volume2 className={`w-5 h-5 ${audioLevel > 0.05 ? 'text-green-500' : 'text-gray-400'} transition-colors`} />
             <span className={`text-sm font-medium ${
-              audioLevel > 0.8 ? 'text-red-500' : 
-              audioLevel > 0.5 ? 'text-yellow-500' : 
-              audioLevel > 0.1 ? 'text-green-500' : 
-              'text-gray-400'
+              audioLevel > 0.8 ? 'text-red-500' :
+              audioLevel > 0.3 ? 'text-green-500' :
+              audioLevel > 0.05 ? 'text-yellow-500' :
+              'text-gray-500'
             } transition-colors`}>
               {getLevelStatus()}
             </span>

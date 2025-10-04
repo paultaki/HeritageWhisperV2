@@ -472,8 +472,8 @@ export default function RecordModal({
             style={{ background: designSystem.colors.background.creamLight }}
           >
             {/* Header */}
-            <div className="px-6 py-4 border-b flex items-center justify-between">
-              <h2 className="text-xl font-bold" style={{ fontFamily: designSystem.typography.fontFamilies.serif }}>
+            <div className="px-4 py-3 border-b flex items-center justify-between">
+              <h2 className="text-lg font-bold flex-1" style={{ fontFamily: designSystem.typography.fontFamilies.serif }}>
                 {isRecording ? 'Recording Your Story' : 'Ready to Share a Story?'}
               </h2>
               <Button
@@ -486,9 +486,9 @@ export default function RecordModal({
                   setEditedTranscription('');
                   onClose();
                 }}
-                className="rounded-full p-2"
+                className="rounded-full p-1.5 -mr-2"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-gray-600" />
               </Button>
             </div>
 
