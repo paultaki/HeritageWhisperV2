@@ -75,10 +75,10 @@ export async function GET(request: NextRequest) {
 
       if (error) {
         console.error('Error creating signed URL for photo:', photoUrl, error);
-        return photoUrl;
+        return null;
       }
 
-      return data?.signedUrl || photoUrl;
+      return data?.signedUrl || null;
     };
 
     // Transform to match frontend expectations
