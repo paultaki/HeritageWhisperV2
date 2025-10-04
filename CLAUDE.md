@@ -832,11 +832,57 @@ To update versions in the future, modify these constants:
 
 ---
 
+---
+
+## 📝 Latest Updates (October 4, 2025 - Evening Session)
+
+### Resend Email Integration (9:00-9:30 PM PST)
+- ✅ **Resend Package Installed**: Transactional email service configured
+- ✅ **Email Templates Created** (`/lib/resend.ts`):
+  - **Verification Email**: Branded Heritage Whisper design with brown gradient header
+  - **Welcome Email**: Onboarding tips with "Start Recording" CTA button
+  - Responsive HTML templates with mobile optimization
+  - From: `Heritage Whisper <noreply@heritagewhisper.com>`
+
+- ✅ **Registration Flow Updated** (`/app/api/auth/register/route.ts`):
+  - **Development**: Auto-confirm users (no email) for fast testing
+  - **Production**: Sends verification email via Resend
+  - Environment check: `NODE_ENV === 'production'` triggers email flow
+  - Fixed session issue: Auto-signs in users when email confirmation disabled
+
+- ✅ **Welcome Email API** (`/app/api/auth/send-welcome/route.ts`):
+  - Endpoint for sending welcome emails after verification
+  - Authenticated endpoint requiring valid JWT token
+  - Uses user's name from metadata or derives from email
+
+- ✅ **Environment Configuration**:
+  - `RESEND_API_KEY`: API key from V1 project (re_beSogo6D...)
+  - `RESEND_SENDER_EMAIL`: noreply@heritagewhisper.com
+  - Resend MCP server configured for email management
+
+### Email Flow
+**Development (current):**
+1. User registers → Auto-confirmed → Immediately signed in → Timeline
+
+**Production (when deployed):**
+1. User registers → Verification email sent via Resend → "Check Email" page
+2. User clicks link → Account verified → Redirected to login
+3. User logs in → Welcome email sent → Timeline
+
+### Technical Details
+- **Resend API Key**: Migrated from HeritageWhisper.com V1 project
+- **Email Templates**: Branded HTML with Heritage Whisper colors (#8B4513, #D2691E)
+- **Session Handling**: Fixed race condition where no session returned in dev mode
+- **Error Handling**: Graceful fallbacks if email sending fails
+- **Testing**: Can force email in dev by setting `requireEmailConfirmation = true`
+
+---
+
 **Status: MIGRATION COMPLETE ✅**
 *Development server running successfully on port 3001*
 *Ready for production deployment to Vercel*
 
-*Last Updated: October 4, 2025 at 3:10 PM PST*
+*Last Updated: October 4, 2025 at 9:30 PM PST*
 
 ## ✅ Today's Accomplishments (October 4, 2025)
 1. **✅ Implemented Complete Terms & Privacy Acceptance Tracking** - Full GDPR/CCPA compliant system
@@ -846,6 +892,7 @@ To update versions in the future, modify these constants:
 5. **✅ Fixed Password Field UX** - Eye icon properly positioned on registration page
 6. **✅ Tested End-to-End** - Successfully registered test user with full compliance tracking
 7. **✅ Deployed to Production** - All code pushed to GitHub and live on dev.heritagewhisper.com
+8. **✅ Resend Email Integration** - Transactional emails for user verification and welcome messages
 
 ## ✅ Previous Accomplishments (January 3, 2025)
 1. **Fixed Critical Photo Persistence Bug** - Photos now properly upload to Supabase and persist after refresh
