@@ -15,9 +15,11 @@ import {
   Mic,
   Upload,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MultiPhotoUploader, type StoryPhoto } from "@/components/MultiPhotoUploader";
+import { AudioRecorder } from "@/components/AudioRecorder";
 import { supabase } from "@/lib/supabase";
 
 interface BookStyleReviewProps {
@@ -67,6 +69,8 @@ export function BookStyleReview({
   const [tempTitle, setTempTitle] = useState(title);
   const [tempYear, setTempYear] = useState(storyYear);
   const [tempWisdom, setTempWisdom] = useState(wisdomText);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const yearInputRef = useRef<HTMLInputElement>(null);
@@ -348,21 +352,72 @@ export function BookStyleReview({
                     </Button>
                   </div>
                 </div>
+              ) : isRecording ? (
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <AudioRecorder
+                    onRecordingComplete={async (audioBlob) => {
+                      setIsRecording(false);
+                      setIsProcessing(true);
+
+                      const audioUrl = URL.createObjectURL(audioBlob);
+                      onAudioChange?.(audioUrl, audioBlob);
+
+                      // Transcribe the audio
+                      const formData = new FormData();
+                      formData.append('audio', audioBlob);
+
+                      try {
+                        const { supabase } = await import("@/lib/supabase");
+                        const { data: { session } } = await supabase.auth.getSession();
+
+                        const headers: HeadersInit = {};
+                        if (session?.access_token) {
+                          headers['Authorization'] = `Bearer ${session.access_token}`;
+                        }
+
+                        const response = await fetch('/api/transcribe', {
+                          method: 'POST',
+                          headers,
+                          body: formData,
+                        });
+
+                        if (response.ok) {
+                          const data = await response.json();
+                          if (data.transcription) {
+                            onTranscriptionChange(data.transcription);
+                          }
+                          if (data.wisdomSuggestion) {
+                            onWisdomChange(data.wisdomSuggestion);
+                          }
+                        }
+                      } catch (error) {
+                        console.error('Transcription error:', error);
+                      } finally {
+                        setIsProcessing(false);
+                      }
+                    }}
+                    onCancel={() => setIsRecording(false)}
+                  />
+                </div>
+              ) : isProcessing ? (
+                <div className="p-8 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-8 h-8 text-coral-500 animate-spin" />
+                    <div className="text-center">
+                      <p className="font-medium text-gray-900">Processing your recording...</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Transcribing audio and generating wisdom
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        // Open the RecordModal
-                        const recordModal = (window as any).__recordModal;
-                        if (recordModal) {
-                          recordModal.open();
-                        } else {
-                          alert('Record functionality is not available. Please use the main Record button in the navigation.');
-                        }
-                      }}
+                      onClick={() => setIsRecording(true)}
                       className="flex items-center gap-2"
                     >
                       <Mic className="w-4 h-4" />
@@ -378,6 +433,8 @@ export function BookStyleReview({
                         input.onchange = async (e) => {
                           const file = (e.target as HTMLInputElement).files?.[0];
                           if (file) {
+                            setIsProcessing(true);
+
                             const audioUrl = URL.createObjectURL(file);
                             onAudioChange?.(audioUrl, file);
 
@@ -411,6 +468,8 @@ export function BookStyleReview({
                               }
                             } catch (error) {
                               console.error('Transcription error:', error);
+                            } finally {
+                              setIsProcessing(false);
                             }
                           }
                         };
