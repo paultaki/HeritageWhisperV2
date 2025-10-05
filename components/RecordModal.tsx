@@ -472,8 +472,25 @@ export default function RecordModal({
             style={{ background: designSystem.colors.background.creamLight }}
           >
             {/* Header */}
-            <div className="px-4 py-3 border-b flex items-center justify-between gap-2">
-              <h2 className="text-lg font-bold flex-1 min-w-0" style={{ fontFamily: designSystem.typography.fontFamilies.serif, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+            <div className="px-4 py-3 border-b flex items-center justify-between">
+              <h2
+                className="text-[15px] sm:text-base md:text-lg font-bold mr-3"
+                style={{
+                  fontFamily: designSystem.typography.fontFamilies.serif,
+                  // Fix for vertical text wrapping on mobile
+                  flex: '1 1 auto',
+                  minWidth: '200px',
+                  maxWidth: 'calc(100% - 50px)',
+                  wordBreak: 'keep-all',
+                  overflowWrap: 'break-word',
+                  wordWrap: 'break-word',
+                  whiteSpace: 'normal',
+                  hyphens: 'none',
+                  WebkitHyphens: 'none',
+                  msHyphens: 'none',
+                  lineHeight: '1.4'
+                }}
+              >
                 {isRecording ? 'Recording Your Story' : 'Ready to Share a Story?'}
               </h2>
               <Button
@@ -486,7 +503,8 @@ export default function RecordModal({
                   setEditedTranscription('');
                   onClose();
                 }}
-                className="rounded-full p-1.5 -mr-2 flex-shrink-0"
+                className="rounded-full p-1.5 -mr-2"
+                style={{ flexShrink: 0 }}
               >
                 <X className="w-5 h-5 text-gray-600" />
               </Button>
