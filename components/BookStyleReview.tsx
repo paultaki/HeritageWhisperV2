@@ -119,10 +119,21 @@ export function BookStyleReview({
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
       {/* Top Navigation */}
-      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
-          <h1 className="text-xl md:text-2xl font-serif text-gray-800 flex-shrink-0">Review Memory</h1>
+          <h1 className="text-xl md:text-2xl font-serif text-gray-800 flex-shrink-0 mr-auto">Review Memory</h1>
           <div className="flex gap-2 flex-shrink-0">
+            {isEditing && onDelete && (
+              <Button
+                variant="outline"
+                onClick={onDelete}
+                disabled={isSaving}
+                className="rounded-full px-4 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="ml-2 hidden md:inline">Delete</span>
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={onCancel}

@@ -234,16 +234,30 @@ function BookStyleReviewContent() {
 
         // Step 2: Upload audio if available
         if (hasNewAudio) {
-          console.log("Uploading audio...");
+          console.log("Uploading audio...", {
+            isFile: mainAudioBlob instanceof File,
+            type: mainAudioBlob?.type,
+            size: mainAudioBlob?.size
+          });
           try {
             const formData = new FormData();
-            formData.append("audio", mainAudioBlob!, "recording.webm");
+            // If it's a File object, it has its own name and type
+            if (mainAudioBlob instanceof File) {
+              formData.append("audio", mainAudioBlob);
+            } else {
+              // For recorded audio (Blob), use default filename
+              formData.append("audio", mainAudioBlob!, "recording.webm");
+            }
 
             const uploadResponse = await apiRequest('POST', '/api/upload/audio', formData);
             if (uploadResponse.ok) {
               const { url } = await uploadResponse.json();
               finalAudioUrl = url;
               console.log("✅ Audio uploaded successfully:", url);
+            } else {
+              console.error("Audio upload failed:", uploadResponse.status);
+              const error = await uploadResponse.text();
+              console.error("Upload error:", error);
             }
           } catch (error) {
             console.error("Audio upload failed:", error);
@@ -361,10 +375,20 @@ function BookStyleReviewContent() {
       // For EDITING or stories without new media, use standard save
       let finalAudioUrl = audioUrl;
       if (mainAudioBlob && audioUrl?.startsWith("blob:")) {
-        console.log("Uploading audio blob...");
+        console.log("Uploading audio blob...", {
+          isFile: mainAudioBlob instanceof File,
+          type: mainAudioBlob.type,
+          size: mainAudioBlob.size
+        });
         try {
           const formData = new FormData();
-          formData.append("audio", mainAudioBlob, "recording.webm");
+          // If it's a File object, it has its own name and type
+          if (mainAudioBlob instanceof File) {
+            formData.append("audio", mainAudioBlob);
+          } else {
+            // For recorded audio (Blob), use default filename
+            formData.append("audio", mainAudioBlob, "recording.webm");
+          }
 
           const uploadResponse = await apiRequest('POST', '/api/upload/audio', formData);
           if (uploadResponse.ok) {
@@ -373,6 +397,8 @@ function BookStyleReviewContent() {
             console.log("Audio uploaded successfully:", url);
           } else {
             console.error("Audio upload failed:", uploadResponse.status);
+            const error = await uploadResponse.text();
+            console.error("Upload error:", error);
           }
         } catch (error) {
           console.error("Failed to upload audio:", error);
