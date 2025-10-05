@@ -176,65 +176,121 @@ export async function PUT(
 
     const body = await request.json();
 
+    // First, fetch the existing story to get current values
+    const { data: existingStory, error: fetchError } = await supabaseAdmin
+      .from("stories")
+      .select("*")
+      .eq("id", params.id)
+      .eq("user_id", user.id)
+      .single();
+
+    if (fetchError || !existingStory) {
+      console.error("Story fetch error:", fetchError);
+      return NextResponse.json(
+        { error: "Story not found or unauthorized" },
+        { status: 404 }
+      );
+    }
+
     // Process photos array - use filePath if available, otherwise extract from URL
-    const processedPhotos = (body.photos || []).filter((photo: any) => {
-      if (!photo.url && !photo.filePath) return false;
-      // Skip blob URLs - these are invalid temporary URLs
-      if (photo.url && photo.url.startsWith('blob:')) {
-        console.warn('Blob URL found in photos array - filtering out:', photo.url);
-        return false;
-      }
-      return true;
-    }).map((photo: any) => {
-      // If we have a filePath, use it as the url (for storage)
-      if (photo.filePath) {
-        return {
-          ...photo,
-          url: photo.filePath // Store the path, not the signed URL
-        };
-      }
+    const processedPhotos = body.photos !== undefined
+      ? (body.photos || []).filter((photo: any) => {
+          if (!photo.url && !photo.filePath) return false;
+          // Skip blob URLs - these are invalid temporary URLs
+          if (photo.url && photo.url.startsWith('blob:')) {
+            console.warn('Blob URL found in photos array - filtering out:', photo.url);
+            return false;
+          }
+          return true;
+        }).map((photo: any) => {
+          // If we have a filePath, use it as the url (for storage)
+          if (photo.filePath) {
+            return {
+              ...photo,
+              url: photo.filePath // Store the path, not the signed URL
+            };
+          }
 
-      // If the URL is a signed Supabase URL, extract the path
-      if (photo.url && photo.url.includes('supabase.co/storage/v1/object/sign/')) {
-        // Extract the path from the signed URL
-        const urlParts = photo.url.split('/');
-        const pathStartIndex = urlParts.indexOf('photo') + 1;
-        if (pathStartIndex > 0 && pathStartIndex < urlParts.length) {
-          const filePath = urlParts.slice(pathStartIndex).join('/').split('?')[0];
-          return {
-            ...photo,
-            url: decodeURIComponent(filePath) // Store the extracted path
-          };
-        }
-      }
+          // If the URL is a signed Supabase URL, extract the path
+          if (photo.url && photo.url.includes('supabase.co/storage/v1/object/sign/')) {
+            // Extract the path from the signed URL
+            const urlParts = photo.url.split('/');
+            const pathStartIndex = urlParts.indexOf('photo') + 1;
+            if (pathStartIndex > 0 && pathStartIndex < urlParts.length) {
+              const filePath = urlParts.slice(pathStartIndex).join('/').split('?')[0];
+              return {
+                ...photo,
+                url: decodeURIComponent(filePath) // Store the extracted path
+              };
+            }
+          }
 
-      // Otherwise keep the photo as-is (might be a path already)
-      return photo;
-    });
+          // Otherwise keep the photo as-is (might be a path already)
+          return photo;
+        })
+      : undefined;
 
-    // Prepare story data for Supabase (snake_case schema)
-    const storyData: any = {
-      title: body.title || "Untitled Story",
-      transcript: body.transcription || body.content,
-      year: body.year || body.storyYear,
-      audio_url: body.audioUrl && !body.audioUrl.startsWith('blob:') ? body.audioUrl : null,
-      wisdom_text: body.wisdomClipText || body.wisdomTranscription,
-      wisdom_clip_url: body.wisdomClipUrl,
-      duration_seconds: Math.max(1, Math.min(120, body.durationSeconds || 30)),
-      emotions: body.emotions,
-      photo_url: body.photoUrl && !body.photoUrl.startsWith('blob:') ? body.photoUrl : undefined,
-      is_saved: true,
-      metadata: {
-        life_age: body.lifeAge || body.age,
-        include_in_timeline: body.includeInTimeline ?? true,
-        include_in_book: body.includeInBook ?? true,
-        is_favorite: body.isFavorite ?? false,
-        photos: processedPhotos,
-        pivotal_category: body.pivotalCategory,
-        story_date: body.storyDate,
-        photo_transform: body.photoTransform,
-      }
-    };
+    // Build update object - only include fields that were actually sent
+    const storyData: any = {};
+
+    // Only update fields that are explicitly provided in the request body
+    if (body.title !== undefined) storyData.title = body.title;
+    if (body.transcription !== undefined || body.content !== undefined) {
+      storyData.transcript = body.transcription || body.content;
+    }
+    if (body.year !== undefined || body.storyYear !== undefined) {
+      storyData.year = body.year || body.storyYear;
+    }
+    if (body.audioUrl !== undefined) {
+      storyData.audio_url = body.audioUrl && !body.audioUrl.startsWith('blob:') ? body.audioUrl : null;
+    }
+    if (body.wisdomClipText !== undefined || body.wisdomTranscription !== undefined) {
+      storyData.wisdom_text = body.wisdomClipText || body.wisdomTranscription;
+    }
+    if (body.wisdomClipUrl !== undefined) storyData.wisdom_clip_url = body.wisdomClipUrl;
+    if (body.durationSeconds !== undefined) {
+      storyData.duration_seconds = Math.max(1, Math.min(120, body.durationSeconds || 30));
+    }
+    if (body.emotions !== undefined) storyData.emotions = body.emotions;
+    if (body.photoUrl !== undefined) {
+      storyData.photo_url = body.photoUrl && !body.photoUrl.startsWith('blob:') ? body.photoUrl : null;
+    }
+
+    // Always set is_saved to true for updates
+    storyData.is_saved = true;
+
+    // Build metadata object - merge with existing metadata
+    const metadata = { ...existingStory.metadata };
+
+    if (body.lifeAge !== undefined || body.age !== undefined) {
+      metadata.life_age = body.lifeAge || body.age;
+    }
+    if (body.includeInTimeline !== undefined) {
+      metadata.include_in_timeline = body.includeInTimeline;
+    }
+    if (body.includeInBook !== undefined) {
+      metadata.include_in_book = body.includeInBook;
+    }
+    if (body.isFavorite !== undefined) {
+      metadata.is_favorite = body.isFavorite;
+    }
+    if (processedPhotos !== undefined) {
+      metadata.photos = processedPhotos;
+    }
+    if (body.pivotalCategory !== undefined) {
+      metadata.pivotal_category = body.pivotalCategory;
+    }
+    if (body.storyDate !== undefined) {
+      metadata.story_date = body.storyDate;
+    }
+    if (body.photoTransform !== undefined) {
+      metadata.photo_transform = body.photoTransform;
+    }
+
+    // Only update metadata if we have changes
+    if (Object.keys(metadata).length > 0) {
+      storyData.metadata = metadata;
+    }
 
     // Update the story in Supabase database
     const { data: updatedStory, error: updateError } = await supabaseAdmin
