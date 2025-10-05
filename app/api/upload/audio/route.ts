@@ -56,21 +56,25 @@ export async function POST(request: NextRequest) {
     const baseType = contentType.split(';')[0];
 
     // Map MIME types to supported formats
+    // Use application/octet-stream as a fallback for better compatibility
     if (baseType === "audio/mpeg" || baseType === "audio/mp3") {
       fileExtension = "mp3";
-      contentType = "audio/mpeg";
+      contentType = "application/octet-stream"; // Use generic binary type for MP3
     } else if (baseType === "audio/wav" || baseType === "audio/wave") {
       fileExtension = "wav";
-      contentType = "audio/wav";
+      contentType = "application/octet-stream"; // Use generic binary type
     } else if (baseType === "audio/ogg") {
       fileExtension = "ogg";
-      contentType = "audio/ogg";
+      contentType = "application/octet-stream"; // Use generic binary type
     } else if (baseType === "audio/mp4" || baseType === "audio/m4a") {
       fileExtension = "m4a";
-      contentType = "audio/mp4";
+      contentType = "application/octet-stream"; // Use generic binary type
     } else if (baseType === "video/webm" || baseType === "audio/webm") {
       fileExtension = "webm";
-      contentType = "audio/webm";  // Use base type without codec info
+      contentType = "audio/webm";  // WebM seems to work, keep it
+    } else {
+      // For any other audio type, use generic binary
+      contentType = "application/octet-stream";
     }
 
     // Generate unique filename with audio/ prefix for heritage-whisper-files bucket

@@ -1404,3 +1404,66 @@ shared_access (
   - Ready for successful Vercel deployment
 
 *Last Updated: January 4, 2025 at 1:00 AM PST*
+
+---
+
+## 📝 Latest Updates (January 4, 2025 - Afternoon Session)
+
+### Critical Fixes (2:00-3:00 PM PST)
+
+#### Audio Upload Issues Fixed
+- ✅ **Fixed uploaded audio not saving on existing memories**:
+  - Issue: Audio files uploaded (not recorded) weren't being saved properly
+  - Cause: File objects were being appended to FormData with hardcoded "recording.webm" filename
+  - Fix: Added detection for File vs Blob objects to preserve original filename and MIME type
+  - Files modified: `/app/review/book-style/page.tsx:362-392`
+
+- ✅ **Fixed audio/webm;codecs=opus MIME type support**:
+  - Issue: Modern browsers send codec information in MIME type causing Supabase upload failures
+  - Fix: Strip codec information from MIME type before upload (e.g., "audio/webm;codecs=opus" → "audio/webm")
+  - Files modified: `/app/api/upload/audio/route.ts:55-73`
+
+#### UI/UX Improvements
+- ✅ **Added Delete button back to BookStyleReview**:
+  - Only shows when editing existing stories (not new stories)
+  - Red color with Trash icon for clear visual indication
+  - Files modified: `/components/BookStyleReview.tsx:126-136`
+
+- ✅ **Fixed Save button overlap with hamburger menu**:
+  - Increased header z-index from `z-10` to `z-50`
+  - Added `mr-auto` to title for proper spacing
+  - Files modified: `/components/BookStyleReview.tsx:122-124`
+
+- ✅ **Fixed RecordModal header text vertical wrapping (5th attempt)**:
+  - Applied comprehensive CSS fixes to prevent character-by-character wrapping
+  - Used `wordBreak: 'keep-all'` and proper flex container settings
+  - Set minimum width and proper line height
+  - Files modified: `/components/RecordModal.tsx:475-511`
+
+#### Authentication & API Fixes
+- ✅ **Fixed 401 Unauthorized errors on /api/profile**:
+  - Issue: RecordModal was calling API without authentication headers
+  - Fix: Updated to use query client's default queryFn which includes auth
+  - Changed query key from `['profile']` to `['/api/profile']`
+  - Files modified: `/components/RecordModal.tsx:68-73`
+
+#### Timeline Sorting Fix (Round 2)
+- ✅ **Fixed timeline decade sorting issue**:
+  - Issue: Stories from 1958-1959 (in "THE 1950s") appeared before 1955 ("The Year I was Born")
+  - Cause: Decade sections were sorted by earliest story year rather than decade start
+  - Fix: Changed to use decade start year (1950) for sorting instead of earliest story (1958)
+  - This ensures proper chronological order: 1940s → 1950s → Birth Year (1955) → 1950s stories (1958-1959)
+  - Files modified: `/app/timeline/page.tsx:1189-1197`
+
+### Technical Details
+- **Audio Upload Architecture**:
+  - Detects File vs Blob objects to handle uploaded vs recorded audio differently
+  - Preserves original filename and MIME type for uploaded files
+  - Strips codec information from MIME types for Supabase compatibility
+
+- **Authentication Flow**:
+  - Query client automatically includes Supabase session tokens
+  - Proper retry logic with session refresh on 401 errors
+  - 5-minute cache for profile data to reduce API calls
+
+*Last Updated: January 4, 2025 at 3:00 PM PST*
