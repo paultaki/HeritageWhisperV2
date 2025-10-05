@@ -1186,15 +1186,22 @@ export default function Timeline() {
                   );
                   const isCurrentDecade = groupDecadeNum === currentDecade;
 
-                  // For sorting, use the decade start year to ensure proper chronological order
-                  // This ensures that the 1950s section (even if it only has 1958-1959 stories)
-                  // sorts correctly relative to the birth year (1955)
-                  const decadeStartYear = groupDecadeNum;
+                  // CRITICAL FIX: If this decade contains the birth year, sort it AFTER the birth year section
+                  // by using the earliest actual story year instead of the decade start year
+                  const birthDecade = Math.floor((normalizedBirthYear || user.birthYear) / 10) * 10;
+                  let sortYear = groupDecadeNum; // Default to decade start
+
+                  if (groupDecadeNum === birthDecade) {
+                    // This decade contains the birth year, so use the earliest story year for sorting
+                    // This ensures stories from 1958-1959 sort AFTER the 1955 birth year
+                    const earliestStoryYear = Math.min(...group.stories.map((s: any) => normalizeYear(s.storyYear)));
+                    sortYear = earliestStoryYear;
+                  }
 
                   allTimelineItems.push({
                     type: "decade",
                     id: group.decade,
-                    year: decadeStartYear, // Use decade start year for consistent chronological sorting
+                    year: sortYear, // Use earliest story year for birth decade, decade start for others
                     title: group.displayName,
                     subtitle: `${group.ageRange} • Life Chapter${isCurrentDecade ? " • Current" : ""}`,
                     stories: group.stories,
