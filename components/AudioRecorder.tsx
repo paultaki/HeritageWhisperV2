@@ -578,6 +578,13 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
     return null;
   }, []);
 
+  // Auto-start recording on mount
+  useEffect(() => {
+    if (!isRecording) {
+      startRecording();
+    }
+  }, []); // Only run once on mount
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {

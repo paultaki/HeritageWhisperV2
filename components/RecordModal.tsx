@@ -179,25 +179,16 @@ export default function RecordModal({
     audioRecorderRef.current?.resumeRecording();
   };
 
-  const handleRecordingComplete = async (blob: Blob, duration: number, isPausingForReview: boolean = false) => {
+  const handleRecordingComplete = async (blob: Blob, duration: number) => {
     setAudioBlob(blob);
+    setIsRecording(false);
+    setIsPaused(false);
+    setRecordingTime(duration);
 
-    // If we're just pausing for review, don't stop completely
-    if (isPausingForReview && audioRecorderRef.current) {
-      audioRecorderRef.current.pauseRecording();
-      setIsPaused(true);
-    } else {
-      setIsRecording(false);
-      setIsPaused(false);
-    }
-
-    // Create audio URL for playback
-    const url = URL.createObjectURL(blob);
-    setAudioUrl(url);
-
-    // Start transcription
-    setShowTranscription(true);
-    setIsTranscribing(true);
+    toast({
+      title: 'Recording complete!',
+      description: 'Transcribing your story...',
+    });
 
     try {
       // Convert blob to base64 for transcription
@@ -227,12 +218,6 @@ export default function RecordModal({
         }
       }
 
-      console.log('[RecordModal] Auth check:', {
-        hasSession: !!session,
-        hasToken: !!session?.access_token,
-        tokenPreview: session?.access_token ? session.access_token.substring(0, 20) + '...' : null
-      });
-
       // Call transcription API with authorization
       const headers: HeadersInit = {
         'Content-Type': 'application/json'
@@ -240,9 +225,7 @@ export default function RecordModal({
 
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
-        console.log('[RecordModal] Sending auth token with request');
       } else {
-        console.warn('[RecordModal] No auth token available - request will likely fail');
         throw new Error('No authentication token. Please sign in again.');
       }
 
@@ -253,18 +236,11 @@ export default function RecordModal({
         body: JSON.stringify({
           audioBase64: base64,
           mimeType: blob.type || 'audio/webm',
-          title: storyTitle || undefined, // Pass title to enable comprehensive processing
+          title: storyTitle || undefined,
         }),
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[RecordModal] Transcription failed:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorText
-        });
-
         if (response.status === 401) {
           throw new Error('Authentication failed. Please refresh the page and sign in again.');
         }
@@ -274,32 +250,16 @@ export default function RecordModal({
       const data = await response.json();
       console.log('[RecordModal] Transcription successful');
 
-      // Store formattedContent if available (includes Go Deeper questions)
-      if (data.formattedContent) {
-        setFormattedContent(data.formattedContent);
-        // Extract Go Deeper questions from formattedContent
-        if (data.formattedContent.questions) {
-          const questions = data.formattedContent.questions.map((q: any) => q.text);
-          setGoDeeperQuestions(questions);
-        }
-      }
+      // Save and navigate to BookStyleReview immediately
+      onSave({
+        audioBlob: blob,
+        transcription: data.transcription || '',
+        formattedContent: data.formattedContent,
+        followUpQuestions: data.formattedContent?.questions?.map((q: any) => q.text) || [],
+        title: storyTitle || undefined,
+        year: storyYear || undefined,
+      });
 
-      // If continuing recording, append to existing transcription
-      if (isContinuingRecording && transcription) {
-        const newFullTranscription = transcription + ' ' + (data.transcription || '');
-        setTranscription(newFullTranscription);
-        setEditedTranscription(newFullTranscription);
-        setAllTranscriptions([...allTranscriptions, data.transcription || '']);
-      } else {
-        setTranscription(data.transcription || '');
-        setEditedTranscription(data.transcription || '');
-        setAllTranscriptions([data.transcription || '']);
-      }
-
-      // Only generate questions if we don't have them from formattedContent
-      if (!data.formattedContent?.questions) {
-        generateGoDeeperQuestions(data.transcription);
-      }
     } catch (error) {
       console.error('[RecordModal] Transcription error:', error);
 
@@ -318,8 +278,14 @@ export default function RecordModal({
         description: errorMessage,
         variant: 'destructive',
       });
-    } finally {
-      setIsTranscribing(false);
+
+      // Even on error, save with the audio blob
+      onSave({
+        audioBlob: blob,
+        transcription: '',
+        title: storyTitle || undefined,
+        year: storyYear || undefined,
+      });
     }
   };
 
@@ -576,26 +542,9 @@ export default function RecordModal({
                     <AudioRecorder
                       ref={audioRecorderRef}
                       onRecordingComplete={(blob, duration) => handleRecordingComplete(blob, duration, false)}
-                      maxDuration={120} // 2 minutes max
+                      maxDuration={300} // 5 minutes max
                       className="w-full"
                     />
-                    {/* Pause & Review Button - allows continuing later */}
-                    {recordingTime > 10 && (
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          // Get current recording and pause for review
-                          const blob = audioRecorderRef.current?.getCurrentRecording();
-                          if (blob) {
-                            handleRecordingComplete(blob, recordingTime, true);
-                          }
-                        }}
-                        className="w-full"
-                      >
-                        <Pause className="w-4 h-4 mr-2" />
-                        Pause & Review Transcription
-                      </Button>
-                    )}
                   </div>
 
                   {/* Follow-up Prompts */}

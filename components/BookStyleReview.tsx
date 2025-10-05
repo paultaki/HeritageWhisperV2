@@ -16,6 +16,7 @@ import {
   Upload,
   Trash2,
   Loader2,
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MultiPhotoUploader, type StoryPhoto } from "@/components/MultiPhotoUploader";
@@ -261,6 +262,20 @@ export function BookStyleReview({
                       variant="outline"
                       size="sm"
                       onClick={() => {
+                        if (confirm("Are you sure you want to re-record? This will replace your current audio.")) {
+                          onAudioChange?.(null, null);
+                          setIsRecording(true);
+                        }
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      Re-record
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
                         if (confirm("Are you sure you want to remove this audio?")) {
                           onAudioChange?.(null, null);
                         }
@@ -269,80 +284,6 @@ export function BookStyleReview({
                     >
                       <X className="w-4 h-4 mr-1" />
                       Remove Audio
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={async () => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = 'audio/*';
-                        input.onchange = async (e) => {
-                          const file = (e.target as HTMLInputElement).files?.[0];
-                          if (file) {
-                            console.log('Audio file selected:', file.name, 'Size:', file.size, 'Type:', file.type);
-
-                            const audioUrl = URL.createObjectURL(file);
-                            onAudioChange?.(audioUrl, file);
-
-                            // Transcribe the audio
-                            const formData = new FormData();
-                            formData.append('audio', file);
-
-                            try {
-                              const { supabase } = await import("@/lib/supabase");
-                              const { data: { session } } = await supabase.auth.getSession();
-
-                              console.log('Session available:', !!session);
-
-                              const headers: HeadersInit = {
-                                // Don't set Content-Type - browser will set it with boundary for FormData
-                              };
-
-                              if (session?.access_token) {
-                                headers['Authorization'] = `Bearer ${session.access_token}`;
-                                console.log('Auth header added');
-                              }
-
-                              console.log('Sending transcription request...');
-                              const response = await fetch('/api/transcribe', {
-                                method: 'POST',
-                                headers,
-                                body: formData,
-                              });
-
-                              console.log('Transcription response status:', response.status);
-
-                              if (response.ok) {
-                                const data = await response.json();
-                                console.log('Transcription response:', data);
-
-                                if (data.transcription) {
-                                  console.log('Setting transcription:', data.transcription.substring(0, 50));
-                                  onTranscriptionChange(data.transcription);
-                                }
-
-                                if (data.wisdomSuggestion) {
-                                  console.log('Setting wisdom suggestion:', data.wisdomSuggestion);
-                                  onWisdomChange(data.wisdomSuggestion);
-                                }
-                              } else {
-                                const errorText = await response.text();
-                                console.error('Transcription failed:', response.status, errorText);
-                                alert('Transcription failed: ' + errorText);
-                              }
-                            } catch (error) {
-                              console.error('Transcription error:', error);
-                              alert('Failed to transcribe audio: ' + (error as Error).message);
-                            }
-                          }
-                        };
-                        input.click();
-                      }}
-                      className="flex items-center gap-2"
-                    >
-                      <Upload className="w-4 h-4" />
-                      Replace Audio
                     </Button>
                   </div>
                 </div>
