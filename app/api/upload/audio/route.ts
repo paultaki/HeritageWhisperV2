@@ -48,9 +48,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
     }
 
+    // Log the received file details for debugging
+    console.log("Received audio file:", {
+      name: audioFile.name,
+      size: audioFile.size,
+      type: audioFile.type,
+    });
+
+    // Check for invalid MIME types
+    const contentType = audioFile.type || "audio/webm";
+    if (contentType === "text/plain" || contentType.startsWith("text/")) {
+      return NextResponse.json({
+        error: "Invalid audio file type",
+        details: `MIME type ${contentType} is not supported. Please upload an audio file.`
+      }, { status: 400 });
+    }
+
     // Determine file extension from MIME type
     let fileExtension = "webm";
-    const contentType = audioFile.type || "audio/webm";
 
     // Strip codec information from MIME type for Supabase compatibility
     const baseType = contentType.split(';')[0];

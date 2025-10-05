@@ -456,9 +456,9 @@ function BookStyleReviewContent() {
 
             // Add photo to story using the API
             const photoResponse = await apiRequest('POST', `/api/stories/${editId}/photos`, {
-              url: filePath,
-              caption: photo.caption || '',
-              isPrimary: photo.isPrimary || false
+              filePath: filePath,  // Changed from 'url' to 'filePath'
+              isHero: photo.isHero || false,  // Changed from 'isPrimary' to 'isHero'
+              transform: photo.transform || { zoom: 1, position: { x: 0, y: 0 } }
             });
 
             if (photoResponse.ok) {
