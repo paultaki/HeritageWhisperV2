@@ -242,12 +242,27 @@ function BookStyleReviewContent() {
           });
           try {
             const formData = new FormData();
+
+            // Debug logging
+            console.log("Creating FormData for audio upload:", {
+              isFile: mainAudioBlob instanceof File,
+              isBlob: mainAudioBlob instanceof Blob,
+              type: mainAudioBlob?.type,
+              size: mainAudioBlob?.size,
+              name: mainAudioBlob instanceof File ? mainAudioBlob.name : 'N/A'
+            });
+
             // If it's a File object, it has its own name and type
             if (mainAudioBlob instanceof File) {
-              formData.append("audio", mainAudioBlob, mainAudioBlob.name);
-            } else {
+              // Create a new File with explicit MIME type to ensure it's not lost
+              const file = new File([mainAudioBlob], mainAudioBlob.name, {
+                type: mainAudioBlob.type || 'audio/mpeg'
+              });
+              formData.append("audio", file);
+            } else if (mainAudioBlob) {
               // For recorded audio (Blob), use default filename
-              formData.append("audio", mainAudioBlob!, "recording.webm");
+              const blob = new Blob([mainAudioBlob], { type: mainAudioBlob.type || 'audio/webm' });
+              formData.append("audio", blob, "recording.webm");
             }
 
             // Get auth token
@@ -394,12 +409,27 @@ function BookStyleReviewContent() {
         });
         try {
           const formData = new FormData();
+
+          // Debug logging
+          console.log("Creating FormData for audio upload (edit mode):", {
+            isFile: mainAudioBlob instanceof File,
+            isBlob: mainAudioBlob instanceof Blob,
+            type: mainAudioBlob.type,
+            size: mainAudioBlob.size,
+            name: mainAudioBlob instanceof File ? mainAudioBlob.name : 'N/A'
+          });
+
           // If it's a File object, it has its own name and type
           if (mainAudioBlob instanceof File) {
-            formData.append("audio", mainAudioBlob, mainAudioBlob.name);
+            // Create a new File with explicit MIME type to ensure it's not lost
+            const file = new File([mainAudioBlob], mainAudioBlob.name, {
+              type: mainAudioBlob.type || 'audio/mpeg'
+            });
+            formData.append("audio", file);
           } else {
             // For recorded audio (Blob), use default filename
-            formData.append("audio", mainAudioBlob, "recording.webm");
+            const blob = new Blob([mainAudioBlob], { type: mainAudioBlob.type || 'audio/webm' });
+            formData.append("audio", blob, "recording.webm");
           }
 
           // Get auth token
