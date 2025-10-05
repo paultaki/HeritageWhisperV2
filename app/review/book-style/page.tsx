@@ -94,7 +94,15 @@ function BookStyleReviewContent() {
         const cachedData = navCache.consume(navId);
 
         if (cachedData) {
-          console.log('[Review] NavCache data retrieved:', cachedData);
+          console.log('[Review] NavCache data retrieved:', {
+            hasTranscription: !!cachedData.transcription,
+            transcriptionLength: cachedData.transcription?.length,
+            hasMainAudioBase64: !!cachedData.mainAudioBase64,
+            base64Length: cachedData.mainAudioBase64?.length,
+            hasTitle: !!cachedData.title,
+            hasYear: !!cachedData.storyYear,
+            allKeys: Object.keys(cachedData)
+          });
 
           if (cachedData.transcription) {
             setTranscription(cachedData.transcription);

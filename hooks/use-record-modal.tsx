@@ -27,23 +27,67 @@ export function useRecordModal() {
     setInitialData(null);
   }, []);
 
-  const handleSave = useCallback((recording: any) => {
+  const handleSave = useCallback(async (recording: any) => {
+    console.log('[useRecordModal] handleSave called with:', {
+      hasAudioBlob: !!recording.audioBlob,
+      hasMainAudioBase64: !!recording.mainAudioBase64,
+      hasTranscription: !!recording.transcription
+    });
+
+    // Convert audio blob to base64 if needed
+    let mainAudioBase64: string | undefined = recording.mainAudioBase64;
+    let mainAudioType: string | undefined = recording.mainAudioType || 'audio/webm';
+
+    if (recording.audioBlob && !mainAudioBase64) {
+      console.log('[useRecordModal] Converting audio blob to base64...');
+      try {
+        mainAudioBase64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+
+          reader.onloadend = () => {
+            try {
+              const base64 = reader.result as string;
+              const base64Data = base64.split(',')[1]; // Remove data:type;base64, prefix
+              resolve(base64Data);
+            } catch (err) {
+              reject(err);
+            }
+          };
+
+          reader.onerror = (error) => {
+            reject(error);
+          };
+
+          reader.readAsDataURL(recording.audioBlob);
+        });
+
+        mainAudioType = recording.audioBlob.type || 'audio/webm';
+        console.log('[useRecordModal] Audio conversion successful, length:', mainAudioBase64.length);
+      } catch (error) {
+        console.error('[useRecordModal] Failed to convert audio blob:', error);
+      }
+    }
+
     // Create navigation cache entry
     const navId = navCache.generateId();
     navCache.set(navId, {
       transcription: recording.transcription || '',
       audioDuration: recording.duration || 0,
       wisdomTranscription: recording.wisdomTranscription || '',
-      mainAudioBase64: recording.mainAudioBase64,
-      mainAudioType: recording.mainAudioType || 'audio/webm',
+      mainAudioBase64,
+      mainAudioType,
       wisdomAudioBase64: recording.wisdomAudioBase64,
       wisdomAudioType: recording.wisdomAudioType || 'audio/webm',
       prompt: recording.prompt,
       selectedPrompt: recording.selectedPrompt,
       followUpQuestions: recording.followUpQuestions,
-      formattedContent: recording.formattedContent, // Include comprehensive processing
+      formattedContent: recording.formattedContent,
+      title: recording.title,
+      storyYear: recording.year,
       fromModal: true,
     });
+
+    console.log('[useRecordModal] Stored in NavCache with ID:', navId);
 
     // Close modal
     setIsOpen(false);

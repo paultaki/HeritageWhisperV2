@@ -53,12 +53,20 @@ export default function BottomNavigation() {
   const hasRecentRecording = false; // This would check user's last recording timestamp
 
   const handleRecordSave = async (recording: any) => {
+    console.log('[BottomNavigation] handleRecordSave called with:', {
+      hasAudioBlob: !!recording.audioBlob,
+      audioBlobSize: recording.audioBlob?.size,
+      audioBlobType: recording.audioBlob?.type,
+      hasTranscription: !!recording.transcription,
+      transcriptionLength: recording.transcription?.length
+    });
+
     // Convert audio blob to base64 for storage in navCache
     let mainAudioBase64: string | undefined;
     let mainAudioType: string | undefined;
 
     if (recording.audioBlob) {
-      // Converting audio blob to base64 for storage
+      console.log('[BottomNavigation] Converting audio blob to base64...');
 
       try {
         mainAudioBase64 = await new Promise<string>((resolve, reject) => {
@@ -84,9 +92,16 @@ export default function BottomNavigation() {
         });
 
         mainAudioType = recording.audioBlob.type || 'audio/webm';
+        console.log('[BottomNavigation] Audio conversion successful:', {
+          base64Length: mainAudioBase64.length,
+          audioType: mainAudioType
+        });
       } catch (error) {
+        console.error('[BottomNavigation] Failed to convert audio blob:', error);
         // Failed to convert audio blob - continue without it
       }
+    } else {
+      console.warn('[BottomNavigation] No audio blob provided in recording object');
     }
 
     // Navigate to the review page with the recording data
@@ -97,15 +112,28 @@ export default function BottomNavigation() {
       transcription: recording.transcription,
       wisdomClip: recording.wisdomClip,
       followUpQuestions: recording.followUpQuestions,
+      title: recording.title,
+      storyYear: recording.year,
     };
 
+    console.log('[BottomNavigation] Storing in NavCache:', {
+      hasBase64: !!navData.mainAudioBase64,
+      base64Length: navData.mainAudioBase64?.length,
+      hasTranscription: !!navData.transcription,
+      hasTitle: !!navData.title,
+      hasYear: !!navData.storyYear
+    });
+
     const navId = navCache.store(navData);
+    console.log('[BottomNavigation] NavCache ID:', navId);
 
     setPulseRecord(false);
     setRecordModalOpen(false);
 
     // Navigate to review page for editing
-    setLocation(`/review?nav=${navId}`);
+    const reviewUrl = `/review?nav=${navId}`;
+    console.log('[BottomNavigation] Navigating to:', reviewUrl);
+    setLocation(reviewUrl);
   };
 
   if (!shouldShow) {
