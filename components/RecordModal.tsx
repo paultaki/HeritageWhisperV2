@@ -66,15 +66,10 @@ export default function RecordModal({
 
   // Fetch personalized prompt based on profile
   const { data: profileData } = useQuery({
-    queryKey: ['profile'],
-    queryFn: async () => {
-      const response = await fetch(getApiUrl('/api/profile'), {
-        credentials: 'include',
-      });
-      if (!response.ok) return null;
-      return response.json();
-    },
+    queryKey: ['/api/profile'],
     enabled: isOpen && !initialPrompt,
+    retry: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // Generate context-aware initial prompt
