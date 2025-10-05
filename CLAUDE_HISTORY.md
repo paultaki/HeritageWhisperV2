@@ -50,6 +50,13 @@ This document contains detailed historical information about the V2 migration an
 - **Login to Register Navigation**: Fixed inline form toggle, now properly navigates to `/auth/register`
 - **Audio Upload MIME Types**: Updated Supabase bucket to allow all audio formats (was only allowing webm/ogg)
 - **Timeline Decade Sorting**: Birth year section now correctly appears before same-decade stories
+- **Legal Documents Update**: Removed wisdom clips and character traits references from Terms & Privacy pages
+- **RLS Security**: Enabled RLS on `recording_sessions` and `usage_tracking` tables
+- **RLS Performance**: Optimized all policies to use `(SELECT auth.uid())` pattern instead of `auth.uid()`
+- **Function Security**: Fixed `increment_view_count` search path with `SET search_path = public, pg_temp`
+- **Email Confirmation Flow**: Fixed redirect to go directly to `/timeline` after email verification
+- **Duplicate Agreement Modal**: Fixed by using service role key in registration to properly set agreement versions
+- **Resend SMTP**: Configured email sending via custom domain (no-reply@updates.heritagewhisper.com)
 
 ---
 
@@ -105,6 +112,29 @@ WHERE name = 'heritage-whisper-files';
 - Session retry logic (5x 100ms delays)
 - Query invalidation after login
 - Check for both `user` AND `session` before fetching data
+
+### Email Confirmation & Agreement Modal (October 5, 2025)
+
+**Problem:** After email confirmation, users saw duplicate agreement modal even though they accepted at signup
+
+**Root Causes:**
+1. Email confirmation redirected to homepage instead of `/auth/callback`
+2. `/auth/callback` had conditional logic checking birth year
+3. Registration used anon key instead of service role key
+4. RLS policies blocked setting `latest_terms_version`/`latest_privacy_version` columns
+5. Agreement status check didn't properly query `user_agreements` table
+
+**Solutions:**
+1. Updated Supabase redirect URLs to include `https://dev.heritagewhisper.com/auth/callback`
+2. Changed `/auth/callback` to always redirect to `/timeline` (birth year already collected at signup)
+3. Changed registration to use service role key: `createClient(supabaseUrl, supabaseServiceKey)`
+4. Fixed `/api/agreements/status` fallback to check both terms AND privacy in `user_agreements` table
+5. Updated agreement status query to properly detect both agreement types
+
+**Key Files Modified:**
+- `/app/api/auth/register/route.ts` - Service role key
+- `/app/auth/callback/page.tsx` - Direct timeline redirect
+- `/app/api/agreements/status/route.ts` - Improved fallback logic
 
 ---
 

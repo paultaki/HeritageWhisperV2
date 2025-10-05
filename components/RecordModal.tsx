@@ -520,23 +520,23 @@ export default function RecordModal({
                     boxShadow: designSystem.shadows.md,
                   }}>
                     <div className="flex items-start gap-3 mb-6">
-                      <Sparkles className="w-5 h-5 mt-2" style={{ color: designSystem.colors.primary.coral }} />
+                      <Sparkles className="w-6 h-6 mt-2" style={{ color: designSystem.colors.primary.coral }} />
                       <div className="flex-1">
-                        <h3 className="font-semibold mb-4 text-lg">Your Personalized Prompt</h3>
-                        <p className="text-3xl leading-relaxed italic text-gray-700">
+                        <h3 className="font-semibold mb-4 text-2xl">Your Personalized Prompt</h3>
+                        <p className="text-4xl leading-relaxed italic text-gray-700">
                           &ldquo;{currentPrompt || "What's a story from your life that you've been wanting to share?"}&rdquo;
                         </p>
                       </div>
                     </div>
-                    <p className="text-xl leading-relaxed text-gray-600">
+                    <p className="text-2xl leading-relaxed text-gray-600">
                       Take a moment to think about this. When you're ready, press record and just start talking.
                     </p>
                   </Card>
 
                   {/* Tips */}
                   <div className="space-y-3">
-                    <h4 className="font-medium text-gray-700">Tips for a great recording:</h4>
-                    <ul className="space-y-2 text-sm text-gray-600">
+                    <h4 className="font-medium text-gray-700 text-xl">Tips for a great recording:</h4>
+                    <ul className="space-y-2 text-lg text-gray-600">
                       <li className="flex items-start gap-2">
                         <span className="text-coral-500 mt-0.5">•</span>
                         <span>Speak naturally, as if telling a friend</span>
@@ -565,8 +565,8 @@ export default function RecordModal({
                   className="space-y-6"
                 >
                   {/* Prompt reminder */}
-                  <Card className="p-4 bg-gray-50">
-                    <p className="text-sm text-gray-600 italic">
+                  <Card className="p-6 bg-gray-50">
+                    <p className="text-2xl text-gray-700 italic leading-relaxed">
                       "{currentPrompt || "Tell your story..."}"
                     </p>
                   </Card>

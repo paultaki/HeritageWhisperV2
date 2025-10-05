@@ -80,41 +80,17 @@ HeritageWhisperV2/
 
 ## 🐛 Common Issues & Fixes
 
-### Audio Upload Issues
-**Problem:** "mime type text/plain;charset=UTF-8 is not supported" or "mime type audio/mpeg is not supported"
-
-**Solution:** Supabase Storage bucket has an `allowed_mime_types` whitelist. Update it:
-```sql
-UPDATE storage.buckets
-SET allowed_mime_types = ARRAY[
-  'audio/webm', 'audio/ogg', 'audio/mpeg', 'audio/mp3',
-  'audio/wav', 'audio/wave', 'audio/mp4', 'audio/m4a',
-  'image/jpeg', 'image/png', 'image/webp'
-]
-WHERE name = 'heritage-whisper-files';
-```
-
-**Location:** `/app/api/upload/audio/route.ts` - uses `audioFile.type` as contentType
-
-### Timeline Sorting (Birth Year Before Same-Decade Stories)
-**Problem:** Stories from same decade as birth year appear before birth year section (e.g., 1958-1959 stories before 1955 birth)
-
-**Solution:** When a decade contains the birth year, use earliest story year (not decade start) for sorting
-**Location:** `/app/timeline/page.tsx:1194-1199`
-
-### Photo Upload
-**Location:** `/app/api/upload/photo/route.ts`
-- Uses signed URLs with 1-week expiry
-- Stores file paths in database, generates URLs on-demand
-
 ### Authentication & Email Verification
 - Uses Supabase Auth as single source of truth
 - **Email Confirmation Required**: Users must verify email before logging in
-- Verification emails sent via Resend (branded) + Supabase
+- Verification emails sent via Resend SMTP (from no-reply@updates.heritagewhisper.com)
+- Email confirmation redirects to `/auth/callback` then `/timeline`
 - JWT tokens with automatic refresh
 - Session retries (5x 100ms) to handle race conditions
 - Error messages for unconfirmed email and invalid credentials
-- Agreement acceptance tracked in `user_agreements` table (version 1.0)
+- Agreement acceptance tracked at signup - no duplicate modal after email confirmation
+- Registration uses service role key to bypass RLS when creating user records
+- Agreement versions stored in both `users` table and `user_agreements` table
 
 ## 🚀 Deployment
 
@@ -131,11 +107,10 @@ WHERE name = 'heritage-whisper-files';
 
 ## 🔍 Quick Troubleshooting
 
-1. **Audio won't upload**: Check Supabase bucket `allowed_mime_types`
-2. **Photos not loading**: Verify signed URL generation (not blob URLs)
-3. **Timeline wrong order**: Birth year should use actual year, decades use earliest story if contains birth year
-4. **401 errors**: Check Supabase session exists before API calls
-5. **Dev server exits**: Run `npm rebuild vite tsx`
+1. **401 errors**: Check Supabase session exists before API calls
+2. **Dev server exits**: Run `npm rebuild vite tsx`
+
+For detailed historical fixes and solutions, see `CLAUDE_HISTORY.md`
 
 ## 📝 Development Commands
 ```bash

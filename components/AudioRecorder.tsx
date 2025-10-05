@@ -50,6 +50,7 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
   const [audioLevel, setAudioLevel] = useState(0);
   const [levelBars, setLevelBars] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const [timeWarning, setTimeWarning] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -350,12 +351,30 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
         console.log('[AudioRecorder] MediaRecorder resumed');
       };
       
+      // Start countdown before recording
+      console.log('[AudioRecorder] Starting 3-2-1 countdown...');
+      setCountdown(3);
+
+      await new Promise<void>((resolve) => {
+        let count = 3;
+        const countdownInterval = setInterval(() => {
+          count--;
+          if (count > 0) {
+            setCountdown(count);
+          } else {
+            setCountdown(null);
+            clearInterval(countdownInterval);
+            resolve();
+          }
+        }, 1000);
+      });
+
       startTimeRef.current = Date.now();
-      
+
       // Start recording with larger timeslice to reduce chunks
       console.log('[AudioRecorder] Starting MediaRecorder with 1000ms timeslice...');
       mediaRecorder.start(1000); // Collect data every 1 second instead of 100ms
-      
+
       setIsRecording(true);
       setDuration(0);
       onStart?.();
@@ -645,12 +664,20 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
         </div>
       )}
       
-      {/* Voice Visualization */}
-      <VoiceVisualizer 
-        isRecording={isRecording}
-        mediaStream={mediaStream}
-        className="mb-8"
-      />
+      {/* Voice Visualization - Bouncing Bars */}
+      {isRecording && (
+        <div className="mb-8 flex items-center justify-center gap-1.5 h-24">
+          {levelBars.map((level, index) => (
+            <div
+              key={index}
+              className="w-3 bg-gradient-to-t from-coral-500 to-coral-300 rounded-full transition-all duration-100"
+              style={{
+                height: `${Math.max(8, level * 80)}px`,
+              }}
+            />
+          ))}
+        </div>
+      )}
       
       {/* Recording Timer */}
       <div className="mb-8">
@@ -676,7 +703,9 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
           data-testid={isRecording ? "button-stop-recording" : "button-start-recording"}
         >
           <div className="flex flex-col items-center gap-2 justify-center">
-            {isRecording ? (
+            {countdown !== null ? (
+              <span className="text-8xl font-bold">{countdown}</span>
+            ) : isRecording ? (
               <>
                 <Square className="w-20 h-20 fill-white" />
                 <span className="text-2xl font-bold tracking-wide">STOP</span>
@@ -691,7 +720,7 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
         </button>
       </div>
 
-      <p className="text-muted-foreground mt-4 text-center">
+      <p className="text-muted-foreground mt-4 text-center text-2xl">
         {isRecording
           ? isPaused
             ? "Recording paused - tap to stop"
