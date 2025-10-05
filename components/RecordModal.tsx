@@ -454,7 +454,7 @@ export default function RecordModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-end md:items-center justify-center"
+          className="fixed inset-0 z-[60] flex items-end md:items-center justify-center"
           style={{ background: 'rgba(0, 0, 0, 0.5)' }}
         >
           {/* Modal Content */}

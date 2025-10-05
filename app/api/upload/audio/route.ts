@@ -48,33 +48,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
     }
 
-    // Determine file extension and content type
+    // Determine file extension from MIME type
     let fileExtension = "webm";
-    let contentType = audioFile.type || "audio/webm";
+    const contentType = audioFile.type || "audio/webm";
 
     // Strip codec information from MIME type for Supabase compatibility
     const baseType = contentType.split(';')[0];
 
-    // Map MIME types to supported formats
-    // Use application/octet-stream as a fallback for better compatibility
+    // Map MIME types to file extensions
+    // We'll let Supabase infer content type from extension
     if (baseType === "audio/mpeg" || baseType === "audio/mp3") {
       fileExtension = "mp3";
-      contentType = "application/octet-stream"; // Use generic binary type for MP3
     } else if (baseType === "audio/wav" || baseType === "audio/wave") {
       fileExtension = "wav";
-      contentType = "application/octet-stream"; // Use generic binary type
     } else if (baseType === "audio/ogg") {
       fileExtension = "ogg";
-      contentType = "application/octet-stream"; // Use generic binary type
     } else if (baseType === "audio/mp4" || baseType === "audio/m4a") {
       fileExtension = "m4a";
-      contentType = "application/octet-stream"; // Use generic binary type
     } else if (baseType === "video/webm" || baseType === "audio/webm") {
       fileExtension = "webm";
-      contentType = "audio/webm";  // WebM seems to work, keep it
     } else {
-      // For any other audio type, use generic binary
-      contentType = "application/octet-stream";
+      // Default to webm for unknown types
+      fileExtension = "webm";
     }
 
     // Generate unique filename with audio/ prefix for heritage-whisper-files bucket
@@ -88,8 +83,8 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabaseAdmin.storage
       .from("heritage-whisper-files")
       .upload(filename, buffer, {
-        contentType: contentType,
         upsert: false,
+        // Let Supabase infer content type from the file extension
       });
 
     if (error) {
