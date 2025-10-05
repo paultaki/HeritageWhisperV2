@@ -101,13 +101,12 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await audioFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Upload without specifying contentType - let Supabase infer from file extension
-    // Specifying audio/mpeg causes "mime type not supported" error
+    // Use the original file's MIME type (bucket now allows all audio types)
     const { data, error } = await supabaseAdmin.storage
       .from("heritage-whisper-files")
       .upload(filename, buffer, {
+        contentType: audioFile.type,
         upsert: false,
-        // Do NOT set contentType - Supabase will infer from .mp3, .wav, etc. extension
       });
 
     if (error) {
