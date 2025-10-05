@@ -8,6 +8,7 @@ import { BookStyleReview } from "@/components/BookStyleReview";
 import { type StoryPhoto } from "@/components/MultiPhotoUploader";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
+import { navCache } from "@/lib/navCache";
 
 function BookStyleReviewContent() {
   const router = useRouter();
@@ -86,7 +87,56 @@ function BookStyleReviewContent() {
     if (isEditing) {
       fetchStoryData();
     } else {
-      // Load data from search params or session storage for new stories
+      // PRIORITY 1: Check NavCache first (most reliable for new recordings)
+      const navId = searchParams.get("nav");
+      if (navId) {
+        console.log('[Review] Loading from NavCache with ID:', navId);
+        const cachedData = navCache.consume(navId);
+
+        if (cachedData) {
+          console.log('[Review] NavCache data retrieved:', cachedData);
+
+          if (cachedData.transcription) {
+            setTranscription(cachedData.transcription);
+          }
+          if (cachedData.title) {
+            setTitle(cachedData.title);
+          }
+          if (cachedData.storyYear) {
+            setStoryYear(cachedData.storyYear);
+          }
+          if (cachedData.wisdomClipText || cachedData.wisdomTranscription) {
+            setWisdomText(cachedData.wisdomClipText || cachedData.wisdomTranscription || '');
+          }
+
+          // Handle audio - convert base64 back to blob if available
+          if (cachedData.mainAudioBase64 && cachedData.mainAudioType) {
+            console.log('[Review] Converting base64 audio to blob');
+            try {
+              const binaryString = atob(cachedData.mainAudioBase64);
+              const bytes = new Uint8Array(binaryString.length);
+              for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+              }
+              const blob = new Blob([bytes], { type: cachedData.mainAudioType });
+              const url = URL.createObjectURL(blob);
+              setMainAudioBlob(blob);
+              setAudioUrl(url);
+              console.log('[Review] Audio blob created, size:', blob.size);
+            } catch (err) {
+              console.error('[Review] Failed to convert base64 to blob:', err);
+            }
+          } else if (cachedData.audioUrl) {
+            setAudioUrl(cachedData.audioUrl);
+          }
+
+          return; // Data loaded from cache, skip other sources
+        } else {
+          console.warn('[Review] No data found in NavCache for ID:', navId);
+        }
+      }
+
+      // PRIORITY 2: Fall back to URL search params
       const urlTranscription = searchParams.get("transcription");
       const urlAudioUrl = searchParams.get("audioUrl");
       const urlTitle = searchParams.get("title");
@@ -106,7 +156,7 @@ function BookStyleReviewContent() {
         setStoryYear(urlYear);
       }
 
-      // Try to retrieve audio blob from session storage
+      // PRIORITY 3: Try to retrieve audio blob from session storage
       const storedAudioData = sessionStorage.getItem("recordedAudio");
       if (storedAudioData) {
         fetch(storedAudioData)
