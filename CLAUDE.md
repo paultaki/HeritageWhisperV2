@@ -107,10 +107,14 @@ WHERE name = 'heritage-whisper-files';
 - Uses signed URLs with 1-week expiry
 - Stores file paths in database, generates URLs on-demand
 
-### Authentication
+### Authentication & Email Verification
 - Uses Supabase Auth as single source of truth
+- **Email Confirmation Required**: Users must verify email before logging in
+- Verification emails sent via Resend (branded) + Supabase
 - JWT tokens with automatic refresh
 - Session retries (5x 100ms) to handle race conditions
+- Error messages for unconfirmed email and invalid credentials
+- Agreement acceptance tracked in `user_agreements` table (version 1.0)
 
 ## 🚀 Deployment
 
