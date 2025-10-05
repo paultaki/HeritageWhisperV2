@@ -52,22 +52,25 @@ export async function POST(request: NextRequest) {
     let fileExtension = "webm";
     let contentType = audioFile.type || "audio/webm";
 
+    // Strip codec information from MIME type for Supabase compatibility
+    const baseType = contentType.split(';')[0];
+
     // Map MIME types to supported formats
-    if (audioFile.type === "audio/mpeg" || audioFile.type === "audio/mp3") {
+    if (baseType === "audio/mpeg" || baseType === "audio/mp3") {
       fileExtension = "mp3";
       contentType = "audio/mpeg";
-    } else if (audioFile.type === "audio/wav" || audioFile.type === "audio/wave") {
+    } else if (baseType === "audio/wav" || baseType === "audio/wave") {
       fileExtension = "wav";
       contentType = "audio/wav";
-    } else if (audioFile.type === "audio/ogg") {
+    } else if (baseType === "audio/ogg") {
       fileExtension = "ogg";
       contentType = "audio/ogg";
-    } else if (audioFile.type === "audio/mp4" || audioFile.type === "audio/m4a") {
+    } else if (baseType === "audio/mp4" || baseType === "audio/m4a") {
       fileExtension = "m4a";
       contentType = "audio/mp4";
-    } else if (audioFile.type === "video/webm" || audioFile.type === "audio/webm") {
+    } else if (baseType === "video/webm" || baseType === "audio/webm") {
       fileExtension = "webm";
-      contentType = "audio/webm";
+      contentType = "audio/webm";  // Use base type without codec info
     }
 
     // Generate unique filename with audio/ prefix for heritage-whisper-files bucket
