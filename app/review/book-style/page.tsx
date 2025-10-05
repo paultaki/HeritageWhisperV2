@@ -168,9 +168,22 @@ function BookStyleReviewContent() {
       // PRIORITY 3: Try to retrieve audio blob from session storage
       const storedAudioData = sessionStorage.getItem("recordedAudio");
       if (storedAudioData) {
+        // When converting data URL to Blob, we need to preserve the MIME type
         fetch(storedAudioData)
           .then(res => res.blob())
-          .then(blob => setMainAudioBlob(blob))
+          .then(blob => {
+            // Extract MIME type from data URL if it's a data URL
+            let mimeType = 'audio/webm'; // default
+            if (storedAudioData.startsWith('data:')) {
+              const mimeMatch = storedAudioData.match(/data:([^;]+);/);
+              if (mimeMatch) {
+                mimeType = mimeMatch[1];
+              }
+            }
+            // Create a new Blob with the correct MIME type
+            const typedBlob = new Blob([blob], { type: mimeType });
+            setMainAudioBlob(typedBlob);
+          })
           .catch(console.error);
       }
     }
@@ -415,13 +428,39 @@ function BookStyleReviewContent() {
             name: mainAudioBlob instanceof File ? mainAudioBlob.name : 'N/A'
           });
 
+          // CRITICAL FIX: Ensure the blob has a proper MIME type
+          let audioToUpload = mainAudioBlob;
+
+          // If the blob doesn't have a type or it's text/plain, we need to fix it
+          if (!mainAudioBlob.type || mainAudioBlob.type.startsWith('text/')) {
+            console.warn("Audio blob has invalid MIME type, attempting to fix:", mainAudioBlob.type);
+
+            // Try to determine the correct MIME type from the filename if it's a File
+            let mimeType = 'audio/webm'; // default fallback
+            if (mainAudioBlob instanceof File) {
+              const ext = mainAudioBlob.name.split('.').pop()?.toLowerCase();
+              const mimeMap: Record<string, string> = {
+                'mp3': 'audio/mpeg',
+                'wav': 'audio/wav',
+                'webm': 'audio/webm',
+                'm4a': 'audio/mp4',
+                'ogg': 'audio/ogg'
+              };
+              mimeType = mimeMap[ext || ''] || 'audio/webm';
+            }
+
+            // Create a new blob with the correct MIME type
+            audioToUpload = new Blob([mainAudioBlob], { type: mimeType });
+            console.log("Fixed audio blob MIME type to:", mimeType);
+          }
+
           // If it's a File object, it has its own name and type
           if (mainAudioBlob instanceof File) {
-            // Directly append the file without wrapping it
-            formData.append("audio", mainAudioBlob, mainAudioBlob.name);
+            // Use the original filename
+            formData.append("audio", audioToUpload, mainAudioBlob.name);
           } else {
             // For recorded audio (Blob), use default filename
-            formData.append("audio", mainAudioBlob, "recording.webm");
+            formData.append("audio", audioToUpload, "recording.webm");
           }
 
           // Get auth token
