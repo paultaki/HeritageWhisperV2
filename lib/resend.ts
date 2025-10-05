@@ -1,6 +1,17 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization to avoid build-time errors
+let resend: Resend | null = null;
+
+function getResendClient() {
+  if (!resend) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY environment variable is not set');
+    }
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
 
 export async function sendVerificationEmail(
   email: string,
@@ -8,7 +19,8 @@ export async function sendVerificationEmail(
   confirmationUrl: string
 ) {
   try {
-    const { data, error } = await resend.emails.send({
+    const resendClient = getResendClient();
+    const { data, error } = await resendClient.emails.send({
       from: 'Heritage Whisper <noreply@heritagewhisper.com>',
       to: email,
       subject: 'Confirm your Heritage Whisper account',
@@ -80,7 +92,8 @@ export async function sendVerificationEmail(
 
 export async function sendWelcomeEmail(email: string, name: string) {
   try {
-    const { data, error } = await resend.emails.send({
+    const resendClient = getResendClient();
+    const { data, error } = await resendClient.emails.send({
       from: 'Heritage Whisper <noreply@heritagewhisper.com>',
       to: email,
       subject: 'Welcome to Heritage Whisper!',
