@@ -38,8 +38,34 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       logger.error("Supabase login error:", error);
+
+      // Check if it's an email not confirmed error
+      if (error.message?.includes('Email not confirmed') || error.message?.includes('email_not_confirmed')) {
+        return NextResponse.json(
+          {
+            error: "Please confirm your email address",
+            details: "We sent you a confirmation email. Please check your inbox and click the link to verify your account.",
+            code: "EMAIL_NOT_CONFIRMED"
+          },
+          { status: 401 }
+        );
+      }
+
+      // Check if it's invalid credentials
+      if (error.message?.includes('Invalid login credentials') || error.message?.includes('invalid_grant')) {
+        return NextResponse.json(
+          {
+            error: "Invalid email or password",
+            details: "Please check your credentials and try again.",
+            code: "INVALID_CREDENTIALS"
+          },
+          { status: 401 }
+        );
+      }
+
+      // Generic error
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: error.message || "Login failed. Please try again." },
         { status: 401 }
       );
     }
