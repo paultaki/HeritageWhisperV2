@@ -17,12 +17,9 @@ const logoUrl = "/HW_logo_mic_clean.png";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [name, setName] = useState("");
-  const [birthYear, setBirthYear] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const { login, register, user } = useAuth();
+  const { login, user } = useAuth();
   const { toast } = useToast();
 
   // Redirect if already logged in
@@ -34,21 +31,9 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
-      if (isRegistering) {
-        if (!name || !birthYear) {
-          toast({
-            title: "All fields required",
-            description: "Please enter your name and birth year to continue",
-            variant: "destructive",
-          });
-          return;
-        }
-        await register(email, password, name, parseInt(birthYear));
-      } else {
-        await login(email, password);
-      }
+      await login(email, password);
     } catch (error: any) {
       toast({
         title: "Authentication failed",
@@ -75,7 +60,7 @@ export default function Login() {
         <Card className="shadow-lg border">
           <CardContent className="pt-8 pb-8 px-8">
             <h2 className="text-2xl font-semibold text-center mb-8">
-              {isRegistering ? "Create Your Story" : "Welcome Back to Your Story"}
+              Welcome Back to Your Story
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -125,61 +110,19 @@ export default function Login() {
                     </div>
                   </div>
                 </div>
-                {!isRegistering && (
-                  <div className="mt-2 text-right">
-                    <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
-                      Forgot password?
-                    </Link>
-                  </div>
-                )}
+                <div className="mt-2 text-right">
+                  <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
               
-              {isRegistering && (
-                <>
-                  <div>
-                    <Label htmlFor="name" className="text-lg font-medium">Full Name</Label>
-                    <Input 
-                      type="text" 
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="mt-3 text-lg py-4"
-                      placeholder="Your full name"
-                      required
-                      data-testid="input-name"
-                    />
-                    <p className="text-sm text-muted-foreground mt-2">
-                      This will appear on your timeline
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="birthYear" className="text-lg font-medium">Birth Year</Label>
-                  <Input 
-                    type="number" 
-                    id="birthYear"
-                    value={birthYear}
-                    onChange={(e) => setBirthYear(e.target.value)}
-                    className="mt-3 text-lg py-4"
-                    placeholder="1952"
-                    min="1920"
-                    max="2010"
-                    required
-                    data-testid="input-birth-year"
-                  />
-                  <p className="text-sm text-muted-foreground mt-2">
-                    This helps us create your timeline
-                  </p>
-                  </div>
-                </>
-              )}
-              
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full text-xl font-semibold py-4"
-                data-testid={isRegistering ? "button-register" : "button-login"}
+                data-testid="button-login"
               >
-                {isRegistering ? "Create My Timeline" : "Sign In"}
+                Sign In
               </Button>
             </form>
 
@@ -224,16 +167,17 @@ export default function Login() {
             </Button>
               
             <div className="text-center mt-6">
-                <Button 
-                  type="button" 
+              <Link href="/auth/register">
+                <Button
+                  type="button"
                   variant="link"
-                  onClick={() => setIsRegistering(!isRegistering)}
                   className="text-primary hover:text-primary/80 text-lg font-medium"
-                  data-testid="button-toggle-mode"
+                  data-testid="button-create-story"
                 >
-                  {isRegistering ? "Already have an account? Sign In" : "New Here? Create Your Story"}
+                  New Here? Create Your Story
                 </Button>
-              </div>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>
