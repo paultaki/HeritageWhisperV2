@@ -9,6 +9,7 @@ import { type StoryPhoto } from "@/components/MultiPhotoUploader";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import { navCache } from "@/lib/navCache";
+import { supabase } from "@/lib/supabase";
 
 function BookStyleReviewContent() {
   const router = useRouter();
@@ -243,13 +244,24 @@ function BookStyleReviewContent() {
             const formData = new FormData();
             // If it's a File object, it has its own name and type
             if (mainAudioBlob instanceof File) {
-              formData.append("audio", mainAudioBlob);
+              formData.append("audio", mainAudioBlob, mainAudioBlob.name);
             } else {
               // For recorded audio (Blob), use default filename
               formData.append("audio", mainAudioBlob!, "recording.webm");
             }
 
-            const uploadResponse = await apiRequest('POST', '/api/upload/audio', formData);
+            // Get auth token
+            const { data: { session } } = await supabase.auth.getSession();
+
+            // Direct fetch to bypass potential apiRequest issues with FormData
+            const uploadResponse = await fetch('/api/upload/audio', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${session?.access_token}`,
+                // Do NOT set Content-Type - let browser set it for FormData
+              },
+              body: formData,
+            });
             if (uploadResponse.ok) {
               const { url } = await uploadResponse.json();
               finalAudioUrl = url;
@@ -384,13 +396,24 @@ function BookStyleReviewContent() {
           const formData = new FormData();
           // If it's a File object, it has its own name and type
           if (mainAudioBlob instanceof File) {
-            formData.append("audio", mainAudioBlob);
+            formData.append("audio", mainAudioBlob, mainAudioBlob.name);
           } else {
             // For recorded audio (Blob), use default filename
             formData.append("audio", mainAudioBlob, "recording.webm");
           }
 
-          const uploadResponse = await apiRequest('POST', '/api/upload/audio', formData);
+          // Get auth token
+          const { data: { session } } = await supabase.auth.getSession();
+
+          // Direct fetch to bypass potential apiRequest issues with FormData
+          const uploadResponse = await fetch('/api/upload/audio', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session?.access_token}`,
+              // Do NOT set Content-Type - let browser set it for FormData
+            },
+            body: formData,
+          });
           if (uploadResponse.ok) {
             const { url } = await uploadResponse.json();
             finalAudioUrl = url;

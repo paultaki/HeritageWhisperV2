@@ -16,6 +16,10 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function POST(request: NextRequest) {
   try {
+    // Log the Content-Type header to debug
+    const contentType = request.headers.get("content-type");
+    console.log("Request Content-Type:", contentType);
+
     // Get the Authorization header
     const authHeader = request.headers.get("authorization");
     const token = authHeader && authHeader.split(" ")[1];
@@ -42,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Get the audio file from the request
     const formData = await request.formData();
-    const audioFile = formData.get("audio") as File;
+    const audioFile = formData.get("audio") as File | Blob;
 
     if (!audioFile) {
       return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
@@ -50,9 +54,11 @@ export async function POST(request: NextRequest) {
 
     // Log the received file details for debugging
     console.log("Received audio file:", {
-      name: audioFile.name,
+      name: audioFile instanceof File ? audioFile.name : "blob",
       size: audioFile.size,
       type: audioFile.type,
+      isFile: audioFile instanceof File,
+      isBlob: audioFile instanceof Blob,
     });
 
     // Check for invalid MIME types

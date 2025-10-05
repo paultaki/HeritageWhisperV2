@@ -64,6 +64,8 @@ export async function apiRequest(
     }
   }
 
+  // IMPORTANT: Do not set Content-Type for FormData
+  // The browser will automatically set the correct Content-Type with boundary
   if (data && !isFormData) {
     headers["Content-Type"] = "application/json";
   }
