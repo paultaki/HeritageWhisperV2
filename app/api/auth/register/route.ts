@@ -5,11 +5,11 @@ import { userAgreements, users } from "@/shared/schema";
 import { eq } from "drizzle-orm";
 import { sendVerificationEmail } from "@/lib/resend";
 
-// Initialize Supabase client
+// Initialize Supabase client with service role key to bypass RLS
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Current versions of legal documents
 const CURRENT_TERMS_VERSION = "1.0";
