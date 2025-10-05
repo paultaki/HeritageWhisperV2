@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
-import { db, users } from "@/lib/db";
-import { eq } from "drizzle-orm";
 
 // Initialize Supabase Admin client for token verification
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -170,14 +168,15 @@ export async function POST(request: NextRequest) {
 
     logger.api("Generating follow-ups for user:", user.id);
 
-    // Get user info from database
-    const [dbUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, user.id))
-      .limit(1);
+    // Get user info from Supabase database
+    const { data: dbUser, error: userError } = await supabaseAdmin
+      .from("users")
+      .select("name, birth_year")
+      .eq("id", user.id)
+      .single();
 
-    if (!dbUser) {
+    if (userError || !dbUser) {
+      logger.error("User not found in database:", userError);
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
@@ -185,7 +184,7 @@ export async function POST(request: NextRequest) {
     }
 
     const currentYear = new Date().getFullYear();
-    const userAge = currentYear - dbUser.birthYear;
+    const userAge = currentYear - dbUser.birth_year;
     const userName = dbUser.name || "User";
 
     // Generate follow-up questions
