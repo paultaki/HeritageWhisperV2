@@ -128,7 +128,7 @@ export default function HomePage() {
   };
 
   const handleStartFree = () => {
-    router.push('/login');
+    router.push('/auth/login');
   };
   
   const handleNeedHelp = () => {
