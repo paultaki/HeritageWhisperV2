@@ -1,5 +1,7 @@
 # HeritageWhisperV2 - Next.js 15 Documentation
 
+> **📝 Note:** This file contains current, active documentation for Claude sessions. Historical fixes, migration notes, and archived information can be moved to `CLAUDE_HISTORY.md` for reference without loading into context every session.
+
 ## 🚀 Project Overview
 AI-powered storytelling platform for seniors to capture and share life memories. Next.js 15 migration completed October 2025.
 

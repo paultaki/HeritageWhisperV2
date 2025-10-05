@@ -26,11 +26,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Disable email confirmation - auto-confirm all users for better UX
-    // Email verification can be added later if needed
-    const requireEmailConfirmation = false;
+    // Require email confirmation for all new users
+    const requireEmailConfirmation = true;
 
-    // Create user in Supabase Auth with auto-confirmation
+    // Create user in Supabase Auth - they will need to confirm their email
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -39,7 +38,7 @@ export async function POST(request: NextRequest) {
           name,
           birthYear: parseInt(birthYear),
         },
-        emailRedirectTo: undefined, // Not needed with auto-confirm
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/auth/callback`,
       },
     });
 
@@ -126,7 +125,7 @@ export async function POST(request: NextRequest) {
       // Don't fail registration if agreement recording fails, but log it
     }
 
-    // If no session was created (email confirmation disabled), sign in the user
+    // Only auto-sign-in if email confirmation is NOT required
     let session = data.session;
     if (!session && !requireEmailConfirmation) {
       console.log('[Registration] No session from signUp, signing in user...');
@@ -141,6 +140,13 @@ export async function POST(request: NextRequest) {
         session = signInData.session;
         console.log('[Registration] Successfully signed in after registration');
       }
+    }
+
+    // If email confirmation is required and a session was created, clear it
+    // (This happens when Supabase has email confirmation disabled in settings)
+    if (requireEmailConfirmation && session) {
+      console.log('[Registration] Email confirmation required but session exists - clearing session');
+      session = null;
     }
 
     // Create user data object
