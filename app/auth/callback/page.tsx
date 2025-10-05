@@ -30,31 +30,12 @@ export default function AuthCallback() {
         // Invalidate queries to fetch fresh user data
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
 
-        // Wait longer for the backend to process the new user and ensure database is synced
+        // Wait for the backend to process the new user and ensure database is synced
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Get user data to check if they have a birth year
-        const res = await fetch("/api/auth/me", {
-          headers: {
-            "Authorization": `Bearer ${session.access_token}`,
-          },
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-
-          // Check if user has birth year set
-          if (!data.birthYear || data.birthYear === new Date().getFullYear() - 30) {
-            // Default birth year (30 years ago) means they haven't set it yet
-            router.push("/onboarding");
-          } else {
-            // User has birth year, go to timeline
-            router.push("/timeline");
-          }
-        } else {
-          // If we can't get user data, assume they need onboarding
-          router.push("/onboarding");
-        }
+        // After email confirmation, always go to timeline
+        // New users already provided birth year and accepted agreements at signup
+        router.push("/timeline");
       } catch (error) {
         console.error("Callback error:", error);
         router.push("/auth/login?error=callback_error");

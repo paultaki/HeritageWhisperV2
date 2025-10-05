@@ -157,7 +157,6 @@ export default function PrivacyPolicy() {
               <ul className="list-disc list-inside space-y-1 text-gray-700">
                 <li>Transcribe voice recordings using AI</li>
                 <li>Generate personalized follow-up questions</li>
-                <li>Extract character traits and wisdom themes</li>
                 <li>Create timeline and book views</li>
                 <li>Enable story sharing with family</li>
               </ul>
@@ -278,8 +277,6 @@ export default function PrivacyPolicy() {
               <p className="text-gray-700 mb-2">Story text is analyzed by GPT-4 to:</p>
               <ul className="list-disc list-inside space-y-1 text-gray-700">
                 <li>Generate personalized follow-up questions based on what you said</li>
-                <li>Extract character traits with supporting evidence</li>
-                <li>Identify wisdom themes and life patterns</li>
                 <li>Create suggested prompts</li>
               </ul>
             </div>

@@ -127,6 +127,7 @@ WHERE name = 'heritage-whisper-files';
 - **Supabase Project:** tjycibrhoammxohemyhq
 - **Bucket:** heritage-whisper-files (PUBLIC)
 - **Schema:** Managed via SQL migrations
+- **RLS Policies**: Enabled on all tables with optimized `(SELECT auth.uid())` pattern for performance
 
 ## 🔍 Quick Troubleshooting
 

@@ -131,7 +131,6 @@ export default function TermsOfService() {
               <ul className="list-disc list-inside space-y-1 text-gray-700 mb-4">
                 <li>3 stories with full AI features</li>
                 <li>Timeline visualization</li>
-                <li>10-second wisdom clips</li>
                 <li>Basic audio cleanup</li>
                 <li>Photo integration</li>
               </ul>
@@ -151,7 +150,6 @@ export default function TermsOfService() {
                 <li>Full transcription of all recordings</li>
                 <li>Annual book generation (PDF + print option)</li>
                 <li>Family sharing (up to 5 members)</li>
-                <li>Searchable wisdom clips</li>
                 <li>Download everything (audio + transcripts)</li>
                 <li>Priority AI processing</li>
                 <li>Permanent share links</li>
@@ -346,8 +344,6 @@ export default function TermsOfService() {
               <p className="text-gray-700 mb-2">GPT-4 analyzes story text to generate:</p>
               <ul className="list-disc list-inside space-y-1 text-gray-700">
                 <li>Personalized follow-up questions</li>
-                <li>Character trait insights</li>
-                <li>Wisdom themes and patterns</li>
                 <li>Suggested prompts</li>
               </ul>
             </div>
@@ -357,7 +353,6 @@ export default function TermsOfService() {
             <p className="text-gray-700 mb-2">We do NOT guarantee:</p>
             <ul className="list-disc list-inside space-y-1 text-gray-700 mb-4">
               <li>100% accurate transcriptions</li>
-              <li>Perfect character analysis</li>
               <li>Flawless AI-generated questions</li>
               <li>Complete capture of meaning or nuance</li>
             </ul>
@@ -366,7 +361,6 @@ export default function TermsOfService() {
             <ul className="list-disc list-inside space-y-1 text-gray-700 mb-6">
               <li>AI makes mistakes and misinterprets context</li>
               <li>Transcriptions may contain errors, especially with accents, unclear speech, background noise, technical terms, or uncommon names</li>
-              <li>Character insights are algorithmic suggestions, not psychological assessments</li>
               <li>All AI-generated content is subject to your review and editing</li>
             </ul>
 

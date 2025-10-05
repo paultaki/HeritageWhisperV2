@@ -49,28 +49,37 @@ export async function GET(request: NextRequest) {
       const { data: agreements, error: agreementError } = await supabase
         .from("user_agreements")
         .select("agreement_type, version")
-        .eq("user_id", user.id)
-        .eq("version", CURRENT_TERMS_VERSION);
+        .eq("user_id", user.id);
 
-      if (agreements && agreements.length >= 2) {
-        // User has already accepted both agreements, they're compliant
-        console.log('[Agreements] User has agreement records but no user record - considering compliant');
-        return NextResponse.json({
-          currentVersions: {
-            terms: CURRENT_TERMS_VERSION,
-            privacy: CURRENT_PRIVACY_VERSION,
-          },
-          userVersions: {
-            terms: CURRENT_TERMS_VERSION,
-            privacy: CURRENT_PRIVACY_VERSION,
-          },
-          needsAcceptance: {
-            terms: false,
-            privacy: false,
-            any: false,
-          },
-          isCompliant: true,
-        });
+      if (agreements && agreements.length > 0) {
+        // Check if they have both current versions
+        const hasTerms = agreements.some(a =>
+          a.agreement_type === 'terms' && a.version === CURRENT_TERMS_VERSION
+        );
+        const hasPrivacy = agreements.some(a =>
+          a.agreement_type === 'privacy' && a.version === CURRENT_PRIVACY_VERSION
+        );
+
+        if (hasTerms && hasPrivacy) {
+          // User has already accepted both agreements, they're compliant
+          console.log('[Agreements] User has both agreement records - considering compliant');
+          return NextResponse.json({
+            currentVersions: {
+              terms: CURRENT_TERMS_VERSION,
+              privacy: CURRENT_PRIVACY_VERSION,
+            },
+            userVersions: {
+              terms: CURRENT_TERMS_VERSION,
+              privacy: CURRENT_PRIVACY_VERSION,
+            },
+            needsAcceptance: {
+              terms: false,
+              privacy: false,
+              any: false,
+            },
+            isCompliant: true,
+          });
+        }
       }
 
       // No agreements found - they need to accept

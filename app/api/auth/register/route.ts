@@ -38,7 +38,8 @@ export async function POST(request: NextRequest) {
           name,
           birthYear: parseInt(birthYear),
         },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/auth/callback`,
+        // Force redirect to callback page after email confirmation
+        emailRedirectTo: `https://dev.heritagewhisper.com/auth/callback`,
       },
     });
 
