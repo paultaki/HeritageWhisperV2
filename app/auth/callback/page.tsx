@@ -30,8 +30,8 @@ export default function AuthCallback() {
         // Invalidate queries to fetch fresh user data
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
 
-        // Wait a bit for the backend to process the new user
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Wait longer for the backend to process the new user and ensure database is synced
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Get user data to check if they have a birth year
         const res = await fetch("/api/auth/me", {

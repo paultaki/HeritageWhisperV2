@@ -5,16 +5,27 @@ import { supabase } from "./supabase";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     try {
-      const json = await res.json();
+      const text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        // If JSON parsing fails, use the text as the error message
+        throw new Error(text || res.statusText || 'Request failed');
+      }
+
       // If the API returns an error object with details, use that
       const errorMessage = json.details || json.error || res.statusText;
       const error: any = new Error(errorMessage);
       error.code = json.code;
       throw error;
     } catch (e) {
-      // If JSON parsing fails, fall back to text
-      const text = res.statusText || 'Request failed';
-      throw new Error(text);
+      // Re-throw if it's already an Error
+      if (e instanceof Error) {
+        throw e;
+      }
+      // Otherwise create a generic error
+      throw new Error(res.statusText || 'Request failed');
     }
   }
 }

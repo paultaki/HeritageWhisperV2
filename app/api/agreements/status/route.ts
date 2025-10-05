@@ -43,7 +43,37 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (dbError || !userRecord) {
-      // User might not have a record yet - return compliant for now
+      console.log('[Agreements] No user record found for', user.id, 'Error:', dbError?.message);
+
+      // Check if user has agreement records in user_agreements table
+      const { data: agreements, error: agreementError } = await supabase
+        .from("user_agreements")
+        .select("agreement_type, version")
+        .eq("user_id", user.id)
+        .eq("version", CURRENT_TERMS_VERSION);
+
+      if (agreements && agreements.length >= 2) {
+        // User has already accepted both agreements, they're compliant
+        console.log('[Agreements] User has agreement records but no user record - considering compliant');
+        return NextResponse.json({
+          currentVersions: {
+            terms: CURRENT_TERMS_VERSION,
+            privacy: CURRENT_PRIVACY_VERSION,
+          },
+          userVersions: {
+            terms: CURRENT_TERMS_VERSION,
+            privacy: CURRENT_PRIVACY_VERSION,
+          },
+          needsAcceptance: {
+            terms: false,
+            privacy: false,
+            any: false,
+          },
+          isCompliant: true,
+        });
+      }
+
+      // No agreements found - they need to accept
       return NextResponse.json({
         currentVersions: {
           terms: CURRENT_TERMS_VERSION,
@@ -54,11 +84,11 @@ export async function GET(request: NextRequest) {
           privacy: null,
         },
         needsAcceptance: {
-          terms: false,
-          privacy: false,
-          any: false,
+          terms: true,
+          privacy: true,
+          any: true,
         },
-        isCompliant: true,
+        isCompliant: false,
       });
     }
 
