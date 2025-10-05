@@ -17,8 +17,8 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 export async function POST(request: NextRequest) {
   try {
     // Log the Content-Type header to debug
-    const contentType = request.headers.get("content-type");
-    console.log("Request Content-Type:", contentType);
+    const requestContentType = request.headers.get("content-type");
+    console.log("[Audio Upload] Request Content-Type:", requestContentType);
 
     // Get the Authorization header
     const authHeader = request.headers.get("authorization");
