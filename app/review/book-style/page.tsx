@@ -254,15 +254,11 @@ function BookStyleReviewContent() {
 
             // If it's a File object, it has its own name and type
             if (mainAudioBlob instanceof File) {
-              // Create a new File with explicit MIME type to ensure it's not lost
-              const file = new File([mainAudioBlob], mainAudioBlob.name, {
-                type: mainAudioBlob.type || 'audio/mpeg'
-              });
-              formData.append("audio", file);
+              // Directly append the file without wrapping it
+              formData.append("audio", mainAudioBlob, mainAudioBlob.name);
             } else if (mainAudioBlob) {
               // For recorded audio (Blob), use default filename
-              const blob = new Blob([mainAudioBlob], { type: mainAudioBlob.type || 'audio/webm' });
-              formData.append("audio", blob, "recording.webm");
+              formData.append("audio", mainAudioBlob, "recording.webm");
             }
 
             // Get auth token
@@ -421,15 +417,11 @@ function BookStyleReviewContent() {
 
           // If it's a File object, it has its own name and type
           if (mainAudioBlob instanceof File) {
-            // Create a new File with explicit MIME type to ensure it's not lost
-            const file = new File([mainAudioBlob], mainAudioBlob.name, {
-              type: mainAudioBlob.type || 'audio/mpeg'
-            });
-            formData.append("audio", file);
+            // Directly append the file without wrapping it
+            formData.append("audio", mainAudioBlob, mainAudioBlob.name);
           } else {
             // For recorded audio (Blob), use default filename
-            const blob = new Blob([mainAudioBlob], { type: mainAudioBlob.type || 'audio/webm' });
-            formData.append("audio", blob, "recording.webm");
+            formData.append("audio", mainAudioBlob, "recording.webm");
           }
 
           // Get auth token
