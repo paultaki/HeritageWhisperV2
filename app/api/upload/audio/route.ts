@@ -101,11 +101,12 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await audioFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    // We must explicitly set contentType or Supabase defaults to text/plain
     const { data, error } = await supabaseAdmin.storage
       .from("heritage-whisper-files")
       .upload(filename, buffer, {
         upsert: false,
-        // Let Supabase infer content type from the file extension
+        contentType: baseType, // Use the cleaned MIME type without codec info
       });
 
     if (error) {
