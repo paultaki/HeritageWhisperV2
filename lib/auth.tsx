@@ -123,8 +123,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('[Auth] Email confirmation required');
         // Store user data for later use
         queryClient.setQueryData(["/api/auth/pending-confirmation"], data);
-        // Redirect to a page that shows "check your email" message
-        router.push("/auth/check-email");
+        // Redirect to a page that shows "check your email" message with email param
+        const email = data.user?.email || '';
+        router.push(`/auth/check-email?email=${encodeURIComponent(email)}`);
         return;
       }
 

@@ -26,10 +26,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Enable email confirmation in production only
-    const requireEmailConfirmation = process.env.NODE_ENV === 'production';
+    // Disable email confirmation - auto-confirm all users for better UX
+    // Email verification can be added later if needed
+    const requireEmailConfirmation = false;
 
-    // Create user in Supabase Auth
+    // Create user in Supabase Auth with auto-confirmation
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -38,9 +39,7 @@ export async function POST(request: NextRequest) {
           name,
           birthYear: parseInt(birthYear),
         },
-        emailRedirectTo: requireEmailConfirmation
-          ? `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/auth/confirm`
-          : undefined,
+        emailRedirectTo: undefined, // Not needed with auto-confirm
       },
     });
 
