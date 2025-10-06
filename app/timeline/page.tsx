@@ -1295,7 +1295,7 @@ export default function Timeline() {
                   className="timeline-section relative"
                 >
                   {/* Timeline Node */}
-                  <div className="absolute left-[4px] md:left-[20px] w-3 h-3 bg-heritage-coral rounded-full ring-2 ring-white shadow-md z-10"></div>
+                  <div className="absolute left-[-1px] md:left-[15px] w-3 h-3 bg-heritage-coral rounded-full ring-2 ring-white shadow-md z-10"></div>
 
                   {/* Content */}
                   <div className="ml-8 md:ml-14">
