@@ -479,7 +479,8 @@ function MemoryCard({
       '#FFFFFF',
     color: colorScheme === 'dark' ? '#E5E5E5' : undefined,
     border: colorScheme === 'white' || colorScheme === 'soft' || colorScheme === 'cool' ? '1px solid #E5E7EB' :
-            colorScheme === 'dark' ? '1px solid #2A2A2A' : undefined
+            colorScheme === 'dark' ? '1px solid #2A2A2A' :
+            colorScheme === 'retro' ? '1px solid #5BB5B0' : undefined
   };
 
   // Render compact format for memories without photos
@@ -487,9 +488,15 @@ function MemoryCard({
     return (
       <div
         style={cardStyle}
-        className={`memory-card cursor-pointer transition-all duration-200 rounded-lg shadow-lg shadow-heritage-orange/10 hover:shadow-xl hover:shadow-heritage-orange/15 p-4 ${
+        className={`memory-card cursor-pointer transition-all duration-200 rounded-lg shadow-lg ${
+          colorScheme === 'retro'
+            ? 'shadow-[#5BB5B0]/20 hover:shadow-xl hover:shadow-[#5BB5B0]/30'
+            : 'shadow-heritage-orange/10 hover:shadow-xl hover:shadow-heritage-orange/15'
+        } p-4 ${
           isHighlighted
-            ? "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
+            ? colorScheme === 'retro'
+              ? "ring-2 ring-[#5BB5B0] shadow-xl shadow-[#5BB5B0]/40 scale-[1.01]"
+              : "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
             : isReturnHighlight
               ? "return-highlight-animation"
               : ""
@@ -502,8 +509,16 @@ function MemoryCard({
           {story.audioUrl && (
             <button
               onClick={handlePlayAudio}
-              className={`w-10 h-10 bg-white rounded-full shadow-md shadow-heritage-orange/10 flex items-center justify-center transition-all flex-shrink-0 ${
-                hasError ? "bg-red-100 hover:bg-red-200" : "hover:bg-heritage-orange/10"
+              className={`w-10 h-10 bg-white rounded-full shadow-md ${
+                colorScheme === 'retro'
+                  ? 'shadow-[#5BB5B0]/20'
+                  : 'shadow-heritage-orange/10'
+              } flex items-center justify-center transition-all flex-shrink-0 ${
+                hasError
+                  ? "bg-red-100 hover:bg-red-200"
+                  : colorScheme === 'retro'
+                    ? "hover:bg-[#5BB5B0]/10"
+                    : "hover:bg-heritage-orange/10"
               } ${isLoading ? "animate-pulse" : ""}`}
               data-testid={`button-play-${story.id}`}
               aria-label={
@@ -515,13 +530,13 @@ function MemoryCard({
               }
             >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 text-heritage-orange animate-spin" />
+                <Loader2 className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-heritage-orange'} animate-spin`} />
               ) : hasError ? (
                 <AlertCircle className="w-4 h-4 text-red-500" />
               ) : isPlaying ? (
-                <Pause className="w-4 h-4 text-heritage-orange" />
+                <Pause className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-heritage-orange'}`} />
               ) : (
-                <Play className="w-4 h-4 text-heritage-orange ml-0.5" />
+                <Play className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-heritage-orange'} ml-0.5`} />
               )}
             </button>
           )}
@@ -555,9 +570,15 @@ function MemoryCard({
   return (
     <div
       style={cardStyle}
-      className={`memory-card cursor-pointer transition-all duration-200 rounded-lg shadow-lg shadow-heritage-orange/10 hover:shadow-xl hover:shadow-heritage-orange/15 p-4 ${
+      className={`memory-card cursor-pointer transition-all duration-200 rounded-lg shadow-lg ${
+        colorScheme === 'retro'
+          ? 'shadow-[#5BB5B0]/20 hover:shadow-xl hover:shadow-[#5BB5B0]/30'
+          : 'shadow-heritage-orange/10 hover:shadow-xl hover:shadow-heritage-orange/15'
+      } p-4 ${
         isHighlighted
-          ? "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
+          ? colorScheme === 'retro'
+            ? "ring-2 ring-[#5BB5B0] shadow-xl shadow-[#5BB5B0]/40 scale-[1.01]"
+            : "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
           : isReturnHighlight
             ? "return-highlight-animation"
             : ""
@@ -605,13 +626,13 @@ function MemoryCard({
             }
           >
             {isLoading ? (
-              <Loader2 className="w-4 h-4 text-[#D4853A] animate-spin" />
+              <Loader2 className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-[#D4853A]'} animate-spin`} />
             ) : hasError ? (
               <AlertCircle className="w-4 h-4 text-red-500" />
             ) : isPlaying ? (
-              <Pause className="w-4 h-4 text-[#D4853A]" />
+              <Pause className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-[#D4853A]'}`} />
             ) : (
-              <Play className="w-4 h-4 text-[#D4853A] ml-0.5" />
+              <Play className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-[#D4853A]'} ml-0.5`} />
             )}
           </button>
         )}
@@ -1079,11 +1100,17 @@ export default function Timeline() {
             onClick={() => handleDecadeClick(decade.id)}
             className={`
               w-14 h-14 rounded-full flex flex-col items-center justify-center
-              transition-all duration-300 transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage-coral
+              transition-all duration-300 transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 ${
+                currentColorScheme === 'retro' ? 'focus-visible:ring-[#5BB5B0]' : 'focus-visible:ring-heritage-coral'
+              }
               ${
                 activeDecade === decade.id
-                  ? "bg-heritage-coral text-white shadow-lg shadow-heritage-coral/30"
-                  : "bg-white text-gray-600 shadow-md shadow-heritage-orange/10 hover:shadow-lg hover:shadow-heritage-coral/20 hover:bg-heritage-coral hover:text-white border border-heritage-coral/10"
+                  ? currentColorScheme === 'retro'
+                    ? "bg-[#5BB5B0] text-white shadow-lg shadow-[#5BB5B0]/30"
+                    : "bg-heritage-coral text-white shadow-lg shadow-heritage-coral/30"
+                  : currentColorScheme === 'retro'
+                    ? "bg-white text-gray-600 shadow-md shadow-[#5BB5B0]/10 hover:shadow-lg hover:shadow-[#5BB5B0]/20 hover:bg-[#5BB5B0] hover:text-white border border-[#5BB5B0]/10"
+                    : "bg-white text-gray-600 shadow-md shadow-heritage-orange/10 hover:shadow-lg hover:shadow-heritage-coral/20 hover:bg-heritage-coral hover:text-white border border-heritage-coral/10"
               }
             `}
             aria-label={`Go to ${decade.label}, ${decade.count} stories`}
@@ -1129,12 +1156,22 @@ export default function Timeline() {
                 }}
                 className={`
                   w-14 h-14 rounded-full flex flex-col items-center justify-center
-                  bg-white shadow-lg shadow-heritage-orange/15 transform transition-all duration-300 hover:scale-110
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage-coral border border-heritage-coral/10
+                  bg-white shadow-lg ${
+                    currentColorScheme === 'retro' ? 'shadow-[#5BB5B0]/15' : 'shadow-heritage-orange/15'
+                  } transform transition-all duration-300 hover:scale-110
+                  focus-visible:outline-none focus-visible:ring-2 ${
+                    currentColorScheme === 'retro' ? 'focus-visible:ring-[#5BB5B0]' : 'focus-visible:ring-heritage-coral'
+                  } border ${
+                    currentColorScheme === 'retro' ? 'border-[#5BB5B0]/10' : 'border-heritage-coral/10'
+                  }
                   ${
                     activeDecade === decade.id
-                      ? "ring-2 ring-heritage-coral ring-offset-2 text-heritage-coral font-bold"
-                      : "text-gray-700 hover:bg-heritage-orange/5 hover:text-heritage-coral"
+                      ? currentColorScheme === 'retro'
+                        ? "ring-2 ring-[#5BB5B0] ring-offset-2 text-[#5BB5B0] font-bold"
+                        : "ring-2 ring-heritage-coral ring-offset-2 text-heritage-coral font-bold"
+                      : currentColorScheme === 'retro'
+                        ? "text-gray-700 hover:bg-[#5BB5B0]/5 hover:text-[#5BB5B0]"
+                        : "text-gray-700 hover:bg-heritage-orange/5 hover:text-heritage-coral"
                   }
                 `}
                 style={{
