@@ -1196,22 +1196,25 @@ export default function Timeline() {
                   console.log(`[Decade ${group.decade}] groupDecadeNum=${groupDecadeNum}, birthDecade=${birthDecade}, match=${groupDecadeNum === birthDecade}`);
 
                   if (groupDecadeNum === birthDecade) {
-                    // This decade contains the birth year, so use the earliest NON-BIRTH-YEAR story for sorting
-                    // This ensures stories from 1958-1959 sort AFTER the 1955 birth year
-                    const nonBirthYearStories = group.stories.filter((s: any) => {
+                    // This decade contains the birth year, so we need special handling
+                    // We want this section to show AFTER the birth year section
+                    // Filter to only stories that are AFTER the birth year
+                    const storiesAfterBirth = group.stories.filter((s: any) => {
                       const storyYear = normalizeYear(s.storyYear);
-                      return storyYear !== normalizedBirthYear;
+                      return storyYear > normalizedBirthYear;
                     });
 
-                    console.log(`[Decade ${group.decade}] Total stories: ${group.stories.length}, Non-birth year stories: ${nonBirthYearStories.length}`);
+                    console.log(`[Decade ${group.decade}] Total stories: ${group.stories.length}, Stories after birth: ${storiesAfterBirth.length}`);
 
-                    if (nonBirthYearStories.length > 0) {
-                      const earliestStoryYear = Math.min(...nonBirthYearStories.map((s: any) => normalizeYear(s.storyYear)));
-                      console.log(`[Decade ${group.decade}] Using earliest non-birth story year: ${earliestStoryYear}`);
-                      sortYear = earliestStoryYear;
+                    if (storiesAfterBirth.length > 0) {
+                      // Use the earliest story AFTER birth year for sorting
+                      const earliestAfterBirth = Math.min(...storiesAfterBirth.map((s: any) => normalizeYear(s.storyYear)));
+                      console.log(`[Decade ${group.decade}] Using earliest story after birth: ${earliestAfterBirth}`);
+                      sortYear = earliestAfterBirth;
                     } else {
-                      // If all stories in this decade are birth year stories, use decade + 1 to sort after birth year section
-                      console.log(`[Decade ${group.decade}] All stories are birth year, using ${normalizedBirthYear + 1}`);
+                      // No stories after birth in this decade - this shouldn't happen normally
+                      // but if it does, sort it right after birth year
+                      console.log(`[Decade ${group.decade}] No stories after birth, using ${normalizedBirthYear + 1}`);
                       sortYear = normalizedBirthYear + 1;
                     }
                   }
