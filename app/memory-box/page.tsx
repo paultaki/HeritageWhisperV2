@@ -487,12 +487,37 @@ export default function MemoryBoxPage() {
       }
       return response.json();
     },
+    onMutate: async ({ id, updates }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/stories', session?.access_token] });
+
+      // Snapshot the previous value
+      const previousStories = queryClient.getQueryData<{ stories: Story[] }>(['/api/stories', session?.access_token]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData<{ stories: Story[] }>(['/api/stories', session?.access_token], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          stories: old.stories.map(story =>
+            story.id === id ? { ...story, ...updates } : story
+          )
+        };
+      });
+
+      // Return context with the snapshotted value
+      return { previousStories };
+    },
     onSuccess: (data) => {
       console.log('Update successful, response:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/stories', session?.access_token] });
       toast({ title: 'Memory updated successfully' });
     },
-    onError: (error: Error) => {
+    onError: (error: Error, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousStories) {
+        queryClient.setQueryData(['/api/stories', session?.access_token], context.previousStories);
+      }
       toast({
         title: 'Failed to update memory',
         description: error.message,
