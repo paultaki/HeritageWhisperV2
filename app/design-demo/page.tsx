@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Play, Pause } from "lucide-react";
 
-// Mock data for demonstration
+// Mock data for demonstration using real HW media
 const mockStories = [
   {
     id: "1",
@@ -11,27 +11,27 @@ const mockStories = [
     year: "1934",
     age: "Before birth",
     lifeChapter: "Family History",
-    imageUrl: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=80",
+    imageUrl: "/demo-dad-boy.png",
     audioUrl: "/sample-audio.mp3",
     hasAudio: true,
   },
   {
     id: "2",
-    title: "Before I Was Born",
+    title: "Dad's War Years",
     year: "1944",
     age: "Before birth",
     lifeChapter: "Family History",
-    imageUrl: "https://images.unsplash.com/photo-1554143090-7669a7d0e419?w=800&q=80",
+    imageUrl: "/demo-dad-ww2.png",
     audioUrl: "/sample-audio.mp3",
     hasAudio: true,
   },
   {
     id: "3",
-    title: "The Diner",
+    title: "Buying Our First Home",
     year: "1948",
     age: "Before birth",
     lifeChapter: "Family History",
-    imageUrl: "https://images.unsplash.com/photo-1593351799-e82d2ce341e3?w=800&q=80",
+    imageUrl: "/demo-first-home.webp",
     audioUrl: "/sample-audio.mp3",
     hasAudio: true,
   },
@@ -136,15 +136,15 @@ export default function DesignDemo() {
               <div style={{ position: "relative" }}>
                 <img
                   className="hw-card-media"
-                  src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80"
-                  alt="Placeholder story"
+                  src="/demo-earliest-memory.webp"
+                  alt="Earliest Memory"
                 />
                 <button className="hw-play" aria-label="Play">
                   <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
                 </button>
               </div>
               <div className="hw-card-body">
-                <h3 className="hw-card-title">My First Day of School</h3>
+                <h3 className="hw-card-title">My Earliest Memory</h3>
                 <div className="hw-meta">
                   <span>1955</span>
                   <span className="dot"></span>
@@ -159,21 +159,21 @@ export default function DesignDemo() {
               <div style={{ position: "relative" }}>
                 <img
                   className="hw-card-media"
-                  src="https://images.unsplash.com/photo-1476900966873-ab0e1e7a2fcd?w=800&q=80"
-                  alt="Placeholder story"
+                  src="/demo-campfire.png"
+                  alt="Campfire Roll Call"
                 />
                 <button className="hw-play" aria-label="Play">
                   <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
                 </button>
               </div>
               <div className="hw-card-body">
-                <h3 className="hw-card-title">Summer at Grandma's Farm</h3>
+                <h3 className="hw-card-title">Campfire Roll Call</h3>
                 <div className="hw-meta">
                   <span>1958</span>
                   <span className="dot"></span>
                   <span>Age 8</span>
                   <span className="dot"></span>
-                  <span>Family</span>
+                  <span>Summer Camp</span>
                 </div>
               </div>
             </div>
