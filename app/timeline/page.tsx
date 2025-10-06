@@ -36,7 +36,7 @@ import { Palette } from "lucide-react";
 const logoUrl = "/HW_logo_mic_clean.png";
 
 // Color scheme options for testing
-type ColorScheme = 'original' | 'white' | 'inverted' | 'soft' | 'cool' | 'dark';
+type ColorScheme = 'original' | 'white' | 'inverted' | 'soft' | 'cool' | 'dark' | 'retro';
 
 const colorSchemes = {
   original: {
@@ -86,6 +86,14 @@ const colorSchemes = {
     header: 'bg-gray-900/95',
     text: 'text-white',
     timelineLine: 'from-gray-600 to-gray-700'
+  },
+  retro: {
+    name: 'Retro Radio',
+    page: 'bg-[#F5E6D3]',
+    card: 'bg-white',
+    header: 'bg-[#F5E6D3]/95',
+    text: 'text-[#6B4E42]',
+    timelineLine: 'from-[#D4654F] to-[#5BB5B0]'
   }
 };
 
@@ -704,6 +712,11 @@ export default function Timeline() {
             setCurrentColorScheme('dark');
             toast({ title: "Color scheme: Dark Mode" });
             break;
+          case '7':
+            e.preventDefault();
+            setCurrentColorScheme('retro');
+            toast({ title: "Color scheme: Retro Radio" });
+            break;
         }
       }
     };
@@ -996,8 +1009,10 @@ export default function Timeline() {
       currentColorScheme === 'inverted' ? '#FFFFFF' :
       currentColorScheme === 'soft' ? '#F9FAFB' :
       currentColorScheme === 'cool' ? '#F8FAFC' :
-      currentColorScheme === 'dark' ? '#0F0F0F' : '#FFF8F3', // Much darker background
-    color: currentColorScheme === 'dark' ? '#E5E5E5' : undefined
+      currentColorScheme === 'dark' ? '#0F0F0F' :
+      currentColorScheme === 'retro' ? '#F5E6D3' : '#FFF8F3',
+    color: currentColorScheme === 'dark' ? '#E5E5E5' :
+           currentColorScheme === 'retro' ? '#6B4E42' : undefined
   };
 
   return (
@@ -1013,9 +1028,11 @@ export default function Timeline() {
             currentColorScheme === 'inverted' ? 'rgba(255, 248, 243, 0.95)' :
             currentColorScheme === 'soft' ? 'rgba(249, 250, 251, 0.95)' :
             currentColorScheme === 'cool' ? 'rgba(248, 250, 252, 0.95)' :
-            currentColorScheme === 'dark' ? 'rgba(15, 15, 15, 0.95)' : // Much darker header
+            currentColorScheme === 'dark' ? 'rgba(15, 15, 15, 0.95)' :
+            currentColorScheme === 'retro' ? 'rgba(245, 230, 211, 0.95)' :
             'rgba(255, 255, 255, 0.95)',
-          color: currentColorScheme === 'dark' ? '#E5E5E5' : undefined
+          color: currentColorScheme === 'dark' ? '#E5E5E5' :
+                 currentColorScheme === 'retro' ? '#6B4E42' : undefined
         }}
       >
         <div className="max-w-6xl mx-auto">
@@ -1168,7 +1185,8 @@ export default function Timeline() {
                 currentColorScheme === 'white' ? 'linear-gradient(to bottom, #D1D5DB, #9CA3AF)' :
                 currentColorScheme === 'soft' ? 'linear-gradient(to bottom, #9CA3AF, #6B7280)' :
                 currentColorScheme === 'cool' ? 'linear-gradient(to bottom, #60A5FA, #3B82F6)' :
-                currentColorScheme === 'dark' ? 'linear-gradient(to bottom, #3A3A3A, #2A2A2A)' : // Darker timeline line
+                currentColorScheme === 'dark' ? 'linear-gradient(to bottom, #3A3A3A, #2A2A2A)' :
+                currentColorScheme === 'retro' ? 'linear-gradient(to bottom, #D4654F, #5BB5B0)' :
                 'linear-gradient(to bottom, #D4853A, #F08466)'
             }}
           ></div>
@@ -1409,6 +1427,7 @@ export default function Timeline() {
                     {key === 'soft' && 'Cmd/Ctrl + 4'}
                     {key === 'cool' && 'Cmd/Ctrl + 5'}
                     {key === 'dark' && 'Cmd/Ctrl + 6'}
+                    {key === 'retro' && 'Cmd/Ctrl + 7'}
                   </div>
                 </button>
               ))}
