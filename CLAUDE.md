@@ -37,6 +37,10 @@ DATABASE_URL=postgresql://...
 # OpenAI
 OPENAI_API_KEY=sk-proj-...
 
+# Upstash Redis (Rate Limiting)
+UPSTASH_REDIS_REST_URL=https://...upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_token
+
 # Stripe (Optional)
 NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
@@ -49,23 +53,33 @@ SESSION_SECRET=your_secret
 ```
 HeritageWhisperV2/
 ├── app/                      # Next.js 15 App Router
-│   ├── api/                 # API routes (auth, stories, upload, etc.)
-│   ├── auth/               # Auth pages (login, register, etc.)
-│   ├── timeline/           # Timeline view
-│   ├── recording/          # Audio recording
-│   ├── review/             # Story editing (create, [id], book-style)
-│   ├── book/               # Book view
-│   └── profile/            # User settings
+│   ├── api/                 # API routes
+│   │   ├── auth/           # Auth endpoints (login, register)
+│   │   ├── stories/        # Story CRUD operations
+│   │   ├── upload/         # File upload (audio, photos)
+│   │   └── user/           # User management (delete, export)
+│   ├── auth/               # Auth pages (login, register, callback)
+│   ├── timeline/           # Timeline view (main stories view)
+│   ├── recording/          # Audio recording page
+│   ├── review/             # Story editing
+│   │   └── book-style/     # BookStyleReview component page
+│   ├── book/               # Book view (dual-page layout)
+│   └── profile/            # User settings & account management
 ├── components/              # React components
 │   ├── AudioRecorder.tsx   # Web Audio API recording
-│   ├── MultiPhotoUploader.tsx # Photo upload with cropping
-│   ├── BookDecadePages.tsx # Decade organization
+│   ├── MultiPhotoUploader.tsx # Photo upload with cropping & hero selection
+│   ├── BookStyleReview.tsx # Story review/edit interface
+│   ├── DesktopNavigation.tsx # Left sidebar navigation (desktop)
+│   ├── MobileNavigation.tsx # Bottom navigation bar (mobile)
+│   ├── HamburgerMenu.tsx   # Top-right menu (settings, logout, share)
 │   └── ui/                 # shadcn/ui components
 ├── lib/                     # Utilities
 │   ├── auth.tsx            # Auth context & provider
-│   ├── supabase.ts         # Supabase client
+│   ├── supabase.ts         # Supabase client & helpers
+│   ├── ratelimit.ts        # Upstash Redis rate limiting
+│   ├── imageProcessor.ts   # Image processing & EXIF stripping
 │   ├── queryClient.ts      # TanStack Query setup
-│   └── utils.ts            # Helper functions
+│   └── utils.ts            # Helper functions (normalizeYear, formatYear)
 └── shared/
     └── schema.ts           # Database schema (Drizzle)
 ```
@@ -73,16 +87,31 @@ HeritageWhisperV2/
 ## 🔑 Key Features
 - **Audio Recording**: Simplified one-session flow with 3-2-1 countdown, 5-minute max, auto-transcription
 - **AI Transcription**: OpenAI Whisper API with automatic processing
-- **Photo Management**: Multi-upload with cropping & hero images
-- **Timeline View**: Chronological story organization by decade
+- **Photo Management**: Multi-upload with cropping & hero images (EXIF data stripped for privacy)
+- **Timeline View**: Chronological story organization by decade with "Before I Was Born" section for pre-birth family stories
 - **Book View**: Dual-page layout with natural pagination
 - **Mobile Responsive**: Senior-friendly UX with large touch targets and bouncing bar visualizations
+- **Desktop Navigation**: Left sidebar (192px wide) with labeled icons for Timeline, Record, Book View, and Memory Box
+- **Rate Limiting**: Upstash Redis-based rate limiting (auth: 5/10s, uploads: 10/min, API: 30/min)
 
 ### Recording Flow (Updated October 2025)
 - Click "Start Recording" → Auto-countdown (3-2-1) → Records for up to 5 minutes
 - No pause/review interruptions during recording
 - Auto-transcription on stop → Direct navigation to BookStyleReview page
 - Review page options: "Re-record" or "Remove Audio"
+
+### Timeline Organization (October 2025)
+- **"Before I Was Born"**: Pre-birth family stories (separate section at top)
+- **"The Year I was Born"**: Birth year stories (always shown)
+- **Decade Sections**: Post-birth stories grouped by decade
+- **Age Display Logic**:
+  - Age > 0: "Age X"
+  - Age = 0: "Birth"
+  - Age < 0: "Before birth"
+- **Decade Markers**: Jump navigation on right side (desktop) / floating action button (mobile)
+  - "TOP" marker jumps to pre-birth section
+  - Birth year marker
+  - Decade markers (1960s, 1970s, etc.)
 
 ## 🐛 Common Issues & Fixes
 
@@ -97,6 +126,25 @@ HeritageWhisperV2/
 - Agreement acceptance tracked at signup - no duplicate modal after email confirmation
 - Registration uses service role key to bypass RLS when creating user records
 - Agreement versions stored in both `users` table and `user_agreements` table
+
+### Security & Privacy
+- **Rate Limiting**: Upstash Redis with lazy initialization (graceful fallback if not configured)
+  - Auth endpoints: 5 requests per 10 seconds
+  - Upload endpoints: 10 requests per 60 seconds
+  - API endpoints: 30 requests per 60 seconds
+- **EXIF Stripping**: All uploaded images processed with Sharp to remove metadata (GPS, camera info)
+- **Image Processing**: Photos resized to max 2400x2400, converted to JPEG at 85% quality
+- **Account Management**:
+  - `/api/user/delete` - Complete account deletion (stories, files, auth)
+  - `/api/user/export` - GDPR-compliant data export
+
+### Navigation & UX
+- **Cancel Button Behavior**:
+  - Editing existing story → Returns to `/timeline`
+  - Creating new story → Returns to `/recording`
+- **Photo Menu**: Three-dot menu positioned at `-top-1 -right-1` (upper right corner)
+- **Age Display**: Consistent across Timeline, Book View, and Review screens
+- **Desktop Nav**: 192px wide sidebar with labeled icons (Timeline, Record, Book View, Memory Box)
 
 ## 🚀 Deployment
 
