@@ -29,14 +29,14 @@ function DesktopNavItem({ icon: Icon, label, href, isActive, onClick }: NavItemP
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:bg-gray-100 group w-full"
+      className="flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-all hover:bg-gray-100 group w-full"
       style={{
         color: isActive ? 'hsl(0, 77%, 64%)' : 'hsl(210, 10%, 60%)',
         background: isActive ? 'hsl(0, 77%, 95%)' : 'transparent',
       }}
     >
       <Icon className="w-6 h-6 flex-shrink-0" />
-      <span className="text-sm font-medium whitespace-nowrap">{label}</span>
+      <span className="text-xs font-medium text-center">{label}</span>
     </button>
   );
 }
@@ -87,7 +87,7 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
         {/* Record Button */}
         <button
           onClick={onRecordClick}
-          className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:bg-red-50 group w-full my-2"
+          className="flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-all hover:bg-red-50 group w-full my-2"
           style={{
             background: 'linear-gradient(135deg, hsl(0, 77%, 64%) 0%, hsl(0, 77%, 54%) 100%)',
             boxShadow: '0 4px 12px rgba(232, 93, 93, 0.4)',
@@ -101,12 +101,12 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
               height={20}
             />
           </div>
-          <span className="text-sm font-medium text-white whitespace-nowrap">Record</span>
+          <span className="text-xs font-medium text-white text-center">Record</span>
         </button>
 
         <DesktopNavItem
           icon={BookOpen}
-          label="Book View"
+          label="Book"
           href="/book"
           isActive={pathname.startsWith('/book')}
         />
