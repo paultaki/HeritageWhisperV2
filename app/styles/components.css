@@ -51,7 +51,6 @@ html, body {
   width: 2px;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.08));
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.08) inset;
-  border-radius: 1px;
 }
 
 /* decade section */
@@ -63,15 +62,16 @@ html, body {
 /* decade band - sticky chapter divider */
 .hw-decade-band {
   position: sticky;
-  top: 64px;
+  top: calc(env(safe-area-inset-top, 0px) + 56px);
   z-index: 5;
-  background: color-mix(in srgb, var(--color-page) 80%, var(--color-accent) 20%);
-  padding: 12px 16px;
+  background: color-mix(in srgb, var(--color-page) 88%, var(--color-accent) 12%);
+  padding: 10px 16px 12px 16px;
   border-bottom: 1px solid var(--color-border);
 }
 .hw-decade-band .title {
   font-family: var(--font-serif);
   font-size: 24px;
+  letter-spacing: -0.01em;
   color: var(--color-text-h);
 }
 .hw-decade-band .meta {
@@ -87,15 +87,15 @@ html, body {
 
 /* story card */
 .hw-card {
-  background: var(--color-card);
+  background: #fff;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
+  border-radius: 16px;
   box-shadow: var(--shadow-card);
   position: relative;
 }
 .hw-card > div:first-of-type {
   overflow: hidden;
-  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  border-radius: 16px 16px 0 0;
 }
 
 /* horizontal connector: short stub always visible */

@@ -31,7 +31,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, href, isActive, on
       onClick={handleClick}
       className="flex flex-col items-center justify-center py-2 px-3 flex-1 transition-all"
       style={{
-        color: isActive ? 'hsl(0, 77%, 64%)' : 'hsl(210, 10%, 60%)',
+        color: isActive ? '#D36A3D' : 'hsl(210, 10%, 60%)',
       }}
     >
       <Icon className={`w-6 h-6 mb-1 transition-transform ${isActive ? 'scale-110' : ''}`} />
@@ -62,7 +62,7 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
       transition={{ type: 'spring', damping: 20 }}
       className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-t-2 md:hidden"
       style={{
-        borderTopColor: 'hsl(0, 77%, 64%)',
+        borderTopColor: '#D36A3D',
         paddingBottom: 'env(safe-area-inset-bottom)',
         boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.08)',
       }}
@@ -91,15 +91,15 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
             className="absolute w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
             style={{
               bottom: '-12px',
-              background: 'linear-gradient(135deg, hsl(0, 77%, 64%) 0%, hsl(0, 77%, 54%) 100%)',
-              boxShadow: '0 4px 12px rgba(232, 93, 93, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)',
+              background: 'linear-gradient(135deg, #D36A3D 0%, #C05A2D 100%)',
+              boxShadow: '0 4px 12px rgba(211, 106, 61, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)',
               border: '2px solid rgba(255, 255, 255, 0.3)',
             }}
           >
             {/* Pulse animation ring */}
             <motion.div
               className="absolute inset-0 rounded-full"
-              style={{ background: 'linear-gradient(135deg, hsl(0, 77%, 64%) 0%, hsl(0, 77%, 54%) 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #D36A3D 0%, #C05A2D 100%)' }}
               animate={{
                 scale: [1, 1.3, 1.3],
                 opacity: [0.5, 0, 0],
