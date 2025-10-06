@@ -17,7 +17,6 @@ interface NavItemProps {
 
 function DesktopNavItem({ icon: Icon, label, href, isActive, onClick }: NavItemProps) {
   const router = useRouter();
-  const [showTooltip, setShowTooltip] = useState(false);
 
   const handleClick = () => {
     if (onClick) {
@@ -28,34 +27,17 @@ function DesktopNavItem({ icon: Icon, label, href, isActive, onClick }: NavItemP
   };
 
   return (
-    <div className="relative">
-      <button
-        onClick={handleClick}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-        className="p-3 rounded-xl transition-all hover:bg-gray-100 group"
-        style={{
-          color: isActive ? 'hsl(0, 77%, 64%)' : 'hsl(210, 10%, 60%)',
-          background: isActive ? 'hsl(0, 77%, 95%)' : 'transparent',
-        }}
-      >
-        <Icon className="w-6 h-6" />
-      </button>
-
-      {/* Tooltip */}
-      <AnimatePresence>
-        {showTooltip && (
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-800 text-white text-sm rounded whitespace-nowrap pointer-events-none z-50"
-          >
-            {label}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    <button
+      onClick={handleClick}
+      className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:bg-gray-100 group w-full"
+      style={{
+        color: isActive ? 'hsl(0, 77%, 64%)' : 'hsl(210, 10%, 60%)',
+        background: isActive ? 'hsl(0, 77%, 95%)' : 'transparent',
+      }}
+    >
+      <Icon className="w-6 h-6 flex-shrink-0" />
+      <span className="text-sm font-medium whitespace-nowrap">{label}</span>
+    </button>
   );
 }
 
@@ -79,21 +61,22 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
       initial={{ x: -100 }}
       animate={{ x: 0 }}
       transition={{ type: 'spring', damping: 20 }}
-      className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-white/90 backdrop-blur-md border-r-2 flex-col items-center py-8 z-40"
+      className="hidden md:flex fixed left-0 top-0 h-full w-48 bg-white/90 backdrop-blur-md border-r-2 flex-col py-8 px-4 z-40"
       style={{
         borderRightColor: 'hsl(0, 77%, 64%)',
         boxShadow: '4px 0 12px rgba(0, 0, 0, 0.08)',
       }}
     >
       {/* Logo/Home */}
-      <div className="mb-8 p-1">
+      <div className="mb-8 flex items-center gap-3">
         <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-[hsl(0,77%,64%)] to-[hsl(0,77%,54%)] shadow-lg">
           <span className="text-white text-xl font-bold">HW</span>
         </div>
+        <span className="text-lg font-semibold text-gray-800">Heritage</span>
       </div>
 
       {/* Navigation Items */}
-      <div className="flex-1 flex flex-col items-center space-y-4">
+      <div className="flex-1 flex flex-col space-y-2">
         <DesktopNavItem
           icon={Calendar}
           label="Timeline"
@@ -101,22 +84,24 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
           isActive={pathname === '/timeline'}
         />
 
-        {/* Record Button - Moved to middle */}
+        {/* Record Button */}
         <button
           onClick={onRecordClick}
-          className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 my-2"
+          className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:bg-red-50 group w-full my-2"
           style={{
             background: 'linear-gradient(135deg, hsl(0, 77%, 64%) 0%, hsl(0, 77%, 54%) 100%)',
-            boxShadow: '0 4px 12px rgba(232, 93, 93, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)',
-            border: '2px solid rgba(255, 255, 255, 0.3)',
+            boxShadow: '0 4px 12px rgba(232, 93, 93, 0.4)',
           }}
         >
-          <Image
-            src="/REC_Mic.png"
-            alt="Record"
-            width={20}
-            height={20}
-          />
+          <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+            <Image
+              src="/REC_Mic.png"
+              alt="Record"
+              width={20}
+              height={20}
+            />
+          </div>
+          <span className="text-sm font-medium text-white whitespace-nowrap">Record</span>
         </button>
 
         <DesktopNavItem
