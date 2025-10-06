@@ -487,8 +487,9 @@ export default function MemoryBoxPage() {
       }
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/stories'] });
+    onSuccess: (data) => {
+      console.log('Update successful, response:', data);
+      queryClient.invalidateQueries({ queryKey: ['/api/stories', session?.access_token] });
       toast({ title: 'Memory updated successfully' });
     },
     onError: (error: Error) => {
