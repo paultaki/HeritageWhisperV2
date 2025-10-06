@@ -153,12 +153,8 @@ export function groupStoriesByDecade(stories: Story[], birthYear: number) {
       return;
     }
 
-    // Skip stories from before birth year - these are pre-birth stories
-    // and shouldn't appear in the decade timeline sections
-    if (normalizedStoryYear < normalizedBirthYear) {
-      console.log(`[groupStoriesByDecade] Filtering out pre-birth story from year ${normalizedStoryYear}`);
-      return;
-    }
+    // IMPORTANT: Don't skip pre-birth stories - they will go in their own "Before I Was Born" section
+    // This is handled in the timeline rendering logic
 
     const decade = getDecadeFromYear(normalizedStoryYear);
     if (decade !== 'Unknown') {

@@ -532,7 +532,8 @@ function MemoryCard({
                     month: "short",
                   })
                 : formatYear(story.storyYear)}
-              {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge >= 0 && ` • Age ${story.lifeAge}`}
+              {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge > 0 && ` • Age ${story.lifeAge}`}
+              {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge === 0 && ` • Birth`}
               {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge < 0 && ` • Before birth`}
             </p>
           </div>
@@ -623,7 +624,8 @@ function MemoryCard({
               month: "short",
             })
           : formatYear(story.storyYear)}
-        {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge >= 0 && ` • Age ${story.lifeAge}`}
+        {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge > 0 && ` • Age ${story.lifeAge}`}
+        {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge === 0 && ` • Birth`}
         {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge < 0 && ` • Before birth`}
       </p>
 
@@ -1159,9 +1161,31 @@ export default function Timeline() {
               // Create chronological timeline
               const allTimelineItems = [];
 
-              // Birth year section
               // Use normalized birth year to handle any corrupted values
               const normalizedBirthYear = normalizeYear(user.birthYear);
+
+              // Pre-birth stories section - "Before I Was Born"
+              const prebirthStories = stories.filter((story: any) => {
+                const normalizedStoryYear = normalizeYear(story.storyYear);
+                return normalizedStoryYear < normalizedBirthYear;
+              });
+              if (prebirthStories.length > 0) {
+                const earliestPrebirthYear = Math.min(
+                  ...prebirthStories.map((s: any) => normalizeYear(s.storyYear))
+                );
+                allTimelineItems.push({
+                  type: "decade",
+                  id: "before-birth",
+                  year: earliestPrebirthYear,
+                  title: "Before I Was Born",
+                  subtitle: "Family History • Stories of those who came before",
+                  stories: prebirthStories.sort((a: any, b: any) => {
+                    return normalizeYear(a.storyYear) - normalizeYear(b.storyYear);
+                  }),
+                });
+              }
+
+              // Birth year section
               const birthYearStories = stories.filter((story: any) => {
                 const normalizedStoryYear = normalizeYear(story.storyYear);
                 return normalizedStoryYear === normalizedBirthYear;
@@ -1178,9 +1202,16 @@ export default function Timeline() {
                 });
               }
 
-              // Add decade groups in chronological order
+              // Add decade groups in chronological order (filtering out pre-birth stories)
               decadeGroups.forEach((group) => {
-                if (group.stories.length > 0) {
+                // Filter out pre-birth stories from this decade - they're in "Before I Was Born"
+                const storiesAfterOrDuringBirth = group.stories.filter((s: any) => {
+                  const storyYear = normalizeYear(s.storyYear);
+                  return storyYear >= normalizedBirthYear;
+                });
+
+                // Only show this decade if it has stories after/during birth
+                if (storiesAfterOrDuringBirth.length > 0) {
                   const currentYear = new Date().getFullYear();
                   const currentDecade = Math.floor(currentYear / 10) * 10;
                   const groupDecadeNum = parseInt(
@@ -1199,12 +1230,12 @@ export default function Timeline() {
                     // This decade contains the birth year, so we need special handling
                     // We want this section to show AFTER the birth year section
                     // Filter to only stories that are AFTER the birth year
-                    const storiesAfterBirth = group.stories.filter((s: any) => {
+                    const storiesAfterBirth = storiesAfterOrDuringBirth.filter((s: any) => {
                       const storyYear = normalizeYear(s.storyYear);
                       return storyYear > normalizedBirthYear;
                     });
 
-                    console.log(`[Decade ${group.decade}] Total stories: ${group.stories.length}, Stories after birth: ${storiesAfterBirth.length}`);
+                    console.log(`[Decade ${group.decade}] Total stories: ${storiesAfterOrDuringBirth.length}, Stories after birth: ${storiesAfterBirth.length}`);
 
                     if (storiesAfterBirth.length > 0) {
                       // Use the earliest story AFTER birth year for sorting
@@ -1227,8 +1258,8 @@ export default function Timeline() {
                     year: sortYear, // Use earliest story year for birth decade, decade start for others
                     title: group.displayName,
                     subtitle: `${group.ageRange} • Life Chapter${isCurrentDecade ? " • Current" : ""}`,
-                    stories: group.stories,
-                    storyCount: group.stories.length,
+                    stories: storiesAfterOrDuringBirth,
+                    storyCount: storiesAfterOrDuringBirth.length,
                   });
                 }
               });
