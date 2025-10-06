@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { userAgreements, users } from "@/shared/schema";
 import { eq } from "drizzle-orm";
 import { sendVerificationEmail } from "@/lib/resend";
+import { authRatelimit, getClientIp, checkRateLimit } from "@/lib/ratelimit";
 
 // Initialize Supabase client with service role key to bypass RLS
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -16,6 +17,13 @@ const CURRENT_TERMS_VERSION = "1.0";
 const CURRENT_PRIVACY_VERSION = "1.0";
 
 export async function POST(request: NextRequest) {
+  // Rate limiting: 5 attempts per 10 seconds per IP
+  const clientIp = getClientIp(request);
+  const rateLimitResponse = await checkRateLimit(`register:${clientIp}`, authRatelimit);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const { email, password, name, birthYear } = await request.json();
 

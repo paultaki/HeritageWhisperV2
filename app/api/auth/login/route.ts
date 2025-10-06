@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { authRatelimit, getClientIp, checkRateLimit } from "@/lib/ratelimit";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -15,6 +16,13 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 export async function POST(request: NextRequest) {
+  // Rate limiting: 5 attempts per 10 seconds per IP
+  const clientIp = getClientIp(request);
+  const rateLimitResponse = await checkRateLimit(`login:${clientIp}`, authRatelimit);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const { email, password } = await request.json();
 

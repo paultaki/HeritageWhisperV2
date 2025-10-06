@@ -71,12 +71,18 @@ HeritageWhisperV2/
 ```
 
 ## 🔑 Key Features
-- **Audio Recording**: Web Audio API with silence detection
-- **AI Transcription**: OpenAI Whisper API
+- **Audio Recording**: Simplified one-session flow with 3-2-1 countdown, 5-minute max, auto-transcription
+- **AI Transcription**: OpenAI Whisper API with automatic processing
 - **Photo Management**: Multi-upload with cropping & hero images
 - **Timeline View**: Chronological story organization by decade
 - **Book View**: Dual-page layout with natural pagination
-- **Mobile Responsive**: Senior-friendly UX with large touch targets
+- **Mobile Responsive**: Senior-friendly UX with large touch targets and bouncing bar visualizations
+
+### Recording Flow (Updated October 2025)
+- Click "Start Recording" → Auto-countdown (3-2-1) → Records for up to 5 minutes
+- No pause/review interruptions during recording
+- Auto-transcription on stop → Direct navigation to BookStyleReview page
+- Review page options: "Re-record" or "Remove Audio"
 
 ## 🐛 Common Issues & Fixes
 
@@ -140,6 +146,11 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 - ✅ Mobile responsive
 - ✅ Production build successful
 - ✅ Deployed and live
+
+## 🧹 Project Cleanup
+- 37 obsolete files removed (October 2025)
+- Old page versions, test scripts, one-time fix docs cleaned up
+- Migrations and schema files preserved in `/migrations` and `/scripts`
 
 ---
 *Last updated: October 5, 2025*

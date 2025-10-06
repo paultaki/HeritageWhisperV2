@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { uploadRatelimit, checkRateLimit } from "@/lib/ratelimit";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -38,6 +39,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Rate limiting: 10 uploads per minute per user
+    const rateLimitResponse = await checkRateLimit(`upload:photo:${user.id}`, uploadRatelimit);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
     // Get the photo file from the request
     const formData = await request.formData();
     const photoFile = formData.get("photo") as File;
@@ -47,20 +54,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No photo file provided" }, { status: 400 });
     }
 
-    // Generate unique filename with photo/ prefix for heritage-whisper-files bucket
-    const timestamp = Date.now();
-    const extension = photoFile.name.split('.').pop() || 'jpg';
-    const filename = `photo/${user.id}/${storyId || 'temp'}/${timestamp}.${extension}`;
-
     // Convert File to ArrayBuffer then to Buffer
     const arrayBuffer = await photoFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Upload to Supabase Storage using admin client
+    // Validate that it's actually an image
+    const { validateImage, processImage } = await import("@/lib/imageProcessor");
+    const isValidImage = await validateImage(buffer);
+
+    if (!isValidImage) {
+      return NextResponse.json(
+        {
+          error: "Invalid image file",
+          details: "The uploaded file is not a valid image or has invalid dimensions"
+        },
+        { status: 400 }
+      );
+    }
+
+    // Process image: strip EXIF data, optimize, and convert to standard format
+    const { buffer: processedBuffer, contentType } = await processImage(buffer, {
+      maxWidth: 2400,
+      maxHeight: 2400,
+      quality: 85,
+      format: "jpeg", // Convert all photos to JPEG for consistency
+    });
+
+    // Generate unique filename with photo/ prefix for heritage-whisper-files bucket
+    const timestamp = Date.now();
+    const filename = `photo/${user.id}/${storyId || 'temp'}/${timestamp}.jpg`;
+
+    // Upload processed image to Supabase Storage using admin client
     const { data, error } = await supabaseAdmin.storage
       .from("heritage-whisper-files")
-      .upload(filename, buffer, {
-        contentType: photoFile.type || "image/jpeg",
+      .upload(filename, processedBuffer, {
+        contentType, // Use the content type from processed image
         upsert: false,
       });
 

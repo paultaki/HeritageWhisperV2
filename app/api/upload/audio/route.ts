@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { uploadRatelimit, checkRateLimit } from "@/lib/ratelimit";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -42,6 +43,12 @@ export async function POST(request: NextRequest) {
         { error: "Invalid authentication" },
         { status: 401 }
       );
+    }
+
+    // Rate limiting: 10 uploads per minute per user
+    const rateLimitResponse = await checkRateLimit(`upload:audio:${user.id}`, uploadRatelimit);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     // Get the audio file from the request
