@@ -207,23 +207,68 @@ export default function Profile() {
   };
 
   const handleExportData = async () => {
-    toast({
-      title: "Exporting data",
-      description: "Your data export is being prepared...",
-    });
-    // In production, trigger data export API
+    try {
+      toast({
+        title: "Exporting data",
+        description: "Your data export is being prepared...",
+      });
+
+      const response = await apiRequest("GET", "/api/user/export");
+
+      if (!response.ok) {
+        throw new Error("Failed to export data");
+      }
+
+      // Download the JSON file
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `heritagewhisper-data-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Export complete",
+        description: "Your data has been downloaded successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: "Could not export your data. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteAccount = async () => {
-    toast({
-      title: "Account deleted",
-      description: "Your account has been scheduled for deletion.",
-      variant: "destructive",
-    });
-    // In production, trigger account deletion API
-    setTimeout(() => {
-      logout();
-    }, 2000);
+    try {
+      const response = await apiRequest("DELETE", "/api/user/delete");
+
+      if (!response.ok) {
+        throw new Error("Failed to delete account");
+      }
+
+      toast({
+        title: "Account deleted",
+        description: "Your account and all data have been permanently deleted.",
+        variant: "destructive",
+      });
+
+      // Logout after 2 seconds
+      setTimeout(() => {
+        logout();
+        router.push("/");
+      }, 2000);
+    } catch (error) {
+      toast({
+        title: "Deletion failed",
+        description: "Could not delete your account. Please try again or contact support.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleLogout = async () => {
