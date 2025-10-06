@@ -122,19 +122,8 @@ export function BookStyleReview({
       {/* Top Navigation */}
       <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
-          <h1 className="text-xl md:text-2xl font-serif text-gray-800 flex-shrink-0 mr-auto">Review Memory</h1>
-          <div className="flex gap-2 flex-shrink-0">
-            {isEditing && onDelete && (
-              <Button
-                variant="outline"
-                onClick={onDelete}
-                disabled={isSaving}
-                className="rounded-full px-4 text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span className="ml-2 hidden md:inline">Delete</span>
-              </Button>
-            )}
+          <h1 className="text-xl md:text-2xl font-serif text-gray-800 flex-shrink-0">Review Memory</h1>
+          <div className="flex gap-2 flex-shrink-0 ml-auto">
             <Button
               variant="outline"
               onClick={onCancel}
@@ -220,7 +209,9 @@ export function BookStyleReview({
                 >
                   <Calendar className="w-5 h-5" />
                   {storyYear || "Add year"}
-                  {age !== null && ` • Age ${age}`}
+                  {age !== null && age > 0 && ` • Age ${age}`}
+                  {age !== null && age === 0 && ` • Birth`}
+                  {age !== null && age < 0 && ` • Before birth`}
                   <Edit2 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </p>
               ) : (
@@ -511,8 +502,8 @@ export function BookStyleReview({
         <p>Click on any element to edit it inline.</p>
       </div>
 
-      {/* Bottom Save Button */}
-      <div className="max-w-3xl mx-auto px-4 pb-8">
+      {/* Bottom Action Buttons */}
+      <div className="max-w-3xl mx-auto px-4 pb-8 space-y-3">
         <Button
           onClick={() => {
             console.log("BookStyleReview: Bottom Save button clicked, calling onSave");
@@ -523,6 +514,17 @@ export function BookStyleReview({
         >
           {isSaving ? "Saving..." : "Save"}
         </Button>
+        {isEditing && onDelete && (
+          <Button
+            variant="outline"
+            onClick={onDelete}
+            disabled={isSaving}
+            className="w-full rounded-full py-6 text-lg font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+          >
+            <Trash2 className="w-5 h-5 mr-2" />
+            Delete Memory
+          </Button>
+        )}
       </div>
     </div>
   );

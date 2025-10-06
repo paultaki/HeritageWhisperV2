@@ -304,7 +304,9 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
             <h2 className="memory-title">{page.title}</h2>
             <div className="memory-year">
               {page.year}
-              {page.age !== null && page.age !== undefined && ` • Age ${page.age}`}
+              {page.age !== null && page.age !== undefined && page.age > 0 && ` • Age ${page.age}`}
+              {page.age !== null && page.age !== undefined && page.age === 0 && ` • Birth`}
+              {page.age !== null && page.age !== undefined && page.age < 0 && ` • Before birth`}
               {page.date && ` • ${page.date}`}
             </div>
           </div>
