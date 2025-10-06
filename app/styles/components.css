@@ -37,27 +37,52 @@ html, body {
   background: var(--color-border);
 }
 
-/* timeline spine - gutter hosts spine, ticks, and connectors */
+/* timeline spine - gutter hosts spine and horizontal connectors */
 .hw-spine {
   position: relative;
-  padding-left: 56px;
+  padding-left: 48px;
 }
 .hw-spine::before {
   content: "";
   position: absolute;
-  left: 12px;
+  left: 24px;
   top: 0;
   bottom: 0;
   width: 2px;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.08));
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.06) inset;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08) inset;
   border-radius: 1px;
 }
 
-/* decade section node */
-.hw-node {
+/* decade section */
+.hw-decade {
   position: relative;
   margin-bottom: var(--space-10);
+}
+
+/* decade band - sticky chapter divider */
+.hw-decade-band {
+  position: sticky;
+  top: 64px;
+  z-index: 5;
+  background: color-mix(in srgb, var(--color-page) 80%, var(--color-accent) 20%);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+.hw-decade-band .title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  color: var(--color-text-h);
+}
+.hw-decade-band .meta {
+  margin-top: 4px;
+  font: 400 12px var(--font-sans);
+  color: var(--color-text-muted);
+}
+
+/* spacing before first card */
+.hw-decade-start {
+  margin-top: 12px;
 }
 
 /* story card */
@@ -70,12 +95,12 @@ html, body {
   position: relative;
 }
 
-/* connector: short stub by default */
+/* horizontal connector: short stub always visible */
 .hw-card::before {
   content: "";
   position: absolute;
-  left: -24px; /* reaches toward spine inside gutter */
-  top: calc(var(--title-offset, 20px)); /* aligns near title */
+  left: -20px; /* reaches toward spine inside gutter */
+  top: calc(var(--title-offset, 22px)); /* aligns to title baseline */
   width: 12px;
   height: 1px;
   background: var(--color-border);
@@ -95,13 +120,6 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .hw-card::before {
     transition: none;
-  }
-}
-
-/* mobile off */
-@media (max-width: 767px) {
-  .hw-card::before {
-    display: none;
   }
 }
 .hw-card-provenance {
@@ -242,9 +260,9 @@ html, body {
 /* year badge - appears on hover/focus */
 .hw-year {
   position: absolute;
-  left: -56px;
-  top: calc(var(--title-offset, 20px) - 6px);
-  font: 600 12px var(--font-sans);
+  left: -52px;
+  top: calc(var(--title-offset, 22px) - 6px);
+  font: 600 11px var(--font-sans);
   color: var(--color-text-muted);
   background: var(--color-page);
   padding: 2px 6px;
@@ -263,31 +281,6 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .hw-year {
     transition: none;
-  }
-}
-@media (max-width: 767px) {
-  .hw-year {
-    display: none;
-  }
-}
-
-/* shared year ladder in the gutter */
-.hw-year-group {
-  position: relative;
-}
-.hw-year-group::before {
-  content: "";
-  position: absolute;
-  left: -32px; /* inside gutter between connector stubs and spine */
-  top: 16px;
-  bottom: 16px;
-  width: 1px;
-  background: var(--color-border);
-  border-radius: 1px;
-}
-@media (max-width: 767px) {
-  .hw-year-group::before {
-    display: none;
   }
 }
 
