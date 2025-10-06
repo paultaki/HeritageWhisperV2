@@ -127,7 +127,7 @@ export function BookStyleReview({
             variant="outline"
             onClick={onCancel}
             disabled={isSaving}
-            className="rounded-full px-4 ml-auto"
+            className="rounded-full px-4 ml-auto mr-12 md:mr-0"
           >
             Cancel
           </Button>
