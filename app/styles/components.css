@@ -91,8 +91,11 @@ html, body {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  overflow: hidden;
   position: relative;
+}
+.hw-card > div:first-of-type {
+  overflow: hidden;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
 }
 
 /* horizontal connector: short stub always visible */
