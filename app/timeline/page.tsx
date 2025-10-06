@@ -1223,7 +1223,9 @@ export default function Timeline() {
               });
 
               // Sort by year
+              console.log('[Timeline Sort] Before sort:', allTimelineItems.map(item => ({ id: item.id, year: item.year, title: item.title })));
               allTimelineItems.sort((a, b) => a.year - b.year);
+              console.log('[Timeline Sort] After sort:', allTimelineItems.map(item => ({ id: item.id, year: item.year, title: item.title })));
 
               return allTimelineItems.map((item, index) => (
                 <section
