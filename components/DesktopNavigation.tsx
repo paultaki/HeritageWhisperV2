@@ -61,7 +61,7 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
       initial={{ x: -100 }}
       animate={{ x: 0 }}
       transition={{ type: 'spring', damping: 20 }}
-      className="hidden md:flex fixed left-0 top-0 h-full w-48 bg-white/90 backdrop-blur-md border-r-2 flex-col py-8 px-4 z-40"
+      className="hidden md:flex fixed left-0 top-0 h-full w-28 bg-white/90 backdrop-blur-md border-r-2 flex-col py-8 px-3 z-40"
       style={{
         borderRightColor: 'hsl(0, 77%, 64%)',
         boxShadow: '4px 0 12px rgba(0, 0, 0, 0.08)',
@@ -113,7 +113,7 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
 
         <DesktopNavItem
           icon={Box}
-          label="Memory Box"
+          label="Memories"
           href="/memory-box"
           isActive={pathname === '/memory-box'}
         />
