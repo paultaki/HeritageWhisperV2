@@ -481,12 +481,22 @@ export default function MemoryBoxPage() {
         },
         body: JSON.stringify(updates),
       });
-      if (!response.ok) throw new Error('Failed to update story');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update story');
+      }
       return response.json();
     },
     onSuccess: () => {
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ['/api/stories'] });
       toast({ title: 'Memory updated successfully' });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Failed to update memory',
+        description: error.message,
+        variant: 'destructive'
+      });
     },
   });
 
@@ -582,14 +592,20 @@ export default function MemoryBoxPage() {
   const handleToggleTimeline = (id: string) => {
     const story = stories.find(s => s.id === id);
     if (story && story.storyYear) {
+      console.log('Toggling timeline for story:', id, 'Current value:', story.includeInTimeline, 'New value:', !story.includeInTimeline);
       updateStory.mutate({ id, updates: { includeInTimeline: !story.includeInTimeline } });
+    } else {
+      console.log('Cannot toggle timeline - story not found or missing year:', story);
     }
   };
 
   const handleToggleBook = (id: string) => {
     const story = stories.find(s => s.id === id);
     if (story) {
+      console.log('Toggling book for story:', id, 'Current value:', story.includeInBook, 'New value:', !story.includeInBook);
       updateStory.mutate({ id, updates: { includeInBook: !story.includeInBook } });
+    } else {
+      console.log('Cannot toggle book - story not found:', id);
     }
   };
 
