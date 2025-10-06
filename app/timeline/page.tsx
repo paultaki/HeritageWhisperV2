@@ -532,7 +532,8 @@ function MemoryCard({
                     month: "short",
                   })
                 : formatYear(story.storyYear)}
-              {story.lifeAge !== null && story.lifeAge !== undefined && ` • Age ${story.lifeAge}`}
+              {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge >= 0 && ` • Age ${story.lifeAge}`}
+              {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge < 0 && ` • Before birth`}
             </p>
           </div>
         </div>
@@ -622,7 +623,8 @@ function MemoryCard({
               month: "short",
             })
           : formatYear(story.storyYear)}
-        {story.lifeAge !== null && story.lifeAge !== undefined && ` • Age ${story.lifeAge}`}
+        {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge >= 0 && ` • Age ${story.lifeAge}`}
+        {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge < 0 && ` • Before birth`}
       </p>
 
       {/* Trait signal */}
@@ -1192,10 +1194,20 @@ export default function Timeline() {
                   let sortYear = groupDecadeNum; // Default to decade start
 
                   if (groupDecadeNum === birthDecade) {
-                    // This decade contains the birth year, so use the earliest story year for sorting
+                    // This decade contains the birth year, so use the earliest NON-BIRTH-YEAR story for sorting
                     // This ensures stories from 1958-1959 sort AFTER the 1955 birth year
-                    const earliestStoryYear = Math.min(...group.stories.map((s: any) => normalizeYear(s.storyYear)));
-                    sortYear = earliestStoryYear;
+                    const nonBirthYearStories = group.stories.filter((s: any) => {
+                      const storyYear = normalizeYear(s.storyYear);
+                      return storyYear !== normalizedBirthYear;
+                    });
+
+                    if (nonBirthYearStories.length > 0) {
+                      const earliestStoryYear = Math.min(...nonBirthYearStories.map((s: any) => normalizeYear(s.storyYear)));
+                      sortYear = earliestStoryYear;
+                    } else {
+                      // If all stories in this decade are birth year stories, use decade + 1 to sort after birth year section
+                      sortYear = normalizedBirthYear + 1;
+                    }
                   }
 
                   allTimelineItems.push({

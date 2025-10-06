@@ -68,9 +68,8 @@ export default function HamburgerMenu() {
 
   const menuItems = [
     { icon: Home, label: 'Home', href: '/' },
-    { icon: User, label: 'Profile', href: '/profile' },
+    { icon: Settings, label: 'Settings', href: '/profile' },
     { icon: Users, label: 'Family', href: '/family' },
-    { icon: Settings, label: 'Settings', href: '/settings' },
     { icon: HelpCircle, label: 'Help', href: '/help' },
   ];
 
