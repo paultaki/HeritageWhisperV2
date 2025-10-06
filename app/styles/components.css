@@ -37,10 +37,10 @@ html, body {
   background: var(--color-border);
 }
 
-/* timeline spine and ticks */
+/* timeline spine - gutter hosts spine, ticks, and connectors */
 .hw-spine {
   position: relative;
-  padding-left: 48px; /* Space for timeline on left */
+  padding-left: 56px;
 }
 .hw-spine::before {
   content: "";
@@ -51,21 +51,13 @@ html, body {
   width: 2px;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.08));
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.06) inset;
+  border-radius: 1px;
 }
+
+/* decade section node */
 .hw-node {
   position: relative;
   margin-bottom: var(--space-10);
-}
-.hw-node::before {
-  content: "";
-  position: absolute;
-  left: -42px;
-  top: 8px;
-  width: 10px;
-  height: 10px;
-  border: 2px solid var(--color-accent);
-  border-radius: 50%;
-  background: #fff;
 }
 
 /* story card */
@@ -76,6 +68,41 @@ html, body {
   box-shadow: var(--shadow-card);
   overflow: hidden;
   position: relative;
+}
+
+/* connector: short stub by default */
+.hw-card::before {
+  content: "";
+  position: absolute;
+  left: -24px; /* reaches toward spine inside gutter */
+  top: calc(var(--title-offset, 20px)); /* aligns near title */
+  width: 12px;
+  height: 1px;
+  background: var(--color-border);
+  border-radius: 1px;
+  opacity: 0.9;
+  pointer-events: none;
+  transition: width 120ms ease-out, background 120ms ease-out;
+}
+
+/* expand and colorize on intent */
+.hw-card:hover::before,
+.hw-card:focus-visible::before {
+  width: 24px;
+  background: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-card::before {
+    transition: none;
+  }
+}
+
+/* mobile off */
+@media (max-width: 767px) {
+  .hw-card::before {
+    display: none;
+  }
 }
 .hw-card-provenance {
   position: absolute;
@@ -209,6 +236,58 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .hw-collapsible {
     transition: none;
+  }
+}
+
+/* year badge - appears on hover/focus */
+.hw-year {
+  position: absolute;
+  left: -56px;
+  top: calc(var(--title-offset, 20px) - 6px);
+  font: 600 12px var(--font-sans);
+  color: var(--color-text-muted);
+  background: var(--color-page);
+  padding: 2px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 120ms ease-out, transform 120ms ease-out;
+  pointer-events: none;
+}
+.hw-card:hover .hw-year,
+.hw-card:focus-visible .hw-year {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hw-year {
+    transition: none;
+  }
+}
+@media (max-width: 767px) {
+  .hw-year {
+    display: none;
+  }
+}
+
+/* shared year ladder in the gutter */
+.hw-year-group {
+  position: relative;
+}
+.hw-year-group::before {
+  content: "";
+  position: absolute;
+  left: -32px; /* inside gutter between connector stubs and spine */
+  top: 16px;
+  bottom: 16px;
+  width: 1px;
+  background: var(--color-border);
+  border-radius: 1px;
+}
+@media (max-width: 767px) {
+  .hw-year-group::before {
+    display: none;
   }
 }
 

@@ -47,6 +47,7 @@ function StoryCard({ story }: { story: typeof mockStories[0] }) {
 
   return (
     <div className="hw-card">
+      <span className="hw-year">{story.year}</span>
       <div style={{ position: "relative" }}>
         <img
           className="hw-card-media"
@@ -76,6 +77,9 @@ function StoryCard({ story }: { story: typeof mockStories[0] }) {
           <span className="divider"></span>
           <span>{story.lifeChapter}</span>
         </div>
+      </div>
+      <div className="hw-card-provenance">
+        Recorded with Heritage Whisper · Created May 2025 · Last edited Oct 2025
       </div>
     </div>
   );
@@ -115,10 +119,12 @@ export default function DesignDemo() {
             <span>Stories of those who came before</span>
           </div>
 
-          <div className="hw-grid">
-            {mockStories.map((story) => (
-              <StoryCard key={story.id} story={story} />
-            ))}
+          <div className="hw-year-group">
+            <div className="hw-grid">
+              {mockStories.map((story) => (
+                <StoryCard key={story.id} story={story} />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -131,49 +137,59 @@ export default function DesignDemo() {
             <span>Childhood</span>
           </div>
 
-          <div className="hw-grid">
-            <div className="hw-card">
-              <div style={{ position: "relative" }}>
-                <img
-                  className="hw-card-media"
-                  src="/demo-earliest-memory.webp"
-                  alt="Earliest Memory"
-                />
-                <button className="hw-play" aria-label="Play">
-                  <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
-                </button>
-              </div>
-              <div className="hw-card-body">
-                <h3 className="hw-card-title">My Earliest Memory</h3>
-                <div className="hw-meta">
-                  <span>1955</span>
-                  <span className="divider"></span>
-                  <span>Age 5</span>
-                  <span className="divider"></span>
-                  <span>Childhood</span>
+          <div className="hw-year-group">
+            <div className="hw-grid">
+              <div className="hw-card">
+                <span className="hw-year">1955</span>
+                <div style={{ position: "relative" }}>
+                  <img
+                    className="hw-card-media"
+                    src="/demo-earliest-memory.webp"
+                    alt="Earliest Memory"
+                  />
+                  <button className="hw-play" aria-label="Play">
+                    <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
+                  </button>
+                </div>
+                <div className="hw-card-body">
+                  <h3 className="hw-card-title">My Earliest Memory</h3>
+                  <div className="hw-meta">
+                    <span>1955</span>
+                    <span className="divider"></span>
+                    <span>Age 5</span>
+                    <span className="divider"></span>
+                    <span>Childhood</span>
+                  </div>
+                </div>
+                <div className="hw-card-provenance">
+                  Recorded with Heritage Whisper · Created Jun 2025 · Last edited Oct 2025
                 </div>
               </div>
-            </div>
 
-            <div className="hw-card">
-              <div style={{ position: "relative" }}>
-                <img
-                  className="hw-card-media"
-                  src="/demo-campfire.png"
-                  alt="Campfire Roll Call"
-                />
-                <button className="hw-play" aria-label="Play">
-                  <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
-                </button>
-              </div>
-              <div className="hw-card-body">
-                <h3 className="hw-card-title">Campfire Roll Call</h3>
-                <div className="hw-meta">
-                  <span>1958</span>
-                  <span className="divider"></span>
-                  <span>Age 8</span>
-                  <span className="divider"></span>
-                  <span>Summer Camp</span>
+              <div className="hw-card">
+                <span className="hw-year">1958</span>
+                <div style={{ position: "relative" }}>
+                  <img
+                    className="hw-card-media"
+                    src="/demo-campfire.png"
+                    alt="Campfire Roll Call"
+                  />
+                  <button className="hw-play" aria-label="Play">
+                    <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
+                  </button>
+                </div>
+                <div className="hw-card-body">
+                  <h3 className="hw-card-title">Campfire Roll Call</h3>
+                  <div className="hw-meta">
+                    <span>1958</span>
+                    <span className="divider"></span>
+                    <span>Age 8</span>
+                    <span className="divider"></span>
+                    <span>Summer Camp</span>
+                  </div>
+                </div>
+                <div className="hw-card-provenance">
+                  Recorded with Heritage Whisper · Created Aug 2025 · Last edited Oct 2025
                 </div>
               </div>
             </div>
