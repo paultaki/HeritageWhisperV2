@@ -1,0 +1,161 @@
+/* page */
+html, body {
+  background: var(--color-page);
+  color: var(--color-text);
+}
+
+/* decade header */
+.hw-decade {
+  font-family: var(--font-serif);
+  color: var(--color-text-h);
+  margin: var(--space-10) 0 var(--space-6);
+  letter-spacing: -0.01em;
+}
+@media (min-width: 768px) {
+  .hw-decade {
+    font-size: var(--h1-desk);
+  }
+}
+@media (max-width: 767px) {
+  .hw-decade {
+    font-size: var(--h1-mobile);
+  }
+}
+
+/* meta row under titles */
+.hw-meta {
+  font-family: var(--font-sans);
+  font-size: var(--meta);
+  color: var(--color-text-muted);
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+.hw-meta .dot {
+  width: 1px;
+  height: 12px;
+  background: var(--color-border);
+}
+
+/* timeline spine and ticks */
+.hw-spine {
+  position: relative;
+}
+.hw-spine::before {
+  content: "";
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.08));
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08) inset;
+}
+.hw-node {
+  position: relative;
+  margin-left: 12px;
+}
+.hw-node::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-accent);
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* story card */
+.hw-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.hw-card-media {
+  aspect-ratio: 16/10;
+  width: 100%;
+  object-fit: cover;
+  display: block;
+}
+.hw-card-body {
+  padding: var(--space-4);
+}
+.hw-card-title {
+  font-family: var(--font-sans);
+  color: var(--color-text-h);
+  margin: 0 0 var(--space-2) 0;
+}
+@media (min-width: 768px) {
+  .hw-card-title {
+    font-size: var(--card-title);
+  }
+}
+@media (max-width: 767px) {
+  .hw-card-title {
+    font-size: var(--card-title-mobile);
+  }
+}
+
+/* play button */
+.hw-play {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--color-accent);
+  display: grid;
+  place-items: center;
+  transition: transform 0.1s ease-out;
+}
+.hw-play:hover {
+  transform: scale(1.04);
+}
+.hw-play svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--color-accent);
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .hw-play:hover {
+    transform: none;
+  }
+}
+
+/* focus and a11y */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* layout helpers */
+.hw-grid {
+  display: grid;
+  gap: var(--space-6);
+}
+@media (min-width: 1024px) {
+  .hw-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* bottom nav selected state */
+.hw-nav-item[aria-current="true"] {
+  color: var(--color-accent);
+}
+.hw-nav-indicator {
+  height: 2px;
+  width: 100%;
+  background: var(--color-accent);
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+}
