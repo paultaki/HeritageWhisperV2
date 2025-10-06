@@ -40,12 +40,12 @@ html, body {
 /* timeline spine - gutter hosts spine and horizontal connectors */
 .hw-spine {
   position: relative;
-  padding-left: 48px;
+  padding-left: 56px;
 }
 .hw-spine::before {
   content: "";
   position: absolute;
-  left: 24px;
+  left: 20px;
   top: 0;
   bottom: 0;
   width: 2px;
@@ -102,13 +102,13 @@ html, body {
 .hw-card::before {
   content: "";
   position: absolute;
-  left: -20px; /* reaches toward spine inside gutter */
+  left: -24px; /* reaches toward spine inside gutter */
   top: calc(var(--title-offset, 22px)); /* aligns to title baseline */
-  width: 12px;
-  height: 1px;
-  background: var(--color-border);
+  width: 18px;
+  height: 1.5px;
+  background: color-mix(in srgb, var(--color-border) 60%, var(--color-accent) 40%);
   border-radius: 1px;
-  opacity: 0.9;
+  opacity: 1;
   pointer-events: none;
   transition: width 120ms ease-out, background 120ms ease-out;
 }
