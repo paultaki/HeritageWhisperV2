@@ -12,6 +12,7 @@ import { getApiUrl } from "@/lib/config";
 import { useRecordModal } from "@/hooks/use-record-modal";
 import RecordModal from "@/components/RecordModal";
 import { generateGhostPrompts, mergeGhostPromptsWithStories, type GhostPrompt } from "@/lib/ghostPrompts";
+import { generateNewUserGhostPrompts, shouldShowNewUserGhosts } from "@/lib/newUserGhostPrompts";
 import { GhostPromptCard } from "@/components/GhostPromptCard";
 import {
   Play,
@@ -894,8 +895,17 @@ export default function Timeline() {
 
   const stories = (storiesData as any)?.stories || [];
 
-  // Generate ghost prompts if user has fewer than 3 stories
-  const ghostPrompts = stories.length < 3 ? generateGhostPrompts(user.birthYear) : [];
+  // Generate ghost prompts based on user's story count
+  let ghostPrompts: any[] = [];
+
+  if (shouldShowNewUserGhosts(stories.length)) {
+    // New user with 0 stories: show onboarding ghost prompts
+    ghostPrompts = generateNewUserGhostPrompts(user.birthYear);
+  } else if (stories.length < 3) {
+    // Existing user with 1-2 stories: show contextual ghost prompts
+    ghostPrompts = generateGhostPrompts(user.birthYear);
+  }
+
   const storiesWithGhostPrompts = mergeGhostPromptsWithStories(stories, ghostPrompts);
 
   // Group all items (stories + ghost prompts) by decade

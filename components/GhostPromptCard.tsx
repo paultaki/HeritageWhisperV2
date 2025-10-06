@@ -11,13 +11,13 @@ export function GhostPromptCard({ prompt, onClick }: GhostPromptCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group relative cursor-pointer transition-all duration-300 hover:scale-[1.02] animate-fadeIn"
+      className="group relative cursor-pointer transition-all duration-300 hover:scale-[1.02] animate-fadeIn opacity-60 hover:opacity-80"
       data-testid={`ghost-prompt-${prompt.id}`}
     >
       {/* Main Card */}
-      <div className="relative p-4 bg-white/85 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-300/60 hover:border-heritage-coral/40 transition-colors">
+      <div className="relative p-4 bg-white/70 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-300/50 hover:border-heritage-coral/40 transition-colors">
         {/* Sparkle Icon */}
-        <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md opacity-90 group-hover:opacity-100 transition-opacity">
+        <div className="absolute -top-2 -right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-md opacity-90 group-hover:opacity-100 transition-opacity">
           <Sparkles className="w-4 h-4 text-heritage-coral animate-pulse" />
         </div>
 
@@ -31,15 +31,15 @@ export function GhostPromptCard({ prompt, onClick }: GhostPromptCardProps) {
             {prompt.icon && <span className="ml-auto">{prompt.icon}</span>}
           </div>
 
-          {/* Title */}
-          <h3 className="font-medium text-gray-800 text-sm line-clamp-1 group-hover:text-heritage-coral transition-colors">
+          {/* Title - Italic for ghost prompts */}
+          <h3 className="font-medium text-gray-800 text-sm line-clamp-1 italic group-hover:text-heritage-coral transition-colors">
             {prompt.title}
           </h3>
 
-          {/* Suggested Memory Label */}
+          {/* Get Started Label */}
           <div className="flex items-center gap-1 text-xs text-gray-400">
             <Plus className="w-3 h-3" />
-            <span className="italic">Suggested memory - Click to record</span>
+            <span className="italic font-medium">Get Started</span>
           </div>
         </div>
 
