@@ -652,8 +652,13 @@ function BookStyleReviewContent() {
     sessionStorage.removeItem("recordedAudio");
     sessionStorage.removeItem("recordingTranscription");
 
-    // Go back to recording page
-    router.push("/recording");
+    // If editing an existing story, go back to timeline
+    // If creating a new story, go back to recording page
+    if (isEditing) {
+      router.push("/timeline");
+    } else {
+      router.push("/recording");
+    }
   };
 
   const handleDelete = async () => {

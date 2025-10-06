@@ -955,7 +955,15 @@ export default function Timeline() {
     return normalizedStoryYear === normalizedBirthYear;
   });
 
+  // Filter pre-birth stories for "TOP" marker
+  const prebirthStories = stories.filter((s: any) => {
+    const normalizedStoryYear = normalizeYear(s.storyYear);
+    return normalizedStoryYear < normalizedBirthYear;
+  });
+
   const decadesWithContent = [
+    // Add TOP marker for pre-birth stories if they exist
+    ...(prebirthStories.length > 0 ? [{ id: "before-birth", label: "TOP", count: prebirthStories.length }] : []),
     { id: "birth-year", label: cleanBirthYear, count: birthYearStories.length },
     ...decadeGroups.map((group) => ({
       id: group.decade,
