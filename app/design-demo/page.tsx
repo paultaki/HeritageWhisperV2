@@ -46,7 +46,7 @@ function StoryCard({ story }: { story: typeof mockStories[0] }) {
   };
 
   return (
-    <div className="hw-card">
+    <div className="hw-card" style={{ "--title-offset": "180px" } as React.CSSProperties}>
       <span className="hw-year">{story.year}</span>
       <div style={{ position: "relative" }}>
         <img
@@ -134,7 +134,7 @@ export default function DesignDemo() {
           <div className="hw-decade-start"></div>
 
           <div className="hw-grid">
-            <div className="hw-card">
+            <div className="hw-card" style={{ "--title-offset": "180px" } as React.CSSProperties}>
               <span className="hw-year">1955</span>
               <div style={{ position: "relative" }}>
                 <img
@@ -161,7 +161,7 @@ export default function DesignDemo() {
               </div>
             </div>
 
-            <div className="hw-card">
+            <div className="hw-card" style={{ "--title-offset": "180px" } as React.CSSProperties}>
               <span className="hw-year">1958</span>
               <div style={{ position: "relative" }}>
                 <img
