@@ -31,8 +31,8 @@ function DesktopNavItem({ icon: Icon, label, href, isActive, onClick }: NavItemP
       onClick={handleClick}
       className="flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-all hover:bg-gray-100 group w-full"
       style={{
-        color: isActive ? 'hsl(0, 77%, 64%)' : 'hsl(210, 10%, 60%)',
-        background: isActive ? 'hsl(0, 77%, 95%)' : 'transparent',
+        color: isActive ? '#D36A3D' : 'hsl(210, 10%, 60%)',
+        background: isActive ? '#FFF5F0' : 'transparent',
       }}
     >
       <Icon className="w-6 h-6 flex-shrink-0" />
@@ -63,13 +63,15 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
       transition={{ type: 'spring', damping: 20 }}
       className="hidden md:flex fixed left-0 top-0 h-full w-28 bg-white/90 backdrop-blur-md border-r-2 flex-col py-8 px-3 z-40"
       style={{
-        borderRightColor: 'hsl(0, 77%, 64%)',
+        borderRightColor: '#D36A3D',
         boxShadow: '4px 0 12px rgba(0, 0, 0, 0.08)',
       }}
     >
       {/* Logo/Home */}
       <div className="mb-8 flex justify-center">
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-[hsl(0,77%,64%)] to-[hsl(0,77%,54%)] shadow-lg">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{
+          background: 'linear-gradient(135deg, #D36A3D 0%, #C05A2D 100%)'
+        }}>
           <span className="text-white text-xl font-serif font-bold tracking-tight">HW</span>
         </div>
       </div>
@@ -88,8 +90,8 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
           onClick={onRecordClick}
           className="flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-all hover:bg-red-50 group w-full my-2"
           style={{
-            background: 'linear-gradient(135deg, hsl(0, 77%, 64%) 0%, hsl(0, 77%, 54%) 100%)',
-            boxShadow: '0 4px 12px rgba(232, 93, 93, 0.4)',
+            background: 'linear-gradient(135deg, #D36A3D 0%, #C05A2D 100%)',
+            boxShadow: '0 4px 12px rgba(211, 106, 61, 0.4)',
           }}
         >
           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">

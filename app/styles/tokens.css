@@ -14,7 +14,11 @@
   --radius-card: 12px;
 
   /* shadow */
-  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.10);
+
+  /* interaction */
+  --focus-ring: #B89B5E;
+  --tap-size: 44px;
 
   /* spacing scale */
   --space-2: 8px;

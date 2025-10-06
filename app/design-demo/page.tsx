@@ -71,9 +71,9 @@ function StoryCard({ story }: { story: typeof mockStories[0] }) {
         <h3 className="hw-card-title">{story.title}</h3>
         <div className="hw-meta">
           <span>{story.year}</span>
-          <span className="dot"></span>
+          <span className="divider"></span>
           <span>{story.age}</span>
-          <span className="dot"></span>
+          <span className="divider"></span>
           <span>{story.lifeChapter}</span>
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function DesignDemo() {
           <h2 className="hw-decade">Before I Was Born</h2>
           <div className="hw-meta" style={{ marginBottom: "var(--space-6)" }}>
             <span>Family History</span>
-            <span className="dot"></span>
+            <span className="divider"></span>
             <span>Stories of those who came before</span>
           </div>
 
@@ -127,7 +127,7 @@ export default function DesignDemo() {
           <h2 className="hw-decade">The 1950s</h2>
           <div className="hw-meta" style={{ marginBottom: "var(--space-6)" }}>
             <span>Ages 0-10</span>
-            <span className="dot"></span>
+            <span className="divider"></span>
             <span>Childhood</span>
           </div>
 
@@ -147,9 +147,9 @@ export default function DesignDemo() {
                 <h3 className="hw-card-title">My Earliest Memory</h3>
                 <div className="hw-meta">
                   <span>1955</span>
-                  <span className="dot"></span>
+                  <span className="divider"></span>
                   <span>Age 5</span>
-                  <span className="dot"></span>
+                  <span className="divider"></span>
                   <span>Childhood</span>
                 </div>
               </div>
@@ -170,9 +170,9 @@ export default function DesignDemo() {
                 <h3 className="hw-card-title">Campfire Roll Call</h3>
                 <div className="hw-meta">
                   <span>1958</span>
-                  <span className="dot"></span>
+                  <span className="divider"></span>
                   <span>Age 8</span>
-                  <span className="dot"></span>
+                  <span className="divider"></span>
                   <span>Summer Camp</span>
                 </div>
               </div>
