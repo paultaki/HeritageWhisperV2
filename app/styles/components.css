@@ -40,11 +40,12 @@ html, body {
 /* timeline spine and ticks */
 .hw-spine {
   position: relative;
+  padding-left: 48px; /* Space for timeline on left */
 }
 .hw-spine::before {
   content: "";
   position: absolute;
-  left: 24px;
+  left: 12px; /* Moved closer to left edge */
   top: 0;
   bottom: 0;
   width: 2px;
@@ -53,12 +54,11 @@ html, body {
 }
 .hw-node {
   position: relative;
-  margin-left: 12px;
 }
 .hw-node::before {
   content: "";
   position: absolute;
-  left: 18px;
+  left: -42px; /* Position relative to node content, aligns with spine */
   top: 8px;
   width: 10px;
   height: 10px;
