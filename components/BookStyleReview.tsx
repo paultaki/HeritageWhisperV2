@@ -123,26 +123,14 @@ export function BookStyleReview({
       <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
           <h1 className="text-xl md:text-2xl font-serif text-gray-800 flex-shrink-0">Review Memory</h1>
-          <div className="flex gap-2 flex-shrink-0 ml-auto">
-            <Button
-              variant="outline"
-              onClick={onCancel}
-              disabled={isSaving}
-              className="rounded-full px-4"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                console.log("BookStyleReview: Save button clicked, calling onSave");
-                onSave();
-              }}
-              disabled={isSaving}
-              className="bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full px-4 md:px-6"
-            >
-              {isSaving ? "Saving..." : "Save"}
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            disabled={isSaving}
+            className="rounded-full px-4 ml-auto"
+          >
+            Cancel
+          </Button>
         </div>
       </div>
 
