@@ -1151,7 +1151,7 @@ export default function Timeline() {
         <div className="relative">
           {/* Vertical Timeline Line */}
           <div
-            className="absolute left-2 md:left-6 top-0 bottom-0 w-1"
+            className="absolute left-[10px] md:left-[26px] top-0 bottom-0 w-1"
             style={{
               background:
                 currentColorScheme === 'original' || currentColorScheme === 'inverted' ? 'linear-gradient(to bottom, #D4853A, #F08466)' :
