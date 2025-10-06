@@ -1,35 +1,95 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
-// Create Redis client
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || "",
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || "",
-});
+// Lazy-load Redis client to avoid build-time errors
+let redis: Redis | null = null;
 
-// Auth rate limiter: 5 requests per 10 seconds per IP
-export const authRatelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(5, "10 s"),
-  analytics: true,
-  prefix: "@hw/auth",
-});
+function getRedis() {
+  if (!redis) {
+    const url = process.env.UPSTASH_REDIS_REST_URL;
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-// Upload rate limiter: 10 uploads per minute per user
-export const uploadRatelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(10, "60 s"),
-  analytics: true,
-  prefix: "@hw/upload",
-});
+    if (!url || !token) {
+      console.warn("[Rate Limit] Redis credentials not configured - rate limiting disabled");
+      // Return a mock Redis client that always allows requests
+      return null;
+    }
 
-// General API rate limiter: 30 requests per minute per IP
-export const apiRatelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(30, "60 s"),
-  analytics: true,
-  prefix: "@hw/api",
-});
+    redis = new Redis({ url, token });
+  }
+  return redis;
+}
+
+// Lazy-initialize rate limiters
+let _authRatelimit: Ratelimit | null = null;
+let _uploadRatelimit: Ratelimit | null = null;
+let _apiRatelimit: Ratelimit | null = null;
+
+function getRateLimiter(type: "auth" | "upload" | "api"): Ratelimit | null {
+  const redis = getRedis();
+  if (!redis) return null;
+
+  if (type === "auth" && !_authRatelimit) {
+    _authRatelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "10 s"),
+      analytics: true,
+      prefix: "@hw/auth",
+    });
+  }
+
+  if (type === "upload" && !_uploadRatelimit) {
+    _uploadRatelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(10, "60 s"),
+      analytics: true,
+      prefix: "@hw/upload",
+    });
+  }
+
+  if (type === "api" && !_apiRatelimit) {
+    _apiRatelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(30, "60 s"),
+      analytics: true,
+      prefix: "@hw/api",
+    });
+  }
+
+  return type === "auth" ? _authRatelimit : type === "upload" ? _uploadRatelimit : _apiRatelimit;
+}
+
+// Export getters instead of direct instances
+export const authRatelimit = {
+  limit: async (identifier: string) => {
+    const limiter = getRateLimiter("auth");
+    if (!limiter) {
+      // If rate limiting is disabled, always allow
+      return { success: true, limit: 999, reset: Date.now() + 10000, remaining: 999 };
+    }
+    return limiter.limit(identifier);
+  },
+};
+
+export const uploadRatelimit = {
+  limit: async (identifier: string) => {
+    const limiter = getRateLimiter("upload");
+    if (!limiter) {
+      return { success: true, limit: 999, reset: Date.now() + 60000, remaining: 999 };
+    }
+    return limiter.limit(identifier);
+  },
+};
+
+export const apiRatelimit = {
+  limit: async (identifier: string) => {
+    const limiter = getRateLimiter("api");
+    if (!limiter) {
+      return { success: true, limit: 999, reset: Date.now() + 60000, remaining: 999 };
+    }
+    return limiter.limit(identifier);
+  },
+};
 
 /**
  * Helper function to get client IP from request headers
@@ -54,7 +114,7 @@ export function getClientIp(request: Request): string {
  */
 export async function checkRateLimit(
   identifier: string,
-  ratelimiter: Ratelimit
+  ratelimiter: { limit: (id: string) => Promise<{ success: boolean; limit: number; reset: number; remaining: number }> }
 ): Promise<Response | null> {
   const { success, limit, reset, remaining } = await ratelimiter.limit(identifier);
 
