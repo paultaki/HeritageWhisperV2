@@ -492,17 +492,14 @@ export default function MemoryBoxPage() {
       await queryClient.cancelQueries({ queryKey: ['/api/stories', session?.access_token] });
 
       // Snapshot the previous value
-      const previousStories = queryClient.getQueryData<{ stories: Story[] }>(['/api/stories', session?.access_token]);
+      const previousStories = queryClient.getQueryData<Story[]>(['/api/stories', session?.access_token]);
 
       // Optimistically update to the new value
-      queryClient.setQueryData<{ stories: Story[] }>(['/api/stories', session?.access_token], (old) => {
+      queryClient.setQueryData<Story[]>(['/api/stories', session?.access_token], (old) => {
         if (!old) return old;
-        return {
-          ...old,
-          stories: old.stories.map(story =>
-            story.id === id ? { ...story, ...updates } : story
-          )
-        };
+        return old.map(story =>
+          story.id === id ? { ...story, ...updates } : story
+        );
       });
 
       // Return context with the snapshotted value

@@ -68,11 +68,10 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
       }}
     >
       {/* Logo/Home */}
-      <div className="mb-8 flex items-center gap-3">
+      <div className="mb-8 flex justify-center">
         <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-[hsl(0,77%,64%)] to-[hsl(0,77%,54%)] shadow-lg">
           <span className="text-white text-xl font-bold">HW</span>
         </div>
-        <span className="text-lg font-semibold text-gray-800">Heritage</span>
       </div>
 
       {/* Navigation Items */}
