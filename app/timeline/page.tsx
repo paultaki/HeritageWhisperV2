@@ -1190,9 +1190,15 @@ export default function Timeline() {
           <button
             onClick={() => setIsFabExpanded(!isFabExpanded)}
             className={`
-              w-14 h-14 rounded-full bg-heritage-coral text-white shadow-lg shadow-heritage-coral/30
+              w-14 h-14 rounded-full ${
+                currentColorScheme === 'retro' ? 'bg-[#5BB5B0]' : 'bg-heritage-coral'
+              } text-white shadow-lg ${
+                currentColorScheme === 'retro' ? 'shadow-[#5BB5B0]/30' : 'shadow-heritage-coral/30'
+              }
               flex items-center justify-center transition-all duration-300 hover:scale-110
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-heritage-coral
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                currentColorScheme === 'retro' ? 'focus-visible:ring-[#5BB5B0]' : 'focus-visible:ring-heritage-coral'
+              }
               ${isFabExpanded ? "rotate-45" : "rotate-0"}
             `}
             aria-label={
