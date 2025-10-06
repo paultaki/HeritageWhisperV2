@@ -597,8 +597,8 @@ export default function Profile() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
+              <div className="flex items-start justify-between py-2 gap-4">
+                <div className="space-y-0.5 flex-1">
                   <Label htmlFor="email-notifications" className="text-base">Email Notifications</Label>
                   <p className="text-sm text-muted-foreground">Receive updates via email</p>
                 </div>
@@ -606,13 +606,14 @@ export default function Profile() {
                   id="email-notifications"
                   checked={emailNotifications}
                   onCheckedChange={setEmailNotifications}
+                  className="flex-shrink-0 mt-1"
                 />
               </div>
 
               <Separator />
 
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
+              <div className="flex items-start justify-between py-2 gap-4">
+                <div className="space-y-0.5 flex-1">
                   <Label htmlFor="weekly-digest" className="text-base">Weekly Digest</Label>
                   <p className="text-sm text-muted-foreground">Get a weekly summary of your stories</p>
                 </div>
@@ -620,13 +621,14 @@ export default function Profile() {
                   id="weekly-digest"
                   checked={weeklyDigest}
                   onCheckedChange={setWeeklyDigest}
+                  className="flex-shrink-0 mt-1"
                 />
               </div>
 
               <Separator />
 
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
+              <div className="flex items-start justify-between py-2 gap-4">
+                <div className="space-y-0.5 flex-1">
                   <Label htmlFor="family-comments" className="text-base">Family Comments</Label>
                   <p className="text-sm text-muted-foreground">Notify when family comments on stories</p>
                 </div>
@@ -634,6 +636,7 @@ export default function Profile() {
                   id="family-comments"
                   checked={familyComments}
                   onCheckedChange={setFamilyComments}
+                  className="flex-shrink-0 mt-1"
                 />
               </div>
             </CardContent>
@@ -651,8 +654,8 @@ export default function Profile() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
+              <div className="flex items-start justify-between py-2 gap-4">
+                <div className="space-y-0.5 flex-1">
                   <Label htmlFor="default-visibility" className="text-base">Share New Stories with Family</Label>
                   <p className="text-sm text-muted-foreground">
                     New stories will be visible to family members by default
@@ -662,6 +665,7 @@ export default function Profile() {
                   id="default-visibility"
                   checked={defaultStoryVisibility}
                   onCheckedChange={setDefaultStoryVisibility}
+                  className="flex-shrink-0 mt-1"
                 />
               </div>
             </CardContent>
