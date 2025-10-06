@@ -298,6 +298,43 @@ html, body {
   z-index: 5;
 }
 
+/* mobile spine adjustments - shift left for better balance */
+@media (max-width: 767px) {
+  /* widen gutter and shift spine left */
+  .hw-spine {
+    padding-left: 64px;
+  }
+  .hw-spine::before {
+    left: 18px;
+  }
+
+  /* keep connectors aligned to title baseline */
+  .hw-card::before {
+    left: -30px;
+    width: 18px;
+  }
+
+  /* decade band aligns with new gutter */
+  .hw-decade-band {
+    padding-left: 16px;
+  }
+}
+
+/* respect safe area on iPhone with notch */
+@supports (padding: max(0px)) {
+  @media (max-width: 767px) {
+    .hw-spine {
+      padding-left: calc(64px + env(safe-area-inset-left));
+    }
+    .hw-decade-band {
+      padding-left: calc(16px + env(safe-area-inset-left));
+    }
+    .hw-spine::before {
+      left: calc(18px + env(safe-area-inset-left));
+    }
+  }
+}
+
 /* bottom nav selected state */
 .hw-nav-item[aria-current="true"] {
   color: var(--color-accent);
