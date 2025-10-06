@@ -487,113 +487,121 @@ function MemoryCard({
   if (!displayPhoto || !displayPhoto.url) {
     return (
       <div
-        style={cardStyle}
-        className={`memory-card cursor-pointer transition-all duration-200 rounded-lg shadow-lg ${
-          colorScheme === 'retro'
-            ? 'shadow-[#5BB5B0]/20 hover:shadow-xl hover:shadow-[#5BB5B0]/30'
-            : 'shadow-heritage-orange/10 hover:shadow-xl hover:shadow-heritage-orange/15'
-        } p-4 ${
+        className={`hw-card cursor-pointer ${
           isHighlighted
-            ? colorScheme === 'retro'
-              ? "ring-2 ring-[#5BB5B0] shadow-xl shadow-[#5BB5B0]/40 scale-[1.01]"
-              : "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
+            ? "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
             : isReturnHighlight
               ? "return-highlight-animation"
               : ""
         }`}
+        style={{ "--title-offset": "22px" } as React.CSSProperties}
         onClick={handleCardClick}
         data-testid={`memory-card-${story.id}`}
       >
-        <div className="flex items-center gap-3">
-          {/* Audio play button */}
-          {story.audioUrl && (
-            <button
-              onClick={handlePlayAudio}
-              className={`w-10 h-10 bg-white rounded-full shadow-md ${
-                colorScheme === 'retro'
-                  ? 'shadow-[#5BB5B0]/20'
-                  : 'shadow-heritage-orange/10'
-              } flex items-center justify-center transition-all flex-shrink-0 ${
-                hasError
-                  ? "bg-red-100 hover:bg-red-200"
-                  : colorScheme === 'retro'
-                    ? "hover:bg-[#5BB5B0]/10"
-                    : "hover:bg-heritage-orange/10"
-              } ${isLoading ? "animate-pulse" : ""}`}
-              data-testid={`button-play-${story.id}`}
-              aria-label={
-                isPlaying
-                  ? "Pause audio"
-                  : hasError
-                    ? "Retry playing audio"
-                    : "Play audio"
-              }
-            >
-              {isLoading ? (
-                <Loader2 className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-heritage-orange'} animate-spin`} />
-              ) : hasError ? (
-                <AlertCircle className="w-4 h-4 text-red-500" />
-              ) : isPlaying ? (
-                <Pause className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-heritage-orange'}`} />
-              ) : (
-                <Play className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-heritage-orange'} ml-0.5`} />
-              )}
-            </button>
-          )}
+        {/* Year badge */}
+        <span className="hw-year">
+          {story.storyDate
+            ? new Date(story.storyDate).toLocaleDateString("en-US", {
+                year: "numeric",
+              })
+            : formatYear(story.storyYear)}
+        </span>
 
-          {/* Title and year */}
-          <div className="flex-1 min-w-0">
-            <h3
-              className="text-lg font-semibold text-gray-900 line-clamp-1"
-              data-testid={`story-title-${story.id}`}
-            >
-              {story.title}
-            </h3>
-            <p className="text-base text-gray-500">
-              {story.storyDate
-                ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                  })
-                : formatYear(story.storyYear)}
-              {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge > 0 && ` • Age ${story.lifeAge}`}
-              {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge === 0 && ` • Birth`}
-              {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge < 0 && ` • Before birth`}
-            </p>
+        <div className="hw-card-body">
+          <div className="flex items-center gap-3">
+            {/* Audio play button */}
+            {story.audioUrl && (
+              <button
+                onClick={handlePlayAudio}
+                className="hw-play"
+                style={{ position: "relative", right: "auto", bottom: "auto" }}
+                data-testid={`button-play-${story.id}`}
+                aria-label={
+                  isPlaying
+                    ? "Pause audio"
+                    : hasError
+                      ? "Retry playing audio"
+                      : "Play audio"
+                }
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" style={{ fill: "var(--color-accent)" }} />
+                ) : hasError ? (
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                ) : isPlaying ? (
+                  <Pause style={{ fill: "var(--color-accent)" }} />
+                ) : (
+                  <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
+                )}
+              </button>
+            )}
+
+            {/* Title and metadata */}
+            <div className="flex-1 min-w-0">
+              <h3 className="hw-card-title line-clamp-1" data-testid={`story-title-${story.id}`}>
+                {story.title}
+              </h3>
+              <div className="hw-meta">
+                <span>
+                  {story.storyDate
+                    ? new Date(story.storyDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                      })
+                    : formatYear(story.storyYear)}
+                </span>
+                <span className="divider"></span>
+                <span>
+                  {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge > 0 && `Age ${story.lifeAge}`}
+                  {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge === 0 && `Birth`}
+                  {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge < 0 && `Before birth`}
+                </span>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Provenance on hover */}
+        <div className="hw-card-provenance">
+          Recorded with Heritage Whisper
+          {story.createdAt && ` · Created ${new Date(story.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
         </div>
       </div>
     );
   }
 
+  // Calculate title offset based on 16:10 aspect ratio image
+  const titleOffset = displayPhoto && displayPhoto.url ? "180px" : "22px";
+
   // Normal format with photo
   return (
     <div
-      style={cardStyle}
-      className={`memory-card cursor-pointer transition-all duration-200 rounded-lg shadow-lg ${
-        colorScheme === 'retro'
-          ? 'shadow-[#5BB5B0]/20 hover:shadow-xl hover:shadow-[#5BB5B0]/30'
-          : 'shadow-heritage-orange/10 hover:shadow-xl hover:shadow-heritage-orange/15'
-      } p-4 ${
+      className={`hw-card cursor-pointer ${
         isHighlighted
-          ? colorScheme === 'retro'
-            ? "ring-2 ring-[#5BB5B0] shadow-xl shadow-[#5BB5B0]/40 scale-[1.01]"
-            : "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
+          ? "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
           : isReturnHighlight
             ? "return-highlight-animation"
             : ""
       }`}
+      style={{ "--title-offset": titleOffset } as React.CSSProperties}
       onClick={handleCardClick}
       data-testid={`memory-card-${story.id}`}
     >
+      {/* Year badge */}
+      <span className="hw-year">
+        {story.storyDate
+          ? new Date(story.storyDate).toLocaleDateString("en-US", {
+              year: "numeric",
+            })
+          : formatYear(story.storyYear)}
+      </span>
+
       {/* Image container with audio overlay */}
-      <div className="retro-tv relative aspect-[3/2] mb-3 rounded-lg overflow-hidden bg-gray-100">
-        <Image
+      <div style={{ position: "relative" }}>
+        <img
           src={displayPhoto.url}
           alt={story.title}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="retro-tv__screen object-cover"
+          className="hw-card-media"
           style={
             displayPhoto.transform
               ? {
@@ -603,19 +611,19 @@ function MemoryCard({
               : undefined
           }
         />
+
         {/* Photo count badge */}
         {photoCount > 1 && (
           <div className="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
             {photoCount} photos
           </div>
         )}
+
         {/* Audio play button overlay */}
         {story.audioUrl && (
           <button
             onClick={handlePlayAudio}
-            className={`absolute bottom-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center transition-all ${
-              hasError ? "bg-red-100 hover:bg-red-200" : "hover:bg-white"
-            } ${isLoading ? "animate-pulse" : ""}`}
+            className="hw-play"
             data-testid={`button-play-${story.id}`}
             aria-label={
               isPlaying
@@ -626,41 +634,55 @@ function MemoryCard({
             }
           >
             {isLoading ? (
-              <Loader2 className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-[#D4853A]'} animate-spin`} />
+              <Loader2 className="w-4 h-4 animate-spin" style={{ fill: "var(--color-accent)" }} />
             ) : hasError ? (
               <AlertCircle className="w-4 h-4 text-red-500" />
             ) : isPlaying ? (
-              <Pause className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-[#D4853A]'}`} />
+              <Pause style={{ fill: "var(--color-accent)" }} />
             ) : (
-              <Play className={`w-4 h-4 ${colorScheme === 'retro' ? 'text-[#5BB5B0]' : 'text-[#D4853A]'} ml-0.5`} />
+              <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
             )}
           </button>
         )}
       </div>
 
-      {/* Title */}
-      <h3
-        className="text-lg font-semibold text-gray-900 line-clamp-2 mb-0.5"
-        data-testid={`story-title-${story.id}`}
-      >
-        {story.title}
-      </h3>
+      <div className="hw-card-body">
+        {/* Title */}
+        <h3 className="hw-card-title" data-testid={`story-title-${story.id}`}>
+          {story.title}
+        </h3>
 
-      {/* Metadata */}
-      <p className="text-base text-gray-500 mb-2">
-        {story.storyDate
-          ? new Date(story.storyDate).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-            })
-          : formatYear(story.storyYear)}
-        {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge > 0 && ` • Age ${story.lifeAge}`}
-        {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge === 0 && ` • Birth`}
-        {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge < 0 && ` • Before birth`}
-      </p>
+        {/* Metadata */}
+        <div className="hw-meta">
+          <span>
+            {story.storyDate
+              ? new Date(story.storyDate).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                })
+              : formatYear(story.storyYear)}
+          </span>
+          <span className="divider"></span>
+          <span>
+            {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge > 0 && `Age ${story.lifeAge}`}
+            {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge === 0 && `Birth`}
+            {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge < 0 && `Before birth`}
+          </span>
+          {top.length > 0 && (
+            <>
+              <span className="divider"></span>
+              <span>{top[0].name}</span>
+            </>
+          )}
+        </div>
+      </div>
 
-      {/* Trait signal */}
-      {top.length ? <StoryTraits traits={top} /> : null}
+      {/* Provenance on hover */}
+      <div className="hw-card-provenance">
+        Recorded with Heritage Whisper
+        {story.createdAt && ` · Created ${new Date(story.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
+        {story.updatedAt && story.updatedAt !== story.createdAt && ` · Last edited ${new Date(story.updatedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
+      </div>
     </div>
   );
 }
@@ -1218,23 +1240,7 @@ export default function Timeline() {
 
       {/* Timeline Content with Vertical Timeline Design */}
       <main className="max-w-6xl mx-auto px-3 py-6 pb-20 md:p-6 md:pb-6 md:pr-20">
-        <div className="relative">
-          {/* Vertical Timeline Line */}
-          <div
-            className="absolute left-[3px] md:left-[19px] top-0 bottom-0 w-1"
-            style={{
-              background:
-                currentColorScheme === 'original' || currentColorScheme === 'inverted' ? 'linear-gradient(to bottom, #D4853A, #F08466)' :
-                currentColorScheme === 'white' ? 'linear-gradient(to bottom, #D1D5DB, #9CA3AF)' :
-                currentColorScheme === 'soft' ? 'linear-gradient(to bottom, #9CA3AF, #6B7280)' :
-                currentColorScheme === 'cool' ? 'linear-gradient(to bottom, #60A5FA, #3B82F6)' :
-                currentColorScheme === 'dark' ? 'linear-gradient(to bottom, #3A3A3A, #2A2A2A)' :
-                currentColorScheme === 'retro' ? 'linear-gradient(to bottom, #D4654F, #5BB5B0)' :
-                'linear-gradient(to bottom, #D4853A, #F08466)'
-            }}
-          ></div>
-
-          <div className="space-y-12 relative">
+        <div className="hw-spine">
             {/* All stories sorted chronologically */}
             {(() => {
               // Create chronological timeline
@@ -1353,63 +1359,54 @@ export default function Timeline() {
                   key={item.id}
                   ref={(el) => (decadeRefs.current[item.id] = el)}
                   data-decade-id={item.id}
-                  className="timeline-section relative"
+                  className="hw-decade"
                 >
-                  {/* Timeline Node */}
-                  <div className="absolute left-[-1px] md:left-[15px] w-3 h-3 bg-heritage-coral rounded-full ring-2 ring-white shadow-md z-10"></div>
-
-                  {/* Content */}
-                  <div className="ml-8 md:ml-14">
-                    {/* Decade Header */}
-                    <div className="mb-6">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Calendar className="w-6 h-6 text-gray-400" />
-                        <h2 className="text-3xl font-semibold text-gray-900">
-                          {item.title}
-                          {item.stories && item.stories.length > 0 && (
-                            <span className="ml-2 text-xl font-normal text-gray-500">
-                              ({item.stories.length}{" "}
-                              {item.stories.length === 1 ? "story" : "stories"})
-                            </span>
-                          )}
-                        </h2>
-                      </div>
-                      <p className="text-base text-muted-foreground ml-9">
-                        {item.subtitle}
-                      </p>
+                  {/* Decade Band - Sticky Header */}
+                  <div className="hw-decade-band">
+                    <div className="title">
+                      {item.title}
+                      {item.stories && item.stories.length > 0 && (
+                        <span className="ml-2 text-xl font-normal" style={{ color: 'var(--color-text-muted)' }}>
+                          ({item.stories.length}{" "}
+                          {item.stories.length === 1 ? "story" : "stories"})
+                        </span>
+                      )}
                     </div>
+                    <div className="meta">{item.subtitle}</div>
+                  </div>
 
-                    {/* Stories Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                      {/* Existing Stories and Ghost Prompts */}
-                      {item.stories.map((storyOrPrompt: any) => {
-                        // Check if this is a ghost prompt
-                        if (storyOrPrompt.isGhost) {
-                          return (
-                            <GhostPromptCard
-                              key={storyOrPrompt.id}
-                              prompt={storyOrPrompt}
-                              onClick={() => handleGhostPromptClick(storyOrPrompt)}
-                            />
-                          );
-                        }
-                        // Regular story
+                  {/* Spacing before first card */}
+                  <div className="hw-decade-start"></div>
+
+                  {/* Stories Grid */}
+                  <div className="hw-grid">
+                    {/* Existing Stories and Ghost Prompts */}
+                    {item.stories.map((storyOrPrompt: any) => {
+                      // Check if this is a ghost prompt
+                      if (storyOrPrompt.isGhost) {
                         return (
-                          <MemoryCard
+                          <GhostPromptCard
                             key={storyOrPrompt.id}
-                            story={storyOrPrompt}
-                            isHighlighted={storyOrPrompt.id === highlightedStoryId}
-                            isReturnHighlight={storyOrPrompt.id === returnHighlightId}
-                            colorScheme={currentColorScheme}
+                            prompt={storyOrPrompt}
+                            onClick={() => handleGhostPromptClick(storyOrPrompt)}
                           />
                         );
-                      })}
-                    </div>
+                      }
+                      // Regular story
+                      return (
+                        <MemoryCard
+                          key={storyOrPrompt.id}
+                          story={storyOrPrompt}
+                          isHighlighted={storyOrPrompt.id === highlightedStoryId}
+                          isReturnHighlight={storyOrPrompt.id === returnHighlightId}
+                          colorScheme={currentColorScheme}
+                        />
+                      );
+                    })}
                   </div>
                 </section>
               ));
             })()}
-          </div>
         </div>
       </main>
 
