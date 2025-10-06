@@ -176,27 +176,31 @@ html, body {
   }
 }
 
-/* play button */
+/* play button - heritage palette */
 .hw-play {
   position: absolute;
   right: var(--space-4);
   bottom: var(--space-4);
-  width: var(--tap-size);
-  height: var(--tap-size);
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  border: 2px solid var(--color-accent);
+  background: rgba(255, 255, 255, 0.94);
+  border: 2px solid var(--color-accent); /* clay ring */
   display: grid;
   place-items: center;
-  transition: transform 0.1s ease-out;
-}
-.hw-play:hover {
-  transform: scale(1.04);
+  transition: transform 0.1s ease-out, background-color 0.1s ease-out;
 }
 .hw-play svg {
   width: 18px;
   height: 18px;
-  fill: var(--color-accent);
+  fill: #2B2B2E; /* charcoal triangle */
+}
+.hw-play:hover {
+  transform: scale(1.04);
+  background: rgba(255, 255, 255, 1);
+}
+.hw-play:hover svg {
+  fill: var(--color-accent); /* swap to clay on hover */
 }
 
 /* Respect reduced motion preference */
@@ -298,40 +302,48 @@ html, body {
   z-index: 5;
 }
 
-/* mobile spine adjustments - shift left for better balance */
+/* mobile layout tighten - reclaim width for cards */
 @media (max-width: 767px) {
-  /* widen gutter and shift spine left */
+  /* narrower gutter, spine nearer edge */
   .hw-spine {
-    padding-left: 64px;
+    padding-left: calc(40px + env(safe-area-inset-left));
   }
   .hw-spine::before {
-    left: 18px;
+    left: calc(14px + env(safe-area-inset-left));
   }
 
-  /* keep connectors aligned to title baseline */
+  /* connectors more visible and longer */
+  .hw-card {
+    position: relative;
+  }
   .hw-card::before {
-    left: -30px;
+    content: "";
+    position: absolute;
+    left: -20px;
+    top: calc(var(--title-offset, 22px));
     width: 18px;
+    height: 2px;
+    background: color-mix(in srgb, var(--color-border) 70%, var(--color-accent) 30%);
+    border-radius: 1px;
+    opacity: 0.95;
+    pointer-events: none;
+  }
+  .hw-card:hover::before,
+  .hw-card:focus-visible::before {
+    width: 36px;
+    background: var(--color-accent);
   }
 
-  /* decade band aligns with new gutter */
-  .hw-decade-band {
-    padding-left: 16px;
-  }
-}
-
-/* respect safe area on iPhone with notch */
-@supports (padding: max(0px)) {
-  @media (max-width: 767px) {
-    .hw-spine {
-      padding-left: calc(64px + env(safe-area-inset-left));
-    }
-    .hw-decade-band {
-      padding-left: calc(16px + env(safe-area-inset-left));
-    }
-    .hw-spine::before {
-      left: calc(18px + env(safe-area-inset-left));
-    }
+  /* timeline nodes align with tighter gutter */
+  .hw-node::before {
+    left: 12px;
+    top: -6px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--color-accent);
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   }
 }
 
