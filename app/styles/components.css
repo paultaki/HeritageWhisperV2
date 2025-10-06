@@ -193,14 +193,17 @@ html, body {
 .hw-play svg {
   width: 18px;
   height: 18px;
-  fill: #2B2B2E; /* charcoal triangle */
+  fill: none; /* no fill */
+  stroke: var(--color-accent); /* orange outline */
+  stroke-width: 2px;
 }
 .hw-play:hover {
   transform: scale(1.04);
   background: rgba(255, 255, 255, 1);
 }
 .hw-play:hover svg {
-  fill: var(--color-accent); /* swap to clay on hover */
+  fill: var(--color-accent); /* fill on hover */
+  stroke: var(--color-accent);
 }
 
 /* Respect reduced motion preference */
