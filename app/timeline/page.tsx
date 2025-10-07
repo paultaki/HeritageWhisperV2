@@ -1376,16 +1376,21 @@ export default function Timeline() {
                       className="hw-decade"
                     >
                   {/* Decade Band - Sticky Header */}
-                  <div className="hw-decade-band">
-                    <div className="title">
-                      {item.title}
-                      {item.stories && item.stories.length > 0 && (
-                        <span className="ml-2 text-xl font-normal" style={{ color: 'var(--color-text-muted)' }}>
-                          ({item.stories.length}{" "}
-                          {item.stories.length === 1 ? "story" : "stories"})
-                        </span>
-                      )}
-                    </div>
+                  <div className="hw-decade-band" style={{ position: 'relative' }}>
+                    {/* Year badge centered in decade band */}
+                    <span className="hw-year" style={{
+                      position: 'absolute',
+                      left: 'auto',
+                      right: '16px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      opacity: 1
+                    }}>
+                      {item.id === "before-birth" ? "TOP" :
+                       item.id === "birth-year" ? formatYear(user.birthYear) :
+                       item.id.replace("decade-", "").replace("s", "")}
+                    </span>
+                    <div className="title">{item.title}</div>
                     <div className="meta">{item.subtitle}</div>
                   </div>
 
