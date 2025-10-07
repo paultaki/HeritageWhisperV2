@@ -1066,14 +1066,7 @@ export default function Timeline() {
           currentColorScheme === 'dark' ? 'border-b border-gray-800' : 'border-b border-gray-100'
         }`}
         style={{
-          backgroundColor:
-            currentColorScheme === 'original' ? 'rgba(255, 255, 255, 0.95)' :
-            currentColorScheme === 'inverted' ? 'rgba(255, 248, 243, 0.95)' :
-            currentColorScheme === 'soft' ? 'rgba(249, 250, 251, 0.95)' :
-            currentColorScheme === 'cool' ? 'rgba(248, 250, 252, 0.95)' :
-            currentColorScheme === 'dark' ? 'rgba(15, 15, 15, 0.95)' :
-            currentColorScheme === 'retro' ? 'rgba(245, 230, 211, 0.95)' :
-            'rgba(255, 255, 255, 0.95)',
+          backgroundColor: 'transparent', // Temporary for debugging
           color: currentColorScheme === 'dark' ? '#E5E5E5' :
                  currentColorScheme === 'retro' ? '#6B4E42' : undefined
         }}
