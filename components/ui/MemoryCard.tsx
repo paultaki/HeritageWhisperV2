@@ -50,7 +50,7 @@ export default function MemoryCard(p: Props) {
           decoding="async"
         />
         <button
-          className="hw-play"
+          className="hw-play hw-play-desktop"
           aria-label="Play memory"
           onClick={p.onPlay}
         >
@@ -86,10 +86,10 @@ export default function MemoryCard(p: Props) {
           )}
         </div>
 
-        {/* Timeline/Book toggles with menu button */}
+        {/* Timeline/Book toggles with play and menu buttons */}
         {(p.onToggleTimeline || p.onToggleBook) && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'var(--space-3)' }}>
-            <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="hw-card-actions-row">
+            <div style={{ display: 'flex', gap: '6px' }}>
               {p.onToggleTimeline && (
                 <button
                   className={`hw-chip ${p.inTimeline ? 'active' : ''}`}
@@ -109,27 +109,38 @@ export default function MemoryCard(p: Props) {
                 </button>
               )}
             </div>
-            <div style={{ position: 'relative' }} ref={menuRef}>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
               <button
-                className="hw-icon-btn"
-                aria-label="More options"
-                onClick={() => setShowMenu(!showMenu)}
+                className="hw-icon-btn hw-play-mobile"
+                aria-label="Play memory"
+                onClick={p.onPlay}
               >
-                ⋯
+                <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18">
+                  <path d="M8 5l11 7-11 7V5z" fill="var(--color-accent)" />
+                </svg>
               </button>
-              {showMenu && (
-                <div className="hw-dropdown-menu">
-                  <button onClick={() => { p.onEdit?.(); setShowMenu(false); }}>
-                    ✎ Edit
-                  </button>
-                  <button onClick={() => { p.onToggleFavorite?.(); setShowMenu(false); }}>
-                    {p.isFavorite ? '★' : '☆'} {p.isFavorite ? 'Unfavorite' : 'Favorite'}
-                  </button>
-                  <button className="danger" onClick={() => { p.onDelete?.(); setShowMenu(false); }}>
-                    🗑 Delete
-                  </button>
-                </div>
-              )}
+              <div style={{ position: 'relative' }} ref={menuRef}>
+                <button
+                  className="hw-icon-btn"
+                  aria-label="More options"
+                  onClick={() => setShowMenu(!showMenu)}
+                >
+                  ⋯
+                </button>
+                {showMenu && (
+                  <div className="hw-dropdown-menu">
+                    <button onClick={() => { p.onEdit?.(); setShowMenu(false); }}>
+                      ✎ Edit
+                    </button>
+                    <button onClick={() => { p.onToggleFavorite?.(); setShowMenu(false); }}>
+                      {p.isFavorite ? '★' : '☆'} {p.isFavorite ? 'Unfavorite' : 'Favorite'}
+                    </button>
+                    <button className="danger" onClick={() => { p.onDelete?.(); setShowMenu(false); }}>
+                      🗑 Delete
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

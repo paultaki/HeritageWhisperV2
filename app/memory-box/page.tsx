@@ -449,9 +449,11 @@ export default function MemoryBoxPage() {
                     }
                   }}
                   onEdit={() => router.push(`/review/book-style?edit=${story.id}`)}
-                  onMore={() => {
-                    // Open context menu or actions
-                    console.log('More actions for', story.id);
+                  onToggleFavorite={() => handleToggleFavorite(story.id)}
+                  onDelete={() => {
+                    if (confirm('Delete this memory? This cannot be undone.')) {
+                      deleteStory.mutate(story.id);
+                    }
                   }}
                   onToggleTimeline={() => handleToggleTimeline(story.id)}
                   onToggleBook={() => handleToggleBook(story.id)}

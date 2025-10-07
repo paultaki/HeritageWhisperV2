@@ -1443,6 +1443,12 @@ textarea:focus-visible {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
 
+  @media (min-width: 768px) {
+    .book-header {
+      margin-left: 80px; /* Desktop nav width */
+    }
+  }
+
   /* Main book container with proper constraints */
   .book-container {
     max-width: 1400px;
