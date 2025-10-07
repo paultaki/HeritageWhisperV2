@@ -60,11 +60,15 @@ HeritageWhisperV2/
 │   │   └── user/           # User management (delete, export)
 │   ├── auth/               # Auth pages (login, register, callback)
 │   ├── timeline/           # Timeline view (main stories view)
+│   ├── design-demo/        # Design system demo/reference
 │   ├── recording/          # Audio recording page
 │   ├── review/             # Story editing
 │   │   └── book-style/     # BookStyleReview component page
 │   ├── book/               # Book view (dual-page layout)
-│   └── profile/            # User settings & account management
+│   ├── profile/            # User settings & account management
+│   └── styles/             # Global styles
+│       ├── tokens.css      # Design tokens (colors, spacing, typography)
+│       └── components.css  # Heritage Whisper component library (hw-* classes)
 ├── components/              # React components
 │   ├── AudioRecorder.tsx   # Web Audio API recording
 │   ├── MultiPhotoUploader.tsx # Photo upload with cropping & hero selection
@@ -112,6 +116,40 @@ HeritageWhisperV2/
   - "TOP" marker jumps to pre-birth section
   - Birth year marker
   - Decade markers (1960s, 1970s, etc.)
+
+### Design System (October 2025)
+Production timeline now uses the Heritage Whisper design system with semantic `hw-*` classes:
+
+**Component Classes:**
+- `.hw-spine` - Timeline container with vertical spine and gutter spacing
+- `.hw-decade` - Decade section wrapper
+- `.hw-decade-band` - Sticky decade headers (87px offset for perfect alignment with app header)
+- `.hw-grid` - Responsive grid (1 col mobile, 2 cols desktop)
+- `.hw-card` - Story card with horizontal connectors to timeline spine
+- `.hw-card-media` - 16:10 aspect ratio images
+- `.hw-card-body` - Card content wrapper
+- `.hw-card-title` - Story title
+- `.hw-meta` - Metadata row with hairline dividers
+- `.hw-card-provenance` - Hover details (creation/edit dates)
+- `.hw-year` - Year badge (appears on hover/focus)
+- `.hw-play` - Play button with heritage palette
+
+**Design Tokens:**
+- Primary accent: `#D36A3D` (clay/terracotta)
+- Secondary accent: `#B89B5E` (soft gold)
+- Focus ring: `#B89B5E`
+- Card shadow: `0 6px 20px rgba(0,0,0,0.10)`
+- Semantic spacing scale in `tokens.css`
+
+**Key Features:**
+- Horizontal connectors aligned to title baseline via `--title-offset` CSS custom property
+- 180px offset for cards with images (16:10 aspect ratio), 22px for text-only
+- Play button: stroke outline at rest, fills on hover
+- Sticky decade bands with soft tinted background (88% page, 12% accent)
+- Year badges show on card hover for temporal context
+- Provenance details on hover (creation/edit dates)
+- Mobile-optimized: 40px gutter, 14px spine position, 18px×2px connectors
+- Desktop: 56px gutter, 20px spine position, 18px connectors (14px default, expands to 24px on hover)
 
 ## 🐛 Common Issues & Fixes
 
@@ -201,5 +239,5 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 - Migrations and schema files preserved in `/migrations` and `/scripts`
 
 ---
-*Last updated: October 5, 2025*
+*Last updated: October 6, 2025*
 *For historical fixes and detailed migration notes, see CLAUDE_HISTORY.md*
