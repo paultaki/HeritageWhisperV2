@@ -272,10 +272,10 @@ html, body {
   position: absolute;
   left: -52px;
   top: calc(var(--title-offset, 22px) - 6px);
-  font: 600 14px var(--font-sans);
+  font: 600 11px var(--font-sans);
   color: var(--color-text-muted);
   background: var(--color-page);
-  padding: 4px 8px;
+  padding: 2px 6px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   opacity: 0;

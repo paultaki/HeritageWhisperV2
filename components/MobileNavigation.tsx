@@ -63,7 +63,7 @@ export default function MobileNavigation({ onRecordClick }: MobileNavigationProp
       className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-t-2 md:hidden"
       style={{
         borderTopColor: '#D36A3D',
-        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
         boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.08)',
       }}
     >
