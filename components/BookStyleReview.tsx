@@ -118,9 +118,9 @@ export function BookStyleReview({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#2c2416] via-[#1a1410] to-[#2c2416] md:bg-gradient-to-b md:from-amber-50 md:to-white">
       {/* Top Navigation */}
-      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      <div className="sticky top-0 z-50 bg-[#faf8f5]/95 backdrop-blur-sm border-b border-[#8B6F47]/20">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
           <h1 className="text-xl md:text-2xl font-serif text-gray-800 flex-shrink-0">Review Memory</h1>
           <Button
@@ -135,9 +135,12 @@ export function BookStyleReview({
       </div>
 
       {/* Single Page Book View */}
-      <div className="flex justify-center px-4 py-8 pb-16">
-        <div className="bg-white rounded-lg shadow-2xl max-w-3xl w-full">
-          <div className="p-8 md:p-12 space-y-8">
+      <div className="flex justify-center px-2 py-4 pb-16 md:px-4 md:py-8">
+        {/* Desktop: Wrap in brown leather border like book */}
+        <div className="w-full max-w-3xl md:bg-[#2c2416] md:p-8 md:rounded-xl md:shadow-[inset_0_0_40px_rgba(0,0,0,0.4),0_20px_60px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)]">
+          {/* Page content - cream background like book pages */}
+          <div className="bg-[#faf8f5] rounded-lg shadow-[0_2px_12px_rgba(139,111,71,0.15)] md:shadow-[0_0_40px_rgba(0,0,0,0.1)_inset,0_0_2px_rgba(0,0,0,0.1)]">
+            <div className="p-6 md:p-12 space-y-8">
 
             {/* 1. Photo Section */}
             <div>
@@ -483,6 +486,7 @@ export function BookStyleReview({
 
           </div>
         </div>
+      </div>
       </div>
 
       {/* Instructions */}

@@ -1430,13 +1430,17 @@ textarea:focus-visible {
     min-height: 100vh;
   }
 
-  /* Book header with logo */
+  /* Book header */
   .book-header {
-    padding: 1.5rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding: 1rem 1.5rem;
     display: flex;
     align-items: center;
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
 
   /* Main book container with proper constraints */
@@ -1451,6 +1455,14 @@ textarea:focus-visible {
       0 20px 60px rgba(0,0,0,0.5),
       0 0 0 1px rgba(255,255,255,0.05);
     perspective: 1500px;
+  }
+
+  /* On desktop, center properly accounting for sidebar navigation (80px wide) */
+  @media (min-width: 1024px) {
+    .book-container {
+      margin-left: max(2rem, calc((100vw - 80px - 1400px) / 2 + 80px));
+      margin-right: max(2rem, calc((100vw - 80px - 1400px) / 2));
+    }
   }
 
   /* Spread container */
@@ -1964,34 +1976,22 @@ textarea:focus-visible {
   /* Mobile adjustments for premium book view - MAXIMIZED CONTENT WIDTH */
   @media (max-width: 899px) {
     .book-view {
-      background: #f5f5f5; /* Light background on mobile - no dark borders */
+      background: linear-gradient(to bottom, #2c2416 0%, #1a1410 100%); /* Dark leather background on mobile */
     }
 
     .book-header {
-      padding: 0.75rem 0.5rem;
+      padding: 1rem 1.5rem;
       background: white;
       border-bottom: 1px solid #e5e5e5;
     }
 
-    .book-header img {
-      display: none; /* Hide logo on mobile */
-    }
-
-    .book-header::before {
-      content: 'HERITAGE WHISPER';
-      font-family: 'Crimson Text', Georgia, serif;
-      font-size: 16px;
-      letter-spacing: 0.05em;
-      color: #8B6F47;
-      font-weight: 600;
-    }
-
     .book-container {
-      margin: 0; /* Remove margins for full width */
-      padding: 0; /* Remove padding for full width */
-      background: transparent; /* Remove dark background */
-      border-radius: 0; /* No rounded corners on mobile */
-      box-shadow: none; /* Remove shadows */
+      margin: 1rem auto; /* Small margins for slim brown border effect */
+      padding: 0.75rem; /* Slim padding for brown border */
+      max-width: calc(100vw - 2rem);
+      background: #2c2416; /* Dark leather color for slim border */
+      border-radius: 8px; /* Slight rounding */
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* Premium shadow */
     }
 
     .book-spread {
@@ -2004,7 +2004,7 @@ textarea:focus-visible {
     .page {
       max-width: 100%; /* Full viewport width */
       margin: 0; /* Remove margins */
-      padding: 1rem 0.5rem 60px; /* Minimal 8px (0.5rem) side padding */
+      padding: 1rem 10px 60px; /* 10px side padding for wider content */
       border-radius: 0; /* No rounded corners */
       background: white; /* Clean white background */
       box-shadow: none; /* Remove all shadows on mobile */
@@ -2065,13 +2065,13 @@ textarea:focus-visible {
       padding: 0.75rem 1rem;
     }
     
-    /* Larger photo on mobile - use 95% of page width */
+    /* Larger photo on mobile - use 98% of page width for maximum impact */
     .memory-photo {
-      width: 95%;
-      max-width: 95%;
+      width: 98%;
+      max-width: 98%;
       aspect-ratio: 16 / 9;
       max-height: none;
-      margin: 0 auto 1.5rem; /* Center and reduce top margin */
+      margin: 0 auto 1rem; /* Center and minimal bottom margin */
       object-fit: cover;
       border-radius: 4px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -2080,15 +2080,15 @@ textarea:focus-visible {
     /* Photo container - reduce padding */
     .memory-photo-wrapper,
     div:has(> .memory-photo) {
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
       padding: 0;
     }
 
-    /* Mobile audio player optimization */
+    /* Mobile audio player optimization - compact and premium */
     .audio-player,
     div[class*="audio"] {
-      margin: 1rem 0;
-      padding: 0.75rem;
+      margin: 0.75rem 0;
+      padding: 0.5rem;
     }
 
     /* Larger play button for mobile */
@@ -2104,11 +2104,14 @@ textarea:focus-visible {
       justify-content: center;
     }
 
-    /* Larger timestamps */
+    /* Compact timestamps */
     .audio-time {
-      font-size: 13px !important;
-      margin-top: 0.5rem;
-      opacity: 0.85;
+      font-size: 11px !important;
+      margin-top: 0.25rem;
+      opacity: 0.7;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
     }
 
     /* Thicker progress bar */
@@ -2210,14 +2213,17 @@ textarea:focus-visible {
       margin-bottom: 12px; /* Reduce margin */
     }
     
-    /* Reduce audio wrapper spacing on mobile */
+    /* Compact audio wrapper spacing on mobile */
     .audio-wrapper {
-      margin-top: 12px; /* Reduce top margin */
-      margin-bottom: 12px; /* Reduce bottom margin */
+      margin-top: 8px;
+      margin-bottom: 8px;
     }
 
     .audio-wrap {
-      padding: 10px 12px; /* Smaller padding */
+      padding: 8px 10px; /* Minimal padding for compact, premium look */
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
     }
 
     /* Ensure audio progress bar is visible on mobile */

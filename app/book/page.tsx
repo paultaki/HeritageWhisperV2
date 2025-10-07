@@ -30,6 +30,7 @@ import FloatingInsightCard from "@/components/FloatingInsightCard";
 import { useSwipeable } from "react-swipeable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
+import BookNav, { type BookNavEntry } from "@/components/ui/BookNav";
 import {
   paginateBook,
   getPageSpreads,
@@ -152,7 +153,13 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
 };
 
 // Single page renderer
-const BookPageRenderer = ({ page }: { page: BookPage }) => {
+const BookPageRenderer = ({
+  page,
+  onNavigateToPage
+}: {
+  page: BookPage;
+  onNavigateToPage?: (pageNumber: number) => void;
+}) => {
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -240,12 +247,16 @@ const BookPageRenderer = ({ page }: { page: BookPage }) => {
                 </h2>
                 <div className="space-y-1 pl-4">
                   {entry.stories.map((story, idx) => (
-                    <div key={idx} className="flex justify-between items-baseline text-sm">
-                      <span className="text-gray-700 flex-1 pr-2">{story.title}</span>
+                    <button
+                      key={idx}
+                      onClick={() => onNavigateToPage && onNavigateToPage(story.pageNumber - 1)}
+                      className="flex justify-between items-baseline text-sm w-full hover:bg-gray-50 px-2 py-1 rounded transition-colors cursor-pointer text-left"
+                    >
+                      <span className="text-gray-700 flex-1 pr-2 hover:text-coral-600">{story.title}</span>
                       <span className="text-gray-500 text-xs whitespace-nowrap">
                         {story.year} • p.{story.pageNumber}
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -410,10 +421,10 @@ export default function BookViewNew() {
 
   const stories = data?.stories || [];
 
-  // Convert to book data structure
-  const { pages, spreads, storyPageIndex } = useMemo(() => {
+  // Convert to book data structure and build navigation
+  const { pages, spreads, storyPageIndex, navEntries } = useMemo(() => {
     if (!stories || stories.length === 0) {
-      return { pages: [], spreads: [], storyPageIndex: -1 };
+      return { pages: [], spreads: [], storyPageIndex: -1, navEntries: [] };
     }
 
     // Group stories by decade
@@ -451,10 +462,39 @@ export default function BookViewNew() {
       pageIndex = bookPages.findIndex(page => page.storyId === storyIdFromUrl);
     }
 
+    // Build navigation entries: TOC + decade markers
+    const navigationEntries: BookNavEntry[] = [];
+
+    // Add TOC as first entry
+    const tocPageIndex = bookPages.findIndex(p => p.type === 'table-of-contents');
+    if (tocPageIndex >= 0) {
+      navigationEntries.push({
+        id: 'toc',
+        label: 'TOC',
+        pageNumber: tocPageIndex,
+        isTOC: true,
+      });
+    }
+
+    // Add decade markers
+    bookPages.forEach((page, idx) => {
+      if (page.type === 'decade-marker' && page.decade) {
+        const label = page.decade === 'birth-year'
+          ? (page.decadeTitle?.split(' ')[0] || 'Birth')
+          : page.decade.replace('decade-', '').replace('s', '');
+        navigationEntries.push({
+          id: page.decade,
+          label: label,
+          pageNumber: idx,
+        });
+      }
+    });
+
     return {
       pages: bookPages,
       spreads: bookSpreads,
       storyPageIndex: pageIndex,
+      navEntries: navigationEntries,
     };
   }, [stories, storyIdFromUrl]);
 
@@ -488,6 +528,15 @@ export default function BookViewNew() {
       setCurrentMobilePage(prev => Math.min(totalPages - 1, prev + 1));
     } else {
       setCurrentSpreadIndex(prev => Math.min(totalSpreads - 1, prev + 1));
+    }
+  };
+
+  const navigateToPage = (pageIndex: number) => {
+    if (isMobile) {
+      setCurrentMobilePage(Math.min(Math.max(0, pageIndex), totalPages - 1));
+    } else {
+      const spreadIndex = Math.floor(pageIndex / 2);
+      setCurrentSpreadIndex(Math.min(Math.max(0, spreadIndex), totalSpreads - 1));
     }
   };
 
@@ -541,7 +590,10 @@ export default function BookViewNew() {
     <div className="book-view min-h-screen bg-background">
       {/* Header */}
       <div className="book-header">
-        <img src={logoUrl} alt="Heritage Whisper" className="h-10 w-auto" />
+        <div className="flex items-center gap-3">
+          <BookOpen className="w-8 h-8 text-coral-500" />
+          <h1 className="text-2xl font-bold">Book</h1>
+        </div>
       </div>
 
       {/* Fixed Navigation Arrows - Outside of book container */}
@@ -587,21 +639,30 @@ export default function BookViewNew() {
         </button>
       )}
 
+      {/* Book Navigation */}
+      {navEntries.length > 0 && (
+        <BookNav
+          entries={navEntries}
+          currentPage={isMobile ? currentMobilePage : currentSpreadIndex * 2}
+          onNavigate={navigateToPage}
+        />
+      )}
+
       {/* Book Content */}
       <div className="book-container relative" {...swipeHandlers}>
 
         <div className="book-spread">
           {isMobile ? (
             // Mobile: Single page view
-            <BookPageRenderer page={pages[currentMobilePage]} />
+            <BookPageRenderer page={pages[currentMobilePage]} onNavigateToPage={navigateToPage} />
           ) : (
             // Desktop: Two-page spread
             <>
               {spreads[currentSpreadIndex] && (
                 <>
-                  <BookPageRenderer page={spreads[currentSpreadIndex][0]} />
+                  <BookPageRenderer page={spreads[currentSpreadIndex][0]} onNavigateToPage={navigateToPage} />
                   {spreads[currentSpreadIndex][1] && (
-                    <BookPageRenderer page={spreads[currentSpreadIndex][1]} />
+                    <BookPageRenderer page={spreads[currentSpreadIndex][1]} onNavigateToPage={navigateToPage} />
                   )}
                 </>
               )}
@@ -610,44 +671,12 @@ export default function BookViewNew() {
         </div>
       </div>
 
-      {/* Sticky Navigation Footer */}
+      {/* Simplified Bottom Bar - Just Page Number */}
       <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 z-30 md:bottom-0 md:left-20 md:z-40">
-        <div className="flex items-center justify-between w-full gap-1 px-1 py-2 md:max-w-7xl md:mx-auto md:gap-2 md:px-6 md:py-2.5">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={goToPrevious}
-            disabled={isMobile ? currentMobilePage === 0 : currentSpreadIndex === 0}
-            className="flex-shrink-0 px-1.5 h-9 min-w-[32px] md:px-4 md:h-10 md:min-w-[44px]"
-          >
-            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
-            <span className="hidden sm:inline ml-1">Previous</span>
-          </Button>
-
-          <div className="text-[10px] leading-tight md:text-sm text-muted-foreground font-medium whitespace-nowrap flex-shrink-0 mx-1">
-            {isMobile
-              ? `${currentMobilePage + 1} of ${totalPages}`
-              : `${currentSpreadIndex * 2 + 1}-${Math.min(
-                  currentSpreadIndex * 2 + 2,
-                  totalPages
-                )} of ${totalPages}`
-            }
+        <div className="flex items-center justify-center w-full px-4 py-2 md:max-w-7xl md:mx-auto">
+          <div className="text-sm md:text-base text-muted-foreground font-medium">
+            Page {isMobile ? currentMobilePage + 1 : currentSpreadIndex * 2 + 1} of {totalPages}
           </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={goToNext}
-            disabled={
-              isMobile
-                ? currentMobilePage === totalPages - 1
-                : currentSpreadIndex === totalSpreads - 1
-            }
-            className="flex-shrink-0 px-1.5 h-9 min-w-[32px] md:px-4 md:h-10 md:min-w-[44px]"
-          >
-            <span className="hidden sm:inline mr-1">Next</span>
-            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-          </Button>
         </div>
       </div>
 

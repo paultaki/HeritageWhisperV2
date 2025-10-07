@@ -93,7 +93,8 @@ HeritageWhisperV2/
 - **AI Transcription**: OpenAI Whisper API with automatic processing
 - **Photo Management**: Multi-upload with cropping & hero images (EXIF data stripped for privacy)
 - **Timeline View**: Chronological story organization by decade with "Before I Was Born" section for pre-birth family stories
-- **Book View**: Dual-page layout with natural pagination
+- **Book View**: Dual-page layout with natural pagination, collapsed decade navigation
+- **Memory Box**: Grid/list view toggle with filtering (All, Favorites, Timeline, Book, No date, Private)
 - **Mobile Responsive**: Senior-friendly UX with large touch targets and bouncing bar visualizations
 - **Desktop Navigation**: Left sidebar (192px wide) with labeled icons for Timeline, Record, Book View, and Memory Box
 - **Rate Limiting**: Upstash Redis-based rate limiting (auth: 5/10s, uploads: 10/min, API: 30/min)
@@ -183,6 +184,11 @@ Production timeline now uses the Heritage Whisper design system with semantic `h
 - **Photo Menu**: Three-dot menu positioned at `-top-1 -right-1` (upper right corner)
 - **Age Display**: Consistent across Timeline, Book View, and Review screens
 - **Desktop Nav**: 192px wide sidebar with labeled icons (Timeline, Record, Book View, Memory Box)
+- **Memory Card Actions**: Dropdown menu (⋯) with Edit, Favorite/Unfavorite, and Delete options
+- **Book Navigation**: Collapsed by default on both desktop and mobile, expands to show TOC + decade markers
+- **Memory Box Views**:
+  - Grid view: Standard card layout with photos, metadata, and action buttons
+  - List view: Compact horizontal rows (~80px height) with 64x64px thumbnails
 
 ## 🚀 Deployment
 
@@ -238,6 +244,34 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 - Old page versions, test scripts, one-time fix docs cleaned up
 - Migrations and schema files preserved in `/migrations` and `/scripts`
 
+## 📋 Recent Updates (October 7, 2025)
+
+### Memory Box Enhancements
+- **Filter System**: 3x2 grid layout with 6 filter buttons (All, Favorites, Timeline, Book, No date, Private)
+- **List View**: Compact horizontal rows with Timeline/Book/menu buttons in single row
+- **Card Improvements**:
+  - Added dropdown menu (⋯ button) with Edit, Favorite, Delete actions
+  - Star icon (⭐) displays on favorited memories
+  - Removed separate edit pencil icon in favor of dropdown menu
+- **Toolbar Polish**: Search box and filter grid have matching widths on mobile for symmetry
+
+### Book View Updates
+- **Navigation**: Collapsed decade navigation by default (desktop & mobile)
+  - Shows current chapter/TOC as pill button
+  - Expands to show all navigation options when clicked
+  - Click outside or select chapter to collapse
+- **Mobile Book Styling**:
+  - Slim brown border (0.75rem padding) with dark leather background
+  - Wider content (10px side margins)
+  - Photos at 98% width for maximum impact
+  - Compact audio player with reduced spacing
+
+### Known Issues
+- **Book View Mobile**: Decade navigation pill button visibility needs improvement (low contrast against brown background)
+  - Current styling: white background, 2px dark border, strong shadow
+  - Positioned at `bottom: 110px` (25px above footer)
+  - To be addressed in next session
+
 ---
-*Last updated: October 6, 2025*
+*Last updated: October 7, 2025*
 *For historical fixes and detailed migration notes, see CLAUDE_HISTORY.md*

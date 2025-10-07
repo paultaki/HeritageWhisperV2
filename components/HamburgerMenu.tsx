@@ -86,7 +86,7 @@ export default function HamburgerMenu() {
   }
 
   return (
-    <div ref={menuRef} className="fixed top-4 right-4 z-[100]">
+    <div ref={menuRef} className="fixed top-[6px] md:top-[4px] right-4 z-[100]">
       {/* Hamburger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}

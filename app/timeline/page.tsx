@@ -1081,33 +1081,10 @@ export default function Timeline() {
       >
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between gap-2">
-            {/* Left side: Logo and Title - more compact */}
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <button
-                type="button"
-                className="w-16 h-16 sm:w-20 sm:h-20 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 -ml-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--primary-coral)] bg-transparent border-none p-0"
-                onClick={() => router.push("/")}
-                aria-label="Home"
-                data-testid="button-home-logo"
-              >
-                <Image
-                  src={logoUrl}
-                  alt="HeritageWhisper Logo"
-                  width={40}
-                  height={40}
-                  className="w-full h-full object-contain"
-                />
-              </button>
-              <div className="min-w-0 hidden sm:block">
-                <h1 className="text-lg font-bold text-foreground truncate">
-                  My Story Timeline
-                </h1>
-                <p className="text-xs text-muted-foreground truncate">
-                  {user.name}'s Life Journey
-                </p>
-              </div>
+            <div className="flex items-center gap-3">
+              <Calendar className="w-8 h-8 text-coral-500" />
+              <h1 className="text-2xl font-bold">Timeline</h1>
             </div>
-
           </div>
         </div>
       </header>
@@ -1319,66 +1296,6 @@ export default function Timeline() {
         initialYear={recordModal.initialData?.year}
       />
 
-      {/* Color Scheme Selector - Floating Button */}
-      <div className="fixed bottom-20 md:bottom-4 left-4 z-50">
-        {/* Color Options - shown when expanded */}
-        {showColorPalette && (
-          <>
-            {/* Backdrop */}
-            <div
-              className="fixed inset-0 bg-black/20 z-40"
-              onClick={() => setShowColorPalette(false)}
-            />
-            {/* Color Palette */}
-            <div className="absolute bottom-16 left-0 bg-white rounded-lg shadow-xl p-4 z-50 space-y-2 min-w-[200px]">
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">Choose Color Scheme:</h3>
-              {Object.entries(colorSchemes).map(([key, value]) => (
-                <button
-                  key={key}
-                  onClick={() => {
-                    setCurrentColorScheme(key as ColorScheme);
-                    setShowColorPalette(false);
-                    toast({ title: `Color scheme: ${value.name}` });
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-md transition-all ${
-                    currentColorScheme === key
-                      ? 'bg-heritage-coral text-white'
-                      : 'hover:bg-gray-100'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">{value.name}</span>
-                    {currentColorScheme === key && (
-                      <span className="text-xs">✓</span>
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {key === 'original' && 'Cmd/Ctrl + 1'}
-                    {key === 'white' && 'Cmd/Ctrl + 2'}
-                    {key === 'inverted' && 'Cmd/Ctrl + 3'}
-                    {key === 'soft' && 'Cmd/Ctrl + 4'}
-                    {key === 'cool' && 'Cmd/Ctrl + 5'}
-                    {key === 'dark' && 'Cmd/Ctrl + 6'}
-                    {key === 'retro' && 'Cmd/Ctrl + 7'}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Main Palette Button */}
-        <button
-          onClick={() => setShowColorPalette(!showColorPalette)}
-          className={`w-14 h-14 rounded-full ${
-            currentColorScheme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-700'
-          } shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center`}
-          aria-label="Change color scheme"
-          title="Change color scheme (Cmd/Ctrl + 1-6)"
-        >
-          <Palette className="w-6 h-6" />
-        </button>
-      </div>
 
     </div>
   );
