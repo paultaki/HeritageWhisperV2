@@ -14,6 +14,7 @@ import RecordModal from "@/components/RecordModal";
 import { generateGhostPrompts, mergeGhostPromptsWithStories, type GhostPrompt } from "@/lib/ghostPrompts";
 import { generateNewUserGhostPrompts, shouldShowNewUserGhosts } from "@/lib/newUserGhostPrompts";
 import { GhostPromptCard } from "@/components/GhostPromptCard";
+import DecadeNav, { type DecadeEntry } from "@/components/ui/DecadeNav";
 import {
   Play,
   Plus,
@@ -1240,7 +1241,8 @@ export default function Timeline() {
 
       {/* Timeline Content with Vertical Timeline Design */}
       <main className="max-w-6xl mx-auto px-3 py-6 pb-20 md:p-6 md:pb-6 md:pr-20">
-        <div className="hw-spine">
+        <div className="hw-layout">
+          <div className="hw-spine">
             {/* All stories sorted chronologically */}
             {(() => {
               // Create chronological timeline
@@ -1354,13 +1356,25 @@ export default function Timeline() {
               allTimelineItems.sort((a, b) => a.year - b.year);
               console.log('[Timeline Sort] After sort:', allTimelineItems.map(item => ({ id: item.id, year: item.year, title: item.title })));
 
-              return allTimelineItems.map((item, index) => (
-                <section
-                  key={item.id}
-                  ref={(el) => (decadeRefs.current[item.id] = el)}
-                  data-decade-id={item.id}
-                  className="hw-decade"
-                >
+              // Build decade entries for navigation
+              const decadeEntries: DecadeEntry[] = allTimelineItems.map(item => ({
+                id: item.id,
+                label: item.id === "before-birth" ? "TOP" :
+                       item.id === "birth-year" ? formatYear(user.birthYear) :
+                       item.id.replace("decade-", "").replace("s", ""),
+                count: item.stories?.length || 0
+              }));
+
+              return (
+                <>
+                  {allTimelineItems.map((item, index) => (
+                    <section
+                      key={item.id}
+                      id={item.id}
+                      ref={(el) => (decadeRefs.current[item.id] = el)}
+                      data-decade-id={item.id}
+                      className="hw-decade"
+                    >
                   {/* Decade Band - Sticky Header */}
                   <div className="hw-decade-band">
                     <div className="title">
@@ -1405,8 +1419,12 @@ export default function Timeline() {
                     })}
                   </div>
                 </section>
-              ));
+              ))}
+              <DecadeNav entries={decadeEntries} />
+            </>
+            );
             })()}
+          </div>
         </div>
       </main>
 

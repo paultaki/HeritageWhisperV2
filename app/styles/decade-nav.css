@@ -1,0 +1,106 @@
+:root{
+  --nav-width: 192px;
+  --nav-pill-h: 40px;
+}
+
+/* desktop sidebar */
+.hw-decade-nav{
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + 80px);
+  height: fit-content;
+  width: var(--nav-width);
+}
+.hw-decade-list{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hw-decade-item{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  padding: 0 12px;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text);
+  font: 500 14px var(--font-sans);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+}
+.hw-decade-item[aria-current="true"]{
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.hw-decade-count{
+  font: 600 12px var(--font-sans);
+  color: var(--color-text-muted);
+}
+
+/* mobile collapsed pill */
+.hw-decade-fab{
+  position: fixed;
+  right: max(8px, env(safe-area-inset-right));
+  top: 30vh;
+  z-index: 30;
+}
+.hw-decade-pill{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--nav-pill-h);
+  min-width: 88px;
+  padding: 0 12px;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+  font: 600 14px var(--font-sans);
+  color: var(--color-text);
+  min-height: 44px;
+  cursor: pointer;
+}
+.hw-decade-pill .caret{
+  margin-left: 8px;
+  width: 10px; height: 10px;
+  border-right: 2px solid var(--color-text-muted);
+  border-bottom: 2px solid var(--color-text-muted);
+  transform: rotate(45deg);
+}
+
+/* mobile expanded list */
+.hw-decade-sheet{
+  position: fixed;
+  right: max(8px, env(safe-area-inset-right));
+  top: 20vh;
+  max-height: 60vh;
+  width: 140px;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.16);
+  z-index: 40;
+}
+.hw-decade-sheet .hw-decade-item{
+  height: 34px;
+  box-shadow: none;
+  min-height: 44px;
+}
+
+/* show desktop sidebar only at md+ */
+@media (max-width: 1023px){
+  .hw-decade-nav{ display: none; }
+}
+@media (min-width: 1024px){
+  .hw-decade-fab, .hw-decade-sheet{ display: none; }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .hw-decade-sheet, .hw-decade-pill{ transition: none; }
+}

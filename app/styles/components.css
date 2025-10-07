@@ -362,3 +362,12 @@ html, body {
   left: 0;
   bottom: -2px;
 }
+
+/* link the sidebar column on desktop so it aligns with the grid */
+@media (min-width: 1024px){
+  .hw-layout{
+    display: grid;
+    grid-template-columns: 1fr var(--nav-width);
+    gap: 32px;
+  }
+}
