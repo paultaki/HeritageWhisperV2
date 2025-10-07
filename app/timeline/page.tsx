@@ -1062,11 +1062,9 @@ export default function Timeline() {
     <div className={`timeline-page min-h-screen md:pl-20`} style={pageStyle}>
       {/* Header Navigation */}
       <header
-        className={`sticky top-0 z-50 backdrop-blur-sm p-3 ${
-          currentColorScheme === 'dark' ? 'border-b border-gray-800' : 'border-b border-gray-100'
-        }`}
+        className={`sticky top-0 z-50 p-3 border-b-4 border-red-500`}
         style={{
-          backgroundColor: 'transparent', // Temporary for debugging
+          backgroundColor: 'rgba(255, 255, 255, 0.2)', // Very transparent for debugging
           color: currentColorScheme === 'dark' ? '#E5E5E5' :
                  currentColorScheme === 'retro' ? '#6B4E42' : undefined
         }}
