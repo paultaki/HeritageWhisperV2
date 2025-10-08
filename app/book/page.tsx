@@ -327,15 +327,15 @@ const BookPageRenderer = ({
         {(page.type === 'story-start' || page.type === 'story-complete') && page.audioUrl && (
           <div className="audio-wrapper">
             <div className="audio-wrap">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 <button
                   onClick={toggleAudio}
-                  className="w-10 h-10 flex items-center justify-center rounded-full border-2 border-primary/30 bg-primary/5 hover:bg-primary/15 hover:border-primary/50 transition-all"
+                  className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full border-2 border-primary/30 bg-primary/5 hover:bg-primary/15 hover:border-primary/50 transition-all flex-shrink-0"
                 >
                   {isPlaying ? (
-                    <Pause className="w-4 h-4 text-primary" />
+                    <Pause className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
                   ) : (
-                    <Play className="w-4 h-4 text-primary ml-0.5" />
+                    <Play className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary ml-0.5" />
                   )}
                 </button>
                 <div className="flex-1 audio-progress-container">
@@ -344,24 +344,39 @@ const BookPageRenderer = ({
                     style={{
                       background: "rgba(0,0,0,0.1)",
                       height: "6px",
-                      borderRadius: "999px",
+                      minHeight: "6px",
+                      maxHeight: "6px",
                       position: "relative",
                       overflow: "hidden",
+                      borderRadius: "999px",
+                      display: "block",
                     }}
                   >
                     <div
-                      className="audio-fill"
                       style={{
                         width: `${playbackProgress}%`,
-                        height: "100%",
-                        background: "linear-gradient(90deg, var(--primary-coral), #FF935F)",
-                        borderRadius: "999px",
+                        height: "6px",
+                        minHeight: "6px",
+                        maxHeight: "6px",
+                        background: "linear-gradient(90deg, #E85D5D, #FF935F)",
+                        position: "absolute",
+                        top: "0",
+                        left: "0",
+                        borderRadius: "3px",
+                        zIndex: 1,
+                        display: "block",
+                        fontSize: "0",
+                        lineHeight: "0",
+                        padding: "0",
+                        margin: "0",
+                        boxSizing: "border-box",
+                        transition: "width 0.1s linear",
                       }}
                     />
                   </div>
                 </div>
               </div>
-              <div className="audio-time mt-2">
+              <div className="audio-time mt-1 md:mt-2">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
@@ -413,6 +428,7 @@ export default function BookViewNew() {
   const [isExporting, setIsExporting] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [fontsReady, setFontsReady] = useState(false);
+  const [isPaginationReady, setIsPaginationReady] = useState(false);
 
   // Get storyId from URL parameters
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
@@ -426,47 +442,35 @@ export default function BookViewNew() {
 
   const stories = data?.stories || [];
 
-  // Wait for fonts and images to be ready before paginating
-  // This ensures accurate measurements
+  // Wait for fonts to be ready for accurate measurements
+  // But don't block initial render - use optimistic pagination
   useEffect(() => {
-    async function waitForReadiness() {
+    async function waitForFonts() {
       if (typeof window === 'undefined' || typeof document === 'undefined') {
         return;
       }
 
       try {
-        // Wait for fonts
-        await document.fonts.ready;
+        // Wait for fonts with timeout fallback
+        const fontsPromise = document.fonts.ready;
+        const timeoutPromise = new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Wait for all images
-        const images = Array.from(document.images);
-        const imagePromises = images
-          .filter(img => !img.complete)
-          .map(img => new Promise(resolve => {
-            img.onload = resolve;
-            img.onerror = resolve; // Resolve even on error to not block
-          }));
+        await Promise.race([fontsPromise, timeoutPromise]);
 
-        await Promise.all(imagePromises);
-
-        // Mark as ready
+        // Mark fonts as ready for re-pagination with accurate metrics
         setFontsReady(true);
       } catch (error) {
-        console.error('Error waiting for fonts/images:', error);
+        console.error('Error waiting for fonts:', error);
         // Mark as ready anyway to not block
         setFontsReady(true);
       }
     }
 
-    waitForReadiness();
+    waitForFonts();
   }, []); // Run once on mount
 
-  // Convert to book data structure
+  // Convert to book data structure with optimistic rendering
   const { pages, spreads, storyPageIndex } = useMemo(() => {
-    // Don't paginate until fonts are ready
-    if (!fontsReady) {
-      return { pages: [], spreads: [], storyPageIndex: -1 };
-    }
     if (!stories || stories.length === 0) {
       return { pages: [], spreads: [], storyPageIndex: -1 };
     }
@@ -498,7 +502,7 @@ export default function BookViewNew() {
           .map(convertToPaginationStory),
       }));
 
-    // Paginate the entire book
+    // Paginate the entire book (optimistically, will re-run when fonts load)
     const bookPages = paginateBook(decadeGroups);
     const bookSpreads = getPageSpreads(bookPages);
 
@@ -513,7 +517,14 @@ export default function BookViewNew() {
       spreads: bookSpreads,
       storyPageIndex: pageIndex,
     };
-  }, [stories, storyIdFromUrl, fontsReady]);
+  }, [stories, storyIdFromUrl, fontsReady]); // Re-paginate when fonts load
+
+  // Signal that pagination is complete when pages are ready
+  useEffect(() => {
+    if (pages.length > 0 || (stories && stories.length === 0)) {
+      setIsPaginationReady(true);
+    }
+  }, [pages, stories]);
 
   // Navigate to story page when storyId is found
   useEffect(() => {
@@ -628,12 +639,18 @@ export default function BookViewNew() {
     }
   }, [showExportMenu]);
 
-  if (isLoading) {
+  // Show loading state while fetching stories OR pagination is not ready yet
+  if (isLoading || !isPaginationReady) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading your book...</p>
+          <p className="mt-4 text-muted-foreground">
+            {isLoading ? 'Loading your stories...' : 'Preparing your book...'}
+          </p>
+          {!fontsReady && !isLoading && (
+            <p className="mt-2 text-sm text-muted-foreground/70">Loading fonts...</p>
+          )}
         </div>
       </div>
     );

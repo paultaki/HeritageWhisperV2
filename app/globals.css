@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 @import "./styles/tokens.css";
 @import "./styles/components.css";
 @import "./book/book.css";
@@ -1744,9 +1744,9 @@ textarea:focus-visible {
     cursor: pointer;
   }
 
-  .audio-bar { 
-    height: 6px; 
-    border-radius: 999px; 
+  .audio-bar {
+    height: 6px;
+    border-radius: 999px;
     background: rgba(0,0,0,.10);
     position: relative;
     overflow: hidden;
@@ -1757,19 +1757,19 @@ textarea:focus-visible {
     height: 10px; 
   }
 
-  .audio-fill { 
-    height: 100%; 
-    border-radius: inherit; 
-    background: #C68A2B;
+  .audio-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: #C68A2B; /* Fallback color, can be overridden by inline styles */
     transition: width 0.1s ease;
   }
 
-  .audio-time { 
-    font-size: .85rem; 
+  .audio-time {
+    font-size: .85rem;
     opacity: .7;
     display: flex;
     justify-content: space-between;
-    padding: 0 40px 0 40px;
+    padding: 0;
   }
 
   /* Wisdom Moment - Premium Quote Treatment */
@@ -2160,6 +2160,7 @@ textarea:focus-visible {
       display: flex;
       justify-content: space-between;
       gap: 0.5rem;
+      padding: 0 !important; /* Remove excessive padding on mobile */
     }
 
     /* Thicker progress bar */
@@ -2167,12 +2168,26 @@ textarea:focus-visible {
     input[type="range"] {
       height: 6px !important;
       border-radius: 3px;
+      line-height: 1 !important;
+      padding: 0 !important;
+      margin: 0 !important;
     }
 
     .audio-progress-bar,
     .audio-bar {
       height: 6px !important;
+      min-height: 6px !important;
+      max-height: 6px !important;
       border-radius: 3px;
+      line-height: 1 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      display: block !important;
+    }
+
+    .audio-fill {
+      border-radius: 3px !important;
+      /* Other styles set via inline styles to avoid conflicts */
     }
 
     /* Better spacing after audio player */
@@ -2263,12 +2278,12 @@ textarea:focus-visible {
     
     /* Compact audio wrapper spacing on mobile */
     .audio-wrapper {
-      margin-top: 8px;
-      margin-bottom: 8px;
+      margin-top: 6px;
+      margin-bottom: 6px;
     }
 
     .audio-wrap {
-      padding: 8px 10px; /* Minimal padding for compact, premium look */
+      padding: 6px 8px; /* Reduced padding for more compact look */
       background: rgba(0, 0, 0, 0.02);
       border-radius: 8px;
       border: 1px solid rgba(0, 0, 0, 0.06);
