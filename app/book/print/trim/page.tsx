@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   paginateBook,
@@ -193,7 +193,7 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
   );
 };
 
-export default function PrintTrimPage() {
+function PrintTrimPageContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId');
   const [pages, setPages] = useState<BookPage[]>([]);
@@ -282,5 +282,13 @@ export default function PrintTrimPage() {
         <PrintPageRenderer key={idx} page={page} />
       ))}
     </div>
+  );
+}
+
+export default function PrintTrimPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Loading...</div>}>
+      <PrintTrimPageContent />
+    </Suspense>
   );
 }
