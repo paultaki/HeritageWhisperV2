@@ -61,12 +61,19 @@ export async function POST(request: NextRequest) {
 
     console.log('[Export 2up] Browser launched, creating new page...');
     const page = await browser.newPage();
+
+    // Set viewport to match print dimensions at 96 DPI
+    await page.setViewport({
+      width: 1056,  // 11 inches × 96 DPI
+      height: 816,  // 8.5 inches × 96 DPI
+      deviceScaleFactor: 1
+    });
     
     // Use actual domain when deployed, localhost for dev
     // Use 127.0.0.1 instead of localhost for better compatibility with headless browsers
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : `http://127.0.0.1:${process.env.PORT || 3000}`;
+      : `http://127.0.0.1:${process.env.PORT || 3001}`;
 
     const printUrl = `${baseUrl}/book/print/2up?userId=${user.id}`;
     console.log('[Export 2up] Navigating to:', printUrl);
@@ -76,7 +83,7 @@ export async function POST(request: NextRequest) {
     } catch (navError) {
       console.log('[Export 2up] Navigation error, trying with localhost...');
       // Fallback to localhost if 127.0.0.1 fails
-      const fallbackUrl = `http://localhost:${process.env.PORT || 3000}/book/print/2up?userId=${user.id}`;
+      const fallbackUrl = `http://localhost:${process.env.PORT || 3001}/book/print/2up?userId=${user.id}`;
       await page.goto(fallbackUrl, { waitUntil: 'networkidle0', timeout: 60000 });
     }
 
@@ -85,12 +92,36 @@ export async function POST(request: NextRequest) {
     // Wait for the page to finish rendering
     await page.waitForSelector('.book-spread', { timeout: 10000 });
 
+    // Additional wait to ensure React has hydrated and styles are applied
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 2000)));
+
+    // Debug: Log the actual HTML to see what's being rendered
+    try {
+      const html = await page.evaluate(() => {
+        const firstSpread = document.querySelector('.book-spread');
+        if (firstSpread) {
+          const computed = window.getComputedStyle(firstSpread);
+          return {
+            width: computed.width,
+            height: computed.height,
+            display: computed.display,
+            html: document.querySelector('.print-2up')?.outerHTML?.substring(0, 500)
+          };
+        }
+        return { html: 'No .book-spread found' };
+      });
+      console.log('[Export 2up] Page diagnostics:', JSON.stringify(html, null, 2));
+    } catch (evalError) {
+      console.error('[Export 2up] Evaluation error:', evalError);
+    }
+
     console.log('[Export 2up] Content loaded, generating PDF...');
     const pdf = await page.pdf({
       width: '11in',
       height: '8.5in',
       printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 }
+      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      preferCSSPageSize: false  // Use our explicit dimensions, not CSS @page
     });
 
     console.log('[Export 2up] PDF generated, closing browser...');
@@ -106,7 +137,8 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('PDF generation error:', error);
+    console.error('[Export 2up] PDF generation error:', error);
+    console.error('[Export 2up] Error stack:', error instanceof Error ? error.stack : 'No stack');
     return NextResponse.json(
       {
         error: 'Failed to generate PDF',

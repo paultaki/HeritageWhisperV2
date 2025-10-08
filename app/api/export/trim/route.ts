@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     // Use actual domain when deployed, localhost for dev
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3002';
+      : `http://localhost:${process.env.PORT || 3001}`;
 
     const printUrl = `${baseUrl}/book/print/trim?userId=${user.id}`;
     await page.goto(printUrl, { waitUntil: 'networkidle0' });

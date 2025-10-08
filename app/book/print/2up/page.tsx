@@ -11,7 +11,6 @@ import {
 } from '@/lib/bookPagination';
 import { DecadeIntroPage } from '@/components/BookDecadePages';
 import { Sparkles } from 'lucide-react';
-import '../print-2up.css';
 
 interface Story {
   id: string;
@@ -282,15 +281,129 @@ export default function Print2UpPage() {
   }
 
   return (
-    <div className="print-2up">
-      {spreads.map((spread, idx) => (
-        <div key={idx} className="book-spread">
-          <div className="spread-content">
-            <PrintPageRenderer page={spread[0]} />
-            {spread[1] && <PrintPageRenderer page={spread[1]} />}
+    <>
+      <style dangerouslySetInnerHTML={{__html: `
+        @page {
+          size: 11in 8.5in;
+          margin: 0;
+        }
+
+        body {
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        /* Hide all UI elements */
+        .hw-hamburger-menu,
+        [class*="hamburger"],
+        button,
+        nav {
+          display: none !important;
+        }
+
+        .print-2up {
+          width: 11in !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        .book-spread {
+          width: 11in !important;
+          height: 8.5in !important;
+          padding: 0.25in !important;
+          margin: 0 !important;
+          box-sizing: border-box !important;
+          page-break-after: always !important;
+          display: block !important;
+          position: relative !important;
+        }
+
+        .book-spread:last-child {
+          page-break-after: auto;
+        }
+
+        .spread-content {
+          width: 10.5in !important;
+          height: 8in !important;
+          display: flex !important;
+          gap: 0 !important;
+          background: white !important;
+          border: 1px solid #ddd !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        .page {
+          width: 5.25in !important;
+          height: 8in !important;
+          position: relative !important;
+          box-sizing: border-box !important;
+          padding: 0.5in !important;
+          margin: 0 !important;
+          overflow: hidden !important;
+          flex-shrink: 0 !important;
+        }
+
+        .page-content {
+          width: 100%;
+          height: 100%;
+          position: relative;
+        }
+
+        .running-header {
+          position: absolute;
+          top: 0.25in;
+          left: 0.5in;
+          right: 0.5in;
+          font-size: 9pt;
+          color: #666;
+          font-family: Georgia, serif;
+          text-align: center;
+        }
+
+        .page-number {
+          position: absolute;
+          bottom: 0.25in;
+          font-size: 10pt;
+          color: #666;
+          font-family: Georgia, serif;
+        }
+
+        .page--left .page-number {
+          left: 0.5in;
+        }
+
+        .page--right .page-number {
+          right: 0.5in;
+        }
+
+        .memory-title {
+          font-size: 18pt;
+          font-weight: bold;
+          margin-bottom: 0.1in;
+          font-family: Georgia, serif;
+        }
+
+        .memory-year {
+          font-size: 10pt;
+          color: #666;
+        }
+
+        .memory-body {
+          font-size: 11pt;
+          line-height: 1.5;
+        }
+      `}} />
+      <div className="print-2up">
+        {spreads.map((spread, idx) => (
+          <div key={idx} className="book-spread">
+            <div className="spread-content">
+              <PrintPageRenderer page={spread[0]} />
+              {spread[1] && <PrintPageRenderer page={spread[1]} />}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   );
 }
