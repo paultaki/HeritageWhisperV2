@@ -58,6 +58,58 @@ This document contains detailed historical information about the V2 migration an
 - **Duplicate Agreement Modal**: Fixed by using service role key in registration to properly set agreement versions
 - **Resend SMTP**: Configured email sending via custom domain (no-reply@updates.heritagewhisper.com)
 
+### October 8, 2025 - Book View & UI Enhancements
+
+#### Book View Premium Layout (Tagged: `book-view-premium-v1`)
+- **Intelligent Viewport Switching**: Automatic spread ↔ single-page mode based on available width and minimum font size (18px body text)
+- **Fixed Header/Footer Alignment**: Corrected desktop nav width calculations (80px → 112px)
+  - `.book-header` now properly aligns with left sidebar (w-28 = 112px)
+  - `.book-container` centering calculation updated to account for correct sidebar width
+  - Removed 48px gap between header and sidebar
+  - Fixed ~38px overlap of container with sidebar
+- **Premium Single-Page Mode**: Spine hint with proper depth, centered content with explicit width
+- **Navigation Arrows**: Fixed z-index (45) and mobile visibility, positioned at 120px on desktop (past 80px sidebar)
+- **Export PDF Button**: Added 60px right margin to avoid hamburger menu overlap
+- **Class-Based Styling**: Switched from media queries to `.spread-mode` and `.single-mode` classes for better control
+- **Mobile Optimization**: Maximized content width with slim brown border, proper touch targets (64px)
+- **Removed Decade Navigation**: Simplified book view by removing decade nav pills
+- All changes are screen-only (no print/PDF export modifications)
+
+#### PDF Export Margins
+- **Fixed Centering Issue**: Content no longer stuck to top-left corner or bleeding onto extra pages
+  - Created `/app/book/print/layout.tsx` to bypass root layout wrapper
+  - Added CSS overrides to reset parent div padding
+  - Used `.book-spread` with `padding: 0.25in` and `box-sizing: border-box` (keeps total height at exactly 8.5in)
+  - Set `.spread-content` to `width: 100%; height: 100%` to fill the padded area
+  - Result: Equal 0.25in margins on all sides without overflow
+
+#### Blank Pages on Initial Book Load
+- **Problem**: BookView showed blank pages on first visit, required refresh to display content
+- **Root Causes**:
+  - Font loading blocked pagination (waiting for `document.fonts.ready`)
+  - Pagination waited for `fontsReady` state before calculating
+  - If fonts failed to load, pagination never occurred
+- **Solution**: Optimistic rendering
+  - Added font preloading in `/app/layout.tsx` (Playfair Display, Crimson Text)
+  - Modified pagination to run immediately with fallback metrics
+  - Font wait happens in parallel, triggers re-pagination when fonts load
+  - Result: Instant page display with automatic refinement when fonts ready
+- Location: `/app/book/page.tsx:430-462`, `/app/layout.tsx:25-36`
+
+#### Audio Progress Bar Gradient (Mobile)
+- **Problem**: Gradient fill not visible below 900px width (appeared as gray bar)
+- **Debug Process**: Added console logging revealed element was 16px×16px instead of stretching
+- **Root Cause**: CSS class `.audio-fill` inherited default 16px font-size, making element fixed size
+- **Solution**: Removed `className="audio-fill"` entirely, used pure inline styles with `fontSize: "0"`
+- Location: `/app/book/page.tsx:355-375`
+
+#### Mobile Audio Player Height
+- **Reduced Vertical Space**: Made ~20-25% shorter on mobile
+  - Button sizes: 40px → 36px (desktop), 44px → 40px (mobile)
+  - Icon sizes: 16px → 14px (mobile)
+  - Reduced margins and padding throughout
+- Location: `/app/book/page.tsx:330-340`
+
 ---
 
 ## 🐛 Historical Issues & Solutions

@@ -120,10 +120,9 @@ HeritageWhisperV2/
 
 ### PDF Export
 - **Print Pages**: `/book/print/2up` and `/book/print/trim`
-- **Margin Fix**: Root layout adds padding to all pages; created `/app/book/print/layout.tsx` to bypass
-- **CSS Override**: Use `body > * { padding: 0 !important }` to reset parent wrappers
-- **Centering**: Use `padding: 0.25in` with `box-sizing: border-box` on container, not margin on content
 - **API Routes**: `/api/export/2up`, `/api/export/trim`, `/api/book-data` (uses service role key)
+- **Print Layout**: Bypasses root layout via `/app/book/print/layout.tsx` to avoid padding conflicts
+- For detailed margin/centering fixes, see CLAUDE_HISTORY.md
 
 ### Navigation & UX Patterns
 - **Cancel Button Behavior**:
@@ -151,10 +150,11 @@ HeritageWhisperV2/
 
 ## 🔍 Quick Troubleshooting
 
-1. **401 errors**: Check Supabase session exists before API calls
+1. **401 errors**: Check Supabase session exists before API calls (session retry logic: 5x 100ms)
 2. **Dev server exits**: Run `npm rebuild vite tsx`
-3. **PDF margins off**: Check print layout bypasses root layout, uses box-sizing padding approach
-4. **Images too large**: Sharp processor resizes to 2400x2400 at 85% quality
+3. **PDF export issues**: Check `/app/book/print/layout.tsx` bypasses root layout padding
+4. **Images too large**: Sharp processor auto-resizes to 2400x2400 at 85% quality
+5. **Mobile styling conflicts**: Check both `/app/globals.css` and `/app/book/book.css` media queries
 
 For detailed historical fixes and solutions, see `CLAUDE_HISTORY.md`
 
@@ -190,36 +190,21 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 
 ## 🎯 Current Known Issues
 - **PDF Export on Vercel**: Print page loads but React app not rendering (timeout waiting for `.book-spread`)
-  - Chromium launches successfully
-  - Page navigation works
-  - React hydration appears to fail silently
-  - Currently debugging with network request logging
-- **Book View Mobile**: Decade navigation pill button visibility could be improved (low contrast against brown background)
 
-## ✅ Recent Fixes (October 8, 2025)
+## ✅ Recent Updates (October 8, 2025)
 
-### Book View Premium Layout (Tagged: `book-view-premium-v1`)
-- **Intelligent Viewport Switching**: Automatic spread ↔ single-page mode based on available width and minimum font size (18px body text)
-- **Fixed Header/Footer Alignment**: Corrected desktop nav width calculations (80px → 112px)
-  - `.book-header` now properly aligns with left sidebar (w-28 = 112px)
-  - `.book-container` centering calculation updated to account for correct sidebar width
-  - Removed 48px gap between header and sidebar
-  - Fixed ~38px overlap of container with sidebar
-- **Premium Single-Page Mode**: Spine hint with proper depth, centered content with explicit width
-- **Navigation Arrows**: Fixed z-index (45) and mobile visibility, positioned at 120px on desktop (past 80px sidebar)
-- **Export PDF Button**: Added 60px right margin to avoid hamburger menu overlap
-- **Class-Based Styling**: Switched from media queries to `.spread-mode` and `.single-mode` classes for better control
-- **Mobile Optimization**: Maximized content width with slim brown border, proper touch targets (64px)
-- **Removed Decade Navigation**: Simplified book view by removing decade nav pills
-- All changes are screen-only (no print/PDF export modifications)
+### Mobile Book View Polish
+- **Removed Debug Badge**: Removed viewport config debug overlay (`/app/book/page.tsx:769`)
+- **Fixed Mobile Scrolling**: Restored `.book-wrap` vertical padding while removing horizontal padding
+  - Mobile brown border now handled by `.book-container` margin (12px) + padding (8px) = 20px total
+  - Pages scroll properly with equal brown border on all sides
+  - Fixed conflict between `book.css` and `globals.css` media query overrides
 
-### PDF Export Margins
-- **Fixed Centering Issue**: Content no longer stuck to top-left corner or bleeding onto extra pages
-  - Created `/app/book/print/layout.tsx` to bypass root layout wrapper
-  - Added CSS overrides to reset parent div padding
-  - Used `.book-spread` with `padding: 0.25in` and `box-sizing: border-box` (keeps total height at exactly 8.5in)
-  - Set `.spread-content` to `width: 100%; height: 100%` to fill the padded area
-  - Result: Equal 0.25in margins on all sides without overflow
+### Timeline Year Badges
+- **Increased Text Size**: Desktop 22px (was 14px), Mobile 17px (was 13px)
+- **Improved Positioning**: Moved 5px left (desktop -65px, mobile -51px) for better alignment with vertical timeline
+- **Explicit Font Properties**: Split shorthand `font:` into individual properties to prevent CSS override issues
+- Location: `/app/styles/components.css:297-320`
 
 ---
 *Last updated: October 8, 2025*
