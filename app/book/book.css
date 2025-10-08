@@ -473,6 +473,11 @@
 
 @layer book-screen {
   @media screen {
+    /* Single source of truth for page content height */
+    :root {
+      --book-content-height: 700px;  /* Exact inner content box at scale 1.0 */
+    }
+
     /* Book stage - explicit width container for proper centering */
     .book-stage {
       margin-inline: auto;

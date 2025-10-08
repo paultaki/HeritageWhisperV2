@@ -60,9 +60,51 @@ export const CAPACITIES = {
 // PAGE POLICY - Single source of truth for pagination rules
 // ============================================================================
 
+/**
+ * Get the exact page content height from CSS variable
+ * Single source of truth defined in app/book/book.css @layer book-screen
+ */
+export function getPageContentHeightPx(): number {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return 700; // SSR fallback
+  }
+
+  try {
+    const raw = getComputedStyle(document.documentElement)
+      .getPropertyValue('--book-content-height')
+      .trim();
+    const n = parseFloat(raw);
+    return Number.isFinite(n) && n > 0 ? n : 700;
+  } catch {
+    return 700; // Fallback if CSS var not available
+  }
+}
+
+/**
+ * Get epsilon guard for sub-pixel rendering issues
+ */
+function getEpsilonPx(): number {
+  if (typeof window === 'undefined') {
+    return 2;
+  }
+  return Math.max(2, Math.ceil(window.devicePixelRatio));
+}
+
 export const PagePolicy = {
-  // Content area height (816px page - 58px top - 58px bottom = 700px)
-  contentBoxPx: 700,
+  // Exact page content height (read from CSS variable)
+  get pageHeightPx(): number {
+    return getPageContentHeightPx();
+  },
+
+  // Legacy alias for backward compatibility
+  get contentBoxPx(): number {
+    return this.pageHeightPx;
+  },
+
+  // Bottom guard for sub-pixel rendering
+  get epsilonPx(): number {
+    return getEpsilonPx();
+  },
 
   // Minimum free space allowed at bottom of page (allows small trailing whitespace)
   minFreePx: 12,
@@ -330,7 +372,7 @@ export function getContentMetrics(): ContentMetrics {
     // SSR fallback
     return {
       contentWidthPx: MEASUREMENTS.PAGE_WIDTH_DESKTOP - MEASUREMENTS.PAGE_PADDING_LEFT - MEASUREMENTS.PAGE_PADDING_RIGHT,
-      contentHeightPx: MEASUREMENTS.CONTENT_BOX_HEIGHT,
+      contentHeightPx: PagePolicy.pageHeightPx,
       lineHeightPx: MEASUREMENTS.LINE_HEIGHT,
     };
   }
@@ -344,17 +386,17 @@ export function getContentMetrics(): ContentMetrics {
 
     globalMetrics = {
       contentWidthPx: rect.width,
-      contentHeightPx: rect.height || MEASUREMENTS.CONTENT_BOX_HEIGHT,
+      contentHeightPx: rect.height || PagePolicy.pageHeightPx,
       lineHeightPx: parseFloat(computed.lineHeight) || MEASUREMENTS.LINE_HEIGHT,
     };
 
     return globalMetrics;
   }
 
-  // Fallback to constants
+  // Fallback to PagePolicy.pageHeightPx (reads from CSS var)
   globalMetrics = {
     contentWidthPx: MEASUREMENTS.PAGE_WIDTH_DESKTOP - MEASUREMENTS.PAGE_PADDING_LEFT - MEASUREMENTS.PAGE_PADDING_RIGHT,
-    contentHeightPx: MEASUREMENTS.CONTENT_BOX_HEIGHT,
+    contentHeightPx: PagePolicy.pageHeightPx,
     lineHeightPx: MEASUREMENTS.LINE_HEIGHT,
   };
 
@@ -755,17 +797,18 @@ export function paginateStory(
     const block = blocks[i];
     const blockHeight = measureBlockHeight(block, metrics);
 
-    // Check if block fits on current page
-    if (usedHeight + blockHeight <= availableHeight) {
+    // Check if block fits on current page (with epsilon guard for sub-pixel rendering)
+    const epsilon = PagePolicy.epsilonPx;
+    if (usedHeight + blockHeight <= availableHeight - epsilon) {
       // Block fits - add it to current page
       currentBlocks.push(block);
       usedHeight += blockHeight;
       i++;
     } else {
       // Block doesn't fit
-      if (block.splittable && usedHeight < availableHeight - PagePolicy.minFreePx) {
+      if (block.splittable && usedHeight < availableHeight - PagePolicy.minFreePx - epsilon) {
         // Try to split the paragraph
-        const remainingHeight = availableHeight - usedHeight;
+        const remainingHeight = availableHeight - usedHeight - epsilon;
         const split = splitParagraphToFit(block.content, remainingHeight, metrics);
 
         if (split.fitsText) {
