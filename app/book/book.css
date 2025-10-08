@@ -494,6 +494,12 @@
       font-size: 28px; /* vs 20pt for print */
     }
 
+    /* Prevent breaking of images, audio, and other non-text content */
+    .no-break {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
     /* Premium desk with subtle vignette */
     .book-wrap {
       background:

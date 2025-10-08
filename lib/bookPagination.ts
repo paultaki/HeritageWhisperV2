@@ -8,20 +8,27 @@
 // ============================================================================
 
 export const MEASUREMENTS = {
-  // Page dimensions
-  PAGE_HEIGHT: 1000,
-  PAGE_WIDTH_DESKTOP: 520,
+  // Page dimensions (must match book.css: 5.5×8.5 at 96 DPI)
+  PAGE_HEIGHT: 816,      // 8.5in × 96 DPI
+  PAGE_WIDTH_DESKTOP: 528,  // 5.5in × 96 DPI (was 520, but CSS uses 528)
   PAGE_WIDTH_MOBILE: 380,
+
+  // Page padding (matches book.css --margin)
+  PAGE_PADDING_TOP: 58,
+  PAGE_PADDING_BOTTOM: 58,
+  PAGE_PADDING_LEFT: 38,   // Reduced from 58 for more content breathing room
+  PAGE_PADDING_RIGHT: 38,
+
+  // Content area height (816 - 58 - 58 = 700px)
+  CONTENT_BOX_HEIGHT: 700,
 
   // Fixed elements (first page only)
   PHOTO_AREA: 220,          // Fixed height even for galleries
   STORY_TITLE: 45,
   STORY_DATE: 30,
   AUDIO_PLAYER: 55,         // Always present on first page
-  PAGE_PADDING_TOP: 60,
-  PAGE_PADDING_BOTTOM: 60,
 
-  // Text properties
+  // Text properties (must match book.css for accurate measurement)
   LINE_HEIGHT: 28,
   FONT_SIZE: 16,
   FONT_FAMILY: 'Georgia, serif',
@@ -34,15 +41,41 @@ export const MEASUREMENTS = {
 
 // Calculated capacities
 export const CAPACITIES = {
-  FIRST_PAGE_TEXT_HEIGHT: 530, // After all fixed elements
-  CONTINUATION_PAGE_HEIGHT: 880,
-  FIRST_PAGE_LINES: Math.floor(530 / 28), // ~19 lines possible
-  CONTINUATION_LINES: Math.floor(880 / 28), // ~31 lines
+  // First page has photos, title, date, audio
+  FIRST_PAGE_TEXT_HEIGHT: 700 - 220 - 45 - 30 - 55 - 20, // = 330px (~11 lines)
+
+  // Continuation pages have full content area
+  CONTINUATION_PAGE_HEIGHT: 700,
+
+  FIRST_PAGE_LINES: Math.floor(330 / 28), // ~11 lines on first page
+  CONTINUATION_LINES: Math.floor(700 / 28), // ~25 lines on continuation pages
 
   // Visual balance targets
   PHOTO_VISUAL_WEIGHT: 8, // Photo "feels like" 8 lines of text
   TARGET_FIRST_PAGE_LINES: 9, // Default balanced split
   CHARS_PER_LINE: 65, // Approximate for 520px width
+};
+
+// ============================================================================
+// PAGE POLICY - Single source of truth for pagination rules
+// ============================================================================
+
+export const PagePolicy = {
+  // Content area height (816px page - 58px top - 58px bottom = 700px)
+  contentBoxPx: 700,
+
+  // Minimum free space allowed at bottom of page (allows small trailing whitespace)
+  minFreePx: 12,
+
+  // Widow/orphan control (minimum lines)
+  widowLines: 2,    // Min lines at top of page when paragraph splits
+  orphanLines: 2,   // Min lines at bottom of page when paragraph splits
+
+  // Story layout rule: each new story MUST start at top of fresh page
+  storyStartsOnFreshPage: true,
+
+  // TOC rules
+  tocMinRowsAfterHeader: 1,  // Decade header must have at least 1 row after it
 };
 
 // ============================================================================
@@ -128,10 +161,11 @@ export interface TextExtraction {
 /**
  * Measures justified text by creating a hidden DOM element
  * This is the only accurate way to measure justified text
+ * Returns number of lines (divides height by LINE_HEIGHT)
  */
 export function measureJustifiedText(
   text: string,
-  containerWidth: number = MEASUREMENTS.PAGE_WIDTH_DESKTOP
+  containerWidth: number = MEASUREMENTS.PAGE_WIDTH_DESKTOP - MEASUREMENTS.PAGE_PADDING_LEFT - MEASUREMENTS.PAGE_PADDING_RIGHT
 ): number {
   if (!text || text.trim().length === 0) {
     return 0;
@@ -485,6 +519,161 @@ export function paginateStory(
 }
 
 // ============================================================================
+// TABLE OF CONTENTS PAGINATION
+// ============================================================================
+
+/**
+ * Paginate TOC across multiple pages, respecting decade header grouping rules
+ * A decade header must never be the last item on a page (needs at least 1 row after it)
+ */
+function paginateTableOfContents(
+  tocEntries: TableOfContentsEntry[],
+  startPageNumber: number
+): BookPage[] {
+  // Estimate heights for TOC elements
+  const DECADE_HEADER_HEIGHT = 50;  // Decade title with border
+  const STORY_ROW_HEIGHT = 32;      // Each story row
+  const TOC_TITLE_HEIGHT = 60;      // "Table of Contents" heading
+  const TOC_PADDING = 40;           // Top/bottom padding
+
+  const availableHeight = PagePolicy.contentBoxPx - TOC_PADDING;
+
+  const pages: BookPage[] = [];
+  let currentPageNumber = startPageNumber;
+  let currentHeight = TOC_TITLE_HEIGHT; // First page includes title
+  let currentPageEntries: TableOfContentsEntry[] = [];
+
+  for (let i = 0; i < tocEntries.length; i++) {
+    const entry = tocEntries[i];
+    const decadeHeight = DECADE_HEADER_HEIGHT;
+    const minRowsHeight = STORY_ROW_HEIGHT * Math.max(1, PagePolicy.tocMinRowsAfterHeader);
+    const totalEntriesHeight = entry.stories.length * STORY_ROW_HEIGHT;
+    const fullGroupHeight = decadeHeight + totalEntriesHeight;
+
+    // Check if the header + minimum rows fits on current page
+    const headerPlusMinRows = decadeHeight + minRowsHeight;
+
+    if (currentHeight + headerPlusMinRows > availableHeight && currentPageEntries.length > 0) {
+      // Start a new page
+      pages.push({
+        type: 'table-of-contents',
+        pageNumber: currentPageNumber,
+        tocEntries: currentPageEntries,
+        isLeftPage: currentPageNumber % 2 === 0,
+        isRightPage: currentPageNumber % 2 === 1,
+      });
+
+      currentPageNumber++;
+      currentHeight = 0; // Subsequent pages don't have title
+      currentPageEntries = [];
+    }
+
+    // Check if entire group fits on current page
+    if (currentHeight + fullGroupHeight <= availableHeight) {
+      // Entire group fits
+      currentPageEntries.push(entry);
+      currentHeight += fullGroupHeight;
+    } else {
+      // Need to split stories across pages
+      // But keep header with at least minRows stories
+      const storiesPerPage: Array<{decade: string; decadeTitle: string; stories: Array<{title: string; year: string; pageNumber: number}>}> = [];
+      let remainingStories = [...entry.stories];
+
+      // First chunk: header + as many stories as fit
+      const firstPageAvailable = availableHeight - currentHeight - decadeHeight;
+      const firstPageStoriesCount = Math.max(
+        PagePolicy.tocMinRowsAfterHeader,
+        Math.floor(firstPageAvailable / STORY_ROW_HEIGHT)
+      );
+
+      if (firstPageStoriesCount >= remainingStories.length) {
+        // All stories fit
+        currentPageEntries.push(entry);
+        currentHeight += fullGroupHeight;
+      } else {
+        // Split stories
+        const firstChunk = remainingStories.slice(0, firstPageStoriesCount);
+        currentPageEntries.push({
+          decade: entry.decade,
+          decadeTitle: entry.decadeTitle,
+          stories: firstChunk,
+        });
+
+        // Finish current page
+        pages.push({
+          type: 'table-of-contents',
+          pageNumber: currentPageNumber,
+          tocEntries: currentPageEntries,
+          isLeftPage: currentPageNumber % 2 === 0,
+          isRightPage: currentPageNumber % 2 === 1,
+        });
+
+        currentPageNumber++;
+        currentHeight = 0;
+        currentPageEntries = [];
+        remainingStories = remainingStories.slice(firstPageStoriesCount);
+
+        // Continue stories on subsequent pages (no header repeat)
+        while (remainingStories.length > 0) {
+          const pageStoriesCount = Math.floor(availableHeight / STORY_ROW_HEIGHT);
+          const chunk = remainingStories.slice(0, pageStoriesCount);
+
+          currentPageEntries.push({
+            decade: entry.decade,
+            decadeTitle: '', // No header on continuation
+            stories: chunk,
+          });
+
+          if (chunk.length >= remainingStories.length) {
+            // This was the last chunk
+            currentHeight = chunk.length * STORY_ROW_HEIGHT;
+            break;
+          } else {
+            // More chunks needed
+            pages.push({
+              type: 'table-of-contents',
+              pageNumber: currentPageNumber,
+              tocEntries: currentPageEntries,
+              isLeftPage: currentPageNumber % 2 === 0,
+              isRightPage: currentPageNumber % 2 === 1,
+            });
+
+            currentPageNumber++;
+            currentHeight = 0;
+            currentPageEntries = [];
+            remainingStories = remainingStories.slice(pageStoriesCount);
+          }
+        }
+      }
+    }
+  }
+
+  // Add last page if it has content
+  if (currentPageEntries.length > 0) {
+    pages.push({
+      type: 'table-of-contents',
+      pageNumber: startPageNumber + pages.length,
+      tocEntries: currentPageEntries,
+      isLeftPage: (startPageNumber + pages.length) % 2 === 0,
+      isRightPage: (startPageNumber + pages.length) % 2 === 1,
+    });
+  }
+
+  // If no pages were created, return at least one empty TOC page
+  if (pages.length === 0) {
+    pages.push({
+      type: 'table-of-contents',
+      pageNumber: startPageNumber,
+      tocEntries: [],
+      isLeftPage: startPageNumber % 2 === 0,
+      isRightPage: startPageNumber % 2 === 1,
+    });
+  }
+
+  return pages;
+}
+
+// ============================================================================
 // FULL BOOK PAGINATION
 // ============================================================================
 
@@ -496,6 +685,7 @@ export interface DecadeGroup {
 
 /**
  * Paginate entire book with decade markers and stories
+ * Enforces PagePolicy.storyStartsOnFreshPage rule
  */
 export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
   const allPages: BookPage[] = [];
@@ -537,6 +727,21 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
 
     // Add all stories in this decade
     for (const story of group.stories) {
+      // FRESH PAGE ENFORCEMENT: If storyStartsOnFreshPage is true and we're not already
+      // on a fresh page (i.e., previous story ended mid-page), skip to next page.
+      // We detect "mid-page" by checking if the last page was a story-end or story-continuation
+      // (not story-complete, which would have used the full page).
+      if (PagePolicy.storyStartsOnFreshPage && tempPages.length > 0) {
+        const lastPage = tempPages[tempPages.length - 1];
+        if (
+          lastPage.type === 'story-end' ||
+          lastPage.type === 'story-continuation'
+        ) {
+          // Previous story ended mid-page, advance to next page for fresh start
+          tempPageNumber++;
+        }
+      }
+
       const storyStartPage = tempPageNumber;
       const storyPages = paginateStory(story, tempPageNumber);
       tempPages.push(...storyPages);
@@ -562,13 +767,20 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
   });
 
   // Add Table of Contents as page 2 (left page)
-  allPages.push({
-    type: 'table-of-contents',
-    pageNumber: 2,
-    tocEntries: tocEntries,
-    isLeftPage: true,
-    isRightPage: false,
-  });
+  // TOC may span multiple pages if there are many stories
+  const tocPages = paginateTableOfContents(tocEntries, 2);
+  allPages.push(...tocPages);
+
+  // Adjust all subsequent page numbers based on actual TOC page count
+  const tocPageCount = tocPages.length;
+  const pageNumberOffset = tocPageCount - 1; // We assumed 1 page, got tocPageCount
+
+  if (pageNumberOffset > 0) {
+    // Shift all story/decade pages forward
+    tempPages.forEach(page => {
+      page.pageNumber += pageNumberOffset;
+    });
+  }
 
   // Add all other pages
   allPages.push(...tempPages);
