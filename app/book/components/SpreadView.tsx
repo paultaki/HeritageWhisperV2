@@ -11,26 +11,35 @@ interface SpreadViewProps {
     children: React.ReactNode;
   };
   totalPages: number;
+  scale?: number;
   className?: string;
 }
 
 /**
- * SpreadView - Renders two facing pages side-by-side
+ * SpreadView - Renders two facing pages side-by-side with optional scaling
  *
- * Creates a book spread with proper gutter margins:
- * - Left page has gutter on the right (binding side)
- * - Right page has gutter on the left (binding side)
+ * Creates a premium book spread with proper gutter margins and depth.
+ * Supports scaling (0.95-1.0) while maintaining readability.
  *
- * Total width: 1080px (528px + 24px gap + 528px)
+ * Total width: 1086px (528px + 30px gap + 528px)
+ * Scaled width at 0.95: 1031.7px
  */
 export default function SpreadView({
   leftPage,
   rightPage,
   totalPages,
+  scale = 1.0,
   className = '',
 }: SpreadViewProps) {
   return (
-    <div className={`spread ${className}`}>
+    <div
+      className={`spread ${className}`}
+      style={{
+        transform: scale !== 1.0 ? `scale(${scale})` : undefined,
+        transformOrigin: 'center top',
+        transition: 'transform 140ms ease-out',
+      }}
+    >
       <Page
         index={leftPage.index}
         total={totalPages}

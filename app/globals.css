@@ -1445,6 +1445,11 @@ textarea:focus-visible {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
 
+  /* Export button - space for hamburger menu */
+  .export-menu-container {
+    margin-right: 60px; /* Space for hamburger menu on desktop */
+  }
+
   @media (min-width: 768px) {
     .book-header {
       margin-left: 80px; /* Desktop nav width */
@@ -1465,6 +1470,14 @@ textarea:focus-visible {
     perspective: 1500px;
   }
 
+  /* Single-page view: tighter brown border */
+  @media (max-width: 1329px) {
+    .book-container {
+      max-width: 650px;
+      padding: 1.5rem;
+    }
+  }
+
   /* On desktop, center properly accounting for sidebar navigation (80px wide) */
   @media (min-width: 1024px) {
     .book-container {
@@ -1473,75 +1486,82 @@ textarea:focus-visible {
     }
   }
 
-  /* Spread container */
+  /* Spread container - base styles */
   .book-spread {
     position: relative;
-    display: grid;
-    gap: 28px;
     background: #faf8f5;
     min-height: 600px;
-    box-shadow: 
+    box-shadow:
       0 0 40px rgba(0,0,0,0.1) inset,
       0 0 2px rgba(0,0,0,0.1);
   }
 
-  @media (min-width: 900px) {
-    .book-spread {
-      grid-template-columns: 1fr 1fr;
-      padding: 10px; /* Reduced from 28px for wider content area */
-    }
-    
-    /* Enhanced center spine with realistic book binding effect */
-    .book-spread::before {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: linear-gradient(90deg,
-        rgba(0,0,0,0.12) 0%,
-        rgba(0,0,0,0.18) 50%,
-        rgba(0,0,0,0.12) 100%);
-      box-shadow:
-        /* Left page inner shadow */
-        -15px 0 25px -5px rgba(0,0,0,0.15),
-        /* Right page inner shadow */
-        15px 0 25px -5px rgba(0,0,0,0.15),
-        /* Center glow/highlight */
-        inset 0 0 1px rgba(255,255,255,0.2);
-      z-index: 10;
-      transform: translateX(-2px);
-      border-radius: 1px;
-    }
+  /* Spread mode: two-page grid layout (class-based, not media query) */
+  .book-spread.spread-mode {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    padding: 28px; /* Equal padding on all sides for symmetrical cream layer */
+  }
 
-    /* Add subtle inner shadow to pages near spine */
-    .page--left::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 30px;
-      background: linear-gradient(to left,
-        rgba(0,0,0,0.08) 0%,
-        transparent 100%);
-      pointer-events: none;
-    }
+  /* Single-page mode: centered single column (class-based, not media query) */
+  .book-spread.single-mode {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 28px; /* Consistent padding with spread mode */
+  }
 
-    .page--right::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 30px;
-      background: linear-gradient(to right,
-        rgba(0,0,0,0.08) 0%,
-        transparent 100%);
-      pointer-events: none;
-      z-index: 1;
-    }
+  /* Enhanced center spine (only visible in spread mode) */
+  .book-spread.spread-mode::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(90deg,
+      rgba(0,0,0,0.12) 0%,
+      rgba(0,0,0,0.18) 50%,
+      rgba(0,0,0,0.12) 100%);
+    box-shadow:
+      /* Left page inner shadow */
+      -15px 0 25px -5px rgba(0,0,0,0.15),
+      /* Right page inner shadow */
+      15px 0 25px -5px rgba(0,0,0,0.15),
+      /* Center glow/highlight */
+      inset 0 0 1px rgba(255,255,255,0.2);
+    z-index: 10;
+    transform: translateX(-2px);
+    border-radius: 1px;
+  }
+
+  /* Add subtle inner shadow to pages near spine */
+  .page--left::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to left,
+      rgba(0,0,0,0.08) 0%,
+      transparent 100%);
+    pointer-events: none;
+  }
+
+  .page--right::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to right,
+      rgba(0,0,0,0.08) 0%,
+      transparent 100%);
+    pointer-events: none;
+    z-index: 1;
   }
 
   /* Page cards with paper texture and realistic depth */
@@ -1998,6 +2018,11 @@ textarea:focus-visible {
       font-size: 1.25rem; /* Smaller title on mobile */
     }
 
+    /* Export button - space for hamburger menu on mobile */
+    .export-menu-container {
+      margin-right: 60px; /* Space for hamburger menu */
+    }
+
     .book-header .flex {
       overflow: visible;
     }
@@ -2011,7 +2036,13 @@ textarea:focus-visible {
       box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* Premium shadow */
     }
 
-    .book-spread {
+    .book-stage {
+      width: auto !important; /* Remove fixed width on mobile */
+      max-width: 100%;
+    }
+
+    .book-spread.single-mode,
+    .book-spread.spread-mode {
       grid-template-columns: 1fr;
       padding: 0; /* Remove all padding for maximum width */
       gap: 0;
@@ -2831,7 +2862,7 @@ textarea:focus-visible {
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 30;
+  z-index: 45 !important; /* Higher than navigation elements (z-40) */
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
@@ -2857,16 +2888,17 @@ textarea:focus-visible {
 }
 
 .nav-arrow--prev {
-  left: 1rem;
+  left: 120px; /* Positioned on brown desk area, past left sidebar */
 }
 
 .nav-arrow--next {
   right: 1rem;
 }
 
-@media (max-width: 768px) {
-  .nav-arrow {
-    display: none;
+/* Mobile navigation arrows remain visible - removed display:none */
+@media (max-width: 767px) {
+  .nav-arrow--prev {
+    left: 1rem !important; /* Closer to edge on mobile (no sidebar) */
   }
 }
 

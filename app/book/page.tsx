@@ -30,7 +30,7 @@ import FloatingInsightCard from "@/components/FloatingInsightCard";
 import { useSwipeable } from "react-swipeable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
-import BookNav, { type BookNavEntry } from "@/components/ui/BookNav";
+import { useViewportConfig } from "./components/ViewportManager";
 import {
   paginateBook,
   getPageSpreads,
@@ -405,6 +405,8 @@ export default function BookViewNew() {
   const router = useRouter();
   const { user, session } = useAuth();
   const isMobile = useIsMobile();
+  const viewportConfig = useViewportConfig(); // Intelligent viewport detection
+  const showSpreadView = viewportConfig.mode === 'spread'; // Use viewport config directly
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
   const { isOpen, open, close } = useRecordModal();
@@ -423,10 +425,10 @@ export default function BookViewNew() {
 
   const stories = data?.stories || [];
 
-  // Convert to book data structure and build navigation
-  const { pages, spreads, storyPageIndex, navEntries } = useMemo(() => {
+  // Convert to book data structure
+  const { pages, spreads, storyPageIndex } = useMemo(() => {
     if (!stories || stories.length === 0) {
-      return { pages: [], spreads: [], storyPageIndex: -1, navEntries: [] };
+      return { pages: [], spreads: [], storyPageIndex: -1 };
     }
 
     // Group stories by decade
@@ -464,39 +466,10 @@ export default function BookViewNew() {
       pageIndex = bookPages.findIndex(page => page.storyId === storyIdFromUrl);
     }
 
-    // Build navigation entries: TOC + decade markers
-    const navigationEntries: BookNavEntry[] = [];
-
-    // Add TOC as first entry
-    const tocPageIndex = bookPages.findIndex(p => p.type === 'table-of-contents');
-    if (tocPageIndex >= 0) {
-      navigationEntries.push({
-        id: 'toc',
-        label: 'TOC',
-        pageNumber: tocPageIndex,
-        isTOC: true,
-      });
-    }
-
-    // Add decade markers
-    bookPages.forEach((page, idx) => {
-      if (page.type === 'decade-marker' && page.decade) {
-        const label = page.decade === 'birth-year'
-          ? (page.decadeTitle?.split(' ')[0] || 'Birth')
-          : page.decade.replace('decade-', '').replace('s', '');
-        navigationEntries.push({
-          id: page.decade,
-          label: label,
-          pageNumber: idx,
-        });
-      }
-    });
-
     return {
       pages: bookPages,
       spreads: bookSpreads,
       storyPageIndex: pageIndex,
-      navEntries: navigationEntries,
     };
   }, [stories, storyIdFromUrl]);
 
@@ -691,78 +664,99 @@ export default function BookViewNew() {
         </div>
       </div>
 
-      {/* Fixed Navigation Arrows - Outside of book container */}
-      {/* Desktop arrows */}
-      {!isMobile && currentSpreadIndex > 0 && (
+      {/* Fixed Navigation Arrows - Premium 64px touch targets */}
+      {/* Spread view arrows */}
+      {showSpreadView && currentSpreadIndex > 0 && (
         <button
           onClick={goToPrevious}
-          className="fixed left-4 top-1/2 -translate-y-1/2 z-50 w-14 h-14 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
-          aria-label="Previous page"
+          className="nav-arrow nav-arrow--prev fixed top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
+          aria-label="Previous spread"
         >
           <ChevronLeft className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
         </button>
       )}
 
-      {!isMobile && currentSpreadIndex < totalSpreads - 1 && (
+      {showSpreadView && currentSpreadIndex < totalSpreads - 1 && (
         <button
           onClick={goToNext}
-          className="fixed right-4 top-1/2 -translate-y-1/2 z-50 w-14 h-14 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
-          aria-label="Next page"
+          className="nav-arrow fixed right-8 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
+          aria-label="Next spread"
         >
           <ChevronRight className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
         </button>
       )}
 
-      {/* Mobile arrows */}
-      {isMobile && currentMobilePage > 0 && (
+      {/* Single page arrows */}
+      {!showSpreadView && currentMobilePage > 0 && (
         <button
           onClick={goToPrevious}
-          className="fixed left-2 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm shadow-lg active:scale-95 transition-all flex items-center justify-center border border-gray-200"
+          className="nav-arrow nav-arrow--prev fixed top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full bg-white/95 hover:bg-gray-50 shadow-xl active:scale-95 transition-all flex items-center justify-center border border-gray-200"
           aria-label="Previous page"
         >
-          <ChevronLeft className="w-6 h-6 text-gray-700" />
+          <ChevronLeft className="w-7 h-7 text-gray-700" />
         </button>
       )}
 
-      {isMobile && currentMobilePage < totalPages - 1 && (
+      {!showSpreadView && currentMobilePage < totalPages - 1 && (
         <button
           onClick={goToNext}
-          className="fixed right-2 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm shadow-lg active:scale-95 transition-all flex items-center justify-center border border-gray-200"
+          className="nav-arrow fixed right-8 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full bg-white/95 hover:bg-gray-50 shadow-xl active:scale-95 transition-all flex items-center justify-center border border-gray-200"
           aria-label="Next page"
         >
-          <ChevronRight className="w-6 h-6 text-gray-700" />
+          <ChevronRight className="w-7 h-7 text-gray-700" />
         </button>
       )}
 
-      {/* Book Navigation */}
-      {navEntries.length > 0 && (
-        <BookNav
-          entries={navEntries}
-          currentPage={isMobile ? currentMobilePage : currentSpreadIndex * 2}
-          onNavigate={navigateToPage}
-        />
+      {/* Debug badge - shows viewport config (remove in production) */}
+      {typeof window !== 'undefined' && (
+        <div className="fixed top-24 right-4 bg-black/90 text-white text-xs px-3 py-2 rounded-lg font-mono z-50 no-print">
+          <div>Mode: {viewportConfig.mode}</div>
+          <div>Scale: {viewportConfig.scale.toFixed(2)}</div>
+          <div>VW: {window.innerWidth}px</div>
+          <div>Body: {viewportConfig.bodyFontSize.toFixed(0)}px</div>
+        </div>
       )}
 
-      {/* Book Content */}
+      {/* Book Content - Always centered */}
       <div className="book-container relative" {...swipeHandlers}>
+        {/* Spine hint for single-page mode - behind everything */}
+        {!showSpreadView && (
+          <div className="spine-hint" aria-hidden="true" />
+        )}
 
-        <div className="book-spread">
-          {isMobile ? (
-            // Mobile: Single page view
-            <BookPageRenderer page={pages[currentMobilePage]} onNavigateToPage={navigateToPage} />
-          ) : (
-            // Desktop: Two-page spread
-            <>
-              {spreads[currentSpreadIndex] && (
-                <>
-                  <BookPageRenderer page={spreads[currentSpreadIndex][0]} onNavigateToPage={navigateToPage} />
-                  {spreads[currentSpreadIndex][1] && (
-                    <BookPageRenderer page={spreads[currentSpreadIndex][1]} onNavigateToPage={navigateToPage} />
-                  )}
-                </>
-              )}
-            </>
-          )}
+        {/* Book stage - explicit width for centering */}
+        <div
+          className="book-stage mx-auto relative"
+          style={{
+            width: `${viewportConfig.scaledWidth}px`,
+            transition: 'width 140ms ease-out',
+          }}
+        >
+          <div
+            className={`book-spread ${!showSpreadView ? 'single-mode' : 'spread-mode'}`}
+            style={{
+              transform: viewportConfig.scale !== 1.0 ? `scale(${viewportConfig.scale})` : undefined,
+              transformOrigin: 'top center',
+              transition: 'transform 140ms ease-out',
+            }}
+          >
+            {!showSpreadView ? (
+              // Single page view - centered by explicit width
+              <BookPageRenderer page={pages[currentMobilePage]} onNavigateToPage={navigateToPage} />
+            ) : (
+              // Spread view - two pages side-by-side
+              <>
+                {spreads[currentSpreadIndex] && (
+                  <>
+                    <BookPageRenderer page={spreads[currentSpreadIndex][0]} onNavigateToPage={navigateToPage} />
+                    {spreads[currentSpreadIndex][1] && (
+                      <BookPageRenderer page={spreads[currentSpreadIndex][1]} onNavigateToPage={navigateToPage} />
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
 

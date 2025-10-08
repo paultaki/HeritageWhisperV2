@@ -182,8 +182,9 @@
   z-index: 2;
 }
 
-.spread .page {
-  margin: 0; /* Remove individual page margins in spread */
+.spread .page,
+.book-spread .page {
+  margin: 0; /* Remove individual page margins in spread - padding handled by .book-spread */
   flex-shrink: 0;
 }
 
@@ -406,6 +407,18 @@
     scroll-padding-top: 101px;
   }
 
+  /* Mobile: Remove .book-stage explicit width, let it flow naturally */
+  .book-stage {
+    width: auto !important;
+    max-width: 100%;
+  }
+
+  /* Mobile: Minimal padding on .book-spread */
+  .book-spread.single-mode,
+  .book-spread.spread-mode {
+    padding: 10px;
+  }
+
   .page {
     /* Page width leaves room for brown borders */
     max-width: calc(100% - 20px);
@@ -446,5 +459,161 @@
   .page.right .page-number {
     right: 16px !important;
     left: auto !important;
+  }
+}
+
+/* ============================================
+   SCREEN-ONLY ENHANCEMENTS - Premium Book Experience
+   ============================================
+
+   These styles apply ONLY to screen viewing, never to print.
+   Wrapped in @layer to prevent any bleed into print output.
+   ============================================ */
+
+@layer book-screen {
+  @media screen {
+    /* Book stage - explicit width container for proper centering */
+    .book-stage {
+      margin-inline: auto;
+      position: relative;
+      /* Width set inline via JS based on viewport config */
+    }
+
+    /* Screen typography - larger for readability (print uses 11pt) */
+    .book-text {
+      font-size: 20px; /* Base screen size (vs 11pt/~14.67px for print) */
+      line-height: 1.7;
+    }
+
+    .book-heading {
+      font-size: 24px; /* vs 16pt for print */
+    }
+
+    .book-title {
+      font-size: 28px; /* vs 20pt for print */
+    }
+
+    /* Premium desk with subtle vignette */
+    .book-wrap {
+      background:
+        radial-gradient(
+          ellipse at center,
+          transparent 30%,
+          rgba(0, 0, 0, 0.08) 100%
+        ),
+        linear-gradient(135deg, #2C1F1A 0%, #3A2A22 100%);
+    }
+
+    /* Enhanced page shadow for screen - more depth */
+    .page {
+      box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+        0 14px 40px rgba(0, 0, 0, 0.12),
+        0 4px 12px rgba(0, 0, 0, 0.08);
+      background-clip: padding-box;
+    }
+
+    /* Spine hint in single-page mode - suggests facing page */
+    .spine-hint {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 816px; /* Match page height */
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0, 0, 0, 0.08) 50%,
+        transparent 100%
+      );
+      /* Fade at top and bottom */
+      mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        black 8%,
+        black 92%,
+        transparent 100%
+      );
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+      /* Smooth fade in/out with mode changes */
+      transition: opacity 140ms ease-out;
+    }
+
+    /* Single-page mode: breathing space around page */
+    .single-wrap {
+      padding-inline: clamp(32px, 6vw, 80px);
+      padding-block: 32px;
+    }
+
+    /* Navigation arrows - premium 64px touch targets */
+    .nav-arrow {
+      width: 64px;
+      height: 64px;
+      z-index: 20;
+      /* Subtle entrance animation */
+      animation: fadeIn 200ms ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    /* Mode transition polish - smooth crossfade */
+    .spread,
+    .page {
+      transition:
+        transform 140ms ease-out,
+        opacity 140ms ease-out,
+        box-shadow 140ms ease-out;
+    }
+
+    /* Respect reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      .spine-hint,
+      .nav-arrow,
+      .spread,
+      .page {
+        transition: none;
+        animation: none;
+      }
+    }
+
+    /* Tighter brown border in single-page view */
+    @media (max-width: 1329px) {
+      .book-container {
+        max-width: 650px;
+        padding: 1.5rem;
+      }
+    }
+
+    /* Z-index hierarchy (screen only) */
+    .book-wrap {
+      z-index: 0;
+    }
+
+    .spine-hint {
+      z-index: 1;
+    }
+
+    .page,
+    .spread {
+      z-index: 10;
+    }
+
+    .nav-arrow {
+      z-index: 20;
+    }
+
+    /* Mic FAB and menus handled by global z-index in main app */
   }
 }

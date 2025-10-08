@@ -10,19 +10,22 @@ interface BookWrapProps {
   onPageChange: (pageIndex: number) => void;
   className?: string;
   spreadMode?: boolean; // Navigate by spreads (2 pages at a time)
+  viewMode?: 'single' | 'spread'; // View mode for spine hint
   scrollToPageRef?: React.MutableRefObject<((pageIndex: number) => void) | null>; // Expose scroll function to parent
 }
 
 /**
- * BookWrap - Scrollable container for pages with keyboard navigation
+ * BookWrap - Scrollable container for pages with premium navigation
  *
  * Features:
  * - Scroll-snap pagination
  * - Arrow key navigation (←/→)
  * - Page Up/Down navigation
- * - Visual arrow buttons
+ * - Visual arrow buttons (64px tap targets)
+ * - Premium spine hint in single-page mode
  * - Accessible focus management
  * - Spread mode: Navigate by two-page spreads
+ * - Smooth transitions with reduced-motion support
  */
 export default function BookWrap({
   children,
@@ -31,6 +34,7 @@ export default function BookWrap({
   onPageChange,
   className = '',
   spreadMode = false,
+  viewMode = 'single',
   scrollToPageRef,
 }: BookWrapProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -150,28 +154,28 @@ export default function BookWrap({
 
   return (
     <div className="relative">
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows - 64px touch targets */}
       {currentPage > 0 && (
         <button
           onClick={goToPrevious}
-          className="fixed left-4 top-1/2 -translate-y-1/2 z-50 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white hover:bg-gray-50 shadow-lg hover:shadow-xl transition-all flex items-center justify-center group border border-gray-200 no-print"
+          className="nav-arrow fixed left-8 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200 no-print"
           aria-label="Previous page"
         >
-          <ChevronLeft className="w-6 h-6 md:w-7 md:h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
+          <ChevronLeft className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
         </button>
       )}
 
       {currentPage < totalPages - 1 && (
         <button
           onClick={goToNext}
-          className="fixed right-4 top-1/2 -translate-y-1/2 z-50 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white hover:bg-gray-50 shadow-lg hover:shadow-xl transition-all flex items-center justify-center group border border-gray-200 no-print"
+          className="nav-arrow fixed right-8 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200 no-print"
           aria-label="Next page"
         >
-          <ChevronRight className="w-6 h-6 md:w-7 md:h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
+          <ChevronRight className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
         </button>
       )}
 
-      {/* Scrollable page container */}
+      {/* Scrollable page container with optional spine hint */}
       <div
         ref={wrapRef}
         className={`book-wrap ${className}`}
@@ -179,12 +183,17 @@ export default function BookWrap({
         tabIndex={0}
         aria-label={`Book viewer, page ${currentPage + 1} of ${totalPages}`}
       >
+        {/* Spine hint for single-page mode - creates premium depth */}
+        {viewMode === 'single' && (
+          <div className="spine-hint no-print" aria-hidden="true" />
+        )}
+
         {children}
       </div>
 
-      {/* Keyboard hints */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-md text-xs text-gray-600 no-print hidden md:block">
-        Use ← → or Page Up/Down to navigate • {currentPage + 1} / {totalPages}
+      {/* Keyboard hints - subtle and premium */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm px-5 py-2.5 rounded-full shadow-lg text-xs font-medium text-gray-600 no-print hidden md:block border border-gray-200/50">
+        Use ← → or Page Up/Down • Page {currentPage + 1} of {totalPages}
       </div>
     </div>
   );

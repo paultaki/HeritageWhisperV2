@@ -12,6 +12,7 @@
   height: fit-content;
   width: var(--nav-width);
   z-index: 30;
+  background: transparent;
 }
 .hw-decade-list{
   display: flex;
@@ -115,7 +116,7 @@
 /* show desktop sidebar only at md+ */
 @media (max-width: 1023px){
   .hw-decade-nav,
-  .hw-book-nav{ display: none; }
+  .hw-book-nav{ display: none !important; }
 }
 @media (min-width: 1024px){
   .hw-decade-fab, .hw-decade-sheet{ display: none; }

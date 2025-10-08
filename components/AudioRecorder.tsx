@@ -652,7 +652,16 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
   // Auto-start recording on mount
   useEffect(() => {
     if (!isRecording) {
-      startRecording();
+      // Wrap in async to properly handle errors
+      const autoStart = async () => {
+        try {
+          await startRecording();
+        } catch (error) {
+          console.error('[AudioRecorder] Auto-start failed:', error);
+          // Error is already handled in startRecording, just log here
+        }
+      };
+      autoStart();
     }
   }, []); // Only run once on mount
 

@@ -123,8 +123,9 @@ export default function HomePage() {
 
   const handleStartRecording = () => {
     setShowRipple(true);
-    // Navigate immediately for better responsiveness
-    router.push('/recording');
+    // Navigate to register page instead of recording directly
+    // User will be redirected to timeline after login/registration
+    router.push('/auth/register');
   };
 
   const handleStartFree = () => {

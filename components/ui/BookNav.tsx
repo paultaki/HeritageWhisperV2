@@ -30,7 +30,7 @@ export default function BookNav({ entries, currentPage, onNavigate }: Props) {
   return (
     <>
       {/* Desktop: Fixed side navigation - collapsed by default */}
-      <nav className="hw-book-nav hidden lg:flex">
+      <nav className="hw-book-nav hidden lg:flex lg:flex-col">
         {!isExpanded ? (
           <button
             className="hw-decade-pill"
