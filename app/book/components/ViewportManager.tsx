@@ -28,7 +28,7 @@ export interface ViewportConfig {
 export const PAGE_WIDTH = 528;   // px (5.5in × 96 DPI)
 export const SPREAD_GAP = 30;    // px
 export const SPREAD_PADDING = 28; // px padding on each side of .book-spread (cream layer)
-export const CHROME_PADDING = 192; // px (left sidebar 80px + arrows/margins ~112px)
+export const CHROME_PADDING = 220; // px (left sidebar 112px + arrows/margins + breathing room)
 
 // Screen typography
 const SCREEN_BODY_SIZE = 20; // px base font size for screen
