@@ -755,29 +755,72 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
     console.log('[AudioRecorder] Cleanup complete');
   }, [mediaStream, cleanupSilenceDetection]);
 
-  // Auto-start recording on mount
-  useEffect(() => {
-    if (!isRecording) {
-      // Wrap in async to properly handle errors
-      const autoStart = async () => {
-        try {
-          await startRecording();
-        } catch (error) {
-          console.error('[AudioRecorder] Auto-start failed:', error);
-          // Error is already handled in startRecording, just log here
-        }
-      };
-      autoStart();
-    }
-  }, []); // Only run once on mount
+  // Auto-start disabled due to React StrictMode conflicts
+  // User must click the button to start recording
 
-  // Cleanup on unmount
+  // Cleanup on unmount only (not on every state change)
   useEffect(() => {
     return () => {
       console.log('[AudioRecorder] Component unmounting, calling cleanup');
-      cleanup();
+
+      // Inline cleanup to avoid dependency issues
+      cancelledRef.current = true;
+
+      // Stop and clean up MediaRecorder
+      if (mediaRecorderRef.current) {
+        const state = mediaRecorderRef.current.state;
+        console.log('[AudioRecorder] Cleaning up MediaRecorder, state:', state);
+
+        // Remove event listeners to prevent callbacks
+        mediaRecorderRef.current.ondataavailable = null;
+        mediaRecorderRef.current.onstop = null;
+        mediaRecorderRef.current.onerror = null;
+        mediaRecorderRef.current.onstart = null;
+        mediaRecorderRef.current.onpause = null;
+        mediaRecorderRef.current.onresume = null;
+
+        if (state === 'recording' || state === 'paused') {
+          try {
+            mediaRecorderRef.current.stop();
+          } catch (error) {
+            console.error('[AudioRecorder] Error stopping MediaRecorder:', error);
+          }
+        }
+        mediaRecorderRef.current = null;
+      }
+
+      // Stop and clean up MediaStream
+      if (mediaStream) {
+        console.log('[AudioRecorder] Stopping media stream tracks');
+        mediaStream.getTracks().forEach(track => {
+          console.log('[AudioRecorder] Stopping track:', track.kind, track.label);
+          track.stop();
+        });
+      }
+
+      // Clear timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+
+      // Clean up silence detection
+      if (silenceDetectionIntervalRef.current) {
+        clearInterval(silenceDetectionIntervalRef.current);
+        silenceDetectionIntervalRef.current = null;
+      }
+      if (levelUpdateIntervalRef.current) {
+        clearInterval(levelUpdateIntervalRef.current);
+        levelUpdateIntervalRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+
+      console.log('[AudioRecorder] Cleanup complete');
     };
-  }, [cleanup]);
+  }, [mediaStream]); // Only depend on mediaStream, not the cleanup function
 
   // Expose methods to parent component
   useImperativeHandle(ref, () => ({
