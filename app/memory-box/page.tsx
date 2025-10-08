@@ -13,6 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useRecordModal } from '@/hooks/use-record-modal';
 import MemoryToolbar from '@/components/ui/MemoryToolbar';
 import MemoryCard from '@/components/ui/MemoryCard';
+import { MemoryList } from '@/components/ui/MemoryList';
+import { Story as SchemaStory } from '@/shared/schema';
 
 interface Story {
   id: string;
@@ -424,6 +426,41 @@ export default function MemoryBoxPage() {
               </Button>
             )}
           </Card>
+        ) : viewMode === 'list' ? (
+          <MemoryList
+            stories={processedStories.map((story) => {
+              const heroPhoto = story.photos?.find(p => p.isHero) || story.photos?.[0];
+              const photoUrl = heroPhoto?.url || story.photoUrl || '/images/placeholder.jpg';
+
+              return {
+                id: story.id,
+                title: story.title,
+                content: story.transcript || '',
+                year_of_event: story.storyYear || null,
+                user_birth_year: user?.birthYear || null,
+                audio_duration: story.durationSeconds || null,
+                audio_url: story.audioUrl || null,
+                cover_photo_url: photoUrl,
+                show_in_timeline: story.includeInTimeline,
+                include_in_book: story.includeInBook,
+                is_favorite: story.isFavorite,
+              } as SchemaStory;
+            })}
+            onPlay={(id) => {
+              const story = processedStories.find(s => s.id === id);
+              if (story?.audioUrl) {
+                AudioManager.getInstance().play(id, story.audioUrl);
+              }
+            }}
+            onOpen={(id) => router.push(`/review/book-style?edit=${id}`)}
+            onToggleFavorite={handleToggleFavorite}
+            onDelete={(id) => {
+              if (confirm('Delete this memory? This cannot be undone.')) {
+                deleteStory.mutate(id);
+              }
+            }}
+            density="comfortable"
+          />
         ) : (
           <div className="hw-grid-mem">
             {processedStories.map((story) => {
