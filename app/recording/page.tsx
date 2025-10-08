@@ -330,78 +330,17 @@ function RecordingContent() {
     router.push(`/review?nav=${navId}`);
   };
 
-  // Silence Detection Handler
+  // Silence Detection Handler - Disabled for now (real-time transcription removed)
   const handleSilenceDetected = async (recordingDuration: number) => {
-    console.log('[In-Flow Prompts] Silence detected at', recordingDuration, 'seconds');
-
-    if (recordingDuration < 30) {
-      console.log('[In-Flow Prompts] Too early for prompt, need 30 seconds. Current:', recordingDuration);
-      return;
-    }
-
-    if (inFlowPromptCount >= 2) {
-      console.log('[In-Flow Prompts] Maximum prompts reached:', inFlowPromptCount);
-      return;
-    }
-
-    const now = Date.now();
-    if (lastPromptTime && (now - lastPromptTime) < 25000) {
-      const timeLeft = Math.ceil((25000 - (now - lastPromptTime)) / 1000);
-      console.log('[In-Flow Prompts] Cooldown period active. Time left:', timeLeft, 'seconds');
-      return;
-    }
-
-    console.log('[In-Flow Prompts] All conditions met! Attempting to show prompt...');
-
-    if (audioRecorderRef.current?.isRecording) {
-      const currentAudio = audioRecorderRef.current.getCurrentRecording();
-
-      if (currentAudio && currentAudio.size > 0) {
-        console.log('[In-Flow Prompts] Got audio blob, size:', currentAudio.size);
-        try {
-          console.log('[In-Flow Prompts] Starting transcription...');
-          const transcriptionResult = await transcribeAudio(currentAudio);
-          transcriptionRef.current = transcriptionResult.text;
-          formattedContentRef.current = transcriptionResult.formattedContent;
-          console.log('[In-Flow Prompts] Transcription complete, text length:', transcriptionResult.text?.length || 0);
-
-          const matchedPrompt = findMatchingPrompt(transcriptionResult.text, usedPrompts);
-          const promptToShow = matchedPrompt?.prompt || getFallbackPrompt(usedPrompts);
-          console.log('[In-Flow Prompts] Selected prompt:', promptToShow?.substring(0, 50) + '...');
-
-          setCurrentInFlowPrompt(promptToShow);
-          setShowInFlowPrompt(true);
-          setInFlowPromptCount(prev => prev + 1);
-          setUsedPrompts(prev => [...prev, promptToShow]);
-          setLastPromptTime(now);
-          console.log('[In-Flow Prompts] Prompt shown! Count now:', inFlowPromptCount + 1);
-
-          audioRecorderRef.current.pauseRecording();
-          console.log('[In-Flow Prompts] Recording paused');
-        } catch (error) {
-          console.error('[In-Flow Prompts] Error processing silence detection:', error);
-        }
-      }
-    }
+    console.log('[Recording] Silence detected at', recordingDuration, 'seconds (in-flow prompts disabled)');
+    // Real-time transcription and in-flow prompts disabled
+    // Transcription will happen after recording completes
   };
 
-  // Speech Detected Handler
+  // Speech Detected Handler - Disabled (in-flow prompts removed)
   const handleSpeechDetected = () => {
-    console.log('Speech detected');
-
-    if (speechDetectedTimeoutRef.current) {
-      clearTimeout(speechDetectedTimeoutRef.current);
-      speechDetectedTimeoutRef.current = null;
-    }
-
-    if (showInFlowPrompt) {
-      speechDetectedTimeoutRef.current = setTimeout(() => {
-        setShowInFlowPrompt(false);
-        if (audioRecorderRef.current?.isPaused) {
-          audioRecorderRef.current.resumeRecording();
-        }
-      }, 500);
-    }
+    console.log('[Recording] Speech detected');
+    // In-flow prompt handling disabled
   };
 
   // In-Flow Prompt Handlers
