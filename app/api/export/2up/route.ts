@@ -108,8 +108,38 @@ export async function POST(request: NextRequest) {
 
     console.log('[Export 2up] Page loaded, waiting for content...');
 
-    // Wait for the page to finish rendering
-    await page.waitForSelector('.book-spread', { timeout: 10000 });
+    // Check for errors on the page
+    const pageErrors: string[] = [];
+    page.on('console', msg => {
+      const text = msg.text();
+      if (msg.type() === 'error') {
+        console.error('[Export 2up] Page error:', text);
+        pageErrors.push(text);
+      } else {
+        console.log('[Export 2up] Page log:', text);
+      }
+    });
+
+    page.on('pageerror', error => {
+      console.error('[Export 2up] Page exception:', error);
+    });
+
+    // Wait for the page to finish rendering (increased timeout)
+    try {
+      await page.waitForSelector('.book-spread', { timeout: 30000 });
+    } catch (waitError) {
+      // Take a screenshot for debugging
+      const screenshot = await page.screenshot({ encoding: 'base64' });
+      console.error('[Export 2up] Failed to find .book-spread');
+      console.error('[Export 2up] Page errors:', pageErrors);
+      console.error('[Export 2up] Screenshot (base64):', screenshot.substring(0, 100) + '...');
+
+      // Get the page HTML to see what's actually there
+      const html = await page.content();
+      console.error('[Export 2up] Page HTML:', html.substring(0, 1000));
+
+      throw waitError;
+    }
 
     // Additional wait to ensure React has hydrated and styles are applied
     await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 2000)));
