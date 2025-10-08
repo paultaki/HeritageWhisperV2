@@ -766,16 +766,6 @@ export default function BookViewNew() {
         </button>
       )}
 
-      {/* Debug badge - shows viewport config (remove in production) */}
-      {typeof window !== 'undefined' && (
-        <div className="fixed top-24 right-4 bg-black/90 text-white text-xs px-3 py-2 rounded-lg font-mono z-50 no-print">
-          <div>Mode: {viewportConfig.mode}</div>
-          <div>Scale: {viewportConfig.scale.toFixed(2)}</div>
-          <div>VW: {window.innerWidth}px</div>
-          <div>Body: {viewportConfig.bodyFontSize.toFixed(0)}px</div>
-        </div>
-      )}
-
       {/* Book Content - Always centered */}
       <div className="book-container relative" {...swipeHandlers}>
         {/* Spine hint for single-page mode - behind everything */}

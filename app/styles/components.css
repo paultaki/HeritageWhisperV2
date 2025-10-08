@@ -296,9 +296,12 @@ html, body {
 /* year badge - always visible, larger */
 .hw-year {
   position: absolute;
-  left: -60px;
+  left: -65px;
   top: calc(var(--title-offset, 22px) - 12px);
-  font: 600 14px/1 var(--font-serif);
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1;
   color: var(--color-text-h);
   background: var(--color-page);
   padding: 5px 8px 7px 8px;
@@ -312,8 +315,8 @@ html, body {
 
 @media (max-width: 767px) {
   .hw-year {
-    left: -46px;
-    font-size: 13px;
+    left: -51px;
+    font-size: 17px;
     line-height: 1;
     padding: 4px 6px 6px 6px;
   }

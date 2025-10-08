@@ -2027,24 +2027,35 @@ textarea:focus-visible {
       overflow: visible;
     }
 
+    /* Keep vertical padding for scrolling, remove horizontal - .book-container margin creates brown border */
+    .book-wrap {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      overflow-y: auto !important;
+      /* Keep padding-top and padding-bottom from book.css for proper scrolling */
+    }
+
     .book-container {
-      margin: 1rem auto; /* Small margins for slim brown border effect */
-      padding: 0.75rem; /* Slim padding for brown border */
-      max-width: calc(100vw - 2rem);
+      margin: 12px auto; /* Thin outer margin */
+      padding: 8px; /* 8px brown border on all sides */
+      max-width: calc(100vw - 24px); /* Account for 12px margin on each side */
       background: #2c2416; /* Dark leather color for slim border */
-      border-radius: 8px; /* Slight rounding */
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* Premium shadow */
+      border-radius: 6px; /* Slight rounding */
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25); /* Premium shadow */
     }
 
     .book-stage {
       width: auto !important; /* Remove fixed width on mobile */
       max-width: 100%;
+      margin: 0 !important; /* Remove any margins */
+      padding: 0 !important; /* Remove any padding */
     }
 
     .book-spread.single-mode,
     .book-spread.spread-mode {
       grid-template-columns: 1fr;
-      padding: 0; /* Remove all padding for maximum width */
+      padding: 0 !important; /* Remove all padding for maximum width */
+      margin: 0 !important; /* Remove all margins */
       gap: 0;
       background: transparent; /* Remove beige background */
     }
@@ -2052,10 +2063,10 @@ textarea:focus-visible {
     .page {
       max-width: 100%; /* Full viewport width */
       margin: 0; /* Remove margins */
-      padding: 1rem 10px 60px; /* 10px side padding for wider content */
-      border-radius: 0; /* No rounded corners */
+      padding: 1rem 16px 60px; /* 16px side padding for text breathing room */
+      border-radius: 4px; /* Slight rounding to match container */
       background: white; /* Clean white background */
-      box-shadow: none; /* Remove all shadows on mobile */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Subtle inner shadow for depth */
       border: none;
       outline: none;
     }
