@@ -270,14 +270,20 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Two export formats:
     - **2-up (Home Print)**: Two 5.5×8.5" pages side-by-side on 11×8.5" landscape
     - **Trim (POD)**: Individual 5.5×8.5" pages for professional printing
-  - Server-side PDF generation using Puppeteer
+  - Server-side PDF generation using Puppeteer + @sparticuz/chromium
   - Print-specific pages at `/book/print/2up` and `/book/print/trim`
   - API routes: `/api/export/2up`, `/api/export/trim`, `/api/book-data`
   - Uses service role key to bypass auth for print pages
+  - **Status**: Working locally, debugging on production (Vercel)
 
 ### Known Issues
-- **PDF Export Margins**: Content not centering properly, sticks to top-left corner
-- **UI Elements in PDF**: Hamburger menu showing in exported PDFs
+- **PDF Export on Vercel**: Print page loads but React app not rendering (timeout waiting for `.book-spread`)
+  - Chromium launches successfully
+  - Page navigation works
+  - React hydration appears to fail silently
+  - Currently debugging with network request logging
+- **PDF Export Margins (Local)**: Content not centering properly, sticks to top-left corner
+- **UI Elements in PDF (Local)**: Hamburger menu showing in exported PDFs
 - **Book View Mobile**: Decade navigation pill button visibility needs improvement (low contrast against brown background)
   - Current styling: white background, 2px dark border, strong shadow
   - Positioned at `bottom: 110px` (25px above footer)
