@@ -105,21 +105,25 @@ export async function POST(request: NextRequest) {
     });
     
     // Use actual domain when deployed, localhost for dev
-    // Use 127.0.0.1 instead of localhost for better compatibility with headless browsers
+    // VERCEL_URL doesn't include protocol, and we need the actual deployment URL
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : `http://127.0.0.1:${process.env.PORT || 3001}`;
+      : process.env.NEXT_PUBLIC_SITE_URL || `http://127.0.0.1:${process.env.PORT || 3002}`;
 
     const printUrl = `${baseUrl}/book/print/2up?userId=${user.id}`;
     console.log('[Export 2up] Navigating to:', printUrl);
 
     try {
-      await page.goto(printUrl, { waitUntil: 'networkidle0', timeout: 60000 });
+      // Use 'load' instead of 'networkidle0' for faster, more reliable rendering
+      await page.goto(printUrl, { waitUntil: 'load', timeout: 60000 });
+      console.log('[Export 2up] Initial page load complete');
     } catch (navError) {
-      console.log('[Export 2up] Navigation error, trying with localhost...');
-      // Fallback to localhost if 127.0.0.1 fails
-      const fallbackUrl = `http://localhost:${process.env.PORT || 3001}/book/print/2up?userId=${user.id}`;
-      await page.goto(fallbackUrl, { waitUntil: 'networkidle0', timeout: 60000 });
+      console.log('[Export 2up] Navigation error:', navError);
+      console.log('[Export 2up] Trying with localhost fallback...');
+      // Fallback to localhost if primary URL fails
+      const fallbackUrl = `http://localhost:${process.env.PORT || 3002}/book/print/2up?userId=${user.id}`;
+      await page.goto(fallbackUrl, { waitUntil: 'load', timeout: 60000 });
+      console.log('[Export 2up] Fallback navigation complete');
     }
 
     console.log('[Export 2up] Page loaded, waiting for content...');
@@ -140,25 +144,59 @@ export async function POST(request: NextRequest) {
       console.error('[Export 2up] Page exception:', error);
     });
 
-    // Wait for the page to finish rendering (increased timeout)
+    // Wait for React to hydrate and render content
+    // Use a custom wait function that checks for actual content, not just the container
     try {
-      await page.waitForSelector('.book-spread', { timeout: 30000 });
+      console.log('[Export 2up] Waiting for React hydration...');
+
+      await page.waitForFunction(
+        () => {
+          const spread = document.querySelector('.book-spread');
+          if (!spread) return false;
+
+          // Check if spread has actual content (not just loading state)
+          const hasContent = spread.querySelector('.page') !== null;
+          const notLoading = !document.body.innerText.includes('Loading');
+
+          return hasContent && notLoading;
+        },
+        { timeout: 45000, polling: 500 }
+      );
+
+      console.log('[Export 2up] Content detected, waiting for images...');
+
+      // Wait for images to load
+      await page.evaluate(() => {
+        return Promise.all(
+          Array.from(document.images)
+            .filter(img => !img.complete)
+            .map(img => new Promise(resolve => {
+              img.onload = img.onerror = resolve;
+            }))
+        );
+      });
+
+      // Additional wait for any async rendering
+      await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 2000)));
+
+      console.log('[Export 2up] All content loaded');
     } catch (waitError) {
       // Take a screenshot for debugging
-      const screenshot = await page.screenshot({ encoding: 'base64' });
-      console.error('[Export 2up] Failed to find .book-spread');
+      const screenshot = await page.screenshot({ encoding: 'base64', fullPage: true });
+      console.error('[Export 2up] Failed to render content');
       console.error('[Export 2up] Page errors:', pageErrors);
       console.error('[Export 2up] Screenshot (base64):', screenshot.substring(0, 100) + '...');
 
       // Get the page HTML to see what's actually there
       const html = await page.content();
-      console.error('[Export 2up] Page HTML:', html.substring(0, 1000));
+      console.error('[Export 2up] Page HTML (first 2000 chars):', html.substring(0, 2000));
 
-      throw waitError;
+      // Check network activity
+      const metrics = await page.metrics();
+      console.error('[Export 2up] Page metrics:', metrics);
+
+      throw new Error(`Failed to render book content: ${waitError instanceof Error ? waitError.message : String(waitError)}`);
     }
-
-    // Additional wait to ensure React has hydrated and styles are applied
-    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 2000)));
 
     // Debug: Log the actual HTML to see what's being rendered
     try {

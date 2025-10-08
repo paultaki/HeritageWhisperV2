@@ -288,15 +288,24 @@ function Print2UpPageContent() {
           margin: 0;
         }
 
-        body {
+        * {
+          box-sizing: border-box;
+        }
+
+        html, body {
           margin: 0 !important;
           padding: 0 !important;
+          width: 100%;
+          height: 100%;
         }
 
         /* Hide all UI elements */
         .hw-hamburger-menu,
         [class*="hamburger"],
-        button,
+        [class*="navigation"],
+        header,
+        footer:not(.page-number),
+        button:not(.page-content button),
         nav {
           display: none !important;
         }
@@ -310,12 +319,15 @@ function Print2UpPageContent() {
         .book-spread {
           width: 11in !important;
           height: 8.5in !important;
-          padding: 0.25in !important;
-          margin: 0 !important;
+          padding: 0 !important;
+          margin: 0 auto !important;
           box-sizing: border-box !important;
           page-break-after: always !important;
-          display: block !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
           position: relative !important;
+          background: white !important;
         }
 
         .book-spread:last-child {
@@ -331,6 +343,7 @@ function Print2UpPageContent() {
           border: 1px solid #ddd !important;
           margin: 0 !important;
           padding: 0 !important;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
         }
 
         .page {
