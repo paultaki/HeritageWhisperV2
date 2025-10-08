@@ -950,15 +950,18 @@ export default function Timeline() {
     return null;
   }
 
-  const stories = (storiesData as any)?.stories || [];
+  const allStories = (storiesData as any)?.stories || [];
 
-  // Generate ghost prompts based on user's story count
+  // Filter to only show stories marked for timeline
+  const stories = allStories.filter((s: any) => s.includeInTimeline === true);
+
+  // Generate ghost prompts based on user's TOTAL story count (not just timeline)
   let ghostPrompts: any[] = [];
 
-  if (shouldShowNewUserGhosts(stories.length)) {
+  if (shouldShowNewUserGhosts(allStories.length)) {
     // New user with 0 stories: show onboarding ghost prompts
     ghostPrompts = generateNewUserGhostPrompts(user.birthYear);
-  } else if (stories.length < 3) {
+  } else if (allStories.length < 3) {
     // Existing user with 1-2 stories: show contextual ghost prompts
     ghostPrompts = generateGhostPrompts(user.birthYear);
   }

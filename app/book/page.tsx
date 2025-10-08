@@ -471,19 +471,21 @@ export default function BookViewNew() {
       return { pages: [], spreads: [], storyPageIndex: -1 };
     }
 
-    // Group stories by decade
+    // Group stories by decade (only stories marked for book)
     const decadeMap = new Map<string, Story[]>();
 
-    stories.forEach((story) => {
-      const year = parseInt(story.storyYear?.toString() || '0');
-      if (year > 0) {
-        const decadeKey = `${Math.floor(year / 10) * 10}s`;
-        if (!decadeMap.has(decadeKey)) {
-          decadeMap.set(decadeKey, []);
+    stories
+      .filter(story => story.includeInBook === true)
+      .forEach((story) => {
+        const year = parseInt(story.storyYear?.toString() || '0');
+        if (year > 0) {
+          const decadeKey = `${Math.floor(year / 10) * 10}s`;
+          if (!decadeMap.has(decadeKey)) {
+            decadeMap.set(decadeKey, []);
+          }
+          decadeMap.get(decadeKey)!.push(story);
         }
-        decadeMap.get(decadeKey)!.push(story);
-      }
-    });
+      });
 
     // Convert to DecadeGroup array
     const decadeGroups: DecadeGroup[] = Array.from(decadeMap.entries())
