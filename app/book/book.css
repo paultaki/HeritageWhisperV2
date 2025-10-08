@@ -1,0 +1,450 @@
+/* ============================================
+   BOOK PAGINATION SYSTEM - 5.5×8.5 Half-Letter Pages
+   ============================================ */
+
+:root {
+  /* Half-Letter dimensions at 96 DPI (5.5×8.5 in) */
+  --page-width: 528px;    /* 5.5in × 96 */
+  --page-height: 816px;   /* 8.5in × 96 */
+
+  /* Equal margins for web reading (home print) */
+  --margin: 58px;         /* ~0.6in equal margin on all sides */
+  --gutter-boost: 24px;   /* ~0.25in added ONLY in POD print mode (future) */
+
+  /* Spread layout */
+  --spread-gap: 30px;     /* Gap between left and right pages */
+  --spread-width: calc(var(--page-width) * 2 + var(--spread-gap));
+
+  /* Content area (equal margins) */
+  --content-width: calc(var(--page-width) - var(--margin) * 2);
+  --content-height: calc(var(--page-height) - var(--margin) * 2);
+
+  /* Typography for print */
+  --book-font-size: 11pt;
+  --book-line-height: 1.6;
+  --book-heading-size: 16pt;
+  --book-title-size: 20pt;
+}
+
+/* ============================================
+   BOOK WRAPPER - Scroll Container
+   ============================================ */
+
+.book-wrap {
+  width: 100%;
+  height: calc(100vh - 120px); /* Account for header */
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+
+  /* Rich leather desk gradient with subtle vignette */
+  background: linear-gradient(135deg, #2C1F1A 0%, #3A2A22 100%);
+  background-attachment: fixed;
+  padding: 26px 0 24px 0; /* Reduced top padding - closer to bottom spacing */
+
+  /* Subtle vignette to draw eye to center */
+  position: relative;
+
+  /* Offset scroll-snap padding to account for top padding */
+  scroll-padding-top: 26px;
+}
+
+.book-wrap::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.08) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.book-wrap:focus {
+  outline: none;
+}
+
+/* ============================================
+   PAGE - 5.5×8.5 Half-Letter Size
+   ============================================ */
+
+.page {
+  position: relative;
+  width: var(--page-width);
+  height: var(--page-height);
+  margin: 0 auto 24px;
+
+  /* Equal margins on all sides for web reading */
+  padding: var(--margin);
+
+  /* Paper white with whisper-level texture */
+  background: #ffffff;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.01) 2px, rgba(0,0,0,0.01) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.01) 2px, rgba(0,0,0,0.01) 4px);
+
+  /* Soft drop shadow with depth and subtle paper lip */
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 10px 24px rgba(0, 0, 0, 0.10);
+
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+  z-index: 2;
+
+  /* Smooth page transitions */
+  transition: transform 140ms ease-out, box-shadow 140ms ease-out;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    transition: none;
+  }
+}
+
+/* Subtle page-turn animation on navigation */
+.page.page-turning-next {
+  transform: translateX(3px);
+}
+
+.page.page-turning-prev {
+  transform: translateX(-3px);
+}
+
+/* Keep left/right classes for page number positioning, but no margin differences */
+.page.left {
+  /* Equal margins - no gutter boost for web reading */
+}
+
+.page.right {
+  /* Equal margins - no gutter boost for web reading */
+}
+
+/* Future: POD print mode with gutter boost */
+/* Uncomment when implementing print preview mode
+.page.print-preview.left {
+  padding-right: calc(var(--margin) + var(--gutter-boost));
+}
+
+.page.print-preview.right {
+  padding-left: calc(var(--margin) + var(--gutter-boost));
+}
+*/
+
+/* Content area within page */
+.page-content {
+  width: 100%;
+  height: var(--content-height);
+  overflow: hidden;
+}
+
+/* Optional: Page header for decade/chapter labels */
+.page-header {
+  position: absolute;
+  top: 24px;
+  font-family: var(--font-serif);
+  font-size: 9pt;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 300;
+  user-select: none;
+}
+
+/* Left page: header in top-left */
+.page.left .page-header {
+  left: var(--margin);
+}
+
+/* Right page: header in top-right */
+.page.right .page-header {
+  right: var(--margin);
+}
+
+/* ============================================
+   SPREAD VIEW - Two Facing Pages
+   ============================================ */
+
+.spread {
+  display: flex;
+  gap: var(--spread-gap);
+  justify-content: center;
+  margin: 0 auto 24px;
+  width: var(--spread-width);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  z-index: 2;
+}
+
+.spread .page {
+  margin: 0; /* Remove individual page margins in spread */
+  flex-shrink: 0;
+}
+
+/* Spine shadow between pages in spread (visual only - does not affect layout) */
+.spread::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.08) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  /* Fade at top and bottom so it doesn't read as a hard rule */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 5%,
+    black 95%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Page number footer - outer corners */
+.page-number {
+  position: absolute;
+  bottom: 24px;
+  font-family: var(--font-serif);
+  font-size: 10pt;
+  color: #666;
+  opacity: 1;
+  user-select: none;
+  font-weight: 400;
+}
+
+/* Left page: page number in bottom-left corner */
+.page.left .page-number {
+  left: var(--margin);
+}
+
+/* Right page: page number in bottom-right corner */
+.page.right .page-number {
+  right: var(--margin);
+}
+
+/* ============================================
+   NO-BREAK REGIONS
+   ============================================ */
+
+.no-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  display: block;
+}
+
+/* Images should not break */
+.book-image,
+.book-audio-player,
+.book-callout,
+.book-caption {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Book images use 16:10 aspect ratio (same as timeline/memory box) */
+.book-image {
+  aspect-ratio: 16/10;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  margin: 12pt 0;
+}
+
+/* ============================================
+   TYPOGRAPHY - Print-optimized
+   ============================================ */
+
+.book-text {
+  font-family: var(--font-serif);
+  font-size: var(--book-font-size);
+  line-height: var(--book-line-height);
+  color: #1a1a1a;
+  hyphens: auto;
+  text-align: justify;
+
+  /* Prevent widows and orphans */
+  widows: 2;
+  orphans: 2;
+}
+
+.book-text p {
+  margin-bottom: 12pt;
+  text-indent: 0;
+}
+
+.book-text p:first-of-type {
+  text-indent: 0;
+}
+
+.book-heading {
+  font-family: var(--font-serif);
+  font-size: var(--book-heading-size);
+  font-weight: 600;
+  margin-bottom: 8pt;
+  margin-top: 16pt;
+  color: #1a1a1a;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.book-title {
+  font-family: var(--font-serif);
+  font-size: var(--book-title-size);
+  font-weight: 700;
+  margin-bottom: 12pt;
+  color: #1a1a1a;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/* ============================================
+   PRINT MEDIA QUERIES
+   ============================================ */
+
+@media print {
+  /* Default print: 5.5×8.5 with equal margins (home print) */
+  @page {
+    size: 5.5in 8.5in;
+    margin: 0.6in;  /* Equal margins for home printing */
+  }
+
+  html, body {
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+  }
+
+  .book-wrap {
+    height: auto;
+    overflow: visible;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .page {
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    break-after: page;
+    page-break-after: always;
+    scroll-snap-align: none;
+  }
+
+  .page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .spread {
+    display: block;
+    width: auto;
+  }
+
+  .page-number {
+    position: static;
+    transform: none;
+    text-align: center;
+    margin-top: 24pt;
+  }
+
+  /* Hide navigation elements in print */
+  .book-nav,
+  .book-controls,
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   RESPONSIVE - Smaller Screens
+   ============================================ */
+
+@media (max-width: 900px) {
+  :root {
+    /* Tablet: 18-20px breathing room for content */
+    --margin: 20px;
+  }
+
+  .book-wrap {
+    padding: 12px;
+  }
+
+  .page {
+    max-width: calc(100% - 24px); /* Leave room for brown borders */
+    box-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.08),
+      0 4px 12px rgba(0, 0, 0, 0.10);
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    /* Mobile: 10px for dotted decor visual area */
+    --margin: 10px;
+  }
+
+  .book-wrap {
+    /* Thin brown border around page edges */
+    padding: 26px 10px 24px 10px;
+    /* Account for header (~80px) + top padding (26px) - adjust for perfect alignment */
+    scroll-padding-top: 101px;
+  }
+
+  .page {
+    /* Page width leaves room for brown borders */
+    max-width: calc(100% - 20px);
+    /* 10px page padding shows dotted texture area */
+    padding: 10px;
+  }
+
+  .page-content {
+    /* Content wrapper provides additional 16px breathing room from dotted area to text */
+    padding: 16px;
+    margin: 0;
+  }
+
+  .book-text {
+    font-size: 10pt;
+    text-align: left; /* Left-align on mobile for readability */
+    padding: 0;
+    margin: 0;
+  }
+
+  .book-text p {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .book-heading {
+    margin-top: 20px; /* Extra space at top of page to first heading */
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .page-number {
+    /* Page numbers positioned within the 16px padding */
+    left: 16px !important;
+    bottom: 16px !important;
+  }
+
+  .page.right .page-number {
+    right: 16px !important;
+    left: auto !important;
+  }
+}
