@@ -403,11 +403,13 @@ const BookPageRenderer = ({
 
 export default function BookViewNew() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const isMobile = useIsMobile();
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
   const { isOpen, open, close } = useRecordModal();
+  const [isExporting, setIsExporting] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Get storyId from URL parameters
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
@@ -558,6 +560,59 @@ export default function BookViewNew() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMobile, totalPages, totalSpreads]);
 
+  // Export PDF functions
+  const exportPDF = async (format: '2up' | 'trim') => {
+    if (!user || !session?.access_token) return;
+
+    setIsExporting(true);
+    setShowExportMenu(false);
+
+    try {
+      const response = await fetch(`/api/export/${format}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ bookId: 'default' }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `heritage-book-${format}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Failed to export PDF. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Close export menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (showExportMenu && !target.closest('.export-menu-container')) {
+        setShowExportMenu(false);
+      }
+    };
+
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showExportMenu]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -593,6 +648,43 @@ export default function BookViewNew() {
         <div className="flex items-center gap-3">
           <BookOpen className="w-8 h-8 text-coral-500" />
           <h1 className="text-2xl font-bold">Book</h1>
+        </div>
+
+        {/* Export PDF Button */}
+        <div className="relative export-menu-container">
+          <Button
+            onClick={() => setShowExportMenu(!showExportMenu)}
+            disabled={isExporting || stories.length === 0}
+            variant="outline"
+            className="gap-2"
+          >
+            <Share2 className="w-4 h-4" />
+            {isExporting ? 'Exporting...' : 'Export PDF'}
+          </Button>
+
+          {/* Export Menu Dropdown */}
+          {showExportMenu && (
+            <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-2 z-50">
+              <button
+                onClick={() => exportPDF('2up')}
+                className="w-full text-left px-4 py-3 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <div className="font-semibold text-sm">2-Up (Home Print)</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Two 5.5×8.5" pages on Letter landscape
+                </div>
+              </button>
+              <button
+                onClick={() => exportPDF('trim')}
+                className="w-full text-left px-4 py-3 rounded-md hover:bg-gray-50 transition-colors mt-1"
+              >
+                <div className="font-semibold text-sm">Trim PDF (POD)</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Individual 5.5×8.5" pages for professional printing
+                </div>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

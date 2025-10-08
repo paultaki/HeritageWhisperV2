@@ -1,0 +1,104 @@
+/* Print Trim Layout CSS */
+/* Clean, standalone CSS for single-page PDF generation */
+
+@page {
+  size: 5.5in 8.5in;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.print-trim {
+  width: 5.5in;
+}
+
+/* Individual page */
+.page {
+  width: 5.5in;
+  height: 8.5in;
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.5in;
+  background: white;
+  page-break-after: always;
+  overflow: hidden;
+}
+
+.page:last-child {
+  page-break-after: auto;
+}
+
+/* Override any imported styles */
+.page-content {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.running-header {
+  position: absolute;
+  top: -0.35in;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9pt;
+  color: #666;
+  font-family: Georgia, serif;
+}
+
+.page-number {
+  position: absolute;
+  bottom: -0.35in;
+  font-size: 10pt;
+  color: #666;
+  font-family: Georgia, serif;
+}
+
+.page--left .page-number {
+  left: 0;
+}
+
+.page--right .page-number {
+  right: 0;
+  text-align: right;
+}
+
+/* Story content styles */
+.memory-header {
+  margin-bottom: 0.25in;
+}
+
+.memory-title {
+  font-size: 18pt;
+  font-weight: bold;
+  margin-bottom: 0.1in;
+  font-family: Georgia, serif;
+}
+
+.memory-year {
+  font-size: 10pt;
+  color: #666;
+}
+
+.memory-body {
+  font-size: 11pt;
+  line-height: 1.5;
+  text-align: justify;
+}
+
+.memory-photo {
+  max-width: 100%;
+  margin-bottom: 0.25in;
+}
+
+/* Hide any UI elements */
+.hw-hamburger-menu,
+.navigation-wrapper,
+button {
+  display: none !important;
+}

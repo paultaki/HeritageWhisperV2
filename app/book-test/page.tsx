@@ -147,7 +147,7 @@ function createMemory(memory: typeof completeMemory): ContentBlock[] {
 
   // Date and Age
   blocks.push({
-    type: 'text',
+    type: 'callout',
     content: (
       <div className="text-sm text-gray-500 mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
         {memory.year} • {memory.age}
