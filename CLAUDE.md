@@ -265,13 +265,23 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Wider content (10px side margins)
   - Photos at 98% width for maximum impact
   - Compact audio player with reduced spacing
+- **PDF Export Feature** (Added October 8, 2025):
+  - Export button with dropdown menu in book view header
+  - Two export formats:
+    - **2-up (Home Print)**: Two 5.5×8.5" pages side-by-side on 11×8.5" landscape
+    - **Trim (POD)**: Individual 5.5×8.5" pages for professional printing
+  - Server-side PDF generation using Puppeteer
+  - Print-specific pages at `/book/print/2up` and `/book/print/trim`
+  - API routes: `/api/export/2up`, `/api/export/trim`, `/api/book-data`
+  - Uses service role key to bypass auth for print pages
 
 ### Known Issues
+- **PDF Export Margins**: Content not centering properly, sticks to top-left corner
+- **UI Elements in PDF**: Hamburger menu showing in exported PDFs
 - **Book View Mobile**: Decade navigation pill button visibility needs improvement (low contrast against brown background)
   - Current styling: white background, 2px dark border, strong shadow
   - Positioned at `bottom: 110px` (25px above footer)
-  - To be addressed in next session
 
 ---
-*Last updated: October 7, 2025*
+*Last updated: October 8, 2025*
 *For historical fixes and detailed migration notes, see CLAUDE_HISTORY.md*
