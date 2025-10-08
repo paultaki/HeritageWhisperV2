@@ -91,6 +91,25 @@ export type PageType =
   | 'story-end'
   | 'story-complete';
 
+// Block model for accurate pagination
+export type BlockType = 'heading' | 'paragraph' | 'image' | 'audioCard' | 'callout' | 'caption' | 'spacer' | 'lessonLearned';
+
+export interface ContentBlock {
+  type: BlockType;
+  content: string;  // Text or HTML
+  splittable: boolean;  // Can this block be split across pages?
+  noBreak: boolean;     // Never break this block
+  id?: string;
+  measuredHeight?: number;  // Cached measurement
+}
+
+// Content metrics measured from live DOM
+export interface ContentMetrics {
+  contentWidthPx: number;
+  contentHeightPx: number;
+  lineHeightPx: number;
+}
+
 export interface StoryPhoto {
   id: string;
   url: string;
@@ -140,8 +159,13 @@ export interface BookPage {
   date?: string;
   age?: number;
   audioUrl?: string;
-  text?: string;
+  text?: string;  // Legacy: plain text (still used for backward compat)
+  blocks?: ContentBlock[];  // New: structured blocks for accurate pagination
   lessonLearned?: string;
+
+  // Pagination flags
+  continued?: boolean;  // True if story continues on next page
+  continuesFrom?: string;  // Story ID/title being continued
 
   // Metadata
   isLeftPage: boolean;
@@ -252,6 +276,281 @@ export function measureMultipleTexts(
 
   document.body.removeChild(container);
   return results;
+}
+
+// ============================================================================
+// TRUE DOM MEASUREMENT
+// ============================================================================
+
+// Global measurer instance (created once, reused for all measurements)
+let globalMeasurer: HTMLDivElement | null = null;
+let globalMetrics: ContentMetrics | null = null;
+
+/**
+ * Get or create the global content measurer element
+ * This element has identical styles to the live .page-content
+ */
+function getOrCreateMeasurer(): HTMLDivElement {
+  if (globalMeasurer && document.body.contains(globalMeasurer)) {
+    return globalMeasurer;
+  }
+
+  const measurer = document.createElement('div');
+  measurer.id = 'book-content-measurer';
+  measurer.style.cssText = `
+    position: absolute;
+    visibility: hidden;
+    left: -9999px;
+    top: -9999px;
+    pointer-events: none;
+  `;
+
+  // Match exact styles from .page-content
+  measurer.className = 'page-content book-text';
+  measurer.setAttribute('lang', 'en');
+
+  document.body.appendChild(measurer);
+  globalMeasurer = measurer;
+
+  return measurer;
+}
+
+/**
+ * Measure the exact content box dimensions from live DOM
+ * Call this once after fonts/images are ready
+ */
+export function getContentMetrics(): ContentMetrics {
+  // Return cached if available
+  if (globalMetrics) {
+    return globalMetrics;
+  }
+
+  // Check if we're in browser
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    // SSR fallback
+    return {
+      contentWidthPx: MEASUREMENTS.PAGE_WIDTH_DESKTOP - MEASUREMENTS.PAGE_PADDING_LEFT - MEASUREMENTS.PAGE_PADDING_RIGHT,
+      contentHeightPx: MEASUREMENTS.CONTENT_BOX_HEIGHT,
+      lineHeightPx: MEASUREMENTS.LINE_HEIGHT,
+    };
+  }
+
+  // Try to find a live .page element
+  const livePage = document.querySelector('.page');
+  if (livePage) {
+    const pageContent = livePage.querySelector('.page-content') || livePage;
+    const rect = pageContent.getBoundingClientRect();
+    const computed = window.getComputedStyle(pageContent);
+
+    globalMetrics = {
+      contentWidthPx: rect.width,
+      contentHeightPx: rect.height || MEASUREMENTS.CONTENT_BOX_HEIGHT,
+      lineHeightPx: parseFloat(computed.lineHeight) || MEASUREMENTS.LINE_HEIGHT,
+    };
+
+    return globalMetrics;
+  }
+
+  // Fallback to constants
+  globalMetrics = {
+    contentWidthPx: MEASUREMENTS.PAGE_WIDTH_DESKTOP - MEASUREMENTS.PAGE_PADDING_LEFT - MEASUREMENTS.PAGE_PADDING_RIGHT,
+    contentHeightPx: MEASUREMENTS.CONTENT_BOX_HEIGHT,
+    lineHeightPx: MEASUREMENTS.LINE_HEIGHT,
+  };
+
+  return globalMetrics;
+}
+
+/**
+ * Normalize story content into measurable blocks
+ */
+export function normalizeStoryToBlocks(story: Story): ContentBlock[] {
+  const blocks: ContentBlock[] = [];
+
+  // Split content by double newlines (paragraphs)
+  const paragraphs = story.content.split('\n\n').filter(p => p.trim());
+
+  paragraphs.forEach((para, idx) => {
+    blocks.push({
+      type: 'paragraph',
+      content: para.trim(),
+      splittable: true,
+      noBreak: false,
+      id: `para-${idx}`,
+    });
+  });
+
+  // Add lesson learned if present
+  if (story.lessonLearned) {
+    blocks.push({
+      type: 'lessonLearned',
+      content: story.lessonLearned,
+      splittable: false,  // Keep lesson learned as one block
+      noBreak: true,
+      id: 'lesson',
+    });
+  }
+
+  return blocks;
+}
+
+/**
+ * Measure the height of a content block using true DOM measurement
+ */
+export function measureBlockHeight(block: ContentBlock, metrics?: ContentMetrics): number {
+  // Return cached if available
+  if (block.measuredHeight !== undefined) {
+    return block.measuredHeight;
+  }
+
+  const measurer = getOrCreateMeasurer();
+  const m = metrics || getContentMetrics();
+
+  // Set measurer width to match content area
+  measurer.style.width = `${m.contentWidthPx}px`;
+
+  // Clear previous content
+  measurer.innerHTML = '';
+
+  // Create appropriate markup based on block type
+  let element: HTMLElement;
+
+  switch (block.type) {
+    case 'heading':
+      element = document.createElement('h2');
+      element.className = 'book-heading';
+      element.textContent = block.content;
+      break;
+
+    case 'paragraph':
+      element = document.createElement('p');
+      element.className = 'mb-4 last:mb-0 leading-relaxed text-justify';
+      element.textContent = block.content;
+      break;
+
+    case 'lessonLearned':
+      element = document.createElement('div');
+      element.className = 'book-callout';
+      element.innerHTML = `<p>${block.content}</p>`;
+      break;
+
+    default:
+      element = document.createElement('div');
+      element.textContent = block.content;
+  }
+
+  measurer.appendChild(element);
+
+  // Force layout
+  const rect = element.getBoundingClientRect();
+  const computed = window.getComputedStyle(element);
+
+  // Include margins
+  const marginTop = parseFloat(computed.marginTop) || 0;
+  const marginBottom = parseFloat(computed.marginBottom) || 0;
+
+  const height = Math.ceil(rect.height + marginTop + marginBottom);
+
+  // Cache the measurement
+  block.measuredHeight = height;
+
+  return height;
+}
+
+/**
+ * Split a paragraph to fit within maxHeight, respecting widow/orphan rules
+ * Returns the text that fits and the remainder
+ */
+export function splitParagraphToFit(
+  text: string,
+  maxHeight: number,
+  metrics?: ContentMetrics
+): { fitsText: string; remainderText: string } {
+  const m = metrics || getContentMetrics();
+  const measurer = getOrCreateMeasurer();
+  measurer.style.width = `${m.contentWidthPx}px`;
+
+  // Helper to measure text height
+  const measureText = (str: string): number => {
+    measurer.innerHTML = '';
+    const p = document.createElement('p');
+    p.className = 'mb-4 last:mb-0 leading-relaxed text-justify';
+    p.textContent = str;
+    measurer.appendChild(p);
+
+    const rect = p.getBoundingClientRect();
+    return Math.ceil(rect.height);
+  };
+
+  // Check if entire text fits
+  const fullHeight = measureText(text);
+  if (fullHeight <= maxHeight) {
+    return { fitsText: text, remainderText: '' };
+  }
+
+  // Binary search for the split point
+  let left = 0;
+  let right = text.length;
+  let bestFit = '';
+
+  while (left < right) {
+    const mid = Math.floor((left + right + 1) / 2);
+    const candidate = text.substring(0, mid);
+    const height = measureText(candidate);
+
+    if (height <= maxHeight) {
+      bestFit = candidate;
+      left = mid;
+    } else {
+      right = mid - 1;
+    }
+  }
+
+  // If nothing fits, return empty
+  if (!bestFit) {
+    return { fitsText: '', remainderText: text };
+  }
+
+  // Try to find a sentence boundary near the split point
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  let accumulated = '';
+  let splitIndex = 0;
+
+  for (const sentence of sentences) {
+    const testText = accumulated + sentence;
+    const height = measureText(testText);
+
+    if (height <= maxHeight) {
+      accumulated = testText;
+      splitIndex += sentence.length;
+    } else {
+      break;
+    }
+  }
+
+  // Use sentence boundary if we found one, otherwise use bestFit
+  if (accumulated && accumulated.length > bestFit.length * 0.7) {
+    // Sentence boundary is close enough
+    return {
+      fitsText: accumulated.trim(),
+      remainderText: text.substring(splitIndex).trim(),
+    };
+  }
+
+  // Fall back to word boundary
+  const lastSpace = bestFit.lastIndexOf(' ');
+  if (lastSpace > bestFit.length * 0.5) {
+    return {
+      fitsText: bestFit.substring(0, lastSpace).trim(),
+      remainderText: text.substring(lastSpace).trim(),
+    };
+  }
+
+  // Last resort: use bestFit as-is
+  return {
+    fitsText: bestFit.trim(),
+    remainderText: text.substring(bestFit.length).trim(),
+  };
 }
 
 // ============================================================================
@@ -422,100 +721,167 @@ export function calculateBalancedSplit(
 // ============================================================================
 
 /**
- * Paginate a single story into book pages
+ * Paginate a single story into book pages using true DOM measurement
+ * This ensures no text is cut off at page boundaries
  */
 export function paginateStory(
   story: Story,
   startPageNumber: number
 ): BookPage[] {
-
-  // Measure all text
-  const textLines = measureJustifiedText(story.content);
-  const lessonLines = story.lessonLearned ?
-    measureJustifiedText(story.lessonLearned) : 0;
-
-  // Check if it fits on a single page
-  const totalContentLines = textLines + lessonLines;
-  const singlePageThreshold = 12; // Conservative threshold
-
-  if (totalContentLines <= singlePageThreshold) {
-    // Single page story
-    return [{
-      type: 'story-complete',
-      pageNumber: startPageNumber,
-      storyId: story.id,
-      photos: story.photos,
-      title: story.title,
-      year: story.year,
-      date: story.date,
-      age: story.age,
-      audioUrl: story.audioUrl,
-      text: story.content,
-      lessonLearned: story.lessonLearned,
-      isLeftPage: startPageNumber % 2 === 0,
-      isRightPage: startPageNumber % 2 === 1,
-    }];
-  }
-
-  // Multi-page story - calculate balanced split
-  const firstPageLines = calculateBalancedSplit(textLines, lessonLines);
+  const metrics = getContentMetrics();
   const pages: BookPage[] = [];
 
-  // First page with photos and metadata
-  const firstPageExtraction = extractLinesWithSentenceBoundary(
-    story.content,
-    0,
-    firstPageLines
-  );
+  // Normalize story to blocks
+  let blocks = normalizeStoryToBlocks(story);
 
-  pages.push({
-    type: 'story-start',
-    pageNumber: startPageNumber,
-    storyId: story.id,
-    photos: story.photos,
-    title: story.title,
-    year: story.year,
-    date: story.date,
-    age: story.age,
-    audioUrl: story.audioUrl,
-    text: firstPageExtraction.text,
-    isLeftPage: startPageNumber % 2 === 0,
-    isRightPage: startPageNumber % 2 === 1,
-  });
+  // Calculate available height on first page (accounting for fixed elements)
+  const firstPageAvailableHeight = metrics.contentHeightPx -
+    MEASUREMENTS.PHOTO_AREA -
+    MEASUREMENTS.STORY_TITLE -
+    MEASUREMENTS.STORY_DATE -
+    MEASUREMENTS.AUDIO_PLAYER -
+    40; // Additional spacing
 
-  // Continue with subsequent pages
-  let currentPosition = firstPageExtraction.endPosition;
-  let currentPageNumber = startPageNumber + 1;
+  // Pagination state
+  let currentPageNumber = startPageNumber;
+  let usedHeight = 0;
+  let availableHeight = firstPageAvailableHeight;
+  let currentBlocks: ContentBlock[] = [];
+  let isFirstPage = true;
 
-  while (currentPosition < story.content.length) {
-    // Check how much text remains
-    const remainingText = story.content.substring(currentPosition);
-    const remainingLines = measureJustifiedText(remainingText);
+  // Process each block
+  let i = 0;
+  while (i < blocks.length) {
+    const block = blocks[i];
+    const blockHeight = measureBlockHeight(block, metrics);
 
-    // Is this the last page?
-    const isLastPage = remainingLines <= CAPACITIES.CONTINUATION_LINES;
+    // Check if block fits on current page
+    if (usedHeight + blockHeight <= availableHeight) {
+      // Block fits - add it to current page
+      currentBlocks.push(block);
+      usedHeight += blockHeight;
+      i++;
+    } else {
+      // Block doesn't fit
+      if (block.splittable && usedHeight < availableHeight - PagePolicy.minFreePx) {
+        // Try to split the paragraph
+        const remainingHeight = availableHeight - usedHeight;
+        const split = splitParagraphToFit(block.content, remainingHeight, metrics);
 
-    const pageExtraction = extractLinesWithSentenceBoundary(
-      story.content,
-      currentPosition,
-      isLastPage ? remainingLines : CAPACITIES.CONTINUATION_LINES
-    );
+        if (split.fitsText) {
+          // Add the part that fits
+          currentBlocks.push({
+            ...block,
+            content: split.fitsText,
+          });
 
-    pages.push({
-      type: isLastPage ? 'story-end' : 'story-continuation',
-      pageNumber: currentPageNumber,
-      storyId: story.id,
-      text: pageExtraction.text,
-      lessonLearned: isLastPage ? story.lessonLearned : undefined,
-      isLeftPage: currentPageNumber % 2 === 0,
-      isRightPage: currentPageNumber % 2 === 1,
-    });
+          // Create new block for remainder
+          blocks[i] = {
+            ...block,
+            content: split.remainderText,
+            measuredHeight: undefined, // Needs remeasurement
+          };
 
-    currentPosition = pageExtraction.endPosition;
-    currentPageNumber++;
+          // Finish current page and continue (don't increment i)
+          const pageBlocks = [...currentBlocks];
+          pages.push(createStoryPage(
+            isFirstPage ? 'story-start' : 'story-continuation',
+            currentPageNumber,
+            story,
+            pageBlocks,
+            isFirstPage,
+            true // continued
+          ));
+
+          // Setup for next page
+          currentPageNumber++;
+          currentBlocks = [];
+          usedHeight = 0;
+          availableHeight = metrics.contentHeightPx;
+          isFirstPage = false;
+          // Don't increment i - we'll process the remainder block next
+        } else {
+          // Nothing fits, move entire block to next page
+          finishPageAndStartNew();
+        }
+      } else {
+        // Non-splittable block or no room - finish page and start new one
+        finishPageAndStartNew();
+      }
+    }
+  }
+
+  // Finish last page if it has content
+  if (currentBlocks.length > 0) {
+    const isComplete = pages.length === 0; // Single page story
+    const pageType = isComplete ? 'story-complete' :
+      (pages.length > 0 ? 'story-end' : 'story-start');
+
+    pages.push(createStoryPage(
+      pageType,
+      currentPageNumber,
+      story,
+      currentBlocks,
+      isFirstPage,
+      false // not continued
+    ));
   }
 
   return pages;
+
+  // Helper: Finish current page and prepare for next
+  function finishPageAndStartNew() {
+    if (currentBlocks.length > 0) {
+      const pageType = isFirstPage ? 'story-start' : 'story-continuation';
+      pages.push(createStoryPage(
+        pageType,
+        currentPageNumber,
+        story,
+        currentBlocks,
+        isFirstPage,
+        false
+      ));
+    }
+
+    currentPageNumber++;
+    currentBlocks = [];
+    usedHeight = 0;
+    availableHeight = metrics.contentHeightPx;
+    isFirstPage = false;
+  }
+}
+
+/**
+ * Helper to create a story page with all metadata
+ */
+function createStoryPage(
+  type: PageType,
+  pageNumber: number,
+  story: Story,
+  blocks: ContentBlock[],
+  includeMetadata: boolean,
+  continued: boolean
+): BookPage {
+  // Convert blocks back to text for backward compatibility
+  const text = blocks.map(b => b.content).join('\n\n');
+
+  return {
+    type,
+    pageNumber,
+    storyId: story.id,
+    photos: includeMetadata ? story.photos : undefined,
+    title: includeMetadata ? story.title : undefined,
+    year: includeMetadata ? story.year : undefined,
+    date: includeMetadata ? story.date : undefined,
+    age: includeMetadata ? story.age : undefined,
+    audioUrl: includeMetadata ? story.audioUrl : undefined,
+    text,
+    blocks,
+    continued,
+    continuesFrom: !includeMetadata ? story.title : undefined,
+    isLeftPage: pageNumber % 2 === 0,
+    isRightPage: pageNumber % 2 === 1,
+  };
 }
 
 // ============================================================================

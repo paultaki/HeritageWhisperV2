@@ -500,6 +500,47 @@
       page-break-inside: avoid;
     }
 
+    /* Debug overlay for pagination (enabled with ?debug=1) */
+    .debug-pagination-lines {
+      position: absolute;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .debug-content-height-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: red;
+      opacity: 0.6;
+    }
+
+    .debug-used-height-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: green;
+      opacity: 0.6;
+    }
+
+    .debug-info {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-family: monospace;
+      border-radius: 4px;
+      z-index: 10000;
+      pointer-events: none;
+    }
+
     /* Premium desk with subtle vignette */
     .book-wrap {
       background:

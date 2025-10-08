@@ -412,6 +412,7 @@ export default function BookViewNew() {
   const { isOpen, open, close } = useRecordModal();
   const [isExporting, setIsExporting] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [fontsReady, setFontsReady] = useState(false);
 
   // Get storyId from URL parameters
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
@@ -425,8 +426,47 @@ export default function BookViewNew() {
 
   const stories = data?.stories || [];
 
+  // Wait for fonts and images to be ready before paginating
+  // This ensures accurate measurements
+  useEffect(() => {
+    async function waitForReadiness() {
+      if (typeof window === 'undefined' || typeof document === 'undefined') {
+        return;
+      }
+
+      try {
+        // Wait for fonts
+        await document.fonts.ready;
+
+        // Wait for all images
+        const images = Array.from(document.images);
+        const imagePromises = images
+          .filter(img => !img.complete)
+          .map(img => new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = resolve; // Resolve even on error to not block
+          }));
+
+        await Promise.all(imagePromises);
+
+        // Mark as ready
+        setFontsReady(true);
+      } catch (error) {
+        console.error('Error waiting for fonts/images:', error);
+        // Mark as ready anyway to not block
+        setFontsReady(true);
+      }
+    }
+
+    waitForReadiness();
+  }, []); // Run once on mount
+
   // Convert to book data structure
   const { pages, spreads, storyPageIndex } = useMemo(() => {
+    // Don't paginate until fonts are ready
+    if (!fontsReady) {
+      return { pages: [], spreads: [], storyPageIndex: -1 };
+    }
     if (!stories || stories.length === 0) {
       return { pages: [], spreads: [], storyPageIndex: -1 };
     }
@@ -471,7 +511,7 @@ export default function BookViewNew() {
       spreads: bookSpreads,
       storyPageIndex: pageIndex,
     };
-  }, [stories, storyIdFromUrl]);
+  }, [stories, storyIdFromUrl, fontsReady]);
 
   // Navigate to story page when storyId is found
   useEffect(() => {
