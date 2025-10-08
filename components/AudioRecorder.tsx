@@ -27,6 +27,7 @@ export interface AudioRecorderHandle {
   isRecording: boolean;
   isPaused: boolean;
   getRecordingDuration: () => number; // Get current recording duration in seconds
+  cleanup: () => void; // Cleanup method to stop and cleanup all resources
 }
 
 export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>(function AudioRecorder({
@@ -59,7 +60,8 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
   const pausedTimeRef = useRef<number>(0);
   const finalElapsedRef = useRef<number>(0);
   const mimeTypeRef = useRef<string>('audio/webm');
-  
+  const cancelledRef = useRef<boolean>(false); // Track if recording was cancelled
+
   // Silence detection refs
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -279,11 +281,18 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
       
       mediaRecorder.onstop = () => {
         console.log('[AudioRecorder] MediaRecorder stopped');
+
+        // Check if recording was cancelled - if so, skip processing
+        if (cancelledRef.current) {
+          console.log('[AudioRecorder] Recording was cancelled, skipping onRecordingComplete');
+          return;
+        }
+
         console.log('[AudioRecorder] Total chunks collected:', chunksRef.current.length);
-        
+
         const totalSize = chunksRef.current.reduce((acc, chunk) => acc + chunk.size, 0);
         console.log('[AudioRecorder] Total audio data size:', totalSize, 'bytes');
-        
+
         if (chunksRef.current.length === 0) {
           console.error('[AudioRecorder] ERROR: No audio chunks collected!');
           alert('Recording failed: No audio data was captured. Please check your microphone.');
@@ -296,32 +305,32 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
           setDuration(0);
           return;
         }
-        
+
         // Use the recorded mime type or fallback
         const blobType = mediaRecorder.mimeType || mimeTypeRef.current || 'audio/webm';
         console.log('[AudioRecorder] Creating blob with type:', blobType);
-        
+
         const audioBlob = new Blob(chunksRef.current, { type: blobType });
         const finalDuration = Math.floor(finalElapsedRef.current / 1000);
-        
+
         console.log('[AudioRecorder] Created audio blob - Type:', audioBlob.type, 'Size:', audioBlob.size, 'bytes');
         console.log('[AudioRecorder] Recording duration:', finalDuration, 'seconds');
-        
+
         if (audioBlob.size === 0) {
           console.error('[AudioRecorder] ERROR: Audio blob is empty!');
           alert('Recording failed: The audio file is empty. Please try again.');
         }
-        
+
         // Clean up stream
         stream.getTracks().forEach(track => {
           console.log('[AudioRecorder] Stopping track:', track.kind, track.label);
           track.stop();
         });
         setMediaStream(undefined);
-        
+
         // Clean up silence detection
         cleanupSilenceDetection();
-        
+
         // Only call completion handler if we have valid data
         if (audioBlob.size > 0) {
           onRecordingComplete(audioBlob, finalDuration);
@@ -561,13 +570,13 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
     if (mediaRecorderRef.current && chunksRef.current.length > 0) {
       console.log('[AudioRecorder] Getting current recording...');
       console.log('[AudioRecorder] Current chunks:', chunksRef.current.length);
-      
+
       // Force MediaRecorder to flush any buffered data
       if (mediaRecorderRef.current.state === 'recording') {
         console.log('[AudioRecorder] Requesting data flush...');
         mediaRecorderRef.current.requestData();
       }
-      
+
       // Get the current recorded chunks and create a blob with the stored mimeType
       const blobType = mediaRecorderRef.current.mimeType || mimeTypeRef.current || 'audio/webm';
       const blob = new Blob(chunksRef.current, { type: blobType });
@@ -577,6 +586,68 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
     console.log('[AudioRecorder] No recording available');
     return null;
   }, []);
+
+  // Comprehensive cleanup method
+  const cleanup = useCallback(() => {
+    console.log('[AudioRecorder] Cleanup called');
+    cancelledRef.current = true;
+
+    // Stop and clean up MediaRecorder
+    if (mediaRecorderRef.current) {
+      const state = mediaRecorderRef.current.state;
+      console.log('[AudioRecorder] Cleaning up MediaRecorder, state:', state);
+
+      // Remove event listeners to prevent callbacks
+      mediaRecorderRef.current.ondataavailable = null;
+      mediaRecorderRef.current.onstop = null;
+      mediaRecorderRef.current.onerror = null;
+      mediaRecorderRef.current.onstart = null;
+      mediaRecorderRef.current.onpause = null;
+      mediaRecorderRef.current.onresume = null;
+
+      if (state === 'recording' || state === 'paused') {
+        try {
+          mediaRecorderRef.current.stop();
+        } catch (error) {
+          console.error('[AudioRecorder] Error stopping MediaRecorder:', error);
+        }
+      }
+      mediaRecorderRef.current = null;
+    }
+
+    // Stop and clean up MediaStream
+    if (mediaStream) {
+      console.log('[AudioRecorder] Stopping media stream tracks');
+      mediaStream.getTracks().forEach(track => {
+        console.log('[AudioRecorder] Stopping track:', track.kind, track.label);
+        track.stop();
+      });
+      setMediaStream(undefined);
+    }
+
+    // Clear timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    // Clean up silence detection
+    cleanupSilenceDetection();
+
+    // Reset state
+    setIsRecording(false);
+    setIsPaused(false);
+    setDuration(0);
+    setAudioLevel(0);
+    setLevelBars([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    setTimeWarning(null);
+    setCountdown(null);
+
+    // Clear chunks
+    chunksRef.current = [];
+
+    console.log('[AudioRecorder] Cleanup complete');
+  }, [mediaStream, cleanupSilenceDetection]);
 
   // Auto-start recording on mount
   useEffect(() => {
@@ -588,9 +659,10 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      cleanupSilenceDetection();
+      console.log('[AudioRecorder] Component unmounting, calling cleanup');
+      cleanup();
     };
-  }, [cleanupSilenceDetection]);
+  }, [cleanup]);
 
   // Expose methods to parent component
   useImperativeHandle(ref, () => ({
@@ -599,8 +671,9 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
     getCurrentRecording,
     isRecording,
     isPaused,
-    getRecordingDuration
-  }), [pauseRecording, resumeRecording, getCurrentRecording, isRecording, isPaused, getRecordingDuration]);
+    getRecordingDuration,
+    cleanup
+  }), [pauseRecording, resumeRecording, getCurrentRecording, isRecording, isPaused, getRecordingDuration, cleanup]);
 
   // Get level meter color based on audio level
   const getLevelColor = (level: number) => {

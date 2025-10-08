@@ -299,6 +299,21 @@ function Print2UpPageContent() {
           height: 100%;
         }
 
+        /* Override root layout wrapper padding - all divs between body and print-2up */
+        body > *,
+        body > * > *,
+        body > * > * > *,
+        body > * > * > * > * {
+          padding: 0 !important;
+          margin: 0 !important;
+          width: 100% !important;
+        }
+
+        /* Reset the print container positioning */
+        .print-2up {
+          position: relative !important;
+        }
+
         /* Hide all UI elements */
         .hw-hamburger-menu,
         [class*="hamburger"],
@@ -319,14 +334,11 @@ function Print2UpPageContent() {
         .book-spread {
           width: 11in !important;
           height: 8.5in !important;
-          padding: 0 !important;
-          margin: 0 auto !important;
+          margin: 0 !important;
+          padding: 0.25in !important;
           box-sizing: border-box !important;
           page-break-after: always !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          position: relative !important;
+          display: block !important;
           background: white !important;
         }
 
@@ -335,8 +347,8 @@ function Print2UpPageContent() {
         }
 
         .spread-content {
-          width: 10.5in !important;
-          height: 8in !important;
+          width: 100% !important;
+          height: 100% !important;
           display: flex !important;
           gap: 0 !important;
           background: white !important;

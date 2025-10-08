@@ -657,9 +657,12 @@ export default function BookViewNew() {
             disabled={isExporting || stories.length === 0}
             variant="outline"
             className="gap-2"
+            aria-label={isExporting ? 'Exporting PDF' : 'Export PDF'}
           >
-            <Share2 className="w-4 h-4" />
-            {isExporting ? 'Exporting...' : 'Export PDF'}
+            <Share2 className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden sm:inline">
+              {isExporting ? 'Exporting...' : 'Export PDF'}
+            </span>
           </Button>
 
           {/* Export Menu Dropdown */}

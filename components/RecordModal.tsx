@@ -458,6 +458,9 @@ export default function RecordModal({
                 variant="ghost"
                 size="sm"
                 onClick={() => {
+                  // Stop and cleanup audio recorder before closing
+                  audioRecorderRef.current?.cleanup();
+
                   // Reset typing mode when closing
                   setIsTypingMode(false);
                   setShowTranscription(false);

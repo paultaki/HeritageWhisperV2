@@ -270,5 +270,95 @@ CREATE TABLE public.shared_access (
 
 ---
 
+## 📋 Feature Updates Archive
+
+### October 7, 2025 - Memory Box & Book View Enhancements
+
+**Memory Box Enhancements:**
+- **Filter System**: 3x2 grid layout with 6 filter buttons (All, Favorites, Timeline, Book, No date, Private)
+- **List View**: Compact horizontal rows with Timeline/Book/menu buttons in single row
+- **Card Improvements**:
+  - Added dropdown menu (⋯ button) with Edit, Favorite, Delete actions
+  - Star icon (⭐) displays on favorited memories
+  - Removed separate edit pencil icon in favor of dropdown menu
+- **Toolbar Polish**: Search box and filter grid have matching widths on mobile for symmetry
+
+**Book View Updates:**
+- **Navigation**: Collapsed decade navigation by default (desktop & mobile)
+  - Shows current chapter/TOC as pill button
+  - Expands to show all navigation options when clicked
+  - Click outside or select chapter to collapse
+- **Mobile Book Styling**:
+  - Slim brown border (0.75rem padding) with dark leather background
+  - Wider content (10px side margins)
+  - Photos at 98% width for maximum impact
+  - Compact audio player with reduced spacing
+
+### October 8, 2025 - PDF Export Feature
+
+**PDF Export Implementation:**
+- Export button with dropdown menu in book view header
+- Two export formats:
+  - **2-up (Home Print)**: Two 5.5×8.5" pages side-by-side on 11×8.5" landscape
+  - **Trim (POD)**: Individual 5.5×8.5" pages for professional printing
+- Server-side PDF generation using Puppeteer + @sparticuz/chromium
+- Print-specific pages at `/book/print/2up` and `/book/print/trim`
+- API routes: `/api/export/2up`, `/api/export/trim`, `/api/book-data`
+- Uses service role key to bypass auth for print pages
+- Created `/app/book/print/layout.tsx` to bypass root layout wrapper
+
+**PDF Export Margin Fix (October 8, 2025):**
+- Issue: Content stuck to top-left corner and bleeding onto extra pages
+- Root cause: Root layout adding `md:pl-20 pb-20 md:pb-0` padding to all pages
+- Solution:
+  - Created minimal print layout to bypass wrapper padding
+  - Added CSS overrides: `body > * { padding: 0 !important }`
+  - Used `.book-spread` with `padding: 0.25in` and `box-sizing: border-box`
+  - Set `.spread-content` to `width: 100%; height: 100%` to fill padded area
+  - Result: Equal 0.25in margins on all sides without overflow
+
+### October 2025 - Project Cleanup
+- 37 obsolete files removed (test scripts, old page versions, one-time fix docs)
+- Migrations and schema files preserved in `/migrations` and `/scripts`
+
+---
+
+## 🎨 Design System Details (October 2025)
+
+Timeline uses Heritage Whisper design system with semantic `hw-*` classes:
+
+**Component Classes:**
+- `.hw-spine` - Timeline container with vertical spine and gutter spacing
+- `.hw-decade` - Decade section wrapper
+- `.hw-decade-band` - Sticky decade headers (87px offset for perfect alignment with app header)
+- `.hw-grid` - Responsive grid (1 col mobile, 2 cols desktop)
+- `.hw-card` - Story card with horizontal connectors to timeline spine
+- `.hw-card-media` - 16:10 aspect ratio images
+- `.hw-card-body` - Card content wrapper
+- `.hw-card-title` - Story title
+- `.hw-meta` - Metadata row with hairline dividers
+- `.hw-card-provenance` - Hover details (creation/edit dates)
+- `.hw-year` - Year badge (appears on hover/focus)
+- `.hw-play` - Play button with heritage palette
+
+**Design Tokens:**
+- Primary accent: `#D36A3D` (clay/terracotta)
+- Secondary accent: `#B89B5E` (soft gold)
+- Focus ring: `#B89B5E`
+- Card shadow: `0 6px 20px rgba(0,0,0,0.10)`
+- Semantic spacing scale in `tokens.css`
+
+**Implementation Details:**
+- Horizontal connectors aligned to title baseline via `--title-offset` CSS custom property
+- 180px offset for cards with images (16:10 aspect ratio), 22px for text-only
+- Play button: stroke outline at rest, fills on hover
+- Sticky decade bands with soft tinted background (88% page, 12% accent)
+- Year badges show on card hover for temporal context
+- Provenance details on hover (creation/edit dates)
+- Mobile-optimized: 40px gutter, 14px spine position, 18px×2px connectors
+- Desktop: 56px gutter, 20px spine position, 18px connectors (14px default, expands to 24px on hover)
+
+---
+
 *This is a historical reference document. For current documentation, see CLAUDE.md*
-*Last updated: October 5, 2025*
+*Last updated: October 8, 2025*

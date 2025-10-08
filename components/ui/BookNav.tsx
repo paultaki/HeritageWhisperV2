@@ -30,7 +30,7 @@ export default function BookNav({ entries, currentPage, onNavigate }: Props) {
   return (
     <>
       {/* Desktop: Fixed side navigation - collapsed by default */}
-      <nav className="hw-book-nav hidden md:flex">
+      <nav className="hw-book-nav hidden lg:flex">
         {!isExpanded ? (
           <button
             className="hw-decade-pill"
@@ -71,7 +71,7 @@ export default function BookNav({ entries, currentPage, onNavigate }: Props) {
       </nav>
 
       {/* Mobile: Floating pill that expands */}
-      <div className="hw-decade-fab md:hidden">
+      <div className="hw-decade-fab lg:hidden">
         {!isExpanded ? (
           <button
             className="hw-decade-pill"

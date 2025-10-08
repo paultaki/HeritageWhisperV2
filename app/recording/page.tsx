@@ -311,6 +311,9 @@ function RecordingContent() {
   const returnToReview = () => {
     if (!navData || !isReturningFromReview) return;
 
+    // Cleanup audio recorder before navigating
+    audioRecorderRef.current?.cleanup();
+
     const navId = navCache.generateId();
     navCache.set(navId, {
       ...navData,
@@ -695,6 +698,9 @@ function RecordingContent() {
   };
 
   const handleSkipRecording = () => {
+    // Cleanup audio recorder before navigating
+    audioRecorderRef.current?.cleanup();
+
     const navId = navCache.generateId();
     navCache.set(navId, {
       transcription: '',
@@ -707,9 +713,23 @@ function RecordingContent() {
     router.push(`/review?nav=${navId}`);
   };
 
+  const handleCancel = () => {
+    // Cleanup audio recorder before navigating
+    audioRecorderRef.current?.cleanup();
+
+    if (isReturningFromReview) {
+      returnToReview();
+    } else {
+      router.push("/timeline");
+    }
+  };
+
   // Clean up on unmount
   useEffect(() => {
     return () => {
+      // Cleanup audio recorder on unmount
+      audioRecorderRef.current?.cleanup();
+
       if (speechDetectedTimeoutRef.current) {
         clearTimeout(speechDetectedTimeoutRef.current);
       }
@@ -752,7 +772,7 @@ function RecordingContent() {
         <div className="text-center mb-12 pt-16">
           <Button
             variant="ghost"
-            onClick={() => isReturningFromReview ? returnToReview() : router.push("/timeline")}
+            onClick={handleCancel}
             className="absolute top-6 left-6 p-3 rounded-full shadow-lg bg-background/90 border-2 border-muted-foreground/20 hover:bg-accent hover:border-accent transition-all"
             data-testid={isReturningFromReview ? "button-back-to-review" : "button-back-to-timeline"}
           >
@@ -794,7 +814,7 @@ function RecordingContent() {
               />
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
                 <Button
-                  onClick={() => isReturningFromReview ? returnToReview() : router.push("/timeline")}
+                  onClick={handleCancel}
                   variant="outline"
                   size="lg"
                   className="px-6 py-2 text-base font-medium border-2 hover:bg-muted/50 transition-colors"

@@ -1988,9 +1988,18 @@ textarea:focus-visible {
     }
 
     .book-header {
-      padding: 1rem 1.5rem;
+      padding: 0.75rem 1rem;
       background: white;
       border-bottom: 1px solid #e5e5e5;
+      overflow: visible;
+    }
+
+    .book-header h1 {
+      font-size: 1.25rem; /* Smaller title on mobile */
+    }
+
+    .book-header .flex {
+      overflow: visible;
     }
 
     .book-container {
