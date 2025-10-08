@@ -87,6 +87,22 @@ export async function POST(request: NextRequest) {
       height: 816,  // 8.5 inches × 96 DPI
       deviceScaleFactor: 1
     });
+
+    // Log all network requests
+    page.on('request', request => {
+      console.log('[Export 2up] Request:', request.method(), request.url());
+    });
+
+    page.on('requestfailed', request => {
+      console.error('[Export 2up] Request failed:', request.url(), request.failure()?.errorText);
+    });
+
+    page.on('response', response => {
+      const url = response.url();
+      if (url.includes('/api/') || url.includes('/book/')) {
+        console.log('[Export 2up] Response:', response.status(), url);
+      }
+    });
     
     // Use actual domain when deployed, localhost for dev
     // Use 127.0.0.1 instead of localhost for better compatibility with headless browsers
