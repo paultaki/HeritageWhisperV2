@@ -169,6 +169,13 @@ export function getDecadeDisplayName(decade: string): string {
 }
 
 /**
+ * Calculate age at the time of an event
+ */
+export function getAge(eventYear: number, birthYear: number): number {
+  return eventYear - birthYear;
+}
+
+/**
  * Group stories by decade
  */
 export function groupStoriesByDecade(stories: any[], birthYear: number) {
