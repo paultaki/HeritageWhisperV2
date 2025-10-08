@@ -1452,7 +1452,7 @@ textarea:focus-visible {
 
   @media (min-width: 768px) {
     .book-header {
-      margin-left: 80px; /* Desktop nav width */
+      margin-left: 112px; /* Desktop nav width (w-28 = 112px) */
     }
   }
 
@@ -1478,11 +1478,11 @@ textarea:focus-visible {
     }
   }
 
-  /* On desktop, center properly accounting for sidebar navigation (80px wide) */
+  /* On desktop, center properly accounting for sidebar navigation (112px wide) */
   @media (min-width: 1024px) {
     .book-container {
-      margin-left: max(2rem, calc((100vw - 80px - 1400px) / 2 + 80px));
-      margin-right: max(2rem, calc((100vw - 80px - 1400px) / 2));
+      margin-left: max(2rem, calc((100vw - 112px - 1400px) / 2 + 112px));
+      margin-right: max(2rem, calc((100vw - 112px - 1400px) / 2));
     }
   }
 
