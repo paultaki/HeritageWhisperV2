@@ -37,14 +37,28 @@ export async function POST(request: NextRequest) {
     // Use local Chrome for development, @sparticuz/chromium for production
     const isDev = process.env.NODE_ENV === 'development';
 
+    let executablePath;
+    if (isDev) {
+      executablePath = process.platform === 'darwin'
+        ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+        : undefined;
+    } else {
+      executablePath = await chromium.executablePath();
+    }
+
+    const launchArgs = isDev
+      ? ['--no-sandbox']
+      : [
+          ...chromium.args,
+          '--disable-gpu',
+          '--no-zygote',
+          '--single-process',
+        ];
+
     const browser = await puppeteer.launch({
-      args: isDev ? ['--no-sandbox'] : chromium.args,
+      args: launchArgs,
       defaultViewport: chromium.defaultViewport,
-      executablePath: isDev
-        ? process.platform === 'darwin'
-          ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-          : undefined // Let puppeteer find Chrome on other platforms
-        : await chromium.executablePath(),
+      executablePath,
       headless: true,
     });
 
