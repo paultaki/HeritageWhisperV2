@@ -258,6 +258,8 @@ const BookPageRenderer = ({
   const [duration, setDuration] = useState(0);
   const audioManager = AudioManager.getInstance();
   const audioId = page.storyId || page.pageNumber.toString();
+  const pageContentRef = useRef<HTMLDivElement>(null);
+  const [hasOverflow, setHasOverflow] = useState(false);
 
   const playbackProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
@@ -285,6 +287,35 @@ const BookPageRenderer = ({
     };
   }, [audioId, page.audioUrl]);
 
+  // Overflow detection - check if content exceeds page capacity
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (!pageContentRef.current) return;
+
+      const element = pageContentRef.current;
+      const isOverflowing = element.scrollHeight > element.clientHeight;
+
+      if (isOverflowing && !hasOverflow) {
+        setHasOverflow(true);
+        console.warn(`Page ${page.pageNumber} has overflow:`, {
+          scrollHeight: element.scrollHeight,
+          clientHeight: element.clientHeight,
+          overflow: element.scrollHeight - element.clientHeight,
+          pageType: page.type,
+          storyId: page.storyId,
+          hasAudio: !!page.audioUrl,
+        });
+      } else if (!isOverflowing && hasOverflow) {
+        setHasOverflow(false);
+      }
+    };
+
+    // Check overflow after render and when content changes
+    const timeoutId = setTimeout(checkOverflow, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [page, hasOverflow]);
+
   const toggleAudio = async () => {
     if (!page.audioUrl) return;
     await audioManager.play(audioId, page.audioUrl);
@@ -300,7 +331,10 @@ const BookPageRenderer = ({
   if (page.type === 'intro') {
     return (
       <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
-        <div className="page-content px-8 py-16 flex flex-col items-center justify-center text-center h-full">
+        <div
+          ref={pageContentRef}
+          className="page-content px-8 py-16 flex flex-col items-center justify-center text-center h-full"
+        >
           <div className="space-y-8">
             <h1 className="text-5xl font-serif text-gray-800 mb-4" style={{ fontFamily: 'Crimson Text, serif' }}>
               Family Memories
@@ -323,7 +357,7 @@ const BookPageRenderer = ({
   if (page.type === 'table-of-contents') {
     return (
       <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
-        <div className="page-content px-8 py-12">
+        <div ref={pageContentRef} className="page-content px-8 py-12">
           <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">Table of Contents</h1>
           <div className="space-y-6">
             {page.tocEntries?.map((entry) => (
@@ -389,7 +423,10 @@ const BookPageRenderer = ({
         )}
       </div>
 
-      <div className="page-content">
+      <div
+        ref={pageContentRef}
+        className="page-content"
+      >
         {/* Photos - only on first page of story */}
         {(page.type === 'story-start' || page.type === 'story-complete') && page.photos && (
           <PhotoCarousel photos={page.photos} />

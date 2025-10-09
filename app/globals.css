@@ -2766,9 +2766,9 @@ textarea:focus-visible {
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin-bottom: 2rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0;
+  /* Removed border-bottom for visual consistency */
 }
 
 .header-left {

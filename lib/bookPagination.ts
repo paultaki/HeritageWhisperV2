@@ -23,10 +23,10 @@ export const MEASUREMENTS = {
   CONTENT_BOX_HEIGHT: 700,
 
   // Fixed elements (first page only)
-  PHOTO_AREA: 220,          // Fixed height even for galleries
-  STORY_TITLE: 45,
-  STORY_DATE: 30,
-  AUDIO_PLAYER: 55,         // Always present on first page
+  PHOTO_AREA: 240,          // Fixed height even for galleries (with margins)
+  STORY_TITLE: 50,          // Title with margins
+  STORY_DATE: 35,           // Date/age line with margins
+  AUDIO_PLAYER: 70,         // Audio player with margins (was 55, but renders at ~70px)
 
   // Text properties (must match book.css for accurate measurement)
   LINE_HEIGHT: 28,
@@ -42,7 +42,7 @@ export const MEASUREMENTS = {
 // Calculated capacities
 export const CAPACITIES = {
   // First page has photos, title, date, audio
-  FIRST_PAGE_TEXT_HEIGHT: 700 - 220 - 45 - 30 - 55 - 20, // = 330px (~11 lines)
+  FIRST_PAGE_TEXT_HEIGHT: 700 - 240 - 50 - 35 - 70 - 40, // = 265px (~9 lines) - updated with new measurements
 
   // Continuation pages have full content area
   CONTINUATION_PAGE_HEIGHT: 700,

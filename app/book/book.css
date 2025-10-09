@@ -267,6 +267,16 @@
 }
 
 /* ============================================
+   PAGINATION HARDENING - Prevent Text Cutoff
+   ============================================ */
+
+/* Audio player must reserve consistent space */
+.audio-wrapper {
+  min-height: 70px; /* Match actual rendered height with margins */
+  box-sizing: border-box;
+}
+
+/* ============================================
    TYPOGRAPHY - Print-optimized
    ============================================ */
 
