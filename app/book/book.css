@@ -7,8 +7,10 @@
   --page-width: 528px;    /* 5.5in × 96 */
   --page-height: 816px;   /* 8.5in × 96 */
 
-  /* Equal margins for web reading (home print) */
-  --margin: 58px;         /* ~0.6in equal margin on all sides */
+  /* Dotted decor border and content margins */
+  --page-border: 48px;    /* Dotted decor width on all sides */
+  --content-margin: 48px; /* Space between dotted decor and content */
+  --margin: 58px;         /* Legacy - deprecated, use --page-border */
   --gutter-boost: 24px;   /* ~0.25in added ONLY in POD print mode (future) */
 
   /* Spread layout */
@@ -76,8 +78,8 @@
   height: var(--page-height);
   margin: 0 auto 24px;
 
-  /* Reduced top padding to match sides (38px) - was 58px */
-  padding: 36px calc(var(--margin) - 20px) var(--margin) calc(var(--margin) - 20px);
+  /* Dotted decor border - 48px all sides */
+  padding: var(--page-border);
 
   /* Paper white with whisper-level texture */
   background: #ffffff;
@@ -141,6 +143,7 @@
   width: 100%;
   height: var(--content-height);
   overflow: hidden;
+  padding: var(--content-margin); /* 48px margin between dotted decor and content */
 }
 
 /* Optional: Page header for decade/chapter labels */
@@ -285,7 +288,7 @@
   line-height: var(--book-line-height);
   color: #1a1a1a;
   hyphens: auto;
-  text-align: justify;
+  text-align: left;
 
   /* Prevent widows and orphans */
   widows: 2;

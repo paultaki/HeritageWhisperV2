@@ -1689,8 +1689,8 @@ textarea:focus-visible {
   .memory-body, .story-text, p {
     font-family: 'Crimson Text', Georgia, serif;
     font-size: 18px;
-    line-height: 1.8;
-    text-align: justify;
+    line-height: 1.75;
+    text-align: left;
     hyphens: auto;
     color: #3a3a3a;
     margin: 20px 0;
@@ -1699,7 +1699,7 @@ textarea:focus-visible {
   
   /* Specific styles for left page text */
   .memory-body--left {
-    margin-top: 24px;
+    margin-top: 0;
     margin-bottom: 16px;
   }
   
@@ -1933,7 +1933,7 @@ textarea:focus-visible {
     box-shadow:
       0 0 0 1px #e8e6e3,
       0 2px 10px rgba(0,0,0,0.1);
-    margin: 20px auto;
+    margin: 0 auto 20px; /* No top margin, centered horizontally, 20px bottom */
     display: block;
     border-radius: 0;
   }
@@ -2766,9 +2766,51 @@ textarea:focus-visible {
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;  /* No margin since we're using absolute positioning */
   padding-bottom: 0;
   /* Removed border-bottom for visual consistency */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;  /* Ensures perfect vertical alignment */
+  gap: 1rem;  /* Space between title and button */
+  min-height: 28px;  /* Consistent height */
+  position: absolute;  /* Position absolutely to not push content down */
+  top: 18px;  /* Position in the dotted decor border area */
+  left: 48px;  /* Align with content area */
+  right: 48px;  /* Align with content area */
+  z-index: 10;  /* Ensure it's above page content */
+  pointer-events: all;  /* Ensure button is clickable */
+}
+
+/* Adjust right page header to be level with left page */
+.page--right .running-header {
+  top: 11px;  /* Move up 7px to align with left page */
+}
+
+/* Story title in header - single line format */
+.story-header-title {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  line-height: 1.5;  /* Explicit line-height for alignment */
+  display: flex;
+  align-items: center;  /* Vertically center the text */
+}
+
+/* Book page wrapper - ensure dotted decor border is 48px on all sides */
+.book-page {
+  padding: 48px !important;  /* Dotted decor border - 48px all sides */
+}
+
+/* Book page content - space between dotted decor and actual content */
+.book-page .page-content {
+  padding: 48px !important;  /* 48px space between dotted decor and content on all sides */
 }
 
 .header-left {
@@ -2827,12 +2869,13 @@ textarea:focus-visible {
 
 /* Memory body text */
 .memory-body {
-  font-size: 1.125rem;
-  line-height: 1.8;
+  font-size: 1.125rem;  /* 18px */
+  line-height: 1.75;
   color: hsl(23, 5%, 30%);
   font-family: 'Crimson Text', Georgia, serif;
-  text-align: justify;
+  text-align: left;
   hyphens: auto;
+  margin-top: 0;  /* No top margin - use page padding-top instead */
   margin-bottom: 1.5rem;
 }
 
@@ -3065,12 +3108,15 @@ textarea:focus-visible {
 
 /* Lesson Learned callout - warm yellow box */
 .lesson-callout {
-  background: #FFF7E6;                 /* warm paper yellow */
-  border-left: 6px solid #FFD36A;      /* single accent line */
-  padding: 16px 18px;
-  border-radius: 12px;
+  background: #FFFBF0;                 /* cream/pale yellow background */
+  border-left: 6px solid #E8B44F;      /* warm gold left border */
+  padding: 24px 28px;                  /* generous padding for breathing room */
+  border-radius: 8px;                  /* subtle rounded corners */
   font-style: italic;
-  margin: 16px 0;
+  font-size: 1.05rem;                  /* slightly larger for readability */
+  line-height: 1.8;                    /* spacious line height */
+  color: #3D3D3D;                      /* darker text for better contrast */
+  margin: 20px 0;
   break-inside: avoid;
   page-break-inside: avoid;
 }
@@ -3078,9 +3124,11 @@ textarea:focus-visible {
 .lesson-callout .title {
   font-style: normal;
   font-weight: 600;
-  font-size: 0.95rem;
-  color: #7A5A16;
-  margin-bottom: 6px;
+  font-size: 0.85rem;
+  color: #8B6914;                      /* warm brown/gold for title */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
 }
 
 /* Story subtitle in header (year • age) */

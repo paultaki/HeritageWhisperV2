@@ -437,19 +437,13 @@ const BookPageRenderer = ({
   return (
     <article className={`page book-page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
       <div className="running-header">
-        <div className="flex flex-col">
-          <span className={page.isLeftPage ? "header-left" : "header-right"}>
-            {page.isLeftPage ? "Heritage Whisper" : "Family Memories"}
-          </span>
-          {/* Date/age subtitle - only on story start pages */}
-          {(page.type === 'story-start' || page.type === 'story-complete') && (
-            <span className="story-subtitle text-left">
-              {page.year}
-              {page.age !== null && page.age !== undefined && page.age > 0 && ` • Age ${page.age}`}
-              {page.age !== null && page.age !== undefined && page.age === 0 && ` • Birth`}
-              {page.age !== null && page.age !== undefined && page.age < 0 && ` • Before birth`}
-            </span>
-          )}
+        {/* Story title with year and age - single line */}
+        <div className="story-header-title">
+          {page.title || (page.isLeftPage ? "Heritage Whisper" : "Family Memories")}
+          {page.year && ` • ${page.year}`}
+          {page.age !== null && page.age !== undefined && page.age > 0 && ` • Age ${page.age}`}
+          {page.age !== null && page.age !== undefined && page.age === 0 && ` • Birth`}
+          {page.age !== null && page.age !== undefined && page.age < 0 && ` • Before birth`}
         </div>
         {/* Edit button for this story */}
         {(page.type === 'story-start' || page.type === 'story-complete') && page.storyId && (

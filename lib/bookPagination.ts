@@ -32,7 +32,7 @@ export const MEASUREMENTS = {
   LINE_HEIGHT: 28,
   FONT_SIZE: 16,
   FONT_FAMILY: 'Georgia, serif',
-  TEXT_ALIGN: 'justify' as const,    // Both edges straight
+  TEXT_ALIGN: 'left' as const,    // Left-aligned text
 
   // Lesson learned
   LESSON_HEADER: 40,
@@ -41,14 +41,14 @@ export const MEASUREMENTS = {
 
 // Calculated capacities
 export const CAPACITIES = {
-  // First page has photos, title, date, audio with generous spacing buffer
-  FIRST_PAGE_TEXT_HEIGHT: 700 - 260 - 60 - 45 - 70 - 100, // = 165px (~6 lines) - VERY conservative
+  // First page has photos, title, date, audio with spacing buffer
+  FIRST_PAGE_TEXT_HEIGHT: 700 - 260 - 60 - 45 - 70 - 40, // = 225px (~8-9 lines) - More space with absolute header
 
-  // Continuation pages need buffer for paragraph margins (20px per paragraph adds up)
-  CONTINUATION_PAGE_HEIGHT: 600, // Reduced from 700 to account for margins
+  // Continuation pages - maximize available space (header is absolutely positioned)
+  CONTINUATION_PAGE_HEIGHT: 680, // Increased to use more page space with new font size
 
-  FIRST_PAGE_LINES: Math.floor(165 / 28), // ~6 lines on first page
-  CONTINUATION_LINES: Math.floor(600 / 28), // ~21 lines on continuation pages
+  FIRST_PAGE_LINES: Math.floor(225 / 28), // ~8 lines on first page
+  CONTINUATION_LINES: Math.floor(680 / 28), // ~24 lines on continuation pages
 
   // Visual balance targets
   PHOTO_VISUAL_WEIGHT: 8, // Photo "feels like" 8 lines of text
@@ -782,7 +782,7 @@ export function paginateStory(
     MEASUREMENTS.STORY_TITLE -
     MEASUREMENTS.STORY_DATE -
     MEASUREMENTS.AUDIO_PLAYER -
-    100; // Generous spacing buffer for margins
+    40; // Spacing buffer for margins (reduced for more text space)
 
   // Pagination state
   let currentPageNumber = startPageNumber;
@@ -913,10 +913,10 @@ function createStoryPage(
     pageNumber,
     storyId: story.id,
     photos: includeMetadata ? story.photos : undefined,
-    title: includeMetadata ? story.title : undefined,
-    year: includeMetadata ? story.year : undefined,
+    title: story.title, // ALWAYS include title on all pages
+    year: story.year,   // ALWAYS include year on all pages
     date: includeMetadata ? story.date : undefined,
-    age: includeMetadata ? story.age : undefined,
+    age: story.age,     // ALWAYS include age on all pages
     audioUrl: includeMetadata ? story.audioUrl : undefined,
     text,
     blocks,
@@ -945,7 +945,7 @@ function paginateTableOfContents(
   const TOC_TITLE_HEIGHT = 80;      // "Table of Contents" heading with margins
   const TOC_PADDING = 60;           // Top/bottom padding
 
-  const availableHeight = 500; // Very conservative - was PagePolicy.contentBoxPx - TOC_PADDING
+  const availableHeight = 620; // Increased from 500 to use more page space
 
   const pages: BookPage[] = [];
   let currentPageNumber = startPageNumber;
