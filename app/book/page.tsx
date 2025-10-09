@@ -42,6 +42,25 @@ import {
 
 const logoUrl = "/HW_logo_mic_clean.png";
 
+// Dynamic pagination constants
+const LINE_GUARD = 2;                 // px safety margin
+const HERO_MIN_TOP = 37;              // minimum top margin for hero (down from 57px)
+const MIN_MOVE_UNIT = 12;             // don't chase tiny adjustments
+
+// Helper: Get element height including margins
+function outerHeightWithMargins(el: HTMLElement): number {
+  const r = el.getBoundingClientRect();
+  const cs = window.getComputedStyle(el);
+  const mt = parseFloat(cs.marginTop) || 0;
+  const mb = parseFloat(cs.marginBottom) || 0;
+  return r.height + mt + mb;
+}
+
+// Helper: Get page content container
+function pageContent(el: HTMLElement | null): HTMLElement | null {
+  return el?.querySelector<HTMLElement>(".book-page-content") || el;
+}
+
 // Audio Manager for single playback
 class AudioManager {
   private static instance: AudioManager;
@@ -193,6 +212,17 @@ const convertToPaginationStory = (story: Story): PaginationStory => {
   };
 };
 
+// Lesson Learned callout component
+const LessonCallout = ({ text }: { text: string }) => {
+  if (!text) return null;
+  return (
+    <aside className="lesson-callout">
+      <div className="title">Lesson Learned</div>
+      <div>{text}</div>
+    </aside>
+  );
+};
+
 // Photo carousel component
 const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -203,7 +233,7 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
   const hasMultiplePhotos = photos.length > 1;
 
   return (
-    <div className="relative mb-4">
+    <div className="relative mb-4 memory-hero">
       <img
         src={currentPhoto.url}
         alt="Memory"
@@ -404,7 +434,7 @@ const BookPageRenderer = ({
 
   // Render story pages
   return (
-    <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
+    <article className={`page book-page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
       <div className="running-header">
         <span className={page.isLeftPage ? "header-left" : "header-right"}>
           {page.isLeftPage ? "Heritage Whisper" : "Family Memories"}
@@ -425,7 +455,7 @@ const BookPageRenderer = ({
 
       <div
         ref={pageContentRef}
-        className="page-content"
+        className="page-content book-page-content"
       >
         {/* Photos - only on first page of story */}
         {(page.type === 'story-start' || page.type === 'story-complete') && page.photos && (
@@ -520,15 +550,7 @@ const BookPageRenderer = ({
 
         {/* Lesson learned - only on last page */}
         {(page.type === 'story-end' || page.type === 'story-complete') && page.lessonLearned && (
-          <div className="wisdom mt-6">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span className="wisdom-label text-amber-700 font-semibold">Lesson Learned</span>
-            </div>
-            <blockquote className="text-lg italic text-gray-800 leading-relaxed mx-auto border-l-4 border-amber-400 pl-4">
-              "{page.lessonLearned}"
-            </blockquote>
-          </div>
+          <LessonCallout text={page.lessonLearned} />
         )}
       </div>
 
@@ -712,6 +734,91 @@ export default function BookViewNew() {
     const audioManager = AudioManager.getInstance();
     audioManager.stopAll();
   }, [currentMobilePage, currentSpreadIndex]);
+
+  // Dynamic pagination: Maximize first page usage
+  useEffect(() => {
+    // Only run for spread view with 2+ pages
+    if (isMobile || !showSpreadView || spreads.length === 0) return;
+    if (currentSpreadIndex >= spreads.length) return;
+
+    const spread = spreads[currentSpreadIndex];
+    if (!spread || !spread[1]) return; // Need 2 pages
+
+    // Wait for next frame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      const bookStage = document.querySelector('.book-stage');
+      if (!bookStage) return;
+
+      const pageElements = bookStage.querySelectorAll<HTMLElement>('.book-page');
+      if (pageElements.length < 2) return;
+
+      const page1 = pageElements[0];
+      const page2 = pageElements[1];
+      const c1 = pageContent(page1);
+      const c2 = pageContent(page2);
+      if (!c1 || !c2) return;
+
+      // 1) If first page overflows, try reducing hero top margin
+      const hero = page1.querySelector<HTMLElement>('.memory-hero');
+      if (hero) {
+        const currentTop = parseFloat(getComputedStyle(hero).marginTop || "57");
+        let low = HERO_MIN_TOP;
+        let high = isNaN(currentTop) ? 57 : currentTop;
+        let changed = false;
+
+        const fits = () => {
+          const h = c1.scrollHeight - c1.clientHeight;
+          return h <= LINE_GUARD;
+        };
+
+        // Only adjust if overflowing and can reduce by meaningful amount
+        if (!fits() && high - low >= MIN_MOVE_UNIT) {
+          // Binary search for stable value
+          while (Math.abs(high - low) > 1) {
+            const mid = Math.floor((low + high) / 2);
+            page1.style.setProperty("--hero-top", `${mid}px`);
+            changed = true;
+            if (fits()) {
+              high = mid;
+            } else {
+              low = mid + 1;
+            }
+          }
+          page1.style.setProperty("--hero-top", `${high}px`);
+        }
+        if (!changed) {
+          // Set variable to current margin for consistency
+          page1.style.setProperty("--hero-top", `${Math.max(HERO_MIN_TOP, high)}px`);
+        }
+      }
+
+      // 2) Pull blocks back from page 2 while there's headroom on page 1
+      const getHeadroom = () => c1.clientHeight - c1.scrollHeight;
+
+      // Find next movable block
+      const movable = () =>
+        Array.from(c2.children).find((n) => n instanceof HTMLElement) as HTMLElement | undefined;
+
+      let guard = 64; // prevent runaway loops
+      while (getHeadroom() > LINE_GUARD && guard-- > 0) {
+        const next = movable();
+        if (!next) break;
+        const need = outerHeightWithMargins(next);
+        if (need <= getHeadroom() - LINE_GUARD) {
+          c1.appendChild(next);
+        } else {
+          break;
+        }
+      }
+
+      // 3) Ensure callouts and elements never split visually
+      bookStage.querySelectorAll<HTMLElement>('.lesson-callout, p, figure, img, audio')
+        .forEach(el => {
+          el.style.breakInside = "avoid";
+          el.style.pageBreakInside = "avoid";
+        });
+    });
+  }, [currentSpreadIndex, spreads, isMobile, showSpreadView, pages]);
 
   // Export PDF functions
   const exportPDF = async (format: '2up' | 'trim') => {

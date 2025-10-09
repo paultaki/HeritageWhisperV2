@@ -3047,3 +3047,38 @@ textarea:focus-visible {
 .hover\:text-heritage-coral:hover {
   color: hsl(0, 77%, 64%);
 }
+
+/* ============================================
+   DYNAMIC PAGINATION - Hero Offset & Lesson Callout
+   ============================================ */
+
+/* Book page container */
+.book-page {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Allow dynamic lift for the hero image on first page */
+.memory-hero {
+  margin-top: var(--hero-top, 57px); /* Default current spacing, can reduce to 37px */
+}
+
+/* Lesson Learned callout - warm yellow box */
+.lesson-callout {
+  background: #FFF7E6;                 /* warm paper yellow */
+  border-left: 6px solid #FFD36A;      /* single accent line */
+  padding: 16px 18px;
+  border-radius: 12px;
+  font-style: italic;
+  margin: 16px 0;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.lesson-callout .title {
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #7A5A16;
+  margin-bottom: 6px;
+}
