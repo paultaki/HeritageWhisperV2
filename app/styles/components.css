@@ -198,7 +198,7 @@ html, body {
   }
 }
 
-/* play button - heritage palette */
+/* play button - dark backdrop for contrast */
 .hw-play {
   position: absolute;
   right: var(--space-4);
@@ -206,8 +206,9 @@ html, body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.94);
-  border: 2px solid var(--color-accent); /* clay ring */
+  background: rgba(0, 0, 0, 0.5); /* Dark semi-transparent backdrop */
+  backdrop-filter: blur(8px);
+  border: none;
   display: grid;
   place-items: center;
   transition: transform 0.1s ease-out, background-color 0.1s ease-out;
@@ -215,17 +216,15 @@ html, body {
 .hw-play svg {
   width: 18px;
   height: 18px;
-  fill: none; /* no fill */
-  stroke: var(--color-accent); /* orange outline */
-  stroke-width: 2px;
+  fill: white; /* White icon for contrast */
+  stroke: none;
 }
 .hw-play:hover {
   transform: scale(1.04);
-  background: rgba(255, 255, 255, 1);
+  background: rgba(0, 0, 0, 0.7);
 }
 .hw-play:hover svg {
-  fill: var(--color-accent); /* fill on hover */
-  stroke: var(--color-accent);
+  fill: var(--color-accent); /* Orange on hover for brand consistency */
 }
 
 /* Respect reduced motion preference */

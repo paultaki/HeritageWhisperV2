@@ -42,6 +42,98 @@ import {
 
 const logoUrl = "/HW_logo_mic_clean.png";
 
+// Audio Manager for single playback
+class AudioManager {
+  private static instance: AudioManager;
+  private currentAudio: HTMLAudioElement | null = null;
+  private currentId: string | null = null;
+  private listeners: Map<string, (playing: boolean, time: number) => void> = new Map();
+
+  static getInstance() {
+    if (!AudioManager.instance) {
+      AudioManager.instance = new AudioManager();
+    }
+    return AudioManager.instance;
+  }
+
+  register(id: string, callback: (playing: boolean, time: number) => void) {
+    this.listeners.set(id, callback);
+  }
+
+  unregister(id: string) {
+    if (this.currentId === id && this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
+      this.currentId = null;
+    }
+    this.listeners.delete(id);
+  }
+
+  async play(id: string, audioUrl: string): Promise<void> {
+    if (this.currentAudio && this.currentId !== id) {
+      this.currentAudio.pause();
+      this.notifyListeners(this.currentId!, false, 0);
+    }
+
+    if (this.currentId === id && this.currentAudio) {
+      if (this.currentAudio.paused) {
+        await this.currentAudio.play();
+        this.notifyListeners(id, true, this.currentAudio.currentTime);
+      } else {
+        this.currentAudio.pause();
+        this.notifyListeners(id, false, this.currentAudio.currentTime);
+      }
+    } else {
+      this.currentAudio = new Audio(audioUrl);
+      this.currentId = id;
+
+      this.currentAudio.addEventListener('ended', () => {
+        this.notifyListeners(id, false, 0);
+        this.currentAudio = null;
+        this.currentId = null;
+      });
+
+      this.currentAudio.addEventListener('timeupdate', () => {
+        if (this.currentAudio) {
+          this.notifyListeners(id, true, this.currentAudio.currentTime);
+        }
+      });
+
+      this.currentAudio.addEventListener('loadedmetadata', () => {
+        if (this.currentAudio) {
+          this.notifyListeners(id, false, 0);
+        }
+      });
+
+      await this.currentAudio.play();
+      this.notifyListeners(id, true, 0);
+    }
+  }
+
+  stopAll() {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      if (this.currentId) {
+        this.notifyListeners(this.currentId, false, 0);
+      }
+      this.currentAudio = null;
+      this.currentId = null;
+    }
+  }
+
+  private notifyListeners(id: string, playing: boolean, time: number) {
+    const callback = this.listeners.get(id);
+    if (callback) callback(playing, time);
+  }
+
+  getDuration(id: string): number {
+    if (this.currentId === id && this.currentAudio) {
+      return this.currentAudio.duration || 0;
+    }
+    return 0;
+  }
+}
+
 // Map the existing Story interface to our pagination Story type
 interface Story {
   id: string;
@@ -164,34 +256,38 @@ const BookPageRenderer = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioManager = AudioManager.getInstance();
+  const audioId = page.storyId || page.pageNumber.toString();
 
   const playbackProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  const toggleAudio = () => {
+  // Register with audio manager
+  useEffect(() => {
+    audioManager.register(audioId, (playing, time) => {
+      setIsPlaying(playing);
+      setCurrentTime(time);
+      if (playing) {
+        const dur = audioManager.getDuration(audioId);
+        if (dur > 0) setDuration(dur);
+      }
+    });
+
+    // Load duration for this audio
+    if (page.audioUrl) {
+      const audio = new Audio(page.audioUrl);
+      audio.addEventListener('loadedmetadata', () => {
+        setDuration(audio.duration);
+      });
+    }
+
+    return () => {
+      audioManager.unregister(audioId);
+    };
+  }, [audioId, page.audioUrl]);
+
+  const toggleAudio = async () => {
     if (!page.audioUrl) return;
-
-    if (!audioRef.current) {
-      audioRef.current = new Audio(page.audioUrl);
-      audioRef.current.addEventListener("loadedmetadata", () => {
-        if (audioRef.current) setDuration(audioRef.current.duration);
-      });
-      audioRef.current.addEventListener("timeupdate", () => {
-        if (audioRef.current) setCurrentTime(audioRef.current.currentTime);
-      });
-      audioRef.current.addEventListener("ended", () => {
-        setIsPlaying(false);
-        setCurrentTime(0);
-      });
-    }
-
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
+    await audioManager.play(audioId, page.audioUrl);
   };
 
   const formatTime = (seconds: number) => {
@@ -199,16 +295,6 @@ const BookPageRenderer = ({
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
-
-  // Cleanup audio on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
 
   // Render intro page
   if (page.type === 'intro') {
@@ -294,7 +380,7 @@ const BookPageRenderer = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push(`/review/book-style?id=${page.storyId}`)}
+            onClick={() => router.push(`/review/book-style?id=${page.storyId}&returnPath=${encodeURIComponent(`/book?storyId=${page.storyId}`)}`)}
             className="gap-1 text-xs px-2 py-1 h-auto"
           >
             <Pencil className="w-3 h-3" />
@@ -375,10 +461,8 @@ const BookPageRenderer = ({
                     />
                   </div>
                 </div>
-              </div>
-              <div className="audio-time mt-1 md:mt-2">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
+                <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap">{formatTime(currentTime)}</span>
+                <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap">{formatTime(duration)}</span>
               </div>
             </div>
           </div>
@@ -585,6 +669,12 @@ export default function BookViewNew() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMobile, totalPages, totalSpreads]);
+
+  // Stop audio when page changes
+  useEffect(() => {
+    const audioManager = AudioManager.getInstance();
+    audioManager.stopAll();
+  }, [currentMobilePage, currentSpreadIndex]);
 
   // Export PDF functions
   const exportPDF = async (format: '2up' | 'trim') => {
