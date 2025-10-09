@@ -906,7 +906,15 @@ function createStoryPage(
   continued: boolean
 ): BookPage {
   // Convert blocks back to text for backward compatibility
-  const text = blocks.map(b => b.content).join('\n\n');
+  // Exclude lessonLearned blocks (they render in LessonCallout component)
+  const text = blocks
+    .filter(b => b.type !== 'lessonLearned')
+    .map(b => b.content)
+    .join('\n\n');
+
+  // Extract lesson learned from blocks (if present)
+  const lessonBlock = blocks.find(b => b.type === 'lessonLearned');
+  const lessonLearned = lessonBlock ? lessonBlock.content : undefined;
 
   return {
     type,
@@ -920,6 +928,7 @@ function createStoryPage(
     audioUrl: includeMetadata ? story.audioUrl : undefined,
     text,
     blocks,
+    lessonLearned, // Add lesson learned to page
     continued,
     continuesFrom: !includeMetadata ? story.title : undefined,
     isLeftPage: pageNumber % 2 === 0,

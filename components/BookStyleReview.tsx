@@ -127,7 +127,7 @@ export function BookStyleReview({
             variant="outline"
             onClick={onCancel}
             disabled={isSaving}
-            className="rounded-full px-4 ml-auto mr-12 md:mr-0"
+            className="rounded-full px-4 ml-auto mr-12 md:mr-20 2xl:mr-0"
           >
             Cancel
           </Button>
@@ -167,7 +167,7 @@ export function BookStyleReview({
                   }}
                 >
                   {title || "Click to add title"}
-                  <Edit2 className="w-5 h-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Edit2 className="w-5 h-5 text-gray-400" />
                 </h2>
               ) : (
                 <Input
@@ -203,7 +203,7 @@ export function BookStyleReview({
                   {age !== null && age > 0 && ` • Age ${age}`}
                   {age !== null && age === 0 && ` • Birth`}
                   {age !== null && age < 0 && ` • Before birth`}
-                  <Edit2 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Edit2 className="w-4 h-4 text-gray-400" />
                 </p>
               ) : (
                 <div className="flex items-center gap-2">
@@ -439,7 +439,7 @@ export function BookStyleReview({
                     <p className="text-gray-700 italic">
                       {wisdomText || "Click to add a lesson or wisdom from this memory..."}
                     </p>
-                    <Edit2 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity mt-2" />
+                    <Edit2 className="w-4 h-4 text-gray-400 mt-2" />
                   </div>
                 ) : (
                   <div className="space-y-2">

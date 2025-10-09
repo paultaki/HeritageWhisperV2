@@ -219,7 +219,7 @@ const LessonCallout = ({ text }: { text: string }) => {
   return (
     <aside className="lesson-callout">
       <div className="title">Lesson Learned</div>
-      <div>{text}</div>
+      <p className="lesson-text">{text}</p>
     </aside>
   );
 };

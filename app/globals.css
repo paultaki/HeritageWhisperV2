@@ -2813,6 +2813,67 @@ textarea:focus-visible {
   padding: 48px !important;  /* 48px space between dotted decor and content on all sides */
 }
 
+/* Mobile book view overrides - must come after desktop with !important to override */
+@media (max-width: 640px) {
+  /* Mobile: 10px dotted decor border (visual texture area) */
+  .book-page {
+    padding: 10px !important;
+  }
+
+  /* Mobile: 20px content padding (breathing room between dotted decor and text) */
+  .book-page .page-content {
+    padding: 20px !important;
+  }
+
+  /* Mobile running header - adjusted for smaller padding */
+  .page .running-header,
+  .book-page .running-header {
+    top: -8px !important;  /* Move up above the page edge */
+    left: 10px !important;
+    right: 10px !important;
+    font-size: 0.625rem !important; /* Smaller text */
+  }
+
+  .page--right .running-header {
+    top: -8px !important; /* Same as left on mobile */
+  }
+
+  /* Mobile Edit button - compact with larger text */
+  .running-header button,
+  .running-header .gap-1 {
+    font-size: 0.875rem !important;  /* Bigger text */
+    padding: 0.4rem 0.6rem !important;  /* Tighter padding for narrower button */
+    min-width: auto !important;  /* Allow button to shrink to content */
+    min-height: 30px !important;
+    gap: 0.25rem !important;  /* Small gap between icon and text */
+  }
+
+  .running-header button svg {
+    width: 0.75rem !important;  /* Icon size */
+    height: 0.75rem !important;
+  }
+
+  /* Mobile navigation arrows - adjust positioning */
+  .nav-arrow {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .nav-arrow.nav-arrow--prev {
+    left: 8px !important;  /* Position left arrow */
+  }
+
+  /* Right arrow - move left by 20px from original right-8 (32px) position */
+  .nav-arrow.fixed:not(.nav-arrow--prev) {
+    right: 12px !important;  /* 32px original - 20px adjustment = 12px */
+  }
+
+  /* Story header title - smaller on mobile */
+  .story-header-title {
+    font-size: 0.625rem !important;
+  }
+}
+
 .header-left {
   float: left;
 }
@@ -3106,29 +3167,36 @@ textarea:focus-visible {
   margin-top: var(--hero-top, 0); /* Default current spacing, can adjust dynamically 0-37px */
 }
 
-/* Lesson Learned callout - warm yellow box */
+/* Lesson Learned callout - elegant curved border */
 .lesson-callout {
   background: #FFFBF0;                 /* cream/pale yellow background */
-  border-left: 6px solid #E8B44F;      /* warm gold left border */
-  padding: 24px 28px;                  /* generous padding for breathing room */
-  border-radius: 8px;                  /* subtle rounded corners */
-  font-style: italic;
-  font-size: 1.05rem;                  /* slightly larger for readability */
-  line-height: 1.8;                    /* spacious line height */
-  color: #3D3D3D;                      /* darker text for better contrast */
-  margin: 20px 0;
+  border-left: 4px solid #E8B44F;      /* warm gold left border */
+  border-radius: 0 8px 8px 40px;       /* curved bottom-left corner for quote effect */
+  padding: 24px 32px 28px 32px;        /* generous padding */
+  margin: 24px 0;
   break-inside: avoid;
   page-break-inside: avoid;
+  position: relative;
 }
 
 .lesson-callout .title {
   font-style: normal;
   font-weight: 600;
-  font-size: 0.85rem;
-  color: #8B6914;                      /* warm brown/gold for title */
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 12px;
+  font-size: 0.875rem;
+  color: #333;                         /* darker for better readability */
+  letter-spacing: 0.02em;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lesson-callout .lesson-text {
+  font-style: italic;
+  font-size: 1.1rem;                   /* slightly larger for readability */
+  line-height: 1.75;                   /* spacious line height */
+  color: #2D2D2D;                      /* darker text for better contrast */
+  margin: 0;
 }
 
 /* Story subtitle in header (year • age) */

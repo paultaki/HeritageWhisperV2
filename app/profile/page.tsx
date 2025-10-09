@@ -64,7 +64,36 @@ export default function Profile() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(true);
   const [familyComments, setFamilyComments] = useState(true);
+  const [printedBooksNotify, setPrintedBooksNotify] = useState(false);
   const [defaultStoryVisibility, setDefaultStoryVisibility] = useState(true);
+
+  // Load notification preferences from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedPref = localStorage.getItem('printedBooksNotify');
+      if (savedPref !== null) {
+        setPrintedBooksNotify(savedPref === 'true');
+      }
+    }
+  }, []);
+
+  // Save printed books notification preference to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const previousValue = localStorage.getItem('printedBooksNotify');
+      localStorage.setItem('printedBooksNotify', printedBooksNotify.toString());
+
+      // Only show toast if value actually changed (not on initial load)
+      if (previousValue !== null && previousValue !== printedBooksNotify.toString()) {
+        toast({
+          title: printedBooksNotify ? "Notifications enabled" : "Notifications disabled",
+          description: printedBooksNotify
+            ? "You'll be notified when printed books become available."
+            : "You won't receive notifications about printed books.",
+        });
+      }
+    }
+  }, [printedBooksNotify, toast]);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -636,6 +665,21 @@ export default function Profile() {
                   id="family-comments"
                   checked={familyComments}
                   onCheckedChange={setFamilyComments}
+                  className="flex-shrink-0 mt-1"
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex items-start justify-between py-2 gap-4">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="printed-books-notify" className="text-base">Printed Books Availability</Label>
+                  <p className="text-sm text-muted-foreground">Notify me when printed books are available for purchase</p>
+                </div>
+                <Switch
+                  id="printed-books-notify"
+                  checked={printedBooksNotify}
+                  onCheckedChange={setPrintedBooksNotify}
                   className="flex-shrink-0 mt-1"
                 />
               </div>

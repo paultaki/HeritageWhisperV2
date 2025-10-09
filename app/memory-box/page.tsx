@@ -348,9 +348,9 @@ export default function MemoryBoxPage() {
   };
 
   const toolbarStats = [
-    { label: 'Total memories', value: stats.total },
-    { label: 'In timeline', value: stats.timeline },
-    { label: 'In book', value: stats.book },
+    { label: 'Memories', value: stats.total },
+    { label: 'In Timeline', value: stats.timeline },
+    { label: 'In Book', value: stats.book },
     { label: 'Private', value: stats.private },
   ];
 

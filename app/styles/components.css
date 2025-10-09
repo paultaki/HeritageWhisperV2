@@ -540,6 +540,7 @@ html, body {
   border-radius: 12px;
   padding: 10px 12px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  text-align: center;
 }
 .hw-kpi .n {
   font: 700 16px var(--font-sans);

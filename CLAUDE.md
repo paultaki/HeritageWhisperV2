@@ -228,6 +228,49 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 - **Explicit Font Properties**: Split shorthand `font:` into individual properties to prevent CSS override issues
 - Location: `/app/styles/components.css:297-320`
 
+## ✅ Recent Updates (October 9, 2025)
+
+### Lesson Learned Display in Book View
+- **Fixed Rendering**: Lessons learned (stored as `wisdomClipText` in database) now display properly in elegant callout boxes
+  - Problem: Lesson text was appearing with CSS class names visible and broken formatting
+  - Root cause: `lessonLearned` blocks were being included in `page.text`, causing duplicate/broken display
+  - Solution: Filter out `lessonLearned` blocks from page text AND extract to `page.lessonLearned` field
+  - Location: `/lib/bookPagination.ts:910-917,931`
+- **Callout Styling**: Elegant curved quotation border with italic text
+  - Background: `#FFFBF0` with `#E8B44F` left border
+  - Curved bottom-left corner (`border-radius: 0 8px 8px 40px`) for quotation effect
+  - Location: `/app/globals.css:3110-3139`
+- **Rendering Logic**: Lessons appear on last page of story (`story-end` or `story-complete` page types)
+  - Location: `/app/book/page.tsx:550-553`
+
+### Mobile Book View Responsive Fixes
+- **Dotted Decor Border**: Desktop 48px, Mobile 10px
+  - Desktop: Full 48px border for premium print-like appearance
+  - Mobile: Minimal 10px border for visual texture without wasting screen space
+  - Location: `/app/globals.css:2819-2821`
+- **Content Padding**: Desktop 48px, Mobile 20px
+  - Desktop: Generous 48px breathing room between border and text
+  - Mobile: Compact 20px padding to maximize content area
+  - Location: `/app/globals.css:2824-2826`
+- **Running Header & Edit Button**:
+  - Desktop: Positioned at 18px from top with normal button sizing
+  - Mobile: Positioned at -8px (above page edge), compact button with larger text
+  - Edit button sizing: Desktop normal, Mobile narrower with 0.875rem text
+  - Location: `/app/globals.css:2829-2854`
+- **Navigation Arrows**:
+  - Desktop: 64px touch targets
+  - Mobile: 48px touch targets, positioned 8px from left, 12px from right
+  - Location: `/app/globals.css:2857-2869`
+
+### Book Layout Polish
+- **Text Alignment**: Left-aligned (changed from justified) for better readability
+  - Location: `/lib/bookPagination.ts:35`, `/app/globals.css:1693,2876`, `/app/book/book.css:291`
+- **Page Margins**: Equal 48px margins on all sides with dotted decor border
+  - Running headers positioned in dotted decor area (desktop: 18px left, 11px right for alignment)
+  - Location: `/app/globals.css:2764-2814`
+- **Photo Margins**: 0 top margin for clean 48px spacing from dotted border
+  - Location: `/app/globals.css:1936`
+
 ---
-*Last updated: October 8, 2025*
+*Last updated: October 9, 2025*
 *For historical fixes, feature archives, and migration notes, see CLAUDE_HISTORY.md*
