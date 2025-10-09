@@ -79,11 +79,13 @@ export default function DesktopNavigation({ onRecordClick }: DesktopNavigationPr
     >
       {/* Logo/Home */}
       <div className="mb-8 flex justify-center">
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{
-          background: 'linear-gradient(135deg, #D36A3D 0%, #C05A2D 100%)'
-        }}>
-          <span className="text-white text-xl font-serif font-bold tracking-tight">HW</span>
-        </div>
+        <Image
+          src="/HW_text-compress.png"
+          alt="HeritageWhisper"
+          width={80}
+          height={48}
+          className="object-contain"
+        />
       </div>
 
       {/* Navigation Items */}

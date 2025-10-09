@@ -678,7 +678,7 @@ export default function BookViewNew() {
       {/* Header */}
       <div className="book-header">
         <div className="flex items-center gap-3">
-          <BookOpen className="w-8 h-8 text-coral-500" />
+          <BookOpen className="w-8 h-8" style={{ color: '#1f0f08' }} />
           <h1 className="text-2xl font-bold">Book</h1>
         </div>
 

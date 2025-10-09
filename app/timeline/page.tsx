@@ -1085,7 +1085,7 @@ export default function Timeline() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
-              <Calendar className="w-8 h-8 text-coral-500" />
+              <Calendar className="w-8 h-8" style={{ color: '#1f0f08' }} />
               <h1 className="text-2xl font-bold">Timeline</h1>
             </div>
           </div>

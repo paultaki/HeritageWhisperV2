@@ -374,7 +374,7 @@ export default function MemoryBoxPage() {
       <header className="sticky top-0 z-40 bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
-            <Box className="w-8 h-8 text-coral-500" />
+            <Box className="w-8 h-8" style={{ color: '#1f0f08' }} />
             <h1 className="text-2xl font-bold">Memory Box</h1>
           </div>
         </div>
