@@ -25,10 +25,9 @@ export default function DecadeNav({ entries }: { entries: DecadeEntry[] }) {
               className="hw-decade-item"
               aria-current={activeId === d.id}
               onClick={() => scrollToId(d.id)}
-              aria-label={`Go to ${d.label}, ${d.count} ${d.count === 1 ? 'story' : 'stories'}`}
+              aria-label={`Go to ${d.label}`}
             >
               <span>{d.label}</span>
-              <span className="hw-decade-count">{d.count}</span>
             </button>
           ))}
         </div>
@@ -52,10 +51,9 @@ export default function DecadeNav({ entries }: { entries: DecadeEntry[] }) {
                   scrollToId(d.id);
                 }}
                 role="menuitem"
-                aria-label={`Go to ${d.label}, ${d.count} ${d.count === 1 ? 'story' : 'stories'}`}
+                aria-label={`Go to ${d.label}`}
               >
                 <span>{d.label}</span>
-                <span className="hw-decade-count">{d.count}</span>
               </button>
             ))}
           </div>

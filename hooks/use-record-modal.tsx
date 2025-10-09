@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { navCache } from '@/lib/navCache';
 
 export interface RecordModalInitialData {
@@ -10,6 +10,7 @@ export interface RecordModalInitialData {
 
 export function useRecordModal() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [initialData, setInitialData] = useState<RecordModalInitialData | null>(null);
 
@@ -85,16 +86,17 @@ export function useRecordModal() {
       title: recording.title,
       storyYear: recording.year,
       fromModal: true,
+      returnPath: pathname, // Store where the user came from
     });
 
-    console.log('[useRecordModal] Stored in NavCache with ID:', navId);
+    console.log('[useRecordModal] Stored in NavCache with ID:', navId, 'returnPath:', pathname);
 
     // Close modal
     setIsOpen(false);
 
     // Navigate to review page for editing
     router.push(`/review?nav=${navId}`);
-  }, [router]);
+  }, [router, pathname]);
 
   return {
     isOpen,

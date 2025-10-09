@@ -681,7 +681,7 @@ function RecordingContent() {
   // Render different screens based on state
   if (recordingState === 'wisdom' || showWisdomClip) {
     return (
-      <div className="min-h-screen bg-background album-texture md:pl-20">
+      <div className="min-h-screen bg-background album-texture">
         <WisdomClipScreen
           onRecord={handleWisdomClipComplete}
           onSkip={handleSkipWisdom}
@@ -694,7 +694,7 @@ function RecordingContent() {
 
   if (recordingState === 'post-followup' && postRecordingFollowUp) {
     return (
-      <div className="min-h-screen bg-background album-texture md:pl-20">
+      <div className="min-h-screen bg-background album-texture">
         <PostRecordingFollowUp
           question={postRecordingFollowUp}
           onRecord={handleRecordFollowUpAnswer}
@@ -705,7 +705,7 @@ function RecordingContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background album-texture pb-20 md:pb-0 md:pl-20">
+    <div className="min-h-screen bg-background album-texture pb-20 md:pb-0">
       <div className="max-w-2xl mx-auto p-6">
         {/* Header */}
         <div className="text-center mb-12 pt-16">
@@ -845,7 +845,7 @@ function RecordingContent() {
 export default function Recording() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-background album-texture pb-20 md:pb-0 md:pl-20 flex items-center justify-center">
+      <div className="min-h-screen bg-background album-texture pb-20 md:pb-0 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-primary" />
           <p className="text-muted-foreground">Loading recording interface...</p>

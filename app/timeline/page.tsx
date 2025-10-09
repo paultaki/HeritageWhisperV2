@@ -1063,7 +1063,7 @@ export default function Timeline() {
   };
 
   return (
-    <div className={`timeline-page min-h-screen md:pl-20`} style={pageStyle}>
+    <div className={`timeline-page min-h-screen`} style={pageStyle}>
       {/* Header Navigation */}
       <header
         className={`sticky top-0 z-50 backdrop-blur-sm p-3 ${
@@ -1233,12 +1233,6 @@ export default function Timeline() {
                   <div className="hw-decade-band">
                     <div className="title">
                       {item.title}
-                      {item.stories && item.stories.length > 0 && (
-                        <span className="ml-2 text-xl font-normal" style={{ color: 'var(--color-text-muted)' }}>
-                          ({item.stories.length}{" "}
-                          {item.stories.length === 1 ? "story" : "stories"})
-                        </span>
-                      )}
                     </div>
                     <div className="meta">{item.subtitle}</div>
                   </div>

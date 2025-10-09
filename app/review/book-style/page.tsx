@@ -31,6 +31,7 @@ function BookStyleReviewContent() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [mainAudioBlob, setMainAudioBlob] = useState<Blob | null>(null);
   const [isLoading, setIsLoading] = useState(isEditing);
+  const [returnPath, setReturnPath] = useState<string | null>(null);
 
   const handleAudioChange = (url: string | null, blob?: Blob | null) => {
     setAudioUrl(url);
@@ -102,6 +103,7 @@ function BookStyleReviewContent() {
             base64Length: cachedData.mainAudioBase64?.length,
             hasTitle: !!cachedData.title,
             hasYear: !!cachedData.storyYear,
+            returnPath: cachedData.returnPath,
             allKeys: Object.keys(cachedData)
           });
 
@@ -116,6 +118,9 @@ function BookStyleReviewContent() {
           }
           if (cachedData.wisdomClipText || cachedData.wisdomTranscription) {
             setWisdomText(cachedData.wisdomClipText || cachedData.wisdomTranscription || '');
+          }
+          if (cachedData.returnPath) {
+            setReturnPath(cachedData.returnPath);
           }
 
           // Handle audio - convert base64 back to blob if available
@@ -653,11 +658,11 @@ function BookStyleReviewContent() {
     sessionStorage.removeItem("recordingTranscription");
 
     // If editing an existing story, go back to timeline
-    // If creating a new story, go back to recording page
+    // If creating a new story, go back to where we came from (or timeline as fallback)
     if (isEditing) {
       router.push("/timeline");
     } else {
-      router.push("/recording");
+      router.push(returnPath || "/timeline");
     }
   };
 

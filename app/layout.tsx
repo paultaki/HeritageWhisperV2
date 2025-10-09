@@ -38,7 +38,7 @@ export default function RootLayout({
         <Providers>
           <AgreementGuard>
             <NavigationWrapper />
-            <div className="md:pl-20 pb-20 md:pb-0">
+            <div className="md:pl-28 pb-20 md:pb-0">
               {children}
             </div>
           </AgreementGuard>

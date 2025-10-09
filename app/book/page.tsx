@@ -810,7 +810,7 @@ export default function BookViewNew() {
       </div>
 
       {/* Simplified Bottom Bar - Just Page Number */}
-      <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 z-30 md:bottom-0 md:left-20 md:z-40">
+      <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 z-30 md:bottom-0 md:left-28 md:z-40">
         <div className="flex items-center justify-center w-full px-4 py-2 md:max-w-7xl md:mx-auto">
           <div className="text-sm md:text-base text-muted-foreground font-medium">
             Page {isMobile ? currentMobilePage + 1 : currentSpreadIndex * 2 + 1} of {totalPages}

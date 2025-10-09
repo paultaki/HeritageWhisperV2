@@ -108,9 +108,9 @@ html, body {
 .hw-card::before {
   content: "";
   position: absolute;
-  left: -24px; /* reaches toward spine inside gutter */
+  left: -27px; /* reaches toward spine inside gutter */
   top: calc(var(--title-offset, 22px)); /* aligns to title baseline */
-  width: 18px;
+  width: 21px;
   height: 1.5px;
   background: color-mix(in srgb, var(--color-border) 60%, var(--color-accent) 40%);
   border-radius: 1px;
@@ -122,7 +122,7 @@ html, body {
 /* expand and colorize on intent */
 .hw-card:hover::before,
 .hw-card:focus-visible::before {
-  width: 24px;
+  width: 27px;
   background: var(--color-accent);
 }
 
@@ -296,17 +296,17 @@ html, body {
 /* year badge - always visible, larger */
 .hw-year {
   position: absolute;
-  left: -65px;
-  top: calc(var(--title-offset, 22px) - 12px);
+  left: -64px;
+  top: calc(var(--title-offset, 22px) - 40px);
   font-family: var(--font-serif);
   font-weight: 600;
-  font-size: 22px;
+  font-size: 19px;
   line-height: 1;
-  color: var(--color-text-h);
+  color: var(--color-text-muted);
   background: var(--color-page);
-  padding: 5px 8px 7px 8px;
+  padding: 4px 7px 6px 7px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 7px;
   opacity: 1;
   transform: translateY(0);
   pointer-events: none;
@@ -315,10 +315,11 @@ html, body {
 
 @media (max-width: 767px) {
   .hw-year {
-    left: -51px;
-    font-size: 17px;
+    left: -45px;
+    top: calc(var(--title-offset, 22px) - 40px);
+    font-size: 14px;
     line-height: 1;
-    padding: 4px 6px 6px 6px;
+    padding: 3px 5px 5px 5px;
   }
 }
 
@@ -350,9 +351,9 @@ html, body {
   .hw-card::before {
     content: "";
     position: absolute;
-    left: -20px;
+    left: -23px;
     top: calc(var(--title-offset, 22px));
-    width: 18px;
+    width: 21px;
     height: 2px;
     background: color-mix(in srgb, var(--color-border) 70%, var(--color-accent) 30%);
     border-radius: 1px;
@@ -361,7 +362,7 @@ html, body {
   }
   .hw-card:hover::before,
   .hw-card:focus-visible::before {
-    width: 36px;
+    width: 39px;
     background: var(--color-accent);
   }
 

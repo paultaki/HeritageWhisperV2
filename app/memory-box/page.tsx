@@ -369,7 +369,7 @@ export default function MemoryBoxPage() {
   };
 
   return (
-    <div className={`min-h-screen pb-20 md:pb-0 md:pl-20 ${viewMode === 'list' ? 'hw-list' : ''}`} style={{ background: 'var(--color-page)' }}>
+    <div className={`min-h-screen pb-20 md:pb-0 ${viewMode === 'list' ? 'hw-list' : ''}`} style={{ background: 'var(--color-page)' }}>
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">

@@ -1037,7 +1037,7 @@ export default function Timeline() {
   };
 
   return (
-    <div className={`timeline-page min-h-screen md:pl-20`} style={pageStyle}>
+    <div className={`timeline-page min-h-screen`} style={pageStyle}>
       {/* Header Navigation */}
       <header
         className={`sticky top-0 z-50 backdrop-blur-sm p-3 ${

@@ -127,7 +127,12 @@ HeritageWhisperV2/
 ### Navigation & UX Patterns
 - **Cancel Button Behavior**:
   - Editing existing story → Returns to `/timeline`
-  - Creating new story → Returns to `/recording`
+  - Creating new story → Returns to origin page (timeline/book/memory box) via `returnPath` in NavCache
+  - Location: `/app/review/book-style/page.tsx:649-667`, `/hooks/use-record-modal.tsx:89`
+- **Recording Flow**:
+  - Click "+" → Start Recording prompt → Countdown → Recording
+  - On stop → "Processing" spinner (stays on recording screen) → Auto-navigate to review page
+  - Location: `/components/RecordModal.tsx:182-308`, `/components/RecordModal.tsx:554-571`
 - **Age Display Logic**:
   - Age > 0: "Age X"
   - Age = 0: "Birth"
@@ -192,6 +197,23 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 - **PDF Export on Vercel**: Print page loads but React app not rendering (timeout waiting for `.book-spread`)
 
 ## ✅ Recent Updates (October 8, 2025)
+
+### Recording UX Improvements
+- **Processing Spinner**: After clicking stop, recording screen now shows "Processing your recording..." spinner while transcribing
+  - Previously jumped back to initial "Start Recording" screen causing confusion
+  - Now stays on recording screen → shows processing state → navigates to review page
+  - Location: `/components/RecordModal.tsx:182-188`, `/components/RecordModal.tsx:554-571`
+- **Cancel Navigation Fix**: Cancel button now returns user to origin page (timeline/book/memory box)
+  - Previously always went to `/recording` page for new stories
+  - Now uses `returnPath` stored in NavCache to return to where recording was initiated
+  - Location: `/app/review/book-style/page.tsx:649-667`, `/hooks/use-record-modal.tsx:89`
+
+### AI Transcription
+- **OpenAI Whisper Integration**: Auto-transcription working with GPT-4 formatting
+  - Model: `whisper-1` for transcription, `gpt-4-turbo-preview` for formatting and lesson generation
+  - **Lesson Learned Generation**: Automatically suggests wisdom/lesson from each story (1-2 sentences, first-person)
+  - Location: `/app/api/transcribe/route.ts:84-117` (wisdom generation), `:30-81` (formatting)
+  - **Important**: Ensure `OPENAI_API_KEY` is uncommented in `.env.local`
 
 ### Mobile Book View Polish
 - **Removed Debug Badge**: Removed viewport config debug overlay (`/app/book/page.tsx:769`)
