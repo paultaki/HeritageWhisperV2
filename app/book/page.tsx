@@ -437,9 +437,20 @@ const BookPageRenderer = ({
   return (
     <article className={`page book-page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
       <div className="running-header">
-        <span className={page.isLeftPage ? "header-left" : "header-right"}>
-          {page.isLeftPage ? "Heritage Whisper" : "Family Memories"}
-        </span>
+        <div className="flex flex-col">
+          <span className={page.isLeftPage ? "header-left" : "header-right"}>
+            {page.isLeftPage ? "Heritage Whisper" : "Family Memories"}
+          </span>
+          {/* Date/age subtitle - only on story start pages */}
+          {(page.type === 'story-start' || page.type === 'story-complete') && (
+            <span className="story-subtitle text-left">
+              {page.year}
+              {page.age !== null && page.age !== undefined && page.age > 0 && ` • Age ${page.age}`}
+              {page.age !== null && page.age !== undefined && page.age === 0 && ` • Birth`}
+              {page.age !== null && page.age !== undefined && page.age < 0 && ` • Before birth`}
+            </span>
+          )}
+        </div>
         {/* Edit button for this story */}
         {(page.type === 'story-start' || page.type === 'story-complete') && page.storyId && (
           <Button
@@ -463,17 +474,10 @@ const BookPageRenderer = ({
           <PhotoCarousel photos={page.photos} />
         )}
 
-        {/* Title and date - only on first page */}
+        {/* Title - only on first page (date moved to header) */}
         {(page.type === 'story-start' || page.type === 'story-complete') && (
           <div className="memory-header">
             <h2 className="memory-title">{page.title}</h2>
-            <div className="memory-year">
-              {page.year}
-              {page.age !== null && page.age !== undefined && page.age > 0 && ` • Age ${page.age}`}
-              {page.age !== null && page.age !== undefined && page.age === 0 && ` • Birth`}
-              {page.age !== null && page.age !== undefined && page.age < 0 && ` • Before birth`}
-              {page.date && ` • ${page.date}`}
-            </div>
           </div>
         )}
 

@@ -3082,3 +3082,13 @@ textarea:focus-visible {
   color: #7A5A16;
   margin-bottom: 6px;
 }
+
+/* Story subtitle in header (year • age) */
+.story-subtitle {
+  font-size: 0.75rem;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+  font-weight: 400;
+}

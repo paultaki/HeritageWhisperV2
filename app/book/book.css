@@ -76,9 +76,8 @@
   height: var(--page-height);
   margin: 0 auto 24px;
 
-  /* Equal margins on all sides for web reading */
-  /* Reduced horizontal padding by 20px each side for more content breathing room */
-  padding: var(--margin) calc(var(--margin) - 20px);
+  /* Reduced top padding to match sides (38px) - was 58px */
+  padding: 36px calc(var(--margin) - 20px) var(--margin) calc(var(--margin) - 20px);
 
   /* Paper white with whisper-level texture */
   background: #ffffff;
