@@ -29,12 +29,22 @@ function DesktopNavItem({ icon: Icon, label, href, isActive, onClick }: NavItemP
   return (
     <button
       onClick={handleClick}
-      className="flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-all hover:bg-gray-100 group w-full"
+      className="flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-all hover:bg-gray-100 group w-full relative"
       style={{
         color: isActive ? '#D36A3D' : 'hsl(210, 10%, 60%)',
         background: isActive ? '#FFF5F0' : 'transparent',
       }}
     >
+      {/* Active indicator bar on right */}
+      {isActive && (
+        <div
+          className="absolute -right-3 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all"
+          style={{
+            backgroundColor: '#D36A3D',
+            height: '70px',
+          }}
+        />
+      )}
       <Icon className="w-6 h-6 flex-shrink-0" />
       <span className="text-xs font-medium text-center">{label}</span>
     </button>

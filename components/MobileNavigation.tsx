@@ -29,11 +29,21 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, href, isActive, on
   return (
     <button
       onClick={handleClick}
-      className="flex flex-col items-center justify-center py-2 px-3 flex-1 transition-all"
+      className="flex flex-col items-center justify-center py-2 px-3 flex-1 transition-all relative"
       style={{
         color: isActive ? '#D36A3D' : 'hsl(210, 10%, 60%)',
       }}
     >
+      {/* Active indicator bar at top */}
+      {isActive && (
+        <div
+          className="absolute -top-2.5 left-1/2 -translate-x-1/2 h-1 rounded-full transition-all"
+          style={{
+            backgroundColor: '#D36A3D',
+            width: '52px',
+          }}
+        />
+      )}
       <Icon className={`w-6 h-6 mb-1 transition-transform ${isActive ? 'scale-110' : ''}`} />
       <span className="text-xs font-medium">{label}</span>
     </button>
