@@ -189,6 +189,9 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
         return;
       }
 
+      // Reset cancelled flag - this is a new recording
+      cancelledRef.current = false;
+
       console.log('[AudioRecorder] Starting recording...');
       console.log('[AudioRecorder] Browser:', navigator.userAgent);
 
@@ -789,15 +792,6 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
         mediaRecorderRef.current = null;
       }
 
-      // Stop and clean up MediaStream
-      if (mediaStream) {
-        console.log('[AudioRecorder] Stopping media stream tracks');
-        mediaStream.getTracks().forEach(track => {
-          console.log('[AudioRecorder] Stopping track:', track.kind, track.label);
-          track.stop();
-        });
-      }
-
       // Clear timer
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -820,7 +814,7 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
 
       console.log('[AudioRecorder] Cleanup complete');
     };
-  }, [mediaStream]); // Only depend on mediaStream, not the cleanup function
+  }, []); // No dependencies - only run on mount/unmount
 
   // Expose methods to parent component
   useImperativeHandle(ref, () => ({

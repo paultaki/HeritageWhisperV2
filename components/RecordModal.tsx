@@ -180,22 +180,27 @@ export default function RecordModal({
   };
 
   const handleRecordingComplete = async (blob: Blob, duration: number) => {
+    console.log('[RecordModal] handleRecordingComplete called with blob:', blob.size, 'duration:', duration);
     setAudioBlob(blob);
-    setIsRecording(false);
+    // Keep isRecording true while transcribing so we stay on the recording screen
     setIsPaused(false);
     setRecordingTime(duration);
+    setIsTranscribing(true); // Show processing state
 
     toast({
       title: 'Recording complete!',
       description: 'Transcribing your story...',
     });
 
+    console.log('[RecordModal] Starting transcription process...');
     try {
       // Convert blob to base64 for transcription
+      console.log('[RecordModal] Converting blob to base64...');
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64Data = (reader.result as string).split(',')[1];
+          console.log('[RecordModal] Blob converted to base64, length:', base64Data.length);
           resolve(base64Data);
         };
         reader.onerror = reject;
@@ -219,16 +224,20 @@ export default function RecordModal({
       }
 
       // Call transcription API with authorization
+      console.log('[RecordModal] Preparing API call to /api/transcribe...');
       const headers: HeadersInit = {
         'Content-Type': 'application/json'
       };
 
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
+        console.log('[RecordModal] Session token found, adding to headers');
       } else {
+        console.error('[RecordModal] No authentication token found!');
         throw new Error('No authentication token. Please sign in again.');
       }
 
+      console.log('[RecordModal] Calling /api/transcribe with blob type:', blob.type);
       const response = await fetch(getApiUrl('/api/transcribe'), {
         method: 'POST',
         headers,
@@ -240,6 +249,7 @@ export default function RecordModal({
         }),
       });
 
+      console.log('[RecordModal] API response status:', response.status, response.statusText);
       if (!response.ok) {
         if (response.status === 401) {
           throw new Error('Authentication failed. Please refresh the page and sign in again.');
@@ -248,9 +258,11 @@ export default function RecordModal({
       }
 
       const data = await response.json();
-      console.log('[RecordModal] Transcription successful');
+      console.log('[RecordModal] Transcription successful, transcription length:', data.transcription?.length || 0);
+      console.log('[RecordModal] Response data:', { hasTranscription: !!data.transcription, hasFormattedContent: !!data.formattedContent });
 
       // Save and navigate to BookStyleReview immediately
+      console.log('[RecordModal] Calling onSave with transcription length:', (data.transcription || '').length);
       onSave({
         audioBlob: blob,
         transcription: data.transcription || '',
@@ -262,6 +274,11 @@ export default function RecordModal({
 
     } catch (error) {
       console.error('[RecordModal] Transcription error:', error);
+      console.error('[RecordModal] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+
+      // Clean up state
+      setIsTranscribing(false);
+      setIsRecording(false);
 
       // Determine the error message to show
       let errorMessage = 'Failed to transcribe audio. You can still save your recording.';
@@ -280,6 +297,7 @@ export default function RecordModal({
       });
 
       // Even on error, save with the audio blob
+      console.log('[RecordModal] Calling onSave with empty transcription due to error');
       onSave({
         audioBlob: blob,
         transcription: '',
@@ -533,47 +551,69 @@ export default function RecordModal({
                   animate={{ opacity: 1, scale: 1 }}
                   className="space-y-6"
                 >
-                  {/* Prompt reminder */}
-                  <Card className="p-6 bg-gray-50">
-                    <p className="text-2xl text-gray-700 italic leading-relaxed">
-                      "{currentPrompt || "Tell your story..."}"
-                    </p>
-                  </Card>
+                  {isTranscribing ? (
+                    // Processing state - show spinner and message
+                    <div className="flex flex-col items-center justify-center py-12 space-y-6">
+                      <div className="relative">
+                        <div className="w-24 h-24 rounded-full border-4 border-gray-200 border-t-coral-500 animate-spin"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Sparkles className="w-10 h-10" style={{ color: designSystem.colors.primary.coral }} />
+                        </div>
+                      </div>
+                      <div className="text-center space-y-2">
+                        <h3 className="text-2xl font-semibold" style={{ fontFamily: designSystem.typography.fontFamilies.serif }}>
+                          Processing your recording...
+                        </h3>
+                        <p className="text-lg text-gray-600">
+                          We're transcribing your story. This will just take a moment.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Prompt reminder */}
+                      <Card className="p-6 bg-gray-50">
+                        <p className="text-2xl text-gray-700 italic leading-relaxed">
+                          "{currentPrompt || "Tell your story..."}"
+                        </p>
+                      </Card>
 
-                  {/* Embedded Audio Recorder */}
-                  <div className="flex flex-col items-center space-y-4">
-                    <AudioRecorder
-                      ref={audioRecorderRef}
-                      onRecordingComplete={(blob, duration) => handleRecordingComplete(blob, duration, false)}
-                      maxDuration={300} // 5 minutes max
-                      className="w-full"
-                    />
-                  </div>
+                      {/* Embedded Audio Recorder */}
+                      <div className="flex flex-col items-center space-y-4">
+                        <AudioRecorder
+                          ref={audioRecorderRef}
+                          onRecordingComplete={handleRecordingComplete}
+                          maxDuration={300} // 5 minutes max
+                          className="w-full"
+                        />
+                      </div>
 
-                  {/* Follow-up Prompts */}
-                  {followUpPrompts.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="space-y-3"
-                    >
-                      <p className="text-sm text-gray-500">Keep going, or consider:</p>
-                      {followUpPrompts.map((prompt, index) => (
+                      {/* Follow-up Prompts */}
+                      {followUpPrompts.length > 0 && (
                         <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="space-y-3"
                         >
-                          <Card className="p-4" style={{
-                            background: 'white',
-                            borderLeft: `3px solid ${designSystem.colors.primary.coral}`,
-                          }}>
-                            <p className="italic text-gray-700">&ldquo;{prompt}&rdquo;</p>
-                          </Card>
+                          <p className="text-sm text-gray-500">Keep going, or consider:</p>
+                          {followUpPrompts.map((prompt, index) => (
+                            <motion.div
+                              key={index}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                            >
+                              <Card className="p-4" style={{
+                                background: 'white',
+                                borderLeft: `3px solid ${designSystem.colors.primary.coral}`,
+                              }}>
+                                <p className="italic text-gray-700">&ldquo;{prompt}&rdquo;</p>
+                              </Card>
+                            </motion.div>
+                          ))}
                         </motion.div>
-                      ))}
-                    </motion.div>
+                      )}
+                    </>
                   )}
                 </motion.div>
               )}

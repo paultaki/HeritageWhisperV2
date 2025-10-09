@@ -117,8 +117,11 @@ Provide only the lesson learned text, no explanations or labels.`
 }
 
 export async function POST(request: NextRequest) {
+  console.log('[Transcribe] POST request received');
+  console.log('[Transcribe] Headers:', Object.fromEntries(request.headers.entries()));
+
   try {
-    console.log('[Transcribe] Request received');
+    console.log('[Transcribe] Inside try block');
 
     // Check if the request is FormData or JSON
     const contentType = request.headers.get("content-type");
@@ -285,6 +288,13 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
+    console.error('[Transcribe] ERROR caught:', error);
+    console.error('[Transcribe] Error type:', typeof error);
+    console.error('[Transcribe] Error instanceof Error:', error instanceof Error);
+    if (error instanceof Error) {
+      console.error('[Transcribe] Error message:', error.message);
+      console.error('[Transcribe] Error stack:', error.stack);
+    }
     logger.error("Transcription error:", error);
     return NextResponse.json(
       {
