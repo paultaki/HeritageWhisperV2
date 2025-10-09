@@ -3060,7 +3060,7 @@ textarea:focus-visible {
 
 /* Allow dynamic lift for the hero image on first page */
 .memory-hero {
-  margin-top: var(--hero-top, 57px); /* Default current spacing, can reduce to 37px */
+  margin-top: var(--hero-top, 0); /* Default current spacing, can adjust dynamically 0-37px */
 }
 
 /* Lesson Learned callout - warm yellow box */

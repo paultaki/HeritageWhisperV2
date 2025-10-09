@@ -44,7 +44,8 @@ const logoUrl = "/HW_logo_mic_clean.png";
 
 // Dynamic pagination constants
 const LINE_GUARD = 2;                 // px safety margin
-const HERO_MIN_TOP = 37;              // minimum top margin for hero (down from 57px)
+const HERO_MIN_TOP = 0;               // minimum top margin for hero (matches side margins)
+const HERO_MAX_TOP = 37;              // maximum top margin if space is available
 const MIN_MOVE_UNIT = 12;             // don't chase tiny adjustments
 
 // Helper: Get element height including margins
@@ -758,37 +759,26 @@ export default function BookViewNew() {
       const c2 = pageContent(page2);
       if (!c1 || !c2) return;
 
-      // 1) If first page overflows, try reducing hero top margin
+      // 1) Adjust hero top margin if needed (starts at 0, can go up to 37px for balance)
       const hero = page1.querySelector<HTMLElement>('.memory-hero');
       if (hero) {
-        const currentTop = parseFloat(getComputedStyle(hero).marginTop || "57");
-        let low = HERO_MIN_TOP;
-        let high = isNaN(currentTop) ? 57 : currentTop;
-        let changed = false;
-
         const fits = () => {
           const h = c1.scrollHeight - c1.clientHeight;
           return h <= LINE_GUARD;
         };
 
-        // Only adjust if overflowing and can reduce by meaningful amount
-        if (!fits() && high - low >= MIN_MOVE_UNIT) {
-          // Binary search for stable value
-          while (Math.abs(high - low) > 1) {
-            const mid = Math.floor((low + high) / 2);
-            page1.style.setProperty("--hero-top", `${mid}px`);
-            changed = true;
-            if (fits()) {
-              high = mid;
-            } else {
-              low = mid + 1;
-            }
-          }
-          page1.style.setProperty("--hero-top", `${high}px`);
-        }
-        if (!changed) {
-          // Set variable to current margin for consistency
-          page1.style.setProperty("--hero-top", `${Math.max(HERO_MIN_TOP, high)}px`);
+        // Start at minimum (0) for maximum content space
+        page1.style.setProperty("--hero-top", `${HERO_MIN_TOP}px`);
+
+        // If we have excess headroom, we can add some top margin for visual balance
+        const headroom = c1.clientHeight - c1.scrollHeight;
+        if (headroom > HERO_MAX_TOP) {
+          // Can afford to add some margin for visual breathing room
+          page1.style.setProperty("--hero-top", `${HERO_MAX_TOP}px`);
+        } else if (headroom > MIN_MOVE_UNIT) {
+          // Add partial margin based on available space
+          const margin = Math.floor(headroom / 2); // Use half the headroom
+          page1.style.setProperty("--hero-top", `${Math.min(margin, HERO_MAX_TOP)}px`);
         }
       }
 
