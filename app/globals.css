@@ -1452,7 +1452,10 @@ textarea:focus-visible {
 
   @media (min-width: 768px) {
     .book-header {
-      margin-left: 112px; /* Desktop nav width (w-28 = 112px) */
+      margin-left: 0; /* Extend to navigation bar */
+      left: 0;
+      right: 0;
+      width: 100%;
     }
   }
 
@@ -1601,22 +1604,26 @@ textarea:focus-visible {
     padding: 40px;
   }
 
-  /* Page corner effect */
-  .page--right::after {
+  /* Page corner effect - only on outer edge, not on spine */
+  /* In spread mode: only show bent corner on the rightmost page's outer edge */
+  .book-spread.spread-mode .book-page.page--right:last-child::after,
+  /* In single mode: show bent corner on right pages */
+  .book-spread.single-mode .book-page.page--right::after {
     content: '';
     position: absolute;
     bottom: 0;
     right: 0;
     width: 50px;
     height: 50px;
-    background: 
-      linear-gradient(135deg, 
-        transparent 50%, 
-        #f5f3f0 50%, 
-        #f5f3f0 60%, 
+    background:
+      linear-gradient(135deg,
+        transparent 50%,
+        #f5f3f0 50%,
+        #f5f3f0 60%,
         #e8e6e3 100%);
     box-shadow: -2px -2px 3px rgba(0,0,0,0.05);
     pointer-events: none;
+    z-index: 2;
   }
 
   /* Page numbers and running headers */
