@@ -22,11 +22,11 @@ export const MEASUREMENTS = {
   // Content area height (816 - 58 - 58 = 700px)
   CONTENT_BOX_HEIGHT: 700,
 
-  // Fixed elements (first page only)
-  PHOTO_AREA: 240,          // Fixed height even for galleries (with margins)
-  STORY_TITLE: 50,          // Title with margins
-  STORY_DATE: 35,           // Date/age line with margins
-  AUDIO_PLAYER: 70,         // Audio player with margins (was 55, but renders at ~70px)
+  // Fixed elements (first page only) - INCREASED for safety margin
+  PHOTO_AREA: 260,          // Photo carousel with all margins and spacing
+  STORY_TITLE: 60,          // Title with all margins (memory-title has margin: 12px 0 6px)
+  STORY_DATE: 45,           // Date/age line with margins
+  AUDIO_PLAYER: 70,         // Audio player with margins (measured at ~70px)
 
   // Text properties (must match book.css for accurate measurement)
   LINE_HEIGHT: 28,
@@ -41,14 +41,14 @@ export const MEASUREMENTS = {
 
 // Calculated capacities
 export const CAPACITIES = {
-  // First page has photos, title, date, audio
-  FIRST_PAGE_TEXT_HEIGHT: 700 - 240 - 50 - 35 - 70 - 40, // = 265px (~9 lines) - updated with new measurements
+  // First page has photos, title, date, audio with generous spacing buffer
+  FIRST_PAGE_TEXT_HEIGHT: 700 - 260 - 60 - 45 - 70 - 100, // = 165px (~6 lines) - VERY conservative
 
-  // Continuation pages have full content area
-  CONTINUATION_PAGE_HEIGHT: 700,
+  // Continuation pages need buffer for paragraph margins (20px per paragraph adds up)
+  CONTINUATION_PAGE_HEIGHT: 600, // Reduced from 700 to account for margins
 
-  FIRST_PAGE_LINES: Math.floor(330 / 28), // ~11 lines on first page
-  CONTINUATION_LINES: Math.floor(700 / 28), // ~25 lines on continuation pages
+  FIRST_PAGE_LINES: Math.floor(165 / 28), // ~6 lines on first page
+  CONTINUATION_LINES: Math.floor(600 / 28), // ~21 lines on continuation pages
 
   // Visual balance targets
   PHOTO_VISUAL_WEIGHT: 8, // Photo "feels like" 8 lines of text
@@ -782,7 +782,7 @@ export function paginateStory(
     MEASUREMENTS.STORY_TITLE -
     MEASUREMENTS.STORY_DATE -
     MEASUREMENTS.AUDIO_PLAYER -
-    40; // Additional spacing
+    100; // Generous spacing buffer for margins
 
   // Pagination state
   let currentPageNumber = startPageNumber;
@@ -840,7 +840,7 @@ export function paginateStory(
           currentPageNumber++;
           currentBlocks = [];
           usedHeight = 0;
-          availableHeight = metrics.contentHeightPx;
+          availableHeight = CAPACITIES.CONTINUATION_PAGE_HEIGHT; // Use reduced height for margins
           isFirstPage = false;
           // Don't increment i - we'll process the remainder block next
         } else {
@@ -889,7 +889,7 @@ export function paginateStory(
     currentPageNumber++;
     currentBlocks = [];
     usedHeight = 0;
-    availableHeight = metrics.contentHeightPx;
+    availableHeight = CAPACITIES.CONTINUATION_PAGE_HEIGHT; // Use reduced height for margins
     isFirstPage = false;
   }
 }
@@ -939,13 +939,13 @@ function paginateTableOfContents(
   tocEntries: TableOfContentsEntry[],
   startPageNumber: number
 ): BookPage[] {
-  // Estimate heights for TOC elements
-  const DECADE_HEADER_HEIGHT = 50;  // Decade title with border
-  const STORY_ROW_HEIGHT = 32;      // Each story row
-  const TOC_TITLE_HEIGHT = 60;      // "Table of Contents" heading
-  const TOC_PADDING = 40;           // Top/bottom padding
+  // Estimate heights for TOC elements - INCREASED to match actual rendering
+  const DECADE_HEADER_HEIGHT = 70;  // Decade title with border and spacing
+  const STORY_ROW_HEIGHT = 45;      // Each story row with padding
+  const TOC_TITLE_HEIGHT = 80;      // "Table of Contents" heading with margins
+  const TOC_PADDING = 60;           // Top/bottom padding
 
-  const availableHeight = PagePolicy.contentBoxPx - TOC_PADDING;
+  const availableHeight = 500; // Very conservative - was PagePolicy.contentBoxPx - TOC_PADDING
 
   const pages: BookPage[] = [];
   let currentPageNumber = startPageNumber;
