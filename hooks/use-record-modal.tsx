@@ -32,7 +32,9 @@ export function useRecordModal() {
     console.log('[useRecordModal] handleSave called with:', {
       hasAudioBlob: !!recording.audioBlob,
       hasMainAudioBase64: !!recording.mainAudioBase64,
-      hasTranscription: !!recording.transcription
+      hasTranscription: !!recording.transcription,
+      hasWisdomClipText: !!recording.wisdomClipText,
+      wisdomClipText: recording.wisdomClipText
     });
 
     // Convert audio blob to base64 if needed
@@ -71,10 +73,14 @@ export function useRecordModal() {
 
     // Create navigation cache entry
     const navId = navCache.generateId();
+    const wisdomText = recording.wisdomClipText || recording.wisdomTranscription || '';
+    console.log('[useRecordModal] Wisdom text for NavCache:', wisdomText);
+    
     navCache.set(navId, {
       transcription: recording.transcription || '',
       audioDuration: recording.duration || 0,
-      wisdomTranscription: recording.wisdomTranscription || '',
+      wisdomClipText: wisdomText,
+      wisdomTranscription: wisdomText, // Keep for backwards compatibility
       mainAudioBase64,
       mainAudioType,
       wisdomAudioBase64: recording.wisdomAudioBase64,

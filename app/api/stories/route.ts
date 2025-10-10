@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { generateTier1Templates } from "@/lib/promptGeneration";
+import { performTier3Analysis, storeTier3Results } from "@/lib/tier3Analysis";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -222,6 +224,130 @@ export async function POST(request: NextRequest) {
         { error: "Failed to create story", details: insertError.message },
         { status: 500 }
       );
+    }
+
+    // ============================================================================
+    // TIER 1: Generate template-based prompts (1-3 per story, synchronous)
+    // ============================================================================
+    console.log('[Stories API] Generating Tier 1 prompts for story:', newStory.id);
+    
+    try {
+      const tier1Prompts = generateTier1Templates(
+        newStory.transcript || '', 
+        newStory.year
+      );
+      
+      if (tier1Prompts.length > 0) {
+        console.log(`[Stories API] ${tier1Prompts.length} Tier 1 prompts generated:`, 
+          tier1Prompts.map(p => ({ entity: p.entity, type: p.type }))
+        );
+        
+        // Calculate 7-day expiry
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+        
+        // Store ALL prompts in active_prompts table
+        const promptsToInsert = tier1Prompts.map(prompt => ({
+          user_id: user.id,
+          prompt_text: prompt.text,
+          context_note: prompt.context,
+          anchor_entity: prompt.entity,
+          anchor_year: newStory.year,
+          anchor_hash: prompt.anchorHash,
+          tier: 1,
+          memory_type: prompt.memoryType,
+          prompt_score: prompt.promptScore,
+          score_reason: 'Template-based prompt from entity extraction',
+          model_version: 'tier1-template',
+          expires_at: expiresAt.toISOString(),
+          is_locked: false,
+          shown_count: 0
+        }));
+        
+        const { error: promptError } = await supabaseAdmin
+          .from('active_prompts')
+          .insert(promptsToInsert);
+        
+        if (promptError) {
+          // Check if it's a duplicate key error (expected - deduplication working)
+          if (promptError.code === '23505') {
+            console.log('[Stories API] Some Tier 1 prompts already exist (deduplication working)');
+          } else {
+            // Log unexpected errors but don't fail the request
+            console.error('[Stories API] Failed to store Tier 1 prompts:', promptError);
+          }
+        } else {
+          console.log(`[Stories API] ${tier1Prompts.length} Tier 1 prompts stored successfully`);
+        }
+      } else {
+        console.log('[Stories API] No Tier 1 prompts generated (no entities found)');
+      }
+    } catch (promptGenError) {
+      // Log error but don't fail the request
+      console.error('[Stories API] Error generating Tier 1 prompts:', promptGenError);
+    }
+
+    // ============================================================================
+    // MILESTONE DETECTION: Check if we should trigger Tier 3 analysis
+    // ============================================================================
+    try {
+      // Count total stories for this user
+      const { count: storyCount, error: countError } = await supabaseAdmin
+        .from('stories')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      if (countError) {
+        console.error('[Stories API] Failed to count stories:', countError);
+      } else {
+        console.log(`[Stories API] User now has ${storyCount} total stories`);
+        
+        // Milestone thresholds from spec
+        const MILESTONES = [1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100];
+        
+        if (MILESTONES.includes(storyCount || 0)) {
+          console.log(`[Stories API] 🎯 MILESTONE HIT: Story #${storyCount}!`);
+          console.log(`[Stories API] Triggering Tier 3 combined analysis...`);
+          
+          // Fetch all user stories for analysis
+          const { data: allStories, error: storiesError } = await supabaseAdmin
+            .from('stories')
+            .select('id, title, transcript, lesson_learned, created_at')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: true });
+          
+          if (storiesError || !allStories) {
+            console.error('[Stories API] Failed to fetch stories for Tier 3:', storiesError);
+          } else {
+            try {
+              // Perform GPT-4o combined analysis
+              const tier3Result = await performTier3Analysis(allStories, storyCount);
+              
+              // Store prompts and character insights
+              await storeTier3Results(
+                supabaseAdmin,
+                user.id,
+                storyCount,
+                tier3Result
+              );
+              
+              console.log(`[Stories API] ✅ Tier 3 analysis complete for Story #${storyCount}`);
+              
+              // Log Story 3 paywall status
+              if (storyCount === 3) {
+                console.log(`[Stories API] 💎 Story 3 paywall: 1 prompt unlocked, 3 locked (premium seed)`);
+              }
+            } catch (tier3Error) {
+              console.error('[Stories API] Tier 3 analysis failed:', tier3Error);
+              // Don't fail the request - Tier 3 is bonus functionality
+            }
+          }
+        } else {
+          console.log(`[Stories API] Not a milestone (next milestone at ${MILESTONES.find(m => m > (storyCount || 0)) || '100+'})`);
+        }
+      }
+    } catch (milestoneError) {
+      console.error('[Stories API] Error checking milestone:', milestoneError);
     }
 
     // Transform the response

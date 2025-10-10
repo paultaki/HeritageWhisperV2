@@ -117,7 +117,11 @@ function BookStyleReviewContent() {
             setStoryYear(cachedData.storyYear);
           }
           if (cachedData.wisdomClipText || cachedData.wisdomTranscription) {
-            setWisdomText(cachedData.wisdomClipText || cachedData.wisdomTranscription || '');
+            const wisdom = cachedData.wisdomClipText || cachedData.wisdomTranscription || '';
+            console.log('[Review] Setting wisdom text from NavCache:', wisdom);
+            setWisdomText(wisdom);
+          } else {
+            console.log('[Review] No wisdom text found in NavCache');
           }
           if (cachedData.returnPath) {
             setReturnPath(cachedData.returnPath);

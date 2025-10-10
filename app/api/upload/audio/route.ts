@@ -108,11 +108,18 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await audioFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Use the original file's MIME type (bucket now allows all audio types)
+    // Normalize content type - convert video/webm to audio/webm (common browser recorder format)
+    let uploadContentType = audioFile.type;
+    if (baseType === "video/webm") {
+      uploadContentType = "audio/webm";
+      console.log("[Audio Upload] Normalized video/webm to audio/webm");
+    }
+
+    // Upload with normalized MIME type
     const { data, error } = await supabaseAdmin.storage
       .from("heritage-whisper-files")
       .upload(filename, buffer, {
-        contentType: audioFile.type,
+        contentType: uploadContentType,
         upsert: false,
       });
 

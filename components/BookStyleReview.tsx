@@ -300,11 +300,20 @@ export function BookStyleReview({
 
                         if (response.ok) {
                           const data = await response.json();
+                          console.log('[BookStyleReview] Transcribe response:', {
+                            hasTranscription: !!data.transcription,
+                            hasLessonOptions: !!data.lessonOptions,
+                            practical: data.lessonOptions?.practical,
+                            emotional: data.lessonOptions?.emotional,
+                            character: data.lessonOptions?.character
+                          });
+                          
                           if (data.transcription) {
                             onTranscriptionChange(data.transcription);
                           }
                           // Use practical lesson as default (user can edit later)
                           if (data.lessonOptions?.practical) {
+                            console.log('[BookStyleReview] Setting lesson learned:', data.lessonOptions.practical);
                             onWisdomChange(data.lessonOptions.practical);
                           }
                         }
@@ -377,11 +386,18 @@ export function BookStyleReview({
 
                               if (response.ok) {
                                 const data = await response.json();
+                                console.log('[BookStyleReview] Upload transcribe response:', {
+                                  hasTranscription: !!data.transcription,
+                                  hasLessonOptions: !!data.lessonOptions,
+                                  practical: data.lessonOptions?.practical
+                                });
+                                
                                 if (data.transcription) {
                                   onTranscriptionChange(data.transcription);
                                 }
                                 // Use practical lesson as default (user can edit later)
                                 if (data.lessonOptions?.practical) {
+                                  console.log('[BookStyleReview] Setting lesson from upload:', data.lessonOptions.practical);
                                   onWisdomChange(data.lessonOptions.practical);
                                 }
                               }

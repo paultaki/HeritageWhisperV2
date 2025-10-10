@@ -259,7 +259,11 @@ export default function RecordModal({
 
       const data = await response.json();
       console.log('[RecordModal] Transcription successful, transcription length:', data.transcription?.length || 0);
-      console.log('[RecordModal] Response data:', { hasTranscription: !!data.transcription, hasFormattedContent: !!data.formattedContent });
+      console.log('[RecordModal] Response data:', { 
+        hasTranscription: !!data.transcription, 
+        hasFormattedContent: !!data.formattedContent,
+        hasLessonOptions: !!data.lessonOptions 
+      });
 
       // Save and navigate to BookStyleReview immediately
       console.log('[RecordModal] Calling onSave with transcription length:', (data.transcription || '').length);
@@ -270,6 +274,7 @@ export default function RecordModal({
         followUpQuestions: data.formattedContent?.questions?.map((q: any) => q.text) || [],
         title: storyTitle || undefined,
         year: storyYear || undefined,
+        wisdomClipText: data.lessonOptions?.practical || '', // Add practical lesson as default
       });
 
     } catch (error) {
