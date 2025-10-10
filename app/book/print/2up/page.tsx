@@ -10,7 +10,6 @@ import {
   type DecadeGroup,
 } from '@/lib/bookPagination';
 import { DecadeIntroPage } from '@/components/BookDecadePages';
-import { Sparkles } from 'lucide-react';
 
 interface Story {
   id: string;
@@ -171,17 +170,10 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
           </>
         )}
 
-        {/* Title and date - only on first page */}
+        {/* Title only - year and age now in running header */}
         {(page.type === 'story-start' || page.type === 'story-complete') && (
           <div className="memory-header">
             <h2 className="memory-title">{page.title}</h2>
-            <div className="memory-year">
-              {page.year}
-              {page.age !== null && page.age !== undefined && page.age > 0 && ` • Age ${page.age}`}
-              {page.age !== null && page.age !== undefined && page.age === 0 && ` • Birth`}
-              {page.age !== null && page.age !== undefined && page.age < 0 && ` • Before birth`}
-              {page.date && ` • ${page.date}`}
-            </div>
           </div>
         )}
 
@@ -459,9 +451,11 @@ function Print2UpPageContent() {
         
         .lesson-learned-box {
           margin-top: 1.5rem;
-          padding-left: 1.5rem;
+          padding: 1rem 0 1rem 1.5rem;
           border-left: 3px solid #D4A574;
-          border-radius: 0 0 0 20px;
+          border-top: 3px solid #D4A574;
+          border-bottom: 3px solid #D4A574;
+          border-radius: 8px 0 0 40px;
         }
         
         .lesson-learned-header {

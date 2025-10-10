@@ -9,7 +9,6 @@ import {
   type DecadeGroup,
 } from '@/lib/bookPagination';
 import { DecadeIntroPage } from '@/components/BookDecadePages';
-import { Sparkles } from 'lucide-react';
 import '../print-trim.css';
 
 interface Story {
@@ -154,17 +153,10 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
           </div>
         )}
 
-        {/* Title and date - only on first page */}
+        {/* Title only - year and age now in running header */}
         {(page.type === 'story-start' || page.type === 'story-complete') && (
           <div className="memory-header">
             <h2 className="memory-title">{page.title}</h2>
-            <div className="memory-year">
-              {page.year}
-              {page.age !== null && page.age !== undefined && page.age > 0 && ` • Age ${page.age}`}
-              {page.age !== null && page.age !== undefined && page.age === 0 && ` • Birth`}
-              {page.age !== null && page.age !== undefined && page.age < 0 && ` • Before birth`}
-              {page.date && ` • ${page.date}`}
-            </div>
           </div>
         )}
 
