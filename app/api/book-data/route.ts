@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     console.log('[Book Data API] Fetching stories for userId:', userId);
 
     // Fetch stories using admin client (bypasses RLS)
-    // Note: Database uses different column names (year, transcript, wisdom_text, etc.)
+    // Note: Database column is 'year' not 'story_year'
     const { data: stories, error } = await supabaseAdmin
       .from('stories')
       .select('*')
@@ -44,6 +44,32 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('[Book Data API] Found', stories?.length || 0, 'stories');
+    
+    // Log first story for debugging
+    if (stories && stories.length > 0) {
+      console.log('[Book Data API] Sample story columns:', Object.keys(stories[0]));
+      console.log('[Book Data API] Sample lesson data:', {
+        lesson_learned: stories[0].lesson_learned,
+        wisdom_text: stories[0].wisdom_text
+      });
+      console.log('[Book Data API] Sample photo data:', {
+        photo_url: stories[0].photo_url,
+        metadata_photos: stories[0].metadata?.photos
+      });
+    }
+
+    // Helper to convert relative photo paths to absolute Supabase URLs
+    const getAbsolutePhotoUrl = (url: string | undefined | null): string | undefined => {
+      if (!url) return undefined;
+      
+      // If already absolute URL, return as-is
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+      
+      // Convert relative path to absolute Supabase storage URL
+      return `${supabaseUrl}/storage/v1/object/public/heritage-whisper-files/${url}`;
+    };
 
     // Transform database column names to match expected format
     const transformedStories = (stories || []).map(story => ({
@@ -51,14 +77,19 @@ export async function GET(request: NextRequest) {
       userId: story.user_id,
       title: story.title,
       audioUrl: story.audio_url,
-      transcription: story.transcript,
-      storyYear: story.year,
+      transcription: story.transcript,    // Database column is 'transcript'
+      storyYear: story.year,              // Database column is 'year'
       storyDate: story.story_date,
-      lifeAge: story.life_age,
-      photoUrl: story.photo_url,
-      photos: story.photos,
-      wisdomClipText: story.wisdom_text,
-      includeInBook: true, // All stories returned are included in book
+      lifeAge: story.metadata?.life_age,
+      photoUrl: getAbsolutePhotoUrl(story.photo_url),
+      // Photos are stored in metadata.photos JSONB column
+      photos: story.metadata?.photos?.map((photo: any) => ({
+        ...photo,
+        url: getAbsolutePhotoUrl(photo.url || photo.filePath) || photo.url || photo.filePath
+      })) || [],
+      // Map lesson (prefer new lesson_learned, fallback to wisdom_text)
+      lessonLearned: story.lesson_learned || story.wisdom_text,
+      includeInBook: story.metadata?.include_in_book !== false, // Respect database setting
     }));
 
     return NextResponse.json({ stories: transformedStories });

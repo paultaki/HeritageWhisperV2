@@ -3178,8 +3178,8 @@ textarea:focus-visible {
 .lesson-callout {
   background: #FFFBF0;                 /* cream/pale yellow background */
   border-left: 4px solid #E8B44F;      /* warm gold left border */
-  border-radius: 0 8px 8px 40px;       /* curved bottom-left corner for quote effect */
-  padding: 24px 32px 28px 32px;        /* generous padding */
+  border-radius: 40px 8px 8px 40px;    /* curved top-left and bottom-left corners for bracket effect */
+  padding: 16px 24px 20px 24px;        /* compact padding */
   margin: 24px 0;
   break-inside: avoid;
   page-break-inside: avoid;

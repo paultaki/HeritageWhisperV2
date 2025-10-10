@@ -52,10 +52,20 @@ html, body {
   top: -0.35in;
   left: 0;
   right: 0;
-  text-align: center;
+  text-align: left;
   font-size: 9pt;
-  color: #666;
+  color: #999;
   font-family: Georgia, serif;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  height: 0.3in;
+}
+
+.running-header .header-left,
+.running-header .header-right {
+  display: block;
+  width: 100%;
 }
 
 .page-number {

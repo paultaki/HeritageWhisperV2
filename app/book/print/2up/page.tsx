@@ -28,7 +28,7 @@ interface Story {
     caption?: string;
     isHero?: boolean;
   }>;
-  wisdomClipText?: string;
+  lessonLearned?: string; // Fixed: was wisdomClipText
   includeInBook?: boolean;
 }
 
@@ -44,6 +44,15 @@ const convertToPaginationStory = (story: Story): PaginationStory => {
     isHero: true,
   }] : []);
 
+  console.log('[Print 2up] Converting story:', {
+    title: story.title,
+    hasPhotosArray: !!story.photos,
+    photosArrayLength: story.photos?.length || 0,
+    hasPhotoUrl: !!story.photoUrl,
+    convertedPhotosLength: photos.length,
+    firstPhotoUrl: photos[0]?.url
+  });
+
   return {
     id: story.id,
     title: story.title,
@@ -52,7 +61,7 @@ const convertToPaginationStory = (story: Story): PaginationStory => {
     date: story.storyDate,
     age: story.lifeAge,
     photos,
-    lessonLearned: story.wisdomClipText || undefined,
+    lessonLearned: story.lessonLearned || undefined,
   };
 };
 
@@ -131,7 +140,14 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
     <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
       <div className="running-header">
         <span className={page.isLeftPage ? "header-left" : "header-right"}>
-          {page.isLeftPage ? "Heritage Whisper" : "Family Memories"}
+          {page.title && page.year ? (
+            <>
+              {page.title.toUpperCase()} • {page.year}
+              {page.age !== null && page.age !== undefined && page.age >= 0 && ` • AGE ${page.age}`}
+            </>
+          ) : (
+            page.isLeftPage ? "Heritage Whisper" : "Family Memories"
+          )}
         </span>
       </div>
 
@@ -143,8 +159,16 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
               src={page.photos[0].url}
               alt="Memory"
               className="w-full object-cover rounded-lg memory-photo"
+              onError={(e) => console.error('[Print 2up] Image failed to load:', page.photos[0].url)}
+              onLoad={() => console.log('[Print 2up] Image loaded:', page.photos[0].url)}
             />
           </div>
+        )}
+        {/* Debug: log if photos should be here but aren't */}
+        {(page.type === 'story-start' || page.type === 'story-complete') && (!page.photos || page.photos.length === 0) && (
+          <>
+            {console.log('[Print 2up] Story page has NO photos:', { type: page.type, title: page.title })}
+          </>
         )}
 
         {/* Title and date - only on first page */}
@@ -176,13 +200,10 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
 
         {/* Lesson learned - only on last page */}
         {(page.type === 'story-end' || page.type === 'story-complete') && page.lessonLearned && (
-          <div className="wisdom mt-6">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span className="wisdom-label text-amber-700 font-semibold">Lesson Learned</span>
-            </div>
-            <blockquote className="text-lg italic text-gray-800 leading-relaxed mx-auto border-l-4 border-amber-400 pl-4">
-              "{page.lessonLearned}"
+          <div className="lesson-learned-box mt-6">
+            <div className="lesson-learned-header">Lesson Learned</div>
+            <blockquote className="lesson-learned-text">
+              {page.lessonLearned}
             </blockquote>
           </div>
         )}
@@ -254,6 +275,13 @@ function Print2UpPageContent() {
       const bookSpreads = getPageSpreads(bookPages);
 
       console.log('[Print 2up] Generated', bookPages.length, 'pages,', bookSpreads.length, 'spreads');
+      
+      // Log photo data for debugging
+      const pagesWithPhotos = bookPages.filter(p => p.photos && p.photos.length > 0);
+      console.log('[Print 2up] Pages with photos:', pagesWithPhotos.length);
+      if (pagesWithPhotos.length > 0) {
+        console.log('[Print 2up] Sample photo URL:', pagesWithPhotos[0].photos?.[0]?.url);
+      }
 
       setPages(bookPages);
       setSpreads(bookSpreads);
@@ -381,9 +409,19 @@ function Print2UpPageContent() {
           left: 0.5in;
           right: 0.5in;
           font-size: 9pt;
-          color: #666;
+          color: #999;
           font-family: Georgia, serif;
-          text-align: center;
+          text-align: left;
+          letter-spacing: 0.05em;
+          display: flex;
+          align-items: center;
+          height: 0.3in;
+        }
+        
+        .running-header .header-left,
+        .running-header .header-right {
+          display: block;
+          width: 100%;
         }
 
         .page-number {
@@ -417,6 +455,29 @@ function Print2UpPageContent() {
         .memory-body {
           font-size: 11pt;
           line-height: 1.5;
+        }
+        
+        .lesson-learned-box {
+          margin-top: 1.5rem;
+          padding-left: 1.5rem;
+          border-left: 3px solid #D4A574;
+          border-radius: 0 0 0 20px;
+        }
+        
+        .lesson-learned-header {
+          font-size: 10pt;
+          font-weight: 600;
+          color: #8B6F47;
+          margin-bottom: 0.5rem;
+          font-family: Georgia, serif;
+        }
+        
+        .lesson-learned-text {
+          font-size: 11pt;
+          font-style: italic;
+          color: #374151;
+          line-height: 1.6;
+          margin: 0;
         }
       `}} />
       <div className="print-2up">

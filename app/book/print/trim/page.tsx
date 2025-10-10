@@ -28,7 +28,7 @@ interface Story {
     caption?: string;
     isHero?: boolean;
   }>;
-  wisdomClipText?: string;
+  lessonLearned?: string; // Fixed: was wisdomClipText
   includeInBook?: boolean;
 }
 
@@ -52,7 +52,7 @@ const convertToPaginationStory = (story: Story): PaginationStory => {
     date: story.storyDate,
     age: story.lifeAge,
     photos,
-    lessonLearned: story.wisdomClipText || undefined,
+    lessonLearned: story.lessonLearned || undefined,
   };
 };
 
@@ -131,7 +131,14 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
     <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
       <div className="running-header">
         <span className={page.isLeftPage ? "header-left" : "header-right"}>
-          {page.isLeftPage ? "Heritage Whisper" : "Family Memories"}
+          {page.title && page.year ? (
+            <>
+              {page.title.toUpperCase()} • {page.year}
+              {page.age !== null && page.age !== undefined && page.age >= 0 && ` • AGE ${page.age}`}
+            </>
+          ) : (
+            page.isLeftPage ? "Heritage Whisper" : "Family Memories"
+          )}
         </span>
       </div>
 
@@ -176,13 +183,10 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
 
         {/* Lesson learned - only on last page */}
         {(page.type === 'story-end' || page.type === 'story-complete') && page.lessonLearned && (
-          <div className="wisdom mt-6">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span className="wisdom-label text-amber-700 font-semibold">Lesson Learned</span>
-            </div>
-            <blockquote className="text-lg italic text-gray-800 leading-relaxed mx-auto border-l-4 border-amber-400 pl-4">
-              "{page.lessonLearned}"
+          <div className="lesson-learned-box mt-6">
+            <div className="lesson-learned-header">Lesson Learned</div>
+            <blockquote className="lesson-learned-text">
+              {page.lessonLearned}
             </blockquote>
           </div>
         )}
