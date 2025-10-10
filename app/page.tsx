@@ -209,7 +209,7 @@ export default function HomePage() {
           
           {/* Scroll Indicator */}
           <button
-            onClick={() => document.querySelector('#character-section')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => document.querySelector('#wisdom-section')?.scrollIntoView({ behavior: 'smooth' })}
             className="absolute bottom-8 animate-bounce p-2 hover:text-gray-600 transition-colors"
             aria-label="Scroll to next section"
             data-testid="button-scroll-down"
@@ -219,112 +219,8 @@ export default function HomePage() {
         </div>
       </section>
       
-      {/* Character Discovery Preview with Glassmorphism Cards - MOVED UP */}
-      <section id="character-section" className="py-20 px-6 relative z-10">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-center text-gray-800 mb-4 fade-up" style={{fontFamily: 'Poppins, sans-serif', fontWeight: 700}}>
-            After 5 conversations with Margaret, we discovered:
-          </h2>
-          <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-gray-600 text-center mb-4 fade-up" style={{fontFamily: 'Poppins, sans-serif', fontWeight: 500, transitionDelay: '200ms'}}>
-            Your character, rooted in real moments
-          </p>
-          <p className="text-xl sm:text-2xl text-gray-500 text-center mb-12 fade-up" style={{fontFamily: 'Poppins, sans-serif', fontWeight: 400, transitionDelay: '300ms'}}>
-            Every recording leaves clues. Our questions connect them and show the through-line.
-          </p>
-          
-          {/* Glassmorphism Character Trait Cards with Confidence Bars */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {characterTraits.map((trait, index) => (
-              <div
-                key={index}
-                data-index={index}
-                className="character-card confidence-card relative transform transition-all duration-500 hover:scale-105 hover:-translate-y-1 shadow-xl hover:shadow-2xl group rounded-2xl overflow-hidden border-2 border-white/60"
-                style={{ 
-                  minHeight: '180px',
-                  opacity: visibleTraits.has(index) ? 1 : 0,
-                  transform: visibleTraits.has(index) ? 'translateY(0) scale(1)' : 'translateY(2rem) scale(0.95)',
-                  transitionDelay: `${index * 150}ms`,
-                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 251, 247, 0.9))',
-                  boxShadow: '0 4px 20px rgba(232, 93, 93, 0.08), 0 2px 8px rgba(0, 0, 0, 0.06)'
-                }}
-              >
-                {/* Content */}
-                <div className="trait relative p-6 h-full flex flex-col">
-                  {/* Top section - emoji, trait name, and confidence score */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <span className="icon text-3xl drop-shadow-lg transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12">{trait.emoji}</span>
-                      <span className="text-gray-800 font-semibold text-base md:text-lg whitespace-nowrap transition-all duration-300 group-hover:tracking-wider">{trait.trait}</span>
-                    </div>
-                    <span className="confidence text-3xl text-gray-900 font-bold">
-                      {trait.decimal}
-                    </span>
-                  </div>
-                  
-                  {/* Middle section - confidence label */}
-                  <div className="mb-2">
-                    <span className="text-xs text-gray-600 uppercase tracking-wider">
-                      {trait.emerging ? 'Emerging Pattern' : 'Confidence Level'}
-                    </span>
-                  </div>
-                  
-                  {/* Progress Bar */}
-                  <div className="mb-4">
-                    <div className="meter w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className="fill h-full rounded-full transition-all duration-1000 ease-out group-hover:shadow-lg bg-gradient-to-r from-amber-400 to-rose-400"
-                        style={{
-                          width: confidenceBars.has(index) ? `${trait.confidence}%` : '0%',
-                          transitionDelay: `${index * 100}ms`
-                        }}
-                        data-confidence={`${trait.confidence}%`}
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Bottom section - Listen to evidence link */}
-                  <div className="mt-auto">
-                    <button 
-                      onClick={() => {
-                        const moments = [
-                          `[Conversation 2, 3:45] "When my father was dying, I realized that forgiveness wasn't weakness—it was the strongest thing I could do."`,
-                          `[Conversation 3, 1:12] "I held onto that pain for 20 years before understanding it was holding me back."`,
-                          `[Conversation 5, 2:33] "My children taught me that love means letting go of who I thought I should be."`
-                        ];
-                        const sampleTranscript = `${trait.emoji} ${trait.trait} Pattern Detected\n\nMoments from Margaret's stories:\n\n${moments.join('\n\n')}\n\nConfidence Score: ${trait.decimal}\n\nThis pattern appeared across multiple conversations, revealing a consistent character trait.`;
-                        alert(sampleTranscript);
-                      }}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-semibold inline-flex items-center gap-1 transition-colors duration-200 cursor-pointer"
-                    >
-                      <span>Hear yourself →</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Caption after trait cards */}
-          <p className="text-lg sm:text-xl md:text-2xl text-gray-600 text-center mt-8 fade-up" style={{fontFamily: 'Poppins, sans-serif', fontWeight: 500, transitionDelay: '800ms'}}>
-            Traits only appear when we can point to them in your conversations.
-          </p>
-
-          {/* Sample Insight */}
-          <div className="mt-16 text-center fade-up" style={{transitionDelay: '1000ms'}}>
-            <div className="bg-white/90 rounded-3xl p-8 px-12 max-w-5xl mx-auto border border-gray-200/30 shadow-xl">
-              <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl italic text-gray-700 leading-relaxed" style={{fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontStyle: 'italic', wordSpacing: '0.1em', letterSpacing: '0.01em'}}>
-                "I never knew I had such quiet strength until I heard it in my own words"
-              </p>
-              <p className="text-xl sm:text-2xl md:text-3xl text-gray-500 mt-4" style={{fontFamily: 'Poppins, sans-serif', fontWeight: 400}}>
-                — Margaret, 74, after 5 conversations
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-      
       {/* PROMINENT WISDOM CLIP DEMO SECTION - EMOTIONAL PAYOFF */}
-      <section className="py-24 px-6 relative z-10 bg-gradient-to-br from-purple-50 via-pink-50 to-white">
+      <section id="wisdom-section" className="py-24 px-6 relative z-10 bg-gradient-to-br from-purple-50 via-pink-50 to-white">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-center text-gray-800 mb-6 fade-up" style={{fontFamily: 'Poppins, sans-serif', fontWeight: 800}}>
             The Wisdom Within
