@@ -9,7 +9,7 @@
 
   /* Dotted decor border and content margins */
   --page-border: 48px;    /* Dotted decor width on all sides */
-  --content-margin: 48px; /* Space between dotted decor and content */
+  --content-margin: 23px; /* Space between dotted decor and content (reduced from 48px) */
   --margin: 58px;         /* Legacy - deprecated, use --page-border */
   --gutter-boost: 24px;   /* ~0.25in added ONLY in POD print mode (future) */
 
@@ -143,7 +143,7 @@
   width: 100%;
   height: var(--content-height);
   overflow: hidden;
-  padding: var(--content-margin); /* 48px margin between dotted decor and content */
+  padding: var(--content-margin); /* 23px margin between dotted decor and content */
 }
 
 /* Optional: Page header for decade/chapter labels */
@@ -680,5 +680,109 @@
     }
 
     /* Mic FAB and menus handled by global z-index in main app */
+
+    /* ============================================
+       BOOK NAVIGATION STYLES
+       ============================================ */
+
+    /* TOC Trigger Tab */
+    .toc-trigger {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 300ms ease;
+      z-index: 30;
+    }
+
+    .toc-trigger:hover {
+      width: 48px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Safe area padding for mobile (iPhone notches, etc.) */
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Mobile bottom sheet animations */
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(100%);
+      }
+    }
+
+    /* Prevent scrolling when bottom sheet is open */
+    body.bottom-sheet-open {
+      overflow: hidden;
+    }
+
+    /* Mobile navigation polish */
+    @media (max-width: 768px) {
+      /* Increase touch target for decade grid */
+      .decade-grid-button {
+        min-height: 88px;
+      }
+
+      /* Increase touch target for story list */
+      .story-list-button {
+        min-height: 64px;
+      }
+
+      /* Smooth transitions for mobile interactions */
+      button {
+        -webkit-tap-highlight-color: transparent;
+      }
+    }
+
+    /* Desktop progress bar hover effects */
+    @media (min-width: 769px) {
+      /* Progress bar already has height transition in component */
+
+      .progress-bar-container .decade-marker {
+        transition: transform 200ms ease;
+      }
+
+      .progress-bar-container .decade-marker:hover {
+        transform: translateY(-50%) scale(1.5);
+      }
+    }
+
+    /* Scrollbar styling for TOC sidebar */
+    .toc-sidebar-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .toc-sidebar-content::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .toc-sidebar-content::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+
+    .toc-sidebar-content::-webkit-scrollbar-thumb:hover {
+      background: #a1a1a1;
+    }
   }
 }

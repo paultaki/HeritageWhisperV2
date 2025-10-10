@@ -245,7 +245,9 @@ export async function PUT(
       storyData.audio_url = body.audioUrl && !body.audioUrl.startsWith('blob:') ? body.audioUrl : null;
     }
     if (body.wisdomClipText !== undefined || body.wisdomTranscription !== undefined) {
-      storyData.wisdom_text = body.wisdomClipText || body.wisdomTranscription;
+      // Allow empty string to clear the lesson learned
+      storyData.wisdom_text = body.wisdomClipText !== undefined ? body.wisdomClipText : body.wisdomTranscription;
+      console.log('[PUT /api/stories/[id]] Updating wisdom_text to:', storyData.wisdom_text);
     }
     if (body.wisdomClipUrl !== undefined) storyData.wisdom_clip_url = body.wisdomClipUrl;
     if (body.durationSeconds !== undefined) {

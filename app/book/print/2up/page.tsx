@@ -383,7 +383,7 @@ function Print2UpPageContent() {
           height: 8in !important;
           position: relative !important;
           box-sizing: border-box !important;
-          padding: 0.5in !important;
+          padding: 0.5in 0.25in !important; /* Reduced horizontal padding from 0.5in to 0.25in */
           margin: 0 !important;
           overflow: hidden !important;
           flex-shrink: 0 !important;
@@ -398,8 +398,8 @@ function Print2UpPageContent() {
         .running-header {
           position: absolute;
           top: 0.25in;
-          left: 0.5in;
-          right: 0.5in;
+          left: 0.25in;
+          right: 0.25in;
           font-size: 9pt;
           color: #999;
           font-family: Georgia, serif;
@@ -425,11 +425,11 @@ function Print2UpPageContent() {
         }
 
         .page--left .page-number {
-          left: 0.5in;
+          left: 0.25in;
         }
 
         .page--right .page-number {
-          right: 0.5in;
+          right: 0.25in;
         }
 
         .memory-title {
@@ -451,11 +451,8 @@ function Print2UpPageContent() {
         
         .lesson-learned-box {
           margin-top: 1.5rem;
-          padding: 1rem 0 1rem 1.5rem;
-          border-left: 3px solid #D4A574;
-          border-top: 3px solid #D4A574;
-          border-bottom: 3px solid #D4A574;
-          border-radius: 8px 0 0 40px;
+          padding-left: 1.5rem;
+          border-left: 4px solid #D4A574;
         }
         
         .lesson-learned-header {

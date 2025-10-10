@@ -31,6 +31,7 @@ import { useSwipeable } from "react-swipeable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
 import { useViewportConfig } from "./components/ViewportManager";
+import BookNavigation from "@/components/BookNavigation";
 import {
   paginateBook,
   getPageSpreads,
@@ -717,7 +718,7 @@ export default function BookViewNew() {
     trackMouse: false,
   });
 
-  // Keyboard navigation
+  // Keyboard navigation for arrow keys only (BookNavigation handles other shortcuts)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") goToPrevious();
@@ -1031,14 +1032,14 @@ export default function BookViewNew() {
         </div>
       </div>
 
-      {/* Simplified Bottom Bar - Just Page Number */}
-      <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 z-30 md:bottom-0 md:left-28 md:z-40">
-        <div className="flex items-center justify-center w-full px-4 py-2 md:max-w-7xl md:mx-auto">
-          <div className="text-sm md:text-base text-muted-foreground font-medium">
-            Page {isMobile ? currentMobilePage + 1 : currentSpreadIndex * 2 + 1} of {totalPages}
-          </div>
-        </div>
-      </div>
+      {/* Book Navigation - Replaces simplified bottom bar */}
+      <BookNavigation
+        pages={pages}
+        currentPage={isMobile ? currentMobilePage : currentSpreadIndex * 2}
+        totalPages={totalPages}
+        onNavigateToPage={navigateToPage}
+        isMobile={isMobile}
+      />
 
       {/* Record Modal */}
       <RecordModal isOpen={isOpen} onClose={close} />
