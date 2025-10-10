@@ -488,6 +488,18 @@ export function BookStyleReview({
                         size="sm"
                         variant="outline"
                         onClick={() => {
+                          onWisdomChange("");
+                          setTempWisdom("");
+                          setEditingWisdom(false);
+                        }}
+                        className="text-amber-600"
+                      >
+                        Remove
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
                           setTempWisdom(wisdomText);
                           setEditingWisdom(false);
                         }}

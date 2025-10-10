@@ -2778,20 +2778,21 @@ textarea:focus-visible {
   /* Removed border-bottom for visual consistency */
   display: flex;
   justify-content: space-between;
-  align-items: center;  /* Ensures perfect vertical alignment */
+  align-items: flex-start;  /* Align to top baseline for consistency */
   gap: 1rem;  /* Space between title and button */
-  min-height: 28px;  /* Consistent height */
+  height: 28px;  /* Fixed height instead of min-height */
+  line-height: 28px;  /* Match height for vertical centering of text */
   position: absolute;  /* Position absolutely to not push content down */
   top: 18px;  /* Position in the dotted decor border area */
-  left: 48px;  /* Align with content area */
-  right: 48px;  /* Align with content area */
+  left: 23px;  /* Align with new content margin (reduced from 48px) */
+  right: 23px;  /* Align with new content margin (reduced from 48px) */
   z-index: 10;  /* Ensure it's above page content */
   pointer-events: all;  /* Ensure button is clickable */
 }
 
-/* Adjust right page header to be level with left page */
+/* Use same top position for both left and right pages */
 .page--right .running-header {
-  top: 11px;  /* Move up 7px to align with left page */
+  top: 18px;  /* Same as left page for perfect alignment */
 }
 
 /* Story title in header - single line format */
@@ -2817,7 +2818,7 @@ textarea:focus-visible {
 
 /* Book page content - space between dotted decor and actual content */
 .book-page .page-content {
-  padding: 48px !important;  /* 48px space between dotted decor and content on all sides */
+  padding: 23px !important;  /* 23px space between dotted decor and content on all sides (reduced from 48px) */
 }
 
 /* Mobile book view overrides - must come after desktop with !important to override */

@@ -28,7 +28,7 @@ html, body {
   height: 8.5in;
   position: relative;
   box-sizing: border-box;
-  padding: 0.5in;
+  padding: 0.5in 0.25in; /* Reduced horizontal padding from 0.5in to 0.25in */
   background: white;
   page-break-after: always;
   overflow: hidden;
@@ -113,14 +113,11 @@ html, body {
   margin-bottom: 0.25in;
 }
 
-/* Lesson Learned - matches site styling */
+/* Lesson Learned - simple straight left border */
 .lesson-learned-box {
   margin-top: 1.5rem;
-  padding: 1rem 0 1rem 1.5rem;
-  border-left: 3px solid #D4A574;
-  border-top: 3px solid #D4A574;
-  border-bottom: 3px solid #D4A574;
-  border-radius: 8px 0 0 40px;
+  padding-left: 1.5rem;
+  border-left: 4px solid #D4A574;
 }
 
 .lesson-learned-header {
