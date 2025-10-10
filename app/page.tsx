@@ -10,43 +10,10 @@ export default function HomePage() {
   const router = useRouter();
   const [showRipple, setShowRipple] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  const [visibleTraits, setVisibleTraits] = useState<Set<number>>(new Set());
   const [showTypewriter, setShowTypewriter] = useState(false);
   const [showNeedHelp, setShowNeedHelp] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [confidenceBars, setConfidenceBars] = useState<Set<number>>(new Set());
   const [isPlaying, setIsPlaying] = useState(false);
-  
-  // Enhanced floating character insights for full viewport coverage
-  const floatingInsights = [
-    { type: 'trait', content: '💪 Quiet Resilience (0.84)', class: 'float-diagonal-slow', position: 'top-[5%] left-[10%]' },
-    { type: 'memory', content: '"The day I met your grandfather..."', class: 'float-horizontal', position: 'top-[15%] right-[5%]' },
-    { type: 'trait', content: '❤️ Radical Forgiveness (0.92)', class: 'float-vertical', position: 'top-[25%] left-[70%]' },
-    { type: 'memory', content: '"When courage meant staying..."', class: 'float-diagonal-reverse', position: 'top-[35%] left-[20%]' },
-    { type: 'trait', content: '🎭 Duty vs Dreams (0.76)', class: 'float-horizontal-reverse', position: 'top-[45%] right-[15%]' },
-    { type: 'memory', content: '"The secret I kept for 40 years..."', class: 'float-vertical-slow', position: 'top-[55%] left-[50%]' },
-    { type: 'trait', content: '🌟 Sacred Rebel (0.68)', class: 'float-diagonal-slow', position: 'top-[65%] left-[80%]' },
-    { type: 'memory', content: '"Why I chose forgiveness..."', class: 'float-horizontal', position: 'top-[75%] left-[10%]' },
-    { type: 'trait', content: '👑 Legacy Builder (0.88)', class: 'float-vertical', position: 'top-[85%] right-[30%]' },
-    { type: 'memory', content: '"What I learned from losing..."', class: 'float-diagonal-reverse', position: 'bottom-[10%] left-[40%]' },
-    { type: 'trait', content: '🌱 Growth Mindset (0.79)', class: 'float-horizontal-reverse', position: 'bottom-[20%] right-[10%]' },
-    { type: 'memory', content: '"The moment everything changed..."', class: 'float-vertical-slow', position: 'bottom-[30%] left-[60%]' }
-  ];
-  
-  // Character traits with confidence scores for discovery preview
-  const characterTraits: Array<{
-    trait: string;
-    emoji: string;
-    confidence: number;
-    decimal: string;
-    emerging?: boolean;
-  }> = [
-    { trait: 'Resilience', emoji: '💪', confidence: 84, decimal: '0.84' },
-    { trait: 'Forgiveness', emoji: '❤️', confidence: 92, decimal: '0.92' },
-    { trait: 'Choices', emoji: '⚖️', confidence: 76, decimal: '0.76' },
-    { trait: 'Duty vs Dreams', emoji: '🎭', confidence: 45, decimal: '0.45', emerging: true },
-    { trait: 'Patient Endurance', emoji: '👑', confidence: 73, decimal: '0.73' }
-  ];
   
   // Process steps with glassmorphism styles
   const processSteps = [
@@ -74,47 +41,34 @@ export default function HomePage() {
     const handleScroll = () => {
       setScrollY(window.scrollY);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
-    
+
     // Trigger typewriter effect faster
     setTimeout(() => setShowTypewriter(true), 200);
-    
+
     // Show help button after delay
     setTimeout(() => setShowNeedHelp(true), 5000);
-    
-    // Set up Intersection Observer for fade-up animations and confidence bars
+
+    // Set up Intersection Observer for fade-up animations
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('in-view');
-            
-            // Animate confidence cards and their bars
-            if (entry.target.classList.contains('confidence-card')) {
-              const index = parseInt((entry.target as HTMLElement).dataset.index || '0');
-              // Make the card visible
-              setTimeout(() => {
-                setVisibleTraits(prev => new Set(prev).add(index));
-              }, index * 150);
-              // Animate the confidence bar
-              setTimeout(() => {
-                setConfidenceBars(prev => new Set(prev).add(index));
-              }, index * 200);
-            }
           }
         });
       },
       { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
     );
-    
+
     // Observe all fade-up elements
     setTimeout(() => {
-      document.querySelectorAll('.fade-up, .confidence-card').forEach(el => {
+      document.querySelectorAll('.fade-up').forEach(el => {
         observer.observe(el);
       });
     }, 100);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       observer.disconnect();
