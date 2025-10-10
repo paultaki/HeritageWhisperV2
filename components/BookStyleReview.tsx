@@ -303,8 +303,9 @@ export function BookStyleReview({
                           if (data.transcription) {
                             onTranscriptionChange(data.transcription);
                           }
-                          if (data.wisdomSuggestion) {
-                            onWisdomChange(data.wisdomSuggestion);
+                          // Use practical lesson as default (user can edit later)
+                          if (data.lessonOptions?.practical) {
+                            onWisdomChange(data.lessonOptions.practical);
                           }
                         }
                       } catch (error) {
@@ -379,8 +380,9 @@ export function BookStyleReview({
                                 if (data.transcription) {
                                   onTranscriptionChange(data.transcription);
                                 }
-                                if (data.wisdomSuggestion) {
-                                  onWisdomChange(data.wisdomSuggestion);
+                                // Use practical lesson as default (user can edit later)
+                                if (data.lessonOptions?.practical) {
+                                  onWisdomChange(data.lessonOptions.practical);
                                 }
                               }
                             } catch (error) {

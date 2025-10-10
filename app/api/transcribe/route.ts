@@ -80,38 +80,86 @@ Return ONLY the cleaned and formatted text with proper paragraph breaks. No expl
   }
 }
 
-// Helper function to generate wisdom/lesson learned suggestion
-async function generateWisdomSuggestion(transcription: string): Promise<string | null> {
+// Helper function to generate 3 lesson options (practical, emotional, character)
+async function generateLessonOptions(transcription: string): Promise<{
+  practical: string;
+  emotional: string;
+  character: string;
+} | null> {
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: "You are a wise elder reflecting on life experiences to extract meaningful lessons that can guide future generations."
+          content: `You are extracting life lessons from personal stories.
+
+Your goal is to find the wisdom that can be passed to future generations.
+Each lesson should be 15-20 words, clear, and meaningful.
+
+Avoid:
+- Generic platitudes ("Be yourself", "Follow your heart")
+- Overly specific details that won't apply to others
+- Negative framing ("Don't trust people")
+- Abstract philosophy
+
+Focus on:
+- Universal truths discovered through personal experience
+- Practical wisdom that guides decisions
+- Character insights that shape who we become
+- The cost and value of choices made`
         },
         {
           role: "user",
-          content: `Based on this personal story, write a thoughtful "Lesson Learned" that captures the wisdom from this experience. It should be:
-- Personal and authentic to the story
-- 1-2 sentences maximum
-- Something valuable to pass on to family
-- Written in first person if appropriate
-- Meaningful but not preachy
+          content: `From this story, extract 3 different types of lessons:
+
+1. PRACTICAL LESSON (what to DO in similar situations)
+2. EMOTIONAL TRUTH (what to FEEL or how to process emotions)
+3. CHARACTER INSIGHT (who to BE or what kind of person to become)
 
 Story: "${transcription}"
 
-Provide only the lesson learned text, no explanations or labels.`
+Return exactly 3 lessons, each 15-20 words, formatted as:
+PRACTICAL: [lesson]
+EMOTIONAL: [lesson]
+CHARACTER: [lesson]`
         }
       ],
-      temperature: 0.7,
-      max_tokens: 100
+      temperature: 0.8,
+      max_tokens: 200
     });
 
-    const wisdom = completion.choices[0]?.message?.content;
-    return wisdom ? wisdom.trim() : null;
+    const content = completion.choices[0]?.message?.content;
+    if (!content) return null;
+
+    // Parse the response
+    const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
+    let practical = '';
+    let emotional = '';
+    let character = '';
+
+    for (const line of lines) {
+      if (line.toUpperCase().startsWith('PRACTICAL:')) {
+        practical = line.replace(/^PRACTICAL:\s*/i, '').trim();
+      } else if (line.toUpperCase().startsWith('EMOTIONAL:')) {
+        emotional = line.replace(/^EMOTIONAL:\s*/i, '').trim();
+      } else if (line.toUpperCase().startsWith('CHARACTER:')) {
+        character = line.replace(/^CHARACTER:\s*/i, '').trim();
+      }
+    }
+
+    // Fallback if parsing fails
+    if (!practical || !emotional || !character) {
+      const fallbacks = lines.filter(l => !l.match(/^(PRACTICAL|EMOTIONAL|CHARACTER):/i));
+      practical = practical || fallbacks[0] || "Every experience teaches something if you're willing to learn from it";
+      emotional = emotional || fallbacks[1] || "The heart remembers what the mind forgets";
+      character = character || fallbacks[2] || "Who you become matters more than what you achieve";
+    }
+
+    return { practical, emotional, character };
   } catch (error) {
-    logger.error("Wisdom generation error:", error);
+    logger.error("Lesson generation error:", error);
     return null;
   }
 }
@@ -251,32 +299,32 @@ export async function POST(request: NextRequest) {
       // Rough estimation: 1MB ≈ 60 seconds for typical audio quality
       const estimatedDuration = Math.round(fileSizeInBytes / (1024 * 1024) * 60);
 
-      // Format the transcription
-      let formattedText = transcription.text;
-      try {
-        formattedText = await formatTranscription(transcription.text);
-      } catch (formatError) {
-        logger.warn("Failed to format transcription, using raw text:", formatError);
-      }
-
-      // Generate wisdom suggestion
-      let wisdomSuggestion = null;
-      try {
-        wisdomSuggestion = await generateWisdomSuggestion(formattedText);
-      } catch (wisdomError) {
-        logger.warn("Failed to generate wisdom suggestion:", wisdomError);
-      }
+      // Run formatting and lesson extraction IN PARALLEL for speed
+      const [formattedText, lessonOptions] = await Promise.all([
+        formatTranscription(transcription.text).catch((error) => {
+          logger.warn("Failed to format transcription, using raw text:", error);
+          return transcription.text;
+        }),
+        generateLessonOptions(transcription.text).catch((error) => {
+          logger.warn("Failed to generate lesson options:", error);
+          return null;
+        })
+      ]);
 
       // Clean up temp file
       if (fs.existsSync(tempFilePath)) {
         fs.unlinkSync(tempFilePath);
       }
 
-      // Return the transcription and wisdom suggestion
+      // Return the transcription and lesson options
       return NextResponse.json({
         transcription: formattedText,
         duration: estimatedDuration,
-        wisdomSuggestion: wisdomSuggestion
+        lessonOptions: lessonOptions || {
+          practical: "Every experience teaches something if you're willing to learn from it",
+          emotional: "The heart remembers what the mind forgets",
+          character: "Who you become matters more than what you achieve"
+        }
       });
 
     } catch (error) {

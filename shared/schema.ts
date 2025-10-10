@@ -16,6 +16,12 @@ export const users = pgTable("users", {
   // Legal agreement tracking (for quick lookups)
   latestTermsVersion: text("latest_terms_version"), // e.g., "1.0"
   latestPrivacyVersion: text("latest_privacy_version"), // e.g., "1.0"
+  // AI Prompt System additions
+  freeStoriesUsed: integer("free_stories_used").default(0),
+  subscriptionStatus: text("subscription_status").default("none"), // 'none', 'active', 'cancelled', 'expired'
+  lastTier2Attempt: timestamp("last_tier2_attempt"),
+  doNotAsk: jsonb("do_not_ask").$type<string[]>().default(sql`'[]'::jsonb`),
+  onboardingT3RanAt: timestamp("onboarding_t3_ran_at"),
   // subscriptionExpires: timestamp("subscription_expires"),
   // stripeCustomerId: text("stripe_customer_id"),
   // stripeSubscriptionId: text("stripe_subscription_id"),
@@ -48,6 +54,25 @@ export const stories = pgTable("stories", {
   storyYear: integer("story_year"), // Nullable to support undated memories
   storyDate: timestamp("story_date"),
   lifeAge: integer("life_age"),
+  // AI Prompt System additions
+  lessonLearned: text("lesson_learned"),
+  lessonAlternatives: jsonb("lesson_alternatives").$type<string[]>().default(sql`'[]'::jsonb`),
+  characterInsights: jsonb("character_insights").$type<{
+    traits?: Array<{
+      trait: string;
+      confidence: number;
+      evidence: string[];
+    }>;
+    invisibleRules?: string[];
+    contradictions?: Array<{
+      stated: string;
+      lived: string;
+      tension: string;
+    }>;
+    coreLessons?: string[];
+  }>(),
+  sourcePromptId: uuid("source_prompt_id"),
+  lifePhase: text("life_phase"), // 'childhood', 'teen', 'early_adult', 'mid_adult', 'late_adult', 'senior'
   photoUrl: text("photo_url"),
   photoTransform: jsonb("photo_transform").$type<{ zoom: number; position: { x: number; y: number } }>(),
   photos: jsonb("photos").$type<Array<{
@@ -223,6 +248,89 @@ export const demoStories = pgTable("demo_stories", {
   publicPhotoUrl: text("public_photo_url"), // Public URL for demo photo files
 });
 
+// ============================================================================
+// AI PROMPT SYSTEM TABLES
+// ============================================================================
+
+// Active prompts table - stores currently active prompts (1-5 per user at any time)
+export const activePrompts = pgTable("active_prompts", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  
+  // Prompt content
+  promptText: text("prompt_text").notNull(),
+  contextNote: text("context_note"), // e.g., "Based on your 1955 story"
+  
+  // Deduplication & anchoring
+  anchorEntity: text("anchor_entity"), // e.g., "father's workshop", "Mrs. Henderson"
+  anchorYear: integer("anchor_year"), // e.g., 1955 (NULL if not year-specific)
+  anchorHash: text("anchor_hash").notNull(), // sha1(`${type}|${entity}|${year||'NA'}`)
+  
+  // Tier & quality
+  tier: integer("tier").notNull(), // 0=fallback, 1=template, 2=on-demand, 3=milestone
+  memoryType: text("memory_type"), // person_expansion, object_origin, decade_gap, etc.
+  promptScore: integer("prompt_score"), // 0-100 (recording likelihood from GPT-4o)
+  scoreReason: text("score_reason"), // 1-sentence explanation for audit
+  modelVersion: text("model_version").default("gpt-4o"), // Track which model generated it
+  
+  // Lifecycle
+  createdAt: timestamp("created_at").default(sql`NOW()`),
+  expiresAt: timestamp("expires_at").notNull(), // Auto-cleanup after expiry
+  isLocked: boolean("is_locked").default(false), // true = hidden until payment
+  
+  // Engagement tracking
+  shownCount: integer("shown_count").default(0),
+  lastShownAt: timestamp("last_shown_at"),
+});
+
+// Prompt history table - archives used/skipped/expired prompts
+export const promptHistory = pgTable("prompt_history", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  
+  // Original prompt data
+  promptText: text("prompt_text").notNull(),
+  anchorHash: text("anchor_hash"),
+  anchorEntity: text("anchor_entity"),
+  anchorYear: integer("anchor_year"),
+  tier: integer("tier"),
+  memoryType: text("memory_type"),
+  promptScore: integer("prompt_score"),
+  
+  // Outcome tracking
+  shownCount: integer("shown_count"),
+  outcome: text("outcome").notNull(), // 'used' | 'skipped' | 'expired'
+  storyId: uuid("story_id").references(() => stories.id), // NULL if skipped/expired
+  
+  // Timestamps
+  createdAt: timestamp("created_at"),
+  resolvedAt: timestamp("resolved_at").default(sql`NOW()`),
+});
+
+// Character evolution table - tracks character development across stories
+export const characterEvolution = pgTable("character_evolution", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  storyCount: integer("story_count").notNull(),
+  
+  // Character analysis
+  traits: jsonb("traits").$type<Array<{
+    trait: string;
+    confidence: number;
+    evidence: string[];
+  }>>(),
+  invisibleRules: jsonb("invisible_rules").$type<string[]>(),
+  contradictions: jsonb("contradictions").$type<Array<{
+    stated: string;
+    lived: string;
+    tension: string;
+  }>>(),
+  
+  // Metadata
+  analyzedAt: timestamp("analyzed_at").default(sql`NOW()`),
+  modelVersion: text("model_version").default("gpt-4o"),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -337,6 +445,23 @@ export const insertUserAgreementSchema = createInsertSchema(userAgreements).omit
   acceptedAt: true,
 });
 
+export const insertActivePromptSchema = createInsertSchema(activePrompts).omit({
+  id: true,
+  createdAt: true,
+  shownCount: true,
+  lastShownAt: true,
+});
+
+export const insertPromptHistorySchema = createInsertSchema(promptHistory).omit({
+  id: true,
+  resolvedAt: true,
+});
+
+export const insertCharacterEvolutionSchema = createInsertSchema(characterEvolution).omit({
+  id: true,
+  analyzedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStory = z.infer<typeof insertStorySchema>;
@@ -364,3 +489,9 @@ export type InsertSharedAccess = z.infer<typeof insertSharedAccessSchema>;
 export type SharedAccess = typeof sharedAccess.$inferSelect;
 export type InsertUserAgreement = z.infer<typeof insertUserAgreementSchema>;
 export type UserAgreement = typeof userAgreements.$inferSelect;
+export type InsertActivePrompt = z.infer<typeof insertActivePromptSchema>;
+export type ActivePrompt = typeof activePrompts.$inferSelect;
+export type InsertPromptHistory = z.infer<typeof insertPromptHistorySchema>;
+export type PromptHistory = typeof promptHistory.$inferSelect;
+export type InsertCharacterEvolution = z.infer<typeof insertCharacterEvolutionSchema>;
+export type CharacterEvolution = typeof characterEvolution.$inferSelect;
