@@ -699,7 +699,7 @@ export default function BookNavigation({
 
   return (
     <>
-      {/* Desktop: TOC trigger tab - moves to screen edge in fullscreen */}
+      {/* Desktop ONLY: TOC trigger tab and sidebar */}
       {!isMobile && (
         <>
           {!tocOpen && (
@@ -708,7 +708,7 @@ export default function BookNavigation({
                 console.log("TOC tab clicked, opening TOC");
                 setTocOpen(true);
               }}
-              className="book-toc-tab fixed left-0 top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center border border-l-0 border-amber-700 hover:w-14"
+              className="book-toc-tab fixed left-0 top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center border border-l-0 border-amber-700 hover:w-14 hidden md:flex"
               aria-label="Open table of contents"
               data-toc-state="closed"
               data-icon="menu"
@@ -724,14 +724,17 @@ export default function BookNavigation({
             currentPage={currentPage + 1}
             onNavigateToPage={onNavigateToPage}
           />
-
-          <DesktopProgressBar
-            currentPage={currentPage + 1}
-            totalPages={totalPages}
-            bookStructure={bookStructure}
-            onNavigateToPage={onNavigateToPage}
-          />
         </>
+      )}
+
+      {/* Desktop ONLY: Progress bar with arrows */}
+      {!isMobile && (
+        <DesktopProgressBar
+          currentPage={currentPage + 1}
+          totalPages={totalPages}
+          bookStructure={bookStructure}
+          onNavigateToPage={onNavigateToPage}
+        />
       )}
 
       {/* Mobile: Bottom navigation */}

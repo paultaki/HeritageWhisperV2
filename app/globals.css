@@ -3541,3 +3541,33 @@ body .fixed.bottom-0[class*="safe-area"] {
   z-index: 50 !important;
 }
 
+
+/* ============================================================================
+   MOBILE: HIDE DESKTOP TOC COMPLETELY
+   ============================================================================ */
+
+/* Hide desktop TOC sidebar and tab on mobile */
+@media (max-width: 767px) {
+  /* Force hide TOC sidebar on mobile */
+  .book-toc-tab,
+  div[role="navigation"][aria-label="Table of contents"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  
+  /* Hide desktop progress bar on mobile */
+  .book-progress-bar {
+    display: none !important;
+  }
+}
+
+/* Desktop: Hide mobile navigation */
+@media (min-width: 768px) {
+  /* Hide mobile bottom sheet on desktop */
+  div[class*="bottom-20"],
+  div[class*="safe-area-bottom"]:not(.book-progress-bar) {
+    display: none !important;
+  }
+}
+
