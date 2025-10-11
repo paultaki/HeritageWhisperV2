@@ -132,7 +132,7 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
             // Silence detected
             if (!silenceStartRef.current) {
               silenceStartRef.current = Date.now();
-              console.log(`[Silence Detection] Silence started at ${currentTime}s`);
+              console.log(`[Silence Detection] Silence started at ${getRecordingDuration()}s`);
             } else {
               const silenceDurationMs = Date.now() - silenceStartRef.current;
               if (silenceDurationMs >= silenceDuration && !isSilentRef.current) {
@@ -146,7 +146,7 @@ export const AudioRecorder = forwardRef<AudioRecorderHandle, AudioRecorderProps>
             // Speech detected
             if (silenceStartRef.current) {
               const silenceDurationMs = Date.now() - silenceStartRef.current;
-              console.log(`[Silence Detection] Speech resumed at ${currentTime}s (after ${silenceDurationMs}ms of silence)`);
+              console.log(`[Silence Detection] Speech resumed at ${getRecordingDuration()}s (after ${silenceDurationMs}ms of silence)`);
               silenceStartRef.current = null;
               if (isSilentRef.current) {
                 isSilentRef.current = false;
