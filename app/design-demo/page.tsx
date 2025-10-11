@@ -37,7 +37,7 @@ const mockStories = [
   },
 ];
 
-function StoryCard({ story }: { story: typeof mockStories[0] }) {
+function StoryCard({ story }: { story: (typeof mockStories)[0] }) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const handlePlayClick = (e: React.MouseEvent) => {
@@ -46,14 +46,13 @@ function StoryCard({ story }: { story: typeof mockStories[0] }) {
   };
 
   return (
-    <div className="hw-card" style={{ "--title-offset": "180px" } as React.CSSProperties}>
+    <div
+      className="hw-card"
+      style={{ "--title-offset": "180px" } as React.CSSProperties}
+    >
       <span className="hw-year">{story.year}</span>
       <div style={{ position: "relative" }}>
-        <img
-          className="hw-card-media"
-          src={story.imageUrl}
-          alt={story.title}
-        />
+        <img className="hw-card-media" src={story.imageUrl} alt={story.title} />
         {story.hasAudio && (
           <button
             className="hw-play"
@@ -63,7 +62,9 @@ function StoryCard({ story }: { story: typeof mockStories[0] }) {
             {isPlaying ? (
               <Pause style={{ fill: "var(--color-accent)" }} />
             ) : (
-              <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
+              <Play
+                style={{ fill: "var(--color-accent)", marginLeft: "2px" }}
+              />
             )}
           </button>
         )}
@@ -87,34 +88,44 @@ function StoryCard({ story }: { story: typeof mockStories[0] }) {
 
 export default function DesignDemo() {
   return (
-    <div style={{ minHeight: "100vh", padding: "var(--space-10) var(--space-6)" }}>
+    <div
+      style={{ minHeight: "100vh", padding: "var(--space-10) var(--space-6)" }}
+    >
       {/* Header */}
       <header style={{ maxWidth: "1200px", margin: "0 auto var(--space-10)" }}>
-        <h1 style={{
-          fontFamily: "var(--font-serif)",
-          fontSize: "var(--h1-desk)",
-          color: "var(--color-text-h)",
-          marginBottom: "var(--space-3)"
-        }}>
+        <h1
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontSize: "var(--h1-desk)",
+            color: "var(--color-text-h)",
+            marginBottom: "var(--space-3)",
+          }}
+        >
           Design Token System Demo
         </h1>
-        <p style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: "var(--meta)",
-          color: "var(--color-text-muted)"
-        }}>
+        <p
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "var(--meta)",
+            color: "var(--color-text-muted)",
+          }}
+        >
           Demonstrating the new token-based design system with semantic classes
         </p>
       </header>
 
       {/* Timeline */}
-      <main className="hw-spine" style={{ maxWidth: "1200px", margin: "0 auto" }}>
-
+      <main
+        className="hw-spine"
+        style={{ maxWidth: "1200px", margin: "0 auto" }}
+      >
         {/* Decade Section: Before I Was Born */}
         <section className="hw-decade">
           <div className="hw-decade-band">
             <div className="title">Before I Was Born</div>
-            <div className="meta">Family History · Stories of those who came before</div>
+            <div className="meta">
+              Family History · Stories of those who came before
+            </div>
           </div>
           <div className="hw-decade-start"></div>
 
@@ -134,7 +145,10 @@ export default function DesignDemo() {
           <div className="hw-decade-start"></div>
 
           <div className="hw-grid">
-            <div className="hw-card" style={{ "--title-offset": "180px" } as React.CSSProperties}>
+            <div
+              className="hw-card"
+              style={{ "--title-offset": "180px" } as React.CSSProperties}
+            >
               <span className="hw-year">1955</span>
               <div style={{ position: "relative" }}>
                 <img
@@ -143,7 +157,9 @@ export default function DesignDemo() {
                   alt="Earliest Memory"
                 />
                 <button className="hw-play" aria-label="Play">
-                  <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
+                  <Play
+                    style={{ fill: "var(--color-accent)", marginLeft: "2px" }}
+                  />
                 </button>
               </div>
               <div className="hw-card-body">
@@ -157,11 +173,15 @@ export default function DesignDemo() {
                 </div>
               </div>
               <div className="hw-card-provenance">
-                Recorded with Heritage Whisper · Created Jun 2025 · Last edited Oct 2025
+                Recorded with Heritage Whisper · Created Jun 2025 · Last edited
+                Oct 2025
               </div>
             </div>
 
-            <div className="hw-card" style={{ "--title-offset": "180px" } as React.CSSProperties}>
+            <div
+              className="hw-card"
+              style={{ "--title-offset": "180px" } as React.CSSProperties}
+            >
               <span className="hw-year">1958</span>
               <div style={{ position: "relative" }}>
                 <img
@@ -170,7 +190,9 @@ export default function DesignDemo() {
                   alt="Campfire Roll Call"
                 />
                 <button className="hw-play" aria-label="Play">
-                  <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
+                  <Play
+                    style={{ fill: "var(--color-accent)", marginLeft: "2px" }}
+                  />
                 </button>
               </div>
               <div className="hw-card-body">
@@ -184,47 +206,168 @@ export default function DesignDemo() {
                 </div>
               </div>
               <div className="hw-card-provenance">
-                Recorded with Heritage Whisper · Created Aug 2025 · Last edited Oct 2025
+                Recorded with Heritage Whisper · Created Aug 2025 · Last edited
+                Oct 2025
               </div>
             </div>
           </div>
         </section>
 
         {/* Token Display Reference */}
-        <section style={{ marginTop: "var(--space-10)", padding: "var(--space-8)", background: "white", borderRadius: "var(--radius-card)", border: "1px solid var(--color-border)" }}>
-          <h2 className="hw-decade" style={{ marginTop: 0 }}>Design Tokens Reference</h2>
+        <section
+          style={{
+            marginTop: "var(--space-10)",
+            padding: "var(--space-8)",
+            background: "white",
+            borderRadius: "var(--radius-card)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <h2 className="hw-decade" style={{ marginTop: 0 }}>
+            Design Tokens Reference
+          </h2>
 
-          <div style={{ display: "grid", gap: "var(--space-6)", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))" }}>
+          <div
+            style={{
+              display: "grid",
+              gap: "var(--space-6)",
+              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+            }}
+          >
             <div>
-              <h3 style={{ fontFamily: "var(--font-sans)", fontSize: "18px", marginBottom: "var(--space-3)" }}>Colors</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-                  <div style={{ width: "24px", height: "24px", background: "var(--color-accent)", borderRadius: "4px" }}></div>
+              <h3
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "18px",
+                  marginBottom: "var(--space-3)",
+                }}
+              >
+                Colors
+              </h3>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "var(--space-2)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--space-2)",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      background: "var(--color-accent)",
+                      borderRadius: "4px",
+                    }}
+                  ></div>
                   <span style={{ fontSize: "14px" }}>--color-accent</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-                  <div style={{ width: "24px", height: "24px", background: "var(--color-accent-2)", borderRadius: "4px" }}></div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--space-2)",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      background: "var(--color-accent-2)",
+                      borderRadius: "4px",
+                    }}
+                  ></div>
                   <span style={{ fontSize: "14px" }}>--color-accent-2</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-                  <div style={{ width: "24px", height: "24px", background: "var(--color-page)", border: "1px solid var(--color-border)", borderRadius: "4px" }}></div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--space-2)",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      background: "var(--color-page)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "4px",
+                    }}
+                  ></div>
                   <span style={{ fontSize: "14px" }}>--color-page</span>
                 </div>
               </div>
             </div>
 
             <div>
-              <h3 style={{ fontFamily: "var(--font-sans)", fontSize: "18px", marginBottom: "var(--space-3)" }}>Typography</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
-                <div style={{ fontFamily: "var(--font-serif)", fontSize: "var(--h1-mobile)" }}>Playfair Display</div>
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--card-title-mobile)" }}>Inter Sans</div>
-                <div style={{ fontSize: "var(--meta)", color: "var(--color-text-muted)" }}>Meta text (14px)</div>
+              <h3
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "18px",
+                  marginBottom: "var(--space-3)",
+                }}
+              >
+                Typography
+              </h3>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "var(--space-2)",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "var(--h1-mobile)",
+                  }}
+                >
+                  Playfair Display
+                </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "var(--card-title-mobile)",
+                  }}
+                >
+                  Inter Sans
+                </div>
+                <div
+                  style={{
+                    fontSize: "var(--meta)",
+                    color: "var(--color-text-muted)",
+                  }}
+                >
+                  Meta text (14px)
+                </div>
               </div>
             </div>
 
             <div>
-              <h3 style={{ fontFamily: "var(--font-sans)", fontSize: "18px", marginBottom: "var(--space-3)" }}>Components</h3>
-              <ul style={{ listStyle: "none", padding: 0, fontSize: "14px", color: "var(--color-text-muted)" }}>
+              <h3
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "18px",
+                  marginBottom: "var(--space-3)",
+                }}
+              >
+                Components
+              </h3>
+              <ul
+                style={{
+                  listStyle: "none",
+                  padding: 0,
+                  fontSize: "14px",
+                  color: "var(--color-text-muted)",
+                }}
+              >
                 <li>.hw-card - Story card</li>
                 <li>.hw-card-media - Image aspect ratio</li>
                 <li>.hw-play - Play button</li>
@@ -237,18 +380,34 @@ export default function DesignDemo() {
             </div>
           </div>
 
-          <div style={{ marginTop: "var(--space-6)", padding: "var(--space-4)", background: "var(--color-page)", borderRadius: "var(--radius-card)" }}>
-            <h4 style={{ fontSize: "16px", marginBottom: "var(--space-2)" }}>Accessibility Features</h4>
-            <ul style={{ fontSize: "14px", lineHeight: "1.6", color: "var(--color-text)" }}>
+          <div
+            style={{
+              marginTop: "var(--space-6)",
+              padding: "var(--space-4)",
+              background: "var(--color-page)",
+              borderRadius: "var(--radius-card)",
+            }}
+          >
+            <h4 style={{ fontSize: "16px", marginBottom: "var(--space-2)" }}>
+              Accessibility Features
+            </h4>
+            <ul
+              style={{
+                fontSize: "14px",
+                lineHeight: "1.6",
+                color: "var(--color-text)",
+              }}
+            >
               <li>✓ Focus-visible outline with --color-focus</li>
-              <li>✓ Prefers-reduced-motion support (no hover scale on .hw-play)</li>
+              <li>
+                ✓ Prefers-reduced-motion support (no hover scale on .hw-play)
+              </li>
               <li>✓ Semantic HTML with proper aria-labels</li>
               <li>✓ Minimum touch targets (48px)</li>
               <li>✓ Readable text contrast</li>
             </ul>
           </div>
         </section>
-
       </main>
 
       {/* Bottom spacing */}

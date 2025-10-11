@@ -1,14 +1,15 @@
 "use client";
 
-import React from 'react';
-import DesktopNavigation from './DesktopNavigation';
-import MobileNavigation from './MobileNavigation';
-import HamburgerMenu from './HamburgerMenu';
-import RecordModal from './RecordModal';
-import { useRecordModal } from '@/hooks/use-record-modal';
+import React from "react";
+import DesktopNavigation from "./DesktopNavigation";
+import MobileNavigation from "./MobileNavigation";
+import HamburgerMenu from "./HamburgerMenu";
+import RecordModal from "./RecordModal";
+import { useRecordModal } from "@/hooks/use-record-modal";
 
 export default function NavigationWrapper() {
-  const { isOpen, openModal, closeModal, handleSave, initialData } = useRecordModal();
+  const { isOpen, openModal, closeModal, handleSave, initialData } =
+    useRecordModal();
 
   return (
     <>

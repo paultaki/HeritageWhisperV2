@@ -20,19 +20,22 @@ export async function GET(request: NextRequest) {
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json(
         { error: "Unauthorized - no token provided" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const token = authHeader.substring(7);
 
     // Verify token and get user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
       return NextResponse.json(
         { error: "Unauthorized - invalid token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -44,7 +47,12 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (dbError || !userRecord) {
-      logger.debug('[Agreements] No user record found for', user.id, 'Error:', dbError?.message);
+      logger.debug(
+        "[Agreements] No user record found for",
+        user.id,
+        "Error:",
+        dbError?.message,
+      );
 
       // Check if user has agreement records in user_agreements table
       const { data: agreements, error: agreementError } = await supabase
@@ -54,16 +62,21 @@ export async function GET(request: NextRequest) {
 
       if (agreements && agreements.length > 0) {
         // Check if they have both current versions
-        const hasTerms = agreements.some(a =>
-          a.agreement_type === 'terms' && a.version === CURRENT_TERMS_VERSION
+        const hasTerms = agreements.some(
+          (a) =>
+            a.agreement_type === "terms" && a.version === CURRENT_TERMS_VERSION,
         );
-        const hasPrivacy = agreements.some(a =>
-          a.agreement_type === 'privacy' && a.version === CURRENT_PRIVACY_VERSION
+        const hasPrivacy = agreements.some(
+          (a) =>
+            a.agreement_type === "privacy" &&
+            a.version === CURRENT_PRIVACY_VERSION,
         );
 
         if (hasTerms && hasPrivacy) {
           // User has already accepted both agreements, they're compliant
-          logger.debug('[Agreements] User has both agreement records - considering compliant');
+          logger.debug(
+            "[Agreements] User has both agreement records - considering compliant",
+          );
           return NextResponse.json({
             currentVersions: {
               terms: CURRENT_TERMS_VERSION,
@@ -103,8 +116,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user needs to accept current versions
-    const needsTermsAcceptance = userRecord.latest_terms_version !== CURRENT_TERMS_VERSION;
-    const needsPrivacyAcceptance = userRecord.latest_privacy_version !== CURRENT_PRIVACY_VERSION;
+    const needsTermsAcceptance =
+      userRecord.latest_terms_version !== CURRENT_TERMS_VERSION;
+    const needsPrivacyAcceptance =
+      userRecord.latest_privacy_version !== CURRENT_PRIVACY_VERSION;
 
     return NextResponse.json({
       currentVersions: {
@@ -126,7 +141,7 @@ export async function GET(request: NextRequest) {
     logger.error("[Agreements] Error checking status:", error);
     return NextResponse.json(
       { error: "Failed to check agreement status" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

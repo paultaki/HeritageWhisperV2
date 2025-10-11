@@ -1,60 +1,64 @@
 // Note: We're using Drizzle directly with PostgreSQL connection instead of Supabase client
 // This file provides utility functions for working with our database schema
 
-import { createClient } from '@supabase/supabase-js';
-import { normalizeYear } from './utils';
+import { createClient } from "@supabase/supabase-js";
+import { normalizeYear } from "./utils";
 
 // Supabase OAuth configuration
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
-    storageKey: 'heritage-whisper-auth',
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    storageKey: "heritage-whisper-auth",
+    storage: typeof window !== "undefined" ? window.localStorage : undefined,
     autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
+    detectSessionInUrl: true,
+  },
 });
 
 // Expose supabase to window for debugging (remove in production)
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
   (window as any).supabase = supabase;
 }
 
 export async function signInWithGoogle() {
-  const redirectUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/auth/callback`
-    : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3002'}/auth/callback`;
+  const redirectUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/auth/callback`
+      : `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3002"}/auth/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
+    provider: "google",
     options: {
       redirectTo: redirectUrl,
       queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
-      }
-    }
+        access_type: "offline",
+        prompt: "consent",
+      },
+    },
   });
-  
+
   if (error) {
-    console.error('Error signing in with Google:', error);
+    console.error("Error signing in with Google:", error);
     throw error;
   }
-  
+
   return data;
 }
 
 export async function handleOAuthCallback() {
-  const { data: { session }, error } = await supabase.auth.getSession();
-  
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+
   if (error) {
-    console.error('Error getting session:', error);
+    console.error("Error getting session:", error);
     throw error;
   }
-  
+
   return session;
 }
 
@@ -115,15 +119,18 @@ export function calculateAge(birthYear: number): number {
 // Calculate decade from year
 export function getDecadeFromYear(year: number | string): string {
   const normalizedYear = normalizeYear(year);
-  if (!normalizedYear) return 'Unknown';
-  
+  if (!normalizedYear) return "Unknown";
+
   const decade = Math.floor(normalizedYear / 10) * 10;
   return `${decade}s`;
 }
 
 // Format age range for decade
-export function getAgeRangeForDecade(birthYear: number, decade: string): string {
-  const decadeStart = parseInt(decade.replace('s', ''));
+export function getAgeRangeForDecade(
+  birthYear: number,
+  decade: string,
+): string {
+  const decadeStart = parseInt(decade.replace("s", ""));
   const startAge = Math.max(0, decadeStart - birthYear);
   const endAge = startAge + 9;
   return `Ages ${startAge}-${endAge}`;
@@ -131,7 +138,7 @@ export function getAgeRangeForDecade(birthYear: number, decade: string): string 
 
 // Get decade display name
 export function getDecadeDisplayName(decade: string): string {
-  const year = decade.replace('s', '');
+  const year = decade.replace("s", "");
   return `THE ${year}s`;
 }
 
@@ -139,8 +146,8 @@ export function getDecadeDisplayName(decade: string): string {
 export function groupStoriesByDecade(stories: Story[], birthYear: number) {
   const decades = new Map<string, Story[]>();
   const normalizedBirthYear = normalizeYear(birthYear);
-  
-  stories.forEach(story => {
+
+  stories.forEach((story) => {
     const normalizedStoryYear = normalizeYear(story.storyYear);
 
     // Skip invalid years
@@ -157,7 +164,7 @@ export function groupStoriesByDecade(stories: Story[], birthYear: number) {
     // This is handled in the timeline rendering logic
 
     const decade = getDecadeFromYear(normalizedStoryYear);
-    if (decade !== 'Unknown') {
+    if (decade !== "Unknown") {
       if (!decades.has(decade)) {
         decades.set(decade, []);
       }
@@ -175,6 +182,6 @@ export function groupStoriesByDecade(stories: Story[], birthYear: number) {
         const yearA = normalizeYear(a.storyYear) || 0;
         const yearB = normalizeYear(b.storyYear) || 0;
         return yearA - yearB;
-      })
+      }),
     }));
 }

@@ -21,7 +21,7 @@ export function InFlowPromptCard({
   onAnswer,
   onKeepTalking,
   onDismiss,
-  autoDismissDelay = 500
+  autoDismissDelay = 500,
 }: InFlowPromptCardProps) {
   const [shouldShow, setShouldShow] = useState(isVisible);
 
@@ -51,7 +51,7 @@ export function InFlowPromptCard({
             type: "spring",
             damping: 25,
             stiffness: 300,
-            duration: 0.3
+            duration: 0.3,
           }}
           className="fixed bottom-0 left-0 right-0 z-50 p-4 pb-8"
         >

@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     logger.error("Auth verification error:", error);
     return NextResponse.json(
       { error: "Authentication failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -37,7 +37,8 @@ export default function Login() {
     } catch (error: any) {
       toast({
         title: "Authentication failed",
-        description: error.message || "Please check your credentials and try again",
+        description:
+          error.message || "Please check your credentials and try again",
         variant: "destructive",
       });
     }
@@ -52,23 +53,31 @@ export default function Login() {
             className="w-40 h-40 mx-auto mb-8 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => router.push("/")}
           >
-            <img src={logoUrl} alt="HeritageWhisper Logo" className="w-full h-full object-contain" />
+            <img
+              src={logoUrl}
+              alt="HeritageWhisper Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
-          <p className="text-2xl text-muted-foreground font-medium">Your voice. Their treasure. Forever.</p>
+          <p className="text-2xl text-muted-foreground font-medium">
+            Your voice. Their treasure. Forever.
+          </p>
         </div>
-        
+
         <Card className="shadow-lg border">
           <CardContent className="pt-8 pb-8 px-8">
             <h2 className="text-2xl font-semibold text-center mb-8">
               Welcome Back to Your Story
             </h2>
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="email" className="text-lg font-medium">Email</Label>
-                <Input 
-                  type="email" 
-                  id="email" 
+                <Label htmlFor="email" className="text-lg font-medium">
+                  Email
+                </Label>
+                <Input
+                  type="email"
+                  id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="mt-3 text-lg py-4"
@@ -78,9 +87,11 @@ export default function Login() {
                   data-testid="input-email"
                 />
               </div>
-              
+
               <div>
-                <Label htmlFor="password" className="text-lg font-medium">Password</Label>
+                <Label htmlFor="password" className="text-lg font-medium">
+                  Password
+                </Label>
                 <div className="mt-3 flex items-center gap-2">
                   <div className="relative flex-1">
                     <Input
@@ -99,7 +110,9 @@ export default function Login() {
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 transition-colors"
-                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
                       >
                         {showPassword ? (
                           <EyeOff className="h-5 w-5" />
@@ -111,12 +124,15 @@ export default function Login() {
                   </div>
                 </div>
                 <div className="mt-2 text-right">
-                  <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-sm text-primary hover:underline"
+                  >
                     Forgot password?
                   </Link>
                 </div>
               </div>
-              
+
               <Button
                 type="submit"
                 className="w-full text-xl font-semibold py-4"
@@ -165,7 +181,7 @@ export default function Login() {
               </svg>
               Continue with Google
             </Button>
-              
+
             <div className="text-center mt-6">
               <Link href="/auth/register">
                 <Button

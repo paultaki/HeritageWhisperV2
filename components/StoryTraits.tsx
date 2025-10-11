@@ -1,5 +1,9 @@
 /** traits: [{label, confidence}] — render a single chip; collapse handled via CSS */
-export default function StoryTraits({ traits = [] }: { traits: Array<{ label: string; confidence: number }> }) {
+export default function StoryTraits({
+  traits = [],
+}: {
+  traits: Array<{ label: string; confidence: number }>;
+}) {
   if (!traits.length) return null;
   const t = traits[0];
   return (

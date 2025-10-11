@@ -9,7 +9,8 @@ export function canView(permissionLevel: string): boolean {
 }
 
 export function getShareUrl(token: string, origin?: string): string {
-  const baseUrl = origin || (typeof window !== "undefined" ? window.location.origin : "");
+  const baseUrl =
+    origin || (typeof window !== "undefined" ? window.location.origin : "");
   return `${baseUrl}/shared/${token}`;
 }
 

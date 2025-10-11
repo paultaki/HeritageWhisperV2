@@ -1,18 +1,20 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { X, MessageCircle, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { X, MessageCircle, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface FloatingInsightCardProps {
-  followUp: {
-    id?: string;
-    text?: string;
-    title?: string;
-    icon?: React.ReactNode;
-  } | string;
+  followUp:
+    | {
+        id?: string;
+        text?: string;
+        title?: string;
+        icon?: React.ReactNode;
+      }
+    | string;
   onAnswer?: () => void;
   storyId?: string;
 }
@@ -20,7 +22,7 @@ interface FloatingInsightCardProps {
 export default function FloatingInsightCard({
   followUp,
   onAnswer,
-  storyId = 'default'
+  storyId = "default",
 }: FloatingInsightCardProps) {
   const isMobile = useIsMobile();
   const [isVisible, setIsVisible] = useState(false);
@@ -28,17 +30,17 @@ export default function FloatingInsightCard({
   const [hasTriggered, setHasTriggered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const normalizedFollowUp = typeof followUp === 'string'
-    ? { text: followUp }
-    : followUp;
+  const normalizedFollowUp =
+    typeof followUp === "string" ? { text: followUp } : followUp;
 
-  const questionText = normalizedFollowUp.text || normalizedFollowUp.title || '';
+  const questionText =
+    normalizedFollowUp.text || normalizedFollowUp.title || "";
 
   const storageKey = `floating-insight-dismissed-${storyId}`;
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const wasDismissed = sessionStorage.getItem(storageKey) === 'true';
+    if (typeof window !== "undefined") {
+      const wasDismissed = sessionStorage.getItem(storageKey) === "true";
       if (wasDismissed) {
         setIsDismissed(true);
       }
@@ -46,8 +48,8 @@ export default function FloatingInsightCard({
   }, [storageKey]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const sessionKey = 'book-visit-shown';
+    if (typeof window !== "undefined") {
+      const sessionKey = "book-visit-shown";
       const hasShownThisSession = sessionStorage.getItem(sessionKey);
 
       if (hasShownThisSession) {
@@ -66,8 +68,8 @@ export default function FloatingInsightCard({
       if (!hasTriggered && !isDismissed) {
         setHasTriggered(true);
         setIsVisible(true);
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('book-visit-shown', 'true');
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("book-visit-shown", "true");
         }
       }
     };
@@ -82,17 +84,23 @@ export default function FloatingInsightCard({
       startPauseTimer();
     };
 
-    const activityEvents = ['mousemove', 'click', 'scroll', 'keydown', 'touchstart'];
+    const activityEvents = [
+      "mousemove",
+      "click",
+      "scroll",
+      "keydown",
+      "touchstart",
+    ];
 
     startPauseTimer();
 
-    activityEvents.forEach(event => {
+    activityEvents.forEach((event) => {
       window.addEventListener(event, resetPauseTimer);
     });
 
     return () => {
       clearTimeout(timeoutId);
-      activityEvents.forEach(event => {
+      activityEvents.forEach((event) => {
         window.removeEventListener(event, resetPauseTimer);
       });
     };
@@ -101,15 +109,15 @@ export default function FloatingInsightCard({
   const handleDismiss = () => {
     setIsVisible(false);
     setIsDismissed(true);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem(storageKey, 'true');
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem(storageKey, "true");
     }
   };
 
   const handleRecall = () => {
     setIsVisible(true);
     setIsDismissed(false);
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       sessionStorage.removeItem(storageKey);
     }
   };
@@ -120,7 +128,10 @@ export default function FloatingInsightCard({
     }
   };
 
-  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+  const handleDragEnd = (
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo,
+  ) => {
     if (isMobile) {
       if (info.offset.y > 100) {
         handleDismiss();
@@ -135,29 +146,29 @@ export default function FloatingInsightCard({
     visible: {
       x: 0,
       opacity: 1,
-      transition: { duration: 0.2, ease: 'easeOut' }
+      transition: { duration: 0.2, ease: "easeOut" },
     },
     exit: {
       x: 400,
       opacity: 0,
-      transition: { duration: 0.2, ease: 'easeIn' }
-    }
+      transition: { duration: 0.2, ease: "easeIn" },
+    },
   };
 
   const mobileVariants = {
-    hidden: { y: '100%', opacity: 0, scale: 1 },
+    hidden: { y: "100%", opacity: 0, scale: 1 },
     visible: {
       y: 0,
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.2, ease: 'easeOut' }
+      transition: { duration: 0.2, ease: "easeOut" },
     },
     exit: {
-      y: '100%',
+      y: "100%",
       opacity: 0,
       scale: 0.8,
-      transition: { duration: 0.15, ease: 'easeIn' }
-    }
+      transition: { duration: 0.15, ease: "easeIn" },
+    },
   };
 
   return (
@@ -168,14 +179,14 @@ export default function FloatingInsightCard({
             ref={cardRef}
             className={`fixed bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-xl rounded-lg p-5 z-[45] overflow-hidden ${
               isMobile
-                ? 'bottom-20 left-4 right-4 min-h-[25vh] max-h-[40vh] rounded-2xl'
-                : 'right-4 bottom-20 w-[320px]'
+                ? "bottom-20 left-4 right-4 min-h-[25vh] max-h-[40vh] rounded-2xl"
+                : "right-4 bottom-20 w-[320px]"
             }`}
             initial="hidden"
             animate="visible"
             exit="exit"
             variants={isMobile ? mobileVariants : desktopVariants}
-            drag={isMobile ? 'y' : false}
+            drag={isMobile ? "y" : false}
             dragConstraints={isMobile ? { top: 0, bottom: 300 } : undefined}
             dragElastic={0.3}
             onDragEnd={handleDragEnd}
@@ -189,10 +200,12 @@ export default function FloatingInsightCard({
 
             <button
               onClick={handleDismiss}
-              className={`absolute ${isMobile ? 'top-2 right-2 p-2' : 'top-3 right-3 p-1'} rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors bg-gray-50 dark:bg-gray-800`}
+              className={`absolute ${isMobile ? "top-2 right-2 p-2" : "top-3 right-3 p-1"} rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors bg-gray-50 dark:bg-gray-800`}
               aria-label="Close insight card"
             >
-              <X className={`${isMobile ? 'w-6 h-6' : 'w-4 h-4'} text-gray-600 dark:text-gray-400`} />
+              <X
+                className={`${isMobile ? "w-6 h-6" : "w-4 h-4"} text-gray-600 dark:text-gray-400`}
+              />
             </button>
 
             <div className="flex flex-col h-full">
@@ -205,7 +218,10 @@ export default function FloatingInsightCard({
                 HW Personalized Story Prompt:
               </div>
 
-              <div className="flex-1 overflow-y-auto mb-4" id="insight-card-content">
+              <div
+                className="flex-1 overflow-y-auto mb-4"
+                id="insight-card-content"
+              >
                 <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                   {questionText}
                 </p>
@@ -230,10 +246,10 @@ export default function FloatingInsightCard({
           <motion.button
             className={`fixed bg-primary text-white rounded-full shadow-lg z-[44] hover:scale-110 transition-transform ${
               isMobile
-                ? 'bottom-28 right-4 w-14 h-14 flex items-center justify-center'
-                : 'bottom-24 right-4 w-12 h-12 flex items-center justify-center'
+                ? "bottom-28 right-4 w-14 h-14 flex items-center justify-center"
+                : "bottom-24 right-4 w-12 h-12 flex items-center justify-center"
             }`}
-            style={{ left: 'auto' }}
+            style={{ left: "auto" }}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
@@ -242,7 +258,7 @@ export default function FloatingInsightCard({
             onClick={handleRecall}
             aria-label="Show follow-up questions"
           >
-            <MessageCircle className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'}`} />
+            <MessageCircle className={`${isMobile ? "w-6 h-6" : "w-5 h-5"}`} />
           </motion.button>
         )}
       </AnimatePresence>

@@ -1,5 +1,5 @@
-import React from 'react';
-import Page from './Page';
+import React from "react";
+import Page from "./Page";
 
 interface SpreadViewProps {
   leftPage: {
@@ -29,29 +29,21 @@ export default function SpreadView({
   rightPage,
   totalPages,
   scale = 1.0,
-  className = '',
+  className = "",
 }: SpreadViewProps) {
   return (
     <div
       className={`spread ${className}`}
       style={{
         transform: scale !== 1.0 ? `scale(${scale})` : undefined,
-        transformOrigin: 'center top',
-        transition: 'transform 140ms ease-out',
+        transformOrigin: "center top",
+        transition: "transform 140ms ease-out",
       }}
     >
-      <Page
-        index={leftPage.index}
-        total={totalPages}
-        side="left"
-      >
+      <Page index={leftPage.index} total={totalPages} side="left">
         {leftPage.children}
       </Page>
-      <Page
-        index={rightPage.index}
-        total={totalPages}
-        side="right"
-      >
+      <Page index={rightPage.index} total={totalPages} side="right">
         {rightPage.children}
       </Page>
     </div>

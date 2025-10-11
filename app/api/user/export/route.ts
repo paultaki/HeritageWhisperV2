@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
-import { stories, users, userAgreements, sharedAccess, familyMembers } from "@/shared/schema";
+import {
+  stories,
+  users,
+  userAgreements,
+  sharedAccess,
+  familyMembers,
+} from "@/shared/schema";
 import { eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
@@ -37,7 +43,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -50,7 +56,7 @@ export async function GET(request: NextRequest) {
     if (authError || !authUser) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -67,7 +73,11 @@ export async function GET(request: NextRequest) {
       familyMembersRecords,
     ] = await Promise.all([
       // User profile
-      db.select().from(users).where(eq(users.id, userId)).then(res => res[0]),
+      db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .then((res) => res[0]),
 
       // Stories
       db.select().from(stories).where(eq(stories.userId, userId)),
@@ -77,8 +87,14 @@ export async function GET(request: NextRequest) {
 
       // Shared access (both as owner and recipient)
       Promise.all([
-        db.select().from(sharedAccess).where(eq(sharedAccess.ownerUserId, userId)),
-        db.select().from(sharedAccess).where(eq(sharedAccess.sharedWithUserId, userId)),
+        db
+          .select()
+          .from(sharedAccess)
+          .where(eq(sharedAccess.ownerUserId, userId)),
+        db
+          .select()
+          .from(sharedAccess)
+          .where(eq(sharedAccess.sharedWithUserId, userId)),
       ]).then(([owned, received]) => ({ owned, received })),
 
       // Family members
@@ -175,35 +191,45 @@ export async function GET(request: NextRequest) {
       statistics: {
         totalStories: userStories.length,
         totalRecordingMinutes: Math.round(
-          userStories.reduce((sum, s) => sum + (s.durationSeconds || 0), 0) / 60
+          userStories.reduce((sum, s) => sum + (s.durationSeconds || 0), 0) /
+            60,
         ),
-        storiesWithPhotos: userStories.filter(s => s.photoUrl || (Array.isArray(s.photos) && s.photos.length > 0)).length,
-        storiesWithAudio: userStories.filter(s => s.audioUrl).length,
-        oldestStoryYear: Math.min(...userStories.map(s => s.storyYear || 9999)),
-        newestStoryYear: Math.max(...userStories.map(s => s.storyYear || 0)),
+        storiesWithPhotos: userStories.filter(
+          (s) => s.photoUrl || (Array.isArray(s.photos) && s.photos.length > 0),
+        ).length,
+        storiesWithAudio: userStories.filter((s) => s.audioUrl).length,
+        oldestStoryYear: Math.min(
+          ...userStories.map((s) => s.storyYear || 9999),
+        ),
+        newestStoryYear: Math.max(...userStories.map((s) => s.storyYear || 0)),
         familyMembersCount: familyMembersRecords.length,
         sharedStoriesCount: sharedAccessRecords.owned.length,
       },
 
       // Export metadata
       dataPolicy: {
-        description: "This export contains all personal data associated with your HeritageWhisper account.",
-        fileUrls: "Audio and photo files can be downloaded separately from your timeline.",
+        description:
+          "This export contains all personal data associated with your HeritageWhisper account.",
+        fileUrls:
+          "Audio and photo files can be downloaded separately from your timeline.",
         format: "JSON",
         gdprCompliant: true,
-        dataRetention: "Data is retained until account deletion or upon request.",
+        dataRetention:
+          "Data is retained until account deletion or upon request.",
       },
     };
 
     logger.debug(`[Data Export] Export completed for user: ${userId}`);
-    logger.debug(`[Data Export] Exported ${userStories.length} stories, ${userAgreementsRecords.length} agreements`);
+    logger.debug(
+      `[Data Export] Exported ${userStories.length} stories, ${userAgreementsRecords.length} agreements`,
+    );
 
     // Return as downloadable JSON file
     return new NextResponse(JSON.stringify(exportData, null, 2), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Content-Disposition": `attachment; filename="heritagewhisper-data-export-${new Date().toISOString().split('T')[0]}.json"`,
+        "Content-Disposition": `attachment; filename="heritagewhisper-data-export-${new Date().toISOString().split("T")[0]}.json"`,
       },
     });
   } catch (error) {
@@ -213,7 +239,7 @@ export async function GET(request: NextRequest) {
         error: "Failed to export data",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

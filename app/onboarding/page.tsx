@@ -63,14 +63,15 @@ export default function Onboarding() {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to save birth year. Please try again.",
+        description:
+          error.message || "Failed to save birth year. Please try again.",
         variant: "destructive",
       });
       setIsSubmitting(false);
     }
   };
 
-  const yearDigits = birthYear.padStart(4, '0').split('');
+  const yearDigits = birthYear.padStart(4, "0").split("");
 
   const updateYear = (index: number, value: string) => {
     // Only allow single digits
@@ -80,7 +81,7 @@ export default function Onboarding() {
 
     const newDigits = [...yearDigits];
     newDigits[index] = value;
-    const newYear = newDigits.join('');
+    const newYear = newDigits.join("");
 
     if (newYear.length === 4) {
       setBirthYear(newYear);
@@ -88,7 +89,9 @@ export default function Onboarding() {
 
     // Auto-focus next input
     if (value && index < 3) {
-      const nextInput = document.querySelector(`[data-testid="input-year-digit-${index + 1}"]`) as HTMLInputElement;
+      const nextInput = document.querySelector(
+        `[data-testid="input-year-digit-${index + 1}"]`,
+      ) as HTMLInputElement;
       if (nextInput) {
         nextInput.focus();
         nextInput.select();
@@ -96,10 +99,15 @@ export default function Onboarding() {
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
     // Handle backspace to move to previous input
-    if (e.key === 'Backspace' && !yearDigits[index] && index > 0) {
-      const prevInput = document.querySelector(`[data-testid="input-year-digit-${index - 1}"]`) as HTMLInputElement;
+    if (e.key === "Backspace" && !yearDigits[index] && index > 0) {
+      const prevInput = document.querySelector(
+        `[data-testid="input-year-digit-${index - 1}"]`,
+      ) as HTMLInputElement;
       if (prevInput) {
         prevInput.focus();
         prevInput.select();

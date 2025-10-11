@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -40,12 +40,15 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     // Rate limiting: 30 API requests per minute per user
-    const rateLimitResponse = await checkRateLimit(`api:verify-upload:${user.id}`, apiRatelimit);
+    const rateLimitResponse = await checkRateLimit(
+      `api:verify-upload:${user.id}`,
+      apiRatelimit,
+    );
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (!filePath) {
       return NextResponse.json(
         { error: "filePath is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -65,29 +68,29 @@ export async function POST(request: NextRequest) {
     // Use list() with prefix to check if file exists WITHOUT downloading
     // This is much more efficient than download() for large files
     const { data: files, error: listError } = await supabaseAdmin.storage
-      .from('heritage-whisper-files')
-      .list(filePath.substring(0, filePath.lastIndexOf('/')), {
+      .from("heritage-whisper-files")
+      .list(filePath.substring(0, filePath.lastIndexOf("/")), {
         limit: 100,
         offset: 0,
-        search: filePath.substring(filePath.lastIndexOf('/') + 1)
+        search: filePath.substring(filePath.lastIndexOf("/") + 1),
       });
 
     if (listError) {
-      logger.error('File verification failed:', listError);
+      logger.error("File verification failed:", listError);
       return NextResponse.json({
         exists: false,
-        error: listError.message
+        error: listError.message,
       });
     }
 
     // Check if file exists in the list
-    const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-    const fileInfo = files?.find(f => f.name === fileName);
+    const fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+    const fileInfo = files?.find((f) => f.name === fileName);
 
     if (!fileInfo) {
       logger.debug(`File not found: ${filePath}`);
       return NextResponse.json({
-        exists: false
+        exists: false,
       });
     }
 
@@ -96,7 +99,9 @@ export async function POST(request: NextRequest) {
 
     // Optionally validate size matches expected
     if (expectedSize && actualSize !== expectedSize) {
-      logger.warn(`File size mismatch for ${filePath}: expected ${expectedSize}, got ${actualSize}`);
+      logger.warn(
+        `File size mismatch for ${filePath}: expected ${expectedSize}, got ${actualSize}`,
+      );
     }
 
     logger.debug(`File verified: ${filePath} (${actualSize} bytes)`);
@@ -106,16 +111,16 @@ export async function POST(request: NextRequest) {
       size: actualSize,
       id: fileInfo.id,
       updatedAt: fileInfo.updated_at,
-      createdAt: fileInfo.created_at
+      createdAt: fileInfo.created_at,
     });
-
   } catch (error) {
     logger.error("File verification error:", error);
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to verify upload"
+        error:
+          error instanceof Error ? error.message : "Failed to verify upload",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

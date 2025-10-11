@@ -16,7 +16,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 // GET all photos for a story
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     // Get the Authorization header
@@ -26,7 +26,7 @@ export async function GET(
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function GET(
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -54,7 +54,7 @@ export async function GET(
     if (fetchError || !story) {
       return NextResponse.json(
         { error: "Story not found or unauthorized" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -65,22 +65,27 @@ export async function GET(
         if (!photo.url) return photo;
 
         // If already a full URL, use as-is
-        if (photo.url.startsWith('http://') || photo.url.startsWith('https://')) {
+        if (
+          photo.url.startsWith("http://") ||
+          photo.url.startsWith("https://")
+        ) {
           return photo;
         }
 
         // Generate signed URL for storage path
         // Photos are stored with 'photo/' prefix in heritage-whisper-files bucket
-        const photoPath = photo.url.startsWith('photo/') ? photo.url : `photo/${photo.url}`;
+        const photoPath = photo.url.startsWith("photo/")
+          ? photo.url
+          : `photo/${photo.url}`;
         const { data: signedUrlData } = await supabaseAdmin.storage
-          .from('heritage-whisper-files')
+          .from("heritage-whisper-files")
           .createSignedUrl(photoPath, 3600); // 1 hour expiry
 
         return {
           ...photo,
-          url: signedUrlData?.signedUrl || photo.url
+          url: signedUrlData?.signedUrl || photo.url,
         };
-      })
+      }),
     );
 
     return NextResponse.json({ photos: photosWithSignedUrls });
@@ -88,7 +93,7 @@ export async function GET(
     logger.error("Photos fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch photos" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -96,7 +101,7 @@ export async function GET(
 // POST add a new photo to a story
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     // Get the Authorization header
@@ -106,7 +111,7 @@ export async function POST(
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -119,7 +124,7 @@ export async function POST(
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -131,7 +136,7 @@ export async function POST(
     if (!filePath) {
       return NextResponse.json(
         { error: "File path is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -144,14 +149,20 @@ export async function POST(
       .single();
 
     if (fetchError || !story) {
-      logger.error('[POST /api/stories/[id]/photos] Story fetch error:', fetchError);
+      logger.error(
+        "[POST /api/stories/[id]/photos] Story fetch error:",
+        fetchError,
+      );
       return NextResponse.json(
         { error: "Story not found or unauthorized" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    logger.debug('[POST /api/stories/[id]/photos] Current story metadata:', story.metadata);
+    logger.debug(
+      "[POST /api/stories/[id]/photos] Current story metadata:",
+      story.metadata,
+    );
 
     // Create new photo object - store the PATH, not the signed URL
     const newPhoto = {
@@ -160,22 +171,31 @@ export async function POST(
       filePath: filePath, // Also store as filePath for clarity
       transform: transform || { zoom: 1, position: { x: 0, y: 0 } },
       isHero: isHero || false,
-      caption: ""
+      caption: "",
     };
 
-    logger.debug('[POST /api/stories/[id]/photos] New photo object:', newPhoto);
+    logger.debug("[POST /api/stories/[id]/photos] New photo object:", newPhoto);
 
     // Get current photos from metadata
     const currentPhotos = story.metadata?.photos || [];
-    logger.debug('[POST /api/stories/[id]/photos] Current photos count:', currentPhotos.length);
+    logger.debug(
+      "[POST /api/stories/[id]/photos] Current photos count:",
+      currentPhotos.length,
+    );
 
     // If this is marked as hero, unmark other photos
     const updatedPhotos = isHero
       ? [...currentPhotos.map((p: any) => ({ ...p, isHero: false })), newPhoto]
       : [...currentPhotos, newPhoto];
 
-    logger.debug('[POST /api/stories/[id]/photos] Updated photos count:', updatedPhotos.length);
-    logger.debug('[POST /api/stories/[id]/photos] Updated photos array:', updatedPhotos);
+    logger.debug(
+      "[POST /api/stories/[id]/photos] Updated photos count:",
+      updatedPhotos.length,
+    );
+    logger.debug(
+      "[POST /api/stories/[id]/photos] Updated photos array:",
+      updatedPhotos,
+    );
 
     // Update story metadata with new photos array in Supabase database
     const { data: updatedStory, error: updateError } = await supabaseAdmin
@@ -183,8 +203,8 @@ export async function POST(
       .update({
         metadata: {
           ...story.metadata,
-          photos: updatedPhotos
-        }
+          photos: updatedPhotos,
+        },
       })
       .eq("id", params.id)
       .eq("user_id", user.id)
@@ -192,34 +212,39 @@ export async function POST(
       .single();
 
     if (updateError || !updatedStory) {
-      logger.error('[POST /api/stories/[id]/photos] Update error:', updateError);
+      logger.error(
+        "[POST /api/stories/[id]/photos] Update error:",
+        updateError,
+      );
       return NextResponse.json(
         { error: "Failed to add photo to story" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
-    logger.debug('[POST /api/stories/[id]/photos] Story updated successfully. New metadata:', updatedStory.metadata);
+    logger.debug(
+      "[POST /api/stories/[id]/photos] Story updated successfully. New metadata:",
+      updatedStory.metadata,
+    );
 
     // Generate a signed URL for the photo so it can be displayed immediately
     // Photos are stored with 'photo/' prefix in heritage-whisper-files bucket
-    const photoPath = filePath.startsWith('photo/') ? filePath : `photo/${filePath}`;
+    const photoPath = filePath.startsWith("photo/")
+      ? filePath
+      : `photo/${filePath}`;
     const { data: signedUrlData } = await supabaseAdmin.storage
-      .from('heritage-whisper-files')
+      .from("heritage-whisper-files")
       .createSignedUrl(photoPath, 604800); // 1 week expiry
 
     const photoWithSignedUrl = {
       ...newPhoto,
       url: signedUrlData?.signedUrl || filePath, // Return signed URL for display
-      filePath: filePath // Always include the storage path
+      filePath: filePath, // Always include the storage path
     };
 
     return NextResponse.json({ photo: photoWithSignedUrl });
   } catch (error) {
     logger.error("Photo add error:", error);
-    return NextResponse.json(
-      { error: "Failed to add photo" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to add photo" }, { status: 500 });
   }
 }

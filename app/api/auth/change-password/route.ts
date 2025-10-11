@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (authError || !authUser) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -48,14 +48,14 @@ export async function POST(request: NextRequest) {
     if (!currentPassword || !newPassword) {
       return NextResponse.json(
         { error: "Current password and new password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (newPassword.length < 8) {
       return NextResponse.json(
         { error: "New password must be at least 8 characters" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -71,17 +71,20 @@ export async function POST(request: NextRequest) {
     if (!user || !user.password) {
       return NextResponse.json(
         { error: "User not found or password not set" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Verify current password
-    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    const isValidPassword = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
 
     if (!isValidPassword) {
       return NextResponse.json(
         { error: "Current password is incorrect" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -98,12 +101,14 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "Password changed successfully",
     });
-
   } catch (error) {
     logger.error("Password change error:", error);
     return NextResponse.json(
-      { error: "Failed to change password", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to change password",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

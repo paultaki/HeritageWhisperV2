@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { getApiUrl } from '@/lib/config';
+import { useState, useEffect } from "react";
+import { getApiUrl } from "@/lib/config";
 
 interface FormattedStory {
   fullText: string;
@@ -9,8 +9,13 @@ interface FormattedStory {
   splitIndex: number;
 }
 
-export function useFormatStory(transcription: string | null | undefined, title?: string) {
-  const [formattedStory, setFormattedStory] = useState<FormattedStory | null>(null);
+export function useFormatStory(
+  transcription: string | null | undefined,
+  title?: string,
+) {
+  const [formattedStory, setFormattedStory] = useState<FormattedStory | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +31,7 @@ export function useFormatStory(transcription: string | null | undefined, title?:
     if (paragraphCount >= 2) {
       // Text is already formatted, just use it as-is with a simple split
       const midpoint = Math.floor(transcription.length * 0.4);
-      const paragraphs = transcription.split(/\n\n+/).filter(p => p.trim());
+      const paragraphs = transcription.split(/\n\n+/).filter((p) => p.trim());
 
       // Find the best paragraph break for splitting
       let splitPoint = 0;
@@ -39,15 +44,17 @@ export function useFormatStory(transcription: string | null | undefined, title?:
         }
       }
 
-      const leftPage = paragraphs.slice(0, Math.max(1, splitPoint)).join('\n\n');
-      const rightPage = paragraphs.slice(splitPoint).join('\n\n');
+      const leftPage = paragraphs
+        .slice(0, Math.max(1, splitPoint))
+        .join("\n\n");
+      const rightPage = paragraphs.slice(splitPoint).join("\n\n");
 
       setFormattedStory({
         fullText: transcription,
         paragraphs,
         leftPage,
         rightPage,
-        splitIndex: splitPoint
+        splitIndex: splitPoint,
       });
       return;
     }
@@ -57,16 +64,16 @@ export function useFormatStory(transcription: string | null | undefined, title?:
       setError(null);
 
       try {
-        const response = await fetch(getApiUrl('/api/format-story'), {
-          method: 'POST',
+        const response = await fetch(getApiUrl("/api/format-story"), {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          credentials: 'include',
+          credentials: "include",
           body: JSON.stringify({
             transcription,
-            title: title || 'Personal Memory'
-          })
+            title: title || "Personal Memory",
+          }),
         });
 
         if (!response.ok) {
@@ -80,7 +87,7 @@ export function useFormatStory(transcription: string | null | undefined, title?:
         } else {
           // Fallback to simple split
           const midpoint = Math.floor(transcription.length * 0.4);
-          const spaceIndex = transcription.indexOf(' ', midpoint);
+          const spaceIndex = transcription.indexOf(" ", midpoint);
           const splitPoint = spaceIndex > -1 ? spaceIndex : midpoint;
 
           setFormattedStory({
@@ -88,16 +95,16 @@ export function useFormatStory(transcription: string | null | undefined, title?:
             paragraphs: [transcription],
             leftPage: transcription.substring(0, splitPoint).trim(),
             rightPage: transcription.substring(splitPoint).trim(),
-            splitIndex: 0
+            splitIndex: 0,
           });
         }
       } catch (err) {
-        console.error('Error formatting story:', err);
-        setError(err instanceof Error ? err.message : 'Failed to format story');
+        console.error("Error formatting story:", err);
+        setError(err instanceof Error ? err.message : "Failed to format story");
 
         // Fallback to simple split on error
         const midpoint = Math.floor(transcription.length * 0.4);
-        const spaceIndex = transcription.indexOf(' ', midpoint);
+        const spaceIndex = transcription.indexOf(" ", midpoint);
         const splitPoint = spaceIndex > -1 ? spaceIndex : midpoint;
 
         setFormattedStory({
@@ -105,7 +112,7 @@ export function useFormatStory(transcription: string | null | undefined, title?:
           paragraphs: [transcription],
           leftPage: transcription.substring(0, splitPoint).trim(),
           rightPage: transcription.substring(splitPoint).trim(),
-          splitIndex: 0
+          splitIndex: 0,
         });
       } finally {
         setIsLoading(false);

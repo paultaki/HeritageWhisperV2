@@ -1,5 +1,14 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, uuid, jsonb } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  varchar,
+  integer,
+  boolean,
+  timestamp,
+  uuid,
+  jsonb,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -20,7 +29,9 @@ export const users = pgTable("users", {
   freeStoriesUsed: integer("free_stories_used").default(0),
   subscriptionStatus: text("subscription_status").default("none"), // 'none', 'active', 'cancelled', 'expired'
   lastTier2Attempt: timestamp("last_tier2_attempt"),
-  doNotAsk: jsonb("do_not_ask").$type<string[]>().default(sql`'[]'::jsonb`),
+  doNotAsk: jsonb("do_not_ask")
+    .$type<string[]>()
+    .default(sql`'[]'::jsonb`),
   onboardingT3RanAt: timestamp("onboarding_t3_ran_at"),
   // subscriptionExpires: timestamp("subscription_expires"),
   // stripeCustomerId: text("stripe_customer_id"),
@@ -42,8 +53,12 @@ export const users = pgTable("users", {
 });
 
 export const stories = pgTable("stories", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
   title: text("title").notNull(),
   audioUrl: text("audio_url"),
   transcription: text("transcription"),
@@ -56,7 +71,9 @@ export const stories = pgTable("stories", {
   lifeAge: integer("life_age"),
   // AI Prompt System additions
   lessonLearned: text("lesson_learned"),
-  lessonAlternatives: jsonb("lesson_alternatives").$type<string[]>().default(sql`'[]'::jsonb`),
+  lessonAlternatives: jsonb("lesson_alternatives")
+    .$type<string[]>()
+    .default(sql`'[]'::jsonb`),
   characterInsights: jsonb("character_insights").$type<{
     traits?: Array<{
       trait: string;
@@ -74,14 +91,19 @@ export const stories = pgTable("stories", {
   sourcePromptId: uuid("source_prompt_id"),
   lifePhase: text("life_phase"), // 'childhood', 'teen', 'early_adult', 'mid_adult', 'late_adult', 'senior'
   photoUrl: text("photo_url"),
-  photoTransform: jsonb("photo_transform").$type<{ zoom: number; position: { x: number; y: number } }>(),
-  photos: jsonb("photos").$type<Array<{
-    id: string;
-    url: string;
-    transform?: { zoom: number; position: { x: number; y: number } };
-    caption?: string;
-    isHero?: boolean;
-  }>>(),
+  photoTransform: jsonb("photo_transform").$type<{
+    zoom: number;
+    position: { x: number; y: number };
+  }>(),
+  photos: jsonb("photos").$type<
+    Array<{
+      id: string;
+      url: string;
+      transform?: { zoom: number; position: { x: number; y: number } };
+      caption?: string;
+      isHero?: boolean;
+    }>
+  >(),
   emotions: jsonb("emotions").$type<string[]>(),
   pivotalCategory: text("pivotal_category"),
   includeInBook: boolean("include_in_book").default(true).notNull(),
@@ -96,7 +118,7 @@ export const stories = pgTable("stories", {
       splitIndex: number;
     };
     questions: Array<{
-      type: 'emotional' | 'wisdom' | 'sensory';
+      type: "emotional" | "wisdom" | "sensory";
       text: string;
     }>;
     themes?: string[];
@@ -113,7 +135,7 @@ export const stories = pgTable("stories", {
     places: Array<{
       location: string;
       year?: string;
-      type: 'lived' | 'visited' | 'worked' | 'born';
+      type: "lived" | "visited" | "worked" | "born";
       confidence: number;
     }>;
     events: Array<{
@@ -125,7 +147,7 @@ export const stories = pgTable("stories", {
     possessions: Array<{
       item: string;
       year?: string;
-      action: 'bought' | 'sold' | 'received' | 'lost';
+      action: "bought" | "sold" | "received" | "lost";
       confidence: number;
     }>;
     extractedAt: string;
@@ -135,16 +157,24 @@ export const stories = pgTable("stories", {
 });
 
 export const followUps = pgTable("follow_ups", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  storyId: uuid("story_id").references(() => stories.id).notNull(),
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  storyId: uuid("story_id")
+    .references(() => stories.id)
+    .notNull(),
   questionText: text("question_text").notNull(),
   questionType: text("question_type").notNull(),
   wasAnswered: boolean("was_answered").default(false),
 });
 
 export const ghostPrompts = pgTable("ghost_prompts", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
   promptText: text("prompt_text").notNull(),
   promptTitle: text("prompt_title").notNull(),
   category: text("category").notNull(),
@@ -157,8 +187,12 @@ export const ghostPrompts = pgTable("ghost_prompts", {
 
 // Historical context for decades - cached per user
 export const historicalContext = pgTable("historical_context", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
   decade: text("decade").notNull(), // e.g., "1950s", "1960s"
   ageRange: text("age_range").notNull(), // e.g., "Age 5-15"
   facts: jsonb("facts").$type<string[]>().notNull(),
@@ -168,8 +202,13 @@ export const historicalContext = pgTable("historical_context", {
 
 // User profile personalization settings
 export const profiles = pgTable("profiles", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull().unique(),
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull()
+    .unique(),
 
   // Personal Timeline
   birthYear: integer("birth_year").notNull(),
@@ -187,10 +226,14 @@ export const profiles = pgTable("profiles", {
   spirituality: integer("spirituality"), // 1-10 scale
 
   // Communication Preferences
-  preferredStyle: text("preferred_style").$type<'direct' | 'gentle' | 'curious' | 'reflective'>(),
+  preferredStyle: text("preferred_style").$type<
+    "direct" | "gentle" | "curious" | "reflective"
+  >(),
   emotionalComfort: integer("emotional_comfort"), // 1-10 scale
-  detailLevel: text("detail_level").$type<'brief' | 'moderate' | 'detailed'>(),
-  followUpFrequency: text("follow_up_frequency").$type<'minimal' | 'occasional' | 'frequent'>(),
+  detailLevel: text("detail_level").$type<"brief" | "moderate" | "detailed">(),
+  followUpFrequency: text("follow_up_frequency").$type<
+    "minimal" | "occasional" | "frequent"
+  >(),
 
   // Metadata
   completionPercentage: integer("completion_percentage").default(0),
@@ -200,7 +243,9 @@ export const profiles = pgTable("profiles", {
 
 // Demo stories table - mirrors the stories table structure
 export const demoStories = pgTable("demo_stories", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: uuid("user_id").notNull(), // Will use a fixed demo user ID
   title: text("title").notNull(),
   audioUrl: text("audio_url"),
@@ -213,14 +258,19 @@ export const demoStories = pgTable("demo_stories", {
   storyDate: timestamp("story_date"),
   lifeAge: integer("life_age"),
   photoUrl: text("photo_url"),
-  photoTransform: jsonb("photo_transform").$type<{ zoom: number; position: { x: number; y: number } }>(),
-  photos: jsonb("photos").$type<Array<{
-    id: string;
-    url: string;
-    transform?: { zoom: number; position: { x: number; y: number } };
-    caption?: string;
-    isHero?: boolean;
-  }>>(),
+  photoTransform: jsonb("photo_transform").$type<{
+    zoom: number;
+    position: { x: number; y: number };
+  }>(),
+  photos: jsonb("photos").$type<
+    Array<{
+      id: string;
+      url: string;
+      transform?: { zoom: number; position: { x: number; y: number } };
+      caption?: string;
+      isHero?: boolean;
+    }>
+  >(),
   emotions: jsonb("emotions").$type<string[]>(),
   pivotalCategory: text("pivotal_category"),
   includeInBook: boolean("include_in_book").default(true).notNull(),
@@ -235,7 +285,7 @@ export const demoStories = pgTable("demo_stories", {
       splitIndex: number;
     };
     questions: Array<{
-      type: 'emotional' | 'wisdom' | 'sensory';
+      type: "emotional" | "wisdom" | "sensory";
       text: string;
     }>;
     themes?: string[];
@@ -254,30 +304,34 @@ export const demoStories = pgTable("demo_stories", {
 
 // Active prompts table - stores currently active prompts (1-5 per user at any time)
 export const activePrompts = pgTable("active_prompts", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
-  
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+
   // Prompt content
   promptText: text("prompt_text").notNull(),
   contextNote: text("context_note"), // e.g., "Based on your 1955 story"
-  
+
   // Deduplication & anchoring
   anchorEntity: text("anchor_entity"), // e.g., "father's workshop", "Mrs. Henderson"
   anchorYear: integer("anchor_year"), // e.g., 1955 (NULL if not year-specific)
   anchorHash: text("anchor_hash").notNull(), // sha1(`${type}|${entity}|${year||'NA'}`)
-  
+
   // Tier & quality
   tier: integer("tier").notNull(), // 0=fallback, 1=template, 2=on-demand, 3=milestone
   memoryType: text("memory_type"), // person_expansion, object_origin, decade_gap, etc.
   promptScore: integer("prompt_score"), // 0-100 (recording likelihood from GPT-4o)
   scoreReason: text("score_reason"), // 1-sentence explanation for audit
   modelVersion: text("model_version").default("gpt-4o"), // Track which model generated it
-  
+
   // Lifecycle
   createdAt: timestamp("created_at").default(sql`NOW()`),
   expiresAt: timestamp("expires_at").notNull(), // Auto-cleanup after expiry
   isLocked: boolean("is_locked").default(false), // true = hidden until payment
-  
+
   // Engagement tracking
   shownCount: integer("shown_count").default(0),
   lastShownAt: timestamp("last_shown_at"),
@@ -285,9 +339,13 @@ export const activePrompts = pgTable("active_prompts", {
 
 // Prompt history table - archives used/skipped/expired prompts
 export const promptHistory = pgTable("prompt_history", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
-  
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+
   // Original prompt data
   promptText: text("prompt_text").notNull(),
   anchorHash: text("anchor_hash"),
@@ -296,12 +354,12 @@ export const promptHistory = pgTable("prompt_history", {
   tier: integer("tier"),
   memoryType: text("memory_type"),
   promptScore: integer("prompt_score"),
-  
+
   // Outcome tracking
   shownCount: integer("shown_count"),
   outcome: text("outcome").notNull(), // 'used' | 'skipped' | 'expired'
   storyId: uuid("story_id").references(() => stories.id), // NULL if skipped/expired
-  
+
   // Timestamps
   createdAt: timestamp("created_at"),
   resolvedAt: timestamp("resolved_at").default(sql`NOW()`),
@@ -309,23 +367,31 @@ export const promptHistory = pgTable("prompt_history", {
 
 // Character evolution table - tracks character development across stories
 export const characterEvolution = pgTable("character_evolution", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
   storyCount: integer("story_count").notNull(),
-  
+
   // Character analysis
-  traits: jsonb("traits").$type<Array<{
-    trait: string;
-    confidence: number;
-    evidence: string[];
-  }>>(),
+  traits: jsonb("traits").$type<
+    Array<{
+      trait: string;
+      confidence: number;
+      evidence: string[];
+    }>
+  >(),
   invisibleRules: jsonb("invisible_rules").$type<string[]>(),
-  contradictions: jsonb("contradictions").$type<Array<{
-    stated: string;
-    lived: string;
-    tension: string;
-  }>>(),
-  
+  contradictions: jsonb("contradictions").$type<
+    Array<{
+      stated: string;
+      lived: string;
+      tension: string;
+    }>
+  >(),
+
   // Metadata
   analyzedAt: timestamp("analyzed_at").default(sql`NOW()`),
   modelVersion: text("model_version").default("gpt-4o"),
@@ -362,8 +428,12 @@ export const insertDemoStorySchema = createInsertSchema(demoStories).omit({
 
 // Family members table
 export const familyMembers = pgTable("family_members", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(), // The storyteller
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(), // The storyteller
   email: text("email").notNull(),
   name: text("name"),
   relationship: text("relationship").notNull(), // Son, Daughter, Grandchild, etc.
@@ -372,18 +442,26 @@ export const familyMembers = pgTable("family_members", {
   acceptedAt: timestamp("accepted_at"),
   lastViewedAt: timestamp("last_viewed_at"),
   customMessage: text("custom_message"),
-  permissions: jsonb("permissions").$type<{
-    canView: boolean;
-    canComment: boolean;
-    canDownload: boolean;
-  }>().default({ canView: true, canComment: true, canDownload: false }),
+  permissions: jsonb("permissions")
+    .$type<{
+      canView: boolean;
+      canComment: boolean;
+      canDownload: boolean;
+    }>()
+    .default({ canView: true, canComment: true, canDownload: false }),
 });
 
 // Family activity/feed
 export const familyActivity = pgTable("family_activity", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(), // The storyteller
-  familyMemberId: uuid("family_member_id").references(() => familyMembers.id).notNull(),
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(), // The storyteller
+  familyMemberId: uuid("family_member_id")
+    .references(() => familyMembers.id)
+    .notNull(),
   storyId: uuid("story_id").references(() => stories.id),
   activityType: text("activity_type").notNull(), // viewed, commented, favorited, shared
   details: text("details"),
@@ -403,15 +481,21 @@ export const insertFamilyMemberSchema = createInsertSchema(familyMembers).omit({
   lastViewedAt: true,
 });
 
-export const insertFamilyActivitySchema = createInsertSchema(familyActivity).omit({
+export const insertFamilyActivitySchema = createInsertSchema(
+  familyActivity,
+).omit({
   id: true,
   createdAt: true,
 });
 
 // Shared access table for timeline/book sharing with permissions
 export const sharedAccess = pgTable("shared_access", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  ownerUserId: uuid("owner_user_id").references(() => users.id).notNull(), // The person sharing their timeline
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  ownerUserId: uuid("owner_user_id")
+    .references(() => users.id)
+    .notNull(), // The person sharing their timeline
   sharedWithEmail: text("shared_with_email").notNull(), // Email of person being granted access
   sharedWithUserId: uuid("shared_with_user_id").references(() => users.id), // Populated when they sign up/sign in
   permissionLevel: text("permission_level").notNull().default("view"), // 'view' or 'edit'
@@ -430,17 +514,25 @@ export const insertSharedAccessSchema = createInsertSchema(sharedAccess).omit({
 
 // User agreements table for tracking Terms of Service and Privacy Policy acceptance
 export const userAgreements = pgTable("user_agreements", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
   agreementType: text("agreement_type").notNull(), // 'terms' or 'privacy'
   version: text("version").notNull(), // e.g., "1.0", "1.1", "2.0"
-  acceptedAt: timestamp("accepted_at").default(sql`NOW()`).notNull(),
+  acceptedAt: timestamp("accepted_at")
+    .default(sql`NOW()`)
+    .notNull(),
   ipAddress: text("ip_address"), // Optional: IP address at time of acceptance
   userAgent: text("user_agent"), // Optional: User agent at time of acceptance
   method: text("method").notNull().default("signup"), // 'signup', 'reacceptance', 'oauth'
 });
 
-export const insertUserAgreementSchema = createInsertSchema(userAgreements).omit({
+export const insertUserAgreementSchema = createInsertSchema(
+  userAgreements,
+).omit({
   id: true,
   acceptedAt: true,
 });
@@ -452,12 +544,16 @@ export const insertActivePromptSchema = createInsertSchema(activePrompts).omit({
   lastShownAt: true,
 });
 
-export const insertPromptHistorySchema = createInsertSchema(promptHistory).omit({
-  id: true,
-  resolvedAt: true,
-});
+export const insertPromptHistorySchema = createInsertSchema(promptHistory).omit(
+  {
+    id: true,
+    resolvedAt: true,
+  },
+);
 
-export const insertCharacterEvolutionSchema = createInsertSchema(characterEvolution).omit({
+export const insertCharacterEvolutionSchema = createInsertSchema(
+  characterEvolution,
+).omit({
   id: true,
   analyzedAt: true,
 });
@@ -493,5 +589,7 @@ export type InsertActivePrompt = z.infer<typeof insertActivePromptSchema>;
 export type ActivePrompt = typeof activePrompts.$inferSelect;
 export type InsertPromptHistory = z.infer<typeof insertPromptHistorySchema>;
 export type PromptHistory = typeof promptHistory.$inferSelect;
-export type InsertCharacterEvolution = z.infer<typeof insertCharacterEvolutionSchema>;
+export type InsertCharacterEvolution = z.infer<
+  typeof insertCharacterEvolutionSchema
+>;
 export type CharacterEvolution = typeof characterEvolution.$inferSelect;

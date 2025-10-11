@@ -8,14 +8,14 @@
  * Removes common prompt injection patterns while preserving authentic content
  */
 export function sanitizeUserInput(input: string): string {
-  if (!input || typeof input !== 'string') {
-    return '';
+  if (!input || typeof input !== "string") {
+    return "";
   }
 
   let sanitized = input;
 
   // Remove excessive whitespace/newlines that could break prompt structure
-  sanitized = sanitized.replace(/\n{4,}/g, '\n\n\n'); // Max 3 consecutive newlines
+  sanitized = sanitized.replace(/\n{4,}/g, "\n\n\n"); // Max 3 consecutive newlines
   sanitized = sanitized.trim();
 
   // Detect and neutralize common prompt injection patterns
@@ -36,17 +36,17 @@ export function sanitizeUserInput(input: string): string {
   for (const pattern of injectionPatterns) {
     if (pattern.test(sanitized)) {
       // Replace injection patterns with safe alternatives
-      sanitized = sanitized.replace(pattern, '[REDACTED]');
+      sanitized = sanitized.replace(pattern, "[REDACTED]");
     }
   }
 
   // Remove control characters except common ones (tab, newline)
-  sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+  sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, "");
 
   // Limit total length to prevent token exhaustion attacks
   const MAX_LENGTH = 50000; // ~12k tokens at worst case
   if (sanitized.length > MAX_LENGTH) {
-    sanitized = sanitized.slice(0, MAX_LENGTH) + '... [truncated]';
+    sanitized = sanitized.slice(0, MAX_LENGTH) + "... [truncated]";
   }
 
   return sanitized;
@@ -78,13 +78,16 @@ export function validateSanitizedInput(sanitized: string): boolean {
  * Safely formats user input for inclusion in prompts
  * Wraps in clear delimiters to prevent context bleeding
  */
-export function formatUserInputForPrompt(input: string, label: string = "User Input"): string {
+export function formatUserInputForPrompt(
+  input: string,
+  label: string = "User Input",
+): string {
   const sanitized = sanitizeUserInput(input);
-  
+
   // Wrap in clear XML-style delimiters that are hard to escape
-  return `<${label.toLowerCase().replace(/\s+/g, '_')}>
+  return `<${label.toLowerCase().replace(/\s+/g, "_")}>
 ${sanitized}
-</${label.toLowerCase().replace(/\s+/g, '_')}>`;
+</${label.toLowerCase().replace(/\s+/g, "_")}>`;
 }
 
 /**
@@ -92,17 +95,17 @@ ${sanitized}
  * More restrictive than general content sanitization
  */
 export function sanitizeMetadata(metadata: string): string {
-  if (!metadata || typeof metadata !== 'string') {
-    return '';
+  if (!metadata || typeof metadata !== "string") {
+    return "";
   }
 
   let sanitized = metadata;
 
   // Remove newlines entirely from metadata
-  sanitized = sanitized.replace(/[\r\n]+/g, ' ');
+  sanitized = sanitized.replace(/[\r\n]+/g, " ");
 
   // Remove special characters that could break prompts
-  sanitized = sanitized.replace(/[<>{}[\]]/g, '');
+  sanitized = sanitized.replace(/[<>{}[\]]/g, "");
 
   // Trim and limit length
   sanitized = sanitized.trim().slice(0, 200);
@@ -116,16 +119,19 @@ export function sanitizeMetadata(metadata: string): string {
 export function buildSafePrompt(
   systemInstructions: string,
   userContent: string,
-  contentLabel: string = "Content"
+  contentLabel: string = "Content",
 ): { systemPrompt: string; userPrompt: string; isSafe: boolean } {
   const sanitizedContent = sanitizeUserInput(userContent);
   const isSafe = validateSanitizedInput(sanitizedContent);
-  
-  const formattedContent = formatUserInputForPrompt(sanitizedContent, contentLabel);
+
+  const formattedContent = formatUserInputForPrompt(
+    sanitizedContent,
+    contentLabel,
+  );
 
   return {
     systemPrompt: systemInstructions,
     userPrompt: formattedContent,
-    isSafe
+    isSafe,
   };
 }

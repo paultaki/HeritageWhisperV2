@@ -1,4 +1,4 @@
-import { Resend } from 'resend';
+import { Resend } from "resend";
 
 // Lazy initialization to avoid build-time errors
 let resend: Resend | null = null;
@@ -6,7 +6,7 @@ let resend: Resend | null = null;
 function getResendClient() {
   if (!resend) {
     if (!process.env.RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY environment variable is not set');
+      throw new Error("RESEND_API_KEY environment variable is not set");
     }
     resend = new Resend(process.env.RESEND_API_KEY);
   }
@@ -16,14 +16,14 @@ function getResendClient() {
 export async function sendVerificationEmail(
   email: string,
   name: string,
-  confirmationUrl: string
+  confirmationUrl: string,
 ) {
   try {
     const resendClient = getResendClient();
     const { data, error } = await resendClient.emails.send({
-      from: 'Heritage Whisper <noreply@heritagewhisper.com>',
+      from: "Heritage Whisper <noreply@heritagewhisper.com>",
       to: email,
-      subject: 'Confirm your Heritage Whisper account',
+      subject: "Confirm your Heritage Whisper account",
       html: `
         <!DOCTYPE html>
         <html>
@@ -78,14 +78,14 @@ export async function sendVerificationEmail(
     });
 
     if (error) {
-      console.error('[Resend] Error sending verification email:', error);
+      console.error("[Resend] Error sending verification email:", error);
       return { success: false, error };
     }
 
-    console.log('[Resend] Verification email sent:', data?.id);
+    console.log("[Resend] Verification email sent:", data?.id);
     return { success: true, data };
   } catch (error) {
-    console.error('[Resend] Failed to send verification email:', error);
+    console.error("[Resend] Failed to send verification email:", error);
     return { success: false, error };
   }
 }
@@ -94,9 +94,9 @@ export async function sendWelcomeEmail(email: string, name: string) {
   try {
     const resendClient = getResendClient();
     const { data, error } = await resendClient.emails.send({
-      from: 'Heritage Whisper <noreply@heritagewhisper.com>',
+      from: "Heritage Whisper <noreply@heritagewhisper.com>",
       to: email,
-      subject: 'Welcome to Heritage Whisper!',
+      subject: "Welcome to Heritage Whisper!",
       html: `
         <!DOCTYPE html>
         <html>
@@ -127,7 +127,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
               </ol>
 
               <div style="text-align: center; margin: 35px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://dev.heritagewhisper.com'}/timeline"
+                <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://dev.heritagewhisper.com"}/timeline"
                    style="background: #8B4513; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; display: inline-block;">
                   Start Recording
                 </a>
@@ -136,7 +136,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
               <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
 
               <p style="font-size: 14px; color: #777;">
-                Questions? Need help? Reply to this email or visit our <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://dev.heritagewhisper.com'}/help" style="color: #8B4513;">help center</a>.
+                Questions? Need help? Reply to this email or visit our <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://dev.heritagewhisper.com"}/help" style="color: #8B4513;">help center</a>.
               </p>
             </div>
 
@@ -149,14 +149,14 @@ export async function sendWelcomeEmail(email: string, name: string) {
     });
 
     if (error) {
-      console.error('[Resend] Error sending welcome email:', error);
+      console.error("[Resend] Error sending welcome email:", error);
       return { success: false, error };
     }
 
-    console.log('[Resend] Welcome email sent:', data?.id);
+    console.log("[Resend] Welcome email sent:", data?.id);
     return { success: true, data };
   } catch (error) {
-    console.error('[Resend] Failed to send welcome email:', error);
+    console.error("[Resend] Failed to send welcome email:", error);
     return { success: false, error };
   }
 }

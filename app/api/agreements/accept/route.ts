@@ -20,19 +20,22 @@ export async function POST(request: NextRequest) {
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json(
         { error: "Unauthorized - no token provided" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const token = authHeader.substring(7);
 
     // Verify token and get user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
       return NextResponse.json(
         { error: "Unauthorized - invalid token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -43,28 +46,29 @@ export async function POST(request: NextRequest) {
     if (!agreementType || !version) {
       return NextResponse.json(
         { error: "agreementType and version are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!["terms", "privacy"].includes(agreementType)) {
       return NextResponse.json(
         { error: "agreementType must be 'terms' or 'privacy'" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!["signup", "reacceptance", "oauth"].includes(method)) {
       return NextResponse.json(
         { error: "method must be 'signup', 'reacceptance', or 'oauth'" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Get IP address and user agent for audit trail
-    const ipAddress = request.headers.get("x-forwarded-for") ||
-                     request.headers.get("x-real-ip") ||
-                     "unknown";
+    const ipAddress =
+      request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
     const userAgent = request.headers.get("user-agent") || "unknown";
 
     // Record the agreement acceptance using Supabase client
@@ -87,9 +91,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Update the user's latest version field for quick lookups
-    const updateField = agreementType === "terms"
-      ? { latest_terms_version: version }
-      : { latest_privacy_version: version };
+    const updateField =
+      agreementType === "terms"
+        ? { latest_terms_version: version }
+        : { latest_privacy_version: version };
 
     const { error: updateError } = await supabase
       .from("users")
@@ -101,7 +106,9 @@ export async function POST(request: NextRequest) {
       // Don't fail the request if user update fails
     }
 
-    logger.debug(`[Agreements] User ${user.id} accepted ${agreementType} v${version} via ${method}`);
+    logger.debug(
+      `[Agreements] User ${user.id} accepted ${agreementType} v${version} via ${method}`,
+    );
 
     return NextResponse.json({
       success: true,
@@ -118,7 +125,7 @@ export async function POST(request: NextRequest) {
     logger.error("[Agreements] Error recording acceptance:", error);
     return NextResponse.json(
       { error: "Failed to record agreement acceptance" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

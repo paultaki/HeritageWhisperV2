@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -36,12 +36,15 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     // Rate limiting: 10 uploads per minute per user
-    const rateLimitResponse = await checkRateLimit(`upload:photo:${user.id}`, uploadRatelimit);
+    const rateLimitResponse = await checkRateLimit(
+      `upload:photo:${user.id}`,
+      uploadRatelimit,
+    );
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -52,7 +55,10 @@ export async function POST(request: NextRequest) {
     const storyId = formData.get("storyId") as string;
 
     if (!photoFile) {
-      return NextResponse.json({ error: "No photo file provided" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No photo file provided" },
+        { status: 400 },
+      );
     }
 
     // Convert File to ArrayBuffer then to Buffer
@@ -60,30 +66,36 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
 
     // Validate that it's actually an image
-    const { validateImage, processImage } = await import("@/lib/imageProcessor");
+    const { validateImage, processImage } = await import(
+      "@/lib/imageProcessor"
+    );
     const isValidImage = await validateImage(buffer);
 
     if (!isValidImage) {
       return NextResponse.json(
         {
           error: "Invalid image file",
-          details: "The uploaded file is not a valid image or has invalid dimensions"
+          details:
+            "The uploaded file is not a valid image or has invalid dimensions",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Process image: strip EXIF data, optimize, and convert to standard format
-    const { buffer: processedBuffer, contentType } = await processImage(buffer, {
-      maxWidth: 2400,
-      maxHeight: 2400,
-      quality: 85,
-      format: "jpeg", // Convert all photos to JPEG for consistency
-    });
+    const { buffer: processedBuffer, contentType } = await processImage(
+      buffer,
+      {
+        maxWidth: 2400,
+        maxHeight: 2400,
+        quality: 85,
+        format: "jpeg", // Convert all photos to JPEG for consistency
+      },
+    );
 
     // Generate unique filename with photo/ prefix for heritage-whisper-files bucket
     const timestamp = Date.now();
-    const filename = `photo/${user.id}/${storyId || 'temp'}/${timestamp}.jpg`;
+    const filename = `photo/${user.id}/${storyId || "temp"}/${timestamp}.jpg`;
 
     // Upload processed image to Supabase Storage using admin client
     const { data, error } = await supabaseAdmin.storage
@@ -95,31 +107,35 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       logger.error("Supabase upload error:", error);
-      return NextResponse.json({
-        error: "Failed to upload photo",
-        details: error.message
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: "Failed to upload photo",
+          details: error.message,
+        },
+        { status: 500 },
+      );
     }
 
     // Generate a signed URL for immediate display
     const { data: signedUrlData } = await supabaseAdmin.storage
-      .from('heritage-whisper-files')
+      .from("heritage-whisper-files")
       .createSignedUrl(filename, 604800); // 1 week expiry
 
     return NextResponse.json({
       url: signedUrlData?.signedUrl || filename,
       path: filename,
-      filePath: filename
+      filePath: filename,
     });
   } catch (error) {
     logger.error("Photo upload error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       {
         error: "Failed to upload photo",
-        details: errorMessage
+        details: errorMessage,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
-import { useLocation } from 'wouter';
-import { Calendar, Users, FileText, User, Mic, Plus, BookOpen, Box } from 'lucide-react';
-import RecordModal from './RecordModal';
-import designSystem from '@/lib/designSystem';
-import { useAuth } from '@/lib/auth';
-import { motion, AnimatePresence } from 'framer-motion';
-import { navCache } from '@/lib/navCache';
+import React, { useState } from "react";
+import { useLocation } from "wouter";
+import {
+  Calendar,
+  Users,
+  FileText,
+  User,
+  Mic,
+  Plus,
+  BookOpen,
+  Box,
+} from "lucide-react";
+import RecordModal from "./RecordModal";
+import designSystem from "@/lib/designSystem";
+import { useAuth } from "@/lib/auth";
+import { motion, AnimatePresence } from "framer-motion";
+import { navCache } from "@/lib/navCache";
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -15,7 +24,13 @@ interface NavItemProps {
   onClick?: () => void;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, href, isActive, onClick }) => {
+const NavItem: React.FC<NavItemProps> = ({
+  icon: Icon,
+  label,
+  href,
+  isActive,
+  onClick,
+}) => {
   const [, setLocation] = useLocation();
 
   const handleClick = () => {
@@ -31,10 +46,14 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, href, isActive, on
       onClick={handleClick}
       className="flex flex-col items-center justify-center py-2 px-3 flex-1 transition-all"
       style={{
-        color: isActive ? designSystem.colors.primary.coral : designSystem.colors.text.secondary,
+        color: isActive
+          ? designSystem.colors.primary.coral
+          : designSystem.colors.text.secondary,
       }}
     >
-      <Icon className={`w-5 h-5 mb-1 transition-transform ${isActive ? 'scale-110' : ''}`} />
+      <Icon
+        className={`w-5 h-5 mb-1 transition-transform ${isActive ? "scale-110" : ""}`}
+      />
       <span className="text-sm font-medium">{label}</span>
     </button>
   );
@@ -47,18 +66,19 @@ export default function BottomNavigation() {
   const { user } = useAuth();
 
   // Check if we should show the navigation (only on main app pages)
-  const shouldShow = user && !['/login', '/onboarding', '/'].includes(currentPath);
+  const shouldShow =
+    user && !["/login", "/onboarding", "/"].includes(currentPath);
 
   // Determine if it's been > 24hrs since last recording (would check actual data in production)
   const hasRecentRecording = false; // This would check user's last recording timestamp
 
   const handleRecordSave = async (recording: any) => {
-    console.log('[BottomNavigation] handleRecordSave called with:', {
+    console.log("[BottomNavigation] handleRecordSave called with:", {
       hasAudioBlob: !!recording.audioBlob,
       audioBlobSize: recording.audioBlob?.size,
       audioBlobType: recording.audioBlob?.type,
       hasTranscription: !!recording.transcription,
-      transcriptionLength: recording.transcription?.length
+      transcriptionLength: recording.transcription?.length,
     });
 
     // Convert audio blob to base64 for storage in navCache
@@ -66,7 +86,7 @@ export default function BottomNavigation() {
     let mainAudioType: string | undefined;
 
     if (recording.audioBlob) {
-      console.log('[BottomNavigation] Converting audio blob to base64...');
+      console.log("[BottomNavigation] Converting audio blob to base64...");
 
       try {
         mainAudioBase64 = await new Promise<string>((resolve, reject) => {
@@ -76,7 +96,7 @@ export default function BottomNavigation() {
             try {
               const base64 = reader.result as string;
 
-              const base64Data = base64.split(',')[1]; // Remove data:type;base64, prefix
+              const base64Data = base64.split(",")[1]; // Remove data:type;base64, prefix
               resolve(base64Data);
             } catch (err) {
               reject(err);
@@ -91,17 +111,22 @@ export default function BottomNavigation() {
           reader.readAsDataURL(recording.audioBlob);
         });
 
-        mainAudioType = recording.audioBlob.type || 'audio/webm';
-        console.log('[BottomNavigation] Audio conversion successful:', {
+        mainAudioType = recording.audioBlob.type || "audio/webm";
+        console.log("[BottomNavigation] Audio conversion successful:", {
           base64Length: mainAudioBase64.length,
-          audioType: mainAudioType
+          audioType: mainAudioType,
         });
       } catch (error) {
-        console.error('[BottomNavigation] Failed to convert audio blob:', error);
+        console.error(
+          "[BottomNavigation] Failed to convert audio blob:",
+          error,
+        );
         // Failed to convert audio blob - continue without it
       }
     } else {
-      console.warn('[BottomNavigation] No audio blob provided in recording object');
+      console.warn(
+        "[BottomNavigation] No audio blob provided in recording object",
+      );
     }
 
     // Navigate to the review page with the recording data
@@ -116,23 +141,23 @@ export default function BottomNavigation() {
       storyYear: recording.year,
     };
 
-    console.log('[BottomNavigation] Storing in NavCache:', {
+    console.log("[BottomNavigation] Storing in NavCache:", {
       hasBase64: !!navData.mainAudioBase64,
       base64Length: navData.mainAudioBase64?.length,
       hasTranscription: !!navData.transcription,
       hasTitle: !!navData.title,
-      hasYear: !!navData.storyYear
+      hasYear: !!navData.storyYear,
     });
 
     const navId = navCache.store(navData);
-    console.log('[BottomNavigation] NavCache ID:', navId);
+    console.log("[BottomNavigation] NavCache ID:", navId);
 
     setPulseRecord(false);
     setRecordModalOpen(false);
 
     // Navigate to review page for editing
     const reviewUrl = `/review?nav=${navId}`;
-    console.log('[BottomNavigation] Navigating to:', reviewUrl);
+    console.log("[BottomNavigation] Navigating to:", reviewUrl);
     setLocation(reviewUrl);
   };
 
@@ -146,11 +171,11 @@ export default function BottomNavigation() {
       <motion.nav
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        transition={{ type: 'spring', damping: 20 }}
+        transition={{ type: "spring", damping: 20 }}
         className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t md:hidden"
         style={{
           borderTopColor: designSystem.colors.background.creamDark,
-          paddingBottom: 'env(safe-area-inset-bottom)', // iOS safe area
+          paddingBottom: "env(safe-area-inset-bottom)", // iOS safe area
         }}
       >
         <div className="flex items-center justify-around h-20 relative">
@@ -159,7 +184,7 @@ export default function BottomNavigation() {
             icon={Calendar}
             label="Timeline"
             href="/timeline"
-            isActive={currentPath === '/timeline'}
+            isActive={currentPath === "/timeline"}
           />
 
           {/* Book View */}
@@ -167,7 +192,7 @@ export default function BottomNavigation() {
             icon={BookOpen}
             label="Book"
             href="/book"
-            isActive={currentPath.startsWith('/book')}
+            isActive={currentPath.startsWith("/book")}
           />
 
           {/* Record Button - Hero Center Element */}
@@ -212,7 +237,7 @@ export default function BottomNavigation() {
             icon={Box}
             label="Memories"
             href="/memory-box"
-            isActive={currentPath === '/memory-box'}
+            isActive={currentPath === "/memory-box"}
           />
 
           {/* Profile */}
@@ -220,7 +245,7 @@ export default function BottomNavigation() {
             icon={User}
             label="Profile"
             href="/profile"
-            isActive={currentPath === '/profile'}
+            isActive={currentPath === "/profile"}
           />
         </div>
       </motion.nav>
@@ -229,7 +254,7 @@ export default function BottomNavigation() {
       <motion.nav
         initial={{ x: -100 }}
         animate={{ x: 0 }}
-        transition={{ type: 'spring', damping: 20 }}
+        transition={{ type: "spring", damping: 20 }}
         className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-white/95 backdrop-blur-md border-r flex-col items-center py-8 z-40"
         style={{ borderRightColor: designSystem.colors.background.creamDark }}
       >
@@ -239,7 +264,7 @@ export default function BottomNavigation() {
             src="/HW_logo_mic_clean.png"
             alt="HeritageWhisper"
             className="w-12 h-12 object-contain"
-            style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))' }}
+            style={{ filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))" }}
           />
         </div>
 
@@ -249,28 +274,28 @@ export default function BottomNavigation() {
             icon={Calendar}
             label="Timeline"
             href="/timeline"
-            isActive={currentPath === '/timeline'}
+            isActive={currentPath === "/timeline"}
           />
 
           <DesktopNavItem
             icon={BookOpen}
             label="Book"
             href="/book"
-            isActive={currentPath.startsWith('/book')}
+            isActive={currentPath.startsWith("/book")}
           />
 
           <DesktopNavItem
             icon={Users}
             label="Family"
             href="/family"
-            isActive={currentPath === '/family'}
+            isActive={currentPath === "/family"}
           />
 
           <DesktopNavItem
             icon={Box}
             label="Memory Box"
             href="/memory-box"
-            isActive={currentPath === '/memory-box'}
+            isActive={currentPath === "/memory-box"}
           />
         </div>
 
@@ -291,7 +316,7 @@ export default function BottomNavigation() {
           icon={User}
           label="Profile"
           href="/profile"
-          isActive={currentPath === '/profile'}
+          isActive={currentPath === "/profile"}
         />
       </motion.nav>
 
@@ -318,8 +343,12 @@ function DesktopNavItem({ icon: Icon, label, href, isActive }: NavItemProps) {
         onMouseLeave={() => setShowTooltip(false)}
         className="p-3 rounded-xl transition-all hover:bg-gray-100"
         style={{
-          color: isActive ? designSystem.colors.primary.coral : designSystem.colors.text.secondary,
-          background: isActive ? designSystem.colors.primary.coralLight : 'transparent',
+          color: isActive
+            ? designSystem.colors.primary.coral
+            : designSystem.colors.text.secondary,
+          background: isActive
+            ? designSystem.colors.primary.coralLight
+            : "transparent",
         }}
       >
         <Icon className="w-5 h-5" />

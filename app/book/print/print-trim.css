@@ -10,7 +10,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0 !important;
   padding: 0 !important;
   width: 100%;
@@ -117,13 +118,13 @@ html, body {
 .lesson-learned-box {
   margin-top: 1.5rem;
   padding-left: 1.5rem;
-  border-left: 4px solid #D4A574;
+  border-left: 4px solid #d4a574;
 }
 
 .lesson-learned-header {
   font-size: 10pt;
   font-weight: 600;
-  color: #8B6F47;
+  color: #8b6f47;
   margin-bottom: 0.5rem;
   font-family: Georgia, serif;
 }

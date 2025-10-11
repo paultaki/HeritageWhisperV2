@@ -48,7 +48,8 @@ export default function Register() {
     } catch (error: any) {
       toast({
         title: "Registration failed",
-        description: error.message || "Please check your information and try again",
+        description:
+          error.message || "Please check your information and try again",
         variant: "destructive",
       });
     }
@@ -63,9 +64,15 @@ export default function Register() {
             className="w-40 h-40 mx-auto mb-8 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => router.push("/")}
           >
-            <img src={logoUrl} alt="HeritageWhisper Logo" className="w-full h-full object-contain" />
+            <img
+              src={logoUrl}
+              alt="HeritageWhisper Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
-          <p className="text-2xl text-muted-foreground font-medium">Your voice. Their treasure. Forever.</p>
+          <p className="text-2xl text-muted-foreground font-medium">
+            Your voice. Their treasure. Forever.
+          </p>
         </div>
 
         <Card className="shadow-lg border">
@@ -76,7 +83,9 @@ export default function Register() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="email" className="text-lg font-medium">Email</Label>
+                <Label htmlFor="email" className="text-lg font-medium">
+                  Email
+                </Label>
                 <Input
                   type="email"
                   id="email"
@@ -90,7 +99,9 @@ export default function Register() {
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-lg font-medium">Password</Label>
+                <Label htmlFor="password" className="text-lg font-medium">
+                  Password
+                </Label>
                 <div className="relative mt-3">
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -107,7 +118,9 @@ export default function Register() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="pointer-events-auto text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showPassword ? (
                         <EyeOff className="h-5 w-5" />
@@ -120,7 +133,9 @@ export default function Register() {
               </div>
 
               <div>
-                <Label htmlFor="name" className="text-lg font-medium">Full Name</Label>
+                <Label htmlFor="name" className="text-lg font-medium">
+                  Full Name
+                </Label>
                 <Input
                   type="text"
                   id="name"
@@ -137,7 +152,9 @@ export default function Register() {
               </div>
 
               <div>
-                <Label htmlFor="birthYear" className="text-lg font-medium">Birth Year</Label>
+                <Label htmlFor="birthYear" className="text-lg font-medium">
+                  Birth Year
+                </Label>
                 <Input
                   type="number"
                   id="birthYear"
@@ -164,13 +181,24 @@ export default function Register() {
                   className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                   data-testid="checkbox-terms"
                 />
-                <Label htmlFor="terms" className="text-sm font-normal leading-relaxed cursor-pointer">
+                <Label
+                  htmlFor="terms"
+                  className="text-sm font-normal leading-relaxed cursor-pointer"
+                >
                   I agree to the{" "}
-                  <Link href="/terms" className="text-primary hover:underline font-medium" target="_blank">
+                  <Link
+                    href="/terms"
+                    className="text-primary hover:underline font-medium"
+                    target="_blank"
+                  >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
-                  <Link href="/privacy" className="text-primary hover:underline font-medium" target="_blank">
+                  <Link
+                    href="/privacy"
+                    className="text-primary hover:underline font-medium"
+                    target="_blank"
+                  >
                     Privacy Policy
                   </Link>
                 </Label>

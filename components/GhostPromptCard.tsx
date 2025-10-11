@@ -1,6 +1,6 @@
-import React from 'react';
-import { Sparkles, Plus } from 'lucide-react';
-import { GhostPrompt } from '@/lib/ghostPrompts';
+import React from "react";
+import { Sparkles, Plus } from "lucide-react";
+import { GhostPrompt } from "@/lib/ghostPrompts";
 
 interface GhostPromptCardProps {
   prompt: GhostPrompt;

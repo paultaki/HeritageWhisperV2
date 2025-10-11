@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -44,9 +51,9 @@ export default function AgreementModal({
 
     try {
       // Get the auth token from Supabase
-      const token = (await import("@/lib/supabase")).supabase.auth.getSession().then(
-        (res) => res.data.session?.access_token
-      );
+      const token = (await import("@/lib/supabase")).supabase.auth
+        .getSession()
+        .then((res) => res.data.session?.access_token);
 
       if (!token) {
         throw new Error("No auth token found");
@@ -60,14 +67,14 @@ export default function AgreementModal({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${await token}`,
+              Authorization: `Bearer ${await token}`,
             },
             body: JSON.stringify({
               agreementType: "terms",
               version: termsVersion,
               method: "reacceptance",
             }),
-          })
+          }),
         );
       }
 
@@ -77,14 +84,14 @@ export default function AgreementModal({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${await token}`,
+              Authorization: `Bearer ${await token}`,
             },
             body: JSON.stringify({
               agreementType: "privacy",
               version: privacyVersion,
               method: "reacceptance",
             }),
-          })
+          }),
         );
       }
 
@@ -164,9 +171,14 @@ export default function AgreementModal({
               checked={agreed}
               onCheckedChange={(checked) => setAgreed(checked as boolean)}
             />
-            <Label htmlFor="agreement-modal" className="text-sm leading-relaxed cursor-pointer">
+            <Label
+              htmlFor="agreement-modal"
+              className="text-sm leading-relaxed cursor-pointer"
+            >
               I have read and agree to the updated{" "}
-              {needsTerms && needsPrivacy && "Terms of Service and Privacy Policy"}
+              {needsTerms &&
+                needsPrivacy &&
+                "Terms of Service and Privacy Policy"}
               {needsTerms && !needsPrivacy && "Terms of Service"}
               {!needsTerms && needsPrivacy && "Privacy Policy"}
             </Label>
@@ -184,7 +196,8 @@ export default function AgreementModal({
         </DialogFooter>
 
         <p className="text-xs text-muted-foreground text-center">
-          You must accept the updated documents to continue using HeritageWhisper
+          You must accept the updated documents to continue using
+          HeritageWhisper
         </p>
       </DialogContent>
     </Dialog>

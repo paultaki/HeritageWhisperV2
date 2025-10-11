@@ -20,7 +20,10 @@ const CURRENT_PRIVACY_VERSION = "1.0";
 export async function POST(request: NextRequest) {
   // Rate limiting: 5 attempts per 10 seconds per IP
   const clientIp = getClientIp(request);
-  const rateLimitResponse = await checkRateLimit(`register:${clientIp}`, authRatelimit);
+  const rateLimitResponse = await checkRateLimit(
+    `register:${clientIp}`,
+    authRatelimit,
+  );
   if (rateLimitResponse) {
     return rateLimitResponse;
   }
@@ -31,7 +34,7 @@ export async function POST(request: NextRequest) {
     if (!email || !password || !name || !birthYear) {
       return NextResponse.json(
         { error: "Email, password, name, and birth year are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -57,46 +60,46 @@ export async function POST(request: NextRequest) {
       if (error.message?.includes("already registered")) {
         return NextResponse.json(
           { error: "This email is already registered. Please sign in." },
-          { status: 400 }
+          { status: 400 },
         );
       }
       return NextResponse.json(
         {
           error: "Registration failed",
-          details: error.message || "Unable to create account. Please try again.",
+          details:
+            error.message || "Unable to create account. Please try again.",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     if (!data.user) {
       return NextResponse.json(
         { error: "Registration failed" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     // Get IP address and user agent for audit trail
-    const ipAddress = request.headers.get("x-forwarded-for") ||
-                     request.headers.get("x-real-ip") ||
-                     "unknown";
+    const ipAddress =
+      request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
     const userAgent = request.headers.get("user-agent") || "unknown";
 
     // Create user record in public.users and record agreements using Supabase client
     try {
       // First, create the user record in public.users table
-      const { error: userInsertError } = await supabase
-        .from("users")
-        .insert({
-          id: data.user.id,
-          email: data.user.email!,
-          name: name,
-          birth_year: parseInt(birthYear),
-          story_count: 0,
-          is_paid: false,
-          latest_terms_version: CURRENT_TERMS_VERSION,
-          latest_privacy_version: CURRENT_PRIVACY_VERSION,
-        });
+      const { error: userInsertError } = await supabase.from("users").insert({
+        id: data.user.id,
+        email: data.user.email!,
+        name: name,
+        birth_year: parseInt(birthYear),
+        story_count: 0,
+        is_paid: false,
+        latest_terms_version: CURRENT_TERMS_VERSION,
+        latest_privacy_version: CURRENT_PRIVACY_VERSION,
+      });
 
       if (userInsertError) {
         logger.error("[Registration] Error creating user:", userInsertError);
@@ -126,36 +129,52 @@ export async function POST(request: NextRequest) {
         ]);
 
       if (agreementsError) {
-        logger.error("[Registration] Error recording agreements:", agreementsError);
+        logger.error(
+          "[Registration] Error recording agreements:",
+          agreementsError,
+        );
       } else {
-        logger.debug(`[Registration] Created user record and recorded agreement acceptance for user ${data.user.id}`);
+        logger.debug(
+          `[Registration] Created user record and recorded agreement acceptance for user ${data.user.id}`,
+        );
       }
     } catch (agreementError) {
-      logger.error("[Registration] Failed to create user or record agreement acceptance:", agreementError);
+      logger.error(
+        "[Registration] Failed to create user or record agreement acceptance:",
+        agreementError,
+      );
       // Don't fail registration if agreement recording fails, but log it
     }
 
     // Only auto-sign-in if email confirmation is NOT required
     let session = data.session;
     if (!session && !requireEmailConfirmation) {
-      logger.debug('[Registration] No session from signUp, signing in user...');
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      logger.debug("[Registration] No session from signUp, signing in user...");
+      const { data: signInData, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
       if (signInError) {
-        logger.error('[Registration] Sign in after registration failed:', signInError);
+        logger.error(
+          "[Registration] Sign in after registration failed:",
+          signInError,
+        );
       } else {
         session = signInData.session;
-        logger.debug('[Registration] Successfully signed in after registration');
+        logger.debug(
+          "[Registration] Successfully signed in after registration",
+        );
       }
     }
 
     // If email confirmation is required and a session was created, clear it
     // (This happens when Supabase has email confirmation disabled in settings)
     if (requireEmailConfirmation && session) {
-      logger.debug('[Registration] Email confirmation required but session exists - clearing session');
+      logger.debug(
+        "[Registration] Email confirmation required but session exists - clearing session",
+      );
       session = null;
     }
 
@@ -171,7 +190,7 @@ export async function POST(request: NextRequest) {
 
     // If email confirmation is required, send verification email via Resend
     if (requireEmailConfirmation && !session) {
-      const confirmationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/auth/verified?email=${encodeURIComponent(email)}`;
+      const confirmationUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/auth/verified?email=${encodeURIComponent(email)}`;
 
       await sendVerificationEmail(email, name, confirmationUrl);
 
@@ -189,9 +208,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error("Registration error:", error);
-    return NextResponse.json(
-      { error: "Registration failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Registration failed" }, { status: 500 });
   }
 }

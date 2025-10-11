@@ -1,23 +1,23 @@
 :root {
   /* colors */
-  --color-page: #FAF8F5;
-  --color-card: #FFFFFF;
-  --color-text-h: #1B1B1F;
-  --color-text: #30343A;
-  --color-text-muted: #8A8F98;
-  --color-border: #EAEAEA;
-  --color-accent: #D36A3D; /* clay */
-  --color-accent-2: #B89B5E; /* soft gold */
-  --color-focus: #B89B5E;
+  --color-page: #faf8f5;
+  --color-card: #ffffff;
+  --color-text-h: #1b1b1f;
+  --color-text: #30343a;
+  --color-text-muted: #8a8f98;
+  --color-border: #eaeaea;
+  --color-accent: #d36a3d; /* clay */
+  --color-accent-2: #b89b5e; /* soft gold */
+  --color-focus: #b89b5e;
 
   /* radius */
   --radius-card: 12px;
 
   /* shadow */
-  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.10);
+  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.1);
 
   /* interaction */
-  --focus-ring: #B89B5E;
+  --focus-ring: #b89b5e;
   --tap-size: 44px;
 
   /* spacing scale */
@@ -30,7 +30,9 @@
   --space-10: 40px;
 
   /* type */
-  --font-sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --font-sans:
+    Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    sans-serif;
   --font-serif: Playfair Display, Georgia, serif;
   --h1-desk: 34px;
   --h1-mobile: 28px;

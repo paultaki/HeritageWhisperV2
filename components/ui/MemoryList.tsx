@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Story } from '@/shared/schema';
-import { MemoryListItem } from './MemoryListItem';
+import { Story } from "@/shared/schema";
+import { MemoryListItem } from "./MemoryListItem";
 
 interface MemoryListProps {
   stories: Story[];
@@ -9,7 +9,7 @@ interface MemoryListProps {
   onOpen: (id: string) => void;
   onToggleFavorite: (id: string) => void;
   onDelete: (id: string) => void;
-  density?: 'comfortable' | 'compact';
+  density?: "comfortable" | "compact";
 }
 
 export function MemoryList({
@@ -18,9 +18,9 @@ export function MemoryList({
   onOpen,
   onToggleFavorite,
   onDelete,
-  density = 'comfortable',
+  density = "comfortable",
 }: MemoryListProps) {
-  const gapClass = density === 'comfortable' ? 'gap-4' : 'gap-3';
+  const gapClass = density === "comfortable" ? "gap-4" : "gap-3";
 
   return (
     <div className={`memory-list flex flex-col ${gapClass}`} role="list">

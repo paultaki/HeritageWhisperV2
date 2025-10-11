@@ -16,7 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             queryFn: getQueryFn({ on401: "throw" }),
           },
         },
-      })
+      }),
   );
 
   return (

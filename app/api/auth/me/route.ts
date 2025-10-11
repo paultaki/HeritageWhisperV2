@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -50,9 +50,10 @@ export async function GET(request: NextRequest) {
       // If user doesn't exist in public.users, create them
       const userData = {
         id: user.id,
-        email: user.email || '',
+        email: user.email || "",
         name: user.user_metadata?.name || user.email?.split("@")[0] || "User",
-        birth_year: user.user_metadata?.birthYear || new Date().getFullYear() - 50,
+        birth_year:
+          user.user_metadata?.birthYear || new Date().getFullYear() - 50,
         story_count: 0,
         is_paid: false,
       };
@@ -71,11 +72,13 @@ export async function GET(request: NextRequest) {
           user: {
             id: user.id,
             email: user.email,
-            name: user.user_metadata?.name || user.email?.split("@")[0] || "User",
-            birthYear: user.user_metadata?.birthYear || new Date().getFullYear() - 50,
+            name:
+              user.user_metadata?.name || user.email?.split("@")[0] || "User",
+            birthYear:
+              user.user_metadata?.birthYear || new Date().getFullYear() - 50,
             storyCount: 0,
             isPaid: false,
-          }
+          },
         });
       }
 
@@ -87,7 +90,7 @@ export async function GET(request: NextRequest) {
           birthYear: newUser.birth_year,
           storyCount: newUser.story_count || 0,
           isPaid: newUser.is_paid || false,
-        }
+        },
       });
     }
 
@@ -106,7 +109,7 @@ export async function GET(request: NextRequest) {
     logger.error("Auth verification error:", error);
     return NextResponse.json(
       { error: "Authentication failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

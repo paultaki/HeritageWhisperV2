@@ -37,35 +37,40 @@ export function useAgreementCheck(): AgreementStatus {
         // Get the current session token with retry logic
         let session = null;
         for (let attempt = 0; attempt < 5; attempt++) {
-          const { data: { session: checkSession } } = await supabase.auth.getSession();
+          const {
+            data: { session: checkSession },
+          } = await supabase.auth.getSession();
           if (checkSession) {
             session = checkSession;
             break;
           }
           // Wait a bit before retrying
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
 
         if (!session) {
-          console.log('[AgreementCheck] No session found after retries');
+          console.log("[AgreementCheck] No session found after retries");
           setStatus((prev) => ({ ...prev, loading: false }));
           return;
         }
 
         const response = await fetch("/api/agreements/status", {
           headers: {
-            "Authorization": `Bearer ${session.access_token}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
         });
 
         if (!response.ok) {
-          console.error("[AgreementCheck] Failed to check agreement status:", response.status);
+          console.error(
+            "[AgreementCheck] Failed to check agreement status:",
+            response.status,
+          );
           setStatus((prev) => ({ ...prev, loading: false }));
           return;
         }
 
         const data = await response.json();
-        console.log('[AgreementCheck] Agreement status:', data);
+        console.log("[AgreementCheck] Agreement status:", data);
 
         setStatus({
           needsTerms: data.needsAcceptance.terms,
@@ -77,7 +82,10 @@ export function useAgreementCheck(): AgreementStatus {
           loading: false,
         });
       } catch (error) {
-        console.error("[AgreementCheck] Error checking agreement status:", error);
+        console.error(
+          "[AgreementCheck] Error checking agreement status:",
+          error,
+        );
         setStatus((prev) => ({ ...prev, loading: false }));
       }
     };

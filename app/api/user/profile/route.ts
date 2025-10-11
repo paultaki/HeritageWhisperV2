@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     logger.error("Profile fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -70,7 +70,7 @@ export async function PATCH(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -83,7 +83,7 @@ export async function PATCH(request: NextRequest) {
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -97,22 +97,22 @@ export async function PATCH(request: NextRequest) {
     };
 
     if (updates.name !== undefined) updatedMetadata.name = updates.name;
-    if (updates.birthYear !== undefined) updatedMetadata.birthYear = updates.birthYear;
+    if (updates.birthYear !== undefined)
+      updatedMetadata.birthYear = updates.birthYear;
     if (updates.bio !== undefined) updatedMetadata.bio = updates.bio;
-    if (updates.profilePhotoUrl !== undefined) updatedMetadata.profilePhotoUrl = updates.profilePhotoUrl;
+    if (updates.profilePhotoUrl !== undefined)
+      updatedMetadata.profilePhotoUrl = updates.profilePhotoUrl;
 
-    const { data: updatedUser, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      user.id,
-      {
+    const { data: updatedUser, error: updateError } =
+      await supabaseAdmin.auth.admin.updateUserById(user.id, {
         user_metadata: updatedMetadata,
-      }
-    );
+      });
 
     if (updateError) {
       logger.error("Failed to update user metadata:", updateError);
       return NextResponse.json(
         { error: "Failed to update profile" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -120,8 +120,13 @@ export async function PATCH(request: NextRequest) {
     const updatedProfile = {
       id: updatedUser.user.id,
       email: updatedUser.user.email,
-      name: updatedUser.user.user_metadata?.name || user.email?.split("@")[0] || "User",
-      birthYear: updatedUser.user.user_metadata?.birthYear || new Date().getFullYear() - 30,
+      name:
+        updatedUser.user.user_metadata?.name ||
+        user.email?.split("@")[0] ||
+        "User",
+      birthYear:
+        updatedUser.user.user_metadata?.birthYear ||
+        new Date().getFullYear() - 30,
       bio: updatedUser.user.user_metadata?.bio || "",
       profilePhotoUrl: updatedUser.user.user_metadata?.profilePhotoUrl || "",
       storyCount: updatedUser.user.user_metadata?.storyCount || 0,
@@ -133,7 +138,7 @@ export async function PATCH(request: NextRequest) {
     logger.error("Profile update error:", error);
     return NextResponse.json(
       { error: "Failed to update profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

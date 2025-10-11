@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     if (!email || !relationship) {
       return NextResponse.json(
         { error: "Email and relationship are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -58,17 +58,14 @@ export async function POST(request: NextRequest) {
       .select()
       .from(familyMembers)
       .where(
-        and(
-          eq(familyMembers.userId, user.id),
-          eq(familyMembers.email, email)
-        )
+        and(eq(familyMembers.userId, user.id), eq(familyMembers.email, email)),
       )
       .limit(1);
 
     if (existingMember.length > 0) {
       return NextResponse.json(
         { error: "This person has already been invited" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -96,12 +93,14 @@ export async function POST(request: NextRequest) {
       success: true,
       member: newMember,
     });
-
   } catch (error) {
     logger.error("Family invitation error:", error);
     return NextResponse.json(
-      { error: "Failed to send invitation", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to send invitation",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

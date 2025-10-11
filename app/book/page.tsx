@@ -44,10 +44,10 @@ import {
 const logoUrl = "/HW_logo_mic_clean.png";
 
 // Dynamic pagination constants
-const LINE_GUARD = 2;                 // px safety margin
-const HERO_MIN_TOP = 0;               // minimum top margin for hero (matches side margins)
-const HERO_MAX_TOP = 37;              // maximum top margin if space is available
-const MIN_MOVE_UNIT = 12;             // don't chase tiny adjustments
+const LINE_GUARD = 2; // px safety margin
+const HERO_MIN_TOP = 0; // minimum top margin for hero (matches side margins)
+const HERO_MAX_TOP = 37; // maximum top margin if space is available
+const MIN_MOVE_UNIT = 12; // don't chase tiny adjustments
 
 // Helper: Get element height including margins
 function outerHeightWithMargins(el: HTMLElement): number {
@@ -68,7 +68,8 @@ class AudioManager {
   private static instance: AudioManager;
   private currentAudio: HTMLAudioElement | null = null;
   private currentId: string | null = null;
-  private listeners: Map<string, (playing: boolean, time: number) => void> = new Map();
+  private listeners: Map<string, (playing: boolean, time: number) => void> =
+    new Map();
 
   static getInstance() {
     if (!AudioManager.instance) {
@@ -108,19 +109,19 @@ class AudioManager {
       this.currentAudio = new Audio(audioUrl);
       this.currentId = id;
 
-      this.currentAudio.addEventListener('ended', () => {
+      this.currentAudio.addEventListener("ended", () => {
         this.notifyListeners(id, false, 0);
         this.currentAudio = null;
         this.currentId = null;
       });
 
-      this.currentAudio.addEventListener('timeupdate', () => {
+      this.currentAudio.addEventListener("timeupdate", () => {
         if (this.currentAudio) {
           this.notifyListeners(id, true, this.currentAudio.currentTime);
         }
       });
 
-      this.currentAudio.addEventListener('loadedmetadata', () => {
+      this.currentAudio.addEventListener("loadedmetadata", () => {
         if (this.currentAudio) {
           this.notifyListeners(id, false, 0);
         }
@@ -190,16 +191,22 @@ interface Story {
 
 // Convert Story to PaginationStory
 const convertToPaginationStory = (story: Story): PaginationStory => {
-  const photos = story.photos?.map(p => ({
-    id: p.id,
-    url: p.url,
-    caption: p.caption,
-    isHero: p.isHero,
-  })) || (story.photoUrl ? [{
-    id: "legacy",
-    url: story.photoUrl,
-    isHero: true,
-  }] : []);
+  const photos =
+    story.photos?.map((p) => ({
+      id: p.id,
+      url: p.url,
+      caption: p.caption,
+      isHero: p.isHero,
+    })) ||
+    (story.photoUrl
+      ? [
+          {
+            id: "legacy",
+            url: story.photoUrl,
+            isHero: true,
+          },
+        ]
+      : []);
 
   return {
     id: story.id,
@@ -226,7 +233,7 @@ const LessonCallout = ({ text }: { text: string }) => {
 };
 
 // Photo carousel component
-const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
+const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   if (photos.length === 0) return null;
@@ -279,7 +286,7 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory['photos'] }) => {
 // Single page renderer
 const BookPageRenderer = ({
   page,
-  onNavigateToPage
+  onNavigateToPage,
 }: {
   page: BookPage;
   onNavigateToPage?: (pageNumber: number) => void;
@@ -309,7 +316,7 @@ const BookPageRenderer = ({
     // Load duration for this audio
     if (page.audioUrl) {
       const audio = new Audio(page.audioUrl);
-      audio.addEventListener('loadedmetadata', () => {
+      audio.addEventListener("loadedmetadata", () => {
         setDuration(audio.duration);
       });
     }
@@ -360,23 +367,30 @@ const BookPageRenderer = ({
   };
 
   // Render intro page
-  if (page.type === 'intro') {
+  if (page.type === "intro") {
     return (
-      <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
+      <article
+        className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+      >
         <div
           ref={pageContentRef}
           className="page-content px-8 py-16 flex flex-col items-center justify-center text-center h-full"
         >
           <div className="space-y-8">
-            <h1 className="text-5xl font-serif text-gray-800 mb-4" style={{ fontFamily: 'Crimson Text, serif' }}>
+            <h1
+              className="text-5xl font-serif text-gray-800 mb-4"
+              style={{ fontFamily: "Crimson Text, serif" }}
+            >
               Family Memories
             </h1>
             <div className="w-24 h-1 bg-coral-600 mx-auto"></div>
             <p className="text-lg text-gray-600 leading-relaxed max-w-md mx-auto italic">
-              A collection of cherished moments, stories, and lessons from a life well-lived.
+              A collection of cherished moments, stories, and lessons from a
+              life well-lived.
             </p>
             <p className="text-base text-gray-500 mt-8">
-              These pages hold the precious memories that shaped our family's journey.
+              These pages hold the precious memories that shaped our family's
+              journey.
             </p>
           </div>
         </div>
@@ -386,11 +400,15 @@ const BookPageRenderer = ({
   }
 
   // Render table of contents
-  if (page.type === 'table-of-contents') {
+  if (page.type === "table-of-contents") {
     return (
-      <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
+      <article
+        className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+      >
         <div ref={pageContentRef} className="page-content px-8 py-12">
-          <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">Table of Contents</h1>
+          <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">
+            Table of Contents
+          </h1>
           <div className="space-y-6">
             {page.tocEntries?.map((entry) => (
               <div key={entry.decade} className="space-y-2">
@@ -401,10 +419,15 @@ const BookPageRenderer = ({
                   {entry.stories.map((story, idx) => (
                     <button
                       key={idx}
-                      onClick={() => onNavigateToPage && onNavigateToPage(story.pageNumber - 1)}
+                      onClick={() =>
+                        onNavigateToPage &&
+                        onNavigateToPage(story.pageNumber - 1)
+                      }
                       className="flex justify-between items-baseline text-sm w-full hover:bg-gray-50 px-2 py-1 rounded transition-colors cursor-pointer text-left"
                     >
-                      <span className="text-gray-700 flex-1 pr-2 hover:text-coral-600">{story.title}</span>
+                      <span className="text-gray-700 flex-1 pr-2 hover:text-coral-600">
+                        {story.title}
+                      </span>
                       <span className="text-gray-500 text-xs whitespace-nowrap">
                         {story.year} • p.{story.pageNumber}
                       </span>
@@ -421,12 +444,14 @@ const BookPageRenderer = ({
   }
 
   // Render decade marker
-  if (page.type === 'decade-marker') {
+  if (page.type === "decade-marker") {
     return (
-      <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
+      <article
+        className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+      >
         <DecadeIntroPage
-          decade={page.decade || ''}
-          title={page.decadeTitle || ''}
+          decade={page.decade || ""}
+          title={page.decadeTitle || ""}
           storiesCount={page.storiesInDecade || 0}
         />
         <div className="page-number">{page.pageNumber}</div>
@@ -436,111 +461,133 @@ const BookPageRenderer = ({
 
   // Render story pages
   return (
-    <article className={`page book-page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
+    <article
+      className={`page book-page ${page.isLeftPage ? "page--left" : "page--right"}`}
+    >
       <div className="running-header">
         {/* Story title with year and age - single line */}
         <div className="story-header-title">
-          {page.title || (page.isLeftPage ? "Heritage Whisper" : "Family Memories")}
+          {page.title ||
+            (page.isLeftPage ? "Heritage Whisper" : "Family Memories")}
           {page.year && ` • ${page.year}`}
-          {page.age !== null && page.age !== undefined && page.age > 0 && ` • Age ${page.age}`}
-          {page.age !== null && page.age !== undefined && page.age === 0 && ` • Birth`}
-          {page.age !== null && page.age !== undefined && page.age < 0 && ` • Before birth`}
+          {page.age !== null &&
+            page.age !== undefined &&
+            page.age > 0 &&
+            ` • Age ${page.age}`}
+          {page.age !== null &&
+            page.age !== undefined &&
+            page.age === 0 &&
+            ` • Birth`}
+          {page.age !== null &&
+            page.age !== undefined &&
+            page.age < 0 &&
+            ` • Before birth`}
         </div>
         {/* Edit button for this story */}
-        {(page.type === 'story-start' || page.type === 'story-complete') && page.storyId && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push(`/review/book-style?id=${page.storyId}&returnPath=${encodeURIComponent(`/book?storyId=${page.storyId}`)}`)}
-            className="gap-1 text-xs px-2 py-1 h-auto"
-          >
-            <Pencil className="w-3 h-3" />
-            <span>Edit</span>
-          </Button>
-        )}
+        {(page.type === "story-start" || page.type === "story-complete") &&
+          page.storyId && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                router.push(
+                  `/review/book-style?id=${page.storyId}&returnPath=${encodeURIComponent(`/book?storyId=${page.storyId}`)}`,
+                )
+              }
+              className="gap-1 text-xs px-2 py-1 h-auto"
+            >
+              <Pencil className="w-3 h-3" />
+              <span>Edit</span>
+            </Button>
+          )}
       </div>
 
-      <div
-        ref={pageContentRef}
-        className="page-content book-page-content"
-      >
+      <div ref={pageContentRef} className="page-content book-page-content">
         {/* Photos - only on first page of story */}
-        {(page.type === 'story-start' || page.type === 'story-complete') && page.photos && (
-          <PhotoCarousel photos={page.photos} />
-        )}
+        {(page.type === "story-start" || page.type === "story-complete") &&
+          page.photos && <PhotoCarousel photos={page.photos} />}
 
         {/* Title - only on first page (date moved to header) */}
-        {(page.type === 'story-start' || page.type === 'story-complete') && (
+        {(page.type === "story-start" || page.type === "story-complete") && (
           <div className="memory-header">
             <h2 className="memory-title">{page.title}</h2>
           </div>
         )}
 
         {/* Audio player - only on first page */}
-        {(page.type === 'story-start' || page.type === 'story-complete') && page.audioUrl && (
-          <div className="audio-wrapper">
-            <div className="audio-wrap">
-              <div className="flex items-center gap-2 md:gap-3">
-                <button
-                  onClick={toggleAudio}
-                  className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full border-2 border-primary/30 bg-primary/5 hover:bg-primary/15 hover:border-primary/50 transition-all flex-shrink-0"
-                >
-                  {isPlaying ? (
-                    <Pause className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
-                  ) : (
-                    <Play className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary ml-0.5" />
-                  )}
-                </button>
-                <div className="flex-1 audio-progress-container">
-                  <div
-                    className="audio-bar"
-                    style={{
-                      background: "rgba(0,0,0,0.1)",
-                      height: "6px",
-                      minHeight: "6px",
-                      maxHeight: "6px",
-                      position: "relative",
-                      overflow: "hidden",
-                      borderRadius: "999px",
-                      display: "block",
-                    }}
+        {(page.type === "story-start" || page.type === "story-complete") &&
+          page.audioUrl && (
+            <div className="audio-wrapper">
+              <div className="audio-wrap">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <button
+                    onClick={toggleAudio}
+                    className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full border-2 border-primary/30 bg-primary/5 hover:bg-primary/15 hover:border-primary/50 transition-all flex-shrink-0"
                   >
+                    {isPlaying ? (
+                      <Pause className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
+                    ) : (
+                      <Play className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary ml-0.5" />
+                    )}
+                  </button>
+                  <div className="flex-1 audio-progress-container">
                     <div
+                      className="audio-bar"
                       style={{
-                        width: `${playbackProgress}%`,
+                        background: "rgba(0,0,0,0.1)",
                         height: "6px",
                         minHeight: "6px",
                         maxHeight: "6px",
-                        background: "linear-gradient(90deg, #E85D5D, #FF935F)",
-                        position: "absolute",
-                        top: "0",
-                        left: "0",
-                        borderRadius: "3px",
-                        zIndex: 1,
+                        position: "relative",
+                        overflow: "hidden",
+                        borderRadius: "999px",
                         display: "block",
-                        fontSize: "0",
-                        lineHeight: "0",
-                        padding: "0",
-                        margin: "0",
-                        boxSizing: "border-box",
-                        transition: "width 0.1s linear",
                       }}
-                    />
+                    >
+                      <div
+                        style={{
+                          width: `${playbackProgress}%`,
+                          height: "6px",
+                          minHeight: "6px",
+                          maxHeight: "6px",
+                          background:
+                            "linear-gradient(90deg, #E85D5D, #FF935F)",
+                          position: "absolute",
+                          top: "0",
+                          left: "0",
+                          borderRadius: "3px",
+                          zIndex: 1,
+                          display: "block",
+                          fontSize: "0",
+                          lineHeight: "0",
+                          padding: "0",
+                          margin: "0",
+                          boxSizing: "border-box",
+                          transition: "width 0.1s linear",
+                        }}
+                      />
+                    </div>
                   </div>
+                  <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap">
+                    {formatTime(currentTime)}
+                  </span>
+                  <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap">
+                    {formatTime(duration)}
+                  </span>
                 </div>
-                <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap">{formatTime(currentTime)}</span>
-                <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap">{formatTime(duration)}</span>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Story text */}
         {page.text && (
           <div className="memory-body">
             <div className="prose prose-lg max-w-none">
-              {page.text.split('\n\n').map((paragraph, index) => (
-                <p key={index} className="mb-4 last:mb-0 leading-relaxed text-justify">
+              {page.text.split("\n\n").map((paragraph, index) => (
+                <p
+                  key={index}
+                  className="mb-4 last:mb-0 leading-relaxed text-justify"
+                >
                   {paragraph}
                 </p>
               ))}
@@ -549,9 +596,8 @@ const BookPageRenderer = ({
         )}
 
         {/* Lesson learned - only on last page */}
-        {(page.type === 'story-end' || page.type === 'story-complete') && page.lessonLearned && (
-          <LessonCallout text={page.lessonLearned} />
-        )}
+        {(page.type === "story-end" || page.type === "story-complete") &&
+          page.lessonLearned && <LessonCallout text={page.lessonLearned} />}
       </div>
 
       <div className="page-number">{page.pageNumber}</div>
@@ -564,7 +610,7 @@ export default function BookViewNew() {
   const { user, session } = useAuth();
   const isMobile = useIsMobile();
   const viewportConfig = useViewportConfig(); // Intelligent viewport detection
-  const showSpreadView = viewportConfig.mode === 'spread'; // Use viewport config directly
+  const showSpreadView = viewportConfig.mode === "spread"; // Use viewport config directly
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
   const { isOpen, open, close } = useRecordModal();
@@ -574,8 +620,10 @@ export default function BookViewNew() {
   const [isPaginationReady, setIsPaginationReady] = useState(false);
 
   // Get storyId from URL parameters
-  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-  const storyIdFromUrl = searchParams.get('storyId');
+  const searchParams = new URLSearchParams(
+    typeof window !== "undefined" ? window.location.search : "",
+  );
+  const storyIdFromUrl = searchParams.get("storyId");
 
   // Fetch stories - API returns { stories: [...] }
   const { data, isLoading } = useQuery<{ stories: Story[] }>({
@@ -589,21 +637,23 @@ export default function BookViewNew() {
   // But don't block initial render - use optimistic pagination
   useEffect(() => {
     async function waitForFonts() {
-      if (typeof window === 'undefined' || typeof document === 'undefined') {
+      if (typeof window === "undefined" || typeof document === "undefined") {
         return;
       }
 
       try {
         // Wait for fonts with timeout fallback
         const fontsPromise = document.fonts.ready;
-        const timeoutPromise = new Promise(resolve => setTimeout(resolve, 1000));
+        const timeoutPromise = new Promise((resolve) =>
+          setTimeout(resolve, 1000),
+        );
 
         await Promise.race([fontsPromise, timeoutPromise]);
 
         // Mark fonts as ready for re-pagination with accurate metrics
         setFontsReady(true);
       } catch (error) {
-        console.error('Error waiting for fonts:', error);
+        console.error("Error waiting for fonts:", error);
         // Mark as ready anyway to not block
         setFontsReady(true);
       }
@@ -622,9 +672,9 @@ export default function BookViewNew() {
     const decadeMap = new Map<string, Story[]>();
 
     stories
-      .filter(story => story.includeInBook === true)
+      .filter((story) => story.includeInBook === true)
       .forEach((story) => {
-        const year = parseInt(story.storyYear?.toString() || '0');
+        const year = parseInt(story.storyYear?.toString() || "0");
         if (year > 0) {
           const decadeKey = `${Math.floor(year / 10) * 10}s`;
           if (!decadeMap.has(decadeKey)) {
@@ -652,7 +702,9 @@ export default function BookViewNew() {
     // Find the page index for the story if storyId is provided
     let pageIndex = -1;
     if (storyIdFromUrl) {
-      pageIndex = bookPages.findIndex(page => page.storyId === storyIdFromUrl);
+      pageIndex = bookPages.findIndex(
+        (page) => page.storyId === storyIdFromUrl,
+      );
     }
 
     return {
@@ -688,17 +740,17 @@ export default function BookViewNew() {
 
   const goToPrevious = () => {
     if (isMobile) {
-      setCurrentMobilePage(prev => Math.max(0, prev - 1));
+      setCurrentMobilePage((prev) => Math.max(0, prev - 1));
     } else {
-      setCurrentSpreadIndex(prev => Math.max(0, prev - 1));
+      setCurrentSpreadIndex((prev) => Math.max(0, prev - 1));
     }
   };
 
   const goToNext = () => {
     if (isMobile) {
-      setCurrentMobilePage(prev => Math.min(totalPages - 1, prev + 1));
+      setCurrentMobilePage((prev) => Math.min(totalPages - 1, prev + 1));
     } else {
-      setCurrentSpreadIndex(prev => Math.min(totalSpreads - 1, prev + 1));
+      setCurrentSpreadIndex((prev) => Math.min(totalSpreads - 1, prev + 1));
     }
   };
 
@@ -707,7 +759,9 @@ export default function BookViewNew() {
       setCurrentMobilePage(Math.min(Math.max(0, pageIndex), totalPages - 1));
     } else {
       const spreadIndex = Math.floor(pageIndex / 2);
-      setCurrentSpreadIndex(Math.min(Math.max(0, spreadIndex), totalSpreads - 1));
+      setCurrentSpreadIndex(
+        Math.min(Math.max(0, spreadIndex), totalSpreads - 1),
+      );
     }
   };
 
@@ -746,10 +800,11 @@ export default function BookViewNew() {
 
     // Wait for next frame to ensure DOM is ready
     requestAnimationFrame(() => {
-      const bookStage = document.querySelector('.book-stage');
+      const bookStage = document.querySelector(".book-stage");
       if (!bookStage) return;
 
-      const pageElements = bookStage.querySelectorAll<HTMLElement>('.book-page');
+      const pageElements =
+        bookStage.querySelectorAll<HTMLElement>(".book-page");
       if (pageElements.length < 2) return;
 
       const page1 = pageElements[0];
@@ -759,7 +814,7 @@ export default function BookViewNew() {
       if (!c1 || !c2) return;
 
       // 1) Adjust hero top margin if needed (starts at 0, can go up to 37px for balance)
-      const hero = page1.querySelector<HTMLElement>('.memory-hero');
+      const hero = page1.querySelector<HTMLElement>(".memory-hero");
       if (hero) {
         const fits = () => {
           const h = c1.scrollHeight - c1.clientHeight;
@@ -777,7 +832,10 @@ export default function BookViewNew() {
         } else if (headroom > MIN_MOVE_UNIT) {
           // Add partial margin based on available space
           const margin = Math.floor(headroom / 2); // Use half the headroom
-          page1.style.setProperty("--hero-top", `${Math.min(margin, HERO_MAX_TOP)}px`);
+          page1.style.setProperty(
+            "--hero-top",
+            `${Math.min(margin, HERO_MAX_TOP)}px`,
+          );
         }
       }
 
@@ -786,7 +844,9 @@ export default function BookViewNew() {
 
       // Find next movable block
       const movable = () =>
-        Array.from(c2.children).find((n) => n instanceof HTMLElement) as HTMLElement | undefined;
+        Array.from(c2.children).find((n) => n instanceof HTMLElement) as
+          | HTMLElement
+          | undefined;
 
       let guard = 64; // prevent runaway loops
       while (getHeadroom() > LINE_GUARD && guard-- > 0) {
@@ -801,8 +861,9 @@ export default function BookViewNew() {
       }
 
       // 3) Ensure callouts and elements never split visually
-      bookStage.querySelectorAll<HTMLElement>('.lesson-callout, p, figure, img, audio')
-        .forEach(el => {
+      bookStage
+        .querySelectorAll<HTMLElement>(".lesson-callout, p, figure, img, audio")
+        .forEach((el) => {
           el.style.breakInside = "avoid";
           el.style.pageBreakInside = "avoid";
         });
@@ -810,7 +871,7 @@ export default function BookViewNew() {
   }, [currentSpreadIndex, spreads, isMobile, showSpreadView, pages]);
 
   // Export PDF functions
-  const exportPDF = async (format: '2up' | 'trim') => {
+  const exportPDF = async (format: "2up" | "trim") => {
     if (!user || !session?.access_token) return;
 
     setIsExporting(true);
@@ -818,21 +879,21 @@ export default function BookViewNew() {
 
     try {
       const response = await fetch(`/api/export/${format}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ bookId: 'default' }),
+        body: JSON.stringify({ bookId: "default" }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate PDF');
+        throw new Error("Failed to generate PDF");
       }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `heritage-book-${format}.pdf`;
       document.body.appendChild(a);
@@ -840,8 +901,8 @@ export default function BookViewNew() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Export error:', error);
-      alert('Failed to export PDF. Please try again.');
+      console.error("Export error:", error);
+      alert("Failed to export PDF. Please try again.");
     } finally {
       setIsExporting(false);
     }
@@ -851,14 +912,15 @@ export default function BookViewNew() {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (showExportMenu && !target.closest('.export-menu-container')) {
+      if (showExportMenu && !target.closest(".export-menu-container")) {
         setShowExportMenu(false);
       }
     };
 
     if (showExportMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [showExportMenu]);
 
@@ -869,10 +931,12 @@ export default function BookViewNew() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-muted-foreground">
-            {isLoading ? 'Loading your stories...' : 'Preparing your book...'}
+            {isLoading ? "Loading your stories..." : "Preparing your book..."}
           </p>
           {!fontsReady && !isLoading && (
-            <p className="mt-2 text-sm text-muted-foreground/70">Loading fonts...</p>
+            <p className="mt-2 text-sm text-muted-foreground/70">
+              Loading fonts...
+            </p>
           )}
         </div>
       </div>
@@ -885,7 +949,9 @@ export default function BookViewNew() {
         <div className="text-center">
           <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-2">No Stories Yet</h2>
-          <p className="text-muted-foreground mb-6">Start recording your first memory to see it here.</p>
+          <p className="text-muted-foreground mb-6">
+            Start recording your first memory to see it here.
+          </p>
           <Button onClick={open} className="gap-2">
             <Plus className="w-4 h-4" />
             Record Your First Story
@@ -901,7 +967,7 @@ export default function BookViewNew() {
       {/* Header */}
       <div className="book-header">
         <div className="flex items-center gap-3">
-          <BookOpen className="w-8 h-8" style={{ color: '#1f0f08' }} />
+          <BookOpen className="w-8 h-8" style={{ color: "#1f0f08" }} />
           <h1 className="text-2xl font-bold">Book</h1>
         </div>
 
@@ -912,11 +978,11 @@ export default function BookViewNew() {
             disabled={isExporting || stories.length === 0}
             variant="outline"
             className="gap-2"
-            aria-label={isExporting ? 'Exporting PDF' : 'Export PDF'}
+            aria-label={isExporting ? "Exporting PDF" : "Export PDF"}
           >
             <Share2 className="w-4 h-4 flex-shrink-0" />
             <span className="hidden sm:inline">
-              {isExporting ? 'Exporting...' : 'Export PDF'}
+              {isExporting ? "Exporting..." : "Export PDF"}
             </span>
           </Button>
 
@@ -924,7 +990,7 @@ export default function BookViewNew() {
           {showExportMenu && (
             <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-2 z-50">
               <button
-                onClick={() => exportPDF('2up')}
+                onClick={() => exportPDF("2up")}
                 className="w-full text-left px-4 py-3 rounded-md hover:bg-gray-50 transition-colors"
               >
                 <div className="font-semibold text-sm">2-Up (Home Print)</div>
@@ -933,7 +999,7 @@ export default function BookViewNew() {
                 </div>
               </button>
               <button
-                onClick={() => exportPDF('trim')}
+                onClick={() => exportPDF("trim")}
                 className="w-full text-left px-4 py-3 rounded-md hover:bg-gray-50 transition-colors mt-1"
               >
                 <div className="font-semibold text-sm">Trim PDF (POD)</div>
@@ -949,37 +1015,47 @@ export default function BookViewNew() {
       {/* Book Content - Always centered */}
       <div className="book-container relative" {...swipeHandlers}>
         {/* Spine hint for single-page mode - behind everything */}
-        {!showSpreadView && (
-          <div className="spine-hint" aria-hidden="true" />
-        )}
+        {!showSpreadView && <div className="spine-hint" aria-hidden="true" />}
 
         {/* Book stage - explicit width for centering */}
         <div
           className="book-stage mx-auto relative"
           style={{
             width: `${viewportConfig.scaledWidth}px`,
-            transition: 'width 140ms ease-out',
+            transition: "width 140ms ease-out",
           }}
         >
           <div
-            className={`book-spread ${!showSpreadView ? 'single-mode' : 'spread-mode'}`}
+            className={`book-spread ${!showSpreadView ? "single-mode" : "spread-mode"}`}
             style={{
-              transform: viewportConfig.scale !== 1.0 ? `scale(${viewportConfig.scale})` : undefined,
-              transformOrigin: 'top center',
-              transition: 'transform 140ms ease-out',
+              transform:
+                viewportConfig.scale !== 1.0
+                  ? `scale(${viewportConfig.scale})`
+                  : undefined,
+              transformOrigin: "top center",
+              transition: "transform 140ms ease-out",
             }}
           >
             {!showSpreadView ? (
               // Single page view - centered by explicit width
-              <BookPageRenderer page={pages[currentMobilePage]} onNavigateToPage={navigateToPage} />
+              <BookPageRenderer
+                page={pages[currentMobilePage]}
+                onNavigateToPage={navigateToPage}
+              />
             ) : (
               // Spread view - two pages side-by-side
               <>
                 {spreads[currentSpreadIndex] && (
                   <>
-                    <BookPageRenderer page={spreads[currentSpreadIndex][0]} onNavigateToPage={navigateToPage} />
+                    <BookPageRenderer
+                      page={spreads[currentSpreadIndex][0]}
+                      onNavigateToPage={navigateToPage}
+                    />
                     {spreads[currentSpreadIndex][1] && (
-                      <BookPageRenderer page={spreads[currentSpreadIndex][1]} onNavigateToPage={navigateToPage} />
+                      <BookPageRenderer
+                        page={spreads[currentSpreadIndex][1]}
+                        onNavigateToPage={navigateToPage}
+                      />
                     )}
                   </>
                 )}

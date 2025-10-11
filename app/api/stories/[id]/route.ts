@@ -16,7 +16,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 // GET single story
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     // Get the Authorization header
@@ -26,7 +26,7 @@ export async function GET(
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function GET(
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -52,10 +52,7 @@ export async function GET(
       .single();
 
     if (fetchError || !story) {
-      return NextResponse.json(
-        { error: "Story not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Story not found" }, { status: 404 });
     }
 
     // Helper function to generate signed URLs for photos
@@ -63,22 +60,25 @@ export async function GET(
       if (!photoUrl) return null;
 
       // Skip blob URLs
-      if (photoUrl.startsWith('blob:')) {
+      if (photoUrl.startsWith("blob:")) {
         return null;
       }
 
       // If already a full URL (starts with http/https), use as-is
-      if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) {
+      if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) {
         return photoUrl;
       }
 
       // Generate signed URL for storage path (valid for 1 week)
       const { data, error } = await supabaseAdmin.storage
-        .from('heritage-whisper-files')
-        .createSignedUrl(photoUrl.startsWith('photo/') ? photoUrl : `photo/${photoUrl}`, 604800);
+        .from("heritage-whisper-files")
+        .createSignedUrl(
+          photoUrl.startsWith("photo/") ? photoUrl : `photo/${photoUrl}`,
+          604800,
+        );
 
       if (error) {
-        logger.error('Error creating signed URL for photo:', photoUrl, error);
+        logger.error("Error creating signed URL for photo:", photoUrl, error);
         return null;
       }
 
@@ -88,24 +88,34 @@ export async function GET(
     // Process photos array from metadata
     let photos = [];
     if (story.metadata?.photos) {
-      logger.debug('[GET /api/stories/[id]] Raw photos from DB:', story.metadata.photos);
+      logger.debug(
+        "[GET /api/stories/[id]] Raw photos from DB:",
+        story.metadata.photos,
+      );
       photos = await Promise.all(
         (story.metadata.photos || []).map(async (photo: any) => {
           const photoPath = photo.url || photo.filePath;
           const signedUrl = await getPhotoUrl(photoPath);
-          logger.debug('[GET /api/stories/[id]] Photo path:', photoPath, '-> Signed URL:', signedUrl);
+          logger.debug(
+            "[GET /api/stories/[id]] Photo path:",
+            photoPath,
+            "-> Signed URL:",
+            signedUrl,
+          );
           return {
             ...photo,
             url: signedUrl,
-            filePath: photoPath // Preserve the storage path
+            filePath: photoPath, // Preserve the storage path
           };
-        })
+        }),
       );
-      logger.debug('[GET /api/stories/[id]] Processed photos:', photos);
+      logger.debug("[GET /api/stories/[id]] Processed photos:", photos);
     }
 
     // Process legacy photoUrl if exists
-    const photoUrl = story.photo_url ? await getPhotoUrl(story.photo_url) : null;
+    const photoUrl = story.photo_url
+      ? await getPhotoUrl(story.photo_url)
+      : null;
 
     // Transform to frontend-compatible format (from Supabase snake_case to camelCase)
     const transformedStory = {
@@ -140,7 +150,7 @@ export async function GET(
     logger.error("Story fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch story" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -148,7 +158,7 @@ export async function GET(
 // PUT update story
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     // Get the Authorization header
@@ -158,7 +168,7 @@ export async function PUT(
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -171,7 +181,7 @@ export async function PUT(
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -189,47 +199,59 @@ export async function PUT(
       logger.error("Story fetch error:", fetchError);
       return NextResponse.json(
         { error: "Story not found or unauthorized" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Process photos array - use filePath if available, otherwise extract from URL
-    const processedPhotos = body.photos !== undefined
-      ? (body.photos || []).filter((photo: any) => {
-          if (!photo.url && !photo.filePath) return false;
-          // Skip blob URLs - these are invalid temporary URLs
-          if (photo.url && photo.url.startsWith('blob:')) {
-            logger.warn('Blob URL found in photos array - filtering out:', photo.url);
-            return false;
-          }
-          return true;
-        }).map((photo: any) => {
-          // If we have a filePath, use it as the url (for storage)
-          if (photo.filePath) {
-            return {
-              ...photo,
-              url: photo.filePath // Store the path, not the signed URL
-            };
-          }
+    const processedPhotos =
+      body.photos !== undefined
+        ? (body.photos || [])
+            .filter((photo: any) => {
+              if (!photo.url && !photo.filePath) return false;
+              // Skip blob URLs - these are invalid temporary URLs
+              if (photo.url && photo.url.startsWith("blob:")) {
+                logger.warn(
+                  "Blob URL found in photos array - filtering out:",
+                  photo.url,
+                );
+                return false;
+              }
+              return true;
+            })
+            .map((photo: any) => {
+              // If we have a filePath, use it as the url (for storage)
+              if (photo.filePath) {
+                return {
+                  ...photo,
+                  url: photo.filePath, // Store the path, not the signed URL
+                };
+              }
 
-          // If the URL is a signed Supabase URL, extract the path
-          if (photo.url && photo.url.includes('supabase.co/storage/v1/object/sign/')) {
-            // Extract the path from the signed URL
-            const urlParts = photo.url.split('/');
-            const pathStartIndex = urlParts.indexOf('photo') + 1;
-            if (pathStartIndex > 0 && pathStartIndex < urlParts.length) {
-              const filePath = urlParts.slice(pathStartIndex).join('/').split('?')[0];
-              return {
-                ...photo,
-                url: decodeURIComponent(filePath) // Store the extracted path
-              };
-            }
-          }
+              // If the URL is a signed Supabase URL, extract the path
+              if (
+                photo.url &&
+                photo.url.includes("supabase.co/storage/v1/object/sign/")
+              ) {
+                // Extract the path from the signed URL
+                const urlParts = photo.url.split("/");
+                const pathStartIndex = urlParts.indexOf("photo") + 1;
+                if (pathStartIndex > 0 && pathStartIndex < urlParts.length) {
+                  const filePath = urlParts
+                    .slice(pathStartIndex)
+                    .join("/")
+                    .split("?")[0];
+                  return {
+                    ...photo,
+                    url: decodeURIComponent(filePath), // Store the extracted path
+                  };
+                }
+              }
 
-          // Otherwise keep the photo as-is (might be a path already)
-          return photo;
-        })
-      : undefined;
+              // Otherwise keep the photo as-is (might be a path already)
+              return photo;
+            })
+        : undefined;
 
     // Build update object - only include fields that were actually sent
     const storyData: any = {};
@@ -243,20 +265,39 @@ export async function PUT(
       storyData.year = body.year || body.storyYear;
     }
     if (body.audioUrl !== undefined) {
-      storyData.audio_url = body.audioUrl && !body.audioUrl.startsWith('blob:') ? body.audioUrl : null;
+      storyData.audio_url =
+        body.audioUrl && !body.audioUrl.startsWith("blob:")
+          ? body.audioUrl
+          : null;
     }
-    if (body.wisdomClipText !== undefined || body.wisdomTranscription !== undefined) {
+    if (
+      body.wisdomClipText !== undefined ||
+      body.wisdomTranscription !== undefined
+    ) {
       // Allow empty string to clear the lesson learned
-      storyData.wisdom_text = body.wisdomClipText !== undefined ? body.wisdomClipText : body.wisdomTranscription;
-      logger.debug('[PUT /api/stories/[id]] Updating wisdom_text to:', storyData.wisdom_text);
+      storyData.wisdom_text =
+        body.wisdomClipText !== undefined
+          ? body.wisdomClipText
+          : body.wisdomTranscription;
+      logger.debug(
+        "[PUT /api/stories/[id]] Updating wisdom_text to:",
+        storyData.wisdom_text,
+      );
     }
-    if (body.wisdomClipUrl !== undefined) storyData.wisdom_clip_url = body.wisdomClipUrl;
+    if (body.wisdomClipUrl !== undefined)
+      storyData.wisdom_clip_url = body.wisdomClipUrl;
     if (body.durationSeconds !== undefined) {
-      storyData.duration_seconds = Math.max(1, Math.min(120, body.durationSeconds || 30));
+      storyData.duration_seconds = Math.max(
+        1,
+        Math.min(120, body.durationSeconds || 30),
+      );
     }
     if (body.emotions !== undefined) storyData.emotions = body.emotions;
     if (body.photoUrl !== undefined) {
-      storyData.photo_url = body.photoUrl && !body.photoUrl.startsWith('blob:') ? body.photoUrl : null;
+      storyData.photo_url =
+        body.photoUrl && !body.photoUrl.startsWith("blob:")
+          ? body.photoUrl
+          : null;
     }
 
     // Always set is_saved to true for updates
@@ -308,7 +349,7 @@ export async function PUT(
       logger.error("Story update error:", updateError);
       return NextResponse.json(
         { error: "Story not found or unauthorized" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -317,22 +358,25 @@ export async function PUT(
       if (!photoUrl) return null;
 
       // Skip blob URLs
-      if (photoUrl.startsWith('blob:')) {
+      if (photoUrl.startsWith("blob:")) {
         return null;
       }
 
       // If already a full URL (starts with http/https), use as-is
-      if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) {
+      if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) {
         return photoUrl;
       }
 
       // Generate signed URL for storage path (valid for 1 week)
       const { data, error } = await supabaseAdmin.storage
-        .from('heritage-whisper-files')
-        .createSignedUrl(photoUrl.startsWith('photo/') ? photoUrl : `photo/${photoUrl}`, 604800);
+        .from("heritage-whisper-files")
+        .createSignedUrl(
+          photoUrl.startsWith("photo/") ? photoUrl : `photo/${photoUrl}`,
+          604800,
+        );
 
       if (error) {
-        logger.error('Error creating signed URL for photo:', photoUrl, error);
+        logger.error("Error creating signed URL for photo:", photoUrl, error);
         return null;
       }
 
@@ -345,13 +389,15 @@ export async function PUT(
       photos = await Promise.all(
         (updatedStory.metadata.photos || []).map(async (photo: any) => ({
           ...photo,
-          url: await getPhotoUrl(photo.url || photo.filePath)
-        }))
+          url: await getPhotoUrl(photo.url || photo.filePath),
+        })),
       );
     }
 
     // Process legacy photoUrl if exists
-    const photoUrl = updatedStory.photo_url ? await getPhotoUrl(updatedStory.photo_url) : null;
+    const photoUrl = updatedStory.photo_url
+      ? await getPhotoUrl(updatedStory.photo_url)
+      : null;
 
     // Transform the response (from Supabase snake_case to camelCase)
     const transformedStory = {
@@ -386,7 +432,7 @@ export async function PUT(
     logger.error("Story update error:", error);
     return NextResponse.json(
       { error: "Failed to update story" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -394,7 +440,7 @@ export async function PUT(
 // DELETE story
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     // Get the Authorization header
@@ -404,7 +450,7 @@ export async function DELETE(
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -417,7 +463,7 @@ export async function DELETE(
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -432,7 +478,7 @@ export async function DELETE(
       logger.error("Story deletion error:", deleteError);
       return NextResponse.json(
         { error: "Story not found or already deleted" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -441,7 +487,7 @@ export async function DELETE(
     logger.error("Story deletion error:", error);
     return NextResponse.json(
       { error: "Failed to delete story" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

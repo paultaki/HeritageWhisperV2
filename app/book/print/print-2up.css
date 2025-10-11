@@ -40,7 +40,7 @@ body {
   gap: 0; /* Pages should touch in the middle */
   background: white;
   border: 1px solid #ddd;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin: 0;
   padding: 0;
 }

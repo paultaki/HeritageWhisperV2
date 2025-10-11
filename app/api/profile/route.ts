@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -56,17 +56,17 @@ export async function GET(request: NextRequest) {
           childhood: { start: 0, end: 12 },
           youngAdult: { start: 13, end: 25 },
           midLife: { start: 26, end: 60 },
-          senior: { start: 61, end: 100 }
+          senior: { start: 61, end: 100 },
         },
         workEthic: 5,
         riskTolerance: 5,
         familyOrientation: 5,
         spirituality: 5,
-        preferredStyle: 'gentle',
+        preferredStyle: "gentle",
         emotionalComfort: 5,
-        detailLevel: 'moderate',
-        followUpFrequency: 'occasional',
-        completionPercentage: 0
+        detailLevel: "moderate",
+        followUpFrequency: "occasional",
+        completionPercentage: 0,
       });
     }
 
@@ -78,24 +78,23 @@ export async function GET(request: NextRequest) {
         childhood: { start: 0, end: 12 },
         youngAdult: { start: 13, end: 25 },
         midLife: { start: 26, end: 60 },
-        senior: { start: 61, end: 100 }
+        senior: { start: 61, end: 100 },
       },
       workEthic: user.user_metadata?.workEthic || 5,
       riskTolerance: user.user_metadata?.riskTolerance || 5,
       familyOrientation: user.user_metadata?.familyOrientation || 5,
       spirituality: user.user_metadata?.spirituality || 5,
-      preferredStyle: user.user_metadata?.preferredStyle || 'gentle',
+      preferredStyle: user.user_metadata?.preferredStyle || "gentle",
       emotionalComfort: user.user_metadata?.emotionalComfort || 5,
-      detailLevel: user.user_metadata?.detailLevel || 'moderate',
-      followUpFrequency: user.user_metadata?.followUpFrequency || 'occasional',
-      completionPercentage: user.user_metadata?.completionPercentage || 0
+      detailLevel: user.user_metadata?.detailLevel || "moderate",
+      followUpFrequency: user.user_metadata?.followUpFrequency || "occasional",
+      completionPercentage: user.user_metadata?.completionPercentage || 0,
     });
-
   } catch (error) {
     logger.error("Profile fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -110,7 +109,7 @@ export async function PATCH(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -123,7 +122,7 @@ export async function PATCH(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -136,33 +135,43 @@ export async function PATCH(request: NextRequest) {
     if (profileData.birthYear) fieldsCompleted++;
     if (profileData.majorLifePhases) fieldsCompleted++;
     if (profileData.workEthic && profileData.workEthic !== 5) fieldsCompleted++;
-    if (profileData.riskTolerance && profileData.riskTolerance !== 5) fieldsCompleted++;
-    if (profileData.familyOrientation && profileData.familyOrientation !== 5) fieldsCompleted++;
-    if (profileData.spirituality && profileData.spirituality !== 5) fieldsCompleted++;
-    if (profileData.preferredStyle && profileData.preferredStyle !== 'gentle') fieldsCompleted++;
-    if (profileData.emotionalComfort && profileData.emotionalComfort !== 5) fieldsCompleted++;
-    if (profileData.detailLevel && profileData.detailLevel !== 'moderate') fieldsCompleted++;
-    if (profileData.followUpFrequency && profileData.followUpFrequency !== 'occasional') fieldsCompleted++;
+    if (profileData.riskTolerance && profileData.riskTolerance !== 5)
+      fieldsCompleted++;
+    if (profileData.familyOrientation && profileData.familyOrientation !== 5)
+      fieldsCompleted++;
+    if (profileData.spirituality && profileData.spirituality !== 5)
+      fieldsCompleted++;
+    if (profileData.preferredStyle && profileData.preferredStyle !== "gentle")
+      fieldsCompleted++;
+    if (profileData.emotionalComfort && profileData.emotionalComfort !== 5)
+      fieldsCompleted++;
+    if (profileData.detailLevel && profileData.detailLevel !== "moderate")
+      fieldsCompleted++;
+    if (
+      profileData.followUpFrequency &&
+      profileData.followUpFrequency !== "occasional"
+    )
+      fieldsCompleted++;
 
-    const completionPercentage = Math.round((fieldsCompleted / totalFields) * 100);
+    const completionPercentage = Math.round(
+      (fieldsCompleted / totalFields) * 100,
+    );
 
     // Update user metadata in Supabase Auth
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      user.id,
-      {
+    const { error: updateError } =
+      await supabaseAdmin.auth.admin.updateUserById(user.id, {
         user_metadata: {
           ...user.user_metadata,
           ...profileData,
-          completionPercentage
-        }
-      }
-    );
+          completionPercentage,
+        },
+      });
 
     if (updateError) {
       logger.error("Error updating user metadata:", updateError);
       return NextResponse.json(
         { error: "Failed to update profile" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -172,7 +181,7 @@ export async function PATCH(request: NextRequest) {
         .from("users")
         .update({
           birth_year: profileData.birthYear,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
 
@@ -187,15 +196,14 @@ export async function PATCH(request: NextRequest) {
       completionPercentage,
       profile: {
         ...profileData,
-        completionPercentage
-      }
+        completionPercentage,
+      },
     });
-
   } catch (error) {
     logger.error("Profile update error:", error);
     return NextResponse.json(
       { error: "Failed to save profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

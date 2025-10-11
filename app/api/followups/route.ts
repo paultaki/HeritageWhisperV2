@@ -3,7 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 import { apiRatelimit, checkRateLimit } from "@/lib/ratelimit";
-import { sanitizeUserInput, validateSanitizedInput } from "@/lib/promptSanitizer";
+import {
+  sanitizeUserInput,
+  validateSanitizedInput,
+} from "@/lib/promptSanitizer";
 
 // Initialize Supabase Admin client for token verification
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -18,15 +21,16 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 // Initialize OpenAI client
 if (!process.env.OPENAI_API_KEY) {
-  throw new Error('OPENAI_API_KEY environment variable is required');
+  throw new Error("OPENAI_API_KEY environment variable is required");
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 // Cache system instructions at module level to avoid rebuilding on every request
-const FOLLOWUP_SYSTEM_PROMPT = "You are a warm, caring interviewer helping preserve family stories. Generate thoughtful follow-up questions.";
+const FOLLOWUP_SYSTEM_PROMPT =
+  "You are a warm, caring interviewer helping preserve family stories. Generate thoughtful follow-up questions.";
 
 const FOLLOWUP_RULES = `Requirements:
 1. EMOTIONAL: About feelings/impact
@@ -44,28 +48,63 @@ Return ONLY valid JSON: {"emotional": "", "wisdom": "", "sensory": ""}`;
 
 // Pivotal moment detection keywords
 const PIVOTAL_KEYWORDS = {
-  'turning_points': ['decided', 'realized', 'understood', 'changed', 'moment', 'suddenly'],
-  'loss_grief': ['died', 'passed', 'funeral', 'lost', 'goodbye', 'miss'],
-  'love': ['fell in love', 'married', 'met', 'wedding', 'proposal', 'heart'],
-  'courage': ['scared', 'brave', 'confronted', 'stood up', 'fought', 'defended'],
-  'achievement': ['proud', 'accomplished', 'succeeded', 'won', 'graduated', 'promoted'],
-  'family': ['born', 'baby', 'children', 'parents', 'siblings', 'family'],
-  'friendship': ['friend', 'best friend', 'met', 'together', 'loyal', 'support'],
-  'education': ['school', 'teacher', 'learned', 'studied', 'college', 'university'],
-  'work': ['job', 'career', 'boss', 'coworker', 'promoted', 'retired'],
-  'travel': ['trip', 'vacation', 'journey', 'visited', 'adventure', 'explore'],
-  'home': ['house', 'moved', 'neighborhood', 'hometown', 'roots', 'belonged'],
-  'health': ['sick', 'hospital', 'doctor', 'recovery', 'illness', 'healthy'],
-  'faith': ['believe', 'pray', 'church', 'spiritual', 'faith', 'divine'],
-  'creativity': ['created', 'made', 'artistic', 'music', 'painting', 'writing'],
-  'nature': ['outdoors', 'garden', 'animals', 'seasons', 'weather', 'beauty'],
-  'traditions': ['holiday', 'celebration', 'tradition', 'ritual', 'custom', 'heritage'],
-  'struggles': ['difficult', 'hard', 'challenge', 'obstacle', 'overcome', 'persevere']
+  turning_points: [
+    "decided",
+    "realized",
+    "understood",
+    "changed",
+    "moment",
+    "suddenly",
+  ],
+  loss_grief: ["died", "passed", "funeral", "lost", "goodbye", "miss"],
+  love: ["fell in love", "married", "met", "wedding", "proposal", "heart"],
+  courage: ["scared", "brave", "confronted", "stood up", "fought", "defended"],
+  achievement: [
+    "proud",
+    "accomplished",
+    "succeeded",
+    "won",
+    "graduated",
+    "promoted",
+  ],
+  family: ["born", "baby", "children", "parents", "siblings", "family"],
+  friendship: ["friend", "best friend", "met", "together", "loyal", "support"],
+  education: [
+    "school",
+    "teacher",
+    "learned",
+    "studied",
+    "college",
+    "university",
+  ],
+  work: ["job", "career", "boss", "coworker", "promoted", "retired"],
+  travel: ["trip", "vacation", "journey", "visited", "adventure", "explore"],
+  home: ["house", "moved", "neighborhood", "hometown", "roots", "belonged"],
+  health: ["sick", "hospital", "doctor", "recovery", "illness", "healthy"],
+  faith: ["believe", "pray", "church", "spiritual", "faith", "divine"],
+  creativity: ["created", "made", "artistic", "music", "painting", "writing"],
+  nature: ["outdoors", "garden", "animals", "seasons", "weather", "beauty"],
+  traditions: [
+    "holiday",
+    "celebration",
+    "tradition",
+    "ritual",
+    "custom",
+    "heritage",
+  ],
+  struggles: [
+    "difficult",
+    "hard",
+    "challenge",
+    "obstacle",
+    "overcome",
+    "persevere",
+  ],
 };
 
 function detectPivotalMoments(transcription: string): string[] {
   const text = transcription.toLowerCase();
-  const detected: Array<{category: string, count: number}> = [];
+  const detected: Array<{ category: string; count: number }> = [];
 
   for (const [category, keywords] of Object.entries(PIVOTAL_KEYWORDS)) {
     const count = keywords.reduce((acc, keyword) => {
@@ -80,7 +119,7 @@ function detectPivotalMoments(transcription: string): string[] {
   return detected
     .sort((a, b) => b.count - a.count)
     .slice(0, 3)
-    .map(item => item.category);
+    .map((item) => item.category);
 }
 
 interface FollowUpQuestions {
@@ -92,11 +131,11 @@ interface FollowUpQuestions {
 async function generateFollowUps(
   transcription: string,
   userName: string,
-  userAge: number
+  userAge: number,
 ): Promise<FollowUpQuestions> {
   // Sanitize user input to prevent prompt injection
   const sanitizedTranscription = sanitizeUserInput(transcription);
-  
+
   if (!validateSanitizedInput(sanitizedTranscription)) {
     logger.warn("Potential prompt injection detected in transcription");
     throw new Error("Invalid input detected");
@@ -108,7 +147,7 @@ async function generateFollowUps(
   const userInstructions = `You are interviewing ${userName}, age ${userAge}, about their life story.
 Generate exactly 3 follow-up questions in JSON format.
 
-Detected themes: ${pivotalCategories.join(', ')}
+Detected themes: ${pivotalCategories.join(", ")}
 
 ${FOLLOWUP_RULES}`;
 
@@ -118,28 +157,28 @@ ${FOLLOWUP_RULES}`;
       messages: [
         {
           role: "system",
-          content: FOLLOWUP_SYSTEM_PROMPT
+          content: FOLLOWUP_SYSTEM_PROMPT,
         },
         {
           role: "user",
-          content: `${userInstructions}\n\n<transcription>\n${sanitizedTranscription}\n</transcription>`
-        }
+          content: `${userInstructions}\n\n<transcription>\n${sanitizedTranscription}\n</transcription>`,
+        },
       ],
       response_format: { type: "json_object" },
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const result = JSON.parse(response.choices[0].message.content || "{}");
     return {
       emotional: result.emotional || "How did that moment make you feel?",
       wisdom: result.wisdom || "What did you learn from that experience?",
-      sensory: result.sensory || "What details do you remember most clearly?"
+      sensory: result.sensory || "What details do you remember most clearly?",
     };
   } catch (error) {
     logger.error("Follow-up generation error:", error);
     return {
       emotional: "How did that moment make you feel?",
       wisdom: "What would you want your grandchildren to know about this?",
-      sensory: "What do you remember seeing, hearing, or smelling?"
+      sensory: "What do you remember seeing, hearing, or smelling?",
     };
   }
 }
@@ -153,7 +192,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -166,12 +205,15 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     // Rate limiting: 30 API requests per minute per user
-    const rateLimitResponse = await checkRateLimit(`api:followups:${user.id}`, apiRatelimit);
+    const rateLimitResponse = await checkRateLimit(
+      `api:followups:${user.id}`,
+      apiRatelimit,
+    );
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -182,7 +224,7 @@ export async function POST(request: NextRequest) {
     if (!transcription) {
       return NextResponse.json(
         { error: "Transcription required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -197,10 +239,7 @@ export async function POST(request: NextRequest) {
 
     if (userError || !dbUser) {
       logger.error("User not found in database:", userError);
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const currentYear = new Date().getFullYear();
@@ -211,14 +250,16 @@ export async function POST(request: NextRequest) {
     const followUps = await generateFollowUps(transcription, userName, userAge);
 
     return NextResponse.json({ followUps });
-
   } catch (error) {
     logger.error("Follow-up generation error:", error);
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to generate follow-ups"
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to generate follow-ups",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

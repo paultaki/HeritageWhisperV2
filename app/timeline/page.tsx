@@ -11,8 +11,15 @@ import { groupStoriesByDecade, type Story } from "@/lib/supabase";
 import { getApiUrl } from "@/lib/config";
 import { useRecordModal } from "@/hooks/use-record-modal";
 import RecordModal from "@/components/RecordModal";
-import { generateGhostPrompts, mergeGhostPromptsWithStories, type GhostPrompt } from "@/lib/ghostPrompts";
-import { generateNewUserGhostPrompts, shouldShowNewUserGhosts } from "@/lib/newUserGhostPrompts";
+import {
+  generateGhostPrompts,
+  mergeGhostPromptsWithStories,
+  type GhostPrompt,
+} from "@/lib/ghostPrompts";
+import {
+  generateNewUserGhostPrompts,
+  shouldShowNewUserGhosts,
+} from "@/lib/newUserGhostPrompts";
 import { GhostPromptCard } from "@/components/GhostPromptCard";
 import DecadeNav, { type DecadeEntry } from "@/components/ui/DecadeNav";
 import {
@@ -37,65 +44,72 @@ import { Palette } from "lucide-react";
 const logoUrl = "/HW_logo_mic_clean.png";
 
 // Color scheme options for testing
-type ColorScheme = 'original' | 'white' | 'inverted' | 'soft' | 'cool' | 'dark' | 'retro';
+type ColorScheme =
+  | "original"
+  | "white"
+  | "inverted"
+  | "soft"
+  | "cool"
+  | "dark"
+  | "retro";
 
 const colorSchemes = {
   original: {
-    name: 'Original',
-    page: 'bg-heritage-warm-bg',
-    card: 'bg-white',
-    header: 'bg-white/95',
-    text: 'text-foreground',
-    timelineLine: 'from-heritage-orange to-heritage-coral'
+    name: "Original",
+    page: "bg-heritage-warm-bg",
+    card: "bg-white",
+    header: "bg-white/95",
+    text: "text-foreground",
+    timelineLine: "from-heritage-orange to-heritage-coral",
   },
   white: {
-    name: 'Clean White',
-    page: 'bg-white',
-    card: 'bg-white border border-gray-200',
-    header: 'bg-white/95',
-    text: 'text-foreground',
-    timelineLine: 'from-gray-300 to-gray-400'
+    name: "Clean White",
+    page: "bg-white",
+    card: "bg-white border border-gray-200",
+    header: "bg-white/95",
+    text: "text-foreground",
+    timelineLine: "from-gray-300 to-gray-400",
   },
   inverted: {
-    name: 'Inverted',
-    page: 'bg-white',
-    card: 'bg-heritage-warm-bg',
-    header: 'bg-heritage-warm-bg/95',
-    text: 'text-foreground',
-    timelineLine: 'from-heritage-orange to-heritage-coral'
+    name: "Inverted",
+    page: "bg-white",
+    card: "bg-heritage-warm-bg",
+    header: "bg-heritage-warm-bg/95",
+    text: "text-foreground",
+    timelineLine: "from-heritage-orange to-heritage-coral",
   },
   soft: {
-    name: 'Soft Gray',
-    page: 'bg-gray-50',
-    card: 'bg-white',
-    header: 'bg-gray-50/95',
-    text: 'text-foreground',
-    timelineLine: 'from-gray-400 to-gray-500'
+    name: "Soft Gray",
+    page: "bg-gray-50",
+    card: "bg-white",
+    header: "bg-gray-50/95",
+    text: "text-foreground",
+    timelineLine: "from-gray-400 to-gray-500",
   },
   cool: {
-    name: 'Cool Blue',
-    page: 'bg-slate-50',
-    card: 'bg-white',
-    header: 'bg-slate-50/95',
-    text: 'text-foreground',
-    timelineLine: 'from-blue-400 to-blue-500'
+    name: "Cool Blue",
+    page: "bg-slate-50",
+    card: "bg-white",
+    header: "bg-slate-50/95",
+    text: "text-foreground",
+    timelineLine: "from-blue-400 to-blue-500",
   },
   dark: {
-    name: 'Dark Mode',
-    page: 'bg-gray-900',
-    card: 'bg-gray-800 text-white',
-    header: 'bg-gray-900/95',
-    text: 'text-white',
-    timelineLine: 'from-gray-600 to-gray-700'
+    name: "Dark Mode",
+    page: "bg-gray-900",
+    card: "bg-gray-800 text-white",
+    header: "bg-gray-900/95",
+    text: "text-white",
+    timelineLine: "from-gray-600 to-gray-700",
   },
   retro: {
-    name: 'Retro Radio',
-    page: 'bg-[#F5E6D3]',
-    card: 'bg-white',
-    header: 'bg-[#F5E6D3]/95',
-    text: 'text-[#6B4E42]',
-    timelineLine: 'from-[#D4654F] to-[#5BB5B0]'
-  }
+    name: "Retro Radio",
+    page: "bg-[#F5E6D3]",
+    card: "bg-white",
+    header: "bg-[#F5E6D3]/95",
+    text: "text-[#6B4E42]",
+    timelineLine: "from-[#D4654F] to-[#5BB5B0]",
+  },
 };
 
 // Global audio manager to ensure only one audio plays at a time
@@ -246,7 +260,7 @@ function MemoryCard({
   story,
   isHighlighted = false,
   isReturnHighlight = false,
-  colorScheme = 'original',
+  colorScheme = "original",
 }: {
   story: Story;
   isHighlighted?: boolean;
@@ -459,7 +473,9 @@ function MemoryCard({
     );
 
     // Check if this is "The Year I was Born" story - if so, go to edit instead of book view
-    const isBirthYearStory = story.title?.toLowerCase().includes('born') || story.title?.toLowerCase().includes('birth');
+    const isBirthYearStory =
+      story.title?.toLowerCase().includes("born") ||
+      story.title?.toLowerCase().includes("birth");
     if (isBirthYearStory) {
       // Navigate directly to edit/review page for birth year story
       router.push(`/review?edit=${story.id}`);
@@ -475,13 +491,22 @@ function MemoryCard({
   // Card styles based on color scheme
   const cardStyle = {
     backgroundColor:
-      colorScheme === 'inverted' ? '#FFF8F3' :
-      colorScheme === 'dark' ? '#1A1A1A' : // Much darker card background
-      '#FFFFFF',
-    color: colorScheme === 'dark' ? '#E5E5E5' : undefined,
-    border: colorScheme === 'white' || colorScheme === 'soft' || colorScheme === 'cool' ? '1px solid #E5E7EB' :
-            colorScheme === 'dark' ? '1px solid #2A2A2A' :
-            colorScheme === 'retro' ? '1px solid #5BB5B0' : undefined
+      colorScheme === "inverted"
+        ? "#FFF8F3"
+        : colorScheme === "dark"
+          ? "#1A1A1A" // Much darker card background
+          : "#FFFFFF",
+    color: colorScheme === "dark" ? "#E5E5E5" : undefined,
+    border:
+      colorScheme === "white" ||
+      colorScheme === "soft" ||
+      colorScheme === "cool"
+        ? "1px solid #E5E7EB"
+        : colorScheme === "dark"
+          ? "1px solid #2A2A2A"
+          : colorScheme === "retro"
+            ? "1px solid #5BB5B0"
+            : undefined,
   };
 
   // Render compact format for memories without photos
@@ -526,20 +551,28 @@ function MemoryCard({
                 }
               >
                 {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" style={{ fill: "var(--color-accent)" }} />
+                  <Loader2
+                    className="w-4 h-4 animate-spin"
+                    style={{ fill: "var(--color-accent)" }}
+                  />
                 ) : hasError ? (
                   <AlertCircle className="w-4 h-4 text-red-500" />
                 ) : isPlaying ? (
                   <Pause style={{ fill: "var(--color-accent)" }} />
                 ) : (
-                  <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
+                  <Play
+                    style={{ fill: "var(--color-accent)", marginLeft: "2px" }}
+                  />
                 )}
               </button>
             )}
 
             {/* Title and metadata */}
             <div className="flex-1 min-w-0">
-              <h3 className="hw-card-title line-clamp-1" data-testid={`story-title-${story.id}`}>
+              <h3
+                className="hw-card-title line-clamp-1"
+                data-testid={`story-title-${story.id}`}
+              >
                 {story.title}
               </h3>
               <div className="hw-meta">
@@ -553,9 +586,18 @@ function MemoryCard({
                 </span>
                 <span className="divider"></span>
                 <span>
-                  {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge > 0 && `Age ${story.lifeAge}`}
-                  {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge === 0 && `Birth`}
-                  {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge < 0 && `Before birth`}
+                  {story.lifeAge !== null &&
+                    story.lifeAge !== undefined &&
+                    story.lifeAge > 0 &&
+                    `Age ${story.lifeAge}`}
+                  {story.lifeAge !== null &&
+                    story.lifeAge !== undefined &&
+                    story.lifeAge === 0 &&
+                    `Birth`}
+                  {story.lifeAge !== null &&
+                    story.lifeAge !== undefined &&
+                    story.lifeAge < 0 &&
+                    `Before birth`}
                 </span>
               </div>
             </div>
@@ -565,7 +607,8 @@ function MemoryCard({
         {/* Provenance on hover */}
         <div className="hw-card-provenance">
           Recorded with Heritage Whisper
-          {story.createdAt && ` · Created ${new Date(story.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
+          {story.createdAt &&
+            ` · Created ${new Date(story.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
         </div>
       </div>
     );
@@ -635,13 +678,18 @@ function MemoryCard({
             }
           >
             {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" style={{ fill: "var(--color-accent)" }} />
+              <Loader2
+                className="w-4 h-4 animate-spin"
+                style={{ fill: "var(--color-accent)" }}
+              />
             ) : hasError ? (
               <AlertCircle className="w-4 h-4 text-red-500" />
             ) : isPlaying ? (
               <Pause style={{ fill: "var(--color-accent)" }} />
             ) : (
-              <Play style={{ fill: "var(--color-accent)", marginLeft: "2px" }} />
+              <Play
+                style={{ fill: "var(--color-accent)", marginLeft: "2px" }}
+              />
             )}
           </button>
         )}
@@ -665,9 +713,18 @@ function MemoryCard({
           </span>
           <span className="divider"></span>
           <span>
-            {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge > 0 && `Age ${story.lifeAge}`}
-            {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge === 0 && `Birth`}
-            {story.lifeAge !== null && story.lifeAge !== undefined && story.lifeAge < 0 && `Before birth`}
+            {story.lifeAge !== null &&
+              story.lifeAge !== undefined &&
+              story.lifeAge > 0 &&
+              `Age ${story.lifeAge}`}
+            {story.lifeAge !== null &&
+              story.lifeAge !== undefined &&
+              story.lifeAge === 0 &&
+              `Birth`}
+            {story.lifeAge !== null &&
+              story.lifeAge !== undefined &&
+              story.lifeAge < 0 &&
+              `Before birth`}
           </span>
           {top.length > 0 && (
             <>
@@ -681,8 +738,11 @@ function MemoryCard({
       {/* Provenance on hover */}
       <div className="hw-card-provenance">
         Recorded with Heritage Whisper
-        {story.createdAt && ` · Created ${new Date(story.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
-        {story.updatedAt && story.updatedAt !== story.createdAt && ` · Last edited ${new Date(story.updatedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
+        {story.createdAt &&
+          ` · Created ${new Date(story.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
+        {story.updatedAt &&
+          story.updatedAt !== story.createdAt &&
+          ` · Last edited ${new Date(story.updatedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
       </div>
     </div>
   );
@@ -700,7 +760,8 @@ export default function Timeline() {
     null,
   );
   const [isFabExpanded, setIsFabExpanded] = useState(false);
-  const [currentColorScheme, setCurrentColorScheme] = useState<ColorScheme>('original');
+  const [currentColorScheme, setCurrentColorScheme] =
+    useState<ColorScheme>("original");
   const [showColorPalette, setShowColorPalette] = useState(false);
   const { toast } = useToast();
   const recordModal = useRecordModal();
@@ -725,48 +786,48 @@ export default function Timeline() {
     const handleKeyPress = (e: KeyboardEvent) => {
       // Check if cmd/ctrl is held
       if (e.metaKey || e.ctrlKey) {
-        switch(e.key) {
-          case '1':
+        switch (e.key) {
+          case "1":
             e.preventDefault();
-            setCurrentColorScheme('original');
+            setCurrentColorScheme("original");
             toast({ title: "Color scheme: Original" });
             break;
-          case '2':
+          case "2":
             e.preventDefault();
-            setCurrentColorScheme('white');
+            setCurrentColorScheme("white");
             toast({ title: "Color scheme: Clean White" });
             break;
-          case '3':
+          case "3":
             e.preventDefault();
-            setCurrentColorScheme('inverted');
+            setCurrentColorScheme("inverted");
             toast({ title: "Color scheme: Inverted" });
             break;
-          case '4':
+          case "4":
             e.preventDefault();
-            setCurrentColorScheme('soft');
+            setCurrentColorScheme("soft");
             toast({ title: "Color scheme: Soft Gray" });
             break;
-          case '5':
+          case "5":
             e.preventDefault();
-            setCurrentColorScheme('cool');
+            setCurrentColorScheme("cool");
             toast({ title: "Color scheme: Cool Blue" });
             break;
-          case '6':
+          case "6":
             e.preventDefault();
-            setCurrentColorScheme('dark');
+            setCurrentColorScheme("dark");
             toast({ title: "Color scheme: Dark Mode" });
             break;
-          case '7':
+          case "7":
             e.preventDefault();
-            setCurrentColorScheme('retro');
+            setCurrentColorScheme("retro");
             toast({ title: "Color scheme: Retro Radio" });
             break;
         }
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [toast]);
 
   // Detect highlight parameter from URL and check for return navigation context
@@ -966,10 +1027,16 @@ export default function Timeline() {
     ghostPrompts = generateGhostPrompts(user.birthYear);
   }
 
-  const storiesWithGhostPrompts = mergeGhostPromptsWithStories(stories, ghostPrompts);
+  const storiesWithGhostPrompts = mergeGhostPromptsWithStories(
+    stories,
+    ghostPrompts,
+  );
 
   // Group all items (stories + ghost prompts) by decade
-  const decadeGroups = groupStoriesByDecade(storiesWithGhostPrompts, user.birthYear);
+  const decadeGroups = groupStoriesByDecade(
+    storiesWithGhostPrompts,
+    user.birthYear,
+  );
 
   const handleRecordPrompt = () => {
     // Check if user has reached story limit
@@ -993,7 +1060,7 @@ export default function Timeline() {
       recordModal.openModal({
         title: prompt.title,
         prompt: prompt.prompt,
-        year: prompt.year
+        year: prompt.year,
       });
     }
   };
@@ -1033,7 +1100,9 @@ export default function Timeline() {
 
   const decadesWithContent = [
     // Add TOP marker for pre-birth stories if they exist
-    ...(prebirthStories.length > 0 ? [{ id: "before-birth", label: "TOP", count: prebirthStories.length }] : []),
+    ...(prebirthStories.length > 0
+      ? [{ id: "before-birth", label: "TOP", count: prebirthStories.length }]
+      : []),
     { id: "birth-year", label: cleanBirthYear, count: birthYearStories.length },
     ...decadeGroups.map((group) => ({
       id: group.decade,
@@ -1051,15 +1120,27 @@ export default function Timeline() {
   // Apply styles directly to ensure they work
   const pageStyle = {
     backgroundColor:
-      currentColorScheme === 'original' ? '#FFF8F3' :
-      currentColorScheme === 'white' ? '#FFFFFF' :
-      currentColorScheme === 'inverted' ? '#FFFFFF' :
-      currentColorScheme === 'soft' ? '#F9FAFB' :
-      currentColorScheme === 'cool' ? '#F8FAFC' :
-      currentColorScheme === 'dark' ? '#0F0F0F' :
-      currentColorScheme === 'retro' ? '#F5E6D3' : '#FFF8F3',
-    color: currentColorScheme === 'dark' ? '#E5E5E5' :
-           currentColorScheme === 'retro' ? '#6B4E42' : undefined
+      currentColorScheme === "original"
+        ? "#FFF8F3"
+        : currentColorScheme === "white"
+          ? "#FFFFFF"
+          : currentColorScheme === "inverted"
+            ? "#FFFFFF"
+            : currentColorScheme === "soft"
+              ? "#F9FAFB"
+              : currentColorScheme === "cool"
+                ? "#F8FAFC"
+                : currentColorScheme === "dark"
+                  ? "#0F0F0F"
+                  : currentColorScheme === "retro"
+                    ? "#F5E6D3"
+                    : "#FFF8F3",
+    color:
+      currentColorScheme === "dark"
+        ? "#E5E5E5"
+        : currentColorScheme === "retro"
+          ? "#6B4E42"
+          : undefined,
   };
 
   return (
@@ -1067,31 +1148,42 @@ export default function Timeline() {
       {/* Header Navigation */}
       <header
         className={`sticky top-0 z-50 backdrop-blur-sm p-3 ${
-          currentColorScheme === 'dark' ? 'border-b border-gray-800' : 'border-b border-gray-100'
+          currentColorScheme === "dark"
+            ? "border-b border-gray-800"
+            : "border-b border-gray-100"
         }`}
         style={{
           backgroundColor:
-            currentColorScheme === 'original' ? 'rgba(255, 255, 255, 0.95)' :
-            currentColorScheme === 'inverted' ? 'rgba(255, 248, 243, 0.95)' :
-            currentColorScheme === 'soft' ? 'rgba(249, 250, 251, 0.95)' :
-            currentColorScheme === 'cool' ? 'rgba(248, 250, 252, 0.95)' :
-            currentColorScheme === 'dark' ? 'rgba(15, 15, 15, 0.95)' :
-            currentColorScheme === 'retro' ? 'rgba(245, 230, 211, 0.95)' :
-            'rgba(255, 255, 255, 0.95)',
-          color: currentColorScheme === 'dark' ? '#E5E5E5' :
-                 currentColorScheme === 'retro' ? '#6B4E42' : undefined
+            currentColorScheme === "original"
+              ? "rgba(255, 255, 255, 0.95)"
+              : currentColorScheme === "inverted"
+                ? "rgba(255, 248, 243, 0.95)"
+                : currentColorScheme === "soft"
+                  ? "rgba(249, 250, 251, 0.95)"
+                  : currentColorScheme === "cool"
+                    ? "rgba(248, 250, 252, 0.95)"
+                    : currentColorScheme === "dark"
+                      ? "rgba(15, 15, 15, 0.95)"
+                      : currentColorScheme === "retro"
+                        ? "rgba(245, 230, 211, 0.95)"
+                        : "rgba(255, 255, 255, 0.95)",
+          color:
+            currentColorScheme === "dark"
+              ? "#E5E5E5"
+              : currentColorScheme === "retro"
+                ? "#6B4E42"
+                : undefined,
         }}
       >
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
-              <Calendar className="w-8 h-8" style={{ color: '#1f0f08' }} />
+              <Calendar className="w-8 h-8" style={{ color: "#1f0f08" }} />
               <h1 className="text-2xl font-bold">Timeline</h1>
             </div>
           </div>
         </div>
       </header>
-
 
       {/* Timeline Content with Vertical Timeline Design */}
       <main className="max-w-6xl mx-auto px-3 py-6 pb-20 md:p-6 md:pb-6 md:pr-20">
@@ -1112,7 +1204,9 @@ export default function Timeline() {
               });
               if (prebirthStories.length > 0) {
                 const earliestPrebirthYear = Math.min(
-                  ...prebirthStories.map((s: any) => normalizeYear(s.storyYear))
+                  ...prebirthStories.map((s: any) =>
+                    normalizeYear(s.storyYear),
+                  ),
                 );
                 allTimelineItems.push({
                   type: "decade",
@@ -1121,7 +1215,9 @@ export default function Timeline() {
                   title: "Before I Was Born",
                   subtitle: "Family History • Stories of those who came before",
                   stories: prebirthStories.sort((a: any, b: any) => {
-                    return normalizeYear(a.storyYear) - normalizeYear(b.storyYear);
+                    return (
+                      normalizeYear(a.storyYear) - normalizeYear(b.storyYear)
+                    );
                   }),
                 });
               }
@@ -1146,10 +1242,12 @@ export default function Timeline() {
               // Add decade groups in chronological order (filtering out pre-birth stories)
               decadeGroups.forEach((group) => {
                 // Filter out pre-birth stories from this decade - they're in "Before I Was Born"
-                const storiesAfterOrDuringBirth = group.stories.filter((s: any) => {
-                  const storyYear = normalizeYear(s.storyYear);
-                  return storyYear >= normalizedBirthYear;
-                });
+                const storiesAfterOrDuringBirth = group.stories.filter(
+                  (s: any) => {
+                    const storyYear = normalizeYear(s.storyYear);
+                    return storyYear >= normalizedBirthYear;
+                  },
+                );
 
                 // Only show this decade if it has stories after/during birth
                 if (storiesAfterOrDuringBirth.length > 0) {
@@ -1162,36 +1260,54 @@ export default function Timeline() {
 
                   // CRITICAL FIX: If this decade contains the birth year, sort it AFTER the birth year section
                   // by using the earliest actual story year instead of the decade start year
-                  const birthDecade = Math.floor((normalizedBirthYear || user.birthYear) / 10) * 10;
+                  const birthDecade =
+                    Math.floor((normalizedBirthYear || user.birthYear) / 10) *
+                    10;
                   let sortYear = groupDecadeNum; // Default to decade start
 
-                  console.log(`[Decade ${group.decade}] groupDecadeNum=${groupDecadeNum}, birthDecade=${birthDecade}, match=${groupDecadeNum === birthDecade}`);
+                  console.log(
+                    `[Decade ${group.decade}] groupDecadeNum=${groupDecadeNum}, birthDecade=${birthDecade}, match=${groupDecadeNum === birthDecade}`,
+                  );
 
                   if (groupDecadeNum === birthDecade) {
                     // This decade contains the birth year, so we need special handling
                     // We want this section to show AFTER the birth year section
                     // Filter to only stories that are AFTER the birth year
-                    const storiesAfterBirth = storiesAfterOrDuringBirth.filter((s: any) => {
-                      const storyYear = normalizeYear(s.storyYear);
-                      return storyYear > normalizedBirthYear;
-                    });
+                    const storiesAfterBirth = storiesAfterOrDuringBirth.filter(
+                      (s: any) => {
+                        const storyYear = normalizeYear(s.storyYear);
+                        return storyYear > normalizedBirthYear;
+                      },
+                    );
 
-                    console.log(`[Decade ${group.decade}] Total stories: ${storiesAfterOrDuringBirth.length}, Stories after birth: ${storiesAfterBirth.length}`);
+                    console.log(
+                      `[Decade ${group.decade}] Total stories: ${storiesAfterOrDuringBirth.length}, Stories after birth: ${storiesAfterBirth.length}`,
+                    );
 
                     if (storiesAfterBirth.length > 0) {
                       // Use the earliest story AFTER birth year for sorting
-                      const earliestAfterBirth = Math.min(...storiesAfterBirth.map((s: any) => normalizeYear(s.storyYear)));
-                      console.log(`[Decade ${group.decade}] Using earliest story after birth: ${earliestAfterBirth}`);
+                      const earliestAfterBirth = Math.min(
+                        ...storiesAfterBirth.map((s: any) =>
+                          normalizeYear(s.storyYear),
+                        ),
+                      );
+                      console.log(
+                        `[Decade ${group.decade}] Using earliest story after birth: ${earliestAfterBirth}`,
+                      );
                       sortYear = earliestAfterBirth;
                     } else {
                       // No stories after birth in this decade - this shouldn't happen normally
                       // but if it does, sort it right after birth year
-                      console.log(`[Decade ${group.decade}] No stories after birth, using ${normalizedBirthYear + 1}`);
+                      console.log(
+                        `[Decade ${group.decade}] No stories after birth, using ${normalizedBirthYear + 1}`,
+                      );
                       sortYear = normalizedBirthYear + 1;
                     }
                   }
 
-                  console.log(`[Decade ${group.decade}] Final sortYear: ${sortYear}`);
+                  console.log(
+                    `[Decade ${group.decade}] Final sortYear: ${sortYear}`,
+                  );
 
                   allTimelineItems.push({
                     type: "decade",
@@ -1206,18 +1322,37 @@ export default function Timeline() {
               });
 
               // Sort by year
-              console.log('[Timeline Sort] Before sort:', allTimelineItems.map(item => ({ id: item.id, year: item.year, title: item.title })));
+              console.log(
+                "[Timeline Sort] Before sort:",
+                allTimelineItems.map((item) => ({
+                  id: item.id,
+                  year: item.year,
+                  title: item.title,
+                })),
+              );
               allTimelineItems.sort((a, b) => a.year - b.year);
-              console.log('[Timeline Sort] After sort:', allTimelineItems.map(item => ({ id: item.id, year: item.year, title: item.title })));
+              console.log(
+                "[Timeline Sort] After sort:",
+                allTimelineItems.map((item) => ({
+                  id: item.id,
+                  year: item.year,
+                  title: item.title,
+                })),
+              );
 
               // Build decade entries for navigation
-              const decadeEntries: DecadeEntry[] = allTimelineItems.map(item => ({
-                id: item.id,
-                label: item.id === "before-birth" ? "TOP" :
-                       item.id === "birth-year" ? formatYear(user.birthYear) :
-                       item.id.replace("decade-", "").replace("s", ""),
-                count: item.stories?.length || 0
-              }));
+              const decadeEntries: DecadeEntry[] = allTimelineItems.map(
+                (item) => ({
+                  id: item.id,
+                  label:
+                    item.id === "before-birth"
+                      ? "TOP"
+                      : item.id === "birth-year"
+                        ? formatYear(user.birthYear)
+                        : item.id.replace("decade-", "").replace("s", ""),
+                  count: item.stories?.length || 0,
+                }),
+              );
 
               return (
                 <>
@@ -1229,48 +1364,52 @@ export default function Timeline() {
                       data-decade-id={item.id}
                       className="hw-decade"
                     >
-                  {/* Decade Band - Sticky Header */}
-                  <div className="hw-decade-band">
-                    <div className="title">
-                      {item.title}
-                    </div>
-                    <div className="meta">{item.subtitle}</div>
-                  </div>
+                      {/* Decade Band - Sticky Header */}
+                      <div className="hw-decade-band">
+                        <div className="title">{item.title}</div>
+                        <div className="meta">{item.subtitle}</div>
+                      </div>
 
-                  {/* Spacing before first card */}
-                  <div className="hw-decade-start"></div>
+                      {/* Spacing before first card */}
+                      <div className="hw-decade-start"></div>
 
-                  {/* Stories Grid */}
-                  <div className="hw-grid">
-                    {/* Existing Stories and Ghost Prompts */}
-                    {item.stories.map((storyOrPrompt: any) => {
-                      // Check if this is a ghost prompt
-                      if (storyOrPrompt.isGhost) {
-                        return (
-                          <GhostPromptCard
-                            key={storyOrPrompt.id}
-                            prompt={storyOrPrompt}
-                            onClick={() => handleGhostPromptClick(storyOrPrompt)}
-                          />
-                        );
-                      }
-                      // Regular story
-                      return (
-                        <MemoryCard
-                          key={storyOrPrompt.id}
-                          story={storyOrPrompt}
-                          isHighlighted={storyOrPrompt.id === highlightedStoryId}
-                          isReturnHighlight={storyOrPrompt.id === returnHighlightId}
-                          colorScheme={currentColorScheme}
-                        />
-                      );
-                    })}
-                  </div>
-                </section>
-              ))}
-              <DecadeNav entries={decadeEntries} />
-            </>
-            );
+                      {/* Stories Grid */}
+                      <div className="hw-grid">
+                        {/* Existing Stories and Ghost Prompts */}
+                        {item.stories.map((storyOrPrompt: any) => {
+                          // Check if this is a ghost prompt
+                          if (storyOrPrompt.isGhost) {
+                            return (
+                              <GhostPromptCard
+                                key={storyOrPrompt.id}
+                                prompt={storyOrPrompt}
+                                onClick={() =>
+                                  handleGhostPromptClick(storyOrPrompt)
+                                }
+                              />
+                            );
+                          }
+                          // Regular story
+                          return (
+                            <MemoryCard
+                              key={storyOrPrompt.id}
+                              story={storyOrPrompt}
+                              isHighlighted={
+                                storyOrPrompt.id === highlightedStoryId
+                              }
+                              isReturnHighlight={
+                                storyOrPrompt.id === returnHighlightId
+                              }
+                              colorScheme={currentColorScheme}
+                            />
+                          );
+                        })}
+                      </div>
+                    </section>
+                  ))}
+                  <DecadeNav entries={decadeEntries} />
+                </>
+              );
             })()}
           </div>
         </div>
@@ -1292,8 +1431,6 @@ export default function Timeline() {
         initialPrompt={recordModal.initialData?.prompt}
         initialYear={recordModal.initialData?.year}
       />
-
-
     </div>
   );
 }

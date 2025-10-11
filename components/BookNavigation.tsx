@@ -67,7 +67,7 @@ function buildBookStructure(pages: BookPage[]): BookStructure {
       if (decadeSection) {
         // Avoid duplicates
         const exists = decadeSection.stories.some(
-          (s) => s.title === page.title && s.pageNumber === page.pageNumber
+          (s) => s.title === page.title && s.pageNumber === page.pageNumber,
         );
         if (!exists) {
           decadeSection.stories.push({
@@ -113,14 +113,14 @@ function DesktopTOCSidebar({
   onNavigateToPage,
 }: DesktopTOCSidebarProps) {
   const [expandedDecades, setExpandedDecades] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Auto-expand current decade
   useEffect(() => {
     const currentDecade = bookStructure.decades.find((d) =>
-      d.stories.some((s) => s.pageNumber === currentPage)
+      d.stories.some((s) => s.pageNumber === currentPage),
     );
     if (currentDecade) {
       setExpandedDecades((prev) => new Set(prev).add(currentDecade.decade));
@@ -183,7 +183,7 @@ function DesktopTOCSidebar({
           {bookStructure.decades.map((decade) => {
             const isExpanded = expandedDecades.has(decade.decade);
             const isCurrentDecade = decade.stories.some(
-              (s) => s.pageNumber === currentPage
+              (s) => s.pageNumber === currentPage,
             );
 
             return (
@@ -284,7 +284,9 @@ function DesktopProgressBar({
   };
 
   const getHoverPage = () => {
-    const rect = document.querySelector(".progress-bar-container")?.getBoundingClientRect();
+    const rect = document
+      .querySelector(".progress-bar-container")
+      ?.getBoundingClientRect();
     if (!rect) return 1;
     const percentage = hoverPosition / rect.width;
     return Math.floor(percentage * totalPages) + 1;
@@ -416,9 +418,7 @@ function MobileBottomSheet({
         }`}
         style={{
           height: "70vh",
-          transform: isOpen
-            ? `translateY(${currentY}px)`
-            : "translateY(100%)",
+          transform: isOpen ? `translateY(${currentY}px)` : "translateY(100%)",
         }}
         role="dialog"
         aria-label="Navigation menu"
@@ -445,7 +445,7 @@ function MobileBottomSheet({
             <div className="grid grid-cols-2 gap-3">
               {bookStructure.decades.map((decade) => {
                 const isCurrentDecade = decade.stories.some(
-                  (s) => s.pageNumber === currentPage
+                  (s) => s.pageNumber === currentPage,
                 );
                 return (
                   <button

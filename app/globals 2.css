@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,7 +7,7 @@
   /* Phase 5-7 Design System Colors */
   --primary-coral: hsl(0, 77%, 64%); /* #E85D5D */
   --bg-cream: hsl(30, 57%, 98%); /* #FDF6F0 */
-  
+
   --background: hsl(30, 57%, 98%); /* Cream background */
   --foreground: hsl(210, 10%, 23%);
   --card: hsl(0, 0%, 100%);
@@ -45,24 +45,29 @@
   --font-mono: Menlo, monospace;
   --radius: 24px; /* Updated button radius */
   /* Character trait colors */
-  --trait-resilience: #6B9BD1;
-  --trait-forgiveness: #81C784;
-  --trait-courage: #B39DDB;
-  --trait-legacy: #FFB74D;
-  --trait-wisdom: #FF8A95;
-  --trait-compassion: #64B5F6;
-  --trait-determination: #A1887F;
-  --trait-gratitude: #FFD54F;
-  --trait-patience: #AED581;
+  --trait-resilience: #6b9bd1;
+  --trait-forgiveness: #81c784;
+  --trait-courage: #b39ddb;
+  --trait-legacy: #ffb74d;
+  --trait-wisdom: #ff8a95;
+  --trait-compassion: #64b5f6;
+  --trait-determination: #a1887f;
+  --trait-gratitude: #ffd54f;
+  --trait-patience: #aed581;
 }
 
 /* Pulse shadow animation for wisdom clip play button */
 @keyframes pulse-shadow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4), 0 20px 50px -10px rgba(168, 85, 247, 0.2);
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(168, 85, 247, 0.4),
+      0 20px 50px -10px rgba(168, 85, 247, 0.2);
   }
   50% {
-    box-shadow: 0 0 0 20px rgba(168, 85, 247, 0), 0 25px 60px -5px rgba(168, 85, 247, 0.3);
+    box-shadow:
+      0 0 0 20px rgba(168, 85, 247, 0),
+      0 25px 60px -5px rgba(168, 85, 247, 0.3);
   }
 }
 
@@ -72,11 +77,12 @@
 
 /* Enhanced waveform animation */
 @keyframes waveform {
-  0%, 100% { 
+  0%,
+  100% {
     transform: scaleY(0.5);
     opacity: 0.8;
   }
-  50% { 
+  50% {
     transform: scaleY(1);
     opacity: 1;
   }
@@ -84,11 +90,11 @@
 
 /* Utility for hiding scrollbars */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 .no-scrollbar::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari and Opera */
+  display: none; /* Chrome, Safari and Opera */
 }
 
 /* Global scrollbar styling - subtle but visible */
@@ -141,54 +147,64 @@ html::-webkit-scrollbar-thumb:hover {
   * {
     @apply border-border;
   }
-  
+
   html {
     scroll-behavior: smooth;
   }
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    background: linear-gradient(135deg, hsl(30, 57%, 98%) 0%, hsl(30, 47%, 96%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(30, 57%, 98%) 0%,
+      hsl(30, 47%, 96%) 100%
+    );
     min-height: 100vh;
     /* Minimum font size for senior readability */
     font-size: 18px;
     line-height: 1.6;
   }
-  
+
   /* Ensure minimum font sizes for seniors */
   p {
     font-size: max(1rem, 18px);
     line-height: 1.6;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     line-height: 1.3;
     text-wrap: balance;
   }
-  
+
   button {
     font-size: max(1.125rem, 20px);
   }
-  
+
   /* Better touch targets for mobile - 44px minimum */
-  button, a {
+  button,
+  a {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* Typography hierarchy refinements */
   h1 {
     font-family: var(--font-serif);
     font-weight: 700;
     font-size: clamp(2rem, 5vw, 3rem);
   }
-  
+
   h2 {
     font-family: var(--font-serif);
     font-weight: 600;
     font-size: clamp(1.5rem, 4vw, 2.25rem);
   }
-  
+
   h3 {
     font-weight: 600;
     font-size: clamp(1.25rem, 3vw, 1.75rem);
@@ -284,17 +300,17 @@ html::-webkit-scrollbar-thumb:hover {
 
 /* Premium shadow effects */
 .shadow-3xl {
-  box-shadow: 
-    0 10px 20px rgba(0,0,0,0.15),
-    0 20px 40px rgba(0,0,0,0.10),
-    0 30px 60px rgba(0,0,0,0.05);
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.15),
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 30px 60px rgba(0, 0, 0, 0.05);
 }
 
 .hover\:shadow-3xl:hover {
-  box-shadow: 
-    0 12px 24px rgba(0,0,0,0.18),
-    0 24px 48px rgba(0,0,0,0.12),
-    0 36px 72px rgba(0,0,0,0.08);
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.18),
+    0 24px 48px rgba(0, 0, 0, 0.12),
+    0 36px 72px rgba(0, 0, 0, 0.08);
 }
 
 /* Typewriter effect - simplified for mobile */
@@ -320,14 +336,15 @@ html::-webkit-scrollbar-thumb:hover {
 }
 
 @keyframes blink {
-  0%, 50% {
+  0%,
+  50% {
     opacity: 1;
   }
-  51%, 100% {
+  51%,
+  100% {
     opacity: 0;
   }
 }
-
 
 /* Animation delays */
 .animation-delay-200 {
@@ -378,7 +395,7 @@ html::-webkit-scrollbar-thumb:hover {
 }
 
 .underline-animate::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -656,7 +673,11 @@ textarea:focus-visible {
 .glassmorphism {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
 }
@@ -664,9 +685,13 @@ textarea:focus-visible {
 .glass-card {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 
+  box-shadow:
     0 8px 32px 0 rgba(31, 38, 135, 0.2),
     inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
@@ -677,7 +702,8 @@ textarea:focus-visible {
 }
 
 @keyframes waveDance {
-  0%, 100% {
+  0%,
+  100% {
     transform: scaleY(1);
   }
   50% {
@@ -726,22 +752,22 @@ textarea:focus-visible {
     transition-duration: 0.01ms !important;
     transition-delay: 0s !important;
   }
-  
+
   html {
     scroll-behavior: auto;
   }
-  
+
   /* Keep essential animations but make them subtle */
   .typewriter-text {
     animation: none;
     width: 100%;
   }
-  
+
   .typewriter-cursor {
     animation: none;
     opacity: 1;
   }
-  
+
   .drift-diagonal,
   .drift-diagonal-reverse,
   .drift-horizontal,
@@ -749,11 +775,11 @@ textarea:focus-visible {
   .drift-vertical {
     animation: none;
   }
-  
+
   .animate-bounce {
     animation: none;
   }
-  
+
   .animate-ping {
     animation: none;
   }
@@ -771,13 +797,13 @@ textarea:focus-visible {
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(232, 93, 93, 0.2);
   }
-  
+
   .btn-primary:hover {
     background: hsl(0, 77%, 58%);
     box-shadow: 0 4px 16px rgba(232, 93, 93, 0.3);
     transform: translateY(-2px);
   }
-  
+
   .btn-secondary {
     background: white;
     color: var(--primary-coral);
@@ -788,21 +814,21 @@ textarea:focus-visible {
     min-height: 44px;
     transition: all 0.3s ease;
   }
-  
+
   .btn-secondary:hover {
     background: var(--primary-coral);
     color: white;
     box-shadow: 0 2px 8px rgba(232, 93, 93, 0.2);
   }
-  
+
   .memory-card {
     background: white;
     padding: 12px;
-    box-shadow: 
-      0 2px 4px rgba(0,0,0,0.18),
-      0 6px 12px rgba(0,0,0,0.12),
-      0 16px 32px rgba(0,0,0,0.08),
-      0 24px 48px rgba(0,0,0,0.04);
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.18),
+      0 6px 12px rgba(0, 0, 0, 0.12),
+      0 16px 32px rgba(0, 0, 0, 0.08),
+      0 24px 48px rgba(0, 0, 0, 0.04);
     transform: rotate(-0.3deg);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: var(--radius);
@@ -810,36 +836,49 @@ textarea:focus-visible {
     /* Ensure readable font size for memory cards */
     font-size: max(1rem, 18px);
   }
-  
+
   /* Stagger animation for memory cards */
-  .memory-card:nth-child(1) { animation-delay: 0.1s; }
-  .memory-card:nth-child(2) { animation-delay: 0.2s; }
-  .memory-card:nth-child(3) { animation-delay: 0.3s; }
-  .memory-card:nth-child(4) { animation-delay: 0.4s; }
-  .memory-card:nth-child(5) { animation-delay: 0.5s; }
-  .memory-card:nth-child(6) { animation-delay: 0.6s; }
-  
+  .memory-card:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  .memory-card:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .memory-card:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  .memory-card:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+  .memory-card:nth-child(5) {
+    animation-delay: 0.5s;
+  }
+  .memory-card:nth-child(6) {
+    animation-delay: 0.6s;
+  }
+
   .memory-card:nth-child(even) {
     transform: rotate(0.2deg);
   }
-  
+
   .memory-card:hover {
     transform: rotate(0deg) scale(1.03) translateY(-4px);
     z-index: 10;
-    box-shadow: 
-      0 4px 8px rgba(0,0,0,0.22),
-      0 8px 16px rgba(0,0,0,0.16),
-      0 20px 40px rgba(0,0,0,0.12),
-      0 32px 64px rgba(0,0,0,0.08);
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.22),
+      0 8px 16px rgba(0, 0, 0, 0.16),
+      0 20px 40px rgba(0, 0, 0, 0.12),
+      0 32px 64px rgba(0, 0, 0, 0.08);
   }
-  
+
   /* Audio player loading pulse animation */
   .audio-loading-pulse {
     animation: audioPulse 1.5s ease-in-out infinite;
   }
 
   @keyframes audioPulse {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 0.8;
       transform: scale(1);
     }
@@ -855,7 +894,8 @@ textarea:focus-visible {
   }
 
   @keyframes playheadPulse {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 0 0 rgba(212, 133, 58, 0.4);
     }
     50% {
@@ -874,7 +914,8 @@ textarea:focus-visible {
   }
 
   @keyframes errorShake {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateX(0);
     }
     25% {
@@ -889,7 +930,7 @@ textarea:focus-visible {
   .return-highlight-animation {
     animation: returnHighlight 2.5s ease-out forwards;
   }
-  
+
   @keyframes returnHighlight {
     0% {
       box-shadow: 0 0 0 0 rgba(212, 133, 58, 0.7);
@@ -908,17 +949,17 @@ textarea:focus-visible {
       transform: scale(1.005);
     }
     100% {
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       transform: scale(1);
     }
   }
-  
+
   .highlight-animation {
-    ring: 2px solid #D4853A;
+    ring: 2px solid #d4853a;
     box-shadow: 0 4px 12px rgba(212, 133, 58, 0.3);
     transform: scale(1.01);
   }
-  
+
   .ghost-prompt {
     color: hsl(45, 15%, 70%);
     font-style: italic;
@@ -928,32 +969,40 @@ textarea:focus-visible {
     /* Ensure readable font size */
     font-size: max(1rem, 18px);
   }
-  
+
   /* Stagger animation for ghost prompts */
-  .ghost-prompt:nth-child(1) { animation-delay: 0.15s; }
-  .ghost-prompt:nth-child(2) { animation-delay: 0.25s; }
-  .ghost-prompt:nth-child(3) { animation-delay: 0.35s; }
-  
+  .ghost-prompt:nth-child(1) {
+    animation-delay: 0.15s;
+  }
+  .ghost-prompt:nth-child(2) {
+    animation-delay: 0.25s;
+  }
+  .ghost-prompt:nth-child(3) {
+    animation-delay: 0.35s;
+  }
+
   .ghost-prompt:hover {
     opacity: 1;
     color: hsl(45, 15%, 60%);
     transform: translateY(-2px);
     border-color: var(--primary);
   }
-  
+
   .timeline-spine {
-    background: linear-gradient(to bottom, 
-      transparent 0%, 
-      #2c3e50 5%, 
-      #2c3e50 95%, 
-      transparent 100%);
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      #2c3e50 5%,
+      #2c3e50 95%,
+      transparent 100%
+    );
     width: 6px;
     position: relative;
     border-radius: 3px;
-    box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
     margin-left: 32px;
   }
-  
+
   /* Timeline markers will be added as separate elements */
   .timeline-marker {
     position: absolute;
@@ -963,45 +1012,46 @@ textarea:focus-visible {
     background-color: #f5a623;
     border: 3px solid white;
     border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     z-index: 1;
   }
-  
+
   .timeline-marker.current-year {
     width: 20px;
     height: 20px;
     left: -2px; /* Adjust for larger marker to stay centered */
     animation: pulse-marker 2s ease-in-out infinite;
   }
-  
+
   @keyframes pulse-marker {
-    0%, 100% { 
+    0%,
+    100% {
       transform: scale(1);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
-    50% { 
+    50% {
       transform: scale(1.1);
-      box-shadow: 0 2px 8px rgba(245,166,35,0.4);
+      box-shadow: 0 2px 8px rgba(245, 166, 35, 0.4);
     }
   }
-  
+
   /* Hide year labels - we don't want text next to dots */
   .timeline-year-label {
     display: none;
   }
-  
+
   /* Hide connector lines */
   .timeline-connector {
     display: none;
   }
-  
+
   /* Timeline Connection Points */
   .memory-card,
   .ghost-prompt,
   .blank-memory {
     position: relative;
   }
-  
+
   /* Connection line from card to dot */
   .memory-card::before,
   .ghost-prompt::before,
@@ -1012,18 +1062,18 @@ textarea:focus-visible {
     top: 24px;
     width: 24px;
     height: 2px;
-    background: #D4B5A0;
+    background: #d4b5a0;
     z-index: 0;
     transition: width 0.3s ease;
   }
-  
+
   /* Extend connection line on hover */
   .memory-card:hover::before,
   .ghost-prompt:hover::before,
   .blank-memory:hover::before {
     width: 28px;
   }
-  
+
   /* Connection dot for completed memories */
   .memory-card::after {
     content: "";
@@ -1032,13 +1082,13 @@ textarea:focus-visible {
     top: 18px;
     width: 12px;
     height: 12px;
-    background: #C68A2B;
+    background: #c68a2b;
     border: 2px solid white;
     border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     z-index: 2;
   }
-  
+
   /* Hollow dashed dot for ghost prompts */
   .ghost-prompt::after {
     content: "";
@@ -1048,11 +1098,11 @@ textarea:focus-visible {
     width: 12px;
     height: 12px;
     background: transparent;
-    border: 2px dashed #C8BDB0;
+    border: 2px dashed #c8bdb0;
     border-radius: 50%;
     z-index: 2;
   }
-  
+
   /* Hollow solid dot for blank memory card */
   .blank-memory::after {
     content: "";
@@ -1062,28 +1112,29 @@ textarea:focus-visible {
     width: 12px;
     height: 12px;
     background: rgba(212, 133, 58, 0.1);
-    border: 2px solid #D4853A;
+    border: 2px solid #d4853a;
     border-radius: 50%;
     z-index: 2;
   }
-  
+
   /* Pulse animation for recently added memories */
   @keyframes pulse-dot {
-    0%, 100% {
+    0%,
+    100% {
       transform: scale(1);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
     50% {
       transform: scale(1.2);
-      box-shadow: 0 2px 8px rgba(198,138,43,0.4);
+      box-shadow: 0 2px 8px rgba(198, 138, 43, 0.4);
     }
   }
-  
+
   /* Apply pulse to newly recorded memory (add .new-memory class via JS if needed) */
   .memory-card.new-memory::after {
     animation: pulse-dot 2s ease-in-out 3;
   }
-  
+
   /* Hover effect for timeline dots */
   .memory-card:hover::after,
   .ghost-prompt:hover::after,
@@ -1091,16 +1142,16 @@ textarea:focus-visible {
     transform: scale(1.3);
     transition: transform 0.2s ease;
   }
-  
+
   /* Mobile-First Responsive Adjustments */
   @media (max-width: 640px) {
     /* Connection lines for saved memories */
     .memory-card::before,
     .blank-memory::before {
-      left: -28px;  /* Extend further left to meet dot */
-      width: 20px;  /* Longer line to reach centered dot */
+      left: -28px; /* Extend further left to meet dot */
+      width: 20px; /* Longer line to reach centered dot */
     }
-    
+
     /* Mobile button styles */
     button {
       width: 100%;
@@ -1108,24 +1159,24 @@ textarea:focus-visible {
       margin-left: auto;
       margin-right: auto;
     }
-    
+
     /* Mobile timeline card adjustments */
     .memory-card {
       margin: 0 8px;
       padding: 16px;
     }
-    
+
     /* Mobile wisdom quote */
     .wisdom {
       padding: 16px;
       margin: 24px 0;
     }
-    
+
     .wisdom blockquote {
       font-size: 16px;
     }
   }
-  
+
   /* Tablet Responsive (768px+) */
   @media (min-width: 768px) {
     /* Timeline container constraint */
@@ -1133,20 +1184,20 @@ textarea:focus-visible {
       max-width: 600px;
       margin: 0 auto;
     }
-    
+
     /* Grid layout for related prompts */
     .related-prompts-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
     }
-    
+
     /* Buttons responsive */
     button {
       width: auto;
     }
   }
-  
+
   /* Desktop Responsive (1024px+) */
   @media (min-width: 1024px) {
     /* Book pages max width */
@@ -1154,68 +1205,81 @@ textarea:focus-visible {
       max-width: 800px;
       margin: 0 auto;
     }
-    
+
     /* Desktop grid for prompts */
     .related-prompts-grid {
       grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
-    
+
     /* Desktop wisdom quote */
     .wisdom {
       padding: 32px;
       margin: 40px 0;
     }
-    
+
     /* Dotted connection line for ghost prompts */
     .ghost-prompt::before {
-      left: -32px;  /* Ghost prompts extend further */
-      width: 24px;  /* Longer line for ghost prompts */
-      border-bottom: 2px dotted #D4B5A0;  /* Make it dotted */
-      background: transparent;  /* Remove solid background */
-      height: 0;  /* Use border instead of background */
-      top: 25px;  /* Adjust vertical position */
+      left: -32px; /* Ghost prompts extend further */
+      width: 24px; /* Longer line for ghost prompts */
+      border-bottom: 2px dotted #d4b5a0; /* Make it dotted */
+      background: transparent; /* Remove solid background */
+      height: 0; /* Use border instead of background */
+      top: 25px; /* Adjust vertical position */
     }
-    
+
     /* Dots for saved memories */
     .memory-card::after,
     .blank-memory::after {
-      left: -37px;  /* Center on timeline spine */
-      width: 10px;  /* Slightly smaller dots on mobile */
+      left: -37px; /* Center on timeline spine */
+      width: 10px; /* Slightly smaller dots on mobile */
       height: 10px;
       top: 19px;
     }
-    
+
     /* Dots for ghost prompts - positioned further left */
     .ghost-prompt::after {
-      left: -41px;  /* Ghost prompts further left */
+      left: -41px; /* Ghost prompts further left */
       width: 10px;
       height: 10px;
       top: 19px;
     }
-    
+
     /* Keep small margin for timeline spine on mobile */
     .timeline-spine {
       margin-left: 8px;
     }
   }
-  
+
   .voice-circle {
     transition: all 0.2s ease;
-    background: linear-gradient(135deg, hsl(210, 29%, 24%) 0%, hsl(210, 35%, 30%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(210, 29%, 24%) 0%,
+      hsl(210, 35%, 30%) 100%
+    );
     border-radius: 50%;
   }
-  
+
   .voice-circle.active {
     animation: pulse 1.5s infinite;
   }
-  
+
   @keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.7; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
-  
+
   /* Entrance animations */
   @keyframes fadeInUp {
     from {
@@ -1227,24 +1291,24 @@ textarea:focus-visible {
       transform: translateY(0);
     }
   }
-  
+
   /* Fade up animation for scroll-triggered elements */
   .fade-up {
     opacity: 0;
     transform: translateY(30px);
     transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .fade-up.in-view {
     opacity: 1;
     transform: translateY(0);
   }
-  
+
   /* Animate fade in up */
   .animate-fade-in-up {
     animation: fadeInUp 0.8s ease-out forwards;
   }
-  
+
   /* Homepage specific animations */
   @keyframes float-in {
     0% {
@@ -1256,7 +1320,7 @@ textarea:focus-visible {
       transform: translateY(0);
     }
   }
-  
+
   @keyframes fade-in-up {
     0% {
       opacity: 0;
@@ -1267,7 +1331,7 @@ textarea:focus-visible {
       transform: translateY(0);
     }
   }
-  
+
   @keyframes fade-in {
     0% {
       opacity: 0;
@@ -1276,39 +1340,39 @@ textarea:focus-visible {
       opacity: 1;
     }
   }
-  
+
   .animate-float-in {
     animation: float-in 1.5s ease-out forwards;
   }
-  
+
   .animate-fade-in-up {
     animation: fade-in-up 0.8s ease-out;
   }
-  
+
   .animate-fade-in {
     animation: fade-in 0.5s ease-out;
   }
-  
+
   .animation-delay-200 {
     animation-delay: 0.2s;
   }
-  
+
   .animation-delay-400 {
     animation-delay: 0.4s;
   }
-  
+
   .animation-delay-600 {
     animation-delay: 0.6s;
   }
-  
+
   .animation-delay-800 {
     animation-delay: 0.8s;
   }
-  
+
   .animation-delay-1000 {
     animation-delay: 1s;
   }
-  
+
   @keyframes fadeInScale {
     from {
       opacity: 0;
@@ -1319,7 +1383,7 @@ textarea:focus-visible {
       transform: scale(1);
     }
   }
-  
+
   @keyframes slideInRight {
     from {
       opacity: 0;
@@ -1330,7 +1394,7 @@ textarea:focus-visible {
       transform: translateX(0);
     }
   }
-  
+
   @keyframes shimmer {
     0% {
       background-position: -1000px 0;
@@ -1339,16 +1403,17 @@ textarea:focus-visible {
       background-position: 1000px 0;
     }
   }
-  
+
   @keyframes gentleFloat {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px);
     }
     50% {
       transform: translateY(-10px);
     }
   }
-  
+
   @keyframes rotateIn {
     from {
       opacity: 0;
@@ -1359,11 +1424,11 @@ textarea:focus-visible {
       transform: rotate(0) scale(1);
     }
   }
-  
+
   .decade-section {
     position: relative;
   }
-  
+
   .decade-marker-container {
     position: absolute;
     left: -41px; /* Position to center marker on 6px spine with 32px margin */
@@ -1372,53 +1437,74 @@ textarea:focus-visible {
     align-items: center;
     height: 40px;
   }
-  
+
   .album-texture {
-    background-image: 
-      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.03) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.03) 0%, transparent 50%),
+    background-image:
+      radial-gradient(
+        circle at 20% 80%,
+        rgba(120, 119, 198, 0.03) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 20%,
+        rgba(255, 119, 198, 0.03) 0%,
+        transparent 50%
+      ),
       linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 100%);
   }
 
   .recording-button {
-    background: linear-gradient(135deg, hsl(351, 83%, 71%) 0%, hsl(351, 90%, 65%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(351, 83%, 71%) 0%,
+      hsl(351, 90%, 65%) 100%
+    );
     transition: all 0.3s ease;
   }
 
   .recording-button:hover {
-    background: linear-gradient(135deg, hsl(351, 90%, 65%) 0%, hsl(351, 83%, 71%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(351, 90%, 65%) 0%,
+      hsl(351, 83%, 71%) 100%
+    );
     transform: scale(1.05);
   }
 
   .wisdom-glow {
-    background: linear-gradient(135deg, hsl(351, 83%, 71%) 0%, hsl(351, 70%, 75%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(351, 83%, 71%) 0%,
+      hsl(351, 70%, 75%) 100%
+    );
     box-shadow: 0 0 20px hsl(351, 83%, 71%, 0.3);
   }
 
   /* Homepage floating particles animation */
   @keyframes float {
-    0%, 100% { 
-      transform: translateY(0px) rotate(0deg); 
-      opacity: 0.3; 
+    0%,
+    100% {
+      transform: translateY(0px) rotate(0deg);
+      opacity: 0.3;
     }
-    25% { 
-      transform: translateY(-10px) rotate(90deg); 
-      opacity: 0.7; 
+    25% {
+      transform: translateY(-10px) rotate(90deg);
+      opacity: 0.7;
     }
-    50% { 
-      transform: translateY(-5px) rotate(180deg); 
-      opacity: 0.5; 
+    50% {
+      transform: translateY(-5px) rotate(180deg);
+      opacity: 0.5;
     }
-    75% { 
-      transform: translateY(-12px) rotate(270deg); 
-      opacity: 0.8; 
+    75% {
+      transform: translateY(-12px) rotate(270deg);
+      opacity: 0.8;
     }
   }
 
   .animate-float {
     animation: float linear infinite;
   }
-  
+
   /* Book View Styles - Premium Memory Book */
 
   /* Book container with leather binding effect */
@@ -1426,9 +1512,9 @@ textarea:focus-visible {
     background: #2c2416; /* Dark leather color */
     padding: 20px;
     border-radius: 4px;
-    box-shadow: 
-      inset 0 0 30px rgba(0,0,0,0.3),
-      0 10px 40px rgba(0,0,0,0.2);
+    box-shadow:
+      inset 0 0 30px rgba(0, 0, 0, 0.3),
+      0 10px 40px rgba(0, 0, 0, 0.2);
     perspective: 1500px;
   }
 
@@ -1439,9 +1525,9 @@ textarea:focus-visible {
     gap: 28px;
     background: #faf8f5;
     min-height: 600px;
-    box-shadow: 
-      0 0 40px rgba(0,0,0,0.1) inset,
-      0 0 2px rgba(0,0,0,0.1);
+    box-shadow:
+      0 0 40px rgba(0, 0, 0, 0.1) inset,
+      0 0 2px rgba(0, 0, 0, 0.1);
   }
 
   @media (min-width: 900px) {
@@ -1449,22 +1535,24 @@ textarea:focus-visible {
       grid-template-columns: 1fr 1fr;
       padding: 28px;
     }
-    
+
     /* Enhanced center spine with book binding effect */
     .book-spread::before {
-      content: '';
+      content: "";
       position: absolute;
       left: 50%;
       top: 0;
       bottom: 0;
       width: 2px;
-      background: linear-gradient(90deg, 
-        rgba(0,0,0,0.05) 0%, 
-        rgba(0,0,0,0.08) 50%, 
-        rgba(0,0,0,0.05) 100%);
-      box-shadow: 
-        -10px 0 20px rgba(0,0,0,0.03),
-        10px 0 20px rgba(0,0,0,0.03);
+      background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.05) 0%,
+        rgba(0, 0, 0, 0.08) 50%,
+        rgba(0, 0, 0, 0.05) 100%
+      );
+      box-shadow:
+        -10px 0 20px rgba(0, 0, 0, 0.03),
+        10px 0 20px rgba(0, 0, 0, 0.03);
       z-index: 10;
       transform: translateX(-1px);
     }
@@ -1474,7 +1562,12 @@ textarea:focus-visible {
   .page {
     position: relative;
     background:
-      linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%),
+      linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+      ),
       #faf8f5;
     border-radius: 18px;
     box-shadow:
@@ -1482,8 +1575,8 @@ textarea:focus-visible {
       0 2px 0 #e5e3e0,
       0 3px 0 #e2e0dd,
       0 4px 0 #dfddd9,
-      0 5px 10px rgba(0,0,0,0.1);
-    outline: 1px solid rgba(0,0,0,.05);
+      0 5px 10px rgba(0, 0, 0, 0.1);
+    outline: 1px solid rgba(0, 0, 0, 0.05);
     overflow: hidden;
     padding: 40px;
   }
@@ -1494,28 +1587,36 @@ textarea:focus-visible {
     flex-direction: column;
   }
 
-  .page-content, .page-left, .page-right {
-    background: 
-      linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%),
+  .page-content,
+  .page-left,
+  .page-right {
+    background:
+      linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+      ),
       #faf8f5;
     padding: 40px;
   }
 
   /* Page corner effect */
   .page--right::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: 0;
     right: 0;
     width: 50px;
     height: 50px;
-    background: 
-      linear-gradient(135deg, 
-        transparent 50%, 
-        #f5f3f0 50%, 
-        #f5f3f0 60%, 
-        #e8e6e3 100%);
-    box-shadow: -2px -2px 3px rgba(0,0,0,0.05);
+    background: linear-gradient(
+      135deg,
+      transparent 50%,
+      #f5f3f0 50%,
+      #f5f3f0 60%,
+      #e8e6e3 100%
+    );
+    box-shadow: -2px -2px 3px rgba(0, 0, 0, 0.05);
     pointer-events: none;
   }
 
@@ -1530,9 +1631,9 @@ textarea:focus-visible {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #8B6F47;
+    color: #8b6f47;
     opacity: 0.7;
-    font-family: 'Crimson Text', serif;
+    font-family: "Crimson Text", serif;
   }
 
   .page-numbers {
@@ -1542,49 +1643,59 @@ textarea:focus-visible {
     right: 40px;
     display: flex;
     justify-content: space-between;
-    font-family: 'Crimson Text', serif;
-    color: #8B6F47;
+    font-family: "Crimson Text", serif;
+    color: #8b6f47;
     font-size: 14px;
   }
 
   .page-number {
     position: absolute;
     bottom: 22px;
-    font-family: 'Crimson Text', serif;
-    color: #8B6F47;
+    font-family: "Crimson Text", serif;
+    color: #8b6f47;
     font-size: 14px;
-    opacity: .8;
+    opacity: 0.8;
   }
-  
-  .page--left .page-number, .page-number-left { left: 40px; }
-  .page--right .page-number, .page-number-right { right: 40px; }
+
+  .page--left .page-number,
+  .page-number-left {
+    left: 40px;
+  }
+  .page--right .page-number,
+  .page-number-right {
+    right: 40px;
+  }
 
   /* Title + year with elegant serif */
-  .memory-title { 
-    font-family: 'Playfair Display', Georgia, serif; 
-    font-weight: 700; 
-    font-size: clamp(22px, 3vw, 32px); 
+  .memory-title {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(22px, 3vw, 32px);
     margin: 12px 0 6px;
     color: #2c2416;
   }
 
-  h1, h2, .story-title {
-    font-family: 'Playfair Display', Georgia, serif;
+  h1,
+  h2,
+  .story-title {
+    font-family: "Playfair Display", Georgia, serif;
     color: #2c2416;
     font-weight: 700;
   }
 
-  .memory-year { 
-    letter-spacing: .06em; 
-    text-transform: uppercase; 
-    opacity: .6; 
-    font-size: .92rem;
-    color: #6B5D4F;
+  .memory-year {
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    font-size: 0.92rem;
+    color: #6b5d4f;
   }
 
   /* Body text with book typography */
-  .memory-body, .story-text, p {
-    font-family: 'Crimson Text', Georgia, serif;
+  .memory-body,
+  .story-text,
+  p {
+    font-family: "Crimson Text", Georgia, serif;
     font-size: 18px;
     line-height: 1.8;
     text-align: justify;
@@ -1593,13 +1704,13 @@ textarea:focus-visible {
     margin: 20px 0;
     white-space: pre-wrap;
   }
-  
+
   /* Specific styles for left page text */
   .memory-body--left {
     margin-top: 24px;
     margin-bottom: 16px;
   }
-  
+
   /* Specific styles for right page text */
   .memory-body--right {
     margin-top: 0;
@@ -1613,10 +1724,10 @@ textarea:focus-visible {
     line-height: 0.8;
     margin: 0.1em 0.1em 0 0;
     font-weight: 700;
-    color: #8B6F47;
-    font-family: 'Playfair Display', serif;
+    color: #8b6f47;
+    font-family: "Playfair Display", serif;
   }
-  
+
   /* For old story-text class, keep drop cap */
   .story-text::first-letter {
     float: left;
@@ -1624,8 +1735,8 @@ textarea:focus-visible {
     line-height: 0.8;
     margin: 0.1em 0.1em 0 0;
     font-weight: 700;
-    color: #8B6F47;
-    font-family: 'Playfair Display', serif;
+    color: #8b6f47;
+    font-family: "Playfair Display", serif;
   }
 
   /* Audio wrapper and controls */
@@ -1633,7 +1744,7 @@ textarea:focus-visible {
     margin: 20px 0;
   }
 
-  .audio-wrap { 
+  .audio-wrap {
     transition: all 0.3s ease;
   }
 
@@ -1641,52 +1752,58 @@ textarea:focus-visible {
     cursor: pointer;
   }
 
-  .audio-bar { 
-    height: 6px; 
-    border-radius: 999px; 
-    background: rgba(0,0,0,.10);
+  .audio-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
     cursor: pointer;
   }
 
-  .audio--expanded .audio-bar { 
-    height: 10px; 
+  .audio--expanded .audio-bar {
+    height: 10px;
   }
 
-  .audio-fill { 
-    height: 100%; 
-    border-radius: inherit; 
-    background: #C68A2B;
+  .audio-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: #c68a2b;
     transition: width 0.1s ease;
   }
 
-  .audio-time { 
-    font-size: .85rem; 
-    opacity: .7;
+  .audio-time {
+    font-size: 0.85rem;
+    opacity: 0.7;
     display: flex;
     justify-content: space-between;
     padding: 0 40px 0 40px;
   }
 
   /* Wisdom Moment - Premium Quote Treatment */
-  .wisdom, .wisdom-moment {
+  .wisdom,
+  .wisdom-moment {
     position: relative;
     margin: 32px 0;
     padding: 24px;
-    background: linear-gradient(135deg, rgba(232, 93, 93, 0.03), rgba(232, 93, 93, 0.01));
+    background: linear-gradient(
+      135deg,
+      rgba(232, 93, 93, 0.03),
+      rgba(232, 93, 93, 0.01)
+    );
     border-left: 4px solid var(--primary-coral);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
   }
-  
+
   .wisdom:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
   }
 
-  .wisdom::before, .wisdom-moment::before {
+  .wisdom::before,
+  .wisdom-moment::before {
     content: '"';
     position: absolute;
     left: -8px;
@@ -1698,11 +1815,11 @@ textarea:focus-visible {
     font-weight: 700;
   }
 
-  .wisdom-label { 
-    font-variant: small-caps; 
-    letter-spacing: 0.08em; 
-    opacity: 0.7; 
-    margin-bottom: 12px; 
+  .wisdom-label {
+    font-variant: small-caps;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+    margin-bottom: 12px;
     display: block;
     font-size: 14px;
     color: var(--primary-coral);
@@ -1711,8 +1828,8 @@ textarea:focus-visible {
     text-transform: uppercase;
   }
 
-  .wisdom blockquote { 
-    margin: 0; 
+  .wisdom blockquote {
+    margin: 0;
     font-style: italic;
     font-size: clamp(18px, 2.5vw, 22px);
     line-height: 1.6;
@@ -1723,46 +1840,48 @@ textarea:focus-visible {
 
   /* Character trait badge - NEW */
   /* Character trait badge refinement */
-  .character-badge, .character-trait {
-    display: inline-flex; 
-    align-items: center; 
+  .character-badge,
+  .character-trait {
+    display: inline-flex;
+    align-items: center;
     gap: 10px;
     background: linear-gradient(135deg, #f5f3f0 0%, #e8e6e3 100%);
     border: 1px solid #d4c5b9;
     padding: 8px 16px;
     border-radius: 4px;
-    font-family: 'Crimson Text', serif;
-    color: #8B6F47;
+    font-family: "Crimson Text", serif;
+    color: #8b6f47;
     font-size: 14px;
     letter-spacing: 0.5px;
     margin-top: 16px;
   }
 
-  .character-badge .trait { 
+  .character-badge .trait {
     font-weight: 600;
-    color: #8B6F47;
+    color: #8b6f47;
   }
 
-  .character-badge .confidence, .confidence-score { 
-    color: #8B6F47;
+  .character-badge .confidence,
+  .confidence-score {
+    color: #8b6f47;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
 
-  .character-badge .proof-link { 
-    border: 0; 
-    background: none; 
-    text-decoration: underline; 
+  .character-badge .proof-link {
+    border: 0;
+    background: none;
+    text-decoration: underline;
     cursor: pointer;
-    color: #C68A2B;
+    color: #c68a2b;
     padding: 0;
     font-size: inherit;
   }
 
   /* Emotion tags */
-  .emotion-tags { 
-    display: flex; 
-    gap: 8px; 
+  .emotion-tags {
+    display: flex;
+    gap: 8px;
     margin-top: 20px;
     position: absolute;
     bottom: 60px;
@@ -1771,22 +1890,22 @@ textarea:focus-visible {
 
   @media (min-width: 900px) {
     .emotion-tags {
-      position: absolute; 
-      bottom: 40px; 
+      position: absolute;
+      bottom: 40px;
       right: -40px;
       left: auto;
-      transform: rotate(-90deg); 
+      transform: rotate(-90deg);
       transform-origin: bottom right;
       margin: 0;
     }
   }
 
   .emotion-tags .tag {
-    padding: 6px 12px; 
+    padding: 6px 12px;
     border-radius: 999px;
-    background: #EEE4D6; 
-    color: #5C4A3B; 
-    font-size: .85rem;
+    background: #eee4d6;
+    color: #5c4a3b;
+    font-size: 0.85rem;
     font-weight: 500;
   }
 
@@ -1801,16 +1920,16 @@ textarea:focus-visible {
   .book-nav button {
     padding: 10px 14px;
     border-radius: 8px;
-    border: 1px solid #D4A574;
+    border: 1px solid #d4a574;
     background: white;
-    color: #8B6914;
+    color: #8b6914;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
   }
 
   .book-nav button:hover {
-    background: #FFF7EC;
+    background: #fff7ec;
   }
 
   .book-nav button:disabled {
@@ -1829,7 +1948,7 @@ textarea:focus-visible {
     border: 8px solid white;
     box-shadow:
       0 0 0 1px #e8e6e3,
-      0 2px 10px rgba(0,0,0,0.1);
+      0 2px 10px rgba(0, 0, 0, 0.1);
     margin: 20px auto;
     display: block;
     border-radius: 0;
@@ -1837,13 +1956,13 @@ textarea:focus-visible {
 
   /* Background override for book view */
   .book-background {
-    background: linear-gradient(135deg, #F5E6D3 0%, #FFF9F0 100%);
+    background: linear-gradient(135deg, #f5e6d3 0%, #fff9f0 100%);
   }
 
   .book-container {
     perspective: 1500px;
   }
-  
+
   .book-page-container {
     flex: 1;
     min-height: 60vh;
@@ -1851,53 +1970,66 @@ textarea:focus-visible {
     position: relative;
     overflow: hidden;
   }
-  
+
   .book-page-container-left {
     border-radius: 8px 0 0 8px;
     box-shadow: inset -3px 0 5px rgba(0, 0, 0, 0.1);
   }
-  
+
   .book-page-container-right {
     border-radius: 0 8px 8px 0;
     box-shadow: inset 3px 0 5px rgba(0, 0, 0, 0.1);
     background: linear-gradient(to left, hsl(38, 46%, 95%), hsl(38, 40%, 93%));
   }
-  
+
   .book-spine {
     width: 2px;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.2),
+      rgba(0, 0, 0, 0.4),
+      rgba(0, 0, 0, 0.2)
+    );
     position: relative;
     z-index: 10;
   }
-  
+
   .book-page {
     height: 100%;
     position: relative;
   }
-  
+
   .book-page-left {
-    background: linear-gradient(135deg, hsl(38, 46%, 95%) 0%, hsl(38, 42%, 92%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(38, 46%, 95%) 0%,
+      hsl(38, 42%, 92%) 100%
+    );
   }
-  
+
   .book-page-right {
-    background: linear-gradient(135deg, hsl(38, 42%, 93%) 0%, hsl(38, 46%, 95%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(38, 42%, 93%) 0%,
+      hsl(38, 46%, 95%) 100%
+    );
   }
-  
+
   .book-page h2 {
     color: hsl(30, 25%, 25%);
   }
-  
+
   .book-page p {
     color: hsl(30, 20%, 35%);
   }
-  
+
   .book-page .prose {
     color: hsl(30, 20%, 30%);
     line-height: 1.8;
   }
-  
+
   /* Remove old mobile styles - now using grid layout */
-  
+
   /* Mobile adjustments for premium book view */
   @media (max-width: 899px) {
     .book-spread {
@@ -1905,22 +2037,22 @@ textarea:focus-visible {
       padding: 16px;
       gap: 20px;
     }
-    
+
     .page {
       max-width: 600px;
       margin: 0 auto;
       padding: 24px 20px 60px;
     }
-    
+
     /* Reduce spacing on left page (image/audio) for mobile */
     .page--left {
       padding-bottom: 30px; /* Reduce bottom padding */
     }
-    
+
     .page::after {
       display: none; /* Hide stack hint on mobile */
     }
-    
+
     /* Reduce photo height and margins on mobile */
     .memory-photo {
       width: 90%;
@@ -1928,26 +2060,26 @@ textarea:focus-visible {
       max-height: 180px; /* Smaller on mobile */
       margin: 12px auto; /* Center and reduce margin */
     }
-    
+
     .memory-title {
       font-size: 24px;
       margin-bottom: 8px; /* Reduce margin */
     }
-    
+
     .memory-date {
       margin-bottom: 12px; /* Reduce margin */
     }
-    
+
     /* Reduce audio wrapper spacing on mobile */
     .audio-wrapper {
       margin-top: 12px; /* Reduce top margin */
       margin-bottom: 12px; /* Reduce bottom margin */
     }
-    
+
     .audio-wrap {
       padding: 10px 12px; /* Smaller padding */
     }
-    
+
     .emotion-tags {
       position: relative !important;
       transform: none !important;
@@ -1956,26 +2088,26 @@ textarea:focus-visible {
       left: auto !important;
       right: auto !important;
     }
-    
+
     .page-number {
       display: none; /* Hide page numbers on mobile single-column view */
     }
-    
+
     .wisdom {
       margin-top: 20px;
       padding: 16px 16px 16px 20px;
     }
-    
+
     .character-badge {
       margin-top: 12px;
-      font-size: .875rem;
+      font-size: 0.875rem;
     }
-    
+
     .memory-body {
       font-size: 15px;
       line-height: 1.65;
     }
-    
+
     /* Fix navigation buttons alignment */
     .book-nav {
       padding: 0;
@@ -1989,12 +2121,12 @@ textarea:focus-visible {
       justify-content: space-between;
       align-items: center;
     }
-    
+
     .book-nav button {
       padding: 8px 12px;
-      font-size: .9rem;
+      font-size: 0.9rem;
     }
-    
+
     /* Ensure buttons don't overlap with text and center vertically */
     .book-nav > div.text-center {
       flex: 0 1 auto;
@@ -2005,23 +2137,23 @@ textarea:focus-visible {
       justify-content: center;
     }
   }
-  
+
   @media (max-width: 768px) {
     /* Keep old mobile fallback for anything else that needs it */
     .book-page-container {
       min-height: 40vh;
     }
-    
+
     .book-page-container-left {
       border-radius: 8px 8px 0 0;
       box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.1);
     }
-    
+
     .book-page-container-right {
       border-radius: 0 0 8px 8px;
       box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.1);
     }
-    
+
     .book-spine {
       width: 100%;
       height: 2px;
@@ -2042,7 +2174,8 @@ textarea:focus-visible {
 /* Enhanced Animation Library */
 /* Premium floating animations */
 @keyframes float-diagonal {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) rotate(-2deg);
   }
   25% {
@@ -2057,7 +2190,8 @@ textarea:focus-visible {
 }
 
 @keyframes float-horizontal {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0) rotate(0deg);
   }
   50% {
@@ -2066,7 +2200,8 @@ textarea:focus-visible {
 }
 
 @keyframes float-vertical {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) rotate(1deg);
   }
   50% {
@@ -2088,7 +2223,8 @@ textarea:focus-visible {
 
 /* Waveform animation */
 @keyframes wave-dance {
-  0%, 100% {
+  0%,
+  100% {
     transform: scaleY(0.5);
   }
   50% {
@@ -2107,10 +2243,12 @@ textarea:focus-visible {
 }
 
 @keyframes blink {
-  0%, 50% {
+  0%,
+  50% {
     opacity: 1;
   }
-  51%, 100% {
+  51%,
+  100% {
     opacity: 0;
   }
 }
@@ -2127,7 +2265,8 @@ textarea:focus-visible {
 
 /* Glow effect */
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(245, 166, 35, 0.3);
   }
   50% {
@@ -2177,12 +2316,7 @@ textarea:focus-visible {
 
 /* Loading animation for async content */
 .loading-skeleton {
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
-  );
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -2298,7 +2432,9 @@ textarea:focus-visible {
 
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -2308,35 +2444,38 @@ textarea:focus-visible {
 /* Mobile text overflow fixes */
 @media (max-width: 640px) {
   /* Prevent text cutoff on small screens */
-  h1, h2, h3, .break-words {
+  h1,
+  h2,
+  h3,
+  .break-words {
     word-break: break-word;
     overflow-wrap: break-word;
     -webkit-hyphens: auto;
     hyphens: auto;
   }
-  
+
   /* Ensure animations don't cause overflow */
   .animate-fade-in-up {
     animation-duration: 0.6s;
   }
-  
+
   /* Much larger text sizing for better readability */
   .text-5xl {
     font-size: clamp(2.5rem, 7vw, 3rem);
   }
-  
+
   .text-4xl {
     font-size: clamp(2rem, 6vw, 2.25rem);
   }
-  
+
   .text-3xl {
     font-size: clamp(1.875rem, 5vw, 2rem);
   }
-  
+
   .text-2xl {
     font-size: clamp(1.5rem, 4vw, 1.75rem);
   }
-  
+
   /* Prevent horizontal scroll from animations */
   body {
     overflow-x: hidden;
@@ -2353,7 +2492,11 @@ textarea:focus-visible {
 }
 
 .gd-acc__item:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 251, 247, 0.95));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 251, 247, 0.95)
+  );
   border-color: var(--primary-coral);
   box-shadow: 0 8px 24px rgba(232, 93, 93, 0.15);
   transform: translateY(-2px);
@@ -2366,7 +2509,11 @@ textarea:focus-visible {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, rgba(232, 93, 93, 0.1), transparent);
+  background: radial-gradient(
+    circle at center,
+    rgba(232, 93, 93, 0.1),
+    transparent
+  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }

@@ -10,7 +10,9 @@ function getRedis() {
     const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
     if (!url || !token) {
-      console.warn("[Rate Limit] Redis credentials not configured - rate limiting disabled");
+      console.warn(
+        "[Rate Limit] Redis credentials not configured - rate limiting disabled",
+      );
       // Return a mock Redis client that always allows requests
       return null;
     }
@@ -56,7 +58,11 @@ function getRateLimiter(type: "auth" | "upload" | "api"): Ratelimit | null {
     });
   }
 
-  return type === "auth" ? _authRatelimit : type === "upload" ? _uploadRatelimit : _apiRatelimit;
+  return type === "auth"
+    ? _authRatelimit
+    : type === "upload"
+      ? _uploadRatelimit
+      : _apiRatelimit;
 }
 
 // Export getters instead of direct instances
@@ -65,7 +71,12 @@ export const authRatelimit = {
     const limiter = getRateLimiter("auth");
     if (!limiter) {
       // If rate limiting is disabled, always allow
-      return { success: true, limit: 999, reset: Date.now() + 10000, remaining: 999 };
+      return {
+        success: true,
+        limit: 999,
+        reset: Date.now() + 10000,
+        remaining: 999,
+      };
     }
     return limiter.limit(identifier);
   },
@@ -75,7 +86,12 @@ export const uploadRatelimit = {
   limit: async (identifier: string) => {
     const limiter = getRateLimiter("upload");
     if (!limiter) {
-      return { success: true, limit: 999, reset: Date.now() + 60000, remaining: 999 };
+      return {
+        success: true,
+        limit: 999,
+        reset: Date.now() + 60000,
+        remaining: 999,
+      };
     }
     return limiter.limit(identifier);
   },
@@ -85,7 +101,12 @@ export const apiRatelimit = {
   limit: async (identifier: string) => {
     const limiter = getRateLimiter("api");
     if (!limiter) {
-      return { success: true, limit: 999, reset: Date.now() + 60000, remaining: 999 };
+      return {
+        success: true,
+        limit: 999,
+        reset: Date.now() + 60000,
+        remaining: 999,
+      };
     }
     return limiter.limit(identifier);
   },
@@ -114,9 +135,19 @@ export function getClientIp(request: Request): string {
  */
 export async function checkRateLimit(
   identifier: string,
-  ratelimiter: { limit: (id: string) => Promise<{ success: boolean; limit: number; reset: number; remaining: number }> }
+  ratelimiter: {
+    limit: (
+      id: string,
+    ) => Promise<{
+      success: boolean;
+      limit: number;
+      reset: number;
+      remaining: number;
+    }>;
+  },
 ): Promise<Response | null> {
-  const { success, limit, reset, remaining } = await ratelimiter.limit(identifier);
+  const { success, limit, reset, remaining } =
+    await ratelimiter.limit(identifier);
 
   if (!success) {
     return new Response(
@@ -134,7 +165,7 @@ export async function checkRateLimit(
           "X-RateLimit-Reset": reset.toString(),
           "Retry-After": Math.ceil((reset - Date.now()) / 1000).toString(),
         },
-      }
+      },
     );
   }
 

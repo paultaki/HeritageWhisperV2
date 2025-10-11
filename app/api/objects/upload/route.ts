@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     if (!fileType || !fileExtension) {
       return NextResponse.json(
         { error: "File type and extension are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -56,20 +56,17 @@ export async function POST(request: NextRequest) {
     const fileName = `${timestamp}-${randomId}.${fileExtension}`;
 
     // Use single bucket with subfolders for paultaki project structure
-    const bucketName = 'heritage-whisper-files';
+    const bucketName = "heritage-whisper-files";
     let filePath: string;
 
-    if (fileType === 'photo') {
+    if (fileType === "photo") {
       // Photos go in photo/ subfolder
-      filePath = `photo/${user.id}/${storyId || 'temp'}/${fileName}`;
-    } else if (fileType === 'audio') {
+      filePath = `photo/${user.id}/${storyId || "temp"}/${fileName}`;
+    } else if (fileType === "audio") {
       // Audio goes in audio/ subfolder
-      filePath = `audio/${user.id}/${storyId || 'temp'}/${fileName}`;
+      filePath = `audio/${user.id}/${storyId || "temp"}/${fileName}`;
     } else {
-      return NextResponse.json(
-        { error: "Invalid file type" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
     }
 
     // Create signed upload URL (valid for 10 minutes)
@@ -81,20 +78,20 @@ export async function POST(request: NextRequest) {
       logger.error("Error creating signed upload URL:", uploadError);
       return NextResponse.json(
         { error: "Failed to create upload URL", details: uploadError.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     return NextResponse.json({
       uploadURL: uploadData.signedUrl,
       filePath: filePath,
-      token: uploadData.token
+      token: uploadData.token,
     });
   } catch (error) {
     logger.error("Upload URL generation error:", error);
     return NextResponse.json(
       { error: "Failed to generate upload URL" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

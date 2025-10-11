@@ -1,13 +1,29 @@
 // Supabase schema - matches the actual database structure
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, uuid, jsonb, inet } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  varchar,
+  integer,
+  boolean,
+  timestamp,
+  uuid,
+  jsonb,
+  inet,
+} from "drizzle-orm/pg-core";
 
 // This matches the actual Supabase database schema
 export const stories = pgTable("stories", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: uuid("user_id"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`NOW()`),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).default(sql`NOW()`),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`NOW()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).default(
+    sql`NOW()`,
+  ),
   expiresAt: timestamp("expires_at", { withTimezone: true }),
   transcript: text("transcript"), // Note: 'transcript' not 'transcription'
   durationSeconds: integer("duration_seconds"),

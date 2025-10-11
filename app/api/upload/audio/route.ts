@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -42,12 +42,15 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     // Rate limiting: 10 uploads per minute per user
-    const rateLimitResponse = await checkRateLimit(`upload:audio:${user.id}`, uploadRatelimit);
+    const rateLimitResponse = await checkRateLimit(
+      `upload:audio:${user.id}`,
+      uploadRatelimit,
+    );
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -57,7 +60,10 @@ export async function POST(request: NextRequest) {
     const audioFile = formData.get("audio") as File | Blob;
 
     if (!audioFile) {
-      return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No audio file provided" },
+        { status: 400 },
+      );
     }
 
     // Log the received file details for debugging
@@ -72,17 +78,20 @@ export async function POST(request: NextRequest) {
     // Check for invalid MIME types
     const contentType = audioFile.type || "audio/webm";
     if (contentType === "text/plain" || contentType.startsWith("text/")) {
-      return NextResponse.json({
-        error: "Invalid audio file type",
-        details: `MIME type ${contentType} is not supported. Please upload an audio file.`
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Invalid audio file type",
+          details: `MIME type ${contentType} is not supported. Please upload an audio file.`,
+        },
+        { status: 400 },
+      );
     }
 
     // Determine file extension from MIME type
     let fileExtension = "webm";
 
     // Strip codec information from MIME type for Supabase compatibility
-    const baseType = contentType.split(';')[0];
+    const baseType = contentType.split(";")[0];
 
     // Map MIME types to file extensions
     // We'll let Supabase infer content type from extension
@@ -131,10 +140,13 @@ export async function POST(request: NextRequest) {
         statusCode: error.statusCode,
         details: error.details,
       });
-      return NextResponse.json({
-        error: "Failed to upload audio",
-        details: error.message
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: "Failed to upload audio",
+          details: error.message,
+        },
+        { status: 500 },
+      );
     }
 
     // Get public URL from heritage-whisper-files bucket
@@ -144,17 +156,18 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       url: publicUrlData.publicUrl,
-      path: filename
+      path: filename,
     });
   } catch (error) {
     logger.error("Audio upload error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       {
         error: "Failed to upload audio",
-        details: errorMessage
+        details: errorMessage,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

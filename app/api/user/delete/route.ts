@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
-import { stories, users, userAgreements, sharedAccess, familyMembers, familyActivity } from "@/shared/schema";
+import {
+  stories,
+  users,
+  userAgreements,
+  sharedAccess,
+  familyMembers,
+  familyActivity,
+} from "@/shared/schema";
 import { eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
@@ -37,7 +44,7 @@ export async function DELETE(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -50,13 +57,15 @@ export async function DELETE(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const userId = user.id;
 
-    logger.debug(`[Account Deletion] Starting deletion process for user: ${userId}`);
+    logger.debug(
+      `[Account Deletion] Starting deletion process for user: ${userId}`,
+    );
 
     // Step 1: Get all user stories to identify files to delete
     const userStories = await db
@@ -64,26 +73,28 @@ export async function DELETE(request: NextRequest) {
       .from(stories)
       .where(eq(stories.userId, userId));
 
-    logger.debug(`[Account Deletion] Found ${userStories.length} stories to delete`);
+    logger.debug(
+      `[Account Deletion] Found ${userStories.length} stories to delete`,
+    );
 
     // Step 2: Delete all files from Supabase Storage
     const filesToDelete: string[] = [];
 
     for (const story of userStories) {
       // Add audio files
-      if (story.audioUrl && !story.audioUrl.startsWith('http')) {
+      if (story.audioUrl && !story.audioUrl.startsWith("http")) {
         filesToDelete.push(story.audioUrl);
       }
 
       // Add photo files
-      if (story.photoUrl && !story.photoUrl.startsWith('http')) {
+      if (story.photoUrl && !story.photoUrl.startsWith("http")) {
         filesToDelete.push(story.photoUrl);
       }
 
       // Add photos from photos array (stored in metadata)
       if (story.photos && Array.isArray(story.photos)) {
         for (const photo of story.photos) {
-          if (photo.url && !photo.url.startsWith('http')) {
+          if (photo.url && !photo.url.startsWith("http")) {
             filesToDelete.push(photo.url);
           }
         }
@@ -92,25 +103,30 @@ export async function DELETE(request: NextRequest) {
 
     // Delete all files from storage
     if (filesToDelete.length > 0) {
-      logger.debug(`[Account Deletion] Deleting ${filesToDelete.length} files from storage`);
+      logger.debug(
+        `[Account Deletion] Deleting ${filesToDelete.length} files from storage`,
+      );
 
-      const { data: deletedFiles, error: storageError } = await supabaseAdmin.storage
-        .from("heritage-whisper-files")
-        .remove(filesToDelete);
+      const { data: deletedFiles, error: storageError } =
+        await supabaseAdmin.storage
+          .from("heritage-whisper-files")
+          .remove(filesToDelete);
 
       if (storageError) {
-        logger.error("[Account Deletion] Storage deletion error:", storageError);
+        logger.error(
+          "[Account Deletion] Storage deletion error:",
+          storageError,
+        );
         // Continue with deletion even if some files fail
       } else {
-        logger.debug(`[Account Deletion] Deleted ${deletedFiles?.length || 0} files from storage`);
+        logger.debug(
+          `[Account Deletion] Deleted ${deletedFiles?.length || 0} files from storage`,
+        );
       }
     }
 
     // Also delete the entire user folder to catch any orphaned files
-    const userFolderPaths = [
-      `audio/${userId}`,
-      `photo/${userId}`,
-    ];
+    const userFolderPaths = [`audio/${userId}`, `photo/${userId}`];
 
     for (const folderPath of userFolderPaths) {
       try {
@@ -119,15 +135,22 @@ export async function DELETE(request: NextRequest) {
           .list(folderPath);
 
         if (folderFiles && folderFiles.length > 0) {
-          const folderFilePaths = folderFiles.map(file => `${folderPath}/${file.name}`);
+          const folderFilePaths = folderFiles.map(
+            (file) => `${folderPath}/${file.name}`,
+          );
           await supabaseAdmin.storage
             .from("heritage-whisper-files")
             .remove(folderFilePaths);
 
-          logger.debug(`[Account Deletion] Cleaned up ${folderFilePaths.length} files from ${folderPath}`);
+          logger.debug(
+            `[Account Deletion] Cleaned up ${folderFilePaths.length} files from ${folderPath}`,
+          );
         }
       } catch (error) {
-        logger.error(`[Account Deletion] Error cleaning folder ${folderPath}:`, error);
+        logger.error(
+          `[Account Deletion] Error cleaning folder ${folderPath}:`,
+          error,
+        );
         // Continue with deletion
       }
     }
@@ -145,7 +168,9 @@ export async function DELETE(request: NextRequest) {
 
     // Delete shared access (both owned and shared with)
     await db.delete(sharedAccess).where(eq(sharedAccess.ownerUserId, userId));
-    await db.delete(sharedAccess).where(eq(sharedAccess.sharedWithUserId, userId));
+    await db
+      .delete(sharedAccess)
+      .where(eq(sharedAccess.sharedWithUserId, userId));
     logger.debug("[Account Deletion] Deleted shared access records");
 
     // Delete user agreements
@@ -157,10 +182,14 @@ export async function DELETE(request: NextRequest) {
     logger.debug("[Account Deletion] Deleted story records");
 
     // Step 4: Delete user from Supabase Auth
-    const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    const { error: authDeleteError } =
+      await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (authDeleteError) {
-      logger.error("[Account Deletion] Auth user deletion error:", authDeleteError);
+      logger.error(
+        "[Account Deletion] Auth user deletion error:",
+        authDeleteError,
+      );
       // Continue anyway - we'll clean up the public.users record
     } else {
       logger.debug("[Account Deletion] Deleted user from Supabase Auth");
@@ -170,7 +199,9 @@ export async function DELETE(request: NextRequest) {
     await db.delete(users).where(eq(users.id, userId));
     logger.debug("[Account Deletion] Deleted user record from database");
 
-    logger.debug(`[Account Deletion] Successfully completed deletion for user: ${userId}`);
+    logger.debug(
+      `[Account Deletion] Successfully completed deletion for user: ${userId}`,
+    );
 
     return NextResponse.json({
       success: true,
@@ -183,7 +214,7 @@ export async function DELETE(request: NextRequest) {
         error: "Failed to delete account",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

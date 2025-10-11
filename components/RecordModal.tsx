@@ -1,16 +1,27 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { X, Mic, Square, Sparkles, ChevronRight, Volume2, Timer, Play, Pause, RotateCcw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { AudioRecorder, AudioRecorderHandle } from './AudioRecorder';
-import { VoiceVisualizer } from './VoiceVisualizer';
-import { toast } from '@/hooks/use-toast';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import designSystem from '@/lib/designSystem';
-import { motion, AnimatePresence } from 'framer-motion';
-import { getApiUrl } from '@/lib/config';
-import { supabase } from '@/lib/supabase';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  X,
+  Mic,
+  Square,
+  Sparkles,
+  ChevronRight,
+  Volume2,
+  Timer,
+  Play,
+  Pause,
+  RotateCcw,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { AudioRecorder, AudioRecorderHandle } from "./AudioRecorder";
+import { VoiceVisualizer } from "./VoiceVisualizer";
+import { toast } from "@/hooks/use-toast";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import designSystem from "@/lib/designSystem";
+import { motion, AnimatePresence } from "framer-motion";
+import { getApiUrl } from "@/lib/config";
+import { supabase } from "@/lib/supabase";
 
 interface RecordModalProps {
   isOpen: boolean;
@@ -34,7 +45,7 @@ export default function RecordModal({
   onSave,
   initialPrompt,
   initialTitle,
-  initialYear
+  initialYear,
 }: RecordModalProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -42,13 +53,13 @@ export default function RecordModal({
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [allTranscriptions, setAllTranscriptions] = useState<string[]>([]);
   const [isContinuingRecording, setIsContinuingRecording] = useState(false);
-  const [currentPrompt, setCurrentPrompt] = useState(initialPrompt || '');
-  const [storyTitle, setStoryTitle] = useState(initialTitle || '');
+  const [currentPrompt, setCurrentPrompt] = useState(initialPrompt || "");
+  const [storyTitle, setStoryTitle] = useState(initialTitle || "");
   const [storyYear, setStoryYear] = useState(initialYear || null);
   const [followUpPrompts, setFollowUpPrompts] = useState<string[]>([]);
   const [showTranscription, setShowTranscription] = useState(false);
-  const [transcription, setTranscription] = useState('');
-  const [editedTranscription, setEditedTranscription] = useState('');
+  const [transcription, setTranscription] = useState("");
+  const [editedTranscription, setEditedTranscription] = useState("");
   const [showGoDeeperOverlay, setShowGoDeeperOverlay] = useState(false);
   const [goDeeperQuestions, setGoDeeperQuestions] = useState<string[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -66,7 +77,7 @@ export default function RecordModal({
 
   // Fetch personalized prompt based on profile
   const { data: profileData } = useQuery({
-    queryKey: ['/api/profile'],
+    queryKey: ["/api/profile"],
     enabled: isOpen && !initialPrompt,
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -78,25 +89,35 @@ export default function RecordModal({
       const prompts = [];
 
       if (profileData.workEthic > 7) {
-        prompts.push("Your profile shows you have a strong work ethic. Tell me about a time your dedication surprised even yourself.");
+        prompts.push(
+          "Your profile shows you have a strong work ethic. Tell me about a time your dedication surprised even yourself.",
+        );
       }
 
       if (profileData.familyOrientation > 7) {
-        prompts.push("Family seems important to you. What's a family memory that still makes you smile?");
+        prompts.push(
+          "Family seems important to you. What's a family memory that still makes you smile?",
+        );
       }
 
       if (profileData.riskTolerance > 6) {
-        prompts.push("You seem comfortable with taking risks. What leap of faith changed your life?");
+        prompts.push(
+          "You seem comfortable with taking risks. What leap of faith changed your life?",
+        );
       }
 
       const currentYear = new Date().getFullYear();
       const age = currentYear - profileData.birthYear;
       if (age > 70) {
-        prompts.push("With all your years of experience, what wisdom would you share with someone just starting out?");
+        prompts.push(
+          "With all your years of experience, what wisdom would you share with someone just starting out?",
+        );
       }
 
       if (prompts.length === 0) {
-        prompts.push("Let's start with something meaningful to you. What story have you been wanting to share?");
+        prompts.push(
+          "Let's start with something meaningful to you. What story have you been wanting to share?",
+        );
       }
 
       setCurrentPrompt(prompts[Math.floor(Math.random() * prompts.length)]);
@@ -107,7 +128,7 @@ export default function RecordModal({
   useEffect(() => {
     if (isRecording && !isPaused) {
       timerRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
+        setRecordingTime((prev) => prev + 1);
       }, 1000);
     } else {
       if (timerRef.current) {
@@ -152,14 +173,15 @@ export default function RecordModal({
       "What did you learn from this experience?",
     ];
 
-    const newPrompt = contextualPrompts[Math.floor(Math.random() * contextualPrompts.length)];
-    setFollowUpPrompts(prev => [...prev, newPrompt].slice(-3)); // Keep last 3
+    const newPrompt =
+      contextualPrompts[Math.floor(Math.random() * contextualPrompts.length)];
+    setFollowUpPrompts((prev) => [...prev, newPrompt].slice(-3)); // Keep last 3
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const startRecording = () => {
@@ -180,7 +202,12 @@ export default function RecordModal({
   };
 
   const handleRecordingComplete = async (blob: Blob, duration: number) => {
-    console.log('[RecordModal] handleRecordingComplete called with blob:', blob.size, 'duration:', duration);
+    console.log(
+      "[RecordModal] handleRecordingComplete called with blob:",
+      blob.size,
+      "duration:",
+      duration,
+    );
     setAudioBlob(blob);
     // Keep isRecording true while transcribing so we stay on the recording screen
     setIsPaused(false);
@@ -188,19 +215,22 @@ export default function RecordModal({
     setIsTranscribing(true); // Show processing state
 
     toast({
-      title: 'Recording complete!',
-      description: 'Transcribing your story...',
+      title: "Recording complete!",
+      description: "Transcribing your story...",
     });
 
-    console.log('[RecordModal] Starting transcription process...');
+    console.log("[RecordModal] Starting transcription process...");
     try {
       // Convert blob to base64 for transcription
-      console.log('[RecordModal] Converting blob to base64...');
+      console.log("[RecordModal] Converting blob to base64...");
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-          const base64Data = (reader.result as string).split(',')[1];
-          console.log('[RecordModal] Blob converted to base64, length:', base64Data.length);
+          const base64Data = (reader.result as string).split(",")[1];
+          console.log(
+            "[RecordModal] Blob converted to base64, length:",
+            base64Data.length,
+          );
           resolve(base64Data);
         };
         reader.onerror = reject;
@@ -208,104 +238,134 @@ export default function RecordModal({
       });
 
       // Get Supabase session for authorization
-      let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      let {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
       // If no session, try to refresh
       if (!session || sessionError) {
-        console.log('[RecordModal] No session or error, attempting refresh...');
-        const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
+        console.log("[RecordModal] No session or error, attempting refresh...");
+        const {
+          data: { session: refreshedSession },
+          error: refreshError,
+        } = await supabase.auth.refreshSession();
         if (refreshedSession) {
           session = refreshedSession;
-          console.log('[RecordModal] Session refreshed successfully');
+          console.log("[RecordModal] Session refreshed successfully");
         } else {
-          console.error('[RecordModal] Failed to refresh session:', refreshError);
-          throw new Error('Authentication failed. Please sign in again.');
+          console.error(
+            "[RecordModal] Failed to refresh session:",
+            refreshError,
+          );
+          throw new Error("Authentication failed. Please sign in again.");
         }
       }
 
       // Call transcription API with authorization
-      console.log('[RecordModal] Preparing API call to /api/transcribe...');
+      console.log("[RecordModal] Preparing API call to /api/transcribe...");
       const headers: HeadersInit = {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       };
 
       if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
-        console.log('[RecordModal] Session token found, adding to headers');
+        headers["Authorization"] = `Bearer ${session.access_token}`;
+        console.log("[RecordModal] Session token found, adding to headers");
       } else {
-        console.error('[RecordModal] No authentication token found!');
-        throw new Error('No authentication token. Please sign in again.');
+        console.error("[RecordModal] No authentication token found!");
+        throw new Error("No authentication token. Please sign in again.");
       }
 
-      console.log('[RecordModal] Calling /api/transcribe with blob type:', blob.type);
-      const response = await fetch(getApiUrl('/api/transcribe'), {
-        method: 'POST',
+      console.log(
+        "[RecordModal] Calling /api/transcribe with blob type:",
+        blob.type,
+      );
+      const response = await fetch(getApiUrl("/api/transcribe"), {
+        method: "POST",
         headers,
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
           audioBase64: base64,
-          mimeType: blob.type || 'audio/webm',
+          mimeType: blob.type || "audio/webm",
           title: storyTitle || undefined,
         }),
       });
 
-      console.log('[RecordModal] API response status:', response.status, response.statusText);
+      console.log(
+        "[RecordModal] API response status:",
+        response.status,
+        response.statusText,
+      );
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error('Authentication failed. Please refresh the page and sign in again.');
+          throw new Error(
+            "Authentication failed. Please refresh the page and sign in again.",
+          );
         }
         throw new Error(`Transcription failed: ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log('[RecordModal] Transcription successful, transcription length:', data.transcription?.length || 0);
-      console.log('[RecordModal] Response data:', { 
-        hasTranscription: !!data.transcription, 
+      console.log(
+        "[RecordModal] Transcription successful, transcription length:",
+        data.transcription?.length || 0,
+      );
+      console.log("[RecordModal] Response data:", {
+        hasTranscription: !!data.transcription,
         hasFormattedContent: !!data.formattedContent,
-        hasLessonOptions: !!data.lessonOptions 
+        hasLessonOptions: !!data.lessonOptions,
       });
 
       // Save and navigate to BookStyleReview immediately
-      console.log('[RecordModal] Calling onSave with transcription length:', (data.transcription || '').length);
+      console.log(
+        "[RecordModal] Calling onSave with transcription length:",
+        (data.transcription || "").length,
+      );
       onSave({
         audioBlob: blob,
-        transcription: data.transcription || '',
+        transcription: data.transcription || "",
         formattedContent: data.formattedContent,
-        followUpQuestions: data.formattedContent?.questions?.map((q: any) => q.text) || [],
+        followUpQuestions:
+          data.formattedContent?.questions?.map((q: any) => q.text) || [],
         title: storyTitle || undefined,
         year: storyYear || undefined,
-        wisdomClipText: data.lessonOptions?.practical || '', // Add practical lesson as default
+        wisdomClipText: data.lessonOptions?.practical || "", // Add practical lesson as default
       });
-
     } catch (error) {
-      console.error('[RecordModal] Transcription error:', error);
-      console.error('[RecordModal] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      console.error("[RecordModal] Transcription error:", error);
+      console.error(
+        "[RecordModal] Error stack:",
+        error instanceof Error ? error.stack : "No stack trace",
+      );
 
       // Clean up state
       setIsTranscribing(false);
       setIsRecording(false);
 
       // Determine the error message to show
-      let errorMessage = 'Failed to transcribe audio. You can still save your recording.';
+      let errorMessage =
+        "Failed to transcribe audio. You can still save your recording.";
       if (error instanceof Error) {
-        if (error.message.includes('Authentication')) {
+        if (error.message.includes("Authentication")) {
           errorMessage = error.message;
-        } else if (error.message.includes('Transcription failed')) {
+        } else if (error.message.includes("Transcription failed")) {
           errorMessage = error.message;
         }
       }
 
       toast({
-        title: 'Transcription Error',
+        title: "Transcription Error",
         description: errorMessage,
-        variant: 'destructive',
+        variant: "destructive",
       });
 
       // Even on error, save with the audio blob
-      console.log('[RecordModal] Calling onSave with empty transcription due to error');
+      console.log(
+        "[RecordModal] Calling onSave with empty transcription due to error",
+      );
       onSave({
         audioBlob: blob,
-        transcription: '',
+        transcription: "",
         title: storyTitle || undefined,
         year: storyYear || undefined,
       });
@@ -322,33 +382,35 @@ export default function RecordModal({
   const generateGoDeeperQuestions = async (transcriptionText: string) => {
     try {
       // Get auth session for API call
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error('No auth session');
+        throw new Error("No auth session");
       }
 
-      const response = await fetch('/api/followups', {
-        method: 'POST',
+      const response = await fetch("/api/followups", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ transcription: transcriptionText })
+        body: JSON.stringify({ transcription: transcriptionText }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate questions');
+        throw new Error("Failed to generate questions");
       }
 
       const data = await response.json();
       const questions = [
         data.followUps.emotional,
         data.followUps.wisdom,
-        data.followUps.sensory
+        data.followUps.sensory,
       ];
       setGoDeeperQuestions(questions);
     } catch (error) {
-      console.error('Error generating Go Deeper questions:', error);
+      console.error("Error generating Go Deeper questions:", error);
       // Fallback to generic questions
       const questions = [
         "Can you tell me more about how that made you feel in that moment?",
@@ -417,8 +479,8 @@ export default function RecordModal({
       setAudioBlob(null);
       setFollowUpPrompts([]);
       setShowTranscription(false);
-      setTranscription('');
-      setEditedTranscription('');
+      setTranscription("");
+      setEditedTranscription("");
       setGoDeeperQuestions([]);
       setAudioUrl(null);
       setAllTranscriptions([]);
@@ -428,8 +490,8 @@ export default function RecordModal({
       onClose();
 
       toast({
-        title: 'Story saved!',
-        description: 'Your story has been saved successfully.',
+        title: "Story saved!",
+        description: "Your story has been saved successfully.",
       });
     }
   };
@@ -444,14 +506,14 @@ export default function RecordModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[60] flex items-end md:items-center justify-center"
-          style={{ background: 'rgba(0, 0, 0, 0.5)' }}
+          style={{ background: "rgba(0, 0, 0, 0.5)" }}
         >
           {/* Modal Content */}
           <motion.div
-            initial={{ y: '100%' }}
+            initial={{ y: "100%" }}
             animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="w-full md:max-w-2xl bg-white rounded-t-3xl md:rounded-3xl max-h-[90vh] overflow-hidden flex flex-col"
             style={{ background: designSystem.colors.background.creamLight }}
           >
@@ -462,20 +524,22 @@ export default function RecordModal({
                 style={{
                   fontFamily: designSystem.typography.fontFamilies.serif,
                   // Fix for vertical text wrapping on mobile
-                  flex: '1 1 auto',
-                  minWidth: '200px',
-                  maxWidth: 'calc(100% - 50px)',
-                  wordBreak: 'keep-all',
-                  overflowWrap: 'break-word',
-                  wordWrap: 'break-word',
-                  whiteSpace: 'normal',
-                  hyphens: 'none',
-                  WebkitHyphens: 'none',
-                  msHyphens: 'none',
-                  lineHeight: '1.4'
+                  flex: "1 1 auto",
+                  minWidth: "200px",
+                  maxWidth: "calc(100% - 50px)",
+                  wordBreak: "keep-all",
+                  overflowWrap: "break-word",
+                  wordWrap: "break-word",
+                  whiteSpace: "normal",
+                  hyphens: "none",
+                  WebkitHyphens: "none",
+                  msHyphens: "none",
+                  lineHeight: "1.4",
                 }}
               >
-                {isRecording ? 'Recording Your Story' : 'Ready to Share a Story?'}
+                {isRecording
+                  ? "Recording Your Story"
+                  : "Ready to Share a Story?"}
               </h2>
               <Button
                 variant="ghost"
@@ -487,7 +551,7 @@ export default function RecordModal({
                   // Reset typing mode when closing
                   setIsTypingMode(false);
                   setShowTranscription(false);
-                  setEditedTranscription('');
+                  setEditedTranscription("");
                   onClose();
                 }}
                 className="rounded-full p-1.5 -mr-2"
@@ -506,28 +570,43 @@ export default function RecordModal({
                   className="space-y-6"
                 >
                   {/* Initial Prompt */}
-                  <Card className="p-8" style={{
-                    background: 'linear-gradient(135deg, white 0%, #FFF8F3 100%)',
-                    borderRadius: designSystem.spacing.borderRadius.card,
-                    boxShadow: designSystem.shadows.md,
-                  }}>
+                  <Card
+                    className="p-8"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, white 0%, #FFF8F3 100%)",
+                      borderRadius: designSystem.spacing.borderRadius.card,
+                      boxShadow: designSystem.shadows.md,
+                    }}
+                  >
                     <div className="flex items-start gap-3 mb-6">
-                      <Sparkles className="w-6 h-6 mt-2" style={{ color: designSystem.colors.primary.coral }} />
+                      <Sparkles
+                        className="w-6 h-6 mt-2"
+                        style={{ color: designSystem.colors.primary.coral }}
+                      />
                       <div className="flex-1">
-                        <h3 className="font-semibold mb-4 text-2xl">Your Personalized Prompt</h3>
+                        <h3 className="font-semibold mb-4 text-2xl">
+                          Your Personalized Prompt
+                        </h3>
                         <p className="text-4xl leading-relaxed italic text-gray-700">
-                          &ldquo;{currentPrompt || "What's a story from your life that you've been wanting to share?"}&rdquo;
+                          &ldquo;
+                          {currentPrompt ||
+                            "What's a story from your life that you've been wanting to share?"}
+                          &rdquo;
                         </p>
                       </div>
                     </div>
                     <p className="text-2xl leading-relaxed text-gray-600">
-                      Take a moment to think about this. When you're ready, press record and just start talking.
+                      Take a moment to think about this. When you're ready,
+                      press record and just start talking.
                     </p>
                   </Card>
 
                   {/* Tips */}
                   <div className="space-y-3">
-                    <h4 className="font-medium text-gray-700 text-xl">Tips for a great recording:</h4>
+                    <h4 className="font-medium text-gray-700 text-xl">
+                      Tips for a great recording:
+                    </h4>
                     <ul className="space-y-2 text-lg text-gray-600">
                       <li className="flex items-start gap-2">
                         <span className="text-coral-500 mt-0.5">•</span>
@@ -539,7 +618,9 @@ export default function RecordModal({
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-coral-500 mt-0.5">•</span>
-                        <span>Include details that make the story come alive</span>
+                        <span>
+                          Include details that make the story come alive
+                        </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-coral-500 mt-0.5">•</span>
@@ -562,15 +643,25 @@ export default function RecordModal({
                       <div className="relative">
                         <div className="w-24 h-24 rounded-full border-4 border-gray-200 border-t-coral-500 animate-spin"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Sparkles className="w-10 h-10" style={{ color: designSystem.colors.primary.coral }} />
+                          <Sparkles
+                            className="w-10 h-10"
+                            style={{ color: designSystem.colors.primary.coral }}
+                          />
                         </div>
                       </div>
                       <div className="text-center space-y-2">
-                        <h3 className="text-2xl font-semibold" style={{ fontFamily: designSystem.typography.fontFamilies.serif }}>
+                        <h3
+                          className="text-2xl font-semibold"
+                          style={{
+                            fontFamily:
+                              designSystem.typography.fontFamilies.serif,
+                          }}
+                        >
                           Processing your recording...
                         </h3>
                         <p className="text-lg text-gray-600">
-                          We're transcribing your story. This will just take a moment.
+                          We're transcribing your story. This will just take a
+                          moment.
                         </p>
                       </div>
                     </div>
@@ -600,7 +691,9 @@ export default function RecordModal({
                           animate={{ opacity: 1, y: 0 }}
                           className="space-y-3"
                         >
-                          <p className="text-sm text-gray-500">Keep going, or consider:</p>
+                          <p className="text-sm text-gray-500">
+                            Keep going, or consider:
+                          </p>
                           {followUpPrompts.map((prompt, index) => (
                             <motion.div
                               key={index}
@@ -608,11 +701,16 @@ export default function RecordModal({
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: index * 0.1 }}
                             >
-                              <Card className="p-4" style={{
-                                background: 'white',
-                                borderLeft: `3px solid ${designSystem.colors.primary.coral}`,
-                              }}>
-                                <p className="italic text-gray-700">&ldquo;{prompt}&rdquo;</p>
+                              <Card
+                                className="p-4"
+                                style={{
+                                  background: "white",
+                                  borderLeft: `3px solid ${designSystem.colors.primary.coral}`,
+                                }}
+                              >
+                                <p className="italic text-gray-700">
+                                  &ldquo;{prompt}&rdquo;
+                                </p>
                               </Card>
                             </motion.div>
                           ))}
@@ -630,13 +728,20 @@ export default function RecordModal({
                   className="space-y-6"
                 >
                   <div className="text-center">
-                    <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: designSystem.typography.fontFamilies.serif }}>
-                      {isTypingMode ? 'Type Your Story' : 'Review Your Story'}
+                    <h3
+                      className="text-2xl font-bold mb-2"
+                      style={{
+                        fontFamily: designSystem.typography.fontFamilies.serif,
+                      }}
+                    >
+                      {isTypingMode ? "Type Your Story" : "Review Your Story"}
                     </h3>
                     <p className="text-gray-600">
                       {isTypingMode
-                        ? 'Type your story below. Take your time and include all the details you want to share.'
-                        : (isTranscribing ? 'Transcribing your story...' : 'You can edit the transcription below')}
+                        ? "Type your story below. Take your time and include all the details you want to share."
+                        : isTranscribing
+                          ? "Transcribing your story..."
+                          : "You can edit the transcription below"}
                     </p>
                   </div>
 
@@ -651,39 +756,61 @@ export default function RecordModal({
                             onClick={togglePlayback}
                             disabled={!audioUrl}
                           >
-                            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                            {isPlaying ? (
+                              <Pause className="w-4 h-4" />
+                            ) : (
+                              <Play className="w-4 h-4" />
+                            )}
                           </Button>
                           <span className="text-sm text-gray-600">
-                            {isPlaying ? 'Playing...' : 'Listen to your recording'}
+                            {isPlaying
+                              ? "Playing..."
+                              : "Listen to your recording"}
                           </span>
                         </div>
-                        <span className="text-sm font-medium">{formatTime(recordingTime)}</span>
+                        <span className="text-sm font-medium">
+                          {formatTime(recordingTime)}
+                        </span>
                       </div>
                     </Card>
                   )}
 
                   {/* Transcription */}
-                  <Card className="p-6" style={{
-                    background: 'white',
-                    borderRadius: designSystem.spacing.borderRadius.card,
-                  }}>
+                  <Card
+                    className="p-6"
+                    style={{
+                      background: "white",
+                      borderRadius: designSystem.spacing.borderRadius.card,
+                    }}
+                  >
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
-                        <Sparkles className="w-5 h-5 mt-1" style={{ color: designSystem.colors.primary.coral }} />
+                        <Sparkles
+                          className="w-5 h-5 mt-1"
+                          style={{ color: designSystem.colors.primary.coral }}
+                        />
                         <div className="flex-1">
-                          <h4 className="font-semibold mb-2">{isTypingMode ? 'Your Story' : 'Your Transcription'}</h4>
+                          <h4 className="font-semibold mb-2">
+                            {isTypingMode ? "Your Story" : "Your Transcription"}
+                          </h4>
                           {isTranscribing ? (
                             <div className="flex items-center gap-2 text-gray-500">
-                              <div className="animate-pulse">Processing audio...</div>
+                              <div className="animate-pulse">
+                                Processing audio...
+                              </div>
                             </div>
                           ) : (
                             <Textarea
                               value={editedTranscription}
-                              onChange={(e) => setEditedTranscription(e.target.value)}
+                              onChange={(e) =>
+                                setEditedTranscription(e.target.value)
+                              }
                               className="min-h-[200px] resize-none"
-                              placeholder={isTypingMode
-                                ? `Start typing your story here...\n\nConsider the prompt: "${currentPrompt}"`
-                                : "Your story transcription will appear here..."}
+                              placeholder={
+                                isTypingMode
+                                  ? `Start typing your story here...\n\nConsider the prompt: "${currentPrompt}"`
+                                  : "Your story transcription will appear here..."
+                              }
                               autoFocus={isTypingMode}
                             />
                           )}
@@ -717,29 +844,45 @@ export default function RecordModal({
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     className="fixed inset-0 z-[60] flex items-center justify-center p-4"
-                    style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+                    style={{ background: "rgba(0, 0, 0, 0.7)" }}
                   >
                     <motion.div
                       className="w-full max-w-md bg-white rounded-2xl p-6 space-y-4"
-                      style={{ background: designSystem.colors.background.creamLight }}
+                      style={{
+                        background: designSystem.colors.background.creamLight,
+                      }}
                     >
                       <div className="text-center">
-                        <h3 className="text-xl font-bold mb-2" style={{ fontFamily: designSystem.typography.fontFamilies.serif }}>
+                        <h3
+                          className="text-xl font-bold mb-2"
+                          style={{
+                            fontFamily:
+                              designSystem.typography.fontFamilies.serif,
+                          }}
+                        >
                           Maybe go deeper here?
                         </h3>
                       </div>
 
-                      <Card className="p-4" style={{
-                        background: `linear-gradient(135deg, ${designSystem.colors.primary.coralLight} 0%, white 100%)`,
-                      }}>
+                      <Card
+                        className="p-4"
+                        style={{
+                          background: `linear-gradient(135deg, ${designSystem.colors.primary.coralLight} 0%, white 100%)`,
+                        }}
+                      >
                         <p className="text-lg italic text-gray-700">
-                          &ldquo;{goDeeperQuestions[currentQuestionIndex]}&rdquo;
+                          &ldquo;{goDeeperQuestions[currentQuestionIndex]}
+                          &rdquo;
                         </p>
                       </Card>
 
                       <div className="flex items-center justify-center gap-3">
                         <button
-                          onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+                          onClick={() =>
+                            setCurrentQuestionIndex(
+                              Math.max(0, currentQuestionIndex - 1),
+                            )
+                          }
                           disabled={currentQuestionIndex === 0}
                           className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                           aria-label="Previous question"
@@ -754,8 +897,8 @@ export default function RecordModal({
                               onClick={() => setCurrentQuestionIndex(index)}
                               className={`w-2.5 h-2.5 rounded-full transition-all ${
                                 index === currentQuestionIndex
-                                  ? 'bg-coral-500 scale-125'
-                                  : 'bg-gray-300 hover:bg-gray-400'
+                                  ? "bg-coral-500 scale-125"
+                                  : "bg-gray-300 hover:bg-gray-400"
                               }`}
                               aria-label={`Question ${index + 1}`}
                             />
@@ -763,8 +906,18 @@ export default function RecordModal({
                         </div>
 
                         <button
-                          onClick={() => setCurrentQuestionIndex(Math.min(goDeeperQuestions.length - 1, currentQuestionIndex + 1))}
-                          disabled={currentQuestionIndex === goDeeperQuestions.length - 1}
+                          onClick={() =>
+                            setCurrentQuestionIndex(
+                              Math.min(
+                                goDeeperQuestions.length - 1,
+                                currentQuestionIndex + 1,
+                              ),
+                            )
+                          }
+                          disabled={
+                            currentQuestionIndex ===
+                            goDeeperQuestions.length - 1
+                          }
                           className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                           aria-label="Next question"
                         >
@@ -785,7 +938,7 @@ export default function RecordModal({
                           className="flex-1"
                           style={{
                             background: designSystem.colors.primary.coral,
-                            color: 'white',
+                            color: "white",
                           }}
                         >
                           Continue Recording
@@ -806,10 +959,10 @@ export default function RecordModal({
                     className="w-full flex items-center justify-center gap-3"
                     style={{
                       background: designSystem.colors.gradients.coral,
-                      color: 'white',
+                      color: "white",
                       borderRadius: designSystem.spacing.borderRadius.full,
-                      padding: '16px',
-                      minHeight: '60px',
+                      padding: "16px",
+                      minHeight: "60px",
                       fontSize: designSystem.typography.sizes.lg,
                       fontWeight: designSystem.typography.weights.semibold,
                       boxShadow: designSystem.shadows.lg,
@@ -824,12 +977,12 @@ export default function RecordModal({
                     onClick={() => {
                       // Go directly to transcription screen for typing
                       setShowTranscription(true);
-                      setTranscription('');
-                      setEditedTranscription('');
+                      setTranscription("");
+                      setEditedTranscription("");
                       setIsTranscribing(false);
                       setIsTypingMode(true);
                       // Create an empty audio blob so save button works
-                      setAudioBlob(new Blob([''], { type: 'audio/webm' }));
+                      setAudioBlob(new Blob([""], { type: "audio/webm" }));
                     }}
                     className="w-full text-center text-gray-600 hover:text-gray-800 transition-colors py-2 text-sm underline decoration-dotted underline-offset-4"
                   >
@@ -860,7 +1013,7 @@ export default function RecordModal({
                     className={isTypingMode ? "w-full" : "flex-1"}
                     style={{
                       background: designSystem.colors.primary.coral,
-                      color: 'white',
+                      color: "white",
                       borderRadius: designSystem.spacing.borderRadius.button,
                     }}
                   >

@@ -4,17 +4,17 @@
 
 :root {
   /* Half-Letter dimensions at 96 DPI (5.5×8.5 in) */
-  --page-width: 528px;    /* 5.5in × 96 */
-  --page-height: 816px;   /* 8.5in × 96 */
+  --page-width: 528px; /* 5.5in × 96 */
+  --page-height: 816px; /* 8.5in × 96 */
 
   /* Dotted decor border and content margins */
-  --page-border: 48px;    /* Dotted decor width on all sides */
+  --page-border: 48px; /* Dotted decor width on all sides */
   --content-margin: 23px; /* Space between dotted decor and content (reduced from 48px) */
-  --margin: 58px;         /* Legacy - deprecated, use --page-border */
-  --gutter-boost: 24px;   /* ~0.25in added ONLY in POD print mode (future) */
+  --margin: 58px; /* Legacy - deprecated, use --page-border */
+  --gutter-boost: 24px; /* ~0.25in added ONLY in POD print mode (future) */
 
   /* Spread layout */
-  --spread-gap: 30px;     /* Gap between left and right pages */
+  --spread-gap: 30px; /* Gap between left and right pages */
   --spread-width: calc(var(--page-width) * 2 + var(--spread-gap));
 
   /* Content area (equal margins) */
@@ -41,7 +41,7 @@
   scroll-behavior: smooth;
 
   /* Rich leather desk gradient with subtle vignette */
-  background: linear-gradient(135deg, #2C1F1A 0%, #3A2A22 100%);
+  background: linear-gradient(135deg, #2c1f1a 0%, #3a2a22 100%);
   background-attachment: fixed;
   padding: 26px 0 24px 0; /* Reduced top padding - closer to bottom spacing */
 
@@ -53,13 +53,17 @@
 }
 
 .book-wrap::before {
-  content: '';
+  content: "";
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.08) 100%);
+  background: radial-gradient(
+    ellipse at center,
+    transparent 30%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
   pointer-events: none;
   z-index: 1;
 }
@@ -84,14 +88,26 @@
   /* Paper white with whisper-level texture */
   background: #ffffff;
   background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.01) 2px, rgba(0,0,0,0.01) 4px),
-    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.01) 2px, rgba(0,0,0,0.01) 4px);
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.01) 2px,
+      rgba(0, 0, 0, 0.01) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.01) 2px,
+      rgba(0, 0, 0, 0.01) 4px
+    );
 
   /* Soft drop shadow with depth and subtle paper lip */
   box-shadow:
     inset 1px 1px 0 rgba(255, 255, 255, 0.5),
     0 2px 4px rgba(0, 0, 0, 0.06),
-    0 10px 24px rgba(0, 0, 0, 0.10);
+    0 10px 24px rgba(0, 0, 0, 0.1);
 
   scroll-snap-align: start;
   scroll-snap-stop: always;
@@ -99,7 +115,9 @@
   z-index: 2;
 
   /* Smooth page transitions */
-  transition: transform 140ms ease-out, box-shadow 140ms ease-out;
+  transition:
+    transform 140ms ease-out,
+    box-shadow 140ms ease-out;
 }
 
 /* Respect reduced motion preference */
@@ -143,7 +161,9 @@
   width: 100%;
   height: var(--content-height);
   overflow: hidden;
-  padding: var(--content-margin); /* 23px margin between dotted decor and content */
+  padding: var(
+    --content-margin
+  ); /* 23px margin between dotted decor and content */
 }
 
 /* Optional: Page header for decade/chapter labels */
@@ -193,7 +213,7 @@
 
 /* Spine shadow between pages in spread (visual only - does not affect layout) */
 .spread::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 50%;
   top: 0;
@@ -333,10 +353,11 @@
   /* Default print: 5.5×8.5 with equal margins (home print) */
   @page {
     size: 5.5in 8.5in;
-    margin: 0.6in;  /* Equal margins for home printing */
+    margin: 0.6in; /* Equal margins for home printing */
   }
 
-  html, body {
+  html,
+  body {
     background: #ffffff;
     margin: 0;
     padding: 0;
@@ -403,7 +424,7 @@
     max-width: calc(100% - 24px); /* Leave room for brown borders */
     box-shadow:
       0 1px 4px rgba(0, 0, 0, 0.08),
-      0 4px 12px rgba(0, 0, 0, 0.10);
+      0 4px 12px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -487,7 +508,7 @@
   @media screen {
     /* Single source of truth for page content height */
     :root {
-      --book-content-height: 700px;  /* Exact inner content box at scale 1.0 */
+      --book-content-height: 700px; /* Exact inner content box at scale 1.0 */
     }
 
     /* Book stage - explicit width container for proper centering */
@@ -566,7 +587,7 @@
           transparent 30%,
           rgba(0, 0, 0, 0.08) 100%
         ),
-        linear-gradient(135deg, #2C1F1A 0%, #3A2A22 100%);
+        linear-gradient(135deg, #2c1f1a 0%, #3a2a22 100%);
     }
 
     /* Enhanced page shadow for screen - more depth */

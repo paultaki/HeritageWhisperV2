@@ -1,17 +1,17 @@
 /**
  * Tier 3 Milestone-Based AI Analysis
- * 
+ *
  * Combined analysis at story milestones using GPT-4o:
  * - Generates 2-5 high-quality personalized prompts
  * - Extracts character traits, invisible rules, contradictions
  * - Stores in active_prompts + character_evolution tables
  */
 
-import OpenAI from 'openai';
-import { generateAnchorHash } from './promptGeneration';
+import OpenAI from "openai";
+import { generateAnchorHash } from "./promptGeneration";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 interface Story {
@@ -54,13 +54,13 @@ interface Tier3Result {
  * Get life phase from age
  */
 function getLifePhase(age: number | null | undefined): string {
-  if (!age) return 'unknown';
-  if (age <= 12) return 'childhood';
-  if (age <= 19) return 'teen';
-  if (age <= 29) return 'early_adult';
-  if (age <= 49) return 'mid_adult';
-  if (age <= 64) return 'late_adult';
-  return 'senior';
+  if (!age) return "unknown";
+  if (age <= 12) return "childhood";
+  if (age <= 19) return "teen";
+  if (age <= 29) return "early_adult";
+  if (age <= 49) return "mid_adult";
+  if (age <= 64) return "late_adult";
+  return "senior";
 }
 
 /**
@@ -68,50 +68,60 @@ function getLifePhase(age: number | null | undefined): string {
  */
 export async function performTier3Analysis(
   stories: Story[],
-  storyCount: number
+  storyCount: number,
 ): Promise<Tier3Result> {
   console.log(`[Tier 3] Starting combined analysis for ${storyCount} stories`);
-  
+
   // Determine number of prompts to generate based on milestone
   let promptCount = 3;
   if (storyCount === 1 || storyCount === 2) promptCount = 5;
-  else if (storyCount === 3) promptCount = 4; // Special: 1 unlocked + 3 locked
+  else if (storyCount === 3)
+    promptCount = 4; // Special: 1 unlocked + 3 locked
   else if (storyCount >= 4 && storyCount <= 20) promptCount = 3;
   else if (storyCount >= 30 && storyCount <= 50) promptCount = 2;
   else promptCount = 1;
-  
+
   // Story analysis context
-  const ageRange = 'unknown'; // Would need birth year + story years from metadata
-  const dominantPhase = 'unknown'; // Will be enhanced later with age calculation
-  
+  const ageRange = "unknown"; // Would need birth year + story years from metadata
+  const dominantPhase = "unknown"; // Will be enhanced later with age calculation
+
   // Build the prompt
-  const systemPrompt = buildSystemPrompt(storyCount, promptCount, ageRange, dominantPhase);
+  const systemPrompt = buildSystemPrompt(
+    storyCount,
+    promptCount,
+    ageRange,
+    dominantPhase,
+  );
   const userPrompt = buildUserPrompt(stories);
-  
-  console.log(`[Tier 3] Calling GPT-4o to analyze ${stories.length} stories and generate ${promptCount} prompts`);
-  
+
+  console.log(
+    `[Tier 3] Calling GPT-4o to analyze ${stories.length} stories and generate ${promptCount} prompts`,
+  );
+
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: "gpt-4o",
       temperature: 0.7,
-      response_format: { type: 'json_object' },
+      response_format: { type: "json_object" },
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ]
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
     });
-    
+
     const content = completion.choices[0]?.message?.content;
     if (!content) {
-      throw new Error('No response from GPT-4o');
+      throw new Error("No response from GPT-4o");
     }
-    
+
     const result = JSON.parse(content);
-    console.log(`[Tier 3] Analysis complete: ${result.prompts?.length || 0} prompts, ${result.characterInsights?.traits?.length || 0} traits`);
-    
+    console.log(
+      `[Tier 3] Analysis complete: ${result.prompts?.length || 0} prompts, ${result.characterInsights?.traits?.length || 0} traits`,
+    );
+
     return result;
   } catch (error) {
-    console.error('[Tier 3] GPT-4o analysis failed:', error);
+    console.error("[Tier 3] GPT-4o analysis failed:", error);
     throw error;
   }
 }
@@ -119,11 +129,17 @@ export async function performTier3Analysis(
 /**
  * Build system prompt based on story count
  */
-function buildSystemPrompt(storyCount: number, promptCount: number, ageRange: string, dominantPhase: string): string {
-  let analysisType = 'expansion'; // Story 1-2
-  if (storyCount === 3) analysisType = 'killer'; // Story 3 (pre-paywall)
-  else if (storyCount >= 4) analysisType = 'patterns'; // Story 4+
-  
+function buildSystemPrompt(
+  storyCount: number,
+  promptCount: number,
+  ageRange: string,
+  dominantPhase: string,
+): string {
+  let analysisType = "expansion"; // Story 1-2
+  if (storyCount === 3)
+    analysisType = "killer"; // Story 3 (pre-paywall)
+  else if (storyCount >= 4) analysisType = "patterns"; // Story 4+
+
   return `You are analyzing ${storyCount} stories to perform two tasks:
 1. Generate ${promptCount} memory prompts for future recordings
 2. Extract character insights and patterns
@@ -223,7 +239,7 @@ Return JSON with this structure:
  * Get prompt generation strategy based on story count
  */
 function getPromptStrategy(type: string, count: number): string {
-  if (type === 'expansion') {
+  if (type === "expansion") {
     return `EXPANSION STRATEGY (Stories 1-2):
 - Find what was IMPLIED but not fully told
 - THE MOMENT BEFORE: What led up to this?
@@ -232,8 +248,8 @@ function getPromptStrategy(type: string, count: number): string {
 - SENSORY GAPS: What did it feel/look/smell like?
 - IMPLIED BACKSTORY: References without explanation
 
-Generate ${count === 1 ? '5' : '4'} prompts that expand on what's already shared.`;
-  } else if (type === 'killer') {
+Generate ${count === 1 ? "5" : "4"} prompts that expand on what's already shared.`;
+  } else if (type === "killer") {
     return `KILLER PROMPT STRATEGY (Story 3 - Pre-Paywall):
 This is the MOST COMPELLING prompt to convince user to pay $149/year.
 
@@ -273,7 +289,7 @@ FIND PATTERNS & ASK CONCISELY:
 - Time gaps → "Nothing between high school and marriage. What happened in your twenties?"
 - Unexplored people → "Who was Coach? What did they teach you?"
 
-Generate ${count <= 20 ? '3' : count <= 50 ? '2' : '1'} prompts. Each one: 25-30 words, conversational, impossible to confuse with anyone else.`;
+Generate ${count <= 20 ? "3" : count <= 50 ? "2" : "1"} prompts. Each one: 25-30 words, conversational, impossible to confuse with anyone else.`;
   }
 }
 
@@ -281,12 +297,14 @@ Generate ${count <= 20 ? '3' : count <= 50 ? '2' : '1'} prompts. Each one: 25-30
  * Build user prompt with all stories
  */
 function buildUserPrompt(stories: Story[]): string {
-  const storyTexts = stories.map((s, i) => {
-    const lesson = s.lesson_learned ? `\nLesson: ${s.lesson_learned}` : '';
-    return `Story "${s.title}":
+  const storyTexts = stories
+    .map((s, i) => {
+      const lesson = s.lesson_learned ? `\nLesson: ${s.lesson_learned}` : "";
+      return `Story "${s.title}":
 ${s.transcript}${lesson}`;
-  }).join('\n\n---\n\n');
-  
+    })
+    .join("\n\n---\n\n");
+
   return `Analyze these stories and generate prompts + character insights:\n\n${storyTexts}`;
 }
 
@@ -297,26 +315,26 @@ export async function storeTier3Results(
   supabase: any,
   userId: string,
   storyCount: number,
-  result: Tier3Result
+  result: Tier3Result,
 ): Promise<void> {
-  console.log('[Tier 3] Storing results in database...');
-  
+  console.log("[Tier 3] Storing results in database...");
+
   // Determine expiry and lock status
   const isStory3 = storyCount === 3;
   const expiresAt = new Date();
-  
+
   if (isStory3) {
     // Story 3: 1 unlocked (30 days) + 3 locked (60 days when unlocked)
     expiresAt.setDate(expiresAt.getDate() + 30);
   } else {
     expiresAt.setDate(expiresAt.getDate() + 30); // Standard 30-day expiry
   }
-  
+
   // Store prompts
   const promptsToInsert = result.prompts.map((prompt, index) => ({
     user_id: userId,
     prompt_text: prompt.prompt,
-    context_note: `Based on analysis of your ${storyCount} ${storyCount === 1 ? 'story' : 'stories'}`,
+    context_note: `Based on analysis of your ${storyCount} ${storyCount === 1 ? "story" : "stories"}`,
     anchor_entity: prompt.anchor_entity,
     anchor_year: null,
     anchor_hash: generateAnchorHash(prompt.trigger, prompt.anchor_entity, null),
@@ -324,60 +342,72 @@ export async function storeTier3Results(
     memory_type: prompt.trigger,
     prompt_score: prompt.recording_likelihood,
     score_reason: prompt.reasoning,
-    model_version: 'gpt-4o',
+    model_version: "gpt-4o",
     expires_at: expiresAt.toISOString(),
     is_locked: isStory3 && index > 0, // Story 3: lock prompts 2-4
-    shown_count: 0
+    shown_count: 0,
   }));
-  
+
   // Insert prompts individually to handle duplicates gracefully
   let successCount = 0;
   let skipCount = 0;
-  
+
   for (const prompt of promptsToInsert) {
     const { error: promptError } = await supabase
-      .from('active_prompts')
+      .from("active_prompts")
       .insert([prompt]);
-    
+
     if (promptError) {
-      if (promptError.code === '23505') {
+      if (promptError.code === "23505") {
         // Duplicate key - skip this prompt
-        console.log(`[Tier 3] Skipping duplicate prompt: ${prompt.prompt_text.substring(0, 50)}...`);
+        console.log(
+          `[Tier 3] Skipping duplicate prompt: ${prompt.prompt_text.substring(0, 50)}...`,
+        );
         skipCount++;
       } else {
-        console.error('[Tier 3] Failed to store prompt:', promptError);
+        console.error("[Tier 3] Failed to store prompt:", promptError);
         throw promptError;
       }
     } else {
       successCount++;
     }
   }
-  
+
   if (successCount === 0 && skipCount > 0) {
-    console.log('[Tier 3] All prompts were duplicates - no new prompts stored');
+    console.log("[Tier 3] All prompts were duplicates - no new prompts stored");
   } else if (successCount > 0) {
-    console.log(`[Tier 3] Stored ${successCount} new prompts, skipped ${skipCount} duplicates (${isStory3 ? '1 unlocked, 3 locked' : 'all unlocked'})`);
+    console.log(
+      `[Tier 3] Stored ${successCount} new prompts, skipped ${skipCount} duplicates (${isStory3 ? "1 unlocked, 3 locked" : "all unlocked"})`,
+    );
   }
-  
+
   // Store character insights (upsert - update if exists)
   const { error: characterError } = await supabase
-    .from('character_evolution')
-    .upsert({
-      user_id: userId,
-      story_count: storyCount,
-      traits: result.characterInsights.traits,
-      invisible_rules: result.characterInsights.invisibleRules,
-      contradictions: result.characterInsights.contradictions,
-      analyzed_at: new Date().toISOString(),
-      model_version: 'gpt-4o'
-    }, {
-      onConflict: 'user_id,story_count'
-    });
-  
+    .from("character_evolution")
+    .upsert(
+      {
+        user_id: userId,
+        story_count: storyCount,
+        traits: result.characterInsights.traits,
+        invisible_rules: result.characterInsights.invisibleRules,
+        contradictions: result.characterInsights.contradictions,
+        analyzed_at: new Date().toISOString(),
+        model_version: "gpt-4o",
+      },
+      {
+        onConflict: "user_id,story_count",
+      },
+    );
+
   if (characterError) {
-    console.error('[Tier 3] Failed to store character insights:', characterError);
+    console.error(
+      "[Tier 3] Failed to store character insights:",
+      characterError,
+    );
     throw characterError;
   }
-  
-  console.log(`[Tier 3] Stored character insights: ${result.characterInsights.traits.length} traits, ${result.characterInsights.invisibleRules?.length || 0} rules`);
+
+  console.log(
+    `[Tier 3] Stored character insights: ${result.characterInsights.traits.length} traits, ${result.characterInsights.invisibleRules?.length || 0} rules`,
+  );
 }

@@ -14,7 +14,7 @@ export async function processImage(
     maxHeight?: number;
     quality?: number;
     format?: "jpeg" | "png" | "webp";
-  } = {}
+  } = {},
 ): Promise<{ buffer: Buffer; contentType: string }> {
   const {
     maxWidth = 2400, // Max width for photos
@@ -91,7 +91,7 @@ export async function processImage(
   } catch (error) {
     console.error("Image processing error:", error);
     throw new Error(
-      `Failed to process image: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Failed to process image: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }
@@ -144,9 +144,7 @@ export async function getImageInfo(buffer: Buffer) {
       height: metadata.height,
       size: buffer.length,
       hasEXIF: !!metadata.exif,
-      hasGPS:
-        metadata.exif &&
-        (metadata.exif as any).GPSLatitude !== undefined,
+      hasGPS: metadata.exif && (metadata.exif as any).GPSLatitude !== undefined,
     };
   } catch (error) {
     throw new Error("Failed to read image metadata");

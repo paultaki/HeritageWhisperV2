@@ -16,7 +16,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 // PATCH update a photo
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; photoId: string } }
+  { params }: { params: { id: string; photoId: string } },
 ) {
   try {
     // Get the Authorization header
@@ -26,7 +26,7 @@ export async function PATCH(
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function PATCH(
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -53,27 +53,20 @@ export async function PATCH(
       .single();
 
     if (storyError || !story) {
-      return NextResponse.json(
-        { error: "Story not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Story not found" }, { status: 404 });
     }
 
     if (story.user_id !== user.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     const currentPhotos = story.photos || [];
-    const photoIndex = currentPhotos.findIndex((p: any) => p.id === params.photoId);
+    const photoIndex = currentPhotos.findIndex(
+      (p: any) => p.id === params.photoId,
+    );
 
     if (photoIndex === -1) {
-      return NextResponse.json(
-        { error: "Photo not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Photo not found" }, { status: 404 });
     }
 
     // If marking this photo as hero, unmark others
@@ -99,7 +92,7 @@ export async function PATCH(
       logger.error("Error updating photo:", updateError);
       return NextResponse.json(
         { error: "Failed to update photo" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -108,7 +101,7 @@ export async function PATCH(
     logger.error("Photo update error:", error);
     return NextResponse.json(
       { error: "Failed to update photo" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -116,7 +109,7 @@ export async function PATCH(
 // DELETE a photo
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; photoId: string } }
+  { params }: { params: { id: string; photoId: string } },
 ) {
   try {
     // Get the Authorization header
@@ -126,7 +119,7 @@ export async function DELETE(
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -139,7 +132,7 @@ export async function DELETE(
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -151,34 +144,33 @@ export async function DELETE(
       .single();
 
     if (storyError || !story) {
-      return NextResponse.json(
-        { error: "Story not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Story not found" }, { status: 404 });
     }
 
     if (story.user_id !== user.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     const currentPhotos = story.photos || [];
-    const photoToDelete = currentPhotos.find((p: any) => p.id === params.photoId);
+    const photoToDelete = currentPhotos.find(
+      (p: any) => p.id === params.photoId,
+    );
 
     if (!photoToDelete) {
-      return NextResponse.json(
-        { error: "Photo not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Photo not found" }, { status: 404 });
     }
 
     // Remove photo from array
-    const updatedPhotos = currentPhotos.filter((p: any) => p.id !== params.photoId);
+    const updatedPhotos = currentPhotos.filter(
+      (p: any) => p.id !== params.photoId,
+    );
 
     // If deleted photo was hero and there are other photos, make the first one hero
-    if (photoToDelete.isHero && updatedPhotos.length > 0 && !updatedPhotos.some((p: any) => p.isHero)) {
+    if (
+      photoToDelete.isHero &&
+      updatedPhotos.length > 0 &&
+      !updatedPhotos.some((p: any) => p.isHero)
+    ) {
       updatedPhotos[0].isHero = true;
     }
 
@@ -192,7 +184,7 @@ export async function DELETE(
       logger.error("Error deleting photo:", updateError);
       return NextResponse.json(
         { error: "Failed to delete photo" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -206,7 +198,7 @@ export async function DELETE(
     logger.error("Photo deletion error:", error);
     return NextResponse.json(
       { error: "Failed to delete photo" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

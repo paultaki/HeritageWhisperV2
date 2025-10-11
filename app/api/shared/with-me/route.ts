@@ -24,16 +24,19 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.getUser(token);
 
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -49,10 +52,10 @@ export async function GET(request: NextRequest) {
         and(
           or(
             eq(sharedAccess.sharedWithEmail, user.email || ""),
-            eq(sharedAccess.sharedWithUserId, user.id)
+            eq(sharedAccess.sharedWithUserId, user.id),
           ),
-          eq(sharedAccess.isActive, true)
-        )
+          eq(sharedAccess.isActive, true),
+        ),
       );
 
     // Filter out expired shares and format response
@@ -79,7 +82,7 @@ export async function GET(request: NextRequest) {
     logger.error("Error fetching shared timelines:", error);
     return NextResponse.json(
       { error: "Failed to fetch shared timelines" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

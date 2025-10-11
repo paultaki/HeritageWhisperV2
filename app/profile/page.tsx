@@ -4,7 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,7 +48,7 @@ import {
   ArrowUpCircle,
   AlertTriangle,
   Download,
-  Trash2
+  Trash2,
 } from "lucide-react";
 
 export default function Profile() {
@@ -69,24 +75,29 @@ export default function Profile() {
 
   // Load notification preferences from localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedPref = localStorage.getItem('printedBooksNotify');
+    if (typeof window !== "undefined") {
+      const savedPref = localStorage.getItem("printedBooksNotify");
       if (savedPref !== null) {
-        setPrintedBooksNotify(savedPref === 'true');
+        setPrintedBooksNotify(savedPref === "true");
       }
     }
   }, []);
 
   // Save printed books notification preference to localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const previousValue = localStorage.getItem('printedBooksNotify');
-      localStorage.setItem('printedBooksNotify', printedBooksNotify.toString());
+    if (typeof window !== "undefined") {
+      const previousValue = localStorage.getItem("printedBooksNotify");
+      localStorage.setItem("printedBooksNotify", printedBooksNotify.toString());
 
       // Only show toast if value actually changed (not on initial load)
-      if (previousValue !== null && previousValue !== printedBooksNotify.toString()) {
+      if (
+        previousValue !== null &&
+        previousValue !== printedBooksNotify.toString()
+      ) {
         toast({
-          title: printedBooksNotify ? "Notifications enabled" : "Notifications disabled",
+          title: printedBooksNotify
+            ? "Notifications enabled"
+            : "Notifications disabled",
           description: printedBooksNotify
             ? "You'll be notified when printed books become available."
             : "You won't receive notifications about printed books.",
@@ -119,7 +130,11 @@ export default function Profile() {
   });
 
   const updateProfileMutation = useMutation({
-    mutationFn: async (data: { name: string; birthYear: number; bio?: string }) => {
+    mutationFn: async (data: {
+      name: string;
+      birthYear: number;
+      bio?: string;
+    }) => {
       const response = await apiRequest("PATCH", "/api/user/profile", data);
       return response.json();
     },
@@ -129,7 +144,8 @@ export default function Profile() {
       queryClient.invalidateQueries({ queryKey: ["/api/stories"] }); // Refresh timeline to update birth year marker
       toast({
         title: "Profile updated",
-        description: "Your profile has been saved successfully. Timeline updated with new birth year.",
+        description:
+          "Your profile has been saved successfully. Timeline updated with new birth year.",
       });
     },
     onError: (error: any) => {
@@ -142,8 +158,15 @@ export default function Profile() {
   });
 
   const updatePasswordMutation = useMutation({
-    mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
-      const response = await apiRequest("POST", "/api/auth/change-password", data);
+    mutationFn: async (data: {
+      currentPassword: string;
+      newPassword: string;
+    }) => {
+      const response = await apiRequest(
+        "POST",
+        "/api/auth/change-password",
+        data,
+      );
       return response.json();
     },
     onSuccess: () => {
@@ -253,7 +276,7 @@ export default function Profile() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `heritagewhisper-data-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `heritagewhisper-data-export-${new Date().toISOString().split("T")[0]}.json`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -294,7 +317,8 @@ export default function Profile() {
     } catch (error) {
       toast({
         title: "Deletion failed",
-        description: "Could not delete your account. Please try again or contact support.",
+        description:
+          "Could not delete your account. Please try again or contact support.",
         variant: "destructive",
       });
     }
@@ -314,15 +338,20 @@ export default function Profile() {
 
   // Calculate stats
   const totalStories = user.storyCount || 0;
-  const totalRecordingMinutes = Math.round((storyStats?.totalSeconds || 0) / 60);
+  const totalRecordingMinutes = Math.round(
+    (storyStats?.totalSeconds || 0) / 60,
+  );
   const storiesShared = storyStats?.sharedCount || 0;
   const familyMembers = storyStats?.familyMembers || 0;
 
   // Calculate storage used (mock data for now)
-  const storageUsedMB = Math.round((totalStories * 2.5) + (totalStories * 0.5)); // Avg 2.5MB audio + 0.5MB photos
+  const storageUsedMB = Math.round(totalStories * 2.5 + totalStories * 0.5); // Avg 2.5MB audio + 0.5MB photos
   const storageUsedGB = (storageUsedMB / 1024).toFixed(2);
   const storageLimitGB = user.isPaid ? 50 : 5;
-  const storagePercent = Math.min((parseFloat(storageUsedGB) / storageLimitGB) * 100, 100);
+  const storagePercent = Math.min(
+    (parseFloat(storageUsedGB) / storageLimitGB) * 100,
+    100,
+  );
 
   return (
     <div className="min-h-screen bg-background album-texture pb-20 md:pb-0">
@@ -339,8 +368,12 @@ export default function Profile() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Profile Settings</h1>
-              <p className="text-sm md:text-base text-muted-foreground">Manage your account and preferences</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                Profile Settings
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground">
+                Manage your account and preferences
+              </p>
             </div>
           </div>
         </div>
@@ -364,14 +397,20 @@ export default function Profile() {
                   <Avatar className="w-20 h-20 md:w-24 md:h-24">
                     <AvatarImage src={profilePhoto} alt={name} />
                     <AvatarFallback className="text-2xl bg-coral-100 text-coral-600">
-                      {name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      {name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <Label htmlFor="photo-upload" className="cursor-pointer">
                       <div className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors w-fit">
                         <Camera className="w-4 h-4" />
-                        <span className="text-sm font-medium">Change Photo</span>
+                        <span className="text-sm font-medium">
+                          Change Photo
+                        </span>
                       </div>
                       <Input
                         id="photo-upload"
@@ -391,7 +430,9 @@ export default function Profile() {
 
                 <div className="grid gap-4">
                   <div>
-                    <Label htmlFor="name" className="text-base">Full Name</Label>
+                    <Label htmlFor="name" className="text-base">
+                      Full Name
+                    </Label>
                     <Input
                       id="name"
                       type="text"
@@ -404,7 +445,9 @@ export default function Profile() {
                   </div>
 
                   <div>
-                    <Label htmlFor="email" className="text-base">Email</Label>
+                    <Label htmlFor="email" className="text-base">
+                      Email
+                    </Label>
                     <Input
                       id="email"
                       type="email"
@@ -419,7 +462,9 @@ export default function Profile() {
                   </div>
 
                   <div>
-                    <Label htmlFor="birthYear" className="text-base">Birth Year</Label>
+                    <Label htmlFor="birthYear" className="text-base">
+                      Birth Year
+                    </Label>
                     <Input
                       id="birthYear"
                       type="number"
@@ -437,7 +482,9 @@ export default function Profile() {
                   </div>
 
                   <div>
-                    <Label htmlFor="bio" className="text-base">About / Bio</Label>
+                    <Label htmlFor="bio" className="text-base">
+                      About / Bio
+                    </Label>
                     <Textarea
                       id="bio"
                       value={bio}
@@ -458,7 +505,9 @@ export default function Profile() {
                   disabled={updateProfileMutation.isPending}
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+                  {updateProfileMutation.isPending
+                    ? "Saving..."
+                    : "Save Changes"}
                 </Button>
               </form>
             </CardContent>
@@ -471,9 +520,7 @@ export default function Profile() {
                 <BarChart3 className="w-5 h-5" />
                 Your Story Statistics
               </CardTitle>
-              <CardDescription>
-                Track your storytelling journey
-              </CardDescription>
+              <CardDescription>Track your storytelling journey</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
@@ -482,7 +529,9 @@ export default function Profile() {
                     <BarChart3 className="w-4 h-4" />
                     <span className="text-sm">Total Stories</span>
                   </div>
-                  <p className="text-3xl font-bold text-foreground">{totalStories}</p>
+                  <p className="text-3xl font-bold text-foreground">
+                    {totalStories}
+                  </p>
                 </div>
 
                 <div className="p-4 rounded-lg bg-muted/50">
@@ -490,7 +539,12 @@ export default function Profile() {
                     <Clock className="w-4 h-4" />
                     <span className="text-sm">Recording Time</span>
                   </div>
-                  <p className="text-3xl font-bold text-foreground">{totalRecordingMinutes}<span className="text-lg text-muted-foreground ml-1">min</span></p>
+                  <p className="text-3xl font-bold text-foreground">
+                    {totalRecordingMinutes}
+                    <span className="text-lg text-muted-foreground ml-1">
+                      min
+                    </span>
+                  </p>
                 </div>
 
                 <div className="p-4 rounded-lg bg-muted/50">
@@ -498,7 +552,9 @@ export default function Profile() {
                     <Share2 className="w-4 h-4" />
                     <span className="text-sm">Shared Stories</span>
                   </div>
-                  <p className="text-3xl font-bold text-foreground">{storiesShared}</p>
+                  <p className="text-3xl font-bold text-foreground">
+                    {storiesShared}
+                  </p>
                 </div>
 
                 <div className="p-4 rounded-lg bg-muted/50">
@@ -506,7 +562,9 @@ export default function Profile() {
                     <Users className="w-4 h-4" />
                     <span className="text-sm">Family Members</span>
                   </div>
-                  <p className="text-3xl font-bold text-foreground">{familyMembers}</p>
+                  <p className="text-3xl font-bold text-foreground">
+                    {familyMembers}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -521,7 +579,9 @@ export default function Profile() {
                   {user.isPaid ? "Premium Plan" : "Free Plan"}
                 </CardTitle>
                 <CardDescription>
-                  {user.isPaid ? "Thank you for being a premium member!" : "Upgrade to unlock more storage and features"}
+                  {user.isPaid
+                    ? "Thank you for being a premium member!"
+                    : "Upgrade to unlock more storage and features"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -560,14 +620,14 @@ export default function Profile() {
                 <Lock className="w-5 h-5" />
                 Change Password
               </CardTitle>
-              <CardDescription>
-                Update your account password
-              </CardDescription>
+              <CardDescription>Update your account password</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleChangePassword} className="space-y-4">
                 <div>
-                  <Label htmlFor="currentPassword" className="text-base">Current Password</Label>
+                  <Label htmlFor="currentPassword" className="text-base">
+                    Current Password
+                  </Label>
                   <Input
                     id="currentPassword"
                     type="password"
@@ -579,7 +639,9 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <Label htmlFor="newPassword" className="text-base">New Password</Label>
+                  <Label htmlFor="newPassword" className="text-base">
+                    New Password
+                  </Label>
                   <Input
                     id="newPassword"
                     type="password"
@@ -591,7 +653,9 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <Label htmlFor="confirmPassword" className="text-base">Confirm New Password</Label>
+                  <Label htmlFor="confirmPassword" className="text-base">
+                    Confirm New Password
+                  </Label>
                   <Input
                     id="confirmPassword"
                     type="password"
@@ -608,7 +672,9 @@ export default function Profile() {
                   disabled={updatePasswordMutation.isPending}
                 >
                   <Lock className="w-4 h-4 mr-2" />
-                  {updatePasswordMutation.isPending ? "Updating..." : "Update Password"}
+                  {updatePasswordMutation.isPending
+                    ? "Updating..."
+                    : "Update Password"}
                 </Button>
               </form>
             </CardContent>
@@ -621,15 +687,17 @@ export default function Profile() {
                 <Bell className="w-5 h-5" />
                 Notification Preferences
               </CardTitle>
-              <CardDescription>
-                Manage how you receive updates
-              </CardDescription>
+              <CardDescription>Manage how you receive updates</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start justify-between py-2 gap-4">
                 <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="email-notifications" className="text-base">Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Receive updates via email</p>
+                  <Label htmlFor="email-notifications" className="text-base">
+                    Email Notifications
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receive updates via email
+                  </p>
                 </div>
                 <Switch
                   id="email-notifications"
@@ -643,8 +711,12 @@ export default function Profile() {
 
               <div className="flex items-start justify-between py-2 gap-4">
                 <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="weekly-digest" className="text-base">Weekly Digest</Label>
-                  <p className="text-sm text-muted-foreground">Get a weekly summary of your stories</p>
+                  <Label htmlFor="weekly-digest" className="text-base">
+                    Weekly Digest
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Get a weekly summary of your stories
+                  </p>
                 </div>
                 <Switch
                   id="weekly-digest"
@@ -658,8 +730,12 @@ export default function Profile() {
 
               <div className="flex items-start justify-between py-2 gap-4">
                 <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="family-comments" className="text-base">Family Comments</Label>
-                  <p className="text-sm text-muted-foreground">Notify when family comments on stories</p>
+                  <Label htmlFor="family-comments" className="text-base">
+                    Family Comments
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Notify when family comments on stories
+                  </p>
                 </div>
                 <Switch
                   id="family-comments"
@@ -673,8 +749,12 @@ export default function Profile() {
 
               <div className="flex items-start justify-between py-2 gap-4">
                 <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="printed-books-notify" className="text-base">Printed Books Availability</Label>
-                  <p className="text-sm text-muted-foreground">Notify me when printed books are available for purchase</p>
+                  <Label htmlFor="printed-books-notify" className="text-base">
+                    Printed Books Availability
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Notify me when printed books are available for purchase
+                  </p>
                 </div>
                 <Switch
                   id="printed-books-notify"
@@ -700,7 +780,9 @@ export default function Profile() {
             <CardContent>
               <div className="flex items-start justify-between py-2 gap-4">
                 <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="default-visibility" className="text-base">Share New Stories with Family</Label>
+                  <Label htmlFor="default-visibility" className="text-base">
+                    Share New Stories with Family
+                  </Label>
                   <p className="text-sm text-muted-foreground">
                     New stories will be visible to family members by default
                   </p>
@@ -748,15 +830,19 @@ export default function Profile() {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your account
-                      and remove all your data from our servers, including all your stories,
-                      photos, and recordings.
+                      This action cannot be undone. This will permanently delete
+                      your account and remove all your data from our servers,
+                      including all your stories, photos, and recordings.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel className="h-12">Cancel</AlertDialogCancel>
+                    <AlertDialogCancel className="h-12">
+                      Cancel
+                    </AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDeleteAccount}
                       className="h-12 bg-destructive hover:bg-destructive/90"

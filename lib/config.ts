@@ -1,5 +1,5 @@
 // API Configuration - In Next.js, API routes are under /api
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 // Get the full API URL for a given path
 export function getApiUrl(path: string): string {

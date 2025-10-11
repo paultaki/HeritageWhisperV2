@@ -3,9 +3,11 @@
 > **📝 Note:** This file contains current, active documentation for Claude sessions. Historical fixes, migration notes, and archived information can be found in `CLAUDE_HISTORY.md`.
 
 ## 🚀 Project Overview
+
 AI-powered storytelling platform for seniors to capture and share life memories. Next.js 15 migration completed October 2025.
 
 ## 🛠️ Tech Stack
+
 - **Framework:** Next.js 15.5.4 with App Router
 - **Styling:** Tailwind CSS v3 + shadcn/ui
 - **Auth:** Supabase Auth with JWT tokens
@@ -18,6 +20,7 @@ AI-powered storytelling platform for seniors to capture and share life memories.
 ## 🔧 Quick Start
 
 ### Development
+
 ```bash
 cd /Users/paul/Documents/DevProjects/HeritageWhisperV2
 npm run dev
@@ -25,6 +28,7 @@ npm run dev
 ```
 
 ### Environment Variables (.env.local)
+
 ```bash
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://tjycibrhoammxohemyhq.supabase.co
@@ -50,6 +54,7 @@ SESSION_SECRET=your_secret
 ```
 
 ## 📁 Project Structure
+
 ```
 HeritageWhisperV2/
 ├── app/                      # Next.js 15 App Router
@@ -88,6 +93,7 @@ HeritageWhisperV2/
 ```
 
 ## 🔑 Key Features
+
 - **Audio Recording**: Simplified one-session flow with 3-2-1 countdown, 5-minute max, auto-transcription
 - **AI Transcription**: OpenAI Whisper API with automatic processing
 - **AI Prompt System**: Multi-tier reflection prompt generation (see AI Features section below)
@@ -103,15 +109,19 @@ HeritageWhisperV2/
 ## 🤖 AI Features
 
 ### AI Prompt Generation System v1.4 (PRODUCTION READY)
+
 Intelligent reflection prompt system that helps users deepen their storytelling through AI-generated questions.
 
 #### Database Schema
+
 Three new tables added via migration `/migrations/0002_add_ai_prompt_system.sql`:
+
 - **`active_prompts`**: Currently active prompts for users (7-day expiry, 1-3 prompts from Tier 1, unlimited from Tier 3)
 - **`prompt_history`**: All generated prompts with retirement tracking (skipped/answered)
 - **`character_evolution`**: AI insights about user's character, invisible rules, contradictions, core lessons
 
 #### Tier 1: Template-Based Entity Prompts
+
 - **Trigger**: After EVERY story save
 - **Process**: Multi-entity extraction (1-3 entities per story) using GPT-4o
   - Extracts people, places, objects, concepts from story
@@ -123,6 +133,7 @@ Three new tables added via migration `/migrations/0002_add_ai_prompt_system.sql`
 - **Example Output**: "You felt 'housebroken by love' with Chewy. What freedom did you trade for that love, and do you miss it?"
 
 #### Tier 3: Milestone Analysis Prompts
+
 - **Trigger**: At story milestones [1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100]
 - **Process**: Combined GPT-4o analysis of all user stories
   - Analyzes entire story collection for patterns, themes, character evolution
@@ -138,6 +149,7 @@ Three new tables added via migration `/migrations/0002_add_ai_prompt_system.sql`
   - Core Lessons: "True courage is staying when you want to run"
 
 #### Lesson Learned Extraction
+
 - **Trigger**: During transcription (every story)
 - **Process**: GPT-4o generates 3 lesson options (1-2 sentences, first-person)
 - **User Experience**: Review page shows 3 options, user picks one or writes their own
@@ -146,6 +158,7 @@ Three new tables added via migration `/migrations/0002_add_ai_prompt_system.sql`
 - **Display**: Book view shows lessons with gold left border callout
 
 #### Key Implementation Details
+
 - **Deduplication**: SHA1 hashing prevents duplicate prompts across all user prompts
 - **Expiry**: Tier 1 prompts expire after 7 days, Tier 3 prompts never expire
 - **Retirement**: Prompts marked as skipped/answered prevent re-generation
@@ -153,15 +166,19 @@ Three new tables added via migration `/migrations/0002_add_ai_prompt_system.sql`
 - **Rate Limiting**: Uses existing Upstash Redis limits for API protection
 
 #### Database Column Updates
+
 Added to `users` table:
+
 - `character_insights` (JSONB): Stores Tier 3 character analysis
 - `milestone_reached` (INTEGER): Tracks highest milestone for Tier 3 triggers
 
 Added to `stories` table:
+
 - `lesson_learned` (TEXT): User-selected wisdom/lesson from story
 - `entities_extracted` (JSONB): Extracted entities for Tier 1 prompt generation
 
 #### Pending Implementation
+
 - **GET `/api/prompts/next`**: Fetch next prompt to display to user
 - **POST `/api/prompts/skip`**: Retire skipped prompts
 - **Stripe webhook**: Unlock Story 3+ premium prompts on payment
@@ -171,6 +188,7 @@ Added to `stories` table:
 ## 🐛 Common Issues & Fixes
 
 ### Authentication & Email Verification
+
 - Uses Supabase Auth as single source of truth
 - **Email Confirmation Required**: Users must verify email before logging in
 - Verification emails sent via Resend SMTP (from no-reply@updates.heritagewhisper.com)
@@ -180,6 +198,7 @@ Added to `stories` table:
 - Registration uses service role key to bypass RLS when creating user records
 
 ### Security & Privacy
+
 - **Rate Limiting**: Upstash Redis with lazy initialization (graceful fallback if not configured)
 - **EXIF Stripping**: All uploaded images processed with Sharp to remove metadata (GPS, camera info)
 - **Image Processing**: Photos resized to max 2400x2400, converted to JPEG at 85% quality
@@ -188,12 +207,14 @@ Added to `stories` table:
   - `/api/user/export` - GDPR-compliant data export
 
 ### PDF Export
+
 - **Print Pages**: `/book/print/2up` and `/book/print/trim`
 - **API Routes**: `/api/export/2up`, `/api/export/trim`, `/api/book-data` (uses service role key)
 - **Print Layout**: Bypasses root layout via `/app/book/print/layout.tsx` to avoid padding conflicts
 - For detailed margin/centering fixes, see CLAUDE_HISTORY.md
 
 ### Navigation & UX Patterns
+
 - **Cancel Button Behavior**:
   - Editing existing story → Returns to `/timeline`
   - Creating new story → Returns to origin page (timeline/book/memory box) via `returnPath` in NavCache
@@ -212,11 +233,13 @@ Added to `stories` table:
 ## 🚀 Deployment
 
 ### Vercel (Frontend)
+
 - Auto-deploys from GitHub main branch
 - Live: https://dev.heritagewhisper.com
 - Set all environment variables in Vercel dashboard
 
 ### Database & Storage
+
 - **Supabase Project:** tjycibrhoammxohemyhq
 - **Bucket:** heritage-whisper-files (PUBLIC)
 - **Schema:** Managed via SQL migrations
@@ -233,6 +256,7 @@ Added to `stories` table:
 For detailed historical fixes and solutions, see `CLAUDE_HISTORY.md`
 
 ## 📝 Development Commands
+
 ```bash
 # Install dependencies
 npm install
@@ -248,7 +272,9 @@ npm run db:push
 ```
 
 ## 🔌 MCP Servers
+
 Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
+
 - ✅ GitHub MCP - Repository management
 - ✅ Supabase MCP - Database queries (read-only)
 - ✅ Vercel MCP - Deployment management
@@ -256,6 +282,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 - ✅ Resend MCP - Email sending
 
 ## 📊 Production Status
+
 - ✅ All core features working
 - ✅ Mobile responsive
 - ✅ Production build successful
@@ -263,11 +290,13 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 - ✅ PDF export working locally
 
 ## 🎯 Current Known Issues
+
 - **PDF Export on Vercel**: Print page loads but React app not rendering (timeout waiting for `.book-spread`)
 
 ## ✅ Recent Updates (October 8, 2025)
 
 ### Recording UX Improvements
+
 - **Processing Spinner**: After clicking stop, recording screen now shows "Processing your recording..." spinner while transcribing
   - Previously jumped back to initial "Start Recording" screen causing confusion
   - Now stays on recording screen → shows processing state → navigates to review page
@@ -278,6 +307,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Location: `/app/review/book-style/page.tsx:649-667`, `/hooks/use-record-modal.tsx:89`
 
 ### AI Transcription
+
 - **OpenAI Whisper Integration**: Auto-transcription working with GPT-4 formatting
   - Model: `whisper-1` for transcription, `gpt-4-turbo-preview` for formatting and lesson generation
   - **Lesson Learned Generation**: Automatically suggests wisdom/lesson from each story (1-2 sentences, first-person)
@@ -285,6 +315,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - **Important**: Ensure `OPENAI_API_KEY` is uncommented in `.env.local`
 
 ### Mobile Book View Polish
+
 - **Removed Debug Badge**: Removed viewport config debug overlay (`/app/book/page.tsx:769`)
 - **Fixed Mobile Scrolling**: Restored `.book-wrap` vertical padding while removing horizontal padding
   - Mobile brown border now handled by `.book-container` margin (12px) + padding (8px) = 20px total
@@ -292,6 +323,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Fixed conflict between `book.css` and `globals.css` media query overrides
 
 ### Timeline Year Badges
+
 - **Increased Text Size**: Desktop 22px (was 14px), Mobile 17px (was 13px)
 - **Improved Positioning**: Moved 5px left (desktop -65px, mobile -51px) for better alignment with vertical timeline
 - **Explicit Font Properties**: Split shorthand `font:` into individual properties to prevent CSS override issues
@@ -300,6 +332,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 ## ✅ Recent Updates (October 9, 2025)
 
 ### Lesson Learned Display in Book View
+
 - **Fixed Rendering**: Lessons learned (stored as `wisdomClipText` in database) now display properly in elegant callout boxes
   - Problem: Lesson text was appearing with CSS class names visible and broken formatting
   - Root cause: `lessonLearned` blocks were being included in `page.text`, causing duplicate/broken display
@@ -313,6 +346,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Location: `/app/book/page.tsx:550-553`
 
 ### Mobile Book View Responsive Fixes
+
 - **Dotted Decor Border**: Desktop 48px, Mobile 10px
   - Desktop: Full 48px border for premium print-like appearance
   - Mobile: Minimal 10px border for visual texture without wasting screen space
@@ -332,6 +366,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Location: `/app/globals.css:2857-2869`
 
 ### Book Layout Polish
+
 - **Text Alignment**: Left-aligned (changed from justified) for better readability
   - Location: `/lib/bookPagination.ts:35`, `/app/globals.css:1693,2876`, `/app/book/book.css:291`
 - **Page Margins**: Equal 48px margins on all sides with dotted decor border
@@ -343,6 +378,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 ## ✅ Recent Updates (October 10, 2025)
 
 ### PDF Export Improvements
+
 - **Running Headers**: Now show story title, year, and age instead of generic "Heritage Whisper" / "Family Memories"
   - Format: "STORY TITLE • YEAR • AGE X" (uppercase)
   - Removed redundant year/age display from below the title
@@ -353,6 +389,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Location: `/app/book/print/2up/page.tsx:452-481`, `/app/book/print/print-trim.css:116-138`
 
 ### Page Margins - Reduced for More Breathing Room
+
 - **Book View**: Content margin reduced from 48px → 23px (25px reduction)
   - Fixed override in `globals.css` that was preventing CSS variable from working
   - Location: `/app/book/book.css:12` (CSS variable), `/app/globals.css:2820` (fixed override)
@@ -362,6 +399,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Location: `/app/book/print/2up/page.tsx:386`, `/app/book/print/print-trim.css:31`
 
 ### Lesson Learned Bug Fixes
+
 - **Added Remove Button**: Can now completely delete lessons in edit mode
   - New "Remove" button between Save and Cancel in lesson editor
   - Location: `/components/BookStyleReview.tsx:490-497`
@@ -371,6 +409,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Location: `/app/api/stories/[id]/route.ts:247-251`
 
 ### Running Header Alignment Fix
+
 - **Perfect Vertical Alignment**: All running headers now at consistent height across every page
   - Previous bug: Left/right pages had different `top` values (18px vs 11px), causing random misalignment
   - Fix: Both pages now use `top: 18px` with fixed height container and baseline alignment
@@ -380,5 +419,6 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Location: `/app/globals.css:2771-2796`
 
 ---
-*Last updated: October 10, 2025*
-*For historical fixes, feature archives, and migration notes, see CLAUDE_HISTORY.md*
+
+_Last updated: October 10, 2025_
+_For historical fixes, feature archives, and migration notes, see CLAUDE_HISTORY.md_

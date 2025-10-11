@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Lock, CheckCircle, Eye, EyeOff } from "lucide-react";
@@ -78,7 +84,8 @@ export default function ResetPassword() {
       console.error("Password update error:", error);
       toast({
         title: "Update failed",
-        description: error.message || "Failed to update password. Please try again.",
+        description:
+          error.message || "Failed to update password. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -106,7 +113,8 @@ export default function ResetPassword() {
               <div className="space-y-2">
                 <h3 className="font-semibold text-lg">Password updated!</h3>
                 <p className="text-sm text-gray-600">
-                  Your password has been successfully reset. Redirecting to login...
+                  Your password has been successfully reset. Redirecting to
+                  login...
                 </p>
               </div>
             </div>

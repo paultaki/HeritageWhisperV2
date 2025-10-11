@@ -4,7 +4,7 @@ AI-powered storytelling platform for seniors - Next.js 15 migration with enhance
 
 ## 🚀 Live Demo
 
-*Deployment URL will be added here once deployed to Vercel*
+_Deployment URL will be added here once deployed to Vercel_
 
 ## 📖 About
 
@@ -45,22 +45,26 @@ HeritageWhisperV2 is a complete rebuild of the original HeritageWhisper platform
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/paultaki/HeritageWhisperV2.git
 cd HeritageWhisperV2
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env.local
 ```
 
 4. Add your environment variables to `.env.local`:
+
 ```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
@@ -82,6 +86,7 @@ STRIPE_SECRET_KEY=your_stripe_secret_key
 ```
 
 5. Run the development server:
+
 ```bash
 npm run dev
 ```
@@ -91,6 +96,7 @@ Open [http://localhost:3002](http://localhost:3002) with your browser.
 ## 📱 Mobile-First Design
 
 The application is optimized for senior users on mobile devices with:
+
 - Large touch targets (minimum 44x44px)
 - High contrast text
 - Simple navigation
@@ -137,6 +143,7 @@ HeritageWhisperV2/
 ### Deploy to Vercel
 
 1. Push to GitHub:
+
 ```bash
 git push origin main
 ```
@@ -183,4 +190,4 @@ For questions or support, please open an issue in this repository.
 ---
 
 **Status**: ✅ Migration Complete - Ready for Production
-*Last Updated: October 1, 2025*
+_Last Updated: October 1, 2025_

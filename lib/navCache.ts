@@ -38,13 +38,13 @@ export const navCache = {
     try {
       // Store in memory for immediate access
       memoryCache.set(id, payload);
-      
+
       // Store in localStorage as backup
       localStorage.setItem(`nav:${id}`, JSON.stringify(payload));
-      
-      console.log('NavCache: Stored data with ID', id, payload);
+
+      console.log("NavCache: Stored data with ID", id, payload);
     } catch (error) {
-      console.error('NavCache: Error storing data', error);
+      console.error("NavCache: Error storing data", error);
     }
   },
 
@@ -56,7 +56,7 @@ export const navCache = {
       // Try memory cache first (fastest)
       const memoryData = memoryCache.get(id);
       if (memoryData) {
-        console.log('NavCache: Retrieved from memory', id);
+        console.log("NavCache: Retrieved from memory", id);
         return memoryData;
       }
 
@@ -66,14 +66,14 @@ export const navCache = {
         const parsed = JSON.parse(localData);
         // Refresh memory cache
         memoryCache.set(id, parsed);
-        console.log('NavCache: Retrieved from localStorage', id);
+        console.log("NavCache: Retrieved from localStorage", id);
         return parsed;
       }
 
-      console.log('NavCache: No data found for ID', id);
+      console.log("NavCache: No data found for ID", id);
       return null;
     } catch (error) {
-      console.error('NavCache: Error retrieving data', error);
+      console.error("NavCache: Error retrieving data", error);
       return null;
     }
   },
@@ -95,9 +95,9 @@ export const navCache = {
     try {
       memoryCache.delete(id);
       localStorage.removeItem(`nav:${id}`);
-      console.log('NavCache: Removed data for ID', id);
+      console.log("NavCache: Removed data for ID", id);
     } catch (error) {
-      console.error('NavCache: Error removing data', error);
+      console.error("NavCache: Error removing data", error);
     }
   },
 
@@ -116,5 +116,5 @@ export const navCache = {
   // Retrieve data (alias for get)
   retrieve(id: string): NavPayload | null {
     return this.get(id);
-  }
+  },
 };

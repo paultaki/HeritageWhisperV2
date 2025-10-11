@@ -1,12 +1,25 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, User, Users, LogOut, Settings, HelpCircle, Home, Plus, Share2, FileText, Shield } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useRecordModal } from '@/hooks/use-record-modal';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState, useRef, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import {
+  Menu,
+  X,
+  User,
+  Users,
+  LogOut,
+  Settings,
+  HelpCircle,
+  Home,
+  Plus,
+  Share2,
+  FileText,
+  Shield,
+} from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRecordModal } from "@/hooks/use-record-modal";
+import { useToast } from "@/hooks/use-toast";
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,11 +39,11 @@ export default function HamburgerMenu() {
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
 
@@ -60,26 +73,37 @@ export default function HamburgerMenu() {
       navigator.clipboard.writeText(shareUrl);
       toast({
         title: "Share link copied!",
-        description: "The link has been copied to your clipboard. Share it with anyone to show your timeline.",
+        description:
+          "The link has been copied to your clipboard. Share it with anyone to show your timeline.",
       });
     }
     setIsOpen(false);
   };
 
   const menuItems = [
-    { icon: Home, label: 'Home', href: '/' },
-    { icon: Settings, label: 'Settings', href: '/profile' },
-    { icon: Users, label: 'Family', href: '/family' },
-    { icon: HelpCircle, label: 'Help', href: '/help' },
+    { icon: Home, label: "Home", href: "/" },
+    { icon: Settings, label: "Settings", href: "/profile" },
+    { icon: Users, label: "Family", href: "/family" },
+    { icon: HelpCircle, label: "Help", href: "/help" },
   ];
 
   const actionItems = [
-    { icon: Plus, label: 'New Memory', onClick: handleNewMemory, color: 'text-heritage-coral hover:bg-heritage-coral/10' },
-    { icon: Share2, label: 'Share', onClick: handleShare, color: 'text-blue-600 hover:bg-blue-50' },
+    {
+      icon: Plus,
+      label: "New Memory",
+      onClick: handleNewMemory,
+      color: "text-heritage-coral hover:bg-heritage-coral/10",
+    },
+    {
+      icon: Share2,
+      label: "Share",
+      onClick: handleShare,
+      color: "text-blue-600 hover:bg-blue-50",
+    },
   ];
 
   // Don't show on auth pages or home page
-  const shouldShow = !['/auth/login', '/auth/register', '/'].includes(pathname);
+  const shouldShow = !["/auth/login", "/auth/register", "/"].includes(pathname);
 
   if (!shouldShow) {
     return null;
@@ -113,7 +137,9 @@ export default function HamburgerMenu() {
             {/* User Info */}
             {user && (
               <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                <p className="text-sm font-medium text-gray-900">{user.name || 'User'}</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {user.name || "User"}
+                </p>
                 <p className="text-xs text-gray-500 truncate">{user.email}</p>
               </div>
             )}
@@ -147,8 +173,8 @@ export default function HamburgerMenu() {
                     onClick={() => handleNavigation(item.href)}
                     className={`w-full flex items-center px-4 py-2.5 text-sm transition-colors ${
                       isActive
-                        ? 'bg-heritage-coral/10 text-heritage-coral'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? "bg-heritage-coral/10 text-heritage-coral"
+                        : "text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     <Icon className="w-4 h-4 mr-3" />
@@ -161,14 +187,14 @@ export default function HamburgerMenu() {
             {/* Legal Links */}
             <div className="border-t border-gray-100 py-1">
               <button
-                onClick={() => handleNavigation('/privacy')}
+                onClick={() => handleNavigation("/privacy")}
                 className="w-full flex items-center px-4 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 <Shield className="w-3.5 h-3.5 mr-2" />
                 Privacy Policy
               </button>
               <button
-                onClick={() => handleNavigation('/terms')}
+                onClick={() => handleNavigation("/terms")}
                 className="w-full flex items-center px-4 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 <FileText className="w-3.5 h-3.5 mr-2" />

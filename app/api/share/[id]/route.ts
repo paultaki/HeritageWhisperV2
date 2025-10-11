@@ -18,7 +18,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 // PATCH /api/share/[id] - Update share permissions
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -27,16 +27,19 @@ export async function PATCH(
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.getUser(token);
 
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -50,15 +53,15 @@ export async function PATCH(
       .where(
         and(
           eq(sharedAccess.id, params.id),
-          eq(sharedAccess.ownerUserId, user.id)
-        )
+          eq(sharedAccess.ownerUserId, user.id),
+        ),
       )
       .limit(1);
 
     if (!share) {
       return NextResponse.json(
         { error: "Share not found or access denied" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -68,7 +71,7 @@ export async function PATCH(
       if (!["view", "edit"].includes(permissionLevel)) {
         return NextResponse.json(
           { error: "Permission level must be 'view' or 'edit'" },
-          { status: 400 }
+          { status: 400 },
         );
       }
       updates.permissionLevel = permissionLevel;
@@ -92,7 +95,7 @@ export async function PATCH(
     logger.error("Error updating share:", error);
     return NextResponse.json(
       { error: "Failed to update share" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -100,7 +103,7 @@ export async function PATCH(
 // DELETE /api/share/[id] - Revoke share access
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -109,16 +112,19 @@ export async function DELETE(
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.getUser(token);
 
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -129,15 +135,15 @@ export async function DELETE(
       .where(
         and(
           eq(sharedAccess.id, params.id),
-          eq(sharedAccess.ownerUserId, user.id)
-        )
+          eq(sharedAccess.ownerUserId, user.id),
+        ),
       )
       .limit(1);
 
     if (!share) {
       return NextResponse.json(
         { error: "Share not found or access denied" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -152,7 +158,7 @@ export async function DELETE(
     logger.error("Error deleting share:", error);
     return NextResponse.json(
       { error: "Failed to delete share" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

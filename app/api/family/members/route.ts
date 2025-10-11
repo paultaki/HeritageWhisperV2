@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -51,12 +51,14 @@ export async function GET(request: NextRequest) {
       .where(eq(familyMembers.userId, user.id));
 
     return NextResponse.json(members);
-
   } catch (error) {
     logger.error("Family members fetch error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch family members", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to fetch family members",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

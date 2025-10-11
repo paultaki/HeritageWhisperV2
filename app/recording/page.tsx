@@ -18,7 +18,7 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64 = reader.result as string;
-      resolve(base64.split(',')[1]); // Remove data:audio/webm;base64, prefix
+      resolve(base64.split(",")[1]); // Remove data:audio/webm;base64, prefix
     };
     reader.onerror = reject;
     reader.readAsDataURL(blob);
@@ -43,7 +43,7 @@ function WisdomClipScreen({
   onRecord,
   onSkip,
   onBack,
-  isVisible
+  isVisible,
 }: {
   onRecord: (audioBlob: Blob, duration: number) => void;
   onSkip: () => void;
@@ -53,12 +53,21 @@ function WisdomClipScreen({
   if (!isVisible) return null;
 
   const handleWisdomRecordingComplete = (audioBlob: Blob, duration: number) => {
-    console.log('[WisdomClip] Recording complete - Size:', audioBlob.size, 'Type:', audioBlob.type, 'Duration:', duration);
+    console.log(
+      "[WisdomClip] Recording complete - Size:",
+      audioBlob.size,
+      "Type:",
+      audioBlob.type,
+      "Duration:",
+      duration,
+    );
     if (audioBlob && audioBlob.size > 0) {
       onRecord(audioBlob, duration);
     } else {
-      console.error('[WisdomClip] ERROR: Empty audio blob received!');
-      alert('Recording failed: No audio was captured. Please check your microphone and try again.');
+      console.error("[WisdomClip] ERROR: Empty audio blob received!");
+      alert(
+        "Recording failed: No audio was captured. Please check your microphone and try again.",
+      );
     }
   };
 
@@ -75,9 +84,12 @@ function WisdomClipScreen({
 
       <div className="mb-12">
         <Heart className="w-16 h-16 text-accent mx-auto mb-6" />
-        <h1 className="text-4xl font-bold text-foreground mb-4">One Last Thing...</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-4">
+          One Last Thing...
+        </h1>
         <p className="text-xl text-muted-foreground mb-8">
-          If you had 60 seconds with your grandchild,<br />
+          If you had 60 seconds with your grandchild,
+          <br />
           what would you say?
         </p>
         <p className="text-lg text-muted-foreground">
@@ -122,7 +134,7 @@ function WisdomClipScreen({
 function PostRecordingFollowUp({
   question,
   onRecord,
-  onSkipToWisdom
+  onSkipToWisdom,
 }: {
   question: string;
   onRecord: () => void;
@@ -132,7 +144,9 @@ function PostRecordingFollowUp({
     <div className="max-w-2xl mx-auto p-6 text-center">
       <div className="mb-12">
         <Mic className="w-16 h-16 text-accent mx-auto mb-6" />
-        <h2 className="text-3xl font-bold text-foreground mb-4">One Follow Up Question</h2>
+        <h2 className="text-3xl font-bold text-foreground mb-4">
+          One Follow Up Question
+        </h2>
         <p className="text-xl text-foreground bg-gradient-to-r from-amber-50 to-rose-50 dark:from-amber-900/20 dark:to-rose-900/20 rounded-lg p-6 mb-8">
           {question}
         </p>
@@ -168,13 +182,16 @@ function RecordingContent() {
   const { toast } = useToast();
 
   // State Management
-  const [recordingState, setRecordingState] = useState<'recording' | 'processing' | 'post-followup' | 'wisdom' | 'complete'>('recording');
+  const [recordingState, setRecordingState] = useState<
+    "recording" | "processing" | "post-followup" | "wisdom" | "complete"
+  >("recording");
   const [showInFlowPrompt, setShowInFlowPrompt] = useState(false);
   const [currentInFlowPrompt, setCurrentInFlowPrompt] = useState<string>("");
   const [inFlowPromptCount, setInFlowPromptCount] = useState(0);
   const [usedPrompts, setUsedPrompts] = useState<string[]>([]);
   const [lastPromptTime, setLastPromptTime] = useState<number>(0);
-  const [postRecordingFollowUp, setPostRecordingFollowUp] = useState<string>("");
+  const [postRecordingFollowUp, setPostRecordingFollowUp] =
+    useState<string>("");
   const [hasRecording, setHasRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -196,7 +213,7 @@ function RecordingContent() {
 
   // Get prompt from navigation or use default
   const getNavDataFromURL = () => {
-    const navId = searchParams.get('nav');
+    const navId = searchParams.get("nav");
 
     if (navId) {
       const navData = navCache.retrieve(navId);
@@ -219,29 +236,38 @@ function RecordingContent() {
     if (navData?.isReRecording && navData?.title) {
       return {
         title: navData.title,
-        text: "Re-record your story. Take your time and speak from the heart."
+        text: "Re-record your story. Take your time and speak from the heart.",
       };
     }
     return {
       title: "Record a New Memory",
-      text: "Share any story from your life - a special moment, a lesson learned, or just something you'd like to remember. Take your time and speak from the heart."
+      text: "Share any story from your life - a special moment, a lesson learned, or just something you'd like to remember. Take your time and speak from the heart.",
     };
   });
 
   // Transcription function
-  const transcribeAudio = async (audioBlob: Blob): Promise<{ text: string; formattedContent: any }> => {
+  const transcribeAudio = async (
+    audioBlob: Blob,
+  ): Promise<{ text: string; formattedContent: any }> => {
     const formData = new FormData();
 
-    let extension = 'webm';
-    if (audioBlob.type.includes('ogg')) extension = 'ogg';
-    else if (audioBlob.type.includes('mp4')) extension = 'mp4';
-    else if (audioBlob.type.includes('wav')) extension = 'wav';
+    let extension = "webm";
+    if (audioBlob.type.includes("ogg")) extension = "ogg";
+    else if (audioBlob.type.includes("mp4")) extension = "mp4";
+    else if (audioBlob.type.includes("wav")) extension = "wav";
 
-    console.log('[Transcribe] Sending audio - Type:', audioBlob.type, 'Size:', audioBlob.size, 'Extension:', extension);
-    formData.append('audio', audioBlob, `recording.${extension}`);
+    console.log(
+      "[Transcribe] Sending audio - Type:",
+      audioBlob.type,
+      "Size:",
+      audioBlob.size,
+      "Extension:",
+      extension,
+    );
+    formData.append("audio", audioBlob, `recording.${extension}`);
 
     if (currentPrompt?.title) {
-      formData.append('title', currentPrompt.title);
+      formData.append("title", currentPrompt.title);
     }
 
     const res = await fetch("/api/audio/transcribe", {
@@ -252,27 +278,31 @@ function RecordingContent() {
     if (!res.ok) {
       const errorData = await res.json().catch(() => null);
       if (res.status === 401) {
-        throw new Error('Authentication required. Please log in to continue.');
+        throw new Error("Authentication required. Please log in to continue.");
       }
-      throw new Error(errorData?.message || `Transcription failed: ${res.statusText}`);
+      throw new Error(
+        errorData?.message || `Transcription failed: ${res.statusText}`,
+      );
     }
 
     return res.json();
   };
 
   // Follow-up generation function
-  const generateFollowUp = async (transcription: string): Promise<{ questions: string[] }> => {
+  const generateFollowUp = async (
+    transcription: string,
+  ): Promise<{ questions: string[] }> => {
     const res = await fetch("/api/followups", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         transcript: transcription,
-        prior: usedPrompts
+        prior: usedPrompts,
       }),
     });
 
     if (!res.ok) {
-      throw new Error('Failed to generate follow-up');
+      throw new Error("Failed to generate follow-up");
     }
 
     return res.json();
@@ -299,8 +329,13 @@ function RecordingContent() {
     return (
       <div className="max-w-2xl mx-auto p-6 text-center">
         <h1 className="text-2xl font-bold mb-4">Please Log In</h1>
-        <p className="text-muted-foreground mb-6">You need to be logged in to record memories.</p>
-        <Button onClick={() => router.push('/auth/login')} data-testid="button-go-to-login">
+        <p className="text-muted-foreground mb-6">
+          You need to be logged in to record memories.
+        </p>
+        <Button
+          onClick={() => router.push("/auth/login")}
+          data-testid="button-go-to-login"
+        >
           Go to Login
         </Button>
       </div>
@@ -322,9 +357,13 @@ function RecordingContent() {
       audioDuration: audioDurationRef.current || navData.audioDuration,
       mainAudioBase64: audioRef.current ? undefined : navData.mainAudioBase64,
       mainAudioType: audioRef.current ? undefined : navData.mainAudioType,
-      wisdomClipBase64: wisdomClipRef.current ? undefined : navData.wisdomClipBase64,
-      wisdomClipType: wisdomClipRef.current ? undefined : navData.wisdomClipType,
-      timestamp: Date.now()
+      wisdomClipBase64: wisdomClipRef.current
+        ? undefined
+        : navData.wisdomClipBase64,
+      wisdomClipType: wisdomClipRef.current
+        ? undefined
+        : navData.wisdomClipType,
+      timestamp: Date.now(),
     });
 
     router.push(`/review?nav=${navId}`);
@@ -332,14 +371,18 @@ function RecordingContent() {
 
   // Silence Detection Handler - Disabled for now (real-time transcription removed)
   const handleSilenceDetected = async (recordingDuration: number) => {
-    console.log('[Recording] Silence detected at', recordingDuration, 'seconds (in-flow prompts disabled)');
+    console.log(
+      "[Recording] Silence detected at",
+      recordingDuration,
+      "seconds (in-flow prompts disabled)",
+    );
     // Real-time transcription and in-flow prompts disabled
     // Transcription will happen after recording completes
   };
 
   // Speech Detected Handler - Disabled (in-flow prompts removed)
   const handleSpeechDetected = () => {
-    console.log('[Recording] Speech detected');
+    console.log("[Recording] Speech detected");
     // In-flow prompt handling disabled
   };
 
@@ -385,21 +428,36 @@ function RecordingContent() {
     setIsRecording(false);
   };
 
-  const handleMainRecordingComplete = async (audioBlob: Blob, duration: number) => {
-    console.log('[Recording] Audio recording complete - Size:', audioBlob.size, 'Type:', audioBlob.type, 'Duration:', duration);
+  const handleMainRecordingComplete = async (
+    audioBlob: Blob,
+    duration: number,
+  ) => {
+    console.log(
+      "[Recording] Audio recording complete - Size:",
+      audioBlob.size,
+      "Type:",
+      audioBlob.type,
+      "Duration:",
+      duration,
+    );
 
     if (!audioBlob || audioBlob.size === 0) {
-      console.error('[Recording] ERROR: Received empty audio blob!');
+      console.error("[Recording] ERROR: Received empty audio blob!");
       toast({
         title: "Recording Failed",
-        description: "No audio was captured. Please check your microphone and try again.",
+        description:
+          "No audio was captured. Please check your microphone and try again.",
         variant: "destructive",
       });
       return;
     }
 
     if (duration < 1) {
-      console.error('[Recording] ERROR: Recording too short:', duration, 'seconds');
+      console.error(
+        "[Recording] ERROR: Recording too short:",
+        duration,
+        "seconds",
+      );
       toast({
         title: "Recording Too Short",
         description: "Please record for at least 1 second.",
@@ -416,7 +474,10 @@ function RecordingContent() {
         followUpTranscriptionRef.current = followUpResult.text;
 
         if (audioRef.current && followUpAudioRef.current) {
-          const combinedAudio = await combineAudioBlobs(audioRef.current, followUpAudioRef.current);
+          const combinedAudio = await combineAudioBlobs(
+            audioRef.current,
+            followUpAudioRef.current,
+          );
           audioRef.current = combinedAudio;
           audioDurationRef.current = audioDurationRef.current + duration;
 
@@ -427,7 +488,7 @@ function RecordingContent() {
           setAudioUrl(newUrl);
         }
       } catch (error) {
-        console.error('Error transcribing follow-up:', error);
+        console.error("Error transcribing follow-up:", error);
       }
 
       await navigateToReview();
@@ -452,20 +513,24 @@ function RecordingContent() {
         description: "Please log in to save your recording.",
         variant: "destructive",
       });
-      router.push('/auth/login');
+      router.push("/auth/login");
       return;
     }
 
-    setRecordingState('processing');
+    setRecordingState("processing");
     setIsTranscribing(true);
 
     try {
       if (!transcriptionRef.current) {
-        console.log('[Recording] Starting transcription of main audio...');
+        console.log("[Recording] Starting transcription of main audio...");
         const transcriptionResult = await transcribeAudio(audioRef.current);
         transcriptionRef.current = transcriptionResult.text;
         formattedContentRef.current = transcriptionResult.formattedContent;
-        console.log('[Recording] Transcription complete:', transcriptionResult.text?.length || 0, 'characters');
+        console.log(
+          "[Recording] Transcription complete:",
+          transcriptionResult.text?.length || 0,
+          "characters",
+        );
       }
 
       const followUpResult = await generateFollowUp(transcriptionRef.current);
@@ -473,18 +538,18 @@ function RecordingContent() {
       if (followUpResult?.questions && followUpResult.questions.length > 0) {
         const question = followUpResult.questions[0];
         const words = question.split(/\s+/);
-        const truncatedQuestion = words.slice(0, 15).join(' ');
+        const truncatedQuestion = words.slice(0, 15).join(" ");
         setPostRecordingFollowUp(truncatedQuestion);
-        setRecordingState('post-followup');
+        setRecordingState("post-followup");
       } else {
         await navigateToReview();
       }
     } catch (error) {
-      console.error('Save error:', error);
+      console.error("Save error:", error);
       toast({
         title: "Processing Error",
         description: "Could not process your recording. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
       await navigateToReview();
     } finally {
@@ -494,7 +559,7 @@ function RecordingContent() {
 
   const handleRecordFollowUpAnswer = () => {
     setIsAnsweringFollowUp(true);
-    setRecordingState('recording');
+    setRecordingState("recording");
     setHasRecording(false);
     setDisplayPrompt(postRecordingFollowUp);
 
@@ -508,20 +573,33 @@ function RecordingContent() {
     await navigateToReview();
   };
 
-  const handleWisdomClipComplete = async (audioBlob: Blob, duration: number) => {
-    console.log('[Recording] Wisdom clip complete - Size:', audioBlob.size, 'Type:', audioBlob.type, 'Duration:', duration);
+  const handleWisdomClipComplete = async (
+    audioBlob: Blob,
+    duration: number,
+  ) => {
+    console.log(
+      "[Recording] Wisdom clip complete - Size:",
+      audioBlob.size,
+      "Type:",
+      audioBlob.type,
+      "Duration:",
+      duration,
+    );
 
     if (!audioBlob || audioBlob.size === 0) {
-      console.error('[Recording] ERROR: Received empty wisdom clip audio blob!');
+      console.error(
+        "[Recording] ERROR: Received empty wisdom clip audio blob!",
+      );
       toast({
         title: "Wisdom Clip Failed",
-        description: "No audio was captured for the wisdom clip. Please check your microphone.",
+        description:
+          "No audio was captured for the wisdom clip. Please check your microphone.",
         variant: "destructive",
       });
-      audioBlob = new Blob([], { type: 'audio/webm' });
+      audioBlob = new Blob([], { type: "audio/webm" });
     }
     wisdomClipRef.current = audioBlob;
-    setRecordingState('complete');
+    setRecordingState("complete");
 
     try {
       let wisdomTranscript = "";
@@ -535,7 +613,10 @@ function RecordingContent() {
         : transcriptionRef.current;
 
       const mainAudioBase64 = await blobToBase64(audioRef.current!);
-      const wisdomClipBase64 = audioBlob && audioBlob.size > 0 ? await blobToBase64(audioBlob) : undefined;
+      const wisdomClipBase64 =
+        audioBlob && audioBlob.size > 0
+          ? await blobToBase64(audioBlob)
+          : undefined;
 
       const navId = navCache.generateId();
       const payload = {
@@ -543,24 +624,25 @@ function RecordingContent() {
         wisdomTranscription: wisdomTranscript,
         audioDuration: audioDurationRef.current,
         mainAudioBase64,
-        mainAudioType: audioRef.current?.type || 'audio/webm',
+        mainAudioType: audioRef.current?.type || "audio/webm",
         wisdomClipBase64,
-        wisdomClipType: audioBlob?.type || 'audio/webm',
+        wisdomClipType: audioBlob?.type || "audio/webm",
         prompt: currentPrompt,
         timestamp: Date.now(),
         isReRecording,
         storyId,
         title: navData?.title || currentPrompt.title,
-        formattedContent: formattedContentRef.current
+        formattedContent: formattedContentRef.current,
       };
 
       navCache.set(navId, payload);
-      const reviewUrl = returnToEdit && storyId
-        ? `/review?edit=${storyId}&nav=${navId}`
-        : `/review?nav=${navId}`;
+      const reviewUrl =
+        returnToEdit && storyId
+          ? `/review?edit=${storyId}&nav=${navId}`
+          : `/review?nav=${navId}`;
       router.push(reviewUrl);
     } catch (error) {
-      console.error('Wisdom clip processing error:', error);
+      console.error("Wisdom clip processing error:", error);
       const mainAudioBase64 = await blobToBase64(audioRef.current!);
       const navId = navCache.generateId();
       navCache.set(navId, {
@@ -569,16 +651,17 @@ function RecordingContent() {
         wisdomTranscription: "",
         audioDuration: audioDurationRef.current,
         mainAudioBase64,
-        mainAudioType: audioRef.current?.type || 'audio/webm',
+        mainAudioType: audioRef.current?.type || "audio/webm",
         prompt: currentPrompt,
         timestamp: Date.now(),
         isReRecording,
         storyId,
-        title: navData?.title || currentPrompt.title
+        title: navData?.title || currentPrompt.title,
       });
-      const reviewUrl = returnToEdit && storyId
-        ? `/review?edit=${storyId}&nav=${navId}`
-        : `/review?nav=${navId}`;
+      const reviewUrl =
+        returnToEdit && storyId
+          ? `/review?edit=${storyId}&nav=${navId}`
+          : `/review?nav=${navId}`;
       router.push(reviewUrl);
     }
   };
@@ -596,16 +679,17 @@ function RecordingContent() {
       wisdomTranscription: "",
       audioDuration: audioDurationRef.current,
       mainAudioBase64,
-      mainAudioType: audioRef.current?.type || 'audio/webm',
+      mainAudioType: audioRef.current?.type || "audio/webm",
       prompt: currentPrompt,
       timestamp: Date.now(),
       isReRecording,
       storyId,
-      title: navData?.title || currentPrompt.title
+      title: navData?.title || currentPrompt.title,
     });
-    const reviewUrl = returnToEdit && storyId
-      ? `/review?edit=${storyId}&nav=${navId}`
-      : `/review?nav=${navId}`;
+    const reviewUrl =
+      returnToEdit && storyId
+        ? `/review?edit=${storyId}&nav=${navId}`
+        : `/review?nav=${navId}`;
     router.push(reviewUrl);
   };
 
@@ -615,7 +699,7 @@ function RecordingContent() {
 
   const handleBackFromWisdom = () => {
     setShowWisdomClip(false);
-    setRecordingState('recording');
+    setRecordingState("recording");
     setIsAnsweringFollowUp(false);
   };
 
@@ -642,12 +726,12 @@ function RecordingContent() {
 
     const navId = navCache.generateId();
     navCache.set(navId, {
-      transcription: '',
+      transcription: "",
       formattedContent: null,
-      wisdomTranscription: '',
+      wisdomTranscription: "",
       audioDuration: 0,
       prompt: currentPrompt,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
     router.push(`/review?nav=${navId}`);
   };
@@ -679,7 +763,7 @@ function RecordingContent() {
   }, [audioUrl]);
 
   // Render different screens based on state
-  if (recordingState === 'wisdom' || showWisdomClip) {
+  if (recordingState === "wisdom" || showWisdomClip) {
     return (
       <div className="min-h-screen bg-background album-texture">
         <WisdomClipScreen
@@ -692,7 +776,7 @@ function RecordingContent() {
     );
   }
 
-  if (recordingState === 'post-followup' && postRecordingFollowUp) {
+  if (recordingState === "post-followup" && postRecordingFollowUp) {
     return (
       <div className="min-h-screen bg-background album-texture">
         <PostRecordingFollowUp
@@ -713,12 +797,18 @@ function RecordingContent() {
             variant="ghost"
             onClick={handleCancel}
             className="absolute top-6 left-6 p-3 rounded-full shadow-lg bg-background/90 border-2 border-muted-foreground/20 hover:bg-accent hover:border-accent transition-all"
-            data-testid={isReturningFromReview ? "button-back-to-review" : "button-back-to-timeline"}
+            data-testid={
+              isReturningFromReview
+                ? "button-back-to-review"
+                : "button-back-to-timeline"
+            }
           >
             <ArrowLeft className="w-6 h-6 text-foreground" />
           </Button>
 
-          <h1 className="text-3xl font-bold text-foreground mb-2">Tell Me About...</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Tell Me About...
+          </h1>
           <h2 className="text-2xl text-primary" data-testid="recording-prompt">
             {currentPrompt.title}
           </h2>
@@ -844,14 +934,18 @@ function RecordingContent() {
 
 export default function Recording() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background album-texture pb-20 md:pb-0 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Loading recording interface...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background album-texture pb-20 md:pb-0 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">
+              Loading recording interface...
+            </p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <RecordingContent />
     </Suspense>
   );

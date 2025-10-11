@@ -9,34 +9,34 @@
 
 export const MEASUREMENTS = {
   // Page dimensions (must match book.css: 5.5×8.5 at 96 DPI)
-  PAGE_HEIGHT: 816,      // 8.5in × 96 DPI
-  PAGE_WIDTH_DESKTOP: 528,  // 5.5in × 96 DPI (was 520, but CSS uses 528)
+  PAGE_HEIGHT: 816, // 8.5in × 96 DPI
+  PAGE_WIDTH_DESKTOP: 528, // 5.5in × 96 DPI (was 520, but CSS uses 528)
   PAGE_WIDTH_MOBILE: 380,
 
   // Page padding (matches book.css --margin)
   PAGE_PADDING_TOP: 58,
   PAGE_PADDING_BOTTOM: 58,
-  PAGE_PADDING_LEFT: 38,   // Reduced from 58 for more content breathing room
+  PAGE_PADDING_LEFT: 38, // Reduced from 58 for more content breathing room
   PAGE_PADDING_RIGHT: 38,
 
   // Content area height (816 - 58 - 58 = 700px)
   CONTENT_BOX_HEIGHT: 700,
 
   // Fixed elements (first page only) - INCREASED for safety margin
-  PHOTO_AREA: 260,          // Photo carousel with all margins and spacing
-  STORY_TITLE: 60,          // Title with all margins (memory-title has margin: 12px 0 6px)
-  STORY_DATE: 45,           // Date/age line with margins
-  AUDIO_PLAYER: 70,         // Audio player with margins (measured at ~70px)
+  PHOTO_AREA: 260, // Photo carousel with all margins and spacing
+  STORY_TITLE: 60, // Title with all margins (memory-title has margin: 12px 0 6px)
+  STORY_DATE: 45, // Date/age line with margins
+  AUDIO_PLAYER: 70, // Audio player with margins (measured at ~70px)
 
   // Text properties (must match book.css for accurate measurement)
   LINE_HEIGHT: 28,
   FONT_SIZE: 16,
-  FONT_FAMILY: 'Georgia, serif',
-  TEXT_ALIGN: 'left' as const,    // Left-aligned text
+  FONT_FAMILY: "Georgia, serif",
+  TEXT_ALIGN: "left" as const, // Left-aligned text
 
   // Lesson learned
   LESSON_HEADER: 40,
-  LESSON_TEXT_LINES: 3,     // Max ~3 lines (1 sentence typical)
+  LESSON_TEXT_LINES: 3, // Max ~3 lines (1 sentence typical)
 };
 
 // Calculated capacities
@@ -65,13 +65,13 @@ export const CAPACITIES = {
  * Single source of truth defined in app/book/book.css @layer book-screen
  */
 export function getPageContentHeightPx(): number {
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
+  if (typeof window === "undefined" || typeof document === "undefined") {
     return 700; // SSR fallback
   }
 
   try {
     const raw = getComputedStyle(document.documentElement)
-      .getPropertyValue('--book-content-height')
+      .getPropertyValue("--book-content-height")
       .trim();
     const n = parseFloat(raw);
     return Number.isFinite(n) && n > 0 ? n : 700;
@@ -84,7 +84,7 @@ export function getPageContentHeightPx(): number {
  * Get epsilon guard for sub-pixel rendering issues
  */
 function getEpsilonPx(): number {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return 2;
   }
   return Math.max(2, Math.ceil(window.devicePixelRatio));
@@ -110,14 +110,14 @@ export const PagePolicy = {
   minFreePx: 12,
 
   // Widow/orphan control (minimum lines)
-  widowLines: 2,    // Min lines at top of page when paragraph splits
-  orphanLines: 2,   // Min lines at bottom of page when paragraph splits
+  widowLines: 2, // Min lines at top of page when paragraph splits
+  orphanLines: 2, // Min lines at bottom of page when paragraph splits
 
   // Story layout rule: each new story MUST start at top of fresh page
   storyStartsOnFreshPage: true,
 
   // TOC rules
-  tocMinRowsAfterHeader: 1,  // Decade header must have at least 1 row after it
+  tocMinRowsAfterHeader: 1, // Decade header must have at least 1 row after it
 };
 
 // ============================================================================
@@ -125,24 +125,32 @@ export const PagePolicy = {
 // ============================================================================
 
 export type PageType =
-  | 'intro'
-  | 'table-of-contents'
-  | 'decade-marker'
-  | 'story-start'
-  | 'story-continuation'
-  | 'story-end'
-  | 'story-complete';
+  | "intro"
+  | "table-of-contents"
+  | "decade-marker"
+  | "story-start"
+  | "story-continuation"
+  | "story-end"
+  | "story-complete";
 
 // Block model for accurate pagination
-export type BlockType = 'heading' | 'paragraph' | 'image' | 'audioCard' | 'callout' | 'caption' | 'spacer' | 'lessonLearned';
+export type BlockType =
+  | "heading"
+  | "paragraph"
+  | "image"
+  | "audioCard"
+  | "callout"
+  | "caption"
+  | "spacer"
+  | "lessonLearned";
 
 export interface ContentBlock {
   type: BlockType;
-  content: string;  // Text or HTML
-  splittable: boolean;  // Can this block be split across pages?
-  noBreak: boolean;     // Never break this block
+  content: string; // Text or HTML
+  splittable: boolean; // Can this block be split across pages?
+  noBreak: boolean; // Never break this block
   id?: string;
-  measuredHeight?: number;  // Cached measurement
+  measuredHeight?: number; // Cached measurement
 }
 
 // Content metrics measured from live DOM
@@ -201,13 +209,13 @@ export interface BookPage {
   date?: string;
   age?: number;
   audioUrl?: string;
-  text?: string;  // Legacy: plain text (still used for backward compat)
-  blocks?: ContentBlock[];  // New: structured blocks for accurate pagination
+  text?: string; // Legacy: plain text (still used for backward compat)
+  blocks?: ContentBlock[]; // New: structured blocks for accurate pagination
   lessonLearned?: string;
 
   // Pagination flags
-  continued?: boolean;  // True if story continues on next page
-  continuesFrom?: string;  // Story ID/title being continued
+  continued?: boolean; // True if story continues on next page
+  continuesFrom?: string; // Story ID/title being continued
 
   // Metadata
   isLeftPage: boolean;
@@ -231,21 +239,23 @@ export interface TextExtraction {
  */
 export function measureJustifiedText(
   text: string,
-  containerWidth: number = MEASUREMENTS.PAGE_WIDTH_DESKTOP - MEASUREMENTS.PAGE_PADDING_LEFT - MEASUREMENTS.PAGE_PADDING_RIGHT
+  containerWidth: number = MEASUREMENTS.PAGE_WIDTH_DESKTOP -
+    MEASUREMENTS.PAGE_PADDING_LEFT -
+    MEASUREMENTS.PAGE_PADDING_RIGHT,
 ): number {
   if (!text || text.trim().length === 0) {
     return 0;
   }
 
   // Check if we're in a browser environment
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
+  if (typeof window === "undefined" || typeof document === "undefined") {
     // Fallback estimation for SSR
     const avgCharsPerLine = CAPACITIES.CHARS_PER_LINE;
     return Math.ceil(text.length / avgCharsPerLine);
   }
 
   // Create hidden measurement div
-  const measureDiv = document.createElement('div');
+  const measureDiv = document.createElement("div");
   measureDiv.style.cssText = `
     position: absolute;
     visibility: hidden;
@@ -279,16 +289,16 @@ export function measureJustifiedText(
  */
 export function measureMultipleTexts(
   texts: string[],
-  containerWidth: number = MEASUREMENTS.PAGE_WIDTH_DESKTOP
+  containerWidth: number = MEASUREMENTS.PAGE_WIDTH_DESKTOP,
 ): number[] {
   // Check if we're in a browser environment
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
+  if (typeof window === "undefined" || typeof document === "undefined") {
     // Fallback estimation for SSR
     const avgCharsPerLine = CAPACITIES.CHARS_PER_LINE;
-    return texts.map(text => Math.ceil(text.length / avgCharsPerLine));
+    return texts.map((text) => Math.ceil(text.length / avgCharsPerLine));
   }
 
-  const container = document.createElement('div');
+  const container = document.createElement("div");
   container.style.cssText = `
     position: absolute;
     visibility: hidden;
@@ -297,8 +307,8 @@ export function measureMultipleTexts(
   `;
   document.body.appendChild(container);
 
-  const results = texts.map(text => {
-    const div = document.createElement('div');
+  const results = texts.map((text) => {
+    const div = document.createElement("div");
     div.style.cssText = `
       width: ${containerWidth}px;
       font-family: ${MEASUREMENTS.FONT_FAMILY};
@@ -337,8 +347,8 @@ function getOrCreateMeasurer(): HTMLDivElement {
     return globalMeasurer;
   }
 
-  const measurer = document.createElement('div');
-  measurer.id = 'book-content-measurer';
+  const measurer = document.createElement("div");
+  measurer.id = "book-content-measurer";
   measurer.style.cssText = `
     position: absolute;
     visibility: hidden;
@@ -348,8 +358,8 @@ function getOrCreateMeasurer(): HTMLDivElement {
   `;
 
   // Match exact styles from .page-content
-  measurer.className = 'page-content book-text';
-  measurer.setAttribute('lang', 'en');
+  measurer.className = "page-content book-text";
+  measurer.setAttribute("lang", "en");
 
   document.body.appendChild(measurer);
   globalMeasurer = measurer;
@@ -368,19 +378,22 @@ export function getContentMetrics(): ContentMetrics {
   }
 
   // Check if we're in browser
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
+  if (typeof window === "undefined" || typeof document === "undefined") {
     // SSR fallback
     return {
-      contentWidthPx: MEASUREMENTS.PAGE_WIDTH_DESKTOP - MEASUREMENTS.PAGE_PADDING_LEFT - MEASUREMENTS.PAGE_PADDING_RIGHT,
+      contentWidthPx:
+        MEASUREMENTS.PAGE_WIDTH_DESKTOP -
+        MEASUREMENTS.PAGE_PADDING_LEFT -
+        MEASUREMENTS.PAGE_PADDING_RIGHT,
       contentHeightPx: PagePolicy.pageHeightPx,
       lineHeightPx: MEASUREMENTS.LINE_HEIGHT,
     };
   }
 
   // Try to find a live .page element
-  const livePage = document.querySelector('.page');
+  const livePage = document.querySelector(".page");
   if (livePage) {
-    const pageContent = livePage.querySelector('.page-content') || livePage;
+    const pageContent = livePage.querySelector(".page-content") || livePage;
     const rect = pageContent.getBoundingClientRect();
     const computed = window.getComputedStyle(pageContent);
 
@@ -395,7 +408,10 @@ export function getContentMetrics(): ContentMetrics {
 
   // Fallback to PagePolicy.pageHeightPx (reads from CSS var)
   globalMetrics = {
-    contentWidthPx: MEASUREMENTS.PAGE_WIDTH_DESKTOP - MEASUREMENTS.PAGE_PADDING_LEFT - MEASUREMENTS.PAGE_PADDING_RIGHT,
+    contentWidthPx:
+      MEASUREMENTS.PAGE_WIDTH_DESKTOP -
+      MEASUREMENTS.PAGE_PADDING_LEFT -
+      MEASUREMENTS.PAGE_PADDING_RIGHT,
     contentHeightPx: PagePolicy.pageHeightPx,
     lineHeightPx: MEASUREMENTS.LINE_HEIGHT,
   };
@@ -410,11 +426,11 @@ export function normalizeStoryToBlocks(story: Story): ContentBlock[] {
   const blocks: ContentBlock[] = [];
 
   // Split content by double newlines (paragraphs)
-  const paragraphs = story.content.split('\n\n').filter(p => p.trim());
+  const paragraphs = story.content.split("\n\n").filter((p) => p.trim());
 
   paragraphs.forEach((para, idx) => {
     blocks.push({
-      type: 'paragraph',
+      type: "paragraph",
       content: para.trim(),
       splittable: true,
       noBreak: false,
@@ -425,11 +441,11 @@ export function normalizeStoryToBlocks(story: Story): ContentBlock[] {
   // Add lesson learned if present
   if (story.lessonLearned) {
     blocks.push({
-      type: 'lessonLearned',
+      type: "lessonLearned",
       content: story.lessonLearned,
-      splittable: false,  // Keep lesson learned as one block
+      splittable: false, // Keep lesson learned as one block
       noBreak: true,
-      id: 'lesson',
+      id: "lesson",
     });
   }
 
@@ -439,7 +455,10 @@ export function normalizeStoryToBlocks(story: Story): ContentBlock[] {
 /**
  * Measure the height of a content block using true DOM measurement
  */
-export function measureBlockHeight(block: ContentBlock, metrics?: ContentMetrics): number {
+export function measureBlockHeight(
+  block: ContentBlock,
+  metrics?: ContentMetrics,
+): number {
   // Return cached if available
   if (block.measuredHeight !== undefined) {
     return block.measuredHeight;
@@ -452,32 +471,32 @@ export function measureBlockHeight(block: ContentBlock, metrics?: ContentMetrics
   measurer.style.width = `${m.contentWidthPx}px`;
 
   // Clear previous content
-  measurer.innerHTML = '';
+  measurer.innerHTML = "";
 
   // Create appropriate markup based on block type
   let element: HTMLElement;
 
   switch (block.type) {
-    case 'heading':
-      element = document.createElement('h2');
-      element.className = 'book-heading';
+    case "heading":
+      element = document.createElement("h2");
+      element.className = "book-heading";
       element.textContent = block.content;
       break;
 
-    case 'paragraph':
-      element = document.createElement('p');
-      element.className = 'mb-4 last:mb-0 leading-relaxed text-justify';
+    case "paragraph":
+      element = document.createElement("p");
+      element.className = "mb-4 last:mb-0 leading-relaxed text-justify";
       element.textContent = block.content;
       break;
 
-    case 'lessonLearned':
-      element = document.createElement('div');
-      element.className = 'book-callout';
+    case "lessonLearned":
+      element = document.createElement("div");
+      element.className = "book-callout";
       element.innerHTML = `<p>${block.content}</p>`;
       break;
 
     default:
-      element = document.createElement('div');
+      element = document.createElement("div");
       element.textContent = block.content;
   }
 
@@ -506,7 +525,7 @@ export function measureBlockHeight(block: ContentBlock, metrics?: ContentMetrics
 export function splitParagraphToFit(
   text: string,
   maxHeight: number,
-  metrics?: ContentMetrics
+  metrics?: ContentMetrics,
 ): { fitsText: string; remainderText: string } {
   const m = metrics || getContentMetrics();
   const measurer = getOrCreateMeasurer();
@@ -514,9 +533,9 @@ export function splitParagraphToFit(
 
   // Helper to measure text height
   const measureText = (str: string): number => {
-    measurer.innerHTML = '';
-    const p = document.createElement('p');
-    p.className = 'mb-4 last:mb-0 leading-relaxed text-justify';
+    measurer.innerHTML = "";
+    const p = document.createElement("p");
+    p.className = "mb-4 last:mb-0 leading-relaxed text-justify";
     p.textContent = str;
     measurer.appendChild(p);
 
@@ -527,13 +546,13 @@ export function splitParagraphToFit(
   // Check if entire text fits
   const fullHeight = measureText(text);
   if (fullHeight <= maxHeight) {
-    return { fitsText: text, remainderText: '' };
+    return { fitsText: text, remainderText: "" };
   }
 
   // Binary search for the split point
   let left = 0;
   let right = text.length;
-  let bestFit = '';
+  let bestFit = "";
 
   while (left < right) {
     const mid = Math.floor((left + right + 1) / 2);
@@ -550,12 +569,12 @@ export function splitParagraphToFit(
 
   // If nothing fits, return empty
   if (!bestFit) {
-    return { fitsText: '', remainderText: text };
+    return { fitsText: "", remainderText: text };
   }
 
   // Try to find a sentence boundary near the split point
   const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-  let accumulated = '';
+  let accumulated = "";
   let splitIndex = 0;
 
   for (const sentence of sentences) {
@@ -580,7 +599,7 @@ export function splitParagraphToFit(
   }
 
   // Fall back to word boundary
-  const lastSpace = bestFit.lastIndexOf(' ');
+  const lastSpace = bestFit.lastIndexOf(" ");
   if (lastSpace > bestFit.length * 0.5) {
     return {
       fitsText: bestFit.substring(0, lastSpace).trim(),
@@ -601,9 +620,30 @@ export function splitParagraphToFit(
 
 // Common abbreviations to ignore when finding sentence boundaries
 const ABBREVIATIONS = [
-  'Dr.', 'Mrs.', 'Mr.', 'Ms.', 'Prof.', 'Sr.', 'Jr.',
-  'Inc.', 'Ltd.', 'Co.', 'Corp.', 'vs.', 'etc.', 'i.e.', 'e.g.',
-  'Jan.', 'Feb.', 'Mar.', 'Apr.', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'
+  "Dr.",
+  "Mrs.",
+  "Mr.",
+  "Ms.",
+  "Prof.",
+  "Sr.",
+  "Jr.",
+  "Inc.",
+  "Ltd.",
+  "Co.",
+  "Corp.",
+  "vs.",
+  "etc.",
+  "i.e.",
+  "e.g.",
+  "Jan.",
+  "Feb.",
+  "Mar.",
+  "Apr.",
+  "Aug.",
+  "Sept.",
+  "Oct.",
+  "Nov.",
+  "Dec.",
 ];
 
 /**
@@ -613,15 +653,14 @@ export function extractLinesWithSentenceBoundary(
   text: string,
   startPos: number,
   targetLines: number,
-  containerWidth: number = MEASUREMENTS.PAGE_WIDTH_DESKTOP
+  containerWidth: number = MEASUREMENTS.PAGE_WIDTH_DESKTOP,
 ): TextExtraction {
-
   if (!text || startPos >= text.length) {
-    return { text: '', endPosition: startPos, lineCount: 0 };
+    return { text: "", endPosition: startPos, lineCount: 0 };
   }
 
   // Estimate character position for target lines
-  const targetEndPos = startPos + (targetLines * CAPACITIES.CHARS_PER_LINE);
+  const targetEndPos = startPos + targetLines * CAPACITIES.CHARS_PER_LINE;
 
   // Don't go past the end of the text
   if (targetEndPos >= text.length) {
@@ -629,7 +668,7 @@ export function extractLinesWithSentenceBoundary(
     return {
       text: extractedText,
       endPosition: text.length,
-      lineCount: measureJustifiedText(extractedText, containerWidth)
+      lineCount: measureJustifiedText(extractedText, containerWidth),
     };
   }
 
@@ -658,7 +697,7 @@ export function extractLinesWithSentenceBoundary(
   return {
     text: extractedText,
     endPosition: bestSplit,
-    lineCount: measureJustifiedText(extractedText, containerWidth)
+    lineCount: measureJustifiedText(extractedText, containerWidth),
   };
 }
 
@@ -667,12 +706,14 @@ export function extractLinesWithSentenceBoundary(
  */
 function isSentenceBoundary(text: string, position: number): boolean {
   // Check for period followed by space or end of text
-  if (text[position] !== '.') return false;
+  if (text[position] !== ".") return false;
 
   // Must be followed by space, newline, or end of text
-  if (position + 1 < text.length &&
-      text[position + 1] !== ' ' &&
-      text[position + 1] !== '\n') {
+  if (
+    position + 1 < text.length &&
+    text[position + 1] !== " " &&
+    text[position + 1] !== "\n"
+  ) {
     return false;
   }
 
@@ -682,13 +723,17 @@ function isSentenceBoundary(text: string, position: number): boolean {
   const lastWord = words[words.length - 1];
 
   for (const abbr of ABBREVIATIONS) {
-    if (lastWord + '.' === abbr) {
+    if (lastWord + "." === abbr) {
       return false; // It's an abbreviation, not a sentence end
     }
   }
 
   // Check for ellipsis (...)
-  if (position >= 2 && text[position - 1] === '.' && text[position - 2] === '.') {
+  if (
+    position >= 2 &&
+    text[position - 1] === "." &&
+    text[position - 2] === "."
+  ) {
     return false;
   }
 
@@ -701,14 +746,14 @@ function isSentenceBoundary(text: string, position: number): boolean {
 function findWordBoundary(text: string, targetPos: number): number {
   // Look backwards for a space
   for (let i = targetPos; i > targetPos - 50 && i >= 0; i--) {
-    if (text[i] === ' ' || text[i] === '\n') {
+    if (text[i] === " " || text[i] === "\n") {
       return i + 1;
     }
   }
 
   // Look forwards if necessary
   for (let i = targetPos; i < targetPos + 50 && i < text.length; i++) {
-    if (text[i] === ' ' || text[i] === '\n') {
+    if (text[i] === " " || text[i] === "\n") {
       return i;
     }
   }
@@ -727,9 +772,8 @@ function findWordBoundary(text: string, targetPos: number): number {
  */
 export function calculateBalancedSplit(
   totalLines: number,
-  lessonLines: number
+  lessonLines: number,
 ): number {
-
   // For very short stories, don't force balance
   if (totalLines <= 15) {
     return Math.min(totalLines, 10);
@@ -740,7 +784,7 @@ export function calculateBalancedSplit(
   const targetFirstPageLines = CAPACITIES.TARGET_FIRST_PAGE_LINES;
 
   // What would be on right page with default split?
-  const rightPageLines = (totalLines - targetFirstPageLines) + lessonLines;
+  const rightPageLines = totalLines - targetFirstPageLines + lessonLines;
   const leftVisualLines = photoVisualWeight + targetFirstPageLines;
 
   // If right would be >1.5x left, rebalance
@@ -768,7 +812,7 @@ export function calculateBalancedSplit(
  */
 export function paginateStory(
   story: Story,
-  startPageNumber: number
+  startPageNumber: number,
 ): BookPage[] {
   const metrics = getContentMetrics();
   const pages: BookPage[] = [];
@@ -777,7 +821,8 @@ export function paginateStory(
   let blocks = normalizeStoryToBlocks(story);
 
   // Calculate available height on first page (accounting for fixed elements)
-  const firstPageAvailableHeight = metrics.contentHeightPx -
+  const firstPageAvailableHeight =
+    metrics.contentHeightPx -
     MEASUREMENTS.PHOTO_AREA -
     MEASUREMENTS.STORY_TITLE -
     MEASUREMENTS.STORY_DATE -
@@ -806,10 +851,17 @@ export function paginateStory(
       i++;
     } else {
       // Block doesn't fit
-      if (block.splittable && usedHeight < availableHeight - PagePolicy.minFreePx - epsilon) {
+      if (
+        block.splittable &&
+        usedHeight < availableHeight - PagePolicy.minFreePx - epsilon
+      ) {
         // Try to split the paragraph
         const remainingHeight = availableHeight - usedHeight - epsilon;
-        const split = splitParagraphToFit(block.content, remainingHeight, metrics);
+        const split = splitParagraphToFit(
+          block.content,
+          remainingHeight,
+          metrics,
+        );
 
         if (split.fitsText) {
           // Add the part that fits
@@ -827,14 +879,16 @@ export function paginateStory(
 
           // Finish current page and continue (don't increment i)
           const pageBlocks = [...currentBlocks];
-          pages.push(createStoryPage(
-            isFirstPage ? 'story-start' : 'story-continuation',
-            currentPageNumber,
-            story,
-            pageBlocks,
-            isFirstPage,
-            true // continued
-          ));
+          pages.push(
+            createStoryPage(
+              isFirstPage ? "story-start" : "story-continuation",
+              currentPageNumber,
+              story,
+              pageBlocks,
+              isFirstPage,
+              true, // continued
+            ),
+          );
 
           // Setup for next page
           currentPageNumber++;
@@ -857,17 +911,22 @@ export function paginateStory(
   // Finish last page if it has content
   if (currentBlocks.length > 0) {
     const isComplete = pages.length === 0; // Single page story
-    const pageType = isComplete ? 'story-complete' :
-      (pages.length > 0 ? 'story-end' : 'story-start');
+    const pageType = isComplete
+      ? "story-complete"
+      : pages.length > 0
+        ? "story-end"
+        : "story-start";
 
-    pages.push(createStoryPage(
-      pageType,
-      currentPageNumber,
-      story,
-      currentBlocks,
-      isFirstPage,
-      false // not continued
-    ));
+    pages.push(
+      createStoryPage(
+        pageType,
+        currentPageNumber,
+        story,
+        currentBlocks,
+        isFirstPage,
+        false, // not continued
+      ),
+    );
   }
 
   return pages;
@@ -875,15 +934,17 @@ export function paginateStory(
   // Helper: Finish current page and prepare for next
   function finishPageAndStartNew() {
     if (currentBlocks.length > 0) {
-      const pageType = isFirstPage ? 'story-start' : 'story-continuation';
-      pages.push(createStoryPage(
-        pageType,
-        currentPageNumber,
-        story,
-        currentBlocks,
-        isFirstPage,
-        false
-      ));
+      const pageType = isFirstPage ? "story-start" : "story-continuation";
+      pages.push(
+        createStoryPage(
+          pageType,
+          currentPageNumber,
+          story,
+          currentBlocks,
+          isFirstPage,
+          false,
+        ),
+      );
     }
 
     currentPageNumber++;
@@ -903,17 +964,17 @@ function createStoryPage(
   story: Story,
   blocks: ContentBlock[],
   includeMetadata: boolean,
-  continued: boolean
+  continued: boolean,
 ): BookPage {
   // Convert blocks back to text for backward compatibility
   // Exclude lessonLearned blocks (they render in LessonCallout component)
   const text = blocks
-    .filter(b => b.type !== 'lessonLearned')
-    .map(b => b.content)
-    .join('\n\n');
+    .filter((b) => b.type !== "lessonLearned")
+    .map((b) => b.content)
+    .join("\n\n");
 
   // Extract lesson learned from blocks (if present)
-  const lessonBlock = blocks.find(b => b.type === 'lessonLearned');
+  const lessonBlock = blocks.find((b) => b.type === "lessonLearned");
   const lessonLearned = lessonBlock ? lessonBlock.content : undefined;
 
   return {
@@ -922,9 +983,9 @@ function createStoryPage(
     storyId: story.id,
     photos: includeMetadata ? story.photos : undefined,
     title: story.title, // ALWAYS include title on all pages
-    year: story.year,   // ALWAYS include year on all pages
+    year: story.year, // ALWAYS include year on all pages
     date: includeMetadata ? story.date : undefined,
-    age: story.age,     // ALWAYS include age on all pages
+    age: story.age, // ALWAYS include age on all pages
     audioUrl: includeMetadata ? story.audioUrl : undefined,
     text,
     blocks,
@@ -946,13 +1007,13 @@ function createStoryPage(
  */
 function paginateTableOfContents(
   tocEntries: TableOfContentsEntry[],
-  startPageNumber: number
+  startPageNumber: number,
 ): BookPage[] {
   // Estimate heights for TOC elements - INCREASED to match actual rendering
-  const DECADE_HEADER_HEIGHT = 70;  // Decade title with border and spacing
-  const STORY_ROW_HEIGHT = 45;      // Each story row with padding
-  const TOC_TITLE_HEIGHT = 80;      // "Table of Contents" heading with margins
-  const TOC_PADDING = 60;           // Top/bottom padding
+  const DECADE_HEADER_HEIGHT = 70; // Decade title with border and spacing
+  const STORY_ROW_HEIGHT = 45; // Each story row with padding
+  const TOC_TITLE_HEIGHT = 80; // "Table of Contents" heading with margins
+  const TOC_PADDING = 60; // Top/bottom padding
 
   const availableHeight = 620; // Increased from 500 to use more page space
 
@@ -964,17 +1025,21 @@ function paginateTableOfContents(
   for (let i = 0; i < tocEntries.length; i++) {
     const entry = tocEntries[i];
     const decadeHeight = DECADE_HEADER_HEIGHT;
-    const minRowsHeight = STORY_ROW_HEIGHT * Math.max(1, PagePolicy.tocMinRowsAfterHeader);
+    const minRowsHeight =
+      STORY_ROW_HEIGHT * Math.max(1, PagePolicy.tocMinRowsAfterHeader);
     const totalEntriesHeight = entry.stories.length * STORY_ROW_HEIGHT;
     const fullGroupHeight = decadeHeight + totalEntriesHeight;
 
     // Check if the header + minimum rows fits on current page
     const headerPlusMinRows = decadeHeight + minRowsHeight;
 
-    if (currentHeight + headerPlusMinRows > availableHeight && currentPageEntries.length > 0) {
+    if (
+      currentHeight + headerPlusMinRows > availableHeight &&
+      currentPageEntries.length > 0
+    ) {
       // Start a new page
       pages.push({
-        type: 'table-of-contents',
+        type: "table-of-contents",
         pageNumber: currentPageNumber,
         tocEntries: currentPageEntries,
         isLeftPage: currentPageNumber % 2 === 0,
@@ -994,14 +1059,18 @@ function paginateTableOfContents(
     } else {
       // Need to split stories across pages
       // But keep header with at least minRows stories
-      const storiesPerPage: Array<{decade: string; decadeTitle: string; stories: Array<{title: string; year: string; pageNumber: number}>}> = [];
+      const storiesPerPage: Array<{
+        decade: string;
+        decadeTitle: string;
+        stories: Array<{ title: string; year: string; pageNumber: number }>;
+      }> = [];
       let remainingStories = [...entry.stories];
 
       // First chunk: header + as many stories as fit
       const firstPageAvailable = availableHeight - currentHeight - decadeHeight;
       const firstPageStoriesCount = Math.max(
         PagePolicy.tocMinRowsAfterHeader,
-        Math.floor(firstPageAvailable / STORY_ROW_HEIGHT)
+        Math.floor(firstPageAvailable / STORY_ROW_HEIGHT),
       );
 
       if (firstPageStoriesCount >= remainingStories.length) {
@@ -1019,7 +1088,7 @@ function paginateTableOfContents(
 
         // Finish current page
         pages.push({
-          type: 'table-of-contents',
+          type: "table-of-contents",
           pageNumber: currentPageNumber,
           tocEntries: currentPageEntries,
           isLeftPage: currentPageNumber % 2 === 0,
@@ -1033,12 +1102,14 @@ function paginateTableOfContents(
 
         // Continue stories on subsequent pages (no header repeat)
         while (remainingStories.length > 0) {
-          const pageStoriesCount = Math.floor(availableHeight / STORY_ROW_HEIGHT);
+          const pageStoriesCount = Math.floor(
+            availableHeight / STORY_ROW_HEIGHT,
+          );
           const chunk = remainingStories.slice(0, pageStoriesCount);
 
           currentPageEntries.push({
             decade: entry.decade,
-            decadeTitle: '', // No header on continuation
+            decadeTitle: "", // No header on continuation
             stories: chunk,
           });
 
@@ -1049,7 +1120,7 @@ function paginateTableOfContents(
           } else {
             // More chunks needed
             pages.push({
-              type: 'table-of-contents',
+              type: "table-of-contents",
               pageNumber: currentPageNumber,
               tocEntries: currentPageEntries,
               isLeftPage: currentPageNumber % 2 === 0,
@@ -1069,7 +1140,7 @@ function paginateTableOfContents(
   // Add last page if it has content
   if (currentPageEntries.length > 0) {
     pages.push({
-      type: 'table-of-contents',
+      type: "table-of-contents",
       pageNumber: startPageNumber + pages.length,
       tocEntries: currentPageEntries,
       isLeftPage: (startPageNumber + pages.length) % 2 === 0,
@@ -1080,7 +1151,7 @@ function paginateTableOfContents(
   // If no pages were created, return at least one empty TOC page
   if (pages.length === 0) {
     pages.push({
-      type: 'table-of-contents',
+      type: "table-of-contents",
       pageNumber: startPageNumber,
       tocEntries: [],
       isLeftPage: startPageNumber % 2 === 0,
@@ -1132,7 +1203,7 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
     const decadeMarkerPage = tempPageNumber;
 
     tempPages.push({
-      type: 'decade-marker',
+      type: "decade-marker",
       pageNumber: tempPageNumber,
       decade: group.decade,
       decadeTitle: group.title,
@@ -1152,8 +1223,8 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
       if (PagePolicy.storyStartsOnFreshPage && tempPages.length > 0) {
         const lastPage = tempPages[tempPages.length - 1];
         if (
-          lastPage.type === 'story-end' ||
-          lastPage.type === 'story-continuation'
+          lastPage.type === "story-end" ||
+          lastPage.type === "story-continuation"
         ) {
           // Previous story ended mid-page, advance to next page for fresh start
           tempPageNumber++;
@@ -1178,7 +1249,7 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
 
   // Add Intro page as page 1 (right page)
   allPages.push({
-    type: 'intro',
+    type: "intro",
     pageNumber: 1,
     isLeftPage: false,
     isRightPage: true,
@@ -1195,7 +1266,7 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
 
   if (pageNumberOffset > 0) {
     // Shift all story/decade pages forward
-    tempPages.forEach(page => {
+    tempPages.forEach((page) => {
       page.pageNumber += pageNumberOffset;
     });
   }
@@ -1213,7 +1284,9 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
 /**
  * Get page spreads for desktop view (pairs of pages)
  */
-export function getPageSpreads(pages: BookPage[]): [BookPage, BookPage | null][] {
+export function getPageSpreads(
+  pages: BookPage[],
+): [BookPage, BookPage | null][] {
   const spreads: [BookPage, BookPage | null][] = [];
 
   for (let i = 0; i < pages.length; i += 2) {
@@ -1229,16 +1302,19 @@ export function getPageSpreads(pages: BookPage[]): [BookPage, BookPage | null][]
  * Find which pages contain a specific story
  */
 export function findStoryPages(pages: BookPage[], storyId: string): BookPage[] {
-  return pages.filter(page => page.storyId === storyId);
+  return pages.filter((page) => page.storyId === storyId);
 }
 
 /**
  * Get page number range for a story
  */
-export function getStoryPageRange(pages: BookPage[], storyId: string): [number, number] | null {
+export function getStoryPageRange(
+  pages: BookPage[],
+  storyId: string,
+): [number, number] | null {
   const storyPages = findStoryPages(pages, storyId);
   if (storyPages.length === 0) return null;
 
-  const pageNumbers = storyPages.map(p => p.pageNumber);
+  const pageNumbers = storyPages.map((p) => p.pageNumber);
   return [Math.min(...pageNumbers), Math.max(...pageNumbers)];
 }

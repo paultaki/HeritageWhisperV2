@@ -1,11 +1,19 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import Page from './Page';
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import Page from "./Page";
 
 // Content types that can be paginated
 export type ContentBlock = {
-  type: 'text' | 'heading' | 'image' | 'audio' | 'callout' | 'toc-item' | 'chapter' | 'page-break';
+  type:
+    | "text"
+    | "heading"
+    | "image"
+    | "audio"
+    | "callout"
+    | "toc-item"
+    | "chapter"
+    | "page-break";
   content: string | React.ReactNode;
   noBreak?: boolean; // Don't split this block across pages
   pageBreakBefore?: boolean; // Force a new page before this block
@@ -33,30 +41,30 @@ export default function AutoPaginator({
   blocks,
   pageHeader,
   pageFooter,
-  className = '',
+  className = "",
 }: AutoPaginatorProps) {
   const [pages, setPages] = useState<ContentBlock[][]>([]);
 
   // Estimate height for a block
   const estimateBlockHeight = useCallback((block: ContentBlock): number => {
     switch (block.type) {
-      case 'heading':
+      case "heading":
         return 40; // ~40px for heading
-      case 'text':
+      case "text":
         // Estimate based on text length
-        if (typeof block.content === 'string') {
+        if (typeof block.content === "string") {
           const lines = Math.ceil(block.content.length / 80); // ~80 chars per line
           return lines * 20 + 12; // ~20px per line + 12px margin
         }
         return 60; // Default text height
-      case 'image':
+      case "image":
         // 16:10 aspect ratio at full content width (~412px) = ~257px height + margins
         return 280;
-      case 'audio':
+      case "audio":
         return 100; // 80px + margins
-      case 'callout':
+      case "callout":
         return 140; // 120px + margins
-      case 'toc-item':
+      case "toc-item":
         return 40; // ~40px per TOC item
       default:
         return 40;
@@ -154,22 +162,22 @@ export default function AutoPaginator({
 }
 
 // Helper: Get CSS class for block type
-function getBlockClassName(type: ContentBlock['type']): string {
+function getBlockClassName(type: ContentBlock["type"]): string {
   switch (type) {
-    case 'heading':
-      return 'book-heading';
-    case 'text':
-      return 'book-text';
-    case 'image':
-      return 'book-image no-break';
-    case 'audio':
-      return 'book-audio-player no-break';
-    case 'callout':
-      return 'book-callout no-break';
-    case 'toc-item':
-      return 'toc-item';
+    case "heading":
+      return "book-heading";
+    case "text":
+      return "book-text";
+    case "image":
+      return "book-image no-break";
+    case "audio":
+      return "book-audio-player no-break";
+    case "callout":
+      return "book-callout no-break";
+    case "toc-item":
+      return "toc-item";
     default:
-      return '';
+      return "";
   }
 }
 
@@ -177,15 +185,15 @@ function getBlockClassName(type: ContentBlock['type']): string {
 function BlockRenderer({ block }: { block: ContentBlock }) {
   const className = getBlockClassName(block.type);
 
-  if (block.type === 'heading') {
+  if (block.type === "heading") {
     return <h2 className={className}>{block.content}</h2>;
   }
 
-  if (block.type === 'text') {
+  if (block.type === "text") {
     return <p className={className}>{block.content}</p>;
   }
 
-  if (block.type === 'toc-item') {
+  if (block.type === "toc-item") {
     return <div className={className}>{block.content}</div>;
   }
 

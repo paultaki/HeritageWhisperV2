@@ -18,7 +18,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 // DELETE /api/family/members/[id] - Remove a family member
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     // Get the Authorization header
@@ -28,7 +28,7 @@ export async function DELETE(
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -41,7 +41,7 @@ export async function DELETE(
     if (authError || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -53,27 +53,26 @@ export async function DELETE(
     const deletedMembers = await db
       .delete(familyMembers)
       .where(
-        and(
-          eq(familyMembers.id, memberId),
-          eq(familyMembers.userId, user.id)
-        )
+        and(eq(familyMembers.id, memberId), eq(familyMembers.userId, user.id)),
       )
       .returning();
 
     if (deletedMembers.length === 0) {
       return NextResponse.json(
         { error: "Family member not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     return NextResponse.json({ success: true });
-
   } catch (error) {
     logger.error("Family member removal error:", error);
     return NextResponse.json(
-      { error: "Failed to remove family member", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to remove family member",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

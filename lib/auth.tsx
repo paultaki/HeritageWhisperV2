@@ -12,7 +12,12 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, birthYear: number) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    name: string,
+    birthYear: number,
+  ) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -38,7 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       // Refetch user data when auth state changes
       if (session) {
@@ -53,29 +60,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [queryClient]);
 
   const loginMutation = useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+    mutationFn: async ({
+      email,
+      password,
+    }: {
+      email: string;
+      password: string;
+    }) => {
       // Authenticate with backend - it will return JWT tokens
-      const res = await apiRequest("POST", "/api/auth/login", { email, password });
+      const res = await apiRequest("POST", "/api/auth/login", {
+        email,
+        password,
+      });
       const data = await res.json();
 
       // Backend now returns real Supabase session for all users
       if (data.session) {
-        console.log('[Auth] Backend returned Supabase session');
+        console.log("[Auth] Backend returned Supabase session");
       }
 
       return data;
     },
     onSuccess: async (data) => {
       if (data.session) {
-        console.log('[Auth] Successfully authenticated with Supabase');
+        console.log("[Auth] Successfully authenticated with Supabase");
         // Set the Supabase session - this works now because it's a real Supabase session
         await supabase.auth.setSession({
           access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token
+          refresh_token: data.session.refresh_token,
         });
         setSession(data.session);
       } else {
-        console.warn('[Auth] No session returned from login');
+        console.warn("[Auth] No session returned from login");
       }
 
       // Set the user data immediately (no need to invalidate, we're setting it directly)
@@ -83,20 +99,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Poll for session availability before navigating
       // This ensures Supabase storage has been updated
-      console.log('[Auth] Waiting for session to be available in storage...');
+      console.log("[Auth] Waiting for session to be available in storage...");
       let sessionReady = false;
       for (let attempt = 0; attempt < 20; attempt++) {
-        const { data: { session: checkSession } } = await supabase.auth.getSession();
+        const {
+          data: { session: checkSession },
+        } = await supabase.auth.getSession();
         if (checkSession?.access_token) {
-          console.log(`[Auth] Session confirmed available after ${attempt * 50}ms`);
+          console.log(
+            `[Auth] Session confirmed available after ${attempt * 50}ms`,
+          );
           sessionReady = true;
           break;
         }
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
       if (!sessionReady) {
-        console.error('[Auth] Session not available after 1000ms, proceeding anyway');
+        console.error(
+          "[Auth] Session not available after 1000ms, proceeding anyway",
+        );
       }
 
       // Now navigate to timeline - session should be available
@@ -105,14 +127,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   const registerMutation = useMutation({
-    mutationFn: async ({ email, password, name, birthYear }: { email: string; password: string; name: string; birthYear: number }) => {
+    mutationFn: async ({
+      email,
+      password,
+      name,
+      birthYear,
+    }: {
+      email: string;
+      password: string;
+      name: string;
+      birthYear: number;
+    }) => {
       // Register with backend - it will return JWT tokens
-      const res = await apiRequest("POST", "/api/auth/register", { email, password, name, birthYear });
+      const res = await apiRequest("POST", "/api/auth/register", {
+        email,
+        password,
+        name,
+        birthYear,
+      });
       const data = await res.json();
 
       // Backend returns real Supabase session for new users
       if (data.session) {
-        console.log('[Auth] Backend returned Supabase session for new user');
+        console.log("[Auth] Backend returned Supabase session for new user");
       }
 
       return data;
@@ -120,25 +157,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     onSuccess: async (data) => {
       // Check if email confirmation is required
       if (data.requiresEmailConfirmation) {
-        console.log('[Auth] Email confirmation required');
+        console.log("[Auth] Email confirmation required");
         // Store user data for later use
         queryClient.setQueryData(["/api/auth/pending-confirmation"], data);
         // Redirect to a page that shows "check your email" message with email param
-        const email = data.user?.email || '';
+        const email = data.user?.email || "";
         router.push(`/auth/check-email?email=${encodeURIComponent(email)}`);
         return;
       }
 
       if (data.session) {
-        console.log('[Auth] Successfully registered with Supabase');
+        console.log("[Auth] Successfully registered with Supabase");
         // Set the Supabase session - this works now because it's a real Supabase session
         await supabase.auth.setSession({
           access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token
+          refresh_token: data.session.refresh_token,
         });
         setSession(data.session);
       } else {
-        console.warn('[Auth] No session returned from registration');
+        console.warn("[Auth] No session returned from registration");
       }
 
       // Set the user data immediately (no need to invalidate, we're setting it directly)
@@ -146,20 +183,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Poll for session availability before navigating
       // This ensures Supabase storage has been updated
-      console.log('[Auth] Waiting for session to be available in storage...');
+      console.log("[Auth] Waiting for session to be available in storage...");
       let sessionReady = false;
       for (let attempt = 0; attempt < 20; attempt++) {
-        const { data: { session: checkSession } } = await supabase.auth.getSession();
+        const {
+          data: { session: checkSession },
+        } = await supabase.auth.getSession();
         if (checkSession?.access_token) {
-          console.log(`[Auth] Session confirmed available after ${attempt * 50}ms`);
+          console.log(
+            `[Auth] Session confirmed available after ${attempt * 50}ms`,
+          );
           sessionReady = true;
           break;
         }
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
       if (!sessionReady) {
-        console.error('[Auth] Session not available after 1000ms, proceeding anyway');
+        console.error(
+          "[Auth] Session not available after 1000ms, proceeding anyway",
+        );
       }
 
       // Now navigate to timeline - session should be available
@@ -188,7 +231,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await loginMutation.mutateAsync({ email, password });
   };
 
-  const register = async (email: string, password: string, name: string, birthYear: number) => {
+  const register = async (
+    email: string,
+    password: string,
+    name: string,
+    birthYear: number,
+  ) => {
     await registerMutation.mutateAsync({ email, password, name, birthYear });
   };
 

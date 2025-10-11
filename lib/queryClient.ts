@@ -11,7 +11,7 @@ async function throwIfResNotOk(res: Response) {
         json = JSON.parse(text);
       } catch {
         // If JSON parsing fails, use the text as the error message
-        throw new Error(text || res.statusText || 'Request failed');
+        throw new Error(text || res.statusText || "Request failed");
       }
 
       // If the API returns an error object with details, use that
@@ -25,7 +25,7 @@ async function throwIfResNotOk(res: Response) {
         throw e;
       }
       // Otherwise create a generic error
-      throw new Error(res.statusText || 'Request failed');
+      throw new Error(res.statusText || "Request failed");
     }
   }
 }
@@ -39,16 +39,21 @@ export async function apiRequest(
   const isFormData = data instanceof FormData;
 
   // Get the Supabase session token with retries for race condition
-  let { data: { session }, error } = await supabase.auth.getSession();
+  let {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
 
   // If no session, retry multiple times (handles race condition after login)
-  if (!session && !url.includes('/api/auth/')) {
+  if (!session && !url.includes("/api/auth/")) {
     for (let attempt = 0; attempt < 5; attempt++) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       const retryResult = await supabase.auth.getSession();
       if (retryResult.data?.session) {
         session = retryResult.data.session;
-        console.log(`[apiRequest] Session found after ${(attempt + 1) * 100}ms retry`);
+        console.log(
+          `[apiRequest] Session found after ${(attempt + 1) * 100}ms retry`,
+        );
         break;
       }
     }
@@ -58,11 +63,14 @@ export async function apiRequest(
   if (!session || error) {
     // Try to refresh the session directly
     try {
-      const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
+      const {
+        data: { session: refreshedSession },
+        error: refreshError,
+      } = await supabase.auth.refreshSession();
 
       if (refreshedSession) {
         session = refreshedSession;
-      } else if (refreshError?.message?.includes('refresh_token_not_found')) {
+      } else if (refreshError?.message?.includes("refresh_token_not_found")) {
         // Try one more time to get session from storage
         const storageCheck = await supabase.auth.getSession();
         if (storageCheck.data?.session) {
@@ -80,8 +88,8 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${session.access_token}`;
   } else {
     // Don't proceed with auth-required requests
-    if (!url.includes('/api/share/') && !url.includes('/api/auth/')) {
-      throw new Error('Authentication required. Please sign in again.');
+    if (!url.includes("/api/share/") && !url.includes("/api/auth/")) {
+      throw new Error("Authentication required. Please sign in again.");
     }
   }
 
@@ -94,20 +102,22 @@ export async function apiRequest(
   const res = await fetch(getApiUrl(url), {
     method,
     headers,
-    body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
+    body: isFormData ? data : data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
 
   // Special handling for 401 errors
   if (res.status === 401) {
     // Try to refresh one more time
-    const { data: { session: lastTry } } = await supabase.auth.refreshSession();
+    const {
+      data: { session: lastTry },
+    } = await supabase.auth.refreshSession();
     if (lastTry) {
       headers["Authorization"] = `Bearer ${lastTry.access_token}`;
       const retryRes = await fetch(getApiUrl(url), {
         method,
         headers,
-        body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
+        body: isFormData ? data : data ? JSON.stringify(data) : undefined,
         credentials: "include",
       });
       await throwIfResNotOk(retryRes);
@@ -126,17 +136,22 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     // Get the Supabase session token with retries for race condition
-    let { data: { session }, error } = await supabase.auth.getSession();
+    let {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
 
     // If no session, retry multiple times (handles race condition after login)
     const url = queryKey.join("/") as string;
-    if (!session && !url.includes('/api/auth/')) {
+    if (!session && !url.includes("/api/auth/")) {
       for (let attempt = 0; attempt < 5; attempt++) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         const retryResult = await supabase.auth.getSession();
         if (retryResult.data?.session) {
           session = retryResult.data.session;
-          console.log(`[getQueryFn] Session found after ${(attempt + 1) * 100}ms retry`);
+          console.log(
+            `[getQueryFn] Session found after ${(attempt + 1) * 100}ms retry`,
+          );
           break;
         }
       }
@@ -144,7 +159,9 @@ export const getQueryFn: <T>(options: {
 
     // If still no session or error, try to refresh the session
     if (!session || error) {
-      const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
+      const {
+        data: { session: refreshedSession },
+      } = await supabase.auth.refreshSession();
       if (refreshedSession) {
         session = refreshedSession;
       }

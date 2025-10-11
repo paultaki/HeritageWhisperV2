@@ -6,7 +6,10 @@ type Entry = { id: string; label: string; count: number };
 
 export function useDecadeSync(entries: Entry[]) {
   const [activeId, setActiveId] = useState(entries[0]?.id);
-  const mapping = useMemo(() => new Map(entries.map(e => [e.id, e])), [entries]);
+  const mapping = useMemo(
+    () => new Map(entries.map((e) => [e.id, e])),
+    [entries],
+  );
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
@@ -24,7 +27,7 @@ export function useDecadeSync(entries: Entry[]) {
     }, options);
     observerRef.current = obs;
 
-    entries.forEach(e => {
+    entries.forEach((e) => {
       const n = document.getElementById(e.id);
       if (n) obs.observe(n);
     });
@@ -35,8 +38,13 @@ export function useDecadeSync(entries: Entry[]) {
   const scrollToId = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "start" });
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    el.scrollIntoView({
+      behavior: prefersReduced ? "auto" : "smooth",
+      block: "start",
+    });
   };
 
   return { activeId, scrollToId, mapping };

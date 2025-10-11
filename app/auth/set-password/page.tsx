@@ -5,10 +5,23 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, ArrowLeft, Lock, CheckCircle, Eye, EyeOff } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Lock,
+  CheckCircle,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 export default function SetPassword() {
   const [password, setPassword] = useState("");
@@ -130,8 +143,9 @@ export default function SetPassword() {
                 <CardTitle>Set Demo Password</CardTitle>
               </div>
               <CardDescription>
-                Set a password for your account to allow email/password login in addition to Google OAuth.
-                Perfect for sharing demo access without sharing Google credentials.
+                Set a password for your account to allow email/password login in
+                addition to Google OAuth. Perfect for sharing demo access
+                without sharing Google credentials.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -139,13 +153,18 @@ export default function SetPassword() {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2 text-green-600">
                     <CheckCircle className="w-6 h-6" />
-                    <span className="font-medium">Password set successfully!</span>
+                    <span className="font-medium">
+                      Password set successfully!
+                    </span>
                   </div>
 
                   <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-medium mb-2">You can now login with:</h4>
+                    <h4 className="font-medium mb-2">
+                      You can now login with:
+                    </h4>
                     <p className="text-sm text-muted-foreground">
-                      Email: {user.email}<br />
+                      Email: {user.email}
+                      <br />
                       Password: {password}
                     </p>
                   </div>
@@ -158,8 +177,9 @@ export default function SetPassword() {
                           For Demo Access:
                         </h4>
                         <p className="text-sm text-yellow-700 mt-1">
-                          Share these credentials with people who need demo access.
-                          They'll see the same account and stories as when you login with Google.
+                          Share these credentials with people who need demo
+                          access. They'll see the same account and stories as
+                          when you login with Google.
                         </p>
                       </div>
                     </div>
@@ -225,7 +245,9 @@ export default function SetPassword() {
                       />
                       <button
                         type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
                       >
                         {showConfirmPassword ? (
@@ -237,11 +259,7 @@ export default function SetPassword() {
                     </div>
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isLoading}
-                  >
+                  <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Setting Password..." : "Set Password"}
                   </Button>
 

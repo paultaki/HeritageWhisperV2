@@ -16,7 +16,7 @@ type Props = {
 export default function MemoryToolbar(p: Props) {
   const handleChipClick = (chipName: string) => {
     // Toggle: if already active, deactivate it; otherwise activate it
-    const newMode = p.filterMode === chipName ? 'all' : chipName;
+    const newMode = p.filterMode === chipName ? "all" : chipName;
     if (p.setFilterMode) {
       p.setFilterMode(newMode);
     }
@@ -86,7 +86,9 @@ export default function MemoryToolbar(p: Props) {
             onChange={(e) => p.setSort(e.target.value)}
           >
             <option value="year-newest">By Year: Newest → Oldest</option>
-            <option value="year-oldest">By Year: Oldest → Newest (Timeline)</option>
+            <option value="year-oldest">
+              By Year: Oldest → Newest (Timeline)
+            </option>
             <option value="added-newest">Recently Added</option>
             <option value="added-oldest">First Added</option>
             <option value="title">Title A-Z</option>

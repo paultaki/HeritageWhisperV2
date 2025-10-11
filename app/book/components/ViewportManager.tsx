@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 /**
  * ViewportManager - Intelligent viewport detection with scale calculation
@@ -15,7 +15,7 @@ import { useState, useEffect } from 'react';
  * - Below that: Single page @ 1.0 scale, centered
  */
 
-export type ViewMode = 'single' | 'spread';
+export type ViewMode = "single" | "spread";
 
 export interface ViewportConfig {
   mode: ViewMode;
@@ -25,14 +25,14 @@ export interface ViewportConfig {
 }
 
 // Page geometry tokens (from book.css)
-export const PAGE_WIDTH = 528;   // px (5.5in × 96 DPI)
-export const SPREAD_GAP = 30;    // px
+export const PAGE_WIDTH = 528; // px (5.5in × 96 DPI)
+export const SPREAD_GAP = 30; // px
 export const SPREAD_PADDING = 28; // px padding on each side of .book-spread (cream layer)
 export const CHROME_PADDING = 220; // px (left sidebar 112px + arrows/margins + breathing room)
 
 // Screen typography
 const SCREEN_BODY_SIZE = 20; // px base font size for screen
-const MIN_BODY_SIZE = 18;    // px minimum readable size
+const MIN_BODY_SIZE = 18; // px minimum readable size
 
 /**
  * Calculate viewport width needed for a given scale
@@ -56,10 +56,10 @@ function calculateViewportConfig(viewportWidth: number): ViewportConfig {
   // Try spread at 1.0 scale
   if (viewportWidth >= spreadWidthNeeded(1.0)) {
     return {
-      mode: 'spread',
+      mode: "spread",
       scale: 1.0,
       bodyFontSize: SCREEN_BODY_SIZE,
-      scaledWidth: (PAGE_WIDTH * 2 + SPREAD_GAP) * 1.0 + (SPREAD_PADDING * 2),
+      scaledWidth: (PAGE_WIDTH * 2 + SPREAD_GAP) * 1.0 + SPREAD_PADDING * 2,
     };
   }
 
@@ -70,19 +70,20 @@ function calculateViewportConfig(viewportWidth: number): ViewportConfig {
     bodyFontAt(scaleAt95) >= MIN_BODY_SIZE
   ) {
     return {
-      mode: 'spread',
+      mode: "spread",
       scale: scaleAt95,
       bodyFontSize: bodyFontAt(scaleAt95),
-      scaledWidth: (PAGE_WIDTH * 2 + SPREAD_GAP) * scaleAt95 + (SPREAD_PADDING * 2),
+      scaledWidth:
+        (PAGE_WIDTH * 2 + SPREAD_GAP) * scaleAt95 + SPREAD_PADDING * 2,
     };
   }
 
   // Default: single page at 1.0 scale, centered
   return {
-    mode: 'single',
+    mode: "single",
     scale: 1.0,
     bodyFontSize: SCREEN_BODY_SIZE,
-    scaledWidth: PAGE_WIDTH * 1.0 + (SPREAD_PADDING * 2),
+    scaledWidth: PAGE_WIDTH * 1.0 + SPREAD_PADDING * 2,
   };
 }
 
@@ -92,12 +93,12 @@ function calculateViewportConfig(viewportWidth: number): ViewportConfig {
 export function useViewportConfig(): ViewportConfig {
   const [config, setConfig] = useState<ViewportConfig>(() => {
     // SSR-safe initialization
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return {
-        mode: 'single',
+        mode: "single",
         scale: 1.0,
         bodyFontSize: SCREEN_BODY_SIZE,
-        scaledWidth: PAGE_WIDTH + (SPREAD_PADDING * 2),
+        scaledWidth: PAGE_WIDTH + SPREAD_PADDING * 2,
       };
     }
     return calculateViewportConfig(window.innerWidth);
@@ -119,10 +120,10 @@ export function useViewportConfig(): ViewportConfig {
       timeoutId = setTimeout(checkViewport, 100);
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     return () => {
       clearTimeout(timeoutId);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 

@@ -41,8 +41,8 @@ export default function AgreementGuard({ children }: AgreementGuardProps) {
       return;
     }
 
-    const isExemptPath = EXEMPT_PATHS.some((path) =>
-      pathname === path || pathname?.startsWith(path + "/")
+    const isExemptPath = EXEMPT_PATHS.some(
+      (path) => pathname === path || pathname?.startsWith(path + "/"),
     );
 
     if (isExemptPath) {

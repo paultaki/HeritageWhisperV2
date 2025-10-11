@@ -9,9 +9,10 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "HeritageWhisper - Preserve Your Life Stories",
-  description: "An AI-powered storytelling platform for seniors to capture and share life memories with family.",
+  description:
+    "An AI-powered storytelling platform for seniors to capture and share life memories with family.",
   icons: {
-    icon: '/favicon.ico',
+    icon: "/favicon.ico",
   },
 };
 
@@ -38,9 +39,7 @@ export default function RootLayout({
         <Providers>
           <AgreementGuard>
             <NavigationWrapper />
-            <div className="md:pl-28 pb-20 md:pb-0">
-              {children}
-            </div>
+            <div className="md:pl-28 pb-20 md:pb-0">{children}</div>
           </AgreementGuard>
         </Providers>
       </body>

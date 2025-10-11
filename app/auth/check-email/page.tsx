@@ -1,12 +1,18 @@
 "use client";
 
-import { Suspense, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Mail, ArrowLeft, RefreshCw } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Mail, ArrowLeft, RefreshCw } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 function CheckEmailContent() {
   const router = useRouter();
@@ -16,10 +22,10 @@ function CheckEmailContent() {
   const [resendCooldown, setResendCooldown] = useState(0);
 
   // Get email from URL params (passed from registration)
-  const email = searchParams.get('email') || 'your email address';
+  const email = searchParams.get("email") || "your email address";
 
   const handleResendEmail = async () => {
-    if (!email || email === 'your email address') {
+    if (!email || email === "your email address") {
       toast({
         title: "Error",
         description: "No email address found. Please try registering again.",
@@ -31,11 +37,11 @@ function CheckEmailContent() {
     setIsResending(true);
     try {
       const { error } = await supabase.auth.resend({
-        type: 'signup',
+        type: "signup",
         email: email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/verified`
-        }
+          emailRedirectTo: `${window.location.origin}/auth/verified`,
+        },
       });
 
       if (error) throw error;
@@ -57,7 +63,7 @@ function CheckEmailContent() {
         });
       }, 1000);
     } catch (error: any) {
-      console.error('Resend error:', error);
+      console.error("Resend error:", error);
       toast({
         title: "Failed to resend",
         description: error.message || "Please try again later.",
@@ -79,23 +85,22 @@ function CheckEmailContent() {
           </div>
           <CardTitle className="text-2xl">Check Your Email</CardTitle>
           <CardDescription className="mt-2">
-            We've sent a verification link to{' '}
-            <span className="font-medium text-gray-900">
-              {email}
-            </span>
+            We've sent a verification link to{" "}
+            <span className="font-medium text-gray-900">{email}</span>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-900">
-              <strong>Almost there!</strong> Click the link in your email to verify your account
-              and start sharing your stories.
+              <strong>Almost there!</strong> Click the link in your email to
+              verify your account and start sharing your stories.
             </p>
           </div>
 
           <div className="space-y-3">
             <p className="text-sm text-gray-600">
-              Didn't receive the email? Check your spam folder or request a new one.
+              Didn't receive the email? Check your spam folder or request a new
+              one.
             </p>
 
             <Button
@@ -121,7 +126,7 @@ function CheckEmailContent() {
             </Button>
 
             <Button
-              onClick={() => router.push('/auth/login')}
+              onClick={() => router.push("/auth/login")}
               variant="ghost"
               className="w-full"
               size="lg"
@@ -133,8 +138,11 @@ function CheckEmailContent() {
 
           <div className="pt-4 border-t">
             <p className="text-xs text-gray-500 text-center">
-              If you continue to have issues, please contact support at{' '}
-              <a href="mailto:hello@heritagewhisper.com" className="text-blue-600 hover:underline">
+              If you continue to have issues, please contact support at{" "}
+              <a
+                href="mailto:hello@heritagewhisper.com"
+                className="text-blue-600 hover:underline"
+              >
                 hello@heritagewhisper.com
               </a>
             </p>
@@ -147,11 +155,13 @@ function CheckEmailContent() {
 
 export default function CheckEmail() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center album-texture">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center album-texture">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        </div>
+      }
+    >
       <CheckEmailContent />
     </Suspense>
   );

@@ -13,322 +13,298 @@ Safety & Compliance
 Metrics & Success Criteria
 Cost Model & Budget
 Implementation Checklist
+
 1. PRODUCT CONTEXT & BUSINESS GOALS
-1.1 The Problems
-Prompt Generation: Seniors struggle to remember what stories to tell. Generic prompts fail to trigger forgotten memories.
-Lesson Extraction: Stories lack the crystallized wisdom that makes them valuable to pass down.
-1.2 The Solutions
-AI Prompts: AI analyzes existing stories to generate personalized prompts that reference what they already shared.
-Lesson Learning: Every story gets 2-3 AI-suggested lessons they can edit, making them look wise and articulate.
-1.3 The Differentiation
-StoryWorth: Generic list of 500 prompts (same for everyone)
-HeritageWhisper: "You mentioned your father's workshop in 1955. Who else spent time there with you?"
-Plus: Every story ends with a meaningful lesson learned in their voice
-1.4 Business Objectives
-Free Tier (Stories 1-3):
-Goal: Convert trial users to paid subscribers
-Strategy: Show AI "magic" at Stories 1, 2, and 3
-Target: 45% trial-to-paid conversion (baseline: 35-40%)
-Paid Tier (Stories 4+):
-Goal: Retain subscribers for 12+ months
-Strategy: Maintain prompt quality through Story 20, then taper
-Target: 80% annual retention
-Revenue Impact:
-Baseline: 1,000 paid users × $149 = $149,000/year
-5% conversion lift: +345 users × $149 = +$51,405/year
-AI cost: $2,170/year (includes lesson extraction)
-Net gain: $49,235/year (ROI: 22x)
+   1.1 The Problems
+   Prompt Generation: Seniors struggle to remember what stories to tell. Generic prompts fail to trigger forgotten memories.
+   Lesson Extraction: Stories lack the crystallized wisdom that makes them valuable to pass down.
+   1.2 The Solutions
+   AI Prompts: AI analyzes existing stories to generate personalized prompts that reference what they already shared.
+   Lesson Learning: Every story gets 2-3 AI-suggested lessons they can edit, making them look wise and articulate.
+   1.3 The Differentiation
+   StoryWorth: Generic list of 500 prompts (same for everyone)
+   HeritageWhisper: "You mentioned your father's workshop in 1955. Who else spent time there with you?"
+   Plus: Every story ends with a meaningful lesson learned in their voice
+   1.4 Business Objectives
+   Free Tier (Stories 1-3):
+   Goal: Convert trial users to paid subscribers
+   Strategy: Show AI "magic" at Stories 1, 2, and 3
+   Target: 45% trial-to-paid conversion (baseline: 35-40%)
+   Paid Tier (Stories 4+):
+   Goal: Retain subscribers for 12+ months
+   Strategy: Maintain prompt quality through Story 20, then taper
+   Target: 80% annual retention
+   Revenue Impact:
+   Baseline: 1,000 paid users × $149 = $149,000/year
+   5% conversion lift: +345 users × $149 = +$51,405/year
+   AI cost: $2,170/year (includes lesson extraction)
+   Net gain: $49,235/year (ROI: 22x)
 2. SYSTEM ARCHITECTURE OVERVIEW
-2.1 Two-Phase Processing System
-┌──────────────────────────────────────────────────────┐
-│           PHASE 1: IMMEDIATE PROCESSING              │
-│  • Trigger: User stops recording                     │
-│  • Parallel: Transcribe + Format + Lesson           │
-│  • Cost: ~$0.002 per story                          │
-│  • Time: 1.7 seconds                                │
-│  • Output: Review screen with editable content      │
-└──────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────┐
-│         PHASE 2: BACKGROUND PROCESSING               │
-│  • Trigger: User saves story (at milestones)        │
-│  • Combined: Prompts + Character Analysis           │
-│  • Cost: $0.01-0.15 per milestone                   │
-│  • Time: 5-10 seconds (invisible to user)           │
-│  • Output: Prompts + Character insights             │
-└──────────────────────────────────────────────────────┘
-2.2 Three-Tier Prompt System
-┌──────────────────────────────────────────────────────┐
-│                    TIER 1: TEMPLATES                 │
-│  • Trigger: After every story save (synchronous)     │
-│  • Method: Regex keyword extraction + template match │
-│  • Cost: $0 (no API call)                           │
-│  • Expiry: 7 days                                   │
-│  • Coverage: 60-70% of stories                      │
-└──────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────┐
-│                 TIER 2: ON-DEMAND AI                 │
-│  • Trigger: When active_prompts is empty            │
-│  • Method: GPT-4o analyzes last 3-5 stories         │
-│  • Cost: ~$0.05 per generation                      │
-│  • Expiry: 14 days                                  │
-│  • Frequency: 2-3x per month per user               │
-└──────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────┐
-│              TIER 3: MILESTONE ANALYSIS              │
-│  • Trigger: At stories 1,2,3,4,7,10,15,20,30,50,100 │
-│  • Method: GPT-4o analyzes ALL stories              │
-│  • Cost: $0.012-0.15 per analysis                   │
-│  • Expiry: 30 days (60 days for premium seed)      │
-│  • Generates: Prompts + Character insights          │
-└──────────────────────────────────────────────────────┘
-2.3 Processing Flow
-Story Recording Stops
-      ↓
-IMMEDIATE (1.7s):
-├── Whisper → Transcribe (1s)
-└── Parallel GPT-4 calls:
-    ├── Format transcript (0.7s)
-    └── Generate lessons (0.7s)
-      ↓
-Review Screen Shows
-      ↓
-User Edits & Saves
-      ↓
-Story Saved to DB
-      ↓
-Check if Milestone
-      ↓
-      YES → Background Job:
-            ├── Generate prompts
-            ├── Extract character traits
-            └── Store insights
-      ↓
-      NO → Done
-2.4 Key Design Principles
-Speed First: Review screen in <2 seconds
-Generate More, Show Less: Always generate 3-5 candidates, show top 1-2
-Deduplication: anchor_hash prevents semantic duplicates
-Safety First: do_not_ask + content classifier before insertion
-Graceful Degradation: Circuit breaker → decade fallback
-Cost Efficiency: Templates first (free), AI only when needed
+   2.1 Two-Phase Processing System
+   ┌──────────────────────────────────────────────────────┐
+   │ PHASE 1: IMMEDIATE PROCESSING │
+   │ • Trigger: User stops recording │
+   │ • Parallel: Transcribe + Format + Lesson │
+   │ • Cost: ~$0.002 per story │
+   │ • Time: 1.7 seconds │
+   │ • Output: Review screen with editable content │
+   └──────────────────────────────────────────────────────┘
+   ↓
+   ┌──────────────────────────────────────────────────────┐
+   │ PHASE 2: BACKGROUND PROCESSING │
+   │ • Trigger: User saves story (at milestones) │
+   │ • Combined: Prompts + Character Analysis │
+   │ • Cost: $0.01-0.15 per milestone │
+   │ • Time: 5-10 seconds (invisible to user) │
+   │ • Output: Prompts + Character insights │
+   └──────────────────────────────────────────────────────┘
+   2.2 Three-Tier Prompt System
+   ┌──────────────────────────────────────────────────────┐
+   │ TIER 1: TEMPLATES │
+   │ • Trigger: After every story save (synchronous) │
+   │ • Method: Regex keyword extraction + template match │
+   │ • Cost: $0 (no API call) │
+   │ • Expiry: 7 days │
+   │ • Coverage: 60-70% of stories │
+   └──────────────────────────────────────────────────────┘
+   ↓
+   ┌──────────────────────────────────────────────────────┐
+   │ TIER 2: ON-DEMAND AI │
+   │ • Trigger: When active_prompts is empty │
+   │ • Method: GPT-4o analyzes last 3-5 stories │
+   │ • Cost: ~$0.05 per generation │
+   │ • Expiry: 14 days │
+   │ • Frequency: 2-3x per month per user │
+   └──────────────────────────────────────────────────────┘
+   ↓
+   ┌──────────────────────────────────────────────────────┐
+   │ TIER 3: MILESTONE ANALYSIS │
+   │ • Trigger: At stories 1,2,3,4,7,10,15,20,30,50,100 │
+   │ • Method: GPT-4o analyzes ALL stories │
+   │ • Cost: $0.012-0.15 per analysis │
+   │ • Expiry: 30 days (60 days for premium seed) │
+   │ • Generates: Prompts + Character insights │
+   └──────────────────────────────────────────────────────┘
+   2.3 Processing Flow
+   Story Recording Stops
+   ↓
+   IMMEDIATE (1.7s):
+   ├── Whisper → Transcribe (1s)
+   └── Parallel GPT-4 calls:
+   ├── Format transcript (0.7s)
+   └── Generate lessons (0.7s)
+   ↓
+   Review Screen Shows
+   ↓
+   User Edits & Saves
+   ↓
+   Story Saved to DB
+   ↓
+   Check if Milestone
+   ↓
+   YES → Background Job:
+   ├── Generate prompts
+   ├── Extract character traits
+   └── Store insights
+   ↓
+   NO → Done
+   2.4 Key Design Principles
+   Speed First: Review screen in <2 seconds
+   Generate More, Show Less: Always generate 3-5 candidates, show top 1-2
+   Deduplication: anchor_hash prevents semantic duplicates
+   Safety First: do_not_ask + content classifier before insertion
+   Graceful Degradation: Circuit breaker → decade fallback
+   Cost Efficiency: Templates first (free), AI only when needed
 3. USER FLOWS
-3.1 Free Tier Flow (Stories 1-3)
-┌──────────────────────────────────────────────────────────────┐
-│                       STORY 1 FLOW                            │
-└──────────────────────────────────────────────────────────────┘
-User registers → Onboarding (birth year) → Timeline (empty)
-                                              ↓
-                                    Ghost prompts appear
-                                    "1955 - The Year I Was Born"
-                                              ↓
-                                    User taps prompt → Records Story 1
-                                              ↓
-                         POST /api/stories (story 1 data)
-                                              ↓
-                              ┌───────────────┴───────────────┐
-                              ↓                               ↓
-                    Save to database              Tier 1: Extract keywords
-                    Set free_stories_used = 1      Generate 1 template prompt
-                              ↓                     (expires in 7 days)
-                    Tier 3: Story 1 Milestone                ↓
-                    GPT-4o generates 5 candidates   Store in active_prompts
-                    Score and filter (≥50)
-                    Store top 2
-                              ↓
-                    Return success to client
-                              ↓
-                    User sees timeline with Story 1 card
-                              ↓
-                    "Next Story" card appears:
-                    "What happened the morning after you told
-                     your father you were quitting?"
-                    📍 Based on your 1955 story
-                              ↓
-                    [Record This Story 🎤] [Skip]
-┌──────────────────────────────────────────────────────────────┐
-│                       STORY 2 FLOW                            │
-└──────────────────────────────────────────────────────────────┘
-User taps "Record This Story" → Records Story 2
-                                              ↓
-                         POST /api/stories (story 2 data)
-                                              ↓
-                    Save to database
-                    Set free_stories_used = 2
-                    Mark previous prompt as used
-                              ↓
-                    Tier 1: Generate 1 template
-                              ↓
-                    Tier 3: Story 2 Milestone
-                    GPT-4o analyzes both stories
-                    Generates 4 candidates (2 expansion, 2 connection)
-                    Score and filter
-                    Store top 2
-                              ↓
-                    User sees "Next Story" card:
-                    "Your father appears in both stories.
-                     What's your earliest memory of him?"
-                    📍 Connecting 1955 and 1982
-┌──────────────────────────────────────────────────────────────┐
-│                   STORY 3 + PAYWALL FLOW                      │
-└──────────────────────────────────────────────────────────────┘
-User records Story 3
-                              ↓
-                    POST /api/stories (story 3 data)
-                              ↓
-                    Save to database
-                    Set free_stories_used = 3
-                              ↓
-                    Tier 1: Generate 1 template
-                              ↓
-                    Tier 3: Story 3 Milestone (SPECIAL)
-                    GPT-4o analyzes all 3 stories
-                    Generates 5 candidates
-                    Score and filter
-                              ↓
-                    Store candidate #1 (highest score):
-                      - is_locked = false (show immediately)
-                      - expires_at = NOW() + 30 days
-                              ↓
-                    Store candidates #2-4 (premium seed):
-                      - is_locked = true (hidden until payment)
-                      - expires_at = NULL (unlocked on payment)
-                              ↓
-                    Return success
-                              ↓
-╔══════════════════════════════════════════════════════════════╗
-║              PAYWALL CARD APPEARS                             ║
-║                                                               ║
-║  ✨ YOUR STORY 3 INSIGHT                                     ║
-║                                                               ║
-║  "Your father appears in all 3 stories. Tell me about        ║
-║   the first time you disappointed him."                      ║
-║                                                               ║
-║  📍 Based on stories from 1955, 1960, 1982                   ║
-║                                                               ║
-║  ─────────────────────────────────────────────────────────   ║
-║                                                               ║
-║  💡 I've analyzed your first 3 stories and found             ║
-║     3 more specific memories you should record.              ║
-║                                                               ║
-║  Ready to unlock your full story?                            ║
-║                                                               ║
-║     [See What I Found - $149/year]                           ║
-║                                                               ║
-║     [Maybe later]                                            ║
-╚══════════════════════════════════════════════════════════════╝
-                              ↓
-                    User clicks "See What I Found"
-                              ↓
-                    Stripe checkout → Payment success
-                              ↓
-                    Webhook: POST /api/webhooks/stripe
-                              ↓
-                    Update users table:
-                      subscription_status = 'active'
-                              ↓
-                    Unlock premium seed:
-                      UPDATE active_prompts
-                      SET is_locked = false,
-                          expires_at = NOW() + INTERVAL '60 days'
-                      WHERE user_id = $1 AND is_locked = true
-                              ↓
-                    User redirected to timeline
-                              ↓
-                    Sees 4 prompts available (1 original + 3 premium)
-3.2 Paid Tier Flow (Stories 4+)
-┌──────────────────────────────────────────────────────────────┐
-│                   RECORDING STORY 4-20                        │
-└──────────────────────────────────────────────────────────────┘
-User records Story N
-                              ↓
-                    POST /api/stories
-                              ↓
-                    Save to database
-                              ↓
-                    Tier 1: Generate 1 template prompt (always)
-                              ↓
-                    Check if milestone (4,7,10,15,20,30,50,100)
-                              ↓
-                    YES → Tier 3 Analysis
-                          - Stories 4-20: Generate 3 prompts
-                          - Stories 30-50: Generate 2 prompts  
-                          - Stories 100+: Generate 1 prompt
-                              ↓
-                    NO → Continue
-                              ↓
-                    Return success
-┌──────────────────────────────────────────────────────────────┐
-│                   EMPTY INVENTORY SCENARIO                    │
-└──────────────────────────────────────────────────────────────┘
-User opens timeline
-                              ↓
-                    GET /api/prompts/next
-                              ↓
-                    Query active_prompts WHERE:
-                      - user_id = $1
-                      - expires_at > NOW()
-                      - is_locked = false
-                              ↓
-                    EMPTY RESULT
-                              ↓
-                    Check last_tier2_attempt timestamp
-                              ↓
-                    < 24 hours ago → Return decade fallback
-                              ↓
-                    ≥ 24 hours ago → Generate Tier 2 prompt
-                                    - Fetch last 5 stories
-                                    - GPT-4o analysis
-                                    - Generate 5 candidates
-                                    - Score and filter
-                                    - Store top 2
-                                    - Update last_tier2_attempt
-                              ↓
-                    Return prompt to client
-3.3 Grace Period Flow (Non-Payer After Story 3)
-Day 0: User records Story 3, sees paywall, clicks "Maybe later"
-       - Can still VIEW timeline and stories
-       - Cannot RECORD Story 4
-       - Email: "Your Story 3 analysis is ready"
-Day 1-6: User can browse read-only
-         - Timeline shows all 3 stories
-         - "Record" button shows paywall
-         - Prompts visible but locked
-Day 3: Email: "I found 3 more memories you should record"
-Day 5: Email: "Last chance - your access expires in 2 days"
-Day 7: Account goes read-only
-       - Cannot record
-       - Cannot view prompts
-       - Can still see story titles (teaser)
-       - Banner: "Subscribe to access your stories and prompts"
+   3.1 Free Tier Flow (Stories 1-3)
+   ┌──────────────────────────────────────────────────────────────┐
+   │ STORY 1 FLOW │
+   └──────────────────────────────────────────────────────────────┘
+   User registers → Onboarding (birth year) → Timeline (empty)
+   ↓
+   Ghost prompts appear
+   "1955 - The Year I Was Born"
+   ↓
+   User taps prompt → Records Story 1
+   ↓
+   POST /api/stories (story 1 data)
+   ↓
+   ┌───────────────┴───────────────┐
+   ↓ ↓
+   Save to database Tier 1: Extract keywords
+   Set free_stories_used = 1 Generate 1 template prompt
+   ↓ (expires in 7 days)
+   Tier 3: Story 1 Milestone ↓
+   GPT-4o generates 5 candidates Store in active_prompts
+   Score and filter (≥50)
+   Store top 2
+   ↓
+   Return success to client
+   ↓
+   User sees timeline with Story 1 card
+   ↓
+   "Next Story" card appears:
+   "What happened the morning after you told
+   your father you were quitting?"
+   📍 Based on your 1955 story
+   ↓
+   [Record This Story 🎤] [Skip]
+   ┌──────────────────────────────────────────────────────────────┐
+   │ STORY 2 FLOW │
+   └──────────────────────────────────────────────────────────────┘
+   User taps "Record This Story" → Records Story 2
+   ↓
+   POST /api/stories (story 2 data)
+   ↓
+   Save to database
+   Set free_stories_used = 2
+   Mark previous prompt as used
+   ↓
+   Tier 1: Generate 1 template
+   ↓
+   Tier 3: Story 2 Milestone
+   GPT-4o analyzes both stories
+   Generates 4 candidates (2 expansion, 2 connection)
+   Score and filter
+   Store top 2
+   ↓
+   User sees "Next Story" card:
+   "Your father appears in both stories.
+   What's your earliest memory of him?"
+   📍 Connecting 1955 and 1982
+   ┌──────────────────────────────────────────────────────────────┐
+   │ STORY 3 + PAYWALL FLOW │
+   └──────────────────────────────────────────────────────────────┘
+   User records Story 3
+   ↓
+   POST /api/stories (story 3 data)
+   ↓
+   Save to database
+   Set free_stories_used = 3
+   ↓
+   Tier 1: Generate 1 template
+   ↓
+   Tier 3: Story 3 Milestone (SPECIAL)
+   GPT-4o analyzes all 3 stories
+   Generates 5 candidates
+   Score and filter
+   ↓
+   Store candidate #1 (highest score): - is_locked = false (show immediately) - expires_at = NOW() + 30 days
+   ↓
+   Store candidates #2-4 (premium seed): - is_locked = true (hidden until payment) - expires_at = NULL (unlocked on payment)
+   ↓
+   Return success
+   ↓
+   ╔══════════════════════════════════════════════════════════════╗
+   ║ PAYWALL CARD APPEARS ║
+   ║ ║
+   ║ ✨ YOUR STORY 3 INSIGHT ║
+   ║ ║
+   ║ "Your father appears in all 3 stories. Tell me about ║
+   ║ the first time you disappointed him." ║
+   ║ ║
+   ║ 📍 Based on stories from 1955, 1960, 1982 ║
+   ║ ║
+   ║ ───────────────────────────────────────────────────────── ║
+   ║ ║
+   ║ 💡 I've analyzed your first 3 stories and found ║
+   ║ 3 more specific memories you should record. ║
+   ║ ║
+   ║ Ready to unlock your full story? ║
+   ║ ║
+   ║ [See What I Found - $149/year] ║
+   ║ ║
+   ║ [Maybe later] ║
+   ╚══════════════════════════════════════════════════════════════╝
+   ↓
+   User clicks "See What I Found"
+   ↓
+   Stripe checkout → Payment success
+   ↓
+   Webhook: POST /api/webhooks/stripe
+   ↓
+   Update users table:
+   subscription_status = 'active'
+   ↓
+   Unlock premium seed:
+   UPDATE active_prompts
+   SET is_locked = false,
+   expires_at = NOW() + INTERVAL '60 days'
+   WHERE user_id = $1 AND is_locked = true
+   ↓
+   User redirected to timeline
+   ↓
+   Sees 4 prompts available (1 original + 3 premium)
+   3.2 Paid Tier Flow (Stories 4+)
+   ┌──────────────────────────────────────────────────────────────┐
+   │ RECORDING STORY 4-20 │
+   └──────────────────────────────────────────────────────────────┘
+   User records Story N
+   ↓
+   POST /api/stories
+   ↓
+   Save to database
+   ↓
+   Tier 1: Generate 1 template prompt (always)
+   ↓
+   Check if milestone (4,7,10,15,20,30,50,100)
+   ↓
+   YES → Tier 3 Analysis - Stories 4-20: Generate 3 prompts - Stories 30-50: Generate 2 prompts  
+    - Stories 100+: Generate 1 prompt
+   ↓
+   NO → Continue
+   ↓
+   Return success
+   ┌──────────────────────────────────────────────────────────────┐
+   │ EMPTY INVENTORY SCENARIO │
+   └──────────────────────────────────────────────────────────────┘
+   User opens timeline
+   ↓
+   GET /api/prompts/next
+   ↓
+   Query active_prompts WHERE: - user_id = $1 - expires_at > NOW() - is_locked = false
+   ↓
+   EMPTY RESULT
+   ↓
+   Check last_tier2_attempt timestamp
+   ↓
+   < 24 hours ago → Return decade fallback
+   ↓
+   ≥ 24 hours ago → Generate Tier 2 prompt - Fetch last 5 stories - GPT-4o analysis - Generate 5 candidates - Score and filter - Store top 2 - Update last_tier2_attempt
+   ↓
+   Return prompt to client
+   3.3 Grace Period Flow (Non-Payer After Story 3)
+   Day 0: User records Story 3, sees paywall, clicks "Maybe later" - Can still VIEW timeline and stories - Cannot RECORD Story 4 - Email: "Your Story 3 analysis is ready"
+   Day 1-6: User can browse read-only - Timeline shows all 3 stories - "Record" button shows paywall - Prompts visible but locked
+   Day 3: Email: "I found 3 more memories you should record"
+   Day 5: Email: "Last chance - your access expires in 2 days"
+   Day 7: Account goes read-only - Cannot record - Cannot view prompts - Can still see story titles (teaser) - Banner: "Subscribe to access your stories and prompts"
 4. DATABASE SCHEMA
-4.1 Schema Additions
-sql
--- ============================================================================
--- STORIES TABLE ADDITIONS
--- ============================================================================
--- Add columns for lesson learned functionality
-ALTER TABLE stories ADD COLUMN IF NOT EXISTS lesson_learned TEXT;
-ALTER TABLE stories ADD COLUMN IF NOT EXISTS lesson_alternatives JSONB DEFAULT '[]'::jsonb;
--- Stores alternative lesson suggestions user can choose from
-ALTER TABLE stories ADD COLUMN IF NOT EXISTS character_insights JSONB;
--- Stores character analysis from milestone processing
-ALTER TABLE stories ADD COLUMN IF NOT EXISTS source_prompt_id UUID;
--- References active_prompts.id (but not FK since prompt gets deleted)
-CREATE INDEX idx_stories_source_prompt ON stories(source_prompt_id) 
-WHERE source_prompt_id IS NOT NULL;
+   4.1 Schema Additions
+   sql
+   -- ============================================================================
+   -- STORIES TABLE ADDITIONS
+   -- ============================================================================
+   -- Add columns for lesson learned functionality
+   ALTER TABLE stories ADD COLUMN IF NOT EXISTS lesson_learned TEXT;
+   ALTER TABLE stories ADD COLUMN IF NOT EXISTS lesson_alternatives JSONB DEFAULT '[]'::jsonb;
+   -- Stores alternative lesson suggestions user can choose from
+   ALTER TABLE stories ADD COLUMN IF NOT EXISTS character_insights JSONB;
+   -- Stores character analysis from milestone processing
+   ALTER TABLE stories ADD COLUMN IF NOT EXISTS source_prompt_id UUID;
+   -- References active_prompts.id (but not FK since prompt gets deleted)
+   CREATE INDEX idx_stories_source_prompt ON stories(source_prompt_id)
+   WHERE source_prompt_id IS NOT NULL;
 
--- Life Phase Context 
-ALTER TABLE stories ADD COLUMN IF NOT EXISTS story_year INTEGER; 
-ALTER TABLE stories ADD COLUMN IF NOT EXISTS story_age INTEGER; 
-ALTER TABLE users ADD COLUMN IF NOT EXISTS birth_year INTEGER; 
+-- Life Phase Context
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS story_year INTEGER;
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS story_age INTEGER;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS birth_year INTEGER;
 
--- Computed/cached for performance 
-ALTER TABLE stories ADD COLUMN IF NOT EXISTS life_phase TEXT; 
--- Values: 'childhood' (0-12), 'teen' (13-19), 'early_adult' (20-29), 
--- 'mid_adult' (30-49), 'late_adult' (50-64), 'senior' (65+) 
+-- Computed/cached for performance
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS life_phase TEXT;
+-- Values: 'childhood' (0-12), 'teen' (13-19), 'early_adult' (20-29),
+-- 'mid_adult' (30-49), 'late_adult' (50-64), 'senior' (65+)
 CREATE INDEX idx_stories_life_phase ON stories(life_phase);
 
 -- ============================================================================
@@ -336,21 +312,21 @@ CREATE INDEX idx_stories_life_phase ON stories(life_phase);
 -- ============================================================================
 -- Tracks character development across stories
 CREATE TABLE character_evolution (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  story_count INTEGER NOT NULL,
-  
-  -- Character analysis
-  traits JSONB, -- [{trait: "resilience", confidence: 0.85, evidence: [...]}]
-  invisible_rules TEXT[], -- ["Never ask for help twice", "Family first"]
-  contradictions JSONB, -- [{stated: "...", lived: "...", tension: "..."}]
-  
-  -- Metadata
-  analyzed_at TIMESTAMP DEFAULT NOW(),
-  model_version TEXT DEFAULT 'gpt-4o',
-  
-  -- Indexes
-  UNIQUE(user_id, story_count)
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+story_count INTEGER NOT NULL,
+
+-- Character analysis
+traits JSONB, -- [{trait: "resilience", confidence: 0.85, evidence: [...]}]
+invisible_rules TEXT[], -- ["Never ask for help twice", "Family first"]
+contradictions JSONB, -- [{stated: "...", lived: "...", tension: "..."}]
+
+-- Metadata
+analyzed_at TIMESTAMP DEFAULT NOW(),
+model_version TEXT DEFAULT 'gpt-4o',
+
+-- Indexes
+UNIQUE(user_id, story_count)
 );
 CREATE INDEX idx_character_evolution_user ON character_evolution(user_id, story_count DESC);
 sql
@@ -360,36 +336,36 @@ sql
 -- Stores currently active prompts (1-5 per user at any time)
 -- Prompts expire and are archived to prompt_history
 CREATE TABLE active_prompts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  
-  -- Prompt content
-  prompt_text TEXT NOT NULL,
-  context_note TEXT, -- e.g., "Based on your 1955 story"
-  
-  -- Deduplication & anchoring
-  anchor_entity TEXT, -- e.g., "father's workshop", "Mrs. Henderson"
-  anchor_year INTEGER, -- e.g., 1955 (NULL if not year-specific)
-  anchor_hash TEXT NOT NULL, -- sha1(`${type}|${entity}|${year||'NA'}`)
-  
-  -- Tier & quality
-  tier INTEGER NOT NULL, -- 0=fallback, 1=template, 2=on-demand, 3=milestone
-  memory_type TEXT, -- person_expansion, object_origin, decade_gap, etc.
-  prompt_score INTEGER, -- 0-100 (recording likelihood from GPT-4o)
-  score_reason TEXT, -- 1-sentence explanation for audit
-  model_version TEXT DEFAULT 'gpt-4o', -- Track which model generated it
-  
-  -- Lifecycle
-  created_at TIMESTAMP DEFAULT NOW(),
-  expires_at TIMESTAMP NOT NULL, -- Auto-cleanup after expiry
-  is_locked BOOLEAN DEFAULT false, -- true = hidden until payment
-  
-  -- Engagement tracking
-  shown_count INTEGER DEFAULT 0,
-  last_shown_at TIMESTAMP,
-  
-  -- Constraints
-  UNIQUE(user_id, anchor_hash) -- Prevent duplicate prompts
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+-- Prompt content
+prompt_text TEXT NOT NULL,
+context_note TEXT, -- e.g., "Based on your 1955 story"
+
+-- Deduplication & anchoring
+anchor_entity TEXT, -- e.g., "father's workshop", "Mrs. Henderson"
+anchor_year INTEGER, -- e.g., 1955 (NULL if not year-specific)
+anchor_hash TEXT NOT NULL, -- sha1(`${type}|${entity}|${year||'NA'}`)
+
+-- Tier & quality
+tier INTEGER NOT NULL, -- 0=fallback, 1=template, 2=on-demand, 3=milestone
+memory_type TEXT, -- person_expansion, object_origin, decade_gap, etc.
+prompt_score INTEGER, -- 0-100 (recording likelihood from GPT-4o)
+score_reason TEXT, -- 1-sentence explanation for audit
+model_version TEXT DEFAULT 'gpt-4o', -- Track which model generated it
+
+-- Lifecycle
+created_at TIMESTAMP DEFAULT NOW(),
+expires_at TIMESTAMP NOT NULL, -- Auto-cleanup after expiry
+is_locked BOOLEAN DEFAULT false, -- true = hidden until payment
+
+-- Engagement tracking
+shown_count INTEGER DEFAULT 0,
+last_shown_at TIMESTAMP,
+
+-- Constraints
+UNIQUE(user_id, anchor_hash) -- Prevent duplicate prompts
 );
 -- Indexes
 CREATE INDEX idx_active_prompts_user ON active_prompts(user_id, expires_at DESC);
@@ -400,26 +376,26 @@ CREATE INDEX idx_active_prompts_locked ON active_prompts(user_id, is_locked);
 -- ============================================================================
 -- Archives used/skipped/expired prompts for analytics
 CREATE TABLE prompt_history (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  
-  -- Original prompt data
-  prompt_text TEXT NOT NULL,
-  anchor_hash TEXT,
-  anchor_entity TEXT,
-  anchor_year INTEGER,
-  tier INTEGER,
-  memory_type TEXT,
-  prompt_score INTEGER,
-  
-  -- Outcome tracking
-  shown_count INTEGER,
-  outcome TEXT NOT NULL, -- 'used' | 'skipped' | 'expired'
-  story_id UUID, -- NULL if skipped/expired, set if used
-  
-  -- Timestamps
-  created_at TIMESTAMP,
-  resolved_at TIMESTAMP DEFAULT NOW()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+-- Original prompt data
+prompt_text TEXT NOT NULL,
+anchor_hash TEXT,
+anchor_entity TEXT,
+anchor_year INTEGER,
+tier INTEGER,
+memory_type TEXT,
+prompt_score INTEGER,
+
+-- Outcome tracking
+shown_count INTEGER,
+outcome TEXT NOT NULL, -- 'used' | 'skipped' | 'expired'
+story_id UUID, -- NULL if skipped/expired, set if used
+
+-- Timestamps
+created_at TIMESTAMP,
+resolved_at TIMESTAMP DEFAULT NOW()
 );
 CREATE INDEX idx_prompt_history_outcome ON prompt_history(user_id, outcome, tier);
 CREATE INDEX idx_prompt_history_story ON prompt_history(story_id) WHERE story_id IS NOT NULL;
@@ -443,7 +419,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS onboarding_t3_ran_at TIMESTAMP;
 -- Add column to track which prompt generated this story
 ALTER TABLE stories ADD COLUMN IF NOT EXISTS source_prompt_id UUID;
 -- References active_prompts.id (but not FK since prompt gets deleted)
-CREATE INDEX idx_stories_source_prompt ON stories(source_prompt_id) 
+CREATE INDEX idx_stories_source_prompt ON stories(source_prompt_id)
 WHERE source_prompt_id IS NOT NULL;
 -- ============================================================================
 -- CLEANUP JOB (Daily)
@@ -451,26 +427,28 @@ WHERE source_prompt_id IS NOT NULL;
 -- Archive expired prompts and clean up old history
 CREATE OR REPLACE FUNCTION archive_expired_prompts() RETURNS void AS $$
 BEGIN
-  -- Move expired prompts to history
-  INSERT INTO prompt_history (
-    user_id, prompt_text, anchor_hash, anchor_entity, anchor_year,
-    tier, memory_type, prompt_score, shown_count, outcome, created_at
-  )
-  SELECT 
-    user_id, prompt_text, anchor_hash, anchor_entity, anchor_year,
-    tier, memory_type, prompt_score, shown_count, 'expired', created_at
-  FROM active_prompts
-  WHERE expires_at < NOW() AND is_locked = false;
-  
-  -- Delete expired prompts
-  DELETE FROM active_prompts 
-  WHERE expires_at < NOW() AND is_locked = false;
-  
-  -- Delete old history (keep 1 year)
-  DELETE FROM prompt_history 
-  WHERE resolved_at < NOW() - INTERVAL '365 days';
+-- Move expired prompts to history
+INSERT INTO prompt_history (
+user_id, prompt_text, anchor_hash, anchor_entity, anchor_year,
+tier, memory_type, prompt_score, shown_count, outcome, created_at
+)
+SELECT
+user_id, prompt_text, anchor_hash, anchor_entity, anchor_year,
+tier, memory_type, prompt_score, shown_count, 'expired', created_at
+FROM active_prompts
+WHERE expires_at < NOW() AND is_locked = false;
+
+-- Delete expired prompts
+DELETE FROM active_prompts
+WHERE expires_at < NOW() AND is_locked = false;
+
+-- Delete old history (keep 1 year)
+DELETE FROM prompt_history
+WHERE resolved_at < NOW() - INTERVAL '365 days';
 END;
-$$ LANGUAGE plpgsql;
+
+$$
+LANGUAGE plpgsql;
 -- Schedule daily (use pg_cron or external scheduler)
 5. API SPECIFICATIONS
 
@@ -508,13 +486,13 @@ Server-Side Logic:
 async function handleTranscribe(req, res) {
   const { audioBase64, mimeType } = req.body;
   const audioBuffer = Buffer.from(audioBase64, 'base64');
-  
+
   // Step 1: Whisper transcription (required first)
   const transcription = await openai.audio.transcriptions.create({
     file: audioStream,
     model: "whisper-1"
   });
-  
+
   // Step 2: Parallel GPT-4 calls for speed
   const [formatted, lessons] = await Promise.all([
     // Format the transcription
@@ -530,20 +508,20 @@ async function handleTranscribe(req, res) {
       temperature: 0.3,
       max_tokens: 3000
     }),
-    
+
     // Generate lesson options (high quality)
     openai.chat.completions.create({
       model: "gpt-4o", // Best model for wisdom extraction
       messages: [{
         role: "system",
         content: `Extract 2-3 possible lessons learned from this story.
-        
+
         Look for:
         - The turning point where understanding shifted
         - What they'd tell their younger self
         - The cost of the experience and what it gave them
         - Universal truths hidden in personal experience
-        
+
         Provide 2-3 options (15-20 words each):
         1. Practical lesson (what to DO)
         2. Emotional truth (what to FEEL)
@@ -556,11 +534,11 @@ async function handleTranscribe(req, res) {
       max_tokens: 200
     })
   ]);
-  
+
   // Parse responses
   const formattedText = formatted.choices[0].message.content;
   const lessonOptions = parseLessonOptions(lessons.choices[0].message.content);
-  
+
   return res.json({
     transcription: formattedText,
     lessonOptions: lessonOptions,
@@ -581,7 +559,7 @@ Authorization: Bearer {jwt_token}
 Content-Type: application/json
 {
   "storyYear": 1955,
-  "storyAge": 23, 
+  "storyAge": 23,
   "transcript": "I was 23 when I decided to leave medical school...",
   "audioUrl": "https://supabase.co/storage/...",
   "lessonLearned": "Sometimes you have to disappoint others to be true to yourself",
@@ -622,11 +600,11 @@ async function handleStoryCreate(req, res) {
   // 2. Update free_stories_used counter
   const freeStoriesUsed = user.free_stories_used + 1;
   await db.users.update(userId, { free_stories_used: freeStoriesUsed });
-  
+
   // 3. Mark source prompt as used (if applicable)
   if (sourcePromptId) {
     const prompt = await db.active_prompts.findById(sourcePromptId);
-    
+
     // Archive to history
     await db.prompt_history.create({
       userId,
@@ -641,11 +619,11 @@ async function handleStoryCreate(req, res) {
       storyId: story.id,
       createdAt: prompt.created_at
     });
-    
+
     // Delete from active
     await db.active_prompts.delete(sourcePromptId);
   }
-  
+
   // 4. Generate Tier 1 template prompt (synchronous, fast)
   const tier1Prompt = generateTier1Template(transcript, storyYear);
   if (tier1Prompt) {
@@ -661,11 +639,11 @@ async function handleStoryCreate(req, res) {
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
     });
   }
-  
+
   // 5. Check for Tier 3 milestone - trigger COMBINED analysis
   const storyCount = await db.stories.count({ userId });
   const milestones = [1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100];
-  
+
   if (milestones.includes(storyCount)) {
     // Queue background job for combined analysis
     await queue.add('analyze-milestone', {
@@ -676,7 +654,7 @@ async function handleStoryCreate(req, res) {
       analysisType: 'combined' // Prompts + Character insights
     });
   }
-  
+
   return res.json({
     success: true,
     story,
@@ -719,16 +697,16 @@ Server-Side Logic:
 async function handlePromptSkip(req, res) {
   const userId = req.user.id;
   const { promptId } = req.body;
-  
+
   const prompt = await db.active_prompts.findById(promptId);
-  
+
   if (!prompt || prompt.user_id !== userId) {
     return res.status(404).json({ error: 'Prompt not found' });
   }
-  
+
   // Increment shown count
   const newShownCount = prompt.shown_count + 1;
-  
+
   // Retire prompt if skipped 3+ times
   if (newShownCount >= 3) {
     // Archive to history
@@ -743,7 +721,7 @@ async function handlePromptSkip(req, res) {
       outcome: 'skipped',
       createdAt: prompt.created_at
     });
-    
+
     // Delete from active
     await db.active_prompts.delete(promptId);
   } else {
@@ -753,7 +731,7 @@ async function handlePromptSkip(req, res) {
       lastShownAt: new Date()
     });
   }
-  
+
   // Return next prompt
   const nextPrompt = await getNextPrompt({ user: { id: userId } }, res);
   return res.json({ success: true, nextPrompt });
@@ -785,16 +763,16 @@ Server-Side Logic:
 ```typescript
 async function handleStripeWebhook(req, res) {
   const event = req.body;
-  
+
   if (event.type === 'checkout.session.completed') {
     const userId = event.data.object.client_reference_id;
-    
+
     // 1. Update subscription status
     await db.users.update(userId, {
       subscription_status: 'active',
       subscription_started_at: new Date()
     });
-    
+
     // 2. Unlock premium seed prompts (from Story 3)
     await db.active_prompts.updateMany(
       {
@@ -806,17 +784,17 @@ async function handleStripeWebhook(req, res) {
         expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000) // 60 days
       }
     );
-    
+
     // 3. Send welcome email (optional)
     await sendEmail({
       to: user.email,
       subject: "Welcome to HeritageWhisper Premium!",
       body: "Your personalized prompts are now unlocked..."
     });
-    
+
     return res.json({ received: true });
   }
-  
+
   // Handle other events (subscription cancelled, etc.)
   // ...
 }
@@ -1214,12 +1192,12 @@ Return comprehensive JSON with all findings.\`
 // Process the combined response
 async function processMilestoneAnalysis(response) {
   const data = JSON.parse(response.choices[0].message.content);
-  
+
   // Store prompts
   for (const prompt of data.prompts) {
     await storePrompt(userId, prompt, 3, isLocked);
   }
-  
+
   // Store character insights
   await db.character_evolution.create({
     userId,
@@ -1230,12 +1208,12 @@ async function processMilestoneAnalysis(response) {
     analyzedAt: new Date(),
     modelVersion: 'gpt-4o'
   });
-  
+
   // Update story with enhanced insights
   await db.stories.update(storyId, {
     characterInsights: data.characterInsights
   });
-  
+
   return data;
 }
 
@@ -1290,13 +1268,13 @@ interface ExtractedEntities {
 function extractEntities(transcript: string): ExtractedEntities {
   // Normalize text (case-insensitive matching)
   const normalized = transcript.toLowerCase();
-  
+
   // Extract people (proper nouns followed by action verbs)
   const peoplePatterns = [
     /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(said|told|taught|showed|gave|asked|wanted|helped|loved)/gi,
     /my\s+(?:friend|teacher|father|mother|brother|sister|boss|mentor)\s+([A-Z][a-z]+)/gi
   ];
-  
+
   const people = new Set<string>();
   peoplePatterns.forEach(pattern => {
     const matches = transcript.matchAll(pattern);
@@ -1304,13 +1282,13 @@ function extractEntities(transcript: string): ExtractedEntities {
       people.add(match[1]);
     }
   });
-  
+
   // Extract places (prepositions + capitalized locations)
   const placePatterns = [
     /\b(?:at|in|near|by|to)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/g,
     /\b(?:the)\s+(workshop|office|house|apartment|school|church|hospital|factory)/gi
   ];
-  
+
   const places = new Set<string>();
   placePatterns.forEach(pattern => {
     const matches = transcript.matchAll(pattern);
@@ -1318,12 +1296,12 @@ function extractEntities(transcript: string): ExtractedEntities {
       places.add(match[1]);
     }
   });
-  
+
   // Extract objects (possessives + concrete nouns)
   const objectPatterns = [
     /\b(?:my|his|her|our|their|the)\s+([\w\s]+?)\s+(?:that|which|was|had|sat|hung)/gi
   ];
-  
+
   const objects = new Set<string>();
   objectPatterns.forEach(pattern => {
     const matches = normalized.matchAll(pattern);
@@ -1335,23 +1313,23 @@ function extractEntities(transcript: string): ExtractedEntities {
       }
     }
   });
-  
+
   // Extract emotions
   const emotionWords = [
-    'proud', 'scared', 'angry', 'happy', 'sad', 'disappointed', 
+    'proud', 'scared', 'angry', 'happy', 'sad', 'disappointed',
     'excited', 'nervous', 'ashamed', 'relieved', 'terrified',
     'joyful', 'anxious', 'grateful', 'regretful'
   ];
-  
-  const emotions = emotionWords.filter(emotion => 
+
+  const emotions = emotionWords.filter(emotion =>
     normalized.includes(emotion)
   );
-  
+
   // Extract temporal boundaries
   const temporalPatterns = [
     /(first|last|only)\s+time/gi
   ];
-  
+
   const temporalBoundaries: string[] = [];
   temporalPatterns.forEach(pattern => {
     const matches = transcript.matchAll(pattern);
@@ -1359,7 +1337,7 @@ function extractEntities(transcript: string): ExtractedEntities {
       temporalBoundaries.push(match[0]);
     }
   });
-  
+
   return {
     people: Array.from(people),
     places: Array.from(places),
@@ -1390,7 +1368,7 @@ const TEMPLATE_LIBRARY: Record<string, PromptTemplate> = {
     context: "You mentioned {person} in your recent story",
     priority: 90
   },
-  
+
   object_origin: {
     trigger: 'object_mentioned',
     patterns: [
@@ -1403,7 +1381,7 @@ const TEMPLATE_LIBRARY: Record<string, PromptTemplate> = {
     context: "You mentioned {object}",
     priority: 85
   },
-  
+
   place_memory: {
     trigger: 'place_mentioned',
     patterns: [
@@ -1416,7 +1394,7 @@ const TEMPLATE_LIBRARY: Record<string, PromptTemplate> = {
     context: "You mentioned {place}",
     priority: 88
   },
-  
+
   emotion_expansion: {
     trigger: 'emotion_detected',
     patterns: [
@@ -1428,7 +1406,7 @@ const TEMPLATE_LIBRARY: Record<string, PromptTemplate> = {
     context: "You felt {emotion}",
     priority: 75
   },
-  
+
   temporal_sequence: {
     trigger: 'temporal_boundary',
     patterns: [
@@ -1451,17 +1429,17 @@ interface Tier1Prompt {
   anchorHash: string;
 }
 function generateTier1Template(
-  transcript: string, 
+  transcript: string,
   storyYear: number
 ): Tier1Prompt | null {
   const entities = extractEntities(transcript);
-  
+
   // Priority order (most likely to trigger recording)
   if (entities.people.length > 0) {
     const person = entities.people[0];
     const template = TEMPLATE_LIBRARY.person_expansion;
     const pattern = template.patterns[Math.floor(Math.random() * template.patterns.length)];
-    
+
     return {
       text: pattern.replace('{person}', person),
       context: template.context.replace('{person}', person),
@@ -1470,12 +1448,12 @@ function generateTier1Template(
       anchorHash: generateAnchorHash('person_expansion', person, storyYear)
     };
   }
-  
+
   if (entities.objects.length > 0) {
     const object = entities.objects[0];
     const template = TEMPLATE_LIBRARY.object_origin;
     const pattern = template.patterns[Math.floor(Math.random() * template.patterns.length)];
-    
+
     return {
       text: pattern.replace('{object}', object),
       context: template.context.replace('{object}', object),
@@ -1484,12 +1462,12 @@ function generateTier1Template(
       anchorHash: generateAnchorHash('object_origin', object, storyYear)
     };
   }
-  
+
   if (entities.places.length > 0) {
     const place = entities.places[0];
     const template = TEMPLATE_LIBRARY.place_memory;
     const pattern = template.patterns[Math.floor(Math.random() * template.patterns.length)];
-    
+
     return {
       text: pattern.replace('{place}', place),
       context: template.context.replace('{place}', place),
@@ -1498,12 +1476,12 @@ function generateTier1Template(
       anchorHash: generateAnchorHash('place_memory', place, storyYear)
     };
   }
-  
+
   if (entities.emotions.length > 0) {
     const emotion = entities.emotions[0];
     const template = TEMPLATE_LIBRARY.emotion_expansion;
     const pattern = template.patterns[Math.floor(Math.random() * template.patterns.length)];
-    
+
     return {
       text: pattern.replace('{emotion}', emotion),
       context: template.context.replace('{emotion}', emotion),
@@ -1512,7 +1490,7 @@ function generateTier1Template(
       anchorHash: generateAnchorHash('emotion_expansion', emotion, storyYear)
     };
   }
-  
+
   // Fallback: decade-based generic
   const decade = Math.floor(storyYear / 10) * 10;
   return {
@@ -1527,15 +1505,15 @@ function generateTier1Template(
 // ANCHOR HASH GENERATION
 // ============================================================================
 function generateAnchorHash(
-  type: string, 
-  entity: string, 
+  type: string,
+  entity: string,
   year: number | null
 ): string {
   const crypto = require('crypto');
   const normalized = entity.toLowerCase().trim();
   const yearStr = year ? year.toString() : 'NA';
   const input = \`\${type}|\${normalized}|\${yearStr}\`;
-  
+
   return crypto.createHash('sha1').update(input).digest('hex');
 }
 
@@ -1562,7 +1540,7 @@ async function generateAndFilterPrompts(
 ): Promise<void> {
   // 1. Generate candidates based on tier
   let candidates: ScoredPrompt[];
-  
+
   if (tier === 1) {
     // Template generation (handled separately)
     return;
@@ -1573,27 +1551,27 @@ async function generateAndFilterPrompts(
     // Milestone generation
     candidates = await generateTier3Candidates(userId, context.storyCount);
   }
-  
+
   // 2. Filter by minimum score threshold
   const MIN_SCORE = 50;
   const filtered = candidates.filter(c => c.recordingLikelihood >= MIN_SCORE);
-  
+
   if (filtered.length === 0) {
     // All candidates scored too low - retry with different approach
     console.warn(\`All candidates scored below \${MIN_SCORE} for user \${userId}\`);
-    
+
     if (tier === 3 && context.isFreeTier) {
       // Free tier failure is critical - retry once with sensory focus
       candidates = await generateTier3Candidates(userId, context.storyCount, 'sensory_only');
       const retryFiltered = candidates.filter(c => c.recordingLikelihood >= MIN_SCORE);
-      
+
       if (retryFiltered.length === 0) {
         // Still failed - use decade fallback
         const fallback = await generateDecadeFallback(userId);
         await storePrompt(userId, fallback, tier);
         return;
       }
-      
+
       filtered.push(...retryFiltered);
     } else {
       // Paid tier failure - just use decade fallback
@@ -1602,10 +1580,10 @@ async function generateAndFilterPrompts(
       return;
     }
   }
-  
+
   // 3. Sort by score descending
   filtered.sort((a, b) => b.recordingLikelihood - a.recordingLikelihood);
-  
+
   // 4. Determine how many to store
   let countToStore = 1;
   if (tier === 3) {
@@ -1622,14 +1600,14 @@ async function generateAndFilterPrompts(
   } else if (tier === 2) {
     countToStore = 2; // On-demand generates 2
   }
-  
+
   const toStore = filtered.slice(0, countToStore);
-  
+
   // 5. Store prompts
   for (let i = 0; i < toStore.length; i++) {
     const candidate = toStore[i];
     const isLocked = (tier === 3 && context.storyCount === 3 && i > 0); // Lock premium seed
-    
+
     await storePrompt(userId, candidate, tier, isLocked);
   }
 }
@@ -1648,7 +1626,7 @@ async function storePrompt(
     prompt.anchorEntity,
     prompt.anchorYear
   );
-  
+
   // Determine expiry based on tier
   let expiryDays: number;
   if (isLocked) {
@@ -1662,21 +1640,21 @@ async function storePrompt(
   } else {
     expiryDays = 7; // Fallback
   }
-  
-  const expiresAt = isLocked 
-    ? null 
+
+  const expiresAt = isLocked
+    ? null
     : new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
-  
+
   // Check if prompt already exists (deduplication)
   const existing = await db.active_prompts.findOne({
     where: { userId, anchorHash }
   });
-  
+
   if (existing) {
     console.log(\`Duplicate prompt detected for user \${userId}, skipping:\`, prompt.prompt);
     return;
   }
-  
+
   // Insert
   await db.active_prompts.create({
     userId,
@@ -1704,12 +1682,12 @@ Function: Generate safe fallback when AI fails or inventory is empty
 async function generateDecadeFallback(userId: string): Promise<ScoredPrompt> {
   const user = await db.users.findById(userId);
   const stories = await db.stories.find({ userId });
-  
+
   // Find decades the user has lived through but hasn't recorded from
   const currentYear = new Date().getFullYear();
   const birthYear = user.birthYear;
   const age = currentYear - birthYear;
-  
+
   // All decades they've lived through
   const livedDecades: number[] = [];
   for (let year = birthYear; year <= currentYear; year += 10) {
@@ -1718,15 +1696,15 @@ async function generateDecadeFallback(userId: string): Promise<ScoredPrompt> {
       livedDecades.push(decade);
     }
   }
-  
+
   // Decades with existing stories
   const recordedDecades = new Set(
     stories.map(s => Math.floor(s.storyYear / 10) * 10)
   );
-  
+
   // Unrecorded decades
   const unrecordedDecades = livedDecades.filter(d => !recordedDecades.has(d));
-  
+
   // Pick random unrecorded decade
   let decade: number;
   if (unrecordedDecades.length > 0) {
@@ -1735,7 +1713,7 @@ async function generateDecadeFallback(userId: string): Promise<ScoredPrompt> {
     // All decades covered - pick random decade they lived through
     decade = livedDecades[Math.floor(Math.random() * livedDecades.length)];
   }
-  
+
   // Generate decade-based prompt
   const prompts = [
     \`Tell me about a typical Saturday in the \${decade}s.\`,
@@ -1744,9 +1722,9 @@ async function generateDecadeFallback(userId: string): Promise<ScoredPrompt> {
     \`Tell me a story from the \${decade}s that makes you smile.\`,
     \`What was happening in your life in \${decade}?\`
   ];
-  
+
   const promptText = prompts[Math.floor(Math.random() * prompts.length)];
-  
+
   return {
     prompt: promptText,
     trigger: 'decade_fallback',
@@ -1775,23 +1753,23 @@ interface LessonOptions {
 }
 async function extractLessons(transcript: string): Promise<LessonOptions> {
   // Called during transcription processing (parallel with formatting)
-  
+
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o', // Best quality for wisdom extraction
     messages: [
       {
         role: 'system',
         content: `You are extracting life lessons from personal stories.
-        
+
         Your goal is to find the wisdom that can be passed to future generations.
         Each lesson should be 15-20 words, clear, and meaningful.
-        
+
         Avoid:
         - Generic platitudes ("Be yourself", "Follow your heart")
         - Overly specific details that won't apply to others
         - Negative framing ("Don't trust people")
         - Abstract philosophy
-        
+
         Focus on:
         - Universal truths discovered through personal experience
         - Practical wisdom that guides decisions
@@ -1814,10 +1792,10 @@ async function extractLessons(transcript: string): Promise<LessonOptions> {
     temperature: 0.8, // Higher for more creative, insightful responses
     max_tokens: 150
   });
-  
+
   // Parse the response
   const lessons = parseGPTLessons(completion.choices[0].message.content);
-  
+
   return {
     practical: lessons[0] || "Every experience teaches something if you're willing to learn from it",
     emotional: lessons[1] || "The heart remembers what the mind forgets",
@@ -1829,11 +1807,11 @@ function parseGPTLessons(content: string): string[] {
   const lines = content.split('\n')
     .map(line => line.trim())
     .filter(line => line.length > 0);
-  
+
   const lessons = lines
     .filter(line => {
       // Look for numbered items or lessons
-      return /^[1-3][\.\):]/.test(line) || 
+      return /^[1-3][\.\):]/.test(line) ||
              line.toLowerCase().includes('lesson') ||
              line.length > 10;
     })
@@ -1845,7 +1823,7 @@ function parseGPTLessons(content: string): string[] {
                  .trim();
     })
     .filter(lesson => lesson.length > 10 && lesson.length < 150);
-  
+
   return lessons.slice(0, 3);
 }
 
@@ -1874,7 +1852,7 @@ const LIFE_PHASE_VOICES = {
     verbStyle: "what did it look/smell/sound like"
   },
   teen: {
-    tone: "peer context, identity formation, firsts", 
+    tone: "peer context, identity formation, firsts",
     verbStyle: "who else was there, what made you different"
   },
   early_adult: {
@@ -1900,19 +1878,19 @@ const LIFE_PHASE_VOICES = {
 // ============================================================================
 function scoreLessonQuality(lesson: string, transcript: string): number {
   let score = 50; // Base score
-  
+
   // Specificity bonus (mentions specific elements from story)
   const storyWords = extractKeywords(transcript);
   const lessonWords = lesson.toLowerCase().split(' ');
   const overlap = lessonWords.filter(word => storyWords.includes(word)).length;
   score += overlap * 10;
-  
+
   // Length penalty (too short or too long)
   const wordCount = lesson.split(' ').length;
   if (wordCount < 10) score -= 20;
   if (wordCount > 25) score -= 10;
   if (wordCount >= 15 && wordCount <= 20) score += 10;
-  
+
   // Cliché penalty
   const cliches = [
     'follow your heart', 'be yourself', 'everything happens',
@@ -1921,13 +1899,13 @@ function scoreLessonQuality(lesson: string, transcript: string): number {
   if (cliches.some(cliche => lesson.toLowerCase().includes(cliche))) {
     score -= 30;
   }
-  
+
   // Action words bonus
   const actionWords = ['choose', 'build', 'create', 'fight', 'protect', 'learn'];
   if (actionWords.some(word => lesson.toLowerCase().includes(word))) {
     score += 15;
   }
-  
+
   return Math.max(0, Math.min(100, score));
 }
 ```
@@ -1945,25 +1923,25 @@ async function getNextPromptWithCircuitBreaker(userId: string) {
   // 1. Try to fetch existing prompt
   let prompt = await fetchActivePrompt(userId);
   if (prompt) return prompt;
-  
+
   // 2. Check Tier 2 rate limit (max 1 per 24 hours)
   const user = await db.users.findById(userId);
   const lastAttempt = user.last_tier2_attempt;
-  const hoursSinceLast = lastAttempt 
+  const hoursSinceLast = lastAttempt
     ? (Date.now() - lastAttempt.getTime()) / (1000 * 60 * 60)
     : 999;
-  
+
   if (hoursSinceLast < 24) {
     // Rate limited - immediate fallback
     return await generateDecadeFallback(userId);
   }
-  
+
   // 3. Try Tier 2 generation
   try {
     await db.users.update(userId, { last_tier2_attempt: new Date() });
-    
+
     const tier2Prompt = await generateTier2Prompt(userId);
-    
+
     if (tier2Prompt) {
       return tier2Prompt;
     } else {
@@ -1989,43 +1967,43 @@ async function generateStory3PromptWithRetry(userId: string): Promise<void> {
   // First attempt: standard Story 3 analysis
   const candidates = await generateStory3Candidates(userId);
   const filtered = candidates.filter(c => c.recordingLikelihood >= 50);
-  
+
   if (filtered.length >= 1) {
     // Success - store as normal
     await storeStory3Prompts(userId, filtered);
     return;
   }
-  
+
   // All candidates failed - retry with sensory focus
   console.warn(\`Story 3 candidates all scored < 50 for user \${userId}, retrying...\`);
-  
+
   const retryPrompt = `
   The previous 5 candidates scored too low. Try again with ONLY sensory detail prompts.
-  
+
   Focus EXCLUSIVELY on:
   - "What did X smell like?"
   - "What color was X?"
   - "What did you hear when X happened?"
   - "Describe the room where X happened"
-  
+
   Generate 3 sensory-focused candidates.
   `;
-  
+
   const retryCandidates = await callOpenAI(retryPrompt);
   const retryFiltered = retryCandidates.filter(c => c.recordingLikelihood >= 50);
-  
+
   if (retryFiltered.length >= 1) {
     // Retry succeeded
     await storeStory3Prompts(userId, retryFiltered);
     return;
   }
-  
+
   // Still failed - use decade fallback as last resort
   console.error(\`Story 3 retry also failed for user \${userId}, using fallback\`);
-  
+
   const fallback = await generateDecadeFallback(userId);
   await storePrompt(userId, fallback, 3, false);
-  
+
   // Also create 3 generic locked prompts for premium seed
   for (let i = 0; i < 3; i++) {
     const genericFallback = await generateDecadeFallback(userId);
@@ -2045,27 +2023,27 @@ Solution: Keep prompts locked, send recovery email
 async function handleStripeWebhook(event) {
   if (event.type === 'checkout.session.expired') {
     const userId = event.data.object.client_reference_id;
-    
+
     // Payment failed or abandoned
     // Prompts remain locked
-    
+
     // Send recovery email
     await sendEmail({
       to: user.email,
       subject: "Your Story Analysis is Still Waiting",
       body: `
         Hi ${user.firstName},
-        
-        I've analyzed your first 3 stories and found 3 specific memories 
-        you should record. Your personalized prompts are ready whenever 
+
+        I've analyzed your first 3 stories and found 3 specific memories
+        you should record. Your personalized prompts are ready whenever
         you're ready to continue.
-        
+
         [Complete Your Subscription - $149/year]
-        
+
         Your prompts will be waiting for you.
       `
     });
-    
+
     return { received: true };
   }
 }
@@ -2085,7 +2063,7 @@ Alternative: Mark prompts as source_story_deleted if you want to handle it:
 async function handleStoryDelete(storyId: string, userId: string) {
   // Delete story
   await db.stories.delete(storyId);
-  
+
   // Optional: Mark related prompts
   await db.active_prompts.updateMany(
     {
@@ -2109,25 +2087,25 @@ Solution: Decade fallback + notification
 async function generateWithSafetyFilter(userId: string) {
   const user = await db.users.findById(userId);
   const bannedTopics = user.do_not_ask || [];
-  
+
   if (bannedTopics.length > 15) {
     console.warn(\`User \${userId} has \${bannedTopics.length} blocked topics\`);
   }
-  
+
   // Generate candidates
   const candidates = await generateCandidates(userId);
-  
+
   // Filter out banned topics
   const safe = candidates.filter(c => {
     const lowerPrompt = c.prompt.toLowerCase();
     return !bannedTopics.some(topic => lowerPrompt.includes(topic.toLowerCase()));
   });
-  
+
   if (safe.length === 0) {
     // All prompts blocked - use decade fallback
     return await generateDecadeFallback(userId);
   }
-  
+
   return safe;
 }
 ```
@@ -2167,21 +2145,21 @@ Implementation:
 async function addToDoNotAsk(userId: string, topic: string): Promise<void> {
   // Normalize topic
   const normalized = topic.toLowerCase().trim();
-  
+
   // Add to user's do_not_ask list
   await db.query(`
     UPDATE users
-    SET do_not_ask = 
-      CASE 
+    SET do_not_ask =
+      CASE
         WHEN do_not_ask IS NULL THEN $2::jsonb
         ELSE do_not_ask || $2::jsonb
       END
     WHERE id = $1
   `, [userId, JSON.stringify([normalized])]);
-  
+
   // Delete any active prompts containing this topic
   const prompts = await db.active_prompts.find({ userId });
-  
+
   for (const prompt of prompts) {
     if (prompt.prompt_text.toLowerCase().includes(normalized)) {
       await db.active_prompts.delete(prompt.id);
@@ -2190,19 +2168,19 @@ async function addToDoNotAsk(userId: string, topic: string): Promise<void> {
   }
 }
 async function filterBannedTopics(
-  userId: string, 
+  userId: string,
   candidates: ScoredPrompt[]
 ): Promise<ScoredPrompt[]> {
   const user = await db.users.findById(userId);
   const bannedTopics = user.do_not_ask || [];
-  
+
   if (bannedTopics.length === 0) {
     return candidates;
   }
-  
+
   return candidates.filter(c => {
     const lowerPrompt = c.prompt.toLowerCase();
-    const containsBanned = bannedTopics.some(topic => 
+    const containsBanned = bannedTopics.some(topic =>
       lowerPrompt.includes(topic.toLowerCase())
     );
     return !containsBanned;
@@ -2218,7 +2196,7 @@ Blocked Topics:
 ```typescript
 const SENSITIVE_TOPICS = {
   trauma: [
-    'abuse', 'assault', 'molest', 'rape', 'violence', 
+    'abuse', 'assault', 'molest', 'rape', 'violence',
     'beaten', 'attacked', 'traumatized'
   ],
   death: [
@@ -2226,7 +2204,7 @@ const SENSITIVE_TOPICS = {
     'passed away', 'terminal', 'fatal'
   ],
   addiction: [
-    'alcoholic', 'addict', 'overdose', 'rehab', 
+    'alcoholic', 'addict', 'overdose', 'rehab',
     'drinking problem', 'substance abuse'
   ],
   financial: [
@@ -2250,7 +2228,7 @@ function classifyPromptSafety(promptText: string): {
   matched?: string;
 } {
   const lowerPrompt = promptText.toLowerCase();
-  
+
   for (const [category, keywords] of Object.entries(SENSITIVE_TOPICS)) {
     for (const keyword of keywords) {
       if (lowerPrompt.includes(keyword)) {
@@ -2262,7 +2240,7 @@ function classifyPromptSafety(promptText: string): {
       }
     }
   }
-  
+
   return { safe: true };
 }
 Application:
@@ -2274,7 +2252,7 @@ async function storePromptWithSafety(
 ): Promise<void> {
   // Check safety
   const safety = classifyPromptSafety(prompt.prompt);
-  
+
   if (!safety.safe) {
     console.warn(
       \`Blocked unsafe prompt for user \${userId}:\`,
@@ -2282,18 +2260,18 @@ async function storePromptWithSafety(
     );
     return; // Don't store
   }
-  
+
   // Check user's do_not_ask
   const user = await db.users.findById(userId);
   const bannedTopics = user.do_not_ask || [];
-  
+
   for (const topic of bannedTopics) {
     if (prompt.prompt.toLowerCase().includes(topic.toLowerCase())) {
       console.warn(\`Blocked prompt matching do_not_ask topic "\${topic}"\`);
       return; // Don't store
     }
   }
-  
+
   // Safe - proceed with storage
   await storePrompt(userId, prompt, tier);
 }
@@ -2306,21 +2284,21 @@ function shouldAllowSensitiveTopic(
   userStories: Story[]
 ): boolean {
   const safety = classifyPromptSafety(prompt);
-  
+
   if (safety.safe) return true;
-  
+
   // Check if user already discussed this topic
-  const userMentionedIt = userStories.some(story => 
+  const userMentionedIt = userStories.some(story =>
     story.transcript.toLowerCase().includes(safety.matched)
   );
-  
+
   if (userMentionedIt) {
     console.log(
       `Allowing sensitive prompt because user initiated topic: ${safety.matched}`
     );
     return true;
   }
-  
+
   return false;
 }
 ```
@@ -2336,15 +2314,15 @@ function detectRecentDeath(transcript: string, storyYear: number): boolean {
     /died/i, /passed away/i, /funeral/i, /buried/i,
     /lost (my|our) (mom|dad|mother|father|wife|husband|son|daughter)/i
   ];
-  
+
   const currentYear = new Date().getFullYear();
   const yearsSinceDeath = currentYear - storyYear;
-  
+
   if (yearsSinceDeath < 1) {
     // Story is from this year - check for death mentions
     return deathIndicators.some(pattern => pattern.test(transcript));
   }
-  
+
   return false;
 }
 // In generateTier1Template:
@@ -2361,7 +2339,7 @@ if (detectRecentDeath(transcript, storyYear)) {
 Prompt → Recording Conversion Rate
 ```sql
 -- Overall conversion by tier
-SELECT 
+SELECT
   tier,
   COUNT(CASE WHEN outcome = 'used' THEN 1 END)::FLOAT / COUNT(*) * 100 AS conversion_rate,
   AVG(shown_count) AS avg_shows_before_outcome
@@ -2375,19 +2353,19 @@ ORDER BY tier;
 Free Tier Funnel Conversion
 sql
 -- Story 1 → Story 2 → Story 3 → Payment
-SELECT 
+SELECT
   COUNT(CASE WHEN free_stories_used >= 1 THEN 1 END) AS reached_story_1,
   COUNT(CASE WHEN free_stories_used >= 2 THEN 1 END) AS reached_story_2,
   COUNT(CASE WHEN free_stories_used >= 3 THEN 1 END) AS reached_story_3,
   COUNT(CASE WHEN subscription_status = 'active' THEN 1 END) AS converted_to_paid,
-  
-  COUNT(CASE WHEN free_stories_used >= 2 THEN 1 END)::FLOAT / 
+
+  COUNT(CASE WHEN free_stories_used >= 2 THEN 1 END)::FLOAT /
     NULLIF(COUNT(CASE WHEN free_stories_used >= 1 THEN 1 END), 0) * 100 AS story1_to_2_rate,
-  
-  COUNT(CASE WHEN free_stories_used >= 3 THEN 1 END)::FLOAT / 
+
+  COUNT(CASE WHEN free_stories_used >= 3 THEN 1 END)::FLOAT /
     NULLIF(COUNT(CASE WHEN free_stories_used >= 2 THEN 1 END), 0) * 100 AS story2_to_3_rate,
-  
-  COUNT(CASE WHEN subscription_status = 'active' THEN 1 END)::FLOAT / 
+
+  COUNT(CASE WHEN subscription_status = 'active' THEN 1 END)::FLOAT /
     NULLIF(COUNT(CASE WHEN free_stories_used >= 3 THEN 1 END), 0) * 100 AS story3_to_paid_rate
 FROM users
 WHERE created_at >= '2025-01-01';
@@ -2398,7 +2376,7 @@ WHERE created_at >= '2025-01-01';
 10.2 Secondary Metrics
 Stories Per User Per Month
 sql
-SELECT 
+SELECT
   DATE_TRUNC('month', created_at) AS month,
   COUNT(*)::FLOAT / COUNT(DISTINCT user_id) AS avg_stories_per_user
 FROM stories
@@ -2409,14 +2387,14 @@ ORDER BY month;
 Days Between Recordings
 sql
 WITH story_gaps AS (
-  SELECT 
+  SELECT
     user_id,
     created_at,
     LAG(created_at) OVER (PARTITION BY user_id ORDER BY created_at) AS prev_created_at,
     EXTRACT(EPOCH FROM (created_at - LAG(created_at) OVER (PARTITION BY user_id ORDER BY created_at))) / 86400 AS days_since_last
   FROM stories
 )
-SELECT 
+SELECT
   AVG(days_since_last) AS avg_days_between_stories,
   PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY days_since_last) AS median_days
 FROM story_gaps
@@ -2424,7 +2402,7 @@ WHERE days_since_last IS NOT NULL;
 -- Target: ≤ 10 days average
 Prompt Skip Rate
 sql
-SELECT 
+SELECT
   tier,
   memory_type,
   COUNT(*) AS total_skipped,
@@ -2436,7 +2414,7 @@ ORDER BY total_skipped DESC;
 -- Target: < 2 skips before use
 Active Prompt Inventory Health
 sql
-SELECT 
+SELECT
   user_id,
   COUNT(*) AS active_prompts,
   AVG(prompt_score) AS avg_score,
@@ -2452,8 +2430,8 @@ HAVING COUNT(*) > 5;
 Prompt Score Correlation with Conversion
 sql
 -- Does higher prompt_score actually lead to more "used" outcomes?
-SELECT 
-  CASE 
+SELECT
+  CASE
     WHEN prompt_score >= 80 THEN '80-100'
     WHEN prompt_score >= 60 THEN '60-79'
     WHEN prompt_score >= 40 THEN '40-59'
@@ -2468,7 +2446,7 @@ ORDER BY score_bucket DESC;
 -- If not, scorer needs refinement
 Tier Effectiveness
 sql
-SELECT 
+SELECT
   tier,
   COUNT(*) AS total_generated,
   COUNT(CASE WHEN outcome = 'used' THEN 1 END) AS used,
@@ -2485,7 +2463,7 @@ ORDER BY tier;
 
 Memory Type Performance
 sql
-SELECT 
+SELECT
   memory_type,
   COUNT(*) AS total,
   COUNT(CASE WHEN outcome = 'used' THEN 1 END)::FLOAT / COUNT(*) * 100 AS conversion_rate,
@@ -2505,17 +2483,17 @@ Incremental Revenue from AI Prompts
 sql
 -- Compare conversion rates: users who saw AI prompts vs control
 -- (Requires A/B test setup)
-SELECT 
+SELECT
   CASE WHEN saw_tier3_prompt THEN 'With AI' ELSE 'Control' END AS cohort,
   COUNT(*) AS users,
   COUNT(CASE WHEN subscription_status = 'active' THEN 1 END) AS conversions,
   COUNT(CASE WHEN subscription_status = 'active' THEN 1 END)::FLOAT / COUNT(*) * 100 AS conversion_rate
 FROM (
-  SELECT 
+  SELECT
     u.id,
     u.subscription_status,
     EXISTS(
-      SELECT 1 FROM prompt_history ph 
+      SELECT 1 FROM prompt_history ph
       WHERE ph.user_id = u.id AND ph.tier = 3 AND ph.outcome = 'used'
     ) AS saw_tier3_prompt
   FROM users u
@@ -2527,7 +2505,7 @@ GROUP BY cohort;
 Cost Per Conversion
 sql
 -- Assume $1,757 annual AI cost for 1,000 paid users
-SELECT 
+SELECT
   COUNT(CASE WHEN subscription_status = 'active' THEN 1 END) AS paid_users,
   1757.0 / NULLIF(COUNT(CASE WHEN subscription_status = 'active' THEN 1 END), 0) AS cost_per_paid_user
 FROM users;
@@ -2536,36 +2514,36 @@ FROM users;
 Weekly Health Check
 sql
 -- Run every Monday
-SELECT 
+SELECT
   'Prompt Conversion' AS metric,
-  (SELECT AVG(CASE WHEN outcome = 'used' THEN 1.0 ELSE 0.0 END) * 100 
-   FROM prompt_history 
+  (SELECT AVG(CASE WHEN outcome = 'used' THEN 1.0 ELSE 0.0 END) * 100
+   FROM prompt_history
    WHERE created_at >= NOW() - INTERVAL '7 days') AS value,
   70.0 AS target
-  
+
 UNION ALL
-SELECT 
+SELECT
   'Free Tier Conversion',
-  (SELECT COUNT(CASE WHEN subscription_status = 'active' THEN 1 END)::FLOAT / 
+  (SELECT COUNT(CASE WHEN subscription_status = 'active' THEN 1 END)::FLOAT /
           NULLIF(COUNT(CASE WHEN free_stories_used >= 3 THEN 1 END), 0) * 100
-   FROM users 
+   FROM users
    WHERE created_at >= NOW() - INTERVAL '7 days'),
   45.0
-  
+
 UNION ALL
-SELECT 
+SELECT
   'Stories Per User',
   (SELECT COUNT(*)::FLOAT / NULLIF(COUNT(DISTINCT user_id), 0)
-   FROM stories 
+   FROM stories
    WHERE created_at >= NOW() - INTERVAL '30 days'),
   3.0
-  
+
 UNION ALL
-SELECT 
+SELECT
   'Active Prompts',
   (SELECT AVG(cnt) FROM (
-    SELECT COUNT(*) AS cnt FROM active_prompts 
-    WHERE expires_at > NOW() 
+    SELECT COUNT(*) AS cnt FROM active_prompts
+    WHERE expires_at > NOW()
     GROUP BY user_id
   ) x),
   3.0;
@@ -2573,23 +2551,23 @@ SELECT
 New metrics for lesson extraction feature
 sql
 -- Lesson acceptance rate (how often users keep AI suggestion)
-SELECT 
+SELECT
   DATE_TRUNC('week', created_at) AS week,
   COUNT(*) AS total_stories,
   COUNT(CASE WHEN lesson_learned = lesson_suggested THEN 1 END) AS kept_suggestion,
   COUNT(CASE WHEN lesson_learned != lesson_suggested THEN 1 END) AS edited,
   COUNT(CASE WHEN lesson_learned IS NULL THEN 1 END) AS no_lesson,
-  
-  COUNT(CASE WHEN lesson_learned = lesson_suggested THEN 1 END)::FLOAT / 
+
+  COUNT(CASE WHEN lesson_learned = lesson_suggested THEN 1 END)::FLOAT /
     NULLIF(COUNT(*), 0) * 100 AS acceptance_rate
-    
+
 FROM stories
 WHERE created_at >= NOW() - INTERVAL '30 days'
 GROUP BY week
 ORDER BY week DESC;
 -- Target: 40% keep as-is, 50% edit slightly, 10% write from scratch
 -- Character trait confidence over time
-SELECT 
+SELECT
   user_id,
   story_count,
   AVG((traits->>'confidence')::FLOAT) AS avg_confidence,
@@ -2612,13 +2590,13 @@ Lesson Extraction (Immediate):
   - 8,000 Story 1s × $0.002 (gpt-4o quick lesson) = $16.00
   - 5,200 Story 2s × $0.002 = $10.40
   - 2,860 Story 3s × $0.002 = $5.72
-  
+
   Subtotal Lessons: $32.12
 Combined Analysis at Milestones:
   - Story 1: 8,000 × $0.006 (prompts + character) = $48.00
   - Story 2: 5,200 × $0.008 = $41.60
   - Story 3: 2,860 × $0.010 = $28.60
-  
+
   Subtotal Analysis: $118.20
 TOTAL FREE TIER: $150.32/year
 11.2 Paid Tier Costs
@@ -2787,3 +2765,4 @@ Read Section 11 to manage costs
 Read Section 12 to plan work
 
 
+$$

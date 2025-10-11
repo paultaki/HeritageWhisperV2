@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       logger.error("Error fetching stories:", storiesError);
       return NextResponse.json(
         { error: "Failed to fetch stories" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -62,22 +62,25 @@ export async function GET(request: NextRequest) {
       if (!photoUrl) return null;
 
       // Skip blob URLs
-      if (photoUrl.startsWith('blob:')) {
+      if (photoUrl.startsWith("blob:")) {
         return null;
       }
 
       // If already a full URL, use as-is
-      if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) {
+      if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) {
         return photoUrl;
       }
 
       // Generate signed URL for storage path
       const { data, error } = await supabaseAdmin.storage
-        .from('heritage-whisper-files')
-        .createSignedUrl(photoUrl.startsWith('photo/') ? photoUrl : `photo/${photoUrl}`, 604800);
+        .from("heritage-whisper-files")
+        .createSignedUrl(
+          photoUrl.startsWith("photo/") ? photoUrl : `photo/${photoUrl}`,
+          604800,
+        );
 
       if (error) {
-        logger.error('Error creating signed URL for photo:', photoUrl, error);
+        logger.error("Error creating signed URL for photo:", photoUrl, error);
         return null;
       }
 
@@ -85,54 +88,56 @@ export async function GET(request: NextRequest) {
     };
 
     // Transform to match frontend expectations
-    const transformedStories = await Promise.all((stories || []).map(async (story) => {
-      // Handle photos if stored as JSON
-      let photos = [];
-      if (story.metadata?.photos) {
-        photos = await Promise.all(
-          (story.metadata.photos || []).map(async (photo: any) => ({
-            ...photo,
-            url: await getPhotoUrl(photo.url || photo.filePath)
-          }))
-        );
-      }
+    const transformedStories = await Promise.all(
+      (stories || []).map(async (story) => {
+        // Handle photos if stored as JSON
+        let photos = [];
+        if (story.metadata?.photos) {
+          photos = await Promise.all(
+            (story.metadata.photos || []).map(async (photo: any) => ({
+              ...photo,
+              url: await getPhotoUrl(photo.url || photo.filePath),
+            })),
+          );
+        }
 
-      const photoUrl = await getPhotoUrl(story.photo_url);
+        const photoUrl = await getPhotoUrl(story.photo_url);
 
-      return {
-        id: story.id,
-        title: story.title || "Untitled Story",
-        content: story.transcript,
-        transcription: story.transcript,
-        createdAt: story.created_at,
-        updatedAt: story.updated_at,
-        age: story.metadata?.life_age || story.metadata?.age,
-        year: story.year,
-        storyYear: story.year,
-        lifeAge: story.metadata?.life_age,
-        includeInTimeline: story.metadata?.include_in_timeline ?? true,
-        includeInBook: story.metadata?.include_in_book ?? true,
-        isFavorite: story.metadata?.is_favorite ?? false,
-        photoUrl: photoUrl,
-        photos: photos,
-        audioUrl: story.audio_url,
-        wisdomTranscription: story.wisdom_text,
-        wisdomClipText: story.wisdom_text,
-        wisdomClipUrl: story.wisdom_clip_url,
-        durationSeconds: story.duration_seconds,
-        emotions: story.emotions,
-        pivotalCategory: story.metadata?.pivotal_category,
-        storyDate: story.metadata?.story_date,
-        photoTransform: story.metadata?.photo_transform,
-      };
-    }));
+        return {
+          id: story.id,
+          title: story.title || "Untitled Story",
+          content: story.transcript,
+          transcription: story.transcript,
+          createdAt: story.created_at,
+          updatedAt: story.updated_at,
+          age: story.metadata?.life_age || story.metadata?.age,
+          year: story.year,
+          storyYear: story.year,
+          lifeAge: story.metadata?.life_age,
+          includeInTimeline: story.metadata?.include_in_timeline ?? true,
+          includeInBook: story.metadata?.include_in_book ?? true,
+          isFavorite: story.metadata?.is_favorite ?? false,
+          photoUrl: photoUrl,
+          photos: photos,
+          audioUrl: story.audio_url,
+          wisdomTranscription: story.wisdom_text,
+          wisdomClipText: story.wisdom_text,
+          wisdomClipUrl: story.wisdom_clip_url,
+          durationSeconds: story.duration_seconds,
+          emotions: story.emotions,
+          pivotalCategory: story.metadata?.pivotal_category,
+          storyDate: story.metadata?.story_date,
+          photoTransform: story.metadata?.photo_transform,
+        };
+      }),
+    );
 
     return NextResponse.json({ stories: transformedStories });
   } catch (error) {
     logger.error("Stories fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch stories" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -146,7 +151,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -159,28 +164,30 @@ export async function POST(request: NextRequest) {
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const body = await request.json();
 
     // Process photos array
-    const processedPhotos = (body.photos || []).filter((photo: any) => {
-      if (!photo.url && !photo.filePath) return false;
-      if (photo.url && photo.url.startsWith('blob:')) {
-        return false;
-      }
-      return true;
-    }).map((photo: any) => {
-      if (photo.filePath) {
-        return {
-          ...photo,
-          url: photo.filePath
-        };
-      }
-      return photo;
-    });
+    const processedPhotos = (body.photos || [])
+      .filter((photo: any) => {
+        if (!photo.url && !photo.filePath) return false;
+        if (photo.url && photo.url.startsWith("blob:")) {
+          return false;
+        }
+        return true;
+      })
+      .map((photo: any) => {
+        if (photo.filePath) {
+          return {
+            ...photo,
+            url: photo.filePath,
+          };
+        }
+        return photo;
+      });
 
     // Prepare story data for Supabase using actual schema
     // Note: duration_seconds has a check constraint (must be between 1 and 120)
@@ -192,12 +199,18 @@ export async function POST(request: NextRequest) {
       title: body.title || "Untitled Story",
       transcript: body.transcription || body.content,
       year: body.year || body.storyYear,
-      audio_url: body.audioUrl && !body.audioUrl.startsWith('blob:') ? body.audioUrl : undefined,
+      audio_url:
+        body.audioUrl && !body.audioUrl.startsWith("blob:")
+          ? body.audioUrl
+          : undefined,
       wisdom_text: body.wisdomClipText || body.wisdomTranscription,
       wisdom_clip_url: body.wisdomClipUrl,
       duration_seconds: constrainedDuration,
       emotions: body.emotions,
-      photo_url: body.photoUrl && !body.photoUrl.startsWith('blob:') ? body.photoUrl : undefined,
+      photo_url:
+        body.photoUrl && !body.photoUrl.startsWith("blob:")
+          ? body.photoUrl
+          : undefined,
       is_saved: true,
       metadata: {
         life_age: body.lifeAge || body.age,
@@ -209,7 +222,7 @@ export async function POST(request: NextRequest) {
         story_date: body.storyDate,
         photo_transform: body.photoTransform,
         actual_duration: body.durationSeconds, // Store actual duration in metadata
-      }
+      },
     };
 
     // Save the story to Supabase
@@ -223,32 +236,36 @@ export async function POST(request: NextRequest) {
       logger.error("Error creating story:", insertError);
       return NextResponse.json(
         { error: "Failed to create story", details: insertError.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     // ============================================================================
     // TIER 1: Generate template-based prompts (1-3 per story, synchronous)
     // ============================================================================
-    logger.debug('[Stories API] Generating Tier 1 prompts for story:', newStory.id);
-    
+    logger.debug(
+      "[Stories API] Generating Tier 1 prompts for story:",
+      newStory.id,
+    );
+
     try {
       const tier1Prompts = generateTier1Templates(
-        newStory.transcript || '', 
-        newStory.year
+        newStory.transcript || "",
+        newStory.year,
       );
-      
+
       if (tier1Prompts.length > 0) {
-        logger.debug(`[Stories API] ${tier1Prompts.length} Tier 1 prompts generated:`, 
-          tier1Prompts.map(p => ({ entity: p.entity, type: p.type }))
+        logger.debug(
+          `[Stories API] ${tier1Prompts.length} Tier 1 prompts generated:`,
+          tier1Prompts.map((p) => ({ entity: p.entity, type: p.type })),
         );
-        
+
         // Calculate 7-day expiry
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7);
-        
+
         // Store ALL prompts in active_prompts table
-        const promptsToInsert = tier1Prompts.map(prompt => ({
+        const promptsToInsert = tier1Prompts.map((prompt) => ({
           user_id: user.id,
           prompt_text: prompt.text,
           context_note: prompt.context,
@@ -258,34 +275,46 @@ export async function POST(request: NextRequest) {
           tier: 1,
           memory_type: prompt.memoryType,
           prompt_score: prompt.promptScore,
-          score_reason: 'Template-based prompt from entity extraction',
-          model_version: 'tier1-template',
+          score_reason: "Template-based prompt from entity extraction",
+          model_version: "tier1-template",
           expires_at: expiresAt.toISOString(),
           is_locked: false,
-          shown_count: 0
+          shown_count: 0,
         }));
-        
+
         const { error: promptError } = await supabaseAdmin
-          .from('active_prompts')
+          .from("active_prompts")
           .insert(promptsToInsert);
-        
+
         if (promptError) {
           // Check if it's a duplicate key error (expected - deduplication working)
-          if (promptError.code === '23505') {
-            logger.debug('[Stories API] Some Tier 1 prompts already exist (deduplication working)');
+          if (promptError.code === "23505") {
+            logger.debug(
+              "[Stories API] Some Tier 1 prompts already exist (deduplication working)",
+            );
           } else {
             // Log unexpected errors but don't fail the request
-            logger.error('[Stories API] Failed to store Tier 1 prompts:', promptError);
+            logger.error(
+              "[Stories API] Failed to store Tier 1 prompts:",
+              promptError,
+            );
           }
         } else {
-          logger.debug(`[Stories API] ${tier1Prompts.length} Tier 1 prompts stored successfully`);
+          logger.debug(
+            `[Stories API] ${tier1Prompts.length} Tier 1 prompts stored successfully`,
+          );
         }
       } else {
-        logger.debug('[Stories API] No Tier 1 prompts generated (no entities found)');
+        logger.debug(
+          "[Stories API] No Tier 1 prompts generated (no entities found)",
+        );
       }
     } catch (promptGenError) {
       // Log error but don't fail the request
-      logger.error('[Stories API] Error generating Tier 1 prompts:', promptGenError);
+      logger.error(
+        "[Stories API] Error generating Tier 1 prompts:",
+        promptGenError,
+      );
     }
 
     // ============================================================================
@@ -294,61 +323,73 @@ export async function POST(request: NextRequest) {
     try {
       // Count total stories for this user
       const { count: storyCount, error: countError } = await supabaseAdmin
-        .from('stories')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .from("stories")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
 
       if (countError) {
-        logger.error('[Stories API] Failed to count stories:', countError);
+        logger.error("[Stories API] Failed to count stories:", countError);
       } else {
         logger.debug(`[Stories API] User now has ${storyCount} total stories`);
-        
+
         // Milestone thresholds from spec
         const MILESTONES = [1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100];
-        
+
         if (MILESTONES.includes(storyCount || 0)) {
           logger.debug(`[Stories API] 🎯 MILESTONE HIT: Story #${storyCount}!`);
           logger.debug(`[Stories API] Triggering Tier 3 combined analysis...`);
-          
+
           // Fetch all user stories for analysis
           const { data: allStories, error: storiesError } = await supabaseAdmin
-            .from('stories')
-            .select('id, title, transcript, lesson_learned, created_at')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: true });
-          
+            .from("stories")
+            .select("id, title, transcript, lesson_learned, created_at")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: true });
+
           if (storiesError || !allStories) {
-            logger.error('[Stories API] Failed to fetch stories for Tier 3:', storiesError);
+            logger.error(
+              "[Stories API] Failed to fetch stories for Tier 3:",
+              storiesError,
+            );
           } else {
             try {
               // Perform GPT-4o combined analysis
-              const tier3Result = await performTier3Analysis(allStories, storyCount);
-              
+              const tier3Result = await performTier3Analysis(
+                allStories,
+                storyCount,
+              );
+
               // Store prompts and character insights
               await storeTier3Results(
                 supabaseAdmin,
                 user.id,
                 storyCount,
-                tier3Result
+                tier3Result,
               );
-              
-              logger.debug(`[Stories API] ✅ Tier 3 analysis complete for Story #${storyCount}`);
-              
+
+              logger.debug(
+                `[Stories API] ✅ Tier 3 analysis complete for Story #${storyCount}`,
+              );
+
               // Log Story 3 paywall status
               if (storyCount === 3) {
-                logger.debug(`[Stories API] 💎 Story 3 paywall: 1 prompt unlocked, 3 locked (premium seed)`);
+                logger.debug(
+                  `[Stories API] 💎 Story 3 paywall: 1 prompt unlocked, 3 locked (premium seed)`,
+                );
               }
             } catch (tier3Error) {
-              logger.error('[Stories API] Tier 3 analysis failed:', tier3Error);
+              logger.error("[Stories API] Tier 3 analysis failed:", tier3Error);
               // Don't fail the request - Tier 3 is bonus functionality
             }
           }
         } else {
-          logger.debug(`[Stories API] Not a milestone (next milestone at ${MILESTONES.find(m => m > (storyCount || 0)) || '100+'})`);
+          logger.debug(
+            `[Stories API] Not a milestone (next milestone at ${MILESTONES.find((m) => m > (storyCount || 0)) || "100+"})`,
+          );
         }
       }
     } catch (milestoneError) {
-      logger.error('[Stories API] Error checking milestone:', milestoneError);
+      logger.error("[Stories API] Error checking milestone:", milestoneError);
     }
 
     // Transform the response
@@ -383,7 +424,7 @@ export async function POST(request: NextRequest) {
     logger.error("Story creation error:", error);
     return NextResponse.json(
       { error: "Failed to create story" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -6,11 +6,33 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
-import { Share2, Copy, Trash2, Eye, Edit, Mail, Calendar, CheckCircle, XCircle } from "lucide-react";
+import {
+  Share2,
+  Copy,
+  Trash2,
+  Eye,
+  Edit,
+  Mail,
+  Calendar,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 
 interface Share {
   id: string;
@@ -41,7 +63,11 @@ export default function ShareManagement() {
 
   // Create share mutation
   const createShareMutation = useMutation({
-    mutationFn: async (data: { email: string; permissionLevel: string; expiresAt?: string }) => {
+    mutationFn: async (data: {
+      email: string;
+      permissionLevel: string;
+      expiresAt?: string;
+    }) => {
       const res = await fetch("/api/share", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -108,7 +134,9 @@ export default function ShareManagement() {
     }
 
     const expiresAt = expiresIn
-      ? new Date(Date.now() + parseInt(expiresIn) * 24 * 60 * 60 * 1000).toISOString()
+      ? new Date(
+          Date.now() + parseInt(expiresIn) * 24 * 60 * 60 * 1000,
+        ).toISOString()
       : undefined;
 
     createShareMutation.mutate({ email, permissionLevel, expiresAt });
@@ -127,7 +155,9 @@ export default function ShareManagement() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">Please sign in to manage sharing</p>
+          <p className="text-muted-foreground mb-4">
+            Please sign in to manage sharing
+          </p>
           <Button onClick={() => router.push("/auth/login")}>Sign In</Button>
         </div>
       </div>
@@ -142,7 +172,9 @@ export default function ShareManagement() {
           <Share2 className="w-8 h-8 text-primary" />
           <div>
             <h1 className="text-3xl font-bold">Share Your Timeline</h1>
-            <p className="text-muted-foreground">Invite family and friends to view or collaborate on your stories</p>
+            <p className="text-muted-foreground">
+              Invite family and friends to view or collaborate on your stories
+            </p>
           </div>
         </div>
 
@@ -150,7 +182,9 @@ export default function ShareManagement() {
         <Card>
           <CardHeader>
             <CardTitle>Create Share Link</CardTitle>
-            <CardDescription>Invite someone to access your timeline</CardDescription>
+            <CardDescription>
+              Invite someone to access your timeline
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -173,7 +207,10 @@ export default function ShareManagement() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="permission">Permission Level</Label>
-                <Select value={permissionLevel} onValueChange={setPermissionLevel}>
+                <Select
+                  value={permissionLevel}
+                  onValueChange={setPermissionLevel}
+                >
                   <SelectTrigger className="mt-2">
                     <SelectValue />
                   </SelectTrigger>
@@ -215,7 +252,9 @@ export default function ShareManagement() {
               disabled={createShareMutation.isPending}
               className="w-full"
             >
-              {createShareMutation.isPending ? "Creating..." : "Create Share Link"}
+              {createShareMutation.isPending
+                ? "Creating..."
+                : "Create Share Link"}
             </Button>
           </CardContent>
         </Card>
@@ -224,7 +263,9 @@ export default function ShareManagement() {
         <Card>
           <CardHeader>
             <CardTitle>Active Shares ({shares.length})</CardTitle>
-            <CardDescription>People who have access to your timeline</CardDescription>
+            <CardDescription>
+              People who have access to your timeline
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -239,10 +280,15 @@ export default function ShareManagement() {
             ) : (
               <div className="space-y-3">
                 {shares.map((share) => (
-                  <div key={share.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={share.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{share.sharedWithEmail}</span>
+                        <span className="font-medium">
+                          {share.sharedWithEmail}
+                        </span>
                         {share.permissionLevel === "view" ? (
                           <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
                             <Eye className="w-3 h-3" />
@@ -256,11 +302,15 @@ export default function ShareManagement() {
                         )}
                       </div>
                       <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                        <span>Created {new Date(share.createdAt).toLocaleDateString()}</span>
+                        <span>
+                          Created{" "}
+                          {new Date(share.createdAt).toLocaleDateString()}
+                        </span>
                         {share.expiresAt && (
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
-                            Expires {new Date(share.expiresAt).toLocaleDateString()}
+                            Expires{" "}
+                            {new Date(share.expiresAt).toLocaleDateString()}
                           </span>
                         )}
                       </div>

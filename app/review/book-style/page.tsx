@@ -46,36 +46,42 @@ function BookStyleReviewContent() {
 
       setIsLoading(true);
       try {
-        console.log('[Edit Mode] Fetching story data for ID:', editId);
-        const response = await apiRequest('GET', `/api/stories/${editId}`);
+        console.log("[Edit Mode] Fetching story data for ID:", editId);
+        const response = await apiRequest("GET", `/api/stories/${editId}`);
         if (response.ok) {
           const { story } = await response.json();
-          console.log('[Edit Mode] Received story data:', story);
+          console.log("[Edit Mode] Received story data:", story);
 
           // Populate form with existing story data
-          setTitle(story.title || '');
-          setTranscription(story.transcription || story.content || '');
-          setStoryYear(story.storyYear?.toString() || story.year?.toString() || '');
-          setWisdomText(story.wisdomClipText || story.wisdomTranscription || '');
+          setTitle(story.title || "");
+          setTranscription(story.transcription || story.content || "");
+          setStoryYear(
+            story.storyYear?.toString() || story.year?.toString() || "",
+          );
+          setWisdomText(
+            story.wisdomClipText || story.wisdomTranscription || "",
+          );
           setAudioUrl(story.audioUrl || null);
 
           // Handle photos
           if (story.photos && Array.isArray(story.photos)) {
-            console.log('[Edit Mode] Setting photos from API:', story.photos);
+            console.log("[Edit Mode] Setting photos from API:", story.photos);
             setPhotos(story.photos);
           } else if (story.photoUrl) {
-            console.log('[Edit Mode] Setting legacy photo:', story.photoUrl);
-            setPhotos([{
-              id: 'legacy',
-              url: story.photoUrl,
-              transform: story.photoTransform
-            }]);
+            console.log("[Edit Mode] Setting legacy photo:", story.photoUrl);
+            setPhotos([
+              {
+                id: "legacy",
+                url: story.photoUrl,
+                transform: story.photoTransform,
+              },
+            ]);
           } else {
-            console.log('[Edit Mode] No photos found in story');
+            console.log("[Edit Mode] No photos found in story");
           }
         }
       } catch (error) {
-        console.error('Failed to fetch story:', error);
+        console.error("Failed to fetch story:", error);
         toast({
           title: "Error loading story",
           description: "Failed to load the story data.",
@@ -92,11 +98,11 @@ function BookStyleReviewContent() {
       // PRIORITY 1: Check NavCache first (most reliable for new recordings)
       const navId = searchParams.get("nav");
       if (navId) {
-        console.log('[Review] Loading from NavCache with ID:', navId);
+        console.log("[Review] Loading from NavCache with ID:", navId);
         const cachedData = navCache.consume(navId);
 
         if (cachedData) {
-          console.log('[Review] NavCache data retrieved:', {
+          console.log("[Review] NavCache data retrieved:", {
             hasTranscription: !!cachedData.transcription,
             transcriptionLength: cachedData.transcription?.length,
             hasMainAudioBase64: !!cachedData.mainAudioBase64,
@@ -104,7 +110,7 @@ function BookStyleReviewContent() {
             hasTitle: !!cachedData.title,
             hasYear: !!cachedData.storyYear,
             returnPath: cachedData.returnPath,
-            allKeys: Object.keys(cachedData)
+            allKeys: Object.keys(cachedData),
           });
 
           if (cachedData.transcription) {
@@ -117,11 +123,12 @@ function BookStyleReviewContent() {
             setStoryYear(cachedData.storyYear);
           }
           if (cachedData.wisdomClipText || cachedData.wisdomTranscription) {
-            const wisdom = cachedData.wisdomClipText || cachedData.wisdomTranscription || '';
-            console.log('[Review] Setting wisdom text from NavCache:', wisdom);
+            const wisdom =
+              cachedData.wisdomClipText || cachedData.wisdomTranscription || "";
+            console.log("[Review] Setting wisdom text from NavCache:", wisdom);
             setWisdomText(wisdom);
           } else {
-            console.log('[Review] No wisdom text found in NavCache');
+            console.log("[Review] No wisdom text found in NavCache");
           }
           if (cachedData.returnPath) {
             setReturnPath(cachedData.returnPath);
@@ -129,20 +136,22 @@ function BookStyleReviewContent() {
 
           // Handle audio - convert base64 back to blob if available
           if (cachedData.mainAudioBase64 && cachedData.mainAudioType) {
-            console.log('[Review] Converting base64 audio to blob');
+            console.log("[Review] Converting base64 audio to blob");
             try {
               const binaryString = atob(cachedData.mainAudioBase64);
               const bytes = new Uint8Array(binaryString.length);
               for (let i = 0; i < binaryString.length; i++) {
                 bytes[i] = binaryString.charCodeAt(i);
               }
-              const blob = new Blob([bytes], { type: cachedData.mainAudioType });
+              const blob = new Blob([bytes], {
+                type: cachedData.mainAudioType,
+              });
               const url = URL.createObjectURL(blob);
               setMainAudioBlob(blob);
               setAudioUrl(url);
-              console.log('[Review] Audio blob created, size:', blob.size);
+              console.log("[Review] Audio blob created, size:", blob.size);
             } catch (err) {
-              console.error('[Review] Failed to convert base64 to blob:', err);
+              console.error("[Review] Failed to convert base64 to blob:", err);
             }
           } else if (cachedData.audioUrl) {
             setAudioUrl(cachedData.audioUrl);
@@ -150,7 +159,7 @@ function BookStyleReviewContent() {
 
           return; // Data loaded from cache, skip other sources
         } else {
-          console.warn('[Review] No data found in NavCache for ID:', navId);
+          console.warn("[Review] No data found in NavCache for ID:", navId);
         }
       }
 
@@ -179,11 +188,11 @@ function BookStyleReviewContent() {
       if (storedAudioData) {
         // When converting data URL to Blob, we need to preserve the MIME type
         fetch(storedAudioData)
-          .then(res => res.blob())
-          .then(blob => {
+          .then((res) => res.blob())
+          .then((blob) => {
             // Extract MIME type from data URL if it's a data URL
-            let mimeType = 'audio/webm'; // default
-            if (storedAudioData.startsWith('data:')) {
+            let mimeType = "audio/webm"; // default
+            if (storedAudioData.startsWith("data:")) {
               const mimeMatch = storedAudioData.match(/data:([^;]+);/);
               if (mimeMatch) {
                 mimeType = mimeMatch[1];
@@ -215,22 +224,27 @@ function BookStyleReviewContent() {
       console.log("Starting save mutation...");
 
       // Calculate age at the time of the story
-      const age = user?.birthYear && storyYear
-        ? parseInt(storyYear) - user.birthYear
-        : null;
+      const age =
+        user?.birthYear && storyYear
+          ? parseInt(storyYear) - user.birthYear
+          : null;
 
       // For NEW stories with blob photos or audio, we need to create the story first, then upload media
-      const hasNewPhotos = !isEditing && photos.some(p => p.url.startsWith('blob:'));
+      const hasNewPhotos =
+        !isEditing && photos.some((p) => p.url.startsWith("blob:"));
       const hasNewAudio = mainAudioBlob && audioUrl?.startsWith("blob:");
 
       if (!isEditing && (hasNewPhotos || hasNewAudio)) {
         console.log("=== NEW STORY WITH MEDIA ===");
-        console.log("Photos with blob URLs:", photos.filter(p => p.url.startsWith('blob:')).length);
+        console.log(
+          "Photos with blob URLs:",
+          photos.filter((p) => p.url.startsWith("blob:")).length,
+        );
         console.log("Has audio blob:", !!hasNewAudio);
 
         // Step 1: Create the story WITHOUT media to get an ID
         const tempStoryData = {
-          title: title || `Memory from ${storyYear || 'the past'}`,
+          title: title || `Memory from ${storyYear || "the past"}`,
           transcription,
           storyYear: parseInt(storyYear) || new Date().getFullYear(),
           lifeAge: age,
@@ -243,10 +257,14 @@ function BookStyleReviewContent() {
         };
 
         console.log("Creating story first...");
-        const createResponse = await apiRequest('POST', '/api/stories', tempStoryData);
+        const createResponse = await apiRequest(
+          "POST",
+          "/api/stories",
+          tempStoryData,
+        );
         if (!createResponse.ok) {
           const error = await createResponse.json();
-          throw new Error(error.error || 'Failed to create story');
+          throw new Error(error.error || "Failed to create story");
         }
 
         const { story: createdStory } = await createResponse.json();
@@ -260,7 +278,7 @@ function BookStyleReviewContent() {
           console.log("Uploading audio...", {
             isFile: mainAudioBlob instanceof File,
             type: mainAudioBlob?.type,
-            size: mainAudioBlob?.size
+            size: mainAudioBlob?.size,
           });
           try {
             const formData = new FormData();
@@ -271,7 +289,7 @@ function BookStyleReviewContent() {
               isBlob: mainAudioBlob instanceof Blob,
               type: mainAudioBlob?.type,
               size: mainAudioBlob?.size,
-              name: mainAudioBlob instanceof File ? mainAudioBlob.name : 'N/A'
+              name: mainAudioBlob instanceof File ? mainAudioBlob.name : "N/A",
             });
 
             // If it's a File object, it has its own name and type
@@ -284,13 +302,15 @@ function BookStyleReviewContent() {
             }
 
             // Get auth token
-            const { data: { session } } = await supabase.auth.getSession();
+            const {
+              data: { session },
+            } = await supabase.auth.getSession();
 
             // Direct fetch to bypass potential apiRequest issues with FormData
-            const uploadResponse = await fetch('/api/upload/audio', {
-              method: 'POST',
+            const uploadResponse = await fetch("/api/upload/audio", {
+              method: "POST",
               headers: {
-                'Authorization': `Bearer ${session?.access_token}`,
+                Authorization: `Bearer ${session?.access_token}`,
                 // Do NOT set Content-Type - let browser set it for FormData
               },
               body: formData,
@@ -321,61 +341,91 @@ function BookStyleReviewContent() {
             hasPhoto: !!photo,
             photoUrl: photo?.url,
             hasPendingFile: !!pendingFile,
-            isBlobUrl: photo?.url?.startsWith('blob:'),
-            pendingFileName: pendingFile?.name
+            isBlobUrl: photo?.url?.startsWith("blob:"),
+            pendingFileName: pendingFile?.name,
           });
 
-          if (pendingFile && photo.url.startsWith('blob:')) {
+          if (pendingFile && photo.url.startsWith("blob:")) {
             try {
               console.log(`✅ Uploading photo ${i} to permanent storage...`);
-              const fileExtension = pendingFile.name.split('.').pop() || 'jpg';
+              const fileExtension = pendingFile.name.split(".").pop() || "jpg";
 
               // Get upload URL
-              const uploadUrlResponse = await apiRequest('POST', '/api/objects/upload', {
-                fileType: 'photo',
-                storyId: newStoryId,
-                fileExtension: fileExtension
-              });
+              const uploadUrlResponse = await apiRequest(
+                "POST",
+                "/api/objects/upload",
+                {
+                  fileType: "photo",
+                  storyId: newStoryId,
+                  fileExtension: fileExtension,
+                },
+              );
 
               if (!uploadUrlResponse.ok) {
-                throw new Error('Failed to get upload URL');
+                throw new Error("Failed to get upload URL");
               }
 
               const { uploadURL, filePath } = await uploadUrlResponse.json();
-              console.log(`Got upload URL for photo ${i}:`, { uploadURL, filePath });
+              console.log(`Got upload URL for photo ${i}:`, {
+                uploadURL,
+                filePath,
+              });
 
               // Upload file to storage
               const uploadResponse = await fetch(uploadURL, {
-                method: 'PUT',
+                method: "PUT",
                 body: pendingFile,
                 headers: {
-                  'Content-Type': pendingFile.type || 'application/octet-stream'
-                }
+                  "Content-Type":
+                    pendingFile.type || "application/octet-stream",
+                },
               });
 
-              console.log(`Upload response for photo ${i}:`, uploadResponse.status, uploadResponse.statusText);
+              console.log(
+                `Upload response for photo ${i}:`,
+                uploadResponse.status,
+                uploadResponse.statusText,
+              );
 
               if (!uploadResponse.ok) {
                 const errorText = await uploadResponse.text();
-                console.error(`Photo upload failed with status ${uploadResponse.status}:`, errorText);
-                throw new Error(`Failed to upload photo: ${uploadResponse.status}`);
+                console.error(
+                  `Photo upload failed with status ${uploadResponse.status}:`,
+                  errorText,
+                );
+                throw new Error(
+                  `Failed to upload photo: ${uploadResponse.status}`,
+                );
               }
 
-              console.log(`Photo ${i} uploaded to storage successfully, now adding to story metadata...`);
+              console.log(
+                `Photo ${i} uploaded to storage successfully, now adding to story metadata...`,
+              );
 
               // Add photo to story using the API
-              const addPhotoResponse = await apiRequest('POST', `/api/stories/${newStoryId}/photos`, {
-                filePath,
-                isHero: photo.isHero,
-                transform: photo.transform
-              });
+              const addPhotoResponse = await apiRequest(
+                "POST",
+                `/api/stories/${newStoryId}/photos`,
+                {
+                  filePath,
+                  isHero: photo.isHero,
+                  transform: photo.transform,
+                },
+              );
 
               if (addPhotoResponse.ok) {
                 const photoResult = await addPhotoResponse.json();
-                console.log(`✅ Photo ${i} added successfully to story metadata:`, photoResult);
+                console.log(
+                  `✅ Photo ${i} added successfully to story metadata:`,
+                  photoResult,
+                );
               } else {
                 const errorText = await addPhotoResponse.text();
-                console.error(`Failed to add photo ${i} to story:`, addPhotoResponse.status, errorText);
+                console.error(
+                  `Failed to add photo ${i} to story:`,
+                  addPhotoResponse.status,
+                  errorText,
+                );
               }
 
               // Clean up
@@ -391,13 +441,19 @@ function BookStyleReviewContent() {
         if (finalAudioUrl) {
           console.log("Updating story with audio URL:", finalAudioUrl);
           // IMPORTANT: Only update the audioUrl field, don't overwrite entire metadata
-          const updateResponse = await apiRequest('GET', `/api/stories/${newStoryId}`);
+          const updateResponse = await apiRequest(
+            "GET",
+            `/api/stories/${newStoryId}`,
+          );
           if (updateResponse.ok) {
             const { story: currentStory } = await updateResponse.json();
-            console.log('[Audio Update] Current story before audio update:', currentStory);
+            console.log(
+              "[Audio Update] Current story before audio update:",
+              currentStory,
+            );
 
             // Use current story data and only update the audioUrl
-            await apiRequest('PUT', `/api/stories/${newStoryId}`, {
+            await apiRequest("PUT", `/api/stories/${newStoryId}`, {
               title: currentStory.title,
               transcription: currentStory.transcription,
               storyYear: currentStory.storyYear,
@@ -408,9 +464,11 @@ function BookStyleReviewContent() {
               wisdomClipText: currentStory.wisdomClipText,
               durationSeconds: currentStory.durationSeconds,
               audioUrl: finalAudioUrl, // THIS is the only field we're updating
-              photos: currentStory.photos || []
+              photos: currentStory.photos || [],
             });
-            console.log('[Audio Update] Story updated with audio URL, photos preserved');
+            console.log(
+              "[Audio Update] Story updated with audio URL, photos preserved",
+            );
           }
         }
 
@@ -423,7 +481,7 @@ function BookStyleReviewContent() {
         console.log("Uploading audio blob...", {
           isFile: mainAudioBlob instanceof File,
           type: mainAudioBlob.type,
-          size: mainAudioBlob.size
+          size: mainAudioBlob.size,
         });
         try {
           const formData = new FormData();
@@ -434,28 +492,31 @@ function BookStyleReviewContent() {
             isBlob: mainAudioBlob instanceof Blob,
             type: mainAudioBlob.type,
             size: mainAudioBlob.size,
-            name: mainAudioBlob instanceof File ? mainAudioBlob.name : 'N/A'
+            name: mainAudioBlob instanceof File ? mainAudioBlob.name : "N/A",
           });
 
           // CRITICAL FIX: Ensure the blob has a proper MIME type
           let audioToUpload = mainAudioBlob;
 
           // If the blob doesn't have a type or it's text/plain, we need to fix it
-          if (!mainAudioBlob.type || mainAudioBlob.type.startsWith('text/')) {
-            console.warn("Audio blob has invalid MIME type, attempting to fix:", mainAudioBlob.type);
+          if (!mainAudioBlob.type || mainAudioBlob.type.startsWith("text/")) {
+            console.warn(
+              "Audio blob has invalid MIME type, attempting to fix:",
+              mainAudioBlob.type,
+            );
 
             // Try to determine the correct MIME type from the filename if it's a File
-            let mimeType = 'audio/webm'; // default fallback
+            let mimeType = "audio/webm"; // default fallback
             if (mainAudioBlob instanceof File) {
-              const ext = mainAudioBlob.name.split('.').pop()?.toLowerCase();
+              const ext = mainAudioBlob.name.split(".").pop()?.toLowerCase();
               const mimeMap: Record<string, string> = {
-                'mp3': 'audio/mpeg',
-                'wav': 'audio/wav',
-                'webm': 'audio/webm',
-                'm4a': 'audio/mp4',
-                'ogg': 'audio/ogg'
+                mp3: "audio/mpeg",
+                wav: "audio/wav",
+                webm: "audio/webm",
+                m4a: "audio/mp4",
+                ogg: "audio/ogg",
               };
-              mimeType = mimeMap[ext || ''] || 'audio/webm';
+              mimeType = mimeMap[ext || ""] || "audio/webm";
             }
 
             // Create a new blob with the correct MIME type
@@ -473,13 +534,15 @@ function BookStyleReviewContent() {
           }
 
           // Get auth token
-          const { data: { session } } = await supabase.auth.getSession();
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
 
           // Direct fetch to bypass potential apiRequest issues with FormData
-          const uploadResponse = await fetch('/api/upload/audio', {
-            method: 'POST',
+          const uploadResponse = await fetch("/api/upload/audio", {
+            method: "POST",
             headers: {
-              'Authorization': `Bearer ${session?.access_token}`,
+              Authorization: `Bearer ${session?.access_token}`,
               // Do NOT set Content-Type - let browser set it for FormData
             },
             body: formData,
@@ -509,50 +572,63 @@ function BookStyleReviewContent() {
         console.log(`Photo ${i}:`, {
           hasPhoto: !!photo,
           photoUrl: photo?.url,
-          isBlobUrl: photo?.url?.startsWith('blob:'),
-          hasPendingFile: !!pendingFile
+          isBlobUrl: photo?.url?.startsWith("blob:"),
+          hasPendingFile: !!pendingFile,
         });
 
         // If it's a blob URL, upload it first
-        if (photo.url.startsWith('blob:') && pendingFile) {
+        if (photo.url.startsWith("blob:") && pendingFile) {
           try {
             console.log(`Uploading blob photo ${i} to storage...`);
-            const fileExtension = pendingFile.name.split('.').pop() || 'jpg';
+            const fileExtension = pendingFile.name.split(".").pop() || "jpg";
 
             // Get upload URL
-            const uploadUrlResponse = await apiRequest('POST', '/api/objects/upload', {
-              fileType: 'photo',
-              storyId: editId,
-              fileExtension: fileExtension
-            });
+            const uploadUrlResponse = await apiRequest(
+              "POST",
+              "/api/objects/upload",
+              {
+                fileType: "photo",
+                storyId: editId,
+                fileExtension: fileExtension,
+              },
+            );
 
             if (!uploadUrlResponse.ok) {
-              throw new Error('Failed to get upload URL');
+              throw new Error("Failed to get upload URL");
             }
 
             const { uploadURL, filePath } = await uploadUrlResponse.json();
 
             // Upload file to storage
             const uploadResponse = await fetch(uploadURL, {
-              method: 'PUT',
+              method: "PUT",
               body: pendingFile,
               headers: {
-                'Content-Type': pendingFile.type || 'application/octet-stream'
-              }
+                "Content-Type": pendingFile.type || "application/octet-stream",
+              },
             });
 
             if (!uploadResponse.ok) {
-              throw new Error(`Failed to upload photo: ${uploadResponse.status}`);
+              throw new Error(
+                `Failed to upload photo: ${uploadResponse.status}`,
+              );
             }
 
             console.log(`Photo ${i} uploaded successfully, adding to story...`);
 
             // Add photo to story using the API
-            const photoResponse = await apiRequest('POST', `/api/stories/${editId}/photos`, {
-              filePath: filePath,  // Changed from 'url' to 'filePath'
-              isHero: photo.isHero || false,  // Changed from 'isPrimary' to 'isHero'
-              transform: photo.transform || { zoom: 1, position: { x: 0, y: 0 } }
-            });
+            const photoResponse = await apiRequest(
+              "POST",
+              `/api/stories/${editId}/photos`,
+              {
+                filePath: filePath, // Changed from 'url' to 'filePath'
+                isHero: photo.isHero || false, // Changed from 'isPrimary' to 'isHero'
+                transform: photo.transform || {
+                  zoom: 1,
+                  position: { x: 0, y: 0 },
+                },
+              },
+            );
 
             if (photoResponse.ok) {
               const { photo: savedPhoto } = await photoResponse.json();
@@ -562,14 +638,14 @@ function BookStyleReviewContent() {
           } catch (error) {
             console.error(`Failed to upload photo ${i}:`, error);
           }
-        } else if (!photo.url.startsWith('blob:')) {
+        } else if (!photo.url.startsWith("blob:")) {
           // Keep existing photos that are not blob URLs
           finalPhotos.push(photo);
         }
       }
 
       const storyData = {
-        title: title || `Memory from ${storyYear || 'the past'}`,
+        title: title || `Memory from ${storyYear || "the past"}`,
         transcription,
         storyYear: parseInt(storyYear) || new Date().getFullYear(),
         lifeAge: age,
@@ -584,22 +660,24 @@ function BookStyleReviewContent() {
 
       console.log("Saving story with data:", storyData);
 
-      const url = isEditing ? `/api/stories/${editId}` : '/api/stories';
-      const method = isEditing ? 'PUT' : 'POST';
+      const url = isEditing ? `/api/stories/${editId}` : "/api/stories";
+      const method = isEditing ? "PUT" : "POST";
 
       const response = await apiRequest(method, url, storyData);
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || `Failed to ${isEditing ? 'update' : 'save'} story`);
+        throw new Error(
+          error.error || `Failed to ${isEditing ? "update" : "save"} story`,
+        );
       }
 
       return response.json();
     },
     onSuccess: (data) => {
       toast({
-        title: `Story ${isEditing ? 'updated' : 'saved'} successfully!`,
-        description: `Your memory has been ${isEditing ? 'updated' : 'added to your timeline'}.`,
+        title: `Story ${isEditing ? "updated" : "saved"} successfully!`,
+        description: `Your memory has been ${isEditing ? "updated" : "added to your timeline"}.`,
       });
 
       // Clear session storage
@@ -616,16 +694,22 @@ function BookStyleReviewContent() {
         description: error.message || "Please try again.",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const handleSave = async () => {
     console.log("Save button clicked!");
-    console.log("Current data:", { title, storyYear, transcription: transcription?.substring(0, 50) });
+    console.log("Current data:", {
+      title,
+      storyYear,
+      transcription: transcription?.substring(0, 50),
+    });
 
     // Check for authentication first
     const { supabase } = await import("@/lib/supabase");
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
     if (!session) {
       toast({
@@ -653,7 +737,9 @@ function BookStyleReviewContent() {
   const handleCancel = () => {
     // Ask for confirmation if there's content
     if (transcription || title || photos.length > 0) {
-      const confirmed = confirm("Are you sure you want to cancel? Your changes will be lost.");
+      const confirmed = confirm(
+        "Are you sure you want to cancel? Your changes will be lost.",
+      );
       if (!confirmed) return;
     }
 
@@ -674,7 +760,7 @@ function BookStyleReviewContent() {
     if (!editId) return;
 
     try {
-      const response = await apiRequest('DELETE', `/api/stories/${editId}`);
+      const response = await apiRequest("DELETE", `/api/stories/${editId}`);
       if (response.ok) {
         toast({
           title: "Story deleted",
@@ -735,14 +821,16 @@ function BookStyleReviewContent() {
 
 export default function BookStyleReviewPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading book view...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading book view...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <BookStyleReviewContent />
     </Suspense>
   );

@@ -13,7 +13,10 @@ export default function AuthCallback() {
     const handleCallback = async () => {
       try {
         // Get the session from the URL hash
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
 
         if (error) {
           console.error("Error getting session:", error);
@@ -31,7 +34,7 @@ export default function AuthCallback() {
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
 
         // Wait for the backend to process the new user and ensure database is synced
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // After email confirmation, always go to timeline
         // New users already provided birth year and accepted agreements at signup

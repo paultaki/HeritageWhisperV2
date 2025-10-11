@@ -3,7 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 import { apiRatelimit, checkRateLimit, getClientIp } from "@/lib/ratelimit";
-import { sanitizeUserInput, validateSanitizedInput } from "@/lib/promptSanitizer";
+import {
+  sanitizeUserInput,
+  validateSanitizedInput,
+} from "@/lib/promptSanitizer";
 import * as fs from "fs";
 import * as path from "path";
 import { nanoid } from "nanoid";
@@ -21,15 +24,16 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 // Initialize OpenAI client
 if (!process.env.OPENAI_API_KEY) {
-  throw new Error('OPENAI_API_KEY environment variable is required');
+  throw new Error("OPENAI_API_KEY environment variable is required");
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 // Cache prompts at module level to avoid rebuilding on every request
-const FORMATTING_SYSTEM_PROMPT = "You are a skilled memoir editor who transforms transcribed speech into beautifully formatted stories while preserving the speaker's authentic voice.";
+const FORMATTING_SYSTEM_PROMPT =
+  "You are a skilled memoir editor who transforms transcribed speech into beautifully formatted stories while preserving the speaker's authentic voice.";
 
 const FORMATTING_GUIDELINES = `You are a professional editor helping to clean up and format transcribed speech into a beautifully readable story for a memory book.
 
@@ -85,7 +89,7 @@ CHARACTER: [lesson]`;
 async function formatTranscription(rawText: string): Promise<string> {
   // Sanitize input to prevent prompt injection
   const sanitizedText = sanitizeUserInput(rawText);
-  
+
   if (!validateSanitizedInput(sanitizedText)) {
     logger.warn("Potential prompt injection detected in raw transcription");
     return rawText; // Return original on injection attempt
@@ -97,15 +101,15 @@ async function formatTranscription(rawText: string): Promise<string> {
       messages: [
         {
           role: "system",
-          content: FORMATTING_SYSTEM_PROMPT
+          content: FORMATTING_SYSTEM_PROMPT,
         },
         {
           role: "user",
-          content: `${FORMATTING_GUIDELINES}\n\n<transcribed_speech>\n${sanitizedText}\n</transcribed_speech>`
-        }
+          content: `${FORMATTING_GUIDELINES}\n\n<transcribed_speech>\n${sanitizedText}\n</transcribed_speech>`,
+        },
       ],
       temperature: 0.3,
-      max_tokens: 3000
+      max_tokens: 3000,
     });
 
     const formatted = completion.choices[0]?.message?.content;
@@ -129,7 +133,7 @@ async function generateLessonOptions(transcription: string): Promise<{
 } | null> {
   // Sanitize input to prevent prompt injection
   const sanitizedTranscription = sanitizeUserInput(transcription);
-  
+
   if (!validateSanitizedInput(sanitizedTranscription)) {
     logger.warn("Potential prompt injection detected in lesson generation");
     return null;
@@ -141,7 +145,7 @@ async function generateLessonOptions(transcription: string): Promise<{
       messages: [
         {
           role: "system",
-          content: LESSON_EXTRACTION_SYSTEM_PROMPT
+          content: LESSON_EXTRACTION_SYSTEM_PROMPT,
         },
         {
           role: "user",
@@ -149,39 +153,53 @@ async function generateLessonOptions(transcription: string): Promise<{
 
 <story>
 ${sanitizedTranscription}
-</story>`
-        }
+</story>`,
+        },
       ],
       temperature: 0.8,
-      max_tokens: 200
+      max_tokens: 200,
     });
 
     const content = completion.choices[0]?.message?.content;
     if (!content) return null;
 
     // Parse the response
-    const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-    
-    let practical = '';
-    let emotional = '';
-    let character = '';
+    const lines = content
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    let practical = "";
+    let emotional = "";
+    let character = "";
 
     for (const line of lines) {
-      if (line.toUpperCase().startsWith('PRACTICAL:')) {
-        practical = line.replace(/^PRACTICAL:\s*/i, '').trim();
-      } else if (line.toUpperCase().startsWith('EMOTIONAL:')) {
-        emotional = line.replace(/^EMOTIONAL:\s*/i, '').trim();
-      } else if (line.toUpperCase().startsWith('CHARACTER:')) {
-        character = line.replace(/^CHARACTER:\s*/i, '').trim();
+      if (line.toUpperCase().startsWith("PRACTICAL:")) {
+        practical = line.replace(/^PRACTICAL:\s*/i, "").trim();
+      } else if (line.toUpperCase().startsWith("EMOTIONAL:")) {
+        emotional = line.replace(/^EMOTIONAL:\s*/i, "").trim();
+      } else if (line.toUpperCase().startsWith("CHARACTER:")) {
+        character = line.replace(/^CHARACTER:\s*/i, "").trim();
       }
     }
 
     // Fallback if parsing fails
     if (!practical || !emotional || !character) {
-      const fallbacks = lines.filter(l => !l.match(/^(PRACTICAL|EMOTIONAL|CHARACTER):/i));
-      practical = practical || fallbacks[0] || "Every experience teaches something if you're willing to learn from it";
-      emotional = emotional || fallbacks[1] || "The heart remembers what the mind forgets";
-      character = character || fallbacks[2] || "Who you become matters more than what you achieve";
+      const fallbacks = lines.filter(
+        (l) => !l.match(/^(PRACTICAL|EMOTIONAL|CHARACTER):/i),
+      );
+      practical =
+        practical ||
+        fallbacks[0] ||
+        "Every experience teaches something if you're willing to learn from it";
+      emotional =
+        emotional ||
+        fallbacks[1] ||
+        "The heart remembers what the mind forgets";
+      character =
+        character ||
+        fallbacks[2] ||
+        "Who you become matters more than what you achieve";
     }
 
     return { practical, emotional, character };
@@ -192,17 +210,22 @@ ${sanitizedTranscription}
 }
 
 export async function POST(request: NextRequest) {
-  logger.debug('[Transcribe] POST request received');
+  logger.debug("[Transcribe] POST request received");
   // REMOVED: Sensitive data logging - console.log('[Transcribe] Headers:', Object.fromEntries(request.headers.entries()));
 
   try {
-    logger.debug('[Transcribe] Inside try block');
+    logger.debug("[Transcribe] Inside try block");
 
     // Check if the request is FormData or JSON
     const contentType = request.headers.get("content-type");
     const isFormData = contentType?.includes("multipart/form-data");
 
-    logger.debug('[Transcribe] Content-Type:', contentType, 'IsFormData:', isFormData);
+    logger.debug(
+      "[Transcribe] Content-Type:",
+      contentType,
+      "IsFormData:",
+      isFormData,
+    );
 
     // For FormData (from BookStyleReview), auth is optional
     // For JSON (from recording page), auth is required
@@ -210,24 +233,24 @@ export async function POST(request: NextRequest) {
     let audioBuffer: Buffer;
 
     if (isFormData) {
-      logger.debug('[Transcribe] Processing FormData upload');
+      logger.debug("[Transcribe] Processing FormData upload");
 
       // Handle FormData upload
       const formData = await request.formData();
       const audioFile = formData.get("audio") as File;
 
       if (!audioFile) {
-        logger.error('[Transcribe] No audio file in FormData');
+        logger.error("[Transcribe] No audio file in FormData");
         return NextResponse.json(
           { error: "No audio file provided" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
-      logger.debug('[Transcribe] Audio file received:', {
+      logger.debug("[Transcribe] Audio file received:", {
         name: audioFile.name,
         size: audioFile.size,
-        type: audioFile.type
+        type: audioFile.type,
       });
 
       // Convert File to Buffer
@@ -249,7 +272,7 @@ export async function POST(request: NextRequest) {
       if (!token) {
         return NextResponse.json(
           { error: "Authentication required" },
-          { status: 401 }
+          { status: 401 },
         );
       }
 
@@ -262,7 +285,7 @@ export async function POST(request: NextRequest) {
       if (authError || !authUser) {
         return NextResponse.json(
           { error: "Invalid authentication" },
-          { status: 401 }
+          { status: 401 },
         );
       }
       user = authUser;
@@ -273,19 +296,22 @@ export async function POST(request: NextRequest) {
       if (!audioBase64) {
         return NextResponse.json(
           { error: "No audio data provided" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       // Convert base64 to buffer
-      audioBuffer = Buffer.from(audioBase64, 'base64');
+      audioBuffer = Buffer.from(audioBase64, "base64");
     }
 
     // Rate limiting: 30 API requests per minute per user (or IP if no auth)
-    const rateLimitIdentifier = user 
+    const rateLimitIdentifier = user
       ? `api:transcribe:${user.id}`
       : `api:transcribe:ip:${getClientIp(request)}`;
-    const rateLimitResponse = await checkRateLimit(rateLimitIdentifier, apiRatelimit);
+    const rateLimitResponse = await checkRateLimit(
+      rateLimitIdentifier,
+      apiRatelimit,
+    );
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -295,19 +321,20 @@ export async function POST(request: NextRequest) {
     if (audioBuffer.length > MAX_SIZE) {
       return NextResponse.json(
         {
-          error: `Audio file too large. Maximum size is 25MB, got ${(audioBuffer.length / 1024 / 1024).toFixed(1)}MB`
+          error: `Audio file too large. Maximum size is 25MB, got ${(audioBuffer.length / 1024 / 1024).toFixed(1)}MB`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Save to temp file for OpenAI processing
     // Use /tmp in production (Vercel), or local temp directory in development
-    const tempDir = process.env.NODE_ENV === 'production'
-      ? '/tmp'
-      : path.join(process.cwd(), 'temp');
+    const tempDir =
+      process.env.NODE_ENV === "production"
+        ? "/tmp"
+        : path.join(process.cwd(), "temp");
 
-    if (process.env.NODE_ENV !== 'production' && !fs.existsSync(tempDir)) {
+    if (process.env.NODE_ENV !== "production" && !fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
     }
 
@@ -333,7 +360,9 @@ export async function POST(request: NextRequest) {
       const stats = fs.statSync(tempFilePath);
       const fileSizeInBytes = stats.size;
       // Rough estimation: 1MB ≈ 60 seconds for typical audio quality
-      const estimatedDuration = Math.round(fileSizeInBytes / (1024 * 1024) * 60);
+      const estimatedDuration = Math.round(
+        (fileSizeInBytes / (1024 * 1024)) * 60,
+      );
 
       // Run formatting and lesson extraction IN PARALLEL for speed
       const [formattedText, lessonOptions] = await Promise.all([
@@ -344,7 +373,7 @@ export async function POST(request: NextRequest) {
         generateLessonOptions(transcription.text).catch((error) => {
           logger.warn("Failed to generate lesson options:", error);
           return null;
-        })
+        }),
       ]);
 
       // Clean up temp file
@@ -357,12 +386,12 @@ export async function POST(request: NextRequest) {
         transcription: formattedText,
         duration: estimatedDuration,
         lessonOptions: lessonOptions || {
-          practical: "Every experience teaches something if you're willing to learn from it",
+          practical:
+            "Every experience teaches something if you're willing to learn from it",
           emotional: "The heart remembers what the mind forgets",
-          character: "Who you become matters more than what you achieve"
-        }
+          character: "Who you become matters more than what you achieve",
+        },
       });
-
     } catch (error) {
       // Clean up temp file on error
       if (fs.existsSync(tempFilePath)) {
@@ -370,21 +399,24 @@ export async function POST(request: NextRequest) {
       }
       throw error;
     }
-
   } catch (error) {
-    logger.error('[Transcribe] ERROR caught:', error);
-    logger.error('[Transcribe] Error type:', typeof error);
-    logger.error('[Transcribe] Error instanceof Error:', error instanceof Error);
+    logger.error("[Transcribe] ERROR caught:", error);
+    logger.error("[Transcribe] Error type:", typeof error);
+    logger.error(
+      "[Transcribe] Error instanceof Error:",
+      error instanceof Error,
+    );
     if (error instanceof Error) {
-      logger.error('[Transcribe] Error message:', error.message);
-      logger.error('[Transcribe] Error stack:', error.stack);
+      logger.error("[Transcribe] Error message:", error.message);
+      logger.error("[Transcribe] Error stack:", error.stack);
     }
     logger.error("Transcription error:", error);
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to transcribe audio"
+        error:
+          error instanceof Error ? error.message : "Failed to transcribe audio",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

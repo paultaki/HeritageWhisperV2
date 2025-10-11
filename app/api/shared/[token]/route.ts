@@ -18,7 +18,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 // GET /api/shared/[token] - Get shared timeline data
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: { token: string } },
 ) {
   try {
     // Find share by token
@@ -28,15 +28,15 @@ export async function GET(
       .where(
         and(
           eq(sharedAccess.shareToken, params.token),
-          eq(sharedAccess.isActive, true)
-        )
+          eq(sharedAccess.isActive, true),
+        ),
       )
       .limit(1);
 
     if (!share) {
       return NextResponse.json(
         { error: "Share link not found or expired" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -44,7 +44,7 @@ export async function GET(
     if (share.expiresAt && new Date(share.expiresAt) < new Date()) {
       return NextResponse.json(
         { error: "Share link has expired" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -64,7 +64,7 @@ export async function GET(
     if (!owner) {
       return NextResponse.json(
         { error: "Timeline owner not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -97,7 +97,7 @@ export async function GET(
               }
 
               return { ...photo, url: data.signedUrl };
-            })
+            }),
           );
           updatedStory.photos = photosWithUrls;
         }
@@ -114,7 +114,7 @@ export async function GET(
         }
 
         return updatedStory;
-      })
+      }),
     );
 
     return NextResponse.json({
@@ -134,7 +134,7 @@ export async function GET(
     logger.error("Error fetching shared timeline:", error);
     return NextResponse.json(
       { error: "Failed to fetch shared timeline" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

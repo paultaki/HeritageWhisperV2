@@ -7,9 +7,11 @@ This document contains detailed historical information about the V2 migration an
 ## 🎉 Migration Timeline
 
 ### October 1, 2025 - Initial Migration
+
 **Duration:** ~7 hours (9:30 AM - 4:30 PM PST)
 
 **Completed:**
+
 - Next.js 15 with App Router setup
 - All authentication pages migrated
 - Core components and pages
@@ -24,6 +26,7 @@ This document contains detailed historical information about the V2 migration an
 ## 📝 Major Feature Additions
 
 ### January 3, 2025 - Database & Photo Persistence
+
 - **Migration to Supabase Database**: Switched from Neon to Supabase's built-in PostgreSQL
 - **Photo Persistence Fix**: Photos now stored as file paths, signed URLs generated on-demand
 - **Audio Controls**: Added delete and re-record functionality
@@ -33,6 +36,7 @@ This document contains detailed historical information about the V2 migration an
 - **Sharing System**: Permission-based sharing (view/edit) - 80% complete
 
 ### January 4, 2025 - Mobile UX Optimization
+
 - **Book View Mobile**: Fixed navigation footer z-index, photo carousel redesign
 - **Timeline Spacing**: Optimized left margin for wider cards on mobile
 - **Audio Upload Formats**: Added support for MP3, WAV, OGG, M4A
@@ -40,6 +44,7 @@ This document contains detailed historical information about the V2 migration an
 - **Mobile Header**: Better spacing and tap targets (44x44px minimum)
 
 ### October 4, 2025 - Legal Compliance
+
 - **Terms & Privacy Tracking**: Full GDPR/CCPA compliant system
 - **Database Schema**: `users` and `user_agreements` tables with audit trail
 - **API Endpoints**: Accept, status, and registration integration
@@ -47,6 +52,7 @@ This document contains detailed historical information about the V2 migration an
 - **Resend Email Integration**: Verification and welcome emails
 
 ### October 5, 2025 - Critical Fixes
+
 - **Login to Register Navigation**: Fixed inline form toggle, now properly navigates to `/auth/register`
 - **Audio Upload MIME Types**: Updated Supabase bucket to allow all audio formats (was only allowing webm/ogg)
 - **Timeline Decade Sorting**: Birth year section now correctly appears before same-decade stories
@@ -61,6 +67,7 @@ This document contains detailed historical information about the V2 migration an
 ### October 8, 2025 - Book View & UI Enhancements
 
 #### Book View Premium Layout (Tagged: `book-view-premium-v1`)
+
 - **Intelligent Viewport Switching**: Automatic spread ↔ single-page mode based on available width and minimum font size (18px body text)
 - **Fixed Header/Footer Alignment**: Corrected desktop nav width calculations (80px → 112px)
   - `.book-header` now properly aligns with left sidebar (w-28 = 112px)
@@ -76,6 +83,7 @@ This document contains detailed historical information about the V2 migration an
 - All changes are screen-only (no print/PDF export modifications)
 
 #### PDF Export Margins
+
 - **Fixed Centering Issue**: Content no longer stuck to top-left corner or bleeding onto extra pages
   - Created `/app/book/print/layout.tsx` to bypass root layout wrapper
   - Added CSS overrides to reset parent div padding
@@ -84,6 +92,7 @@ This document contains detailed historical information about the V2 migration an
   - Result: Equal 0.25in margins on all sides without overflow
 
 #### Blank Pages on Initial Book Load
+
 - **Problem**: BookView showed blank pages on first visit, required refresh to display content
 - **Root Causes**:
   - Font loading blocked pagination (waiting for `document.fonts.ready`)
@@ -97,6 +106,7 @@ This document contains detailed historical information about the V2 migration an
 - Location: `/app/book/page.tsx:430-462`, `/app/layout.tsx:25-36`
 
 #### Audio Progress Bar Gradient (Mobile)
+
 - **Problem**: Gradient fill not visible below 900px width (appeared as gray bar)
 - **Debug Process**: Added console logging revealed element was 16px×16px instead of stretching
 - **Root Cause**: CSS class `.audio-fill` inherited default 16px font-size, making element fixed size
@@ -104,6 +114,7 @@ This document contains detailed historical information about the V2 migration an
 - Location: `/app/book/page.tsx:355-375`
 
 #### Mobile Audio Player Height
+
 - **Reduced Vertical Space**: Made ~20-25% shorter on mobile
   - Button sizes: 40px → 36px (desktop), 44px → 40px (mobile)
   - Icon sizes: 16px → 14px (mobile)
@@ -117,6 +128,7 @@ This document contains detailed historical information about the V2 migration an
 ### Audio Upload Issues (October 5, 2025)
 
 **Multiple Attempts:**
+
 1. ❌ Tried removing explicit contentType → Defaulted to text/plain
 2. ❌ Tried setting contentType to `audio/mpeg` → Rejected as unsupported
 3. ❌ Tried wrapping File in new File() → Converted to string
@@ -124,6 +136,7 @@ This document contains detailed historical information about the V2 migration an
 5. ✅ **ROOT CAUSE**: Supabase bucket `allowed_mime_types` only had webm/ogg
 
 **Final Solution:**
+
 ```sql
 UPDATE storage.buckets
 SET allowed_mime_types = ARRAY[
@@ -141,6 +154,7 @@ WHERE name = 'heritage-whisper-files';
 **Problem:** Stories from same decade as birth year appearing before birth year section
 
 **Iterations:**
+
 1. October 4, 2025: Fixed by using earliest story year for decade sorting
 2. October 5, 2025: Re-fixed after issue recurred - now detects birth decade and uses earliest story year only for that decade
 
@@ -151,6 +165,7 @@ WHERE name = 'heritage-whisper-files';
 **Problem:** Photos stored as blob URLs instead of Supabase paths
 
 **Solution:**
+
 - Store file paths in database (not URLs)
 - Generate signed URLs with 1-week expiry on-demand
 - Blob URL filtering in API endpoints
@@ -161,6 +176,7 @@ WHERE name = 'heritage-whisper-files';
 **Problem:** 401 errors when timeline/book view loaded immediately after login
 
 **Solution:**
+
 - Session retry logic (5x 100ms delays)
 - Query invalidation after login
 - Check for both `user` AND `session` before fetching data
@@ -170,6 +186,7 @@ WHERE name = 'heritage-whisper-files';
 **Problem:** After email confirmation, users saw duplicate agreement modal even though they accepted at signup
 
 **Root Causes:**
+
 1. Email confirmation redirected to homepage instead of `/auth/callback`
 2. `/auth/callback` had conditional logic checking birth year
 3. Registration used anon key instead of service role key
@@ -177,6 +194,7 @@ WHERE name = 'heritage-whisper-files';
 5. Agreement status check didn't properly query `user_agreements` table
 
 **Solutions:**
+
 1. Updated Supabase redirect URLs to include `https://dev.heritagewhisper.com/auth/callback`
 2. Changed `/auth/callback` to always redirect to `/timeline` (birth year already collected at signup)
 3. Changed registration to use service role key: `createClient(supabaseUrl, supabaseServiceKey)`
@@ -184,6 +202,7 @@ WHERE name = 'heritage-whisper-files';
 5. Updated agreement status query to properly detect both agreement types
 
 **Key Files Modified:**
+
 - `/app/api/auth/register/route.ts` - Service role key
 - `/app/auth/callback/page.tsx` - Direct timeline redirect
 - `/app/api/agreements/status/route.ts` - Improved fallback logic
@@ -193,21 +212,25 @@ WHERE name = 'heritage-whisper-files';
 ## 📁 Key File Locations
 
 ### Audio Management
+
 - `/app/api/upload/audio/route.ts` - Audio file upload to Supabase
 - `/components/AudioRecorder.tsx` - Web Audio API recording component
 - `/components/BookStyleReview.tsx` - Audio playback and controls
 
 ### Photo Management
+
 - `/app/api/upload/photo/route.ts` - Photo upload to Supabase
 - `/app/api/stories/[id]/photos/route.ts` - Add photos to stories
 - `/components/MultiPhotoUploader.tsx` - Photo upload with cropping
 
 ### Timeline & Book View
+
 - `/app/timeline/page.tsx` - Timeline with decade organization
 - `/app/book/page.tsx` - Book view with pagination
 - `/lib/bookPagination.ts` - Text measurement and page splitting
 
 ### Authentication
+
 - `/app/api/auth/login/route.ts` - Email/password login
 - `/app/api/auth/register/route.ts` - User registration with agreements
 - `/lib/auth.tsx` - Auth context and provider
@@ -218,6 +241,7 @@ WHERE name = 'heritage-whisper-files';
 ## 🔧 Database Schema Changes
 
 ### October 4, 2025 - Legal Compliance
+
 ```sql
 CREATE TABLE public.users (
   id UUID PRIMARY KEY REFERENCES auth.users(id),
@@ -242,6 +266,7 @@ CREATE TABLE public.user_agreements (
 ```
 
 ### January 3, 2025 - Sharing System
+
 ```sql
 CREATE TABLE public.shared_access (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -262,16 +287,19 @@ CREATE TABLE public.shared_access (
 ## 📊 Performance Improvements
 
 ### Image Optimization
+
 - Next.js Image component with automatic optimization
 - 40-60% faster page loads
 - Lazy loading for off-screen images
 
 ### Code Splitting
+
 - Dynamic imports for heavy components
 - Route-based splitting with App Router
 - Reduced initial bundle size
 
 ### Query Caching
+
 - TanStack Query with 30-minute stale time
 - Optimistic updates for better UX
 - Automatic background refetching
@@ -281,6 +309,7 @@ CREATE TABLE public.shared_access (
 ## 🚧 Incomplete Features (from V1)
 
 ### Not Yet Migrated
+
 - Subscribe page (Stripe payment integration)
 - Go Deeper UI components (GoDeeperAccordion, GoDeeperLite)
 - Demo mode (complete guest experience)
@@ -288,6 +317,7 @@ CREATE TABLE public.shared_access (
 - Guest Timeline/Book Views for sharing (20% remaining)
 
 ### Partially Complete
+
 - **Sharing System (80%)**: Core functionality done, needs guest views
 - **Email Notifications**: Resend integrated, needs share notification emails
 
@@ -296,6 +326,7 @@ CREATE TABLE public.shared_access (
 ## 🔐 Security Improvements
 
 ### January 30, 2025
+
 - Removed 200+ console.log statements exposing tokens
 - Fixed hardcoded secrets (SESSION_SECRET, OPENAI_API_KEY)
 - Cleaned auth-middleware.ts
@@ -303,6 +334,7 @@ CREATE TABLE public.shared_access (
 - Created security checker script
 
 ### September 30, 2025
+
 - Admin scripts renamed with .dev extension
 - Production guards added to all admin scripts
 - Enhanced .gitignore patterns
@@ -327,6 +359,7 @@ CREATE TABLE public.shared_access (
 ### October 7, 2025 - Memory Box & Book View Enhancements
 
 **Memory Box Enhancements:**
+
 - **Filter System**: 3x2 grid layout with 6 filter buttons (All, Favorites, Timeline, Book, No date, Private)
 - **List View**: Compact horizontal rows with Timeline/Book/menu buttons in single row
 - **Card Improvements**:
@@ -336,6 +369,7 @@ CREATE TABLE public.shared_access (
 - **Toolbar Polish**: Search box and filter grid have matching widths on mobile for symmetry
 
 **Book View Updates:**
+
 - **Navigation**: Collapsed decade navigation by default (desktop & mobile)
   - Shows current chapter/TOC as pill button
   - Expands to show all navigation options when clicked
@@ -349,6 +383,7 @@ CREATE TABLE public.shared_access (
 ### October 8, 2025 - PDF Export Feature
 
 **PDF Export Implementation:**
+
 - Export button with dropdown menu in book view header
 - Two export formats:
   - **2-up (Home Print)**: Two 5.5×8.5" pages side-by-side on 11×8.5" landscape
@@ -360,6 +395,7 @@ CREATE TABLE public.shared_access (
 - Created `/app/book/print/layout.tsx` to bypass root layout wrapper
 
 **PDF Export Margin Fix (October 8, 2025):**
+
 - Issue: Content stuck to top-left corner and bleeding onto extra pages
 - Root cause: Root layout adding `md:pl-20 pb-20 md:pb-0` padding to all pages
 - Solution:
@@ -370,6 +406,7 @@ CREATE TABLE public.shared_access (
   - Result: Equal 0.25in margins on all sides without overflow
 
 ### October 2025 - Project Cleanup
+
 - 37 obsolete files removed (test scripts, old page versions, one-time fix docs)
 - Migrations and schema files preserved in `/migrations` and `/scripts`
 
@@ -380,6 +417,7 @@ CREATE TABLE public.shared_access (
 Timeline uses Heritage Whisper design system with semantic `hw-*` classes:
 
 **Component Classes:**
+
 - `.hw-spine` - Timeline container with vertical spine and gutter spacing
 - `.hw-decade` - Decade section wrapper
 - `.hw-decade-band` - Sticky decade headers (87px offset for perfect alignment with app header)
@@ -394,6 +432,7 @@ Timeline uses Heritage Whisper design system with semantic `hw-*` classes:
 - `.hw-play` - Play button with heritage palette
 
 **Design Tokens:**
+
 - Primary accent: `#D36A3D` (clay/terracotta)
 - Secondary accent: `#B89B5E` (soft gold)
 - Focus ring: `#B89B5E`
@@ -401,6 +440,7 @@ Timeline uses Heritage Whisper design system with semantic `hw-*` classes:
 - Semantic spacing scale in `tokens.css`
 
 **Implementation Details:**
+
 - Horizontal connectors aligned to title baseline via `--title-offset` CSS custom property
 - 180px offset for cards with images (16:10 aspect ratio), 22px for text-only
 - Play button: stroke outline at rest, fills on hover
@@ -412,5 +452,5 @@ Timeline uses Heritage Whisper design system with semantic `hw-*` classes:
 
 ---
 
-*This is a historical reference document. For current documentation, see CLAUDE.md*
-*Last updated: October 8, 2025*
+_This is a historical reference document. For current documentation, see CLAUDE.md_
+_Last updated: October 8, 2025_

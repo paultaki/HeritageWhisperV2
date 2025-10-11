@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -80,18 +80,21 @@ export async function GET(request: NextRequest) {
           storyTitle,
           activityType: activity.activityType,
           details: activity.details,
-          createdAt: activity.createdAt?.toISOString() || new Date().toISOString(),
+          createdAt:
+            activity.createdAt?.toISOString() || new Date().toISOString(),
         };
-      })
+      }),
     );
 
     return NextResponse.json(enrichedActivities);
-
   } catch (error) {
     logger.error("Family activity fetch error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch family activity", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to fetch family activity",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

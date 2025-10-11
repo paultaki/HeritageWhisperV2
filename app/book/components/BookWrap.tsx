@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useEffect, useRef, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface BookWrapProps {
   children: React.ReactNode;
@@ -10,8 +10,10 @@ interface BookWrapProps {
   onPageChange: (pageIndex: number) => void;
   className?: string;
   spreadMode?: boolean; // Navigate by spreads (2 pages at a time)
-  viewMode?: 'single' | 'spread'; // View mode for spine hint
-  scrollToPageRef?: React.MutableRefObject<((pageIndex: number) => void) | null>; // Expose scroll function to parent
+  viewMode?: "single" | "spread"; // View mode for spine hint
+  scrollToPageRef?: React.MutableRefObject<
+    ((pageIndex: number) => void) | null
+  >; // Expose scroll function to parent
 }
 
 /**
@@ -32,32 +34,35 @@ export default function BookWrap({
   currentPage,
   totalPages,
   onPageChange,
-  className = '',
+  className = "",
   spreadMode = false,
-  viewMode = 'single',
+  viewMode = "single",
   scrollToPageRef,
 }: BookWrapProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
 
   // Scroll to specific page or spread
-  const scrollToPage = useCallback((pageIndex: number) => {
-    if (!wrapRef.current) return;
+  const scrollToPage = useCallback(
+    (pageIndex: number) => {
+      if (!wrapRef.current) return;
 
-    // In spread mode, scroll to the spread container
-    const selector = spreadMode ? '.spread' : '.page';
-    const elements = wrapRef.current.querySelectorAll(selector);
+      // In spread mode, scroll to the spread container
+      const selector = spreadMode ? ".spread" : ".page";
+      const elements = wrapRef.current.querySelectorAll(selector);
 
-    // In spread mode, each spread contains 2 pages
-    const targetIndex = spreadMode ? Math.floor(pageIndex / 2) : pageIndex;
+      // In spread mode, each spread contains 2 pages
+      const targetIndex = spreadMode ? Math.floor(pageIndex / 2) : pageIndex;
 
-    if (elements[targetIndex]) {
-      elements[targetIndex].scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-      onPageChange(pageIndex);
-    }
-  }, [onPageChange, spreadMode]);
+      if (elements[targetIndex]) {
+        elements[targetIndex].scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        onPageChange(pageIndex);
+      }
+    },
+    [onPageChange, spreadMode],
+  );
 
   // Navigate to previous page/spread
   const goToPrevious = useCallback(() => {
@@ -88,30 +93,30 @@ export default function BookWrap({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
-        case 'ArrowLeft':
-        case 'PageUp':
+        case "ArrowLeft":
+        case "PageUp":
           e.preventDefault();
           goToPrevious();
           break;
-        case 'ArrowRight':
-        case 'PageDown':
-        case ' ': // Spacebar
+        case "ArrowRight":
+        case "PageDown":
+        case " ": // Spacebar
           e.preventDefault();
           goToNext();
           break;
-        case 'Home':
+        case "Home":
           e.preventDefault();
           scrollToPage(0);
           break;
-        case 'End':
+        case "End":
           e.preventDefault();
           scrollToPage(totalPages - 1);
           break;
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goToPrevious, goToNext, scrollToPage, totalPages]);
 
   // Track scroll position to update current page
@@ -120,7 +125,7 @@ export default function BookWrap({
     if (!wrap) return;
 
     const handleScroll = () => {
-      const selector = spreadMode ? '.spread' : '.page';
+      const selector = spreadMode ? ".spread" : ".page";
       const elements = wrap.querySelectorAll(selector);
 
       // Find which element is most visible
@@ -148,8 +153,8 @@ export default function BookWrap({
       }
     };
 
-    wrap.addEventListener('scroll', handleScroll, { passive: true });
-    return () => wrap.removeEventListener('scroll', handleScroll);
+    wrap.addEventListener("scroll", handleScroll, { passive: true });
+    return () => wrap.removeEventListener("scroll", handleScroll);
   }, [currentPage, onPageChange, spreadMode]);
 
   return (
@@ -184,7 +189,7 @@ export default function BookWrap({
         aria-label={`Book viewer, page ${currentPage + 1} of ${totalPages}`}
       >
         {/* Spine hint for single-page mode - creates premium depth */}
-        {viewMode === 'single' && (
+        {viewMode === "single" && (
           <div className="spine-hint no-print" aria-hidden="true" />
         )}
 

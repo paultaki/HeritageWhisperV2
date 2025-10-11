@@ -25,16 +25,19 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.getUser(token);
 
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -49,7 +52,7 @@ export async function GET(request: NextRequest) {
     logger.error("Error fetching shares:", error);
     return NextResponse.json(
       { error: "Failed to fetch shares" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -63,16 +66,19 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.getUser(token);
 
     if (error || !user) {
       return NextResponse.json(
         { error: "Invalid authentication" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -81,16 +87,13 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
     if (permissionLevel && !["view", "edit"].includes(permissionLevel)) {
       return NextResponse.json(
         { error: "Permission level must be 'view' or 'edit'" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -102,15 +105,15 @@ export async function POST(request: NextRequest) {
         and(
           eq(sharedAccess.ownerUserId, user.id),
           eq(sharedAccess.sharedWithEmail, email.toLowerCase()),
-          eq(sharedAccess.isActive, true)
-        )
+          eq(sharedAccess.isActive, true),
+        ),
       )
       .limit(1);
 
     if (existingShare.length > 0) {
       return NextResponse.json(
         { error: "This email already has access to your timeline" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -140,7 +143,7 @@ export async function POST(request: NextRequest) {
     logger.error("Error creating share:", error);
     return NextResponse.json(
       { error: "Failed to create share" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

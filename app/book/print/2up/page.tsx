@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import React, { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   paginateBook,
   getPageSpreads,
   type Story as PaginationStory,
   type BookPage,
   type DecadeGroup,
-} from '@/lib/bookPagination';
-import { DecadeIntroPage } from '@/components/BookDecadePages';
+} from "@/lib/bookPagination";
+import { DecadeIntroPage } from "@/components/BookDecadePages";
 
 interface Story {
   id: string;
@@ -32,24 +32,30 @@ interface Story {
 }
 
 const convertToPaginationStory = (story: Story): PaginationStory => {
-  const photos = story.photos?.map(p => ({
-    id: p.id,
-    url: p.url,
-    caption: p.caption,
-    isHero: p.isHero,
-  })) || (story.photoUrl ? [{
-    id: "legacy",
-    url: story.photoUrl,
-    isHero: true,
-  }] : []);
+  const photos =
+    story.photos?.map((p) => ({
+      id: p.id,
+      url: p.url,
+      caption: p.caption,
+      isHero: p.isHero,
+    })) ||
+    (story.photoUrl
+      ? [
+          {
+            id: "legacy",
+            url: story.photoUrl,
+            isHero: true,
+          },
+        ]
+      : []);
 
-  console.log('[Print 2up] Converting story:', {
+  console.log("[Print 2up] Converting story:", {
     title: story.title,
     hasPhotosArray: !!story.photos,
     photosArrayLength: story.photos?.length || 0,
     hasPhotoUrl: !!story.photoUrl,
     convertedPhotosLength: photos.length,
-    firstPhotoUrl: photos[0]?.url
+    firstPhotoUrl: photos[0]?.url,
   });
 
   return {
@@ -67,9 +73,11 @@ const convertToPaginationStory = (story: Story): PaginationStory => {
 // Print-optimized page renderer (no audio, no edit buttons)
 const PrintPageRenderer = ({ page }: { page: BookPage }) => {
   // Intro page
-  if (page.type === 'intro') {
+  if (page.type === "intro") {
     return (
-      <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
+      <article
+        className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+      >
         <div className="page-content px-8 py-16 flex flex-col items-center justify-center text-center h-full">
           <div className="space-y-8">
             <h1 className="text-5xl font-serif text-gray-800 mb-4">
@@ -77,7 +85,8 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
             </h1>
             <div className="w-24 h-1 bg-coral-600 mx-auto"></div>
             <p className="text-lg text-gray-600 leading-relaxed max-w-md mx-auto italic">
-              A collection of cherished moments, stories, and lessons from a life well-lived.
+              A collection of cherished moments, stories, and lessons from a
+              life well-lived.
             </p>
           </div>
         </div>
@@ -87,11 +96,15 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
   }
 
   // Table of contents
-  if (page.type === 'table-of-contents') {
+  if (page.type === "table-of-contents") {
     return (
-      <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
+      <article
+        className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+      >
         <div className="page-content px-8 py-12">
-          <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">Table of Contents</h1>
+          <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">
+            Table of Contents
+          </h1>
           <div className="space-y-6">
             {page.tocEntries?.map((entry) => (
               <div key={entry.decade} className="space-y-2">
@@ -104,7 +117,9 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
                       key={idx}
                       className="flex justify-between items-baseline text-sm"
                     >
-                      <span className="text-gray-700 flex-1 pr-2">{story.title}</span>
+                      <span className="text-gray-700 flex-1 pr-2">
+                        {story.title}
+                      </span>
                       <span className="text-gray-500 text-xs whitespace-nowrap">
                         {story.year} • p.{story.pageNumber}
                       </span>
@@ -121,12 +136,14 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
   }
 
   // Decade marker
-  if (page.type === 'decade-marker') {
+  if (page.type === "decade-marker") {
     return (
-      <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
+      <article
+        className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+      >
         <DecadeIntroPage
-          decade={page.decade || ''}
-          title={page.decadeTitle || ''}
+          decade={page.decade || ""}
+          title={page.decadeTitle || ""}
           storiesCount={page.storiesInDecade || 0}
         />
         <div className="page-number">{page.pageNumber}</div>
@@ -136,42 +153,62 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
 
   // Story pages
   return (
-    <article className={`page ${page.isLeftPage ? 'page--left' : 'page--right'}`}>
+    <article
+      className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+    >
       <div className="running-header">
         <span className={page.isLeftPage ? "header-left" : "header-right"}>
           {page.title && page.year ? (
             <>
               {page.title.toUpperCase()} • {page.year}
-              {page.age !== null && page.age !== undefined && page.age >= 0 && ` • AGE ${page.age}`}
+              {page.age !== null &&
+                page.age !== undefined &&
+                page.age >= 0 &&
+                ` • AGE ${page.age}`}
             </>
+          ) : page.isLeftPage ? (
+            "Heritage Whisper"
           ) : (
-            page.isLeftPage ? "Heritage Whisper" : "Family Memories"
+            "Family Memories"
           )}
         </span>
       </div>
 
       <div className="page-content">
         {/* Photos - only on first page of story */}
-        {(page.type === 'story-start' || page.type === 'story-complete') && page.photos && page.photos.length > 0 && (
-          <div className="mb-4">
-            <img
-              src={page.photos[0].url}
-              alt="Memory"
-              className="w-full object-cover rounded-lg memory-photo"
-              onError={(e) => console.error('[Print 2up] Image failed to load:', page.photos[0].url)}
-              onLoad={() => console.log('[Print 2up] Image loaded:', page.photos[0].url)}
-            />
-          </div>
-        )}
+        {(page.type === "story-start" || page.type === "story-complete") &&
+          page.photos &&
+          page.photos.length > 0 && (
+            <div className="mb-4">
+              <img
+                src={page.photos[0].url}
+                alt="Memory"
+                className="w-full object-cover rounded-lg memory-photo"
+                onError={(e) =>
+                  console.error(
+                    "[Print 2up] Image failed to load:",
+                    page.photos[0].url,
+                  )
+                }
+                onLoad={() =>
+                  console.log("[Print 2up] Image loaded:", page.photos[0].url)
+                }
+              />
+            </div>
+          )}
         {/* Debug: log if photos should be here but aren't */}
-        {(page.type === 'story-start' || page.type === 'story-complete') && (!page.photos || page.photos.length === 0) && (
-          <>
-            {console.log('[Print 2up] Story page has NO photos:', { type: page.type, title: page.title })}
-          </>
-        )}
+        {(page.type === "story-start" || page.type === "story-complete") &&
+          (!page.photos || page.photos.length === 0) && (
+            <>
+              {console.log("[Print 2up] Story page has NO photos:", {
+                type: page.type,
+                title: page.title,
+              })}
+            </>
+          )}
 
         {/* Title only - year and age now in running header */}
-        {(page.type === 'story-start' || page.type === 'story-complete') && (
+        {(page.type === "story-start" || page.type === "story-complete") && (
           <div className="memory-header">
             <h2 className="memory-title">{page.title}</h2>
           </div>
@@ -181,8 +218,11 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
         {page.text && (
           <div className="memory-body">
             <div className="prose prose-lg max-w-none">
-              {page.text.split('\n\n').map((paragraph, index) => (
-                <p key={index} className="mb-4 last:mb-0 leading-relaxed text-justify">
+              {page.text.split("\n\n").map((paragraph, index) => (
+                <p
+                  key={index}
+                  className="mb-4 last:mb-0 leading-relaxed text-justify"
+                >
                   {paragraph}
                 </p>
               ))}
@@ -191,14 +231,15 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
         )}
 
         {/* Lesson learned - only on last page */}
-        {(page.type === 'story-end' || page.type === 'story-complete') && page.lessonLearned && (
-          <div className="lesson-learned-box mt-6">
-            <div className="lesson-learned-header">Lesson Learned</div>
-            <blockquote className="lesson-learned-text">
-              {page.lessonLearned}
-            </blockquote>
-          </div>
-        )}
+        {(page.type === "story-end" || page.type === "story-complete") &&
+          page.lessonLearned && (
+            <div className="lesson-learned-box mt-6">
+              <div className="lesson-learned-header">Lesson Learned</div>
+              <blockquote className="lesson-learned-text">
+                {page.lessonLearned}
+              </blockquote>
+            </div>
+          )}
       </div>
 
       <div className="page-number">{page.pageNumber}</div>
@@ -208,7 +249,7 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
 
 function Print2UpPageContent() {
   const searchParams = useSearchParams();
-  const userId = searchParams.get('userId');
+  const userId = searchParams.get("userId");
   const [pages, setPages] = useState<BookPage[]>([]);
   const [spreads, setSpreads] = useState<BookPage[][]>([]);
   const [loading, setLoading] = useState(true);
@@ -218,12 +259,12 @@ function Print2UpPageContent() {
     async function loadStories() {
       try {
         if (!userId) {
-          setError('No userId provided');
+          setError("No userId provided");
           setLoading(false);
           return;
         }
 
-        console.log('[Print 2up] Fetching stories for userId:', userId);
+        console.log("[Print 2up] Fetching stories for userId:", userId);
 
         // Fetch stories from server API (uses service role key to bypass auth)
         const response = await fetch(`/api/book-data?userId=${userId}`);
@@ -232,57 +273,68 @@ function Print2UpPageContent() {
         }
 
         const { stories } = await response.json();
-        console.log('[Print 2up] Received', stories?.length || 0, 'stories');
+        console.log("[Print 2up] Received", stories?.length || 0, "stories");
 
         if (!stories || stories.length === 0) {
-          setError('No stories found');
+          setError("No stories found");
           setLoading(false);
           return;
         }
 
-      // Group by decade
-      const decadeMap = new Map<string, Story[]>();
-      stories.forEach((story) => {
-        const year = parseInt(story.storyYear?.toString() || '0');
-        if (year > 0) {
-          const decadeKey = `${Math.floor(year / 10) * 10}s`;
-          if (!decadeMap.has(decadeKey)) {
-            decadeMap.set(decadeKey, []);
+        // Group by decade
+        const decadeMap = new Map<string, Story[]>();
+        stories.forEach((story) => {
+          const year = parseInt(story.storyYear?.toString() || "0");
+          if (year > 0) {
+            const decadeKey = `${Math.floor(year / 10) * 10}s`;
+            if (!decadeMap.has(decadeKey)) {
+              decadeMap.set(decadeKey, []);
+            }
+            decadeMap.get(decadeKey)!.push(story);
           }
-          decadeMap.get(decadeKey)!.push(story);
+        });
+
+        const decadeGroups: DecadeGroup[] = Array.from(decadeMap.entries())
+          .sort(([a], [b]) => parseInt(a) - parseInt(b))
+          .map(([decade, storyList]) => ({
+            decade,
+            title: `The ${decade}`,
+            stories: storyList
+              .sort((a, b) => (a.storyYear || 0) - (b.storyYear || 0))
+              .map(convertToPaginationStory),
+          }));
+
+        const bookPages = paginateBook(decadeGroups);
+        const bookSpreads = getPageSpreads(bookPages);
+
+        console.log(
+          "[Print 2up] Generated",
+          bookPages.length,
+          "pages,",
+          bookSpreads.length,
+          "spreads",
+        );
+
+        // Log photo data for debugging
+        const pagesWithPhotos = bookPages.filter(
+          (p) => p.photos && p.photos.length > 0,
+        );
+        console.log("[Print 2up] Pages with photos:", pagesWithPhotos.length);
+        if (pagesWithPhotos.length > 0) {
+          console.log(
+            "[Print 2up] Sample photo URL:",
+            pagesWithPhotos[0].photos?.[0]?.url,
+          );
         }
-      });
 
-      const decadeGroups: DecadeGroup[] = Array.from(decadeMap.entries())
-        .sort(([a], [b]) => parseInt(a) - parseInt(b))
-        .map(([decade, storyList]) => ({
-          decade,
-          title: `The ${decade}`,
-          stories: storyList
-            .sort((a, b) => (a.storyYear || 0) - (b.storyYear || 0))
-            .map(convertToPaginationStory),
-        }));
-
-      const bookPages = paginateBook(decadeGroups);
-      const bookSpreads = getPageSpreads(bookPages);
-
-      console.log('[Print 2up] Generated', bookPages.length, 'pages,', bookSpreads.length, 'spreads');
-      
-      // Log photo data for debugging
-      const pagesWithPhotos = bookPages.filter(p => p.photos && p.photos.length > 0);
-      console.log('[Print 2up] Pages with photos:', pagesWithPhotos.length);
-      if (pagesWithPhotos.length > 0) {
-        console.log('[Print 2up] Sample photo URL:', pagesWithPhotos[0].photos?.[0]?.url);
+        setPages(bookPages);
+        setSpreads(bookSpreads);
+        setLoading(false);
+      } catch (err) {
+        console.error("[Print 2up] Error:", err);
+        setError(err instanceof Error ? err.message : "Failed to load stories");
+        setLoading(false);
       }
-
-      setPages(bookPages);
-      setSpreads(bookSpreads);
-      setLoading(false);
-    } catch (err) {
-      console.error('[Print 2up] Error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load stories');
-      setLoading(false);
-    }
     }
 
     loadStories();
@@ -302,7 +354,9 @@ function Print2UpPageContent() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @page {
           size: 11in 8.5in;
           margin: 0;
@@ -470,7 +524,9 @@ function Print2UpPageContent() {
           line-height: 1.6;
           margin: 0;
         }
-      `}} />
+      `,
+        }}
+      />
       <div className="print-2up">
         {spreads.map((spread, idx) => (
           <div key={idx} className="book-spread">

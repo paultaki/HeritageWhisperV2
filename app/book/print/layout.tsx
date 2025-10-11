@@ -10,9 +10,5 @@ export default function PrintLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }

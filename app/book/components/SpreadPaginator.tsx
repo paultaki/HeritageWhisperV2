@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import React, { useMemo } from 'react';
-import AutoPaginator, { ContentBlock } from './AutoPaginator';
-import SpreadView from './SpreadView';
-import Page from './Page';
+import React, { useMemo } from "react";
+import AutoPaginator, { ContentBlock } from "./AutoPaginator";
+import SpreadView from "./SpreadView";
+import Page from "./Page";
 
 interface SpreadPaginatorProps {
   blocks: ContentBlock[];
   pageHeader?: React.ReactNode;
   pageFooter?: React.ReactNode;
   className?: string;
-  viewMode: 'single' | 'spread';
+  viewMode: "single" | "spread";
 }
 
 /**
@@ -23,11 +23,11 @@ export default function SpreadPaginator({
   blocks,
   pageHeader,
   pageFooter,
-  className = '',
+  className = "",
   viewMode,
 }: SpreadPaginatorProps) {
   // For single page view, just use AutoPaginator as-is
-  if (viewMode === 'single') {
+  if (viewMode === "single") {
     return (
       <AutoPaginator
         blocks={blocks}
@@ -58,36 +58,39 @@ function SpreadRenderer({
   blocks,
   pageHeader,
   pageFooter,
-  className = '',
-}: Omit<SpreadPaginatorProps, 'viewMode'>) {
+  className = "",
+}: Omit<SpreadPaginatorProps, "viewMode">) {
   const [pages, setPages] = React.useState<ContentBlock[][]>([]);
 
   // Same pagination logic as AutoPaginator
   const CONTENT_HEIGHT = 700;
 
-  const estimateBlockHeight = React.useCallback((block: ContentBlock): number => {
-    switch (block.type) {
-      case 'heading':
-        return 40;
-      case 'text':
-        if (typeof block.content === 'string') {
-          const lines = Math.ceil(block.content.length / 80);
-          return lines * 20 + 12;
-        }
-        return 60;
-      case 'image':
-        // 16:10 aspect ratio at full content width (~412px) = ~257px height + margins
-        return 280;
-      case 'audio':
-        return 100;
-      case 'callout':
-        return 140;
-      case 'toc-item':
-        return 40;
-      default:
-        return 40;
-    }
-  }, []);
+  const estimateBlockHeight = React.useCallback(
+    (block: ContentBlock): number => {
+      switch (block.type) {
+        case "heading":
+          return 40;
+        case "text":
+          if (typeof block.content === "string") {
+            const lines = Math.ceil(block.content.length / 80);
+            return lines * 20 + 12;
+          }
+          return 60;
+        case "image":
+          // 16:10 aspect ratio at full content width (~412px) = ~257px height + margins
+          return 280;
+        case "audio":
+          return 100;
+        case "callout":
+          return 140;
+        case "toc-item":
+          return 40;
+        default:
+          return 40;
+      }
+    },
+    [],
+  );
 
   React.useEffect(() => {
     if (blocks.length === 0) {
@@ -166,7 +169,8 @@ function SpreadRenderer({
     <>
       {spreads.map((spread, spreadIndex) => {
         const leftPageBlocks = pages[spread.left];
-        const rightPageBlocks = spread.right < pages.length ? pages[spread.right] : null;
+        const rightPageBlocks =
+          spread.right < pages.length ? pages[spread.right] : null;
 
         if (!rightPageBlocks) {
           // Odd number of pages - render last page solo
@@ -180,7 +184,10 @@ function SpreadRenderer({
               {pageHeader}
               <div className="book-text" lang="en">
                 {leftPageBlocks.map((block, blockIndex) => (
-                  <BlockRenderer key={`${spread.left}-${blockIndex}`} block={block} />
+                  <BlockRenderer
+                    key={`${spread.left}-${blockIndex}`}
+                    block={block}
+                  />
                 ))}
               </div>
               {pageFooter}
@@ -198,7 +205,10 @@ function SpreadRenderer({
                   {pageHeader}
                   <div className="book-text" lang="en">
                     {leftPageBlocks.map((block, blockIndex) => (
-                      <BlockRenderer key={`${spread.left}-${blockIndex}`} block={block} />
+                      <BlockRenderer
+                        key={`${spread.left}-${blockIndex}`}
+                        block={block}
+                      />
                     ))}
                   </div>
                   {pageFooter}
@@ -212,7 +222,10 @@ function SpreadRenderer({
                   {pageHeader}
                   <div className="book-text" lang="en">
                     {rightPageBlocks.map((block, blockIndex) => (
-                      <BlockRenderer key={`${spread.right}-${blockIndex}`} block={block} />
+                      <BlockRenderer
+                        key={`${spread.right}-${blockIndex}`}
+                        block={block}
+                      />
                     ))}
                   </div>
                   {pageFooter}
@@ -229,22 +242,22 @@ function SpreadRenderer({
 }
 
 // Helper: Get CSS class for block type
-function getBlockClassName(type: ContentBlock['type']): string {
+function getBlockClassName(type: ContentBlock["type"]): string {
   switch (type) {
-    case 'heading':
-      return 'book-heading';
-    case 'text':
-      return 'book-text';
-    case 'image':
-      return 'book-image no-break';
-    case 'audio':
-      return 'book-audio-player no-break';
-    case 'callout':
-      return 'book-callout no-break';
-    case 'toc-item':
-      return 'toc-item';
+    case "heading":
+      return "book-heading";
+    case "text":
+      return "book-text";
+    case "image":
+      return "book-image no-break";
+    case "audio":
+      return "book-audio-player no-break";
+    case "callout":
+      return "book-callout no-break";
+    case "toc-item":
+      return "toc-item";
     default:
-      return '';
+      return "";
   }
 }
 
@@ -252,15 +265,15 @@ function getBlockClassName(type: ContentBlock['type']): string {
 function BlockRenderer({ block }: { block: ContentBlock }) {
   const className = getBlockClassName(block.type);
 
-  if (block.type === 'heading') {
+  if (block.type === "heading") {
     return <h2 className={className}>{block.content}</h2>;
   }
 
-  if (block.type === 'text') {
+  if (block.type === "text") {
     return <p className={className}>{block.content}</p>;
   }
 
-  if (block.type === 'toc-item') {
+  if (block.type === "toc-item") {
     return <div className={className}>{block.content}</div>;
   }
 
