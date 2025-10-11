@@ -3429,9 +3429,14 @@ textarea:focus-visible {
   transition: left 300ms ease-in-out;
 }
 
-/* Progress bar always visible at bottom */
+/* Progress bar always visible and sticky at bottom of viewport */
 .book-progress-bar {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
   transition: padding 300ms ease-in-out;
+  pointer-events: auto;
 }
 
 /* ============================================================================

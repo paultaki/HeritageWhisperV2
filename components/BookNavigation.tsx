@@ -299,18 +299,20 @@ function DesktopProgressBar({
 
   const handlePrevious = () => {
     if (hasPrevious) {
-      onNavigateToPage(currentPage - 2); // Convert to 0-indexed
+      // currentPage is 1-indexed, convert to 0-indexed and go back 2 pages (for spread)
+      onNavigateToPage(currentPage - 1 - 2);
     }
   };
 
   const handleNextPage = () => {
     if (hasNext) {
-      onNavigateToPage(currentPage); // Already 1-indexed, so just use it
+      // currentPage is 1-indexed, convert to 0-indexed and go forward 2 pages (for spread)
+      onNavigateToPage(currentPage - 1 + 2);
     }
   };
 
   return (
-    <div className="book-progress-bar fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30 shadow-lg">
+    <div className="book-progress-bar fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 shadow-lg">
       <div className="relative px-6 py-3 max-w-7xl mx-auto flex items-center gap-4">
         {/* Previous button */}
         <button
@@ -691,16 +693,15 @@ export default function BookNavigation({
       {/* Desktop: TOC trigger tab - moves to screen edge in fullscreen */}
       {!isMobile && (
         <>
-          <button
-            onClick={() => setTocOpen(true)}
-            className="book-toc-tab fixed top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center border border-l-0 border-amber-700 hover:w-14"
-            aria-label="Open table of contents"
-            style={{
-              left: tocOpen ? 'auto' : '0',
-            }}
-          >
-            <Menu className="w-6 h-6 text-white" />
-          </button>
+          {!tocOpen && (
+            <button
+              onClick={() => setTocOpen(true)}
+              className="book-toc-tab fixed left-0 top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center border border-l-0 border-amber-700 hover:w-14"
+              aria-label="Open table of contents"
+            >
+              <Menu className="w-6 h-6 text-white" />
+            </button>
+          )}
 
           <DesktopTOCSidebar
             isOpen={tocOpen}
