@@ -21,6 +21,8 @@ import {
   shouldShowNewUserGhosts,
 } from "@/lib/newUserGhostPrompts";
 import { GhostPromptCard } from "@/components/GhostPromptCard";
+import { NextStoryCard } from "@/components/NextStoryCard";
+import { PaywallPromptCard } from "@/components/PaywallPromptCard";
 import DecadeNav, { type DecadeEntry } from "@/components/ui/DecadeNav";
 import {
   Play,
@@ -1187,6 +1189,43 @@ export default function Timeline() {
 
       {/* Timeline Content with Vertical Timeline Design */}
       <main className="max-w-6xl mx-auto px-3 py-6 pb-20 md:p-6 md:pb-6 md:pr-20">
+        {/* Paywall Prompt for Story 3 (if applicable) */}
+        {user?.freeStoriesUsed === 3 && user?.subscriptionStatus !== "active" && (
+          <div className="mb-8">
+            <PaywallPromptCard
+              onSubscribe={() => {
+                // TODO: Integrate with Stripe checkout
+                toast({
+                  title: "Coming soon!",
+                  description: "Stripe integration will be added soon.",
+                });
+              }}
+              onDismiss={() => {
+                // Dismissed - will be hidden via localStorage
+              }}
+            />
+          </div>
+        )}
+
+        {/* AI-Generated Next Story Prompt (show if not at paywall) */}
+        {!(user?.freeStoriesUsed === 3 && user?.subscriptionStatus !== "active") && (
+          <div className="mb-8">
+            <NextStoryCard
+              onRecordClick={(promptId, promptText) => {
+                // Store promptId in modal initial data for later use
+                openModal({
+                  prompt: promptText,
+                  title: "",
+                });
+                // We'll pass the promptId through when saving the story
+                if (promptId) {
+                  sessionStorage.setItem("activePromptId", promptId);
+                }
+              }}
+            />
+          </div>
+        )}
+
         <div className="hw-layout">
           <div className="hw-spine">
             {/* All stories sorted chronologically */}

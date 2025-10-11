@@ -74,6 +74,8 @@ export interface User {
   birthYear: number;
   storyCount: number;
   isPaid: boolean;
+  freeStoriesUsed?: number;
+  subscriptionStatus?: string; // 'none', 'active', 'cancelled', 'expired'
 }
 
 export interface Story {

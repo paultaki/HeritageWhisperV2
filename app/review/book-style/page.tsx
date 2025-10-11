@@ -229,6 +229,12 @@ function BookStyleReviewContent() {
           ? parseInt(storyYear) - user.birthYear
           : null;
 
+      // Get source prompt ID if this story was triggered by a prompt
+      const sourcePromptId = sessionStorage.getItem("activePromptId");
+      if (sourcePromptId) {
+        console.log("Story triggered by prompt:", sourcePromptId);
+      }
+
       // For NEW stories with blob photos or audio, we need to create the story first, then upload media
       const hasNewPhotos =
         !isEditing && photos.some((p) => p.url.startsWith("blob:"));
@@ -254,6 +260,7 @@ function BookStyleReviewContent() {
           audioUrl: null, // Will be set after upload
           wisdomClipText: wisdomText,
           durationSeconds: 0,
+          sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
         };
 
         console.log("Creating story first...");
@@ -656,6 +663,7 @@ function BookStyleReviewContent() {
         audioUrl: finalAudioUrl,
         wisdomClipText: wisdomText,
         durationSeconds: 0,
+        sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
       };
 
       console.log("Saving story with data:", storyData);
@@ -683,6 +691,10 @@ function BookStyleReviewContent() {
       // Clear session storage
       sessionStorage.removeItem("recordedAudio");
       sessionStorage.removeItem("recordingTranscription");
+      sessionStorage.removeItem("activePromptId"); // Clear prompt ID after save
+
+      // Invalidate prompts query to fetch next prompt
+      queryClient.invalidateQueries({ queryKey: ["/api/prompts/next"] });
 
       // Navigate to timeline
       router.push("/timeline");

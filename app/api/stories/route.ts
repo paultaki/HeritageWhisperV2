@@ -212,6 +212,7 @@ export async function POST(request: NextRequest) {
           ? body.photoUrl
           : undefined,
       is_saved: true,
+      source_prompt_id: body.sourcePromptId || null, // Track which prompt generated this story
       metadata: {
         life_age: body.lifeAge || body.age,
         include_in_timeline: body.includeInTimeline ?? true,
@@ -238,6 +239,82 @@ export async function POST(request: NextRequest) {
         { error: "Failed to create story", details: insertError.message },
         { status: 500 },
       );
+    }
+
+    // ============================================================================
+    // PROMPT TRACKING: Mark source prompt as "used" if applicable
+    // ============================================================================
+    if (body.sourcePromptId) {
+      try {
+        logger.debug(
+          "[Stories API] Marking prompt as used:",
+          body.sourcePromptId,
+        );
+
+        // Fetch the prompt to archive it
+        const { data: usedPrompt, error: promptFetchError } =
+          await supabaseAdmin
+            .from("active_prompts")
+            .select("*")
+            .eq("id", body.sourcePromptId)
+            .eq("user_id", user.id)
+            .single();
+
+        if (promptFetchError) {
+          logger.warn(
+            "[Stories API] Could not fetch prompt to archive:",
+            promptFetchError,
+          );
+        } else if (usedPrompt) {
+          // Archive to prompt_history
+          const { error: historyError } = await supabaseAdmin
+            .from("prompt_history")
+            .insert({
+              user_id: user.id,
+              prompt_text: usedPrompt.prompt_text,
+              anchor_hash: usedPrompt.anchor_hash,
+              anchor_entity: usedPrompt.anchor_entity,
+              anchor_year: usedPrompt.anchor_year,
+              tier: usedPrompt.tier,
+              memory_type: usedPrompt.memory_type,
+              prompt_score: usedPrompt.prompt_score,
+              shown_count: usedPrompt.shown_count,
+              outcome: "used",
+              story_id: newStory.id,
+              created_at: usedPrompt.created_at,
+            });
+
+          if (historyError) {
+            logger.warn(
+              "[Stories API] Could not archive prompt to history:",
+              historyError,
+            );
+          }
+
+          // Delete from active_prompts
+          const { error: deleteError } = await supabaseAdmin
+            .from("active_prompts")
+            .delete()
+            .eq("id", body.sourcePromptId);
+
+          if (deleteError) {
+            logger.warn(
+              "[Stories API] Could not delete active prompt:",
+              deleteError,
+            );
+          } else {
+            logger.debug(
+              "[Stories API] Successfully marked prompt as used and archived",
+            );
+          }
+        }
+      } catch (promptError) {
+        // Log but don't fail the request
+        logger.error(
+          "[Stories API] Error handling source prompt:",
+          promptError,
+        );
+      }
     }
 
     // ============================================================================
