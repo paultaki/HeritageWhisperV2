@@ -90,6 +90,7 @@ HeritageWhisperV2/
 ## 🔑 Key Features
 - **Audio Recording**: Simplified one-session flow with 3-2-1 countdown, 5-minute max, auto-transcription
 - **AI Transcription**: OpenAI Whisper API with automatic processing
+- **AI Prompt System**: Multi-tier reflection prompt generation (see AI Features section below)
 - **Photo Management**: Multi-upload with cropping & hero images (EXIF data stripped for privacy)
 - **Timeline View**: Chronological story organization by decade with "Before I Was Born" section
 - **Book View**: Dual-page layout with natural pagination, collapsed decade navigation
@@ -98,6 +99,74 @@ HeritageWhisperV2/
 - **Mobile Responsive**: Senior-friendly UX with large touch targets
 - **Desktop Navigation**: Left sidebar (192px wide) with labeled icons
 - **Rate Limiting**: Upshash Redis-based (auth: 5/10s, uploads: 10/min, API: 30/min)
+
+## 🤖 AI Features
+
+### AI Prompt Generation System v1.4 (PRODUCTION READY)
+Intelligent reflection prompt system that helps users deepen their storytelling through AI-generated questions.
+
+#### Database Schema
+Three new tables added via migration `/migrations/0002_add_ai_prompt_system.sql`:
+- **`active_prompts`**: Currently active prompts for users (7-day expiry, 1-3 prompts from Tier 1, unlimited from Tier 3)
+- **`prompt_history`**: All generated prompts with retirement tracking (skipped/answered)
+- **`character_evolution`**: AI insights about user's character, invisible rules, contradictions, core lessons
+
+#### Tier 1: Template-Based Entity Prompts
+- **Trigger**: After EVERY story save
+- **Process**: Multi-entity extraction (1-3 entities per story) using GPT-4o
+  - Extracts people, places, objects, concepts from story
+  - Generates 1-3 prompts using template library (5 categories: Appreciation, Perspective Shifts, Unfinished Business, Invisible Rules, Future Self)
+  - SHA1 deduplication prevents duplicate prompts
+  - 7-day expiry (auto-cleanup via database trigger)
+- **Prompt Format**: 25-30 words, conversational, no story titles, specific details
+- **Location**: `/lib/promptGeneration.ts`, `/app/api/stories/route.ts:231-262`
+- **Example Output**: "You felt 'housebroken by love' with Chewy. What freedom did you trade for that love, and do you miss it?"
+
+#### Tier 3: Milestone Analysis Prompts
+- **Trigger**: At story milestones [1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100]
+- **Process**: Combined GPT-4o analysis of all user stories
+  - Analyzes entire story collection for patterns, themes, character evolution
+  - Generates high-quality reflection prompts (25-30 words each)
+  - Extracts character insights: traits, invisible rules, contradictions, core lessons
+  - Stores insights in `character_evolution` table (upsert on conflict)
+- **Character Insights**: Confidence scores, supporting evidence, insight categories
+- **Location**: `/lib/tier3Analysis.ts`, `/app/api/stories/route.ts:277-366`
+- **Example Insights**:
+  - Traits: "Loyalty (0.9 confidence): Stayed at camp despite fear"
+  - Invisible Rules: "Never show weakness even when scared"
+  - Contradictions: "Values independence but craves deep connection"
+  - Core Lessons: "True courage is staying when you want to run"
+
+#### Lesson Learned Extraction
+- **Trigger**: During transcription (every story)
+- **Process**: GPT-4o generates 3 lesson options (1-2 sentences, first-person)
+- **User Experience**: Review page shows 3 options, user picks one or writes their own
+- **Database**: Stored in `stories.wisdom_text` column
+- **Location**: `/app/api/transcribe/route.ts:84-117`
+- **Display**: Book view shows lessons with gold left border callout
+
+#### Key Implementation Details
+- **Deduplication**: SHA1 hashing prevents duplicate prompts across all user prompts
+- **Expiry**: Tier 1 prompts expire after 7 days, Tier 3 prompts never expire
+- **Retirement**: Prompts marked as skipped/answered prevent re-generation
+- **Error Handling**: Graceful degradation if OpenAI API fails
+- **Rate Limiting**: Uses existing Upstash Redis limits for API protection
+
+#### Database Column Updates
+Added to `users` table:
+- `character_insights` (JSONB): Stores Tier 3 character analysis
+- `milestone_reached` (INTEGER): Tracks highest milestone for Tier 3 triggers
+
+Added to `stories` table:
+- `lesson_learned` (TEXT): User-selected wisdom/lesson from story
+- `entities_extracted` (JSONB): Extracted entities for Tier 1 prompt generation
+
+#### Pending Implementation
+- **GET `/api/prompts/next`**: Fetch next prompt to display to user
+- **POST `/api/prompts/skip`**: Retire skipped prompts
+- **Stripe webhook**: Unlock Story 3+ premium prompts on payment
+- **UI components**: Display prompts in app interface
+- **Do-not-ask**: User-controlled topic blocking
 
 ## 🐛 Common Issues & Fixes
 
@@ -271,6 +340,45 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 - **Photo Margins**: 0 top margin for clean 48px spacing from dotted border
   - Location: `/app/globals.css:1936`
 
+## ✅ Recent Updates (October 10, 2025)
+
+### PDF Export Improvements
+- **Running Headers**: Now show story title, year, and age instead of generic "Heritage Whisper" / "Family Memories"
+  - Format: "STORY TITLE • YEAR • AGE X" (uppercase)
+  - Removed redundant year/age display from below the title
+  - Location: `/app/book/print/2up/page.tsx`, `/app/book/print/trim/page.tsx`
+- **Lesson Learned Styling**: Updated to match clean site design
+  - Changed from yellow background box with icon to simple 4px straight gold left border (`#D4A574`)
+  - Consistent styling across web view and PDF exports
+  - Location: `/app/book/print/2up/page.tsx:452-481`, `/app/book/print/print-trim.css:116-138`
+
+### Page Margins - Reduced for More Breathing Room
+- **Book View**: Content margin reduced from 48px → 23px (25px reduction)
+  - Fixed override in `globals.css` that was preventing CSS variable from working
+  - Location: `/app/book/book.css:12` (CSS variable), `/app/globals.css:2820` (fixed override)
+- **PDF Export**: Horizontal padding reduced from 0.5in → 0.25in per side
+  - Gives text more breathing room on printed pages
+  - Updated running header and page number positioning to match
+  - Location: `/app/book/print/2up/page.tsx:386`, `/app/book/print/print-trim.css:31`
+
+### Lesson Learned Bug Fixes
+- **Added Remove Button**: Can now completely delete lessons in edit mode
+  - New "Remove" button between Save and Cancel in lesson editor
+  - Location: `/components/BookStyleReview.tsx:490-497`
+- **Fixed Empty String Handling**: Deleting all text now properly saves empty string
+  - Previous bug: Using `||` operator treated empty string as falsy, causing old value to reappear
+  - Fix: Changed to explicit `!== undefined` check to allow empty strings
+  - Location: `/app/api/stories/[id]/route.ts:247-251`
+
+### Running Header Alignment Fix
+- **Perfect Vertical Alignment**: All running headers now at consistent height across every page
+  - Previous bug: Left/right pages had different `top` values (18px vs 11px), causing random misalignment
+  - Fix: Both pages now use `top: 18px` with fixed height container and baseline alignment
+  - Changed from `min-height: 28px` → `height: 28px` + `line-height: 28px` to prevent layout shifts
+  - Changed `align-items: center` → `align-items: flex-start` for consistent baseline
+  - Updated horizontal positioning from 48px → 23px to match new content margins
+  - Location: `/app/globals.css:2771-2796`
+
 ---
-*Last updated: October 9, 2025*
+*Last updated: October 10, 2025*
 *For historical fixes, feature archives, and migration notes, see CLAUDE_HISTORY.md*

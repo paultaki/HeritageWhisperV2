@@ -648,10 +648,10 @@ export default function BookNavigation({
         <>
           <button
             onClick={() => setTocOpen(true)}
-            className="fixed left-0 top-1/2 -translate-y-1/2 w-10 h-20 bg-white/95 backdrop-blur-sm rounded-r-lg shadow-lg hover:shadow-xl transition-all z-30 flex items-center justify-center border border-l-0 border-gray-200 hover:w-12"
+            className="fixed left-28 top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center border border-l-0 border-amber-700 hover:w-14"
             aria-label="Open table of contents"
           >
-            <Menu className="w-5 h-5 text-gray-700" />
+            <Menu className="w-6 h-6 text-white" />
           </button>
 
           <DesktopTOCSidebar

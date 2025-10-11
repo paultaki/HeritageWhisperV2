@@ -946,49 +946,6 @@ export default function BookViewNew() {
         </div>
       </div>
 
-      {/* Fixed Navigation Arrows - Premium 64px touch targets */}
-      {/* Spread view arrows */}
-      {showSpreadView && currentSpreadIndex > 0 && (
-        <button
-          onClick={goToPrevious}
-          className="nav-arrow nav-arrow--prev fixed top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
-          aria-label="Previous spread"
-        >
-          <ChevronLeft className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
-        </button>
-      )}
-
-      {showSpreadView && currentSpreadIndex < totalSpreads - 1 && (
-        <button
-          onClick={goToNext}
-          className="nav-arrow fixed right-8 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transition-all flex items-center justify-center group border border-gray-200"
-          aria-label="Next spread"
-        >
-          <ChevronRight className="w-7 h-7 text-gray-700 group-hover:text-coral-600 transition-colors" />
-        </button>
-      )}
-
-      {/* Single page arrows */}
-      {!showSpreadView && currentMobilePage > 0 && (
-        <button
-          onClick={goToPrevious}
-          className="nav-arrow nav-arrow--prev fixed top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full bg-white/95 hover:bg-gray-50 shadow-xl active:scale-95 transition-all flex items-center justify-center border border-gray-200"
-          aria-label="Previous page"
-        >
-          <ChevronLeft className="w-7 h-7 text-gray-700" />
-        </button>
-      )}
-
-      {!showSpreadView && currentMobilePage < totalPages - 1 && (
-        <button
-          onClick={goToNext}
-          className="nav-arrow fixed right-8 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full bg-white/95 hover:bg-gray-50 shadow-xl active:scale-95 transition-all flex items-center justify-center border border-gray-200"
-          aria-label="Next page"
-        >
-          <ChevronRight className="w-7 h-7 text-gray-700" />
-        </button>
-      )}
-
       {/* Book Content - Always centered */}
       <div className="book-container relative" {...swipeHandlers}>
         {/* Spine hint for single-page mode - behind everything */}
