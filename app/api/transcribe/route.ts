@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 import { apiRatelimit, checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { sanitizeUserInput, validateSanitizedInput } from "@/lib/promptSanitizer";
 import * as fs from "fs";
 import * as path from "path";
 import { nanoid } from "nanoid";
@@ -29,6 +30,14 @@ const openai = new OpenAI({
 
 // Helper function to format transcription
 async function formatTranscription(rawText: string): Promise<string> {
+  // Sanitize input to prevent prompt injection
+  const sanitizedText = sanitizeUserInput(rawText);
+  
+  if (!validateSanitizedInput(sanitizedText)) {
+    logger.warn("Potential prompt injection detected in raw transcription");
+    return rawText; // Return original on injection attempt
+  }
+
   try {
     const systemInstructions = `You are a professional editor helping to clean up and format transcribed speech into a beautifully readable story for a memory book.
 
@@ -53,7 +62,7 @@ Guidelines for formatting:
 Return ONLY the cleaned and formatted text with proper paragraph breaks. No explanations or commentary.`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -61,7 +70,7 @@ Return ONLY the cleaned and formatted text with proper paragraph breaks. No expl
         },
         {
           role: "user",
-          content: `${systemInstructions}\n\nTranscribed speech to format:\n"${rawText}"`
+          content: `${systemInstructions}\n\n<transcribed_speech>\n${sanitizedText}\n</transcribed_speech>`
         }
       ],
       temperature: 0.3,
@@ -87,6 +96,14 @@ async function generateLessonOptions(transcription: string): Promise<{
   emotional: string;
   character: string;
 } | null> {
+  // Sanitize input to prevent prompt injection
+  const sanitizedTranscription = sanitizeUserInput(transcription);
+  
+  if (!validateSanitizedInput(sanitizedTranscription)) {
+    logger.warn("Potential prompt injection detected in lesson generation");
+    return null;
+  }
+
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -118,7 +135,9 @@ Focus on:
 2. EMOTIONAL TRUTH (what to FEEL or how to process emotions)
 3. CHARACTER INSIGHT (who to BE or what kind of person to become)
 
-Story: "${transcription}"
+<story>
+${sanitizedTranscription}
+</story>
 
 Return exactly 3 lessons, each 15-20 words, formatted as:
 PRACTICAL: [lesson]

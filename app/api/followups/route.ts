@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 import { apiRatelimit, checkRateLimit } from "@/lib/ratelimit";
+import { sanitizeUserInput, validateSanitizedInput } from "@/lib/promptSanitizer";
 
 // Initialize Supabase Admin client for token verification
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -76,7 +77,15 @@ async function generateFollowUps(
   userName: string,
   userAge: number
 ): Promise<FollowUpQuestions> {
-  const pivotalCategories = detectPivotalMoments(transcription);
+  // Sanitize user input to prevent prompt injection
+  const sanitizedTranscription = sanitizeUserInput(transcription);
+  
+  if (!validateSanitizedInput(sanitizedTranscription)) {
+    logger.warn("Potential prompt injection detected in transcription");
+    throw new Error("Invalid input detected");
+  }
+
+  const pivotalCategories = detectPivotalMoments(sanitizedTranscription);
 
   const systemInstructions = `
 You are interviewing ${userName}, age ${userAge}, about their life story.
@@ -109,7 +118,7 @@ Return ONLY valid JSON: {"emotional": "", "wisdom": "", "sensory": ""}
         },
         {
           role: "user",
-          content: `${systemInstructions}\n\nTranscription:\n"${transcription}"`
+          content: `${systemInstructions}\n\n<transcription>\n${sanitizedTranscription}\n</transcription>`
         }
       ],
       response_format: { type: "json_object" },
