@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { stories, users, userAgreements, sharedAccess, familyMembers, familyActivity } from "@/shared/schema";
 import { eq } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -55,7 +56,7 @@ export async function DELETE(request: NextRequest) {
 
     const userId = user.id;
 
-    console.log(`[Account Deletion] Starting deletion process for user: ${userId}`);
+    logger.debug(`[Account Deletion] Starting deletion process for user: ${userId}`);
 
     // Step 1: Get all user stories to identify files to delete
     const userStories = await db
@@ -63,7 +64,7 @@ export async function DELETE(request: NextRequest) {
       .from(stories)
       .where(eq(stories.userId, userId));
 
-    console.log(`[Account Deletion] Found ${userStories.length} stories to delete`);
+    logger.debug(`[Account Deletion] Found ${userStories.length} stories to delete`);
 
     // Step 2: Delete all files from Supabase Storage
     const filesToDelete: string[] = [];
@@ -91,17 +92,17 @@ export async function DELETE(request: NextRequest) {
 
     // Delete all files from storage
     if (filesToDelete.length > 0) {
-      console.log(`[Account Deletion] Deleting ${filesToDelete.length} files from storage`);
+      logger.debug(`[Account Deletion] Deleting ${filesToDelete.length} files from storage`);
 
       const { data: deletedFiles, error: storageError } = await supabaseAdmin.storage
         .from("heritage-whisper-files")
         .remove(filesToDelete);
 
       if (storageError) {
-        console.error("[Account Deletion] Storage deletion error:", storageError);
+        logger.error("[Account Deletion] Storage deletion error:", storageError);
         // Continue with deletion even if some files fail
       } else {
-        console.log(`[Account Deletion] Deleted ${deletedFiles?.length || 0} files from storage`);
+        logger.debug(`[Account Deletion] Deleted ${deletedFiles?.length || 0} files from storage`);
       }
     }
 
@@ -123,10 +124,10 @@ export async function DELETE(request: NextRequest) {
             .from("heritage-whisper-files")
             .remove(folderFilePaths);
 
-          console.log(`[Account Deletion] Cleaned up ${folderFilePaths.length} files from ${folderPath}`);
+          logger.debug(`[Account Deletion] Cleaned up ${folderFilePaths.length} files from ${folderPath}`);
         }
       } catch (error) {
-        console.error(`[Account Deletion] Error cleaning folder ${folderPath}:`, error);
+        logger.error(`[Account Deletion] Error cleaning folder ${folderPath}:`, error);
         // Continue with deletion
       }
     }
@@ -136,47 +137,47 @@ export async function DELETE(request: NextRequest) {
 
     // Delete family activity
     await db.delete(familyActivity).where(eq(familyActivity.userId, userId));
-    console.log("[Account Deletion] Deleted family activity records");
+    logger.debug("[Account Deletion] Deleted family activity records");
 
     // Delete family members
     await db.delete(familyMembers).where(eq(familyMembers.userId, userId));
-    console.log("[Account Deletion] Deleted family member records");
+    logger.debug("[Account Deletion] Deleted family member records");
 
     // Delete shared access (both owned and shared with)
     await db.delete(sharedAccess).where(eq(sharedAccess.ownerUserId, userId));
     await db.delete(sharedAccess).where(eq(sharedAccess.sharedWithUserId, userId));
-    console.log("[Account Deletion] Deleted shared access records");
+    logger.debug("[Account Deletion] Deleted shared access records");
 
     // Delete user agreements
     await db.delete(userAgreements).where(eq(userAgreements.userId, userId));
-    console.log("[Account Deletion] Deleted user agreement records");
+    logger.debug("[Account Deletion] Deleted user agreement records");
 
     // Delete stories (this should cascade to follow_ups via DB constraints)
     await db.delete(stories).where(eq(stories.userId, userId));
-    console.log("[Account Deletion] Deleted story records");
+    logger.debug("[Account Deletion] Deleted story records");
 
     // Step 4: Delete user from Supabase Auth
     const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (authDeleteError) {
-      console.error("[Account Deletion] Auth user deletion error:", authDeleteError);
+      logger.error("[Account Deletion] Auth user deletion error:", authDeleteError);
       // Continue anyway - we'll clean up the public.users record
     } else {
-      console.log("[Account Deletion] Deleted user from Supabase Auth");
+      logger.debug("[Account Deletion] Deleted user from Supabase Auth");
     }
 
     // Step 5: Delete user record from public.users
     await db.delete(users).where(eq(users.id, userId));
-    console.log("[Account Deletion] Deleted user record from database");
+    logger.debug("[Account Deletion] Deleted user record from database");
 
-    console.log(`[Account Deletion] Successfully completed deletion for user: ${userId}`);
+    logger.debug(`[Account Deletion] Successfully completed deletion for user: ${userId}`);
 
     return NextResponse.json({
       success: true,
       message: "Account and all associated data have been permanently deleted",
     });
   } catch (error) {
-    console.error("[Account Deletion] Error:", error);
+    logger.error("[Account Deletion] Error:", error);
     return NextResponse.json(
       {
         error: "Failed to delete account",

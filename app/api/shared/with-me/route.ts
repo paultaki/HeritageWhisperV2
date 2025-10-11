@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { sharedAccess, users } from "@/shared/schema";
 import { eq, and, or } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ shares: validShares });
   } catch (error) {
-    console.error("Error fetching shared timelines:", error);
+    logger.error("Error fetching shared timelines:", error);
     return NextResponse.json(
       { error: "Failed to fetch shared timelines" },
       { status: 500 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
       .createSignedUploadUrl(filePath);
 
     if (uploadError) {
-      console.error("Error creating signed upload URL:", uploadError);
+      logger.error("Error creating signed upload URL:", uploadError);
       return NextResponse.json(
         { error: "Failed to create upload URL", details: uploadError.message },
         { status: 500 }
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
       token: uploadData.token
     });
   } catch (error) {
-    console.error("Upload URL generation error:", error);
+    logger.error("Upload URL generation error:", error);
     return NextResponse.json(
       { error: "Failed to generate upload URL" },
       { status: 500 }

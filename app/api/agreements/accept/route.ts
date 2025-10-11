@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { userAgreements, users } from "@/shared/schema";
 import { eq, and } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error("[Agreements] Error inserting agreement:", insertError);
+      logger.error("[Agreements] Error inserting agreement:", insertError);
       throw insertError;
     }
 
@@ -96,11 +97,11 @@ export async function POST(request: NextRequest) {
       .eq("id", user.id);
 
     if (updateError) {
-      console.error("[Agreements] Error updating user:", updateError);
+      logger.error("[Agreements] Error updating user:", updateError);
       // Don't fail the request if user update fails
     }
 
-    console.log(`[Agreements] User ${user.id} accepted ${agreementType} v${version} via ${method}`);
+    logger.debug(`[Agreements] User ${user.id} accepted ${agreementType} v${version} via ${method}`);
 
     return NextResponse.json({
       success: true,
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[Agreements] Error recording acceptance:", error);
+    logger.error("[Agreements] Error recording acceptance:", error);
     return NextResponse.json(
       { error: "Failed to record agreement acceptance" },
       { status: 500 }

@@ -5,6 +5,7 @@ import { userAgreements, users } from "@/shared/schema";
 import { eq } from "drizzle-orm";
 import { sendVerificationEmail } from "@/lib/resend";
 import { authRatelimit, getClientIp, checkRateLimit } from "@/lib/ratelimit";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase client with service role key to bypass RLS
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error("[Registration] Supabase error:", error);
+      logger.error("[Registration] Supabase error:", error);
       if (error.message?.includes("already registered")) {
         return NextResponse.json(
           { error: "This email is already registered. Please sign in." },
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
         });
 
       if (userInsertError) {
-        console.error("[Registration] Error creating user:", userInsertError);
+        logger.error("[Registration] Error creating user:", userInsertError);
         // Don't fail registration - user exists in auth.users
       }
 
@@ -125,36 +126,36 @@ export async function POST(request: NextRequest) {
         ]);
 
       if (agreementsError) {
-        console.error("[Registration] Error recording agreements:", agreementsError);
+        logger.error("[Registration] Error recording agreements:", agreementsError);
       } else {
-        console.log(`[Registration] Created user record and recorded agreement acceptance for user ${data.user.id}`);
+        logger.debug(`[Registration] Created user record and recorded agreement acceptance for user ${data.user.id}`);
       }
     } catch (agreementError) {
-      console.error("[Registration] Failed to create user or record agreement acceptance:", agreementError);
+      logger.error("[Registration] Failed to create user or record agreement acceptance:", agreementError);
       // Don't fail registration if agreement recording fails, but log it
     }
 
     // Only auto-sign-in if email confirmation is NOT required
     let session = data.session;
     if (!session && !requireEmailConfirmation) {
-      console.log('[Registration] No session from signUp, signing in user...');
+      logger.debug('[Registration] No session from signUp, signing in user...');
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (signInError) {
-        console.error('[Registration] Sign in after registration failed:', signInError);
+        logger.error('[Registration] Sign in after registration failed:', signInError);
       } else {
         session = signInData.session;
-        console.log('[Registration] Successfully signed in after registration');
+        logger.debug('[Registration] Successfully signed in after registration');
       }
     }
 
     // If email confirmation is required and a session was created, clear it
     // (This happens when Supabase has email confirmation disabled in settings)
     if (requireEmailConfirmation && session) {
-      console.log('[Registration] Email confirmation required but session exists - clearing session');
+      logger.debug('[Registration] Email confirmation required but session exists - clearing session');
       session = null;
     }
 
@@ -187,7 +188,7 @@ export async function POST(request: NextRequest) {
       session: session,
     });
   } catch (error) {
-    console.error("Registration error:", error);
+    logger.error("Registration error:", error);
     return NextResponse.json(
       { error: "Registration failed" },
       { status: 500 }

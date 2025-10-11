@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -95,7 +96,7 @@ export async function PATCH(
       .single();
 
     if (updateError) {
-      console.error("Error updating photo:", updateError);
+      logger.error("Error updating photo:", updateError);
       return NextResponse.json(
         { error: "Failed to update photo" },
         { status: 500 }
@@ -104,7 +105,7 @@ export async function PATCH(
 
     return NextResponse.json({ photo: updatedPhotos[photoIndex] });
   } catch (error) {
-    console.error("Photo update error:", error);
+    logger.error("Photo update error:", error);
     return NextResponse.json(
       { error: "Failed to update photo" },
       { status: 500 }
@@ -188,7 +189,7 @@ export async function DELETE(
       .eq("id", params.id);
 
     if (updateError) {
-      console.error("Error deleting photo:", updateError);
+      logger.error("Error deleting photo:", updateError);
       return NextResponse.json(
         { error: "Failed to delete photo" },
         { status: 500 }
@@ -202,7 +203,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Photo deletion error:", error);
+    logger.error("Photo deletion error:", error);
     return NextResponse.json(
       { error: "Failed to delete photo" },
       { status: 500 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (userError || !dbUser) {
-      console.error("Error fetching user:", userError);
+      logger.error("Error fetching user:", userError);
       // Return default profile data
       return NextResponse.json({
         birthYear: user.user_metadata?.birthYear || 1950,
@@ -91,7 +92,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error("Profile fetch error:", error);
+    logger.error("Profile fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch profile" },
       { status: 500 }
@@ -158,7 +159,7 @@ export async function PATCH(request: NextRequest) {
     );
 
     if (updateError) {
-      console.error("Error updating user metadata:", updateError);
+      logger.error("Error updating user metadata:", updateError);
       return NextResponse.json(
         { error: "Failed to update profile" },
         { status: 500 }
@@ -176,7 +177,7 @@ export async function PATCH(request: NextRequest) {
         .eq("id", user.id);
 
       if (userUpdateError) {
-        console.error("Error updating user birth year:", userUpdateError);
+        logger.error("Error updating user birth year:", userUpdateError);
         // Don't fail the request, metadata was updated successfully
       }
     }
@@ -191,7 +192,7 @@ export async function PATCH(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error("Profile update error:", error);
+    logger.error("Profile update error:", error);
     return NextResponse.json(
       { error: "Failed to save profile" },
       { status: 500 }

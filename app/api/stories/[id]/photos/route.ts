@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -84,7 +85,7 @@ export async function GET(
 
     return NextResponse.json({ photos: photosWithSignedUrls });
   } catch (error) {
-    console.error("Photos fetch error:", error);
+    logger.error("Photos fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch photos" },
       { status: 500 }
@@ -125,7 +126,7 @@ export async function POST(
     const body = await request.json();
     const { filePath, isHero, transform } = body;
 
-    console.log('[POST /api/stories/[id]/photos] Request body:', body);
+    // REMOVED: Sensitive data logging - console.log('[POST /api/stories/[id]/photos] Request body:', body);
 
     if (!filePath) {
       return NextResponse.json(
@@ -143,14 +144,14 @@ export async function POST(
       .single();
 
     if (fetchError || !story) {
-      console.error('[POST /api/stories/[id]/photos] Story fetch error:', fetchError);
+      logger.error('[POST /api/stories/[id]/photos] Story fetch error:', fetchError);
       return NextResponse.json(
         { error: "Story not found or unauthorized" },
         { status: 404 }
       );
     }
 
-    console.log('[POST /api/stories/[id]/photos] Current story metadata:', story.metadata);
+    logger.debug('[POST /api/stories/[id]/photos] Current story metadata:', story.metadata);
 
     // Create new photo object - store the PATH, not the signed URL
     const newPhoto = {
@@ -162,19 +163,19 @@ export async function POST(
       caption: ""
     };
 
-    console.log('[POST /api/stories/[id]/photos] New photo object:', newPhoto);
+    logger.debug('[POST /api/stories/[id]/photos] New photo object:', newPhoto);
 
     // Get current photos from metadata
     const currentPhotos = story.metadata?.photos || [];
-    console.log('[POST /api/stories/[id]/photos] Current photos count:', currentPhotos.length);
+    logger.debug('[POST /api/stories/[id]/photos] Current photos count:', currentPhotos.length);
 
     // If this is marked as hero, unmark other photos
     const updatedPhotos = isHero
       ? [...currentPhotos.map((p: any) => ({ ...p, isHero: false })), newPhoto]
       : [...currentPhotos, newPhoto];
 
-    console.log('[POST /api/stories/[id]/photos] Updated photos count:', updatedPhotos.length);
-    console.log('[POST /api/stories/[id]/photos] Updated photos array:', updatedPhotos);
+    logger.debug('[POST /api/stories/[id]/photos] Updated photos count:', updatedPhotos.length);
+    logger.debug('[POST /api/stories/[id]/photos] Updated photos array:', updatedPhotos);
 
     // Update story metadata with new photos array in Supabase database
     const { data: updatedStory, error: updateError } = await supabaseAdmin
@@ -191,14 +192,14 @@ export async function POST(
       .single();
 
     if (updateError || !updatedStory) {
-      console.error('[POST /api/stories/[id]/photos] Update error:', updateError);
+      logger.error('[POST /api/stories/[id]/photos] Update error:', updateError);
       return NextResponse.json(
         { error: "Failed to add photo to story" },
         { status: 500 }
       );
     }
 
-    console.log('[POST /api/stories/[id]/photos] Story updated successfully. New metadata:', updatedStory.metadata);
+    logger.debug('[POST /api/stories/[id]/photos] Story updated successfully. New metadata:', updatedStory.metadata);
 
     // Generate a signed URL for the photo so it can be displayed immediately
     // Photos are stored with 'photo/' prefix in heritage-whisper-files bucket
@@ -215,7 +216,7 @@ export async function POST(
 
     return NextResponse.json({ photo: photoWithSignedUrl });
   } catch (error) {
-    console.error("Photo add error:", error);
+    logger.error("Photo add error:", error);
     return NextResponse.json(
       { error: "Failed to add photo" },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { uploadRatelimit, checkRateLimit } from "@/lib/ratelimit";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (error) {
-      console.error("Supabase upload error:", error);
+      logger.error("Supabase upload error:", error);
       return NextResponse.json({
         error: "Failed to upload photo",
         details: error.message
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
       filePath: filename
     });
   } catch (error) {
-    console.error("Photo upload error:", error);
+    logger.error("Photo upload error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       {

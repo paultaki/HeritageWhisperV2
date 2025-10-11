@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { uploadRatelimit, checkRateLimit } from "@/lib/ratelimit";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
   try {
     // Log the Content-Type header to debug
     const requestContentType = request.headers.get("content-type");
-    console.log("[Audio Upload] Request Content-Type:", requestContentType);
+    logger.debug("[Audio Upload] Request Content-Type:", requestContentType);
 
     // Get the Authorization header
     const authHeader = request.headers.get("authorization");
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log the received file details for debugging
-    console.log("Received audio file:", {
+    logger.debug("Received audio file:", {
       name: audioFile instanceof File ? audioFile.name : "blob",
       size: audioFile.size,
       type: audioFile.type,
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
     let uploadContentType = audioFile.type;
     if (baseType === "video/webm") {
       uploadContentType = "audio/webm";
-      console.log("[Audio Upload] Normalized video/webm to audio/webm");
+      logger.debug("[Audio Upload] Normalized video/webm to audio/webm");
     }
 
     // Upload with normalized MIME type
@@ -124,8 +125,8 @@ export async function POST(request: NextRequest) {
       });
 
     if (error) {
-      console.error("Supabase upload error:", error);
-      console.error("Error details:", {
+      logger.error("Supabase upload error:", error);
+      logger.error("Error details:", {
         message: error.message,
         statusCode: error.statusCode,
         details: error.details,
@@ -146,7 +147,7 @@ export async function POST(request: NextRequest) {
       path: filename
     });
   } catch (error) {
-    console.error("Audio upload error:", error);
+    logger.error("Audio upload error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       {

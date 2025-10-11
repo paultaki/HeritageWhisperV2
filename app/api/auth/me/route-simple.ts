@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ user: userData });
   } catch (error) {
-    console.error("Auth verification error:", error);
+    logger.error("Auth verification error:", error);
     return NextResponse.json(
       { error: "Authentication failed" },
       { status: 500 }

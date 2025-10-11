@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer-core';
 import chromium from '@sparticuz/chromium';
 import { createClient } from '@supabase/supabase-js';
+import { logger } from "@/lib/logger";
 
 export const maxDuration = 60;
 export const runtime = 'nodejs';
@@ -19,27 +20,27 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('[Export Trim] Starting PDF export...');
+    logger.debug('[Export Trim] Starting PDF export...');
 
     // Get the Authorization header
     const authHeader = request.headers.get('authorization');
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-      console.log('[Export Trim] No auth token found');
+      // REMOVED: Sensitive data logging - console.log('[Export Trim] No auth token found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('[Export Trim] Verifying auth token...');
+    // REMOVED: Sensitive data logging - console.log('[Export Trim] Verifying auth token...');
     // Verify the JWT token with Supabase
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
-      console.log('[Export Trim] Auth failed:', authError);
+      logger.debug('[Export Trim] Auth failed:', authError);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('[Export Trim] Auth successful, user:', user.id);
+    logger.debug('[Export Trim] Auth successful, user:', user.id);
 
     // Use local Chrome for development, @sparticuz/chromium for production
     const isDev = process.env.NODE_ENV === 'development';
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
         : undefined;
     } else {
       executablePath = await chromium.executablePath();
-      console.log('[Export Trim] Chromium path:', executablePath);
+      logger.debug('[Export Trim] Chromium path:', executablePath);
     }
 
     const launchArgs = isDev
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
           '--single-process',
         ];
 
-    console.log('[Export Trim] Launching browser...');
+    logger.debug('[Export Trim] Launching browser...');
     const browser = await puppeteer.launch({
       args: launchArgs,
       defaultViewport: chromium.defaultViewport,
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
       headless: true,
     });
 
-    console.log('[Export Trim] Browser launched, creating new page...');
+    logger.debug('[Export Trim] Browser launched, creating new page...');
     const page = await browser.newPage();
 
     // Set viewport to match print dimensions
@@ -87,18 +88,18 @@ export async function POST(request: NextRequest) {
       : process.env.NEXT_PUBLIC_SITE_URL || `http://127.0.0.1:${process.env.PORT || 3002}`;
 
     const printUrl = `${baseUrl}/book/print/trim?userId=${user.id}`;
-    console.log('[Export Trim] Navigating to:', printUrl);
+    logger.debug('[Export Trim] Navigating to:', printUrl);
 
     try {
       await page.goto(printUrl, { waitUntil: 'load', timeout: 60000 });
-      console.log('[Export Trim] Page loaded');
+      logger.debug('[Export Trim] Page loaded');
     } catch (navError) {
-      console.log('[Export Trim] Navigation error, trying localhost fallback...');
+      logger.debug('[Export Trim] Navigation error, trying localhost fallback...');
       const fallbackUrl = `http://localhost:${process.env.PORT || 3002}/book/print/trim?userId=${user.id}`;
       await page.goto(fallbackUrl, { waitUntil: 'load', timeout: 60000 });
     }
 
-    console.log('[Export Trim] Waiting for content...');
+    logger.debug('[Export Trim] Waiting for content...');
 
     // Wait for React to hydrate and content to render
     await page.waitForFunction(
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
     // Additional wait for rendering
     await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 2000)));
 
-    console.log('[Export Trim] Content loaded, generating PDF...');
+    logger.debug('[Export Trim] Content loaded, generating PDF...');
     const pdf = await page.pdf({
       width: '5.5in',
       height: '8.5in',
@@ -133,10 +134,10 @@ export async function POST(request: NextRequest) {
       preferCSSPageSize: false
     });
 
-    console.log('[Export Trim] PDF generated, closing browser...');
+    logger.debug('[Export Trim] PDF generated, closing browser...');
     await browser.close();
 
-    console.log('[Export Trim] Success! Returning PDF');
+    logger.debug('[Export Trim] Success! Returning PDF');
     return new NextResponse(pdf, {
       headers: {
         'Content-Type': 'application/pdf',
@@ -145,8 +146,8 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Export Trim] PDF generation error:', error);
-    console.error('[Export Trim] Error stack:', error instanceof Error ? error.stack : 'No stack');
+    logger.error('[Export Trim] PDF generation error:', error);
+    logger.error('[Export Trim] Error stack:', error instanceof Error ? error.stack : 'No stack');
     return NextResponse.json(
       {
         error: 'Failed to generate PDF',

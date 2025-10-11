@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { generateTier1Templates } from "@/lib/promptGeneration";
 import { performTier3Analysis, storeTier3Results } from "@/lib/tier3Analysis";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (storiesError) {
-      console.error("Error fetching stories:", storiesError);
+      logger.error("Error fetching stories:", storiesError);
       return NextResponse.json(
         { error: "Failed to fetch stories" },
         { status: 500 }
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
         .createSignedUrl(photoUrl.startsWith('photo/') ? photoUrl : `photo/${photoUrl}`, 604800);
 
       if (error) {
-        console.error('Error creating signed URL for photo:', photoUrl, error);
+        logger.error('Error creating signed URL for photo:', photoUrl, error);
         return null;
       }
 
@@ -128,7 +129,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ stories: transformedStories });
   } catch (error) {
-    console.error("Stories fetch error:", error);
+    logger.error("Stories fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch stories" },
       { status: 500 }
@@ -219,7 +220,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error("Error creating story:", insertError);
+      logger.error("Error creating story:", insertError);
       return NextResponse.json(
         { error: "Failed to create story", details: insertError.message },
         { status: 500 }
@@ -229,7 +230,7 @@ export async function POST(request: NextRequest) {
     // ============================================================================
     // TIER 1: Generate template-based prompts (1-3 per story, synchronous)
     // ============================================================================
-    console.log('[Stories API] Generating Tier 1 prompts for story:', newStory.id);
+    logger.debug('[Stories API] Generating Tier 1 prompts for story:', newStory.id);
     
     try {
       const tier1Prompts = generateTier1Templates(
@@ -238,7 +239,7 @@ export async function POST(request: NextRequest) {
       );
       
       if (tier1Prompts.length > 0) {
-        console.log(`[Stories API] ${tier1Prompts.length} Tier 1 prompts generated:`, 
+        logger.debug(`[Stories API] ${tier1Prompts.length} Tier 1 prompts generated:`, 
           tier1Prompts.map(p => ({ entity: p.entity, type: p.type }))
         );
         
@@ -271,20 +272,20 @@ export async function POST(request: NextRequest) {
         if (promptError) {
           // Check if it's a duplicate key error (expected - deduplication working)
           if (promptError.code === '23505') {
-            console.log('[Stories API] Some Tier 1 prompts already exist (deduplication working)');
+            logger.debug('[Stories API] Some Tier 1 prompts already exist (deduplication working)');
           } else {
             // Log unexpected errors but don't fail the request
-            console.error('[Stories API] Failed to store Tier 1 prompts:', promptError);
+            logger.error('[Stories API] Failed to store Tier 1 prompts:', promptError);
           }
         } else {
-          console.log(`[Stories API] ${tier1Prompts.length} Tier 1 prompts stored successfully`);
+          logger.debug(`[Stories API] ${tier1Prompts.length} Tier 1 prompts stored successfully`);
         }
       } else {
-        console.log('[Stories API] No Tier 1 prompts generated (no entities found)');
+        logger.debug('[Stories API] No Tier 1 prompts generated (no entities found)');
       }
     } catch (promptGenError) {
       // Log error but don't fail the request
-      console.error('[Stories API] Error generating Tier 1 prompts:', promptGenError);
+      logger.error('[Stories API] Error generating Tier 1 prompts:', promptGenError);
     }
 
     // ============================================================================
@@ -298,16 +299,16 @@ export async function POST(request: NextRequest) {
         .eq('user_id', user.id);
 
       if (countError) {
-        console.error('[Stories API] Failed to count stories:', countError);
+        logger.error('[Stories API] Failed to count stories:', countError);
       } else {
-        console.log(`[Stories API] User now has ${storyCount} total stories`);
+        logger.debug(`[Stories API] User now has ${storyCount} total stories`);
         
         // Milestone thresholds from spec
         const MILESTONES = [1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100];
         
         if (MILESTONES.includes(storyCount || 0)) {
-          console.log(`[Stories API] 🎯 MILESTONE HIT: Story #${storyCount}!`);
-          console.log(`[Stories API] Triggering Tier 3 combined analysis...`);
+          logger.debug(`[Stories API] 🎯 MILESTONE HIT: Story #${storyCount}!`);
+          logger.debug(`[Stories API] Triggering Tier 3 combined analysis...`);
           
           // Fetch all user stories for analysis
           const { data: allStories, error: storiesError } = await supabaseAdmin
@@ -317,7 +318,7 @@ export async function POST(request: NextRequest) {
             .order('created_at', { ascending: true });
           
           if (storiesError || !allStories) {
-            console.error('[Stories API] Failed to fetch stories for Tier 3:', storiesError);
+            logger.error('[Stories API] Failed to fetch stories for Tier 3:', storiesError);
           } else {
             try {
               // Perform GPT-4o combined analysis
@@ -331,23 +332,23 @@ export async function POST(request: NextRequest) {
                 tier3Result
               );
               
-              console.log(`[Stories API] ✅ Tier 3 analysis complete for Story #${storyCount}`);
+              logger.debug(`[Stories API] ✅ Tier 3 analysis complete for Story #${storyCount}`);
               
               // Log Story 3 paywall status
               if (storyCount === 3) {
-                console.log(`[Stories API] 💎 Story 3 paywall: 1 prompt unlocked, 3 locked (premium seed)`);
+                logger.debug(`[Stories API] 💎 Story 3 paywall: 1 prompt unlocked, 3 locked (premium seed)`);
               }
             } catch (tier3Error) {
-              console.error('[Stories API] Tier 3 analysis failed:', tier3Error);
+              logger.error('[Stories API] Tier 3 analysis failed:', tier3Error);
               // Don't fail the request - Tier 3 is bonus functionality
             }
           }
         } else {
-          console.log(`[Stories API] Not a milestone (next milestone at ${MILESTONES.find(m => m > (storyCount || 0)) || '100+'})`);
+          logger.debug(`[Stories API] Not a milestone (next milestone at ${MILESTONES.find(m => m > (storyCount || 0)) || '100+'})`);
         }
       }
     } catch (milestoneError) {
-      console.error('[Stories API] Error checking milestone:', milestoneError);
+      logger.error('[Stories API] Error checking milestone:', milestoneError);
     }
 
     // Transform the response
@@ -379,7 +380,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ story: transformedStory });
   } catch (error) {
-    console.error("Story creation error:", error);
+    logger.error("Story creation error:", error);
     return NextResponse.json(
       { error: "Failed to create story" },
       { status: 500 }

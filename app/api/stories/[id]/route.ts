@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -77,7 +78,7 @@ export async function GET(
         .createSignedUrl(photoUrl.startsWith('photo/') ? photoUrl : `photo/${photoUrl}`, 604800);
 
       if (error) {
-        console.error('Error creating signed URL for photo:', photoUrl, error);
+        logger.error('Error creating signed URL for photo:', photoUrl, error);
         return null;
       }
 
@@ -87,12 +88,12 @@ export async function GET(
     // Process photos array from metadata
     let photos = [];
     if (story.metadata?.photos) {
-      console.log('[GET /api/stories/[id]] Raw photos from DB:', story.metadata.photos);
+      logger.debug('[GET /api/stories/[id]] Raw photos from DB:', story.metadata.photos);
       photos = await Promise.all(
         (story.metadata.photos || []).map(async (photo: any) => {
           const photoPath = photo.url || photo.filePath;
           const signedUrl = await getPhotoUrl(photoPath);
-          console.log('[GET /api/stories/[id]] Photo path:', photoPath, '-> Signed URL:', signedUrl);
+          logger.debug('[GET /api/stories/[id]] Photo path:', photoPath, '-> Signed URL:', signedUrl);
           return {
             ...photo,
             url: signedUrl,
@@ -100,7 +101,7 @@ export async function GET(
           };
         })
       );
-      console.log('[GET /api/stories/[id]] Processed photos:', photos);
+      logger.debug('[GET /api/stories/[id]] Processed photos:', photos);
     }
 
     // Process legacy photoUrl if exists
@@ -136,7 +137,7 @@ export async function GET(
 
     return NextResponse.json({ story: transformedStory });
   } catch (error) {
-    console.error("Story fetch error:", error);
+    logger.error("Story fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch story" },
       { status: 500 }
@@ -185,7 +186,7 @@ export async function PUT(
       .single();
 
     if (fetchError || !existingStory) {
-      console.error("Story fetch error:", fetchError);
+      logger.error("Story fetch error:", fetchError);
       return NextResponse.json(
         { error: "Story not found or unauthorized" },
         { status: 404 }
@@ -198,7 +199,7 @@ export async function PUT(
           if (!photo.url && !photo.filePath) return false;
           // Skip blob URLs - these are invalid temporary URLs
           if (photo.url && photo.url.startsWith('blob:')) {
-            console.warn('Blob URL found in photos array - filtering out:', photo.url);
+            logger.warn('Blob URL found in photos array - filtering out:', photo.url);
             return false;
           }
           return true;
@@ -247,7 +248,7 @@ export async function PUT(
     if (body.wisdomClipText !== undefined || body.wisdomTranscription !== undefined) {
       // Allow empty string to clear the lesson learned
       storyData.wisdom_text = body.wisdomClipText !== undefined ? body.wisdomClipText : body.wisdomTranscription;
-      console.log('[PUT /api/stories/[id]] Updating wisdom_text to:', storyData.wisdom_text);
+      logger.debug('[PUT /api/stories/[id]] Updating wisdom_text to:', storyData.wisdom_text);
     }
     if (body.wisdomClipUrl !== undefined) storyData.wisdom_clip_url = body.wisdomClipUrl;
     if (body.durationSeconds !== undefined) {
@@ -304,7 +305,7 @@ export async function PUT(
       .single();
 
     if (updateError || !updatedStory) {
-      console.error("Story update error:", updateError);
+      logger.error("Story update error:", updateError);
       return NextResponse.json(
         { error: "Story not found or unauthorized" },
         { status: 404 }
@@ -331,7 +332,7 @@ export async function PUT(
         .createSignedUrl(photoUrl.startsWith('photo/') ? photoUrl : `photo/${photoUrl}`, 604800);
 
       if (error) {
-        console.error('Error creating signed URL for photo:', photoUrl, error);
+        logger.error('Error creating signed URL for photo:', photoUrl, error);
         return null;
       }
 
@@ -382,7 +383,7 @@ export async function PUT(
 
     return NextResponse.json({ story: transformedStory });
   } catch (error) {
-    console.error("Story update error:", error);
+    logger.error("Story update error:", error);
     return NextResponse.json(
       { error: "Failed to update story" },
       { status: 500 }
@@ -428,7 +429,7 @@ export async function DELETE(
       .eq("user_id", user.id);
 
     if (deleteError) {
-      console.error("Story deletion error:", deleteError);
+      logger.error("Story deletion error:", deleteError);
       return NextResponse.json(
         { error: "Story not found or already deleted" },
         { status: 404 }
@@ -437,7 +438,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Story deletion error:", error);
+    logger.error("Story deletion error:", error);
     return NextResponse.json(
       { error: "Failed to delete story" },
       { status: 500 }

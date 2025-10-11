@@ -185,17 +185,17 @@ CHARACTER: [lesson]`
 }
 
 export async function POST(request: NextRequest) {
-  console.log('[Transcribe] POST request received');
-  console.log('[Transcribe] Headers:', Object.fromEntries(request.headers.entries()));
+  logger.debug('[Transcribe] POST request received');
+  // REMOVED: Sensitive data logging - console.log('[Transcribe] Headers:', Object.fromEntries(request.headers.entries()));
 
   try {
-    console.log('[Transcribe] Inside try block');
+    logger.debug('[Transcribe] Inside try block');
 
     // Check if the request is FormData or JSON
     const contentType = request.headers.get("content-type");
     const isFormData = contentType?.includes("multipart/form-data");
 
-    console.log('[Transcribe] Content-Type:', contentType, 'IsFormData:', isFormData);
+    logger.debug('[Transcribe] Content-Type:', contentType, 'IsFormData:', isFormData);
 
     // For FormData (from BookStyleReview), auth is optional
     // For JSON (from recording page), auth is required
@@ -203,21 +203,21 @@ export async function POST(request: NextRequest) {
     let audioBuffer: Buffer;
 
     if (isFormData) {
-      console.log('[Transcribe] Processing FormData upload');
+      logger.debug('[Transcribe] Processing FormData upload');
 
       // Handle FormData upload
       const formData = await request.formData();
       const audioFile = formData.get("audio") as File;
 
       if (!audioFile) {
-        console.error('[Transcribe] No audio file in FormData');
+        logger.error('[Transcribe] No audio file in FormData');
         return NextResponse.json(
           { error: "No audio file provided" },
           { status: 400 }
         );
       }
 
-      console.log('[Transcribe] Audio file received:', {
+      logger.debug('[Transcribe] Audio file received:', {
         name: audioFile.name,
         size: audioFile.size,
         type: audioFile.type
@@ -365,12 +365,12 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('[Transcribe] ERROR caught:', error);
-    console.error('[Transcribe] Error type:', typeof error);
-    console.error('[Transcribe] Error instanceof Error:', error instanceof Error);
+    logger.error('[Transcribe] ERROR caught:', error);
+    logger.error('[Transcribe] Error type:', typeof error);
+    logger.error('[Transcribe] Error instanceof Error:', error instanceof Error);
     if (error instanceof Error) {
-      console.error('[Transcribe] Error message:', error.message);
-      console.error('[Transcribe] Error stack:', error.stack);
+      logger.error('[Transcribe] Error message:', error.message);
+      logger.error('[Transcribe] Error stack:', error.stack);
     }
     logger.error("Transcription error:", error);
     return NextResponse.json(

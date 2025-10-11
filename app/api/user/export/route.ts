@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { stories, users, userAgreements, sharedAccess, familyMembers } from "@/shared/schema";
 import { eq } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     const userId = authUser.id;
 
-    console.log(`[Data Export] Starting export for user: ${userId}`);
+    logger.debug(`[Data Export] Starting export for user: ${userId}`);
 
     // Fetch all user data
     const [
@@ -194,8 +195,8 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    console.log(`[Data Export] Export completed for user: ${userId}`);
-    console.log(`[Data Export] Exported ${userStories.length} stories, ${userAgreementsRecords.length} agreements`);
+    logger.debug(`[Data Export] Export completed for user: ${userId}`);
+    logger.debug(`[Data Export] Exported ${userStories.length} stories, ${userAgreementsRecords.length} agreements`);
 
     // Return as downloadable JSON file
     return new NextResponse(JSON.stringify(exportData, null, 2), {
@@ -206,7 +207,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[Data Export] Error:", error);
+    logger.error("[Data Export] Error:", error);
     return NextResponse.json(
       {
         error: "Failed to export data",

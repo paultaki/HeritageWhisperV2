@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { users } from "@/shared/schema";
 import { eq } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (dbError || !userRecord) {
-      console.log('[Agreements] No user record found for', user.id, 'Error:', dbError?.message);
+      logger.debug('[Agreements] No user record found for', user.id, 'Error:', dbError?.message);
 
       // Check if user has agreement records in user_agreements table
       const { data: agreements, error: agreementError } = await supabase
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
 
         if (hasTerms && hasPrivacy) {
           // User has already accepted both agreements, they're compliant
-          console.log('[Agreements] User has both agreement records - considering compliant');
+          logger.debug('[Agreements] User has both agreement records - considering compliant');
           return NextResponse.json({
             currentVersions: {
               terms: CURRENT_TERMS_VERSION,
@@ -122,7 +123,7 @@ export async function GET(request: NextRequest) {
       isCompliant: !needsTermsAcceptance && !needsPrivacyAcceptance,
     });
   } catch (error) {
-    console.error("[Agreements] Error checking status:", error);
+    logger.error("[Agreements] Error checking status:", error);
     return NextResponse.json(
       { error: "Failed to check agreement status" },
       { status: 500 }

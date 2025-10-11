@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -14,18 +15,18 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('[Book Data API] Request received');
+    logger.debug('[Book Data API] Request received');
 
     // Get userId from query params
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
     if (!userId) {
-      console.log('[Book Data API] No userId provided');
+      logger.debug('[Book Data API] No userId provided');
       return NextResponse.json({ error: 'userId required' }, { status: 400 });
     }
 
-    console.log('[Book Data API] Fetching stories for userId:', userId);
+    logger.debug('[Book Data API] Fetching stories for userId:', userId);
 
     // Fetch stories using admin client (bypasses RLS)
     // Note: Database column is 'year' not 'story_year'
@@ -36,23 +37,23 @@ export async function GET(request: NextRequest) {
       .order('year', { ascending: true });
 
     if (error) {
-      console.error('[Book Data API] Supabase error:', error);
+      logger.error('[Book Data API] Supabase error:', error);
       return NextResponse.json({
         error: 'Failed to fetch stories',
         details: error.message
       }, { status: 500 });
     }
 
-    console.log('[Book Data API] Found', stories?.length || 0, 'stories');
+    logger.debug('[Book Data API] Found', stories?.length || 0, 'stories');
     
     // Log first story for debugging
     if (stories && stories.length > 0) {
-      console.log('[Book Data API] Sample story columns:', Object.keys(stories[0]));
-      console.log('[Book Data API] Sample lesson data:', {
+      logger.debug('[Book Data API] Sample story columns:', Object.keys(stories[0]));
+      logger.debug('[Book Data API] Sample lesson data:', {
         lesson_learned: stories[0].lesson_learned,
         wisdom_text: stories[0].wisdom_text
       });
-      console.log('[Book Data API] Sample photo data:', {
+      logger.debug('[Book Data API] Sample photo data:', {
         photo_url: stories[0].photo_url,
         metadata_photos: stories[0].metadata?.photos
       });
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ stories: transformedStories });
 
   } catch (error) {
-    console.error('Book data API error:', error);
+    logger.error('Book data API error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch book data' },
       { status: 500 }

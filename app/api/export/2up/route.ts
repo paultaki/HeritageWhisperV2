@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer-core';
 import chromium from '@sparticuz/chromium';
 import { createClient } from '@supabase/supabase-js';
+import { logger } from "@/lib/logger";
 
 export const maxDuration = 60;
 export const runtime = 'nodejs';
@@ -19,33 +20,33 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('[Export 2up] Starting PDF export...');
+    logger.debug('[Export 2up] Starting PDF export...');
 
     // Get the Authorization header
     const authHeader = request.headers.get('authorization');
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-      console.log('[Export 2up] No auth token found');
+      // REMOVED: Sensitive data logging - console.log('[Export 2up] No auth token found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('[Export 2up] Verifying auth token...');
+    // REMOVED: Sensitive data logging - console.log('[Export 2up] Verifying auth token...');
     // Verify the JWT token with Supabase
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
-      console.log('[Export 2up] Auth failed:', authError);
+      logger.debug('[Export 2up] Auth failed:', authError);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('[Export 2up] Auth successful, user:', user.id);
+    logger.debug('[Export 2up] Auth successful, user:', user.id);
 
     const { bookId } = await request.json();
 
-    console.log('[Export 2up] Launching browser...');
-    console.log('[Export 2up] Environment:', process.env.NODE_ENV);
-    console.log('[Export 2up] Platform:', process.platform);
+    logger.debug('[Export 2up] Launching browser...');
+    logger.debug('[Export 2up] Environment:', process.env.NODE_ENV);
+    logger.debug('[Export 2up] Platform:', process.platform);
 
     // Use local Chrome for development, @sparticuz/chromium for production
     const isDev = process.env.NODE_ENV === 'development';
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
         : undefined;
     } else {
       executablePath = await chromium.executablePath();
-      console.log('[Export 2up] Chromium path:', executablePath);
+      logger.debug('[Export 2up] Chromium path:', executablePath);
     }
 
     const launchArgs = isDev
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
           '--single-process',
         ];
 
-    console.log('[Export 2up] Launch args:', launchArgs.join(' '));
+    logger.debug('[Export 2up] Launch args:', launchArgs.join(' '));
 
     const browser = await puppeteer.launch({
       args: launchArgs,
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
       headless: true,
     });
 
-    console.log('[Export 2up] Browser launched, creating new page...');
+    logger.debug('[Export 2up] Browser launched, creating new page...');
     const page = await browser.newPage();
 
     // Set viewport to match print dimensions at 96 DPI
@@ -90,17 +91,17 @@ export async function POST(request: NextRequest) {
 
     // Log all network requests
     page.on('request', request => {
-      console.log('[Export 2up] Request:', request.method(), request.url());
+      logger.debug('[Export 2up] Request:', request.method(), request.url());
     });
 
     page.on('requestfailed', request => {
-      console.error('[Export 2up] Request failed:', request.url(), request.failure()?.errorText);
+      logger.error('[Export 2up] Request failed:', request.url(), request.failure()?.errorText);
     });
 
     page.on('response', response => {
       const url = response.url();
       if (url.includes('/api/') || url.includes('/book/')) {
-        console.log('[Export 2up] Response:', response.status(), url);
+        logger.debug('[Export 2up] Response:', response.status(), url);
       }
     });
     
@@ -111,43 +112,43 @@ export async function POST(request: NextRequest) {
       : process.env.NEXT_PUBLIC_SITE_URL || `http://127.0.0.1:${process.env.PORT || 3002}`;
 
     const printUrl = `${baseUrl}/book/print/2up?userId=${user.id}`;
-    console.log('[Export 2up] Navigating to:', printUrl);
+    logger.debug('[Export 2up] Navigating to:', printUrl);
 
     try {
       // Use 'load' instead of 'networkidle0' for faster, more reliable rendering
       await page.goto(printUrl, { waitUntil: 'load', timeout: 60000 });
-      console.log('[Export 2up] Initial page load complete');
+      logger.debug('[Export 2up] Initial page load complete');
     } catch (navError) {
-      console.log('[Export 2up] Navigation error:', navError);
-      console.log('[Export 2up] Trying with localhost fallback...');
+      logger.debug('[Export 2up] Navigation error:', navError);
+      logger.debug('[Export 2up] Trying with localhost fallback...');
       // Fallback to localhost if primary URL fails
       const fallbackUrl = `http://localhost:${process.env.PORT || 3002}/book/print/2up?userId=${user.id}`;
       await page.goto(fallbackUrl, { waitUntil: 'load', timeout: 60000 });
-      console.log('[Export 2up] Fallback navigation complete');
+      logger.debug('[Export 2up] Fallback navigation complete');
     }
 
-    console.log('[Export 2up] Page loaded, waiting for content...');
+    logger.debug('[Export 2up] Page loaded, waiting for content...');
 
     // Check for errors on the page
     const pageErrors: string[] = [];
     page.on('console', msg => {
       const text = msg.text();
       if (msg.type() === 'error') {
-        console.error('[Export 2up] Page error:', text);
+        logger.error('[Export 2up] Page error:', text);
         pageErrors.push(text);
       } else {
-        console.log('[Export 2up] Page log:', text);
+        logger.debug('[Export 2up] Page log:', text);
       }
     });
 
     page.on('pageerror', error => {
-      console.error('[Export 2up] Page exception:', error);
+      logger.error('[Export 2up] Page exception:', error);
     });
 
     // Wait for React to hydrate and render content
     // Use a custom wait function that checks for actual content, not just the container
     try {
-      console.log('[Export 2up] Waiting for React hydration...');
+      logger.debug('[Export 2up] Waiting for React hydration...');
 
       await page.waitForFunction(
         () => {
@@ -163,7 +164,7 @@ export async function POST(request: NextRequest) {
         { timeout: 45000, polling: 500 }
       );
 
-      console.log('[Export 2up] Content detected, waiting for images...');
+      logger.debug('[Export 2up] Content detected, waiting for images...');
 
       // Wait for images to load
       await page.evaluate(() => {
@@ -179,21 +180,21 @@ export async function POST(request: NextRequest) {
       // Additional wait for any async rendering
       await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 2000)));
 
-      console.log('[Export 2up] All content loaded');
+      logger.debug('[Export 2up] All content loaded');
     } catch (waitError) {
       // Take a screenshot for debugging
       const screenshot = await page.screenshot({ encoding: 'base64', fullPage: true });
-      console.error('[Export 2up] Failed to render content');
-      console.error('[Export 2up] Page errors:', pageErrors);
-      console.error('[Export 2up] Screenshot (base64):', screenshot.substring(0, 100) + '...');
+      logger.error('[Export 2up] Failed to render content');
+      logger.error('[Export 2up] Page errors:', pageErrors);
+      logger.error('[Export 2up] Screenshot (base64):', screenshot.substring(0, 100) + '...');
 
       // Get the page HTML to see what's actually there
       const html = await page.content();
-      console.error('[Export 2up] Page HTML (first 2000 chars):', html.substring(0, 2000));
+      logger.error('[Export 2up] Page HTML (first 2000 chars):', html.substring(0, 2000));
 
       // Check network activity
       const metrics = await page.metrics();
-      console.error('[Export 2up] Page metrics:', metrics);
+      logger.error('[Export 2up] Page metrics:', metrics);
 
       throw new Error(`Failed to render book content: ${waitError instanceof Error ? waitError.message : String(waitError)}`);
     }
@@ -213,12 +214,12 @@ export async function POST(request: NextRequest) {
         }
         return { html: 'No .book-spread found' };
       });
-      console.log('[Export 2up] Page diagnostics:', JSON.stringify(html, null, 2));
+      logger.debug('[Export 2up] Page diagnostics:', JSON.stringify(html, null, 2));
     } catch (evalError) {
-      console.error('[Export 2up] Evaluation error:', evalError);
+      logger.error('[Export 2up] Evaluation error:', evalError);
     }
 
-    console.log('[Export 2up] Content loaded, generating PDF...');
+    logger.debug('[Export 2up] Content loaded, generating PDF...');
     const pdf = await page.pdf({
       width: '11in',
       height: '8.5in',
@@ -227,10 +228,10 @@ export async function POST(request: NextRequest) {
       preferCSSPageSize: false  // Use our explicit dimensions, not CSS @page
     });
 
-    console.log('[Export 2up] PDF generated, closing browser...');
+    logger.debug('[Export 2up] PDF generated, closing browser...');
     await browser.close();
 
-    console.log('[Export 2up] Success! Returning PDF');
+    logger.debug('[Export 2up] Success! Returning PDF');
 
     return new NextResponse(pdf, {
       headers: {
@@ -240,8 +241,8 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Export 2up] PDF generation error:', error);
-    console.error('[Export 2up] Error stack:', error instanceof Error ? error.stack : 'No stack');
+    logger.error('[Export 2up] PDF generation error:', error);
+    logger.error('[Export 2up] Error stack:', error instanceof Error ? error.stack : 'No stack');
     return NextResponse.json(
       {
         error: 'Failed to generate PDF',

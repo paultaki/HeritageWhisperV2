@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { sharedAccess } from "@/shared/schema";
 import { eq, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { logger } from "@/lib/logger";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ shares });
   } catch (error) {
-    console.error("Error fetching shares:", error);
+    logger.error("Error fetching shares:", error);
     return NextResponse.json(
       { error: "Failed to fetch shares" },
       { status: 500 }
@@ -136,7 +137,7 @@ export async function POST(request: NextRequest) {
       shareUrl,
     });
   } catch (error) {
-    console.error("Error creating share:", error);
+    logger.error("Error creating share:", error);
     return NextResponse.json(
       { error: "Failed to create share" },
       { status: 500 }
