@@ -164,16 +164,18 @@ function DesktopTOCSidebar({
         role="navigation"
         aria-label="Table of contents"
       >
-        {/* Orange close tab attached to right edge */}
-        <button
-          onClick={onClose}
-          className="absolute -right-12 top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center border border-l-0 border-amber-700"
-          aria-label="Close table of contents"
-          data-toc-state="open"
-          data-icon="x"
-        >
-          <X className="w-6 h-6 text-white" />
-        </button>
+        {/* Orange close tab attached to right edge - only show when open */}
+        {isOpen && (
+          <button
+            onClick={onClose}
+            className="absolute -right-12 top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center border border-l-0 border-amber-700"
+            aria-label="Close table of contents"
+            data-toc-state="open"
+            data-icon="x"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+        )}
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -643,6 +645,11 @@ export default function BookNavigation({
 }: BookNavigationProps) {
   const [tocOpen, setTocOpen] = useState(false);
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
+
+  // Debug: Log TOC state on mount and when it changes
+  useEffect(() => {
+    console.log(`[BookNavigation] TOC state changed: ${tocOpen}`);
+  }, [tocOpen]);
 
   const bookStructure = buildBookStructure(pages);
 
