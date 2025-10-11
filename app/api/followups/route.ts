@@ -25,6 +25,23 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+// Cache system instructions at module level to avoid rebuilding on every request
+const FOLLOWUP_SYSTEM_PROMPT = "You are a warm, caring interviewer helping preserve family stories. Generate thoughtful follow-up questions.";
+
+const FOLLOWUP_RULES = `Requirements:
+1. EMOTIONAL: About feelings/impact
+2. WISDOM: Extract life lessons learned
+3. SENSORY: Capture vivid details (sounds, smells, textures, visual details)
+
+Rules:
+- Maximum 12 words per question
+- Use their exact words when possible
+- Warm, conversational tone like a caring granddaughter
+- Make questions feel personal and gentle
+- If they mentioned someone else, ask about relationships
+
+Return ONLY valid JSON: {"emotional": "", "wisdom": "", "sensory": ""}`;
+
 // Pivotal moment detection keywords
 const PIVOTAL_KEYWORDS = {
   'turning_points': ['decided', 'realized', 'understood', 'changed', 'moment', 'suddenly'],
@@ -87,26 +104,13 @@ async function generateFollowUps(
 
   const pivotalCategories = detectPivotalMoments(sanitizedTranscription);
 
-  const systemInstructions = `
-You are interviewing ${userName}, age ${userAge}, about their life story.
+  // Build user-specific instructions using cached base prompt
+  const userInstructions = `You are interviewing ${userName}, age ${userAge}, about their life story.
 Generate exactly 3 follow-up questions in JSON format.
 
 Detected themes: ${pivotalCategories.join(', ')}
 
-Requirements:
-1. EMOTIONAL: About feelings/impact (focus on ${pivotalCategories[0] || 'emotions'})
-2. WISDOM: Extract life lessons learned
-3. SENSORY: Capture vivid details (sounds, smells, textures, visual details)
-
-Rules:
-- Maximum 12 words per question
-- Use their exact words when possible
-- Warm, conversational tone like a caring granddaughter
-- Make questions feel personal and gentle
-- If they mentioned someone else, ask about relationships
-
-Return ONLY valid JSON: {"emotional": "", "wisdom": "", "sensory": ""}
-`;
+${FOLLOWUP_RULES}`;
 
   try {
     const response = await openai.chat.completions.create({
@@ -114,11 +118,11 @@ Return ONLY valid JSON: {"emotional": "", "wisdom": "", "sensory": ""}
       messages: [
         {
           role: "system",
-          content: "You are a warm, caring interviewer helping preserve family stories. Generate thoughtful follow-up questions."
+          content: FOLLOWUP_SYSTEM_PROMPT
         },
         {
           role: "user",
-          content: `${systemInstructions}\n\n<transcription>\n${sanitizedTranscription}\n</transcription>`
+          content: `${userInstructions}\n\n<transcription>\n${sanitizedTranscription}\n</transcription>`
         }
       ],
       response_format: { type: "json_object" },

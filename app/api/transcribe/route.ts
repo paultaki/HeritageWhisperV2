@@ -28,18 +28,10 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// Helper function to format transcription
-async function formatTranscription(rawText: string): Promise<string> {
-  // Sanitize input to prevent prompt injection
-  const sanitizedText = sanitizeUserInput(rawText);
-  
-  if (!validateSanitizedInput(sanitizedText)) {
-    logger.warn("Potential prompt injection detected in raw transcription");
-    return rawText; // Return original on injection attempt
-  }
+// Cache prompts at module level to avoid rebuilding on every request
+const FORMATTING_SYSTEM_PROMPT = "You are a skilled memoir editor who transforms transcribed speech into beautifully formatted stories while preserving the speaker's authentic voice.";
 
-  try {
-    const systemInstructions = `You are a professional editor helping to clean up and format transcribed speech into a beautifully readable story for a memory book.
+const FORMATTING_GUIDELINES = `You are a professional editor helping to clean up and format transcribed speech into a beautifully readable story for a memory book.
 
 Guidelines for formatting:
 1. Remove filler words like "um", "uh", "uhh", "umm", "er", "ah" etc.
@@ -61,16 +53,55 @@ Guidelines for formatting:
 
 Return ONLY the cleaned and formatted text with proper paragraph breaks. No explanations or commentary.`;
 
+const LESSON_EXTRACTION_SYSTEM_PROMPT = `You are extracting life lessons from personal stories.
+
+Your goal is to find the wisdom that can be passed to future generations.
+Each lesson should be 15-20 words, clear, and meaningful.
+
+Avoid:
+- Generic platitudes ("Be yourself", "Follow your heart")
+- Overly specific details that won't apply to others
+- Negative framing ("Don't trust people")
+- Abstract philosophy
+
+Focus on:
+- Universal truths discovered through personal experience
+- Practical wisdom that guides decisions
+- Character insights that shape who we become
+- The cost and value of choices made`;
+
+const LESSON_EXTRACTION_PROMPT = `From this story, extract 3 different types of lessons:
+
+1. PRACTICAL LESSON (what to DO in similar situations)
+2. EMOTIONAL TRUTH (what to FEEL or how to process emotions)
+3. CHARACTER INSIGHT (who to BE or what kind of person to become)
+
+Return exactly 3 lessons, each 15-20 words, formatted as:
+PRACTICAL: [lesson]
+EMOTIONAL: [lesson]
+CHARACTER: [lesson]`;
+
+// Helper function to format transcription
+async function formatTranscription(rawText: string): Promise<string> {
+  // Sanitize input to prevent prompt injection
+  const sanitizedText = sanitizeUserInput(rawText);
+  
+  if (!validateSanitizedInput(sanitizedText)) {
+    logger.warn("Potential prompt injection detected in raw transcription");
+    return rawText; // Return original on injection attempt
+  }
+
+  try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: "You are a skilled memoir editor who transforms transcribed speech into beautifully formatted stories while preserving the speaker's authentic voice."
+          content: FORMATTING_SYSTEM_PROMPT
         },
         {
           role: "user",
-          content: `${systemInstructions}\n\n<transcribed_speech>\n${sanitizedText}\n</transcribed_speech>`
+          content: `${FORMATTING_GUIDELINES}\n\n<transcribed_speech>\n${sanitizedText}\n</transcribed_speech>`
         }
       ],
       temperature: 0.3,
@@ -110,39 +141,15 @@ async function generateLessonOptions(transcription: string): Promise<{
       messages: [
         {
           role: "system",
-          content: `You are extracting life lessons from personal stories.
-
-Your goal is to find the wisdom that can be passed to future generations.
-Each lesson should be 15-20 words, clear, and meaningful.
-
-Avoid:
-- Generic platitudes ("Be yourself", "Follow your heart")
-- Overly specific details that won't apply to others
-- Negative framing ("Don't trust people")
-- Abstract philosophy
-
-Focus on:
-- Universal truths discovered through personal experience
-- Practical wisdom that guides decisions
-- Character insights that shape who we become
-- The cost and value of choices made`
+          content: LESSON_EXTRACTION_SYSTEM_PROMPT
         },
         {
           role: "user",
-          content: `From this story, extract 3 different types of lessons:
-
-1. PRACTICAL LESSON (what to DO in similar situations)
-2. EMOTIONAL TRUTH (what to FEEL or how to process emotions)
-3. CHARACTER INSIGHT (who to BE or what kind of person to become)
+          content: `${LESSON_EXTRACTION_PROMPT}
 
 <story>
 ${sanitizedTranscription}
-</story>
-
-Return exactly 3 lessons, each 15-20 words, formatted as:
-PRACTICAL: [lesson]
-EMOTIONAL: [lesson]
-CHARACTER: [lesson]`
+</story>`
         }
       ],
       temperature: 0.8,
