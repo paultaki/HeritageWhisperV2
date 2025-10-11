@@ -169,6 +169,8 @@ function DesktopTOCSidebar({
           onClick={onClose}
           className="absolute -right-12 top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center border border-l-0 border-amber-700"
           aria-label="Close table of contents"
+          data-toc-state="open"
+          data-icon="x"
         >
           <X className="w-6 h-6 text-white" />
         </button>
@@ -695,9 +697,14 @@ export default function BookNavigation({
         <>
           {!tocOpen && (
             <button
-              onClick={() => setTocOpen(true)}
+              onClick={() => {
+                console.log("TOC tab clicked, opening TOC");
+                setTocOpen(true);
+              }}
               className="book-toc-tab fixed left-0 top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center border border-l-0 border-amber-700 hover:w-14"
               aria-label="Open table of contents"
+              data-toc-state="closed"
+              data-icon="menu"
             >
               <Menu className="w-6 h-6 text-white" />
             </button>
