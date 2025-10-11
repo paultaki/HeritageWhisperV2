@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
+import { apiRatelimit, checkRateLimit } from "@/lib/ratelimit";
 
 // Initialize Supabase Admin client for token verification
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -154,6 +155,12 @@ export async function POST(request: NextRequest) {
         { error: "Invalid authentication" },
         { status: 401 }
       );
+    }
+
+    // Rate limiting: 30 API requests per minute per user
+    const rateLimitResponse = await checkRateLimit(`api:followups:${user.id}`, apiRatelimit);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     const body = await request.json();

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
+import { apiRatelimit, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import * as fs from "fs";
 import * as path from "path";
 import { nanoid } from "nanoid";
@@ -252,6 +253,15 @@ export async function POST(request: NextRequest) {
 
       // Convert base64 to buffer
       audioBuffer = Buffer.from(audioBase64, 'base64');
+    }
+
+    // Rate limiting: 30 API requests per minute per user (or IP if no auth)
+    const rateLimitIdentifier = user 
+      ? `api:transcribe:${user.id}`
+      : `api:transcribe:ip:${getClientIp(request)}`;
+    const rateLimitResponse = await checkRateLimit(rateLimitIdentifier, apiRatelimit);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     // Check size limits (25MB max for OpenAI Whisper)
