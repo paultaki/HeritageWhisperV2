@@ -3369,3 +3369,53 @@ textarea:focus-visible {
   margin-top: 4px;
   font-weight: 400;
 }
+
+/* ============================================================================
+   FULLSCREEN BOOK MODE - Premium transitions for seniors
+   ============================================================================ */
+
+/* Smooth hardware-accelerated transitions */
+@media (prefers-reduced-motion: no-preference) {
+  .transition-transform,
+  .transition-opacity,
+  .transition-all {
+    will-change: transform, opacity;
+  }
+}
+
+/* Floating toggle button hover effects */
+.fixed.top-4.right-4 {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Premium shadow for depth */
+.shadow-3xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+}
+
+/* Ensure book content expands to full viewport in fullscreen */
+.book-view {
+  transition: padding 300ms ease-in-out;
+}
+
+/* Smooth icon transitions */
+.group svg {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus states for accessibility */
+.fixed.top-4.right-4:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Prevent layout shift during transitions */
+.book-header {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 40;
+  background: var(--background);
+}
+

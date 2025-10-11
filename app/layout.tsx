@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import NavigationWrapper from "@/components/NavigationWrapper";
 import AgreementGuard from "@/components/AgreementGuard";
+import LayoutContent from "@/components/LayoutContent";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -39,7 +40,7 @@ export default function RootLayout({
         <Providers>
           <AgreementGuard>
             <NavigationWrapper />
-            <div className="md:pl-28 pb-20 md:pb-0">{children}</div>
+            <LayoutContent>{children}</LayoutContent>
           </AgreementGuard>
         </Providers>
       </body>

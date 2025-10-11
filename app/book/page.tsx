@@ -32,6 +32,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
 import { useViewportConfig } from "./components/ViewportManager";
 import BookNavigation from "@/components/BookNavigation";
+import { useBookFullscreen } from "@/hooks/use-book-fullscreen";
 import {
   paginateBook,
   getPageSpreads,
@@ -619,6 +620,9 @@ export default function BookViewNew() {
   const [fontsReady, setFontsReady] = useState(false);
   const [isPaginationReady, setIsPaginationReady] = useState(false);
 
+  // Fullscreen book mode
+  const { isFullscreen, toggleFullscreen, setFullscreen } = useBookFullscreen();
+
   // Get storyId from URL parameters
   const searchParams = new URLSearchParams(
     typeof window !== "undefined" ? window.location.search : "",
@@ -632,6 +636,49 @@ export default function BookViewNew() {
   });
 
   const stories = data?.stories || [];
+
+  // Auto-enable fullscreen for iPad (768-1024px breakpoint)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const checkBreakpoint = () => {
+      const width = window.innerWidth;
+      const isTablet = width >= 768 && width <= 1024;
+
+      // Auto-enable fullscreen for tablet if not explicitly disabled by user
+      if (isTablet && !isFullscreen) {
+        setFullscreen(true);
+      }
+    };
+
+    // Check on mount
+    checkBreakpoint();
+
+    // Check on resize (debounced)
+    let timeoutId: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkBreakpoint, 150);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isFullscreen, setFullscreen]);
+
+  // ESC key to exit fullscreen
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFullscreen) {
+        setFullscreen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isFullscreen, setFullscreen]);
 
   // Wait for fonts to be ready for accurate measurements
   // But don't block initial render - use optimistic pagination
@@ -964,8 +1011,13 @@ export default function BookViewNew() {
 
   return (
     <div className="book-view min-h-screen bg-background">
-      {/* Header */}
-      <div className="book-header">
+      {/* Header - slides up when fullscreen */}
+      <div
+        className="book-header transition-transform duration-300 ease-in-out"
+        style={{
+          transform: isFullscreen ? "translateY(-100%)" : "translateY(0)",
+        }}
+      >
         <div className="flex items-center gap-3">
           <BookOpen className="w-8 h-8" style={{ color: "#1f0f08" }} />
           <h1 className="text-2xl font-bold">Book</h1>
@@ -1011,6 +1063,21 @@ export default function BookViewNew() {
           )}
         </div>
       </div>
+
+      {/* Floating Fullscreen Toggle Button - Premium design for seniors */}
+      <button
+        onClick={toggleFullscreen}
+        className="fixed top-4 right-4 z-50 w-14 h-14 rounded-full bg-white hover:bg-gray-50 shadow-2xl hover:shadow-3xl transition-all flex items-center justify-center border-2 border-gray-200 hover:border-coral-500 group"
+        aria-label={isFullscreen ? "Show navigation" : "Hide navigation"}
+        title={isFullscreen ? "Show navigation (ESC)" : "Hide navigation"}
+      >
+        <Menu
+          className={`w-6 h-6 text-gray-700 group-hover:text-coral-600 transition-all ${isFullscreen ? "opacity-100 scale-100" : "opacity-0 scale-0"}`}
+        />
+        <X
+          className={`w-6 h-6 text-gray-700 group-hover:text-coral-600 transition-all absolute ${!isFullscreen ? "opacity-100 scale-100" : "opacity-0 scale-0"}`}
+        />
+      </button>
 
       {/* Book Content - Always centered */}
       <div className="book-container relative" {...swipeHandlers}>
