@@ -3465,3 +3465,79 @@ textarea:focus-visible {
   }
 }
 
+
+/* ============================================================================
+   COMPREHENSIVE RESPONSIVE FIXES FOR BOOK VIEW
+   ============================================================================ */
+
+/* Book view container - allows natural scrolling */
+.book-view {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-y: auto; /* Allow vertical scroll */
+}
+
+/* Wrapper for proper padding around navigation bars */
+.book-container-wrapper {
+  padding-top: 80px; /* Space for header */
+  padding-bottom: 80px; /* Space for bottom navigation */
+  min-height: 100vh;
+}
+
+/* Override all previous .book-container rules with specificity */
+body .book-container {
+  position: relative !important;
+  max-width: 1400px !important;
+  margin: 2rem auto !important;
+  padding: 2rem !important;
+  overflow: visible !important; /* Critical: allow content to flow */
+  display: block !important; /* Remove flex constraints */
+  min-height: auto !important; /* Remove height constraints */
+}
+
+/* Desktop: Account for navigation bars */
+@media (min-width: 1024px) {
+  body .book-container {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+/* iPad/Tablet: Single page, centered */
+@media (max-width: 1329px) and (min-width: 768px) {
+  body .book-container {
+    max-width: 650px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+/* Mobile: Full width with padding */
+@media (max-width: 767px) {
+  .book-container-wrapper {
+    padding-top: 60px; /* Smaller header on mobile */
+    padding-bottom: 80px; /* Space for mobile nav */
+  }
+
+  body .book-container {
+    max-width: calc(100vw - 24px) !important;
+    margin: 12px auto !important;
+    padding: 8px !important;
+  }
+}
+
+/* Ensure fixed navigation elements stay fixed */
+.book-progress-bar,
+.book-header {
+  position: fixed !important;
+  z-index: 50 !important;
+}
+
+/* Mobile navigation bar - always fixed to bottom */
+body .fixed.bottom-0[class*="safe-area"] {
+  position: fixed !important;
+  bottom: 0 !important;
+  z-index: 50 !important;
+}
+
