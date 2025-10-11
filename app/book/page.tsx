@@ -23,6 +23,8 @@ import {
   Share2,
   ChevronLeft,
   ChevronRight,
+  Menu,
+  X,
 } from "lucide-react";
 import { useRecordModal } from "@/hooks/use-record-modal";
 import RecordModal from "@/components/RecordModal";
