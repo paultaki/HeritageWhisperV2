@@ -155,7 +155,7 @@ function DesktopTOCSidebar({
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar with attached orange close tab */}
       <div
         ref={sidebarRef}
         className={`fixed left-0 top-0 bottom-0 w-80 bg-white shadow-2xl z-50 transition-transform duration-300 ease-out ${
@@ -164,18 +164,20 @@ function DesktopTOCSidebar({
         role="navigation"
         aria-label="Table of contents"
       >
+        {/* Orange close tab attached to right edge */}
+        <button
+          onClick={onClose}
+          className="absolute -right-12 top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center border border-l-0 border-amber-700"
+          aria-label="Close table of contents"
+        >
+          <X className="w-6 h-6 text-white" />
+        </button>
+
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-serif font-semibold text-gray-800">
             Table of Contents
           </h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-            aria-label="Close table of contents"
-          >
-            <X className="w-5 h-5 text-gray-600" />
-          </button>
         </div>
 
         {/* Scrollable content */}
@@ -292,12 +294,41 @@ function DesktopProgressBar({
     return Math.floor(percentage * totalPages) + 1;
   };
 
+  const hasPrevious = currentPage > 1;
+  const hasNext = currentPage < totalPages;
+
+  const handlePrevious = () => {
+    if (hasPrevious) {
+      onNavigateToPage(currentPage - 2); // Convert to 0-indexed
+    }
+  };
+
+  const handleNextPage = () => {
+    if (hasNext) {
+      onNavigateToPage(currentPage); // Already 1-indexed, so just use it
+    }
+  };
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30 md:left-28">
-      <div className="relative px-6 py-3 max-w-7xl mx-auto">
+    <div className="book-progress-bar fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30 shadow-lg">
+      <div className="relative px-6 py-3 max-w-7xl mx-auto flex items-center gap-4">
+        {/* Previous button */}
+        <button
+          onClick={handlePrevious}
+          disabled={!hasPrevious}
+          className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+            hasPrevious
+              ? "bg-gray-100 hover:bg-gray-200 text-gray-700"
+              : "bg-gray-50 text-gray-300 cursor-not-allowed"
+          }`}
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
         {/* Progress bar */}
         <div
-          className="progress-bar-container relative h-2 bg-gray-200 rounded-full cursor-pointer overflow-visible group transition-all duration-200 hover:h-3"
+          className="progress-bar-container relative h-2 bg-gray-200 rounded-full cursor-pointer overflow-visible group transition-all duration-200 hover:h-3 flex-1"
           onClick={handleClick}
           onMouseMove={handleMouseMove}
           onMouseEnter={() => setIsHovering(true)}
@@ -340,6 +371,20 @@ function DesktopProgressBar({
             </div>
           )}
         </div>
+
+        {/* Next button */}
+        <button
+          onClick={handleNextPage}
+          disabled={!hasNext}
+          className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+            hasNext
+              ? "bg-gray-100 hover:bg-gray-200 text-gray-700"
+              : "bg-gray-50 text-gray-300 cursor-not-allowed"
+          }`}
+          aria-label="Next page"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
     </div>
   );
@@ -643,13 +688,16 @@ export default function BookNavigation({
 
   return (
     <>
-      {/* Desktop: TOC trigger tab */}
+      {/* Desktop: TOC trigger tab - moves to screen edge in fullscreen */}
       {!isMobile && (
         <>
           <button
             onClick={() => setTocOpen(true)}
-            className="fixed left-28 top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center border border-l-0 border-amber-700 hover:w-14"
+            className="book-toc-tab fixed top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center border border-l-0 border-amber-700 hover:w-14"
             aria-label="Open table of contents"
+            style={{
+              left: tocOpen ? 'auto' : '0',
+            }}
           >
             <Menu className="w-6 h-6 text-white" />
           </button>

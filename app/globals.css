@@ -3419,3 +3419,44 @@ textarea:focus-visible {
   background: var(--background);
 }
 
+
+/* ============================================================================
+   TOC TAB POSITIONING - Responds to navigation state
+   ============================================================================ */
+
+/* TOC tab moves to left edge when fullscreen (handled by inline styles in component) */
+.book-toc-tab {
+  transition: left 300ms ease-in-out;
+}
+
+/* Progress bar always visible at bottom */
+.book-progress-bar {
+  transition: padding 300ms ease-in-out;
+}
+
+/* ============================================================================
+   BOOK VERTICAL CENTERING
+   ============================================================================ */
+
+/* Center book content vertically in viewport */
+.book-container {
+  min-height: calc(100vh - 80px - 64px); /* viewport - header - footer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+/* Adjust for fullscreen mode (no header) */
+@media (min-width: 768px) {
+  .book-view {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .book-container {
+    flex: 1;
+    min-height: 0;
+  }
+}
+

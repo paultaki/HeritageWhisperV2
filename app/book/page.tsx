@@ -1012,7 +1012,7 @@ export default function BookViewNew() {
   }
 
   return (
-    <div className="book-view min-h-screen bg-background">
+    <div className="book-view min-h-screen bg-background flex flex-col">
       {/* Header - slides up when fullscreen */}
       <div
         className="book-header transition-transform duration-300 ease-in-out"
@@ -1081,8 +1081,8 @@ export default function BookViewNew() {
         />
       </button>
 
-      {/* Book Content - Always centered */}
-      <div className="book-container relative" {...swipeHandlers}>
+      {/* Book Content - Always centered vertically */}
+      <div className="book-container relative flex-1 flex items-center justify-center" {...swipeHandlers}>
         {/* Spine hint for single-page mode - behind everything */}
         {!showSpreadView && <div className="spine-hint" aria-hidden="true" />}
 
