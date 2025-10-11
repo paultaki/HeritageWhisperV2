@@ -584,7 +584,7 @@ function MobileNavBar({
   hasNext,
 }: MobileNavBarProps) {
   return (
-    <div className="fixed bottom-20 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-30 safe-area-bottom shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 safe-area-bottom shadow-lg">
       <div className="flex items-center justify-between px-4 py-3">
         {/* Previous button */}
         <button
