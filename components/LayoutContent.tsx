@@ -13,6 +13,7 @@ export default function LayoutContent({
 
   const isBookPage = pathname === "/book";
   const shouldRemovePadding = isBookPage && isFullscreen;
+  const shouldRemoveBottomPadding = isBookPage; // Remove bottom padding on all book page views
 
   return (
     <div
@@ -22,7 +23,7 @@ export default function LayoutContent({
         paddingBottom: shouldRemovePadding ? "0" : undefined,
       }}
     >
-      <div className={shouldRemovePadding ? "" : "md:pl-28 pb-20 md:pb-0"}>
+      <div className={shouldRemovePadding ? "" : shouldRemoveBottomPadding ? "md:pl-28" : "md:pl-28 pb-20 md:pb-0"}>
         {children}
       </div>
     </div>

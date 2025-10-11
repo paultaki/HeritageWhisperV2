@@ -68,9 +68,9 @@ export default function MobileNavigation({
   const pathname = usePathname();
   const { user } = useAuth();
 
-  // Don't show navigation on auth pages or home page
+  // Don't show navigation on auth pages, home page, or book page (book has its own navigation)
   const shouldShow =
-    user && !["/auth/login", "/auth/register", "/"].includes(pathname);
+    user && !["/auth/login", "/auth/register", "/", "/book"].includes(pathname) && !pathname.startsWith("/book/");
 
   if (!shouldShow) {
     return null;
@@ -81,11 +81,12 @@ export default function MobileNavigation({
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", damping: 20 }}
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-t-2 md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t-2 md:hidden safe-area-bottom"
       style={{
         borderTopColor: "#D36A3D",
         paddingBottom: "env(safe-area-inset-bottom)",
         boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.08)",
+        position: "fixed",
       }}
     >
       <div className="flex items-center justify-around h-20 relative">

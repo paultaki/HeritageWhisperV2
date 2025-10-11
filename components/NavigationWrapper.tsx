@@ -21,36 +21,14 @@ export default function NavigationWrapper() {
 
   return (
     <>
-      {/* Desktop Navigation (left sidebar) - slides out when fullscreen */}
-      <div
-        className="transition-transform duration-300 ease-in-out"
-        style={{
-          transform: shouldHideNav ? "translateX(-100%)" : "translateX(0)",
-        }}
-      >
-        <DesktopNavigation onRecordClick={() => openModal()} />
-      </div>
+      {/* Desktop Navigation (left sidebar) - only hide on book page in fullscreen */}
+      {!shouldHideNav && <DesktopNavigation onRecordClick={() => openModal()} />}
 
-      {/* Mobile Navigation (bottom bar) - slides down when fullscreen */}
-      <div
-        className="transition-transform duration-300 ease-in-out"
-        style={{
-          transform: shouldHideNav ? "translateY(100%)" : "translateY(0)",
-        }}
-      >
-        <MobileNavigation onRecordClick={() => openModal()} />
-      </div>
+      {/* Mobile Navigation (bottom bar) - only hide on book page in fullscreen */}
+      {!shouldHideNav && <MobileNavigation onRecordClick={() => openModal()} />}
 
-      {/* Hamburger Menu (top right) - fades out when fullscreen */}
-      <div
-        className="transition-opacity duration-300 ease-in-out"
-        style={{
-          opacity: shouldHideNav ? 0 : 1,
-          pointerEvents: shouldHideNav ? "none" : "auto",
-        }}
-      >
-        <HamburgerMenu />
-      </div>
+      {/* Hamburger Menu (top right) - only hide on book page in fullscreen */}
+      {!shouldHideNav && <HamburgerMenu />}
 
       {/* Record Modal */}
       <RecordModal

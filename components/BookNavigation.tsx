@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 import { BookPage } from "@/lib/bookPagination";
+import { useBookFullscreen } from "@/hooks/use-book-fullscreen";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -103,6 +104,7 @@ interface DesktopTOCSidebarProps {
   bookStructure: BookStructure;
   currentPage: number;
   onNavigateToPage: (pageNumber: number) => void;
+  isFullscreen: boolean;
 }
 
 function DesktopTOCSidebar({
@@ -111,6 +113,7 @@ function DesktopTOCSidebar({
   bookStructure,
   currentPage,
   onNavigateToPage,
+  isFullscreen,
 }: DesktopTOCSidebarProps) {
   const [expandedDecades, setExpandedDecades] = useState<Set<string>>(
     new Set(),
@@ -149,7 +152,10 @@ function DesktopTOCSidebar({
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity duration-300"
+          className="fixed top-0 right-0 bottom-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity duration-300"
+          style={{
+            left: isFullscreen ? '0' : '112px', // Don't cover the navbar
+          }}
           onClick={onClose}
           aria-hidden="true"
         />
@@ -158,9 +164,12 @@ function DesktopTOCSidebar({
       {/* Sidebar with attached orange close tab */}
       <div
         ref={sidebarRef}
-        className={`fixed left-0 top-0 bottom-0 w-80 bg-white shadow-2xl z-50 transition-transform duration-300 ease-out ${
+        className={`fixed top-0 bottom-0 w-80 bg-white shadow-2xl z-50 transition-all duration-300 ease-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        style={{
+          left: isFullscreen ? '0' : '112px', // 112px = 7rem = w-28 (sidebar width)
+        }}
         role="navigation"
         aria-label="Table of contents"
       >
@@ -455,7 +464,7 @@ function MobileBottomSheet({
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+          className="fixed inset-0 bg-black/50 z-[150] transition-opacity duration-300"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -464,9 +473,7 @@ function MobileBottomSheet({
       {/* Bottom sheet */}
       <div
         ref={sheetRef}
-        className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-50 transition-transform duration-300 ease-out ${
-          isOpen ? "translate-y-0" : "translate-y-full"
-        }`}
+        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-[160] transition-transform duration-300 ease-out"
         style={{
           height: "70vh",
           transform: isOpen ? `translateY(${currentY}px)` : "translateY(100%)",
@@ -490,10 +497,10 @@ function MobileBottomSheet({
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto h-[calc(70vh-80px)] px-4 py-4">
+        <div className="overflow-y-auto h-[calc(70vh-80px)] px-6 py-6">
           {!selectedDecade ? (
             // Decade grid
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               {bookStructure.decades.map((decade) => {
                 const isCurrentDecade = decade.stories.some(
                   (s) => s.pageNumber === currentPage,
@@ -502,17 +509,17 @@ function MobileBottomSheet({
                   <button
                     key={decade.decade}
                     onClick={() => setSelectedDecade(decade.decade)}
-                    className={`p-4 rounded-lg border-2 transition-all active:scale-95 ${
+                    className={`p-5 rounded-xl border-2 transition-all active:scale-95 min-h-[100px] flex flex-col items-center justify-center ${
                       isCurrentDecade
                         ? "border-amber-500 bg-amber-50"
                         : "border-gray-200 bg-white hover:border-gray-300"
                     }`}
                   >
-                    <div className="text-sm font-serif font-semibold text-gray-800">
+                    <div className="text-base font-serif font-semibold text-gray-800 text-center">
                       {decade.title}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {decade.stories.length} stories
+                    <div className="text-sm text-gray-500 mt-2">
+                      {decade.stories.length} {decade.stories.length === 1 ? 'story' : 'stories'}
                     </div>
                   </button>
                 );
@@ -523,13 +530,13 @@ function MobileBottomSheet({
             <div>
               <button
                 onClick={() => setSelectedDecade(null)}
-                className="flex items-center gap-2 text-sm text-gray-600 mb-4 active:text-gray-900"
+                className="flex items-center gap-2 text-base text-gray-600 mb-6 active:text-gray-900 py-2"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-5 h-5" />
                 Back to decades
               </button>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {bookStructure.decades
                   .find((d) => d.decade === selectedDecade)
                   ?.stories.map((story, idx) => {
@@ -538,17 +545,17 @@ function MobileBottomSheet({
                       <button
                         key={idx}
                         onClick={() => handleNavigate(story.pageNumber)}
-                        className={`w-full text-left p-4 rounded-lg transition-all active:scale-98 ${
+                        className={`w-full text-left p-5 rounded-xl transition-all active:scale-98 ${
                           isCurrent
                             ? "bg-amber-100 border-2 border-amber-500"
                             : "bg-gray-50 border-2 border-transparent hover:border-gray-200"
                         }`}
                       >
-                        <div className="flex justify-between items-baseline">
-                          <span className="font-medium text-gray-800 flex-1 pr-2">
+                        <div className="flex justify-between items-baseline gap-3">
+                          <span className="font-medium text-gray-800 flex-1 text-base leading-snug">
                             {story.title}
                           </span>
-                          <span className="text-xs text-gray-500 whitespace-nowrap">
+                          <span className="text-sm text-gray-500 whitespace-nowrap">
                             p.{story.pageNumber}
                           </span>
                         </div>
@@ -588,7 +595,16 @@ function MobileNavBar({
   hasNext,
 }: MobileNavBarProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 safe-area-bottom shadow-lg">
+    <div 
+      className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 safe-area-bottom shadow-lg"
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+      }}
+    >
       <div className="flex items-center justify-between px-4 py-3">
         {/* Previous button */}
         <button
@@ -645,6 +661,7 @@ export default function BookNavigation({
 }: BookNavigationProps) {
   const [tocOpen, setTocOpen] = useState(false);
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
+  const { isFullscreen } = useBookFullscreen();
 
   // Debug: Log TOC state on mount and when it changes
   useEffect(() => {
@@ -708,7 +725,10 @@ export default function BookNavigation({
                 console.log("TOC tab clicked, opening TOC");
                 setTocOpen(true);
               }}
-              className="book-toc-tab fixed left-0 top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center border border-l-0 border-amber-700 hover:w-14 hidden md:flex"
+              className="book-toc-tab fixed top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all z-50 flex items-center justify-center border border-l-0 border-amber-700 hover:w-14 hidden md:flex"
+              style={{
+                left: isFullscreen ? '0' : '112px', // 112px = 7rem = w-28
+              }}
               aria-label="Open table of contents"
               data-toc-state="closed"
               data-icon="menu"
@@ -723,6 +743,7 @@ export default function BookNavigation({
             bookStructure={bookStructure}
             currentPage={currentPage + 1}
             onNavigateToPage={onNavigateToPage}
+            isFullscreen={isFullscreen}
           />
         </>
       )}
@@ -737,28 +758,26 @@ export default function BookNavigation({
         />
       )}
 
-      {/* Mobile: Bottom navigation */}
-      {isMobile && (
-        <>
-          <MobileNavBar
-            currentPage={currentPage + 1}
-            totalPages={totalPages}
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            onOpenMenu={() => setBottomSheetOpen(true)}
-            hasPrevious={hasPrevious}
-            hasNext={hasNext}
-          />
+      {/* Mobile: Bottom navigation - Always render but hide on desktop with CSS */}
+      <div className={isMobile === false ? "hidden" : "block md:hidden"}>
+        <MobileNavBar
+          currentPage={currentPage + 1}
+          totalPages={totalPages}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          onOpenMenu={() => setBottomSheetOpen(true)}
+          hasPrevious={hasPrevious}
+          hasNext={hasNext}
+        />
 
-          <MobileBottomSheet
-            isOpen={bottomSheetOpen}
-            onClose={() => setBottomSheetOpen(false)}
-            bookStructure={bookStructure}
-            currentPage={currentPage + 1}
-            onNavigateToPage={onNavigateToPage}
-          />
-        </>
-      )}
+        <MobileBottomSheet
+          isOpen={bottomSheetOpen}
+          onClose={() => setBottomSheetOpen(false)}
+          bookStructure={bookStructure}
+          currentPage={currentPage + 1}
+          onNavigateToPage={onNavigateToPage}
+        />
+      </div>
     </>
   );
 }

@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -1020,7 +1021,7 @@ export default function BookViewNew() {
           transform: isFullscreen ? "translateY(-100%)" : "translateY(0)",
         }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 ml-5 md:ml-52">
           <BookOpen className="w-8 h-8" style={{ color: "#1f0f08" }} />
           <h1 className="text-2xl font-bold">Book</h1>
         </div>
@@ -1136,17 +1137,20 @@ export default function BookViewNew() {
         </div>
       </div>
 
-      {/* Book Navigation - Replaces simplified bottom bar */}
-      <BookNavigation
-        pages={pages}
-        currentPage={isMobile ? currentMobilePage : currentSpreadIndex * 2}
-        totalPages={totalPages}
-        onNavigateToPage={navigateToPage}
-        isMobile={isMobile}
-      />
-
       {/* Record Modal */}
       <RecordModal isOpen={isOpen} onClose={close} />
+      
+      {/* Book Navigation - Rendered via portal to escape parent hierarchy */}
+      {typeof window !== 'undefined' && createPortal(
+        <BookNavigation
+          pages={pages}
+          currentPage={isMobile ? currentMobilePage : currentSpreadIndex * 2}
+          totalPages={totalPages}
+          onNavigateToPage={navigateToPage}
+          isMobile={isMobile}
+        />,
+        document.body
+      )}
     </div>
   );
 }
