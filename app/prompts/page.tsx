@@ -125,14 +125,14 @@ export default function PromptsPage() {
 
   return (
     <div className="min-h-screen bg-[#FFF8F3] py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-3xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-serif font-bold text-heritage-brown">
-            Your Memory Inbox
+          <h1 className="text-2xl font-serif text-heritage-brown">
+            Your Memory Prompts
           </h1>
-          <p className="text-lg text-gray-600 italic">
-            Questions waiting to become stories
+          <p className="text-base text-gray-600">
+            Quality over quantity
           </p>
         </div>
 
@@ -154,12 +154,15 @@ export default function PromptsPage() {
           </Link>
         )}
 
-        {/* Section 1: Waiting to be Told (Active) */}
+        {/* Section 1: Waiting to be Told (Active) - Maximum 3 */}
         <div className="space-y-4">
           <h2 className="text-2xl font-serif font-semibold text-heritage-brown flex items-center gap-2">
             <span className="text-amber-600">📬</span>
-            Waiting to be Told
+            Ready to Tell
           </h2>
+          <p className="text-sm text-gray-600 italic">
+            Maximum 3 curated questions at a time
+          </p>
 
           {activeLoading ? (
             <div className="text-center py-8">
@@ -169,7 +172,7 @@ export default function PromptsPage() {
             <Card className="bg-gradient-to-br from-[#FFFBF0] to-[#FFF5E6] border border-[#E8D5C4]">
               <CardContent className="p-8 text-center">
                 <p className="text-lg text-gray-600 italic font-serif">
-                  Your personalized questions will appear here after you record your first story
+                  New prompts will appear as you share more stories
                 </p>
                 <Button
                   onClick={() => router.push("/recording")}
@@ -182,7 +185,7 @@ export default function PromptsPage() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {activePrompts.map((prompt) => (
+              {activePrompts.slice(0, 3).map((prompt) => (
                 <Card
                   key={prompt.id}
                   className="bg-gradient-to-br from-[#FFFBF0] to-[#FFF5E6] border border-[#E8D5C4] shadow-md hover:shadow-lg transition-shadow"

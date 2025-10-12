@@ -997,3 +997,59 @@ body {
     background-position: 0 0;
   }
 }
+
+/* ============================================
+   TIMELINE PROMPT CARD - Whisper-like
+   ============================================ */
+
+/* Compact, gentle prompt suggestion */
+.timeline-prompt-card {
+  max-width: 600px;
+  padding: 1.5rem 2rem;
+  margin: 1rem auto 2rem;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.timeline-prompt-text {
+  font-size: 1.125rem; /* 18px instead of 24px */
+  line-height: 1.6;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* Minimize button - subtle */
+.timeline-prompt-minimize {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  transition: all 0.2s;
+}
+
+.timeline-prompt-minimize:hover {
+  color: #6B7280;
+  background-color: #F3F4F6;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .timeline-prompt-card {
+    padding: 1.25rem 1.5rem;
+    margin: 0.75rem 1rem 1.5rem;
+  }
+  
+  .timeline-prompt-text {
+    font-size: 1rem;
+  }
+}

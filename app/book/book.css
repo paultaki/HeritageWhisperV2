@@ -814,6 +814,14 @@
 
 /* Whisper pages have warmer, more inviting tone */
 .whisper-page {
+  /* Better vertical distribution */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 2rem;
+  min-height: 100%;
+  position: relative;
+  
   /* Warmer paper color - like aged parchment */
   background: linear-gradient(
     135deg, 
@@ -826,23 +834,78 @@
   box-shadow: 
     inset 0 0 30px rgba(220, 190, 140, 0.03),
     inset 0 2px 4px rgba(0, 0, 0, 0.02);
-  
-  /* Ensure whisper page takes full page height */
-  min-height: var(--page-height);
 }
 
-/* The question itself - handwritten, intimate feel */
+/* Subtle background pattern instead of lonely emoji */
+.whisper-page::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  right: 10%;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.whisper-content {
+  max-width: 42rem;
+  margin: 0 auto;
+  animation: whisper-fade-in 0.8s ease-out;
+}
+
+/* Make the "After reading..." much more subtle */
+.whisper-context {
+  font-size: 0.875rem;
+  color: #D4C4B0;
+  opacity: 0.7;
+  margin-bottom: 2.5rem;
+  font-style: italic;
+}
+
+/* The question - bigger, more readable, no hyphens */
 .whisper-question {
+  font-size: 1.875rem; /* 30px */
+  line-height: 1.6;
+  color: #3A3A3A;
   font-family: 'Crimson Text', Georgia, serif;
-  color: #4A4A4A;
-  font-weight: 400;
-  
-  /* Subtle warmth through text shadow */
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  
-  /* Organic line height for natural reading flow */
-  line-height: 1.7;
-  letter-spacing: 0.01em;
+  hyphens: none;
+  word-break: normal;
+  margin: 0 auto 3rem;
+  max-width: 85%; /* Prevent edge-to-edge */
+}
+
+/* More elegant buttons - no underlines */
+.whisper-actions {
+  margin-top: 2rem;
+}
+
+.whisper-action-primary {
+  /* "I want to tell this story" - prominent */
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: white;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.whisper-action-secondary {
+  /* "Continue reading" - subtle */
+  background: transparent;
+  color: #9CA3AF;
+  border: 1px solid #E5E7EB;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
 }
 
 /* Gentle fade-in animation when whisper appears */
@@ -857,43 +920,25 @@
   }
 }
 
-.whisper-content {
-  animation: whisper-fade-in 0.8s ease-out;
-}
-
-/* Action buttons - understated elegance */
-.whisper-actions button {
-  transition: all 0.2s ease;
-}
-
-.whisper-actions button:hover {
-  transform: translateY(-1px);
-}
-
-.whisper-actions button:active {
-  transform: translateY(0);
-}
-
-/* Mobile-specific whisper styles */
+/* Mobile adjustments */
 @media (max-width: 768px) {
   .whisper-page {
     padding: 2rem 1.5rem;
   }
   
   .whisper-question {
-    font-size: 1.25rem;
-    line-height: 1.8;
+    font-size: 1.5rem;
+    max-width: 90%;
   }
   
-  /* Stack actions vertically on small screens */
-  @media (max-width: 400px) {
-    .whisper-actions {
-      flex-direction: column;
-      gap: 1rem;
-    }
-    
-    .whisper-actions span {
-      display: none; /* Hide divider dot */
-    }
+  .whisper-context {
+    font-size: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  
+  .whisper-action-primary,
+  .whisper-action-secondary {
+    width: 100%;
+    text-align: center;
   }
 }

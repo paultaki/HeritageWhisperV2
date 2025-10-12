@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { Sparkles } from "lucide-react";
 
 interface WhisperPageProps {
   prompt: {
@@ -31,56 +30,44 @@ export default function WhisperPage({
   }, [prompt.id]);
 
   return (
-    <div className="whisper-page h-full flex items-center justify-center p-8 md:p-12">
+    <div className="whisper-page">
       {/* The whisper content - centered and gentle */}
-      <div className="whisper-content max-w-2xl mx-auto text-center">
+      <div className="whisper-content">
         
         {/* Context - very subtle, like a margin note */}
-        <p className="text-xs md:text-sm text-gray-400 italic mb-6 md:mb-8 opacity-70">
+        <p className="whisper-context text-center">
           After reading your {afterStory.year} story...
         </p>
         
         {/* The question - the heart of the whisper */}
-        <div className="mb-10 md:mb-14">
-          <p className="whisper-question text-xl md:text-2xl lg:text-3xl 
-                        font-serif text-gray-700 leading-relaxed px-4">
-            {prompt.promptText}
-          </p>
-        </div>
+        <h2 className="whisper-question text-center">
+          {prompt.promptText}
+        </h2>
         
         {/* Optional context note - even more subtle */}
         {prompt.contextNote && (
-          <p className="text-xs md:text-sm text-gray-400 italic mb-8 opacity-60">
+          <p className="whisper-context text-center" style={{ marginTop: '-1rem', marginBottom: '2rem' }}>
             {prompt.contextNote}
           </p>
         )}
         
         {/* Actions - gentle invitation, not pressure */}
-        <div className="whisper-actions flex flex-col sm:flex-row items-center justify-center gap-4 text-sm md:text-base">
+        <div className="whisper-actions flex gap-4 justify-center flex-col sm:flex-row">
           <button
             onClick={onRecord}
-            className="text-amber-600 hover:text-amber-700 underline underline-offset-4
-                     transition-colors duration-200 px-4 py-2"
+            className="whisper-action-primary transform hover:scale-105 transition-transform"
             aria-label="Start recording this story"
           >
             I want to tell this story
           </button>
           
-          <span className="hidden sm:inline text-gray-300">·</span>
-          
           <button
             onClick={onContinue}
-            className="text-gray-500 hover:text-gray-700 underline underline-offset-4
-                     transition-colors duration-200 px-4 py-2"
+            className="whisper-action-secondary hover:border-gray-400 transition-colors"
             aria-label="Continue reading"
           >
             Continue reading
           </button>
-        </div>
-        
-        {/* Very subtle sparkle - shows this is special */}
-        <div className="mt-12 md:mt-16 opacity-30">
-          <Sparkles className="w-4 h-4 mx-auto text-amber-400" />
         </div>
       </div>
     </div>

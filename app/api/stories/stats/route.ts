@@ -55,16 +55,15 @@ export async function GET(request: NextRequest) {
       return acc + (story.durationSeconds || 0);
     }, 0);
 
-    // Count shared stories (check metadata for visibility settings)
+    // Count shared stories (check visibility settings)
     const sharedCount = userStories.filter((story) => {
-      const metadata = story.metadata as any;
-      return metadata?.includeInTimeline || metadata?.includeInBook;
+      return story.includeInTimeline || story.includeInBook;
     }).length;
 
     // Map stories to minimal format for Memory Map
     const storiesForMap = userStories.map((story) => ({
       id: story.id,
-      story_year: story.year,
+      story_year: story.storyYear,
     }));
 
     return NextResponse.json({
