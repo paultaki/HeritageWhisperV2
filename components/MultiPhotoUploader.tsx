@@ -497,16 +497,16 @@ export function MultiPhotoUploader({
             style={{ touchAction: "none" }}
           />
 
-          {/* Modal - Always centered on viewport */}
-          <Card 
-            className="fixed z-50 w-[90vw] max-w-2xl max-h-[90vh] flex flex-col bg-background overflow-hidden"
-            style={{
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-            }}
+          {/* Modal wrapper - Forces viewport centering */}
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ pointerEvents: 'none' }}
           >
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <Card 
+              className="w-full max-w-2xl max-h-[90vh] flex flex-col bg-background overflow-hidden"
+              style={{ pointerEvents: 'auto' }}
+            >
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
             <div className="flex justify-between items-center mb-2 gap-4">
               <h3 className="text-lg font-semibold whitespace-nowrap">
                 Edit Photo
@@ -629,6 +629,7 @@ export function MultiPhotoUploader({
               </div>
             </div>
           </Card>
+          </div>
         </>
       )}
 
