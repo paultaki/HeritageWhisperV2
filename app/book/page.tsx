@@ -21,11 +21,8 @@ import {
   Sparkles,
   MessageCircle,
   Plus,
-  Share2,
   ChevronLeft,
   ChevronRight,
-  Menu,
-  X,
 } from "lucide-react";
 import { useRecordModal } from "@/hooks/use-record-modal";
 import RecordModal from "@/components/RecordModal";
@@ -35,7 +32,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
 import { useViewportConfig } from "./components/ViewportManager";
 import BookNavigation from "@/components/BookNavigation";
-import { useBookFullscreen } from "@/hooks/use-book-fullscreen";
+import BookSidebarPanel from "@/components/BookSidebarPanel";
 import {
   paginateBook,
   getPageSpreads,
@@ -618,13 +615,8 @@ export default function BookViewNew() {
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
   const { isOpen, open, close } = useRecordModal();
-  const [isExporting, setIsExporting] = useState(false);
-  const [showExportMenu, setShowExportMenu] = useState(false);
   const [fontsReady, setFontsReady] = useState(false);
   const [isPaginationReady, setIsPaginationReady] = useState(false);
-
-  // Fullscreen book mode
-  const { isFullscreen, toggleFullscreen, setFullscreen } = useBookFullscreen();
 
   // Get storyId from URL parameters
   const searchParams = new URLSearchParams(
@@ -639,49 +631,6 @@ export default function BookViewNew() {
   });
 
   const stories = data?.stories || [];
-
-  // Auto-enable fullscreen for iPad (768-1024px breakpoint)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const checkBreakpoint = () => {
-      const width = window.innerWidth;
-      const isTablet = width >= 768 && width <= 1024;
-
-      // Auto-enable fullscreen for tablet if not explicitly disabled by user
-      if (isTablet && !isFullscreen) {
-        setFullscreen(true);
-      }
-    };
-
-    // Check on mount
-    checkBreakpoint();
-
-    // Check on resize (debounced)
-    let timeoutId: NodeJS.Timeout;
-    const handleResize = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(checkBreakpoint, 150);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [isFullscreen, setFullscreen]);
-
-  // ESC key to exit fullscreen
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isFullscreen) {
-        setFullscreen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [isFullscreen, setFullscreen]);
 
   // Wait for fonts to be ready for accurate measurements
   // But don't block initial render - use optimistic pagination
@@ -920,60 +869,6 @@ export default function BookViewNew() {
     });
   }, [currentSpreadIndex, spreads, isMobile, showSpreadView, pages]);
 
-  // Export PDF functions
-  const exportPDF = async (format: "2up" | "trim") => {
-    if (!user || !session?.access_token) return;
-
-    setIsExporting(true);
-    setShowExportMenu(false);
-
-    try {
-      const response = await fetch(`/api/export/${format}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ bookId: "default" }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate PDF");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `heritage-book-${format}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Export error:", error);
-      alert("Failed to export PDF. Please try again.");
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  // Close export menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (showExportMenu && !target.closest(".export-menu-container")) {
-        setShowExportMenu(false);
-      }
-    };
-
-    if (showExportMenu) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () =>
-        document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [showExportMenu]);
-
   // Show loading state while fetching stories OR pagination is not ready yet
   if (isLoading || !isPaginationReady) {
     return (
@@ -1014,74 +909,6 @@ export default function BookViewNew() {
 
   return (
     <div className="book-view min-h-screen bg-background">
-      {/* Header - slides up when fullscreen */}
-      <div
-        className="book-header transition-transform duration-300 ease-in-out"
-        style={{
-          transform: isFullscreen ? "translateY(-100%)" : "translateY(0)",
-        }}
-      >
-        <div className="flex items-center gap-3 ml-5 md:ml-52">
-          <BookOpen className="w-8 h-8" style={{ color: "#1f0f08" }} />
-          <h1 className="text-2xl font-bold">Book</h1>
-        </div>
-
-        {/* Export PDF Button */}
-        <div className="relative export-menu-container">
-          <Button
-            onClick={() => setShowExportMenu(!showExportMenu)}
-            disabled={isExporting || stories.length === 0}
-            variant="outline"
-            className="gap-2"
-            aria-label={isExporting ? "Exporting PDF" : "Export PDF"}
-          >
-            <Share2 className="w-4 h-4 flex-shrink-0" />
-            <span className="hidden sm:inline">
-              {isExporting ? "Exporting..." : "Export PDF"}
-            </span>
-          </Button>
-
-          {/* Export Menu Dropdown */}
-          {showExportMenu && (
-            <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-2 z-50">
-              <button
-                onClick={() => exportPDF("2up")}
-                className="w-full text-left px-4 py-3 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                <div className="font-semibold text-sm">2-Up (Home Print)</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Two 5.5×8.5" pages on Letter landscape
-                </div>
-              </button>
-              <button
-                onClick={() => exportPDF("trim")}
-                className="w-full text-left px-4 py-3 rounded-md hover:bg-gray-50 transition-colors mt-1"
-              >
-                <div className="font-semibold text-sm">Trim PDF (POD)</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Individual 5.5×8.5" pages for professional printing
-                </div>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Floating Fullscreen Toggle Button - Premium design for seniors */}
-      <button
-        onClick={toggleFullscreen}
-        className="fixed top-4 right-4 z-50 w-14 h-14 rounded-full bg-white hover:bg-gray-50 shadow-2xl hover:shadow-3xl transition-all flex items-center justify-center border-2 border-gray-200 hover:border-coral-500 group"
-        aria-label={isFullscreen ? "Show navigation" : "Hide navigation"}
-        title={isFullscreen ? "Show navigation (ESC)" : "Hide navigation"}
-      >
-        <Menu
-          className={`w-6 h-6 text-gray-700 group-hover:text-coral-600 transition-all ${isFullscreen ? "opacity-100 scale-100" : "opacity-0 scale-0"}`}
-        />
-        <X
-          className={`w-6 h-6 text-gray-700 group-hover:text-coral-600 transition-all absolute ${!isFullscreen ? "opacity-100 scale-100" : "opacity-0 scale-0"}`}
-        />
-      </button>
-
       {/* Book Content - Always centered, allows natural scrolling */}
       <div className="book-container-wrapper" {...swipeHandlers}>
         <div className="book-container relative mx-auto">
@@ -1140,7 +967,18 @@ export default function BookViewNew() {
       {/* Record Modal */}
       <RecordModal isOpen={isOpen} onClose={close} />
       
-      {/* Book Navigation - Rendered via portal to escape parent hierarchy */}
+      {/* Desktop: Combined Sidebar Panel (Nav + TOC) - Rendered via portal */}
+      {!isMobile && typeof window !== 'undefined' && createPortal(
+        <BookSidebarPanel
+          pages={pages}
+          currentPage={isMobile ? currentMobilePage : currentSpreadIndex * 2}
+          onNavigateToPage={navigateToPage}
+          onRecordClick={open}
+        />,
+        document.body
+      )}
+
+      {/* Book Navigation (progress bar for desktop, bottom sheet for mobile) - Rendered via portal */}
       {typeof window !== 'undefined' && createPortal(
         <BookNavigation
           pages={pages}

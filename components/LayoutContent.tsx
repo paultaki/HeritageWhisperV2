@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useBookFullscreen } from "@/hooks/use-book-fullscreen";
 
 export default function LayoutContent({
   children,
@@ -9,23 +8,13 @@ export default function LayoutContent({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { isFullscreen } = useBookFullscreen();
-
   const isBookPage = pathname === "/book";
-  const shouldRemovePadding = isBookPage && isFullscreen;
-  const shouldRemoveBottomPadding = isBookPage; // Remove bottom padding on all book page views
 
+  // Book page has no navigation sidebar, so no left padding needed
+  // Also remove bottom padding since it has its own navigation
   return (
-    <div
-      className="transition-all duration-300 ease-in-out"
-      style={{
-        paddingLeft: shouldRemovePadding ? "0" : undefined,
-        paddingBottom: shouldRemovePadding ? "0" : undefined,
-      }}
-    >
-      <div className={shouldRemovePadding ? "" : shouldRemoveBottomPadding ? "md:pl-28" : "md:pl-28 pb-20 md:pb-0"}>
-        {children}
-      </div>
+    <div className={isBookPage ? "" : "md:pl-28 pb-20 md:pb-0"}>
+      {children}
     </div>
   );
 }

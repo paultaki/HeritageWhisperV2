@@ -67,9 +67,9 @@ export default function DesktopNavigation({
   const pathname = usePathname();
   const { user } = useAuth();
 
-  // Don't show navigation on auth pages or home page
+  // Don't show navigation on auth pages, home page, or book page (book has its own combined sidebar)
   const shouldShow =
-    user && !["/auth/login", "/auth/register", "/"].includes(pathname);
+    user && !["/auth/login", "/auth/register", "/", "/book"].includes(pathname) && !pathname.startsWith("/book/");
 
   if (!shouldShow) {
     return null;
@@ -97,7 +97,7 @@ export default function DesktopNavigation({
         />
       </div>
 
-      {/* Navigation Items */}
+      {/* Navigation Items - Order: Timeline, Book, Record, Memories, Prompts */}
       <div className="flex-1 flex flex-col space-y-2">
         <DesktopNavItem
           icon={Calendar}
@@ -107,10 +107,10 @@ export default function DesktopNavigation({
         />
 
         <DesktopNavItem
-          icon={Sparkles}
-          label="Prompts"
-          href="/prompts"
-          isActive={pathname === "/prompts"}
+          icon={BookOpen}
+          label="Book"
+          href="/book"
+          isActive={pathname.startsWith("/book")}
         />
 
         {/* Record Button */}
@@ -131,17 +131,17 @@ export default function DesktopNavigation({
         </button>
 
         <DesktopNavItem
-          icon={BookOpen}
-          label="Book"
-          href="/book"
-          isActive={pathname.startsWith("/book")}
-        />
-
-        <DesktopNavItem
           icon={Box}
           label="Memories"
           href="/memory-box"
           isActive={pathname === "/memory-box"}
+        />
+
+        <DesktopNavItem
+          icon={Sparkles}
+          label="Prompts"
+          href="/prompts"
+          isActive={pathname === "/prompts"}
         />
       </div>
     </motion.nav>

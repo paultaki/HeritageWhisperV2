@@ -15,20 +15,33 @@ import {
   Share2,
   FileText,
   Shield,
+  Download,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRecordModal } from "@/hooks/use-record-modal";
 import { useToast } from "@/hooks/use-toast";
 
+interface ActionItem {
+  icon: React.ElementType;
+  label: string;
+  onClick: () => void;
+  color: string;
+  description?: string;
+  disabled?: boolean;
+}
+
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, session } = useAuth();
   const recordModal = useRecordModal();
   const { toast } = useToast();
+  
+  const isBookPage = pathname === "/book";
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -80,6 +93,52 @@ export default function HamburgerMenu() {
     setIsOpen(false);
   };
 
+  const exportPDF = async (format: "2up" | "trim") => {
+    if (!user || !session?.access_token) return;
+
+    setIsExporting(true);
+    setIsOpen(false);
+
+    try {
+      const response = await fetch(`/api/export/${format}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ bookId: "default" }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate PDF");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `heritage-book-${format}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "PDF Downloaded!",
+        description: `Your ${format === "2up" ? "2-Up" : "Trim"} PDF has been downloaded.`,
+      });
+    } catch (error) {
+      console.error("Export error:", error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const menuItems = [
     { icon: Home, label: "Home", href: "/" },
     { icon: Settings, label: "Settings", href: "/profile" },
@@ -87,34 +146,59 @@ export default function HamburgerMenu() {
     { icon: HelpCircle, label: "Help", href: "/help" },
   ];
 
-  const actionItems = [
-    {
-      icon: Plus,
-      label: "New Memory",
-      onClick: handleNewMemory,
-      color: "text-heritage-coral hover:bg-heritage-coral/10",
-    },
-    {
-      icon: Share2,
-      label: "Share",
-      onClick: handleShare,
-      color: "text-blue-600 hover:bg-blue-50",
-    },
-  ];
+  const actionItems = isBookPage
+    ? [
+        // Book page: Export options
+        {
+          icon: Download,
+          label: isExporting ? "Exporting..." : "Export 2-Up PDF",
+          description: "Two 5.5×8.5\" pages on Letter landscape",
+          onClick: () => exportPDF("2up"),
+          color: "text-purple-600 hover:bg-purple-50",
+          disabled: isExporting,
+        },
+        {
+          icon: Download,
+          label: "Export Trim PDF",
+          description: "Individual 5.5×8.5\" pages for professional printing",
+          onClick: () => exportPDF("trim"),
+          color: "text-purple-600 hover:bg-purple-50",
+          disabled: isExporting,
+        },
+      ]
+    : [
+        // Other pages: New Memory & Share
+        {
+          icon: Plus,
+          label: "New Memory",
+          onClick: handleNewMemory,
+          color: "text-heritage-coral hover:bg-heritage-coral/10",
+        },
+        {
+          icon: Share2,
+          label: "Share",
+          onClick: handleShare,
+          color: "text-blue-600 hover:bg-blue-50",
+        },
+      ];
 
-  // Don't show on auth pages, home page, or book page (book has its own fullscreen toggle)
-  const shouldShow = !["/auth/login", "/auth/register", "/", "/book"].includes(pathname) && !pathname.startsWith("/book/");
+  // Don't show on auth pages or home page
+  const shouldShow = !["/auth/login", "/auth/register", "/"].includes(pathname);
 
   if (!shouldShow) {
     return null;
   }
 
   return (
-    <div ref={menuRef} className="fixed top-[6px] md:top-[4px] right-4 z-[100]">
-      {/* Hamburger Button */}
+    <div ref={menuRef} className="fixed top-4 right-4 z-[100]">
+      {/* Hamburger Button - Semi-transparent on book page */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-lg bg-white/90 backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-md transition-all"
+        className={`p-3 rounded-full transition-all ${
+          isBookPage
+            ? "bg-white/70 backdrop-blur-md border-2 border-white/30 shadow-lg hover:shadow-xl hover:bg-white/80"
+            : "bg-white/90 backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-md rounded-lg p-2"
+        }`}
         aria-label="Menu"
       >
         {isOpen ? (
@@ -144,7 +228,7 @@ export default function HamburgerMenu() {
               </div>
             )}
 
-            {/* Action Items (New Memory, Share) */}
+            {/* Action Items (Export PDFs on book page, New Memory/Share on other pages) */}
             <div className="py-1 border-b border-gray-100">
               {actionItems.map((item, index) => {
                 const Icon = item.icon;
@@ -152,10 +236,18 @@ export default function HamburgerMenu() {
                   <button
                     key={index}
                     onClick={item.onClick}
-                    className={`w-full flex items-center px-4 py-2.5 text-sm transition-colors ${item.color}`}
+                    disabled={item.disabled}
+                    className={`w-full flex flex-col px-4 py-2.5 text-sm transition-colors ${item.color} ${item.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
-                    <Icon className="w-4 h-4 mr-3" />
-                    {item.label}
+                    <div className="flex items-center w-full">
+                      <Icon className="w-4 h-4 mr-3" />
+                      {item.label}
+                    </div>
+                    {item.description && (
+                      <div className="text-xs text-gray-500 mt-1 ml-7">
+                        {item.description}
+                      </div>
+                    )}
                   </button>
                 );
               })}

@@ -1,34 +1,26 @@
 "use client";
 
 import React from "react";
-import { usePathname } from "next/navigation";
 import DesktopNavigation from "./DesktopNavigation";
 import MobileNavigation from "./MobileNavigation";
 import HamburgerMenu from "./HamburgerMenu";
 import RecordModal from "./RecordModal";
 import { useRecordModal } from "@/hooks/use-record-modal";
-import { useBookFullscreen } from "@/hooks/use-book-fullscreen";
 
 export default function NavigationWrapper() {
   const { isOpen, openModal, closeModal, handleSave, initialData } =
     useRecordModal();
-  const pathname = usePathname();
-  const { isFullscreen } = useBookFullscreen();
-
-  // Only hide navigation when on book page AND in fullscreen mode
-  const isBookPage = pathname === "/book";
-  const shouldHideNav = isBookPage && isFullscreen;
 
   return (
     <>
-      {/* Desktop Navigation (left sidebar) - only hide on book page in fullscreen */}
-      {!shouldHideNav && <DesktopNavigation onRecordClick={() => openModal()} />}
+      {/* Desktop Navigation (left sidebar) - hidden on book page, book has its own combined sidebar */}
+      <DesktopNavigation onRecordClick={() => openModal()} />
 
-      {/* Mobile Navigation (bottom bar) - only hide on book page in fullscreen */}
-      {!shouldHideNav && <MobileNavigation onRecordClick={() => openModal()} />}
+      {/* Mobile Navigation (bottom bar) - hidden on book page per component logic */}
+      <MobileNavigation onRecordClick={() => openModal()} />
 
-      {/* Hamburger Menu (top right) - only hide on book page in fullscreen */}
-      {!shouldHideNav && <HamburgerMenu />}
+      {/* Hamburger Menu (top right) - hidden on book page per component logic */}
+      <HamburgerMenu />
 
       {/* Record Modal */}
       <RecordModal

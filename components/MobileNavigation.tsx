@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Calendar, BookOpen, Box, User } from "lucide-react";
+import { Calendar, BookOpen, Box, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -155,12 +155,12 @@ export default function MobileNavigation({
           isActive={pathname === "/memory-box"}
         />
 
-        {/* Profile */}
+        {/* Prompts - Profile removed since it's in hamburger menu */}
         <NavItem
-          icon={User}
-          label="Profile"
-          href="/profile"
-          isActive={pathname === "/profile"}
+          icon={Sparkles}
+          label="Prompts"
+          href="/prompts"
+          isActive={pathname === "/prompts"}
         />
       </div>
     </motion.nav>
