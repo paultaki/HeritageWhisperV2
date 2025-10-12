@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mic, SkipForward, Sparkles } from "lucide-react";
+import { Mic, X, Sparkles } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useState, useEffect } from "react";
 
@@ -21,10 +21,84 @@ interface NextStoryCardProps {
   onRecordClick: (promptId: string | null, promptText: string) => void;
 }
 
+// Track dismissals per prompt
+interface DismissalData {
+  promptId: string;
+  dismissedAt: number;
+  count: number;
+}
+
+// Check if we should show the prompt today
+function shouldShowPromptToday(promptId: string | null): boolean {
+  if (!promptId) return true; // Always show fallback prompts
+  
+  const dismissalsKey = "promptDismissals";
+  const today = new Date().toDateString();
+  const lastShownKey = `lastPromptShown_${today}`;
+  
+  try {
+    const dismissalsJson = localStorage.getItem(dismissalsKey);
+    const dismissals: DismissalData[] = dismissalsJson ? JSON.parse(dismissalsJson) : [];
+    
+    // Find this prompt's dismissal record
+    const promptDismissal = dismissals.find(d => d.promptId === promptId);
+    
+    // If dismissed 3+ times total, don't show for 24 hours after last dismissal
+    if (promptDismissal && promptDismissal.count >= 3) {
+      const hoursSinceLastDismissal = (Date.now() - promptDismissal.dismissedAt) / (1000 * 60 * 60);
+      if (hoursSinceLastDismissal < 24) {
+        return false;
+      }
+    }
+    
+    // Check if already shown today
+    const lastShown = localStorage.getItem(lastShownKey);
+    if (lastShown === promptId) {
+      return false;
+    }
+    
+    return true;
+  } catch {
+    return true; // Show if localStorage fails
+  }
+}
+
+// Track that we've shown this prompt today
+function markPromptShown(promptId: string | null) {
+  if (!promptId) return;
+  const today = new Date().toDateString();
+  const lastShownKey = `lastPromptShown_${today}`;
+  localStorage.setItem(lastShownKey, promptId);
+}
+
+// Check if this is the first prompt shown today (for sparkle animation)
+function isFirstPromptToday(): boolean {
+  const today = new Date().toDateString();
+  const shownTodayKey = `promptsShownToday_${today}`;
+  const shown = localStorage.getItem(shownTodayKey);
+  
+  if (!shown) {
+    localStorage.setItem(shownTodayKey, "true");
+    return true;
+  }
+  return false;
+}
+
+// Get time-aware greeting
+function getTimeAwareGreeting(): string {
+  const hour = new Date().getHours();
+  
+  if (hour < 12) return "Good morning! I have a question for you...";
+  if (hour < 17) return "I've been thinking about your stories...";
+  if (hour < 21) return "As the day winds down, I'm curious...";
+  return "Before you rest, one more thought...";
+}
+
 export function NextStoryCard({ onRecordClick }: NextStoryCardProps) {
   const queryClient = useQueryClient();
   const [isVisible, setIsVisible] = useState(false);
-  const [skipCooldown, setSkipCooldown] = useState(false);
+  const [showSparkle, setShowSparkle] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   // Fetch next prompt
   const { data, isLoading, error } = useQuery<{ prompt: Prompt | null }>({
@@ -35,133 +109,158 @@ export function NextStoryCard({ onRecordClick }: NextStoryCardProps) {
 
   const prompt = data?.prompt;
 
-  // Skip mutation
-  const skipMutation = useMutation({
-    mutationFn: async (promptId: string | null) => {
-      if (!promptId) {
-        // Can't skip fallback prompts, just refetch to get a new one
-        return { success: true, nextPrompt: null };
-      }
-      const response = await apiRequest("POST", "/api/prompts/skip", { promptId });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      // Invalidate and refetch prompts
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/next"] });
-      
-      // Set cooldown to prevent rapid skipping
-      setSkipCooldown(true);
-      setTimeout(() => setSkipCooldown(false), 5000);
-    },
-  });
-
-  // Fade in animation on mount
-  useEffect(() => {
-    if (prompt) {
-      setIsVisible(true);
-    }
-  }, [prompt]);
-
-  // Check localStorage to prevent re-showing same prompt
+  // Check if we should show this prompt
   useEffect(() => {
     if (prompt?.id) {
-      const lastSeenPromptId = localStorage.getItem("lastSeenPromptId");
-      if (lastSeenPromptId === prompt.id) {
-        // Already seen this prompt, mark as shown
-        localStorage.setItem("lastSeenPromptId", prompt.id);
+      const shouldShow = shouldShowPromptToday(prompt.id);
+      if (!shouldShow) {
+        setIsDismissed(true);
+        return;
       }
+      
+      // Mark as shown
+      markPromptShown(prompt.id);
+      
+      // Show sparkle animation if first prompt today
+      const isFirst = isFirstPromptToday();
+      setShowSparkle(isFirst);
+      
+      // Gentle slide-down animation
+      setTimeout(() => setIsVisible(true), 100);
     }
   }, [prompt?.id]);
 
-  const handleSkip = () => {
-    if (skipCooldown || skipMutation.isPending) return;
+  // Handle "Not today" dismissal
+  const handleDismiss = () => {
+    if (!prompt?.id) return;
     
-    skipMutation.mutate(prompt?.id || null);
+    // Track dismissal
+    const dismissalsKey = "promptDismissals";
+    try {
+      const dismissalsJson = localStorage.getItem(dismissalsKey);
+      const dismissals: DismissalData[] = dismissalsJson ? JSON.parse(dismissalsJson) : [];
+      
+      // Find or create dismissal record
+      const existingIndex = dismissals.findIndex(d => d.promptId === prompt.id);
+      if (existingIndex >= 0) {
+        dismissals[existingIndex].dismissedAt = Date.now();
+        dismissals[existingIndex].count += 1;
+      } else {
+        dismissals.push({
+          promptId: prompt.id,
+          dismissedAt: Date.now(),
+          count: 1,
+        });
+      }
+      
+      localStorage.setItem(dismissalsKey, JSON.stringify(dismissals));
+    } catch (e) {
+      console.error("Failed to save dismissal:", e);
+    }
+    
+    // Fade out animation
     setIsVisible(false);
-    
-    // Fade in next prompt after a brief delay
-    setTimeout(() => setIsVisible(true), 300);
+    setTimeout(() => setIsDismissed(true), 300);
   };
 
   const handleRecord = () => {
     if (prompt) {
-      // Store last seen prompt ID
-      if (prompt.id) {
-        localStorage.setItem("lastSeenPromptId", prompt.id);
-      }
       onRecordClick(prompt.id, prompt.prompt_text);
     }
   };
 
-  // Don't show card if no prompt or loading
-  if (isLoading || !prompt) {
+  // Don't show if loading, no prompt, error, or dismissed
+  if (isLoading || !prompt || error || isDismissed) {
     return null;
   }
 
-  // Don't show if error
-  if (error) {
-    console.error("Error fetching prompt:", error);
-    return null;
-  }
+  const greeting = getTimeAwareGreeting();
 
   return (
     <div
-      className={`transition-all duration-500 ease-out ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      className={`transition-all duration-400 ease-out ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"
       }`}
     >
-      <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 shadow-lg hover:shadow-xl transition-shadow">
-        <CardContent className="p-6 space-y-4">
-          {/* Header with icon */}
-          <div className="flex items-center gap-2 text-heritage-brown">
-            <Sparkles className="w-5 h-5 text-amber-600" />
-            <span className="text-sm font-medium text-amber-700">
-              {prompt.tier === 3 ? "✨ Personalized Memory" : "Your Next Story"}
-            </span>
+      <Card className="relative bg-gradient-to-br from-[#FFFBF0] to-[#FFF5E6] border border-[#E8D5C4] shadow-xl overflow-hidden">
+        {/* Sparkle animation for first prompt of the day */}
+        {showSparkle && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute top-4 right-4 w-8 h-8 animate-pulse">
+              <Sparkles className="w-8 h-8 text-amber-400 drop-shadow-lg" />
+            </div>
+            <div className="absolute top-8 right-12 w-4 h-4 animate-ping animation-delay-150">
+              <Sparkles className="w-4 h-4 text-amber-300" />
+            </div>
+          </div>
+        )}
+
+        <CardContent className="p-8 space-y-5 relative z-10">
+          {/* Close button */}
+          <button
+            onClick={handleDismiss}
+            className="absolute top-4 right-4 p-2 rounded-full hover:bg-amber-100 transition-colors"
+            aria-label="Not today"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+
+          {/* Time-aware greeting */}
+          <div className="pr-12">
+            <p className="text-base text-amber-800 italic font-serif">
+              {greeting}
+            </p>
           </div>
 
-          {/* Prompt text - larger, conversational */}
-          <div className="space-y-2">
-            <p className="text-xl md:text-2xl font-medium text-heritage-brown leading-relaxed">
+          {/* Prompt text - serif font, larger, conversational */}
+          <div className="space-y-3">
+            <p 
+              className="text-xl md:text-2xl font-serif text-heritage-brown leading-relaxed"
+              style={{ 
+                fontSize: '20px', 
+                lineHeight: '1.6',
+                fontFamily: 'Georgia, "Times New Roman", serif'
+              }}
+            >
               {prompt.prompt_text}
             </p>
 
-            {/* Context note */}
+            {/* Context whisper */}
             {prompt.context_note && (
-              <p className="text-sm text-gray-600 flex items-center gap-1">
-                <span className="text-base">📝</span>
+              <p className="text-sm text-gray-600 italic flex items-center gap-2 font-serif">
+                <span className="text-base not-italic">✨</span>
                 {prompt.context_note}
               </p>
             )}
           </div>
 
-          {/* Action buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+          {/* Action button - prominent */}
+          <div className="pt-4">
             <Button
               onClick={handleRecord}
               size="lg"
-              className="flex-1 bg-heritage-orange hover:bg-heritage-coral text-white font-semibold shadow-md hover:shadow-lg transition-all"
+              className="w-full bg-[#D4A574] hover:bg-[#C09564] text-white font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+              style={{ minHeight: '48px', fontSize: '18px' }}
             >
-              <Mic className="w-5 h-5 mr-2" />
-              Record This Story
-            </Button>
-
-            <Button
-              onClick={handleSkip}
-              disabled={skipCooldown || skipMutation.isPending}
-              variant="outline"
-              size="lg"
-              className="sm:w-auto border-2 border-gray-300 hover:bg-gray-50"
-            >
-              <SkipForward className="w-4 h-4 mr-2" />
-              {skipMutation.isPending ? "Skipping..." : "Skip"}
+              <Mic className="w-5 h-5 mr-3" />
+              Record This Memory
             </Button>
           </div>
 
-          {/* Quality indicator for high-tier prompts */}
-          {prompt.tier === 3 && prompt.prompt_score && prompt.prompt_score >= 80 && (
-            <div className="text-xs text-amber-700 text-center pt-1">
-              This prompt was specially crafted based on your stories
+          {/* "Not today" text button - gentle, below main action */}
+          <div className="text-center">
+            <button
+              onClick={handleDismiss}
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors underline decoration-dotted"
+            >
+              Not today
+            </button>
+          </div>
+
+          {/* Subtle quality indicator for Tier 3 prompts */}
+          {prompt.tier === 3 && (
+            <div className="text-xs text-amber-700 text-center pt-2 italic font-serif border-t border-amber-200/50">
+              This question was crafted especially for you
             </div>
           )}
         </CardContent>

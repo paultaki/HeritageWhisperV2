@@ -16,8 +16,10 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 // GET single story
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  // Await params (Next.js 15 requirement)
+  const { id } = await params;
   try {
     // Get the Authorization header
     const authHeader = request.headers.get("authorization");
@@ -47,7 +49,7 @@ export async function GET(
     const { data: story, error: fetchError } = await supabaseAdmin
       .from("stories")
       .select("*")
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .single();
 
@@ -158,8 +160,11 @@ export async function GET(
 // PUT update story
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  // Await params (Next.js 15 requirement)
+  const { id } = await params;
+  
   try {
     // Get the Authorization header
     const authHeader = request.headers.get("authorization");
@@ -191,7 +196,7 @@ export async function PUT(
     const { data: existingStory, error: fetchError } = await supabaseAdmin
       .from("stories")
       .select("*")
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .single();
 
@@ -340,7 +345,7 @@ export async function PUT(
     const { data: updatedStory, error: updateError } = await supabaseAdmin
       .from("stories")
       .update(storyData)
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .select()
       .single();
@@ -440,8 +445,11 @@ export async function PUT(
 // DELETE story
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  // Await params (Next.js 15 requirement)
+  const { id } = await params;
+  
   try {
     // Get the Authorization header
     const authHeader = request.headers.get("authorization");
@@ -471,7 +479,7 @@ export async function DELETE(
     const { error: deleteError } = await supabaseAdmin
       .from("stories")
       .delete()
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id);
 
     if (deleteError) {

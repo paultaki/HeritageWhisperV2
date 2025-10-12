@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { MemoryMap } from "@/components/MemoryMap";
+import { ProfileInterests } from "@/components/ProfileInterests";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -377,6 +379,35 @@ export default function Profile() {
             </div>
           </div>
         </div>
+
+        {/* Memory Map - Visual overview of decades */}
+        {user && (
+          <div>
+            {/* Debug info */}
+            {!storyStats && (
+              <div className="p-4 bg-yellow-100 rounded mb-4">
+                <p>Loading story stats...</p>
+              </div>
+            )}
+            {storyStats && !storyStats.stories && (
+              <div className="p-4 bg-red-100 rounded mb-4">
+                <p>Story stats loaded but no stories array found</p>
+                <pre>{JSON.stringify(storyStats, null, 2)}</pre>
+              </div>
+            )}
+            {storyStats && storyStats.stories && (
+              <MemoryMap stories={storyStats.stories} />
+            )}
+          </div>
+        )}
+
+        {/* Profile Interests - Help personalize prompts */}
+        {user && (
+          <ProfileInterests 
+            userId={user.id}
+            initialInterests={profileData?.profile_interests}
+          />
+        )}
 
         <div className="space-y-6">
           {/* Profile Photo & Basic Info */}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { generateTier1Templates } from "@/lib/promptGeneration";
 import { performTier3Analysis, storeTier3Results } from "@/lib/tier3Analysis";
+import { generateEchoPrompt, generateEchoAnchorHash } from "@/lib/echoPrompts";
 import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
@@ -392,6 +393,58 @@ export async function POST(request: NextRequest) {
         "[Stories API] Error generating Tier 1 prompts:",
         promptGenError,
       );
+    }
+
+    // ============================================================================
+    // ECHO PROMPT: Generate instant follow-up (shows we're listening)
+    // ============================================================================
+    logger.debug("[Stories API] Generating echo prompt for immediate engagement");
+
+    try {
+      const echoPromptText = await generateEchoPrompt(newStory.transcript || "");
+      
+      if (echoPromptText) {
+        logger.debug("[Stories API] Echo prompt generated:", echoPromptText);
+
+        // Calculate 7-day expiry
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+
+        // Store echo prompt
+        const { error: echoError } = await supabaseAdmin
+          .from("active_prompts")
+          .insert({
+            user_id: user.id,
+            prompt_text: echoPromptText,
+            context_note: "Inspired by what you just shared",
+            anchor_entity: "echo",
+            anchor_year: newStory.year,
+            anchor_hash: generateEchoAnchorHash(newStory.transcript || ""),
+            tier: 1,
+            memory_type: "echo",
+            prompt_score: 75, // High score - immediate engagement
+            score_reason: "Instant follow-up to show active listening",
+            model_version: "gpt-4o-mini-echo",
+            expires_at: expiresAt.toISOString(),
+            is_locked: false,
+            shown_count: 0,
+          });
+
+        if (echoError) {
+          if (echoError.code === "23505") {
+            logger.debug("[Stories API] Echo prompt already exists (deduplication)");
+          } else {
+            logger.error("[Stories API] Failed to store echo prompt:", echoError);
+          }
+        } else {
+          logger.debug("[Stories API] Echo prompt stored successfully");
+        }
+      } else {
+        logger.debug("[Stories API] No echo prompt generated");
+      }
+    } catch (echoError) {
+      // Log error but don't fail the request
+      logger.error("[Stories API] Error generating echo prompt:", echoError);
     }
 
     // ============================================================================

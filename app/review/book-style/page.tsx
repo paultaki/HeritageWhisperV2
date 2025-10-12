@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BookStyleReview } from "@/components/BookStyleReview";
 import { type StoryPhoto } from "@/components/MultiPhotoUploader";
 import { apiRequest } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navCache } from "@/lib/navCache";
 import { supabase } from "@/lib/supabase";
 
@@ -16,6 +16,7 @@ function BookStyleReviewContent() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Check if we're editing an existing story
   // Support both 'edit' and 'id' parameters for compatibility
@@ -696,8 +697,12 @@ function BookStyleReviewContent() {
       // Invalidate prompts query to fetch next prompt
       queryClient.invalidateQueries({ queryKey: ["/api/prompts/next"] });
 
-      // Navigate to timeline
+      // Navigate to timeline and scroll to top where new prompt awaits
       router.push("/timeline");
+      // Scroll to top after navigation
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
     },
     onError: (error: any) => {
       console.error("Save error:", error);

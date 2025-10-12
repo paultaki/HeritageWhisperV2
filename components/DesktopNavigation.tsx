@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Calendar, BookOpen, Box } from "lucide-react";
+import { Calendar, BookOpen, Box, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -104,6 +104,13 @@ export default function DesktopNavigation({
           label="Timeline"
           href="/timeline"
           isActive={pathname === "/timeline"}
+        />
+
+        <DesktopNavItem
+          icon={Sparkles}
+          label="Prompts"
+          href="/prompts"
+          isActive={pathname === "/prompts"}
         />
 
         {/* Record Button */}

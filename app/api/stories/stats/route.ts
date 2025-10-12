@@ -61,10 +61,17 @@ export async function GET(request: NextRequest) {
       return metadata?.includeInTimeline || metadata?.includeInBook;
     }).length;
 
+    // Map stories to minimal format for Memory Map
+    const storiesForMap = userStories.map((story) => ({
+      id: story.id,
+      story_year: story.year,
+    }));
+
     return NextResponse.json({
       totalSeconds,
       sharedCount,
       familyMembers: 0, // Family members feature not yet implemented
+      stories: storiesForMap, // Include stories for Memory Map
     });
   } catch (error) {
     logger.error("Story stats fetch error:", error);

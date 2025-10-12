@@ -497,8 +497,16 @@ export function MultiPhotoUploader({
             style={{ touchAction: "none" }}
           />
 
-          {/* Modal */}
-          <Card className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-2xl p-6 space-y-4 bg-background overflow-auto max-h-[90vh]">
+          {/* Modal - Always centered on viewport */}
+          <Card 
+            className="fixed z-50 w-[90vw] max-w-2xl max-h-[90vh] flex flex-col bg-background overflow-hidden"
+            style={{
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
             <div className="flex justify-between items-center mb-2 gap-4">
               <h3 className="text-lg font-semibold whitespace-nowrap">
                 Edit Photo
@@ -516,11 +524,11 @@ export function MultiPhotoUploader({
             <div className="relative w-full">
               {/* Outer container for context */}
               <div className="relative w-full bg-gray-200 p-4 rounded-lg">
-                {/* The actual crop frame that matches thumbnail aspect ratio */}
+                {/* The actual crop frame that matches thumbnail aspect ratio EXACTLY */}
                 <div className="relative w-full aspect-[3/2] rounded-lg overflow-hidden bg-white shadow-lg">
-                  {/* Image container */}
+                  {/* Image container - must match thumbnail structure EXACTLY */}
                   <div
-                    className="relative w-full h-full overflow-hidden select-none"
+                    className="absolute inset-0 overflow-hidden select-none"
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUp}
@@ -530,10 +538,11 @@ export function MultiPhotoUploader({
                     <img
                       src={normalizePhotoUrl(selectedPhoto.url)}
                       alt="Edit photo"
-                      className="absolute inset-0 w-full h-full object-cover transition-transform cursor-move"
+                      className="absolute inset-0 w-full h-full transition-transform cursor-move"
                       style={{
                         transform: `scale(${editingTransform.zoom}) translate(${editingTransform.position.x / editingTransform.zoom}px, ${editingTransform.position.y / editingTransform.zoom}px)`,
                         transformOrigin: "center center",
+                        objectFit: "cover",
                       }}
                       draggable={false}
                     />
@@ -594,23 +603,30 @@ export function MultiPhotoUploader({
               </p>
             </div>
 
-            <div className="flex gap-2">
-              <Button
-                onClick={handleTransformSave}
-                disabled={disabled || loading}
-                className="flex-1"
-                data-testid="button-save-transform"
-              >
-                Save
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setSelectedPhotoIndex(null)}
-                disabled={disabled || loading}
-                data-testid="button-cancel-transform"
-              >
-                Cancel
-              </Button>
+            </div>
+            
+            {/* Fixed bottom buttons - always visible */}
+            <div className="border-t p-4 bg-background">
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleTransformSave}
+                  disabled={disabled || loading}
+                  className="flex-1"
+                  style={{ minHeight: '48px' }}
+                  data-testid="button-save-transform"
+                >
+                  Save
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedPhotoIndex(null)}
+                  disabled={disabled || loading}
+                  style={{ minHeight: '48px' }}
+                  data-testid="button-cancel-transform"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </Card>
         </>
