@@ -100,7 +100,20 @@ export default function PromptsPage() {
     return `${Math.floor(diffDays / 365)} years ago`;
   };
 
-  const activePrompts = activeData?.prompts || [];
+  // Filter out broken prompts as last line of defense
+  const filterBrokenPrompts = (prompts: Prompt[]) => {
+    return prompts.filter(p => {
+      // Grammar error patterns
+      const hasGrammarError = /\s(the|a|an)\s+(said|told|was|were)/.test(p.prompt_text);
+      const hasBrokenEntity = /\b(impress|mention)\s+(the|a)\s+(said|told)/.test(p.prompt_text);
+      const tooShort = p.prompt_text.split(' ').length < 5;
+      const missingQuestionMark = !p.prompt_text.includes('?');
+      
+      return !hasGrammarError && !hasBrokenEntity && !tooShort && !missingQuestionMark;
+    });
+  };
+  
+  const activePrompts = filterBrokenPrompts(activeData?.prompts || []);
   const dismissedPrompts = dismissedData?.prompts || [];
   const answeredPrompts = answeredData?.prompts || [];
 

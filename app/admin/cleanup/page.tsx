@@ -51,6 +51,32 @@ export default function CleanupPage() {
     }
   };
 
+  const runEmergencyCleanup = async () => {
+    if (!confirm('This will IMMEDIATELY delete all broken prompts (grammar errors, entity extraction bugs). Continue?')) {
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await apiRequest("POST", "/api/prompts/emergency-cleanup");
+      const data = await response.json();
+      
+      if (data.success) {
+        alert(`✓ Emergency cleanup complete!\n\nRemoved ${data.removed} broken prompts`);
+        // Refresh the page data
+        window.location.reload();
+      } else {
+        setError(data.error || "Emergency cleanup failed");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -78,6 +104,31 @@ export default function CleanupPage() {
             <CardTitle>Cleanup Tools</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Emergency Cleanup - Most Important */}
+            <div className="p-4 bg-red-50 border-2 border-red-300 rounded-lg">
+              <h3 className="font-semibold text-red-900 mb-2 flex items-center gap-2">
+                🚨 Emergency: Delete Broken Prompts
+              </h3>
+              <p className="text-sm text-red-800 mb-3">
+                Remove prompts with grammar errors like "impress the said", "the told", etc.
+                These are BUGS, not quality issues.
+              </p>
+              <Button
+                onClick={runEmergencyCleanup}
+                disabled={isLoading}
+                variant="destructive"
+                className="w-full bg-red-600 hover:bg-red-700"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4 mr-2" />
+                )}
+                Run Emergency Cleanup
+              </Button>
+            </div>
+            
+            {/* Regular Quality Cleanup */}
             <div className="flex gap-3">
               <Button
                 onClick={() => runCleanup(true, true)}
@@ -104,12 +155,12 @@ export default function CleanupPage() {
                 ) : (
                   <Trash2 className="w-4 h-4 mr-2" />
                 )}
-                Clean Up Now
+                Quality Cleanup
               </Button>
             </div>
             
             <p className="text-sm text-gray-500">
-              Preview shows what would be removed without making changes. Clean Up Now removes poor quality prompts permanently.
+              Emergency cleanup removes broken prompts immediately. Quality cleanup removes generic/vague prompts.
             </p>
           </CardContent>
         </Card>
