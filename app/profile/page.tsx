@@ -51,11 +51,12 @@ import {
   AlertTriangle,
   Download,
   Trash2,
+  FileText,
 } from "lucide-react";
 
 export default function Profile() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, session } = useAuth();
   const { toast } = useToast();
 
   // User Information
@@ -74,6 +75,9 @@ export default function Profile() {
   const [familyComments, setFamilyComments] = useState(true);
   const [printedBooksNotify, setPrintedBooksNotify] = useState(false);
   const [defaultStoryVisibility, setDefaultStoryVisibility] = useState(true);
+
+  // PDF Export
+  const [isExporting, setIsExporting] = useState(false);
 
   // Load notification preferences from localStorage
   useEffect(() => {
@@ -825,6 +829,46 @@ export default function Profile() {
                   className="flex-shrink-0 mt-1"
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Export Your Book */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Export Your Book
+              </CardTitle>
+              <CardDescription>
+                Download your stories as a PDF book
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                variant="outline"
+                className="w-full h-12 text-base justify-start"
+                onClick={() => handleExportPDF("2up")}
+                disabled={isExporting}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {isExporting ? "Exporting..." : "Export 2-Up PDF (Home Print)"}
+              </Button>
+              <p className="text-sm text-muted-foreground px-1">
+                Two 5.5×8.5" pages on Letter landscape for home printing
+              </p>
+
+              <Button
+                variant="outline"
+                className="w-full h-12 text-base justify-start mt-3"
+                onClick={() => handleExportPDF("trim")}
+                disabled={isExporting}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {isExporting ? "Exporting..." : "Export Trim PDF (Professional)"}
+              </Button>
+              <p className="text-sm text-muted-foreground px-1">
+                Individual 5.5×8.5" pages for professional printing services
+              </p>
             </CardContent>
           </Card>
 

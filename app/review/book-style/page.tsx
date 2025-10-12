@@ -697,12 +697,27 @@ function BookStyleReviewContent() {
       // Invalidate prompts query to fetch next prompt
       queryClient.invalidateQueries({ queryKey: ["/api/prompts/next"] });
 
-      // Navigate to timeline and scroll to top where new prompt awaits
-      router.push("/timeline");
-      // Scroll to top after navigation
-      setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }, 100);
+      // Check if we should return to book after recording from whisper
+      const returnToBook = sessionStorage.getItem("returnToBook");
+      const bookPageNumber = sessionStorage.getItem("bookPageNumber");
+      
+      if (returnToBook === "true" && bookPageNumber) {
+        // Clean up session storage
+        sessionStorage.removeItem("returnToBook");
+        sessionStorage.removeItem("bookPageNumber");
+        sessionStorage.removeItem("sourcePromptId");
+        sessionStorage.removeItem("promptText");
+        
+        // Return to book page
+        router.push(`/book?page=${bookPageNumber}`);
+      } else {
+        // Navigate to timeline and scroll to top where new prompt awaits
+        router.push("/timeline");
+        // Scroll to top after navigation
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 100);
+      }
     },
     onError: (error: any) => {
       console.error("Save error:", error);

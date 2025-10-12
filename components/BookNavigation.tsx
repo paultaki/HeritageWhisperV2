@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
 import { BookPage } from "@/lib/bookPagination";
-import { useBookFullscreen } from "@/hooks/use-book-fullscreen";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -327,18 +326,24 @@ function DesktopProgressBar({
   return (
     <div className="book-progress-bar fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 shadow-lg">
       <div className="relative px-6 py-3 max-w-7xl mx-auto flex items-center gap-4">
-        {/* Previous button */}
+        {/* Previous button - Classic physical button style for seniors */}
         <button
           onClick={handlePrevious}
           disabled={!hasPrevious}
-          className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+          className={`flex-shrink-0 flex flex-col items-center justify-center gap-0.5 px-4 py-2.5 min-w-[80px] rounded transition-all font-semibold text-xs uppercase tracking-wide ${
             hasPrevious
-              ? "bg-gray-100 hover:bg-gray-200 text-gray-700"
-              : "bg-gray-50 text-gray-300 cursor-not-allowed"
+              ? "bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 hover:from-gray-100 hover:via-gray-150 hover:to-gray-250 text-gray-800 border-t-2 border-l-2 border-r border-b border-t-gray-300 border-l-gray-300 border-r-gray-500 border-b-gray-600 active:border-t-gray-500 active:border-l-gray-500 active:border-r-gray-300 active:border-b-gray-300"
+              : "bg-gradient-to-b from-gray-200 to-gray-300 text-gray-500 cursor-not-allowed border border-gray-400"
           }`}
+          style={hasPrevious ? {
+            boxShadow: "0 3px 0 rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5)",
+          } : {
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.2)",
+          }}
           aria-label="Previous page"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5 -mb-1" />
+          <span className="text-[10px]">PREV</span>
         </button>
 
         {/* Progress bar */}
@@ -362,7 +367,16 @@ function DesktopProgressBar({
 
           {/* Decade markers */}
           {bookStructure.decades.map((decade) => {
-            const markerPosition = (decade.startPage / totalPages) * 100;
+            // Clamp marker position to max 98% to keep within progress bar bounds
+            const rawPosition = (decade.startPage / totalPages) * 100;
+            const markerPosition = Math.min(rawPosition, 98);
+            
+            // Only show markers that are within valid range
+            if (decade.startPage > totalPages) {
+              console.warn(`[BookNavigation] Decade marker out of range: ${decade.title} at page ${decade.startPage} (total: ${totalPages})`);
+              return null;
+            }
+            
             return (
               <div
                 key={decade.decade}
@@ -387,18 +401,24 @@ function DesktopProgressBar({
           )}
         </div>
 
-        {/* Next button */}
+        {/* Next button - Classic physical button style for seniors */}
         <button
           onClick={handleNextPage}
           disabled={!hasNext}
-          className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+          className={`flex-shrink-0 flex flex-col items-center justify-center gap-0.5 px-4 py-2.5 min-w-[80px] rounded transition-all font-semibold text-xs uppercase tracking-wide ${
             hasNext
-              ? "bg-gray-100 hover:bg-gray-200 text-gray-700"
-              : "bg-gray-50 text-gray-300 cursor-not-allowed"
+              ? "bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 hover:from-gray-100 hover:via-gray-150 hover:to-gray-250 text-gray-800 border-t-2 border-l-2 border-r border-b border-t-gray-300 border-l-gray-300 border-r-gray-500 border-b-gray-600 active:border-t-gray-500 active:border-l-gray-500 active:border-r-gray-300 active:border-b-gray-300"
+              : "bg-gradient-to-b from-gray-200 to-gray-300 text-gray-500 cursor-not-allowed border border-gray-400"
           }`}
+          style={hasNext ? {
+            boxShadow: "0 3px 0 rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5)",
+          } : {
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.2)",
+          }}
           aria-label="Next page"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-5 h-5 -mb-1" />
+          <span className="text-[10px]">NEXT</span>
         </button>
       </div>
     </div>
@@ -605,43 +625,58 @@ function MobileNavBar({
         zIndex: 9999,
       }}
     >
-      <div className="flex items-center justify-between px-4 py-3">
-        {/* Previous button */}
+      <div className="flex items-center gap-2 px-3 py-3">
+        {/* Previous button - Classic physical button style */}
         <button
           onClick={onPrevious}
           disabled={!hasPrevious}
-          className={`flex items-center justify-center w-12 h-12 rounded-full transition-all active:scale-95 ${
+          className={`w-[68px] flex flex-col items-center justify-center gap-0.5 py-2 rounded transition-all font-semibold text-[9px] uppercase tracking-wide ${
             hasPrevious
-              ? "bg-gray-100 text-gray-700 active:bg-gray-200"
-              : "bg-gray-50 text-gray-300 cursor-not-allowed"
+              ? "bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 text-gray-800 border-t-2 border-l-2 border-r border-b border-t-gray-300 border-l-gray-300 border-r-gray-500 border-b-gray-600 active:border-t-gray-500 active:border-l-gray-500 active:border-r-gray-300 active:border-b-gray-300"
+              : "bg-gradient-to-b from-gray-200 to-gray-300 text-gray-500 cursor-not-allowed border border-gray-400"
           }`}
+          style={hasPrevious ? {
+            boxShadow: "0 2px 0 rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5)",
+          } : {
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.2)",
+          }}
           aria-label="Previous page"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-5 h-5 -mb-0.5" />
+          <span>PREV</span>
         </button>
 
-        {/* Jump To button */}
+        {/* Jump To button - Takes remaining space */}
         <button
           onClick={onOpenMenu}
-          className="flex-1 mx-3 flex items-center justify-center gap-2 h-12 rounded-full bg-amber-100 text-amber-900 font-medium transition-all active:scale-98 active:bg-amber-200"
+          className="flex-1 flex items-center justify-center gap-1.5 h-11 rounded bg-gradient-to-b from-amber-50 via-amber-100 to-amber-200 border-t-2 border-l-2 border-r border-b border-t-amber-300 border-l-amber-300 border-r-amber-600 border-b-amber-700 text-amber-900 font-semibold text-xs uppercase tracking-wide transition-all active:border-t-amber-600 active:border-l-amber-600 active:border-r-amber-300 active:border-b-amber-300"
+          style={{
+            boxShadow: "0 2px 0 rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5)",
+          }}
           aria-label="Open navigation menu"
         >
-          <Menu className="w-5 h-5" />
-          <span>Jump To...</span>
+          <Menu className="w-4 h-4" />
+          <span className="text-[11px]">Jump To</span>
         </button>
 
-        {/* Next button */}
+        {/* Next button - Classic physical button style */}
         <button
           onClick={onNext}
           disabled={!hasNext}
-          className={`flex items-center justify-center w-12 h-12 rounded-full transition-all active:scale-95 ${
+          className={`w-[68px] flex flex-col items-center justify-center gap-0.5 py-2 rounded transition-all font-semibold text-[9px] uppercase tracking-wide ${
             hasNext
-              ? "bg-gray-100 text-gray-700 active:bg-gray-200"
-              : "bg-gray-50 text-gray-300 cursor-not-allowed"
+              ? "bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 text-gray-800 border-t-2 border-l-2 border-r border-b border-t-gray-300 border-l-gray-300 border-r-gray-500 border-b-gray-600 active:border-t-gray-500 active:border-l-gray-500 active:border-r-gray-300 active:border-b-gray-300"
+              : "bg-gradient-to-b from-gray-200 to-gray-300 text-gray-500 cursor-not-allowed border border-gray-400"
           }`}
+          style={hasNext ? {
+            boxShadow: "0 2px 0 rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5)",
+          } : {
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.2)",
+          }}
           aria-label="Next page"
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-5 h-5 -mb-0.5" />
+          <span>NEXT</span>
         </button>
       </div>
     </div>
@@ -659,14 +694,7 @@ export default function BookNavigation({
   onNavigateToPage,
   isMobile,
 }: BookNavigationProps) {
-  const [tocOpen, setTocOpen] = useState(false);
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
-  const { isFullscreen } = useBookFullscreen();
-
-  // Debug: Log TOC state on mount and when it changes
-  useEffect(() => {
-    console.log(`[BookNavigation] TOC state changed: ${tocOpen}`);
-  }, [tocOpen]);
 
   const bookStructure = buildBookStructure(pages);
 
@@ -698,57 +726,15 @@ export default function BookNavigation({
           onNavigateToPage(decade.startPage - 1);
         }
       }
-
-      // 'T' for table of contents
-      if (e.key === "t" || e.key === "T") {
-        setTocOpen((prev) => !prev);
-      }
-
-      // Escape to close TOC
-      if (e.key === "Escape" && tocOpen) {
-        setTocOpen(false);
-      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isMobile, tocOpen, bookStructure, onNavigateToPage]);
+  }, [isMobile, bookStructure, onNavigateToPage]);
 
   return (
     <>
-      {/* Desktop ONLY: TOC trigger tab and sidebar */}
-      {!isMobile && (
-        <>
-          {!tocOpen && (
-            <button
-              onClick={() => {
-                console.log("TOC tab clicked, opening TOC");
-                setTocOpen(true);
-              }}
-              className="book-toc-tab fixed top-1/2 -translate-y-1/2 w-12 h-24 bg-amber-600 hover:bg-amber-700 rounded-r-lg shadow-lg hover:shadow-xl transition-all z-50 flex items-center justify-center border border-l-0 border-amber-700 hover:w-14 hidden md:flex"
-              style={{
-                left: isFullscreen ? '0' : '112px', // 112px = 7rem = w-28
-              }}
-              aria-label="Open table of contents"
-              data-toc-state="closed"
-              data-icon="menu"
-            >
-              <Menu className="w-6 h-6 text-white" />
-            </button>
-          )}
-
-          <DesktopTOCSidebar
-            isOpen={tocOpen}
-            onClose={() => setTocOpen(false)}
-            bookStructure={bookStructure}
-            currentPage={currentPage + 1}
-            onNavigateToPage={onNavigateToPage}
-            isFullscreen={isFullscreen}
-          />
-        </>
-      )}
-
-      {/* Desktop ONLY: Progress bar with arrows */}
+      {/* Desktop ONLY: Progress bar with arrows (TOC is now in BookSidebarPanel) */}
       {!isMobile && (
         <DesktopProgressBar
           currentPage={currentPage + 1}

@@ -33,6 +33,7 @@ import { DecadeIntroPage } from "@/components/BookDecadePages";
 import { useViewportConfig } from "./components/ViewportManager";
 import BookNavigation from "@/components/BookNavigation";
 import BookSidebarPanel from "@/components/BookSidebarPanel";
+import WhisperPage from "@/components/WhisperPage";
 import {
   paginateBook,
   getPageSpreads,
@@ -460,6 +461,46 @@ const BookPageRenderer = ({
     );
   }
 
+  // Render whisper page - gentle prompts between stories
+  if (page.type === "whisper" && page.whisperPrompt) {
+    const handleWhisperRecord = () => {
+      // Store context for recording session
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("sourcePromptId", page.whisperPrompt!.id);
+        sessionStorage.setItem("promptText", page.whisperPrompt!.promptText);
+        sessionStorage.setItem("returnToBook", "true");
+        sessionStorage.setItem("bookPageNumber", page.pageNumber.toString());
+      }
+      
+      // Navigate to recording
+      router.push("/recording");
+    };
+
+    const handleWhisperContinue = () => {
+      // Navigate to next page
+      if (onNavigateToPage) {
+        onNavigateToPage(page.pageNumber); // This will advance by 1 page (0-indexed)
+      }
+    };
+
+    return (
+      <article
+        className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+      >
+        <WhisperPage
+          prompt={page.whisperPrompt}
+          afterStory={{
+            year: page.afterStoryYear || "",
+            title: page.afterStoryTitle || "",
+          }}
+          onRecord={handleWhisperRecord}
+          onContinue={handleWhisperContinue}
+        />
+        <div className="page-number">{page.pageNumber}</div>
+      </article>
+    );
+  }
+
   // Render story pages
   return (
     <article
@@ -631,6 +672,18 @@ export default function BookViewNew() {
   });
 
   const stories = data?.stories || [];
+  
+  // Fetch active prompts for whisper pages
+  const { data: promptsData } = useQuery<{ prompts: Array<{id: string; prompt_text: string}> }>({
+    queryKey: ["/api/prompts/active"],
+    enabled: !!user,
+  });
+
+  const whisperPrompts = (promptsData?.prompts || []).map(p => ({
+    id: p.id,
+    promptText: p.prompt_text,
+    contextNote: undefined, // Can be added later if needed
+  }));
 
   // Wait for fonts to be ready for accurate measurements
   // But don't block initial render - use optimistic pagination
@@ -694,8 +747,8 @@ export default function BookViewNew() {
           .map(convertToPaginationStory),
       }));
 
-    // Paginate the entire book (optimistically, will re-run when fonts load)
-    const bookPages = paginateBook(decadeGroups);
+    // Paginate the entire book with whisper pages (optimistically, will re-run when fonts load)
+    const bookPages = paginateBook(decadeGroups, whisperPrompts);
     const bookSpreads = getPageSpreads(bookPages);
 
     // Find the page index for the story if storyId is provided

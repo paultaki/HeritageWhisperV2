@@ -131,7 +131,8 @@ export type PageType =
   | "story-start"
   | "story-continuation"
   | "story-end"
-  | "story-complete";
+  | "story-complete"
+  | "whisper";
 
 // Block model for accurate pagination
 export type BlockType =
@@ -212,6 +213,16 @@ export interface BookPage {
   text?: string; // Legacy: plain text (still used for backward compat)
   blocks?: ContentBlock[]; // New: structured blocks for accurate pagination
   lessonLearned?: string;
+
+  // For whisper pages
+  whisperPrompt?: {
+    id: string;
+    promptText: string;
+    contextNote?: string;
+  };
+  afterStoryId?: string;
+  afterStoryYear?: string;
+  afterStoryTitle?: string;
 
   // Pagination flags
   continued?: boolean; // True if story continues on next page
@@ -1173,10 +1184,14 @@ export interface DecadeGroup {
 }
 
 /**
- * Paginate entire book with decade markers and stories
+ * Paginate entire book with decade markers, stories, and whisper pages
  * Enforces PagePolicy.storyStartsOnFreshPage rule
+ * Inserts whisper pages after every 3rd story
  */
-export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
+export function paginateBook(
+  decadeGroups: DecadeGroup[], 
+  whisperPrompts: Array<{id: string; promptText: string; contextNote?: string}> = []
+): BookPage[] {
   const allPages: BookPage[] = [];
   let currentPageNumber = 1;
 
@@ -1186,6 +1201,16 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
 
   // Start at page 3 to leave room for intro (page 1) and TOC (page 2)
   let tempPageNumber = 3;
+  
+  // Track stories for whisper page insertion
+  let storyCount = 0;
+  let whisperIndex = 0;
+  const allStories: Story[] = [];
+
+  // Collect all stories first for whisper insertion logic
+  for (const group of decadeGroups) {
+    allStories.push(...group.stories);
+  }
 
   for (const group of decadeGroups) {
     const tocEntry: TableOfContentsEntry = {
@@ -1242,6 +1267,33 @@ export function paginateBook(decadeGroups: DecadeGroup[]): BookPage[] {
         year: story.year,
         pageNumber: storyStartPage,
       });
+      
+      // Increment story count and check if we should insert a whisper page
+      storyCount++;
+      
+      // Insert whisper page after every 3rd story (if prompts available)
+      if (storyCount % 3 === 0 && whisperIndex < whisperPrompts.length) {
+        const whisperPrompt = whisperPrompts[whisperIndex];
+        
+        // Whisper page on its own page (like pressed flower between pages)
+        tempPages.push({
+          type: "whisper",
+          pageNumber: tempPageNumber,
+          whisperPrompt: {
+            id: whisperPrompt.id,
+            promptText: whisperPrompt.promptText,
+            contextNote: whisperPrompt.contextNote,
+          },
+          afterStoryId: story.id,
+          afterStoryYear: story.year,
+          afterStoryTitle: story.title,
+          isLeftPage: tempPageNumber % 2 === 0,
+          isRightPage: tempPageNumber % 2 === 1,
+        });
+        
+        tempPageNumber++;
+        whisperIndex++;
+      }
     }
 
     tocEntries.push(tocEntry);

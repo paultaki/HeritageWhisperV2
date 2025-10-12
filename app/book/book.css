@@ -807,3 +807,93 @@
     }
   }
 }
+
+/* ============================================
+   WHISPER PAGES - Gentle Prompts Between Stories
+   ============================================ */
+
+/* Whisper pages have warmer, more inviting tone */
+.whisper-page {
+  /* Warmer paper color - like aged parchment */
+  background: linear-gradient(
+    135deg, 
+    #FFFEF8 0%, 
+    #FFF9F0 50%, 
+    #FFFDF5 100%
+  );
+  
+  /* Subtle inner shadow for organic depth */
+  box-shadow: 
+    inset 0 0 30px rgba(220, 190, 140, 0.03),
+    inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  
+  /* Ensure whisper page takes full page height */
+  min-height: var(--page-height);
+}
+
+/* The question itself - handwritten, intimate feel */
+.whisper-question {
+  font-family: 'Crimson Text', Georgia, serif;
+  color: #4A4A4A;
+  font-weight: 400;
+  
+  /* Subtle warmth through text shadow */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  
+  /* Organic line height for natural reading flow */
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+}
+
+/* Gentle fade-in animation when whisper appears */
+@keyframes whisper-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.whisper-content {
+  animation: whisper-fade-in 0.8s ease-out;
+}
+
+/* Action buttons - understated elegance */
+.whisper-actions button {
+  transition: all 0.2s ease;
+}
+
+.whisper-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.whisper-actions button:active {
+  transform: translateY(0);
+}
+
+/* Mobile-specific whisper styles */
+@media (max-width: 768px) {
+  .whisper-page {
+    padding: 2rem 1.5rem;
+  }
+  
+  .whisper-question {
+    font-size: 1.25rem;
+    line-height: 1.8;
+  }
+  
+  /* Stack actions vertically on small screens */
+  @media (max-width: 400px) {
+    .whisper-actions {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .whisper-actions span {
+      display: none; /* Hide divider dot */
+    }
+  }
+}
