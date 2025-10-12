@@ -130,11 +130,35 @@ export function NextStoryCard({ onRecordClick }: NextStoryCardProps) {
     }
   }, [prompt?.id]);
 
+  // Skip prompt mutation
+  const skipMutation = useMutation({
+    mutationFn: async (promptId: string) => {
+      return apiRequest("POST", "/api/prompts/skip", { promptId });
+    },
+    onSuccess: () => {
+      // Refetch next prompt
+      queryClient.invalidateQueries({ queryKey: ["/api/prompts/next"] });
+    },
+  });
+
   // Handle "Not today" dismissal
-  const handleDismiss = () => {
+  const handleDismiss = async () => {
     if (!prompt?.id) return;
     
-    // Track dismissal
+    // Fade out animation immediately for smooth UX
+    setIsVisible(false);
+    setTimeout(() => setIsDismissed(true), 300);
+    
+    // Call skip API to increment shown_count in database
+    // After 3 skips, prompt will be retired to history
+    try {
+      await skipMutation.mutateAsync(prompt.id);
+    } catch (e) {
+      console.error("Failed to skip prompt:", e);
+      // Continue with local dismissal even if API fails
+    }
+    
+    // Track local dismissal for UI state
     const dismissalsKey = "promptDismissals";
     try {
       const dismissalsJson = localStorage.getItem(dismissalsKey);
@@ -155,12 +179,8 @@ export function NextStoryCard({ onRecordClick }: NextStoryCardProps) {
       
       localStorage.setItem(dismissalsKey, JSON.stringify(dismissals));
     } catch (e) {
-      console.error("Failed to save dismissal:", e);
+      console.error("Failed to save local dismissal:", e);
     }
-    
-    // Fade out animation
-    setIsVisible(false);
-    setTimeout(() => setIsDismissed(true), 300);
   };
 
   const handleRecord = () => {
