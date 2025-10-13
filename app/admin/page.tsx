@@ -41,6 +41,14 @@ const ADMIN_TOOLS: AdminTool[] = [
     color: "text-blue-600 bg-blue-50",
   },
   {
+    title: "Test Accounts",
+    description: "Clone accounts and test at different milestones (Story 1, 3, 10, etc.) without adding real stories",
+    href: "/admin/test-accounts",
+    icon: <Users className="w-6 h-6" />,
+    category: "testing",
+    color: "text-indigo-600 bg-indigo-50",
+  },
+  {
     title: "Prompt Cleanup",
     description: "Remove low-quality or broken prompts from the database",
     href: "/admin/cleanup",
