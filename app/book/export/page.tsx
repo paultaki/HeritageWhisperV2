@@ -209,24 +209,25 @@ export default function ExportPage() {
             <div>
               <h3 className="font-semibold mb-1">Method 1: Direct Download (Recommended)</h3>
               <p className="text-gray-600">
-                Click "Download PDF" button above. The PDF will be generated on our servers 
-                and downloaded directly to your device. Takes 10-30 seconds depending on book size.
+                Click "Download PDF" button above. Your PDF will be created and downloaded 
+                automatically to your device. Usually takes 10-30 seconds depending on book size.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-1">Method 2: Browser Print</h3>
+              <h3 className="font-semibold mb-1">Method 2: Browser Print (Backup)</h3>
               <p className="text-gray-600">
-                Click "Preview in Browser" to open the print-optimized view. Then use your 
-                browser's print function (⌘+P on Mac, Ctrl+P on Windows) and select "Save as PDF" 
-                as the destination.
+                Click "Preview in Browser" to see your book formatted for printing. Then use 
+                your browser's print function (⌘+P on Mac, Ctrl+P on Windows) and choose 
+                "Save as PDF" as your printer.
               </p>
             </div>
 
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
               <p className="text-amber-800 text-xs">
-                <strong>Note:</strong> Server-side PDF generation may timeout on very large books 
-                (50+ stories). If this happens, use the browser print method instead.
+                <strong>Note:</strong> For very large books (50+ stories), the direct download 
+                may take longer or timeout. If this happens, click "Preview in Browser" 
+                and use your browser's print-to-PDF option instead.
               </p>
             </div>
           </CardContent>
