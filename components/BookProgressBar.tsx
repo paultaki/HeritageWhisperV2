@@ -104,14 +104,23 @@ export default function BookProgressBar({
         boxShadow: '0 -2px 8px rgba(0,0,0,0.08)'
       }}
     >
-      <div className="relative px-6 py-2 max-w-7xl mx-auto">
+      <div className="relative px-6 max-w-7xl mx-auto flex items-center" style={{ height: '32px' }}>
         {/* Progress bar */}
         <div
-          className="progress-bar-container relative h-2 bg-gray-200 rounded-full cursor-pointer overflow-visible group transition-all duration-200 hover:h-4"
+          className="progress-bar-container relative w-full h-2 bg-gray-200 rounded-full cursor-pointer overflow-visible group transition-all duration-200"
+          style={{
+            transition: 'transform 0.2s ease-out',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scaleY(2)';
+            setIsHovering(true);
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scaleY(1)';
+            setIsHovering(false);
+          }}
           onClick={handleClick}
           onMouseMove={handleMouseMove}
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
           role="slider"
           aria-label="Book progress"
           aria-valuemin={1}

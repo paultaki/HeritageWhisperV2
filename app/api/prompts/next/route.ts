@@ -1,20 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { generateTier1Prompts, validatePromptQuality } from "@/lib/promptGeneration";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
+  auth: { autoRefreshToken: false, persistSession: false },
 });
 
-// Decade fallback prompts when no active prompts exist
-function generateDecadeFallback(birthYear: number, recordedDecades: Set<number>): {
+// Config
+const TIER1_TTL_DAYS = 7;
+
+// Helpers
+function addDays(d: Date, days: number) {
+  const nd = new Date(d);
+  nd.setDate(nd.getDate() + days);
+  return nd;
+}
+function wc(s: string) {
+  return (s || "").trim().split(/\s+/).filter(Boolean).length;
+}
+
+// Decade fallback prompts (kept from your version)
+function generateDecadeFallback(
+  birthYear: number,
+  recordedDecades: Set<number>
+): {
   prompt_text: string;
   context_note: string;
   anchor_entity: string;
@@ -22,68 +36,106 @@ function generateDecadeFallback(birthYear: number, recordedDecades: Set<number>)
 } {
   const currentYear = new Date().getFullYear();
   const livedDecades: number[] = [];
-  
-  // Calculate decades user has lived through
   for (let year = birthYear; year <= currentYear; year += 10) {
     const decade = Math.floor(year / 10) * 10;
-    if (!livedDecades.includes(decade)) {
-      livedDecades.push(decade);
-    }
+    if (!livedDecades.includes(decade)) livedDecades.push(decade);
   }
-  
-  // Find unrecorded decades
-  const unrecordedDecades = livedDecades.filter(d => !recordedDecades.has(d));
-  
-  // Pick random decade (prefer unrecorded, fallback to any)
-  const decade = unrecordedDecades.length > 0 
-    ? unrecordedDecades[Math.floor(Math.random() * unrecordedDecades.length)]
-    : livedDecades[Math.floor(Math.random() * livedDecades.length)];
-  
-  // Random decade-based prompt
+  const unrecordedDecades = livedDecades.filter((d) => !recordedDecades.has(d));
+  const decade =
+    unrecordedDecades.length > 0
+      ? unrecordedDecades[Math.floor(Math.random() * unrecordedDecades.length)]
+      : livedDecades[Math.floor(Math.random() * livedDecades.length)];
+
   const prompts = [
-    `Tell me about a typical Saturday in the ${decade}s.`,
-    `What was your favorite thing about the ${decade}s?`,
-    `What do you remember most about ${decade}?`,
-    `Tell me a story from the ${decade}s that makes you smile.`,
-    `What was happening in your life in ${decade}?`,
+    `Think back to the ${decade}s. What decision from then still echoes today?`,
+    `In the ${decade}s, who shaped you the most, and how?`,
+    `What felt hard in the ${decade}s that later made sense?`,
+    `What did you gain in the ${decade}s, and what did it cost?`,
+    `What promise you made in the ${decade}s still matters now?`,
   ];
-  
+
   return {
     prompt_text: prompts[Math.floor(Math.random() * prompts.length)],
     context_note: `A memory from the ${decade}s`,
     anchor_entity: `${decade}s`,
-    tier: 0, // Fallback tier
+    tier: 0,
+  };
+}
+
+// Try to fetch user's last story + extracted signals
+async function fetchLastStoryBundle(userId: string) {
+  // Pull the most recent story
+  const { data: story, error: storyErr } = await supabaseAdmin
+    .from("stories")
+    .select(
+      `
+      id,
+      story_text,
+      story_year,
+      emotions,
+      entities,
+      extracted_entities,
+      ner
+    `
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (storyErr || !story) return null;
+
+  // Normalize entities/emotions from whatever columns you have
+  // Accepts: entities | extracted_entities | ner
+  let rawEntities: any[] =
+    story.entities || story.extracted_entities || story.ner || [];
+  if (!Array.isArray(rawEntities)) rawEntities = [];
+
+  // Best-effort mapping to our generator shape
+  const entities = rawEntities
+    .map((e: any) => {
+      // Support several common shapes
+      // { kind, text } or { type, text } or { label, value }
+      const text = e?.text ?? e?.value ?? e?.name ?? e?.surface ?? "";
+      const kindRaw = (e?.kind ?? e?.type ?? e?.label ?? "").toString().toLowerCase();
+      let kind: "person" | "place" | "object" | "emotion" = "object";
+      if (kindRaw.includes("person") || kindRaw === "per" || kindRaw === "human") kind = "person";
+      else if (kindRaw.includes("place") || kindRaw === "loc") kind = "place";
+      else if (kindRaw.includes("emotion") || kindRaw === "emo") kind = "emotion";
+      return text ? { kind, text } : null;
+    })
+    .filter(Boolean);
+
+  const emotions: string[] = Array.isArray(story.emotions)
+    ? story.emotions.filter(Boolean)
+    : [];
+
+  return {
+    storyId: story.id,
+    text: story.story_text ?? "",
+    yearHint: story.story_year ?? null,
+    entities,
+    emotions,
   };
 }
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the Authorization header
+    // Auth: same as your code
     const authHeader = request.headers.get("authorization");
     const token = authHeader && authHeader.split(" ")[1];
+    if (!token) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
-    }
-
-    // Verify the JWT token with Supabase
     const {
       data: { user },
-      error,
+      error: userErr,
     } = await supabaseAdmin.auth.getUser(token);
 
-    if (error || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 },
-      );
+    if (userErr || !user) {
+      return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
     }
 
-    // Fetch next active prompt for this user
-    // ORDER BY tier DESC (Tier 3 > Tier 2 > Tier 1), then by prompt_score DESC
+    // 1) Existing unlocked prompts, ordered by tier desc then prompt_score desc — but quality gated
     const { data: prompts, error: promptsError } = await supabaseAdmin
       .from("active_prompts")
       .select("*")
@@ -92,26 +144,77 @@ export async function GET(request: NextRequest) {
       .gt("expires_at", new Date().toISOString())
       .order("tier", { ascending: false })
       .order("prompt_score", { ascending: false })
-      .limit(1);
+      .limit(10);
 
     if (promptsError) {
       logger.error("Error fetching active prompts:", promptsError);
-      return NextResponse.json(
-        { error: "Failed to fetch prompts" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "Failed to fetch prompts" }, { status: 500 });
     }
 
-    // If we have an active prompt, return it
-    if (prompts && prompts.length > 0) {
-      return NextResponse.json({ prompt: prompts[0] });
+    const validExisting = (prompts ?? []).filter(
+      (p) => validatePromptQuality(p.prompt_text) && wc(p.prompt_text) <= 30
+    );
+
+    if (validExisting.length > 0) {
+      // Keep your precedence: highest tier, highest score
+      const best = validExisting[0];
+      return NextResponse.json({ prompt: best });
     }
 
-    // No active prompts - check if we can generate Tier 2 on-demand
-    // TODO: Implement Tier 2 on-demand generation in future update
-    // For now, return decade fallback
+    // 2) No valid existing → try Tier-1 generation from the most recent story
+    const bundle = await fetchLastStoryBundle(user.id);
 
-    // Get user's birth year and recorded story decades
+    if (bundle) {
+      const t1 = generateTier1Prompts({
+        userId: user.id,
+        storyId: bundle.storyId,
+        text: bundle.text,
+        entities: bundle.entities,
+        yearHint: bundle.yearHint,
+        emotions: bundle.emotions,
+      });
+
+      // Take the top validated
+      const top = t1.find((p) => validatePromptQuality(p.prompt_text) && wc(p.prompt_text) <= 30);
+
+      if (top) {
+        // Insert into active_prompts so your app sees it everywhere
+        const insertPayload: any = {
+          user_id: user.id,
+          prompt_text: top.prompt_text,
+          type: top.type,                 // if you have a type column
+          tier: 1,                        // Tier-1
+          is_locked: false,
+          prompt_score: 80,               // seed a sane score; your scorer can update later
+          source_story_id: top.source_story_id ?? bundle.storyId,
+          expires_at: addDays(new Date(), TIER1_TTL_DAYS).toISOString(),
+          shown_count: 0,
+          created_at: new Date().toISOString(),
+        };
+
+        const { data: ins, error: insErr } = await supabaseAdmin
+          .from("active_prompts")
+          .insert(insertPayload)
+          .select("*")
+          .single();
+
+        if (insErr) {
+          logger.warn("Tier-1 insert failed, returning ephemeral:", insErr);
+          // Return ephemeral if DB insert fails
+          return NextResponse.json({
+            prompt: {
+              ...insertPayload,
+              id: null,
+              expires_at: null,
+            },
+          });
+        }
+
+        return NextResponse.json({ prompt: ins });
+      }
+    }
+
+    // 3) Final fallback — decade prompt (≤30 words, no robotic phrasing)
     const { data: userData, error: userError } = await supabaseAdmin
       .from("users")
       .select("birth_year")
@@ -119,45 +222,38 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (userError || !userData?.birth_year) {
-      // Can't generate fallback without birth year, return null
       return NextResponse.json({ prompt: null });
     }
 
-    // Get decades user has already recorded stories in
     const { data: stories, error: storiesError } = await supabaseAdmin
       .from("stories")
       .select("story_year")
       .eq("user_id", user.id)
       .not("story_year", "is", null);
 
-    const recordedDecades = new Set<number>();
-    if (stories) {
-      stories.forEach(s => {
-        if (s.story_year) {
-          recordedDecades.add(Math.floor(s.story_year / 10) * 10);
-        }
-      });
+    if (storiesError) {
+      logger.error("Error fetching stories for fallback:", storiesError);
     }
 
-    // Generate and return decade fallback
+    const recordedDecades = new Set<number>();
+    (stories ?? []).forEach((s: any) => {
+      if (s.story_year) recordedDecades.add(Math.floor(s.story_year / 10) * 10);
+    });
+
     const fallbackPrompt = generateDecadeFallback(userData.birth_year, recordedDecades);
-    
-    return NextResponse.json({ 
+
+    return NextResponse.json({
       prompt: {
         ...fallbackPrompt,
-        id: null, // Null ID indicates this is a fallback, not stored in DB
+        id: null,
         user_id: user.id,
         created_at: new Date().toISOString(),
         expires_at: null,
         shown_count: 0,
-      }
+      },
     });
-
   } catch (err) {
     logger.error("Error in GET /api/prompts/next:", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
