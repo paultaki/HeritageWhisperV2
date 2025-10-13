@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Trash2, Eye, CheckCircle2 } from "lucide-react";
+import { Loader2, Trash2, Eye, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface CleanupSummary {
@@ -18,6 +18,11 @@ interface CleanupSummary {
     score: number;
     issues: string[];
   }>;
+  goodPrompts?: Array<{
+    id: string;
+    text: string;
+    score: number;
+  }>;
   issueTypeCounts: Record<string, number>;
 }
 
@@ -26,6 +31,7 @@ export default function CleanupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState<CleanupSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showGoodPrompts, setShowGoodPrompts] = useState(false);
 
   const runCleanup = async (dryRun: boolean, verbose: boolean = false) => {
     setIsLoading(true);
@@ -234,6 +240,44 @@ export default function CleanupPage() {
                         </div>
                       ))}
                   </div>
+                </div>
+              )}
+
+              {/* High Quality Prompts (Collapsible) */}
+              {summary.goodPrompts && summary.goodPrompts.length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setShowGoodPrompts(!showGoodPrompts)}
+                    className="flex items-center justify-between w-full p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors mb-3"
+                  >
+                    <h3 className="font-semibold text-green-900">
+                      High Quality Prompts ({summary.goodPrompts.length})
+                    </h3>
+                    {showGoodPrompts ? (
+                      <ChevronUp className="w-5 h-5 text-green-700" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-green-700" />
+                    )}
+                  </button>
+                  {showGoodPrompts && (
+                    <div className="space-y-3 mb-6">
+                      {summary.goodPrompts.map((prompt) => (
+                        <div
+                          key={prompt.id}
+                          className="p-3 bg-green-50 border border-green-200 rounded-lg"
+                        >
+                          <p className="text-sm mb-2 text-gray-800 italic">
+                            "{prompt.text}"
+                          </p>
+                          <div className="flex items-center justify-end text-xs">
+                            <span className="text-green-700 font-medium">
+                              Score: {prompt.score}/100
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
