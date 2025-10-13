@@ -1030,13 +1030,19 @@ export default function BookViewNew() {
                     <BookPageRenderer
                       page={spreads[currentSpreadIndex][0]}
                       onNavigateToPage={navigateToPage}
-                      onPageClick={(isLeft) => isLeft && goToPrevious()}
+                      onPageClick={(isLeft) => {
+                        console.log('[BookView] Left page clicked, calling goToPrevious');
+                        goToPrevious();
+                      }}
                     />
                     {spreads[currentSpreadIndex][1] && (
                       <BookPageRenderer
                         page={spreads[currentSpreadIndex][1]}
                         onNavigateToPage={navigateToPage}
-                        onPageClick={(isLeft) => !isLeft && goToNext()}
+                        onPageClick={(isLeft) => {
+                          console.log('[BookView] Right page clicked, calling goToNext');
+                          goToNext();
+                        }}
                       />
                     )}
                   </>
@@ -1053,12 +1059,15 @@ export default function BookViewNew() {
       
       {/* Desktop: Progress Bar - Above bottom navigation */}
       {!isMobile && (
-        <BookProgressBar
-          pages={pages}
-          currentPage={currentSpreadIndex * 2}
-          totalPages={totalPages}
-          onNavigateToPage={navigateToPage}
-        />
+        <>
+          {console.log('[BookView] Rendering progress bar, isMobile:', isMobile, 'currentPage:', currentSpreadIndex * 2)}
+          <BookProgressBar
+            pages={pages}
+            currentPage={currentSpreadIndex * 2}
+            totalPages={totalPages}
+            onNavigateToPage={navigateToPage}
+          />
+        </>
       )}
 
       {/* Mobile: Decades Pill - Floating navigation */}
