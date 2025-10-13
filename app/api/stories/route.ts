@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { generateTier1Templates } from "@/lib/promptGeneration";
-import { performTier3Analysis, storeTier3Results } from "@/lib/tier3Analysis";
+import { generateTier1Templates as generateTier1TemplatesV2 } from "@/lib/promptGenerationV2";
+import { performTier3Analysis, storeTier3Results } from "@/lib/tier3AnalysisV2";
 import { generateEchoPrompt, generateEchoAnchorHash } from "@/lib/echoPrompts";
+import { validatePromptQuality } from "@/lib/promptQuality";
 import { logger } from "@/lib/logger";
 import { tier3Ratelimit } from "@/lib/ratelimit";
 
@@ -320,23 +321,24 @@ export async function POST(request: NextRequest) {
     }
 
     // ============================================================================
-    // TIER 1: Generate template-based prompts (1-3 per story, synchronous)
+    // TIER 1 V2: Generate relationship-first prompts (quality-gated)
     // ============================================================================
     logger.debug(
-      "[Stories API] Generating Tier 1 prompts for story:",
+      "[Stories API] Generating Tier 1 V2 prompts for story:",
       newStory.id,
     );
 
     try {
-      const tier1Prompts = generateTier1Templates(
+      const tier1Prompts = generateTier1TemplatesV2(
         newStory.transcript || "",
         newStory.year,
       );
 
+      // V2 already filters through quality gates during generation
       if (tier1Prompts.length > 0) {
         logger.debug(
-          `[Stories API] ${tier1Prompts.length} Tier 1 prompts generated:`,
-          tier1Prompts.map((p) => ({ entity: p.entity, type: p.type })),
+          `[Stories API] ${tier1Prompts.length} Tier 1 V2 prompts generated (quality-validated):`,
+          tier1Prompts.map((p) => ({ entity: p.entity, type: p.type, words: p.wordCount })),
         );
 
         // Calculate 7-day expiry
@@ -354,8 +356,8 @@ export async function POST(request: NextRequest) {
           tier: 1,
           memory_type: prompt.memoryType,
           prompt_score: prompt.promptScore,
-          score_reason: "Template-based prompt from entity extraction",
-          model_version: "tier1-template",
+          score_reason: "Relationship-first prompt from V2 engine",
+          model_version: "tier1-v2-intimacy",
           expires_at: expiresAt.toISOString(),
           is_locked: false,
           shown_count: 0,
@@ -369,29 +371,29 @@ export async function POST(request: NextRequest) {
           // Check if it's a duplicate key error (expected - deduplication working)
           if (promptError.code === "23505") {
             logger.debug(
-              "[Stories API] Some Tier 1 prompts already exist (deduplication working)",
+              "[Stories API] Some Tier 1 V2 prompts already exist (deduplication working)",
             );
           } else {
             // Log unexpected errors but don't fail the request
             logger.error(
-              "[Stories API] Failed to store Tier 1 prompts:",
+              "[Stories API] Failed to store Tier 1 V2 prompts:",
               promptError,
             );
           }
         } else {
           logger.debug(
-            `[Stories API] ${tier1Prompts.length} Tier 1 prompts stored successfully`,
+            `[Stories API] ${tier1Prompts.length} Tier 1 V2 prompts stored successfully`,
           );
         }
       } else {
         logger.debug(
-          "[Stories API] No Tier 1 prompts generated (no entities found)",
+          "[Stories API] No Tier 1 V2 prompts generated (no worthy entities found or all rejected by quality gates)",
         );
       }
     } catch (promptGenError) {
       // Log error but don't fail the request
       logger.error(
-        "[Stories API] Error generating Tier 1 prompts:",
+        "[Stories API] Error generating Tier 1 V2 prompts:",
         promptGenError,
       );
     }
@@ -405,40 +407,47 @@ export async function POST(request: NextRequest) {
       const echoPromptText = await generateEchoPrompt(newStory.transcript || "");
       
       if (echoPromptText) {
-        logger.debug("[Stories API] Echo prompt generated:", echoPromptText);
+        // Quality gate: validate echo prompt before storing
+        const isValid = validatePromptQuality(echoPromptText);
+        
+        if (isValid) {
+          logger.debug("[Stories API] Echo prompt generated (validated):", echoPromptText);
 
-        // Calculate 7-day expiry
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7);
+          // Calculate 7-day expiry
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 7);
 
-        // Store echo prompt
-        const { error: echoError } = await supabaseAdmin
-          .from("active_prompts")
-          .insert({
-            user_id: user.id,
-            prompt_text: echoPromptText,
-            context_note: "Inspired by what you just shared",
-            anchor_entity: "echo",
-            anchor_year: newStory.year,
-            anchor_hash: generateEchoAnchorHash(newStory.transcript || ""),
-            tier: 1,
-            memory_type: "echo",
-            prompt_score: 75, // High score - immediate engagement
-            score_reason: "Instant follow-up to show active listening",
-            model_version: "gpt-4o-mini-echo",
-            expires_at: expiresAt.toISOString(),
-            is_locked: false,
-            shown_count: 0,
-          });
+          // Store echo prompt
+          const { error: echoError } = await supabaseAdmin
+            .from("active_prompts")
+            .insert({
+              user_id: user.id,
+              prompt_text: echoPromptText,
+              context_note: "Inspired by what you just shared",
+              anchor_entity: "echo",
+              anchor_year: newStory.year,
+              anchor_hash: generateEchoAnchorHash(newStory.transcript || ""),
+              tier: 1,
+              memory_type: "echo",
+              prompt_score: 75, // High score - immediate engagement
+              score_reason: "Instant follow-up to show active listening",
+              model_version: "gpt-4o-mini-echo",
+              expires_at: expiresAt.toISOString(),
+              is_locked: false,
+              shown_count: 0,
+            });
 
-        if (echoError) {
-          if (echoError.code === "23505") {
-            logger.debug("[Stories API] Echo prompt already exists (deduplication)");
+          if (echoError) {
+            if (echoError.code === "23505") {
+              logger.debug("[Stories API] Echo prompt already exists (deduplication)");
+            } else {
+              logger.error("[Stories API] Failed to store echo prompt:", echoError);
+            }
           } else {
-            logger.error("[Stories API] Failed to store echo prompt:", echoError);
+            logger.debug("[Stories API] Echo prompt stored successfully");
           }
         } else {
-          logger.debug("[Stories API] Echo prompt stored successfully");
+          logger.warn("[Stories API] Echo prompt rejected by quality gate:", echoPromptText);
         }
       } else {
         logger.debug("[Stories API] No echo prompt generated");
