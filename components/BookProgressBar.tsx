@@ -89,6 +89,20 @@ export default function BookProgressBar({
     return Math.floor(percentage * totalPages) + 1;
   };
 
+  const getHoverPageInfo = () => {
+    const pageNum = getHoverPage();
+    const page = pages[pageNum - 1]; // Convert to 0-indexed
+    
+    if (!page) {
+      return { pageNum, year: null };
+    }
+
+    return {
+      pageNum,
+      year: page.year || null,
+    };
+  };
+
   return (
     <div 
       style={{ 
@@ -157,17 +171,21 @@ export default function BookProgressBar({
           })}
 
           {/* Hover tooltip */}
-          {isHovering && (
-            <div
-              className="absolute bottom-full mb-2 px-3 py-1.5 bg-gray-800 text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-              style={{
-                left: `${hoverPosition}px`,
-                transform: "translateX(-50%)",
-              }}
-            >
-              Page {getHoverPage()} of {totalPages}
-            </div>
-          )}
+          {isHovering && (() => {
+            const { pageNum, year } = getHoverPageInfo();
+            return (
+              <div
+                className="absolute bottom-full mb-2 px-3 py-1.5 bg-gray-800 text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                style={{
+                  left: `${hoverPosition}px`,
+                  transform: "translateX(-50%)",
+                }}
+              >
+                Page {pageNum} of {totalPages}
+                {year && <span className="text-amber-300"> • {year}</span>}
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
