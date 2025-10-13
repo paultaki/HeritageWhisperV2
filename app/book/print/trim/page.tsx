@@ -221,19 +221,47 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
 
 function PrintTrimPageContent() {
   const searchParams = useSearchParams();
-  const userId = searchParams.get("userId");
   const [pages, setPages] = useState<BookPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get userId from URL params or from session
+  useEffect(() => {
+    const userIdFromUrl = searchParams.get("userId");
+    
+    if (userIdFromUrl) {
+      console.log("[Print Trim] Using userId from URL:", userIdFromUrl);
+      setUserId(userIdFromUrl);
+    } else {
+      // Get from Supabase session
+      console.log("[Print Trim] No userId in URL, checking session...");
+      import("@supabase/supabase-js").then(({ createClient }) => {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+        );
+        
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session?.user?.id) {
+            console.log("[Print Trim] Using userId from session:", session.user.id);
+            setUserId(session.user.id);
+          } else {
+            setError("Not authenticated. Please sign in first.");
+            setLoading(false);
+          }
+        });
+      });
+    }
+  }, [searchParams]);
 
   useEffect(() => {
+    if (!userId) {
+      return; // Wait for userId to be set
+    }
+
     async function loadStories() {
       try {
-        if (!userId) {
-          setError("No userId provided");
-          setLoading(false);
-          return;
-        }
 
         console.log("[Print Trim] Fetching stories for userId:", userId);
 

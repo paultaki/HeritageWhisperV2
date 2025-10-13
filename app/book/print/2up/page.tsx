@@ -249,13 +249,46 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
 
 function Print2UpPageContent() {
   const searchParams = useSearchParams();
-  const userId = searchParams.get("userId");
   const [pages, setPages] = useState<BookPage[]>([]);
   const [spreads, setSpreads] = useState<BookPage[][]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get userId from URL params or from session
+  useEffect(() => {
+    const userIdFromUrl = searchParams.get("userId");
+    
+    if (userIdFromUrl) {
+      console.log("[Print 2up] Using userId from URL:", userIdFromUrl);
+      setUserId(userIdFromUrl);
+    } else {
+      // Get from Supabase session
+      console.log("[Print 2up] No userId in URL, checking session...");
+      import("@supabase/supabase-js").then(({ createClient }) => {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+        );
+        
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session?.user?.id) {
+            console.log("[Print 2up] Using userId from session:", session.user.id);
+            setUserId(session.user.id);
+          } else {
+            setError("Not authenticated. Please sign in first.");
+            setLoading(false);
+          }
+        });
+      });
+    }
+  }, [searchParams]);
 
   useEffect(() => {
+    if (!userId) {
+      return; // Wait for userId to be set
+    }
+
     // Set a timeout to prevent infinite loading
     const loadingTimeout = setTimeout(() => {
       if (loading) {
@@ -266,12 +299,6 @@ function Print2UpPageContent() {
 
     async function loadStories() {
       try {
-        if (!userId) {
-          clearTimeout(loadingTimeout);
-          setError("No userId provided in URL parameters");
-          setLoading(false);
-          return;
-        }
 
         console.log("[Print 2up] Fetching stories for userId:", userId);
 
