@@ -118,6 +118,31 @@
   transition:
     transform 140ms ease-out,
     box-shadow 140ms ease-out;
+  
+  /* Default cursor */
+  cursor: default;
+}
+
+/* Page navigation cursors - show arrow on outer margins */
+.book-spread.spread-mode .page--left {
+  cursor: w-resize; /* Left-pointing arrow for left page */
+}
+
+.book-spread.spread-mode .page--right {
+  cursor: e-resize; /* Right-pointing arrow for right page */
+}
+
+/* Single page mode - always forward */
+.book-spread.single-mode .page {
+  cursor: e-resize;
+}
+
+/* Reset cursor for interactive elements */
+.page button,
+.page a,
+.page .audio-controls,
+.page .toc-entry {
+  cursor: pointer;
 }
 
 /* Respect reduced motion preference */

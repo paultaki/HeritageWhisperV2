@@ -289,9 +289,11 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
 const BookPageRenderer = ({
   page,
   onNavigateToPage,
+  onPageClick,
 }: {
   page: BookPage;
   onNavigateToPage?: (pageNumber: number) => void;
+  onPageClick?: (isLeftPage: boolean) => void;
 }) => {
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -368,11 +370,31 @@ const BookPageRenderer = ({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  // Handle page click for navigation
+  const handlePageClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('a') ||
+      target.closest('.audio-controls') ||
+      target.closest('.toc-entry')
+    ) {
+      return;
+    }
+
+    // Call the navigation handler
+    if (onPageClick) {
+      onPageClick(page.isLeftPage);
+    }
+  };
+
   // Render intro page
   if (page.type === "intro") {
     return (
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+        onClick={handlePageClick}
       >
         <div
           ref={pageContentRef}
@@ -406,6 +428,7 @@ const BookPageRenderer = ({
     return (
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+        onClick={handlePageClick}
       >
         <div ref={pageContentRef} className="page-content px-8 py-12">
           <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">
@@ -450,6 +473,7 @@ const BookPageRenderer = ({
     return (
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+        onClick={handlePageClick}
       >
         <DecadeIntroPage
           decade={page.decade || ""}
@@ -486,6 +510,7 @@ const BookPageRenderer = ({
     return (
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+        onClick={handlePageClick}
       >
         <WhisperPage
           prompt={page.whisperPrompt}
@@ -505,6 +530,7 @@ const BookPageRenderer = ({
   return (
     <article
       className={`page book-page ${page.isLeftPage ? "page--left" : "page--right"}`}
+      onClick={handlePageClick}
     >
       <div className="running-header">
         {/* Story title with year and age - single line */}
@@ -992,6 +1018,7 @@ export default function BookViewNew() {
               <BookPageRenderer
                 page={pages[currentMobilePage]}
                 onNavigateToPage={navigateToPage}
+                onPageClick={goToNext}
               />
             ) : (
               // Spread view - two pages side-by-side
@@ -1001,11 +1028,13 @@ export default function BookViewNew() {
                     <BookPageRenderer
                       page={spreads[currentSpreadIndex][0]}
                       onNavigateToPage={navigateToPage}
+                      onPageClick={(isLeft) => isLeft && goToPrevious()}
                     />
                     {spreads[currentSpreadIndex][1] && (
                       <BookPageRenderer
                         page={spreads[currentSpreadIndex][1]}
                         onNavigateToPage={navigateToPage}
+                        onPageClick={(isLeft) => !isLeft && goToNext()}
                       />
                     )}
                   </>
