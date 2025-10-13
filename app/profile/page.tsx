@@ -80,6 +80,9 @@ export default function Profile() {
   // PDF Export
   const [isExporting, setIsExporting] = useState(false);
 
+  // Delete account confirmation
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+
 
 
   // Redirect to login if not authenticated
@@ -946,23 +949,50 @@ export default function Profile() {
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      Are you absolutely sure?
+                      Delete Account Permanently?
                     </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete
-                      your account and remove all your data from our servers,
-                      including all your stories, photos, and recordings.
+                    <AlertDialogDescription className="space-y-4">
+                      <p className="text-red-600 font-semibold">
+                        ⚠️ This action cannot be undone!
+                      </p>
+                      <p>
+                        This will permanently delete your account and remove all your data from our servers, including:
+                      </p>
+                      <ul className="list-disc list-inside space-y-1 text-sm">
+                        <li>All your stories and recordings</li>
+                        <li>All photos and memories</li>
+                        <li>Your profile and settings</li>
+                        <li>All family connections</li>
+                      </ul>
+                      <div className="pt-4">
+                        <Label htmlFor="delete-confirmation" className="text-sm font-medium">
+                          Type <span className="font-bold text-red-600">DELETE</span> to confirm:
+                        </Label>
+                        <Input
+                          id="delete-confirmation"
+                          type="text"
+                          value={deleteConfirmation}
+                          onChange={(e) => setDeleteConfirmation(e.target.value)}
+                          placeholder="Type DELETE"
+                          className="mt-2"
+                          autoComplete="off"
+                        />
+                      </div>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel className="h-12">
+                    <AlertDialogCancel 
+                      className="h-12"
+                      onClick={() => setDeleteConfirmation("")}
+                    >
                       Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDeleteAccount}
-                      className="h-12 bg-destructive hover:bg-destructive/90"
+                      disabled={deleteConfirmation !== "DELETE"}
+                      className="h-12 bg-destructive hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Delete Account
+                      Delete Account Permanently
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
