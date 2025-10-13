@@ -20,6 +20,8 @@ import { useAuth } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRecordModal } from "@/hooks/use-record-modal";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,6 +31,13 @@ export default function HamburgerMenu() {
   const { user, logout } = useAuth();
   const recordModal = useRecordModal();
   const { toast } = useToast();
+
+  // Fetch profile data for profile photo
+  const { data: profileData } = useQuery({
+    queryKey: ["/api/user/profile"],
+    enabled: !!user,
+    retry: false,
+  });
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -145,11 +154,27 @@ export default function HamburgerMenu() {
           >
             {/* User Info */}
             {user && (
-              <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                <p className="text-sm font-medium text-gray-900">
-                  {user.name || "User"}
-                </p>
-                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-3">
+                <Avatar className="w-10 h-10 flex-shrink-0">
+                  <AvatarImage 
+                    src={profileData?.user?.profilePhotoUrl || ""} 
+                    alt={user.name || "User"} 
+                  />
+                  <AvatarFallback className="bg-heritage-coral/10 text-heritage-coral text-sm">
+                    {(user.name || "U")
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {user.name || "User"}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                </div>
               </div>
             )}
 
