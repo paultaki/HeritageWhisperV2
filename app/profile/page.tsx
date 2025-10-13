@@ -42,10 +42,6 @@ import {
   Lock,
   Bell,
   Eye,
-  BarChart3,
-  Clock,
-  Share2,
-  Users,
   CreditCard,
   HardDrive,
   ArrowUpCircle,
@@ -389,15 +385,8 @@ export default function Profile() {
     return null;
   }
 
-  // Calculate stats
-  const totalStories = user.storyCount || 0;
-  const totalRecordingMinutes = Math.round(
-    (storyStats?.totalSeconds || 0) / 60,
-  );
-  const storiesShared = storyStats?.sharedCount || 0;
-  const familyMembers = storyStats?.familyMembers || 0;
-
   // Calculate storage used (mock data for now)
+  const totalStories = user.storyCount || 0;
   const storageUsedMB = Math.round(totalStories * 2.5 + totalStories * 0.5); // Avg 2.5MB audio + 0.5MB photos
   const storageUsedGB = (storageUsedMB / 1024).toFixed(2);
   const storageLimitGB = user.isPaid ? 50 : 5;
@@ -573,63 +562,6 @@ export default function Profile() {
                     : "Save Changes"}
                 </Button>
               </form>
-            </CardContent>
-          </Card>
-
-          {/* Story Statistics */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
-                Your Story Statistics
-              </CardTitle>
-              <CardDescription>Track your storytelling journey</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                    <BarChart3 className="w-4 h-4" />
-                    <span className="text-sm">Total Stories</span>
-                  </div>
-                  <p className="text-3xl font-bold text-foreground">
-                    {totalStories}
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-sm">Recording Time</span>
-                  </div>
-                  <p className="text-3xl font-bold text-foreground">
-                    {totalRecordingMinutes}
-                    <span className="text-lg text-muted-foreground ml-1">
-                      min
-                    </span>
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                    <Share2 className="w-4 h-4" />
-                    <span className="text-sm">Shared Stories</span>
-                  </div>
-                  <p className="text-3xl font-bold text-foreground">
-                    {storiesShared}
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                    <Users className="w-4 h-4" />
-                    <span className="text-sm">Family Members</span>
-                  </div>
-                  <p className="text-3xl font-bold text-foreground">
-                    {familyMembers}
-                  </p>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
