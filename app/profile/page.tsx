@@ -135,6 +135,20 @@ export default function Profile() {
     enabled: !!user,
   });
 
+  // Populate form fields from loaded profile data
+  useEffect(() => {
+    if (profileData?.user) {
+      const profile = profileData.user;
+      setBio(profile.bio || "");
+      setProfilePhoto(profile.profilePhotoUrl || "");
+      setEmailNotifications(profile.emailNotifications ?? true);
+      setWeeklyDigest(profile.weeklyDigest ?? true);
+      setFamilyComments(profile.familyComments ?? true);
+      setPrintedBooksNotify(profile.printedBooksNotify ?? false);
+      setDefaultStoryVisibility(profile.defaultStoryVisibility ?? true);
+    }
+  }, [profileData]);
+
   const updateProfileMutation = useMutation({
     mutationFn: async (data: {
       name: string;
