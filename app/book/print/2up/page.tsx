@@ -256,10 +256,19 @@ function Print2UpPageContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Set a timeout to prevent infinite loading
+    const loadingTimeout = setTimeout(() => {
+      if (loading) {
+        setError("Loading timed out. Please try again.");
+        setLoading(false);
+      }
+    }, 30000); // 30 second timeout
+
     async function loadStories() {
       try {
         if (!userId) {
-          setError("No userId provided");
+          clearTimeout(loadingTimeout);
+          setError("No userId provided in URL parameters");
           setLoading(false);
           return;
         }
@@ -269,14 +278,18 @@ function Print2UpPageContent() {
         // Fetch stories from server API (uses service role key to bypass auth)
         const response = await fetch(`/api/book-data?userId=${userId}`);
         if (!response.ok) {
-          throw new Error(`API returned ${response.status}`);
+          clearTimeout(loadingTimeout);
+          const errorText = await response.text().catch(() => "Unknown error");
+          throw new Error(`API returned ${response.status}: ${errorText}`);
         }
 
         const { stories } = await response.json();
+        clearTimeout(loadingTimeout);
         console.log("[Print 2up] Received", stories?.length || 0, "stories");
 
         if (!stories || stories.length === 0) {
-          setError("No stories found");
+          console.error("[Print 2up] No stories found for user");
+          setError("No stories found for this user. Please create some stories first.");
           setLoading(false);
           return;
         }
@@ -331,6 +344,7 @@ function Print2UpPageContent() {
         setSpreads(bookSpreads);
         setLoading(false);
       } catch (err) {
+        clearTimeout(loadingTimeout);
         console.error("[Print 2up] Error:", err);
         setError(err instanceof Error ? err.message : "Failed to load stories");
         setLoading(false);
@@ -338,6 +352,9 @@ function Print2UpPageContent() {
     }
 
     loadStories();
+
+    // Cleanup timeout on unmount
+    return () => clearTimeout(loadingTimeout);
   }, [userId]);
 
   if (loading) {
