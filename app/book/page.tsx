@@ -383,8 +383,6 @@ const BookPageRenderer = ({
       return;
     }
 
-    console.log(`Page clicked: ${page.isLeftPage ? 'LEFT' : 'RIGHT'} page, pageNumber: ${page.pageNumber}`);
-
     // Call the navigation handler
     if (onPageClick) {
       onPageClick(page.isLeftPage);
@@ -1030,19 +1028,13 @@ export default function BookViewNew() {
                     <BookPageRenderer
                       page={spreads[currentSpreadIndex][0]}
                       onNavigateToPage={navigateToPage}
-                      onPageClick={(isLeft) => {
-                        console.log('[BookView] Left page clicked, calling goToPrevious');
-                        goToPrevious();
-                      }}
+                      onPageClick={goToPrevious}
                     />
                     {spreads[currentSpreadIndex][1] && (
                       <BookPageRenderer
                         page={spreads[currentSpreadIndex][1]}
                         onNavigateToPage={navigateToPage}
-                        onPageClick={(isLeft) => {
-                          console.log('[BookView] Right page clicked, calling goToNext');
-                          goToNext();
-                        }}
+                        onPageClick={goToNext}
                       />
                     )}
                   </>

@@ -108,9 +108,7 @@ export default function BookDecadesPill({
               aria-current={activeDecade === d.decade}
               onClick={() => {
                 setOpen(false);
-                // Navigate to the decade marker page
-                // pageNumber is 1-indexed in the book, but navigateToPage expects 0-indexed
-                console.log(`Navigating to decade ${d.decade}, pageNumber: ${d.pageNumber}, passing index: ${d.pageNumber - 1}`);
+                // Navigate to the decade marker page (subtract 1 for 0-indexing)
                 onNavigateToPage(d.pageNumber - 1);
               }}
               role="menuitem"

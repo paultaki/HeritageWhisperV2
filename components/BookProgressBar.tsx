@@ -66,8 +66,6 @@ export default function BookProgressBar({
   const progress = (currentPage / totalPages) * 100;
   const bookStructure = buildBookStructure(pages);
 
-  console.log('[BookProgressBar] Rendering, currentPage:', currentPage, 'totalPages:', totalPages, 'progress:', progress);
-
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
