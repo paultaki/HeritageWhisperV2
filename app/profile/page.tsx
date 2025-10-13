@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { MemoryMap } from "@/components/MemoryMap";
 import { ProfileInterests } from "@/components/ProfileInterests";
+import { ProfilePhotoUploader } from "@/components/ProfilePhotoUploader";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -282,20 +283,14 @@ export default function Profile() {
     });
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // In production, upload to Supabase Storage
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePhoto(reader.result as string);
-        toast({
-          title: "Photo uploaded",
-          description: "Your profile photo has been updated.",
-        });
-      };
-      reader.readAsDataURL(file);
-    }
+  const handlePhotoUpdate = async (photoUrl: string) => {
+    setProfilePhoto(photoUrl);
+    await updateProfileMutation.mutateAsync({
+      name,
+      birthYear: parseInt(birthYear),
+      bio,
+      profilePhotoUrl: photoUrl,
+    });
   };
 
   const handleExportData = async () => {
@@ -463,34 +458,15 @@ export default function Profile() {
               <form onSubmit={handleSaveProfile} className="space-y-6">
                 {/* Profile Photo */}
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                  <Avatar className="w-20 h-20 md:w-24 md:h-24">
-                    <AvatarImage src={profilePhoto} alt={name} />
-                    <AvatarFallback className="text-2xl bg-coral-100 text-coral-600">
-                      {name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <Label htmlFor="photo-upload" className="cursor-pointer">
-                      <div className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors w-fit">
-                        <Camera className="w-4 h-4" />
-                        <span className="text-sm font-medium">
-                          Change Photo
-                        </span>
-                      </div>
-                      <Input
-                        id="photo-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoUpload}
-                        className="hidden"
-                      />
-                    </Label>
-                    <p className="text-xs md:text-sm text-muted-foreground mt-2">
-                      Upload a profile photo (JPG, PNG, max 5MB)
+                  <ProfilePhotoUploader
+                    currentPhotoUrl={profilePhoto}
+                    onPhotoUpdate={handlePhotoUpdate}
+                    disabled={updateProfileMutation.isPending}
+                  />
+                  <div className="flex-1 pt-4">
+                    <h4 className="font-medium mb-1">Profile Photo</h4>
+                    <p className="text-xs md:text-sm text-muted-foreground">
+                      Click the camera icon to upload a new photo. You can zoom and reposition before saving.
                     </p>
                   </div>
                 </div>
