@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-import { db, stories } from "@/lib/db";
-import { eq, sql } from "drizzle-orm";
 
-// Initialize Supabase Admin client for token verification
+// Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -44,26 +42,31 @@ export async function GET(request: NextRequest) {
 
     logger.api("Fetching story stats for user:", user.id);
 
-    // Get all user stories
-    const userStories = await db
-      .select()
-      .from(stories)
-      .where(eq(stories.userId, user.id));
+    // Get all user stories using Supabase client
+    const { data: userStories, error: storiesError } = await supabaseAdmin
+      .from("stories")
+      .select("id, duration_seconds, include_in_timeline, include_in_book, story_year")
+      .eq("user_id", user.id);
+
+    if (storiesError) {
+      logger.error("Error fetching stories:", storiesError);
+      throw storiesError;
+    }
 
     // Calculate total recording time
-    const totalSeconds = userStories.reduce((acc, story) => {
-      return acc + (story.durationSeconds || 0);
+    const totalSeconds = (userStories || []).reduce((acc, story) => {
+      return acc + (story.duration_seconds || 0);
     }, 0);
 
     // Count shared stories (check visibility settings)
-    const sharedCount = userStories.filter((story) => {
-      return story.includeInTimeline || story.includeInBook;
+    const sharedCount = (userStories || []).filter((story) => {
+      return story.include_in_timeline || story.include_in_book;
     }).length;
 
     // Map stories to minimal format for Memory Map
-    const storiesForMap = userStories.map((story) => ({
+    const storiesForMap = (userStories || []).map((story) => ({
       id: story.id,
-      story_year: story.storyYear,
+      story_year: story.story_year,
     }));
 
     return NextResponse.json({

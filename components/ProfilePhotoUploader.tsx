@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import * as SliderPrimitive from "@radix-ui/react-slider";
-import { apiRequest } from "@/lib/auth";
+import { apiRequest } from "@/lib/queryClient";
 
 interface ProfilePhotoUploaderProps {
   currentPhotoUrl?: string;
@@ -162,9 +162,7 @@ export function ProfilePhotoUploader({
       formData.append("file", blob, `profile-${Date.now()}.jpg`);
 
       // Upload to server
-      const response = await apiRequest("POST", "/api/upload/profile-photo", formData, {
-        headers: {}, // Let browser set Content-Type for FormData
-      });
+      const response = await apiRequest("POST", "/api/upload/profile-photo", formData);
 
       const data = await response.json();
 
