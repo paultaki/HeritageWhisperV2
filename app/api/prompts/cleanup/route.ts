@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { activePrompts, promptHistory } from "@/shared/schema";
-import { assessPromptQuality, getQualityReport } from "@/lib/promptQuality";
+import { getQualityReport } from "@/lib/promptQuality";
 import { eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
@@ -118,16 +118,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Build response
-    const summary = {
-      totalScanned: prompts.length,
-      highQuality: prompts.length - removedCount,
-      lowQuality: removedCount,
-      dryRun,
-      issues: verbose ? issues : issues.slice(0, 5), // Limit to 5 unless verbose
-      goodPrompts: verbose ? goodPrompts : [],
-    };
-
     // Count issue types
     const issueTypeCounts: Record<string, number> = {};
     issues.forEach((issue) => {
@@ -136,7 +126,16 @@ export async function POST(request: NextRequest) {
       });
     });
 
-    summary.issueTypeCounts = issueTypeCounts;
+    // Build response
+    const summary = {
+      totalScanned: prompts.length,
+      highQuality: prompts.length - removedCount,
+      lowQuality: removedCount,
+      dryRun,
+      issues: verbose ? issues : issues.slice(0, 5), // Limit to 5 unless verbose
+      goodPrompts: verbose ? goodPrompts : [],
+      issueTypeCounts,
+    };
 
     logger.api(
       `[Cleanup] Complete: ${removedCount} low quality prompts ${dryRun ? "identified" : "removed"}`,

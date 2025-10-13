@@ -300,6 +300,120 @@ export function scorePromptQuality(
 }
 
 // ============================================================================
+// QUALITY REPORT
+// ============================================================================
+
+export interface QualityIssue {
+  type: string;
+  message: string;
+}
+
+export interface QualityReport {
+  isQuality: boolean;
+  score: number;
+  issues: QualityIssue[];
+  warnings: QualityIssue[];
+}
+
+/**
+ * Get detailed quality report for a prompt
+ * Used by cleanup tools and admin dashboards
+ */
+export function getQualityReport(promptText?: string | null): QualityReport {
+  if (!promptText) {
+    return {
+      isQuality: false,
+      score: 0,
+      issues: [{ type: "empty", message: "Prompt is empty" }],
+      warnings: [],
+    };
+  }
+
+  const issues: QualityIssue[] = [];
+  const warnings: QualityIssue[] = [];
+  
+  const trimmed = promptText.trim();
+  const lower = trimmed.toLowerCase();
+  const wordCount = trimmed.split(/\s+/).filter(Boolean).length;
+
+  // Check word count
+  if (wordCount > 30) {
+    issues.push({
+      type: "too_long",
+      message: `Too long: ${wordCount} words (30 max)`,
+    });
+  } else if (wordCount > 25) {
+    warnings.push({
+      type: "near_limit",
+      message: `Close to limit: ${wordCount} words`,
+    });
+  }
+
+  // Check for generic words
+  const foundGeneric: string[] = [];
+  for (const word of GENERIC_WORDS) {
+    if (new RegExp(`\\b${word}\\b`, 'i').test(trimmed)) {
+      foundGeneric.push(word);
+    }
+  }
+  if (foundGeneric.length > 0) {
+    issues.push({
+      type: "generic_words",
+      message: `Contains generic words: ${foundGeneric.join(", ")}`,
+    });
+  }
+
+  // Check for banned phrases
+  const foundBanned: string[] = [];
+  for (const phrase of BANNED_PHRASES) {
+    if (lower.includes(phrase)) {
+      foundBanned.push(phrase);
+    }
+  }
+  if (foundBanned.length > 0) {
+    issues.push({
+      type: "banned_phrases",
+      message: `Contains banned phrases: ${foundBanned.join(", ")}`,
+    });
+  }
+
+  // Check if it's a question
+  if (!trimmed.includes("?")) {
+    warnings.push({
+      type: "not_question",
+      message: "Not a question",
+    });
+  }
+
+  // Check for yes/no questions
+  if (/^(did|do|does|is|are|was|were|has|have|had|will|would|could|should|can)\b/i.test(trimmed)) {
+    warnings.push({
+      type: "yes_no_question",
+      message: "Might be a yes/no question",
+    });
+  }
+
+  // Check for emotional depth
+  const hasEmotionalDepth = EMOTIONAL_DEPTH_SIGNALS.some(signal => lower.includes(signal));
+  if (!hasEmotionalDepth) {
+    warnings.push({
+      type: "no_emotional_depth",
+      message: "No emotional depth signals",
+    });
+  }
+
+  const score = scorePromptQuality(promptText);
+  const isValid = validatePromptQuality(promptText);
+
+  return {
+    isQuality: isValid && issues.length === 0,
+    score,
+    issues,
+    warnings,
+  };
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -307,6 +421,7 @@ export const qualityGates = {
   isWorthyEntity,
   validatePromptQuality,
   scorePromptQuality,
+  getQualityReport,
   GENERIC_WORDS,
   BANNED_PHRASES,
   EMOTIONAL_DEPTH_SIGNALS,
