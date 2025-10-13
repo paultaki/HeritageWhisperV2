@@ -4,6 +4,7 @@ import { generateTier1Templates } from "@/lib/promptGeneration";
 import { performTier3Analysis, storeTier3Results } from "@/lib/tier3Analysis";
 import { generateEchoPrompt, generateEchoAnchorHash } from "@/lib/echoPrompts";
 import { logger } from "@/lib/logger";
+import { tier3Ratelimit } from "@/lib/ratelimit";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -483,23 +484,39 @@ export async function POST(request: NextRequest) {
             );
           } else {
             try {
-              // Perform GPT-4o combined analysis
-              const tier3Result = await performTier3Analysis(
-                allStories,
-                storyCount,
-              );
+              // Check rate limit for expensive Tier 3 analysis
+              const rateLimitResult = await tier3Ratelimit.limit(user.id);
+              
+              if (!rateLimitResult.success) {
+                logger.warn(
+                  `[Stories API] ⏱️  Tier 3 rate limit exceeded for user ${user.id}. Skipping analysis.`,
+                  {
+                    reset: new Date(rateLimitResult.reset),
+                    remaining: rateLimitResult.remaining,
+                  }
+                );
+                // Don't fail the story save, just skip Tier 3 analysis
+              } else {
+                logger.debug(`[Stories API] Rate limit OK. Performing Tier 3 analysis...`);
+                
+                // Perform GPT-4o combined analysis
+                const tier3Result = await performTier3Analysis(
+                  allStories,
+                  storyCount,
+                );
 
-              // Store prompts and character insights
-              await storeTier3Results(
-                supabaseAdmin,
-                user.id,
-                storyCount,
-                tier3Result,
-              );
+                // Store prompts and character insights
+                await storeTier3Results(
+                  supabaseAdmin,
+                  user.id,
+                  storyCount,
+                  tier3Result,
+                );
 
-              logger.debug(
-                `[Stories API] ✅ Tier 3 analysis complete for Story #${storyCount}`,
-              );
+                logger.debug(
+                  `[Stories API] ✅ Tier 3 analysis complete for Story #${storyCount}`,
+                );
+              }
 
               // Log Story 3 paywall status
               if (storyCount === 3) {

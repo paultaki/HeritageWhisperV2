@@ -6,6 +6,7 @@
  */
 
 import { createHash } from "crypto";
+import { sanitizeForGPT, sanitizeEntity, normalizeEntity } from "./sanitization";
 
 // ============================================================================
 // TYPES
@@ -45,11 +46,13 @@ interface PromptTemplate {
  * Extract entities from transcript using regex patterns
  */
 export function extractEntities(transcript: string): ExtractedEntities {
-  const normalized = transcript.toLowerCase();
+  // Sanitize transcript before processing to prevent injection
+  const sanitized = sanitizeForGPT(transcript);
+  const normalized = sanitized.toLowerCase();
 
   console.log(
     "[Entity Extraction] Processing transcript:",
-    transcript.substring(0, 100) + "...",
+    sanitized.substring(0, 100) + "...",
   );
 
   // Extract people - combination of proper nouns and role nouns
@@ -175,7 +178,7 @@ export function extractEntities(transcript: string): ExtractedEntities {
     "Boss",
   ];
   for (const title of standaloneTitles) {
-    if (transcript.includes(title)) {
+    if (sanitized.includes(title)) {
       people.add(title);
     }
   }
@@ -183,7 +186,7 @@ export function extractEntities(transcript: string): ExtractedEntities {
   // Pattern 3: Capitalized names with action verbs
   const nameWithVerbPattern =
     /\b([A-Z][a-z]{2,}(?:\s+[A-Z][a-z]+)?)\s+(?:said|told|taught|showed|gave|asked|wanted|helped|loved|knew|met|called|kept|started|stopped|was|were|had)/g;
-  const nameMatches = Array.from(transcript.matchAll(nameWithVerbPattern));
+  const nameMatches = Array.from(sanitized.matchAll(nameWithVerbPattern));
   for (const match of nameMatches) {
     const name = match[1];
     if (!excludeWords.has(name) && !standaloneTitles.includes(name)) {
@@ -194,12 +197,12 @@ export function extractEntities(transcript: string): ExtractedEntities {
   // Pattern 3: "with/from [Proper Name]" (ONLY if next word is capitalized)
   const withFromPattern =
     /\b(?:with|from)\s+([A-Z][a-z]{2,}(?:\s+[A-Z][a-z]+)?)\b/g;
-  const withFromMatches = Array.from(transcript.matchAll(withFromPattern));
+  const withFromMatches = Array.from(sanitized.matchAll(withFromPattern));
   for (const match of withFromMatches) {
     const name = match[1];
     // Extra validation: check if it's followed by lowercase or end of sentence
     const matchIndex = match.index! + match[0].length;
-    const nextChar = transcript[matchIndex];
+    const nextChar = sanitized[matchIndex];
     if (
       !excludeWords.has(name) &&
       (!nextChar || nextChar === " " || nextChar === "." || nextChar === ",")
@@ -218,7 +221,7 @@ export function extractEntities(transcript: string): ExtractedEntities {
 
   const places = new Set<string>();
   placePatterns.forEach((pattern, index) => {
-    const matches = Array.from(transcript.matchAll(pattern));
+    const matches = Array.from(sanitized.matchAll(pattern));
     for (const match of matches) {
       const place = match[1];
       if (place && !["The", "I", "We"].includes(place)) {
@@ -431,13 +434,15 @@ const TEMPLATE_LIBRARY: Record<string, PromptTemplate> = {
 /**
  * Generate SHA1 hash for prompt deduplication
  * Format: sha1(`${type}|${entity}|${year||'NA'}`)
+ * Uses fuzzy entity normalization for better deduplication
  */
 export function generateAnchorHash(
   type: string,
   entity: string,
   year: number | null,
 ): string {
-  const normalized = entity.toLowerCase().trim();
+  // Use fuzzy normalization to catch spelling variations
+  const normalized = normalizeEntity(entity);
   const yearStr = year ? year.toString() : "NA";
   const input = `${type}|${normalized}|${yearStr}`;
 

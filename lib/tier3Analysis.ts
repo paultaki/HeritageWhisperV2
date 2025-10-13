@@ -9,6 +9,7 @@
 
 import OpenAI from "openai";
 import { generateAnchorHash } from "./promptGeneration";
+import { sanitizeForGPT, sanitizeEntity } from "./sanitization";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -299,9 +300,15 @@ Generate ${count <= 20 ? "3" : count <= 50 ? "2" : "1"} prompts. Each one: 25-30
 function buildUserPrompt(stories: Story[]): string {
   const storyTexts = stories
     .map((s, i) => {
-      const lesson = s.lesson_learned ? `\nLesson: ${s.lesson_learned}` : "";
-      return `Story "${s.title}":
-${s.transcript}${lesson}`;
+      // Sanitize transcript and lesson to prevent injection attacks
+      const sanitizedTranscript = sanitizeForGPT(s.transcript || "");
+      const sanitizedLesson = s.lesson_learned 
+        ? `\nLesson: ${sanitizeForGPT(s.lesson_learned)}` 
+        : "";
+      const sanitizedTitle = sanitizeEntity(s.title || "Untitled");
+      
+      return `Story "${sanitizedTitle}":
+${sanitizedTranscript}${sanitizedLesson}`;
     })
     .join("\n\n---\n\n");
 

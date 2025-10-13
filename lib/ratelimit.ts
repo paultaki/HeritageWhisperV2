@@ -26,8 +26,9 @@ function getRedis() {
 let _authRatelimit: Ratelimit | null = null;
 let _uploadRatelimit: Ratelimit | null = null;
 let _apiRatelimit: Ratelimit | null = null;
+let _tier3Ratelimit: Ratelimit | null = null;
 
-function getRateLimiter(type: "auth" | "upload" | "api"): Ratelimit | null {
+function getRateLimiter(type: "auth" | "upload" | "api" | "tier3"): Ratelimit | null {
   const redis = getRedis();
   if (!redis) return null;
 
@@ -58,11 +59,23 @@ function getRateLimiter(type: "auth" | "upload" | "api"): Ratelimit | null {
     });
   }
 
+  if (type === "tier3" && !_tier3Ratelimit) {
+    // Tier 3: Expensive GPT-4o analysis - limit to 1 per 5 minutes per user
+    _tier3Ratelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(1, "300 s"), // 1 request per 5 minutes
+      analytics: true,
+      prefix: "@hw/tier3",
+    });
+  }
+
   return type === "auth"
     ? _authRatelimit
     : type === "upload"
       ? _uploadRatelimit
-      : _apiRatelimit;
+      : type === "tier3"
+        ? _tier3Ratelimit
+        : _apiRatelimit;
 }
 
 // Export getters instead of direct instances
@@ -105,6 +118,21 @@ export const apiRatelimit = {
         success: true,
         limit: 999,
         reset: Date.now() + 60000,
+        remaining: 999,
+      };
+    }
+    return limiter.limit(identifier);
+  },
+};
+
+export const tier3Ratelimit = {
+  limit: async (identifier: string) => {
+    const limiter = getRateLimiter("tier3");
+    if (!limiter) {
+      return {
+        success: true,
+        limit: 999,
+        reset: Date.now() + 300000,
         remaining: 999,
       };
     }
