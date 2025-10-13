@@ -306,13 +306,16 @@ export default function Profile() {
     try {
       toast({
         title: "Generating PDF",
-        description: "Your book is being prepared for download...",
+        description: "This may take up to 60 seconds...",
       });
 
-      const response = await apiRequest("POST", `/api/export/${format}`, {});
+      const response = await apiRequest("POST", `/api/export/${format}`, {
+        bookId: null, // Not used, but API expects it
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to generate PDF");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.details || "Failed to generate PDF");
       }
 
       // Download the PDF
@@ -334,7 +337,7 @@ export default function Profile() {
       console.error("PDF export error:", error);
       toast({
         title: "Export failed",
-        description: "Could not generate PDF. Please try again.",
+        description: error instanceof Error ? error.message : "Could not generate PDF. Please try again.",
         variant: "destructive",
       });
     } finally {
