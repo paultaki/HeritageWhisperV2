@@ -23,9 +23,10 @@ function extractDecades(pages: BookPage[]): DecadeEntry[] {
   const decades: DecadeEntry[] = [];
   const seen = new Set<string>();
 
-  pages.forEach((page) => {
+  pages.forEach((page, index) => {
     if (page.type === "decade-marker" && page.decade && !seen.has(page.decade)) {
       seen.add(page.decade);
+      console.log(`[DecadesPill] Found decade ${page.decade}: pageNumber=${page.pageNumber}, arrayIndex=${index}`);
       decades.push({
         decade: page.decade,
         title: page.decadeTitle || page.decade,
@@ -109,6 +110,7 @@ export default function BookDecadesPill({
               onClick={() => {
                 setOpen(false);
                 // Navigate to the decade marker page (subtract 1 for 0-indexing)
+                console.log(`[DecadesPill] Clicking ${d.decade}: pageNumber=${d.pageNumber}, navigating to index=${d.pageNumber - 1}`);
                 onNavigateToPage(d.pageNumber - 1);
               }}
               role="menuitem"
