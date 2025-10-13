@@ -123,13 +123,13 @@
   cursor: default;
 }
 
-/* Page navigation cursors - show arrow on outer margins */
+/* Page navigation cursors - consistent directional hints */
 .book-spread.spread-mode .page--left {
-  cursor: w-resize; /* Left-pointing arrow for left page */
+  cursor: w-resize; /* Left-pointing arrow for going back */
 }
 
 .book-spread.spread-mode .page--right {
-  cursor: e-resize; /* Right-pointing arrow for right page */
+  cursor: e-resize; /* Right-pointing arrow for going forward */
 }
 
 /* Single page mode - always forward */
