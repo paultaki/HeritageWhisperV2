@@ -39,16 +39,36 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Return user profile data from auth metadata
+    // Get user data from database
+    const { data: dbUser, error: dbError } = await supabaseAdmin
+      .from("users")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (dbError) {
+      logger.error("Error fetching user from database:", dbError);
+      return NextResponse.json(
+        { error: "Failed to fetch profile" },
+        { status: 500 },
+      );
+    }
+
+    // Return user profile data from database
     const profile = {
-      id: user.id,
+      id: dbUser.id,
       email: user.email,
-      name: user.user_metadata?.name || user.email?.split("@")[0] || "User",
-      birthYear: user.user_metadata?.birthYear || new Date().getFullYear() - 30,
-      bio: user.user_metadata?.bio || "",
-      profilePhotoUrl: user.user_metadata?.profilePhotoUrl || "",
-      storyCount: user.user_metadata?.storyCount || 0,
-      isPaid: user.user_metadata?.isPaid || false,
+      name: dbUser.name || user.email?.split("@")[0] || "User",
+      birthYear: dbUser.birth_year || new Date().getFullYear() - 30,
+      bio: dbUser.bio || "",
+      profilePhotoUrl: dbUser.profile_photo_url || "",
+      emailNotifications: dbUser.email_notifications ?? true,
+      weeklyDigest: dbUser.weekly_digest ?? true,
+      familyComments: dbUser.family_comments ?? true,
+      printedBooksNotify: dbUser.printed_books_notify ?? false,
+      defaultStoryVisibility: dbUser.default_story_visibility ?? true,
+      storyCount: dbUser.story_count || 0,
+      isPaid: dbUser.is_paid || false,
     };
 
     return NextResponse.json({ user: profile });
@@ -91,46 +111,67 @@ export async function PATCH(request: NextRequest) {
 
     logger.api("Updating user profile:", user.id, updates);
 
-    // Update Supabase user metadata
-    const updatedMetadata = {
-      ...user.user_metadata,
+    // Build database update object
+    const dbUpdates: any = {
+      updated_at: new Date().toISOString(),
     };
 
-    if (updates.name !== undefined) updatedMetadata.name = updates.name;
-    if (updates.birthYear !== undefined)
-      updatedMetadata.birthYear = updates.birthYear;
-    if (updates.bio !== undefined) updatedMetadata.bio = updates.bio;
-    if (updates.profilePhotoUrl !== undefined)
-      updatedMetadata.profilePhotoUrl = updates.profilePhotoUrl;
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.birthYear !== undefined) dbUpdates.birth_year = updates.birthYear;
+    if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
+    if (updates.profilePhotoUrl !== undefined) dbUpdates.profile_photo_url = updates.profilePhotoUrl;
+    
+    // Notification preferences
+    if (updates.emailNotifications !== undefined) dbUpdates.email_notifications = updates.emailNotifications;
+    if (updates.weeklyDigest !== undefined) dbUpdates.weekly_digest = updates.weeklyDigest;
+    if (updates.familyComments !== undefined) dbUpdates.family_comments = updates.familyComments;
+    if (updates.printedBooksNotify !== undefined) dbUpdates.printed_books_notify = updates.printedBooksNotify;
+    
+    // Privacy settings
+    if (updates.defaultStoryVisibility !== undefined) dbUpdates.default_story_visibility = updates.defaultStoryVisibility;
 
-    const { data: updatedUser, error: updateError } =
-      await supabaseAdmin.auth.admin.updateUserById(user.id, {
-        user_metadata: updatedMetadata,
-      });
+    // Update database
+    const { data: dbUser, error: updateError } = await supabaseAdmin
+      .from("users")
+      .update(dbUpdates)
+      .eq("id", user.id)
+      .select()
+      .single();
 
     if (updateError) {
-      logger.error("Failed to update user metadata:", updateError);
+      logger.error("Failed to update user in database:", updateError);
       return NextResponse.json(
         { error: "Failed to update profile" },
         { status: 500 },
       );
     }
 
+    // Also update auth metadata for backward compatibility
+    if (updates.name !== undefined || updates.birthYear !== undefined) {
+      await supabaseAdmin.auth.admin.updateUserById(user.id, {
+        user_metadata: {
+          ...user.user_metadata,
+          name: updates.name,
+          birthYear: updates.birthYear,
+        },
+      });
+    }
+
     // Return updated profile
     const updatedProfile = {
-      id: updatedUser.user.id,
-      email: updatedUser.user.email,
-      name:
-        updatedUser.user.user_metadata?.name ||
-        user.email?.split("@")[0] ||
-        "User",
-      birthYear:
-        updatedUser.user.user_metadata?.birthYear ||
-        new Date().getFullYear() - 30,
-      bio: updatedUser.user.user_metadata?.bio || "",
-      profilePhotoUrl: updatedUser.user.user_metadata?.profilePhotoUrl || "",
-      storyCount: updatedUser.user.user_metadata?.storyCount || 0,
-      isPaid: updatedUser.user.user_metadata?.isPaid || false,
+      id: dbUser.id,
+      email: user.email,
+      name: dbUser.name || user.email?.split("@")[0] || "User",
+      birthYear: dbUser.birth_year || new Date().getFullYear() - 30,
+      bio: dbUser.bio || "",
+      profilePhotoUrl: dbUser.profile_photo_url || "",
+      emailNotifications: dbUser.email_notifications ?? true,
+      weeklyDigest: dbUser.weekly_digest ?? true,
+      familyComments: dbUser.family_comments ?? true,
+      printedBooksNotify: dbUser.printed_books_notify ?? false,
+      defaultStoryVisibility: dbUser.default_story_visibility ?? true,
+      storyCount: dbUser.story_count || 0,
+      isPaid: dbUser.is_paid || false,
     };
 
     return NextResponse.json({ user: updatedProfile });

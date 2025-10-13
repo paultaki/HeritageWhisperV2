@@ -144,6 +144,14 @@ export async function POST(request: NextRequest) {
     logger.debug("[Export Trim] PDF generated, closing browser...");
     await browser.close();
 
+    // Track PDF export
+    try {
+      await supabaseAdmin.rpc('increment_pdf_export', { user_id: user.id });
+    } catch (trackError) {
+      // Don't fail the export if tracking fails
+      logger.error("[Export Trim] Failed to track export:", trackError);
+    }
+
     logger.debug("[Export Trim] Success! Returning PDF");
     return new NextResponse(pdf, {
       headers: {

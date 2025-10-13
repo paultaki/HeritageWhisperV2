@@ -224,6 +224,14 @@ export async function GET(request: NextRequest) {
       `[Data Export] Exported ${userStories.length} stories, ${userAgreementsRecords.length} agreements`,
     );
 
+    // Track data export
+    try {
+      await supabaseAdmin.rpc('increment_data_export', { user_id: userId });
+    } catch (trackError) {
+      // Don't fail the export if tracking fails
+      logger.error("[Data Export] Failed to track export:", trackError);
+    }
+
     // Return as downloadable JSON file
     return new NextResponse(JSON.stringify(exportData, null, 2), {
       status: 200,

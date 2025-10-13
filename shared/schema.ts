@@ -22,9 +22,22 @@ export const users = pgTable("users", {
   profilePhotoUrl: text("profile_photo_url"), // Profile photo
   storyCount: integer("story_count").default(0),
   isPaid: boolean("is_paid").default(false),
+  // Notification preferences
+  emailNotifications: boolean("email_notifications").default(true),
+  weeklyDigest: boolean("weekly_digest").default(true),
+  familyComments: boolean("family_comments").default(true),
+  printedBooksNotify: boolean("printed_books_notify").default(false),
+  // Privacy settings
+  defaultStoryVisibility: boolean("default_story_visibility").default(true),
+  // Export tracking
+  pdfExportsCount: integer("pdf_exports_count").default(0),
+  lastPdfExportAt: timestamp("last_pdf_export_at"),
+  dataExportsCount: integer("data_exports_count").default(0),
+  lastDataExportAt: timestamp("last_data_export_at"),
   // Legal agreement tracking (for quick lookups)
   latestTermsVersion: text("latest_terms_version"), // e.g., "1.0"
   latestPrivacyVersion: text("latest_privacy_version"), // e.g., "1.0"
+  updatedAt: timestamp("updated_at").default(sql`NOW()`),
   // AI Prompt System additions
   freeStoriesUsed: integer("free_stories_used").default(0),
   subscriptionStatus: text("subscription_status").default("none"), // 'none', 'active', 'cancelled', 'expired'
