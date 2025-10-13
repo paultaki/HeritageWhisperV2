@@ -93,8 +93,19 @@ export default function BookProgressBar({
 
   return (
     <div 
-      className="fixed bottom-20 left-0 right-0 h-14 bg-red-500 border-t-4 border-black z-[9999] shadow-xl"
-      style={{ display: 'block !important' as any }}
+      id="book-progress-bar-debug"
+      className="bg-red-500 border-black"
+      style={{ 
+        display: 'block',
+        position: 'fixed',
+        bottom: '80px',
+        left: '0',
+        right: '0',
+        height: '56px',
+        borderTop: '4px solid black',
+        zIndex: 99999,
+        backgroundColor: '#ef4444'
+      }}
     >
       <div className="relative px-6 py-4 max-w-7xl mx-auto">
         {/* Progress bar */}
