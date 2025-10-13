@@ -193,6 +193,26 @@ export default function Profile() {
     },
   });
 
+  const updatePreferencesMutation = useMutation({
+    mutationFn: async (data: {
+      emailNotifications?: boolean;
+      weeklyDigest?: boolean;
+      familyComments?: boolean;
+      printedBooksNotify?: boolean;
+      defaultStoryVisibility?: boolean;
+    }) => {
+      const response = await apiRequest("PATCH", "/api/user/profile", data);
+      return response.json();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update failed",
+        description: error.message || "Could not update your preferences.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -737,7 +757,10 @@ export default function Profile() {
                 <Switch
                   id="email-notifications"
                   checked={emailNotifications}
-                  onCheckedChange={setEmailNotifications}
+                  onCheckedChange={(checked) => {
+                    setEmailNotifications(checked);
+                    updatePreferencesMutation.mutate({ emailNotifications: checked });
+                  }}
                   className="flex-shrink-0 mt-1"
                 />
               </div>
@@ -756,7 +779,10 @@ export default function Profile() {
                 <Switch
                   id="weekly-digest"
                   checked={weeklyDigest}
-                  onCheckedChange={setWeeklyDigest}
+                  onCheckedChange={(checked) => {
+                    setWeeklyDigest(checked);
+                    updatePreferencesMutation.mutate({ weeklyDigest: checked });
+                  }}
                   className="flex-shrink-0 mt-1"
                 />
               </div>
@@ -775,7 +801,10 @@ export default function Profile() {
                 <Switch
                   id="family-comments"
                   checked={familyComments}
-                  onCheckedChange={setFamilyComments}
+                  onCheckedChange={(checked) => {
+                    setFamilyComments(checked);
+                    updatePreferencesMutation.mutate({ familyComments: checked });
+                  }}
                   className="flex-shrink-0 mt-1"
                 />
               </div>
@@ -825,7 +854,10 @@ export default function Profile() {
                 <Switch
                   id="default-visibility"
                   checked={defaultStoryVisibility}
-                  onCheckedChange={setDefaultStoryVisibility}
+                  onCheckedChange={(checked) => {
+                    setDefaultStoryVisibility(checked);
+                    updatePreferencesMutation.mutate({ defaultStoryVisibility: checked });
+                  }}
                   className="flex-shrink-0 mt-1"
                 />
               </div>
