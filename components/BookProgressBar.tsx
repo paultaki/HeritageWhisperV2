@@ -93,23 +93,23 @@ export default function BookProgressBar({
 
   return (
     <div 
-      id="book-progress-bar-debug"
       style={{ 
         display: 'block',
         position: 'fixed',
         bottom: '80px',
         left: '0',
         right: '0',
-        height: '56px',
-        borderTop: '4px solid black',
-        zIndex: 99999,
-        backgroundColor: '#ef4444'
+        height: '48px',
+        borderTop: '1px solid #e5e5e5',
+        zIndex: 50,
+        backgroundColor: '#ffffff',
+        boxShadow: '0 -2px 8px rgba(0,0,0,0.08)'
       }}
     >
       <div className="relative px-6 py-4 max-w-7xl mx-auto">
         {/* Progress bar */}
         <div
-          className="progress-bar-container relative h-3 bg-gray-300 rounded-full cursor-pointer overflow-visible group transition-all duration-200 hover:h-4"
+          className="progress-bar-container relative h-2 bg-gray-200 rounded-full cursor-pointer overflow-visible group transition-all duration-200 hover:h-3"
           onClick={handleClick}
           onMouseMove={handleMouseMove}
           onMouseEnter={() => setIsHovering(true)}
