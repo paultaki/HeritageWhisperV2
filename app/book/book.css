@@ -268,20 +268,21 @@
   position: absolute;
   bottom: 24px;
   font-family: var(--font-serif);
-  font-size: 10pt;
+  font-size: 11pt;
   color: #666;
   opacity: 1;
   user-select: none;
   font-weight: 400;
+  z-index: 10;
 }
 
 /* Left page: page number in bottom-left corner */
-.page.left .page-number {
+.page--left .page-number {
   left: var(--margin);
 }
 
 /* Right page: page number in bottom-right corner */
-.page.right .page-number {
+.page--right .page-number {
   right: var(--margin);
 }
 

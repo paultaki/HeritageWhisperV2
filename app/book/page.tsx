@@ -537,7 +537,7 @@ const BookPageRenderer = ({
         <div className="story-header-title">
           {page.title ||
             (page.isLeftPage ? "Heritage Whisper" : "Family Memories")}
-          {page.year && ` • ${page.year}`}
+          {page.year && !page.title?.includes(page.year) && ` • ${page.year}`}
           {page.age !== null &&
             page.age !== undefined &&
             page.age > 0 &&
