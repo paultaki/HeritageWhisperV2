@@ -92,7 +92,10 @@ export default function BookProgressBar({
   };
 
   return (
-    <div className="fixed bottom-20 left-0 right-0 h-14 bg-red-500 border-t-4 border-black z-[9999] shadow-xl block">
+    <div 
+      className="fixed bottom-20 left-0 right-0 h-14 bg-red-500 border-t-4 border-black z-[9999] shadow-xl"
+      style={{ display: 'block !important' as any }}
+    >
       <div className="relative px-6 py-4 max-w-7xl mx-auto">
         {/* Progress bar */}
         <div
