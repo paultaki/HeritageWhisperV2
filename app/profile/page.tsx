@@ -125,7 +125,7 @@ export default function Profile() {
 
   // Fetch profile data
   const { data: profileData, isLoading } = useQuery({
-    queryKey: ["/api/profile"],
+    queryKey: ["/api/user/profile"],
     enabled: !!user,
   });
 
@@ -160,7 +160,7 @@ export default function Profile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stories"] }); // Refresh timeline to update birth year marker
       toast({
         title: "Profile updated",
