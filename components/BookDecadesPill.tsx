@@ -7,7 +7,8 @@ import "@/app/styles/decade-nav.css";
 export type DecadeEntry = {
   decade: string; // ex "1950s"
   title: string; // ex "1950s - Early Childhood"
-  pageNumber: number; // first page of decade
+  pageNumber: number; // Display page number (1-indexed)
+  arrayIndex: number; // Array index for navigation (0-indexed)
 };
 
 interface BookDecadesPillProps {
@@ -26,11 +27,11 @@ function extractDecades(pages: BookPage[]): DecadeEntry[] {
   pages.forEach((page, index) => {
     if (page.type === "decade-marker" && page.decade && !seen.has(page.decade)) {
       seen.add(page.decade);
-      console.log(`[DecadesPill] Found decade ${page.decade}: pageNumber=${page.pageNumber}, arrayIndex=${index}`);
       decades.push({
         decade: page.decade,
         title: page.decadeTitle || page.decade,
         pageNumber: page.pageNumber,
+        arrayIndex: index,
       });
     }
   });
@@ -109,9 +110,8 @@ export default function BookDecadesPill({
               aria-current={activeDecade === d.decade}
               onClick={() => {
                 setOpen(false);
-                // Navigate to the decade marker page (subtract 1 for 0-indexing)
-                console.log(`[DecadesPill] Clicking ${d.decade}: pageNumber=${d.pageNumber}, navigating to index=${d.pageNumber - 1}`);
-                onNavigateToPage(d.pageNumber - 1);
+                // Navigate using arrayIndex (already 0-indexed)
+                onNavigateToPage(d.arrayIndex);
               }}
               role="menuitem"
               aria-label={`Go to ${d.title}`}
