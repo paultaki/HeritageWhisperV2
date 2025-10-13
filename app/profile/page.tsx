@@ -103,6 +103,8 @@ export default function Profile() {
   const { data: storyStats } = useQuery({
     queryKey: ["/api/stories/stats"],
     enabled: !!user,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   // Populate form fields from loaded profile data
@@ -296,6 +298,47 @@ export default function Profile() {
         description: "Could not export your data. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleExportPDF = async (format: "2up" | "trim") => {
+    setIsExporting(true);
+    try {
+      toast({
+        title: "Generating PDF",
+        description: "Your book is being prepared for download...",
+      });
+
+      const response = await apiRequest("POST", `/api/export/${format}`, {});
+
+      if (!response.ok) {
+        throw new Error("Failed to generate PDF");
+      }
+
+      // Download the PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `heritage-book-${format}-${new Date().toISOString().split("T")[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "PDF ready",
+        description: "Your book has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast({
+        title: "Export failed",
+        description: "Could not generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
     }
   };
 

@@ -127,22 +127,51 @@ export function ProfilePhotoUploader({
 
       // Apply transforms and draw circular crop
       ctx.save();
+      
+      // Create circular clipping path
       ctx.beginPath();
       ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
       ctx.closePath();
       ctx.clip();
 
-      // Calculate the drawing dimensions
+      // Calculate dimensions to cover the canvas
+      const imgAspect = img.width / img.height;
+      let sourceWidth = img.width;
+      let sourceHeight = img.height;
+      let sourceX = 0;
+      let sourceY = 0;
+
+      // Make image cover the canvas (1:1 aspect ratio)
+      if (imgAspect > 1) {
+        // Image is wider - crop sides
+        sourceWidth = img.height;
+        sourceX = (img.width - img.height) / 2;
+      } else {
+        // Image is taller - crop top/bottom
+        sourceHeight = img.width;
+        sourceY = (img.height - img.width) / 2;
+      }
+
+      // Apply zoom and pan
       const scale = transform.zoom;
-      const offsetX = transform.position.x / scale;
-      const offsetY = transform.position.y / scale;
+      const scaledWidth = size * scale;
+      const scaledHeight = size * scale;
+      const x = (size - scaledWidth) / 2 + transform.position.x;
+      const y = (size - scaledHeight) / 2 + transform.position.y;
 
-      // Draw the image centered with transformations
-      const drawSize = size / scale;
-      const x = size / 2 + offsetX - drawSize / 2;
-      const y = size / 2 + offsetY - drawSize / 2;
-
-      ctx.drawImage(img, x, y, drawSize, drawSize);
+      // Draw the cropped and transformed image
+      ctx.drawImage(
+        img,
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
+        x,
+        y,
+        scaledWidth,
+        scaledHeight
+      );
+      
       ctx.restore();
 
       // Convert canvas to blob
