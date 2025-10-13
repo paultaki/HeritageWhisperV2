@@ -101,6 +101,13 @@ export const stories = pgTable("stories", {
     }>;
     coreLessons?: string[];
   }>(),
+  entitiesExtracted: jsonb("entities_extracted").$type<{
+    people: string[];
+    places: string[];
+    objects: string[];
+    emotions: string[];
+    temporalBoundaries: string[];
+  }>(),
   sourcePromptId: uuid("source_prompt_id"),
   lifePhase: text("life_phase"), // 'childhood', 'teen', 'early_adult', 'mid_adult', 'late_adult', 'senior'
   photoUrl: text("photo_url"),

@@ -96,8 +96,10 @@ async function formatTranscription(rawText: string): Promise<string> {
   }
 
   try {
+    // Use GPT-4o-mini for formatting (cost: ~$0.001 vs $0.007)
+    // Formatting is simpler than lesson extraction, doesn't need GPT-4o
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
