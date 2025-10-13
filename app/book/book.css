@@ -155,10 +155,25 @@
 }
 
 /* Right page: right margin shows forward arrow */
-.book-spread.spread-mode .page--right::after {
+/* Note: Using a custom data attribute to avoid conflicting with existing ::after (page curl) */
+.book-spread.spread-mode .page--right {
+  position: relative;
+}
+
+.book-spread.spread-mode .page--right:hover {
+  background-image: 
+    radial-gradient(
+      circle at right center,
+      rgba(211, 106, 61, 0.03) 0%,
+      transparent 30%
+    );
+}
+
+/* Add arrow using a different technique that doesn't conflict with page curl */
+.book-spread.spread-mode .page--right:hover .page-content::after {
   content: '›';
   position: absolute;
-  right: 10px;
+  right: -38px; /* Position outside the page-content area */
   top: 50%;
   transform: translateY(-50%);
   width: 32px;
@@ -167,16 +182,16 @@
   align-items: center;
   justify-content: center;
   font-size: 32px;
-  color: rgba(211, 106, 61, 0.15); /* Coral color at 15% opacity */
+  color: rgba(211, 106, 61, 0.25); /* Slightly more visible */
   cursor: e-resize;
-  z-index: 5;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  z-index: 10;
+  animation: fadeIn 0.3s ease;
   pointer-events: none;
 }
 
-.book-spread.spread-mode .page--right:hover::after {
-  opacity: 1;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Clickable zone overlay for cursor */
