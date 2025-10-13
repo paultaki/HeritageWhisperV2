@@ -123,84 +123,13 @@
   cursor: default;
 }
 
-/* Page navigation - default cursor on main content area */
-.book-spread.spread-mode .page {
-  cursor: default;
-  position: relative;
-}
-
-/* Left page: left margin shows back arrow */
-.book-spread.spread-mode .page--left::before {
-  content: '‹';
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  color: rgba(211, 106, 61, 0.15); /* Coral color at 15% opacity */
-  cursor: w-resize;
-  z-index: 5;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.book-spread.spread-mode .page--left:hover::before {
-  opacity: 1;
-}
-
-/* Right page: right margin shows forward arrow */
-/* Note: Using a custom data attribute to avoid conflicting with existing ::after (page curl) */
-.book-spread.spread-mode .page--right {
-  position: relative;
-}
-
-.book-spread.spread-mode .page--right:hover {
-  background-image: 
-    radial-gradient(
-      circle at right center,
-      rgba(211, 106, 61, 0.03) 0%,
-      transparent 30%
-    );
-}
-
-/* Add arrow using a different technique that doesn't conflict with page curl */
-.book-spread.spread-mode .page--right:hover .page-content::after {
-  content: '›';
-  position: absolute;
-  right: -38px; /* Position outside the page-content area */
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  color: rgba(211, 106, 61, 0.25); /* Slightly more visible */
-  cursor: e-resize;
-  z-index: 10;
-  animation: fadeIn 0.3s ease;
-  pointer-events: none;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Clickable zone overlay for cursor */
+/* Page navigation - cursor hints only */
 .book-spread.spread-mode .page--left {
-  cursor: w-resize;
+  cursor: w-resize; /* Left-pointing arrow cursor for going back */
 }
 
 .book-spread.spread-mode .page--right {
-  cursor: e-resize;
+  cursor: e-resize; /* Right-pointing arrow cursor for going forward */
 }
 
 /* Single page mode - always forward */
