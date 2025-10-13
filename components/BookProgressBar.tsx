@@ -94,7 +94,6 @@ export default function BookProgressBar({
   return (
     <div 
       id="book-progress-bar-debug"
-      className="bg-red-500 border-black"
       style={{ 
         display: 'block',
         position: 'fixed',
