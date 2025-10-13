@@ -34,7 +34,7 @@
 
 .book-wrap {
   width: 100%;
-  height: calc(100vh - 110px); /* Account for progress bar (~30px) + nav (80px) */
+  height: calc(100vh - 112px); /* Account for progress bar (32px) + nav (80px) */
   overflow-y: auto;
   overflow-x: hidden;
   scroll-snap-type: y mandatory;
