@@ -31,8 +31,8 @@ import { useSwipeable } from "react-swipeable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
 import { useViewportConfig } from "./components/ViewportManager";
-import BookNavigation from "@/components/BookNavigation";
-import BookSidebarPanel from "@/components/BookSidebarPanel";
+import BookProgressBar from "@/components/BookProgressBar";
+import BookDecadesPill from "@/components/BookDecadesPill";
 import WhisperPage from "@/components/WhisperPage";
 import {
   paginateBook,
@@ -1049,27 +1049,23 @@ export default function BookViewNew() {
       {/* Record Modal */}
       <RecordModal isOpen={isOpen} onClose={close} />
       
-      {/* Desktop: Combined Sidebar Panel (Nav + TOC) - Rendered via portal */}
-      {!isMobile && typeof window !== 'undefined' && createPortal(
-        <BookSidebarPanel
+      {/* Desktop: Progress Bar - Above bottom navigation */}
+      {!isMobile && (
+        <BookProgressBar
           pages={pages}
-          currentPage={isMobile ? currentMobilePage : currentSpreadIndex * 2}
-          onNavigateToPage={navigateToPage}
-          onRecordClick={open}
-        />,
-        document.body
-      )}
-
-      {/* Book Navigation (progress bar for desktop, bottom sheet for mobile) - Rendered via portal */}
-      {typeof window !== 'undefined' && createPortal(
-        <BookNavigation
-          pages={pages}
-          currentPage={isMobile ? currentMobilePage : currentSpreadIndex * 2}
+          currentPage={currentSpreadIndex * 2}
           totalPages={totalPages}
           onNavigateToPage={navigateToPage}
-          isMobile={isMobile}
-        />,
-        document.body
+        />
+      )}
+
+      {/* Mobile: Decades Pill - Floating navigation */}
+      {isMobile && (
+        <BookDecadesPill
+          pages={pages}
+          currentPage={currentMobilePage}
+          onNavigateToPage={navigateToPage}
+        />
       )}
     </div>
   );

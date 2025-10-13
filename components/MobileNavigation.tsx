@@ -68,9 +68,9 @@ export default function MobileNavigation({
   const pathname = usePathname();
   const { user } = useAuth();
 
-  // Don't show navigation on auth pages, home page, or book page (book has its own navigation)
+  // Don't show navigation on auth pages or home page
   const shouldShow =
-    user && !["/auth/login", "/auth/register", "/", "/book"].includes(pathname) && !pathname.startsWith("/book/");
+    user && !["/auth/login", "/auth/register", "/"].includes(pathname);
 
   if (!shouldShow) {
     return null;

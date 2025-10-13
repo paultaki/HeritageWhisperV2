@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import DesktopNavigation from "./DesktopNavigation";
+import DesktopNavigationBottom from "./DesktopNavigationBottom";
 import MobileNavigation from "./MobileNavigation";
 import HamburgerMenu from "./HamburgerMenu";
 import RecordModal from "./RecordModal";
@@ -13,10 +13,10 @@ export default function NavigationWrapper() {
 
   return (
     <>
-      {/* Desktop Navigation (left sidebar) - hidden on book page, book has its own combined sidebar */}
-      <DesktopNavigation onRecordClick={() => openModal()} />
+      {/* Desktop Navigation (bottom bar) - shows on all pages */}
+      <DesktopNavigationBottom onRecordClick={() => openModal()} />
 
-      {/* Mobile Navigation (bottom bar) - hidden on book page per component logic */}
+      {/* Mobile Navigation (bottom bar) - shows on all pages */}
       <MobileNavigation onRecordClick={() => openModal()} />
 
       {/* Hamburger Menu (top right) - hidden on book page per component logic */}

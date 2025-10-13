@@ -8,12 +8,11 @@ export default function LayoutContent({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isBookPage = pathname === "/book";
 
-  // Book page has no navigation sidebar, so no left padding needed
-  // Also remove bottom padding since it has its own navigation
+  // All pages now have bottom navigation
+  // Book page needs special handling for progress bar
   return (
-    <div className={isBookPage ? "" : "md:pl-28 pb-20 md:pb-0"}>
+    <div className="pb-20 md:pb-20">
       {children}
     </div>
   );
