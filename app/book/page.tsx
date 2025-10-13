@@ -1059,15 +1059,12 @@ export default function BookViewNew() {
       
       {/* Desktop: Progress Bar - Above bottom navigation */}
       {!isMobile && (
-        <>
-          {console.log('[BookView] Rendering progress bar, isMobile:', isMobile, 'currentPage:', currentSpreadIndex * 2)}
-          <BookProgressBar
-            pages={pages}
-            currentPage={currentSpreadIndex * 2}
-            totalPages={totalPages}
-            onNavigateToPage={navigateToPage}
-          />
-        </>
+        <BookProgressBar
+          pages={pages}
+          currentPage={currentSpreadIndex * 2}
+          totalPages={totalPages}
+          onNavigateToPage={navigateToPage}
+        />
       )}
 
       {/* Mobile: Decades Pill - Floating navigation */}
