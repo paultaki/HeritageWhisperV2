@@ -1058,6 +1058,7 @@ export default function BookViewNew() {
       <RecordModal isOpen={isOpen} onClose={close} />
       
       {/* Desktop: Progress Bar - Above bottom navigation */}
+      {console.log('[BookView] isMobile:', isMobile, 'shouldShowProgressBar:', !isMobile)}
       {!isMobile && (
         <BookProgressBar
           pages={pages}
