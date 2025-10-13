@@ -83,7 +83,7 @@ export default function DesktopNavigationBottom({
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", damping: 20 }}
-      className="hidden md:flex fixed bottom-0 left-0 right-0 h-20 bg-white/95 backdrop-blur-md border-t-2 items-center justify-center px-8 z-40"
+      className="flex fixed bottom-0 left-0 right-0 h-20 bg-blue-500 backdrop-blur-md border-t-4 border-black items-center justify-center px-8 z-[9999]"
       style={{
         borderTopColor: "#D36A3D",
         boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.08)",
