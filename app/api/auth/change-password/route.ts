@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-import { db, users } from "@/lib/db";
-import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
-// Initialize Supabase Admin client for token verification
+// Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -61,14 +59,15 @@ export async function POST(request: NextRequest) {
 
     logger.api("Changing password for user:", authUser.id);
 
-    // Get user from database
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, authUser.id))
-      .limit(1);
+    // Get user from database using Supabase client
+    const { data: user, error: userError } = await supabaseAdmin
+      .from("users")
+      .select("id, password")
+      .eq("id", authUser.id)
+      .single();
 
-    if (!user || !user.password) {
+    if (userError || !user || !user.password) {
+      logger.error("User lookup error:", userError);
       return NextResponse.json(
         { error: "User not found or password not set" },
         { status: 404 },
@@ -91,11 +90,16 @@ export async function POST(request: NextRequest) {
     // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update password in database
-    await db
-      .update(users)
-      .set({ password: hashedPassword })
-      .where(eq(users.id, authUser.id));
+    // Update password in database using Supabase client
+    const { error: updateError } = await supabaseAdmin
+      .from("users")
+      .update({ password: hashedPassword })
+      .eq("id", authUser.id);
+
+    if (updateError) {
+      logger.error("Password update error:", updateError);
+      throw new Error("Failed to update password in database");
+    }
 
     return NextResponse.json({
       success: true,
