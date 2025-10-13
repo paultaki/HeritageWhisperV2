@@ -92,11 +92,14 @@ export default function BookProgressBar({
   };
 
   return (
-    <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 z-50 shadow-lg hidden md:block">
-      <div className="relative px-6 py-2 max-w-7xl mx-auto">
+    <div 
+      className="fixed bottom-20 left-0 right-0 bg-amber-50 border-t-2 border-amber-600 z-50 shadow-xl hidden md:block"
+      style={{ minHeight: '56px' }}
+    >
+      <div className="relative px-6 py-4 max-w-7xl mx-auto">
         {/* Progress bar */}
         <div
-          className="progress-bar-container relative h-2 bg-gray-200 rounded-full cursor-pointer overflow-visible group transition-all duration-200 hover:h-3"
+          className="progress-bar-container relative h-3 bg-gray-300 rounded-full cursor-pointer overflow-visible group transition-all duration-200 hover:h-4"
           onClick={handleClick}
           onMouseMove={handleMouseMove}
           onMouseEnter={() => setIsHovering(true)}
