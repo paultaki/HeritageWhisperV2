@@ -107,30 +107,32 @@ export default function BookProgressBar({
       <div className="relative px-6 max-w-7xl mx-auto flex items-center" style={{ height: '32px' }}>
         {/* Progress bar */}
         <div
-          className="progress-bar-container relative w-full h-2 bg-gray-200 rounded-full cursor-pointer overflow-visible group transition-all duration-200"
-          style={{
-            transition: 'transform 0.2s ease-out',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scaleY(2)';
-            setIsHovering(true);
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scaleY(1)';
-            setIsHovering(false);
-          }}
+          className="progress-bar-container relative w-full h-2 cursor-pointer overflow-visible group"
           onClick={handleClick}
           onMouseMove={handleMouseMove}
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
           role="slider"
           aria-label="Book progress"
           aria-valuemin={1}
           aria-valuemax={totalPages}
           aria-valuenow={currentPage}
         >
-          {/* Progress fill */}
+          {/* Background bar that scales on hover */}
           <div
-            className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-600 to-amber-500 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
+            className="absolute inset-0 bg-gray-200 rounded-full transition-transform duration-200"
+            style={{
+              transform: isHovering ? 'scaleY(2)' : 'scaleY(1)',
+            }}
+          />
+          
+          {/* Progress fill - scales with background */}
+          <div
+            className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-600 to-amber-500 rounded-full transition-all duration-200"
+            style={{ 
+              width: `${progress}%`,
+              transform: isHovering ? 'scaleY(2)' : 'scaleY(1)',
+            }}
           />
 
           {/* Decade markers */}
