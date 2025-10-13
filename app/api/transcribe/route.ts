@@ -95,6 +95,26 @@ async function formatTranscription(rawText: string): Promise<string> {
     return rawText; // Return original on injection attempt
   }
 
+  // Preprocessing: Clean up common issues before GPT formatting
+  let preprocessed = sanitizedText;
+  
+  // 1. Remove filler words (deterministic, more reliable than GPT alone)
+  preprocessed = preprocessed.replace(/\b(um|uh|uhh|umm|er|ah)\b/gi, '');
+  
+  // 2. Remove "like" and "you know" when used as fillers (not when meaningful)
+  // Only remove when surrounded by spaces or at sentence boundaries
+  preprocessed = preprocessed.replace(/\s+(like|you know)\s+/gi, ' ');
+  
+  // 3. Remove repeated false starts: "I was, I was going" → "I was going"
+  // Matches: word, optional comma, space, same word
+  preprocessed = preprocessed.replace(/\b(\w+),?\s+\1\b/gi, '$1');
+  
+  // 4. Clean up multiple spaces and trim
+  preprocessed = preprocessed.replace(/\s+/g, ' ').trim();
+  
+  // 5. Remove spaces before punctuation
+  preprocessed = preprocessed.replace(/\s+([.,!?;:])/g, '$1');
+
   try {
     // Use GPT-4o-mini for formatting (cost: ~$0.001 vs $0.007)
     // Formatting is simpler than lesson extraction, doesn't need GPT-4o
@@ -107,7 +127,7 @@ async function formatTranscription(rawText: string): Promise<string> {
         },
         {
           role: "user",
-          content: `${FORMATTING_GUIDELINES}\n\n<transcribed_speech>\n${sanitizedText}\n</transcribed_speech>`,
+          content: `${FORMATTING_GUIDELINES}\n\n<transcribed_speech>\n${preprocessed}\n</transcribed_speech>`,
         },
       ],
       temperature: 0.3,
