@@ -90,7 +90,7 @@ export default function BookProgressBar({
   };
 
   return (
-    <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 z-40 shadow-lg md:block hidden">
+    <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 z-50 shadow-lg hidden md:block">
       <div className="relative px-6 py-2 max-w-7xl mx-auto">
         {/* Progress bar */}
         <div

@@ -383,6 +383,8 @@ const BookPageRenderer = ({
       return;
     }
 
+    console.log(`Page clicked: ${page.isLeftPage ? 'LEFT' : 'RIGHT'} page, pageNumber: ${page.pageNumber}`);
+
     // Call the navigation handler
     if (onPageClick) {
       onPageClick(page.isLeftPage);
