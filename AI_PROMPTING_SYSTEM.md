@@ -53,7 +53,8 @@ The business impact is profound: users who receive personalized prompts record *
                         │
                         ▼  (if milestone hit)
         ┌───────────────────────────────────────────┐
-        │         TIER 3 ANALYSIS (GPT-4o)          │
+        │    TIER 3 ANALYSIS (GPT-5/GPT-4o)         │
+        │  • GPT-5 with reasoning effort (opt-in)   │
         │  • Analyze ALL stories together           │
         │  • Find patterns & connections            │
         │  • Extract character insights             │
@@ -1488,6 +1489,223 @@ WHERE anchor_entity IN (SELECT entities FROM stories WHERE id = deleted_story_id
 - 10,000 users × $0.49 = **$4,900 total AI cost**
 - Revenue (10% convert to $149/year): 1,000 × $149 = **$149,000**
 - **AI cost as % of revenue:** 3.3% (very healthy margin)
+
+---
+
+### GPT-5 Upgrade: Reasoning for Deeper Synthesis (October 2025)
+
+**Status:** Production-ready with feature flags  
+**Branch:** `feature/gpt5-tier3-whispers`  
+**Commit:** eeb7493  
+
+#### Overview
+
+HeritageWhisper now uses GPT-5 with adjustable reasoning effort for operations requiring deeper synthesis (Tier-3 milestone analysis and Whisper generation), while maintaining fast performance on high-frequency operations (Tier-1 and Echo prompts).
+
+#### Model Routing Strategy
+
+**Fast Operations (Always gpt-4o-mini):**
+- ✅ **Tier-1 Templates** - Entity-based prompts after every story save
+- ✅ **Echo Prompts** - Instant sensory follow-up questions
+- **Reasoning:** No reasoning effort (optimized for speed and cost)
+- **Why:** These run on every story save; speed matters more than depth
+
+**Deep Synthesis Operations (GPT-5 when enabled):**
+- ✅ **Tier-3 Milestone Analysis** - Stories 1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100
+  - **Reasoning Effort Progression:**
+    - Stories 1-9: `low` effort (basic pattern recognition)
+    - Stories 10-49: `medium` effort (pattern synthesis)
+    - Stories 50+: `high` effort (deep character insights)
+- ✅ **Whisper Generation** - Context-aware prompts based on story content
+  - **Reasoning Effort:** Fixed at `medium`
+- **Why:** These run infrequently; quality matters more than speed
+
+#### Architecture
+
+**New Files:**
+```
+lib/ai/
+├── modelConfig.ts        # Model selection & reasoning effort mapping
+└── gatewayClient.ts      # Gateway client with telemetry extraction
+
+tests/ai/
+├── routing.spec.ts       # Model routing tests
+└── gatewayClient.spec.ts # Gateway connection tests
+```
+
+**Updated Files:**
+- `/lib/tier3AnalysisV2.ts` - Now uses GPT-5 with adjustable reasoning effort
+- `/lib/whisperGeneration.ts` - Now uses GPT-5 at medium effort
+- `/lib/echoPrompts.ts` - Updated to use Gateway (stays on fast model)
+- `/app/api/stories/route.ts` - Added comprehensive telemetry logging
+
+#### Configuration
+
+**Environment Variables:**
+```bash
+# Vercel AI Gateway (required)
+VERCEL_AI_GATEWAY_BASE_URL=https://ai-gateway.vercel.sh/v1
+VERCEL_AI_GATEWAY_API_KEY=your_vercel_ai_gateway_key
+
+# Model Configuration
+NEXT_PUBLIC_FAST_MODEL_ID=gpt-4o-mini          # Default for Tier-1/Echo
+NEXT_PUBLIC_GPT5_MODEL_ID=gpt-5                # Default for Tier-3/Whispers
+
+# Feature Flags (safe defaults: false = use fast model)
+NEXT_PUBLIC_GPT5_TIER3_ENABLED=true            # Enable GPT-5 for Tier-3
+NEXT_PUBLIC_GPT5_WHISPERS_ENABLED=true         # Enable GPT-5 for Whispers
+```
+
+**Reasoning Effort Logic:**
+```typescript
+export function effortForMilestone(milestone: number): ReasoningEffort {
+  if (milestone >= 50) return "high";   // Stories 50+: Deep synthesis
+  if (milestone >= 10) return "medium"; // Stories 10-49: Pattern recognition
+  return "low";                         // Stories 1-9: Basic analysis
+}
+```
+
+#### Telemetry & Observability
+
+**Per-Call Telemetry (logged to console + Gateway dashboard):**
+```typescript
+{
+  op: "ai_call",
+  stage: "tier3" | "whisper" | "echo",
+  milestone?: number,
+  model: "gpt-5" | "gpt-4o-mini",
+  effort: "low" | "medium" | "high" | "n/a",
+  ttftMs: 150,              // Time to first token
+  latencyMs: 2500,          // Total request latency
+  costUsd: 0.0234,          // Cost in USD
+  tokensUsed: {
+    input: 1500,
+    output: 450,
+    reasoning: 2800,        // GPT-5 reasoning tokens (not visible)
+    total: 4750
+  }
+}
+```
+
+**Where to Monitor:**
+- **Gateway Dashboard:** https://vercel.com/dashboard/ai-gateway
+- **Application Logs:** Server console shows per-call telemetry
+- **Cost Tracking:** Real-time spending by model/operation
+
+#### Cost Analysis with GPT-5
+
+**Per Story Costs (GPT-5 Enabled):**
+- Transcription (Whisper): $0.03
+- Formatting (gpt-4o-mini): $0.001
+- Lesson extraction (gpt-4o-mini): $0.001
+- Echo prompt (gpt-4o-mini): $0.0001
+- **Tier-1** (regex): $0.00
+- **Total per story:** ~$0.032
+
+**Tier-3 Milestone Costs (GPT-5 with reasoning effort):**
+- **Story 3** (low effort): ~$0.02 per analysis
+- **Story 10** (medium effort): ~$0.05 per analysis
+- **Story 50** (high effort): ~$0.15 per analysis
+
+**Whisper Generation Costs (GPT-5 at medium effort):**
+- Per whisper: ~$0.01
+
+**Total Cost per User (10 stories, GPT-5 enabled):**
+- 10 stories × $0.032 = $0.32 (transcription + formatting + echo)
+- 10 whispers × $0.01 = $0.10 (GPT-5 whispers)
+- 6 Tier-3 analyses (milestones 1,2,3,4,7,10):
+  - Story 1,2,3 (low): 3 × $0.02 = $0.06
+  - Story 4,7 (low): 2 × $0.02 = $0.04
+  - Story 10 (medium): 1 × $0.05 = $0.05
+- **Total:** ~$0.57 per user (10 stories)
+
+**Cost Comparison:**
+- **Baseline** (all gpt-4o-mini): $0.49 per user
+- **With GPT-5**: $0.57 per user (+16% cost increase)
+- **Value:** Significantly better prompt quality → higher Story 3 conversion
+
+**At Scale (10,000 users, GPT-5 enabled):**
+- 10,000 users × $0.57 = **$5,700 total AI cost**
+- Revenue (10% convert): 1,000 × $149 = **$149,000**
+- **AI cost as % of revenue:** 3.8% (still very healthy)
+
+**Cost Controls:**
+- Disable Whispers: `NEXT_PUBLIC_GPT5_WHISPERS_ENABLED=false` saves $0.10/user
+- Reduce Tier-3 frequency: Adjust milestone thresholds
+- Lower effort mapping: Modify `effortForMilestone()` to use medium at 50+ only
+
+#### Performance Characteristics
+
+**Latency Expectations:**
+- **Tier-1** (regex): <100ms (unchanged)
+- **Echo** (gpt-4o-mini): ~500ms (unchanged)
+- **Tier-3** (GPT-5):
+  - Low effort (Stories 1-9): 2-5 seconds
+  - Medium effort (Stories 10-49): 5-8 seconds
+  - High effort (Stories 50+): 8-15 seconds
+- **Whispers** (GPT-5 medium): ~2-3 seconds
+
+**Quality Improvements:**
+- **Tier-3 Prompts:** Better pattern recognition across multiple stories
+- **Character Insights:** Deeper analysis of invisible rules and contradictions
+- **Whispers:** More sophisticated detection of implicit emotional content
+- **Conversion Impact:** Expected 5-10% increase in Story 3 → paid conversion
+
+#### Feature Flags & Rollback
+
+**Safe Defaults:**
+```typescript
+export const flags = {
+  GPT5_TIER3_ENABLED: process.env.NEXT_PUBLIC_GPT5_TIER3_ENABLED === "true",
+  GPT5_WHISPERS_ENABLED: process.env.NEXT_PUBLIC_GPT5_WHISPERS_ENABLED === "true",
+};
+```
+
+If flags are `false` (or not set), system uses gpt-4o-mini for all operations.
+
+**Immediate Rollback:**
+```bash
+# Set in Vercel dashboard → redeploy
+NEXT_PUBLIC_GPT5_TIER3_ENABLED=false
+NEXT_PUBLIC_GPT5_WHISPERS_ENABLED=false
+```
+
+No code changes needed for rollback.
+
+#### Monitoring Alerts
+
+**Watch for:**
+- **Tier-3 latency spikes:** >15s indicates potential issues
+- **Prompt quality scores:** Should maintain ≥70 average
+- **Story 3 conversion:** Target ≥45% (baseline: 35-40%)
+- **Error rates:** GPT-5 should have <1% failure rate
+- **Cost per user:** Track in Gateway dashboard by model
+
+#### Testing
+
+**Run Tests:**
+```bash
+npm test tests/ai/routing.spec.ts        # Model routing & effort mapping
+npm test tests/ai/gatewayClient.spec.ts  # Gateway client config
+```
+
+**Test Coverage:**
+- ✅ Effort mapping: 3→low, 10→medium, 50→high
+- ✅ Model selection respects feature flags
+- ✅ Fast model always used for Tier-1/Echo
+- ✅ Gateway client configuration
+- ✅ No linting errors
+
+#### Documentation
+
+**Full Implementation Guide:** `/GPT5_FEATURE_README.md`
+
+**Includes:**
+- Complete environment setup
+- Cost implications by scale
+- Troubleshooting guide
+- Gateway dashboard access
+- Rollback procedures
 
 ---
 
