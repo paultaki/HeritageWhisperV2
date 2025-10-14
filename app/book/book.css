@@ -139,7 +139,8 @@
   bottom: 0;
   width: 15%;
   cursor: w-resize;
-  z-index: 5;
+  z-index: 999;
+  pointer-events: auto;
 }
 
 /* Right page: invisible clickable zone on RIGHT margin only */
@@ -151,7 +152,8 @@
   bottom: 0;
   width: 15%;
   cursor: e-resize;
-  z-index: 5;
+  z-index: 999;
+  pointer-events: auto;
 }
 
 /* Single page mode - always forward on right margin */
@@ -163,7 +165,8 @@
   bottom: 0;
   width: 15%;
   cursor: e-resize;
-  z-index: 5;
+  z-index: 999;
+  pointer-events: auto;
 }
 
 /* Interactive elements keep pointer cursor */
