@@ -124,25 +124,28 @@
 }
 
 /* Page navigation - cursor hints only */
-.book-spread.spread-mode .page--left {
-  cursor: w-resize; /* Left-pointing arrow cursor for going back */
+.book-spread.spread-mode .page--left,
+.book-spread.spread-mode .page--left * {
+  cursor: w-resize !important; /* Left-pointing arrow cursor for going back */
 }
 
-.book-spread.spread-mode .page--right {
-  cursor: e-resize; /* Right-pointing arrow cursor for going forward */
+.book-spread.spread-mode .page--right,
+.book-spread.spread-mode .page--right * {
+  cursor: e-resize !important; /* Right-pointing arrow cursor for going forward */
 }
 
 /* Single page mode - always forward */
-.book-spread.single-mode .page {
-  cursor: e-resize;
+.book-spread.single-mode .page,
+.book-spread.single-mode .page * {
+  cursor: e-resize !important;
 }
 
-/* Reset cursor for interactive elements */
-.page button,
-.page a,
-.page .audio-controls,
-.page .toc-entry {
-  cursor: pointer;
+/* Reset cursor for interactive elements - must override with higher specificity */
+.book-spread .page button,
+.book-spread .page a,
+.book-spread .page .audio-controls,
+.book-spread .page .toc-entry {
+  cursor: pointer !important;
 }
 
 /* Respect reduced motion preference */
