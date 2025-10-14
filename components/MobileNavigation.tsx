@@ -143,6 +143,7 @@ export default function MobileNavigation({
               width={24}
               height={24}
               className="z-10"
+              style={{ width: 'auto', height: 'auto' }}
             />
           </button>
         </div>

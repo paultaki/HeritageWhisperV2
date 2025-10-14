@@ -94,28 +94,61 @@ Return ONLY the questions in this exact format:
 
 No explanations, no extra text.`;
 
-    // Call GPT-5 with low reasoning effort
+    // Try GPT-5 first, fallback to GPT-4o-mini if not available
     const startTime = Date.now();
-    const response = await openai.chat.completions.create({
-      model: "gpt-5",
-      // @ts-ignore - reasoning_effort is valid for GPT-5 but not in types yet
-      reasoning_effort: "low",
-      temperature: 0.8,
-      max_tokens: 150,
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt,
-        },
-        {
-          role: "user",
-          content: userPrompt,
-        },
-      ],
-    });
+    let response;
+    let modelUsed = "gpt-5";
+
+    try {
+      response = await openai.chat.completions.create({
+        model: "gpt-5",
+        // @ts-ignore - reasoning_effort is valid for GPT-5 but not in types yet
+        reasoning_effort: "low",
+        temperature: 0.8,
+        max_tokens: 150,
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          {
+            role: "user",
+            content: userPrompt,
+          },
+        ],
+      });
+    } catch (gpt5Error: any) {
+      logger.warn("[FollowUp] GPT-5 not available, falling back to GPT-4o-mini", {
+        error: gpt5Error?.message,
+      });
+
+      // Fallback to GPT-4o-mini (no reasoning_effort parameter)
+      modelUsed = "gpt-4o-mini";
+      response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        temperature: 0.8,
+        max_tokens: 150,
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          {
+            role: "user",
+            content: userPrompt,
+          },
+        ],
+      });
+    }
 
     const latencyMs = Date.now() - startTime;
     const content = response.choices[0]?.message?.content?.trim();
+
+    logger.debug("[FollowUp] Raw API response", {
+      modelUsed,
+      contentLength: content?.length,
+      content: content?.substring(0, 200),
+    });
 
     if (!content) {
       throw new Error("No follow-up questions generated");
@@ -143,6 +176,7 @@ No explanations, no extra text.`;
       followUpNumber,
       questionsGenerated: questions.length,
       latencyMs,
+      modelUsed,
       tokensUsed: {
         input: response.usage?.prompt_tokens,
         output: response.usage?.completion_tokens,
@@ -150,7 +184,6 @@ No explanations, no extra text.`;
         reasoning: response.usage?.reasoning_tokens,
         total: response.usage?.total_tokens,
       },
-      model: response.model,
     });
 
     return NextResponse.json({
