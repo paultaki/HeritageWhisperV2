@@ -22,20 +22,28 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
-// Initialize OpenAI client with Vercel AI Gateway
-// Falls back to direct OpenAI API if AI_GATEWAY_API_KEY is not set
-const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
-const baseURL = process.env.AI_GATEWAY_API_KEY
+// Initialize TWO OpenAI clients:
+// 1. Direct OpenAI for Whisper (AI Gateway doesn't support audio endpoints)
+// 2. AI Gateway for chat completions (GPT-4, GPT-4o-mini)
+
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error("OPENAI_API_KEY environment variable is required");
+}
+
+// Direct OpenAI client for Whisper transcription
+const openaiDirect = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// AI Gateway client for chat completions (formatting, lesson generation)
+const gatewayApiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
+const gatewayBaseURL = process.env.AI_GATEWAY_API_KEY
   ? 'https://ai-gateway.vercel.sh/v1'
   : undefined;
 
-if (!apiKey) {
-  throw new Error("AI_GATEWAY_API_KEY or OPENAI_API_KEY environment variable is required");
-}
-
-const openai = new OpenAI({
-  apiKey,
-  baseURL,
+const openaiGateway = new OpenAI({
+  apiKey: gatewayApiKey,
+  baseURL: gatewayBaseURL,
 });
 
 // Cache prompts at module level to avoid rebuilding on every request
@@ -125,7 +133,7 @@ async function formatTranscription(rawText: string): Promise<string> {
   try {
     // Use GPT-4o-mini for formatting (cost: ~$0.001 vs $0.007)
     // Formatting is simpler than lesson extraction, doesn't need GPT-4o
-    const completion = await openai.chat.completions.create({
+    const completion = await openaiGateway.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -169,7 +177,7 @@ async function generateLessonOptions(transcription: string): Promise<{
   }
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await openaiGateway.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -379,8 +387,8 @@ export async function POST(request: NextRequest) {
       // Create a readable stream from the file
       const audioReadStream = fs.createReadStream(tempFilePath);
 
-      // Transcribe using OpenAI Whisper
-      const transcription = await openai.audio.transcriptions.create({
+      // Transcribe using OpenAI Whisper (direct API, not Gateway)
+      const transcription = await openaiDirect.audio.transcriptions.create({
         file: audioReadStream as any,
         model: "whisper-1",
       });
