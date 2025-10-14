@@ -37,7 +37,7 @@ export type AudioState = {
 };
 
 export default function InterviewChatPage() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showWelcome, setShowWelcome] = useState(true);
@@ -53,12 +53,12 @@ export default function InterviewChatPage() {
     fullTranscript: '',
   });
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated (only after loading completes)
   useEffect(() => {
-    if (!user) {
+    if (!isLoading && !user) {
       router.push('/auth/login');
     }
-  }, [user, router]);
+  }, [user, isLoading, router]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -325,6 +325,19 @@ export default function InterviewChatPage() {
     }
   };
 
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-page)' }}>
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-4 animate-pulse" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated (will redirect)
   if (!user) {
     return null;
   }
