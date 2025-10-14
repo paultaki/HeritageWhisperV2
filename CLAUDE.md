@@ -14,7 +14,7 @@ AI-powered storytelling platform for seniors to capture and share life memories.
 - **Database:** PostgreSQL via Supabase (project: tjycibrhoammxohemyhq)
 - **Storage:** Supabase Storage (bucket: heritage-whisper-files)
 - **State:** TanStack Query v5
-- **AI:** OpenAI API (Whisper & GPT-4)
+- **AI:** OpenAI API (Whisper transcription) + Vercel AI Gateway (GPT-4o/GPT-5 routing)
 - **Deployment:** Vercel (https://dev.heritagewhisper.com)
 
 ## 🔧 Quick Start
@@ -315,6 +315,172 @@ Watch for:
 - **Slowest requests**: TTFT spikes indicate performance issues
 - **Caching wins**: Repeat operations showing 97% cost reduction
 - **Error rates**: Failed requests or Gateway downtime
+
+### GPT-5 Tier-3 and Whisper Upgrades (PRODUCTION)
+
+Advanced AI routing with GPT-5 reasoning for deeper synthesis in milestone analysis and whisper generation.
+
+#### Overview
+
+**Deployed:** October 14, 2025
+**Status:** Production-ready with feature flags
+**Branch:** `feature/gpt5-tier3-whispers`
+**Commit:** eeb7493
+
+Ships GPT-5 where deeper synthesis is needed (Tier-3 + Whispers) while preserving UX speed on Tier-1/Echo with fast models.
+
+#### Model Routing Architecture
+
+**Fast Operations (Always gpt-4o-mini):**
+- ✅ **Tier-1 Templates**: Entity-based prompts after every story save
+- ✅ **Echo Prompts**: Instant follow-up questions showing active listening
+- No reasoning effort parameter (optimized for speed)
+
+**Deep Synthesis Operations (GPT-5 when enabled):**
+- ✅ **Tier-3 Milestones**: Story 1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100
+  - Reasoning effort adjusts by milestone depth:
+    - Stories 1-9: `low` effort (basic pattern recognition)
+    - Stories 10-49: `medium` effort (pattern synthesis)
+    - Stories 50+: `high` effort (deep character insights)
+- ✅ **Whispers**: Context-aware prompts with `medium` effort
+- Falls back to gpt-4o-mini when flags disabled
+
+#### File Structure
+
+**New Files:**
+```
+lib/ai/
+├── modelConfig.ts        # Model selection & reasoning effort mapping
+└── gatewayClient.ts      # Gateway client with comprehensive telemetry
+
+tests/ai/
+├── routing.spec.ts       # Model routing & effort mapping tests
+└── gatewayClient.spec.ts # Gateway client configuration tests
+```
+
+**Updated Files:**
+- `/lib/tier3AnalysisV2.ts` - Now uses GPT-5 with adjustable reasoning effort
+- `/lib/whisperGeneration.ts` - Now uses GPT-5 at medium effort
+- `/lib/echoPrompts.ts` - Updated to use Gateway (stays on fast model)
+- `/app/api/stories/route.ts` - Added comprehensive telemetry logging
+
+#### Environment Variables
+
+Add to `.env.local`:
+
+```bash
+# Vercel AI Gateway (required)
+VERCEL_AI_GATEWAY_BASE_URL=https://ai-gateway.vercel.sh/v1
+VERCEL_AI_GATEWAY_API_KEY=your_vercel_ai_gateway_key
+
+# Model Configuration
+NEXT_PUBLIC_FAST_MODEL_ID=gpt-4o-mini          # Default for Tier-1/Echo
+NEXT_PUBLIC_GPT5_MODEL_ID=gpt-5                # Default for Tier-3/Whispers
+
+# Feature Flags (set to "true" to enable GPT-5)
+NEXT_PUBLIC_GPT5_TIER3_ENABLED=true            # GPT-5 for Tier-3 with reasoning effort
+NEXT_PUBLIC_GPT5_WHISPERS_ENABLED=true         # GPT-5 for Whispers at medium effort
+```
+
+**Safe Defaults:** Flags default to `false`, using fast model (gpt-4o-mini) for all operations when not set.
+
+#### Telemetry & Observability
+
+All AI calls now log comprehensive telemetry:
+
+```typescript
+{
+  op: "ai_call",
+  stage: "tier3" | "whisper" | "echo",
+  milestone?: number,
+  model: "gpt-5" | "gpt-4o-mini",
+  effort: "low" | "medium" | "high" | "n/a",
+  ttftMs: 150,              // Time to first token (from Gateway headers)
+  latencyMs: 2500,          // Total request latency
+  costUsd: 0.0234,          // Cost in USD (from Gateway headers)
+  tokensUsed: {
+    input: 1500,
+    output: 450,
+    reasoning: 2800,        // GPT-5 reasoning tokens only
+    total: 4750
+  }
+}
+```
+
+Monitor in:
+- Gateway Dashboard: https://vercel.com/dashboard/ai-gateway
+- Application logs: Server console shows per-call telemetry
+- Cost tracking: Real-time spending by model/operation
+
+#### Cost Implications
+
+**Per Story Costs (GPT-5 enabled):**
+- Tier-1 (gpt-4o-mini): ~$0.0001
+- Echo (gpt-4o-mini): ~$0.0001
+- Whisper (gpt-5 medium): ~$0.01
+- Tier-3 (gpt-5 variable):
+  - Story 3 (low effort): ~$0.02
+  - Story 10 (medium effort): ~$0.05
+  - Story 50 (high effort): ~$0.15
+
+**Monthly Costs (1,000 active users, 10 stories/user):**
+- Baseline (all gpt-4o-mini): ~$15/month
+- With GPT-5 enabled: ~$52-132/month (3.5-9x increase)
+- **ROI:** Significantly better prompt quality → higher Story 3 conversion
+
+**Cost Controls:**
+- Disable Whispers: `NEXT_PUBLIC_GPT5_WHISPERS_ENABLED=false` saves ~$10/month
+- Reduce Tier-3 frequency: Adjust milestone thresholds
+- Lower effort: Modify `effortForMilestone()` mapping
+
+#### Testing
+
+**Run Tests:**
+```bash
+npm test tests/ai/routing.spec.ts        # Model routing & effort mapping
+npm test tests/ai/gatewayClient.spec.ts  # Gateway client config
+```
+
+**Smoke Test Checklist:**
+- [ ] Flags true → Tier-3 uses GPT-5 with milestone-based effort
+- [ ] Flags false → All operations use fast model
+- [ ] Gateway dashboard shows TTFT and cost for Tier-3/Whispers
+- [ ] Quality gates still reject generic prompts (0% regression)
+- [ ] Skip/retire logic unchanged
+- [ ] Story 3 paywall: 1 unlocked + 3 locked prompts
+
+#### Rollback Plan
+
+If GPT-5 causes issues:
+
+```bash
+# Immediate rollback (set in Vercel dashboard)
+NEXT_PUBLIC_GPT5_TIER3_ENABLED=false
+NEXT_PUBLIC_GPT5_WHISPERS_ENABLED=false
+```
+
+System automatically falls back to gpt-4o-mini for all operations. No code changes needed.
+
+#### Monitoring & Alerts
+
+Watch for:
+- **Tier-3 latency**: Should be 2-5s (low), 5-10s (high effort)
+- **Prompt quality scores**: Maintain ≥70 average
+- **Story 3 conversion**: Target ≥45% (baseline: 35-40%)
+- **Error rates**: GPT-5 should have <1% failure rate
+- **Cost per user**: Track in Gateway dashboard by model
+
+#### Documentation
+
+Full implementation guide: `/GPT5_FEATURE_README.md`
+
+**Includes:**
+- Complete environment variable setup
+- Architecture diagrams
+- Cost breakdowns
+- Troubleshooting guide
+- Monitoring dashboard access
+- Rollback procedures
 
 ## 🐛 Common Issues & Fixes
 
