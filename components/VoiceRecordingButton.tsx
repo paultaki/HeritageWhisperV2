@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Mic } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AudioRecorderHandle } from "./AudioRecorder";
-import { designSystem } from "@/lib/designSystem";
+import designSystem from "@/lib/designSystem";
 
 interface VoiceRecordingButtonProps {
   isRecording: boolean;
