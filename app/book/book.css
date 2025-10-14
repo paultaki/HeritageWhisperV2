@@ -123,28 +123,31 @@
   cursor: default;
 }
 
-/* Page navigation - cursor hints only on margins */
+/* Page navigation - cursor hints enforced on entire page */
 
-/* Apply directional cursors directly to pages - simpler approach */
-.book-spread.spread-mode .page--left {
-  cursor: w-resize;
+/* Apply directional cursors to pages AND all children */
+.book-spread.spread-mode .page--left,
+.book-spread.spread-mode .page--left * {
+  cursor: w-resize !important;
 }
 
-.book-spread.spread-mode .page--right {
-  cursor: e-resize;
+.book-spread.spread-mode .page--right,
+.book-spread.spread-mode .page--right * {
+  cursor: e-resize !important;
 }
 
 /* Single page mode - always forward */
-.book-spread.single-mode .page {
-  cursor: e-resize;
+.book-spread.single-mode .page,
+.book-spread.single-mode .page * {
+  cursor: e-resize !important;
 }
 
-/* Interactive elements keep pointer cursor */
-.page button,
-.page a,
-.page .audio-controls,
-.page .toc-entry {
-  cursor: pointer;
+/* Exception: Keep pointer cursor for actual interactive elements */
+.book-spread .page button:not([disabled]),
+.book-spread .page a[href],
+.book-spread .page .audio-controls button,
+.book-spread .page .toc-entry button {
+  cursor: pointer !important;
 }
 
 /* Respect reduced motion preference */
