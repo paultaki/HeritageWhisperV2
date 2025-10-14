@@ -193,7 +193,8 @@ Added to `stories` table:
 
 #### Testing Infrastructure
 
-- **Test Suite**: Complete Vitest test suite with 20 comprehensive tests
+**Unit Tests (Vitest):**
+- Complete test suite with 20 comprehensive tests
   - 10 tests for GET `/api/prompts/next` (auth, validation, Tier-1 generation, fallbacks)
   - 10 tests for POST `/api/prompts/skip` (skip counting, retirement, archival)
   - In-memory Supabase mock with query builder
@@ -201,6 +202,26 @@ Added to `stories` table:
   - Real validation logic (not mocked)
   - Location: `/tests/` directory, see `TESTING_GUIDE.md`
   - Run with: `npm test`
+
+**AI Prompt Testing Suite (Interactive Dashboard):**
+- Live testing interface for prompt generation without recording new stories
+- **Access**: `http://localhost:3000/dev/prompts` (requires authentication)
+- **Features**:
+  - Story selector with checkboxes (Select All / Clear buttons)
+  - Milestone simulator dropdown (Story 1, 3, 7, 10, 15, 20, 30, 50, 100)
+  - Real-time GPT-4o analysis with dry-run mode (no database writes)
+  - Results display: prompts, character insights, traits, invisible rules, contradictions
+  - Split-screen layout: stories left, analysis results right
+- **Use Cases**:
+  - Test prompt quality on existing story collections
+  - Iterate on system prompts in `/lib/tier3Analysis.ts`
+  - Preview what prompts users would see at different milestones
+  - Validate character insights extraction accuracy
+- **Implementation**:
+  - Frontend: `/app/dev/prompts/page.tsx`
+  - Backend: `/app/api/dev/analyze-tier3/route.ts`
+  - Uses existing `performTier3Analysis()` from `/lib/tier3Analysis.ts`
+- **Note**: AI Gateway compatibility fix applied - JSON responses may be wrapped in markdown code fences, which are automatically stripped before parsing
 
 #### Pending Implementation
 

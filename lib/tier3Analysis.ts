@@ -115,7 +115,8 @@ export async function performTier3Analysis(
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       temperature: 0.7,
-      response_format: { type: "json_object" },
+      // Note: response_format not supported by AI Gateway
+      // Prompt engineering ensures JSON response instead
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -127,7 +128,16 @@ export async function performTier3Analysis(
       throw new Error("No response from GPT-4o");
     }
 
-    const result = JSON.parse(content);
+    // Strip markdown code fences if present (GPT-4o sometimes wraps JSON in ```json)
+    let cleanedContent = content.trim();
+    if (cleanedContent.startsWith("```")) {
+      // Remove opening fence (```json or ```)
+      cleanedContent = cleanedContent.replace(/^```(?:json)?\n?/, "");
+      // Remove closing fence (```)
+      cleanedContent = cleanedContent.replace(/\n?```$/, "");
+    }
+
+    const result = JSON.parse(cleanedContent);
     console.log(
       `[Tier 3] Analysis complete: ${result.prompts?.length || 0} prompts, ${result.characterInsights?.traits?.length || 0} traits`,
     );

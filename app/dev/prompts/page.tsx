@@ -40,6 +40,7 @@ interface AnalysisResult {
   storyTitles: string[];
   prompts: Prompt[];
   characterInsights: CharacterInsights;
+  tier?: string;
 }
 
 export default function PromptsTestingPage() {
@@ -47,6 +48,7 @@ export default function PromptsTestingPage() {
   const router = useRouter();
   const [stories, setStories] = useState<Story[]>([]);
   const [selectedStoryIds, setSelectedStoryIds] = useState<string[]>([]);
+  const [tier, setTier] = useState<string>("tier3v2");
   const [milestone, setMilestone] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -103,7 +105,7 @@ export default function PromptsTestingPage() {
     setSelectedStoryIds([]);
   };
 
-  // Run Tier 3 analysis
+  // Run analysis
   const runAnalysis = async () => {
     if (!session || selectedStoryIds.length === 0) return;
 
@@ -112,7 +114,7 @@ export default function PromptsTestingPage() {
     setAnalysisResult(null);
 
     try {
-      const response = await fetch("/api/dev/analyze-tier3", {
+      const response = await fetch("/api/dev/analyze-prompts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -120,6 +122,7 @@ export default function PromptsTestingPage() {
         },
         body: JSON.stringify({
           storyIds: selectedStoryIds,
+          tier: tier,
           milestone: milestone ? parseInt(milestone) : null,
           dryRun: true,
         }),
@@ -131,7 +134,7 @@ export default function PromptsTestingPage() {
       }
 
       const data = await response.json();
-      setAnalysisResult(data.analysis);
+      setAnalysisResult({ ...data.analysis, tier: data.tier });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed");
     } finally {
@@ -231,6 +234,78 @@ export default function PromptsTestingPage() {
 
             {/* Analysis Controls */}
             <div className="mt-6 pt-6 border-t border-gray-200">
+              {/* Tier Selection */}
+              <div className="mb-6">
+                <label className="block mb-3 text-sm font-medium text-[#8B4513]">
+                  Select Tier System
+                </label>
+                <div className="space-y-3">
+                  <label className={`flex items-start gap-3 p-3 border-2 rounded cursor-pointer transition-colors ${
+                    tier === "tier1"
+                      ? "border-[#8B4513] bg-amber-50"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}>
+                    <input
+                      type="radio"
+                      name="tier"
+                      value="tier1"
+                      checked={tier === "tier1"}
+                      onChange={(e) => setTier(e.target.value)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="font-semibold text-[#8B4513]">Tier 1: Entity Templates</div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        Extracts 1-3 entities per story (people, places, objects) and generates prompts using template library. Runs after EVERY story save. No character insights.
+                      </div>
+                    </div>
+                  </label>
+
+                  <label className={`flex items-start gap-3 p-3 border-2 rounded cursor-pointer transition-colors ${
+                    tier === "tier3v1"
+                      ? "border-[#8B4513] bg-amber-50"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}>
+                    <input
+                      type="radio"
+                      name="tier"
+                      value="tier3v1"
+                      checked={tier === "tier3v1"}
+                      onChange={(e) => setTier(e.target.value)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="font-semibold text-[#8B4513]">Tier 3 V1: Pattern Analysis</div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        Original milestone analysis. Analyzes patterns, gaps, and connections across all stories. Extracts character traits, invisible rules, contradictions, and core lessons.
+                      </div>
+                    </div>
+                  </label>
+
+                  <label className={`flex items-start gap-3 p-3 border-2 rounded cursor-pointer transition-colors ${
+                    tier === "tier3v2"
+                      ? "border-[#8B4513] bg-amber-50"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}>
+                    <input
+                      type="radio"
+                      name="tier"
+                      value="tier3v2"
+                      checked={tier === "tier3v2"}
+                      onChange={(e) => setTier(e.target.value)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="font-semibold text-[#8B4513]">Tier 3 V2: Intimacy Engine ⭐</div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        Advanced milestone analysis using 4 intimacy types: "I Caught That" (exact phrases), "I See Your Pattern" (behaviors), "I Notice the Absence" (what's missing), "I Understand the Cost" (tradeoffs). Includes quality gates.
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Milestone Selection */}
               <label className="block mb-2 text-sm font-medium text-[#8B4513]">
                 Simulate Milestone (optional)
               </label>
@@ -258,7 +333,7 @@ export default function PromptsTestingPage() {
                 disabled={selectedStoryIds.length === 0 || analyzing}
                 className="w-full px-6 py-3 bg-[#8B4513] text-white rounded-lg font-semibold hover:bg-[#A0522D] disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
-                {analyzing ? "Analyzing..." : "Run Tier 3 Analysis"}
+                {analyzing ? "Analyzing..." : `Run ${tier === "tier1" ? "Tier 1" : tier === "tier3v1" ? "Tier 3 V1" : "Tier 3 V2"} Analysis`}
               </button>
             </div>
           </div>
@@ -271,14 +346,16 @@ export default function PromptsTestingPage() {
 
             {!analysisResult && !analyzing && (
               <div className="text-center py-12 text-gray-500">
-                Select stories and click "Run Tier 3 Analysis" to see results
+                Select stories and tier system, then click "Run Analysis" to see results
               </div>
             )}
 
             {analyzing && (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B4513] mx-auto mb-4"></div>
-                <p className="text-[#A0522D]">Analyzing stories with GPT-4o...</p>
+                <p className="text-[#A0522D]">
+                  {tier === "tier1" ? "Extracting entities and generating prompts..." : "Analyzing stories with GPT-4o..."}
+                </p>
               </div>
             )}
 
@@ -288,10 +365,20 @@ export default function PromptsTestingPage() {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <h3 className="font-semibold text-blue-900 mb-2">Summary</h3>
                   <div className="text-sm text-blue-800 space-y-1">
+                    <div>
+                      <span className="font-medium">Tier:</span>{" "}
+                      {analysisResult.tier === "tier1"
+                        ? "Tier 1 (Entity Templates)"
+                        : analysisResult.tier === "tier3v1"
+                        ? "Tier 3 V1 (Pattern Analysis)"
+                        : "Tier 3 V2 (Intimacy Engine)"}
+                    </div>
                     <div>Stories Analyzed: {analysisResult.storiesAnalyzed}</div>
                     <div>Milestone: Story {analysisResult.storyCount}</div>
                     <div>Prompts Generated: {analysisResult.prompts.length}</div>
-                    <div>Traits Identified: {analysisResult.characterInsights.traits.length}</div>
+                    {analysisResult.tier !== "tier1" && (
+                      <div>Traits Identified: {analysisResult.characterInsights.traits.length}</div>
+                    )}
                   </div>
                 </div>
 
@@ -337,8 +424,14 @@ export default function PromptsTestingPage() {
                     Character Insights
                   </h3>
 
-                  {/* Traits */}
-                  {analysisResult.characterInsights.traits.length > 0 && (
+                  {analysisResult.tier === "tier1" ? (
+                    <div className="text-sm text-gray-600 italic py-4">
+                      Tier 1 focuses on entity extraction only. Character insights are only available in Tier 3 analysis.
+                    </div>
+                  ) : (
+                    <>
+                      {/* Traits */}
+                      {analysisResult.characterInsights.traits.length > 0 && (
                     <div className="mb-4">
                       <h4 className="text-sm font-medium text-gray-700 mb-2">
                         Traits
@@ -397,7 +490,9 @@ export default function PromptsTestingPage() {
                       </ul>
                     </div>
                   )}
-                </div>
+                    </>
+                  )}
+                  </div>
               </div>
             )}
           </div>
