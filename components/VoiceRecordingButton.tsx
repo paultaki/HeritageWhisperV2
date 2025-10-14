@@ -176,11 +176,11 @@ export function VoiceRecordingButton({
             {/* Circular gradient fill in background */}
             {!isPaused && <CircularGradientFill />}
 
-            {/* Timer overlay with enhanced visibility - centered */}
+            {/* Timer overlay with enhanced visibility - perfectly centered */}
             <div className="absolute inset-0 flex items-center justify-center relative z-10">
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center justify-center">
                 <motion.span
-                  className="text-2xl font-bold text-white"
+                  className="text-2xl font-bold text-white leading-none"
                   style={{ 
                     textShadow: '0 2px 8px rgba(0,0,0,0.5), 0 0 2px rgba(255,255,255,0.3)',
                   }}
@@ -190,9 +190,9 @@ export function VoiceRecordingButton({
                 </motion.span>
                 {isPaused && (
                   <motion.span 
-                    initial={{ opacity: 0, y: -5 }}
+                    initial={{ opacity: 0, y: -2 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-xs text-white/90 mt-1 font-medium"
+                    className="text-xs text-white/90 mt-0.5 font-medium leading-none"
                     style={{ 
                       textShadow: '0 1px 4px rgba(0,0,0,0.5)',
                     }}

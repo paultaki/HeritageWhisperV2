@@ -28,6 +28,7 @@ interface AudioRecorderProps {
 }
 
 export interface AudioRecorderHandle {
+  startRecording: () => Promise<void>;
   pauseRecording: () => void;
   resumeRecording: () => void;
   getCurrentRecording: () => Blob | null;
@@ -1096,6 +1097,7 @@ export const AudioRecorder = forwardRef<
   useImperativeHandle(
     ref,
     () => ({
+      startRecording,
       pauseRecording,
       resumeRecording,
       getCurrentRecording,
@@ -1108,6 +1110,7 @@ export const AudioRecorder = forwardRef<
       cleanup,
     }),
     [
+      startRecording,
       pauseRecording,
       resumeRecording,
       getCurrentRecording,

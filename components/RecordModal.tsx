@@ -207,21 +207,43 @@ export default function RecordModal({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const startRecording = () => {
+  const startRecording = async () => {
+    console.log("[RecordModal] startRecording called");
     setIsRecording(true);
     setIsPaused(false);
     setRecordingTime(0);
     setFollowUpPrompts([]);
+    setFollowUpQuestions([]);
+    setContextualFollowUpQuestion(null);
+    setPartialTranscript("");
+    setTranscribedChunkCount(0);
+    
+    // Actually start the AudioRecorder
+    try {
+      await audioRecorderRef.current?.startRecording();
+      console.log("[RecordModal] AudioRecorder started successfully");
+    } catch (error) {
+      console.error("[RecordModal] Error starting AudioRecorder:", error);
+      toast({
+        title: "Recording failed",
+        description: error instanceof Error ? error.message : "Could not start recording",
+        variant: "destructive",
+      });
+      setIsRecording(false);
+    }
   };
 
   const pauseRecording = () => {
+    console.log("[RecordModal] pauseRecording called");
     setIsPaused(true);
     audioRecorderRef.current?.pauseRecording();
   };
 
   const resumeRecording = () => {
+    console.log("[RecordModal] resumeRecording called");
     setIsPaused(false);
     setContextualFollowUpQuestion(null); // Clear question when resuming
+    setFollowUpQuestions([]); // Clear follow-up questions when resuming
     audioRecorderRef.current?.resumeRecording();
   };
 
