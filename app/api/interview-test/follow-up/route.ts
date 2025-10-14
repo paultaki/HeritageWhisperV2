@@ -56,34 +56,43 @@ export async function POST(request: NextRequest) {
       followUpNumber,
     });
 
-    // System prompt for follow-up generation
+    // System prompt for follow-up generation (multiple questions)
     const systemPrompt = `You are an empathetic interviewer helping someone record their life story.
 
-Your job: Generate ONE natural follow-up question based on what they just shared.
+Your job: Generate 2-3 natural follow-up questions based on what they just shared.
 
-Rules:
+Rules for EACH question:
 - Keep it conversational and warm
 - Ask about feelings, details, or lessons learned
 - 15-25 words max
 - Never repeat what they said
 - Make them want to share more
+- Each question should explore a DIFFERENT angle
 
-Example good questions:
-- "How did that moment change the way you saw yourself?"
-- "What would you tell someone facing a similar choice?"
-- "Looking back, what surprised you most about that experience?"`;
+Question types to vary between:
+1. Emotional depth: "How did that moment change the way you saw yourself?"
+2. Practical wisdom: "What would you tell someone facing a similar choice?"
+3. Reflection: "Looking back, what surprises you most about that experience?"
+4. Relationships: "How did that affect your relationships with others?"
+5. Lessons: "What did you learn that you still carry with you today?"`;
 
     // User prompt with context
     const userPrompt = `Here's what they've shared so far:
 
 "${fullTranscript.trim()}"
 
-Generate follow-up question #${followUpNumber} (of 3 total).
-${followUpNumber === 1 ? "Dig deeper into what they just said." : ""}
-${followUpNumber === 2 ? "Explore the emotional impact or meaning." : ""}
-${followUpNumber === 3 ? "Ask about lessons learned or future reflection." : ""}
+Generate 2-3 follow-up questions for exchange #${followUpNumber}.
 
-Return ONLY the question, no explanation.`;
+${followUpNumber === 1 ? "Focus on: Dig deeper into what they just said. Explore feelings and immediate reactions." : ""}
+${followUpNumber === 2 ? "Focus on: Explore the emotional impact, meaning, and how it changed them." : ""}
+${followUpNumber === 3 ? "Focus on: Ask about lessons learned, wisdom gained, and future reflection." : ""}
+
+Return ONLY the questions in this exact format:
+1. [First question]
+2. [Second question]
+3. [Third question (optional)]
+
+No explanations, no extra text.`;
 
     // Call GPT-5 with low reasoning effort
     const startTime = Date.now();
@@ -91,8 +100,8 @@ Return ONLY the question, no explanation.`;
       model: "gpt-5",
       // @ts-ignore - reasoning_effort is valid for GPT-5 but not in types yet
       reasoning_effort: "low",
-      temperature: 0.7,
-      max_tokens: 50,
+      temperature: 0.8,
+      max_tokens: 150,
       messages: [
         {
           role: "system",
@@ -106,15 +115,33 @@ Return ONLY the question, no explanation.`;
     });
 
     const latencyMs = Date.now() - startTime;
-    const followUp = response.choices[0]?.message?.content?.trim();
+    const content = response.choices[0]?.message?.content?.trim();
 
-    if (!followUp) {
-      throw new Error("No follow-up question generated");
+    if (!content) {
+      throw new Error("No follow-up questions generated");
+    }
+
+    // Parse the numbered list
+    const questions: string[] = [];
+    const lines = content.split('\n').filter(line => line.trim());
+
+    for (const line of lines) {
+      // Match "1. Question text" or "1) Question text" patterns
+      const match = line.match(/^\d+[\.)]\s*(.+)$/);
+      if (match && match[1]) {
+        questions.push(match[1].trim());
+      }
+    }
+
+    // Ensure we have at least 2 questions
+    if (questions.length < 2) {
+      throw new Error("Failed to parse questions from response");
     }
 
     // Log telemetry for cost tracking
     logger.api("[FollowUp] Generated successfully", {
       followUpNumber,
+      questionsGenerated: questions.length,
       latencyMs,
       tokensUsed: {
         input: response.usage?.prompt_tokens,
@@ -127,9 +154,11 @@ Return ONLY the question, no explanation.`;
     });
 
     return NextResponse.json({
-      followUp,
+      questions: questions.slice(0, 3), // Return max 3 questions
+      followUp: questions[0], // Keep backward compatibility
       meta: {
         followUpNumber,
+        questionsGenerated: questions.length,
         latencyMs,
         tokensUsed: response.usage?.total_tokens,
       },
