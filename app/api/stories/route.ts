@@ -508,11 +508,26 @@ export async function POST(request: NextRequest) {
               } else {
                 logger.debug(`[Stories API] Rate limit OK. Performing Tier 3 analysis...`);
                 
-                // Perform GPT-4o combined analysis
+                // Perform GPT-4o/GPT-5 combined analysis
                 const tier3Result = await performTier3Analysis(
                   allStories,
                   storyCount,
                 );
+
+                // Log AI call telemetry
+                if (tier3Result._meta) {
+                  logger.info({
+                    op: "ai_call",
+                    stage: "tier3",
+                    milestone: storyCount,
+                    model: tier3Result._meta.modelUsed,
+                    effort: tier3Result._meta.reasoningEffort,
+                    ttftMs: tier3Result._meta.ttftMs,
+                    latencyMs: tier3Result._meta.latencyMs,
+                    costUsd: tier3Result._meta.costUsd,
+                    tokensUsed: tier3Result._meta.tokensUsed,
+                  });
+                }
 
                 // Store prompts and character insights
                 await storeTier3Results(

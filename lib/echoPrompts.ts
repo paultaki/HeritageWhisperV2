@@ -1,25 +1,13 @@
-import OpenAI from "openai";
 import { logger } from "./logger";
-
-// Initialize OpenAI client with Vercel AI Gateway
-// Falls back to direct OpenAI API if AI_GATEWAY_API_KEY is not set
-const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
-const baseURL = process.env.AI_GATEWAY_API_KEY
-  ? 'https://ai-gateway.vercel.sh/v1'
-  : undefined;
-
-if (!apiKey) {
-  throw new Error("AI_GATEWAY_API_KEY or OPENAI_API_KEY environment variable is required");
-}
-
-const openai = new OpenAI({
-  apiKey,
-  baseURL,
-});
+import { chat } from "./ai/gatewayClient";
+import { getModelConfig } from "./ai/modelConfig";
+import { validatePromptQuality } from "./promptQuality";
 
 /**
  * Generate instant "echo" prompt after every story
  * This shows immediate listening and engagement
+ * 
+ * Always uses fast model (gpt-4o-mini) for low latency.
  */
 export async function generateEchoPrompt(transcript: string): Promise<string | null> {
   try {
@@ -27,8 +15,11 @@ export async function generateEchoPrompt(transcript: string): Promise<string | n
     const words = transcript.split(/\s+/);
     const lastSection = words.slice(-300).join(' ');
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Fast and cheap for immediate feedback
+    // Always use fast model for Echo (no reasoning needed)
+    const modelConfig = getModelConfig("echo");
+
+    const { text, meta } = await chat({
+      model: modelConfig.model, // Always fast model (gpt-4o-mini)
       messages: [
         {
           role: "system",
@@ -41,6 +32,7 @@ Rules:
 - Be genuinely curious, not analytical
 - Feel natural, like continuing a conversation
 - Never be generic or therapeutic
+- No generic nouns (girl, boy, man, woman, house, room)
 
 Good examples:
 "You said the sawdust smelled like home. What did Sunday mornings smell like there?"
@@ -59,14 +51,25 @@ Bad examples:
           content: `Generate one follow-up question for: "${lastSection}"`,
         },
       ],
+      temperature: 0.4,
       max_tokens: 50,
-      temperature: 0.4, // Some creativity but not too wild
     });
 
-    const promptText = response.choices[0].message.content?.trim();
+    logger.debug("[Echo Prompt] AI call completed:", {
+      model: meta.modelUsed,
+      latencyMs: meta.latencyMs,
+    });
+    
+    const promptText = text?.trim();
     
     if (!promptText || promptText.length > 150) {
       logger.warn("[Echo Prompt] Generated text too long or empty");
+      return null;
+    }
+
+    // Quality validation
+    if (!validatePromptQuality(promptText)) {
+      logger.warn(`[Echo Prompt] Failed quality check: "${promptText}"`);
       return null;
     }
 

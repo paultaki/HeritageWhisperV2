@@ -1,25 +1,13 @@
 /**
  * Whisper Prompt Generation
  * Creates context-aware prompts based on stories
+ * 
+ * Uses GPT-5 at medium effort when enabled for deeper synthesis.
  */
 
-import OpenAI from "openai";
-
-// Initialize OpenAI client with Vercel AI Gateway
-// Falls back to direct OpenAI API if AI_GATEWAY_API_KEY is not set
-const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
-const baseURL = process.env.AI_GATEWAY_API_KEY
-  ? 'https://ai-gateway.vercel.sh/v1'
-  : undefined;
-
-if (!apiKey) {
-  throw new Error("AI_GATEWAY_API_KEY or OPENAI_API_KEY environment variable is required");
-}
-
-const openai = new OpenAI({
-  apiKey,
-  baseURL,
-});
+import { chat } from "./ai/gatewayClient";
+import { getModelConfig } from "./ai/modelConfig";
+import { validatePromptQuality } from "./promptQuality";
 
 export interface Story {
   id: string;
@@ -34,8 +22,15 @@ export interface Story {
  */
 export async function generateWhisperForStory(story: Story): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    // Get model configuration (GPT-5 at medium effort if enabled)
+    const modelConfig = getModelConfig("whisper");
+    
+    console.log(
+      `[Whisper] Generating for story ${story.id} using ${modelConfig.model} (effort: ${modelConfig.reasoning_effort ?? "n/a"})`
+    );
+
+    const { text, meta } = await chat({
+      model: modelConfig.model,
       messages: [
         {
           role: "system",
@@ -53,6 +48,7 @@ NEVER:
 - Use psychology language  
 - Reference multiple stories
 - Ask yes/no questions
+- Use generic nouns (girl, boy, man, woman, house, room)
 
 The question should be under 30 words and feel like it comes from love.`,
         },
@@ -61,11 +57,27 @@ The question should be under 30 words and feel like it comes from love.`,
           content: `Story from ${story.story_year}: ${story.transcript}`,
         },
       ],
+      reasoning_effort: modelConfig.reasoning_effort,
       temperature: 0.7,
       max_tokens: 60,
     });
 
-    return response.choices[0].message.content || "";
+    // Log telemetry
+    console.log("[Whisper] AI call completed:", {
+      model: meta.modelUsed,
+      effort: meta.reasoningEffort,
+      ttftMs: meta.ttftMs,
+      latencyMs: meta.latencyMs,
+      costUsd: meta.costUsd.toFixed(4),
+    });
+
+    // Quality validation (ensure under 30 words, no generic entities)
+    if (text && !validatePromptQuality(text)) {
+      console.warn(`[Whisper] Generated prompt failed quality check: "${text}"`);
+      return ""; // Reject low-quality whispers
+    }
+
+    return text || "";
   } catch (error) {
     console.error("[WhisperGeneration] Error generating prompt:", error);
     return "";

@@ -10,26 +10,11 @@
  * All prompts validated through quality gates before storage.
  */
 
-import OpenAI from "openai";
 import { generateAnchorHash } from "./promptGeneration";
 import { sanitizeForGPT, sanitizeEntity } from "./sanitization";
 import { validatePromptQuality, scorePromptQuality } from "./promptQuality";
-
-// Initialize OpenAI client with Vercel AI Gateway
-// Falls back to direct OpenAI API if AI_GATEWAY_API_KEY is not set
-const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
-const baseURL = process.env.AI_GATEWAY_API_KEY
-  ? 'https://ai-gateway.vercel.sh/v1'
-  : undefined;
-
-if (!apiKey) {
-  throw new Error("AI_GATEWAY_API_KEY or OPENAI_API_KEY environment variable is required");
-}
-
-const openai = new OpenAI({
-  apiKey,
-  baseURL,
-});
+import { chat } from "./ai/gatewayClient";
+import { getModelConfig } from "./ai/modelConfig";
 
 interface Story {
   id: string;
@@ -66,6 +51,7 @@ interface CharacterInsights {
 interface Tier3Result {
   prompts: Tier3Prompt[];
   characterInsights: CharacterInsights;
+  _meta?: any; // Telemetry metadata from AI call
 }
 
 /**
@@ -88,26 +74,37 @@ export async function performTier3Analysis(
   const systemPrompt = buildIntimacySystemPrompt(storyCount, promptCount);
   const userPrompt = buildUserPrompt(stories);
 
+  // Get model configuration (GPT-5 with reasoning effort if enabled)
+  const modelConfig = getModelConfig("tier3", storyCount);
+  
   console.log(
-    `[Tier 3 V2] Calling GPT-4o to analyze ${stories.length} stories (generate ${promptCount} intimacy prompts)`,
+    `[Tier 3 V2] Calling ${modelConfig.model} (effort: ${modelConfig.reasoning_effort ?? "n/a"}) to analyze ${stories.length} stories (generate ${promptCount} intimacy prompts)`,
   );
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      temperature: 0.7,
-      // Note: response_format not supported by AI Gateway
-      // Prompt engineering ensures JSON response instead
+    const { text: content, meta } = await chat({
+      model: modelConfig.model,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
+      reasoning_effort: modelConfig.reasoning_effort,
+      temperature: 0.7,
       max_tokens: 2000,
     });
 
-    const content = completion.choices[0]?.message?.content;
+    // Log telemetry for monitoring
+    console.log("[Tier 3 V2] AI call completed:", {
+      model: meta.modelUsed,
+      effort: meta.reasoningEffort,
+      ttftMs: meta.ttftMs,
+      latencyMs: meta.latencyMs,
+      costUsd: meta.costUsd.toFixed(4),
+      tokensUsed: meta.tokensUsed,
+    });
+
     if (!content) {
-      throw new Error("No response from GPT-4o");
+      throw new Error(`No response from ${modelConfig.model}`);
     }
 
     // Strip markdown code fences if present (GPT-4o sometimes wraps JSON in ```json)
@@ -157,9 +154,10 @@ export async function performTier3Analysis(
       `[Tier 3 V2] Analysis complete: ${result.prompts.length} prompts (validated), ${result.characterInsights.traits?.length || 0} traits`,
     );
 
-    return result;
+    // Return result with metadata for telemetry
+    return { ...result, _meta: meta };
   } catch (error) {
-    console.error("[Tier 3 V2] GPT-4o analysis failed:", error);
+    console.error("[Tier 3 V2] Analysis failed:", error);
     throw error;
   }
 }
@@ -357,7 +355,7 @@ export async function storeTier3Results(
     memory_type: prompt.intimacy_type,
     prompt_score: prompt.recording_likelihood,
     score_reason: prompt.reasoning,
-    model_version: "gpt-4o-intimacy-v2",
+    model_version: result._meta?.modelUsed || "gpt-4o-intimacy-v2",
     expires_at: expiresAt.toISOString(),
     is_locked: isStory3 && index > 0, // Story 3: lock prompts 2-4
     shown_count: 0,
@@ -407,7 +405,7 @@ export async function storeTier3Results(
         invisible_rules: result.characterInsights.invisibleRules,
         contradictions: result.characterInsights.contradictions,
         analyzed_at: new Date().toISOString(),
-        model_version: "gpt-4o-intimacy-v2",
+        model_version: result._meta?.modelUsed || "gpt-4o-intimacy-v2",
       },
       {
         onConflict: "user_id,story_count",
