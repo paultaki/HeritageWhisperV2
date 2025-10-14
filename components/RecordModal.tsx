@@ -69,6 +69,11 @@ export default function RecordModal({
   const [formattedContent, setFormattedContent] = useState<any>(null);
   const [silenceTimer, setSilenceTimer] = useState(0);
   const [isTypingMode, setIsTypingMode] = useState(false);
+  
+  // Follow-up question feature state
+  const [showFollowUpButton, setShowFollowUpButton] = useState(false);
+  const [isGeneratingFollowUp, setIsGeneratingFollowUp] = useState(false);
+  const [contextualFollowUpQuestion, setContextualFollowUpQuestion] = useState<string | null>(null);
 
   const audioRecorderRef = useRef<AudioRecorderHandle>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -123,6 +128,15 @@ export default function RecordModal({
       setCurrentPrompt(prompts[Math.floor(Math.random() * prompts.length)]);
     }
   }, [profileData, isOpen, initialPrompt]);
+
+  // Show follow-up button when paused > 60s
+  useEffect(() => {
+    if (isPaused && recordingTime >= 60) {
+      setShowFollowUpButton(true);
+    } else {
+      setShowFollowUpButton(false);
+    }
+  }, [isPaused, recordingTime]);
 
   // Recording timer
   useEffect(() => {
@@ -198,7 +212,92 @@ export default function RecordModal({
 
   const resumeRecording = () => {
     setIsPaused(false);
+    setContextualFollowUpQuestion(null); // Clear question when resuming
     audioRecorderRef.current?.resumeRecording();
+  };
+
+  const handleGetFollowUpQuestion = async () => {
+    if (!audioRecorderRef.current) return;
+
+    setIsGeneratingFollowUp(true);
+
+    try {
+      // Get current partial recording without stopping
+      const partialBlob = audioRecorderRef.current.getCurrentPartialRecording();
+
+      if (!partialBlob || partialBlob.size === 0) {
+        throw new Error("No audio data available");
+      }
+
+      // Convert blob to base64
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Data = (reader.result as string).split(",")[1];
+          resolve(base64Data);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(partialBlob);
+      });
+
+      // Get session
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      // Transcribe current audio
+      const transcribeResponse = await fetch(getApiUrl("/api/transcribe"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: session?.access_token
+            ? `Bearer ${session.access_token}`
+            : "",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          audioBase64: base64,
+          mimeType: partialBlob.type || "audio/webm",
+        }),
+      });
+
+      if (!transcribeResponse.ok) {
+        throw new Error("Transcription failed");
+      }
+
+      const transcribeData = await transcribeResponse.json();
+
+      // Generate contextual follow-up question
+      const followUpResponse = await fetch("/api/followups/contextual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transcript: transcribeData.transcription || transcribeData.text,
+          originalPrompt: currentPrompt,
+        }),
+      });
+
+      if (!followUpResponse.ok) {
+        throw new Error("Failed to generate follow-up");
+      }
+
+      const followUpData = await followUpResponse.json();
+      setContextualFollowUpQuestion(followUpData.question);
+
+      toast({
+        title: "Follow-up question ready!",
+        description: "Resume recording when you're ready to answer.",
+      });
+    } catch (error) {
+      console.error("Error generating follow-up:", error);
+      toast({
+        title: "Couldn't generate question",
+        description: "Try resuming and continuing your story.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingFollowUp(false);
+    }
   };
 
   const handleRecordingComplete = async (blob: Blob, duration: number) => {
@@ -684,6 +783,101 @@ export default function RecordModal({
                         />
                       </div>
 
+                      {/* Pause/Resume and Stop controls */}
+                      <Card className="p-6">
+                        <div className="space-y-4">
+                          {/* Control Buttons */}
+                          <div className="flex gap-4 justify-center">
+                            <Button
+                              variant="outline"
+                              onClick={isPaused ? resumeRecording : pauseRecording}
+                              className="flex-1 max-w-[160px] min-h-[44px]"
+                            >
+                              {isPaused ? (
+                                <>
+                                  <Play className="w-4 h-4 mr-2" />
+                                  Resume
+                                </>
+                              ) : (
+                                <>
+                                  <Pause className="w-4 h-4 mr-2" />
+                                  Pause
+                                </>
+                              )}
+                            </Button>
+
+                            <Button
+                              onClick={stopRecording}
+                              className="flex-1 max-w-[180px] min-h-[44px]"
+                              style={{
+                                background: designSystem.colors.gradients.coral,
+                                color: "white",
+                              }}
+                            >
+                              <Square className="w-4 h-4 mr-2" />
+                              Stop & Transcribe
+                            </Button>
+                          </div>
+
+                          {/* Contextual Follow-up Button - Show when paused >1min */}
+                          {showFollowUpButton && (
+                            <div className="flex justify-center pt-2">
+                              <Button
+                                variant="ghost"
+                                onClick={handleGetFollowUpQuestion}
+                                disabled={isGeneratingFollowUp}
+                                className="text-sm text-primary hover:bg-primary/10"
+                              >
+                                {isGeneratingFollowUp ? (
+                                  <>
+                                    <div className="w-4 h-4 mr-2 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                    Thinking...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Sparkles className="w-4 h-4 mr-2" />
+                                    Need help? Get a follow-up question
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* Display generated follow-up question */}
+                          {contextualFollowUpQuestion && (
+                            <div className="mt-4">
+                              <div className="p-4 rounded-lg" style={{
+                                background: "linear-gradient(to right, rgb(254 243 199) 0%, rgb(254 226 226) 100%)",
+                                borderLeft: `4px solid ${designSystem.colors.primary.coral}`,
+                              }}>
+                                <div className="flex items-start gap-3">
+                                  <Sparkles
+                                    className="w-5 h-5 mt-1 flex-shrink-0"
+                                    style={{ color: designSystem.colors.primary.coral }}
+                                  />
+                                  <div>
+                                    <p className="text-sm font-semibold text-gray-700 mb-1">
+                                      Here&apos;s a question to keep you going:
+                                    </p>
+                                    <p className="text-base italic text-gray-800">
+                                      &ldquo;{contextualFollowUpQuestion}&rdquo;
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Helper text */}
+                          <div className="text-center pt-2">
+                            <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
+                              <Sparkles className="w-4 h-4" />
+                              Auto-transcribe after you stop
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+
                       {/* Follow-up Prompts */}
                       {followUpPrompts.length > 0 && (
                         <motion.div
@@ -969,7 +1163,7 @@ export default function RecordModal({
                     }}
                   >
                     <Mic className="w-6 h-6" />
-                    Start Recording
+                    Continue
                   </Button>
 
                   {/* Type Story Option - More discrete */}
