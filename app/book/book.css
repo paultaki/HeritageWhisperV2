@@ -337,7 +337,7 @@
   font-family: var(--font-serif);
   font-size: var(--book-font-size);
   line-height: var(--book-line-height);
-  color: #1a1a1a;
+  color: #1e1710;
   hyphens: auto;
   text-align: left;
 
@@ -361,7 +361,7 @@
   font-weight: 600;
   margin-bottom: 8pt;
   margin-top: 16pt;
-  color: #1a1a1a;
+  color: #1e1710;
   break-after: avoid;
   page-break-after: avoid;
 }
@@ -371,7 +371,7 @@
   font-size: var(--book-title-size);
   font-weight: 700;
   margin-bottom: 12pt;
-  color: #1a1a1a;
+  color: #1e1710;
   break-after: avoid;
   page-break-after: avoid;
 }
