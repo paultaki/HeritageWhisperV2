@@ -994,11 +994,11 @@ export default function BookViewNew() {
         {/* Spine hint for single-page mode - behind everything */}
         {!showSpreadView && <div className="spine-hint" aria-hidden="true" />}
 
-        {/* Book stage - explicit width for centering */}
+        {/* Book stage - explicit width for mobile only, auto for desktop */}
         <div
           className="book-stage mx-auto relative"
           style={{
-            width: `${viewportConfig.scaledWidth}px`,
+            width: viewportConfig.scaledWidth > 0 ? `${viewportConfig.scaledWidth}px` : undefined,
             transition: "width 140ms ease-out",
           }}
         >

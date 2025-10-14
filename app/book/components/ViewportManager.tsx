@@ -80,6 +80,7 @@ function calculateViewportConfig(viewportWidth: number): ViewportConfig {
 
   // DESKTOP/TABLET: Try scaling up from MAX_SCALE down to MIN_SCALE
   // This allows book to grow larger on bigger screens
+  // Note: We use transform scale, NOT explicit width (scaledWidth = 0 signals auto-width)
   for (let scale = MAX_SCALE; scale >= MIN_SCALE; scale -= SCALE_STEP) {
     // Round to avoid floating point precision issues
     scale = Math.round(scale * 100) / 100;
@@ -97,7 +98,7 @@ function calculateViewportConfig(viewportWidth: number): ViewportConfig {
         mode: "spread",
         scale,
         bodyFontSize: bodyFont,
-        scaledWidth: (PAGE_WIDTH * 2 + SPREAD_GAP) * scale + SPREAD_PADDING * 2,
+        scaledWidth: 0, // Auto-width for desktop - let transform scale do the work
       };
     }
 
@@ -107,7 +108,7 @@ function calculateViewportConfig(viewportWidth: number): ViewportConfig {
         mode: "single",
         scale,
         bodyFontSize: bodyFont,
-        scaledWidth: PAGE_WIDTH * scale + SPREAD_PADDING * 2,
+        scaledWidth: 0, // Auto-width for desktop - let transform scale do the work
       };
     }
   }
@@ -117,7 +118,7 @@ function calculateViewportConfig(viewportWidth: number): ViewportConfig {
     mode: "single",
     scale: 1.0,
     bodyFontSize: SCREEN_BODY_SIZE,
-    scaledWidth: PAGE_WIDTH * 1.0 + SPREAD_PADDING * 2,
+    scaledWidth: 0, // Auto-width
   };
 }
 
