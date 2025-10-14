@@ -4,7 +4,7 @@
 
 HeritageWhisper's AI Prompting System transforms storytelling from a one-time activity into an ongoing conversation that unlocks 10x more memories. Think of it as a caring grandchild who actually listens—after you share one story, it asks the perfect follow-up question that makes you think, "Oh! I never told anyone about that!"
 
-The system works in three layers: **immediate echo** (asks about sensory details you just mentioned), **template expansion** (finds people, places, and objects you referenced but didn't fully explain), and **milestone analysis** (discovers patterns across all your stories to ask deeper questions). Every prompt proves we listened by referencing specific names, quotes, and details from YOUR stories—never generic therapy questions.
+The system works in four layers: **mid-recording follow-ups** (keeps users talking when they pause during recording), **immediate echo** (asks about sensory details you just mentioned), **template expansion** (finds people, places, and objects you referenced but didn't fully explain), and **milestone analysis** (discovers patterns across all your stories to ask deeper questions). Every prompt proves we listened by referencing specific names, quotes, and details from YOUR stories—never generic therapy questions.
 
 The business impact is profound: users who receive personalized prompts record **3-5x more stories** than those without. Each story generates **1-3 new prompts**, creating a **content flywheel** that increases engagement and lifetime value. The data moat deepens with every story—we're not just collecting text, we're building a **character evolution model** that understands invisible rules, contradictions, and wisdom patterns. This becomes more valuable and harder to replicate as users share more of their lives.
 
@@ -18,6 +18,15 @@ The business impact is profound: users who receive personalized prompts record *
 ┌─────────────────────────────────────────────────────────────────────┐
 │                          USER RECORDS STORY                          │
 │                      (Audio → Transcription)                         │
+│                                                                       │
+│  ┌────────────────────────────────────────────────────────────────┐ │
+│  │ NEW: MID-RECORDING FOLLOW-UPS (GPT-4o-mini)                    │ │
+│  │ • User pauses after 30+ seconds → "Need help?" button appears  │ │
+│  │ • Click → Transcribe partial audio (mark chunks as processed)  │ │
+│  │ • Generate 3 contextual questions to keep them talking         │ │
+│  │ • Resume → Continue recording (only new chunks transcribed)    │ │
+│  │ • COST SAVINGS: 20% on recordings with follow-ups              │ │
+│  └────────────────────────────────────────────────────────────────┘ │
 └────────────────────────────┬────────────────────────────────────────┘
                              │
                              ▼
@@ -285,6 +294,179 @@ show up, even when you're exhausted."
 1. **Person (Chewy):** "What did Chewy look like?" (prompt_score: 85)
 2. **Person (daughter):** "When did you last see our daughter?" (prompt_score: 85)
 3. **Place (nursery):** "What did nursery door smell like?" (prompt_score: 82)
+
+---
+
+### Mid-Recording Follow-ups: Keep Users Talking
+
+#### Location
+- **Files:** 
+  - `/components/RecordModal.tsx` - UI and orchestration
+  - `/components/AudioRecorder.tsx` - Audio chunk tracking
+  - `/app/api/followups/contextual/route.ts` - API endpoint
+- **Trigger:** User pauses after recording for 30+ seconds
+
+#### Process Flow
+
+1. **User Pauses Recording** (lines 133-140 in RecordModal.tsx):
+   ```typescript
+   useEffect(() => {
+     if (isPaused && recordingTime >= 30) {
+       setShowFollowUpButton(true);
+     } else {
+       setShowFollowUpButton(false);
+     }
+   }, [isPaused, recordingTime]);
+   ```
+
+2. **Click "Need help? Get a follow-up question"** → Triggers audio chunk tracking:
+   ```typescript
+   // Get partial recording with chunk count
+   const { blob, chunkCount } = audioRecorderRef.current.getCurrentPartialRecording();
+   
+   // Transcribe only what we have so far
+   const transcribeResponse = await fetch("/api/transcribe", {
+     body: JSON.stringify({ audioBase64, mimeType })
+   });
+   
+   // Save partial transcript and mark chunks as processed
+   setPartialTranscript(transcribeData.transcription);
+   setTranscribedChunkCount(chunkCount);
+   audioRecorderRef.current.markChunksAsTranscribed(chunkCount);
+   ```
+
+3. **Generate 3 Contextual Questions** via GPT-4o-mini:
+   ```typescript
+   // API call to /api/followups/contextual
+   const response = await fetch("/api/followups/contextual", {
+     body: JSON.stringify({
+       transcript: partialTranscription,
+       originalPrompt: currentPrompt
+     })
+   });
+   
+   // Returns { questions: ["Q1?", "Q2?", "Q3?"] }
+   ```
+
+4. **GPT-4o-mini System Prompt** (lines 27-60 in route.ts):
+   ```typescript
+   content: `Generate EXACTLY 3 follow-up questions as a JSON array.
+   
+   Rules:
+   - 15 words or less per question
+   - Reference specific details they mentioned (names, places, emotions)
+   - Keep them talking: ask about sensory details, moments, people
+   - Conversational tone (not therapy-speak)
+   - Open-ended questions (not yes/no)
+   - Avoid generic phrases like "tell me more"
+   
+   Return: { "questions": ["Q1", "Q2", "Q3"] }`
+   ```
+
+5. **Quality Validation** (lines 89-99):
+   ```typescript
+   const validatedQuestions = rawQuestions.filter((q: string) => {
+     const validation = validatePromptQuality(q);
+     const wordCount = q.split(/\s+/).length;
+     return validation.isValid && wordCount <= 20;
+   });
+   ```
+
+6. **UI Display** - 3 Questions with Next Button:
+   ```typescript
+   {followUpQuestions.length > 0 && (
+     <Card>
+       <p>"{followUpQuestions[currentFollowUpIndex]}"</p>
+       <p>Question {currentFollowUpIndex + 1} of {followUpQuestions.length}</p>
+       
+       {currentFollowUpIndex < followUpQuestions.length - 1 && (
+         <Button onClick={() => setCurrentFollowUpIndex(i => i + 1)}>
+           Next Question
+         </Button>
+       )}
+     </Card>
+   )}
+   ```
+
+7. **Resume Recording** → User continues talking
+
+8. **Final Transcription** - Efficient Chunk Strategy:
+   ```typescript
+   if (transcribedChunkCount > 0 && partialTranscript) {
+     // Get only remaining chunks (not already transcribed)
+     const remainingBlob = audioRecorderRef.current.getRemainingChunks();
+     
+     // Transcribe only the new audio
+     const remainingTranscript = await transcribe(remainingBlob);
+     
+     // Combine: partial (already have) + remaining (just transcribed)
+     finalTranscript = partialTranscript + " " + remainingTranscript;
+   }
+   ```
+
+#### Audio Chunk Tracking (Cost Optimization)
+
+**Implementation** (AudioRecorder.tsx lines 74, 917-949):
+```typescript
+// Track which chunks were already transcribed
+const transcribedChunksCountRef = useRef<number>(0);
+
+// Get only chunks we haven't transcribed yet
+const getRemainingChunks = useCallback(() => {
+  const remaining = chunksRef.current.slice(transcribedChunksCountRef.current);
+  return new Blob(remaining, { type: mimeType });
+}, []);
+
+// Mark chunks as processed
+const markChunksAsTranscribed = useCallback((count: number) => {
+  transcribedChunksCountRef.current = count;
+}, []);
+```
+
+#### Cost Analysis
+
+**Scenario:** 4-minute recording, pause at 1:00 for follow-up
+
+**Before (naive re-transcription):**
+- Follow-up: Transcribe 1 min @ $0.006/min = $0.006
+- Final: Transcribe all 4 min @ $0.006/min = $0.024
+- **Total: $0.030**
+
+**After (chunk tracking):**
+- Follow-up: Transcribe 1 min @ $0.006/min = $0.006
+- Final: Transcribe remaining 3 min @ $0.006/min = $0.018
+- **Total: $0.024 (20% savings)**
+
+Savings scale with:
+- Longer recordings (5 min = 25% savings)
+- Multiple pauses (2 pauses = 33% savings)
+- Higher Whisper usage volume
+
+#### Good vs Bad Examples
+
+**Good Mid-Recording Questions:**
+- ✅ "You mentioned your father's workshop. What did it smell like?"
+- ✅ "Who taught you that lesson about standing up for yourself?"
+- ✅ "What happened right after you made that decision?"
+
+**Bad Mid-Recording Questions:**
+- ❌ "Tell me more about that" (too generic)
+- ❌ "How did that make you feel?" (therapy-speak)
+- ❌ "Can you elaborate on your experience?" (robotic)
+
+#### UI Features
+
+**Visual Elements:**
+1. **Circular Gradient Voice Visualizer:** Bottom-to-top fill with transparency
+2. **5-Minute Timer:** Warnings at 1:00 and 0:30 remaining
+3. **3-Question Display:** Shows "Question X of 3" with next button
+4. **Smooth Animations:** 100ms transitions with proper z-index layering
+
+#### Cost per Follow-up Request
+- **GPT-4o-mini:** ~400 input tokens + 100 output tokens = ~$0.00008
+- **Whisper (partial):** ~1 min audio @ $0.006/min = $0.006
+- **Total per follow-up:** ~$0.0061
+- **ROI:** Keeps user engaged, increases story length = more content value
 
 ---
 
