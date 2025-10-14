@@ -852,9 +852,9 @@ export default function RecordModal({
                             <div className="flex-1">
                               <p className="text-2xl text-gray-700 italic leading-relaxed">
                                 {followUpQuestions.length > 0 ? (
-                                  `"${followUpQuestions[currentFollowUpIndex]}"`
+                                  <>&ldquo;{followUpQuestions[currentFollowUpIndex]}&rdquo;</>
                                 ) : (
-                                  `"${currentPrompt || "What's a story from your life that you've been wanting to share?"}"`
+                                  <>&ldquo;{currentPrompt || "What's a story from your life that you've been wanting to share?"}&rdquo;</>
                                 )}
                               </p>
                               {followUpQuestions.length > 0 && (
