@@ -33,27 +33,12 @@ export const CHROME_PADDING = 220; // px (left sidebar 112px + arrows/margins + 
 // Screen typography
 const SCREEN_BODY_SIZE = 20; // px base font size for screen
 const MIN_BODY_SIZE = 18; // px minimum readable size
-const MAX_BODY_SIZE = 26; // px maximum readable size (prevents oversized text)
-
-// Scaling constraints
-const MAX_SCALE = 1.3; // Maximum scale to prevent text from being too large
-const MIN_SCALE = 0.95; // Minimum scale for smaller viewports
-const SCALE_STEP = 0.05; // Granularity for scale calculations
-const MOBILE_BREAKPOINT = 640; // Mobile devices stay locked at 1.0x
 
 /**
- * Calculate viewport width needed for spread view at a given scale
+ * Calculate viewport width needed for a given scale
  */
 function spreadWidthNeeded(scale: number): number {
   const contentWidth = (PAGE_WIDTH * 2 + SPREAD_GAP) * scale;
-  return contentWidth + CHROME_PADDING;
-}
-
-/**
- * Calculate viewport width needed for single page view at a given scale
- */
-function singleWidthNeeded(scale: number): number {
-  const contentWidth = PAGE_WIDTH * scale;
   return contentWidth + CHROME_PADDING;
 }
 
@@ -65,60 +50,40 @@ function bodyFontAt(scale: number): number {
 }
 
 /**
- * Calculate optimal viewport configuration with dynamic upscaling
+ * Calculate optimal viewport configuration
  */
 function calculateViewportConfig(viewportWidth: number): ViewportConfig {
-  // MOBILE: Lock at 1.0x (DO NOT CHANGE - preserves mobile experience)
-  if (viewportWidth <= MOBILE_BREAKPOINT) {
+  // Try spread at 1.0 scale
+  if (viewportWidth >= spreadWidthNeeded(1.0)) {
     return {
-      mode: "single",
+      mode: "spread",
       scale: 1.0,
       bodyFontSize: SCREEN_BODY_SIZE,
-      scaledWidth: PAGE_WIDTH * 1.0 + SPREAD_PADDING * 2,
+      scaledWidth: (PAGE_WIDTH * 2 + SPREAD_GAP) * 1.0 + SPREAD_PADDING * 2,
     };
   }
 
-  // DESKTOP/TABLET: Try scaling up from MAX_SCALE down to MIN_SCALE
-  // This allows book to grow larger on bigger screens
-  // Note: We use transform scale, NOT explicit width (scaledWidth = 0 signals auto-width)
-  for (let scale = MAX_SCALE; scale >= MIN_SCALE; scale -= SCALE_STEP) {
-    // Round to avoid floating point precision issues
-    scale = Math.round(scale * 100) / 100;
-
-    const bodyFont = bodyFontAt(scale);
-
-    // Skip if font size is outside readable range
-    if (bodyFont < MIN_BODY_SIZE || bodyFont > MAX_BODY_SIZE) {
-      continue;
-    }
-
-    // Try spread view first (preferred for larger screens)
-    if (viewportWidth >= spreadWidthNeeded(scale)) {
-      return {
-        mode: "spread",
-        scale,
-        bodyFontSize: bodyFont,
-        scaledWidth: 0, // Auto-width for desktop - let transform scale do the work
-      };
-    }
-
-    // Try single page view at this scale
-    if (viewportWidth >= singleWidthNeeded(scale)) {
-      return {
-        mode: "single",
-        scale,
-        bodyFontSize: bodyFont,
-        scaledWidth: 0, // Auto-width for desktop - let transform scale do the work
-      };
-    }
+  // Try spread at 0.95 scale (only if body font stays ≥ 18px)
+  const scaleAt95 = 0.95;
+  if (
+    viewportWidth >= spreadWidthNeeded(scaleAt95) &&
+    bodyFontAt(scaleAt95) >= MIN_BODY_SIZE
+  ) {
+    return {
+      mode: "spread",
+      scale: scaleAt95,
+      bodyFontSize: bodyFontAt(scaleAt95),
+      scaledWidth:
+        (PAGE_WIDTH * 2 + SPREAD_GAP) * scaleAt95 + SPREAD_PADDING * 2,
+    };
   }
 
-  // Fallback: single page at 1.0 scale, centered
+  // Default: single page at 1.0 scale, centered
   return {
     mode: "single",
     scale: 1.0,
     bodyFontSize: SCREEN_BODY_SIZE,
-    scaledWidth: 0, // Auto-width
+    scaledWidth: PAGE_WIDTH * 1.0 + SPREAD_PADDING * 2,
   };
 }
 
