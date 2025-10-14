@@ -19,13 +19,20 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
-// Initialize OpenAI client
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY environment variable is required");
+// Initialize OpenAI client with Vercel AI Gateway
+// Falls back to direct OpenAI API if AI_GATEWAY_API_KEY is not set
+const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
+const baseURL = process.env.AI_GATEWAY_API_KEY
+  ? 'https://ai-gateway.vercel.sh/v1'
+  : undefined;
+
+if (!apiKey) {
+  throw new Error("AI_GATEWAY_API_KEY or OPENAI_API_KEY environment variable is required");
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey,
+  baseURL,
 });
 
 // Cache system instructions at module level to avoid rebuilding on every request
