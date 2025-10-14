@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { AudioRecorder, AudioRecorderHandle } from "./AudioRecorder";
 import { VoiceVisualizer } from "./VoiceVisualizer";
+import { VoiceRecordingButton } from "./VoiceRecordingButton";
 import { toast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import designSystem from "@/lib/designSystem";
@@ -662,78 +663,10 @@ export default function RecordModal({
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto px-6 py-6">
-              {!isRecording && !showTranscription && (
+              {!showTranscription && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="space-y-6"
-                >
-                  {/* Initial Prompt */}
-                  <Card
-                    className="p-8"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, white 0%, #FFF8F3 100%)",
-                      borderRadius: designSystem.spacing.borderRadius.card,
-                      boxShadow: designSystem.shadows.md,
-                    }}
-                  >
-                    <div className="flex items-start gap-3 mb-6">
-                      <Sparkles
-                        className="w-6 h-6 mt-2"
-                        style={{ color: designSystem.colors.primary.coral }}
-                      />
-                      <div className="flex-1">
-                        <h3 className="font-semibold mb-4 text-2xl">
-                          Your Personalized Prompt
-                        </h3>
-                        <p className="text-4xl leading-relaxed italic text-gray-700">
-                          &ldquo;
-                          {currentPrompt ||
-                            "What's a story from your life that you've been wanting to share?"}
-                          &rdquo;
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-2xl leading-relaxed text-gray-600">
-                      Take a moment to think about this. When you're ready,
-                      press record and just start talking.
-                    </p>
-                  </Card>
-
-                  {/* Tips */}
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-gray-700 text-xl">
-                      Tips for a great recording:
-                    </h4>
-                    <ul className="space-y-2 text-lg text-gray-600">
-                      <li className="flex items-start gap-2">
-                        <span className="text-coral-500 mt-0.5">•</span>
-                        <span>Speak naturally, as if telling a friend</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-coral-500 mt-0.5">•</span>
-                        <span>Don't worry about perfect grammar</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-coral-500 mt-0.5">•</span>
-                        <span>
-                          Include details that make the story come alive
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-coral-500 mt-0.5">•</span>
-                        <span>We'll ask follow-up questions if you pause</span>
-                      </li>
-                    </ul>
-                  </div>
-                </motion.div>
-              )}
-
-              {isRecording && !showTranscription && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
                   className="space-y-6"
                 >
                   {isTranscribing ? (
@@ -766,15 +699,21 @@ export default function RecordModal({
                     </div>
                   ) : (
                     <>
-                      {/* Prompt reminder */}
-                      <Card className="p-6 bg-gray-50">
-                        <p className="text-2xl text-gray-700 italic leading-relaxed">
-                          "{currentPrompt || "Tell your story..."}"
-                        </p>
+                      {/* Prompt at top */}
+                      <Card className="p-6 bg-gradient-to-br from-white to-amber-50/30">
+                        <div className="flex items-start gap-3">
+                          <Sparkles
+                            className="w-5 h-5 mt-1 flex-shrink-0"
+                            style={{ color: designSystem.colors.primary.coral }}
+                          />
+                          <p className="text-xl text-gray-700 italic leading-relaxed">
+                            &ldquo;{currentPrompt || "What's a story from your life that you've been wanting to share?"}&rdquo;
+                          </p>
+                        </div>
                       </Card>
 
-                      {/* Embedded Audio Recorder */}
-                      <div className="flex flex-col items-center space-y-4">
+                      {/* Morphing Recording Button - Hidden AudioRecorder */}
+                      <div className="hidden">
                         <AudioRecorder
                           ref={audioRecorderRef}
                           onRecordingComplete={handleRecordingComplete}
@@ -783,133 +722,124 @@ export default function RecordModal({
                         />
                       </div>
 
-                      {/* Pause/Resume and Stop controls */}
-                      <Card className="p-6">
-                        <div className="space-y-4">
-                          {/* Control Buttons */}
-                          <div className="flex gap-4 justify-center">
-                            <Button
-                              variant="outline"
-                              onClick={isPaused ? resumeRecording : pauseRecording}
-                              className="flex-1 max-w-[160px] min-h-[44px]"
-                            >
-                              {isPaused ? (
-                                <>
-                                  <Play className="w-4 h-4 mr-2" />
-                                  Resume
-                                </>
-                              ) : (
-                                <>
-                                  <Pause className="w-4 h-4 mr-2" />
-                                  Pause
-                                </>
-                              )}
-                            </Button>
+                      {/* Center: Morphing Recording Button */}
+                      <div className="flex flex-col items-center justify-center py-8">
+                        <VoiceRecordingButton
+                          isRecording={isRecording}
+                          isPaused={isPaused}
+                          recordingTime={recordingTime}
+                          onStart={startRecording}
+                          audioRecorderRef={audioRecorderRef}
+                        />
+                      </div>
 
-                            <Button
-                              onClick={stopRecording}
-                              className="flex-1 max-w-[180px] min-h-[44px]"
-                              style={{
-                                background: designSystem.colors.gradients.coral,
-                                color: "white",
-                              }}
-                            >
-                              <Square className="w-4 h-4 mr-2" />
-                              Stop & Transcribe
-                            </Button>
-                          </div>
-
-                          {/* Contextual Follow-up Button - Show when paused >1min */}
-                          {showFollowUpButton && (
-                            <div className="flex justify-center pt-2">
-                              <Button
-                                variant="ghost"
-                                onClick={handleGetFollowUpQuestion}
-                                disabled={isGeneratingFollowUp}
-                                className="text-sm text-primary hover:bg-primary/10"
-                              >
-                                {isGeneratingFollowUp ? (
-                                  <>
-                                    <div className="w-4 h-4 mr-2 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                                    Thinking...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Sparkles className="w-4 h-4 mr-2" />
-                                    Need help? Get a follow-up question
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                          )}
-
-                          {/* Display generated follow-up question */}
-                          {contextualFollowUpQuestion && (
-                            <div className="mt-4">
-                              <div className="p-4 rounded-lg" style={{
-                                background: "linear-gradient(to right, rgb(254 243 199) 0%, rgb(254 226 226) 100%)",
-                                borderLeft: `4px solid ${designSystem.colors.primary.coral}`,
-                              }}>
-                                <div className="flex items-start gap-3">
-                                  <Sparkles
-                                    className="w-5 h-5 mt-1 flex-shrink-0"
-                                    style={{ color: designSystem.colors.primary.coral }}
-                                  />
-                                  <div>
-                                    <p className="text-sm font-semibold text-gray-700 mb-1">
-                                      Here&apos;s a question to keep you going:
-                                    </p>
-                                    <p className="text-base italic text-gray-800">
-                                      &ldquo;{contextualFollowUpQuestion}&rdquo;
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Helper text */}
-                          <div className="text-center pt-2">
-                            <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
-                              <Sparkles className="w-4 h-4" />
-                              Auto-transcribe after you stop
-                            </p>
-                          </div>
-                        </div>
-                      </Card>
-
-                      {/* Follow-up Prompts */}
-                      {followUpPrompts.length > 0 && (
+                      {/* Recording Controls - Only show when recording */}
+                      {isRecording && (
                         <motion.div
-                          initial={{ opacity: 0, y: 20 }}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex gap-4 justify-center"
+                        >
+                          <Button
+                            variant="outline"
+                            onClick={isPaused ? resumeRecording : pauseRecording}
+                            className="flex-1 max-w-[140px] min-h-[44px]"
+                          >
+                            {isPaused ? (
+                              <>
+                                <Play className="w-4 h-4 mr-2" />
+                                Resume
+                              </>
+                            ) : (
+                              <>
+                                <Pause className="w-4 h-4 mr-2" />
+                                Pause
+                              </>
+                            )}
+                          </Button>
+
+                          <Button
+                            onClick={stopRecording}
+                            className="flex-1 max-w-[180px] min-h-[44px]"
+                            style={{
+                              background: designSystem.colors.gradients.coral,
+                              color: "white",
+                            }}
+                          >
+                            <Square className="w-4 h-4 mr-2" />
+                            Stop & Transcribe
+                          </Button>
+                        </motion.div>
+                      )}
+
+                      {/* Contextual Follow-up Button - Show when paused >1min */}
+                      {showFollowUpButton && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex justify-center"
+                        >
+                          <Button
+                            variant="ghost"
+                            onClick={handleGetFollowUpQuestion}
+                            disabled={isGeneratingFollowUp}
+                            className="text-sm text-primary hover:bg-primary/10"
+                          >
+                            {isGeneratingFollowUp ? (
+                              <>
+                                <div className="w-4 h-4 mr-2 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                Getting your personalized question...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-4 h-4 mr-2" />
+                                Need help? Get a follow-up question
+                              </>
+                            )}
+                          </Button>
+                        </motion.div>
+                      )}
+
+                      {/* Bottom Section: Tips or Follow-up Question */}
+                      {contextualFollowUpQuestion ? (
+                        // Generated follow-up question replaces tips
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           className="space-y-3"
                         >
-                          <p className="text-sm text-gray-500">
-                            Keep going, or consider:
-                          </p>
-                          {followUpPrompts.map((prompt, index) => (
-                            <motion.div
-                              key={index}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                            >
-                              <Card
-                                className="p-4"
-                                style={{
-                                  background: "white",
-                                  borderLeft: `3px solid ${designSystem.colors.primary.coral}`,
-                                }}
-                              >
-                                <p className="italic text-gray-700">
-                                  &ldquo;{prompt}&rdquo;
-                                </p>
-                              </Card>
-                            </motion.div>
-                          ))}
+                          <Card className="p-6 bg-gradient-to-br from-amber-50 to-rose-50">
+                            <p className="text-xl text-gray-700 italic leading-relaxed">
+                              &ldquo;{contextualFollowUpQuestion}&rdquo;
+                            </p>
+                          </Card>
                         </motion.div>
-                      )}
+                      ) : !isRecording ? (
+                        // Tips section when not recording
+                        <div className="space-y-3">
+                          <h4 className="font-medium text-gray-700 text-base">
+                            Tips for a great recording:
+                          </h4>
+                          <ul className="space-y-2 text-sm text-gray-600">
+                            <li className="flex items-start gap-2">
+                              <span className="text-coral-500 mt-0.5">•</span>
+                              <span>Speak naturally, as if telling a friend</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-coral-500 mt-0.5">•</span>
+                              <span>Don't worry about perfect grammar</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-coral-500 mt-0.5">•</span>
+                              <span>Include details that make the story come alive</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-coral-500 mt-0.5">•</span>
+                              <span>We'll ask follow-up questions if you pause</span>
+                            </li>
+                          </ul>
+                        </div>
+                      ) : null}
                     </>
                   )}
                 </motion.div>
@@ -1146,27 +1076,9 @@ export default function RecordModal({
 
             {/* Footer Actions */}
             <div className="px-6 py-4 border-t bg-white">
-              {!isRecording && !showTranscription && (
+              {!showTranscription && (
                 <div className="space-y-3">
-                  <Button
-                    onClick={startRecording}
-                    className="w-full flex items-center justify-center gap-3"
-                    style={{
-                      background: designSystem.colors.gradients.coral,
-                      color: "white",
-                      borderRadius: designSystem.spacing.borderRadius.full,
-                      padding: "16px",
-                      minHeight: "60px",
-                      fontSize: designSystem.typography.sizes.lg,
-                      fontWeight: designSystem.typography.weights.semibold,
-                      boxShadow: designSystem.shadows.lg,
-                    }}
-                  >
-                    <Mic className="w-6 h-6" />
-                    Continue
-                  </Button>
-
-                  {/* Type Story Option - More discrete */}
+                  {/* Type Story Option - Moved to footer */}
                   <button
                     onClick={() => {
                       // Go directly to transcription screen for typing
@@ -1184,8 +1096,6 @@ export default function RecordModal({
                   </button>
                 </div>
               )}
-
-              {/* Recording controls are now handled by AudioRecorder component */}
 
               {showTranscription && !isTranscribing && (
                 <div className="flex gap-3">
