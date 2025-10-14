@@ -267,11 +267,25 @@ export default function RecordModal({
 
   const processFollowUpQuestion = async (audioBlob: Blob) => {
     try {
+      console.log("[RecordModal] processFollowUpQuestion called");
+      
+      // First, pause the recording to ensure we get all data
+      if (audioRecorderRef.current && !isPaused) {
+        console.log("[RecordModal] Recording not paused, pausing now...");
+        audioRecorderRef.current.pauseRecording();
+        setIsPaused(true);
+        // Wait a bit for the pause to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
       // Get chunk count for tracking
       const { blob, chunkCount } = audioRecorderRef.current?.getCurrentPartialRecording() || { blob: null, chunkCount: 0 };
       
-      if (!blob) {
-        throw new Error("No audio blob available");
+      console.log("[RecordModal] Partial recording result:", { hasBlob: !!blob, blobSize: blob?.size, chunkCount });
+      
+      if (!blob || blob.size === 0) {
+        console.error("[RecordModal] No audio data available for follow-up");
+        throw new Error("No audio data available. Please record for a bit longer before requesting a follow-up.");
       }
 
       console.log("[RecordModal] Converting audio blob to base64...");

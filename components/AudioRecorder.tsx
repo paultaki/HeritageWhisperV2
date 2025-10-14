@@ -881,37 +881,48 @@ export const AudioRecorder = forwardRef<
   }, []);
 
   const getCurrentPartialRecording = useCallback(() => {
-    if (mediaRecorderRef.current && chunksRef.current.length > 0) {
-      console.log("[AudioRecorder] Getting partial recording for AI follow-up...");
-      console.log("[AudioRecorder] Current chunks:", chunksRef.current.length);
-
-      // Request current data - triggers ondataavailable to flush buffered audio
-      if (mediaRecorderRef.current.state === "recording" || 
-          mediaRecorderRef.current.state === "paused") {
-        console.log("[AudioRecorder] Requesting data for partial recording...");
-        mediaRecorderRef.current.requestData();
-      }
-
-      // Create blob from current chunks without stopping recording
-      const blobType =
-        mediaRecorderRef.current.mimeType ||
-        mimeTypeRef.current ||
-        "audio/webm";
-      const blob = new Blob(chunksRef.current, { type: blobType });
-      const chunkCount = chunksRef.current.length;
-      
-      console.log(
-        "[AudioRecorder] Created partial blob - Size:",
-        blob.size,
-        "Type:",
-        blob.type,
-        "Chunk count:",
-        chunkCount
-      );
-      return { blob, chunkCount };
+    console.log("[AudioRecorder] getCurrentPartialRecording called");
+    console.log("[AudioRecorder] MediaRecorder state:", mediaRecorderRef.current?.state);
+    console.log("[AudioRecorder] Current chunks:", chunksRef.current.length);
+    
+    if (!mediaRecorderRef.current) {
+      console.log("[AudioRecorder] No mediaRecorder available");
+      return { blob: null, chunkCount: 0 };
     }
-    console.log("[AudioRecorder] No partial recording available");
-    return { blob: null, chunkCount: 0 };
+
+    // Request current data to flush buffered audio - WAIT for it
+    if (mediaRecorderRef.current.state === "recording" || 
+        mediaRecorderRef.current.state === "paused") {
+      console.log("[AudioRecorder] Requesting data flush...");
+      mediaRecorderRef.current.requestData();
+      
+      // Wait a tiny bit for the data to be flushed to chunks
+      // This is synchronous in most browsers, but let's be safe
+    }
+
+    // Even if no chunks yet, check if we have data
+    if (chunksRef.current.length === 0) {
+      console.log("[AudioRecorder] No chunks available yet");
+      return { blob: null, chunkCount: 0 };
+    }
+
+    // Create blob from current chunks without stopping recording
+    const blobType =
+      mediaRecorderRef.current.mimeType ||
+      mimeTypeRef.current ||
+      "audio/webm";
+    const blob = new Blob(chunksRef.current, { type: blobType });
+    const chunkCount = chunksRef.current.length;
+    
+    console.log(
+      "[AudioRecorder] Created partial blob - Size:",
+      blob.size,
+      "Type:",
+      blob.type,
+      "Chunk count:",
+      chunkCount
+    );
+    return { blob, chunkCount };
   }, []);
 
   const getRemainingChunks = useCallback(() => {

@@ -115,20 +115,20 @@ export function VoiceRecordingButton({
 
   // Voice level circular gradient fill
   const CircularGradientFill = () => {
-    const fillPercentage = voiceLevel * 100;
+    // Clamp voice level between 0 and 1
+    const clampedLevel = Math.max(0, Math.min(1, voiceLevel));
+    const fillPercentage = clampedLevel * 100;
 
     return (
       <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
         <motion.div 
-          className="absolute bottom-0 left-0 right-0"
+          className="absolute bottom-0 left-0 right-0 rounded-full"
           style={{
             background: 'linear-gradient(to top, rgba(251, 146, 60, 0.8) 0%, rgba(251, 146, 60, 0.2) 100%)',
-          }}
-          animate={{
             height: `${fillPercentage}%`,
           }}
           transition={{
-            duration: 0.1,
+            duration: 0.15,
             ease: "easeOut"
           }}
         />
@@ -176,29 +176,31 @@ export function VoiceRecordingButton({
             {/* Circular gradient fill in background */}
             {!isPaused && <CircularGradientFill />}
 
-            {/* Timer overlay with enhanced visibility */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center relative z-10">
-              <motion.span
-                className="text-2xl font-bold text-white"
-                style={{ 
-                  textShadow: '0 2px 8px rgba(0,0,0,0.5), 0 0 2px rgba(255,255,255,0.3)',
-                  position: 'relative',
-                  zIndex: 20
-                }}
-                animate={{ opacity: isPaused ? 0.5 : 1 }}
-              >
-                {formatTime(recordingTime)}
-              </motion.span>
-              {isPaused && (
-                <span 
-                  className="text-xs text-white/90 mt-1"
+            {/* Timer overlay with enhanced visibility - centered */}
+            <div className="absolute inset-0 flex items-center justify-center relative z-10">
+              <div className="flex flex-col items-center">
+                <motion.span
+                  className="text-2xl font-bold text-white"
                   style={{ 
-                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.5), 0 0 2px rgba(255,255,255,0.3)',
                   }}
+                  animate={{ opacity: isPaused ? 0.5 : 1 }}
                 >
-                  Paused
-                </span>
-              )}
+                  {formatTime(recordingTime)}
+                </motion.span>
+                {isPaused && (
+                  <motion.span 
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-xs text-white/90 mt-1 font-medium"
+                    style={{ 
+                      textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                    }}
+                  >
+                    Paused
+                  </motion.span>
+                )}
+              </div>
             </div>
           </motion.div>
         ) : (
