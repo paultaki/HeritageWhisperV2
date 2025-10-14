@@ -882,27 +882,37 @@ export const AudioRecorder = forwardRef<
 
   const getCurrentPartialRecording = useCallback(() => {
     console.log("[AudioRecorder] getCurrentPartialRecording called");
+    console.log("[AudioRecorder] MediaRecorder exists:", !!mediaRecorderRef.current);
     console.log("[AudioRecorder] MediaRecorder state:", mediaRecorderRef.current?.state);
-    console.log("[AudioRecorder] Current chunks:", chunksRef.current.length);
+    console.log("[AudioRecorder] Current chunks count:", chunksRef.current.length);
+    console.log("[AudioRecorder] Chunks sizes:", chunksRef.current.map(c => c.size));
     
     if (!mediaRecorderRef.current) {
       console.log("[AudioRecorder] No mediaRecorder available");
       return { blob: null, chunkCount: 0 };
     }
 
-    // Request current data to flush buffered audio - WAIT for it
+    // Request current data to flush buffered audio
     if (mediaRecorderRef.current.state === "recording" || 
         mediaRecorderRef.current.state === "paused") {
-      console.log("[AudioRecorder] Requesting data flush...");
-      mediaRecorderRef.current.requestData();
-      
-      // Wait a tiny bit for the data to be flushed to chunks
-      // This is synchronous in most browsers, but let's be safe
+      console.log("[AudioRecorder] State is", mediaRecorderRef.current.state, "- requesting data flush...");
+      try {
+        mediaRecorderRef.current.requestData();
+        console.log("[AudioRecorder] requestData() called successfully");
+      } catch (error) {
+        console.error("[AudioRecorder] Error calling requestData():", error);
+      }
+    } else {
+      console.log("[AudioRecorder] Cannot request data, state is:", mediaRecorderRef.current.state);
     }
 
+    // Wait a bit for ondataavailable to fire
+    // In testing, requestData is sometimes async
+    console.log("[AudioRecorder] Checking chunks after requestData...");
+    
     // Even if no chunks yet, check if we have data
     if (chunksRef.current.length === 0) {
-      console.log("[AudioRecorder] No chunks available yet");
+      console.log("[AudioRecorder] Still no chunks available after requestData");
       return { blob: null, chunkCount: 0 };
     }
 

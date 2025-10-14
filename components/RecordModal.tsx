@@ -274,18 +274,30 @@ export default function RecordModal({
         console.log("[RecordModal] Recording not paused, pausing now...");
         audioRecorderRef.current.pauseRecording();
         setIsPaused(true);
-        // Wait a bit for the pause to complete
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Wait a bit for the pause to complete and data to flush
+        await new Promise(resolve => setTimeout(resolve, 300));
+      } else {
+        console.log("[RecordModal] Already paused, waiting 200ms for any pending data...");
+        // Even if already paused, wait a bit for data to settle
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
       
       // Get chunk count for tracking
+      console.log("[RecordModal] Getting partial recording from AudioRecorder...");
       const { blob, chunkCount } = audioRecorderRef.current?.getCurrentPartialRecording() || { blob: null, chunkCount: 0 };
       
-      console.log("[RecordModal] Partial recording result:", { hasBlob: !!blob, blobSize: blob?.size, chunkCount });
+      console.log("[RecordModal] Partial recording result:", { 
+        hasBlob: !!blob, 
+        blobSize: blob?.size, 
+        chunkCount,
+        isPaused,
+        isRecording 
+      });
       
       if (!blob || blob.size === 0) {
         console.error("[RecordModal] No audio data available for follow-up");
-        throw new Error("No audio data available. Please record for a bit longer before requesting a follow-up.");
+        console.error("[RecordModal] This might mean chunks aren't being captured. Check AudioRecorder logs.");
+        throw new Error("No audio data available. Please try recording for a bit longer, then pause, then request a follow-up.");
       }
 
       console.log("[RecordModal] Converting audio blob to base64...");
