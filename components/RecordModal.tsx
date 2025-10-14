@@ -610,10 +610,36 @@ export default function RecordModal({
   };
 
   const stopRecording = () => {
-    // This will trigger handleRecordingComplete via the AudioRecorder component
-    // The stop button is handled by the AudioRecorder component itself
-    setIsRecording(false);
-    setIsPaused(false);
+    console.log("[RecordModal] stopRecording called");
+    
+    // Get the current recording from AudioRecorder before we stop it
+    const blob = audioRecorderRef.current?.getCurrentRecording();
+    const duration = audioRecorderRef.current?.getRecordingDuration() || 0;
+    
+    console.log("[RecordModal] Got current recording:", { 
+      hasBlob: !!blob, 
+      blobSize: blob?.size, 
+      duration 
+    });
+    
+    // Stop the actual AudioRecorder
+    if (audioRecorderRef.current) {
+      audioRecorderRef.current.cleanup();
+    }
+    
+    // If we have a recording, process it
+    if (blob && blob.size > 0 && duration > 0) {
+      handleRecordingComplete(blob, duration);
+    } else {
+      console.error("[RecordModal] No valid recording to process");
+      toast({
+        title: "No recording found",
+        description: "Please try recording again.",
+        variant: "destructive",
+      });
+      setIsRecording(false);
+      setIsPaused(false);
+    }
   };
 
   const generateGoDeeperQuestions = async (transcriptionText: string) => {
