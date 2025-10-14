@@ -417,12 +417,8 @@ export function getQualityReport(promptText?: string | null): QualityReport {
 // EXPORTS
 // ============================================================================
 
-// Export individual functions (used by API routes and components)
+// Export constants (functions are already exported inline above)
 export {
-  isWorthyEntity,
-  validatePromptQuality,
-  scorePromptQuality,
-  getQualityReport,
   GENERIC_WORDS,
   BANNED_PHRASES,
   EMOTIONAL_DEPTH_SIGNALS,
