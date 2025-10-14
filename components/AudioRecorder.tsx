@@ -31,7 +31,9 @@ export interface AudioRecorderHandle {
   pauseRecording: () => void;
   resumeRecording: () => void;
   getCurrentRecording: () => Blob | null;
-  getCurrentPartialRecording: () => Blob | null;
+  getCurrentPartialRecording: () => { blob: Blob | null; chunkCount: number };
+  getRemainingChunks: () => Blob | null;
+  markChunksAsTranscribed: (count: number) => void;
   isRecording: boolean;
   isPaused: boolean;
   getRecordingDuration: () => number; // Get current recording duration in seconds
@@ -71,6 +73,7 @@ export const AudioRecorder = forwardRef<
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const transcribedChunksCountRef = useRef<number>(0); // Track which chunks were already transcribed
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const pausedTimeRef = useRef<number>(0);
@@ -895,16 +898,54 @@ export const AudioRecorder = forwardRef<
         mimeTypeRef.current ||
         "audio/webm";
       const blob = new Blob(chunksRef.current, { type: blobType });
+      const chunkCount = chunksRef.current.length;
+      
       console.log(
         "[AudioRecorder] Created partial blob - Size:",
         blob.size,
         "Type:",
         blob.type,
+        "Chunk count:",
+        chunkCount
       );
-      return blob;
+      return { blob, chunkCount };
     }
     console.log("[AudioRecorder] No partial recording available");
-    return null;
+    return { blob: null, chunkCount: 0 };
+  }, []);
+
+  const getRemainingChunks = useCallback(() => {
+    if (!mediaRecorderRef.current || chunksRef.current.length === 0) {
+      console.log("[AudioRecorder] No remaining chunks available");
+      return null;
+    }
+    
+    const remaining = chunksRef.current.slice(transcribedChunksCountRef.current);
+    if (remaining.length === 0) {
+      console.log("[AudioRecorder] All chunks already transcribed");
+      return null;
+    }
+    
+    const blobType =
+      mediaRecorderRef.current.mimeType ||
+      mimeTypeRef.current ||
+      "audio/webm";
+    const blob = new Blob(remaining, { type: blobType });
+    
+    console.log(
+      "[AudioRecorder] Created remaining chunks blob - Chunks:",
+      remaining.length,
+      "Size:",
+      blob.size,
+      "Type:",
+      blob.type
+    );
+    return blob;
+  }, []);
+
+  const markChunksAsTranscribed = useCallback((count: number) => {
+    console.log("[AudioRecorder] Marking", count, "chunks as transcribed");
+    transcribedChunksCountRef.current = count;
   }, []);
 
   // Comprehensive cleanup method
@@ -1038,6 +1079,8 @@ export const AudioRecorder = forwardRef<
       resumeRecording,
       getCurrentRecording,
       getCurrentPartialRecording,
+      getRemainingChunks,
+      markChunksAsTranscribed,
       isRecording,
       isPaused,
       getRecordingDuration,
@@ -1048,6 +1091,8 @@ export const AudioRecorder = forwardRef<
       resumeRecording,
       getCurrentRecording,
       getCurrentPartialRecording,
+      getRemainingChunks,
+      markChunksAsTranscribed,
       isRecording,
       isPaused,
       getRecordingDuration,

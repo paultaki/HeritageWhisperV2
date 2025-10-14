@@ -75,6 +75,14 @@ export default function RecordModal({
   const [showFollowUpButton, setShowFollowUpButton] = useState(false);
   const [isGeneratingFollowUp, setIsGeneratingFollowUp] = useState(false);
   const [contextualFollowUpQuestion, setContextualFollowUpQuestion] = useState<string | null>(null);
+  
+  // Multi-question follow-up state
+  const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
+  const [currentFollowUpIndex, setCurrentFollowUpIndex] = useState(0);
+  
+  // Chunk tracking for efficient transcription
+  const [transcribedChunkCount, setTranscribedChunkCount] = useState(0);
+  const [partialTranscript, setPartialTranscript] = useState("");
 
   const audioRecorderRef = useRef<AudioRecorderHandle>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -259,6 +267,12 @@ export default function RecordModal({
 
   const processFollowUpQuestion = async (audioBlob: Blob) => {
     try {
+      // Get chunk count for tracking
+      const { blob, chunkCount } = audioRecorderRef.current?.getCurrentPartialRecording() || { blob: null, chunkCount: 0 };
+      
+      if (!blob) {
+        throw new Error("No audio blob available");
+      }
 
       console.log("[RecordModal] Converting audio blob to base64...");
       const base64 = await new Promise<string>((resolve, reject) => {
@@ -268,7 +282,7 @@ export default function RecordModal({
           resolve(base64Data);
         };
         reader.onerror = reject;
-        reader.readAsDataURL(audioBlob);
+        reader.readAsDataURL(blob);
       });
 
       // Get session
@@ -277,7 +291,7 @@ export default function RecordModal({
       } = await supabase.auth.getSession();
 
       // Transcribe current audio
-      console.log("[RecordModal] Transcribing audio...");
+      console.log("[RecordModal] Transcribing partial audio...");
       const transcribeResponse = await fetch(getApiUrl("/api/transcribe"), {
         method: "POST",
         headers: {
@@ -289,7 +303,7 @@ export default function RecordModal({
         credentials: "include",
         body: JSON.stringify({
           audioBase64: base64,
-          mimeType: audioBlob.type || "audio/webm",
+          mimeType: blob.type || "audio/webm",
         }),
       });
 
@@ -298,10 +312,17 @@ export default function RecordModal({
       }
 
       const transcribeData = await transcribeResponse.json();
-      console.log("[RecordModal] Transcription received:", transcribeData.transcription?.substring(0, 100));
+      console.log("[RecordModal] Partial transcription received:", transcribeData.transcription?.substring(0, 100));
+      
+      // Save partial transcript and chunk count for later
+      setPartialTranscript(transcribeData.transcription || "");
+      setTranscribedChunkCount(chunkCount);
+      
+      // Mark these chunks as transcribed in AudioRecorder
+      audioRecorderRef.current?.markChunksAsTranscribed(chunkCount);
 
-      // Generate contextual follow-up question
-      console.log("[RecordModal] Generating follow-up question...");
+      // Generate 3 contextual follow-up questions
+      console.log("[RecordModal] Generating 3 follow-up questions...");
       const followUpResponse = await fetch("/api/followups/contextual", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -312,15 +333,23 @@ export default function RecordModal({
       });
 
       if (!followUpResponse.ok) {
-        throw new Error("Failed to generate follow-up");
+        throw new Error("Failed to generate follow-up questions");
       }
 
       const followUpData = await followUpResponse.json();
-      console.log("[RecordModal] Follow-up question generated:", followUpData.question);
-      setContextualFollowUpQuestion(followUpData.question);
+      console.log("[RecordModal] Follow-up questions generated:", followUpData.questions);
+      
+      // Set the 3 questions
+      setFollowUpQuestions(followUpData.questions || []);
+      setCurrentFollowUpIndex(0);
+      
+      // Also set the first question to old state for backward compatibility
+      if (followUpData.questions && followUpData.questions.length > 0) {
+        setContextualFollowUpQuestion(followUpData.questions[0]);
+      }
 
       toast({
-        title: "Follow-up question ready!",
+        title: "Follow-up questions ready!",
         description: "Resume recording when you're ready to answer.",
       });
     } finally {
@@ -348,22 +377,9 @@ export default function RecordModal({
 
     console.log("[RecordModal] Starting transcription process...");
     try {
-      // Convert blob to base64 for transcription
-      console.log("[RecordModal] Converting blob to base64...");
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64Data = (reader.result as string).split(",")[1];
-          console.log(
-            "[RecordModal] Blob converted to base64, length:",
-            base64Data.length,
-          );
-          resolve(base64Data);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-
+      let finalTranscript = "";
+      let data: any = {};
+      
       // Get Supabase session for authorization
       let {
         data: { session },
@@ -389,56 +405,102 @@ export default function RecordModal({
         }
       }
 
-      // Call transcription API with authorization
-      console.log("[RecordModal] Preparing API call to /api/transcribe...");
       const headers: HeadersInit = {
         "Content-Type": "application/json",
       };
-
       if (session?.access_token) {
         headers["Authorization"] = `Bearer ${session.access_token}`;
-        console.log("[RecordModal] Session token found, adding to headers");
       } else {
-        console.error("[RecordModal] No authentication token found!");
         throw new Error("No authentication token. Please sign in again.");
       }
 
-      console.log(
-        "[RecordModal] Calling /api/transcribe with blob type:",
-        blob.type,
-      );
-      const response = await fetch(getApiUrl("/api/transcribe"), {
-        method: "POST",
-        headers,
-        credentials: "include",
-        body: JSON.stringify({
-          audioBase64: base64,
-          mimeType: blob.type || "audio/webm",
-          title: storyTitle || undefined,
-        }),
-      });
-
-      console.log(
-        "[RecordModal] API response status:",
-        response.status,
-        response.statusText,
-      );
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error(
-            "Authentication failed. Please refresh the page and sign in again.",
-          );
+      // Check if we have a partial transcription from follow-up
+      if (transcribedChunkCount > 0 && partialTranscript) {
+        console.log("[RecordModal] Using partial + remaining chunks strategy");
+        console.log("[RecordModal] Partial transcript length:", partialTranscript.length);
+        console.log("[RecordModal] Transcribed chunks:", transcribedChunkCount);
+        
+        // Get only the remaining chunks
+        const remainingBlob = audioRecorderRef.current?.getRemainingChunks();
+        
+        if (remainingBlob && remainingBlob.size > 0) {
+          console.log("[RecordModal] Transcribing remaining chunks...");
+          // Convert remaining blob to base64
+          const remainingBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64Data = (reader.result as string).split(",")[1];
+              resolve(base64Data);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(remainingBlob);
+          });
+          
+          // Transcribe only the remaining audio
+          const remainingResponse = await fetch(getApiUrl("/api/transcribe"), {
+            method: "POST",
+            headers,
+            credentials: "include",
+            body: JSON.stringify({
+              audioBase64: remainingBase64,
+              mimeType: remainingBlob.type || "audio/webm",
+              title: storyTitle || undefined,
+            }),
+          });
+          
+          if (!remainingResponse.ok) {
+            throw new Error(`Remaining transcription failed: ${remainingResponse.statusText}`);
+          }
+          
+          const remainingData = await remainingResponse.json();
+          console.log("[RecordModal] Remaining transcription length:", remainingData.transcription?.length || 0);
+          
+          // Combine partial + remaining
+          finalTranscript = partialTranscript + " " + (remainingData.transcription || "");
+          data = remainingData; // Use remaining data for formatted content, lessons, etc.
+        } else {
+          // No remaining audio, just use partial
+          console.log("[RecordModal] No remaining chunks, using partial only");
+          finalTranscript = partialTranscript;
         }
-        throw new Error(`Transcription failed: ${response.statusText}`);
+      } else {
+        // Normal flow: transcribe everything
+        console.log("[RecordModal] No partial transcript, transcribing full audio");
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64Data = (reader.result as string).split(",")[1];
+            resolve(base64Data);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+
+        const response = await fetch(getApiUrl("/api/transcribe"), {
+          method: "POST",
+          headers,
+          credentials: "include",
+          body: JSON.stringify({
+            audioBase64: base64,
+            mimeType: blob.type || "audio/webm",
+            title: storyTitle || undefined,
+          }),
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Authentication failed. Please refresh the page and sign in again.");
+          }
+          throw new Error(`Transcription failed: ${response.statusText}`);
+        }
+
+        data = await response.json();
+        finalTranscript = data.transcription || "";
       }
 
-      const data = await response.json();
-      console.log(
-        "[RecordModal] Transcription successful, transcription length:",
-        data.transcription?.length || 0,
-      );
+      console.log("[RecordModal] Final transcript length:", finalTranscript.length);
       console.log("[RecordModal] Response data:", {
-        hasTranscription: !!data.transcription,
+        hasTranscription: !!finalTranscript,
         hasFormattedContent: !!data.formattedContent,
         hasLessonOptions: !!data.lessonOptions,
       });
@@ -446,11 +508,11 @@ export default function RecordModal({
       // Save and navigate to BookStyleReview immediately
       console.log(
         "[RecordModal] Calling onSave with transcription length:",
-        (data.transcription || "").length,
+        finalTranscript.length,
       );
       onSave({
         audioBlob: blob,
-        transcription: data.transcription || "",
+        transcription: finalTranscript,
         formattedContent: data.formattedContent,
         followUpQuestions:
           data.formattedContent?.questions?.map((q: any) => q.text) || [],
@@ -745,6 +807,20 @@ export default function RecordModal({
                           ref={audioRecorderRef}
                           onRecordingComplete={handleRecordingComplete}
                           maxDuration={300} // 5 minutes max
+                          onTimeWarning={(remaining) => {
+                            if (remaining === 60) {
+                              toast({
+                                title: "1 minute remaining",
+                                description: "Your story will auto-save soon.",
+                              });
+                            } else if (remaining === 30) {
+                              toast({
+                                title: "30 seconds remaining",
+                                description: "Recording will stop automatically.",
+                                variant: "warning",
+                              });
+                            }
+                          }}
                           className="w-full"
                         />
                       </div>
@@ -827,9 +903,48 @@ export default function RecordModal({
                         </motion.div>
                       )}
 
-                      {/* Bottom Section: Tips or Follow-up Question */}
-                      {contextualFollowUpQuestion ? (
-                        // Generated follow-up question replaces tips
+                      {/* Bottom Section: Tips or Follow-up Questions */}
+                      {followUpQuestions.length > 0 ? (
+                        // Show 3 follow-up questions with next button
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="space-y-4"
+                        >
+                          <Card className="p-6 bg-gradient-to-br from-amber-50 to-rose-50">
+                            <div className="flex items-start gap-3">
+                              <Sparkles
+                                className="w-6 h-6 mt-1 flex-shrink-0"
+                                style={{ color: designSystem.colors.primary.coral }}
+                              />
+                              <div className="flex-1">
+                                <p className="text-2xl text-gray-700 italic leading-relaxed">
+                                  &ldquo;{followUpQuestions[currentFollowUpIndex]}&rdquo;
+                                </p>
+                                <p className="text-sm text-gray-500 mt-3">
+                                  Question {currentFollowUpIndex + 1} of {followUpQuestions.length}
+                                </p>
+                              </div>
+                            </div>
+                          </Card>
+                          
+                          {currentFollowUpIndex < followUpQuestions.length - 1 && (
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                const nextIndex = currentFollowUpIndex + 1;
+                                setCurrentFollowUpIndex(nextIndex);
+                                // Also update the old single question state for backward compatibility
+                                setContextualFollowUpQuestion(followUpQuestions[nextIndex]);
+                              }}
+                              className="w-full"
+                            >
+                              Next Question
+                            </Button>
+                          )}
+                        </motion.div>
+                      ) : contextualFollowUpQuestion ? (
+                        // Fallback: old single question display (backward compatibility)
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}

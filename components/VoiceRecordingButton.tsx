@@ -113,37 +113,25 @@ export function VoiceRecordingButton({
     }
   };
 
-  // Voice level visualization bars
-  const VoiceVisualizer = () => {
-    const bars = 5;
-    const activeBarCount = Math.ceil(voiceLevel * bars);
+  // Voice level circular gradient fill
+  const CircularGradientFill = () => {
+    const fillPercentage = voiceLevel * 100;
 
     return (
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="flex gap-1 items-end h-12">
-          {Array.from({ length: bars }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="w-1.5 rounded-full"
-              style={{
-                background:
-                  i < activeBarCount
-                    ? designSystem.colors.gradients.coral
-                    : "#e5e7eb",
-                height: `${((i + 1) / bars) * 100}%`,
-              }}
-              animate={{
-                opacity: i < activeBarCount ? 1 : 0.3,
-                scaleY: i < activeBarCount ? [1, 1.2, 1] : 1,
-              }}
-              transition={{
-                duration: 0.3,
-                repeat: i < activeBarCount ? Infinity : 0,
-                repeatType: "reverse",
-              }}
-            />
-          ))}
-        </div>
+      <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+        <motion.div 
+          className="absolute bottom-0 left-0 right-0"
+          style={{
+            background: 'linear-gradient(to top, rgba(251, 146, 60, 0.8) 0%, rgba(251, 146, 60, 0.2) 100%)',
+          }}
+          animate={{
+            height: `${fillPercentage}%`,
+          }}
+          transition={{
+            duration: 0.1,
+            ease: "easeOut"
+          }}
+        />
       </div>
     );
   };
@@ -185,19 +173,31 @@ export function VoiceRecordingButton({
             exit={{ opacity: 0 }}
             className="absolute inset-0"
           >
-            {/* Voice visualizer in background */}
-            {!isPaused && <VoiceVisualizer />}
+            {/* Circular gradient fill in background */}
+            {!isPaused && <CircularGradientFill />}
 
-            {/* Timer overlay */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
+            {/* Timer overlay with enhanced visibility */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center relative z-10">
               <motion.span
                 className="text-2xl font-bold text-white"
+                style={{ 
+                  textShadow: '0 2px 8px rgba(0,0,0,0.5), 0 0 2px rgba(255,255,255,0.3)',
+                  position: 'relative',
+                  zIndex: 20
+                }}
                 animate={{ opacity: isPaused ? 0.5 : 1 }}
               >
                 {formatTime(recordingTime)}
               </motion.span>
               {isPaused && (
-                <span className="text-xs text-white/80 mt-1">Paused</span>
+                <span 
+                  className="text-xs text-white/90 mt-1"
+                  style={{ 
+                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                  }}
+                >
+                  Paused
+                </span>
               )}
             </div>
           </motion.div>

@@ -426,3 +426,14 @@ export const qualityGates = {
   BANNED_PHRASES,
   EMOTIONAL_DEPTH_SIGNALS,
 };
+
+// Export individual functions for convenience
+export {
+  isWorthyEntity,
+  validatePromptQuality,
+  scorePromptQuality,
+  getQualityReport,
+  GENERIC_WORDS,
+  BANNED_PHRASES,
+  EMOTIONAL_DEPTH_SIGNALS,
+};
