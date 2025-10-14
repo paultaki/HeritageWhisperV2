@@ -1810,7 +1810,7 @@ textarea:focus-visible {
     line-height: 1.75;
     text-align: left;
     hyphens: auto;
-    color: #3a3a3a;
+    color: #1e1710;
     margin: 20px 0;
     white-space: pre-wrap;
   }
@@ -2130,11 +2130,11 @@ textarea:focus-visible {
   }
 
   .book-page p {
-    color: hsl(30, 20%, 35%);
+    color: #1e1710;
   }
 
   .book-page .prose {
-    color: hsl(30, 20%, 30%);
+    color: #1e1710;
     line-height: 1.8;
   }
 
@@ -3091,7 +3091,7 @@ textarea:focus-visible {
 .memory-body {
   font-size: 1.125rem; /* 18px */
   line-height: 1.75;
-  color: hsl(23, 5%, 30%);
+  color: #1e1710;
   font-family: "Crimson Text", Georgia, serif;
   text-align: left;
   hyphens: auto;
