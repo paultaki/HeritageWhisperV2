@@ -130,9 +130,9 @@ export default function RecordModal({
     }
   }, [profileData, isOpen, initialPrompt]);
 
-  // Show follow-up button when paused > 60s
+  // Show follow-up button when paused > 30s
   useEffect(() => {
-    if (isPaused && recordingTime >= 60) {
+    if (isPaused && recordingTime >= 30) {
       setShowFollowUpButton(true);
     } else {
       setShowFollowUpButton(false);
@@ -218,19 +218,49 @@ export default function RecordModal({
   };
 
   const handleGetFollowUpQuestion = async () => {
-    if (!audioRecorderRef.current) return;
+    if (!audioRecorderRef.current) {
+      console.log("[RecordModal] No audio recorder reference");
+      return;
+    }
 
     setIsGeneratingFollowUp(true);
 
     try {
       // Get current partial recording without stopping
+      console.log("[RecordModal] Requesting partial recording...");
       const partialBlob = audioRecorderRef.current.getCurrentPartialRecording();
 
+      console.log("[RecordModal] Partial blob size:", partialBlob?.size || 0);
+
       if (!partialBlob || partialBlob.size === 0) {
-        throw new Error("No audio data available");
+        // Fall back to using getCurrentRecording if partial doesn't work
+        const fullBlob = audioRecorderRef.current.getCurrentRecording();
+        console.log("[RecordModal] Fallback to full recording, size:", fullBlob?.size || 0);
+        
+        if (!fullBlob || fullBlob.size === 0) {
+          throw new Error("No audio data available yet. Try recording for a bit longer.");
+        }
+        
+        // Use the full recording instead
+        return await processFollowUpQuestion(fullBlob);
       }
 
-      // Convert blob to base64
+      await processFollowUpQuestion(partialBlob);
+    } catch (error) {
+      console.error("Error generating follow-up:", error);
+      toast({
+        title: "Couldn't generate question",
+        description: error instanceof Error ? error.message : "Try resuming and continuing your story.",
+        variant: "destructive",
+      });
+      setIsGeneratingFollowUp(false);
+    }
+  };
+
+  const processFollowUpQuestion = async (audioBlob: Blob) => {
+    try {
+
+      console.log("[RecordModal] Converting audio blob to base64...");
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -238,7 +268,7 @@ export default function RecordModal({
           resolve(base64Data);
         };
         reader.onerror = reject;
-        reader.readAsDataURL(partialBlob);
+        reader.readAsDataURL(audioBlob);
       });
 
       // Get session
@@ -247,6 +277,7 @@ export default function RecordModal({
       } = await supabase.auth.getSession();
 
       // Transcribe current audio
+      console.log("[RecordModal] Transcribing audio...");
       const transcribeResponse = await fetch(getApiUrl("/api/transcribe"), {
         method: "POST",
         headers: {
@@ -258,7 +289,7 @@ export default function RecordModal({
         credentials: "include",
         body: JSON.stringify({
           audioBase64: base64,
-          mimeType: partialBlob.type || "audio/webm",
+          mimeType: audioBlob.type || "audio/webm",
         }),
       });
 
@@ -267,8 +298,10 @@ export default function RecordModal({
       }
 
       const transcribeData = await transcribeResponse.json();
+      console.log("[RecordModal] Transcription received:", transcribeData.transcription?.substring(0, 100));
 
       // Generate contextual follow-up question
+      console.log("[RecordModal] Generating follow-up question...");
       const followUpResponse = await fetch("/api/followups/contextual", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -283,18 +316,12 @@ export default function RecordModal({
       }
 
       const followUpData = await followUpResponse.json();
+      console.log("[RecordModal] Follow-up question generated:", followUpData.question);
       setContextualFollowUpQuestion(followUpData.question);
 
       toast({
         title: "Follow-up question ready!",
         description: "Resume recording when you're ready to answer.",
-      });
-    } catch (error) {
-      console.error("Error generating follow-up:", error);
-      toast({
-        title: "Couldn't generate question",
-        description: "Try resuming and continuing your story.",
-        variant: "destructive",
       });
     } finally {
       setIsGeneratingFollowUp(false);
@@ -703,10 +730,10 @@ export default function RecordModal({
                       <Card className="p-6 bg-gradient-to-br from-white to-amber-50/30">
                         <div className="flex items-start gap-3">
                           <Sparkles
-                            className="w-5 h-5 mt-1 flex-shrink-0"
+                            className="w-6 h-6 mt-1 flex-shrink-0"
                             style={{ color: designSystem.colors.primary.coral }}
                           />
-                          <p className="text-xl text-gray-700 italic leading-relaxed">
+                          <p className="text-2xl text-gray-700 italic leading-relaxed">
                             &ldquo;{currentPrompt || "What's a story from your life that you've been wanting to share?"}&rdquo;
                           </p>
                         </div>
@@ -723,7 +750,7 @@ export default function RecordModal({
                       </div>
 
                       {/* Center: Morphing Recording Button */}
-                      <div className="flex flex-col items-center justify-center py-8">
+                      <div className="flex flex-col items-center justify-center py-4">
                         <VoiceRecordingButton
                           isRecording={isRecording}
                           isPaused={isPaused}
@@ -772,7 +799,7 @@ export default function RecordModal({
                         </motion.div>
                       )}
 
-                      {/* Contextual Follow-up Button - Show when paused >1min */}
+                      {/* Contextual Follow-up Button - Show when paused >30s */}
                       {showFollowUpButton && (
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
@@ -783,16 +810,16 @@ export default function RecordModal({
                             variant="ghost"
                             onClick={handleGetFollowUpQuestion}
                             disabled={isGeneratingFollowUp}
-                            className="text-sm text-primary hover:bg-primary/10"
+                            className="text-base text-primary hover:bg-primary/10"
                           >
                             {isGeneratingFollowUp ? (
                               <>
-                                <div className="w-4 h-4 mr-2 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                <div className="w-5 h-5 mr-2 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                                 Getting your personalized question...
                               </>
                             ) : (
                               <>
-                                <Sparkles className="w-4 h-4 mr-2" />
+                                <Sparkles className="w-5 h-5 mr-2" />
                                 Need help? Get a follow-up question
                               </>
                             )}
@@ -809,9 +836,15 @@ export default function RecordModal({
                           className="space-y-3"
                         >
                           <Card className="p-6 bg-gradient-to-br from-amber-50 to-rose-50">
-                            <p className="text-xl text-gray-700 italic leading-relaxed">
-                              &ldquo;{contextualFollowUpQuestion}&rdquo;
-                            </p>
+                            <div className="flex items-start gap-3">
+                              <Sparkles
+                                className="w-6 h-6 mt-1 flex-shrink-0"
+                                style={{ color: designSystem.colors.primary.coral }}
+                              />
+                              <p className="text-2xl text-gray-700 italic leading-relaxed">
+                                &ldquo;{contextualFollowUpQuestion}&rdquo;
+                              </p>
+                            </div>
                           </Card>
                         </motion.div>
                       ) : !isRecording ? (
@@ -1090,7 +1123,7 @@ export default function RecordModal({
                       // Create an empty audio blob so save button works
                       setAudioBlob(new Blob([""], { type: "audio/webm" }));
                     }}
-                    className="w-full text-center text-gray-600 hover:text-gray-800 transition-colors py-2 text-sm underline decoration-dotted underline-offset-4"
+                    className="w-full text-center text-gray-600 hover:text-gray-800 transition-colors py-2 text-base underline decoration-dotted underline-offset-4"
                   >
                     I want to type my story instead
                   </button>

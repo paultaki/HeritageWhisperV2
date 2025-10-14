@@ -97,16 +97,18 @@ export function VoiceRecordingButton({
       setShowCountdown(true);
       setCountdown(3);
 
+      let count = 3;
       const countdownInterval = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(countdownInterval);
-            setShowCountdown(false);
-            onStart(); // Start recording
-            return 0;
-          }
-          return prev - 1;
-        });
+        count--;
+        if (count > 0) {
+          setCountdown(count);
+        } else {
+          clearInterval(countdownInterval);
+          setShowCountdown(false);
+          setCountdown(0);
+          // Use setTimeout to avoid calling setState during render
+          setTimeout(() => onStart(), 0);
+        }
       }, 500); // 0.5s per count = 1.5s total
     }
   };
