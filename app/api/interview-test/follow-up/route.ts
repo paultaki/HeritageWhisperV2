@@ -117,13 +117,32 @@ No explanations, no extra text.`;
           },
         ],
       });
+
+      const latencyMs = Date.now() - startTime;
+      const content = response.choices[0]?.message?.content?.trim();
+
+      logger.debug("[FollowUp] GPT-5 response", {
+        modelUsed,
+        contentLength: content?.length,
+        content: content?.substring(0, 200),
+      });
+
+      // If GPT-5 returns empty, try fallback
+      if (!content) {
+        throw new Error("GPT-5 returned empty response");
+      }
+
+      // Success - use GPT-5 response
+      const parsedContent = content;
+
     } catch (gpt5Error: any) {
-      logger.warn("[FollowUp] GPT-5 not available, falling back to GPT-4o-mini", {
+      logger.warn("[FollowUp] GPT-5 failed, falling back to GPT-4o-mini", {
         error: gpt5Error?.message,
       });
 
       // Fallback to GPT-4o-mini (no reasoning_effort parameter)
       modelUsed = "gpt-4o-mini";
+      const fallbackStart = Date.now();
       response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         temperature: 0.8,
@@ -139,19 +158,24 @@ No explanations, no extra text.`;
           },
         ],
       });
+
+      logger.debug("[FollowUp] GPT-4o-mini response", {
+        modelUsed,
+        latencyMs: Date.now() - fallbackStart,
+      });
     }
 
     const latencyMs = Date.now() - startTime;
     const content = response.choices[0]?.message?.content?.trim();
 
-    logger.debug("[FollowUp] Raw API response", {
+    logger.debug("[FollowUp] Final response", {
       modelUsed,
       contentLength: content?.length,
       content: content?.substring(0, 200),
     });
 
     if (!content) {
-      throw new Error("No follow-up questions generated");
+      throw new Error("No follow-up questions generated from either model");
     }
 
     // Parse the numbered list
