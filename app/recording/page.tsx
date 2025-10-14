@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AudioRecorder, AudioRecorderHandle } from "@/components/AudioRecorder";
 import { InFlowPromptCard } from "@/components/InFlowPromptCard";
 import { useAuth } from "@/lib/auth";
-import { ArrowLeft, Heart, Mic, Loader2 } from "lucide-react";
+import { ArrowLeft, Heart, Mic, Loader2, Pause, Play, Square, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { navCache } from "@/lib/navCache";
 import { findMatchingPrompt, getFallbackPrompt } from "@/utils/keywordPrompts";
@@ -195,10 +195,17 @@ function RecordingContent() {
   const [hasRecording, setHasRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
   const [displayPrompt, setDisplayPrompt] = useState<string>("");
   const [showWisdomClip, setShowWisdomClip] = useState(false);
   const [isAnsweringFollowUp, setIsAnsweringFollowUp] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  
+  // Follow-up question feature state
+  const [showFollowUpButton, setShowFollowUpButton] = useState(false);
+  const [isGeneratingFollowUp, setIsGeneratingFollowUp] = useState(false);
+  const [contextualFollowUpQuestion, setContextualFollowUpQuestion] = useState<string | null>(null);
 
   // Refs
   const audioRef = useRef<Blob | null>(null);
@@ -313,6 +320,36 @@ function RecordingContent() {
     setDisplayPrompt(currentPrompt.text);
   }, [currentPrompt]);
 
+  // Poll recording duration and update follow-up button visibility
+  useEffect(() => {
+    if (!isRecording || !isPaused) {
+      setShowFollowUpButton(false);
+      return;
+    }
+
+    // Update duration from recorder
+    const updateDuration = () => {
+      if (audioRecorderRef.current) {
+        const duration = audioRecorderRef.current.getRecordingDuration();
+        setRecordingDuration(duration);
+        
+        // Show follow-up button if paused and duration > 60s
+        if (isPaused && duration >= 60) {
+          setShowFollowUpButton(true);
+        } else {
+          setShowFollowUpButton(false);
+        }
+      }
+    };
+
+    // Update immediately
+    updateDuration();
+
+    // Poll every second while recording
+    const interval = setInterval(updateDuration, 1000);
+    return () => clearInterval(interval);
+  }, [isRecording, isPaused]);
+
   // Redirect to login if no user
   useEffect(() => {
     if (!user) {
@@ -416,6 +453,8 @@ function RecordingContent() {
   // Recording Handlers
   const handleRecordingStart = () => {
     setIsRecording(true);
+    setIsPaused(false);
+    setContextualFollowUpQuestion(null);
 
     if (!isAnsweringFollowUp) {
       setInFlowPromptCount(0);
@@ -426,6 +465,77 @@ function RecordingContent() {
 
   const handleRecordingStop = () => {
     setIsRecording(false);
+    setIsPaused(false);
+  };
+
+  const handlePauseResume = () => {
+    if (!audioRecorderRef.current) return;
+
+    if (isPaused) {
+      audioRecorderRef.current.resumeRecording();
+      setIsPaused(false);
+      setContextualFollowUpQuestion(null); // Clear question when resuming
+    } else {
+      audioRecorderRef.current.pauseRecording();
+      setIsPaused(true);
+    }
+  };
+
+  const handleStopRecording = () => {
+    if (!audioRecorderRef.current) return;
+    // The AudioRecorder's stop button will handle this
+    // Just update our local state
+    setIsRecording(false);
+    setIsPaused(false);
+  };
+
+  const handleGetFollowUpQuestion = async () => {
+    if (!audioRecorderRef.current) return;
+
+    setIsGeneratingFollowUp(true);
+
+    try {
+      // Get current partial recording without stopping
+      const partialBlob = audioRecorderRef.current.getCurrentPartialRecording();
+
+      if (!partialBlob || partialBlob.size === 0) {
+        throw new Error("No audio data available");
+      }
+
+      // Transcribe current audio
+      const transcription = await transcribeAudio(partialBlob);
+
+      // Generate contextual follow-up question
+      const response = await fetch("/api/followups/contextual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transcript: transcription.text,
+          originalPrompt: currentPrompt.text,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate follow-up");
+      }
+
+      const data = await response.json();
+      setContextualFollowUpQuestion(data.question);
+
+      toast({
+        title: "Follow-up question ready!",
+        description: "Resume recording when you're ready to answer.",
+      });
+    } catch (error) {
+      console.error("Error generating follow-up:", error);
+      toast({
+        title: "Couldn't generate question",
+        description: "Try resuming and continuing your story.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingFollowUp(false);
+    }
   };
 
   const handleMainRecordingComplete = async (
@@ -841,26 +951,122 @@ function RecordingContent() {
                 silenceDuration={1000}
                 className="mb-8"
               />
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
-                <Button
-                  onClick={handleCancel}
-                  variant="outline"
-                  size="lg"
-                  className="px-6 py-2 text-base font-medium border-2 hover:bg-muted/50 transition-colors"
-                  data-testid="button-cancel-recording"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSkipRecording}
-                  variant="outline"
-                  size="lg"
-                  className="px-6 py-2 text-base font-medium border-2 hover:bg-muted/50 transition-colors"
-                  data-testid="button-skip-recording"
-                >
-                  Skip recording - I&apos;ll type my story instead
-                </Button>
-              </div>
+
+              {/* Pause/Resume and Stop buttons - Show when recording */}
+              {isRecording && (
+                <Card className="max-w-lg mx-auto mb-6">
+                  <CardContent className="pt-6 pb-6">
+                    <div className="space-y-4">
+                      {/* Control Buttons */}
+                      <div className="flex gap-4 justify-center">
+                        <Button
+                          variant="outline"
+                          onClick={handlePauseResume}
+                          className="flex-1 max-w-[160px] min-h-[44px]"
+                          data-testid="button-pause-resume"
+                        >
+                          {isPaused ? (
+                            <>
+                              <Play className="w-4 h-4 mr-2" />
+                              Resume
+                            </>
+                          ) : (
+                            <>
+                              <Pause className="w-4 h-4 mr-2" />
+                              Pause
+                            </>
+                          )}
+                        </Button>
+
+                        <Button
+                          onClick={handleStopRecording}
+                          className="flex-1 max-w-[180px] min-h-[44px] bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white"
+                          data-testid="button-stop-transcribe"
+                        >
+                          <Square className="w-4 h-4 mr-2" />
+                          Stop & Transcribe
+                        </Button>
+                      </div>
+
+                      {/* Contextual Follow-up Button - Show when paused >1min */}
+                      {showFollowUpButton && (
+                        <div className="flex justify-center pt-2">
+                          <Button
+                            variant="ghost"
+                            onClick={handleGetFollowUpQuestion}
+                            disabled={isGeneratingFollowUp}
+                            className="text-sm text-primary hover:bg-primary/10"
+                            data-testid="button-get-followup"
+                          >
+                            {isGeneratingFollowUp ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Thinking...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-4 h-4 mr-2" />
+                                Need help? Get a follow-up question
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Display generated follow-up question */}
+                      {contextualFollowUpQuestion && (
+                        <div className="mt-4">
+                          <div className="p-4 bg-gradient-to-r from-amber-50 to-rose-50 border-l-4 border-primary rounded-lg">
+                            <div className="flex items-start gap-3">
+                              <Sparkles className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                              <div>
+                                <p className="text-sm font-semibold text-gray-700 mb-1">
+                                  Here&apos;s a question to keep you going:
+                                </p>
+                                <p className="text-base italic text-gray-800">
+                                  &ldquo;{contextualFollowUpQuestion}&rdquo;
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Helper text */}
+                      <div className="text-center pt-2">
+                        <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
+                          <Sparkles className="w-4 h-4" />
+                          Auto-transcribe after you stop
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Cancel and Skip buttons - Show when not recording */}
+              {!isRecording && (
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+                  <Button
+                    onClick={handleCancel}
+                    variant="outline"
+                    size="lg"
+                    className="px-6 py-2 text-base font-medium border-2 hover:bg-muted/50 transition-colors"
+                    data-testid="button-cancel-recording"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSkipRecording}
+                    variant="outline"
+                    size="lg"
+                    className="px-6 py-2 text-base font-medium border-2 hover:bg-muted/50 transition-colors"
+                    data-testid="button-skip-recording"
+                  >
+                    Skip recording - I&apos;ll type my story instead
+                  </Button>
+                </div>
+              )}
             </>
           ) : (
             <div className="space-y-6">

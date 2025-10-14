@@ -31,6 +31,7 @@ export interface AudioRecorderHandle {
   pauseRecording: () => void;
   resumeRecording: () => void;
   getCurrentRecording: () => Blob | null;
+  getCurrentPartialRecording: () => Blob | null;
   isRecording: boolean;
   isPaused: boolean;
   getRecordingDuration: () => number; // Get current recording duration in seconds
@@ -511,7 +512,7 @@ export const AudioRecorder = forwardRef<
             clearInterval(countdownInterval);
             resolve();
           }
-        }, 1000);
+        }, 500); // Faster countdown: 0.5s per count = 1.5s total
       });
 
       // Give the MediaStream a moment to fully initialize
@@ -876,6 +877,36 @@ export const AudioRecorder = forwardRef<
     return null;
   }, []);
 
+  const getCurrentPartialRecording = useCallback(() => {
+    if (mediaRecorderRef.current && chunksRef.current.length > 0) {
+      console.log("[AudioRecorder] Getting partial recording for AI follow-up...");
+      console.log("[AudioRecorder] Current chunks:", chunksRef.current.length);
+
+      // Request current data - triggers ondataavailable to flush buffered audio
+      if (mediaRecorderRef.current.state === "recording" || 
+          mediaRecorderRef.current.state === "paused") {
+        console.log("[AudioRecorder] Requesting data for partial recording...");
+        mediaRecorderRef.current.requestData();
+      }
+
+      // Create blob from current chunks without stopping recording
+      const blobType =
+        mediaRecorderRef.current.mimeType ||
+        mimeTypeRef.current ||
+        "audio/webm";
+      const blob = new Blob(chunksRef.current, { type: blobType });
+      console.log(
+        "[AudioRecorder] Created partial blob - Size:",
+        blob.size,
+        "Type:",
+        blob.type,
+      );
+      return blob;
+    }
+    console.log("[AudioRecorder] No partial recording available");
+    return null;
+  }, []);
+
   // Comprehensive cleanup method
   const cleanup = useCallback(() => {
     console.log("[AudioRecorder] Cleanup called");
@@ -1006,6 +1037,7 @@ export const AudioRecorder = forwardRef<
       pauseRecording,
       resumeRecording,
       getCurrentRecording,
+      getCurrentPartialRecording,
       isRecording,
       isPaused,
       getRecordingDuration,
@@ -1015,6 +1047,7 @@ export const AudioRecorder = forwardRef<
       pauseRecording,
       resumeRecording,
       getCurrentRecording,
+      getCurrentPartialRecording,
       isRecording,
       isPaused,
       getRecordingDuration,
@@ -1135,7 +1168,7 @@ export const AudioRecorder = forwardRef<
       <div className="flex flex-col items-center">
         <button
           onClick={isRecording ? stopRecording : startRecording}
-          className={`w-44 h-44 rounded-full text-2xl relative ${
+          className={`w-32 h-32 rounded-full text-xl relative ${
             isRecording
               ? "bg-gradient-to-b from-red-500 to-red-600 text-white shadow-[inset_0_-4px_8px_rgba(0,0,0,0.3),_0_6px_12px_rgba(0,0,0,0.2)] border-4 border-red-700 hover:from-red-600 hover:to-red-700 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
               : "bg-gradient-to-b from-amber-500 to-rose-500 text-white shadow-[0_6px_12px_rgba(0,0,0,0.3),_inset_0_2px_4px_rgba(255,255,255,0.4)] border-4 border-amber-600 hover:from-amber-600 hover:to-rose-600 transform hover:scale-105 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] active:scale-95"
@@ -1146,16 +1179,16 @@ export const AudioRecorder = forwardRef<
         >
           <div className="flex flex-col items-center gap-2 justify-center">
             {countdown !== null ? (
-              <span className="text-8xl font-bold">{countdown}</span>
+              <span className="text-6xl font-bold">{countdown}</span>
             ) : isRecording ? (
               <>
-                <Square className="w-20 h-20 fill-white" />
-                <span className="text-2xl font-bold tracking-wide">STOP</span>
+                <Square className="w-12 h-12 fill-white" />
+                <span className="text-xl font-bold tracking-wide">STOP</span>
               </>
             ) : (
               <>
-                <Mic className="w-24 h-24" />
-                <span className="text-2xl font-bold tracking-wide">START</span>
+                <Mic className="w-16 h-16" />
+                <span className="text-xl font-bold tracking-wide">START</span>
               </>
             )}
           </div>
