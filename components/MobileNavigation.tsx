@@ -81,15 +81,14 @@ export default function MobileNavigation({
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", damping: 20 }}
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t-2 md:hidden safe-area-bottom"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t-2 md:hidden"
       style={{
         borderTopColor: "#D36A3D",
-        paddingBottom: "env(safe-area-inset-bottom)",
+        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 0px)",
         boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.08)",
-        position: "fixed",
       }}
     >
-      <div className="flex items-center justify-around h-20 relative">
+      <div className="flex items-center justify-around h-20 relative pb-0">
         {/* Timeline */}
         <NavItem
           icon={Calendar}
