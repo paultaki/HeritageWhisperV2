@@ -99,14 +99,14 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-rose-50 to-white overflow-x-hidden">
-      {/* Sign In Button - Fixed Position Top Right */}
+      {/* Continue Stories Button - Fixed Position Top Right */}
       <div className="fixed top-4 right-4 z-50">
         <button
           onClick={() => router.push("/auth/login")}
           className="bg-white/90 backdrop-blur-sm text-gray-700 px-6 py-3 rounded-lg font-semibold shadow-sm hover:shadow-md transition-all duration-300 hover:bg-white border border-gray-200"
           style={{ fontFamily: "Poppins, sans-serif" }}
         >
-          Sign In
+          Continue Stories
         </button>
       </div>
 
