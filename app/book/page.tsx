@@ -370,23 +370,28 @@ const BookPageRenderer = ({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Handle page click for navigation
-  const handlePageClick = (e: React.MouseEvent) => {
-    // Don't navigate if clicking on interactive elements
-    const target = e.target as HTMLElement;
-    if (
-      target.closest('button') ||
-      target.closest('a') ||
-      target.closest('.audio-controls') ||
-      target.closest('.toc-entry')
-    ) {
-      return;
-    }
-
-    // Call the navigation handler
+  // Handle margin click for navigation
+  const handleMarginClick = () => {
     if (onPageClick) {
       onPageClick(page.isLeftPage);
     }
+  };
+
+  // Margin click zone component
+  const MarginClickZone = () => {
+    // For left pages, clickable zone is on the LEFT (outer) margin
+    // For right pages, clickable zone is on the RIGHT (outer) margin
+    const isLeftMargin = page.isLeftPage;
+    
+    return (
+      <div
+        className={`absolute top-0 bottom-0 w-[15%] z-10 ${
+          isLeftMargin ? 'left-0' : 'right-0'
+        }`}
+        onClick={handleMarginClick}
+        style={{ cursor: 'pointer' }}
+      />
+    );
   };
 
   // Render intro page
@@ -394,8 +399,8 @@ const BookPageRenderer = ({
     return (
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
-        onClick={handlePageClick}
       >
+        <MarginClickZone />
         <div
           ref={pageContentRef}
           className="page-content px-8 py-16 flex flex-col items-center justify-center text-center h-full"
@@ -428,8 +433,8 @@ const BookPageRenderer = ({
     return (
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
-        onClick={handlePageClick}
       >
+        <MarginClickZone />
         <div ref={pageContentRef} className="page-content px-8 py-12">
           <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">
             Table of Contents
@@ -473,8 +478,8 @@ const BookPageRenderer = ({
     return (
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
-        onClick={handlePageClick}
       >
+        <MarginClickZone />
         <DecadeIntroPage
           decade={page.decade || ""}
           title={page.decadeTitle || ""}
@@ -510,8 +515,8 @@ const BookPageRenderer = ({
     return (
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
-        onClick={handlePageClick}
       >
+        <MarginClickZone />
         <WhisperPage
           prompt={page.whisperPrompt}
           afterStory={{
@@ -530,8 +535,8 @@ const BookPageRenderer = ({
   return (
     <article
       className={`page book-page ${page.isLeftPage ? "page--left" : "page--right"}`}
-      onClick={handlePageClick}
     >
+      <MarginClickZone />
       <div className="running-header">
         {/* Story title with year and age - single line */}
         <div className="story-header-title">
