@@ -125,48 +125,18 @@
 
 /* Page navigation - cursor hints only on margins */
 
-/* Default cursor for page content */
-.book-spread.spread-mode .page {
-  cursor: default;
-}
-
-/* Left page: invisible clickable zone on LEFT margin only */
-.book-spread.spread-mode .page--left::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 15%;
+/* Apply directional cursors directly to pages - simpler approach */
+.book-spread.spread-mode .page--left {
   cursor: w-resize;
-  z-index: 999;
-  pointer-events: auto;
 }
 
-/* Right page: invisible clickable zone on RIGHT margin only */
-.book-spread.spread-mode .page--right::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 15%;
+.book-spread.spread-mode .page--right {
   cursor: e-resize;
-  z-index: 999;
-  pointer-events: auto;
 }
 
-/* Single page mode - always forward on right margin */
-.book-spread.single-mode .page::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 15%;
+/* Single page mode - always forward */
+.book-spread.single-mode .page {
   cursor: e-resize;
-  z-index: 999;
-  pointer-events: auto;
 }
 
 /* Interactive elements keep pointer cursor */
