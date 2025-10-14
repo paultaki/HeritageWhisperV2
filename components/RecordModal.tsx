@@ -836,18 +836,59 @@ export default function RecordModal({
                     </div>
                   ) : (
                     <>
-                      {/* Prompt at top */}
-                      <Card className="p-6 bg-gradient-to-br from-white to-amber-50/30">
-                        <div className="flex items-start gap-3">
-                          <Sparkles
-                            className="w-6 h-6 mt-1 flex-shrink-0"
-                            style={{ color: designSystem.colors.primary.coral }}
-                          />
-                          <p className="text-2xl text-gray-700 italic leading-relaxed">
-                            &ldquo;{currentPrompt || "What's a story from your life that you've been wanting to share?"}&rdquo;
-                          </p>
-                        </div>
-                      </Card>
+                      {/* Prompt at top - or Follow-up Questions */}
+                      <motion.div
+                        key={followUpQuestions.length > 0 ? `followup-${currentFollowUpIndex}` : 'original-prompt'}
+                        initial={{ backgroundColor: 'rgba(251, 146, 60, 0.1)' }}
+                        animate={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                      >
+                        <Card className="p-6 bg-gradient-to-br from-white to-amber-50/30">
+                          <div className="flex items-start gap-3">
+                            <Sparkles
+                              className="w-6 h-6 mt-1 flex-shrink-0"
+                              style={{ color: designSystem.colors.primary.coral }}
+                            />
+                            <div className="flex-1">
+                              <p className="text-2xl text-gray-700 italic leading-relaxed">
+                                {followUpQuestions.length > 0 ? (
+                                  `"${followUpQuestions[currentFollowUpIndex]}"`
+                                ) : (
+                                  `"${currentPrompt || "What's a story from your life that you've been wanting to share?"}"`
+                                )}
+                              </p>
+                              {followUpQuestions.length > 0 && (
+                                <div className="flex items-center justify-between mt-4">
+                                  <p className="text-sm text-gray-500">
+                                    Question {currentFollowUpIndex + 1} of {followUpQuestions.length}
+                                  </p>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => setCurrentFollowUpIndex(i => Math.max(0, i - 1))}
+                                      disabled={currentFollowUpIndex === 0}
+                                      className="text-sm"
+                                    >
+                                      ← Previous
+                                    </Button>
+                                    {currentFollowUpIndex < followUpQuestions.length - 1 && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setCurrentFollowUpIndex(i => i + 1)}
+                                        className="text-sm"
+                                      >
+                                        Next →
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </Card>
+                      </motion.div>
 
                       {/* Morphing Recording Button - Hidden AudioRecorder */}
                       <div className="hidden">
@@ -951,67 +992,9 @@ export default function RecordModal({
                         </motion.div>
                       )}
 
-                      {/* Bottom Section: Tips or Follow-up Questions */}
-                      {followUpQuestions.length > 0 ? (
-                        // Show 3 follow-up questions with next button
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="space-y-4"
-                        >
-                          <Card className="p-6 bg-gradient-to-br from-amber-50 to-rose-50">
-                            <div className="flex items-start gap-3">
-                              <Sparkles
-                                className="w-6 h-6 mt-1 flex-shrink-0"
-                                style={{ color: designSystem.colors.primary.coral }}
-                              />
-                              <div className="flex-1">
-                                <p className="text-2xl text-gray-700 italic leading-relaxed">
-                                  &ldquo;{followUpQuestions[currentFollowUpIndex]}&rdquo;
-                                </p>
-                                <p className="text-sm text-gray-500 mt-3">
-                                  Question {currentFollowUpIndex + 1} of {followUpQuestions.length}
-                                </p>
-                              </div>
-                            </div>
-                          </Card>
-                          
-                          {currentFollowUpIndex < followUpQuestions.length - 1 && (
-                            <Button
-                              variant="outline"
-                              onClick={() => {
-                                const nextIndex = currentFollowUpIndex + 1;
-                                setCurrentFollowUpIndex(nextIndex);
-                                // Also update the old single question state for backward compatibility
-                                setContextualFollowUpQuestion(followUpQuestions[nextIndex]);
-                              }}
-                              className="w-full"
-                            >
-                              Next Question
-                            </Button>
-                          )}
-                        </motion.div>
-                      ) : contextualFollowUpQuestion ? (
-                        // Fallback: old single question display (backward compatibility)
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="space-y-3"
-                        >
-                          <Card className="p-6 bg-gradient-to-br from-amber-50 to-rose-50">
-                            <div className="flex items-start gap-3">
-                              <Sparkles
-                                className="w-6 h-6 mt-1 flex-shrink-0"
-                                style={{ color: designSystem.colors.primary.coral }}
-                              />
-                              <p className="text-2xl text-gray-700 italic leading-relaxed">
-                                &ldquo;{contextualFollowUpQuestion}&rdquo;
-                              </p>
-                            </div>
-                          </Card>
-                        </motion.div>
-                      ) : !isRecording ? (
-                        // Tips section when not recording
+                      {/* Bottom Section: Tips (follow-up questions now in top card) */}
+                      {!isRecording && followUpQuestions.length === 0 && (
+                        // Tips section when not recording and no follow-up questions
                         <div className="space-y-3">
                           <h4 className="font-medium text-gray-700 text-base">
                             Tips for a great recording:
@@ -1035,7 +1018,7 @@ export default function RecordModal({
                             </li>
                           </ul>
                         </div>
-                      ) : null}
+                      )}
                     </>
                   )}
                 </motion.div>

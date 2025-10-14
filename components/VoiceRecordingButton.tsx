@@ -176,9 +176,9 @@ export function VoiceRecordingButton({
             {/* Circular gradient fill in background */}
             {!isPaused && <CircularGradientFill />}
 
-            {/* Timer overlay with enhanced visibility - perfectly centered */}
+            {/* Timer overlay - positioned down from center by 60px */}
             <div className="absolute inset-0 flex items-center justify-center relative z-10">
-              <div className="flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center justify-center" style={{ marginTop: '60px' }}>
                 <motion.span
                   className="text-2xl font-bold text-white leading-none"
                   style={{ 
