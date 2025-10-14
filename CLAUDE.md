@@ -41,6 +41,9 @@ DATABASE_URL=postgresql://...
 # OpenAI
 OPENAI_API_KEY=sk-proj-...
 
+# Vercel AI Gateway (Optional)
+AI_GATEWAY_API_KEY=vck_...  # Get from https://vercel.com/dashboard/ai-gateway
+
 # Upstash Redis (Rate Limiting)
 UPSTASH_REDIS_REST_URL=https://...upstash.io
 UPSTASH_REDIS_REST_TOKEN=your_token
@@ -206,6 +209,91 @@ Added to `stories` table:
 - **Stripe webhook**: Unlock Story 3+ premium prompts on payment
 - **UI components**: Display prompts in app interface
 - **Do-not-ask**: User-controlled topic blocking
+
+### Vercel AI Gateway Integration (PRODUCTION)
+
+Hybrid AI infrastructure for observability, caching, and automatic failover.
+
+#### Overview
+
+**Deployed:** October 14, 2025
+**Status:** Production-ready with hybrid architecture
+
+All GPT models (chat completions) route through Vercel AI Gateway for observability and caching. Whisper transcriptions use direct OpenAI API (Gateway doesn't support audio endpoints).
+
+#### Architecture
+
+**Two OpenAI Clients:**
+1. **Direct OpenAI** - Whisper transcriptions only (`openaiDirect`)
+2. **AI Gateway** - All GPT models (`openaiGateway`)
+
+**Files Updated (6 total):**
+- `/app/api/transcribe/route.ts` - Hybrid (Whisper direct, GPT via Gateway)
+- `/lib/tier3Analysis.ts` - AI Gateway enabled
+- `/lib/tier3AnalysisV2.ts` - AI Gateway enabled
+- `/lib/whisperGeneration.ts` - AI Gateway enabled
+- `/lib/echoPrompts.ts` - AI Gateway enabled
+- `/app/api/followups/route.ts` - AI Gateway enabled
+
+#### What Routes Through Gateway
+
+✅ **GPT-4o** - Tier 3 analysis, lesson generation, entity extraction
+✅ **GPT-4o-mini** - Formatting, echo prompts, follow-ups
+❌ **Whisper-1** - Direct OpenAI (audio not supported by Gateway)
+
+#### Benefits
+
+- **Cost Visibility**: Track spending per model/endpoint in real-time
+- **Performance Metrics**: TTFT (Time to First Token) tracking per request
+- **Automatic Caching**: 70-90% cost reduction on repeat operations
+- **Failover**: Auto-retry with alternative providers if OpenAI is down
+- **Unified Dashboard**: All AI usage at https://vercel.com/dashboard/ai-gateway
+
+#### Cost Breakdown (Per Story)
+
+- Whisper transcription: ~$0.006 (direct API)
+- GPT-4o-mini formatting: ~$0.001 (Gateway)
+- GPT-4o lesson generation: ~$0.009 (Gateway)
+- **Total per story**: ~$0.016
+
+**Tier 3 Milestone** (Story 3, 7, 10, etc.):
+- GPT-4o analysis: ~$0.02-0.04 (most expensive operation)
+
+#### Configuration
+
+**Environment Variable:**
+```bash
+AI_GATEWAY_API_KEY=vck_...  # Optional, falls back to OPENAI_API_KEY if not set
+```
+
+**Fallback Pattern:**
+```typescript
+const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
+const baseURL = process.env.AI_GATEWAY_API_KEY
+  ? 'https://ai-gateway.vercel.sh/v1'
+  : undefined;
+```
+
+If `AI_GATEWAY_API_KEY` is not set, all requests use direct OpenAI API with zero code changes.
+
+#### Observability Dashboard
+
+**Location:** https://vercel.com/dashboard/ai-gateway
+
+**Metrics Available:**
+- Request volume by model (gpt-4o vs gpt-4o-mini)
+- Cost per request and total spend over time
+- TTFT (latency) graph showing request performance
+- Token usage (input/output) per operation
+- Activity log with timestamps and model details
+
+#### Monitoring
+
+Watch for:
+- **Most expensive operations**: Tier 3 analysis > Lesson generation > Formatting
+- **Slowest requests**: TTFT spikes indicate performance issues
+- **Caching wins**: Repeat operations showing 97% cost reduction
+- **Error rates**: Failed requests or Gateway downtime
 
 ## 🐛 Common Issues & Fixes
 

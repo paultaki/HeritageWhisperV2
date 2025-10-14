@@ -1,0 +1,408 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth";
+import { useRouter } from "next/navigation";
+
+interface Story {
+  id: string;
+  title: string;
+  story_year: number | null;
+  created_at: string;
+}
+
+interface Prompt {
+  prompt: string;
+  trigger: string;
+  anchorEntity: string;
+  recordingLikelihood: number;
+  reasoning: string;
+}
+
+interface CharacterInsights {
+  traits: Array<{
+    trait: string;
+    confidence: number;
+    evidence: string[];
+  }>;
+  invisibleRules: string[];
+  contradictions: Array<{
+    stated: string;
+    lived: string;
+    tension: string;
+  }>;
+  coreLessons: string[];
+}
+
+interface AnalysisResult {
+  storyCount: number;
+  storiesAnalyzed: number;
+  storyTitles: string[];
+  prompts: Prompt[];
+  characterInsights: CharacterInsights;
+}
+
+export default function PromptsTestingPage() {
+  const { session } = useAuth();
+  const router = useRouter();
+  const [stories, setStories] = useState<Story[]>([]);
+  const [selectedStoryIds, setSelectedStoryIds] = useState<string[]>([]);
+  const [milestone, setMilestone] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
+    null,
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch user stories
+  useEffect(() => {
+    async function fetchStories() {
+      if (!session) return;
+
+      setLoading(true);
+      try {
+        const response = await fetch("/api/stories", {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch stories");
+        }
+
+        const data = await response.json();
+        setStories(data.stories || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load stories");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchStories();
+  }, [session]);
+
+  // Handle story selection toggle
+  const toggleStorySelection = (storyId: string) => {
+    setSelectedStoryIds((prev) =>
+      prev.includes(storyId)
+        ? prev.filter((id) => id !== storyId)
+        : [...prev, storyId],
+    );
+  };
+
+  // Select all stories
+  const selectAll = () => {
+    setSelectedStoryIds(stories.map((s) => s.id));
+  };
+
+  // Clear selection
+  const clearSelection = () => {
+    setSelectedStoryIds([]);
+  };
+
+  // Run Tier 3 analysis
+  const runAnalysis = async () => {
+    if (!session || selectedStoryIds.length === 0) return;
+
+    setAnalyzing(true);
+    setError(null);
+    setAnalysisResult(null);
+
+    try {
+      const response = await fetch("/api/dev/analyze-tier3", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          storyIds: selectedStoryIds,
+          milestone: milestone ? parseInt(milestone) : null,
+          dryRun: true,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Analysis failed");
+      }
+
+      const data = await response.json();
+      setAnalysisResult(data.analysis);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Analysis failed");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  if (!session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5E6D3]">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold mb-4">Authentication Required</h1>
+          <button
+            onClick={() => router.push("/auth/login")}
+            className="px-6 py-3 bg-[#8B4513] text-white rounded-lg hover:bg-[#A0522D]"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F5E6D3] p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[#8B4513] mb-2">
+            AI Prompt Testing Suite
+          </h1>
+          <p className="text-[#A0522D]">
+            Test your AI prompt generation system without affecting production data
+          </p>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left: Story Selection */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-[#8B4513]">
+                Select Stories ({selectedStoryIds.length} selected)
+              </h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={selectAll}
+                  className="px-3 py-1 text-sm bg-[#8B4513] text-white rounded hover:bg-[#A0522D]"
+                >
+                  Select All
+                </button>
+                <button
+                  onClick={clearSelection}
+                  className="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-8 text-[#A0522D]">
+                Loading stories...
+              </div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {stories.map((story) => (
+                  <label
+                    key={story.id}
+                    className="flex items-start gap-3 p-3 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedStoryIds.includes(story.id)}
+                      onChange={() => toggleStorySelection(story.id)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-[#8B4513]">
+                        {story.title || "Untitled"}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {story.story_year && `Year: ${story.story_year} • `}
+                        {new Date(story.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+
+            {/* Analysis Controls */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <label className="block mb-2 text-sm font-medium text-[#8B4513]">
+                Simulate Milestone (optional)
+              </label>
+              <select
+                value={milestone}
+                onChange={(e) => setMilestone(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded mb-4"
+              >
+                <option value="">Auto (use story count)</option>
+                <option value="1">Story 1</option>
+                <option value="2">Story 2</option>
+                <option value="3">Story 3 (Paywall)</option>
+                <option value="4">Story 4</option>
+                <option value="7">Story 7</option>
+                <option value="10">Story 10</option>
+                <option value="15">Story 15</option>
+                <option value="20">Story 20</option>
+                <option value="30">Story 30</option>
+                <option value="50">Story 50</option>
+                <option value="100">Story 100</option>
+              </select>
+
+              <button
+                onClick={runAnalysis}
+                disabled={selectedStoryIds.length === 0 || analyzing}
+                className="w-full px-6 py-3 bg-[#8B4513] text-white rounded-lg font-semibold hover:bg-[#A0522D] disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                {analyzing ? "Analyzing..." : "Run Tier 3 Analysis"}
+              </button>
+            </div>
+          </div>
+
+          {/* Right: Analysis Results */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-[#8B4513] mb-4">
+              Analysis Results
+            </h2>
+
+            {!analysisResult && !analyzing && (
+              <div className="text-center py-12 text-gray-500">
+                Select stories and click "Run Tier 3 Analysis" to see results
+              </div>
+            )}
+
+            {analyzing && (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B4513] mx-auto mb-4"></div>
+                <p className="text-[#A0522D]">Analyzing stories with GPT-4o...</p>
+              </div>
+            )}
+
+            {analysisResult && (
+              <div className="space-y-6 max-h-[600px] overflow-y-auto">
+                {/* Summary */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-900 mb-2">Summary</h3>
+                  <div className="text-sm text-blue-800 space-y-1">
+                    <div>Stories Analyzed: {analysisResult.storiesAnalyzed}</div>
+                    <div>Milestone: Story {analysisResult.storyCount}</div>
+                    <div>Prompts Generated: {analysisResult.prompts.length}</div>
+                    <div>Traits Identified: {analysisResult.characterInsights.traits.length}</div>
+                  </div>
+                </div>
+
+                {/* Generated Prompts */}
+                <div>
+                  <h3 className="font-semibold text-[#8B4513] mb-3">
+                    Generated Prompts ({analysisResult.prompts.length})
+                  </h3>
+                  <div className="space-y-3">
+                    {analysisResult.prompts.map((prompt, idx) => (
+                      <div
+                        key={idx}
+                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                      >
+                        <div className="font-medium text-[#8B4513] mb-2">
+                          {prompt.prompt}
+                        </div>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <div>
+                            <span className="font-medium">Trigger:</span> {prompt.trigger}
+                          </div>
+                          <div>
+                            <span className="font-medium">Anchor:</span>{" "}
+                            {prompt.anchorEntity}
+                          </div>
+                          <div>
+                            <span className="font-medium">Score:</span>{" "}
+                            {prompt.recordingLikelihood}/100
+                          </div>
+                          <div className="text-xs bg-gray-50 p-2 rounded mt-2">
+                            <span className="font-medium">Reasoning:</span>{" "}
+                            {prompt.reasoning}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Character Insights */}
+                <div>
+                  <h3 className="font-semibold text-[#8B4513] mb-3">
+                    Character Insights
+                  </h3>
+
+                  {/* Traits */}
+                  {analysisResult.characterInsights.traits.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Traits
+                      </h4>
+                      <div className="space-y-2">
+                        {analysisResult.characterInsights.traits.map((trait, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-green-50 border border-green-200 rounded p-3"
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-medium text-green-900">
+                                {trait.trait}
+                              </span>
+                              <span className="text-sm text-green-700">
+                                {(trait.confidence * 100).toFixed(0)}% confidence
+                              </span>
+                            </div>
+                            <div className="text-xs text-green-800">
+                              Evidence: {trait.evidence.join(" • ")}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Invisible Rules */}
+                  {analysisResult.characterInsights.invisibleRules.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Invisible Rules
+                      </h4>
+                      <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                        {analysisResult.characterInsights.invisibleRules.map(
+                          (rule, idx) => (
+                            <li key={idx}>{rule}</li>
+                          ),
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Core Lessons */}
+                  {analysisResult.characterInsights.coreLessons.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Core Lessons
+                      </h4>
+                      <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                        {analysisResult.characterInsights.coreLessons.map(
+                          (lesson, idx) => (
+                            <li key={idx}>{lesson}</li>
+                          ),
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
