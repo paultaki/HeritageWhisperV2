@@ -85,18 +85,22 @@ Generate 3 follow-up questions as JSON:`
 
     const rawQuestions = parsedResponse.questions || [];
     
-    // Validate each question with basic quality gates
+    logger.info("[ContextualFollowUp] Raw questions from GPT:", { rawQuestions });
+    
+    // Very basic validation - just check they're strings and not too long
     const validatedQuestions = rawQuestions
       .filter((q: string) => {
         if (!q || typeof q !== 'string') return false;
-        
-        const validation = validatePromptQuality(q);
         const wordCount = q.split(/\s+/).length;
-        
-        // Looser validation than full intimacy engine (20 words instead of 30)
-        return validation.isValid && wordCount <= 20;
+        // Just check word count, skip other validation which might be too strict
+        return wordCount > 3 && wordCount <= 25;
       })
       .slice(0, 3); // Max 3 questions
+
+    logger.info("[ContextualFollowUp] Validated questions:", { 
+      count: validatedQuestions.length,
+      questions: validatedQuestions 
+    });
 
     // Ensure we have at least 2 questions
     const finalQuestions = validatedQuestions.length >= 2 
@@ -106,6 +110,8 @@ Generate 3 follow-up questions as JSON:`
           "How did that change things for you?",
           "Who else was part of that story?"
         ];
+    
+    logger.info("[ContextualFollowUp] Final questions to send:", { finalQuestions });
 
     logger.info("[ContextualFollowUp] Generated questions", {
       rawCount: rawQuestions.length,
