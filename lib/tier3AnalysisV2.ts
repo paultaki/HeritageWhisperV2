@@ -10,7 +10,7 @@
  * All prompts validated through quality gates before storage.
  */
 
-import { generateAnchorHash } from "./promptGeneration";
+import { generateAnchorHash } from "./promptGenerationV2";
 import { sanitizeForGPT, sanitizeEntity } from "./sanitization";
 import { validatePromptQuality, scorePromptQuality } from "./promptQuality";
 import { chat } from "./ai/gatewayClient";

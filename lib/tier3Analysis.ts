@@ -8,7 +8,7 @@
  */
 
 import OpenAI from "openai";
-import { generateAnchorHash } from "./promptGeneration";
+import { generateAnchorHash } from "./promptGenerationV2";
 import { sanitizeForGPT, sanitizeEntity } from "./sanitization";
 
 // Initialize OpenAI client with Vercel AI Gateway
