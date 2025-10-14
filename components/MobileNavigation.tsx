@@ -84,11 +84,12 @@ export default function MobileNavigation({
       className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t-2 md:hidden"
       style={{
         borderTopColor: "#D36A3D",
-        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 0px)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
         boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.08)",
+        marginBottom: 0,
       }}
     >
-      <div className="flex items-center justify-around h-20 relative pb-0">
+      <div className="flex items-center justify-around h-20 relative">
         {/* Timeline */}
         <NavItem
           icon={Calendar}
