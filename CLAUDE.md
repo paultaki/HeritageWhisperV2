@@ -78,8 +78,10 @@ HeritageWhisperV2/
 │   ├── AudioRecorder.tsx   # Web Audio API recording
 │   ├── MultiPhotoUploader.tsx # Photo upload with cropping & hero selection
 │   ├── BookStyleReview.tsx # Story review/edit interface
-│   ├── DesktopNavigation.tsx # Left sidebar navigation (desktop)
+│   ├── DesktopNavigationBottom.tsx # Bottom horizontal navigation (desktop)
 │   ├── MobileNavigation.tsx # Bottom navigation bar (mobile)
+│   ├── BookProgressBar.tsx # Standalone progress bar for book view
+│   ├── BookDecadesPill.tsx # Mobile decade navigation for book view
 │   └── ui/                 # shadcn/ui components
 ├── lib/                     # Utilities
 │   ├── auth.tsx            # Auth context & provider
@@ -88,6 +90,13 @@ HeritageWhisperV2/
 │   ├── imageProcessor.ts   # Image processing & EXIF stripping
 │   ├── bookPagination.ts   # Book pagination logic
 │   └── utils.ts            # Helper functions (normalizeYear, formatYear)
+├── tests/                   # Test suite
+│   ├── mocks/              # Mock implementations
+│   │   └── supabaseAdmin.mock.ts # In-memory Supabase client
+│   ├── prompts.next.test.ts # GET /api/prompts/next tests
+│   ├── prompts.skip.test.ts # POST /api/prompts/skip tests
+│   ├── setup.ts            # Global test setup
+│   └── utils.ts            # Test helper functions
 └── shared/
     └── schema.ts           # Database schema (Drizzle)
 ```
@@ -103,7 +112,9 @@ HeritageWhisperV2/
 - **PDF Export**: 2-up (home print) and trim (POD) formats with server-side generation
 - **Memory Box**: Grid/list view toggle with filtering (All, Favorites, Timeline, Book, No date, Private)
 - **Mobile Responsive**: Senior-friendly UX with large touch targets
-- **Desktop Navigation**: Left sidebar (192px wide) with labeled icons
+- **Desktop Navigation**: Bottom horizontal bar with icon buttons (Home, Timeline, Book, Profile)
+- **Book Progress Bar**: Interactive progress bar with decade markers, year tooltips, click-to-navigate
+- **Page Navigation**: Click page margins to turn pages (left margin = back, right margin = forward)
 - **Rate Limiting**: Upshash Redis-based (auth: 5/10s, uploads: 10/min, API: 30/min)
 
 ## 🤖 AI Features
@@ -177,10 +188,21 @@ Added to `stories` table:
 - `lesson_learned` (TEXT): User-selected wisdom/lesson from story
 - `entities_extracted` (JSONB): Extracted entities for Tier 1 prompt generation
 
+#### Testing Infrastructure
+
+- **Test Suite**: Complete Vitest test suite with 20 comprehensive tests
+  - 10 tests for GET `/api/prompts/next` (auth, validation, Tier-1 generation, fallbacks)
+  - 10 tests for POST `/api/prompts/skip` (skip counting, retirement, archival)
+  - In-memory Supabase mock with query builder
+  - Zero network calls - fully isolated tests
+  - Real validation logic (not mocked)
+  - Location: `/tests/` directory, see `TESTING_GUIDE.md`
+  - Run with: `npm test`
+
 #### Pending Implementation
 
-- **GET `/api/prompts/next`**: Fetch next prompt to display to user
-- **POST `/api/prompts/skip`**: Retire skipped prompts
+- **GET `/api/prompts/next`**: Fetch next prompt to display to user (tested, needs UI integration)
+- **POST `/api/prompts/skip`**: Retire skipped prompts (tested, needs UI integration)
 - **Stripe webhook**: Unlock Story 3+ premium prompts on payment
 - **UI components**: Display prompts in app interface
 - **Do-not-ask**: User-controlled topic blocking
@@ -269,6 +291,12 @@ npm run check
 
 # Database sync
 npm run db:push
+
+# Run tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
 ```
 
 ## 🔌 MCP Servers
@@ -292,6 +320,7 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 ## 🎯 Current Known Issues
 
 - **PDF Export on Vercel**: Print page loads but React app not rendering (timeout waiting for `.book-spread`)
+- **Book View Cursor Hints**: Directional cursor arrows (w-resize/e-resize) randomly flicker between directions on same page despite forced styles - clicking still works correctly
 
 ## ✅ Recent Updates (October 8, 2025)
 
@@ -418,7 +447,48 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Updated horizontal positioning from 48px → 23px to match new content margins
   - Location: `/app/globals.css:2771-2796`
 
+## ✅ Recent Updates (January 2025)
+
+### Navigation Redesign
+
+- **Desktop Navigation Moved to Bottom**: Horizontal navigation bar replacing left sidebar
+  - Home, Timeline, Book, Profile icons
+  - Fixed to bottom of viewport (80px from bottom to avoid progress bar)
+  - Location: `/components/DesktopNavigationBottom.tsx`
+- **Book View Simplified**: Removed TOC sidebar and book navigation panel
+  - Clean dual-page layout with only progress bar for navigation
+  - Standalone progress bar component: `/components/BookProgressBar.tsx`
+  - Decade markers clickable on progress bar
+- **Mobile Book View Enhanced**: 
+  - Restored bottom navigation bar (previously hidden)
+  - Added decades pill navigation for quick chapter jumps
+  - Location: `/components/BookDecadesPill.tsx`
+
+### Book View Enhancements
+
+- **Progress Bar Improvements**:
+  - Tooltip now shows "Page 25 of 92 • 1995" (page number + year)
+  - Year displayed in amber color matching progress bar
+  - Expands on hover (2x height via scaleY transform)
+  - Centered with symmetric expansion
+  - Location: `/components/BookProgressBar.tsx`
+- **Page Click Navigation**:
+  - Click page margins to turn pages
+  - Clickable via existing `onClick` handlers
+  - Cursor hints attempted (w-resize/e-resize) but have reliability issues (see Known Issues)
+  - Location: `/app/book/page.tsx`, `/app/book/book.css`
+
+### Testing Infrastructure
+
+- **Vitest Test Suite**: Complete test coverage for prompt API endpoints
+  - 20 comprehensive tests (10 GET, 10 POST)
+  - In-memory Supabase mock with full query builder
+  - Zero network calls - isolated tests
+  - Tests: authentication, validation, Tier-1 generation, skip flow, retirement
+  - Guide: `TESTING_GUIDE.md`
+  - Run: `npm test` or `npm run test:watch`
+
 ---
 
-_Last updated: October 10, 2025_
+_Last updated: January 2025_
 _For historical fixes, feature archives, and migration notes, see CLAUDE_HISTORY.md_
