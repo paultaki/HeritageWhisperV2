@@ -417,7 +417,8 @@ export function getQualityReport(promptText?: string | null): QualityReport {
 // EXPORTS
 // ============================================================================
 
-export const qualityGates = {
+// Export individual functions (used by API routes and components)
+export {
   isWorthyEntity,
   validatePromptQuality,
   scorePromptQuality,
@@ -427,8 +428,8 @@ export const qualityGates = {
   EMOTIONAL_DEPTH_SIGNALS,
 };
 
-// Export individual functions for convenience
-export {
+// Legacy grouped export for backward compatibility
+export const qualityGates = {
   isWorthyEntity,
   validatePromptQuality,
   scorePromptQuality,
