@@ -2,7 +2,6 @@
 -- Test Account Infrastructure
 -- ============================================================================
 -- Enables creating test accounts from production data for milestone testing
--- Author: Droid
 -- Date: 2024-10-13
 
 -- ============================================================================
