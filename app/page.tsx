@@ -325,7 +325,7 @@ export default function HomePage() {
               </div>
               <div className="order-1 md:order-2 relative">
                 <Image
-                  src="/book small.png"
+                  src="/model-3.png"
                   alt="Beautiful family book"
                   width={600}
                   height={400}
@@ -361,7 +361,7 @@ export default function HomePage() {
 
       {/* Product Showcase */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16" data-animate>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               From Voice to Treasure
@@ -371,32 +371,18 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out space-y-8">
-              <Image
-                src="/timeline 2.png"
-                alt="Digital timeline"
-                width={600}
-                height={304}
-                className="w-full max-h-[304px] object-cover rounded-2xl shadow-2xl"
-              />
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-orange-100">
-                <h4 className="text-xl font-bold text-gray-900 mb-2">Interactive Digital Timeline</h4>
-                <p className="text-lg text-gray-600">Every memory, organized and accessible. Tap any moment to hear their voice telling the story.</p>
-              </div>
-            </div>
-
-            <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out space-y-8" style={{ transitionDelay: "200ms" }}>
+          <div className="flex flex-col items-center">
+            <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out w-full max-w-3xl">
               <Image
                 src="/book full.png"
-                alt="Printed memory book"
-                width={600}
-                height={400}
+                alt="Premium Digital Book"
+                width={780}
+                height={520}
                 className="w-full h-auto rounded-2xl shadow-2xl"
               />
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-orange-100">
-                <h4 className="text-xl font-bold text-gray-900 mb-2">Premium Printed Book</h4>
-                <p className="text-lg text-gray-600">Hold their story in your hands. Beautifully designed, professionally printed, yours to keep forever.</p>
+              <div className="mt-8 text-center bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 border border-orange-100">
+                <h4 className="text-2xl font-bold text-gray-900 mb-3">Premium Digital Book</h4>
+                <p className="text-lg text-gray-600 leading-relaxed">Your written and audio stories beautifully combined. Always up to date as you add more memories.</p>
               </div>
             </div>
           </div>
@@ -408,10 +394,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16" data-animate>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              A Lifetime of Precious Moments
+              The Interactive Timeline
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Capture every chapter of their incredible journey
+              Every moment organized and accessible. Tap any memory to hear their voice telling the story.
             </p>
           </div>
 
@@ -422,21 +408,29 @@ export default function HomePage() {
 
             <div className="space-y-12">
               {[
-                { img: "/demo-earliest-memory.webp", title: "Earliest Memories", subtitle: "Childhood wonder", year: "1950s" },
-                { img: "/demo_meeting_a_lifelong_friend.webp", title: "Meeting a Lifelong Friend", subtitle: "Bonds that last forever", year: "1970s" },
-                { img: "/demo-dad-ww2.png", title: "Life's Challenges", subtitle: "Strength & perseverance", year: "1980s" },
-                { img: "/demo-campfire.png", title: "Family Traditions", subtitle: "Passing the torch", year: "2000s" },
+                { img: "/demo-dad-ww2.png", title: "Life's Challenges", subtitle: "Strength & perseverance", year: "1950s" },
+                { img: "/demo-earliest-memory.webp", title: "Earliest Memories", subtitle: "Childhood wonder", year: "1970s" },
+                { img: "/demo_meeting_a_lifelong_friend.webp", title: "Meeting a Lifelong Friend", subtitle: "Bonds that last forever", year: "1980s" },
+                { img: "/demo-hiking.png", title: "Family Traditions", subtitle: "Passing the torch", year: "2000s" },
               ].map((memory, index) => (
                 <div
                   key={index}
                   data-animate
                   style={{ transitionDelay: `${index * 150}ms` }}
-                  className={`opacity-0 translate-y-8 transition-all duration-700 ease-out grid md:grid-cols-2 gap-8 items-center ${
+                  className={`opacity-0 translate-y-8 transition-all duration-700 ease-out grid md:grid-cols-2 gap-8 items-center relative ${
                     index % 2 === 0 ? "" : "md:flex-row-reverse"
                   }`}
                 >
+                  {/* Year badge on timeline - desktop only */}
+                  <div className="hidden md:block absolute left-1/2 top-[128px] -translate-x-1/2 z-10">
+                    <div className="px-4 py-1 bg-orange-500 text-white text-sm font-semibold rounded-full whitespace-nowrap">
+                      {memory.year}
+                    </div>
+                  </div>
+
                   <div className={`${index % 2 === 0 ? "md:text-right md:pr-12" : "md:text-left md:pl-12 md:col-start-2"}`}>
-                    <div className="inline-block px-4 py-1 bg-orange-500 text-white text-sm font-semibold rounded-full mb-3">
+                    {/* Year badge - mobile only */}
+                    <div className="md:hidden inline-block px-4 py-1 bg-orange-500 text-white text-sm font-semibold rounded-full mb-3">
                       {memory.year}
                     </div>
                     <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{memory.title}</h3>
@@ -491,8 +485,8 @@ export default function HomePage() {
               },
               {
                 icon: Sparkles,
-                title: "AI Asks Follow-Ups",
-                description: "Our AI listens and asks personalized questions based on their unique story. Every conversation goes deeper.",
+                title: "We Ask Follow-Ups",
+                description: "Our system listens and asks personalized questions to help capture the full story. Every conversation goes deeper.",
               },
               {
                 icon: Users,
