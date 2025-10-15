@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,7 +19,7 @@ interface SessionData {
 
 type Status = 'loading' | 'success' | 'error';
 
-export default function FamilyAccessPage() {
+function FamilyAccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<Status>('loading');
@@ -207,4 +207,23 @@ export default function FamilyAccessPage() {
   }
 
   return null;
+}
+
+export default function FamilyAccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-12 pb-12 text-center">
+            <Loader2 className="w-16 h-16 mx-auto mb-6 text-amber-600 animate-spin" />
+            <h2 className="text-2xl font-serif font-bold text-gray-800 mb-2">
+              Loading...
+            </h2>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <FamilyAccessContent />
+    </Suspense>
+  );
 }
