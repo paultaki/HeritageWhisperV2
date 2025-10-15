@@ -10,6 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useRecordModal } from "@/hooks/use-record-modal";
+import RecordModal from "@/components/RecordModal";
 import MoreIdeas from "@/components/MoreIdeas";
 
 interface Prompt {
@@ -39,7 +40,7 @@ export default function PromptsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { openModal } = useRecordModal();
+  const { isOpen, openModal, closeModal, handleSave, initialData } = useRecordModal();
   const [showDismissed, setShowDismissed] = useState(false);
   const [showAnswered, setShowAnswered] = useState(false);
 
@@ -538,6 +539,16 @@ export default function PromptsPage() {
         </div>
       </div>
       </div>
+
+      {/* Record Modal */}
+      <RecordModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        onSave={handleSave}
+        initialPrompt={initialData?.prompt}
+        initialTitle={initialData?.title}
+        initialYear={initialData?.year}
+      />
     </div>
   );
 }
