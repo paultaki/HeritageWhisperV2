@@ -423,7 +423,7 @@ export default function HomePage() {
             <div className="space-y-12">
               {[
                 { img: "/demo-earliest-memory.webp", title: "Earliest Memories", subtitle: "Childhood wonder", year: "1950s" },
-                { img: "/demo-first-home.webp", title: "First Home", subtitle: "Building a life", year: "1970s" },
+                { img: "/demo_meeting_a_lifelong_friend.webp", title: "Meeting a Lifelong Friend", subtitle: "Bonds that last forever", year: "1970s" },
                 { img: "/demo-dad-ww2.png", title: "Life's Challenges", subtitle: "Strength & perseverance", year: "1980s" },
                 { img: "/demo-campfire.png", title: "Family Traditions", subtitle: "Passing the torch", year: "2000s" },
               ].map((memory, index) => (
