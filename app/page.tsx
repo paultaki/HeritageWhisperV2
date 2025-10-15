@@ -109,7 +109,12 @@ export default function HomePage() {
               </div>
 
               {/* Trust signals */}
-              <div className="flex items-center justify-center lg:justify-start gap-6 pt-4">
+              <div className="flex flex-col items-center lg:items-start gap-3 pt-4">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-500 text-amber-500" />
+                  ))}
+                </div>
                 <div className="flex -space-x-2">
                   {['A', 'B', 'C', 'D'].map((letter) => (
                     <div key={letter} className="w-10 h-10 rounded-full border-2 border-white overflow-hidden">
@@ -122,14 +127,6 @@ export default function HomePage() {
                       />
                     </div>
                   ))}
-                </div>
-                <div className="text-left">
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className="w-4 h-4 fill-amber-500 text-amber-500" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-600 font-medium">10,000+ families preserving memories</p>
                 </div>
               </div>
             </div>
