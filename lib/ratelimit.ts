@@ -52,8 +52,10 @@ let _authRatelimit: Ratelimit | null = null;
 let _uploadRatelimit: Ratelimit | null = null;
 let _apiRatelimit: Ratelimit | null = null;
 let _tier3Ratelimit: Ratelimit | null = null;
+let _aiIpRatelimit: Ratelimit | null = null;
+let _aiGlobalRatelimit: Ratelimit | null = null;
 
-function getRateLimiter(type: "auth" | "upload" | "api" | "tier3"): Ratelimit | null {
+function getRateLimiter(type: "auth" | "upload" | "api" | "tier3" | "ai-ip" | "ai-global"): Ratelimit | null {
   const redis = getRedis();
 
   // CRITICAL CHANGE: Fail in production if Redis not available
@@ -103,13 +105,37 @@ function getRateLimiter(type: "auth" | "upload" | "api" | "tier3"): Ratelimit | 
     });
   }
 
+  if (type === "ai-ip" && !_aiIpRatelimit) {
+    // AI IP-based: Prevent abuse from single IP - 10 per hour per IP
+    _aiIpRatelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(10, "3600 s"), // 10 requests per hour
+      analytics: true,
+      prefix: "@hw/ai-ip",
+    });
+  }
+
+  if (type === "ai-global" && !_aiGlobalRatelimit) {
+    // AI Global: System-wide protection - 1000 per hour total
+    _aiGlobalRatelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(1000, "3600 s"), // 1000 requests per hour
+      analytics: true,
+      prefix: "@hw/ai-global",
+    });
+  }
+
   return type === "auth"
     ? _authRatelimit
     : type === "upload"
       ? _uploadRatelimit
       : type === "tier3"
         ? _tier3Ratelimit
-        : _apiRatelimit;
+        : type === "ai-ip"
+          ? _aiIpRatelimit
+          : type === "ai-global"
+            ? _aiGlobalRatelimit
+            : _apiRatelimit;
 }
 
 // Export getters instead of direct instances
@@ -242,6 +268,72 @@ export const tier3Ratelimit = {
         success: true,
         limit: 999,
         reset: Date.now() + 300000,
+        remaining: 999,
+      };
+    }
+  },
+};
+
+export const aiIpRatelimit = {
+  limit: async (identifier: string) => {
+    try {
+      const limiter = getRateLimiter("ai-ip");
+      if (!limiter) {
+        return {
+          success: true,
+          limit: 999,
+          reset: Date.now() + 3600000,
+          remaining: 999,
+        };
+      }
+      return limiter.limit(identifier);
+    } catch (error) {
+      console.error('[Rate Limit] AI IP rate limit check failed:', error);
+      if (process.env.NODE_ENV === 'production') {
+        return {
+          success: false,
+          limit: 0,
+          reset: Date.now() + 3600000,
+          remaining: 0,
+        };
+      }
+      return {
+        success: true,
+        limit: 999,
+        reset: Date.now() + 3600000,
+        remaining: 999,
+      };
+    }
+  },
+};
+
+export const aiGlobalRatelimit = {
+  limit: async (identifier: string) => {
+    try {
+      const limiter = getRateLimiter("ai-global");
+      if (!limiter) {
+        return {
+          success: true,
+          limit: 999,
+          reset: Date.now() + 3600000,
+          remaining: 999,
+        };
+      }
+      return limiter.limit(identifier);
+    } catch (error) {
+      console.error('[Rate Limit] AI global rate limit check failed:', error);
+      if (process.env.NODE_ENV === 'production') {
+        return {
+          success: false,
+          limit: 0,
+          reset: Date.now() + 3600000,
+          remaining: 0,
+        };
+      }
+      return {
+        success: true,
+        limit: 999,
+        reset: Date.now() + 3600000,
         remaining: 999,
       };
     }
