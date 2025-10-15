@@ -346,9 +346,6 @@ function DesktopNavItem({ icon: Icon, label, href, isActive }: NavItemProps) {
           color: isActive
             ? designSystem.colors.primary.coral
             : designSystem.colors.text.secondary,
-          background: isActive
-            ? designSystem.colors.primary.coralLight
-            : "transparent",
         }}
       >
         <Icon className="w-5 h-5" />

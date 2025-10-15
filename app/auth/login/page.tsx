@@ -10,9 +10,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithGoogle } from "@/lib/supabase";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
 
-const logoUrl = "/HW_logo_mic_clean.png";
+const logoUrl = "/HW_text-compress.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -59,7 +59,7 @@ export default function Login() {
               className="w-full h-full object-contain"
             />
           </div>
-          <p className="text-2xl text-muted-foreground font-medium">
+          <p className="text-2xl text-muted-foreground font-medium text-center">
             Your voice. Their treasure. Forever.
           </p>
         </div>
@@ -72,34 +72,48 @@ export default function Login() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="email" className="text-lg font-medium">
+                <Label htmlFor="email" className="text-lg font-medium text-foreground">
                   Email
                 </Label>
-                <Input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-3 text-lg py-4"
-                  placeholder="your@email.com"
-                  required
-                  autoComplete="email"
-                  data-testid="input-email"
-                />
+                <div className="relative mt-3">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                    <Mail className="h-5 w-5" />
+                  </div>
+                  <Input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="text-lg py-4 pl-10"
+                    placeholder="your@email.com"
+                    required
+                    autoComplete="email"
+                    data-testid="input-email"
+                  />
+                </div>
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-lg font-medium">
+                <Label htmlFor="password" className="text-lg font-medium text-foreground">
                   Password
                 </Label>
                 <div className="mt-3 flex items-center gap-2">
                   <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                      <Lock className="h-5 w-5" />
+                    </div>
                     <Input
                       type={showPassword ? "text" : "password"}
                       id="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="text-lg py-4 pr-12 w-full"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleSubmit(e as any);
+                        }
+                      }}
+                      className="text-lg py-4 pl-10 pr-12 w-full"
                       placeholder="••••••••"
                       required
                       autoComplete="current-password"
@@ -126,7 +140,7 @@ export default function Login() {
                 <div className="mt-2 text-right">
                   <Link
                     href="/auth/forgot-password"
-                    className="text-sm text-primary hover:underline"
+                    className="text-sm text-gray-700 hover:text-gray-900 hover:underline"
                   >
                     Forgot password?
                   </Link>
@@ -135,10 +149,29 @@ export default function Login() {
 
               <Button
                 type="submit"
-                className="w-full text-xl font-semibold py-4"
+                className="relative w-full text-xl font-semibold py-4 transition-all duration-300 overflow-hidden flex items-center justify-center gap-2 group hover:shadow-[0_0_0_1px_rgba(245,158,11,0.35),0_20px_40px_rgba(245,158,11,0.18)]"
                 data-testid="button-login"
               >
-                Sign In
+                <LogIn className="h-5 w-5 relative z-[1] group-hover:translate-x-1 transition-transform duration-300" />
+                <span className="relative z-[1] group-hover:translate-x-1 transition-transform duration-300">
+                  Sign In
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300"
+                  style={{
+                    background:
+                      "linear-gradient(45deg, rgba(245,158,11,0.8) 0%, rgba(251,146,60,0.8) 50%, rgba(251,113,133,0.8) 100%)",
+                  }}
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-md"
+                  style={{
+                    background:
+                      "radial-gradient(120% 80% at 50% -20%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0) 60%)",
+                  }}
+                />
               </Button>
             </form>
 
@@ -157,7 +190,7 @@ export default function Login() {
               type="button"
               onClick={signInWithGoogle}
               variant="outline"
-              className="w-full text-lg font-medium py-4 flex items-center justify-center gap-3 hover:bg-gray-50"
+              className="w-full text-lg font-medium py-4 flex items-center justify-center gap-3 transition-all duration-300 hover:bg-gray-50 hover:shadow-md"
               data-testid="button-google-signin"
             >
               <svg className="h-6 w-6" viewBox="0 0 24 24">
@@ -187,7 +220,7 @@ export default function Login() {
                 <Button
                   type="button"
                   variant="link"
-                  className="text-primary hover:text-primary/80 text-lg font-medium"
+                  className="text-gray-700 hover:text-gray-900 text-lg font-medium"
                   data-testid="button-create-story"
                 >
                   New Here? Create Your Story

@@ -38,7 +38,6 @@ function DesktopNavItem({
       className="flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-all hover:bg-gray-100 group w-full relative"
       style={{
         color: isActive ? "#D36A3D" : "hsl(210, 10%, 60%)",
-        background: isActive ? "#FFF5F0" : "transparent",
       }}
     >
       {/* Active indicator bar on right */}

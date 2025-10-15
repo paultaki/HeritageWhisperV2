@@ -125,14 +125,14 @@ export function BookStyleReview({
       {/* Top Navigation */}
       <div className="sticky top-0 z-50 bg-[#faf8f5]/95 backdrop-blur-sm border-b border-[#8B6F47]/20">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
-          <h1 className="text-xl md:text-2xl font-serif text-gray-800 flex-shrink-0">
+          <h1 className="text-2xl md:text-3xl font-serif text-gray-800 flex-shrink-0">
             Review Memory
           </h1>
           <Button
             variant="outline"
             onClick={onCancel}
             disabled={isSaving}
-            className="rounded-full px-4 ml-auto mr-12 md:mr-20 2xl:mr-0"
+            className="rounded-full px-6 py-6 text-lg ml-auto mr-12 md:mr-20 2xl:mr-0"
           >
             Cancel
           </Button>
@@ -148,8 +148,8 @@ export function BookStyleReview({
             <div className="p-6 md:p-12 space-y-8">
               {/* 1. Photo Section */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                  <Camera className="w-4 h-4" />
+                <h3 className="text-lg font-medium text-gray-700 mb-3 flex items-center gap-2">
+                  <Camera className="w-5 h-5" />
                   Photos (Optional)
                 </h3>
                 <MultiPhotoUploader
@@ -164,14 +164,14 @@ export function BookStyleReview({
               <div className="group relative">
                 {!editingTitle ? (
                   <h2
-                    className="memory-title text-4xl font-serif text-gray-900 cursor-pointer hover:bg-amber-50 rounded px-3 -mx-3 py-2 transition-colors flex items-center gap-2"
+                    className="memory-title text-5xl font-serif text-gray-900 cursor-pointer hover:bg-amber-50 rounded px-3 -mx-3 py-2 transition-colors flex items-center gap-2"
                     onClick={() => {
                       setTempTitle(title);
                       setEditingTitle(true);
                     }}
                   >
                     {title || "Click to add title"}
-                    <Edit2 className="w-5 h-5 text-gray-400" />
+                    <Edit2 className="w-6 h-6 text-gray-400" />
                   </h2>
                 ) : (
                   <Input
@@ -186,7 +186,7 @@ export function BookStyleReview({
                         setEditingTitle(false);
                       }
                     }}
-                    className="text-4xl font-serif"
+                    className="text-5xl font-serif"
                     placeholder="Give your memory a title..."
                   />
                 )}
@@ -196,22 +196,22 @@ export function BookStyleReview({
               <div className="group relative">
                 {!editingYear ? (
                   <p
-                    className="text-lg text-gray-600 cursor-pointer hover:bg-amber-50 rounded px-3 -mx-3 py-1 transition-colors inline-flex items-center gap-2"
+                    className="text-xl text-gray-600 cursor-pointer hover:bg-amber-50 rounded px-3 -mx-3 py-1 transition-colors inline-flex items-center gap-2"
                     onClick={() => {
                       setTempYear(storyYear);
                       setEditingYear(true);
                     }}
                   >
-                    <Calendar className="w-5 h-5" />
+                    <Calendar className="w-6 h-6" />
                     {storyYear || "Add year"}
                     {age !== null && age > 0 && ` • Age ${age}`}
                     {age !== null && age === 0 && ` • Birth`}
                     {age !== null && age < 0 && ` • Before birth`}
-                    <Edit2 className="w-4 h-4 text-gray-400" />
+                    <Edit2 className="w-5 h-5 text-gray-400" />
                   </p>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-gray-600" />
+                    <Calendar className="w-6 h-6 text-gray-600" />
                     <Input
                       ref={yearInputRef}
                       type="number"
@@ -225,7 +225,7 @@ export function BookStyleReview({
                           setEditingYear(false);
                         }
                       }}
-                      className="w-32 text-lg"
+                      className="w-32 text-xl"
                       placeholder="Year"
                       min="1900"
                       max={new Date().getFullYear()}
@@ -236,8 +236,8 @@ export function BookStyleReview({
 
               {/* 4. Audio Recording */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                  <Mic className="w-4 h-4" />
+                <h3 className="text-lg font-medium text-gray-700 mb-3 flex items-center gap-2">
+                  <Mic className="w-5 h-5" />
                   Audio Recording (Optional)
                 </h3>
                 {audioUrl ? (
@@ -350,12 +350,12 @@ export function BookStyleReview({
                 ) : isProcessing ? (
                   <div className="p-8 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex flex-col items-center gap-4">
-                      <Loader2 className="w-8 h-8 text-coral-500 animate-spin" />
+                      <Loader2 className="w-10 h-10 text-coral-500 animate-spin" />
                       <div className="text-center">
-                        <p className="font-medium text-gray-900">
+                        <p className="text-xl font-medium text-gray-900">
                           Processing your recording...
                         </p>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-lg text-gray-600 mt-1">
                           Transcribing audio and generating wisdom
                         </p>
                       </div>
@@ -456,7 +456,7 @@ export function BookStyleReview({
                         Upload Audio
                       </Button>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-base text-gray-500 mt-2">
                       Add an audio recording to preserve your voice with this
                       memory
                     </p>
@@ -466,17 +466,17 @@ export function BookStyleReview({
 
               {/* 5. Your Story */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                <h3 className="text-lg font-medium text-gray-700 mb-3">
                   Your Story
                 </h3>
                 <Textarea
                   value={transcription}
                   onChange={(e) => onTranscriptionChange(e.target.value)}
-                  className="w-full min-h-[300px] resize-none border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-base focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400"
+                  className="w-full min-h-[300px] resize-none border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400"
                   placeholder="Type or paste your story here. This is how it will appear in your book..."
                 />
                 {transcription && (
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-base text-gray-500 mt-2">
                     {
                       transcription.split(" ").filter((w) => w.length > 0)
                         .length
@@ -489,8 +489,8 @@ export function BookStyleReview({
               {/* 6. Lesson Learned */}
               <div>
                 <div className="group relative">
-                  <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
+                  <h3 className="text-lg font-medium text-gray-700 mb-3 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-amber-500" />
                     Lesson Learned
                   </h3>
                   {!editingWisdom ? (
@@ -501,11 +501,11 @@ export function BookStyleReview({
                         setEditingWisdom(true);
                       }}
                     >
-                      <p className="text-gray-700 italic">
+                      <p className="text-lg text-gray-700 italic">
                         {wisdomText ||
                           "Click to add a lesson or wisdom from this memory..."}
                       </p>
-                      <Edit2 className="w-4 h-4 text-gray-400 mt-2" />
+                      <Edit2 className="w-5 h-5 text-gray-400 mt-2" />
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -567,7 +567,7 @@ export function BookStyleReview({
       </div>
 
       {/* Instructions */}
-      <div className="max-w-3xl mx-auto px-4 pb-4 text-center text-sm text-gray-600">
+      <div className="max-w-3xl mx-auto px-4 pb-4 text-center text-lg text-gray-600">
         <p>Click on any element to edit it inline.</p>
       </div>
 
@@ -581,7 +581,7 @@ export function BookStyleReview({
             onSave();
           }}
           disabled={isSaving}
-          className="w-full bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full py-6 text-lg font-medium"
+          className="w-full bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full py-7 text-xl font-medium"
         >
           {isSaving ? "Saving..." : "Save"}
         </Button>
@@ -590,9 +590,9 @@ export function BookStyleReview({
             variant="outline"
             onClick={onDelete}
             disabled={isSaving}
-            className="w-full rounded-full py-6 text-lg font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+            className="w-full rounded-full py-7 text-xl font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
           >
-            <Trash2 className="w-5 h-5 mr-2" />
+            <Trash2 className="w-6 h-6 mr-2" />
             Delete Memory
           </Button>
         )}

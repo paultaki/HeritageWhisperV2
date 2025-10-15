@@ -289,11 +289,13 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
 const BookPageRenderer = ({
   page,
   onNavigateToPage,
-  onPageClick,
+  onNavigatePrevious,
+  onNavigateNext,
 }: {
   page: BookPage;
   onNavigateToPage?: (pageNumber: number) => void;
-  onPageClick?: (isLeftPage: boolean) => void;
+  onNavigatePrevious?: () => void;
+  onNavigateNext?: () => void;
 }) => {
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -370,27 +372,50 @@ const BookPageRenderer = ({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Handle margin click for navigation
-  const handleMarginClick = () => {
-    if (onPageClick) {
-      onPageClick(page.isLeftPage);
+  // Handle margin clicks for navigation
+  const handleLeftMarginClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling
+    if (onNavigatePrevious) {
+      onNavigatePrevious();
     }
   };
 
-  // Margin click zone component
-  const MarginClickZone = () => {
-    // For left pages, clickable zone is on the LEFT (outer) margin
-    // For right pages, clickable zone is on the RIGHT (outer) margin
-    const isLeftMargin = page.isLeftPage;
-    
+  const handleRightMarginClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling
+    if (onNavigateNext) {
+      onNavigateNext();
+    }
+  };
+
+  // Margin click zones - left goes back, right goes forward
+  const MarginClickZones = () => {
     return (
-      <div
-        className={`absolute top-0 bottom-0 w-[15%] z-10 ${
-          isLeftMargin ? 'left-0' : 'right-0'
-        }`}
-        onClick={handleMarginClick}
-        style={{ cursor: 'pointer' }}
-      />
+      <>
+        {/* Left margin - previous page */}
+        <div
+          className="absolute top-0 bottom-0 left-0 w-[15%] z-10 hover:bg-black/5 transition-all duration-200 cursor-pointer group"
+          onClick={handleLeftMarginClick}
+          aria-label="Previous page"
+          role="button"
+          tabIndex={-1}
+        >
+          <div className="absolute top-1/2 left-2 -translate-y-1/2 opacity-0 group-hover:opacity-40 transition-opacity duration-200 pointer-events-none">
+            <ChevronLeft className="w-8 h-8 text-gray-700" />
+          </div>
+        </div>
+        {/* Right margin - next page */}
+        <div
+          className="absolute top-0 bottom-0 right-0 w-[15%] z-10 hover:bg-black/5 transition-all duration-200 cursor-pointer group"
+          onClick={handleRightMarginClick}
+          aria-label="Next page"
+          role="button"
+          tabIndex={-1}
+        >
+          <div className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 group-hover:opacity-40 transition-opacity duration-200 pointer-events-none">
+            <ChevronRight className="w-8 h-8 text-gray-700" />
+          </div>
+        </div>
+      </>
     );
   };
 
@@ -400,7 +425,7 @@ const BookPageRenderer = ({
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
       >
-        <MarginClickZone />
+        <MarginClickZones />
         <div
           ref={pageContentRef}
           className="page-content px-8 py-16 flex flex-col items-center justify-center text-center h-full"
@@ -434,7 +459,7 @@ const BookPageRenderer = ({
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
       >
-        <MarginClickZone />
+        <MarginClickZones />
         <div ref={pageContentRef} className="page-content px-8 py-12">
           <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">
             Table of Contents
@@ -479,7 +504,7 @@ const BookPageRenderer = ({
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
       >
-        <MarginClickZone />
+        <MarginClickZones />
         <DecadeIntroPage
           decade={page.decade || ""}
           title={page.decadeTitle || ""}
@@ -516,7 +541,7 @@ const BookPageRenderer = ({
       <article
         className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
       >
-        <MarginClickZone />
+        <MarginClickZones />
         <WhisperPage
           prompt={page.whisperPrompt}
           afterStory={{
@@ -536,7 +561,7 @@ const BookPageRenderer = ({
     <article
       className={`page book-page ${page.isLeftPage ? "page--left" : "page--right"}`}
     >
-      <MarginClickZone />
+      <MarginClickZones />
       <div className="running-header">
         {/* Story title with year and age - single line */}
         <div className="story-header-title">
@@ -1023,7 +1048,8 @@ export default function BookViewNew() {
               <BookPageRenderer
                 page={pages[currentMobilePage]}
                 onNavigateToPage={navigateToPage}
-                onPageClick={goToNext}
+                onNavigatePrevious={goToPrevious}
+                onNavigateNext={goToNext}
               />
             ) : (
               // Spread view - two pages side-by-side
@@ -1033,13 +1059,15 @@ export default function BookViewNew() {
                     <BookPageRenderer
                       page={spreads[currentSpreadIndex][0]}
                       onNavigateToPage={navigateToPage}
-                      onPageClick={goToPrevious}
+                      onNavigatePrevious={goToPrevious}
+                      onNavigateNext={goToNext}
                     />
                     {spreads[currentSpreadIndex][1] && (
                       <BookPageRenderer
                         page={spreads[currentSpreadIndex][1]}
                         onNavigateToPage={navigateToPage}
-                        onPageClick={goToNext}
+                        onNavigatePrevious={goToPrevious}
+                        onNavigateNext={goToNext}
                       />
                     )}
                   </>

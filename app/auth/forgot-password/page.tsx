@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, Mail } from "lucide-react";
+import { ArrowLeft, Mail, Send } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function ForgotPassword() {
@@ -98,9 +98,28 @@ export default function ForgotPassword() {
               <Button
                 type="submit"
                 disabled={loading || !email}
-                className="w-full bg-heritage-blue hover:bg-heritage-blue/90 text-white py-6 text-lg"
+                className="relative w-full text-white text-lg font-semibold py-6 transition-all duration-300 overflow-hidden flex items-center justify-center gap-2 group hover:shadow-[0_0_0_1px_rgba(245,158,11,0.35),0_20px_40px_rgba(245,158,11,0.18)]"
               >
-                {loading ? "Sending..." : "Send Reset Link"}
+                <Send className="h-5 w-5 relative z-[1] group-hover:translate-x-1 transition-transform duration-300" />
+                <span className="relative z-[1] group-hover:translate-x-1 transition-transform duration-300">
+                  {loading ? "Sending..." : "Send Reset Link"}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300"
+                  style={{
+                    background:
+                      "linear-gradient(45deg, rgba(245,158,11,0.8) 0%, rgba(251,146,60,0.8) 50%, rgba(251,113,133,0.8) 100%)",
+                  }}
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-md"
+                  style={{
+                    background:
+                      "radial-gradient(120% 80% at 50% -20%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0) 60%)",
+                  }}
+                />
               </Button>
             </form>
           </CardContent>

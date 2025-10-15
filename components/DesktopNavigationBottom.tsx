@@ -38,7 +38,6 @@ function DesktopNavItemBottom({
       className="flex flex-col items-center gap-1 px-6 py-2 rounded-xl transition-all hover:bg-gray-100 group relative"
       style={{
         color: isActive ? "#D36A3D" : "hsl(210, 10%, 60%)",
-        background: isActive ? "#FFF5F0" : "transparent",
       }}
     >
       {/* Active indicator bar at top */}
@@ -105,22 +104,47 @@ export default function DesktopNavigationBottom({
           isActive={pathname.startsWith("/book")}
         />
 
-        {/* Record Button - Highlighted */}
-        <button
-          onClick={onRecordClick}
-          className="flex flex-col items-center gap-1 px-6 py-2 rounded-xl transition-all hover:brightness-110 group mx-2"
-          style={{
-            background: "linear-gradient(135deg, #D36A3D 0%, #C05A2D 100%)",
-            boxShadow: "0 4px 12px rgba(211, 106, 61, 0.4)",
-          }}
-        >
-          <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-            <Image src="/REC_Mic.png" alt="Record" width={20} height={20} />
-          </div>
-          <span className="text-xs font-medium text-white text-center whitespace-nowrap">
-            Record
-          </span>
-        </button>
+        {/* Record Button - Hero Center Element (matches mobile) */}
+        <div className="relative flex items-center justify-center px-4">
+          <button
+            onClick={onRecordClick}
+            className="absolute w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            style={{
+              bottom: "-14px",
+              background: "linear-gradient(135deg, #D36A3D 0%, #C05A2D 100%)",
+              boxShadow:
+                "0 4px 12px rgba(211, 106, 61, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
+              border: "2px solid rgba(255, 255, 255, 0.3)",
+            }}
+          >
+            {/* Pulse animation ring */}
+            <motion.div
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: "linear-gradient(135deg, #D36A3D 0%, #C05A2D 100%)",
+              }}
+              animate={{
+                scale: [1, 1.3, 1.3],
+                opacity: [0.5, 0, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                repeatDelay: 0.5,
+              }}
+            />
+
+            {/* Icon */}
+            <Image
+              src="/REC_Mic.png"
+              alt="Record"
+              width={22}
+              height={22}
+              className="z-10"
+              style={{ width: 'auto', height: 'auto' }}
+            />
+          </button>
+        </div>
 
         <DesktopNavItemBottom
           icon={Box}
