@@ -435,12 +435,12 @@ export default function HomePage() {
                     index % 2 === 0 ? "" : "md:flex-row-reverse"
                   }`}
                 >
-                  <div className={`${index % 2 === 0 ? "md:text-right md:pr-12" : "md:pl-12 md:col-start-2"}`}>
+                  <div className={`${index % 2 === 0 ? "md:text-right md:pr-12" : "md:text-left md:pl-12 md:col-start-2"}`}>
                     <div className="inline-block px-4 py-1 bg-orange-500 text-white text-sm font-semibold rounded-full mb-3">
                       {memory.year}
                     </div>
                     <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{memory.title}</h3>
-                    <p className="text-lg text-gray-600">{memory.subtitle}</p>
+                    <p className={`text-lg text-gray-600 ${index % 2 === 0 ? "md:text-right" : "md:text-left"}`}>{memory.subtitle}</p>
                   </div>
                   <div className={`${index % 2 === 0 ? "md:pl-12" : "md:pr-12 md:col-start-1 md:row-start-1"}`}>
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl group">
