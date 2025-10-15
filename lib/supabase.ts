@@ -18,10 +18,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-// Expose supabase to window for debugging (remove in production)
-if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
-  (window as any).supabase = supabase;
-}
+// SECURITY: Removed window.supabase exposure (was only for debugging)
+// Never expose auth client to window object, even in development
 
 export async function signInWithGoogle() {
   const redirectUrl =

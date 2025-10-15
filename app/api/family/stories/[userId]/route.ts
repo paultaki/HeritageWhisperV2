@@ -131,9 +131,23 @@ export async function GET(
       })
       .eq('id', session.family_member_id);
 
+    // Transform stories to match frontend expectations (camelCase)
+    const transformedStories = stories.map((story: any) => ({
+      id: story.id,
+      title: story.title,
+      transcript: story.transcription || story.transcript,
+      audioUrl: story.audio_url,
+      storyYear: story.year,
+      ageAtStory: story.metadata?.life_age,
+      heroPhotoUrl: story.photo_url,
+      photos: story.metadata?.photos || [],
+      wisdomText: story.wisdom_clip_text,
+      createdAt: story.created_at,
+    }));
+
     return NextResponse.json({
-      stories: stories || [],
-      total: stories?.length || 0,
+      stories: transformedStories,
+      total: transformedStories.length,
     });
   } catch (error) {
     console.error('Error in family stories API:', error);

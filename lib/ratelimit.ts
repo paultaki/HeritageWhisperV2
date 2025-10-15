@@ -3,23 +3,48 @@ import { Redis } from "@upstash/redis";
 
 // Lazy-load Redis client to avoid build-time errors
 let redis: Redis | null = null;
+let redisInitialized = false;
+let redisInitError: Error | null = null;
 
 function getRedis() {
-  if (!redis) {
-    const url = process.env.UPSTASH_REDIS_REST_URL;
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (redisInitialized) {
+    return redis;
+  }
 
-    if (!url || !token) {
-      console.warn(
-        "[Rate Limit] Redis credentials not configured - rate limiting disabled",
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const nodeEnv = process.env.NODE_ENV;
+
+  if (!url || !token) {
+    const errorMsg = "[Rate Limit] Redis credentials not configured";
+
+    // CRITICAL CHANGE: Fail in production, warn in development
+    if (nodeEnv === 'production') {
+      redisInitError = new Error(
+        `${errorMsg} - Rate limiting is REQUIRED in production. ` +
+        `Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN environment variables.`
       );
-      // Return a mock Redis client that always allows requests
-      return null;
+      console.error(redisInitError.message);
+      // Don't throw here - let individual rate limit calls handle it
+    } else {
+      console.warn(`${errorMsg} - rate limiting disabled in development`);
     }
 
-    redis = new Redis({ url, token });
+    redisInitialized = true;
+    return null;
   }
-  return redis;
+
+  try {
+    redis = new Redis({ url, token });
+    redisInitialized = true;
+    console.info('[Rate Limit] Redis connection initialized successfully');
+    return redis;
+  } catch (error) {
+    redisInitError = error as Error;
+    console.error('[Rate Limit] Failed to initialize Redis:', error);
+    redisInitialized = true;
+    return null;
+  }
 }
 
 // Lazy-initialize rate limiters
@@ -30,7 +55,16 @@ let _tier3Ratelimit: Ratelimit | null = null;
 
 function getRateLimiter(type: "auth" | "upload" | "api" | "tier3"): Ratelimit | null {
   const redis = getRedis();
-  if (!redis) return null;
+
+  // CRITICAL CHANGE: Fail in production if Redis not available
+  if (!redis) {
+    if (process.env.NODE_ENV === 'production' || redisInitError) {
+      throw new Error(
+        `Rate limiting unavailable in production. Redis initialization failed: ${redisInitError?.message || 'No credentials'}`
+      );
+    }
+    return null;
+  }
 
   if (type === "auth" && !_authRatelimit) {
     _authRatelimit = new Ratelimit({
@@ -81,9 +115,30 @@ function getRateLimiter(type: "auth" | "upload" | "api" | "tier3"): Ratelimit | 
 // Export getters instead of direct instances
 export const authRatelimit = {
   limit: async (identifier: string) => {
-    const limiter = getRateLimiter("auth");
-    if (!limiter) {
-      // If rate limiting is disabled, always allow
+    try {
+      const limiter = getRateLimiter("auth");
+      if (!limiter) {
+        // Development fallback only
+        return {
+          success: true,
+          limit: 999,
+          reset: Date.now() + 10000,
+          remaining: 999,
+        };
+      }
+      return limiter.limit(identifier);
+    } catch (error) {
+      console.error('[Rate Limit] Auth rate limit check failed:', error);
+      // In production, fail closed (deny request)
+      if (process.env.NODE_ENV === 'production') {
+        return {
+          success: false,
+          limit: 0,
+          reset: Date.now() + 60000,
+          remaining: 0,
+        };
+      }
+      // In development, fail open (allow request but log)
       return {
         success: true,
         limit: 999,
@@ -91,14 +146,32 @@ export const authRatelimit = {
         remaining: 999,
       };
     }
-    return limiter.limit(identifier);
   },
 };
 
 export const uploadRatelimit = {
   limit: async (identifier: string) => {
-    const limiter = getRateLimiter("upload");
-    if (!limiter) {
+    try {
+      const limiter = getRateLimiter("upload");
+      if (!limiter) {
+        return {
+          success: true,
+          limit: 999,
+          reset: Date.now() + 60000,
+          remaining: 999,
+        };
+      }
+      return limiter.limit(identifier);
+    } catch (error) {
+      console.error('[Rate Limit] Upload rate limit check failed:', error);
+      if (process.env.NODE_ENV === 'production') {
+        return {
+          success: false,
+          limit: 0,
+          reset: Date.now() + 60000,
+          remaining: 0,
+        };
+      }
       return {
         success: true,
         limit: 999,
@@ -106,14 +179,32 @@ export const uploadRatelimit = {
         remaining: 999,
       };
     }
-    return limiter.limit(identifier);
   },
 };
 
 export const apiRatelimit = {
   limit: async (identifier: string) => {
-    const limiter = getRateLimiter("api");
-    if (!limiter) {
+    try {
+      const limiter = getRateLimiter("api");
+      if (!limiter) {
+        return {
+          success: true,
+          limit: 999,
+          reset: Date.now() + 60000,
+          remaining: 999,
+        };
+      }
+      return limiter.limit(identifier);
+    } catch (error) {
+      console.error('[Rate Limit] API rate limit check failed:', error);
+      if (process.env.NODE_ENV === 'production') {
+        return {
+          success: false,
+          limit: 0,
+          reset: Date.now() + 60000,
+          remaining: 0,
+        };
+      }
       return {
         success: true,
         limit: 999,
@@ -121,14 +212,32 @@ export const apiRatelimit = {
         remaining: 999,
       };
     }
-    return limiter.limit(identifier);
   },
 };
 
 export const tier3Ratelimit = {
   limit: async (identifier: string) => {
-    const limiter = getRateLimiter("tier3");
-    if (!limiter) {
+    try {
+      const limiter = getRateLimiter("tier3");
+      if (!limiter) {
+        return {
+          success: true,
+          limit: 999,
+          reset: Date.now() + 300000,
+          remaining: 999,
+        };
+      }
+      return limiter.limit(identifier);
+    } catch (error) {
+      console.error('[Rate Limit] Tier 3 rate limit check failed:', error);
+      if (process.env.NODE_ENV === 'production') {
+        return {
+          success: false,
+          limit: 0,
+          reset: Date.now() + 300000,
+          remaining: 0,
+        };
+      }
       return {
         success: true,
         limit: 999,
@@ -136,7 +245,6 @@ export const tier3Ratelimit = {
         remaining: 999,
       };
     }
-    return limiter.limit(identifier);
   },
 };
 
@@ -198,4 +306,32 @@ export async function checkRateLimit(
   }
 
   return null;
+}
+
+/**
+ * Health check for rate limiting system
+ * Call this on app startup to verify Redis is working
+ */
+export async function healthCheckRateLimit(): Promise<{
+  healthy: boolean;
+  error?: string;
+}> {
+  try {
+    const redis = getRedis();
+    if (!redis) {
+      return {
+        healthy: process.env.NODE_ENV !== 'production',
+        error: 'Redis not configured',
+      };
+    }
+
+    // Test Redis connection with a simple ping
+    await redis.ping();
+    return { healthy: true };
+  } catch (error) {
+    return {
+      healthy: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
 }
