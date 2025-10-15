@@ -14,8 +14,6 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 // Generate a secure random token (32 bytes = 64 hex characters)
 function generateSecureToken(): string {
   return crypto.randomBytes(32).toString('hex');
@@ -152,40 +150,53 @@ export async function POST(req: NextRequest) {
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/family/access?token=${inviteToken}`;
     
     try {
-      const emailContent = FamilyInviteEmail({
-        storytellerName: senderName,
-        familyMemberName: name,
-        relationship,
-        magicLink: inviteUrl,
-        expiresAt: expiresAt.toISOString(),
-      });
+      // Only initialize Resend if API key is available
+      if (process.env.RESEND_API_KEY) {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        
+        const emailContent = FamilyInviteEmail({
+          storytellerName: senderName,
+          familyMemberName: name,
+          relationship,
+          magicLink: inviteUrl,
+          expiresAt: expiresAt.toISOString(),
+        });
 
-      const { data: emailData, error: emailError } = await resend.emails.send({
-        from: 'Heritage Whisper <no-reply@updates.heritagewhisper.com>',
-        to: email,
-        subject: emailContent.subject,
-        html: emailContent.html,
-        text: emailContent.text,
-      });
+        const { data: emailData, error: emailError } = await resend.emails.send({
+          from: 'Heritage Whisper <no-reply@updates.heritagewhisper.com>',
+          to: email,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          text: emailContent.text,
+        });
 
-      if (emailError) {
-        console.error('Error sending email:', emailError);
-        // Still log to console as fallback
-        console.log('=== FAMILY INVITE (Email failed, console backup) ===');
+        if (emailError) {
+          console.error('Error sending email:', emailError);
+          // Still log to console as fallback
+          console.log('=== FAMILY INVITE (Email failed, console backup) ===');
+          console.log('To:', email);
+          console.log('From:', senderName);
+          console.log('Link:', inviteUrl);
+          console.log('Expires:', expiresAt.toISOString());
+          console.log('===================================================');
+        } else {
+          console.log('✅ Family invite email sent:', emailData?.id);
+          // Also log in development
+          if (process.env.NODE_ENV === 'development') {
+            console.log('=== FAMILY INVITE (Email sent) ===');
+            console.log('To:', email);
+            console.log('Link:', inviteUrl);
+            console.log('===================================');
+          }
+        }
+      } else {
+        // No Resend API key - log to console only
+        console.log('=== FAMILY INVITE (No Resend API key, console only) ===');
         console.log('To:', email);
         console.log('From:', senderName);
         console.log('Link:', inviteUrl);
         console.log('Expires:', expiresAt.toISOString());
-        console.log('===================================================');
-      } else {
-        console.log('✅ Family invite email sent:', emailData?.id);
-        // Also log in development
-        if (process.env.NODE_ENV === 'development') {
-          console.log('=== FAMILY INVITE (Email sent) ===');
-          console.log('To:', email);
-          console.log('Link:', inviteUrl);
-          console.log('===================================');
-        }
+        console.log('=======================================================');
       }
     } catch (emailError) {
       console.error('Exception sending email:', emailError);
