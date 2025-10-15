@@ -92,13 +92,12 @@ CREATE TRIGGER cleanup_sessions_on_insert
   EXECUTE FUNCTION trigger_cleanup_expired_sessions();
 
 -- Index for efficient expiry queries
+-- Note: Cannot use NOW() in partial index (not immutable), so create full indexes
 CREATE INDEX IF NOT EXISTS idx_family_sessions_expires_at
-ON public.family_sessions(expires_at)
-WHERE expires_at < NOW();
+ON public.family_sessions(expires_at);
 
 CREATE INDEX IF NOT EXISTS idx_family_sessions_absolute_expires_at
-ON public.family_sessions(absolute_expires_at)
-WHERE absolute_expires_at < NOW();
+ON public.family_sessions(absolute_expires_at);
 
 COMMENT ON COLUMN public.family_sessions.absolute_expires_at IS 'Absolute max session lifetime - cannot be extended';
 COMMENT ON FUNCTION cleanup_expired_family_sessions IS 'Removes all expired family sessions';

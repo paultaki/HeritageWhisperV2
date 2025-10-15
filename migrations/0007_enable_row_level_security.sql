@@ -2,6 +2,38 @@
 -- Created: 2025-10-15
 -- Description: Add defense-in-depth with database-level access control
 
+-- Drop existing policies first (idempotent - safe to run multiple times)
+DO $$
+BEGIN
+    -- Drop all existing RLS policies to make migration idempotent
+    DROP POLICY IF EXISTS "Users can view their own stories" ON public.stories;
+    DROP POLICY IF EXISTS "Users can insert their own stories" ON public.stories;
+    DROP POLICY IF EXISTS "Users can update their own stories" ON public.stories;
+    DROP POLICY IF EXISTS "Users can delete their own stories" ON public.stories;
+    DROP POLICY IF EXISTS "Service role has full access to stories" ON public.stories;
+    DROP POLICY IF EXISTS "Users can view their own prompts" ON public.active_prompts;
+    DROP POLICY IF EXISTS "Users can insert their own prompts" ON public.active_prompts;
+    DROP POLICY IF EXISTS "Users can update their own prompts" ON public.active_prompts;
+    DROP POLICY IF EXISTS "Users can delete their own prompts" ON public.active_prompts;
+    DROP POLICY IF EXISTS "Service role has full access to active_prompts" ON public.active_prompts;
+    DROP POLICY IF EXISTS "Users can view their own prompt history" ON public.prompt_history;
+    DROP POLICY IF EXISTS "Users can insert their own prompt history" ON public.prompt_history;
+    DROP POLICY IF EXISTS "Service role has full access to prompt_history" ON public.prompt_history;
+    DROP POLICY IF EXISTS "Users can view their own family members" ON public.family_members;
+    DROP POLICY IF EXISTS "Users can insert their own family members" ON public.family_members;
+    DROP POLICY IF EXISTS "Users can update their own family members" ON public.family_members;
+    DROP POLICY IF EXISTS "Users can delete their own family members" ON public.family_members;
+    DROP POLICY IF EXISTS "Service role has full access to family_members" ON public.family_members;
+    DROP POLICY IF EXISTS "Service role has full access to family_sessions" ON public.family_sessions;
+    DROP POLICY IF EXISTS "Users can view their own profile" ON public.users;
+    DROP POLICY IF EXISTS "Users can update their own profile" ON public.users;
+    DROP POLICY IF EXISTS "Service role can insert users" ON public.users;
+    DROP POLICY IF EXISTS "Service role has full access to users" ON public.users;
+    DROP POLICY IF EXISTS "Admins can view audit log" ON public.admin_audit_log;
+    DROP POLICY IF EXISTS "Service role can insert audit log" ON public.admin_audit_log;
+    DROP POLICY IF EXISTS "Service role has full access to audit_log" ON public.admin_audit_log;
+END $$;
+
 -- ============================================================================
 -- STORIES TABLE RLS
 -- ============================================================================
