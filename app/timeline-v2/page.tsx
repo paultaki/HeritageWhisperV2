@@ -343,10 +343,146 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
     }
   };
 
+  // Render function for card content to avoid component definition issues
+  const renderCardContent = () => {
+    console.log("[Timeline-v2] Rendering card for:", story.title, "Photo URL:", displayPhoto?.url);
+    
+    return (
+      <div
+        className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer"
+        onClick={handleCardClick}
+      >
+        {/* Title (shown if no photo) */}
+        {!displayPhoto?.url && (
+          <div className="mb-6">
+            <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-3">
+              {story.title}
+            </h3>
+            <div className="flex items-center gap-3 text-sm text-gray-600">
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" />
+                {story.storyDate
+                  ? new Date(story.storyDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                    })
+                  : formatYear(story.storyYear)}
+              </span>
+              {story.lifeAge !== null && story.lifeAge !== undefined && (
+                <>
+                  <span className="text-gray-400">•</span>
+                  <span>
+                    {story.lifeAge > 0 && `Age ${story.lifeAge}`}
+                    {story.lifeAge === 0 && `Birth`}
+                    {story.lifeAge < 0 && `Before birth`}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Image with overlay */}
+        {displayPhoto?.url && (
+          <div className="relative mb-6 rounded-2xl overflow-hidden">
+            <img
+              src={displayPhoto.url}
+              alt={story.title}
+              className="w-full h-48 lg:h-64 object-cover"
+              style={
+                displayPhoto.transform
+                  ? {
+                      transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
+                      transformOrigin: "center center",
+                    }
+                  : undefined
+              }
+              onError={(e) => console.error("[Timeline-v2] Image failed to load:", displayPhoto.url)}
+              onLoad={() => console.log("[Timeline-v2] Image loaded successfully:", displayPhoto.url)}
+            />
+            {/* Memory Footer Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 lg:p-4">
+              <h3 className="text-lg lg:text-xl font-semibold text-white mb-1 line-clamp-2">
+                {story.title}
+              </h3>
+              <div className="flex items-center gap-2 lg:gap-3 text-xs lg:text-sm text-white/90">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3 lg:w-3.5 h-3 lg:h-3.5" />
+                  {story.storyDate
+                    ? new Date(story.storyDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                      })
+                    : formatYear(story.storyYear)}
+                </span>
+                {story.lifeAge !== null && story.lifeAge !== undefined && (
+                  <>
+                    <span className="text-white/70">•</span>
+                    <span>
+                      {story.lifeAge > 0 && `Age ${story.lifeAge}`}
+                      {story.lifeAge === 0 && `Birth`}
+                      {story.lifeAge < 0 && `Before birth`}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Audio Player */}
+        {story.audioUrl && (
+          <div className="mb-4">
+            <button
+              onClick={handlePlayAudio}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              {isLoading ? (
+                <Loader2 className="w-4 lg:w-5 h-4 lg:h-5 animate-spin" />
+              ) : isPlaying ? (
+                <Pause className="w-4 lg:w-5 h-4 lg:h-5" />
+              ) : (
+                <Play className="w-4 lg:w-5 h-4 lg:h-5 ml-0.5" />
+              )}
+              <span className="text-sm font-medium">
+                {isPlaying ? "Pause" : "Listen"}
+              </span>
+            </button>
+
+            {/* Progress Bar */}
+            {(isPlaying || progress > 0) && (
+              <div className="mt-3">
+                <div
+                  ref={progressBarRef}
+                  onClick={handleProgressBarClick}
+                  className="h-1.5 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
+                >
+                  <div
+                    className="h-full bg-orange-500 rounded-full transition-all duration-100"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
+                  <span>{formatDuration(currentTime)}</span>
+                  <span>{formatDuration(duration)}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Traits */}
+        {story.traits && story.traits.length > 0 && (
+          <StoryTraits traits={story.traits} />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div
       ref={cardRef}
-      className={`timeline-step flex flex-col lg:flex-row items-center gap-6 lg:gap-12 transition-all duration-800 ${
+      className={`timeline-step flex flex-col lg:flex-row items-center gap-6 lg:gap-4 transition-all duration-800 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
       }`}
       style={{
@@ -354,156 +490,9 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
         transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
-      {/* Left side content (for right-positioned cards, this is empty) */}
-      <div className={`flex-1 ${position === "left" ? "lg:pr-12" : ""} hidden lg:block`}>
-        {position === "left" && (
-          <div
-            className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer"
-            onClick={handleCardClick}
-          >
-            {/* Title (always shown) */}
-            {!displayPhoto?.url && (
-              <div className="mb-6">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-3">
-                  {story.title}
-                </h3>
-                <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {story.storyDate
-                      ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                        })
-                      : formatYear(story.storyYear)}
-                  </span>
-                  {story.lifeAge !== null && story.lifeAge !== undefined && (
-                    <>
-                      <span className="text-gray-400">•</span>
-                      <span>
-                        {story.lifeAge > 0 && `Age ${story.lifeAge}`}
-                        {story.lifeAge === 0 && `Birth`}
-                        {story.lifeAge < 0 && `Before birth`}
-                      </span>
-                    </>
-                  )}
-                  {story.audioUrl && story.durationSeconds && (
-                    <>
-                      <span className="text-gray-400">•</span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />
-                        {formatDuration(story.durationSeconds)}
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {displayPhoto?.url && (
-              <div className="relative mb-6 rounded-2xl overflow-hidden">
-                <img
-                  src={displayPhoto.url}
-                  alt={story.title}
-                  className="w-full h-64 object-cover"
-                  style={
-                    displayPhoto.transform
-                      ? {
-                          transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
-                          transformOrigin: "center center",
-                        }
-                      : undefined
-                  }
-                />
-                {/* Memory Footer Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4">
-                  <h3 className="text-xl font-semibold text-white mb-1 line-clamp-2">
-                    {story.title}
-                  </h3>
-                  <div className="flex items-center gap-3 text-sm text-white/90">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {story.storyDate
-                        ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                          })
-                        : formatYear(story.storyYear)}
-                    </span>
-                    {story.lifeAge !== null && story.lifeAge !== undefined && (
-                      <span className="text-white/70">•</span>
-                    )}
-                    {story.lifeAge !== null && story.lifeAge !== undefined && (
-                      <span>
-                        {story.lifeAge > 0 && `Age ${story.lifeAge}`}
-                        {story.lifeAge === 0 && `Birth`}
-                        {story.lifeAge < 0 && `Before birth`}
-                      </span>
-                    )}
-                    {story.audioUrl && story.durationSeconds && (
-                      <>
-                        <span className="text-white/70">•</span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          {formatDuration(story.durationSeconds)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Audio Player */}
-            {story.audioUrl && (
-              <div className="mb-4">
-                <button
-                  onClick={handlePlayAudio}
-                  className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-all duration-200 shadow-md hover:shadow-lg"
-                  aria-label={isPlaying ? "Pause audio" : hasError ? "Retry playing audio" : "Play audio"}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : hasError ? (
-                    <AlertCircle className="w-5 h-5" />
-                  ) : isPlaying ? (
-                    <Pause className="w-5 h-5" />
-                  ) : (
-                    <Play className="w-5 h-5 ml-0.5" />
-                  )}
-                  <span className="text-sm font-medium">
-                    {isPlaying ? "Pause" : hasError ? "Retry" : "Listen"}
-                  </span>
-                </button>
-
-                {/* Progress Bar */}
-                {(isPlaying || progress > 0) && (
-                  <div className="mt-3">
-                    <div
-                      ref={progressBarRef}
-                      onClick={handleProgressBarClick}
-                      className="h-1.5 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
-                    >
-                      <div
-                        className="h-full bg-orange-500 rounded-full transition-all duration-100"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
-                      <span>{formatDuration(currentTime)}</span>
-                      <span>{formatDuration(duration)}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Traits */}
-            {story.traits && story.traits.length > 0 && (
-              <StoryTraits traits={story.traits} />
-            )}
-          </div>
-        )}
+      {/* Left side content (for left-positioned cards) - Desktop only */}
+      <div className={`flex-1 flex ${position === "left" ? "justify-end lg:pr-6" : ""} hidden lg:flex`}>
+        {position === "left" && <div className="max-w-md w-full">{renderCardContent()}</div>}
       </div>
 
       {/* Center dot */}
@@ -517,261 +506,14 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
         }}
       />
 
-      {/* Right side content (for left-positioned cards, this is empty) */}
-      <div className={`flex-1 ${position === "right" ? "lg:pl-12" : ""} hidden lg:block`}>
-        {position === "right" && (
-          <div
-            className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer"
-            onClick={handleCardClick}
-          >
-            {/* Title (always shown) */}
-            {!displayPhoto?.url && (
-              <div className="mb-6">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-3">
-                  {story.title}
-                </h3>
-                <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {story.storyDate
-                      ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                        })
-                      : formatYear(story.storyYear)}
-                  </span>
-                  {story.lifeAge !== null && story.lifeAge !== undefined && (
-                    <>
-                      <span className="text-gray-400">•</span>
-                      <span>
-                        {story.lifeAge > 0 && `Age ${story.lifeAge}`}
-                        {story.lifeAge === 0 && `Birth`}
-                        {story.lifeAge < 0 && `Before birth`}
-                      </span>
-                    </>
-                  )}
-                  {story.audioUrl && story.durationSeconds && (
-                    <>
-                      <span className="text-gray-400">•</span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />
-                        {formatDuration(story.durationSeconds)}
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {displayPhoto?.url && (
-              <div className="relative mb-6 rounded-2xl overflow-hidden">
-                <img
-                  src={displayPhoto.url}
-                  alt={story.title}
-                  className="w-full h-64 object-cover"
-                  style={
-                    displayPhoto.transform
-                      ? {
-                          transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
-                          transformOrigin: "center center",
-                        }
-                      : undefined
-                  }
-                />
-                {/* Memory Footer Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4">
-                  <h3 className="text-xl font-semibold text-white mb-1 line-clamp-2">
-                    {story.title}
-                  </h3>
-                  <div className="flex items-center gap-3 text-sm text-white/90">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {story.storyDate
-                        ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                          })
-                        : formatYear(story.storyYear)}
-                    </span>
-                    {story.lifeAge !== null && story.lifeAge !== undefined && (
-                      <span className="text-white/70">•</span>
-                    )}
-                    {story.lifeAge !== null && story.lifeAge !== undefined && (
-                      <span>
-                        {story.lifeAge > 0 && `Age ${story.lifeAge}`}
-                        {story.lifeAge === 0 && `Birth`}
-                        {story.lifeAge < 0 && `Before birth`}
-                      </span>
-                    )}
-                    {story.audioUrl && story.durationSeconds && (
-                      <>
-                        <span className="text-white/70">•</span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          {formatDuration(story.durationSeconds)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Audio Player */}
-            {story.audioUrl && (
-              <div className="mb-4">
-                <button
-                  onClick={handlePlayAudio}
-                  className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-all duration-200 shadow-md hover:shadow-lg"
-                  aria-label={isPlaying ? "Pause audio" : hasError ? "Retry playing audio" : "Play audio"}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : hasError ? (
-                    <AlertCircle className="w-5 h-5" />
-                  ) : isPlaying ? (
-                    <Pause className="w-5 h-5" />
-                  ) : (
-                    <Play className="w-5 h-5 ml-0.5" />
-                  )}
-                  <span className="text-sm font-medium">
-                    {isPlaying ? "Pause" : hasError ? "Retry" : "Listen"}
-                  </span>
-                </button>
-
-                {/* Progress Bar */}
-                {(isPlaying || progress > 0) && (
-                  <div className="mt-3">
-                    <div
-                      ref={progressBarRef}
-                      onClick={handleProgressBarClick}
-                      className="h-1.5 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
-                    >
-                      <div
-                        className="h-full bg-orange-500 rounded-full transition-all duration-100"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
-                      <span>{formatDuration(currentTime)}</span>
-                      <span>{formatDuration(duration)}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Traits */}
-            {story.traits && story.traits.length > 0 && (
-              <StoryTraits traits={story.traits} />
-            )}
-          </div>
-        )}
+      {/* Right side content (for right-positioned cards) - Desktop only */}
+      <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`}>
+        {position === "right" && <div className="max-w-md w-full">{renderCardContent()}</div>}
       </div>
 
-      {/* Mobile Card (shown on small screens) */}
+      {/* Mobile Card (shown on all small screens) */}
       <div className="lg:hidden w-full">
-        <div
-          className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all duration-500 cursor-pointer"
-          onClick={handleCardClick}
-        >
-          {/* Title (always shown on mobile) */}
-          {!displayPhoto?.url && (
-            <div className="mb-4">
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {story.title}
-              </h3>
-              <div className="flex items-center gap-2 text-xs text-gray-600">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  {story.storyDate
-                    ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                      })
-                    : formatYear(story.storyYear)}
-                </span>
-                {story.lifeAge !== null && story.lifeAge !== undefined && (
-                  <>
-                    <span className="text-gray-400">•</span>
-                    <span>
-                      {story.lifeAge > 0 && `Age ${story.lifeAge}`}
-                      {story.lifeAge === 0 && `Birth`}
-                      {story.lifeAge < 0 && `Before birth`}
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-
-          {displayPhoto?.url && (
-            <div className="relative mb-4 rounded-2xl overflow-hidden">
-              <img
-                src={displayPhoto.url}
-                alt={story.title}
-                className="w-full h-48 object-cover"
-                style={
-                  displayPhoto.transform
-                    ? {
-                        transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
-                        transformOrigin: "center center",
-                      }
-                    : undefined
-                }
-              />
-              {/* Memory Footer Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3">
-                <h3 className="text-lg font-semibold text-white mb-1 line-clamp-2">
-                  {story.title}
-                </h3>
-                <div className="flex items-center gap-2 text-xs text-white/90">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {story.storyDate
-                      ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                        })
-                      : formatYear(story.storyYear)}
-                  </span>
-                  {story.lifeAge !== null && story.lifeAge !== undefined && (
-                    <>
-                      <span className="text-white/70">•</span>
-                      <span>
-                        {story.lifeAge > 0 && `Age ${story.lifeAge}`}
-                        {story.lifeAge === 0 && `Birth`}
-                        {story.lifeAge < 0 && `Before birth`}
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Audio Player */}
-          {story.audioUrl && (
-            <div className="mb-3">
-              <button
-                onClick={handlePlayAudio}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-all duration-200 shadow-md text-sm"
-                aria-label={isPlaying ? "Pause audio" : "Play audio"}
-              >
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : isPlaying ? (
-                  <Pause className="w-4 h-4" />
-                ) : (
-                  <Play className="w-4 h-4 ml-0.5" />
-                )}
-                <span className="font-medium">
-                  {isPlaying ? "Pause" : "Listen"}
-                </span>
-              </button>
-            </div>
-          )}
-        </div>
+        {renderCardContent()}
       </div>
     </div>
   );
@@ -944,17 +686,6 @@ export default function TimelineV2Page() {
 
       {/* Custom Styles */}
       <style jsx global>{`
-        .timeline-step {
-          opacity: 0;
-          transform: translateY(50px);
-        }
-
-        .timeline-dot {
-          background: #e2e8f0;
-          transform: scale(0.8);
-          opacity: 0.5;
-        }
-
         @media (max-width: 1024px) {
           .timeline-step {
             opacity: 1 !important;
@@ -971,4 +702,3 @@ export default function TimelineV2Page() {
     </div>
   );
 }
-
