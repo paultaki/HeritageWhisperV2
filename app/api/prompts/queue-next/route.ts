@@ -64,24 +64,38 @@ export async function POST(req: NextRequest) {
     // Determine status: ready if less than 3, otherwise saved
     const status = (count ?? 0) < 3 ? 'ready' : 'saved';
 
-    // Upsert the prompt
-    const { error: upsertError } = await supabaseAdmin
+    // Check if prompt already exists for this user in ready or saved status
+    const { data: existingPrompt } = await supabaseAdmin
       .from('user_prompts')
-      .upsert(
-        {
-          user_id: user.id,
-          text,
-          category,
-          status,
-          source: 'catalog',
-        },
-        { onConflict: 'user_id,text,status' }
-      );
+      .select('id, status')
+      .eq('user_id', user.id)
+      .eq('text', text)
+      .in('status', ['ready', 'saved'])
+      .single();
 
-    if (upsertError) {
-      console.error('Error upserting prompt:', upsertError);
+    // If it already exists, return success (idempotent)
+    if (existingPrompt) {
+      return NextResponse.json({ 
+        promoted: existingPrompt.status === 'ready',
+        alreadyExists: true 
+      });
+    }
+
+    // Insert the new prompt
+    const { error: insertError } = await supabaseAdmin
+      .from('user_prompts')
+      .insert({
+        user_id: user.id,
+        text,
+        category,
+        status,
+        source: 'catalog',
+      });
+
+    if (insertError) {
+      console.error('Error inserting prompt:', insertError);
       return NextResponse.json(
-        { error: 'Failed to save prompt' },
+        { error: 'Failed to save prompt', details: insertError.message },
         { status: 500 }
       );
     }

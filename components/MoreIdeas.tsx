@@ -50,6 +50,7 @@ export default function MoreIdeas() {
   const [category, setCategory] = useState<string | null>(null);
   const [ideas, setIdeas] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const categories = [...BASE_CATEGORIES, ...(showSensitive ? SENSITIVE_CATEGORIES : [])];
 
@@ -69,16 +70,21 @@ export default function MoreIdeas() {
   }, [category, showSensitive]);
 
   async function queueNext(p: Prompt) {
+    if (savingId) return; // Prevent double-clicks
+    
+    setSavingId(p.id);
     try {
+      console.log('Queueing prompt:', p);
       const response = await apiRequest('POST', '/api/prompts/queue-next', {
         text: p.text,
         category: p.category,
       });
-      const { promoted } = await response.json();
+      const result = await response.json();
+      console.log('Queue response:', result);
 
       toast({
-        title: promoted ? 'Queued to Ready to Tell' : 'Added to Saved for later',
-        description: promoted
+        title: result.promoted ? 'Queued to Ready to Tell' : 'Added to Saved for later',
+        description: result.promoted
           ? 'Your prompt is now in your inbox'
           : 'Max 3 ready at a time. Check Saved for later.',
       });
@@ -86,18 +92,26 @@ export default function MoreIdeas() {
       console.error('Error queueing prompt:', error);
       toast({
         title: 'Error',
-        description: 'Failed to add prompt. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to add prompt. Please try again.',
         variant: 'destructive',
       });
+    } finally {
+      setSavingId(null);
     }
   }
 
   async function saveForLater(p: Prompt) {
+    if (savingId) return; // Prevent double-clicks
+    
+    setSavingId(p.id);
     try {
-      await apiRequest('POST', '/api/prompts/save', {
+      console.log('Saving prompt:', p);
+      const response = await apiRequest('POST', '/api/prompts/save', {
         text: p.text,
         category: p.category,
       });
+      const result = await response.json();
+      console.log('Save response:', result);
 
       toast({
         title: 'Saved for later',
@@ -107,9 +121,11 @@ export default function MoreIdeas() {
       console.error('Error saving prompt:', error);
       toast({
         title: 'Error',
-        description: 'Failed to save prompt. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to save prompt. Please try again.',
         variant: 'destructive',
       });
+    } finally {
+      setSavingId(null);
     }
   }
 
@@ -171,7 +187,7 @@ export default function MoreIdeas() {
 
           {/* Selected category prompts */}
           {category && (
-            <div className="pl-8 space-y-3">
+            <div className="pl-8">
               {loading && (
                 <p className="text-sm text-gray-500 italic">Loading prompts…</p>
               )}
@@ -183,35 +199,68 @@ export default function MoreIdeas() {
               )}
 
               {!loading && ideas.length > 0 && (
-                <ul className="space-y-3">
-                  {ideas.map((p) => (
-                    <li
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {ideas.map((p, index) => (
+                    <div
                       key={p.id}
-                      className="rounded-xl border border-amber-200/50 p-5 bg-gradient-to-br from-amber-50/40 to-orange-50/40 hover:border-amber-300/70 transition-all duration-200"
+                      className="bg-white/30 backdrop-blur-md border border-white/40 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:bg-white/40 flex flex-col"
+                      style={{
+                        minHeight: '280px',
+                      }}
                     >
-                      <p className="text-base font-serif text-gray-800 leading-relaxed mb-4">
-                        {p.text}
-                      </p>
-                      <div className="flex gap-3">
-                        <Button
-                          onClick={() => queueNext(p)}
-                          className="bg-gradient-to-r from-amber-500 via-orange-400 to-rose-400 hover:from-amber-600 hover:via-orange-500 hover:to-rose-500 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-300 text-sm h-10"
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Queue next
-                        </Button>
-                        <Button
-                          onClick={() => saveForLater(p)}
-                          variant="outline"
-                          className="bg-white/60 hover:bg-white/80 border-amber-200 hover:border-amber-300 text-gray-700 text-sm h-10"
-                        >
-                          <Bookmark className="w-4 h-4 mr-1" />
-                          Save for later
-                        </Button>
+                      <div className="p-4 flex flex-col h-full justify-between">
+                        {/* Prompt text - centered vertically */}
+                        <div className="flex-1 flex items-center justify-center mb-3">
+                          <p 
+                            className="text-base md:text-lg font-serif text-gray-800 leading-relaxed text-center"
+                            style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+                          >
+                            {p.text}
+                          </p>
+                        </div>
+
+                        {/* Action buttons stacked */}
+                        <div className="space-y-2">
+                          <Button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              queueNext(p);
+                            }}
+                            disabled={savingId === p.id}
+                            className="w-full bg-gradient-to-r from-amber-500 via-orange-400 to-rose-400 hover:from-amber-600 hover:via-orange-500 hover:to-rose-500 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-300 text-sm h-9 disabled:opacity-50"
+                          >
+                            {savingId === p.id ? (
+                              <span className="animate-pulse">Saving...</span>
+                            ) : (
+                              <>
+                                <Plus className="w-4 h-4 mr-1" />
+                                Queue
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              saveForLater(p);
+                            }}
+                            disabled={savingId === p.id}
+                            variant="outline"
+                            className="w-full bg-white/60 hover:bg-white/80 border-amber-200 hover:border-amber-300 text-gray-700 text-sm h-9 disabled:opacity-50"
+                          >
+                            {savingId === p.id ? (
+                              <span className="animate-pulse">Saving...</span>
+                            ) : (
+                              <>
+                                <Bookmark className="w-4 h-4 mr-1" />
+                                Save
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </div>
           )}

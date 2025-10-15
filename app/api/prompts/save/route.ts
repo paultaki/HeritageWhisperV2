@@ -46,24 +46,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Upsert the prompt with status 'saved'
-    const { error: upsertError } = await supabaseAdmin
+    // Check if prompt already exists for this user in ready or saved status
+    const { data: existingPrompt } = await supabaseAdmin
       .from('user_prompts')
-      .upsert(
-        {
-          user_id: user.id,
-          text,
-          category,
-          status: 'saved',
-          source: 'catalog',
-        },
-        { onConflict: 'user_id,text,status' }
-      );
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('text', text)
+      .in('status', ['ready', 'saved'])
+      .single();
 
-    if (upsertError) {
-      console.error('Error saving prompt:', upsertError);
+    // If it already exists, return success (idempotent)
+    if (existingPrompt) {
+      return NextResponse.json({ saved: true, alreadyExists: true });
+    }
+
+    // Insert the new prompt with status 'saved'
+    const { error: insertError } = await supabaseAdmin
+      .from('user_prompts')
+      .insert({
+        user_id: user.id,
+        text,
+        category,
+        status: 'saved',
+        source: 'catalog',
+      });
+
+    if (insertError) {
+      console.error('Error saving prompt:', insertError);
       return NextResponse.json(
-        { error: 'Failed to save prompt' },
+        { error: 'Failed to save prompt', details: insertError.message },
         { status: 500 }
       );
     }

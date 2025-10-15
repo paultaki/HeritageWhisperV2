@@ -35,9 +35,9 @@ function DesktopNavItemBottom({
   return (
     <button
       onClick={handleClick}
-      className="flex flex-col items-center gap-1 px-6 py-2 rounded-xl transition-all hover:bg-gray-100 group relative"
+      className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all hover:bg-gray-100 group relative"
       style={{
-        color: isActive ? "#D36A3D" : "hsl(210, 10%, 60%)",
+        color: isActive ? "#D36A3D" : "hsl(210, 10%, 40%)",
       }}
     >
       {/* Active indicator bar at top */}
@@ -51,7 +51,7 @@ function DesktopNavItemBottom({
         />
       )}
       <Icon className="w-6 h-6 flex-shrink-0" />
-      <span className="text-xs font-medium text-center whitespace-nowrap">
+      <span className="text-sm font-medium text-center whitespace-nowrap">
         {label}
       </span>
     </button>
@@ -89,7 +89,7 @@ export default function DesktopNavigationBottom({
       }}
     >
       {/* Navigation Items Container - Centered */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <DesktopNavItemBottom
           icon={Calendar}
           label="Timeline"
@@ -105,10 +105,10 @@ export default function DesktopNavigationBottom({
         />
 
         {/* Record Button - Hero Center Element (matches mobile) */}
-        <div className="relative flex items-center justify-center px-4">
+        <div className="relative flex items-center justify-center px-4 z-50">
           <button
             onClick={onRecordClick}
-            className="absolute w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            className="absolute w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-50"
             style={{
               bottom: "-14px",
               background: "linear-gradient(135deg, #D36A3D 0%, #C05A2D 100%)",
