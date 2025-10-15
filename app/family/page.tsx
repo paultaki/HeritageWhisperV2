@@ -66,14 +66,17 @@ import {
 
 interface FamilyMember {
   id: string;
+  user_id: string;
   email: string;
-  name?: string;
-  relationship: string;
-  status: "pending" | "active" | "declined";
-  invitedAt: string;
-  acceptedAt?: string;
-  lastViewedAt?: string;
-  customMessage?: string;
+  name: string | null;
+  relationship: string | null;
+  status: "pending" | "active" | "suspended";
+  invited_at: string;
+  first_accessed_at: string | null;
+  last_accessed_at: string | null;
+  access_count: number;
+  created_at: string;
+  inviteExpired?: boolean;
 }
 
 interface FamilyActivityItem {
@@ -105,12 +108,15 @@ export default function FamilyPage() {
   }, [user, router]);
 
   // Fetch family members
-  const { data: familyMembers = [], isLoading: loadingMembers } = useQuery<
-    FamilyMember[]
-  >({
+  const { data: familyMembersData, isLoading: loadingMembers } = useQuery<{
+    members: FamilyMember[];
+    total: number;
+  }>({
     queryKey: ["/api/family/members"],
     enabled: !!user,
   });
+
+  const familyMembers = familyMembersData?.members || [];
 
   // Fetch family activity
   const { data: familyActivity = [], isLoading: loadingActivity } = useQuery<
@@ -124,18 +130,24 @@ export default function FamilyPage() {
   const inviteMutation = useMutation({
     mutationFn: async (data: {
       email: string;
+      name: string;
       relationship: string;
-      customMessage?: string;
     }) => {
       const response = await apiRequest("POST", "/api/family/invite", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
       setInviteDialogOpen(false);
       setInviteEmail("");
       setInviteRelationship("");
       setInviteMessage("");
+      
+      // Show invite URL in development
+      if (data.inviteUrl) {
+        console.log('Invite URL:', data.inviteUrl);
+      }
+      
       toast({
         title: "Invitation sent",
         description: "Your family member will receive an email invitation.",
@@ -155,7 +167,7 @@ export default function FamilyPage() {
     mutationFn: async (memberId: string) => {
       const response = await apiRequest(
         "DELETE",
-        `/api/family/members/${memberId}`,
+        `/api/family/${memberId}`,
       );
       return response.json();
     },
@@ -187,10 +199,13 @@ export default function FamilyPage() {
       return;
     }
 
+    // Extract name from email if not provided separately
+    const name = inviteEmail.split('@')[0];
+    
     await inviteMutation.mutateAsync({
       email: inviteEmail,
+      name: name,
       relationship: inviteRelationship,
-      customMessage: inviteMessage || undefined,
     });
   };
 
@@ -514,11 +529,11 @@ export default function FamilyPage() {
                             </div>
                             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                               <span>{member.email}</span>
-                              {member.lastViewedAt && (
+                              {member.last_accessed_at && (
                                 <span className="flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
                                   Last viewed{" "}
-                                  {getRelativeTime(member.lastViewedAt)}
+                                  {getRelativeTime(member.last_accessed_at)}
                                 </span>
                               )}
                             </div>
@@ -591,12 +606,17 @@ export default function FamilyPage() {
                           <div>
                             <div className="flex items-center gap-2">
                               <p className="font-medium">{member.email}</p>
-                              <Badge variant="outline">
-                                {member.relationship}
-                              </Badge>
+                              {member.relationship && (
+                                <Badge variant="outline">
+                                  {member.relationship}
+                                </Badge>
+                              )}
+                              {member.inviteExpired && (
+                                <Badge variant="destructive">Expired</Badge>
+                              )}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              Invited {getRelativeTime(member.invitedAt)}
+                              Invited {getRelativeTime(member.invited_at)}
                             </p>
                           </div>
                         </div>

@@ -12,19 +12,20 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
-// Generate a secure random token (32 bytes = 64 hex characters)
 function generateSecureToken(): string {
   return crypto.randomBytes(32).toString('hex');
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { memberId: string } }
+) {
   try {
-    const { email, name, relationship } = await req.json();
+    const memberId = params.memberId;
 
-    // Validate input
-    if (!email || !email.includes('@')) {
+    if (!memberId) {
       return NextResponse.json(
-        { error: 'Valid email address is required' },
+        { error: 'Member ID is required' },
         { status: 400 }
       );
     }
@@ -52,77 +53,45 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if user already has this family member
-    const { data: existing } = await supabaseAdmin
+    // Verify the family member belongs to this user
+    const { data: member, error: memberError } = await supabaseAdmin
       .from('family_members')
-      .select('id, status')
+      .select('*')
+      .eq('id', memberId)
       .eq('user_id', user.id)
-      .eq('email', email.toLowerCase())
       .single();
 
-    if (existing) {
+    if (memberError || !member) {
       return NextResponse.json(
-        { error: 'This email is already invited' },
+        { error: 'Family member not found' },
+        { status: 404 }
+      );
+    }
+
+    // Only allow resend for pending or active members
+    if (member.status === 'suspended') {
+      return NextResponse.json(
+        { error: 'Cannot resend invite to suspended member' },
         { status: 400 }
       );
     }
 
-    // Check family member limit (max 10)
-    const { count } = await supabaseAdmin
-      .from('family_members')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
-
-    if ((count || 0) >= 10) {
-      return NextResponse.json(
-        { error: 'Maximum 10 family members allowed' },
-        { status: 400 }
-      );
-    }
-
-    // Create family member record
-    const { data: familyMember, error: memberError } = await supabaseAdmin
-      .from('family_members')
-      .insert({
-        user_id: user.id,
-        email: email.toLowerCase(),
-        name: name || null,
-        relationship: relationship || null,
-        status: 'pending',
-      })
-      .select()
-      .single();
-
-    if (memberError || !familyMember) {
-      console.error('Error creating family member:', memberError);
-      return NextResponse.json(
-        { error: 'Failed to create invitation' },
-        { status: 500 }
-      );
-    }
-
-    // Generate secure token
+    // Generate new secure token
     const inviteToken = generateSecureToken();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
 
-    // Create invite record
+    // Create new invite record
     const { error: inviteError } = await supabaseAdmin
       .from('family_invites')
       .insert({
-        family_member_id: familyMember.id,
+        family_member_id: member.id,
         token: inviteToken,
         expires_at: expiresAt.toISOString(),
       });
 
     if (inviteError) {
       console.error('Error creating invite:', inviteError);
-      // Rollback: delete family member
-      await supabaseAdmin
-        .from('family_members')
-        .delete()
-        .eq('id', familyMember.id);
-
       return NextResponse.json(
         { error: 'Failed to create invitation' },
         { status: 500 }
@@ -141,33 +110,22 @@ export async function POST(req: NextRequest) {
       : 'A family member';
 
     // TODO: Send email via Resend
-    // For now, we'll just log the invite link
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/family/access?token=${inviteToken}`;
     
-    console.log('=== FAMILY INVITE ===');
-    console.log('To:', email);
+    console.log('=== RESEND FAMILY INVITE ===');
+    console.log('To:', member.email);
     console.log('From:', senderName);
     console.log('Link:', inviteUrl);
     console.log('Expires:', expiresAt.toISOString());
-    console.log('====================');
-
-    // In production, send email here
-    // await sendFamilyInviteEmail({
-    //   to: email,
-    //   recipientName: name,
-    //   senderName,
-    //   magicLink: inviteUrl,
-    // });
+    console.log('============================');
 
     return NextResponse.json({
       success: true,
-      memberId: familyMember.id,
       inviteSent: true,
-      // For development: include the link
       ...(process.env.NODE_ENV === 'development' && { inviteUrl }),
     });
   } catch (error) {
-    console.error('Error in family invite:', error);
+    console.error('Error in resend invite:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

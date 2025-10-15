@@ -1,0 +1,161 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
+
+function generateSecureToken(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const inviteToken = searchParams.get('token');
+
+    if (!inviteToken) {
+      return NextResponse.json(
+        { error: 'Invite token is required' },
+        { status: 400 }
+      );
+    }
+
+    // Find the invite
+    const { data: invite, error: inviteError } = await supabaseAdmin
+      .from('family_invites')
+      .select(`
+        id,
+        family_member_id,
+        expires_at,
+        used_at,
+        family_members (
+          id,
+          user_id,
+          email,
+          name,
+          relationship,
+          status,
+          first_accessed_at
+        )
+      `)
+      .eq('token', inviteToken)
+      .single();
+
+    if (inviteError || !invite) {
+      return NextResponse.json(
+        { error: 'Invalid or expired invite link' },
+        { status: 404 }
+      );
+    }
+
+    // Check if token is expired
+    if (new Date(invite.expires_at) < new Date()) {
+      return NextResponse.json(
+        { error: 'This invite link has expired' },
+        { status: 400 }
+      );
+    }
+
+    // Check if token already used
+    if (invite.used_at) {
+      // Token was already used, but we can still create a session
+      // This allows the user to access again if they lost their session
+    }
+
+    const familyMember = (invite as any).family_members;
+
+    if (!familyMember) {
+      return NextResponse.json(
+        { error: 'Family member not found' },
+        { status: 404 }
+      );
+    }
+
+    // Mark invite as used (first time only)
+    if (!invite.used_at) {
+      await supabaseAdmin
+        .from('family_invites')
+        .update({ used_at: new Date().toISOString() })
+        .eq('id', invite.id);
+
+      // Update family member status to active
+      await supabaseAdmin
+        .from('family_members')
+        .update({
+          status: 'active',
+          first_accessed_at: new Date().toISOString(),
+          last_accessed_at: new Date().toISOString(),
+          access_count: 1,
+        })
+        .eq('id', familyMember.id);
+    } else {
+      // Update last accessed time and increment count
+      await supabaseAdmin
+        .from('family_members')
+        .update({
+          last_accessed_at: new Date().toISOString(),
+          access_count: (familyMember.access_count || 0) + 1,
+        })
+        .eq('id', familyMember.id);
+    }
+
+    // Create a family session (30 days)
+    const sessionToken = generateSecureToken();
+    const sessionExpiresAt = new Date();
+    sessionExpiresAt.setDate(sessionExpiresAt.getDate() + 30);
+
+    const { error: sessionError } = await supabaseAdmin
+      .from('family_sessions')
+      .insert({
+        family_member_id: familyMember.id,
+        token: sessionToken,
+        user_agent: req.headers.get('user-agent') || null,
+        ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null,
+        expires_at: sessionExpiresAt.toISOString(),
+      });
+
+    if (sessionError) {
+      console.error('Error creating family session:', sessionError);
+      return NextResponse.json(
+        { error: 'Failed to create session' },
+        { status: 500 }
+      );
+    }
+
+    // Get user info for context
+    const { data: userInfo } = await supabaseAdmin
+      .from('users')
+      .select('id, firstName, lastName')
+      .eq('id', familyMember.user_id)
+      .single();
+
+    return NextResponse.json({
+      valid: true,
+      sessionToken,
+      expiresAt: sessionExpiresAt.toISOString(),
+      familyMember: {
+        id: familyMember.id,
+        name: familyMember.name,
+        relationship: familyMember.relationship,
+      },
+      storyteller: {
+        id: userInfo?.id,
+        name: userInfo ? `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() : 'Your family member',
+      },
+    });
+  } catch (error) {
+    console.error('Error in verify token:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
