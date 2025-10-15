@@ -360,7 +360,11 @@ export default function RecordModal({
       }
 
       const transcribeData = await transcribeResponse.json();
-      console.log("[RecordModal] Partial transcription received:", transcribeData.transcription?.substring(0, 100));
+      console.log("[RecordModal] Partial transcription received:", {
+        hasTranscription: !!transcribeData.transcription,
+        length: transcribeData.transcription?.length || 0,
+        preview: transcribeData.transcription?.substring(0, 100)
+      });
       
       // Save partial transcript and chunk count for later
       setPartialTranscript(transcribeData.transcription || "");
@@ -469,7 +473,12 @@ export default function RecordModal({
         console.log("[RecordModal] Transcribed chunks:", transcribedChunkCount);
         
         // Get only the remaining chunks
+        console.log("[RecordModal] Calling getRemainingChunks...");
         const remainingBlob = audioRecorderRef.current?.getRemainingChunks();
+        console.log("[RecordModal] getRemainingChunks returned:", {
+          hasBlob: !!remainingBlob,
+          blobSize: remainingBlob?.size || 0
+        });
         
         if (remainingBlob && remainingBlob.size > 0) {
           console.log("[RecordModal] Transcribing remaining chunks...");
@@ -501,10 +510,26 @@ export default function RecordModal({
           }
           
           const remainingData = await remainingResponse.json();
-          console.log("[RecordModal] Remaining transcription length:", remainingData.transcription?.length || 0);
+          const remainingTranscript = remainingData.transcription || remainingData.text || "";
+          console.log("[RecordModal] Remaining transcript:", {
+            hasTranscription: !!remainingTranscript,
+            length: remainingTranscript.length,
+            preview: remainingTranscript.substring(0, 100)
+          });
+          console.log("[RecordModal] Partial transcript:", {
+            length: partialTranscript.length,
+            preview: partialTranscript.substring(0, 100)
+          });
           
-          // Combine partial + remaining
-          finalTranscript = partialTranscript + " " + (remainingData.transcription || "");
+          // Combine partial + remaining with proper spacing
+          finalTranscript = `${partialTranscript} ${remainingTranscript}`.trim();
+          console.log("[RecordModal] COMBINED transcript:", {
+            length: finalTranscript.length,
+            preview: finalTranscript.substring(0, 200),
+            partialLength: partialTranscript.length,
+            remainingLength: remainingTranscript.length
+          });
+          
           data = remainingData; // Use remaining data for formatted content, lessons, etc.
         } else {
           // No remaining audio, just use partial
@@ -622,14 +647,15 @@ export default function RecordModal({
       duration 
     });
     
-    // Stop the actual AudioRecorder
-    if (audioRecorderRef.current) {
-      audioRecorderRef.current.cleanup();
-    }
-    
     // If we have a recording, process it
     if (blob && blob.size > 0 && duration > 0) {
+      // IMPORTANT: Process recording BEFORE cleanup so we can get remaining chunks
       handleRecordingComplete(blob, duration);
+      
+      // Stop the actual AudioRecorder AFTER processing
+      if (audioRecorderRef.current) {
+        audioRecorderRef.current.cleanup();
+      }
     } else {
       console.error("[RecordModal] No valid recording to process");
       toast({
@@ -639,6 +665,11 @@ export default function RecordModal({
       });
       setIsRecording(false);
       setIsPaused(false);
+      
+      // Cleanup even on error
+      if (audioRecorderRef.current) {
+        audioRecorderRef.current.cleanup();
+      }
     }
   };
 

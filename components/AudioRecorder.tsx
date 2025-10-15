@@ -937,12 +937,19 @@ export const AudioRecorder = forwardRef<
   }, []);
 
   const getRemainingChunks = useCallback(() => {
+    console.log("[AudioRecorder] getRemainingChunks called");
+    console.log("[AudioRecorder] Total chunks:", chunksRef.current.length);
+    console.log("[AudioRecorder] Transcribed chunks count:", transcribedChunksCountRef.current);
+    console.log("[AudioRecorder] MediaRecorder exists:", !!mediaRecorderRef.current);
+    
     if (!mediaRecorderRef.current || chunksRef.current.length === 0) {
-      console.log("[AudioRecorder] No remaining chunks available");
+      console.log("[AudioRecorder] No remaining chunks available - no mediaRecorder or no chunks");
       return null;
     }
     
     const remaining = chunksRef.current.slice(transcribedChunksCountRef.current);
+    console.log("[AudioRecorder] Remaining chunks after slice:", remaining.length);
+    
     if (remaining.length === 0) {
       console.log("[AudioRecorder] All chunks already transcribed");
       return null;
@@ -1257,7 +1264,7 @@ export const AudioRecorder = forwardRef<
             ) : (
               <>
                 <Mic className="w-16 h-16" />
-                <span className="text-xl font-bold tracking-wide">START</span>
+                <span className="text-2xl font-bold tracking-wide">START</span>
               </>
             )}
           </div>

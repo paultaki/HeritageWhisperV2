@@ -419,14 +419,19 @@ export async function POST(request: NextRequest) {
       }
 
       // Return the transcription and lesson options
+      // Include both 'transcription' and 'text' for backwards compatibility
       return NextResponse.json({
         transcription: formattedText,
+        text: formattedText, // Add for backwards compatibility
         duration: estimatedDuration,
         lessonOptions: lessonOptions || {
           practical:
             "Every experience teaches something if you're willing to learn from it",
           emotional: "The heart remembers what the mind forgets",
           character: "Who you become matters more than what you achieve",
+        },
+        formattedContent: {
+          formattedText: formattedText,
         },
       });
     } catch (error) {

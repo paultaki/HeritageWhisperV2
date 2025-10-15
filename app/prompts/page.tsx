@@ -3,10 +3,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mic, Check, ChevronDown, ChevronUp, RotateCcw, Eye, ArrowRight, Clock, Bookmark, Trash2 } from "lucide-react";
+import { Mic, Check, ChevronDown, ChevronUp, RotateCcw, Eye, Clock, Bookmark, Trash2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -164,17 +163,6 @@ export default function PromptsPage() {
   const dismissedPrompts = dismissedData?.prompts || [];
   const answeredPrompts = answeredData?.prompts || [];
 
-  // Calculate decade count from answered prompts
-  const decades = new Set();
-  answeredPrompts.forEach((prompt) => {
-    if (prompt.anchor_year) {
-      const decade = Math.floor(prompt.anchor_year / 10) * 10;
-      decades.add(decade);
-    }
-  });
-  const decadeCount = decades.size;
-  const storyCount = answeredPrompts.length;
-
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -184,7 +172,31 @@ export default function PromptsPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden py-8 px-4 animated-gradient-bg">
+    <div className="min-h-screen pb-20 md:pb-0" style={{ background: "var(--color-page)" }}>
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-white border-b">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center gap-3">
+            <svg className="w-8 h-8" style={{ color: "#1f0f08" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h1 className="text-2xl font-bold">Prompts</h1>
+          </div>
+        </div>
+      </header>
+
+      {/* Toolbar / Controls Section */}
+      <section className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          {/* User will specify what goes here */}
+          <div className="text-gray-500 text-sm">
+            Controls section - content coming soon
+          </div>
+        </div>
+      </section>
+
+      {/* Content with gradient background */}
+      <div className="relative overflow-hidden animated-gradient-bg">
       {/* Animated gradient orbs and card animations */}
       <style jsx global>{`
         .animated-gradient-bg {
@@ -268,32 +280,7 @@ export default function PromptsPage() {
       <div className="orb orb2"></div>
       <div className="orb orb3"></div>
 
-      <div className="relative z-10 max-w-3xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-serif text-heritage-brown">
-            Your Memory Prompts
-          </h1>
-        </div>
-
-        {/* Mini Memory Map - Link to profile */}
-        {storyCount > 0 && (
-          <Link href="/profile" className="block">
-            <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 hover:border-amber-300 transition-colors cursor-pointer">
-              <p className="text-sm text-gray-600 mb-1">Your Memory Map</p>
-              <div className="flex items-center justify-between">
-                <p className="text-lg font-serif text-heritage-brown">
-                  {storyCount} {storyCount === 1 ? 'story' : 'stories'} across {decadeCount || 'multiple'} {decadeCount === 1 ? 'decade' : 'decades'}
-                </p>
-                <div className="flex items-center gap-2 text-amber-600">
-                  <span className="text-sm font-medium">Customize</span>
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-              </div>
-            </div>
-          </Link>
-        )}
-
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Section 1: Waiting to be Told (Active) - Maximum 3 */}
         <div className="space-y-4">
           <h2 className="text-2xl font-serif font-semibold text-heritage-brown flex items-center gap-2">
@@ -329,20 +316,20 @@ export default function PromptsPage() {
                   style={{
                     animation: `slideInUp 0.8s ease-in-out ${index * 0.15}s forwards`,
                     opacity: 0,
-                    minHeight: '320px',
+                    minHeight: window.innerWidth >= 1024 ? '420px' : '320px',
                   }}
                 >
-                  <CardContent className="p-4 flex flex-col h-full justify-between">
+                  <CardContent className="p-4 md:p-6 lg:p-8 flex flex-col h-full justify-between">
                     {/* Header badge */}
-                    <div className="flex items-center gap-1 text-xs text-amber-600 mb-3">
+                    <div className="flex items-center gap-1 text-xs md:text-sm text-amber-600 mb-3">
                       <span>✨</span>
                       <span className="font-medium">Inspired by your memories</span>
                     </div>
 
                     {/* Prompt text - centered vertically */}
-                    <div className="flex-1 flex items-center justify-center mb-3">
+                    <div className="flex-1 flex items-center justify-center mb-3 md:mb-4">
                       <p 
-                        className="text-lg font-serif text-gray-800 leading-relaxed drop-shadow-sm text-center"
+                        className="text-lg md:text-xl lg:text-2xl font-serif text-gray-800 leading-relaxed drop-shadow-sm text-center"
                         style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
                       >
                         {prompt.prompt_text}
@@ -353,9 +340,9 @@ export default function PromptsPage() {
                     <div className="space-y-2">
                       <Button
                         onClick={() => handleRecord(prompt.id, prompt.prompt_text)}
-                        className="w-full bg-gradient-to-r from-amber-500 via-orange-400 to-rose-400 hover:from-amber-600 hover:via-orange-500 hover:to-rose-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] text-sm py-2"
+                        className="w-full bg-gradient-to-r from-amber-500 via-orange-400 to-rose-400 hover:from-amber-600 hover:via-orange-500 hover:to-rose-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] text-sm md:text-base py-2 md:py-3"
                       >
-                        <Mic className="w-4 h-4 mr-1" />
+                        <Mic className="w-4 h-4 md:w-5 md:h-5 mr-1" />
                         Record
                       </Button>
                       <div className="grid grid-cols-2 gap-2">
@@ -363,18 +350,18 @@ export default function PromptsPage() {
                           onClick={() => skipMutation.mutate(prompt.id)}
                           disabled={skipMutation.isPending}
                           variant="outline"
-                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-white/60 transition-all duration-300 text-sm py-2"
+                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-white/60 transition-all duration-300 text-sm md:text-base py-2 md:py-3"
                         >
-                          <Bookmark className="w-3 h-3 mr-1" />
+                          <Bookmark className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                           Save
                         </Button>
                         <Button
                           onClick={() => deleteMutation.mutate(prompt.id)}
                           disabled={deleteMutation.isPending}
                           variant="outline"
-                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-red-100 hover:border-red-300 hover:text-red-700 transition-all duration-300 text-sm py-2"
+                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-red-100 hover:border-red-300 hover:text-red-700 transition-all duration-300 text-sm md:text-base py-2 md:py-3"
                         >
-                          <Trash2 className="w-3 h-3 mr-1" />
+                          <Trash2 className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                           Delete
                         </Button>
                       </div>
@@ -416,20 +403,20 @@ export default function PromptsPage() {
                     style={{
                       animation: `slideInUp 0.8s ease-in-out ${index * 0.15}s forwards`,
                       opacity: 0,
-                      minHeight: '320px',
+                      minHeight: window.innerWidth >= 1024 ? '420px' : '320px',
                     }}
                   >
-                    <CardContent className="p-4 flex flex-col h-full justify-between">
+                    <CardContent className="p-4 md:p-6 lg:p-8 flex flex-col h-full justify-between">
                       {/* Header badge */}
-                      <div className="flex items-center gap-1 text-xs text-amber-600 mb-3">
+                      <div className="flex items-center gap-1 text-xs md:text-sm text-amber-600 mb-3">
                         <span>💭</span>
                         <span className="font-medium">Saved for later</span>
                       </div>
 
                       {/* Prompt text - centered vertically */}
-                      <div className="flex-1 flex items-center justify-center mb-3">
+                      <div className="flex-1 flex items-center justify-center mb-3 md:mb-4">
                         <p 
-                          className="text-lg font-serif text-gray-800 leading-relaxed drop-shadow-sm text-center"
+                          className="text-lg md:text-xl lg:text-2xl font-serif text-gray-800 leading-relaxed drop-shadow-sm text-center"
                           style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
                         >
                           {prompt.prompt_text}
@@ -442,18 +429,18 @@ export default function PromptsPage() {
                           onClick={() => restoreMutation.mutate(prompt.id)}
                           disabled={restoreMutation.isPending}
                           variant="outline"
-                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-white/60 transition-all duration-300 text-sm py-2"
+                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-white/60 transition-all duration-300 text-sm md:text-base py-2 md:py-3"
                         >
-                          <RotateCcw className="w-3 h-3 mr-1" />
+                          <RotateCcw className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                           Restore
                         </Button>
                         <Button
                           onClick={() => deleteHistoryMutation.mutate(prompt.id)}
                           disabled={deleteHistoryMutation.isPending}
                           variant="outline"
-                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-red-100 hover:border-red-300 hover:text-red-700 transition-all duration-300 text-sm py-2"
+                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-red-100 hover:border-red-300 hover:text-red-700 transition-all duration-300 text-sm md:text-base py-2 md:py-3"
                         >
-                          <Trash2 className="w-3 h-3 mr-1" />
+                          <Trash2 className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                           Delete
                         </Button>
                       </div>
@@ -495,20 +482,20 @@ export default function PromptsPage() {
                     style={{
                       animation: `slideInUp 0.8s ease-in-out ${index * 0.15}s forwards`,
                       opacity: 0,
-                      minHeight: '320px',
+                      minHeight: window.innerWidth >= 1024 ? '420px' : '320px',
                     }}
                   >
-                    <CardContent className="p-4 flex flex-col h-full justify-between">
+                    <CardContent className="p-4 md:p-6 lg:p-8 flex flex-col h-full justify-between">
                       {/* Header badge */}
-                      <div className="flex items-center gap-1 text-xs text-green-600 mb-3">
+                      <div className="flex items-center gap-1 text-xs md:text-sm text-green-600 mb-3">
                         <span>✓</span>
                         <span className="font-medium">Story shared</span>
                       </div>
 
                       {/* Prompt text - centered vertically */}
-                      <div className="flex-1 flex items-center justify-center mb-3">
+                      <div className="flex-1 flex items-center justify-center mb-3 md:mb-4">
                         <p 
-                          className="text-lg font-serif text-gray-800 leading-relaxed drop-shadow-sm text-center"
+                          className="text-lg md:text-xl lg:text-2xl font-serif text-gray-800 leading-relaxed drop-shadow-sm text-center"
                           style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
                         >
                           {prompt.prompt_text}
@@ -520,9 +507,9 @@ export default function PromptsPage() {
                         {prompt.story_id && (
                           <Button
                             onClick={() => handleViewStory(prompt.story_id!)}
-                            className="w-full bg-gradient-to-r from-amber-500 via-orange-400 to-rose-400 hover:from-amber-600 hover:via-orange-500 hover:to-rose-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] text-sm py-2"
+                            className="w-full bg-gradient-to-r from-amber-500 via-orange-400 to-rose-400 hover:from-amber-600 hover:via-orange-500 hover:to-rose-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] text-sm md:text-base py-2 md:py-3"
                           >
-                            <Eye className="w-4 h-4 mr-1" />
+                            <Eye className="w-4 h-4 md:w-5 md:h-5 mr-1" />
                             View Story
                           </Button>
                         )}
@@ -530,9 +517,9 @@ export default function PromptsPage() {
                           onClick={() => deleteHistoryMutation.mutate(prompt.id)}
                           disabled={deleteHistoryMutation.isPending}
                           variant="outline"
-                          className="w-full bg-white/40 backdrop-blur-sm border-white/50 hover:bg-red-100 hover:border-red-300 hover:text-red-700 transition-all duration-300 text-sm py-2"
+                          className="w-full bg-white/40 backdrop-blur-sm border-white/50 hover:bg-red-100 hover:border-red-300 hover:text-red-700 transition-all duration-300 text-sm md:text-base py-2 md:py-3"
                         >
-                          <Trash2 className="w-3 h-3 mr-1" />
+                          <Trash2 className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                           Delete
                         </Button>
                       </div>
@@ -543,6 +530,7 @@ export default function PromptsPage() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
