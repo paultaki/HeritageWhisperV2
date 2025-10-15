@@ -113,9 +113,9 @@ export default function MobileNavigation({
             className="absolute w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
             style={{
               bottom: "-12px",
-              background: "linear-gradient(135deg, #D36A3D 0%, #C05A2D 100%)",
+              background: "linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)",
               boxShadow:
-                "0 4px 12px rgba(211, 106, 61, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
+                "0 4px 12px rgba(245, 158, 11, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
               border: "2px solid rgba(255, 255, 255, 0.3)",
             }}
           >
@@ -123,7 +123,7 @@ export default function MobileNavigation({
             <motion.div
               className="absolute inset-0 rounded-full"
               style={{
-                background: "linear-gradient(135deg, #D36A3D 0%, #C05A2D 100%)",
+                background: "linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)",
               }}
               animate={{
                 scale: [1, 1.3, 1.3],

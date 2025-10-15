@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { WelcomeModal } from "./components/WelcomeModal";
 import { ChatMessage } from "./components/ChatMessage";
 import { QuestionOptions } from "./components/QuestionOptions";
@@ -368,14 +369,16 @@ export default function InterviewChatPage() {
       <div className="max-w-3xl mx-auto h-screen flex flex-col">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 flex items-center justify-center text-white font-semibold">
-              HW
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">Heritage Whisper</h1>
-              <p className="text-sm text-gray-500">Guided Interview</p>
-            </div>
+          <div className="flex flex-col items-center gap-2">
+            <Image
+              src="/HW_text-compress.png"
+              alt="Heritage Whisper"
+              width={200}
+              height={50}
+              className="h-10 w-auto"
+              priority
+            />
+            <p className="text-sm text-gray-500">Guided Interview</p>
           </div>
         </div>
 
