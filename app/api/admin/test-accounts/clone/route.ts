@@ -8,6 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { requireAdmin, logAdminAction } from "@/lib/adminAuth";
 import { getClientIp } from "@/lib/ratelimit";
+import { validateEmail, validateOptional, validateString } from "@/lib/inputValidation";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -27,15 +28,27 @@ export async function POST(request: NextRequest) {
 
     const { email, name } = await request.json();
 
-    if (!email) {
-      return NextResponse.json({ error: "email is required" }, { status: 400 });
+    // SECURITY: Validate and sanitize inputs
+    const emailValidation = validateEmail(email, 'email');
+    if (!emailValidation.valid) {
+      return NextResponse.json({ error: emailValidation.error }, { status: 400 });
     }
+
+    const nameValidation = validateOptional(name, (val) =>
+      validateString(val, 'name', 1, 255)
+    );
+    if (!nameValidation.valid) {
+      return NextResponse.json({ error: nameValidation.error }, { status: 400 });
+    }
+
+    const sanitizedEmail = emailValidation.sanitized;
+    const sanitizedName = nameValidation.sanitized;
 
     // Log admin action for audit trail
     await logAdminAction({
       adminUserId: user!.id,
       action: 'clone_user_account',
-      details: { newEmail: email, newName: name },
+      details: { newEmail: sanitizedEmail, newName: sanitizedName },
       ipAddress: getClientIp(request),
       userAgent: request.headers.get('user-agent') || undefined,
     });
@@ -43,8 +56,8 @@ export async function POST(request: NextRequest) {
     // Clone the account using SQL function
     const { data, error: cloneError } = await supabaseAdmin.rpc("clone_user_account", {
       source_user_id: user.id,
-      new_email: email,
-      new_name: name || null,
+      new_email: sanitizedEmail,
+      new_name: sanitizedName,
     });
 
     if (cloneError) {

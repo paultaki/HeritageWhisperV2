@@ -8,6 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { requireAdmin, logAdminAction } from "@/lib/adminAuth";
 import { getClientIp } from "@/lib/ratelimit";
+import { validateUUID, validateEmail } from "@/lib/inputValidation";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -27,27 +28,34 @@ export async function POST(request: NextRequest) {
 
     const { userId, confirmEmail } = await request.json();
 
-    if (!userId || !confirmEmail) {
-      return NextResponse.json(
-        { error: "userId and confirmEmail are required" },
-        { status: 400 }
-      );
+    // SECURITY: Validate and sanitize inputs
+    const userIdValidation = validateUUID(userId, 'userId');
+    if (!userIdValidation.valid) {
+      return NextResponse.json({ error: userIdValidation.error }, { status: 400 });
     }
+
+    const emailValidation = validateEmail(confirmEmail, 'confirmEmail');
+    if (!emailValidation.valid) {
+      return NextResponse.json({ error: emailValidation.error }, { status: 400 });
+    }
+
+    const sanitizedUserId = userIdValidation.sanitized;
+    const sanitizedEmail = emailValidation.sanitized;
 
     // Log admin action for audit trail
     await logAdminAction({
       adminUserId: user!.id,
       action: 'delete_test_account',
-      targetUserId: userId,
-      details: { confirmEmail },
+      targetUserId: sanitizedUserId,
+      details: { confirmEmail: sanitizedEmail },
       ipAddress: getClientIp(request),
       userAgent: request.headers.get('user-agent') || undefined,
     });
 
     // Delete account using SQL function
     const { data, error: deleteError } = await supabaseAdmin.rpc("delete_test_account", {
-      target_user_id: userId,
-      confirm_email: confirmEmail,
+      target_user_id: sanitizedUserId,
+      confirm_email: sanitizedEmail,
     });
 
     if (deleteError) {

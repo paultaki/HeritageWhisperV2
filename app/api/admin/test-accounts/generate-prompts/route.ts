@@ -10,6 +10,7 @@ import { performTier3Analysis, storeTier3Results } from "@/lib/tier3AnalysisV2";
 import { logger } from "@/lib/logger";
 import { requireAdmin, logAdminAction } from "@/lib/adminAuth";
 import { getClientIp } from "@/lib/ratelimit";
+import { validateUUID } from "@/lib/inputValidation";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -31,15 +32,19 @@ export async function POST(request: NextRequest) {
 
     const { userId } = await request.json();
 
-    if (!userId) {
-      return NextResponse.json({ error: "userId is required" }, { status: 400 });
+    // SECURITY: Validate and sanitize inputs
+    const userIdValidation = validateUUID(userId, 'userId');
+    if (!userIdValidation.valid) {
+      return NextResponse.json({ error: userIdValidation.error }, { status: 400 });
     }
+
+    const sanitizedUserId = userIdValidation.sanitized;
 
     // Log admin action for audit trail
     await logAdminAction({
       adminUserId: user!.id,
       action: 'generate_test_prompts',
-      targetUserId: userId,
+      targetUserId: sanitizedUserId,
       ipAddress: getClientIp(request),
       userAgent: request.headers.get('user-agent') || undefined,
     });
@@ -48,7 +53,7 @@ export async function POST(request: NextRequest) {
     const { data: stories, error: storiesError } = await supabaseAdmin
       .from("stories")
       .select("id, title, transcript, year, created_at")
-      .eq("user_id", userId)
+      .eq("user_id", sanitizedUserId)
       .eq("is_private", false)
       .order("created_at", { ascending: true });
 
@@ -85,7 +90,7 @@ export async function POST(request: NextRequest) {
           expiresAt.setDate(expiresAt.getDate() + 7);
 
           const promptsToInsert = tier1Prompts.map((prompt) => ({
-            user_id: userId,
+            user_id: sanitizedUserId,
             prompt_text: prompt.text,
             context_note: prompt.context,
             anchor_entity: prompt.entity,
@@ -131,7 +136,7 @@ export async function POST(request: NextRequest) {
         // Store prompts and character insights
         await storeTier3Results(
           supabaseAdmin,
-          userId,
+          sanitizedUserId,
           storyCount,
           tier3Result,
         );

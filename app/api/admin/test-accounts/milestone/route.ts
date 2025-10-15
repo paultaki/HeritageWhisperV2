@@ -8,6 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { requireAdmin, logAdminAction } from "@/lib/adminAuth";
 import { getClientIp } from "@/lib/ratelimit";
+import { validateUUID, validateInteger } from "@/lib/inputValidation";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -27,24 +28,34 @@ export async function POST(request: NextRequest) {
 
     const { userId, storyCount } = await request.json();
 
-    if (!userId || !storyCount) {
-      return NextResponse.json({ error: "userId and storyCount are required" }, { status: 400 });
+    // SECURITY: Validate and sanitize inputs
+    const userIdValidation = validateUUID(userId, 'userId');
+    if (!userIdValidation.valid) {
+      return NextResponse.json({ error: userIdValidation.error }, { status: 400 });
     }
+
+    const storyCountValidation = validateInteger(storyCount, 'storyCount', 1, 1000);
+    if (!storyCountValidation.valid) {
+      return NextResponse.json({ error: storyCountValidation.error }, { status: 400 });
+    }
+
+    const sanitizedUserId = userIdValidation.sanitized;
+    const sanitizedStoryCount = storyCountValidation.sanitized;
 
     // Log admin action for audit trail
     await logAdminAction({
       adminUserId: user!.id,
       action: 'set_user_milestone',
-      targetUserId: userId,
-      details: { storyCount },
+      targetUserId: sanitizedUserId,
+      details: { storyCount: sanitizedStoryCount },
       ipAddress: getClientIp(request),
       userAgent: request.headers.get('user-agent') || undefined,
     });
 
     // Set milestone using SQL function
     const { data, error: milestoneError } = await supabaseAdmin.rpc("set_user_story_milestone", {
-      target_user_id: userId,
-      target_story_count: storyCount,
+      target_user_id: sanitizedUserId,
+      target_story_count: sanitizedStoryCount,
     });
 
     if (milestoneError) {

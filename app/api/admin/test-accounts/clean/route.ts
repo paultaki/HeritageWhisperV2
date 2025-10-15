@@ -8,6 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { requireAdmin, logAdminAction } from "@/lib/adminAuth";
 import { getClientIp } from "@/lib/ratelimit";
+import { validateUUID } from "@/lib/inputValidation";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -27,22 +28,26 @@ export async function POST(request: NextRequest) {
 
     const { userId } = await request.json();
 
-    if (!userId) {
-      return NextResponse.json({ error: "userId is required" }, { status: 400 });
+    // SECURITY: Validate and sanitize inputs
+    const userIdValidation = validateUUID(userId, 'userId');
+    if (!userIdValidation.valid) {
+      return NextResponse.json({ error: userIdValidation.error }, { status: 400 });
     }
+
+    const sanitizedUserId = userIdValidation.sanitized;
 
     // Log admin action for audit trail
     await logAdminAction({
       adminUserId: user!.id,
       action: 'clean_test_prompts',
-      targetUserId: userId,
+      targetUserId: sanitizedUserId,
       ipAddress: getClientIp(request),
       userAgent: request.headers.get('user-agent') || undefined,
     });
 
     // Clean prompts using SQL function
     const { data, error: cleanError } = await supabaseAdmin.rpc("clean_test_prompts", {
-      target_user_id: userId,
+      target_user_id: sanitizedUserId,
     });
 
     if (cleanError) {
