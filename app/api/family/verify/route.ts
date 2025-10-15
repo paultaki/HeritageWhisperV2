@@ -107,10 +107,17 @@ export async function GET(req: NextRequest) {
         .eq('id', familyMember.id);
     }
 
-    // Create a family session (30 days)
+    // SECURITY: Session rotation - invalidate old sessions before creating new one
+    // This prevents long-lived compromised tokens from remaining valid
+    await supabaseAdmin
+      .from('family_sessions')
+      .delete()
+      .eq('family_member_id', familyMember.id);
+
+    // Create a new family session (7 days, reduced from 30 for better security)
     const sessionToken = generateSecureToken();
     const sessionExpiresAt = new Date();
-    sessionExpiresAt.setDate(sessionExpiresAt.getDate() + 30);
+    sessionExpiresAt.setDate(sessionExpiresAt.getDate() + 7);
 
     const { error: sessionError } = await supabaseAdmin
       .from('family_sessions')
@@ -129,6 +136,12 @@ export async function GET(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // SECURITY: Cleanup expired sessions (housekeeping)
+    await supabaseAdmin
+      .from('family_sessions')
+      .delete()
+      .lt('expires_at', new Date().toISOString());
 
     // Get user info for context
     const { data: userInfo, error: userError } = await supabaseAdmin

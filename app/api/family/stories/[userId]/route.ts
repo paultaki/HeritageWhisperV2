@@ -72,7 +72,7 @@ export async function GET(
       );
     }
 
-    // Verify userId matches the storyteller
+    // Verify userId matches the storyteller (defense-in-depth)
     if (familyMember.user_id !== userId) {
       console.error('User ID mismatch:', {
         familyMemberUserId: familyMember.user_id,
@@ -84,11 +84,12 @@ export async function GET(
       );
     }
 
-    // Fetch all stories (we'll filter by metadata.include_in_timeline/book in JS)
+    // SECURITY: Filter at database level using verified family member's user_id
+    // This prevents enumeration attacks even if application logic is bypassed
     const { data: allStories, error: storiesError } = await supabaseAdmin
       .from('stories')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', familyMember.user_id)
       .order('year', { ascending: false })
       .order('created_at', { ascending: false });
     
