@@ -9,6 +9,8 @@ import { Mic, Check, ChevronDown, ChevronUp, RotateCcw, Eye, Clock, Bookmark, Tr
 import { apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useRecordModal } from "@/hooks/use-record-modal";
+import MoreIdeas from "@/components/MoreIdeas";
 
 interface Prompt {
   id: string;
@@ -37,6 +39,7 @@ export default function PromptsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { openModal } = useRecordModal();
   const [showDismissed, setShowDismissed] = useState(false);
   const [showAnswered, setShowAnswered] = useState(false);
 
@@ -124,8 +127,8 @@ export default function PromptsPage() {
   const handleRecord = (promptId: string, promptText: string) => {
     // Store prompt ID for tracking
     sessionStorage.setItem("activePromptId", promptId);
-    // Navigate to recording page with prompt
-    router.push(`/recording?prompt=${encodeURIComponent(promptText)}`);
+    // Open recording modal with the selected prompt
+    openModal({ prompt: promptText });
   };
 
   const handleViewStory = (storyId: string) => {
@@ -372,6 +375,9 @@ export default function PromptsPage() {
             </div>
           )}
         </div>
+
+        {/* More Ideas Section */}
+        <MoreIdeas />
 
         {/* Section 2: Saved for Later (Dismissed) */}
         <div className="space-y-4">
