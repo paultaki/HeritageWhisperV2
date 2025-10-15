@@ -78,13 +78,24 @@ export default function HomePage() {
               <div className="space-y-4">
                 <button
                   onClick={handleCTA}
-                  className="group relative w-full sm:w-auto px-10 py-5 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white text-xl font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 active:scale-95"
+                  className="premium-cta-button group relative w-full sm:w-auto px-10 py-5 text-white text-xl font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 active:scale-95"
                 >
-                  <span className="flex items-center justify-center gap-3">
+                  <div className="points-wrapper">
+                    <i className="point"></i>
+                    <i className="point"></i>
+                    <i className="point"></i>
+                    <i className="point"></i>
+                    <i className="point"></i>
+                    <i className="point"></i>
+                    <i className="point"></i>
+                    <i className="point"></i>
+                    <i className="point"></i>
+                    <i className="point"></i>
+                  </div>
+                  <span className="button-inner flex items-center justify-center gap-3">
                     <Mic className="w-6 h-6" />
                     Start Preserving Stories
                   </span>
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 opacity-0 group-hover:opacity-100 transition-opacity -z-10 blur"></div>
                 </button>
                 <p className="text-base text-gray-600">
                   ✓ No writing required ✓ Just talk ✓ Whole family included
@@ -319,9 +330,21 @@ export default function HomePage() {
           <div className="text-center mt-16" data-animate>
             <button
               onClick={handleCTA}
-              className="px-10 py-5 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white text-xl font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+              className="premium-cta-button px-10 py-5 text-white text-xl font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
             >
-              Start Preserving Stories Today
+              <div className="points-wrapper">
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+              </div>
+              <span className="button-inner">Start Preserving Stories Today</span>
             </button>
           </div>
         </div>
@@ -590,9 +613,21 @@ export default function HomePage() {
 
             <button
               onClick={handleCTA}
-              className="w-full py-6 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white text-xl font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+              className="premium-cta-button w-full py-6 text-white text-xl font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
             >
-              Start Preserving Stories Today
+              <div className="points-wrapper">
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+              </div>
+              <span className="button-inner">Start Preserving Stories Today</span>
             </button>
 
             <p className="text-center text-sm text-gray-600 mt-4">
@@ -619,9 +654,21 @@ export default function HomePage() {
 
             <button
               onClick={handleCTA}
-              className="group relative px-12 py-6 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white text-2xl font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 active:scale-95"
+              className="premium-cta-button group relative px-12 py-6 text-white text-2xl font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 active:scale-95"
             >
-              <span className="flex items-center justify-center gap-3">
+              <div className="points-wrapper">
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+              </div>
+              <span className="button-inner flex items-center justify-center gap-3">
                 <Mic className="w-7 h-7" />
                 Start Preserving Stories Now
               </span>
@@ -665,6 +712,160 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Premium CTA Button Styles */}
+      <style jsx global>{`
+        .premium-cta-button {
+          cursor: pointer;
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          background: radial-gradient(65.28% 65.28% at 50% 100%, rgba(251, 146, 60, 0.8) 0%, rgba(251, 146, 60, 0) 100%), linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%);
+          border: none;
+          outline: none;
+        }
+
+        .premium-cta-button::before,
+        .premium-cta-button::after {
+          content: "";
+          position: absolute;
+          transition: all 0.5s ease-in-out;
+          z-index: 0;
+        }
+
+        .premium-cta-button::before {
+          inset: 1px;
+          background: linear-gradient(177.95deg, rgba(255, 255, 255, 0.19) 0%, rgba(255, 255, 255, 0) 100%);
+          border-radius: calc(0.75rem - 1px);
+        }
+
+        .premium-cta-button::after {
+          inset: 2px;
+          background: radial-gradient(65.28% 65.28% at 50% 100%, rgba(251, 146, 60, 0.8) 0%, rgba(251, 146, 60, 0) 100%), linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%);
+          border-radius: calc(0.75rem - 2px);
+        }
+
+        .premium-cta-button:active {
+          transform: scale(0.95);
+        }
+
+        .points-wrapper {
+          overflow: hidden;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          position: absolute;
+          z-index: 1;
+          inset: 0;
+        }
+
+        .points-wrapper .point {
+          bottom: -10px;
+          position: absolute;
+          animation: floating-points infinite ease-in-out;
+          pointer-events: none;
+          width: 2px;
+          height: 2px;
+          background-color: #fff;
+          border-radius: 9999px;
+        }
+
+        @keyframes floating-points {
+          0% {
+            transform: translateY(0);
+          }
+          85% {
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(-55px);
+            opacity: 0;
+          }
+        }
+
+        .points-wrapper .point:nth-child(1) {
+          left: 10%;
+          opacity: 1;
+          animation-duration: 2.35s;
+          animation-delay: 0.2s;
+        }
+
+        .points-wrapper .point:nth-child(2) {
+          left: 30%;
+          opacity: 0.7;
+          animation-duration: 2.5s;
+          animation-delay: 0.5s;
+        }
+
+        .points-wrapper .point:nth-child(3) {
+          left: 25%;
+          opacity: 0.8;
+          animation-duration: 2.2s;
+          animation-delay: 0.1s;
+        }
+
+        .points-wrapper .point:nth-child(4) {
+          left: 44%;
+          opacity: 0.6;
+          animation-duration: 2.05s;
+        }
+
+        .points-wrapper .point:nth-child(5) {
+          left: 50%;
+          opacity: 1;
+          animation-duration: 1.9s;
+        }
+
+        .points-wrapper .point:nth-child(6) {
+          left: 75%;
+          opacity: 0.5;
+          animation-duration: 1.5s;
+          animation-delay: 1.5s;
+        }
+
+        .points-wrapper .point:nth-child(7) {
+          left: 88%;
+          opacity: 0.9;
+          animation-duration: 2.2s;
+          animation-delay: 0.2s;
+        }
+
+        .points-wrapper .point:nth-child(8) {
+          left: 58%;
+          opacity: 0.8;
+          animation-duration: 2.25s;
+          animation-delay: 0.2s;
+        }
+
+        .points-wrapper .point:nth-child(9) {
+          left: 98%;
+          opacity: 0.6;
+          animation-duration: 2.6s;
+          animation-delay: 0.1s;
+        }
+
+        .points-wrapper .point:nth-child(10) {
+          left: 65%;
+          opacity: 1;
+          animation-duration: 2.5s;
+          animation-delay: 0.2s;
+        }
+
+        .button-inner {
+          z-index: 2;
+          position: relative;
+          width: 100%;
+          color: white;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 500;
+          line-height: 1.5;
+          transition: color 0.2s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 }
