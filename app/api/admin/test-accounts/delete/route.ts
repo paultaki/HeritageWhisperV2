@@ -6,6 +6,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { requireAdmin, logAdminAction } from "@/lib/adminAuth";
+import { getClientIp } from "@/lib/ratelimit";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -19,18 +21,9 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
-    }
-
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-
-    if (error || !user) {
-      return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
-    }
+    // SECURITY: Require admin authorization
+    const { user, response } = await requireAdmin(request);
+    if (response) return response;
 
     const { userId, confirmEmail } = await request.json();
 
@@ -40,6 +33,16 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Log admin action for audit trail
+    await logAdminAction({
+      adminUserId: user!.id,
+      action: 'delete_test_account',
+      targetUserId: userId,
+      details: { confirmEmail },
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get('user-agent') || undefined,
+    });
 
     // Delete account using SQL function
     const { data, error: deleteError } = await supabaseAdmin.rpc("delete_test_account", {
