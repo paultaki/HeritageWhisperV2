@@ -178,24 +178,3 @@ COMMENT ON COLUMN public.users.ai_monthly_budget_usd IS 'Maximum AI spending per
 
 COMMENT ON FUNCTION check_ai_budget IS 'Checks if user is within daily/monthly AI budget before operation';
 COMMENT ON FUNCTION log_ai_usage IS 'Helper function to log AI API usage with cost tracking';
-
--- ============================================================================
--- VERIFICATION
--- ============================================================================
-
--- Show AI usage log structure
-\d public.ai_usage_log
-
--- Show users table with new budget columns
-SELECT column_name, data_type, column_default
-FROM information_schema.columns
-WHERE table_schema = 'public'
-  AND table_name = 'users'
-  AND column_name LIKE 'ai_%'
-ORDER BY ordinal_position;
-
--- Test budget check function exists
-SELECT proname, pg_get_functiondef(oid)
-FROM pg_proc
-WHERE proname IN ('check_ai_budget', 'log_ai_usage')
-  AND pronamespace = 'public'::regnamespace;
