@@ -265,7 +265,7 @@ export default function HomePage() {
                   src="/timeline 1.png"
                   alt="Stories organize into timeline"
                   width={600}
-                  height={400}
+                  height={304}
                   className="w-full h-auto rounded-2xl shadow-2xl"
                 />
               </div>
@@ -378,7 +378,7 @@ export default function HomePage() {
                 alt="Digital timeline"
                 width={600}
                 height={304}
-                className="w-full h-auto rounded-2xl shadow-2xl"
+                className="w-full max-h-[304px] object-cover rounded-2xl shadow-2xl"
               />
               <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-orange-100">
                 <h4 className="text-xl font-bold text-gray-900 mb-2">Interactive Digital Timeline</h4>
@@ -472,7 +472,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Not Just Another Memory Project
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto text-center">
               This is different from anything you've tried before
             </p>
           </div>
@@ -584,7 +584,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Preserving Priceless Memories
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 text-center">
               Simple pricing for unlimited stories
             </p>
           </div>
@@ -657,7 +657,7 @@ export default function HomePage() {
                 Stories Fade
               </span>
             </h2>
-            <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed max-w-2xl mx-auto text-center">
               Don't let their precious memories disappear. Start preserving them today—it's easier than you think.
             </p>
 
@@ -682,10 +682,6 @@ export default function HomePage() {
                 Start Preserving Stories Now
               </span>
             </button>
-
-            <p className="text-lg text-gray-600 mt-6">
-              Join 10,000+ families who started today
-            </p>
           </div>
         </div>
       </section>
