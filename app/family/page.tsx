@@ -239,6 +239,33 @@ export default function FamilyPage() {
     },
   });
 
+  // Update permission mutation
+  const updatePermissionMutation = useMutation({
+    mutationFn: async ({ memberId, permissionLevel }: { memberId: string; permissionLevel: 'viewer' | 'contributor' }) => {
+      const response = await apiRequest(
+        "PATCH",
+        `/api/family/${memberId}/permissions`,
+        { permissionLevel }
+      );
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+      const newLevel = variables.permissionLevel === 'contributor' ? 'Contributor' : 'Viewer';
+      toast({
+        title: "Permissions updated",
+        description: `Changed to ${newLevel} - they can ${variables.permissionLevel === 'contributor' ? 'now submit questions' : 'only view stories'}.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update failed",
+        description: error.message || "Could not update permissions.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -600,12 +627,17 @@ export default function FamilyPage() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <p className="font-medium">
                                 {member.name || member.email}
                               </p>
-                              <Badge variant="secondary">
-                                {member.relationship}
+                              {member.relationship && (
+                                <Badge variant="secondary">
+                                  {member.relationship}
+                                </Badge>
+                              )}
+                              <Badge variant={member.permissionLevel === 'contributor' ? 'default' : 'outline'} className="text-xs">
+                                {member.permissionLevel === 'contributor' ? '✏️ Contributor' : '👁 Viewer'}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
@@ -620,16 +652,35 @@ export default function FamilyPage() {
                             </div>
                           </div>
                         </div>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </AlertDialogTrigger>
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value={member.permissionLevel || 'viewer'}
+                            onValueChange={(value: 'viewer' | 'contributor') => 
+                              updatePermissionMutation.mutate({ memberId: member.id, permissionLevel: value })
+                            }
+                          >
+                            <SelectTrigger className="h-9 w-[140px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="viewer">
+                                👁 Viewer
+                              </SelectItem>
+                              <SelectItem value="contributor">
+                                ✏️ Contributor
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>
@@ -654,6 +705,7 @@ export default function FamilyPage() {
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
+                        </div>
                       </div>
                     ))}
                   </div>
