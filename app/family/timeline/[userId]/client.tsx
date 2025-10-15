@@ -1,14 +1,14 @@
-import FamilyTimelineClient from './client';
+'use client';
 
-export default async function FamilyTimelinePage({
-  params,
-}: {
-  params: Promise<{ userId: string }>;
-}) {
-  const { userId } = await params;
-  
-  return <FamilyTimelineClient userId={userId} />;
-}
+import { useQuery } from '@tanstack/react-query';
+import { FamilyGuard } from '@/components/FamilyGuard';
+import { FamilyBanner } from '@/components/FamilyBanner';
+import { useFamilyAuth } from '@/hooks/use-family-auth';
+import { Card } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
+
+export default function FamilyTimelineClient({ userId }: { userId: string }) {
   const { session, updateFirstAccess } = useFamilyAuth();
 
   useEffect(() => {

@@ -1,14 +1,13 @@
-import FamilyBookClient from './client';
+'use client';
 
-export default async function FamilyBookPage({
-  params,
-}: {
-  params: Promise<{ userId: string }>;
-}) {
-  const { userId } = await params;
-  
-  return <FamilyBookClient userId={userId} />;
-}
+import { useQuery } from '@tanstack/react-query';
+import { FamilyGuard } from '@/components/FamilyGuard';
+import { FamilyBanner } from '@/components/FamilyBanner';
+import { useFamilyAuth } from '@/hooks/use-family-auth';
+import { Card } from '@/components/ui/card';
+import { Loader2, BookOpen } from 'lucide-react';
+
+export default function FamilyBookClient({ userId }: { userId: string }) {
   const { session } = useFamilyAuth();
 
   // Fetch stories using family session token

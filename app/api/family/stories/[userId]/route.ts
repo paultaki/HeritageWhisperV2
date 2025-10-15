@@ -13,10 +13,10 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const userId = params.userId;
+    const { userId } = await params;
 
     // Get family session token from header
     const authHeader = req.headers.get('authorization');
