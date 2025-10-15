@@ -23,7 +23,7 @@ export function MemoryList({
   const gapClass = density === "comfortable" ? "gap-4" : "gap-3";
 
   return (
-    <div className={`memory-list flex flex-col ${gapClass}`} role="list">
+    <div className={`memory-list grid grid-cols-1 md:grid-cols-2 ${gapClass}`} role="list">
       {stories.map((story) => (
         <MemoryListItem
           key={story.id}

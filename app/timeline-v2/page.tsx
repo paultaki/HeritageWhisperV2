@@ -492,7 +492,11 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
     >
       {/* Left side content (for left-positioned cards) - Desktop only */}
       <div className={`flex-1 flex ${position === "left" ? "justify-end lg:pr-6" : ""} hidden lg:flex`}>
-        {position === "left" && <div className="max-w-md w-full">{renderCardContent()}</div>}
+        {position === "left" && (
+          <div className="max-w-md w-full">
+            {renderCardContent()}
+          </div>
+        )}
       </div>
 
       {/* Center dot */}
@@ -503,12 +507,19 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
         style={{
           transitionDelay: `${index * 150 + 200}ms`,
           boxShadow: isVisible ? "0 0 20px rgba(249, 115, 22, 0.5)" : "none",
+          transform: position === "left" 
+            ? (isVisible ? "translateX(-12px) scale(1)" : "translateX(-12px) scale(0.8)")
+            : (isVisible ? "translateX(12px) scale(1)" : "translateX(12px) scale(0.8)"),
         }}
       />
 
       {/* Right side content (for right-positioned cards) - Desktop only */}
       <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`}>
-        {position === "right" && <div className="max-w-md w-full">{renderCardContent()}</div>}
+        {position === "right" && (
+          <div className="max-w-md w-full">
+            {renderCardContent()}
+          </div>
+        )}
       </div>
 
       {/* Mobile Card (shown on all small screens) */}
@@ -648,14 +659,15 @@ export default function TimelineV2Page() {
           </div>
 
           {/* Timeline Steps */}
-          <div className="space-y-12 md:space-y-20">
+          <div className="flex flex-col gap-2 md:gap-0">
             {sortedStories.map((story: Story, index: number) => (
-              <CenteredMemoryCard
-                key={story.id}
-                story={story}
-                position={index % 2 === 0 ? "left" : "right"}
-                index={index}
-              />
+              <div key={story.id} className="md:-mt-[59px] first:md:mt-0">
+                <CenteredMemoryCard
+                  story={story}
+                  position={index % 2 === 0 ? "left" : "right"}
+                  index={index}
+                />
+              </div>
             ))}
 
             {sortedStories.length === 0 && (

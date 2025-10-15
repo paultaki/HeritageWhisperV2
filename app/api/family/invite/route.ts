@@ -25,9 +25,9 @@ function generateSecureToken(): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, name, relationship } = body;
+    const { email, name, relationship, permissionLevel } = body;
 
-    console.log('Family invite request:', { email, name, relationship });
+    console.log('Family invite request:', { email, name, relationship, permissionLevel: permissionLevel || 'viewer' });
 
     // Validate input
     if (!email || !email.includes('@')) {
@@ -96,6 +96,7 @@ export async function POST(req: NextRequest) {
         email: email.toLowerCase(),
         name: name || null,
         relationship: relationship || null,
+        permission_level: permissionLevel || 'viewer',
         status: 'pending',
       })
       .select()

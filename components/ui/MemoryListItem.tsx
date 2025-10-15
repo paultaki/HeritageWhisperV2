@@ -37,97 +37,107 @@ export function MemoryListItem({
 
   return (
     <div
-      className="memory-row group grid grid-cols-[auto,1fr,auto] items-center gap-4
-                 rounded-2xl bg-white/90 hover:bg-white shadow-sm hover:shadow
+      className="memory-row group rounded-2xl bg-white/90 hover:bg-white shadow-sm hover:shadow
                  ring-1 ring-black/5 px-4 py-3 md:py-4 transition-all duration-200"
       role="article"
       aria-label={story.title || "Untitled memory"}
     >
-      {/* Thumbnail */}
+      {/* Title - Full Width */}
       <button
         onClick={() => onOpen(story.id)}
-        className="thumb relative overflow-hidden rounded-xl
-                   w-24 md:w-28 aspect-[4/3] ring-1 ring-black/5
-                   focus:outline-none focus:ring-2 focus:ring-[#D7794F] focus:ring-offset-2
-                   transition-transform hover:scale-[1.02] active:scale-[0.98]"
-        aria-label={`View ${story.title || "memory"}`}
-      >
-        <img
-          src={coverUrl}
-          alt={story.title || "Memory cover"}
-          className="h-full w-full object-cover"
-        />
-      </button>
-
-      {/* Content */}
-      <button
-        onClick={() => onOpen(story.id)}
-        className="text-left min-w-0 focus:outline-none focus:ring-2 focus:ring-[#D7794F]
+        className="text-left w-full mb-3 focus:outline-none focus:ring-2 focus:ring-[#D7794F]
                    focus:ring-offset-2 rounded-lg px-2 -mx-2 py-1 -my-1"
       >
         <div
           className="title text-[17px] md:text-[18px] font-semibold tracking-tight
-                        text-[#2C1F1A] truncate leading-snug"
+                        text-[#2C1F1A] line-clamp-2 leading-snug"
         >
           {story.title || "Untitled Memory"}
         </div>
-        <div className="meta mt-0.5 text-[13px] text-black/50 flex items-center gap-2 flex-wrap">
-          {story.year_of_event && (
-            <span>{formatYear(story.year_of_event)}</span>
-          )}
-          {typeof age === "number" && (
-            <>
-              <span className="hidden sm:inline">•</span>
-              <span>
-                {age > 0 ? `Age ${age}` : age === 0 ? "Birth" : "Before birth"}
-              </span>
-            </>
-          )}
-          {duration && (
-            <>
-              <span className="hidden sm:inline">•</span>
-              <span>{duration}</span>
-            </>
-          )}
-        </div>
-        <div className="badges mt-1.5 hidden sm:flex items-center gap-2">
-          {story.show_in_timeline && (
-            <span
-              className="pill text-[11px] px-2 py-0.5 rounded-full
-                           bg-[#D7794F]/10 text-[#D7794F] font-medium"
-            >
-              Timeline
-            </span>
-          )}
-          {story.include_in_book && (
-            <span
-              className="pill text-[11px] px-2 py-0.5 rounded-full
-                           bg-[#8B4513]/10 text-[#8B4513] font-medium"
-            >
-              Book
-            </span>
-          )}
-          {story.is_favorite && (
-            <span
-              className="star text-[#D7794F]"
-              aria-label="Favorite"
-              role="img"
-            >
-              ⭐
-            </span>
-          )}
-        </div>
       </button>
 
-      {/* Actions */}
-      <div className="actions flex items-center gap-2">
+      {/* Bottom Row: Thumbnail, Metadata, Actions */}
+      <div className="grid grid-cols-[auto,1fr,auto] items-center gap-4">
+        {/* Thumbnail */}
+        <button
+          onClick={() => onOpen(story.id)}
+          className="thumb relative overflow-hidden rounded-xl
+                     w-24 md:w-28 aspect-[4/3] ring-1 ring-black/5
+                     focus:outline-none focus:ring-2 focus:ring-[#D7794F] focus:ring-offset-2
+                     transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          aria-label={`View ${story.title || "memory"}`}
+        >
+          <img
+            src={coverUrl}
+            alt={story.title || "Memory cover"}
+            className="h-full w-full object-cover"
+          />
+        </button>
+
+        {/* Metadata */}
+        <button
+          onClick={() => onOpen(story.id)}
+          className="text-left min-w-0 focus:outline-none focus:ring-2 focus:ring-[#D7794F]
+                     focus:ring-offset-2 rounded-lg px-2 -mx-2 py-1 -my-1"
+        >
+          <div className="meta text-[13px] text-black/50 flex items-center gap-2 flex-wrap">
+            {story.year_of_event && (
+              <span>{formatYear(story.year_of_event)}</span>
+            )}
+            {typeof age === "number" && (
+              <>
+                <span className="hidden sm:inline">•</span>
+                <span>
+                  {age > 0 ? `Age ${age}` : age === 0 ? "Birth" : "Before birth"}
+                </span>
+              </>
+            )}
+            {duration && (
+              <>
+                <span className="hidden sm:inline">•</span>
+                <span>{duration}</span>
+              </>
+            )}
+          </div>
+          <div className="badges mt-1.5 hidden sm:flex items-center gap-2">
+            {story.show_in_timeline && (
+              <span
+                className="pill text-[11px] px-2 py-0.5 rounded-full
+                             bg-[#D7794F]/10 text-[#D7794F] font-medium"
+              >
+                Timeline
+              </span>
+            )}
+            {story.include_in_book && (
+              <span
+                className="pill text-[11px] px-2 py-0.5 rounded-full
+                             bg-[#8B4513]/10 text-[#8B4513] font-medium"
+              >
+                Book
+              </span>
+            )}
+            {story.is_favorite && (
+              <span
+                className="star text-[#D7794F]"
+                aria-label="Favorite"
+                role="img"
+              >
+                ⭐
+              </span>
+            )}
+          </div>
+        </button>
+
+        {/* Actions */}
+        <div className="actions flex items-center gap-2">
         <button
           aria-label="Play memory"
           onClick={() => onPlay(story.id)}
           className="play-btn grid place-items-center w-11 h-11 md:w-12 md:h-12 rounded-full
                      bg-[#D7794F] text-white shadow-md hover:shadow-lg active:opacity-90
                      focus:outline-none focus:ring-2 focus:ring-[#D7794F] focus:ring-offset-2
-                     transition-all duration-200 hover:scale-105 active:scale-95"
+                     transition-all duration-200 hover:scale-105 active:scale-95
+                     translate-y-[27px] md:translate-y-0"
         >
           <svg
             className="w-4 h-4 md:w-5 md:h-5 ml-0.5"
@@ -138,7 +148,7 @@ export function MemoryListItem({
           </svg>
         </button>
 
-        <div className="relative group/menu">
+        <div className="relative group/menu translate-y-[27px] md:translate-y-0">
           <button
             aria-label="More options"
             className="more grid place-items-center w-10 h-10 md:w-11 md:h-11 rounded-full
@@ -182,6 +192,7 @@ export function MemoryListItem({
               Delete
             </button>
           </div>
+        </div>
         </div>
       </div>
     </div>

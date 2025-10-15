@@ -97,6 +97,7 @@ export default function FamilyPage() {
   // Invite form state
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRelationship, setInviteRelationship] = useState("");
+  const [invitePermission, setInvitePermission] = useState<'viewer' | 'contributor'>('viewer');
   const [inviteMessage, setInviteMessage] = useState("");
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -257,6 +258,7 @@ export default function FamilyPage() {
       email: inviteEmail,
       name: name,
       relationship: inviteRelationship,
+      permissionLevel: invitePermission,
     });
   };
 
@@ -426,6 +428,33 @@ export default function FamilyPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="permission" className="text-base">
+                    Permission Level
+                  </Label>
+                  <Select
+                    value={invitePermission}
+                    onValueChange={(value) => setInvitePermission(value as 'viewer' | 'contributor')}
+                  >
+                    <SelectTrigger className="mt-2 h-12 text-base">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="viewer">
+                        👁 Viewer - View stories only
+                      </SelectItem>
+                      <SelectItem value="contributor">
+                        ✏️ Contributor - Can submit questions
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    {invitePermission === 'viewer' 
+                      ? 'Read stories, listen to audio, view photos'
+                      : 'Can also submit questions they want answered'}
+                  </p>
                 </div>
 
                 <div>

@@ -6,6 +6,7 @@ export interface FamilySession {
   storytellerName: string;
   familyMemberName: string;
   relationship: string | null;
+  permissionLevel: 'viewer' | 'contributor';
   expiresAt: string;
   firstAccess: boolean;
 }

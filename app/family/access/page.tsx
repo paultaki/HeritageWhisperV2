@@ -12,6 +12,7 @@ interface SessionData {
   storytellerName: string;
   familyMemberName: string;
   relationship: string | null;
+  permissionLevel: 'viewer' | 'contributor';
   expiresAt: string;
   firstAccess: boolean;
 }
@@ -54,6 +55,7 @@ export default function FamilyAccessPage() {
         storytellerName: data.storyteller.name,
         familyMemberName: data.familyMember.name || 'Family Member',
         relationship: data.familyMember.relationship,
+        permissionLevel: data.familyMember.permissionLevel || 'viewer',
         expiresAt: data.expiresAt,
         firstAccess: true,
       };

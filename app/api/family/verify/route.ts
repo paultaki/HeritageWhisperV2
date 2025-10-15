@@ -155,6 +155,7 @@ export async function GET(req: NextRequest) {
         id: familyMember.id,
         name: familyMember.name,
         relationship: familyMember.relationship,
+        permissionLevel: familyMember.permission_level || 'viewer',
       },
       storyteller: {
         id: familyMember.user_id,

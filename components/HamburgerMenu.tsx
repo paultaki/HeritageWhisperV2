@@ -124,7 +124,7 @@ export default function HamburgerMenu() {
   const isBookPage = pathname === "/book";
 
   return (
-    <div ref={menuRef} className="fixed top-4 right-4 z-[100]">
+    <div ref={menuRef} className="fixed right-4 z-[100]" style={{ top: '5px' }}>
       {/* Hamburger Button - Semi-transparent on book page */}
       <button
         onClick={() => setIsOpen(!isOpen)}
