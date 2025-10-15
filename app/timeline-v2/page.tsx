@@ -2,9 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import { groupStoriesByDecade, type Story } from "@/lib/supabase";
@@ -357,7 +355,7 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
       }}
     >
       {/* Left side content (for right-positioned cards, this is empty) */}
-      <div className={`flex-1 ${position === "right" ? "lg:pr-12" : ""} hidden lg:block`}>
+      <div className={`flex-1 ${position === "left" ? "lg:pr-12" : ""} hidden lg:block`}>
         {position === "left" && (
           <div
             className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer"
@@ -520,7 +518,7 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
       />
 
       {/* Right side content (for left-positioned cards, this is empty) */}
-      <div className={`flex-1 ${position === "left" ? "lg:pl-12" : ""} ${position === "right" ? "" : "hidden lg:block"}`}>
+      <div className={`flex-1 ${position === "right" ? "lg:pl-12" : ""} hidden lg:block`}>
         {position === "right" && (
           <div
             className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer"
@@ -677,13 +675,41 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
           className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all duration-500 cursor-pointer"
           onClick={handleCardClick}
         >
+          {/* Title (always shown on mobile) */}
+          {!displayPhoto?.url && (
+            <div className="mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {story.title}
+              </h3>
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  {story.storyDate
+                    ? new Date(story.storyDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                      })
+                    : formatYear(story.storyYear)}
+                </span>
+                {story.lifeAge !== null && story.lifeAge !== undefined && (
+                  <>
+                    <span className="text-gray-400">•</span>
+                    <span>
+                      {story.lifeAge > 0 && `Age ${story.lifeAge}`}
+                      {story.lifeAge === 0 && `Birth`}
+                      {story.lifeAge < 0 && `Before birth`}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
           {displayPhoto?.url && (
             <div className="relative mb-4 rounded-2xl overflow-hidden">
-              <Image
+              <img
                 src={displayPhoto.url}
                 alt={story.title}
-                width={600}
-                height={400}
                 className="w-full h-48 object-cover"
                 style={
                   displayPhoto.transform

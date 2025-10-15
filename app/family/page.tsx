@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import confetti from "canvas-confetti";
 import {
   Card,
   CardContent,
@@ -99,6 +100,7 @@ export default function FamilyPage() {
   const [inviteMessage, setInviteMessage] = useState("");
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const sendButtonRef = useRef<HTMLButtonElement>(null);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -126,6 +128,51 @@ export default function FamilyPage() {
     enabled: !!user,
   });
 
+  // Confetti celebration function
+  const celebrateInvite = () => {
+    // Get button position if available
+    const button = sendButtonRef.current;
+    let origin = { x: 0.5, y: 0.5 }; // Default to center
+
+    if (button) {
+      const rect = button.getBoundingClientRect();
+      origin = {
+        x: (rect.left + rect.width / 2) / window.innerWidth,
+        y: (rect.top + rect.height / 2) / window.innerHeight,
+      };
+    }
+
+    // First burst
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: origin,
+      colors: ['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5'],
+    });
+
+    // Second burst (slight delay)
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 60,
+        spread: 55,
+        origin: origin,
+        colors: ['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5'],
+      });
+    }, 150);
+
+    // Third burst (opposite angle)
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 120,
+        spread: 55,
+        origin: origin,
+        colors: ['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5'],
+      });
+    }, 300);
+  };
+
   // Invite mutation
   const inviteMutation = useMutation({
     mutationFn: async (data: {
@@ -138,6 +185,10 @@ export default function FamilyPage() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+      
+      // Trigger confetti celebration!
+      celebrateInvite();
+      
       setInviteDialogOpen(false);
       setInviteEmail("");
       setInviteRelationship("");
@@ -149,7 +200,7 @@ export default function FamilyPage() {
       }
       
       toast({
-        title: "Invitation sent",
+        title: "Invitation sent! 🎉",
         description: "Your family member will receive an email invitation.",
       });
     },
@@ -427,6 +478,7 @@ export default function FamilyPage() {
                     Cancel
                   </Button>
                   <Button
+                    ref={sendButtonRef}
                     type="submit"
                     disabled={inviteMutation.isPending}
                     className="h-12"
