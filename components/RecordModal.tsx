@@ -34,6 +34,7 @@ interface RecordModalProps {
     followUpQuestions?: string[];
     title?: string;
     year?: number;
+    duration?: number;
   }) => void;
   initialPrompt?: string;
   initialTitle?: string;
@@ -242,8 +243,7 @@ export default function RecordModal({
   const resumeRecording = () => {
     console.log("[RecordModal] resumeRecording called");
     setIsPaused(false);
-    setContextualFollowUpQuestion(null); // Clear question when resuming
-    setFollowUpQuestions([]); // Clear follow-up questions when resuming
+    // Don't clear follow-up questions - keep them visible until user stops or gets new ones
     audioRecorderRef.current?.resumeRecording();
   };
 
@@ -416,6 +416,10 @@ export default function RecordModal({
       "duration:",
       duration,
     );
+    
+    // Note: We capture chunk info for cost-saving logic, but will transcribe full audio
+    // because partial audio chunks without WebM headers cause transcription errors
+    
     setAudioBlob(blob);
     // Keep isRecording true while transcribing so we stay on the recording screen
     setIsPaused(false);
@@ -466,110 +470,44 @@ export default function RecordModal({
         throw new Error("No authentication token. Please sign in again.");
       }
 
-      // Check if we have a partial transcription from follow-up
+      // Note: Even if we have a partial transcript, we transcribe the FULL audio
+      // because WebM chunks without headers are invalid. The cost of re-transcription
+      // is acceptable for correct results.
+      console.log("[RecordModal] Transcribing full audio blob");
       if (transcribedChunkCount > 0 && partialTranscript) {
-        console.log("[RecordModal] Using partial + remaining chunks strategy");
-        console.log("[RecordModal] Partial transcript length:", partialTranscript.length);
-        console.log("[RecordModal] Transcribed chunks:", transcribedChunkCount);
-        
-        // Get only the remaining chunks
-        console.log("[RecordModal] Calling getRemainingChunks...");
-        const remainingBlob = audioRecorderRef.current?.getRemainingChunks();
-        console.log("[RecordModal] getRemainingChunks returned:", {
-          hasBlob: !!remainingBlob,
-          blobSize: remainingBlob?.size || 0
-        });
-        
-        if (remainingBlob && remainingBlob.size > 0) {
-          console.log("[RecordModal] Transcribing remaining chunks...");
-          // Convert remaining blob to base64
-          const remainingBase64 = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const base64Data = (reader.result as string).split(",")[1];
-              resolve(base64Data);
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(remainingBlob);
-          });
-          
-          // Transcribe only the remaining audio
-          const remainingResponse = await fetch(getApiUrl("/api/transcribe"), {
-            method: "POST",
-            headers,
-            credentials: "include",
-            body: JSON.stringify({
-              audioBase64: remainingBase64,
-              mimeType: remainingBlob.type || "audio/webm",
-              title: storyTitle || undefined,
-            }),
-          });
-          
-          if (!remainingResponse.ok) {
-            throw new Error(`Remaining transcription failed: ${remainingResponse.statusText}`);
-          }
-          
-          const remainingData = await remainingResponse.json();
-          const remainingTranscript = remainingData.transcription || remainingData.text || "";
-          console.log("[RecordModal] Remaining transcript:", {
-            hasTranscription: !!remainingTranscript,
-            length: remainingTranscript.length,
-            preview: remainingTranscript.substring(0, 100)
-          });
-          console.log("[RecordModal] Partial transcript:", {
-            length: partialTranscript.length,
-            preview: partialTranscript.substring(0, 100)
-          });
-          
-          // Combine partial + remaining with proper spacing
-          finalTranscript = `${partialTranscript} ${remainingTranscript}`.trim();
-          console.log("[RecordModal] COMBINED transcript:", {
-            length: finalTranscript.length,
-            preview: finalTranscript.substring(0, 200),
-            partialLength: partialTranscript.length,
-            remainingLength: remainingTranscript.length
-          });
-          
-          data = remainingData; // Use remaining data for formatted content, lessons, etc.
-        } else {
-          // No remaining audio, just use partial
-          console.log("[RecordModal] No remaining chunks, using partial only");
-          finalTranscript = partialTranscript;
-        }
-      } else {
-        // Normal flow: transcribe everything
-        console.log("[RecordModal] No partial transcript, transcribing full audio");
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64Data = (reader.result as string).split(",")[1];
-            resolve(base64Data);
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-
-        const response = await fetch(getApiUrl("/api/transcribe"), {
-          method: "POST",
-          headers,
-          credentials: "include",
-          body: JSON.stringify({
-            audioBase64: base64,
-            mimeType: blob.type || "audio/webm",
-            title: storyTitle || undefined,
-          }),
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            throw new Error("Authentication failed. Please refresh the page and sign in again.");
-          }
-          throw new Error(`Transcription failed: ${response.statusText}`);
-        }
-
-        data = await response.json();
-        finalTranscript = data.transcription || "";
+        console.log("[RecordModal] Note: Re-transcribing full audio (had partial:", partialTranscript.length, "chars)");
       }
+      
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Data = (reader.result as string).split(",")[1];
+          resolve(base64Data);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
+      const response = await fetch(getApiUrl("/api/transcribe"), {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: JSON.stringify({
+          audioBase64: base64,
+          mimeType: blob.type || "audio/webm",
+          title: storyTitle || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication failed. Please refresh the page and sign in again.");
+        }
+        throw new Error(`Transcription failed: ${response.statusText}`);
+      }
+
+      data = await response.json();
+      finalTranscript = data.transcription || "";
 
       console.log("[RecordModal] Final transcript length:", finalTranscript.length);
       console.log("[RecordModal] Response data:", {
@@ -592,6 +530,7 @@ export default function RecordModal({
         title: storyTitle || undefined,
         year: storyYear || undefined,
         wisdomClipText: data.lessonOptions?.practical || "", // Add practical lesson as default
+        duration: duration, // Pass the actual recording duration
       });
     } catch (error) {
       console.error("[RecordModal] Transcription error:", error);
@@ -630,11 +569,12 @@ export default function RecordModal({
         transcription: "",
         title: storyTitle || undefined,
         year: storyYear || undefined,
+        duration: duration, // Pass duration even on error
       });
     }
   };
 
-  const stopRecording = () => {
+  const stopRecording = async () => {
     console.log("[RecordModal] stopRecording called");
     
     // Get the current recording from AudioRecorder before we stop it
@@ -649,10 +589,12 @@ export default function RecordModal({
     
     // If we have a recording, process it
     if (blob && blob.size > 0 && duration > 0) {
-      // IMPORTANT: Process recording BEFORE cleanup so we can get remaining chunks
-      handleRecordingComplete(blob, duration);
+      // IMPORTANT: AWAIT the async processing BEFORE cleanup so chunks are available
+      await handleRecordingComplete(blob, duration);
       
-      // Stop the actual AudioRecorder AFTER processing
+      console.log("[RecordModal] handleRecordingComplete finished, now cleaning up...");
+      
+      // Stop the actual AudioRecorder AFTER processing completes
       if (audioRecorderRef.current) {
         audioRecorderRef.current.cleanup();
       }
@@ -758,6 +700,7 @@ export default function RecordModal({
         formattedContent: formattedContent,
         title: storyTitle || undefined,
         year: storyYear || undefined,
+        duration: recordingTime || 0, // Pass recording time as duration
       });
 
       // Cleanup

@@ -38,6 +38,7 @@ export function useRecordModal() {
         hasTranscription: !!recording.transcription,
         hasWisdomClipText: !!recording.wisdomClipText,
         wisdomClipText: recording.wisdomClipText,
+        duration: recording.duration, // Log duration for debugging
       });
 
       // Convert audio blob to base64 if needed
@@ -87,9 +88,12 @@ export function useRecordModal() {
         recording.wisdomClipText || recording.wisdomTranscription || "";
       console.log("[useRecordModal] Wisdom text for NavCache:", wisdomText);
 
+      const audioDuration = recording.duration || 0;
+      console.log("[useRecordModal] Audio duration:", audioDuration, "seconds");
+      
       navCache.set(navId, {
         transcription: recording.transcription || "",
-        audioDuration: recording.duration || 0,
+        audioDuration: audioDuration,
         wisdomClipText: wisdomText,
         wisdomTranscription: wisdomText, // Keep for backwards compatibility
         mainAudioBase64,
@@ -111,6 +115,8 @@ export function useRecordModal() {
         navId,
         "returnPath:",
         pathname,
+        "audioDuration:",
+        audioDuration,
       );
 
       // Close modal

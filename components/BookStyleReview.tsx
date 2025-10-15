@@ -24,6 +24,7 @@ import {
   type StoryPhoto,
 } from "@/components/MultiPhotoUploader";
 import { AudioRecorder } from "@/components/AudioRecorder";
+import { CustomAudioPlayer } from "@/components/CustomAudioPlayer";
 import { supabase } from "@/lib/supabase";
 
 interface BookStyleReviewProps {
@@ -33,6 +34,7 @@ interface BookStyleReviewProps {
   photos: StoryPhoto[];
   wisdomText: string;
   audioUrl?: string | null;
+  audioDuration?: number; // Duration in seconds
   onTitleChange: (title: string) => void;
   onYearChange: (year: string) => void;
   onTranscriptionChange: (text: string) => void;
@@ -54,6 +56,7 @@ export function BookStyleReview({
   photos,
   wisdomText,
   audioUrl,
+  audioDuration,
   onTitleChange,
   onYearChange,
   onTranscriptionChange,
@@ -242,7 +245,11 @@ export function BookStyleReview({
                 </h3>
                 {audioUrl ? (
                   <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <audio controls src={audioUrl} className="w-full mb-3" />
+                    <CustomAudioPlayer 
+                      src={audioUrl} 
+                      knownDuration={audioDuration} 
+                      className="mb-3"
+                    />
                     <div className="flex gap-2">
                       <Button
                         variant="outline"

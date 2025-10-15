@@ -31,6 +31,7 @@ function BookStyleReviewContent() {
   const [wisdomText, setWisdomText] = useState("");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [mainAudioBlob, setMainAudioBlob] = useState<Blob | null>(null);
+  const [audioDuration, setAudioDuration] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(isEditing);
   const [returnPath, setReturnPath] = useState<string | null>(null);
 
@@ -156,6 +157,12 @@ function BookStyleReviewContent() {
             }
           } else if (cachedData.audioUrl) {
             setAudioUrl(cachedData.audioUrl);
+          }
+          
+          // Set audio duration from cache if available
+          if (cachedData.audioDuration) {
+            setAudioDuration(cachedData.audioDuration);
+            console.log("[Review] Audio duration from cache:", cachedData.audioDuration, "seconds");
           }
 
           return; // Data loaded from cache, skip other sources
@@ -835,6 +842,7 @@ function BookStyleReviewContent() {
       photos={photos}
       wisdomText={wisdomText}
       audioUrl={audioUrl}
+      audioDuration={audioDuration}
       onTitleChange={setTitle}
       onYearChange={setStoryYear}
       onTranscriptionChange={setTranscription}
