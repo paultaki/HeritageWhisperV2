@@ -131,11 +131,21 @@ export async function GET(req: NextRequest) {
     }
 
     // Get user info for context
-    const { data: userInfo } = await supabaseAdmin
+    const { data: userInfo, error: userError } = await supabaseAdmin
       .from('users')
-      .select('id, firstName, lastName')
+      .select('id, name')
       .eq('id', familyMember.user_id)
       .single();
+
+    if (userError) {
+      console.error('Error fetching user info:', userError);
+    }
+
+    console.log('Verify token response:', {
+      storytellerId: familyMember.user_id,
+      userInfoId: userInfo?.id,
+      familyMemberId: familyMember.id,
+    });
 
     return NextResponse.json({
       valid: true,
@@ -147,8 +157,8 @@ export async function GET(req: NextRequest) {
         relationship: familyMember.relationship,
       },
       storyteller: {
-        id: userInfo?.id,
-        name: userInfo ? `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() : 'Your family member',
+        id: familyMember.user_id,
+        name: userInfo?.name || 'Your family member',
       },
     });
   } catch (error) {

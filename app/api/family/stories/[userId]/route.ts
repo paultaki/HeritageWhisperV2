@@ -84,18 +84,34 @@ export async function GET(
       );
     }
 
-    // Fetch stories - only public ones (includeInTimeline OR includeInBook)
-    const { data: stories, error: storiesError } = await supabaseAdmin
+    // Fetch all stories (we'll filter by metadata.include_in_timeline/book in JS)
+    const { data: allStories, error: storiesError } = await supabaseAdmin
       .from('stories')
       .select('*')
       .eq('user_id', userId)
-      .or('includeInTimeline.eq.true,includeInBook.eq.true')
-      .order('storyYear', { ascending: false, nullsFirst: false });
+      .order('year', { ascending: false })
+      .order('created_at', { ascending: false });
+    
+    // Filter for public stories (include_in_timeline OR include_in_book in metadata)
+    const stories = (allStories || []).filter((story: any) => {
+      const includeInTimeline = story.metadata?.include_in_timeline ?? true;
+      const includeInBook = story.metadata?.include_in_book ?? true;
+      return includeInTimeline || includeInBook;
+    });
 
     if (storiesError) {
       console.error('Error fetching stories:', storiesError);
+      console.error('Query details:', {
+        userId,
+        errorCode: storiesError.code,
+        errorMessage: storiesError.message,
+        errorDetails: storiesError.details,
+      });
       return NextResponse.json(
-        { error: 'Failed to fetch stories' },
+        { 
+          error: 'Failed to fetch stories',
+          details: process.env.NODE_ENV === 'development' ? storiesError.message : undefined
+        },
         { status: 500 }
       );
     }

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { Resend } from 'resend';
+import { FamilyInviteEmail } from '@/lib/emails/family-invite';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -11,6 +14,8 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     persistSession: false,
   },
 });
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Generate a secure random token (32 bytes = 64 hex characters)
 function generateSecureToken(): string {
@@ -143,24 +148,55 @@ export async function POST(req: NextRequest) {
       ? `${userProfile.firstName || ''} ${userProfile.lastName || ''}`.trim()
       : 'A family member';
 
-    // TODO: Send email via Resend
-    // For now, we'll just log the invite link
+    // Send email with Resend
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/family/access?token=${inviteToken}`;
     
-    console.log('=== FAMILY INVITE ===');
-    console.log('To:', email);
-    console.log('From:', senderName);
-    console.log('Link:', inviteUrl);
-    console.log('Expires:', expiresAt.toISOString());
-    console.log('====================');
+    try {
+      const emailContent = FamilyInviteEmail({
+        storytellerName: senderName,
+        familyMemberName: name,
+        relationship,
+        magicLink: inviteUrl,
+        expiresAt: expiresAt.toISOString(),
+      });
 
-    // In production, send email here
-    // await sendFamilyInviteEmail({
-    //   to: email,
-    //   recipientName: name,
-    //   senderName,
-    //   magicLink: inviteUrl,
-    // });
+      const { data: emailData, error: emailError } = await resend.emails.send({
+        from: 'Heritage Whisper <no-reply@updates.heritagewhisper.com>',
+        to: email,
+        subject: emailContent.subject,
+        html: emailContent.html,
+        text: emailContent.text,
+      });
+
+      if (emailError) {
+        console.error('Error sending email:', emailError);
+        // Still log to console as fallback
+        console.log('=== FAMILY INVITE (Email failed, console backup) ===');
+        console.log('To:', email);
+        console.log('From:', senderName);
+        console.log('Link:', inviteUrl);
+        console.log('Expires:', expiresAt.toISOString());
+        console.log('===================================================');
+      } else {
+        console.log('✅ Family invite email sent:', emailData?.id);
+        // Also log in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log('=== FAMILY INVITE (Email sent) ===');
+          console.log('To:', email);
+          console.log('Link:', inviteUrl);
+          console.log('===================================');
+        }
+      }
+    } catch (emailError) {
+      console.error('Exception sending email:', emailError);
+      // Fallback to console
+      console.log('=== FAMILY INVITE (Exception, console backup) ===');
+      console.log('To:', email);
+      console.log('From:', senderName);
+      console.log('Link:', inviteUrl);
+      console.log('Expires:', expiresAt.toISOString());
+      console.log('=================================================');
+    }
 
     return NextResponse.json({
       success: true,
