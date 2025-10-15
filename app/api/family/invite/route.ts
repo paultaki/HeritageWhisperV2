@@ -19,7 +19,10 @@ function generateSecureToken(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, name, relationship } = await req.json();
+    const body = await req.json();
+    const { email, name, relationship } = body;
+
+    console.log('Family invite request:', { email, name, relationship });
 
     // Validate input
     if (!email || !email.includes('@')) {
@@ -166,10 +169,18 @@ export async function POST(req: NextRequest) {
       // For development: include the link
       ...(process.env.NODE_ENV === 'development' && { inviteUrl }),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in family invite:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+    });
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Failed to create invitation',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      },
       { status: 500 }
     );
   }
