@@ -111,9 +111,15 @@ export default function HomePage() {
               {/* Trust signals */}
               <div className="flex items-center justify-center lg:justify-start gap-6 pt-4">
                 <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-200 to-orange-300 border-2 border-white flex items-center justify-center text-sm font-semibold text-gray-700">
-                      {String.fromCharCode(64 + i)}
+                  {['A', 'B', 'C', 'D'].map((letter) => (
+                    <div key={letter} className="w-10 h-10 rounded-full border-2 border-white overflow-hidden">
+                      <Image
+                        src={`/${letter}.png`}
+                        alt={`User ${letter}`}
+                        width={40}
+                        height={40}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   ))}
                 </div>
