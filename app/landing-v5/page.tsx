@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Mic, Clock, Users, Heart, BookOpen, Sparkles, Star, CheckCircle } from "lucide-react";
 
-export default function LandingV5() {
+export default function HomePage() {
   const router = useRouter();
 
   // Intersection Observer for scroll animations
@@ -115,7 +115,7 @@ export default function LandingV5() {
             <div className="relative" data-animate>
               <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                 <Image
-                  src="/demo-dad-boy.png"
+                  src="/1a.png"
                   alt="Father and son sharing stories"
                   width={600}
                   height={600}
