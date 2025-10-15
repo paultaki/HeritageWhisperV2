@@ -377,7 +377,7 @@ export default function HomePage() {
                 src="/timeline 2.png"
                 alt="Digital timeline"
                 width={600}
-                height={400}
+                height={304}
                 className="w-full h-auto rounded-2xl shadow-2xl"
               />
               <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-orange-100">
@@ -449,7 +449,7 @@ export default function HomePage() {
                         alt={memory.title}
                         width={500}
                         height={350}
-                        className="w-full h-auto transition-transform duration-300 group-hover:scale-110"
+                        className="w-full h-[350px] object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                       {/* Timeline dot */}
