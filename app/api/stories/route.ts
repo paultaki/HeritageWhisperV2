@@ -5,7 +5,7 @@ import { performTier3Analysis, storeTier3Results } from "@/lib/tier3AnalysisV2";
 import { generateEchoPrompt, generateEchoAnchorHash } from "@/lib/echoPrompts";
 import { validatePromptQuality } from "@/lib/promptQuality";
 import { logger } from "@/lib/logger";
-import { tier3Ratelimit } from "@/lib/ratelimit";
+import { tier3Ratelimit, aiIpRatelimit, aiGlobalRatelimit, getClientIp } from "@/lib/ratelimit";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -493,21 +493,47 @@ export async function POST(request: NextRequest) {
             );
           } else {
             try {
-              // Check rate limit for expensive Tier 3 analysis
-              const rateLimitResult = await tier3Ratelimit.limit(user.id);
-              
-              if (!rateLimitResult.success) {
+              // Multi-layer rate limiting for expensive Tier 3 analysis
+              const clientIp = getClientIp(request);
+
+              // Layer 1: User-based rate limit (1 per 5 minutes)
+              const userRateLimitResult = await tier3Ratelimit.limit(user.id);
+
+              // Layer 2: IP-based rate limit (10 per hour per IP)
+              const ipRateLimitResult = await aiIpRatelimit.limit(clientIp);
+
+              // Layer 3: Global rate limit (1000 per hour total)
+              const globalRateLimitResult = await aiGlobalRatelimit.limit('tier3-global');
+
+              // Check if any rate limit failed
+              if (!userRateLimitResult.success) {
                 logger.warn(
-                  `[Stories API] ⏱️  Tier 3 rate limit exceeded for user ${user.id}. Skipping analysis.`,
+                  `[Stories API] ⏱️  Tier 3 USER rate limit exceeded for ${user.id}. Skipping analysis.`,
                   {
-                    reset: new Date(rateLimitResult.reset),
-                    remaining: rateLimitResult.remaining,
+                    reset: new Date(userRateLimitResult.reset),
+                    remaining: userRateLimitResult.remaining,
                   }
                 );
-                // Don't fail the story save, just skip Tier 3 analysis
+              } else if (!ipRateLimitResult.success) {
+                logger.warn(
+                  `[Stories API] ⏱️  Tier 3 IP rate limit exceeded for ${clientIp}. Skipping analysis.`,
+                  {
+                    reset: new Date(ipRateLimitResult.reset),
+                    remaining: ipRateLimitResult.remaining,
+                  }
+                );
+              } else if (!globalRateLimitResult.success) {
+                logger.error(
+                  `[Stories API] 🚨 Tier 3 GLOBAL rate limit exceeded - system under load. Skipping analysis.`,
+                  {
+                    reset: new Date(globalRateLimitResult.reset),
+                    remaining: globalRateLimitResult.remaining,
+                  }
+                );
               } else {
-                logger.debug(`[Stories API] Rate limit OK. Performing Tier 3 analysis...`);
-                
+                // All rate limits passed - proceed with Tier 3 analysis
+                logger.debug(`[Stories API] All rate limits OK. Performing Tier 3 analysis...`);
+
                 // Perform GPT-4o/GPT-5 combined analysis
                 const tier3Result = await performTier3Analysis(
                   allStories,
