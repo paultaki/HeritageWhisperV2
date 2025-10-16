@@ -43,9 +43,19 @@ export default function HomePage() {
         <div className="absolute top-0 left-0 w-96 h-96 bg-orange-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-rose-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: "2s" }}></div>
 
+        {/* Continue Stories Button - Upper Right */}
+        <div className="absolute top-6 right-6 z-10">
+          <button
+            onClick={() => router.push("/auth/login")}
+            className="px-5 py-2 text-gray-600 hover:text-orange-700 text-base font-medium transition-colors hover:bg-white/50 rounded-lg"
+          >
+            Continue Stories
+          </button>
+        </div>
+
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-          {/* Header with Logo and Sign In */}
-          <div className="relative flex justify-center items-center mb-12">
+          {/* Header with Logo */}
+          <div className="flex justify-center items-center mb-12">
             <Image
               src="/HW_text-compress.png"
               alt="Heritage Whisper"
@@ -54,12 +64,6 @@ export default function HomePage() {
               className="h-14 w-auto"
               priority
             />
-            <button
-              onClick={() => router.push("/auth/login")}
-              className="absolute right-0 top-0 px-5 py-2 text-gray-600 hover:text-orange-700 text-base font-medium transition-colors hover:bg-white/50 rounded-lg"
-            >
-              Continue Stories
-            </button>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
