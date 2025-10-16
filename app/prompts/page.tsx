@@ -5,15 +5,29 @@ import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mic, Check, ChevronDown, ChevronUp, RotateCcw, Eye, Clock, Bookmark, Trash2 } from "lucide-react";
+import { Mic, ChevronDown, ChevronUp } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useRecordModal } from "@/hooks/use-record-modal";
 import RecordModal from "@/components/RecordModal";
 import MoreIdeas from "@/components/MoreIdeas";
+import PromptCard from "@/components/PromptCard";
 
-interface Prompt {
+interface QueuedPrompt {
+  id: string;
+  prompt_text: string;
+  context_note?: string | null;
+  source: 'ai' | 'catalog';
+  category?: string;
+  tier?: number;
+  queue_position: number;
+  queued_at: string;
+  anchor_entity?: string;
+  anchor_year?: number;
+}
+
+interface ActivePrompt {
   id: string;
   prompt_text: string;
   context_note: string | null;
@@ -24,13 +38,14 @@ interface Prompt {
   anchor_year?: number;
 }
 
-interface PromptHistory {
+interface ArchivedPrompt {
   id: string;
   prompt_text: string;
-  context_note?: string;
-  outcome: string;
-  resolved_at: string;
-  story_id?: string;
+  context_note?: string | null;
+  source: 'ai' | 'catalog';
+  category?: string;
+  tier?: number;
+  dismissed_at: string;
   anchor_entity?: string;
   anchor_year?: number;
 }
@@ -41,131 +56,163 @@ export default function PromptsPage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { isOpen, openModal, closeModal, handleSave, initialData } = useRecordModal();
-  const [showDismissed, setShowDismissed] = useState(false);
-  const [showAnswered, setShowAnswered] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
 
-  // Fetch active prompts
-  const { data: activeData, isLoading: activeLoading } = useQuery<{ prompts: Prompt[] }>({
+  // Fetch user profile to get their name
+  const { data: userProfile } = useQuery<{ user: { name: string } }>({
+    queryKey: ["/api/user/profile"],
+    enabled: !!user,
+  });
+
+  // Get user's first name from database or fallback to email
+  const firstName = userProfile?.user?.name?.split(' ')[0]
+    || user?.user_metadata?.name?.split(' ')[0]
+    || user?.user_metadata?.full_name?.split(' ')[0]
+    || user?.email?.split('@')[0]
+    || 'You';
+
+  // Fetch queued prompts
+  const { data: queuedData, isLoading: queuedLoading } = useQuery<{ prompts: QueuedPrompt[] }>({
+    queryKey: ["/api/prompts/queued"],
+    enabled: !!user,
+  });
+
+  // Fetch active (personalized) prompts
+  const { data: activeData, isLoading: activeLoading } = useQuery<{ prompts: ActivePrompt[] }>({
     queryKey: ["/api/prompts/active"],
     enabled: !!user,
   });
 
-  // Fetch dismissed prompts
-  const { data: dismissedData } = useQuery<{ prompts: PromptHistory[] }>({
-    queryKey: ["/api/prompts/dismissed"],
-    enabled: !!user && showDismissed,
+  // Fetch archived prompts (always fetch to show count, but only display when expanded)
+  const { data: archivedData, isLoading: archivedLoading } = useQuery<{ prompts: ArchivedPrompt[] }>({
+    queryKey: ["/api/prompts/archived"],
+    enabled: !!user,
   });
 
-  // Fetch answered prompts
-  const { data: answeredData } = useQuery<{ prompts: PromptHistory[] }>({
-    queryKey: ["/api/prompts/answered"],
-    enabled: !!user && showAnswered,
-  });
-
-  // Skip/Save for later mutation
-  const skipMutation = useMutation({
-    mutationFn: async (promptId: string) => {
-      const response = await apiRequest("POST", "/api/prompts/skip", { promptId });
+  // Queue mutation - adds prompts to queue
+  const queueMutation = useMutation({
+    mutationFn: async ({ promptId, source, text, category }: {
+      promptId: string;
+      source: 'ai' | 'catalog';
+      text: string;
+      category?: string;
+    }) => {
+      const response = await apiRequest("POST", "/api/prompts/queue", {
+        promptId: source === 'ai' ? promptId : undefined,
+        source,
+        text: source === 'catalog' ? text : undefined,
+        category: source === 'catalog' ? category : undefined,
+      });
       return response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prompts/queued"] });
       queryClient.invalidateQueries({ queryKey: ["/api/prompts/active"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/dismissed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/prompts/archived"] });
       toast({
-        title: "Saved for later",
-        description: "This question has been moved to your saved list",
+        title: "Added to queue",
+        description: "This prompt is now in your queue",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add to queue",
+        variant: "destructive",
       });
     },
   });
 
-  // Delete prompt mutation (for active prompts)
+  // Dismiss mutation - moves prompts to archive
+  const dismissMutation = useMutation({
+    mutationFn: async ({ promptId, source, text, category }: {
+      promptId: string;
+      source: 'ai' | 'catalog';
+      text: string;
+      category?: string;
+    }) => {
+      const response = await apiRequest("POST", "/api/prompts/dismiss", {
+        promptId: source === 'ai' ? promptId : undefined,
+        source,
+        text: source === 'catalog' ? text : undefined,
+        category: source === 'catalog' ? category : undefined,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prompts/queued"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/prompts/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/prompts/archived"] });
+      toast({
+        title: "Moved to archive",
+        description: "This prompt has been archived",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to dismiss prompt",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete mutation - permanently deletes prompts
   const deleteMutation = useMutation({
-    mutationFn: async (promptId: string) => {
-      const response = await apiRequest("DELETE", `/api/prompts/${promptId}`, {});
-      return response.json();
+    mutationFn: async ({ promptId, source }: {
+      promptId: string;
+      source: 'ai' | 'catalog';
+    }) => {
+      if (source === 'ai') {
+        const response = await apiRequest("DELETE", `/api/prompts/${promptId}`, {});
+        return response.json();
+      } else {
+        const response = await apiRequest("DELETE", `/api/prompts/history/${promptId}`, {});
+        return response.json();
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/prompts/archived"] });
       toast({
         title: "Prompt deleted",
-        description: "This question has been permanently removed",
+        description: "This prompt has been permanently removed",
       });
     },
-  });
-
-  // Delete history mutation (for saved/answered prompts)
-  const deleteHistoryMutation = useMutation({
-    mutationFn: async (promptId: string) => {
-      const response = await apiRequest("DELETE", `/api/prompts/history/${promptId}`, {});
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/dismissed"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/answered"] });
+    onError: (error: any) => {
       toast({
-        title: "Prompt deleted",
-        description: "This question has been permanently removed",
+        title: "Error",
+        description: error.message || "Failed to delete prompt",
+        variant: "destructive",
       });
     },
   });
 
-  // Restore dismissed prompt mutation
-  const restoreMutation = useMutation({
-    mutationFn: async (promptId: string) => {
-      const response = await apiRequest("POST", "/api/prompts/restore", { promptId });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/active"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/dismissed"] });
-      toast({
-        title: "Prompt restored",
-        description: "This question is back in your memory inbox",
-      });
-    },
-  });
-
-  const handleRecord = (promptId: string, promptText: string) => {
+  const handleRecord = (promptId: string, promptText: string, source: 'ai' | 'catalog') => {
     // Store prompt ID for tracking
-    sessionStorage.setItem("activePromptId", promptId);
+    if (source === 'ai') {
+      sessionStorage.setItem("activePromptId", promptId);
+    }
     // Open recording modal with the selected prompt
     openModal({ prompt: promptText });
   };
 
-  const handleViewStory = (storyId: string) => {
-    router.push(`/timeline#story-${storyId}`);
+  const handleQueue = (id: string, text: string, source: 'ai' | 'catalog', category?: string) => {
+    queueMutation.mutate({ promptId: id, source, text, category });
   };
 
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-    return `${Math.floor(diffDays / 365)} years ago`;
+  const handleDismiss = (id: string, text: string, source: 'ai' | 'catalog', category?: string) => {
+    dismissMutation.mutate({ promptId: id, source, text, category });
   };
 
-  // Filter out broken prompts as last line of defense
-  const filterBrokenPrompts = (prompts: Prompt[]) => {
-    return prompts.filter(p => {
-      // Grammar error patterns
-      const hasGrammarError = /\s(the|a|an)\s+(said|told|was|were)/.test(p.prompt_text);
-      const hasBrokenEntity = /\b(impress|mention)\s+(the|a)\s+(said|told)/.test(p.prompt_text);
-      const tooShort = p.prompt_text.split(' ').length < 5;
-      const missingQuestionMark = !p.prompt_text.includes('?');
-      
-      return !hasGrammarError && !hasBrokenEntity && !tooShort && !missingQuestionMark;
-    });
+  const handleDelete = (id: string, source: 'ai' | 'catalog') => {
+    deleteMutation.mutate({ promptId: id, source });
   };
-  
-  const activePrompts = filterBrokenPrompts(activeData?.prompts || []);
-  const dismissedPrompts = dismissedData?.prompts || [];
-  const answeredPrompts = answeredData?.prompts || [];
+
+  const isAnyMutationPending = queueMutation.isPending || dismissMutation.isPending || deleteMutation.isPending;
+
+  const queuedPrompts = queuedData?.prompts || [];
+  const activePrompts = activeData?.prompts || [];
+  const archivedPrompts = archivedData?.prompts || [];
 
   if (!user) {
     return (
@@ -189,26 +236,16 @@ export default function PromptsPage() {
         </div>
       </header>
 
-      {/* Toolbar / Controls Section */}
-      <section className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          {/* User will specify what goes here */}
-          <div className="text-gray-500 text-sm">
-            Controls section - content coming soon
-          </div>
-        </div>
-      </section>
-
       {/* Content with gradient background */}
       <div className="relative overflow-hidden animated-gradient-bg">
-      {/* Animated gradient orbs and card animations */}
-      <style jsx global>{`
+        {/* Animated gradient orbs */}
+        <style jsx global>{`
         .animated-gradient-bg {
           background: linear-gradient(135deg, #fef3c7, #ffedd5, #fed7aa, #fecdd3);
           background-size: 400% 400%;
           animation: gradientShift 15s ease infinite;
         }
-        
+
         @keyframes gradientShift {
           0% {
             background-position: 0% 50%;
@@ -220,7 +257,7 @@ export default function PromptsPage() {
             background-position: 0% 50%;
           }
         }
-        
+
         .orb {
           position: absolute;
           border-radius: 9999px;
@@ -279,265 +316,159 @@ export default function PromptsPage() {
           }
         }
       `}</style>
-      
-      <div className="orb orb1"></div>
-      <div className="orb orb2"></div>
-      <div className="orb orb3"></div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Section 1: Waiting to be Told (Active) - Maximum 3 */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-serif font-semibold text-heritage-brown flex items-center gap-2">
-            <span className="text-amber-600">📬</span>
-            Ready to Tell
-          </h2>
+        <div className="orb orb1"></div>
+        <div className="orb orb2"></div>
+        <div className="orb orb3"></div>
 
-          {activeLoading ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">Loading your questions...</p>
-            </div>
-          ) : activePrompts.length === 0 ? (
-            <Card className="bg-gradient-to-br from-[#FFFBF0] to-[#FFF5E6] border border-[#E8D5C4]">
-              <CardContent className="p-8 text-center">
-                <p className="text-lg text-gray-600 italic font-serif">
-                  New prompts will appear as you share more stories
-                </p>
-                <Button
-                  onClick={() => router.push("/recording")}
-                  className="mt-6 bg-[#D4A574] hover:bg-[#C09564]"
-                >
-                  <Mic className="w-4 h-4 mr-2" />
-                  Record Your First Story
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {activePrompts.slice(0, 6).map((prompt, index) => (
-                <Card
-                  key={prompt.id}
-                  className="bg-white/20 backdrop-blur-md border border-white/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-white/25 flex flex-col"
-                  style={{
-                    animation: `slideInUp 0.8s ease-in-out ${index * 0.15}s forwards`,
-                    opacity: 0,
-                    minHeight: window.innerWidth >= 1024 ? '420px' : '320px',
-                  }}
-                >
-                  <CardContent className="p-4 md:p-6 lg:p-8 flex flex-col h-full justify-between">
-                    {/* Header badge */}
-                    <div className="flex items-center gap-1 text-xs md:text-sm text-amber-600 mb-3">
-                      <span>✨</span>
-                      <span className="font-medium">Inspired by your memories</span>
-                    </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-8 space-y-8">
+          {/* Section 1: Your Prompt Queue */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-serif font-semibold text-heritage-brown flex items-center gap-2">
+              <span className="text-amber-600">📋</span>
+              Your Prompt Queue
+            </h2>
 
-                    {/* Prompt text - centered vertically */}
-                    <div className="flex-1 flex items-center justify-center mb-3 md:mb-4">
-                      <p 
-                        className="text-lg md:text-xl lg:text-2xl font-serif text-gray-800 leading-relaxed drop-shadow-sm text-center"
-                        style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-                      >
-                        {prompt.prompt_text}
-                      </p>
-                    </div>
-
-                    {/* Action buttons */}
-                    <div className="space-y-2">
-                      <Button
-                        onClick={() => handleRecord(prompt.id, prompt.prompt_text)}
-                        className="w-full bg-gradient-to-r from-amber-500 via-orange-400 to-rose-400 hover:from-amber-600 hover:via-orange-500 hover:to-rose-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] text-sm md:text-base py-2 md:py-3"
-                      >
-                        <Mic className="w-4 h-4 md:w-5 md:h-5 mr-1" />
-                        Record
-                      </Button>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button
-                          onClick={() => skipMutation.mutate(prompt.id)}
-                          disabled={skipMutation.isPending}
-                          variant="outline"
-                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-white/60 transition-all duration-300 text-sm md:text-base py-2 md:py-3"
-                        >
-                          <Bookmark className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                          Save
-                        </Button>
-                        <Button
-                          onClick={() => deleteMutation.mutate(prompt.id)}
-                          disabled={deleteMutation.isPending}
-                          variant="outline"
-                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-red-100 hover:border-red-300 hover:text-red-700 transition-all duration-300 text-sm md:text-base py-2 md:py-3"
-                        >
-                          <Trash2 className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* More Ideas Section */}
-        <MoreIdeas />
-
-        {/* Section 2: Saved for Later (Dismissed) */}
-        <div className="space-y-4">
-          <button
-            onClick={() => setShowDismissed(!showDismissed)}
-            className="flex items-center gap-2 text-xl font-serif font-semibold text-heritage-brown hover:text-amber-700 transition-colors"
-          >
-            <span className="text-amber-600">💭</span>
-            Saved for Later
-            <span className="text-sm text-gray-500">({dismissedPrompts.length})</span>
-            {showDismissed ? (
-              <ChevronUp className="w-5 h-5" />
+            {queuedLoading ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Loading your queue...</p>
+              </div>
+            ) : queuedPrompts.length === 0 ? (
+              <Card className="bg-gradient-to-br from-[#FFFBF0] to-[#FFF5E6] border border-[#E8D5C4]">
+                <CardContent className="p-8 text-center">
+                  <p className="text-lg text-gray-600 italic font-serif">
+                    Your queue is empty. Add prompts from below!
+                  </p>
+                </CardContent>
+              </Card>
             ) : (
-              <ChevronDown className="w-5 h-5" />
-            )}
-          </button>
-
-          {showDismissed && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {dismissedPrompts.length === 0 ? (
-                <p className="text-gray-500 italic pl-8 col-span-full">
-                  Questions you skip will appear here
-                </p>
-              ) : (
-                dismissedPrompts.map((prompt, index) => (
-                  <Card
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {queuedPrompts.map((prompt, index) => (
+                  <PromptCard
                     key={prompt.id}
-                    className="bg-white/20 backdrop-blur-md border border-white/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-white/25 flex flex-col"
-                    style={{
-                      animation: `slideInUp 0.8s ease-in-out ${index * 0.15}s forwards`,
-                      opacity: 0,
-                      minHeight: window.innerWidth >= 1024 ? '420px' : '320px',
-                    }}
+                    id={prompt.id}
+                    promptText={prompt.prompt_text}
+                    contextNote={prompt.context_note}
+                    source={prompt.source}
+                    category={prompt.category}
+                    anchorEntity={prompt.anchor_entity}
+                    anchorYear={prompt.anchor_year}
+                    variant="queue"
+                    index={index}
+                    onRecord={handleRecord}
+                    onDismiss={handleDismiss}
+                    onDelete={handleDelete}
+                    isLoading={isAnyMutationPending}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 2: Prompts for {FirstName} (Personalized) */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-serif font-semibold text-heritage-brown flex items-center gap-2">
+              <span className="text-amber-600">✨</span>
+              Prompts for {firstName}
+            </h2>
+
+            {activeLoading ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Loading your personalized prompts...</p>
+              </div>
+            ) : activePrompts.length === 0 ? (
+              <Card className="bg-gradient-to-br from-[#FFFBF0] to-[#FFF5E6] border border-[#E8D5C4]">
+                <CardContent className="p-8 text-center">
+                  <p className="text-lg text-gray-600 italic font-serif">
+                    New prompts will appear as you share more stories
+                  </p>
+                  <Button
+                    onClick={() => router.push("/recording")}
+                    className="mt-6 bg-[#D4A574] hover:bg-[#C09564]"
                   >
-                    <CardContent className="p-4 md:p-6 lg:p-8 flex flex-col h-full justify-between">
-                      {/* Header badge */}
-                      <div className="flex items-center gap-1 text-xs md:text-sm text-amber-600 mb-3">
-                        <span>💭</span>
-                        <span className="font-medium">Saved for later</span>
-                      </div>
-
-                      {/* Prompt text - centered vertically */}
-                      <div className="flex-1 flex items-center justify-center mb-3 md:mb-4">
-                        <p 
-                          className="text-lg md:text-xl lg:text-2xl font-serif text-gray-800 leading-relaxed drop-shadow-sm text-center"
-                          style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-                        >
-                          {prompt.prompt_text}
-                        </p>
-                      </div>
-
-                      {/* Action buttons */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button
-                          onClick={() => restoreMutation.mutate(prompt.id)}
-                          disabled={restoreMutation.isPending}
-                          variant="outline"
-                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-white/60 transition-all duration-300 text-sm md:text-base py-2 md:py-3"
-                        >
-                          <RotateCcw className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                          Restore
-                        </Button>
-                        <Button
-                          onClick={() => deleteHistoryMutation.mutate(prompt.id)}
-                          disabled={deleteHistoryMutation.isPending}
-                          variant="outline"
-                          className="bg-white/40 backdrop-blur-sm border-white/50 hover:bg-red-100 hover:border-red-300 hover:text-red-700 transition-all duration-300 text-sm md:text-base py-2 md:py-3"
-                        >
-                          <Trash2 className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Section 3: Stories You've Shared (Answered) */}
-        <div className="space-y-4">
-          <button
-            onClick={() => setShowAnswered(!showAnswered)}
-            className="flex items-center gap-2 text-xl font-serif font-semibold text-heritage-brown hover:text-amber-700 transition-colors"
-          >
-            <span className="text-amber-600">✓</span>
-            Stories You've Shared
-            <span className="text-sm text-gray-500">({answeredPrompts.length})</span>
-            {showAnswered ? (
-              <ChevronUp className="w-5 h-5" />
+                    <Mic className="w-4 h-4 mr-2" />
+                    Record Your First Story
+                  </Button>
+                </CardContent>
+              </Card>
             ) : (
-              <ChevronDown className="w-5 h-5" />
-            )}
-          </button>
-
-          {showAnswered && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {answeredPrompts.length === 0 ? (
-                <p className="text-gray-500 italic pl-8 col-span-full">
-                  Your answered questions will appear here
-                </p>
-              ) : (
-                answeredPrompts.map((prompt, index) => (
-                  <Card
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {activePrompts.slice(0, 6).map((prompt, index) => (
+                  <PromptCard
                     key={prompt.id}
-                    className="bg-white/20 backdrop-blur-md border border-white/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-white/25 flex flex-col"
-                    style={{
-                      animation: `slideInUp 0.8s ease-in-out ${index * 0.15}s forwards`,
-                      opacity: 0,
-                      minHeight: window.innerWidth >= 1024 ? '420px' : '320px',
-                    }}
-                  >
-                    <CardContent className="p-4 md:p-6 lg:p-8 flex flex-col h-full justify-between">
-                      {/* Header badge */}
-                      <div className="flex items-center gap-1 text-xs md:text-sm text-green-600 mb-3">
-                        <span>✓</span>
-                        <span className="font-medium">Story shared</span>
-                      </div>
+                    id={prompt.id}
+                    promptText={prompt.prompt_text}
+                    contextNote={prompt.context_note}
+                    source="ai"
+                    anchorEntity={prompt.anchor_entity}
+                    anchorYear={prompt.anchor_year}
+                    variant="personalized"
+                    index={index}
+                    onRecord={handleRecord}
+                    onQueue={handleQueue}
+                    onDismiss={handleDismiss}
+                    onDelete={handleDelete}
+                    isLoading={isAnyMutationPending}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
 
-                      {/* Prompt text - centered vertically */}
-                      <div className="flex-1 flex items-center justify-center mb-3 md:mb-4">
-                        <p 
-                          className="text-lg md:text-xl lg:text-2xl font-serif text-gray-800 leading-relaxed drop-shadow-sm text-center"
-                          style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-                        >
-                          {prompt.prompt_text}
-                        </p>
-                      </div>
+          {/* More Ideas Section */}
+          <MoreIdeas />
 
-                      {/* Action buttons */}
-                      <div className="space-y-2">
-                        {prompt.story_id && (
-                          <Button
-                            onClick={() => handleViewStory(prompt.story_id!)}
-                            className="w-full bg-gradient-to-r from-amber-500 via-orange-400 to-rose-400 hover:from-amber-600 hover:via-orange-500 hover:to-rose-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] text-sm md:text-base py-2 md:py-3"
-                          >
-                            <Eye className="w-4 h-4 md:w-5 md:h-5 mr-1" />
-                            View Story
-                          </Button>
-                        )}
-                        <Button
-                          onClick={() => deleteHistoryMutation.mutate(prompt.id)}
-                          disabled={deleteHistoryMutation.isPending}
-                          variant="outline"
-                          className="w-full bg-white/40 backdrop-blur-sm border-white/50 hover:bg-red-100 hover:border-red-300 hover:text-red-700 transition-all duration-300 text-sm md:text-base py-2 md:py-3"
-                        >
-                          <Trash2 className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+          {/* Section 3: Prompt Archive (Dismissed) */}
+          <div className="space-y-4">
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              className="flex items-center gap-2 text-xl font-serif font-semibold text-heritage-brown hover:text-amber-700 transition-colors"
+            >
+              <span className="text-amber-600">📦</span>
+              Prompt Archive
+              {archivedLoading ? (
+                <span className="text-sm text-gray-400">(...)</span>
+              ) : (
+                <span className="text-sm text-gray-500">({archivedPrompts.length})</span>
               )}
-            </div>
-          )}
+              {showArchived ? (
+                <ChevronUp className="w-5 h-5" />
+              ) : (
+                <ChevronDown className="w-5 h-5" />
+              )}
+            </button>
+
+            {showArchived && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {archivedPrompts.length === 0 ? (
+                  <p className="text-gray-500 italic pl-8 col-span-full">
+                    Dismissed prompts will appear here
+                  </p>
+                ) : (
+                  archivedPrompts.map((prompt, index) => (
+                    <PromptCard
+                      key={prompt.id}
+                      id={prompt.id}
+                      promptText={prompt.prompt_text}
+                      contextNote={prompt.context_note}
+                      source={prompt.source}
+                      category={prompt.category}
+                      anchorEntity={prompt.anchor_entity}
+                      anchorYear={prompt.anchor_year}
+                      variant="archived"
+                      index={index}
+                      onRecord={handleRecord}
+                      onQueue={handleQueue}
+                      onDismiss={handleDismiss}
+                      onDelete={handleDelete}
+                      isLoading={isAnyMutationPending}
+                    />
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
       </div>
 
       {/* Record Modal */}

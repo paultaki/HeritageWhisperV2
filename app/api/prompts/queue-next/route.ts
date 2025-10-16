@@ -46,49 +46,69 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Count ready prompts
-    const { count, error: countError } = await supabaseAdmin
-      .from('user_prompts')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('status', 'ready');
+    // Get next queue position using the helper function
+    const { data: positionData, error: positionError } = await supabaseAdmin
+      .rpc('get_next_queue_position', { p_user_id: user.id });
 
-    if (countError) {
-      console.error('Error counting ready prompts:', countError);
+    if (positionError) {
+      console.error('Error getting next queue position:', positionError);
       return NextResponse.json(
-        { error: 'Failed to count prompts' },
+        { error: 'Failed to get queue position' },
         { status: 500 }
       );
     }
 
-    // Determine status: ready if less than 3, otherwise saved
-    const status = (count ?? 0) < 3 ? 'ready' : 'saved';
+    const queuePosition = positionData || 1;
 
-    // Check if prompt already exists for this user in ready or saved status
+    // Check if prompt already exists for this user in queued or dismissed status
     const { data: existingPrompt } = await supabaseAdmin
       .from('user_prompts')
       .select('id, status')
       .eq('user_id', user.id)
       .eq('text', text)
-      .in('status', ['ready', 'saved'])
+      .in('status', ['queued', 'dismissed'])
       .single();
 
-    // If it already exists, return success (idempotent)
+    // If it already exists and is queued, return success (idempotent)
     if (existingPrompt) {
-      return NextResponse.json({ 
-        promoted: existingPrompt.status === 'ready',
-        alreadyExists: true 
-      });
+      if (existingPrompt.status === 'queued') {
+        return NextResponse.json({
+          promoted: true,
+          alreadyExists: true
+        });
+      } else {
+        // If dismissed, update to queued
+        const { error: updateError } = await supabaseAdmin
+          .from('user_prompts')
+          .update({
+            status: 'queued',
+            queue_position: queuePosition,
+            queued_at: new Date().toISOString(),
+          })
+          .eq('id', existingPrompt.id);
+
+        if (updateError) {
+          console.error('Error updating prompt to queued:', updateError);
+          return NextResponse.json(
+            { error: 'Failed to queue prompt' },
+            { status: 500 }
+          );
+        }
+
+        return NextResponse.json({ promoted: true });
+      }
     }
 
-    // Insert the new prompt
+    // Insert the new prompt as queued
     const { error: insertError } = await supabaseAdmin
       .from('user_prompts')
       .insert({
         user_id: user.id,
         text,
         category,
-        status,
+        status: 'queued',
+        queue_position: queuePosition,
+        queued_at: new Date().toISOString(),
         source: 'catalog',
       });
 
@@ -100,7 +120,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({ promoted: status === 'ready' });
+    return NextResponse.json({ promoted: true });
   } catch (error) {
     console.error('Error in queue-next:', error);
     return NextResponse.json(

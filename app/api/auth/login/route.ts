@@ -36,10 +36,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Debug: Log the attempt (without password)
-    logger.info(`Login attempt for email: ${email}`);
-    logger.info(`Supabase URL: ${supabaseUrl}`);
-    logger.info(`Anon key present: ${!!supabaseAnonKey}`);
+    // Debug: Log the attempt (anonymized - no PII)
+    if (process.env.NODE_ENV === 'development') {
+      logger.info(`Login attempt for email: ${email}`);
+      logger.info(`Supabase URL: ${supabaseUrl}`);
+      logger.info(`Anon key present: ${!!supabaseAnonKey}`);
+    }
 
     // Sign in with Supabase
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -48,7 +50,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      logger.error("Supabase login error:", error);
+      // Log error without exposing PII
+      logger.error("Supabase login error:", error.message);
 
       // Check if it's an email not confirmed error
       if (
@@ -112,7 +115,8 @@ export async function POST(request: NextRequest) {
       session: data.session,
     });
   } catch (error) {
-    logger.error("Login error:", error);
+    // Log error without exposing PII or credentials
+    logger.error("Login error:", error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: "Login failed" }, { status: 500 });
   }
 }

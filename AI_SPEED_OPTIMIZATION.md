@@ -6,7 +6,113 @@ Current bottlenecks: Sequential AI calls, overuse of GPT-4o, synchronous Tier 3 
 
 ## Phase 1: Quick Wins (Implement Today)
 
-### 1.1 Parallelize Audio Processing Pipeline
+### 1.1 Respect Reduced Motion Preferences ✅ IMPLEMENTED
+
+**Files: `/app/page.tsx`, `/app/globals.css`**
+
+**Problem**: Homepage runs animations, timers, and Intersection Observers for every visitor, even when their OS requests reduced motion.
+
+**Solution Implemented**:
+
+1. **JavaScript Motion Detection**:
+   ```typescript
+   // Detects user's motion preference on mount
+   const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+   setPrefersReducedMotion(mediaQuery.matches);
+   
+   // Listens for preference changes in real-time
+   mediaQuery.addEventListener("change", handleChange);
+   ```
+
+2. **Skip Animations Conditionally**:
+   ```typescript
+   // If reduced motion preferred, immediately show all elements
+   if (prefersReducedMotion) {
+     document.querySelectorAll("[data-animate]").forEach((el) => {
+       el.classList.remove("opacity-0", "translate-y-8");
+       el.classList.add("opacity-100", "translate-y-0");
+     });
+     return; // Skip Intersection Observer setup
+   }
+   ```
+
+3. **Global CSS Override**:
+   ```css
+   @media (prefers-reduced-motion: reduce) {
+     *, *::before, *::after {
+       animation-duration: 0.01ms !important;
+       animation-iteration-count: 1 !important;
+       transition-duration: 0.01ms !important;
+       scroll-behavior: auto !important;
+     }
+   }
+   ```
+
+**Impact**:
+- ✅ Zero animation timers for users with reduced motion
+- ✅ No Intersection Observer overhead when not needed
+- ✅ Instant page rendering without animation delays
+- ✅ Better accessibility (WCAG 2.1 Level AA compliance)
+- ✅ Reduced CPU usage for motion-sensitive users
+
+**Applied to**:
+- ✅ `/app/page.tsx` - Landing page (all scroll animations)
+- ✅ `/app/timeline-v2/page.tsx` - Timeline cards (Intersection Observer)
+- ✅ `/app/globals.css` - Global CSS animations disabled
+
+### 1.2 Remove PII from Authentication Logs ✅ IMPLEMENTED
+
+**Files: `/app/api/auth/**/*.ts`**
+
+**Problem**: Authentication routes logged emails, user IDs, and full error objects containing credentials to console, which would end up in production logs.
+
+**Solution Implemented**:
+
+1. **Email Logging Gated to Development**:
+   ```typescript
+   // BEFORE: Always logs email in production
+   logger.info(`Login attempt for email: ${email}`);
+   
+   // AFTER: Only logs in development
+   if (process.env.NODE_ENV === 'development') {
+     logger.info(`Login attempt for email: ${email}`);
+   }
+   ```
+
+2. **Error Objects Sanitized**:
+   ```typescript
+   // BEFORE: Logs full error object (may contain passwords, tokens)
+   logger.error("Login error:", error);
+   
+   // AFTER: Only logs error message
+   logger.error("Login error:", error instanceof Error ? error.message : 'Unknown error');
+   ```
+
+3. **Supabase Errors Cleaned**:
+   ```typescript
+   // BEFORE: Full error object
+   logger.error("Supabase login error:", error);
+   
+   // AFTER: Message only
+   logger.error("Supabase login error:", error.message);
+   ```
+
+**Files Updated**:
+- ✅ `/app/api/auth/login/route.ts` - Removed email logging, sanitized errors
+- ✅ `/app/api/auth/register/route.ts` - Sanitized all error logging
+- ✅ `/app/api/auth/change-password/route.ts` - Gated user ID logging, sanitized errors
+- ✅ `/app/api/auth/me/route.ts` - Sanitized error logging
+- ✅ `/app/api/auth/logout/route.ts` - Sanitized error logging
+- ✅ `/app/api/auth/send-welcome/route.ts` - Sanitized error logging
+
+**Impact**:
+- ✅ No PII (emails, user IDs) in production logs
+- ✅ No credentials in error logs
+- ✅ GDPR/privacy compliance improved
+- ✅ Reduced log storage costs (shorter messages)
+- ✅ Development debugging still works (gated to dev mode)
+
+### 1.3 Parallelize Audio Processing Pipeline
 
 **File: `/app/api/transcribe/route.ts`**
 
@@ -32,7 +138,7 @@ const lessonOptions = await generateLessonOptions(transcription.text);
 // Keep existing parallel code but switch lesson extraction to GPT-4o-mini
 ```
 
-### 1.2 Switch Lesson Extraction to GPT-4o-mini
+### 1.4 Switch Lesson Extraction to GPT-4o-mini
 
 **File: `/app/api/transcribe/route.ts` Line 181**
 
@@ -47,7 +153,7 @@ temperature: 0.9,  // Slightly higher for creativity
 
 **Rationale**: Lesson extraction is template-driven, doesn't need GPT-4o's reasoning.
 
-### 1.3 Make Tier 3 Analysis Asynchronous
+### 1.5 Make Tier 3 Analysis Asynchronous
 
 **File: `/app/api/stories/route.ts` Lines 478-580**
 

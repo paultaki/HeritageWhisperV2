@@ -100,28 +100,29 @@ export default function MoreIdeas() {
     }
   }
 
-  async function saveForLater(p: Prompt) {
+  async function dismissPrompt(p: Prompt) {
     if (savingId) return; // Prevent double-clicks
-    
+
     setSavingId(p.id);
     try {
-      console.log('Saving prompt:', p);
-      const response = await apiRequest('POST', '/api/prompts/save', {
+      console.log('Dismissing prompt:', p);
+      const response = await apiRequest('POST', '/api/prompts/dismiss', {
+        source: 'catalog',
         text: p.text,
         category: p.category,
       });
       const result = await response.json();
-      console.log('Save response:', result);
+      console.log('Dismiss response:', result);
 
       toast({
-        title: 'Saved for later',
-        description: 'You can find this in your Saved for later section',
+        title: 'Moved to archive',
+        description: 'You can find this in your Prompt Archive',
       });
     } catch (error) {
-      console.error('Error saving prompt:', error);
+      console.error('Error dismissing prompt:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to save prompt. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to dismiss prompt. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -241,18 +242,18 @@ export default function MoreIdeas() {
                           <Button
                             onClick={(e) => {
                               e.preventDefault();
-                              saveForLater(p);
+                              dismissPrompt(p);
                             }}
                             disabled={savingId === p.id}
                             variant="outline"
                             className="w-full bg-white/60 hover:bg-white/80 border-amber-200 hover:border-amber-300 text-gray-700 text-sm h-9 disabled:opacity-50"
                           >
                             {savingId === p.id ? (
-                              <span className="animate-pulse">Saving...</span>
+                              <span className="animate-pulse">Dismissing...</span>
                             ) : (
                               <>
                                 <Bookmark className="w-4 h-4 mr-1" />
-                                Save
+                                Dismiss
                               </>
                             )}
                           </Button>

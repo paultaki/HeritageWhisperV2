@@ -1,15 +1,39 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Mic, Clock, Users, Heart, BookOpen, Sparkles, Star, CheckCircle } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-  // Intersection Observer for scroll animations
+  // Check for prefers-reduced-motion preference
   useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  // Intersection Observer for scroll animations (respects reduced motion)
+  useEffect(() => {
+    // Skip animations if user prefers reduced motion
+    if (prefersReducedMotion) {
+      // Immediately show all elements without animation
+      document.querySelectorAll("[data-animate]").forEach((el) => {
+        el.classList.remove("opacity-0", "translate-y-8");
+        el.classList.add("opacity-100", "translate-y-0");
+      });
+      return;
+    }
+
     const observerOptions = {
       threshold: 0.1,
       rootMargin: "0px 0px -50px 0px",
@@ -29,7 +53,7 @@ export default function HomePage() {
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [prefersReducedMotion]);
 
   const handleCTA = () => {
     router.push("/auth/signup");

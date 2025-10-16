@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         .single();
 
       if (insertError) {
-        logger.error("Error creating user in public.users:", insertError);
+        logger.error("Error creating user in public.users:", insertError.message);
         // Return basic data even if insert fails
         return NextResponse.json({
           user: {
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ user: userData });
   } catch (error) {
-    logger.error("Auth verification error:", error);
+    logger.error("Auth verification error:", error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
       { error: "Authentication failed" },
       { status: 500 },

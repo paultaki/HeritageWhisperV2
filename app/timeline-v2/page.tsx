@@ -130,6 +130,7 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(story.durationSeconds || 0);
   const [isVisible, setIsVisible] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -151,8 +152,27 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
   const displayPhoto = getDisplayPhoto();
   const photoCount = story.photos?.length || (story.photoUrl ? 1 : 0);
 
-  // Intersection Observer for scroll animation
+  // Check for prefers-reduced-motion preference
   useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  // Intersection Observer for scroll animation (respects reduced motion)
+  useEffect(() => {
+    // Skip animations if user prefers reduced motion
+    if (prefersReducedMotion) {
+      setIsVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -163,7 +183,7 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
       },
       {
         threshold: 0.2,
-        rootMargin: "-50px 0px -100px 0px",
+        rootMargin: "300px 0px 300px 0px", // Load images 300px before they enter viewport
       }
     );
 
@@ -176,7 +196,7 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
         observer.unobserve(cardRef.current);
       }
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   const formatDuration = (seconds?: number) => {
     if (!seconds || isNaN(seconds)) return "0:00";
@@ -348,44 +368,14 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
   const renderCardContent = () => {
     console.log("[Timeline-v2] Rendering card for:", story.title, "Photo URL:", displayPhoto?.url);
     
-    return (
-      <div
-        className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer"
-        onClick={handleCardClick}
-      >
-        {/* Title (shown if no photo) */}
-        {!displayPhoto?.url && (
-          <div className="mb-6">
-            <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-3">
-              {story.title}
-            </h3>
-            <div className="flex items-center gap-3 text-sm text-gray-600">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                {story.storyDate
-                  ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                    })
-                  : formatYear(story.storyYear)}
-              </span>
-              {story.lifeAge !== null && story.lifeAge !== undefined && (
-                <>
-                  <span className="text-gray-400">•</span>
-                  <span>
-                    {story.lifeAge > 0 && `Age ${story.lifeAge}`}
-                    {story.lifeAge === 0 && `Birth`}
-                    {story.lifeAge < 0 && `Before birth`}
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Image with overlay */}
-        {displayPhoto?.url && (
-          <div className={`relative mb-6 rounded-2xl overflow-hidden transition-all duration-700 ${
+    // If there's a photo, render without white container
+    if (displayPhoto?.url) {
+      return (
+        <div
+          className="cursor-pointer"
+          onClick={handleCardClick}
+        >
+          <div className={`relative rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}>
             <div className="relative w-full h-48 lg:h-64">
@@ -395,7 +385,8 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
                 className="object-cover transition-transform duration-500 hover:scale-105"
-                loading="lazy"
+                loading={index < 4 ? "eager" : "lazy"}
+                priority={index < 2}
                 style={
                   displayPhoto.transform
                     ? {
@@ -408,41 +399,133 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
                 onLoad={() => console.log("[Timeline-v2] Image loaded successfully:", displayPhoto.url)}
               />
             </div>
-            {/* Memory Footer Overlay */}
+            
+            {/* Memory Footer Overlay with Play Button */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 lg:p-4">
-              <h3 className="text-lg lg:text-xl font-semibold text-white mb-1 line-clamp-2">
-                {story.title}
-              </h3>
-              <div className="flex items-center gap-2 lg:gap-3 text-xs lg:text-sm text-white/90">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3 lg:w-3.5 h-3 lg:h-3.5" />
-                  {story.storyDate
-                    ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                      })
-                    : formatYear(story.storyYear)}
-                </span>
-                {story.lifeAge !== null && story.lifeAge !== undefined && (
-                  <>
-                    <span className="text-white/70">•</span>
-                    <span>
-                      {story.lifeAge > 0 && `Age ${story.lifeAge}`}
-                      {story.lifeAge === 0 && `Birth`}
-                      {story.lifeAge < 0 && `Before birth`}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg lg:text-xl font-semibold text-white mb-1 truncate pr-2">
+                    {story.title}
+                  </h3>
+                  <div className="flex items-center gap-2 lg:gap-3 text-xs lg:text-sm text-white/90">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 lg:w-3.5 h-3 lg:h-3.5" />
+                      {story.storyDate
+                        ? new Date(story.storyDate).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                          })
+                        : formatYear(story.storyYear)}
                     </span>
-                  </>
+                    {story.lifeAge !== null && story.lifeAge !== undefined && (
+                      <>
+                        <span className="text-white/70">•</span>
+                        <span>
+                          {story.lifeAge > 0 && `Age ${story.lifeAge}`}
+                          {story.lifeAge === 0 && `Birth`}
+                          {story.lifeAge < 0 && `Before birth`}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Play Button Overlaid on Photo */}
+                {story.audioUrl && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePlayAudio(e);
+                    }}
+                    className="flex-shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-4 lg:w-5 h-4 lg:h-5 animate-spin" />
+                    ) : isPlaying ? (
+                      <Pause className="w-4 lg:w-5 h-4 lg:h-5" />
+                    ) : (
+                      <Play className="w-4 lg:w-5 h-4 lg:h-5 ml-0.5" />
+                    )}
+                  </button>
                 )}
               </div>
+              
+              {/* Progress Bar (shown when playing) */}
+              {story.audioUrl && (isPlaying || progress > 0) && (
+                <div className="mt-2">
+                  <div
+                    ref={progressBarRef}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleProgressBarClick(e);
+                    }}
+                    className="h-1.5 bg-white/20 rounded-full cursor-pointer overflow-hidden"
+                  >
+                    <div
+                      className="h-full bg-white rounded-full transition-all duration-100"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-white/80 mt-1">
+                    <span>{formatDuration(currentTime)}</span>
+                    <span>{formatDuration(duration)}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
+          
+          {/* Traits below photo */}
+          {story.traits && story.traits.length > 0 && (
+            <div className="mt-3">
+              <StoryTraits traits={story.traits} />
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // No photo - render white card (existing design)
+    return (
+      <div
+        className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer"
+        onClick={handleCardClick}
+      >
+        <div className="mb-6">
+          <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-3">
+            {story.title}
+          </h3>
+          <div className="flex items-center gap-3 text-sm text-gray-600">
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5" />
+              {story.storyDate
+                ? new Date(story.storyDate).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                  })
+                : formatYear(story.storyYear)}
+            </span>
+            {story.lifeAge !== null && story.lifeAge !== undefined && (
+              <>
+                <span className="text-gray-400">•</span>
+                <span>
+                  {story.lifeAge > 0 && `Age ${story.lifeAge}`}
+                  {story.lifeAge === 0 && `Birth`}
+                  {story.lifeAge < 0 && `Before birth`}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
 
         {/* Audio Player */}
         {story.audioUrl && (
           <div className="mb-4">
             <button
-              onClick={handlePlayAudio}
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePlayAudio(e);
+              }}
               className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-all duration-200 shadow-md hover:shadow-lg"
             >
               {isLoading ? (
@@ -462,7 +545,10 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
               <div className="mt-3">
                 <div
                   ref={progressBarRef}
-                  onClick={handleProgressBarClick}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleProgressBarClick(e);
+                  }}
                   className="h-1.5 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
                 >
                   <div
@@ -630,15 +716,7 @@ export default function TimelineV2Page() {
             <div className="flex items-center gap-3">
               <Calendar className="w-7 h-7 text-gray-800" />
               <h1 className="text-2xl font-bold text-gray-900">Timeline V2</h1>
-              <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">Preview</span>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push("/timeline")}
-            >
-              Back to Original
-            </Button>
           </div>
         </div>
       </header>
@@ -647,11 +725,10 @@ export default function TimelineV2Page() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-20">
         {/* Title Section */}
         <div className="text-center mb-16">
-          <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">Your Story</p>
           <h2 className="text-5xl md:text-7xl font-light tracking-tight text-gray-900 mb-6">
-            Life's Journey
+            {user?.name ? `${user.name}'s Journey` : "Life's Journey"}
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto text-center">
             A timeline of memories, moments, and milestones that shaped your life.
           </p>
         </div>
@@ -674,7 +751,7 @@ export default function TimelineV2Page() {
           {/* Timeline Steps */}
           <div className="flex flex-col gap-2 md:gap-0">
             {sortedStories.map((story: Story, index: number) => (
-              <div key={story.id} className="md:-mt-[59px] first:md:mt-0">
+              <div key={story.id} className="md:-mt-[50px] first:md:mt-0">
                 <CenteredMemoryCard
                   story={story}
                   position={index % 2 === 0 ? "left" : "right"}

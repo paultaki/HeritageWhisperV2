@@ -46,13 +46,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if prompt already exists for this user in ready or saved status
+    // Check if prompt already exists for this user in queued or dismissed status
     const { data: existingPrompt } = await supabaseAdmin
       .from('user_prompts')
       .select('id')
       .eq('user_id', user.id)
       .eq('text', text)
-      .in('status', ['ready', 'saved'])
+      .in('status', ['queued', 'dismissed'])
       .single();
 
     // If it already exists, return success (idempotent)
@@ -60,14 +60,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ saved: true, alreadyExists: true });
     }
 
-    // Insert the new prompt with status 'saved'
+    // Insert the new prompt with status 'dismissed' (archived)
     const { error: insertError } = await supabaseAdmin
       .from('user_prompts')
       .insert({
         user_id: user.id,
         text,
         category,
-        status: 'saved',
+        status: 'dismissed',
+        dismissed_at: new Date().toISOString(),
         source: 'catalog',
       });
 

@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      logger.error("Logout error:", error);
+      logger.error("Logout error:", error.message);
       // Even if there's an error, we consider logout successful
       // as the client will clear the session
     }
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error("Logout error:", error);
+    logger.error("Logout error:", error instanceof Error ? error.message : 'Unknown error');
     // Even on error, return success to clear client session
     return NextResponse.json({ success: true });
   }

@@ -57,7 +57,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.api("Changing password for user:", authUser.id);
+    // Only log in development - no PII in production
+    if (process.env.NODE_ENV === 'development') {
+      logger.api("Changing password for user:", authUser.id);
+    }
 
     // Get user from database using Supabase client
     const { data: user, error: userError } = await supabaseAdmin
@@ -67,7 +70,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (userError || !user || !user.password) {
-      logger.error("User lookup error:", userError);
+      logger.error("User lookup error:", userError?.message || 'User not found');
       return NextResponse.json(
         { error: "User not found or password not set" },
         { status: 404 },
@@ -97,7 +100,7 @@ export async function POST(request: NextRequest) {
       .eq("id", authUser.id);
 
     if (updateError) {
-      logger.error("Password update error:", updateError);
+      logger.error("Password update error:", updateError.message);
       throw new Error("Failed to update password in database");
     }
 
@@ -106,7 +109,7 @@ export async function POST(request: NextRequest) {
       message: "Password changed successfully",
     });
   } catch (error) {
-    logger.error("Password change error:", error);
+    logger.error("Password change error:", error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
       {
         error: "Failed to change password",

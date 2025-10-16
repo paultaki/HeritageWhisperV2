@@ -39,13 +39,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch all active prompts for this user
+    // Fetch all active prompts for this user (exclude queued and dismissed)
     const { data: prompts, error: promptsError } = await supabaseAdmin
       .from("active_prompts")
       .select("*")
       .eq("user_id", user.id)
       .eq("is_locked", false)
       .gt("expires_at", new Date().toISOString())
+      .is("user_status", null) // Only show prompts that haven't been queued or dismissed
       .order("tier", { ascending: false })
       .order("prompt_score", { ascending: false });
 

@@ -56,7 +56,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      logger.error("[Registration] Supabase error:", error);
+      // Log error message only, not full error object that may contain PII
+      logger.error("[Registration] Supabase error:", error.message);
       if (error.message?.includes("already registered")) {
         return NextResponse.json(
           { error: "This email is already registered. Please sign in." },
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (userInsertError) {
-        logger.error("[Registration] Error creating user:", userInsertError);
+        logger.error("[Registration] Error creating user:", userInsertError.message);
         // Don't fail registration - user exists in auth.users
       }
 
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
       if (agreementsError) {
         logger.error(
           "[Registration] Error recording agreements:",
-          agreementsError,
+          agreementsError.message,
         );
       } else {
         logger.debug(
@@ -141,7 +142,7 @@ export async function POST(request: NextRequest) {
     } catch (agreementError) {
       logger.error(
         "[Registration] Failed to create user or record agreement acceptance:",
-        agreementError,
+        agreementError instanceof Error ? agreementError.message : 'Unknown error',
       );
       // Don't fail registration if agreement recording fails, but log it
     }
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest) {
       if (signInError) {
         logger.error(
           "[Registration] Sign in after registration failed:",
-          signInError,
+          signInError.message,
         );
       } else {
         session = signInData.session;
@@ -207,7 +208,8 @@ export async function POST(request: NextRequest) {
       session: session,
     });
   } catch (error) {
-    logger.error("Registration error:", error);
+    // Log error without exposing PII or credentials
+    logger.error("Registration error:", error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: "Registration failed" }, { status: 500 });
   }
 }
