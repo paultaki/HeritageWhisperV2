@@ -45,7 +45,7 @@ export default function HomePage() {
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           {/* Header with Logo and Sign In */}
-          <div className="flex justify-between items-center mb-12">
+          <div className="relative flex justify-center items-center mb-12">
             <Image
               src="/HW_text-compress.png"
               alt="Heritage Whisper"
@@ -56,7 +56,7 @@ export default function HomePage() {
             />
             <button
               onClick={() => router.push("/auth/login")}
-              className="px-6 py-3 text-orange-700 hover:text-orange-800 font-semibold text-lg transition-colors"
+              className="absolute right-0 top-0 px-5 py-2 text-gray-600 hover:text-orange-700 text-base font-medium transition-colors hover:bg-white/50 rounded-lg"
             >
               Continue Stories
             </button>
@@ -366,7 +366,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               From Voice to Treasure
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto text-center">
               See how your loved one's voice transforms into a beautiful, lasting legacy
             </p>
           </div>
@@ -396,7 +396,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               The Interactive Timeline
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto text-center">
               Every moment organized and accessible. Tap any memory to hear their voice telling the story.
             </p>
           </div>
@@ -518,7 +518,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Stories From Families Like Yours
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto text-center">
               Hear from adult children who started preserving their parents' stories
             </p>
           </div>
