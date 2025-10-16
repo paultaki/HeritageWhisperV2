@@ -594,10 +594,10 @@ export default function HomePage() {
               </div>
               <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Complete Family Plan</h3>
               <div className="flex items-baseline justify-center gap-2 mb-4">
-                <span className="text-5xl md:text-6xl font-bold text-gray-900">$29</span>
-                <span className="text-xl text-gray-600">/month</span>
+                <span className="text-5xl md:text-6xl font-bold text-gray-900">$129</span>
+                <span className="text-xl text-gray-600">/year</span>
               </div>
-              <p className="text-lg text-gray-600">Less than a dollar a day to preserve a lifetime</p>
+              <p className="text-lg text-gray-600">Just 35 cents a day to preserve a lifetime</p>
             </div>
 
             <div className="space-y-4 mb-8">
