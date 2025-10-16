@@ -34,6 +34,7 @@ import {
   BookOpen,
   Clock,
 } from "lucide-react";
+import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
 import { normalizeYear, formatYear } from "@/lib/utils";
@@ -384,22 +385,29 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
 
         {/* Image with overlay */}
         {displayPhoto?.url && (
-          <div className="relative mb-6 rounded-2xl overflow-hidden">
-            <img
-              src={displayPhoto.url}
-              alt={story.title}
-              className="w-full h-48 lg:h-64 object-cover"
-              style={
-                displayPhoto.transform
-                  ? {
-                      transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
-                      transformOrigin: "center center",
-                    }
-                  : undefined
-              }
-              onError={(e) => console.error("[Timeline-v2] Image failed to load:", displayPhoto.url)}
-              onLoad={() => console.log("[Timeline-v2] Image loaded successfully:", displayPhoto.url)}
-            />
+          <div className={`relative mb-6 rounded-2xl overflow-hidden transition-all duration-700 ${
+            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}>
+            <div className="relative w-full h-48 lg:h-64">
+              <Image
+                src={displayPhoto.url}
+                alt={story.title}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
+                className="object-cover transition-transform duration-500 hover:scale-105"
+                loading="lazy"
+                style={
+                  displayPhoto.transform
+                    ? {
+                        transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
+                        transformOrigin: "center center",
+                      }
+                    : undefined
+                }
+                onError={(e) => console.error("[Timeline-v2] Image failed to load:", displayPhoto.url)}
+                onLoad={() => console.log("[Timeline-v2] Image loaded successfully:", displayPhoto.url)}
+              />
+            </div>
             {/* Memory Footer Overlay */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 lg:p-4">
               <h3 className="text-lg lg:text-xl font-semibold text-white mb-1 line-clamp-2">
@@ -499,19 +507,24 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
         )}
       </div>
 
-      {/* Center dot */}
+      {/* Center date bubble */}
       <div
-        className={`w-6 h-6 z-20 flex-shrink-0 rounded-full shadow-lg timeline-dot transition-all duration-800 ${
-          isVisible ? "bg-orange-500 scale-100 opacity-100" : "bg-gray-300 scale-80 opacity-50"
+        className={`z-20 flex-shrink-0 timeline-dot transition-all duration-800 ${
+          isVisible ? "opacity-100 scale-100" : "opacity-50 scale-80"
         }`}
         style={{
           transitionDelay: `${index * 150 + 200}ms`,
-          boxShadow: isVisible ? "0 0 20px rgba(249, 115, 22, 0.5)" : "none",
           transform: position === "left" 
-            ? (isVisible ? "translateX(-12px) scale(1)" : "translateX(-12px) scale(0.8)")
-            : (isVisible ? "translateX(12px) scale(1)" : "translateX(12px) scale(0.8)"),
+            ? (isVisible ? "translateX(-12px)" : "translateX(-12px) scale(0.8)")
+            : (isVisible ? "translateX(12px)" : "translateX(12px) scale(0.8)"),
         }}
-      />
+      >
+        <div className="px-4 py-1 bg-orange-500 text-white text-sm font-semibold rounded-full whitespace-nowrap shadow-lg">
+          {story.storyDate
+            ? new Date(story.storyDate).getFullYear()
+            : formatYear(story.storyYear)}
+        </div>
+      </div>
 
       {/* Right side content (for right-positioned cards) - Desktop only */}
       <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`}>
@@ -704,10 +717,8 @@ export default function TimelineV2Page() {
             transform: translateY(0) !important;
           }
           .timeline-dot {
-            background: #f97316 !important;
             transform: scale(1) !important;
             opacity: 1 !important;
-            box-shadow: 0 0 20px rgba(249, 115, 22, 0.5) !important;
           }
         }
       `}</style>
