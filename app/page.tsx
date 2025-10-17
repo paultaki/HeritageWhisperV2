@@ -56,7 +56,7 @@ export default function HomePage() {
   }, [prefersReducedMotion]);
 
   const handleCTA = () => {
-    router.push("/auth/signup");
+    router.push("/auth/register");
   };
 
   return (

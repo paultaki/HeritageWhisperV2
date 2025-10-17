@@ -637,6 +637,7 @@ export default function TimelineV2Page() {
   const queryClient = useQueryClient();
   const progressLineRef = useRef<HTMLDivElement>(null);
   const timelineContainerRef = useRef<HTMLDivElement>(null);
+  const [returnHighlightId, setReturnHighlightId] = useState<string | null>(null);
 
   const {
     data: storiesData,
@@ -650,6 +651,56 @@ export default function TimelineV2Page() {
     },
     enabled: !!user,
   });
+
+  // Restore scroll position when returning from book view
+  useEffect(() => {
+    // Check for return navigation context from BookView
+    const contextStr = sessionStorage.getItem("timeline-navigation-context");
+    if (contextStr) {
+      try {
+        const context = JSON.parse(contextStr);
+        const isExpired = Date.now() - context.timestamp > 5 * 60 * 1000; // 5 minutes expiry
+
+        if (!isExpired && context.returnPath === "/timeline-v2") {
+          // Set the return highlight
+          setReturnHighlightId(context.memoryId);
+
+          // Restore scroll position after a brief delay to ensure DOM is ready
+          setTimeout(() => {
+            window.scrollTo({
+              top: context.scrollPosition,
+              behavior: "instant",
+            });
+
+            // Then apply smooth scroll to the specific card for visual feedback
+            const memoryCard = document.querySelector(
+              `[data-memory-id="${context.memoryId}"]`,
+            );
+            if (memoryCard) {
+              memoryCard.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          }, 100);
+
+          // Clear the context after using it
+          sessionStorage.removeItem("timeline-navigation-context");
+
+          // Remove highlight after animation
+          setTimeout(() => {
+            setReturnHighlightId(null);
+          }, 3000);
+        } else if (isExpired) {
+          // Clear expired context
+          sessionStorage.removeItem("timeline-navigation-context");
+        }
+      } catch (e) {
+        console.error("Failed to parse navigation context:", e);
+        sessionStorage.removeItem("timeline-navigation-context");
+      }
+    }
+  }, [storiesData]);
 
   // Animate progress line on scroll
   useEffect(() => {
@@ -752,7 +803,17 @@ export default function TimelineV2Page() {
           {/* Timeline Steps */}
           <div className="flex flex-col gap-2 md:gap-0">
             {sortedStories.map((story: Story, index: number) => (
-              <div key={story.id} className="md:-mt-[50px] first:md:mt-0">
+              <div 
+                key={story.id} 
+                className="md:-mt-[50px] first:md:mt-0"
+                data-memory-id={story.id}
+                style={{
+                  transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',
+                  backgroundColor: returnHighlightId === story.id ? 'rgba(251, 146, 60, 0.1)' : 'transparent',
+                  borderRadius: returnHighlightId === story.id ? '1rem' : '0',
+                  padding: returnHighlightId === story.id ? '1rem' : '0',
+                }}
+              >
                 <CenteredMemoryCard
                   story={story}
                   position={index % 2 === 0 ? "left" : "right"}

@@ -467,7 +467,7 @@ function MemoryCard({
       memoryId: story.id,
       scrollPosition: window.scrollY,
       timestamp: Date.now(),
-      returnPath: "/timeline",
+      returnPath: "/timeline-v3",
     };
     sessionStorage.setItem(
       "timeline-navigation-context",
@@ -844,7 +844,7 @@ export default function Timeline() {
         const context = JSON.parse(contextStr);
         const isExpired = Date.now() - context.timestamp > 5 * 60 * 1000; // 5 minutes expiry
 
-        if (!isExpired && context.returnPath === "/timeline") {
+        if (!isExpired && context.returnPath === "/timeline-v3") {
           // Set the return highlight
           setReturnHighlightId(context.memoryId);
 

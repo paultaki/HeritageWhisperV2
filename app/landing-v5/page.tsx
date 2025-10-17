@@ -32,7 +32,7 @@ export default function HomePage() {
   }, []);
 
   const handleCTA = () => {
-    router.push("/auth/signup");
+    router.push("/auth/register");
   };
 
   return (

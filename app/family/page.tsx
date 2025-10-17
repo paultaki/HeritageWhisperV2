@@ -184,22 +184,23 @@ export default function FamilyPage() {
       const response = await apiRequest("POST", "/api/family/invite", data);
       return response.json();
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
-      
+    onSuccess: async (data) => {
       // Trigger confetti celebration!
       celebrateInvite();
-      
+
+      // Wait for the data to refetch before closing dialog
+      await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
+
       setInviteDialogOpen(false);
       setInviteEmail("");
       setInviteRelationship("");
       setInviteMessage("");
-      
+
       // Show invite URL in development
       if (data.inviteUrl) {
         console.log('Invite URL:', data.inviteUrl);
       }
-      
+
       toast({
         title: "Invitation sent! 🎉",
         description: "Your family member will receive an email invitation.",
@@ -232,8 +233,8 @@ export default function FamilyPage() {
       );
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
       toast({
         title: "Member removed",
         description: "Family member has been removed from your circle.",
@@ -257,8 +258,8 @@ export default function FamilyPage() {
       );
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
       toast({
         title: "Invitation resent! 📧",
         description: "A new invitation email has been sent.",
@@ -283,8 +284,8 @@ export default function FamilyPage() {
       );
       return response.json();
     },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+    onSuccess: async (data, variables) => {
+      await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
       const newLevel = variables.permissionLevel === 'contributor' ? 'Contributor' : 'Viewer';
       toast({
         title: "Permissions updated",

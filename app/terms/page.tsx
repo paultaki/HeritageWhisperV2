@@ -10,6 +10,35 @@ export default function TermsOfService() {
           <p className="text-lg text-gray-600">Last Updated: October 4, 2025</p>
         </div>
 
+        {/* Beta/Pilot Notice */}
+        <div className="bg-amber-50 border-l-4 border-amber-400 rounded-lg p-6 mb-8">
+          <div className="flex items-start gap-3">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-200 text-amber-900 border border-amber-300">
+              BETA
+            </span>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-gray-900 mb-2">
+                Pilot Phase Notice
+              </h2>
+              <p className="text-gray-700 mb-2">
+                HeritageWhisper is currently in <strong>beta/pilot phase</strong>. This means:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-gray-700 text-sm">
+                <li>Features may change or be discontinued</li>
+                <li>You may encounter bugs or unexpected behavior</li>
+                <li>Service availability is not guaranteed</li>
+                <li>We may make breaking changes to improve the product</li>
+                <li>Your feedback helps us improve - thank you for being an early adopter!</li>
+              </ul>
+              <p className="text-gray-700 mt-3 text-sm">
+                <strong>Data Protection:</strong> While we're in beta, we still take your data seriously.
+                All security measures, backup procedures, and privacy protections described in these Terms
+                and our Privacy Policy are fully in effect.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Content */}
         <div className="bg-white rounded-lg shadow-sm p-8 prose prose-lg max-w-none">
           {/* Agreement to Terms */}
@@ -1045,6 +1074,25 @@ export default function TermsOfService() {
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
               12. Disclaimers and Limitations of Liability
             </h2>
+
+            <div className="mb-6 bg-amber-100 border border-amber-300 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                ⚠️ Beta/Pilot Phase Additional Disclaimer
+              </h3>
+              <p className="text-gray-800 text-sm">
+                <strong>HERITAGEWHISPER IS CURRENTLY IN BETA/PILOT PHASE.</strong> You acknowledge and agree that:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-gray-700 text-sm mt-2">
+                <li>The service is under active development and testing</li>
+                <li>Features may be incomplete, experimental, or subject to change</li>
+                <li>You may experience bugs, errors, data loss, or service interruptions</li>
+                <li>We may modify or discontinue features without notice during this phase</li>
+                <li>Performance and reliability may not meet production standards</li>
+              </ul>
+              <p className="text-gray-800 text-sm mt-2">
+                <strong>We strongly recommend:</strong> Keeping backup copies of important recordings outside of HeritageWhisper during the beta period.
+              </p>
+            </div>
 
             <div className="mb-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-3">
