@@ -8,10 +8,11 @@ import React, {
   useMemo,
 } from "react";
 import { createPortal } from "react-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
+import { apiRequest } from "@/lib/queryClient";
 import {
   ArrowLeft,
   BookOpen,
@@ -308,6 +309,13 @@ const BookPageRenderer = ({
 
   const playbackProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+  // Skip mutation to dismiss whisper prompts (must be at top level, not conditional)
+  const skipMutation = useMutation({
+    mutationFn: async (promptId: string) => {
+      return apiRequest("POST", "/api/prompts/skip", { promptId });
+    },
+  });
+
   // Register with audio manager
   useEffect(() => {
     audioManager.register(audioId, (playing, time) => {
@@ -525,12 +533,20 @@ const BookPageRenderer = ({
         sessionStorage.setItem("returnToBook", "true");
         sessionStorage.setItem("bookPageNumber", page.pageNumber.toString());
       }
-      
+
       // Navigate to recording
       router.push("/recording");
     };
 
-    const handleWhisperContinue = () => {
+    const handleWhisperContinue = async () => {
+      // Dismiss the prompt (add to archive)
+      try {
+        await skipMutation.mutateAsync(page.whisperPrompt!.id);
+      } catch (error) {
+        console.error("Failed to dismiss whisper prompt:", error);
+        // Continue navigation even if dismissal fails
+      }
+
       // Navigate to next page
       if (onNavigateToPage) {
         onNavigateToPage(page.pageNumber); // This will advance by 1 page (0-indexed)

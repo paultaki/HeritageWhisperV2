@@ -314,7 +314,7 @@ export function BookStyleReview({
                               `Bearer ${session.access_token}`;
                           }
 
-                          const response = await fetch("/api/transcribe", {
+                          const response = await fetch("/api/transcribe-assemblyai", {
                             method: "POST",
                             headers,
                             body: formData,
@@ -415,7 +415,7 @@ export function BookStyleReview({
                                 }
 
                                 const response = await fetch(
-                                  "/api/transcribe",
+                                  "/api/transcribe-assemblyai",
                                   {
                                     method: "POST",
                                     headers,

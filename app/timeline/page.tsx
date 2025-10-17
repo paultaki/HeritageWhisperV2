@@ -1213,7 +1213,7 @@ export default function Timeline() {
             <NextStoryCard
               onRecordClick={(promptId, promptText) => {
                 // Store promptId in modal initial data for later use
-                openModal({
+                recordModal.openModal({
                   prompt: promptText,
                   title: "",
                 });

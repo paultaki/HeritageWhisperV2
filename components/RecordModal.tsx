@@ -377,9 +377,9 @@ export default function RecordModal({
         data: { session },
       } = await supabase.auth.getSession();
 
-      // Transcribe current audio
+      // Transcribe current audio (using AssemblyAI for 3-5x faster transcription)
       console.log("[RecordModal] Transcribing partial audio...");
-      const transcribeResponse = await fetch(getApiUrl("/api/transcribe"), {
+      const transcribeResponse = await fetch(getApiUrl("/api/transcribe-assemblyai"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -527,7 +527,7 @@ export default function RecordModal({
         reader.readAsDataURL(blob);
       });
 
-      const response = await fetch(getApiUrl("/api/transcribe"), {
+      const response = await fetch(getApiUrl("/api/transcribe-assemblyai"), {
         method: "POST",
         headers,
         credentials: "include",

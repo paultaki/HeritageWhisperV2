@@ -65,39 +65,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Prompt not found" }, { status: 404 });
     }
 
-    // Immediately move to prompt_history (save for later)
-    const hasSkipCount = Object.prototype.hasOwnProperty.call(prompt, "skip_count");
-    
-    // Archive to prompt_history
-    const { error: historyError } = await supabaseAdmin.from("prompt_history").insert({
-      user_id: user.id,
-      prompt_text: prompt.prompt_text,
-      anchor_hash: prompt.anchor_hash ?? null,
-      anchor_entity: prompt.anchor_entity ?? null,
-      anchor_year: prompt.anchor_year ?? null,
-      tier: prompt.tier ?? 1,
-      memory_type: prompt.memory_type ?? null,
-      prompt_score: prompt.prompt_score ?? null,
-      shown_count: prompt.shown_count ?? 0,
-      outcome: "skipped",
-      created_at: prompt.created_at ?? new Date().toISOString(),
-    });
-    
-    if (historyError) {
-      logger.error("Error archiving prompt to history:", historyError);
-      return NextResponse.json({ error: "Failed to save prompt" }, { status: 500 });
-    }
-
-    // Delete from active_prompts
-    const { error: deleteError } = await supabaseAdmin
+    // Mark prompt as dismissed (saves to archive)
+    const { error: updateError } = await supabaseAdmin
       .from("active_prompts")
-      .delete()
+      .update({
+        user_status: "dismissed",
+        dismissed_at: new Date().toISOString(),
+      })
       .eq("id", prompt.id)
       .eq("user_id", user.id);
 
-    if (deleteError) {
-      logger.error("Error deleting saved prompt:", deleteError);
-      return NextResponse.json({ error: "Failed to save prompt" }, { status: 500 });
+    if (updateError) {
+      logger.error("Error dismissing prompt:", updateError);
+      return NextResponse.json({ error: "Failed to dismiss prompt" }, { status: 500 });
     }
 
     // Fetch next prompt by calling your existing GET /api/prompts/next
