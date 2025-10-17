@@ -119,6 +119,10 @@ export async function GET(req: NextRequest) {
     const sessionExpiresAt = new Date();
     sessionExpiresAt.setDate(sessionExpiresAt.getDate() + 7);
 
+    // Absolute expiry is the maximum session lifetime (30 days, cannot be extended)
+    const absoluteExpiresAt = new Date();
+    absoluteExpiresAt.setDate(absoluteExpiresAt.getDate() + 30);
+
     const { error: sessionError } = await supabaseAdmin
       .from('family_sessions')
       .insert({
@@ -127,6 +131,7 @@ export async function GET(req: NextRequest) {
         user_agent: req.headers.get('user-agent') || null,
         ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null,
         expires_at: sessionExpiresAt.toISOString(),
+        absolute_expires_at: absoluteExpiresAt.toISOString(),
       });
 
     if (sessionError) {

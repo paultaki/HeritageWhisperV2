@@ -14,16 +14,22 @@ interface PromptCardProps {
   id: string;
   promptText: string;
   contextNote?: string | null;
-  source: 'ai' | 'catalog';
+  source: 'ai' | 'catalog' | 'family';
   category?: string;
   anchorEntity?: string;
   anchorYear?: number;
-  variant: 'queue' | 'personalized' | 'archived';
+  variant: 'queue' | 'personalized' | 'archived' | 'family';
   index?: number;
-  onRecord: (id: string, text: string, source: 'ai' | 'catalog') => void;
-  onQueue?: (id: string, text: string, source: 'ai' | 'catalog', category?: string) => void;
-  onDismiss: (id: string, text: string, source: 'ai' | 'catalog', category?: string) => void;
-  onDelete: (id: string, source: 'ai' | 'catalog') => void;
+  submittedBy?: {
+    id: string;
+    name: string;
+    email?: string;
+    relationship?: string;
+  };
+  onRecord: (id: string, text: string, source: 'ai' | 'catalog' | 'family') => void;
+  onQueue?: (id: string, text: string, source: 'ai' | 'catalog' | 'family', category?: string) => void;
+  onDismiss: (id: string, text: string, source: 'ai' | 'catalog' | 'family', category?: string) => void;
+  onDelete: (id: string, source: 'ai' | 'catalog' | 'family') => void;
   isLoading?: boolean;
 }
 
@@ -37,6 +43,7 @@ export default function PromptCard({
   anchorYear,
   variant,
   index = 0,
+  submittedBy,
   onRecord,
   onQueue,
   onDismiss,
@@ -46,41 +53,71 @@ export default function PromptCard({
   const isArchived = variant === 'archived';
   const isQueued = variant === 'queue';
   const isPersonalized = variant === 'personalized';
+  const isFamily = variant === 'family';
 
   return (
     <Card
-      className="bg-white border border-black/10 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col relative"
+      className={`group ${
+        isFamily
+          ? 'bg-gradient-to-br from-blue-50/80 to-indigo-50/40 border-2 border-blue-200/70 hover:border-blue-300/90'
+          : 'bg-gradient-to-br from-white to-gray-50/30 border border-gray-200/60 hover:border-gray-300/80'
+      } shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col relative overflow-hidden`}
       style={{
-        borderRadius: '8px',
+        borderRadius: '12px',
       }}
     >
-      <CardContent className="p-3 flex flex-col h-full justify-between gap-3">
-        {/* Metadata badge - smaller and subtle */}
-        {contextNote && !isArchived && (
-          <p className="text-sm text-gray-600" style={{ opacity: 0.7 }}>
-            {contextNote}
-          </p>
+      {/* Subtle top accent bar */}
+      <div
+        className={`absolute top-0 left-0 right-0 h-[3px] ${
+          isFamily
+            ? 'bg-gradient-to-r from-blue-400/70 via-indigo-400/60 to-purple-400/70'
+            : 'bg-gradient-to-r from-amber-400/60 via-orange-400/50 to-rose-400/60'
+        } opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+      />
+
+      <CardContent className="p-5 flex flex-col h-full justify-between gap-4">
+        {/* Submitter name for family prompts */}
+        {isFamily && submittedBy && (
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-300/60">
+              💙 Question from {submittedBy.name}
+              {submittedBy.relationship && ` • ${submittedBy.relationship}`}
+            </span>
+          </div>
         )}
 
-        {/* Prompt text */}
+        {/* Metadata badge - elegant and subtle */}
+        {contextNote && !isArchived && !isFamily && (
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
+              {contextNote}
+            </span>
+          </div>
+        )}
+
+        {/* Prompt text - more elegant typography */}
         <div className="flex-1 flex items-start">
-          <p className="text-xl leading-relaxed text-gray-900">
+          <p className="text-[17px] leading-[1.6] text-gray-800 font-normal tracking-[-0.011em]">
             {promptText}
           </p>
         </div>
 
         {/* Actions */}
         {!isArchived && (
-          <div className="flex items-center gap-2">
-            {/* Primary Record button */}
+          <div className="flex items-center gap-2.5 pt-2">
+            {/* Primary Record button - styled based on variant */}
             <Button
               onClick={() => onRecord(id, promptText, source)}
               disabled={isLoading}
-              className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium shadow-sm transition-all duration-200 min-h-[48px] text-base whitespace-nowrap"
-              style={{ borderRadius: '6px' }}
+              className={`flex-1 ${
+                isFamily
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                  : 'bg-gray-900 hover:bg-gray-800'
+              } text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 min-h-[44px] text-[15px] whitespace-nowrap group/btn`}
+              style={{ borderRadius: '8px' }}
             >
-              <Mic className="w-4 h-4 mr-1.5" />
-              Record
+              <Mic className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
+              {isFamily ? 'Answer' : 'Record'}
             </Button>
 
             {/* Overflow menu for Queue and Dismiss */}
@@ -89,21 +126,22 @@ export default function PromptCard({
                 <Button
                   variant="ghost"
                   disabled={isLoading}
-                  className="w-[48px] h-[48px] p-0 hover:bg-gray-100 flex-shrink-0"
+                  className="w-[44px] h-[44px] p-0 hover:bg-gray-100 flex-shrink-0 border border-gray-200 hover:border-gray-300 transition-all duration-200"
                   aria-label="More options"
+                  style={{ borderRadius: '8px' }}
                 >
-                  <MoreVertical className="w-5 h-5 text-gray-600" />
+                  <MoreVertical className="w-4.5 h-4.5 text-gray-500" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-48" style={{ borderRadius: '10px' }}>
                 {/* Queue option - only for personalized */}
                 {isPersonalized && onQueue && (
                   <DropdownMenuItem
                     onClick={() => onQueue(id, promptText, source, category)}
                     disabled={isLoading}
-                    className="cursor-pointer text-base"
+                    className="cursor-pointer text-[15px] py-2.5"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Plus className="w-4 h-4 mr-2.5 text-gray-600" />
                     Add to Queue
                   </DropdownMenuItem>
                 )}
@@ -111,9 +149,9 @@ export default function PromptCard({
                 <DropdownMenuItem
                   onClick={() => onDismiss(id, promptText, source, category)}
                   disabled={isLoading}
-                  className="cursor-pointer text-base"
+                  className="cursor-pointer text-[15px] py-2.5"
                 >
-                  <Archive className="w-4 h-4 mr-2" />
+                  <Archive className="w-4 h-4 mr-2.5 text-gray-600" />
                   Dismiss
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -123,23 +161,24 @@ export default function PromptCard({
 
         {/* Archive actions - horizontal layout */}
         {isArchived && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5 pt-2">
             {onQueue && (
               <Button
                 onClick={() => onQueue(id, promptText, source, category)}
                 disabled={isLoading}
-                className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium shadow-sm transition-all duration-200 min-h-[48px] text-base"
-                style={{ borderRadius: '6px' }}
+                className="flex-1 bg-gray-900 hover:bg-gray-800 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 min-h-[44px] text-[15px]"
+                style={{ borderRadius: '8px' }}
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add
+                Add Back
               </Button>
             )}
             <Button
               onClick={() => onDelete(id, source)}
               disabled={isLoading}
               variant="outline"
-              className="flex-1 text-base font-medium min-h-[48px] hover:bg-red-50 hover:text-red-700 hover:border-red-300"
+              className="flex-1 text-[15px] font-medium min-h-[44px] border-gray-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-200"
+              style={{ borderRadius: '8px' }}
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Delete

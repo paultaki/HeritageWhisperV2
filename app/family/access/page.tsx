@@ -26,10 +26,11 @@ function FamilyAccessContent() {
   const [error, setError] = useState<string | null>(null);
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
     const token = searchParams?.get('token');
-    
+
     if (!token) {
       setStatus('error');
       setError('No invitation token provided. Please check your invite link.');
@@ -38,6 +39,18 @@ function FamilyAccessContent() {
 
     verifyToken(token);
   }, [searchParams]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (showWelcome && countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (showWelcome && countdown === 0) {
+      handleContinue();
+    }
+  }, [showWelcome, countdown]);
 
   async function verifyToken(token: string) {
     try {
@@ -64,13 +77,6 @@ function FamilyAccessContent() {
       setSessionData(familySession);
       setStatus('success');
       setShowWelcome(true);
-
-      // Auto-redirect after 5 seconds if they don't click
-      setTimeout(() => {
-        if (showWelcome) {
-          handleContinue();
-        }
-      }, 5000);
     } catch (err: any) {
       console.error('Token verification error:', err);
       setStatus('error');
@@ -191,7 +197,7 @@ function FamilyAccessContent() {
                 Continue to Timeline
               </Button>
               <p className="text-sm text-gray-500 mt-4">
-                Redirecting automatically in 5 seconds...
+                Redirecting automatically in {countdown} second{countdown !== 1 ? 's' : ''}...
               </p>
             </div>
 

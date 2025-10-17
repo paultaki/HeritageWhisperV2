@@ -36,9 +36,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Debug: Log the attempt (anonymized - no PII)
+    // Debug: Log the attempt (NEVER log PII like emails)
     if (process.env.NODE_ENV === 'development') {
-      logger.info(`Login attempt for email: ${email}`);
+      logger.info('Login attempt received');
       logger.info(`Supabase URL: ${supabaseUrl}`);
       logger.info(`Anon key present: ${!!supabaseAnonKey}`);
     }

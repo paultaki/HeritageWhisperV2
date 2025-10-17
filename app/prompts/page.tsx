@@ -50,6 +50,21 @@ interface ArchivedPrompt {
   anchor_year?: number;
 }
 
+interface FamilyPrompt {
+  id: string;
+  prompt_text: string;
+  context_note?: string | null;
+  source: 'family';
+  status: string;
+  created_at: string;
+  submittedBy: {
+    id: string;
+    name: string;
+    email?: string;
+    relationship?: string;
+  };
+}
+
 export default function PromptsPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -88,6 +103,12 @@ export default function PromptsPage() {
   // Fetch archived prompts (always fetch to show count, but only display when expanded)
   const { data: archivedData, isLoading: archivedLoading } = useQuery<{ prompts: ArchivedPrompt[] }>({
     queryKey: ["/api/prompts/archived"],
+    enabled: !!user,
+  });
+
+  // Fetch family-submitted prompts
+  const { data: familyData, isLoading: familyLoading } = useQuery<{ prompts: FamilyPrompt[] }>({
+    queryKey: ["/api/prompts/family-submitted"],
     enabled: !!user,
   });
 
@@ -223,6 +244,7 @@ export default function PromptsPage() {
   const queuedPrompts = queuedData?.prompts || [];
   const activePrompts = activeData?.prompts || [];
   const archivedPrompts = archivedData?.prompts || [];
+  const familyPrompts = familyData?.prompts || [];
 
   // Progressive disclosure: show 2 initially
   const displayedQueuedPrompts = showAllQueued ? queuedPrompts : queuedPrompts.slice(0, 2);
@@ -237,35 +259,38 @@ export default function PromptsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-20 md:pb-0" style={{ background: "#e8e5e4" }}>
+    <div
+      className="min-h-screen pb-20 md:pb-0"
+      style={{
+        background: "linear-gradient(to bottom, #fafaf9 0%, #f5f5f4 50%, #fafaf9 100%)"
+      }}
+    >
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <h1 className="text-2xl font-bold" style={{ color: "#000000" }}>Prompts</h1>
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200/50">
+        <div className="max-w-7xl mx-auto px-6 py-5">
+          <h1 className="text-[26px] font-semibold tracking-tight text-gray-900">Story Prompts</h1>
+          <p className="text-sm text-gray-600 mt-0.5">Thoughtful questions to spark your next memory</p>
         </div>
       </header>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-6 py-10 space-y-10">
         {/* Section 1: Your Prompt Queue */}
-        <section style={{ marginTop: "24px" }}>
-          <h2
-            className="font-bold mb-4"
-            style={{
-              fontSize: "20px",
-              color: "#000000",
-              lineHeight: "1.4"
-            }}
-          >
-            Your Prompt Queue
-          </h2>
+        <section>
+          <div className="flex items-center gap-3 mb-5">
+            <h2 className="text-[19px] font-semibold tracking-tight text-gray-900">
+              Your Queue
+            </h2>
+            <span className="text-sm text-gray-500 font-medium">
+              {queuedPrompts.length} {queuedPrompts.length === 1 ? 'prompt' : 'prompts'}
+            </span>
+          </div>
 
           <div
-            className="bg-white rounded-lg shadow-sm"
+            className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50"
             style={{
-              padding: "16px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+              padding: "20px",
+              borderRadius: "16px",
             }}
           >
             {queuedLoading ? (
@@ -280,7 +305,7 @@ export default function PromptsPage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {displayedQueuedPrompts.map((prompt, index) => (
                     <PromptCard
                       key={prompt.id}
@@ -303,7 +328,7 @@ export default function PromptsPage() {
                 {queuedPrompts.length > 2 && !showAllQueued && (
                   <button
                     onClick={() => setShowAllQueued(true)}
-                    className="mt-4 text-base font-medium text-gray-700 hover:text-gray-900 underline"
+                    className="mt-5 text-[15px] font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200 underline underline-offset-2"
                   >
                     Show {queuedPrompts.length - 2} more
                   </button>
@@ -311,7 +336,7 @@ export default function PromptsPage() {
                 {showAllQueued && queuedPrompts.length > 2 && (
                   <button
                     onClick={() => setShowAllQueued(false)}
-                    className="mt-4 text-base font-medium text-gray-700 hover:text-gray-900 underline"
+                    className="mt-5 text-[15px] font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200 underline underline-offset-2"
                   >
                     Show less
                   </button>
@@ -322,31 +347,62 @@ export default function PromptsPage() {
         </section>
 
         {/* Section 2: Prompts for {FirstName} (Personalized) */}
-        <section style={{ marginTop: "32px" }}>
-          <h2
-            className="font-bold mb-4"
-            style={{
-              fontSize: "20px",
-              color: "#000000",
-              lineHeight: "1.4"
-            }}
-          >
-            Prompts for {firstName}
-          </h2>
+        <section>
+          <div className="flex items-center gap-3 mb-5">
+            <h2 className="text-[19px] font-semibold tracking-tight text-gray-900">
+              For {firstName}
+            </h2>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
+              Personalized
+            </span>
+          </div>
 
+          {/* Family-Submitted Prompts (Priority Display) */}
+          {familyPrompts.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200/50">
+                  💝 From Your Family
+                </span>
+                <span className="text-sm text-gray-500">
+                  {familyPrompts.length} {familyPrompts.length === 1 ? 'question' : 'questions'} they want answered
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {familyPrompts.map((prompt, index) => (
+                  <PromptCard
+                    key={prompt.id}
+                    id={prompt.id}
+                    promptText={prompt.prompt_text}
+                    contextNote={prompt.context_note}
+                    source="family"
+                    variant="family"
+                    index={index}
+                    submittedBy={prompt.submittedBy}
+                    onRecord={handleRecord}
+                    onQueue={handleQueue}
+                    onDismiss={handleDismiss}
+                    onDelete={handleDelete}
+                    isLoading={isAnyMutationPending}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* AI-Generated Personalized Prompts */}
           <div
-            className="bg-white rounded-lg shadow-sm"
+            className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50"
             style={{
-              padding: "16px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+              padding: "20px",
+              borderRadius: "16px",
             }}
           >
             {activeLoading ? (
               <div className="text-center py-8">
                 <p className="text-gray-500">Loading your personalized prompts...</p>
               </div>
-            ) : activePrompts.length === 0 ? (
+            ) : activePrompts.length === 0 && familyPrompts.length === 0 ? (
               <div className="p-8 text-center">
                 <p className="text-base text-gray-600 mb-4">
                   New prompts will appear as you share more stories
@@ -359,9 +415,15 @@ export default function PromptsPage() {
                   Record Your First Story
                 </Button>
               </div>
+            ) : activePrompts.length === 0 ? (
+              <div className="p-8 text-center">
+                <p className="text-base text-gray-600">
+                  More AI-generated prompts will appear as you share stories
+                </p>
+              </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {displayedActivePrompts.map((prompt, index) => (
                     <PromptCard
                       key={prompt.id}
@@ -384,7 +446,7 @@ export default function PromptsPage() {
                 {activePrompts.length > 2 && !showAllActive && (
                   <button
                     onClick={() => setShowAllActive(true)}
-                    className="mt-4 text-base font-medium text-gray-700 hover:text-gray-900 underline"
+                    className="mt-5 text-[15px] font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200 underline underline-offset-2"
                   >
                     Show {activePrompts.length - 2} more
                   </button>
@@ -392,7 +454,7 @@ export default function PromptsPage() {
                 {showAllActive && activePrompts.length > 2 && (
                   <button
                     onClick={() => setShowAllActive(false)}
-                    className="mt-4 text-base font-medium text-gray-700 hover:text-gray-900 underline"
+                    className="mt-5 text-[15px] font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200 underline underline-offset-2"
                   >
                     Show less
                   </button>
@@ -403,13 +465,12 @@ export default function PromptsPage() {
         </section>
 
         {/* More Ideas Section */}
-        <section style={{ marginTop: "32px" }}>
+        <section>
           <div
-            className="bg-white rounded-lg shadow-sm"
+            className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50"
             style={{
-              padding: "16px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+              padding: "20px",
+              borderRadius: "16px",
             }}
           >
             <MoreIdeas />
@@ -417,36 +478,30 @@ export default function PromptsPage() {
         </section>
 
         {/* Section 3: Prompt Archive (Dismissed) */}
-        <section style={{ marginTop: "32px" }}>
+        <section>
           <button
             onClick={() => setShowArchived(!showArchived)}
-            className="flex items-center gap-2 font-bold w-full mb-4 hover:opacity-80 transition-opacity"
-            style={{
-              fontSize: "20px",
-              color: "#000000",
-              lineHeight: "1.4"
-            }}
+            className="flex items-center gap-3 w-full mb-5 hover:opacity-70 transition-opacity group"
           >
-            <span className="flex-1 text-left">Prompt Archive</span>
-            {archivedLoading ? (
-              <span className="text-sm text-gray-400" style={{ opacity: 0.7 }}>(...)</span>
-            ) : (
-              <span className="text-sm text-gray-500" style={{ opacity: 0.7 }}>({archivedPrompts.length})</span>
-            )}
+            <h2 className="flex-1 text-left text-[19px] font-semibold tracking-tight text-gray-900">
+              Archive
+            </h2>
+            <span className="text-sm text-gray-500 font-medium">
+              {archivedLoading ? '...' : `${archivedPrompts.length} dismissed`}
+            </span>
             {showArchived ? (
-              <ChevronUp className="w-5 h-5" />
+              <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
             ) : (
-              <ChevronDown className="w-5 h-5" />
+              <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
             )}
           </button>
 
           {showArchived && (
             <div
-              className="bg-white rounded-lg shadow-sm"
+              className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50"
               style={{
-                padding: "16px",
-                borderRadius: "8px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+                padding: "20px",
+                borderRadius: "16px",
               }}
             >
               {archivedPrompts.length === 0 ? (
@@ -454,7 +509,7 @@ export default function PromptsPage() {
                   Dismissed prompts will appear here
                 </p>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {archivedPrompts.map((prompt, index) => (
                     <PromptCard
                       key={prompt.id}

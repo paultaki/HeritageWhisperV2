@@ -26,6 +26,83 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Security Headers - Protect against common web vulnerabilities
+  async headers() {
+    // Content Security Policy - Prevents XSS attacks
+    const cspHeader = `
+      default-src 'self';
+      script-src 'self' 'unsafe-eval' 'unsafe-inline';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      img-src 'self' data: blob: https://*.supabase.co;
+      font-src 'self' https://fonts.gstatic.com;
+      media-src 'self' blob: https://*.supabase.co;
+      connect-src 'self' https://*.supabase.co https://api.openai.com https://ai-gateway.vercel.sh https://api.assemblyai.com wss://*.supabase.co;
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'none';
+      upgrade-insecure-requests;
+    `.replace(/\s{2,}/g, ' ').trim();
+
+    return [
+      {
+        // Apply security headers to all routes
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: cspHeader,
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY', // Prevent clickjacking attacks
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff', // Prevent MIME type sniffing
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains', // Force HTTPS for 1 year
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block', // Legacy XSS protection (modern browsers use CSP)
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin', // Control referrer information
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(self), geolocation=(), interest-cohort=()', // Restrict browser features
+          },
+        ],
+      },
+      {
+        // CORS configuration for API routes
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: process.env.NEXT_PUBLIC_APP_URL || 'https://dev.heritagewhisper.com',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+          {
+            key: 'Access-Control-Max-Age',
+            value: '86400', // 24 hours - cache preflight requests
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -1,0 +1,23 @@
+# Security Contact Information for HeritageWhisper
+# If you discover a security vulnerability, please report it responsibly
+
+Contact: mailto:security@heritagewhisper.com
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://heritagewhisper.com/.well-known/security.txt
+
+# Security Policy
+Policy: https://heritagewhisper.com/privacy
+
+# Please report security vulnerabilities privately before public disclosure
+# We appreciate responsible disclosure and will respond within 48 hours
+# Do not exploit vulnerabilities - report them so we can fix them
+
+# Our commitment:
+# - We will acknowledge your report within 48 hours
+# - We will provide regular updates on our investigation
+# - We will credit you for responsible disclosure (if desired)
+# - We will not take legal action for good-faith security research
+
+# Thank you for helping keep HeritageWhisper secure!
+

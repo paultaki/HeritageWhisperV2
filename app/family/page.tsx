@@ -233,14 +233,35 @@ export default function FamilyPage() {
       );
       return response.json();
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
-      toast({
-        title: "Member removed",
-        description: "Family member has been removed from your circle.",
+    onMutate: async (memberId) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["/api/family/members"] });
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData(["/api/family/members"]);
+
+      // Optimistically update the UI
+      queryClient.setQueryData(["/api/family/members"], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          members: old.members.filter((m: FamilyMember) => m.id !== memberId),
+          total: Math.max(0, (old.total || 0) - 1),
+        };
       });
+
+      // Return context with the snapshot
+      return { previousData };
     },
-    onError: (error: any) => {
+    onSuccess: async () => {
+      // Invalidate to ensure fresh data
+      await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+    },
+    onError: (error: any, memberId, context) => {
+      // Rollback on error
+      if (context?.previousData) {
+        queryClient.setQueryData(["/api/family/members"], context.previousData);
+      }
       toast({
         title: "Removal failed",
         description: error.message || "Could not remove family member.",
@@ -338,11 +359,16 @@ export default function FamilyPage() {
   const handleRemoveMember = async (memberId: string, isPending: boolean = false) => {
     try {
       await removeMutation.mutateAsync(memberId);
-      // Override the success message for pending invites
+      // Show success message after mutation completes
       if (isPending) {
         toast({
           title: "Invitation revoked",
           description: "The invitation has been cancelled.",
+        });
+      } else {
+        toast({
+          title: "Member removed",
+          description: "Family member has been removed from your circle.",
         });
       }
     } catch (error) {
@@ -918,28 +944,6 @@ export default function FamilyPage() {
               </CardContent>
             </Card>
 
-            {/* Family Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  Family Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start h-11"
-                  onClick={handleCopyInviteLink}
-                >
-                  <LinkIcon className="w-4 h-4 mr-2" />
-                  Copy Invite Link
-                </Button>
-                <Button variant="outline" className="w-full justify-start h-11">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Bulk Share Stories
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
