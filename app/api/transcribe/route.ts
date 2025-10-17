@@ -31,8 +31,11 @@ if (!process.env.OPENAI_API_KEY) {
 }
 
 // Direct OpenAI client for Whisper transcription
+// PRODUCTION OPTIMIZATION: Added timeout (60s) and retry logic (3 attempts) to prevent hangs
 const openaiDirect = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 60000, // 60 seconds - prevents indefinite hangs on slow/unresponsive API
+  maxRetries: 3,  // Retry up to 3 times on 500/502/503/504 errors with exponential backoff
 });
 
 // AI Gateway client for chat completions (formatting, lesson generation)
@@ -44,6 +47,8 @@ const gatewayBaseURL = process.env.AI_GATEWAY_API_KEY
 const openaiGateway = new OpenAI({
   apiKey: gatewayApiKey,
   baseURL: gatewayBaseURL,
+  timeout: 60000, // 60 seconds - prevents indefinite hangs
+  maxRetries: 3,  // Automatic retry on transient failures
 });
 
 // Cache prompts at module level to avoid rebuilding on every request

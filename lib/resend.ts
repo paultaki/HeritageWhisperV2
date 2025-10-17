@@ -13,12 +13,49 @@ function getResendClient() {
   return resend;
 }
 
+/**
+ * Escapes HTML special characters to prevent XSS attacks
+ * SECURITY: Always use this function for user-provided data in HTML emails
+ */
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
+ * Validates and sanitizes name input
+ * SECURITY: Limits length and removes dangerous characters
+ */
+function sanitizeName(name: string): string {
+  // Limit length to prevent abuse
+  const trimmed = name.trim().slice(0, 100);
+
+  // Basic validation - allow letters, spaces, hyphens, apostrophes
+  if (!/^[a-zA-Z\s'-]+$/.test(trimmed)) {
+    throw new Error('Invalid name format. Only letters, spaces, hyphens, and apostrophes are allowed.');
+  }
+
+  return escapeHtml(trimmed);
+}
+
 export async function sendVerificationEmail(
   email: string,
   name: string,
   confirmationUrl: string,
 ) {
   try {
+    // SECURITY: Sanitize all user inputs before using in HTML
+    const safeName = sanitizeName(name);
+    const safeEmail = escapeHtml(email);
+    // Don't HTML-escape URLs, but validate they're from our domain
+    if (!confirmationUrl.startsWith(process.env.NEXT_PUBLIC_APP_URL || 'https://dev.heritagewhisper.com')) {
+      throw new Error('Invalid confirmation URL');
+    }
+
     const resendClient = getResendClient();
     const { data, error } = await resendClient.emails.send({
       from: "Heritage Whisper <noreply@heritagewhisper.com>",
@@ -38,7 +75,7 @@ export async function sendVerificationEmail(
             </div>
 
             <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
-              <h2 style="color: #8B4513; margin-top: 0;">Welcome, ${name}!</h2>
+              <h2 style="color: #8B4513; margin-top: 0;">Welcome, ${safeName}!</h2>
 
               <p style="font-size: 16px; color: #555;">
                 Thank you for joining Heritage Whisper. We're excited to help you preserve your life stories for generations to come.
@@ -92,6 +129,10 @@ export async function sendVerificationEmail(
 
 export async function sendWelcomeEmail(email: string, name: string) {
   try {
+    // SECURITY: Sanitize all user inputs before using in HTML
+    const safeName = sanitizeName(name);
+    const safeEmail = escapeHtml(email);
+
     const resendClient = getResendClient();
     const { data, error } = await resendClient.emails.send({
       from: "Heritage Whisper <noreply@heritagewhisper.com>",
@@ -111,7 +152,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
             </div>
 
             <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
-              <h2 style="color: #8B4513; margin-top: 0;">Welcome, ${name}! 🎉</h2>
+              <h2 style="color: #8B4513; margin-top: 0;">Welcome, ${safeName}! 🎉</h2>
 
               <p style="font-size: 16px; color: #555;">
                 Your account is now active! You're ready to start preserving your precious memories.

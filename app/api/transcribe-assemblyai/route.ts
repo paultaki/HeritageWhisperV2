@@ -41,6 +41,8 @@ const gatewayBaseURL = process.env.AI_GATEWAY_API_KEY
 const openaiGateway = new OpenAI({
   apiKey: gatewayApiKey,
   baseURL: gatewayBaseURL,
+  timeout: 60000, // 60 seconds - prevents indefinite hangs
+  maxRetries: 3,  // Automatic retry on transient failures
 });
 
 // Cache prompts at module level
