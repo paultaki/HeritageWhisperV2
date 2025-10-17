@@ -633,28 +633,17 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
       }}
     >
       {/* Left side content (for left-positioned cards) - Desktop only */}
-      <div className={`flex-1 flex ${position === "left" ? "justify-end" : ""} hidden lg:flex relative`}>
+      <div className={`flex-1 flex ${position === "left" ? "justify-end lg:pr-6" : ""} hidden lg:flex`}>
         {position === "left" && (
-          <>
-            <div className="max-w-md w-full">
-              {renderCardContent()}
-            </div>
-            {/* Connecting line from card to timeline */}
-            <div 
-              className={`absolute right-0 top-1/2 w-6 h-px bg-gray-300 transition-all duration-800 ${
-                isVisible ? "opacity-60" : "opacity-0"
-              }`}
-              style={{
-                transitionDelay: `${index * 150 + 100}ms`,
-              }}
-            />
-          </>
+          <div className="max-w-md w-full">
+            {renderCardContent()}
+          </div>
         )}
       </div>
 
       {/* Center date bubble */}
       <div
-        className={`z-20 flex-shrink-0 timeline-dot transition-all duration-800 relative ${
+        className={`z-20 flex-shrink-0 timeline-dot transition-all duration-800 ${
           isVisible ? "opacity-100 scale-100" : "opacity-50 scale-80"
         }`}
         style={{
@@ -672,22 +661,11 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
       </div>
 
       {/* Right side content (for right-positioned cards) - Desktop only */}
-      <div className={`flex-1 flex ${position === "right" ? "justify-start" : ""} hidden lg:flex relative`}>
+      <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`}>
         {position === "right" && (
-          <>
-            {/* Connecting line from timeline to card */}
-            <div 
-              className={`absolute left-0 top-1/2 w-6 h-px bg-gray-300 transition-all duration-800 ${
-                isVisible ? "opacity-60" : "opacity-0"
-              }`}
-              style={{
-                transitionDelay: `${index * 150 + 100}ms`,
-              }}
-            />
-            <div className="max-w-md w-full">
-              {renderCardContent()}
-            </div>
-          </>
+          <div className="max-w-md w-full">
+            {renderCardContent()}
+          </div>
         )}
       </div>
 
@@ -920,6 +898,83 @@ export default function TimelineV2Page() {
 
       {/* Custom Styles */}
       <style jsx global>{`
+        /* Connector lines from cards to timeline center */
+        .timeline-step {
+          position: relative;
+        }
+        
+        /* Connector line - horizontal stub from card to center timeline */
+        @media (min-width: 1024px) {
+          .timeline-step .max-w-md {
+            position: relative;
+          }
+          
+          .timeline-step .max-w-md::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 1.5px;
+            background: linear-gradient(
+              to right,
+              rgba(156, 163, 175, 0.3),
+              rgba(156, 163, 175, 0.5)
+            );
+            border-radius: 1px;
+            opacity: 1;
+            pointer-events: none;
+            transition: all 150ms ease-out;
+            z-index: 1;
+          }
+          
+          /* Left-positioned cards - connector goes to the right */
+          .timeline-step .justify-end .max-w-md::after {
+            right: -26px;
+            background: linear-gradient(
+              to right,
+              rgba(156, 163, 175, 0.5),
+              rgba(156, 163, 175, 0.3)
+            );
+          }
+          
+          /* Right-positioned cards - connector goes to the left */
+          .timeline-step .justify-start .max-w-md::after {
+            left: -26px;
+            background: linear-gradient(
+              to left,
+              rgba(156, 163, 175, 0.5),
+              rgba(156, 163, 175, 0.3)
+            );
+          }
+          
+          /* Hover effect - extend and brighten */
+          .timeline-step:hover .max-w-md::after {
+            width: 26px;
+            background: linear-gradient(
+              to right,
+              rgba(107, 114, 128, 0.6),
+              rgba(107, 114, 128, 0.4)
+            );
+          }
+          
+          .timeline-step:hover .justify-end .max-w-md::after {
+            background: linear-gradient(
+              to right,
+              rgba(107, 114, 128, 0.6),
+              rgba(107, 114, 128, 0.4)
+            );
+          }
+          
+          .timeline-step:hover .justify-start .max-w-md::after {
+            background: linear-gradient(
+              to left,
+              rgba(107, 114, 128, 0.6),
+              rgba(107, 114, 128, 0.4)
+            );
+          }
+        }
+        
         @media (max-width: 1024px) {
           .timeline-step {
             opacity: 1 !important;
@@ -928,6 +983,12 @@ export default function TimelineV2Page() {
           .timeline-dot {
             transform: scale(1) !important;
             opacity: 1 !important;
+          }
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+          .timeline-step .max-w-md::after {
+            transition: none !important;
           }
         }
       `}</style>
