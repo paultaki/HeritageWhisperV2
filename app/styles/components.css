@@ -223,7 +223,7 @@ body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(128, 128, 128, 0.4); /* Gray semi-transparent backdrop */
+  background: rgba(128, 128, 128, 0.4) !important; /* Gray semi-transparent backdrop */
   backdrop-filter: blur(8px);
   border: none;
   display: grid;
@@ -320,10 +320,10 @@ body {
   font-weight: 500;
   font-size: 18px;
   line-height: 1;
-  color: #9CA3AF; /* Lighter gray to match production */
-  background: rgba(255, 255, 255, 0.95);
+  color: #9CA3AF !important; /* Lighter gray to match production */
+  background: rgba(255, 255, 255, 0.95) !important;
   padding: 6px 10px 8px 10px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
   border-radius: 8px;
   opacity: 1;
   transform: translateY(0);

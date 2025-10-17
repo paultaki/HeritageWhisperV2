@@ -901,7 +901,96 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
   - Guide: `TESTING_GUIDE.md`
   - Run: `npm test` or `npm run test:watch`
 
+## ✅ Recent Updates (October 17, 2025)
+
+### Security Hardening
+
+- **Comprehensive Security Headers** (`next.config.ts`):
+  - **Content Security Policy (CSP)**: Prevents XSS attacks by restricting script/style sources
+    - Allows: self, Supabase, OpenAI, AI Gateway, AssemblyAI
+    - Blocks: inline scripts (except unsafe-eval for Next.js), object embeds
+  - **HSTS**: Forces HTTPS for 1 year (`max-age=31536000; includeSubDomains`)
+  - **X-Frame-Options**: `DENY` to prevent clickjacking
+  - **X-Content-Type-Options**: `nosniff` to prevent MIME sniffing
+  - **X-XSS-Protection**: `1; mode=block` for legacy browsers
+  - **Referrer-Policy**: `strict-origin-when-cross-origin`
+  - **Permissions-Policy**: Restricts camera/geolocation/tracking
+  - Location: `/next.config.ts:30-105`
+
+- **CORS Configuration**: API routes restricted to app domain only
+  - Origin: `NEXT_PUBLIC_APP_URL` (fallback: dev.heritagewhisper.com)
+  - Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+  - Max-Age: 24 hours for preflight caching
+  - Location: `/next.config.ts:83-103`
+
+- **PII Removal from Logs**: Authentication logs no longer log email addresses
+  - Changed from `logger.info(\`Login attempt for email: ${email}\`)` to `logger.info('Login attempt received')`
+  - Location: `/app/api/auth/login/route.ts:39-43`
+
+- **Security Contact Information** (`public/.well-known/security.txt`):
+  - Responsible disclosure contact: security@heritagewhisper.com
+  - 48-hour response commitment
+  - Expires: December 31, 2026
+  - Location: `/public/.well-known/security.txt`
+
+- **Security Logging Infrastructure** (`lib/securityLogger.ts`):
+  - Structured logging for auth failures, suspicious activity, rate limits
+  - Automatic PII hashing (emails, IPs) before logging
+  - Audit trail for sensitive data access
+  - Location: `/lib/securityLogger.ts`
+
+- **Trust Signals on Auth Pages**:
+  - Login/Register pages now show "Protected Session" badge and trust signals
+  - Footer displays "256-bit SSL" and "Bank-Level Security"
+  - Shield icons for visual security reassurance
+  - Hydration mismatch fixes for localStorage "Remember Me" feature
+  - Location: `/app/auth/login/page.tsx`, `/app/auth/register/page.tsx`
+
+- **Privacy Section on Homepage**:
+  - New "Your Privacy Matters" section with key privacy commitments
+  - Header trust bar: "🔒 Bank-Level Security | Only your family sees your stories"
+  - Footer trust signals: Secure, Private, Your Control
+  - Location: `/app/page.tsx` (homepage)
+
+- **Documentation**:
+  - Comprehensive `SECURITY.md` with implementation details
+  - Environment variable template `env.example` with security notes
+  - Privacy policy updated with "Your Security & Control" section
+
+### Family-Submitted Prompts Feature
+
+- **New API Endpoint** (`/api/prompts/family-submitted`):
+  - Fetches pending prompts submitted by family contributors
+  - Joins with `family_members` table to include submitter details
+  - Returns: prompt text, context, submitter name/relationship
+  - Location: `/app/api/prompts/family-submitted/route.ts`
+
+- **Prompts Page Integration** (`/prompts`):
+  - Family prompts display FIRST in "For {Name}" personalized section
+  - Distinct visual styling:
+    - **Blue/indigo gradient background** (vs. gray for AI prompts)
+    - **2px blue border** (vs. 1px gray)
+    - **"💝 From Your Family" badge** with count
+    - **"💙 Question from {Name} • {Relationship}"** badge on each card
+  - Special **blue gradient "Answer" button** (vs. gray "Record")
+  - Location: `/app/prompts/page.tsx:53-66, 360-391`
+
+- **PromptCard Component Enhancement** (`components/PromptCard.tsx`):
+  - Added support for `source: 'family'` and `variant: 'family'`
+  - New `submittedBy` prop with name, email, relationship
+  - Conditional styling based on prompt source
+  - Location: `/components/PromptCard.tsx:17, 23-28, 60-87, 112-121`
+
+- **User Flow**:
+  1. Family contributor (with contributor permissions) submits question via "Submit a Question" dialog
+  2. Question saved to `family_prompts` table with `status='pending'`
+  3. Member sees it on `/prompts` page in personalized section (appears first)
+  4. Member clicks "Answer" to record response
+  5. Works like any other prompt
+
+- **Privacy Note**: Personalized prompts are NOT visible to family members - they only see published stories on timeline/book pages
+
 ---
 
-_Last updated: October 16, 2025_
+_Last updated: October 17, 2025_
 _For historical fixes, feature archives, and migration notes, see CLAUDE_HISTORY.md_

@@ -1,73 +1,16 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 import { FamilyGuard } from '@/components/FamilyGuard';
 import { FamilyBanner } from '@/components/FamilyBanner';
 import { SubmitQuestionDialog } from '@/components/SubmitQuestionDialog';
 import { useFamilyAuth } from '@/hooks/use-family-auth';
 import { Card } from '@/components/ui/card';
-import { Loader2, Calendar, Play, Pause, AlertCircle } from 'lucide-react';
-import { useEffect, useState, useRef } from 'react';
-import { groupStoriesByDecade } from '@/lib/supabase';
-import { normalizeYear, formatYear } from '@/lib/utils';
-import { getTopTraits } from '@/utils/getTopTraits';
-import Image from 'next/image';
-
-// Audio Manager (same as author's timeline)
-class AudioManager {
-  private static instance: AudioManager;
-  private currentAudio: HTMLAudioElement | null = null;
-  private currentCardId: string | null = null;
-  private listeners: Map<string, (playing: boolean, audioElement?: HTMLAudioElement | null) => void> = new Map();
-
-  static getInstance() {
-    if (!AudioManager.instance) {
-      AudioManager.instance = new AudioManager();
-    }
-    return AudioManager.instance;
-  }
-
-  register(cardId: string, callback: (playing: boolean, audioElement?: HTMLAudioElement | null) => void) {
-    this.listeners.set(cardId, callback);
-  }
-
-  unregister(cardId: string) {
-    if (this.currentCardId === cardId && this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio = null;
-      this.currentCardId = null;
-    }
-    this.listeners.delete(cardId);
-  }
-
-  play(cardId: string, audio: HTMLAudioElement) {
-    if (this.currentAudio && this.currentCardId !== cardId) {
-      this.currentAudio.pause();
-      this.currentAudio.currentTime = 0;
-      const oldCallback = this.listeners.get(this.currentCardId!);
-      if (oldCallback) {
-        oldCallback(false, this.currentAudio);
-      }
-    }
-    this.currentAudio = audio;
-    this.currentCardId = cardId;
-  }
-
-  pause(cardId: string) {
-    if (this.currentCardId === cardId) {
-      this.currentAudio = null;
-      this.currentCardId = null;
-    }
-  }
-}
-
-const audioManager = AudioManager.getInstance();
+import { Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function FamilyTimelineClient({ userId }: { userId: string }) {
-  const router = useRouter();
   const { session, updateFirstAccess } = useFamilyAuth();
-  const decadeRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   useEffect(() => {
     // Mark first access as complete
@@ -99,9 +42,7 @@ export default function FamilyTimelineClient({ userId }: { userId: string }) {
     enabled: !!session?.sessionToken,
   });
 
-  const allStories = storiesData?.stories || [];
-  const stories = allStories.filter((s: any) => s.includeInTimeline === true);
-  const storytellerBirthYear = storiesData?.storyteller?.birthYear || 1950;
+  const stories = storiesData?.stories || [];
 
   return (
     <FamilyGuard userId={userId}>

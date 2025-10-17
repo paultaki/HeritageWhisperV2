@@ -166,6 +166,7 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
   }, []);
 
   // Intersection Observer for scroll animation (respects reduced motion)
+  // Images load immediately (eager), but we only reveal them with animation when scrolling
   useEffect(() => {
     // Skip animations if user prefers reduced motion
     if (prefersReducedMotion) {
@@ -182,8 +183,8 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
         });
       },
       {
-        threshold: 0.2,
-        rootMargin: "300px 0px 300px 0px", // Load images 300px before they enter viewport
+        threshold: 0.1, // Trigger earlier for smoother reveal
+        rootMargin: "400px 0px 400px 0px", // Start revealing 400px before viewport
       }
     );
 
@@ -385,8 +386,11 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
                 className="object-cover transition-transform duration-500 hover:scale-105"
-                loading={index < 4 ? "eager" : "lazy"}
-                priority={index < 2}
+                loading="eager"
+                priority={index < 8}
+                quality={85}
+                placeholder="blur"
+                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
                 style={
                   displayPhoto.transform
                     ? {
@@ -437,14 +441,36 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
                       e.stopPropagation();
                       handlePlayAudio(e);
                     }}
-                    className="flex-shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
+                    className="flex-shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
                   >
                     {isLoading ? (
-                      <Loader2 className="w-4 lg:w-5 h-4 lg:h-5 animate-spin" />
-                    ) : isPlaying ? (
-                      <Pause className="w-4 lg:w-5 h-4 lg:h-5" />
+                      <Loader2 className="w-4 lg:w-5 h-4 lg:h-5 animate-spin text-orange-500" />
                     ) : (
-                      <Play className="w-4 lg:w-5 h-4 lg:h-5 ml-0.5" />
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        className="text-orange-500"
+                      >
+                        {isPlaying ? (
+                          <>
+                            <rect x="2" y="4" width="2" height="12" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0ms', animationDuration: '600ms' }} />
+                            <rect x="6" y="2" width="2" height="16" fill="currentColor" className="animate-pulse" style={{ animationDelay: '100ms', animationDuration: '600ms' }} />
+                            <rect x="10" y="6" width="2" height="8" fill="currentColor" className="animate-pulse" style={{ animationDelay: '200ms', animationDuration: '600ms' }} />
+                            <rect x="14" y="3" width="2" height="14" fill="currentColor" className="animate-pulse" style={{ animationDelay: '300ms', animationDuration: '600ms' }} />
+                            <rect x="18" y="5" width="2" height="10" fill="currentColor" className="animate-pulse" style={{ animationDelay: '400ms', animationDuration: '600ms' }} />
+                          </>
+                        ) : (
+                          <>
+                            <rect x="2" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
+                            <rect x="6" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
+                            <rect x="10" y="4" width="2" height="12" fill="currentColor" opacity="0.6" />
+                            <rect x="14" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
+                            <rect x="18" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
+                          </>
+                        )}
+                      </svg>
                     )}
                   </button>
                 )}
@@ -526,16 +552,38 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
                 e.stopPropagation();
                 handlePlayAudio(e);
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-all duration-200 shadow-md hover:shadow-lg"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 rounded-full transition-all duration-200 shadow-md hover:shadow-lg"
             >
               {isLoading ? (
-                <Loader2 className="w-4 lg:w-5 h-4 lg:h-5 animate-spin" />
-              ) : isPlaying ? (
-                <Pause className="w-4 lg:w-5 h-4 lg:h-5" />
+                <Loader2 className="w-4 lg:w-5 h-4 lg:h-5 animate-spin text-orange-500" />
               ) : (
-                <Play className="w-4 lg:w-5 h-4 lg:h-5 ml-0.5" />
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  className="text-orange-500"
+                >
+                  {isPlaying ? (
+                    <>
+                      <rect x="2" y="4" width="2" height="12" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0ms', animationDuration: '600ms' }} />
+                      <rect x="6" y="2" width="2" height="16" fill="currentColor" className="animate-pulse" style={{ animationDelay: '100ms', animationDuration: '600ms' }} />
+                      <rect x="10" y="6" width="2" height="8" fill="currentColor" className="animate-pulse" style={{ animationDelay: '200ms', animationDuration: '600ms' }} />
+                      <rect x="14" y="3" width="2" height="14" fill="currentColor" className="animate-pulse" style={{ animationDelay: '300ms', animationDuration: '600ms' }} />
+                      <rect x="18" y="5" width="2" height="10" fill="currentColor" className="animate-pulse" style={{ animationDelay: '400ms', animationDuration: '600ms' }} />
+                    </>
+                  ) : (
+                    <>
+                      <rect x="2" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
+                      <rect x="6" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
+                      <rect x="10" y="4" width="2" height="12" fill="currentColor" opacity="0.6" />
+                      <rect x="14" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
+                      <rect x="18" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
+                    </>
+                  )}
+                </svg>
               )}
-              <span className="text-sm font-medium">
+              <span className="text-sm font-medium text-orange-500">
                 {isPlaying ? "Pause" : "Listen"}
               </span>
             </button>
@@ -600,12 +648,12 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
         }`}
         style={{
           transitionDelay: `${index * 150 + 200}ms`,
-          transform: position === "left" 
+          transform: position === "left"
             ? (isVisible ? "translateX(-12px)" : "translateX(-12px) scale(0.8)")
             : (isVisible ? "translateX(12px)" : "translateX(12px) scale(0.8)"),
         }}
       >
-        <div className="px-4 py-1 bg-orange-500 text-white text-sm font-semibold rounded-full whitespace-nowrap shadow-lg">
+        <div className="px-4 py-1 bg-white/95 border border-gray-200 text-gray-400 text-lg font-serif font-medium rounded-lg whitespace-nowrap shadow-sm">
           {story.storyDate
             ? new Date(story.storyDate).getFullYear()
             : formatYear(story.storyYear)}
@@ -760,7 +808,7 @@ export default function TimelineV2Page() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#FFF8F3' }}>
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200 p-4">
         <div className="max-w-7xl mx-auto">
@@ -794,8 +842,8 @@ export default function TimelineV2Page() {
               className="w-full rounded-full transition-all duration-300 ease-out"
               style={{
                 height: "0%",
-                background: "linear-gradient(to bottom, #f97316, #ea580c)",
-                boxShadow: "0 0 10px rgba(249, 115, 22, 0.3)",
+                background: "linear-gradient(to bottom, #9ca3af, #6b7280)",
+                boxShadow: "0 0 10px rgba(156, 163, 175, 0.2)",
               }}
             />
           </div>
