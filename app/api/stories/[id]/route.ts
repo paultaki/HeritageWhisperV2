@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { UpdateStorySchema, safeValidateRequestBody } from "@/lib/validationSchemas";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -190,7 +191,35 @@ export async function PUT(
       );
     }
 
-    const body = await request.json();
+    // Parse and validate request body
+    const rawBody = await request.json();
+
+    // Add the story ID to the body for validation
+    const bodyWithId = { ...rawBody, id };
+
+    // Validate input with Zod schema
+    const validationResult = safeValidateRequestBody(UpdateStorySchema, bodyWithId);
+
+    if (!validationResult.success) {
+      // Format validation errors for user-friendly response
+      const errorMessages = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+
+      logger.warn('[PUT /api/stories/[id]] Validation failed:', errorMessages);
+
+      return NextResponse.json(
+        {
+          error: 'Invalid story data',
+          details: errorMessages,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Use validated data
+    const body = validationResult.data;
 
     // First, fetch the existing story to get current values
     const { data: existingStory, error: fetchError } = await supabaseAdmin
@@ -292,10 +321,9 @@ export async function PUT(
     if (body.wisdomClipUrl !== undefined)
       storyData.wisdom_clip_url = body.wisdomClipUrl;
     if (body.durationSeconds !== undefined) {
-      storyData.duration_seconds = Math.max(
-        1,
-        Math.min(120, body.durationSeconds || 30),
-      );
+      // Duration validated by UpdateStorySchema (1-600 seconds)
+      // Database constraint is 1-120, so clamp to database limits
+      storyData.duration_seconds = Math.min(body.durationSeconds, 120);
     }
     if (body.emotions !== undefined) storyData.emotions = body.emotions;
     if (body.photoUrl !== undefined) {

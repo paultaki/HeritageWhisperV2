@@ -6,6 +6,8 @@ import { generateEchoPrompt, generateEchoAnchorHash } from "@/lib/echoPrompts";
 import { validatePromptQuality } from "@/lib/promptQuality";
 import { logger } from "@/lib/logger";
 import { tier3Ratelimit, aiIpRatelimit, aiGlobalRatelimit, getClientIp } from "@/lib/ratelimit";
+import { CreateStorySchema, safeValidateRequestBody } from "@/lib/validationSchemas";
+import { ZodError } from "zod";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -171,18 +173,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    // Parse and validate request body
+    const rawBody = await request.json();
 
-    // Process photos array
+    // Validate input with Zod schema
+    const validationResult = safeValidateRequestBody(CreateStorySchema, rawBody);
+
+    if (!validationResult.success) {
+      // Format validation errors for user-friendly response
+      const errorMessages = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+
+      logger.warn('[Stories API] Validation failed:', errorMessages);
+
+      return NextResponse.json(
+        {
+          error: 'Invalid story data',
+          details: errorMessages,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Use validated data
+    const body = validationResult.data;
+
+    // Process photos array (after validation)
     const processedPhotos = (body.photos || [])
-      .filter((photo: any) => {
+      .filter((photo) => {
         if (!photo.url && !photo.filePath) return false;
         if (photo.url && photo.url.startsWith("blob:")) {
           return false;
         }
         return true;
       })
-      .map((photo: any) => {
+      .map((photo) => {
         if (photo.filePath) {
           return {
             ...photo,
@@ -192,10 +219,10 @@ export async function POST(request: NextRequest) {
         return photo;
       });
 
-    // Prepare story data for Supabase using actual schema
-    // Note: duration_seconds has a check constraint (must be between 1 and 120)
-    const duration = body.durationSeconds || 30; // Default to 30 seconds if not provided
-    const constrainedDuration = Math.max(1, Math.min(120, duration)); // Ensure between 1-120
+    // Prepare story data for Supabase
+    // Duration is now validated and constrained by CreateStorySchema (1-600 seconds)
+    // Database constraint is 1-120, so we need to clamp to database limits
+    const durationForDb = Math.min(body.durationSeconds, 120);
 
     const storyData = {
       user_id: user.id,
@@ -208,7 +235,7 @@ export async function POST(request: NextRequest) {
           : undefined,
       wisdom_text: body.wisdomClipText || body.wisdomTranscription,
       wisdom_clip_url: body.wisdomClipUrl,
-      duration_seconds: constrainedDuration,
+      duration_seconds: durationForDb, // Clamped to database constraint (1-120)
       emotions: body.emotions,
       photo_url:
         body.photoUrl && !body.photoUrl.startsWith("blob:")
@@ -225,7 +252,7 @@ export async function POST(request: NextRequest) {
         pivotal_category: body.pivotalCategory,
         story_date: body.storyDate,
         photo_transform: body.photoTransform,
-        actual_duration: body.durationSeconds, // Store actual duration in metadata
+        actual_duration: body.durationSeconds, // Store actual validated duration in metadata
       },
     };
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { authRatelimit, getClientIp, checkRateLimit } from "@/lib/ratelimit";
+import { LoginUserSchema, safeValidateRequestBody } from "@/lib/validationSchemas";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -27,14 +28,32 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { email, password } = await request.json();
+    // Parse and validate request body
+    const rawBody = await request.json();
 
-    if (!email || !password) {
+    // Validate input with Zod schema
+    const validationResult = safeValidateRequestBody(LoginUserSchema, rawBody);
+
+    if (!validationResult.success) {
+      // Format validation errors for user-friendly response
+      const errorMessages = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+
+      logger.warn('[Login] Validation failed:', errorMessages);
+
       return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 },
+        {
+          error: 'Invalid login data',
+          details: errorMessages,
+        },
+        { status: 400 }
       );
     }
+
+    // Use validated data
+    const { email, password } = validationResult.data;
 
     // Debug: Log the attempt (NEVER log PII like emails)
     if (process.env.NODE_ENV === 'development') {

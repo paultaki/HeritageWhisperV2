@@ -183,8 +183,8 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
         });
       },
       {
-        threshold: 0.1, // Trigger earlier for smoother reveal
-        rootMargin: "400px 0px 400px 0px", // Start revealing 400px before viewport
+        threshold: 0.05, // Trigger very early
+        rootMargin: "200px 0px 200px 0px", // Start revealing 200px before viewport (faster)
       }
     );
 
@@ -624,11 +624,10 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
   return (
     <div
       ref={cardRef}
-      className={`timeline-step flex flex-col lg:flex-row items-center gap-6 lg:gap-4 transition-all duration-800 ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+      className={`timeline-step flex flex-col lg:flex-row items-center gap-6 lg:gap-4 transition-all duration-500 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
       style={{
-        transitionDelay: `${index * 150}ms`,
         transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
@@ -643,11 +642,10 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
 
       {/* Center date bubble */}
       <div
-        className={`z-20 flex-shrink-0 timeline-dot transition-all duration-800 ${
+        className={`z-20 flex-shrink-0 timeline-dot transition-all duration-500 ${
           isVisible ? "opacity-100 scale-100" : "opacity-50 scale-80"
         }`}
         style={{
-          transitionDelay: `${index * 150 + 200}ms`,
           transform: position === "left"
             ? (isVisible ? "translateX(-12px)" : "translateX(-12px) scale(0.8)")
             : (isVisible ? "translateX(12px)" : "translateX(12px) scale(0.8)"),

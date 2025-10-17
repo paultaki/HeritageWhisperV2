@@ -40,6 +40,7 @@ import { useState, useEffect, useRef } from "react";
 import { normalizeYear, formatYear } from "@/lib/utils";
 import StoryTraits from "@/components/StoryTraits";
 import { getTopTraits } from "@/utils/getTopTraits";
+import "./timeline-polish.css";
 
 const logoUrl = "/HW_logo_mic_clean.png";
 
@@ -376,18 +377,18 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
           className="cursor-pointer"
           onClick={handleCardClick}
         >
-          <div className={`relative rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 ${
-            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-          }`}>
-            <div className="relative w-full h-48 lg:h-64">
+          <div className={`timeline-card relative rounded-3xl overflow-hidden shadow-lg ${
+            isVisible ? 'in-view revealed' : ''
+          } ${isPlaying ? 'playing' : ''}`}>
+            <div className="image-container relative w-full h-48 lg:h-64">
               <Image
                 src={displayPhoto.url}
                 alt={story.title}
                 fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
-                className="object-cover transition-transform duration-500 hover:scale-105"
-                loading="eager"
-                priority={index < 8}
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 420px"
+                className="ken-burns-image object-cover"
+                loading={index < 6 ? "eager" : "lazy"}
+                priority={index < 2}
                 quality={85}
                 placeholder="blur"
                 blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
@@ -514,7 +515,9 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
     // No photo - render white card (existing design)
     return (
       <div
-        className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer"
+        className={`timeline-card bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 lg:p-8 shadow-lg cursor-pointer ${
+          isVisible ? 'in-view revealed' : ''
+        } ${isPlaying ? 'playing' : ''}`}
         onClick={handleCardClick}
       >
         <div className="mb-6">

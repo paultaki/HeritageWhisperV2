@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { sendVerificationEmail } from "@/lib/resend";
 import { authRatelimit, getClientIp, checkRateLimit } from "@/lib/ratelimit";
 import { logger } from "@/lib/logger";
+import { RegisterUserSchema, safeValidateRequestBody } from "@/lib/validationSchemas";
 
 // Initialize Supabase client with service role key to bypass RLS
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -29,14 +30,32 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { email, password, name, birthYear } = await request.json();
+    // Parse and validate request body
+    const rawBody = await request.json();
 
-    if (!email || !password || !name || !birthYear) {
+    // Validate input with Zod schema
+    const validationResult = safeValidateRequestBody(RegisterUserSchema, rawBody);
+
+    if (!validationResult.success) {
+      // Format validation errors for user-friendly response
+      const errorMessages = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+
+      logger.warn('[Registration] Validation failed:', errorMessages);
+
       return NextResponse.json(
-        { error: "Email, password, name, and birth year are required" },
-        { status: 400 },
+        {
+          error: 'Invalid registration data',
+          details: errorMessages,
+        },
+        { status: 400 }
       );
     }
+
+    // Use validated data
+    const { email, password, name, birthYear } = validationResult.data;
 
     // Require email confirmation for all new users
     const requireEmailConfirmation = true;

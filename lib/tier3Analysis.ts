@@ -22,9 +22,12 @@ if (!apiKey) {
   throw new Error("AI_GATEWAY_API_KEY or OPENAI_API_KEY environment variable is required");
 }
 
+// PRODUCTION OPTIMIZATION: Added timeout (60s) and retry logic (3 attempts) to prevent hangs
 const openai = new OpenAI({
   apiKey,
   baseURL,
+  timeout: 60000,  // 60 seconds - prevents indefinite hangs on slow/unresponsive API
+  maxRetries: 3,   // Retry up to 3 times on 500/502/503/504 errors with exponential backoff
 });
 
 interface Story {

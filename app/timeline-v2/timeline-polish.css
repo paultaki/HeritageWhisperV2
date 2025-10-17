@@ -1,0 +1,226 @@
+/* ================================================================
+   TIMELINE V2 - POLISH LAYER
+   "Holy Shit" Effects - Desktop Only
+   Based on 2025 Web Animation Best Practices
+   ================================================================ */
+
+/* ================================================================
+   1. KEN BURNS EFFECT - Living Images
+   ================================================================ */
+
+.image-container {
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+  position: relative;
+  will-change: transform;
+}
+
+.ken-burns-image {
+  object-fit: cover;
+  transform: scale(1.08) translate3d(0, 0, 0);
+  transition: transform 12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+/* Trigger Ken Burns when card enters view */
+.timeline-card.in-view .ken-burns-image {
+  transform: scale(1.0) rotate(0.3deg) translate3d(0, 0, 0);
+}
+
+/* Subtle zoom on hover - overrides Ken Burns temporarily */
+.timeline-card:hover .ken-burns-image {
+  transform: scale(1.03) rotate(0.3deg) translate3d(0, 0, 0);
+  transition-duration: 0.5s;
+}
+
+/* GPU Acceleration - Critical for 60fps */
+.timeline-card {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ================================================================
+   2. PROGRESSIVE SCROLL REVEAL
+   ================================================================ */
+
+.timeline-card {
+  opacity: 0;
+  transform: translateY(40px) scale(0.97) translate3d(0, 0, 0);
+  transition: 
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.timeline-card.revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1) translate3d(0, 0, 0);
+}
+
+/* Stagger animation delays */
+.timeline-step:nth-child(1) .timeline-card { transition-delay: 0ms; }
+.timeline-step:nth-child(2) .timeline-card { transition-delay: 80ms; }
+.timeline-step:nth-child(3) .timeline-card { transition-delay: 160ms; }
+.timeline-step:nth-child(4) .timeline-card { transition-delay: 240ms; }
+.timeline-step:nth-child(5) .timeline-card { transition-delay: 320ms; }
+.timeline-step:nth-child(6) .timeline-card { transition-delay: 400ms; }
+
+/* ================================================================
+   3. CARD MICRO-INTERACTIONS
+   ================================================================ */
+
+.timeline-card {
+  cursor: pointer;
+  transition: 
+    transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+    box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hover state - lift and enhance shadow */
+.timeline-card.revealed:hover {
+  transform: translateY(-6px) scale(1.01) translate3d(0, 0, 0);
+  box-shadow: 
+    0 12px 24px rgba(0, 0, 0, 0.1),
+    0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* Active/Click state - quick press down */
+.timeline-card.revealed:active {
+  transform: translateY(-3px) scale(0.99) translate3d(0, 0, 0);
+  transition-duration: 0.1s;
+}
+
+/* Playing state - golden glow */
+.timeline-card.playing {
+  box-shadow: 
+    0 0 0 2px #D4AF37,
+    0 12px 32px rgba(212, 175, 55, 0.35),
+    0 4px 12px rgba(212, 175, 55, 0.25);
+  transform: scale(1.02) translate3d(0, 0, 0);
+}
+
+/* Focus state for keyboard navigation (a11y) */
+.timeline-card:focus-visible {
+  outline: 3px solid #D4AF37;
+  outline-offset: 4px;
+  border-radius: 20px;
+}
+
+/* ================================================================
+   4. ENHANCED TIMELINE SPINE (existing line improvement)
+   ================================================================ */
+
+/* Add subtle pulse to center line */
+.timeline-container {
+  position: relative;
+}
+
+/* Progress line enhancement */
+@keyframes spine-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(156, 163, 175, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(156, 163, 175, 0.4);
+  }
+}
+
+/* ================================================================
+   5. SMOOTH TRANSITIONS FOR ALL INTERACTIVE ELEMENTS
+   ================================================================ */
+
+.timeline-card button,
+.timeline-card a,
+.timeline-card [role="button"] {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================================================================
+   6. PERFORMANCE OPTIMIZATIONS
+   ================================================================ */
+
+/* Remove will-change after animations complete */
+.timeline-card.revealed:not(:hover):not(.playing) {
+  will-change: auto;
+}
+
+/* Only apply transforms that are GPU-accelerated */
+.timeline-card > * {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ================================================================
+   7. ACCESSIBILITY - RESPECT USER PREFERENCES
+   ================================================================ */
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .timeline-card,
+  .ken-burns-image,
+  .timeline-card button,
+  .timeline-card a {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+  
+  .ken-burns-image {
+    transform: scale(1.0) !important;
+  }
+}
+
+/* ================================================================
+   8. MOBILE OPTIMIZATIONS (disable heavy effects)
+   ================================================================ */
+
+@media (max-width: 1024px) {
+  /* Disable Ken Burns on mobile/tablet for performance */
+  .ken-burns-image {
+    transition: none;
+    transform: scale(1.0) translate3d(0, 0, 0) !important;
+  }
+  
+  /* Instant reveal on mobile */
+  .timeline-card {
+    opacity: 1 !important;
+    transform: translateY(0) scale(1) !important;
+    transition: none !important;
+  }
+  
+  /* Keep hover effects but simpler */
+  .timeline-card:hover {
+    transform: translateY(-2px) translate3d(0, 0, 0);
+  }
+}
+
+/* ================================================================
+   9. PRINT STYLES (disable all animations)
+   ================================================================ */
+
+@media print {
+  .timeline-card,
+  .ken-burns-image {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* ================================================================
+   10. COLOR SYSTEM VARIABLES (if not already defined)
+   ================================================================ */
+
+:root {
+  --gold: #D4AF37;
+  --warm-brown: #8B5A2B;
+  --deep-brown: #6B4E42;
+  --parchment: #FAF8F3;
+  
+  /* Easing functions */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+

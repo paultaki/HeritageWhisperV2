@@ -437,13 +437,19 @@ export function BookStyleReview({
                             data: { session },
                           } = await supabase.auth.getSession();
 
-                          const headers: HeadersInit = {};
+                          // Get CSRF token
+                          const csrfResponse = await fetch("/api/csrf");
+                          const { token: csrfToken } = await csrfResponse.json();
+
+                          const headers: HeadersInit = {
+                            "x-csrf-token": csrfToken,
+                          };
                           if (session?.access_token) {
                             headers["Authorization"] =
                               `Bearer ${session.access_token}`;
                           }
 
-                          const response = await fetch("/api/transcribe-assemblyai", {
+                          const response = await fetch("/api/transcribe", {
                             method: "POST",
                             headers,
                             body: formData,
@@ -537,14 +543,20 @@ export function BookStyleReview({
                                   data: { session },
                                 } = await supabase.auth.getSession();
 
-                                const headers: HeadersInit = {};
+                                // Get CSRF token
+                                const csrfResponse = await fetch("/api/csrf");
+                                const { token: csrfToken } = await csrfResponse.json();
+
+                                const headers: HeadersInit = {
+                                  "x-csrf-token": csrfToken,
+                                };
                                 if (session?.access_token) {
                                   headers["Authorization"] =
                                     `Bearer ${session.access_token}`;
                                 }
 
                                 const response = await fetch(
-                                  "/api/transcribe-assemblyai",
+                                  "/api/transcribe",
                                   {
                                     method: "POST",
                                     headers,

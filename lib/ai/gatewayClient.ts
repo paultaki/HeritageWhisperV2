@@ -16,9 +16,12 @@ if (!apiKey) {
 }
 
 // Initialize OpenAI client with Gateway
-export const gateway = new OpenAI({ 
-  apiKey, 
+// PRODUCTION OPTIMIZATION: Added timeout (60s) and retry logic (3 attempts) to prevent hangs
+export const gateway = new OpenAI({
+  apiKey,
   baseURL,
+  timeout: 60000,  // 60 seconds - prevents indefinite hangs on slow/unresponsive API
+  maxRetries: 3,   // Retry up to 3 times on 500/502/503/504 errors with exponential backoff
 });
 
 export interface ChatRequest {
