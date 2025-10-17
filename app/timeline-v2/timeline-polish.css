@@ -128,7 +128,69 @@
 }
 
 /* ================================================================
-   5. SMOOTH TRANSITIONS FOR ALL INTERACTIVE ELEMENTS
+   5. GLASSMORPHIC PLAY BUTTON
+   ================================================================ */
+
+.glass-play-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  
+  /* White glass effect */
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  
+  /* Subtle white border for definition */
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  
+  /* Shadows for depth */
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translate3d(0, 0, 0);
+  will-change: transform, box-shadow;
+}
+
+/* Hover state - lift and glow */
+.glass-play-button:hover {
+  transform: scale(1.08) translate3d(0, 0, 0);
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 6px 24px rgba(0, 0, 0, 0.2),
+    0 3px 10px rgba(0, 0, 0, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* Active/Press state */
+.glass-play-button:active {
+  transform: scale(1.02) translate3d(0, 0, 0);
+  transition-duration: 0.1s;
+}
+
+/* Focus state for keyboard navigation */
+.glass-play-button:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 3px;
+}
+
+/* Icon color - white with slight glow */
+.glass-play-button svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* ================================================================
+   6. SMOOTH TRANSITIONS FOR ALL INTERACTIVE ELEMENTS
    ================================================================ */
 
 .timeline-card button,
@@ -138,7 +200,7 @@
 }
 
 /* ================================================================
-   6. PERFORMANCE OPTIMIZATIONS
+   7. PERFORMANCE OPTIMIZATIONS
    ================================================================ */
 
 /* Remove will-change after animations complete */
@@ -153,7 +215,7 @@
 }
 
 /* ================================================================
-   7. ACCESSIBILITY - RESPECT USER PREFERENCES
+   8. ACCESSIBILITY - RESPECT USER PREFERENCES
    ================================================================ */
 
 /* Respect prefers-reduced-motion */
@@ -161,7 +223,8 @@
   .timeline-card,
   .ken-burns-image,
   .timeline-card button,
-  .timeline-card a {
+  .timeline-card a,
+  .glass-play-button {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
@@ -169,10 +232,14 @@
   .ken-burns-image {
     transform: scale(1.0) !important;
   }
+  
+  .glass-play-button:hover {
+    transform: scale(1.0) !important;
+  }
 }
 
 /* ================================================================
-   8. MOBILE OPTIMIZATIONS (disable heavy effects)
+   9. MOBILE OPTIMIZATIONS (disable heavy effects)
    ================================================================ */
 
 @media (max-width: 1024px) {
@@ -196,7 +263,7 @@
 }
 
 /* ================================================================
-   9. PRINT STYLES (disable all animations)
+   10. PRINT STYLES (disable all animations)
    ================================================================ */
 
 @media print {
@@ -209,7 +276,7 @@
 }
 
 /* ================================================================
-   10. COLOR SYSTEM VARIABLES (if not already defined)
+   11. COLOR SYSTEM VARIABLES (if not already defined)
    ================================================================ */
 
 :root {

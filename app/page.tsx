@@ -403,22 +403,22 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center">
               Your Privacy Matters
             </h2>
-            <div className="space-y-4 text-lg text-gray-700">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl mt-0.5 flex-shrink-0">•</span>
-                <p>Only you control who sees your stories</p>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-orange-500 flex-shrink-0" />
+                <span className="text-lg text-gray-700">Only you control who sees your stories</span>
               </div>
-              <div className="flex items-start gap-3">
-                <span className="text-2xl mt-0.5 flex-shrink-0">•</span>
-                <p><strong>We never sell your data. Ever.</strong></p>
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-orange-500 flex-shrink-0" />
+                <span className="text-lg text-gray-700"><strong>We never sell your data. Ever.</strong></span>
               </div>
-              <div className="flex items-start gap-3">
-                <span className="text-2xl mt-0.5 flex-shrink-0">•</span>
-                <p>Download or delete everything anytime</p>
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-orange-500 flex-shrink-0" />
+                <span className="text-lg text-gray-700">Download or delete everything anytime</span>
               </div>
-              <div className="flex items-start gap-3">
-                <span className="text-2xl mt-0.5 flex-shrink-0">•</span>
-                <p>Location data automatically removed</p>
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-orange-500 flex-shrink-0" />
+                <span className="text-lg text-gray-700">Location data automatically removed</span>
               </div>
             </div>
           </div>

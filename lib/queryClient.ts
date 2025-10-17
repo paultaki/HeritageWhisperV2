@@ -15,7 +15,15 @@ async function throwIfResNotOk(res: Response) {
       }
 
       // If the API returns an error object with details, use that
-      const errorMessage = json.details || json.error || res.statusText;
+      let errorMessage = json.error || res.statusText;
+      
+      // If details is an array, format it nicely
+      if (json.details && Array.isArray(json.details)) {
+        errorMessage = json.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+      } else if (json.details && typeof json.details === 'string') {
+        errorMessage = json.details;
+      }
+      
       const error: any = new Error(errorMessage);
       error.code = json.code;
       throw error;

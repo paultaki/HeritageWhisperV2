@@ -100,6 +100,14 @@ export async function csrfProtection(request: NextRequest): Promise<NextResponse
   ];
 
   const pathname = new URL(url).pathname;
+  
+  // Skip CSRF for API routes with JWT authentication (Authorization header present)
+  const hasAuthHeader = request.headers.get('authorization');
+  if (hasAuthHeader && pathname.startsWith('/api/')) {
+    logger.debug(`[CSRF] Skipping validation for authenticated API request: ${pathname}`);
+    return null;
+  }
+  
   const shouldSkip = skipPaths.some(path => pathname.startsWith(path));
 
   if (shouldSkip) {

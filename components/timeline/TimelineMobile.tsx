@@ -541,8 +541,7 @@ function MemoryCard({
             {story.audioUrl && (
               <button
                 onClick={handlePlayAudio}
-                className="hw-play"
-                style={{ position: "relative", right: "auto", bottom: "auto" }}
+                className="glass-play-button-mobile"
                 data-testid={`button-play-${story.id}`}
                 aria-label={
                   isPlaying
@@ -553,18 +552,13 @@ function MemoryCard({
                 }
               >
                 {isLoading ? (
-                  <Loader2
-                    className="w-4 h-4 animate-spin"
-                    style={{ fill: "var(--color-accent)" }}
-                  />
+                  <Loader2 className="w-5 h-5 animate-spin text-white" />
                 ) : hasError ? (
-                  <AlertCircle className="w-4 h-4 text-red-500" />
+                  <AlertCircle className="w-5 h-5 text-red-500" />
                 ) : isPlaying ? (
-                  <Pause style={{ fill: "var(--color-accent)" }} />
+                  <Pause className="w-5 h-5 text-white fill-white" />
                 ) : (
-                  <Play
-                    style={{ fill: "var(--color-accent)", marginLeft: "2px" }}
-                  />
+                  <Play className="w-5 h-5 text-white fill-white ml-0.5" />
                 )}
               </button>
             )}

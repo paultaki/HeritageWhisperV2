@@ -180,6 +180,7 @@ export default function FamilyPage() {
       email: string;
       name: string;
       relationship: string;
+      permissionLevel?: 'viewer' | 'contributor';
     }) => {
       const response = await apiRequest("POST", "/api/family/invite", data);
       return response.json();
@@ -188,23 +189,27 @@ export default function FamilyPage() {
       // Trigger confetti celebration!
       celebrateInvite();
 
-      // Wait for the data to refetch before closing dialog
-      await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
+      // Show success toast immediately
+      toast({
+        title: "Invitation sent! 🎉",
+        description: "Your family member will receive an email invitation.",
+      });
 
+      // Wait for confetti animation to finish (500ms) before closing dialog
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Close dialog and refetch data
       setInviteDialogOpen(false);
       setInviteEmail("");
       setInviteRelationship("");
       setInviteMessage("");
 
+      await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
+
       // Show invite URL in development
       if (data.inviteUrl) {
         console.log('Invite URL:', data.inviteUrl);
       }
-
-      toast({
-        title: "Invitation sent! 🎉",
-        description: "Your family member will receive an email invitation.",
-      });
     },
     onError: (error: any) => {
       // Better handling for duplicate invite

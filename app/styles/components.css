@@ -216,6 +216,7 @@ body {
 }
 
 /* play button - gray transparent circle with orange icon */
+/* Legacy hw-play - keeping for backwards compatibility */
 .hw-play {
   position: absolute;
   right: var(--space-4);
@@ -250,6 +251,67 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hw-play:hover {
     transform: none;
+  }
+}
+
+/* New glass-play-button-mobile - glassmorphic white design */
+.glass-play-button-mobile {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  
+  /* White glass effect */
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  
+  /* Subtle white border for definition */
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  
+  /* Shadows for depth */
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translate3d(0, 0, 0);
+}
+
+.glass-play-button-mobile:hover {
+  transform: scale(1.08) translate3d(0, 0, 0);
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 6px 24px rgba(0, 0, 0, 0.2),
+    0 3px 10px rgba(0, 0, 0, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.glass-play-button-mobile:active {
+  transform: scale(1.02) translate3d(0, 0, 0);
+  transition-duration: 0.1s;
+}
+
+.glass-play-button-mobile:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 3px;
+}
+
+.glass-play-button-mobile svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .glass-play-button-mobile:hover {
+    transform: scale(1.0) !important;
   }
 }
 

@@ -17,15 +17,28 @@ import { z } from 'zod';
  * Validates individual photo objects in stories
  */
 const PhotoSchema = z.object({
-  url: z.string().url().optional(),
+  id: z.string().optional(),
+  url: z.string().optional(),
   filePath: z.string().optional(),
   isHero: z.boolean().optional(),
-  transform: z.object({
-    x: z.number(),
-    y: z.number(),
-    scale: z.number().min(0.1).max(5),
-    rotation: z.number().optional(),
-  }).optional(),
+  caption: z.string().optional(),
+  transform: z.union([
+    // New structure: { zoom, position: { x, y } }
+    z.object({
+      zoom: z.number().min(0.1).max(5),
+      position: z.object({
+        x: z.number(),
+        y: z.number(),
+      }),
+    }),
+    // Legacy structure: { x, y, scale, rotation? }
+    z.object({
+      x: z.number(),
+      y: z.number(),
+      scale: z.number().min(0.1).max(5),
+      rotation: z.number().optional(),
+    }),
+  ]).optional(),
 }).refine(
   (data) => data.url || data.filePath,
   { message: 'Photo must have either url or filePath' }
@@ -63,35 +76,39 @@ export const CreateStorySchema = z.object({
 
   lifeAge: z.number()
     .int('Age must be an integer')
-    .min(-10, 'Age cannot be less than -10 years before birth')
+    .min(-100, 'Age cannot be less than 100 years before birth')
     .max(120, 'Age cannot exceed 120 years')
     .nullable()
     .optional(),
 
   age: z.number()
     .int()
-    .min(-10)
+    .min(-100)
     .max(120)
     .nullable()
     .optional(),
 
-  durationSeconds: z.number()
-    .int('Duration must be an integer')
-    .min(1, 'Duration must be at least 1 second')
-    .max(600, 'Duration cannot exceed 10 minutes (600 seconds)')
-    .optional()
-    .default(30),
+  durationSeconds: z.preprocess(
+    (val) => {
+      // Handle null, undefined, 0, empty string, or any falsy value
+      if (!val || val === 0) return 30;
+      return val;
+    },
+    z.number().int('Duration must be an integer').min(1, 'Duration must be at least 1 second').max(600, 'Duration cannot exceed 10 minutes (600 seconds)')
+  ).optional().default(30),
 
   // Media fields
-  audioUrl: z.string()
-    .url('Invalid audio URL')
-    .refine(url => !url.startsWith('blob:'), 'Blob URLs not allowed')
-    .optional(),
+  audioUrl: z.union([
+    z.string().url('Invalid audio URL').refine(url => !url.startsWith('blob:'), 'Blob URLs not allowed'),
+    z.null(),
+    z.undefined(),
+  ]).optional(),
 
-  photoUrl: z.string()
-    .url('Invalid photo URL')
-    .refine(url => !url.startsWith('blob:'), 'Blob URLs not allowed')
-    .optional(),
+  photoUrl: z.union([
+    z.string().url('Invalid photo URL').refine(url => !url.startsWith('blob:'), 'Blob URLs not allowed'),
+    z.null(),
+    z.undefined(),
+  ]).optional(),
 
   photos: z.array(PhotoSchema)
     .max(20, 'Maximum 20 photos allowed per story')
@@ -135,7 +152,11 @@ export const CreateStorySchema = z.object({
   isFavorite: z.boolean().optional().default(false),
 
   // Prompt tracking
-  sourcePromptId: z.string().uuid().optional(),
+  sourcePromptId: z.union([
+    z.string().uuid(),
+    z.null(),
+    z.undefined(),
+  ]).optional(),
 
   // Legacy field compatibility
   content: z.string().optional(),

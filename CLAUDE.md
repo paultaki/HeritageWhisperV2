@@ -122,6 +122,7 @@ HeritageWhisperV2/
 - **Book Progress Bar**: Interactive progress bar with decade markers, year tooltips, click-to-navigate
 - **Page Navigation**: Click page margins to turn pages (left margin = back, right margin = forward)
 - **Rate Limiting**: Upshash Redis-based (auth: 5/10s, uploads: 10/min, API: 30/min)
+- **Family Sharing**: Magic link invites with role-based permissions (viewer/contributor) - see `FAMILY_SHARING_ANALYSIS.md` for architecture details
 
 ## 🤖 AI Features
 
@@ -640,6 +641,36 @@ Watch for in logs:
 - **Account Management**:
   - `/api/user/delete` - Complete account deletion (stories, files, auth)
   - `/api/user/export` - GDPR-compliant data export
+
+### Family Sharing
+
+**Current Implementation:** Magic link-based invites with session-based access
+
+- **Invite Flow**: Account holder invites family member → Secure token generated (32 bytes) → Magic link sent via email
+- **Security**: 7-day invite expiry, single-use tokens, rate limiting
+- **Session Management**:
+  - 7-day rolling expiry (extends on each login)
+  - 30-day absolute expiry (hard limit)
+  - Session rotation on verification
+- **Permissions**: Role-based (viewer, contributor)
+- **Limits**: Max 10 family members per account
+- **API Endpoints**:
+  - `/api/family/invite` - Generate invite links
+  - `/api/family/verify` - Token verification & session creation
+- **Database Tables**: `family_members`, `family_sessions`
+
+**⚠️ Security Review Completed (October 17, 2025):**
+
+A comprehensive analysis found security and UX limitations with the current magic link approach. Key findings:
+- **7-day invite expiry is too long** (industry standard: 10-60 minutes)
+- **Session-only access** limits multi-device usage and lacks proper revocation mechanism
+- **Email dependency** creates single point of failure
+
+**See `FAMILY_SHARING_ANALYSIS.md` for:**
+- Full security assessment
+- Industry best practices comparison
+- Three implementation options (Quick Fix, Hybrid Approach, Full User Accounts)
+- Recommended migration path with effort/impact analysis
 
 ### PDF Export
 

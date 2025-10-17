@@ -442,36 +442,14 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
                       e.stopPropagation();
                       handlePlayAudio(e);
                     }}
-                    className="flex-shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
+                    className="glass-play-button flex-shrink-0"
                   >
                     {isLoading ? (
-                      <Loader2 className="w-4 lg:w-5 h-4 lg:h-5 animate-spin text-orange-500" />
+                      <Loader2 className="w-5 h-5 animate-spin text-white" />
+                    ) : isPlaying ? (
+                      <Pause className="w-5 h-5 text-white fill-white" />
                     ) : (
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        className="text-orange-500"
-                      >
-                        {isPlaying ? (
-                          <>
-                            <rect x="2" y="4" width="2" height="12" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0ms', animationDuration: '600ms' }} />
-                            <rect x="6" y="2" width="2" height="16" fill="currentColor" className="animate-pulse" style={{ animationDelay: '100ms', animationDuration: '600ms' }} />
-                            <rect x="10" y="6" width="2" height="8" fill="currentColor" className="animate-pulse" style={{ animationDelay: '200ms', animationDuration: '600ms' }} />
-                            <rect x="14" y="3" width="2" height="14" fill="currentColor" className="animate-pulse" style={{ animationDelay: '300ms', animationDuration: '600ms' }} />
-                            <rect x="18" y="5" width="2" height="10" fill="currentColor" className="animate-pulse" style={{ animationDelay: '400ms', animationDuration: '600ms' }} />
-                          </>
-                        ) : (
-                          <>
-                            <rect x="2" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
-                            <rect x="6" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
-                            <rect x="10" y="4" width="2" height="12" fill="currentColor" opacity="0.6" />
-                            <rect x="14" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
-                            <rect x="18" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
-                          </>
-                        )}
-                      </svg>
+                      <Play className="w-5 h-5 text-white fill-white ml-0.5" />
                     )}
                   </button>
                 )}
@@ -555,40 +533,15 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
                 e.stopPropagation();
                 handlePlayAudio(e);
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 rounded-full transition-all duration-200 shadow-md hover:shadow-lg"
+              className="glass-play-button"
             >
               {isLoading ? (
-                <Loader2 className="w-4 lg:w-5 h-4 lg:h-5 animate-spin text-orange-500" />
+                <Loader2 className="w-5 h-5 animate-spin text-white" />
+              ) : isPlaying ? (
+                <Pause className="w-5 h-5 text-white fill-white" />
               ) : (
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  className="text-orange-500"
-                >
-                  {isPlaying ? (
-                    <>
-                      <rect x="2" y="4" width="2" height="12" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0ms', animationDuration: '600ms' }} />
-                      <rect x="6" y="2" width="2" height="16" fill="currentColor" className="animate-pulse" style={{ animationDelay: '100ms', animationDuration: '600ms' }} />
-                      <rect x="10" y="6" width="2" height="8" fill="currentColor" className="animate-pulse" style={{ animationDelay: '200ms', animationDuration: '600ms' }} />
-                      <rect x="14" y="3" width="2" height="14" fill="currentColor" className="animate-pulse" style={{ animationDelay: '300ms', animationDuration: '600ms' }} />
-                      <rect x="18" y="5" width="2" height="10" fill="currentColor" className="animate-pulse" style={{ animationDelay: '400ms', animationDuration: '600ms' }} />
-                    </>
-                  ) : (
-                    <>
-                      <rect x="2" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
-                      <rect x="6" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
-                      <rect x="10" y="4" width="2" height="12" fill="currentColor" opacity="0.6" />
-                      <rect x="14" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
-                      <rect x="18" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
-                    </>
-                  )}
-                </svg>
+                <Play className="w-5 h-5 text-white fill-white ml-0.5" />
               )}
-              <span className="text-sm font-medium text-orange-500">
-                {isPlaying ? "Pause" : "Listen"}
-              </span>
             </button>
 
             {/* Progress Bar */}

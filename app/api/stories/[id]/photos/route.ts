@@ -16,8 +16,10 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 // GET all photos for a story
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  // Await params (Next.js 15 requirement)
+  const { id } = await params;
   try {
     // Get the Authorization header
     const authHeader = request.headers.get("authorization");
@@ -47,7 +49,7 @@ export async function GET(
     const { data: story, error: fetchError } = await supabaseAdmin
       .from("stories")
       .select("metadata, user_id")
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .single();
 
@@ -101,8 +103,10 @@ export async function GET(
 // POST add a new photo to a story
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  // Await params (Next.js 15 requirement)
+  const { id } = await params;
   try {
     // Get the Authorization header
     const authHeader = request.headers.get("authorization");
@@ -144,7 +148,7 @@ export async function POST(
     const { data: story, error: fetchError } = await supabaseAdmin
       .from("stories")
       .select("metadata, user_id")
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .single();
 
@@ -206,7 +210,7 @@ export async function POST(
           photos: updatedPhotos,
         },
       })
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .select()
       .single();
