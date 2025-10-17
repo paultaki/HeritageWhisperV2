@@ -17,6 +17,9 @@ import {
   Trash2,
   Loader2,
   RotateCcw,
+  Wand2,
+  Undo2,
+  Lightbulb,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -26,6 +29,7 @@ import {
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { CustomAudioPlayer } from "@/components/CustomAudioPlayer";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 interface BookStyleReviewProps {
   title: string;
@@ -78,7 +82,17 @@ export function BookStyleReview({
   const [tempWisdom, setTempWisdom] = useState(wisdomText);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isGeneratingLesson, setIsGeneratingLesson] = useState(false);
+  const [originalTranscription, setOriginalTranscription] = useState<string | null>(null);
+  const [lessonOptions, setLessonOptions] = useState<{
+    practical?: string;
+    emotional?: string;
+    character?: string;
+  } | null>(null);
+  const [showLessonOptions, setShowLessonOptions] = useState(false);
 
+  const { toast } = useToast();
   const titleInputRef = useRef<HTMLInputElement>(null);
   const yearInputRef = useRef<HTMLInputElement>(null);
   const wisdomInputRef = useRef<HTMLTextAreaElement>(null);
@@ -121,6 +135,121 @@ export function BookStyleReview({
   const handleWisdomSave = () => {
     onWisdomChange(tempWisdom);
     setEditingWisdom(false);
+  };
+
+  const handleEnhanceStory = async () => {
+    if (!transcription?.trim()) {
+      toast({
+        title: "No story to enhance",
+        description: "Please write your story first before enhancing it.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsEnhancing(true);
+    try {
+      // Save original before enhancing
+      setOriginalTranscription(transcription);
+
+      const currentWordCount = transcription.split(" ").filter(w => w.length > 0).length;
+
+      const response = await fetch("/api/stories/enhance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          story: transcription,
+          title: title,
+          year: storyYear,
+          currentWordCount,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to enhance story");
+      }
+
+      const data = await response.json();
+
+      onTranscriptionChange(data.enhancedStory);
+
+      toast({
+        title: "✨ Story enhanced!",
+        description: `Expanded from ${data.meta.originalWordCount} to ${data.meta.enhancedWordCount} words. Click Undo if you want to revert.`,
+      });
+    } catch (error) {
+      console.error("Enhancement error:", error);
+      toast({
+        title: "Enhancement failed",
+        description: "Please try again or continue editing manually.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  const handleUndoEnhancement = () => {
+    if (originalTranscription) {
+      onTranscriptionChange(originalTranscription);
+      setOriginalTranscription(null);
+      toast({
+        title: "Reverted to original",
+        description: "Your original story has been restored.",
+      });
+    }
+  };
+
+  const handleGenerateLesson = async () => {
+    if (!transcription?.trim()) {
+      toast({
+        title: "No story yet",
+        description: "Please write your story first before generating lessons.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingLesson(true);
+    try {
+      const response = await fetch("/api/stories/suggest-lesson", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          story: transcription,
+          title: title,
+          year: storyYear,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate lessons");
+      }
+
+      const data = await response.json();
+      setLessonOptions(data.lessons);
+      setShowLessonOptions(true);
+    } catch (error) {
+      console.error("Lesson generation error:", error);
+      toast({
+        title: "Generation failed",
+        description: "Please try again or write your own lesson.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingLesson(false);
+    }
+  };
+
+  const handleSelectLesson = (lesson: string) => {
+    onWisdomChange(lesson);
+    setTempWisdom(lesson);
+    setShowLessonOptions(false);
+    setEditingWisdom(false);
+    toast({
+      title: "Lesson added",
+      description: "You can still edit it if you'd like.",
+    });
   };
 
   return (
@@ -473,33 +602,141 @@ export function BookStyleReview({
 
               {/* 5. Your Story */}
               <div>
-                <h3 className="text-lg font-medium text-gray-700 mb-3">
-                  Your Story
-                </h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-medium text-gray-700">
+                    Your Story
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {originalTranscription && (
+                      <Button
+                        onClick={handleUndoEnhancement}
+                        disabled={isEnhancing}
+                        size="sm"
+                        variant="outline"
+                        className="text-gray-600 hover:text-gray-900"
+                      >
+                        <Undo2 className="w-4 h-4 mr-1.5" />
+                        Undo Enhancement
+                      </Button>
+                    )}
+                    <Button
+                      onClick={handleEnhanceStory}
+                      disabled={isEnhancing || !transcription?.trim()}
+                      size="sm"
+                      variant="outline"
+                      className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200"
+                    >
+                      {isEnhancing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                          Enhancing...
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 className="w-4 h-4 mr-1.5" />
+                          Enhance Story
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
                 <Textarea
                   value={transcription}
                   onChange={(e) => onTranscriptionChange(e.target.value)}
                   className="w-full min-h-[300px] resize-none border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400"
                   placeholder="Type or paste your story here. This is how it will appear in your book..."
+                  disabled={isEnhancing}
                 />
                 {transcription && (
-                  <p className="text-base text-gray-500 mt-2">
-                    {
-                      transcription.split(" ").filter((w) => w.length > 0)
-                        .length
-                    }{" "}
-                    words
-                  </p>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-base text-gray-500">
+                      {
+                        transcription.split(" ").filter((w) => w.length > 0)
+                          .length
+                      }{" "}
+                      words
+                    </p>
+                    {isEnhancing && (
+                      <p className="text-base text-purple-600 flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        AI is enhancing your story...
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 
               {/* 6. Lesson Learned */}
               <div>
                 <div className="group relative">
-                  <h3 className="text-lg font-medium text-gray-700 mb-3 flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-amber-500" />
-                    Lesson Learned
-                  </h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-medium text-gray-700 flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-amber-500" />
+                      Lesson Learned
+                    </h3>
+                    <Button
+                      onClick={handleGenerateLesson}
+                      disabled={isGeneratingLesson || !transcription?.trim()}
+                      size="sm"
+                      variant="outline"
+                      className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200"
+                    >
+                      {isGeneratingLesson ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Lightbulb className="w-4 h-4 mr-1.5" />
+                          {wisdomText ? "Get Another Recommendation" : "Need a Recommendation?"}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Lesson Options Display */}
+                  {showLessonOptions && lessonOptions && (
+                    <div className="mb-4 space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-sm font-medium text-blue-900">Choose a lesson or edit it:</p>
+                      {lessonOptions.practical && (
+                        <button
+                          onClick={() => handleSelectLesson(lessonOptions.practical!)}
+                          className="w-full text-left p-3 bg-white rounded border border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                        >
+                          <p className="text-xs text-blue-600 font-medium mb-1">Practical</p>
+                          <p className="text-base text-gray-700">{lessonOptions.practical}</p>
+                        </button>
+                      )}
+                      {lessonOptions.emotional && (
+                        <button
+                          onClick={() => handleSelectLesson(lessonOptions.emotional!)}
+                          className="w-full text-left p-3 bg-white rounded border border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                        >
+                          <p className="text-xs text-blue-600 font-medium mb-1">Emotional</p>
+                          <p className="text-base text-gray-700">{lessonOptions.emotional}</p>
+                        </button>
+                      )}
+                      {lessonOptions.character && (
+                        <button
+                          onClick={() => handleSelectLesson(lessonOptions.character!)}
+                          className="w-full text-left p-3 bg-white rounded border border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                        >
+                          <p className="text-xs text-blue-600 font-medium mb-1">Character</p>
+                          <p className="text-base text-gray-700">{lessonOptions.character}</p>
+                        </button>
+                      )}
+                      <Button
+                        onClick={() => setShowLessonOptions(false)}
+                        size="sm"
+                        variant="ghost"
+                        className="w-full"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+
                   {!editingWisdom ? (
                     <div
                       className="wisdom-quote p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border-l-4 border-amber-400 cursor-pointer hover:from-amber-100 hover:to-orange-100 transition-colors"

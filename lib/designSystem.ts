@@ -25,7 +25,7 @@ export const colors = {
     gold: "#D4853A",
   },
   gradients: {
-    coral: "linear-gradient(90deg, #F59E0B 0%, #EC4899 100%)",
+    coral: "linear-gradient(90deg, #F59E0B 0%, #F97316 100%)",
     warm: "linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)",
     cta: "linear-gradient(to right, rgb(245 158 11) 0%, rgb(239 68 68) 100%)",
     ctaReverse:

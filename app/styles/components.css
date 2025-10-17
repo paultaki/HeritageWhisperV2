@@ -49,7 +49,7 @@ body {
   left: 20px;
   top: 0;
   bottom: 0;
-  width: 2px;
+  width: 3px;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.08));
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.08) inset;
 }
@@ -215,7 +215,7 @@ body {
   }
 }
 
-/* play button - dark backdrop for contrast */
+/* play button - gray transparent circle with orange icon */
 .hw-play {
   position: absolute;
   right: var(--space-4);
@@ -223,7 +223,7 @@ body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5); /* Dark semi-transparent backdrop */
+  background: rgba(128, 128, 128, 0.4); /* Gray semi-transparent backdrop */
   backdrop-filter: blur(8px);
   border: none;
   display: grid;
@@ -235,15 +235,15 @@ body {
 .hw-play svg {
   width: 18px;
   height: 18px;
-  fill: white; /* White icon for contrast */
+  fill: var(--color-accent); /* Orange play icon always */
   stroke: none;
 }
 .hw-play:hover {
-  transform: scale(1.04);
-  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.08);
+  background: rgba(128, 128, 128, 0.6); /* Slightly more opaque on hover */
 }
 .hw-play:hover svg {
-  fill: var(--color-accent); /* Orange on hover for brand consistency */
+  fill: var(--color-accent); /* Keep orange on hover */
 }
 
 /* Respect reduced motion preference */
@@ -311,24 +311,24 @@ body {
   }
 }
 
-/* year badge - always visible, larger */
+/* year badge - minimal production style */
 .hw-year {
   position: absolute;
   left: -64px;
   top: calc(var(--title-offset, 22px) - 40px);
   font-family: var(--font-serif);
-  font-weight: 600;
-  font-size: 19px;
+  font-weight: 500;
+  font-size: 18px;
   line-height: 1;
-  color: var(--color-text-muted);
-  background: var(--color-page);
-  padding: 4px 7px 6px 7px;
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
+  color: #9CA3AF; /* Lighter gray to match production */
+  background: rgba(255, 255, 255, 0.95);
+  padding: 6px 10px 8px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
   opacity: 1;
   transform: translateY(0);
   pointer-events: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 @media (max-width: 767px) {
@@ -337,7 +337,7 @@ body {
     top: calc(var(--title-offset, 22px) - 40px);
     font-size: 14px;
     line-height: 1;
-    padding: 3px 5px 5px 5px;
+    padding: 4px 7px 6px 7px;
   }
 }
 
