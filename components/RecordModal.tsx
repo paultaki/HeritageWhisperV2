@@ -90,6 +90,45 @@ export default function RecordModal({
   const silenceRef = useRef<NodeJS.Timeout | null>(null);
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
 
+  // Reset all state when modal opens fresh
+  useEffect(() => {
+    if (isOpen) {
+      console.log("[RecordModal] Modal opened, resetting all state");
+      // Reset all recording-related state
+      setIsTranscribing(false);
+      setIsRecording(false);
+      setIsPaused(false);
+      setRecordingTime(0);
+      setAudioBlob(null);
+      setAllTranscriptions([]);
+      setIsContinuingRecording(false);
+      setFollowUpPrompts([]);
+      setShowTranscription(false);
+      setTranscription("");
+      setEditedTranscription("");
+      setShowGoDeeperOverlay(false);
+      setGoDeeperQuestions([]);
+      setCurrentQuestionIndex(0);
+      setAudioUrl(null);
+      setIsPlaying(false);
+      setFormattedContent(null);
+      setSilenceTimer(0);
+      setIsTypingMode(false);
+      setShowFollowUpButton(false);
+      setIsGeneratingFollowUp(false);
+      setContextualFollowUpQuestion(null);
+      setFollowUpQuestions([]);
+      setCurrentFollowUpIndex(0);
+      setTranscribedChunkCount(0);
+      setPartialTranscript("");
+
+      // Set initial values if provided
+      setCurrentPrompt(initialPrompt || "");
+      setStoryTitle(initialTitle || "");
+      setStoryYear(initialYear || null);
+    }
+  }, [isOpen, initialPrompt, initialTitle, initialYear]);
+
   // Fetch personalized prompt based on profile
   const { data: profileData } = useQuery({
     queryKey: ["/api/profile"],

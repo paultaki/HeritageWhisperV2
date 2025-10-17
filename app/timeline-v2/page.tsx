@@ -666,13 +666,14 @@ export default function TimelineV2Page() {
       const containerHeight = containerRect.height;
       const windowHeight = window.innerHeight;
 
-      // Calculate how much of the timeline is visible
+      // Calculate how far the viewport bottom has scrolled into the timeline
+      // When containerTop is positive (timeline below viewport), progress should be minimal
+      // When containerTop is negative (timeline scrolled up), progress grows
+      // When bottom of viewport reaches bottom of timeline, progress should be 100%
+      const distanceIntoTimeline = windowHeight - containerTop;
       const scrollProgress = Math.max(
         0,
-        Math.min(
-          1,
-          (windowHeight - containerTop) / (containerHeight + windowHeight)
-        )
+        Math.min(1, distanceIntoTimeline / containerHeight)
       );
 
       progressLine.style.height = `${scrollProgress * 100}%`;

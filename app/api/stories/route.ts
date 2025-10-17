@@ -531,41 +531,55 @@ export async function POST(request: NextRequest) {
                   }
                 );
               } else {
-                // All rate limits passed - proceed with Tier 3 analysis
-                logger.debug(`[Stories API] All rate limits OK. Performing Tier 3 analysis...`);
+                // All rate limits passed - proceed with Tier 3 analysis IN BACKGROUND
+                logger.debug(`[Stories API] All rate limits OK. Queueing Tier 3 analysis for background processing...`);
 
-                // Perform GPT-4o/GPT-5 combined analysis
-                const tier3Result = await performTier3Analysis(
-                  allStories,
-                  storyCount,
-                );
+                // Fire and forget - don't block the response
+                setImmediate(async () => {
+                  try {
+                    logger.debug(`[Tier 3 Background] Starting analysis for Story #${storyCount}...`);
+                    
+                    // Perform GPT-4o/GPT-5 combined analysis
+                    const tier3Result = await performTier3Analysis(
+                      allStories,
+                      storyCount,
+                    );
 
-                // Log AI call telemetry
-                if (tier3Result._meta) {
-                  logger.info({
-                    op: "ai_call",
-                    stage: "tier3",
-                    milestone: storyCount,
-                    model: tier3Result._meta.modelUsed,
-                    effort: tier3Result._meta.reasoningEffort,
-                    ttftMs: tier3Result._meta.ttftMs,
-                    latencyMs: tier3Result._meta.latencyMs,
-                    costUsd: tier3Result._meta.costUsd,
-                    tokensUsed: tier3Result._meta.tokensUsed,
-                  });
-                }
+                    // Log AI call telemetry
+                    if (tier3Result._meta) {
+                      logger.info({
+                        op: "ai_call",
+                        stage: "tier3_background",
+                        milestone: storyCount,
+                        model: tier3Result._meta.modelUsed,
+                        effort: tier3Result._meta.reasoningEffort,
+                        ttftMs: tier3Result._meta.ttftMs,
+                        latencyMs: tier3Result._meta.latencyMs,
+                        costUsd: tier3Result._meta.costUsd,
+                        tokensUsed: tier3Result._meta.tokensUsed,
+                      });
+                    }
 
-                // Store prompts and character insights
-                await storeTier3Results(
-                  supabaseAdmin,
-                  user.id,
-                  storyCount,
-                  tier3Result,
-                );
+                    // Store prompts and character insights
+                    await storeTier3Results(
+                      supabaseAdmin,
+                      user.id,
+                      storyCount,
+                      tier3Result,
+                    );
 
-                logger.debug(
-                  `[Stories API] ✅ Tier 3 analysis complete for Story #${storyCount}`,
-                );
+                    logger.debug(
+                      `[Tier 3 Background] ✅ Analysis complete for Story #${storyCount}. Prompts now available in user's queue.`,
+                    );
+                  } catch (backgroundError) {
+                    logger.error(
+                      `[Tier 3 Background] Analysis failed for Story #${storyCount}:`,
+                      backgroundError instanceof Error ? backgroundError.message : backgroundError,
+                    );
+                  }
+                });
+
+                logger.debug(`[Stories API] Tier 3 analysis queued for background. Returning response to user immediately.`);
               }
 
               // Log Story 3 paywall status

@@ -178,7 +178,7 @@ async function generateLessonOptions(transcription: string): Promise<{
 
   try {
     const completion = await openaiGateway.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini", // Switched from gpt-4o: 10x cheaper, template-driven task
       messages: [
         {
           role: "system",
@@ -193,7 +193,7 @@ ${sanitizedTranscription}
 </story>`,
         },
       ],
-      temperature: 0.8,
+      temperature: 0.9, // Slightly higher for creativity with smaller model
       max_tokens: 200,
     });
 
