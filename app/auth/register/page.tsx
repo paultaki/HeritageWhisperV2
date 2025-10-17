@@ -10,9 +10,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithGoogle } from "@/lib/supabase";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Calendar, Shield, UserPlus } from "lucide-react";
 
-const logoUrl = "/HW_logo_mic_clean.png";
+const logoUrl = "/HW_text-compress.png";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -70,103 +70,135 @@ export default function Register() {
               className="w-full h-full object-contain"
             />
           </div>
-          <p className="text-2xl text-muted-foreground font-medium">
+          <p className="text-2xl text-muted-foreground font-medium text-center">
             Your voice. Their treasure. Forever.
           </p>
         </div>
 
         <Card className="shadow-lg border">
           <CardContent className="pt-8 pb-8 px-8">
-            <h2 className="text-2xl font-semibold text-center mb-8">
+            <h2 className="text-2xl font-semibold text-center mb-3">
               Create Your Story
             </h2>
+            
+            {/* Protected Session Badge */}
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
+                <Shield className="h-3.5 w-3.5 text-green-600" />
+                <span className="text-xs font-medium text-green-700">Protected Session</span>
+              </div>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
               <div>
-                <Label htmlFor="email" className="text-lg font-medium">
+                <Label htmlFor="email" className="text-lg font-medium text-foreground">
                   Email
                 </Label>
-                <Input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-3 text-lg py-4"
-                  placeholder="your@email.com"
-                  required
-                  data-testid="input-email"
-                />
+                <div className="relative mt-3">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                    <Mail className="h-5 w-5" />
+                  </div>
+                  <Input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="text-lg py-4 pl-10"
+                    placeholder="your@email.com"
+                    required
+                    autoComplete="email"
+                    data-testid="input-email"
+                  />
+                </div>
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-lg font-medium">
+                <Label htmlFor="password" className="text-lg font-medium text-foreground">
                   Password
                 </Label>
-                <div className="relative mt-3">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="text-lg py-4 pr-14 w-full"
-                    placeholder="••••••••"
-                    required
-                    data-testid="input-password"
-                  />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="pointer-events-auto text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 transition-colors"
-                      aria-label={
-                        showPassword ? "Hide password" : "Show password"
-                      }
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                      <Lock className="h-5 w-5" />
+                    </div>
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="text-lg py-4 pl-10 pr-12 w-full"
+                      placeholder="••••••••"
+                      required
+                      autoComplete="new-password"
+                      data-testid="input-password"
+                    />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 transition-colors"
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="name" className="text-lg font-medium">
+                <Label htmlFor="name" className="text-lg font-medium text-foreground">
                   Full Name
                 </Label>
-                <Input
-                  type="text"
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="mt-3 text-lg py-4"
-                  placeholder="Your full name"
-                  required
-                  data-testid="input-name"
-                />
+                <div className="relative mt-3">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                    <User className="h-5 w-5" />
+                  </div>
+                  <Input
+                    type="text"
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="text-lg py-4 pl-10"
+                    placeholder="Your full name"
+                    required
+                    autoComplete="name"
+                    data-testid="input-name"
+                  />
+                </div>
                 <p className="text-sm text-muted-foreground mt-2">
                   This will appear on your timeline
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="birthYear" className="text-lg font-medium">
+                <Label htmlFor="birthYear" className="text-lg font-medium text-foreground">
                   Birth Year
                 </Label>
-                <Input
-                  type="number"
-                  id="birthYear"
-                  value={birthYear}
-                  onChange={(e) => setBirthYear(e.target.value)}
-                  className="mt-3 text-lg py-4"
-                  placeholder="1952"
-                  min="1920"
-                  max="2010"
-                  required
-                  data-testid="input-birth-year"
-                />
+                <div className="relative mt-3">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                    <Calendar className="h-5 w-5" />
+                  </div>
+                  <Input
+                    type="number"
+                    id="birthYear"
+                    value={birthYear}
+                    onChange={(e) => setBirthYear(e.target.value)}
+                    className="text-lg py-4 pl-10"
+                    placeholder="1952"
+                    min="1920"
+                    max="2010"
+                    required
+                    autoComplete="bday-year"
+                    data-testid="input-birth-year"
+                  />
+                </div>
                 <p className="text-sm text-muted-foreground mt-2">
                   This helps us create your timeline
                 </p>
@@ -206,11 +238,30 @@ export default function Register() {
 
               <Button
                 type="submit"
-                className="w-full text-xl font-semibold py-4"
+                className="relative w-full text-xl font-semibold py-4 transition-all duration-300 overflow-hidden flex items-center justify-center gap-2 group hover:shadow-[0_0_0_1px_rgba(245,158,11,0.35),0_20px_40px_rgba(245,158,11,0.18)]"
                 disabled={!agreedToTerms}
                 data-testid="button-register"
               >
-                Create My Timeline
+                <UserPlus className="h-5 w-5 relative z-[1] group-hover:translate-x-1 transition-transform duration-300" />
+                <span className="relative z-[1] group-hover:translate-x-1 transition-transform duration-300">
+                  Create My Timeline
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300"
+                  style={{
+                    background:
+                      "linear-gradient(45deg, rgba(245,158,11,0.8) 0%, rgba(251,146,60,0.8) 50%, rgba(251,113,133,0.8) 100%)",
+                  }}
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-md"
+                  style={{
+                    background:
+                      "radial-gradient(120% 80% at 50% -20%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0) 60%)",
+                  }}
+                />
               </Button>
             </form>
 
@@ -229,7 +280,7 @@ export default function Register() {
               type="button"
               onClick={signInWithGoogle}
               variant="outline"
-              className="w-full text-lg font-medium py-4 flex items-center justify-center gap-3 hover:bg-gray-50"
+              className="w-full text-lg font-medium py-4 flex items-center justify-center gap-3 transition-all duration-300 hover:bg-gray-50 hover:shadow-md"
               data-testid="button-google-signin"
             >
               <svg className="h-6 w-6" viewBox="0 0 24 24">
@@ -261,6 +312,18 @@ export default function Register() {
               >
                 Already have an account? Sign In
               </Link>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="flex items-center justify-center gap-6 mt-8 pt-6 border-t border-gray-200">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Lock className="h-4 w-4" />
+                <span>256-bit SSL</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Shield className="h-4 w-4" />
+                <span>Bank-Level Security</span>
+              </div>
             </div>
           </CardContent>
         </Card>

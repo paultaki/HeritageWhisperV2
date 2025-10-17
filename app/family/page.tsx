@@ -206,11 +206,20 @@ export default function FamilyPage() {
       });
     },
     onError: (error: any) => {
-      toast({
-        title: "Invitation failed",
-        description: error.message || "Could not send invitation.",
-        variant: "destructive",
-      });
+      // Better handling for duplicate invite
+      if (error.message?.includes("already invited")) {
+        toast({
+          title: "Already invited",
+          description: "This person already has an invitation. Try using 'Resend' instead.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Invitation failed",
+          description: error.message || "Could not send invitation.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -234,6 +243,31 @@ export default function FamilyPage() {
       toast({
         title: "Removal failed",
         description: error.message || "Could not remove family member.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Resend invitation mutation
+  const resendMutation = useMutation({
+    mutationFn: async (memberId: string) => {
+      const response = await apiRequest(
+        "POST",
+        `/api/family/${memberId}/resend`,
+      );
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+      toast({
+        title: "Invitation resent! 📧",
+        description: "A new invitation email has been sent.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Resend failed",
+        description: error.message || "Could not resend invitation.",
         variant: "destructive",
       });
     },
@@ -300,8 +334,19 @@ export default function FamilyPage() {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const handleRemoveMember = async (memberId: string) => {
-    await removeMutation.mutateAsync(memberId);
+  const handleRemoveMember = async (memberId: string, isPending: boolean = false) => {
+    try {
+      await removeMutation.mutateAsync(memberId);
+      // Override the success message for pending invites
+      if (isPending) {
+        toast({
+          title: "Invitation revoked",
+          description: "The invitation has been cancelled.",
+        });
+      }
+    } catch (error) {
+      // Error handled by mutation onError
+    }
   };
 
   // Show loading spinner while checking authentication
@@ -762,9 +807,50 @@ export default function FamilyPage() {
                             </p>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm">
-                          Resend
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => resendMutation.mutate(member.id)}
+                            disabled={resendMutation.isPending}
+                          >
+                            {resendMutation.isPending ? "Sending..." : "Resend"}
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive"
+                              >
+                                Revoke
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Revoke invitation?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will cancel the invitation to{" "}
+                                  {member.email}. They won't be able to use the
+                                  invite link.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="h-12">
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleRemoveMember(member.id, true)}
+                                  className="h-12 bg-destructive hover:bg-destructive/90"
+                                >
+                                  Revoke
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </div>
                     ))}
                   </div>

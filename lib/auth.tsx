@@ -35,8 +35,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refetchOnWindowFocus: false,
   });
 
+  // Handle logout on browser close if "Remember Me" is disabled
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const rememberMe = localStorage.getItem('rememberMe');
+      // Only clear sessionActive flag, actual logout happens on next page load
+      if (rememberMe === 'false') {
+        sessionStorage.removeItem('sessionActive');
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
   // Initialize and monitor Supabase session
   useEffect(() => {
+    // Check "Remember Me" preference and handle session persistence
+    const checkSessionPersistence = async () => {
+      const rememberMe = localStorage.getItem('rememberMe');
+      const sessionActive = sessionStorage.getItem('sessionActive');
+      
+      // If "Remember Me" is disabled and this is a new browser session (sessionActive is missing)
+      // then the user closed their browser and we should logout
+      if (rememberMe === 'false' && !sessionActive) {
+        console.log('[Auth] Remember Me disabled - clearing session on browser reopen');
+        await supabase.auth.signOut();
+        return;
+      }
+      
+      // Mark this browser tab session as active
+      if (rememberMe === 'false') {
+        sessionStorage.setItem('sessionActive', 'true');
+      }
+    };
+    
+    checkSessionPersistence();
+    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -50,6 +85,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Refetch user data when auth state changes
       if (session) {
         queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        
+        // If "Remember Me" is unchecked, track session in sessionStorage
+        const rememberMe = localStorage.getItem('rememberMe');
+        if (rememberMe === 'false') {
+          sessionStorage.setItem('sessionActive', 'true');
+        }
       } else {
         // Clear user data when session is null (logged out)
         queryClient.setQueryData(["/api/auth/me"], null);
@@ -222,6 +263,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(null);
       // Clear all cached queries
       queryClient.clear();
+      
+      // Only clear saved email if "Remember Me" is NOT checked
+      if (typeof window !== 'undefined') {
+        const rememberMe = localStorage.getItem('rememberMe');
+        
+        // If "Remember Me" is unchecked (false or null), clear everything
+        if (rememberMe !== 'true') {
+          localStorage.removeItem('savedEmail');
+          localStorage.removeItem('rememberMe');
+        }
+        // If "Remember Me" IS checked (true), keep both savedEmail and rememberMe
+        // so the email persists for next login
+      }
+      
       // Navigate to login
       router.push("/auth/login");
     },

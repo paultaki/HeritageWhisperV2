@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithGoogle } from "@/lib/supabase";
-import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, LogIn, Shield } from "lucide-react";
 
 const logoUrl = "/HW_text-compress.png";
 
@@ -18,9 +18,29 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true); // Default to checked
+  const [isClient, setIsClient] = useState(false); // Track client-side hydration
   const router = useRouter();
   const { login, user } = useAuth();
   const { toast } = useToast();
+
+  // Mark client-side as hydrated to prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Load saved email if "Remember me" was checked (only after hydration)
+  useEffect(() => {
+    if (!isClient) return;
+    
+    const savedEmail = localStorage.getItem('savedEmail');
+    const savedRememberMe = localStorage.getItem('rememberMe');
+    
+    if (savedEmail && savedRememberMe === 'true') {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, [isClient]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -33,6 +53,19 @@ export default function Login() {
     e.preventDefault();
 
     try {
+      // Store remember me preference and email
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('rememberMe', rememberMe ? 'true' : 'false');
+        
+        if (rememberMe) {
+          // Save email for next login
+          localStorage.setItem('savedEmail', email);
+        } else {
+          // Clear saved email if unchecked
+          localStorage.removeItem('savedEmail');
+        }
+      }
+      
       await login(email, password);
     } catch (error: any) {
       toast({
@@ -66,11 +99,19 @@ export default function Login() {
 
         <Card className="shadow-lg border">
           <CardContent className="pt-8 pb-8 px-8">
-            <h2 className="text-2xl font-semibold text-center mb-8">
+            <h2 className="text-2xl font-semibold text-center mb-3">
               Welcome Back to Your Story
             </h2>
+            
+            {/* Protected Session Badge */}
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
+                <Shield className="h-3.5 w-3.5 text-green-600" />
+                <span className="text-xs font-medium text-green-700">Protected Session</span>
+              </div>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
               <div>
                 <Label htmlFor="email" className="text-lg font-medium text-foreground">
                   Email
@@ -91,6 +132,31 @@ export default function Login() {
                     data-testid="input-email"
                   />
                 </div>
+              </div>
+
+              {/* Remember Me Checkbox */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setRememberMe(checked);
+                    
+                    // If unchecked, clear saved email immediately
+                    if (!checked && typeof window !== 'undefined') {
+                      localStorage.removeItem('savedEmail');
+                    }
+                  }}
+                  className="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2 cursor-pointer"
+                />
+                <Label
+                  htmlFor="rememberMe"
+                  className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+                >
+                  Remember me for 30 days
+                </Label>
               </div>
 
               <div>
@@ -226,6 +292,18 @@ export default function Login() {
                   New Here? Create Your Story
                 </Button>
               </Link>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="flex items-center justify-center gap-6 mt-8 pt-6 border-t border-gray-200">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Lock className="h-4 w-4" />
+                <span>256-bit SSL</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Shield className="h-4 w-4" />
+                <span>Bank-Level Security</span>
+              </div>
             </div>
           </CardContent>
         </Card>
