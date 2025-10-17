@@ -633,17 +633,28 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
       }}
     >
       {/* Left side content (for left-positioned cards) - Desktop only */}
-      <div className={`flex-1 flex ${position === "left" ? "justify-end lg:pr-6" : ""} hidden lg:flex`}>
+      <div className={`flex-1 flex ${position === "left" ? "justify-end" : ""} hidden lg:flex relative`}>
         {position === "left" && (
-          <div className="max-w-md w-full">
-            {renderCardContent()}
-          </div>
+          <>
+            <div className="max-w-md w-full">
+              {renderCardContent()}
+            </div>
+            {/* Connecting line from card to timeline */}
+            <div 
+              className={`absolute right-0 top-1/2 w-6 h-px bg-gray-300 transition-all duration-800 ${
+                isVisible ? "opacity-60" : "opacity-0"
+              }`}
+              style={{
+                transitionDelay: `${index * 150 + 100}ms`,
+              }}
+            />
+          </>
         )}
       </div>
 
       {/* Center date bubble */}
       <div
-        className={`z-20 flex-shrink-0 timeline-dot transition-all duration-800 ${
+        className={`z-20 flex-shrink-0 timeline-dot transition-all duration-800 relative ${
           isVisible ? "opacity-100 scale-100" : "opacity-50 scale-80"
         }`}
         style={{
@@ -661,11 +672,22 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
       </div>
 
       {/* Right side content (for right-positioned cards) - Desktop only */}
-      <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`}>
+      <div className={`flex-1 flex ${position === "right" ? "justify-start" : ""} hidden lg:flex relative`}>
         {position === "right" && (
-          <div className="max-w-md w-full">
-            {renderCardContent()}
-          </div>
+          <>
+            {/* Connecting line from timeline to card */}
+            <div 
+              className={`absolute left-0 top-1/2 w-6 h-px bg-gray-300 transition-all duration-800 ${
+                isVisible ? "opacity-60" : "opacity-0"
+              }`}
+              style={{
+                transitionDelay: `${index * 150 + 100}ms`,
+              }}
+            />
+            <div className="max-w-md w-full">
+              {renderCardContent()}
+            </div>
+          </>
         )}
       </div>
 
