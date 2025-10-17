@@ -2,32 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 
-// Initialize OpenAI client with AI Gateway (if configured)
-// Falls back to direct OpenAI API if AI_GATEWAY_API_KEY not set
-const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
-const baseURL = process.env.AI_GATEWAY_API_KEY
-  ? 'https://ai-gateway.vercel.sh/v1'
-  : undefined;
-
+// Initialize OpenAI client with DIRECT API (bypassing Gateway for speed test)
+// Gateway was adding significant latency to follow-up generation
 const openai = new OpenAI({
-  apiKey,
-  baseURL,
+  apiKey: process.env.OPENAI_API_KEY,
+  // No baseURL = direct OpenAI (faster)
 });
 
 /**
- * GPT-5 Follow-up Question Generator
+ * Follow-up Question Generator
  *
- * Uses GPT-5 with LOW reasoning effort for cost-efficient follow-up generation.
+ * Uses GPT-4o-mini for FAST, cost-efficient follow-up generation.
  * Takes the FULL TEXT TRANSCRIPT as context (not audio).
  *
- * Cost: ~$0.01 per follow-up with GPT-5 low reasoning effort
- * vs. ~$0.009 per follow-up with GPT-4o (1.1x increase for better quality)
+ * Optimized for speed: ~1-2 seconds (vs 9-11s with GPT-5)
+ *
+ * Cost: ~$0.001 per follow-up (90% cheaper than GPT-5)
  *
  * Configuration:
- * - model: "gpt-5"
- * - reasoning_effort: "low" (basic reasoning, fast and cheap)
- * - temperature: 0.7 (balanced creativity/consistency)
- * - max_tokens: 50 (keep questions concise)
+ * - model: "gpt-4o-mini"
+ * - temperature: 0.9 (higher for creativity with smaller model)
+ * - max_tokens: 150
  */
 export async function POST(request: NextRequest) {
   logger.debug("[FollowUp] POST request received");
@@ -94,76 +89,27 @@ Return ONLY the questions in this exact format:
 
 No explanations, no extra text.`;
 
-    // Try GPT-5 first, fallback to GPT-4o-mini if not available
+    // Use GPT-4o-mini for fast, cost-efficient follow-up generation
+    // Optimized: 10x faster than GPT-5 (1-2s vs 9-11s), 90% cheaper
     const startTime = Date.now();
     let response;
-    let modelUsed = "gpt-5";
+    const modelUsed = "gpt-4o-mini";
 
-    try {
-      response = await openai.chat.completions.create({
-        model: "gpt-5",
-        // @ts-ignore - reasoning_effort is valid for GPT-5 but not in types yet
-        reasoning_effort: "low",
-        temperature: 0.8,
-        max_tokens: 150,
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: userPrompt,
-          },
-        ],
-      });
-
-      const latencyMs = Date.now() - startTime;
-      const content = response.choices[0]?.message?.content?.trim();
-
-      logger.debug("[FollowUp] GPT-5 response", {
-        modelUsed,
-        contentLength: content?.length,
-        content: content?.substring(0, 200),
-      });
-
-      // If GPT-5 returns empty, try fallback
-      if (!content) {
-        throw new Error("GPT-5 returned empty response");
-      }
-
-      // Success - use GPT-5 response
-      const parsedContent = content;
-
-    } catch (gpt5Error: any) {
-      logger.warn("[FollowUp] GPT-5 failed, falling back to GPT-4o-mini", {
-        error: gpt5Error?.message,
-      });
-
-      // Fallback to GPT-4o-mini (no reasoning_effort parameter)
-      modelUsed = "gpt-4o-mini";
-      const fallbackStart = Date.now();
-      response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        temperature: 0.8,
-        max_tokens: 150,
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: userPrompt,
-          },
-        ],
-      });
-
-      logger.debug("[FollowUp] GPT-4o-mini response", {
-        modelUsed,
-        latencyMs: Date.now() - fallbackStart,
-      });
-    }
+    response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0.9, // Slightly higher for creativity with smaller model
+      max_tokens: 150,
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        {
+          role: "user",
+          content: userPrompt,
+        },
+      ],
+    });
 
     const latencyMs = Date.now() - startTime;
     const content = response.choices[0]?.message?.content?.trim();
@@ -175,7 +121,7 @@ No explanations, no extra text.`;
     });
 
     if (!content) {
-      throw new Error("No follow-up questions generated from either model");
+      throw new Error("No follow-up questions generated");
     }
 
     // Parse the numbered list
@@ -204,8 +150,6 @@ No explanations, no extra text.`;
       tokensUsed: {
         input: response.usage?.prompt_tokens,
         output: response.usage?.completion_tokens,
-        // @ts-ignore - reasoning tokens may not be in types yet
-        reasoning: response.usage?.reasoning_tokens,
         total: response.usage?.total_tokens,
       },
     });
@@ -223,17 +167,6 @@ No explanations, no extra text.`;
 
   } catch (error) {
     logger.error("[FollowUp] ERROR:", error);
-
-    // Check if it's a model availability error
-    if (error instanceof Error && error.message.includes("gpt-5")) {
-      logger.warn("[FollowUp] GPT-5 not available, check if model is enabled");
-      return NextResponse.json(
-        {
-          error: "GPT-5 model not available. Please check your OpenAI API configuration.",
-        },
-        { status: 503 }
-      );
-    }
 
     return NextResponse.json(
       {
