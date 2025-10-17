@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Footer from "./Footer";
 
 export default function LayoutContent({
   children,
@@ -13,11 +12,8 @@ export default function LayoutContent({
   // All pages now have bottom navigation
   // Book page needs special handling for progress bar
   return (
-    <>
-      <div className="pb-20 md:pb-20">
-        {children}
-      </div>
-      <Footer />
-    </>
+    <div className="pb-20 md:pb-20">
+      {children}
+    </div>
   );
 }

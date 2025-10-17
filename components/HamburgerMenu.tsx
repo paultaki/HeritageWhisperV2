@@ -236,6 +236,16 @@ export default function HamburgerMenu() {
               </button>
             </div>
 
+            {/* Beta Badge */}
+            <div className="border-t border-gray-100 py-2 px-4">
+              <div className="flex items-center justify-center gap-2">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                  BETA
+                </span>
+                <span className="text-xs text-gray-500">Pilot Phase</span>
+              </div>
+            </div>
+
             {/* Logout */}
             <div className="border-t border-gray-100 py-1">
               <button

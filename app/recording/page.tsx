@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AudioRecorder, AudioRecorderHandle } from "@/components/AudioRecorder";
 import { InFlowPromptCard } from "@/components/InFlowPromptCard";
 import { useAuth } from "@/lib/auth";
-import { ArrowLeft, Heart, Mic, Loader2, Pause, Play, Square, Sparkles } from "lucide-react";
+import { ArrowLeft, Heart, Mic, Loader2, Pause, Play, Square, Sparkles, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { navCache } from "@/lib/navCache";
 import { findMatchingPrompt, getFallbackPrompt } from "@/utils/keywordPrompts";
@@ -490,6 +490,30 @@ function RecordingContent() {
     }
   };
 
+  const handleRestart = () => {
+    if (!audioRecorderRef.current) return;
+    
+    // Stop current recording
+    audioRecorderRef.current.stopRecording();
+    
+    // Reset states
+    setIsRecording(false);
+    setIsPaused(false);
+    setHasRecording(false);
+    setAudioUrl(null);
+    setRecordingDuration(0);
+    setContextualFollowUpQuestion(null);
+    setShowFollowUpButton(false);
+    
+    // Small delay then restart
+    setTimeout(() => {
+      if (audioRecorderRef.current) {
+        audioRecorderRef.current.startRecording();
+        setIsRecording(true);
+      }
+    }, 300);
+  };
+
   const handleStopRecording = () => {
     if (!audioRecorderRef.current) return;
     // The AudioRecorder's stop button will handle this
@@ -967,11 +991,11 @@ function RecordingContent() {
                   <CardContent className="pt-6 pb-6">
                     <div className="space-y-4">
                       {/* Control Buttons */}
-                      <div className="flex gap-4 justify-center">
+                      <div className="flex gap-3 justify-center">
                         <Button
                           variant="outline"
                           onClick={handlePauseResume}
-                          className="flex-1 max-w-[160px] min-h-[44px]"
+                          className="flex-1 max-w-[140px] min-h-[48px]"
                           data-testid="button-pause-resume"
                         >
                           {isPaused ? (
@@ -989,13 +1013,28 @@ function RecordingContent() {
 
                         <Button
                           onClick={handleStopRecording}
-                          className="flex-1 max-w-[180px] min-h-[44px] bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white"
+                          className="flex-1 max-w-[140px] min-h-[48px] bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white"
                           data-testid="button-stop-transcribe"
                         >
                           <Square className="w-4 h-4 mr-2" />
-                          Stop & Transcribe
+                          Stop
                         </Button>
                       </div>
+
+                      {/* Restart button - Only show when paused */}
+                      {isPaused && (
+                        <div className="flex justify-center">
+                          <Button
+                            variant="ghost"
+                            onClick={handleRestart}
+                            className="text-sm text-muted-foreground hover:text-foreground min-h-[40px]"
+                            data-testid="button-restart"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+                            Start Over
+                          </Button>
+                        </div>
+                      )}
 
                       {/* Contextual Follow-up Button - Show when paused >1min */}
                       {showFollowUpButton && (
