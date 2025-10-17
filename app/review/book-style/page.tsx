@@ -14,7 +14,7 @@ import { supabase } from "@/lib/supabase";
 function BookStyleReviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -215,9 +215,9 @@ function BookStyleReviewContent() {
     }
   }, [searchParams, editId, isEditing, toast]);
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated (wait for auth to finish loading)
   useEffect(() => {
-    if (!user) {
+    if (!isAuthLoading && !user) {
       toast({
         title: "Authentication Required",
         description: "Please log in to continue.",
@@ -225,7 +225,7 @@ function BookStyleReviewContent() {
       });
       router.push("/auth/login");
     }
-  }, [user, router, toast]);
+  }, [user, isAuthLoading, router, toast]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -818,6 +818,18 @@ function BookStyleReviewContent() {
       });
     }
   };
+
+  // Show loading spinner while checking authentication
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return null;

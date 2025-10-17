@@ -45,18 +45,20 @@ const SENSITIVE_CATEGORIES = [
 export default function MoreIdeas() {
   const { session } = useAuth();
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // Collapsed by default
   const [showSensitive, setShowSensitive] = useState(false);
   const [category, setCategory] = useState<string | null>(null);
   const [ideas, setIdeas] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [showAllIdeas, setShowAllIdeas] = useState(false);
 
   const categories = [...BASE_CATEGORIES, ...(showSensitive ? SENSITIVE_CATEGORIES : [])];
 
   useEffect(() => {
     if (!category) return;
     setLoading(true);
+    setShowAllIdeas(false); // Reset when category changes
     fetch(
       `/api/catalog/prompts?category=${encodeURIComponent(category)}&showSensitive=${showSensitive}`
     )
@@ -71,7 +73,7 @@ export default function MoreIdeas() {
 
   async function queueNext(p: Prompt) {
     if (savingId) return; // Prevent double-clicks
-    
+
     setSavingId(p.id);
     try {
       console.log('Queueing prompt:', p);
@@ -82,11 +84,14 @@ export default function MoreIdeas() {
       const result = await response.json();
       console.log('Queue response:', result);
 
+      // Refresh the prompts page data
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('refreshPrompts'));
+      }
+
       toast({
-        title: result.promoted ? 'Queued to Ready to Tell' : 'Added to Saved for later',
-        description: result.promoted
-          ? 'Your prompt is now in your inbox'
-          : 'Max 3 ready at a time. Check Saved for later.',
+        title: 'Added to queue',
+        description: 'This prompt is now in your queue',
       });
     } catch (error) {
       console.error('Error queueing prompt:', error);
@@ -114,6 +119,11 @@ export default function MoreIdeas() {
       const result = await response.json();
       console.log('Dismiss response:', result);
 
+      // Refresh the prompts page data
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('refreshPrompts'));
+      }
+
       toast({
         title: 'Moved to archive',
         description: 'You can find this in your Prompt Archive',
@@ -137,15 +147,19 @@ export default function MoreIdeas() {
       {/* Header */}
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 text-xl font-serif font-semibold text-heritage-brown hover:text-amber-700 transition-colors w-full"
+        className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity w-full"
+        style={{
+          fontSize: "20px",
+          color: "#000000",
+          lineHeight: "1.4"
+        }}
       >
-        <span className="text-amber-600">💡</span>
-        <span className="flex-1 text-left">More ideas</span>
+        <span className="flex-1 text-left">More Ideas</span>
         {open ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
       </button>
 
       {!open && (
-        <p className="text-sm text-gray-500 pl-8">
+        <p className="text-sm text-gray-600" style={{ opacity: 0.7 }}>
           Browse by category. Add any to your list.
         </p>
       )}
@@ -153,8 +167,8 @@ export default function MoreIdeas() {
       {open && (
         <>
           {/* Controls */}
-          <div className="flex items-center justify-between pl-8">
-            <p className="text-sm text-gray-600">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-600" style={{ opacity: 0.7 }}>
               Browse by category. Add any to your list.
             </p>
             <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
@@ -169,7 +183,7 @@ export default function MoreIdeas() {
           </div>
 
           {/* Category chips */}
-          <div className="flex flex-wrap gap-2 pl-8">
+          <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2">
             {categories.map((c) => (
               <Button
                 key={c}
@@ -188,7 +202,7 @@ export default function MoreIdeas() {
 
           {/* Selected category prompts */}
           {category && (
-            <div className="pl-8">
+            <div>
               {loading && (
                 <p className="text-sm text-gray-500 italic">Loading prompts…</p>
               )}
@@ -200,68 +214,85 @@ export default function MoreIdeas() {
               )}
 
               {!loading && ideas.length > 0 && (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {ideas.map((p, index) => (
-                    <div
-                      key={p.id}
-                      className="bg-white/30 backdrop-blur-md border border-white/40 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:bg-white/40 flex flex-col"
-                      style={{
-                        minHeight: '280px',
-                      }}
-                    >
-                      <div className="p-4 flex flex-col h-full justify-between">
-                        {/* Prompt text - centered vertically */}
-                        <div className="flex-1 flex items-center justify-center mb-3">
-                          <p 
-                            className="text-base md:text-lg font-serif text-gray-800 leading-relaxed text-center"
-                            style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-                          >
-                            {p.text}
-                          </p>
-                        </div>
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {(showAllIdeas ? ideas : ideas.slice(0, 3)).map((p, index) => (
+                      <div
+                        key={p.id}
+                        className="bg-white border border-black/10 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col"
+                        style={{
+                          borderRadius: '8px',
+                          minHeight: '200px',
+                        }}
+                      >
+                        <div className="p-3 flex flex-col h-full justify-between gap-3">
+                          {/* Prompt text */}
+                          <div className="flex-1 flex items-start">
+                            <p className="text-xl leading-relaxed text-gray-900">
+                              {p.text}
+                            </p>
+                          </div>
 
-                        {/* Action buttons stacked */}
-                        <div className="space-y-2">
-                          <Button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              queueNext(p);
-                            }}
-                            disabled={savingId === p.id}
-                            className="w-full bg-gradient-to-r from-amber-500 via-orange-400 to-rose-400 hover:from-amber-600 hover:via-orange-500 hover:to-rose-500 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-300 text-sm h-9 disabled:opacity-50"
-                          >
-                            {savingId === p.id ? (
-                              <span className="animate-pulse">Saving...</span>
-                            ) : (
-                              <>
-                                <Plus className="w-4 h-4 mr-1" />
-                                Queue
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              dismissPrompt(p);
-                            }}
-                            disabled={savingId === p.id}
-                            variant="outline"
-                            className="w-full bg-white/60 hover:bg-white/80 border-amber-200 hover:border-amber-300 text-gray-700 text-sm h-9 disabled:opacity-50"
-                          >
-                            {savingId === p.id ? (
-                              <span className="animate-pulse">Dismissing...</span>
-                            ) : (
-                              <>
-                                <Bookmark className="w-4 h-4 mr-1" />
-                                Dismiss
-                              </>
-                            )}
-                          </Button>
+                          {/* Action buttons */}
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                queueNext(p);
+                              }}
+                              disabled={savingId === p.id}
+                              className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium shadow-sm transition-all duration-200 min-h-[48px] text-base whitespace-nowrap"
+                              style={{ borderRadius: '6px' }}
+                            >
+                              {savingId === p.id ? (
+                                <span className="animate-pulse">Adding...</span>
+                              ) : (
+                                <>
+                                  <Plus className="w-4 h-4 mr-1" />
+                                  Add
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                dismissPrompt(p);
+                              }}
+                              disabled={savingId === p.id}
+                              variant="outline"
+                              className="flex-1 text-base font-medium min-h-[48px] whitespace-nowrap"
+                            >
+                              {savingId === p.id ? (
+                                <span className="animate-pulse">...</span>
+                              ) : (
+                                <>
+                                  <Bookmark className="w-4 h-4 mr-1" />
+                                  Dismiss
+                                </>
+                              )}
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                  {ideas.length > 3 && !showAllIdeas && (
+                    <button
+                      onClick={() => setShowAllIdeas(true)}
+                      className="mt-4 text-base font-medium text-gray-700 hover:text-gray-900 underline"
+                    >
+                      Show {ideas.length - 3} more
+                    </button>
+                  )}
+                  {showAllIdeas && ideas.length > 3 && (
+                    <button
+                      onClick={() => setShowAllIdeas(false)}
+                      className="mt-4 text-base font-medium text-gray-700 hover:text-gray-900 underline"
+                    >
+                      Show less
+                    </button>
+                  )}
+                </>
               )}
             </div>
           )}

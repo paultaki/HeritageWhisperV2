@@ -998,6 +998,13 @@ export default function Timeline() {
     };
   }, [user, storiesData]);
 
+  // Handle redirect to login page in useEffect (not during render)
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/auth/login");
+    }
+  }, [isLoading, user, router]);
+
   // Check if auth is still loading - don't redirect until we know auth state
   if (isLoading) {
     return (
@@ -1007,10 +1014,13 @@ export default function Timeline() {
     );
   }
 
-  // Only redirect to login if auth has finished loading and there's no user
-  if (!isLoading && !user) {
-    router.push("/auth/login");
-    return null;
+  // Show loading while redirecting to login
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
   const allStories = (storiesData as any)?.stories || [];

@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+import { CustomToggle } from "@/components/ui/custom-toggle";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -53,7 +53,7 @@ import {
 
 export default function Profile() {
   const router = useRouter();
-  const { user, logout, session } = useAuth();
+  const { user, logout, session, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
 
   // User Information
@@ -81,16 +81,16 @@ export default function Profile() {
 
 
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated (but wait for loading to finish)
   useEffect(() => {
-    if (!user) {
+    if (!isAuthLoading && !user) {
       router.push("/auth/login");
-    } else {
+    } else if (user) {
       setName(user.name || "");
       setEmail(user.email || "");
       setBirthYear(user.birthYear?.toString() || "");
     }
-  }, [user, router]);
+  }, [user, isAuthLoading, router]);
 
   // Fetch profile data
   const { data: profileData, isLoading } = useQuery({
@@ -381,6 +381,15 @@ export default function Profile() {
     }
   };
 
+  // Show loading state while checking authentication
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-background album-texture flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   if (!user) {
     return null;
   }
@@ -449,11 +458,11 @@ export default function Profile() {
           />
         )}
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Profile Photo & Basic Info */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg font-bold">
                 <User className="w-5 h-5" />
                 Personal Information
               </CardTitle>
@@ -611,7 +620,7 @@ export default function Profile() {
           {/* Password Change */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg font-bold">
                 <Lock className="w-5 h-5" />
                 Change Password
               </CardTitle>
@@ -678,7 +687,7 @@ export default function Profile() {
           {/* Notification Settings */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg font-bold">
                 <Bell className="w-5 h-5" />
                 Notification Preferences
               </CardTitle>
@@ -687,21 +696,21 @@ export default function Profile() {
             <CardContent className="space-y-4">
               <div className="flex items-start justify-between py-2 gap-4">
                 <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="email-notifications" className="text-base">
+                  <Label htmlFor="email-notifications" className="text-base font-medium">
                     Email Notifications
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Receive updates via email
+                    Receive important updates, new story reminders, and account notifications via email
                   </p>
                 </div>
-                <Switch
+                <CustomToggle
                   id="email-notifications"
                   checked={emailNotifications}
                   onCheckedChange={(checked) => {
                     setEmailNotifications(checked);
                     updatePreferencesMutation.mutate({ emailNotifications: checked });
                   }}
-                  className="flex-shrink-0 mt-1"
+                  aria-label="Toggle email notifications"
                 />
               </div>
 
@@ -709,21 +718,21 @@ export default function Profile() {
 
               <div className="flex items-start justify-between py-2 gap-4">
                 <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="weekly-digest" className="text-base">
+                  <Label htmlFor="weekly-digest" className="text-base font-medium">
                     Weekly Digest
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Get a weekly summary of your stories
+                    Receive a weekly email with your story count, new memories, and suggested prompts
                   </p>
                 </div>
-                <Switch
+                <CustomToggle
                   id="weekly-digest"
                   checked={weeklyDigest}
                   onCheckedChange={(checked) => {
                     setWeeklyDigest(checked);
                     updatePreferencesMutation.mutate({ weeklyDigest: checked });
                   }}
-                  className="flex-shrink-0 mt-1"
+                  aria-label="Toggle weekly digest"
                 />
               </div>
 
@@ -731,21 +740,21 @@ export default function Profile() {
 
               <div className="flex items-start justify-between py-2 gap-4">
                 <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="family-comments" className="text-base">
+                  <Label htmlFor="family-comments" className="text-base font-medium">
                     Family Comments
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Notify when family comments on stories
+                    Get notified when family members add comments or reactions to your stories
                   </p>
                 </div>
-                <Switch
+                <CustomToggle
                   id="family-comments"
                   checked={familyComments}
                   onCheckedChange={(checked) => {
                     setFamilyComments(checked);
                     updatePreferencesMutation.mutate({ familyComments: checked });
                   }}
-                  className="flex-shrink-0 mt-1"
+                  aria-label="Toggle family comments notifications"
                 />
               </div>
 
@@ -753,21 +762,21 @@ export default function Profile() {
 
               <div className="flex items-start justify-between py-2 gap-4">
                 <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="printed-books-notify" className="text-base">
+                  <Label htmlFor="printed-books-notify" className="text-base font-medium">
                     Printed Books Availability
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Notify me when printed books are available for purchase
+                    Be the first to know when professionally printed books become available for order
                   </p>
                 </div>
-                <Switch
+                <CustomToggle
                   id="printed-books-notify"
                   checked={printedBooksNotify}
                   onCheckedChange={(checked) => {
                     setPrintedBooksNotify(checked);
                     updatePreferencesMutation.mutate({ printedBooksNotify: checked });
                   }}
-                  className="flex-shrink-0 mt-1"
+                  aria-label="Toggle printed books notifications"
                 />
               </div>
             </CardContent>
@@ -776,7 +785,7 @@ export default function Profile() {
           {/* Privacy Settings */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg font-bold">
                 <Eye className="w-5 h-5" />
                 Privacy Settings
               </CardTitle>
@@ -787,86 +796,101 @@ export default function Profile() {
             <CardContent>
               <div className="flex items-start justify-between py-2 gap-4">
                 <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="default-visibility" className="text-base">
+                  <Label htmlFor="default-visibility" className="text-base font-medium">
                     Share New Stories with Family
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    New stories will be visible to family members by default
+                    When enabled, new stories automatically appear in your family's timeline. You can change this per story.
                   </p>
                 </div>
-                <Switch
+                <CustomToggle
                   id="default-visibility"
                   checked={defaultStoryVisibility}
                   onCheckedChange={(checked) => {
                     setDefaultStoryVisibility(checked);
                     updatePreferencesMutation.mutate({ defaultStoryVisibility: checked });
                   }}
-                  className="flex-shrink-0 mt-1"
+                  aria-label="Toggle default story visibility"
                 />
               </div>
             </CardContent>
           </Card>
 
-          {/* Export Your Book */}
+          {/* Data & Privacy */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Export Your Book
+              <CardTitle className="flex items-center gap-2 text-lg font-bold">
+                <HardDrive className="w-5 h-5" />
+                Data & Privacy
               </CardTitle>
               <CardDescription>
-                Download your stories as a PDF book
+                Download and manage your personal data
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                variant="outline"
-                className="w-full h-12 text-base justify-start"
-                onClick={() => handleExportPDF("2up")}
-                disabled={isExporting}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                {isExporting ? "Exporting..." : "Export 2-Up PDF (Home Print)"}
-              </Button>
-              <p className="text-sm text-muted-foreground px-1">
-                Two 5.5×8.5" pages on Letter landscape for home printing
-              </p>
+            <CardContent className="space-y-6">
+              {/* Export All Data */}
+              <div>
+                <Button
+                  variant="outline"
+                  className="w-full h-12 text-base justify-start"
+                  onClick={handleExportData}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export All Data (JSON)
+                </Button>
+                <p className="text-sm text-muted-foreground mt-2 px-1">
+                  Download a complete copy of your stories, photos, and profile data in JSON format
+                </p>
+              </div>
 
-              <Button
-                variant="outline"
-                className="w-full h-12 text-base justify-start mt-3"
-                onClick={() => handleExportPDF("trim")}
-                disabled={isExporting}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                {isExporting ? "Exporting..." : "Export Trim PDF (Professional)"}
-              </Button>
-              <p className="text-sm text-muted-foreground px-1">
-                Individual 5.5×8.5" pages for professional printing services
-              </p>
+              <Separator />
+
+              {/* Export Book PDFs */}
+              <div>
+                <h3 className="text-base font-semibold mb-3">Export as PDF Book</h3>
+                <div className="space-y-3">
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 text-base justify-start"
+                    onClick={() => handleExportPDF("2up")}
+                    disabled={isExporting}
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    {isExporting ? "Exporting..." : "2-Up PDF (Home Print)"}
+                  </Button>
+                  <p className="text-sm text-muted-foreground px-1">
+                    Two 5.5×8.5" pages on Letter landscape for home printing
+                  </p>
+
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 text-base justify-start"
+                    onClick={() => handleExportPDF("trim")}
+                    disabled={isExporting}
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    {isExporting ? "Exporting..." : "Trim PDF (Professional)"}
+                  </Button>
+                  <p className="text-sm text-muted-foreground px-1">
+                    Individual 5.5×8.5" pages for professional printing services
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           {/* Danger Zone */}
-          <Card className="border-destructive/50">
+          <Card className="border-destructive/50 bg-destructive/5">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-destructive">
+              <CardTitle className="flex items-center gap-2 text-destructive text-lg font-bold">
                 <AlertTriangle className="w-5 h-5" />
                 Danger Zone
               </CardTitle>
-              <CardDescription>
-                Irreversible actions - proceed with caution
+              <CardDescription className="text-destructive/80">
+                ⚠️ Irreversible actions that cannot be undone
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button
-                variant="outline"
-                className="w-full h-12 text-base justify-start"
-                onClick={handleExportData}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export All Data
-              </Button>
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>

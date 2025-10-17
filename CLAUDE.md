@@ -14,7 +14,7 @@ AI-powered storytelling platform for seniors to capture and share life memories.
 - **Database:** PostgreSQL via Supabase (project: tjycibrhoammxohemyhq)
 - **Storage:** Supabase Storage (bucket: heritage-whisper-files)
 - **State:** TanStack Query v5
-- **AI:** AssemblyAI ("best" model for fast transcription) + OpenAI API (Whisper fallback) + Vercel AI Gateway (GPT-4o/GPT-5 routing)
+- **AI:** AssemblyAI ("universal" batch transcription, 58% cheaper) + OpenAI API (Whisper fallback) + Vercel AI Gateway (GPT-4o/GPT-5 routing)
 - **Deployment:** Vercel (https://dev.heritagewhisper.com)
 
 ## 🔧 Quick Start
@@ -110,7 +110,7 @@ HeritageWhisperV2/
 ## 🔑 Key Features
 
 - **Audio Recording**: Simplified one-session flow with 3-2-1 countdown, 5-minute max, auto-transcription
-- **AI Transcription**: AssemblyAI "best" model (500ms-1s, 58% cheaper) with OpenAI Whisper fallback
+- **AI Transcription**: AssemblyAI "universal" batch (~3.7s, 58% cheaper, 93.4% accuracy) with OpenAI Whisper fallback
 - **AI Prompt System**: Multi-tier reflection prompt generation (see AI Features section below)
 - **Photo Management**: Multi-upload with cropping & hero images (EXIF data stripped for privacy)
 - **Timeline View**: Chronological story organization by decade with "Before I Was Born" section
@@ -497,10 +497,10 @@ Performance and cost optimizations for the AI pipeline without sacrificing quali
 #### Overview
 
 **Deployed:** October 16, 2025
-**Status:** Phase 2 Complete (AssemblyAI Integration)
+**Status:** Phase 2 Complete (AssemblyAI Batch Integration)
 **Full Plan:** `/AI_SPEED_OPTIMIZATION.md`
 
-Achieved **14s → 3-4s** total latency reduction through model optimization and AssemblyAI integration.
+Achieved **14s → 6-8s** total latency (57% improvement) through model optimization and AssemblyAI batch transcription.
 
 #### Phase 1 Implementations (Complete ✅)
 
@@ -558,41 +558,59 @@ Watch for in logs:
 #### Phase 2 Implementations (Complete ✅)
 
 **1. AssemblyAI Batch Transcription Integration**
-- **Changed**: OpenAI Whisper → AssemblyAI "best" model for transcription
-- **Impact**: **3-5s → 0.5-1s transcription** (80-83% faster!)
+- **Changed**: OpenAI Whisper → AssemblyAI "universal" model for transcription
+- **Impact**: Marginal speed improvement but significant cost savings
+- **Actual Performance**:
+  - AssemblyAI batch transcription: ~3.7s (includes upload + polling overhead)
+  - Whisper was: ~3-5s
+  - Total flow: ~6-8s (vs 14s initial, 8s after Phase 1)
 - **Cost Savings**: $0.006 → $0.0025 per minute (58% cheaper)
-- **Quality**: Highest accuracy model for conversational audio, maintains formatting quality
+- **Quality**: Industry-leading accuracy (93.4% word accuracy, 6.6% WER)
 - **Implementation**:
   - New endpoint: `/app/api/transcribe-assemblyai/route.ts`
   - Updated components: RecordModal.tsx, BookStyleReview.tsx
-  - Uses `best` speech model (highest accuracy for batch transcription)
-- **Total Pipeline**: ~3-4 seconds end-to-end (vs 8 seconds before)
-  - AssemblyAI transcription: ~0.5-1s
-  - GPT-4o-mini formatting + lesson extraction: ~2-2.5s (parallel)
+  - Uses `universal` speech model (balanced accuracy and speed)
+  - Model options: "nano" (fastest/cheapest), "universal" (balanced), "best" (most accurate)
+- **Total Pipeline**: ~6-8 seconds end-to-end (vs 14 seconds initial)
+  - AssemblyAI transcription: ~3.7s (upload + queue + poll)
+  - GPT-4o-mini formatting + lesson extraction: ~2-3s (parallel)
 
 **2. Environment Setup**
-- Required: `ASSEMBLYAI_API_KEY` in `.env.local`
+- Required: `ASSEMBLYAI_API_KEY` in `.env.local` AND Vercel dashboard
 - Get your key at: https://www.assemblyai.com/
 - Fallback: Original Whisper endpoint still available at `/api/transcribe`
 
 #### Performance Results (Phase 1 + Phase 2)
 
 **Total Latency Reduction:**
-- Initial state: 14 seconds
-- After Phase 1: 8 seconds (GPT-5 → GPT-4o-mini for follow-ups)
-- After Phase 2: **3-4 seconds** (Whisper → AssemblyAI)
-- **Net improvement: 71-78% faster** ⚡
+- Initial state: 14 seconds (GPT-5 follow-ups + Whisper)
+- After Phase 1: 8 seconds (switched to GPT-4o-mini)
+- After Phase 2: **6-8 seconds** (switched to AssemblyAI batch)
+- **Net improvement: 43-57% faster** ⚡
 
 **Cost Impact:**
 - Transcription: 58% cheaper ($0.006 → $0.0025 per min)
-- Lesson extraction: 90% cheaper (already from Phase 1)
-- Total per-story cost: ~$0.003-0.004 (vs $0.016 before)
+- Lesson extraction: 90% cheaper (Phase 1 optimization)
+- Follow-up generation: 90% cheaper (Phase 1 optimization)
+- Total per-story cost: ~$0.004-0.005 (vs $0.016 before)
+
+**Why Not Faster?**
+- AssemblyAI batch API requires: upload → queue → poll → return
+- Polling overhead adds ~2-3s to actual processing time
+- Real-time streaming could achieve sub-1s but requires more complex implementation
 
 #### Future Optimizations (Phase 3)
 
+**High-Impact:**
+- **AssemblyAI Real-Time Streaming**: Could reduce transcription to <1s (vs current 3.7s batch)
+  - More complex to implement (WebSocket connections, chunking)
+  - Would require frontend changes to stream audio
+  - Potential to hit original 3-4s total target
+
+**Lower Priority:**
 - Response caching for lesson deduplication
 - Selective GPT-4o usage for Tier 3 (reserve GPT-5 for critical milestones)
-- Streaming for Echo Prompts generation
+- Parallel processing of follow-up questions during recording
 
 #### Architecture Principles
 

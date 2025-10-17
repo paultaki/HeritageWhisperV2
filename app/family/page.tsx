@@ -91,7 +91,7 @@ interface FamilyActivityItem {
 
 export default function FamilyPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
 
   // Invite form state
@@ -103,12 +103,12 @@ export default function FamilyPage() {
   const [copiedLink, setCopiedLink] = useState(false);
   const sendButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated (wait for auth to finish loading)
   useEffect(() => {
-    if (!user) {
+    if (!isAuthLoading && !user) {
       router.push("/auth/login");
     }
-  }, [user, router]);
+  }, [user, isAuthLoading, router]);
 
   // Fetch family members
   const { data: familyMembersData, isLoading: loadingMembers } = useQuery<{
@@ -303,6 +303,15 @@ export default function FamilyPage() {
   const handleRemoveMember = async (memberId: string) => {
     await removeMutation.mutateAsync(memberId);
   };
+
+  // Show loading spinner while checking authentication
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   if (!user) {
     return null;

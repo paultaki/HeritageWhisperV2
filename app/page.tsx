@@ -79,15 +79,24 @@ export default function HomePage() {
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           {/* Header with Logo */}
-          <div className="flex justify-center items-center mb-12">
+          <div className="flex flex-col justify-center items-center mb-12">
             <Image
               src="/HW_text-compress.png"
               alt="Heritage Whisper"
               width={280}
               height={70}
-              className="h-14 w-auto"
+              className="h-14 w-auto mb-3"
               priority
             />
+            {/* Trust bar */}
+            <div className="text-sm text-gray-600 flex items-center gap-3">
+              <span className="flex items-center gap-1.5">
+                <span className="text-base">🔒</span>
+                Bank-Level Security
+              </span>
+              <span className="text-gray-400">|</span>
+              <span>Only your family sees your stories</span>
+            </div>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -383,6 +392,35 @@ export default function HomePage() {
               </div>
               <span className="button-inner">Start Preserving Stories Today</span>
             </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Privacy Matters Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8">
+          <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-10 border border-orange-100">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center">
+              Your Privacy Matters
+            </h2>
+            <div className="space-y-4 text-lg text-gray-700">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl mt-0.5 flex-shrink-0">•</span>
+                <p>Only you control who sees your stories</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-2xl mt-0.5 flex-shrink-0">•</span>
+                <p><strong>We never sell your data. Ever.</strong></p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-2xl mt-0.5 flex-shrink-0">•</span>
+                <p>Download or delete everything anytime</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-2xl mt-0.5 flex-shrink-0">•</span>
+                <p>Location data automatically removed</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -734,8 +772,23 @@ export default function HomePage() {
               </button>
             </div>
           </div>
-          <div className="text-center mt-8 text-sm text-gray-400">
-            © 2025 Heritage Whisper. Preserving memories, one story at a time.
+          <div className="text-center mt-8 space-y-3">
+            <div className="text-sm text-gray-400 flex items-center justify-center gap-4">
+              <span className="flex items-center gap-1.5">
+                <span>🔒</span>
+                Secure
+              </span>
+              <span className="text-gray-600">|</span>
+              <span className="flex items-center gap-1.5">
+                <span>🛡️</span>
+                Private
+              </span>
+              <span className="text-gray-600">|</span>
+              <span>Your Stories, Your Control</span>
+            </div>
+            <div className="text-sm text-gray-400">
+              © 2025 Heritage Whisper. Preserving memories, one story at a time.
+            </div>
           </div>
         </div>
       </footer>

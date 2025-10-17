@@ -954,7 +954,7 @@ export default function RecordModal({
                       </div>
 
                       {/* Center: Morphing Recording Button */}
-                      <div className="flex flex-col items-center justify-center py-4">
+                      <div className="flex flex-col items-center justify-center py-4 space-y-3">
                         <VoiceRecordingButton
                           isRecording={isRecording}
                           isPaused={isPaused}
@@ -962,6 +962,12 @@ export default function RecordModal({
                           onStart={startRecording}
                           audioRecorderRef={audioRecorderRef}
                         />
+                        {!isRecording && (
+                          <div className="text-sm text-gray-500 flex items-center gap-1.5">
+                            <span className="text-base">🔒</span>
+                            <span>Safe & Private</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Recording Controls - Only show when recording */}

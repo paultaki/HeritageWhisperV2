@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mic, ChevronDown, ChevronUp } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useRecordModal } from "@/hooks/use-record-modal";
 import RecordModal from "@/components/RecordModal";
@@ -57,6 +57,8 @@ export default function PromptsPage() {
   const { toast } = useToast();
   const { isOpen, openModal, closeModal, handleSave, initialData } = useRecordModal();
   const [showArchived, setShowArchived] = useState(false);
+  const [showAllQueued, setShowAllQueued] = useState(false);
+  const [showAllActive, setShowAllActive] = useState(false);
 
   // Fetch user profile to get their name
   const { data: userProfile } = useQuery<{ user: { name: string } }>({
@@ -163,13 +165,9 @@ export default function PromptsPage() {
       promptId: string;
       source: 'ai' | 'catalog';
     }) => {
-      if (source === 'ai') {
-        const response = await apiRequest("DELETE", `/api/prompts/${promptId}`, {});
-        return response.json();
-      } else {
-        const response = await apiRequest("DELETE", `/api/prompts/history/${promptId}`, {});
-        return response.json();
-      }
+      // Single endpoint handles both AI and catalog prompts
+      const response = await apiRequest("DELETE", `/api/prompts/${promptId}`, {});
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/prompts/archived"] });
@@ -186,6 +184,18 @@ export default function PromptsPage() {
       });
     },
   });
+
+  // Listen for refresh events from MoreIdeas component
+  useEffect(() => {
+    const handleRefresh = () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prompts/queued"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/prompts/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/prompts/archived"] });
+    };
+
+    window.addEventListener('refreshPrompts', handleRefresh);
+    return () => window.removeEventListener('refreshPrompts', handleRefresh);
+  }, [queryClient]);
 
   const handleRecord = (promptId: string, promptText: string, source: 'ai' | 'catalog') => {
     // Store prompt ID for tracking
@@ -214,6 +224,10 @@ export default function PromptsPage() {
   const activePrompts = activeData?.prompts || [];
   const archivedPrompts = archivedData?.prompts || [];
 
+  // Progressive disclosure: show 2 initially
+  const displayedQueuedPrompts = showAllQueued ? queuedPrompts : queuedPrompts.slice(0, 2);
+  const displayedActivePrompts = showAllActive ? activePrompts : activePrompts.slice(0, 2);
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -223,229 +237,225 @@ export default function PromptsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-20 md:pb-0" style={{ background: "var(--color-page)" }}>
+    <div className="min-h-screen pb-20 md:pb-0" style={{ background: "#e8e5e4" }}>
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <svg className="w-8 h-8" style={{ color: "#1f0f08" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h1 className="text-2xl font-bold">Prompts</h1>
-          </div>
+          <h1 className="text-2xl font-bold" style={{ color: "#000000" }}>Prompts</h1>
         </div>
       </header>
 
-      {/* Content with gradient background */}
-      <div className="relative overflow-hidden animated-gradient-bg">
-        {/* Animated gradient orbs */}
-        <style jsx global>{`
-        .animated-gradient-bg {
-          background: linear-gradient(135deg, #fef3c7, #ffedd5, #fed7aa, #fecdd3);
-          background-size: 400% 400%;
-          animation: gradientShift 15s ease infinite;
-        }
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        {/* Section 1: Your Prompt Queue */}
+        <section style={{ marginTop: "24px" }}>
+          <h2
+            className="font-bold mb-4"
+            style={{
+              fontSize: "20px",
+              color: "#000000",
+              lineHeight: "1.4"
+            }}
+          >
+            Your Prompt Queue
+          </h2>
 
-        @keyframes gradientShift {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
-        }
-
-        .orb {
-          position: absolute;
-          border-radius: 9999px;
-          filter: blur(64px);
-          opacity: 0.4;
-          mix-blend-mode: lighten;
-          z-index: 0;
-          pointer-events: none;
-          transition: opacity 0.3s;
-        }
-        .orb1 {
-          width: 420px;
-          height: 420px;
-          left: -120px;
-          top: 100px;
-          background: radial-gradient(circle at 40% 40%, #fbbf24 20%, #fb923c 90%);
-          animation: orb1move 13s ease-in-out infinite alternate;
-        }
-        .orb2 {
-          width: 340px;
-          height: 340px;
-          right: -70px;
-          top: 300px;
-          background: radial-gradient(circle at 70% 30%, #fb923c 10%, #fb7185 90%);
-          animation: orb2move 11s ease-in-out infinite alternate;
-        }
-        .orb3 {
-          width: 350px;
-          height: 350px;
-          left: 50%;
-          bottom: -140px;
-          background: radial-gradient(circle at 30% 70%, #fbbf24 0%, #fb923c 100%);
-          transform: translateX(-50%);
-          animation: orb3move 15s ease-in-out infinite alternate;
-        }
-        @keyframes orb1move {
-          0% { transform: scale(1) translateY(0) rotate(0deg); }
-          100% { transform: scale(1.12) translateY(40px) rotate(30deg); }
-        }
-        @keyframes orb2move {
-          0% { transform: scale(1) translateY(0) rotate(0deg); }
-          100% { transform: scale(1.05) translateY(-65px) rotate(-25deg); }
-        }
-        @keyframes orb3move {
-          0% { transform: translateX(-50%) scale(1) rotate(0deg); }
-          100% { transform: translateX(-50%) scale(1.12) translateY(-45px) rotate(16deg); }
-        }
-        @keyframes slideInUp {
-          0% {
-            opacity: 0;
-            transform: translateY(40px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
-
-        <div className="orb orb1"></div>
-        <div className="orb orb2"></div>
-        <div className="orb orb3"></div>
-
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-8 space-y-8">
-          {/* Section 1: Your Prompt Queue */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-serif font-semibold text-heritage-brown flex items-center gap-2">
-              <span className="text-amber-600">📋</span>
-              Your Prompt Queue
-            </h2>
-
+          <div
+            className="bg-white rounded-lg shadow-sm"
+            style={{
+              padding: "16px",
+              borderRadius: "8px",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+            }}
+          >
             {queuedLoading ? (
               <div className="text-center py-8">
                 <p className="text-gray-500">Loading your queue...</p>
               </div>
             ) : queuedPrompts.length === 0 ? (
-              <Card className="bg-gradient-to-br from-[#FFFBF0] to-[#FFF5E6] border border-[#E8D5C4]">
-                <CardContent className="p-8 text-center">
-                  <p className="text-lg text-gray-600 italic font-serif">
-                    Your queue is empty. Add prompts from below!
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {queuedPrompts.map((prompt, index) => (
-                  <PromptCard
-                    key={prompt.id}
-                    id={prompt.id}
-                    promptText={prompt.prompt_text}
-                    contextNote={prompt.context_note}
-                    source={prompt.source}
-                    category={prompt.category}
-                    anchorEntity={prompt.anchor_entity}
-                    anchorYear={prompt.anchor_year}
-                    variant="queue"
-                    index={index}
-                    onRecord={handleRecord}
-                    onDismiss={handleDismiss}
-                    onDelete={handleDelete}
-                    isLoading={isAnyMutationPending}
-                  />
-                ))}
+              <div className="p-8 text-center">
+                <p className="text-base text-gray-600">
+                  Your queue is empty. Add prompts from below!
+                </p>
               </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {displayedQueuedPrompts.map((prompt, index) => (
+                    <PromptCard
+                      key={prompt.id}
+                      id={prompt.id}
+                      promptText={prompt.prompt_text}
+                      contextNote={prompt.context_note}
+                      source={prompt.source}
+                      category={prompt.category}
+                      anchorEntity={prompt.anchor_entity}
+                      anchorYear={prompt.anchor_year}
+                      variant="queue"
+                      index={index}
+                      onRecord={handleRecord}
+                      onDismiss={handleDismiss}
+                      onDelete={handleDelete}
+                      isLoading={isAnyMutationPending}
+                    />
+                  ))}
+                </div>
+                {queuedPrompts.length > 2 && !showAllQueued && (
+                  <button
+                    onClick={() => setShowAllQueued(true)}
+                    className="mt-4 text-base font-medium text-gray-700 hover:text-gray-900 underline"
+                  >
+                    Show {queuedPrompts.length - 2} more
+                  </button>
+                )}
+                {showAllQueued && queuedPrompts.length > 2 && (
+                  <button
+                    onClick={() => setShowAllQueued(false)}
+                    className="mt-4 text-base font-medium text-gray-700 hover:text-gray-900 underline"
+                  >
+                    Show less
+                  </button>
+                )}
+              </>
             )}
           </div>
+        </section>
 
-          {/* Section 2: Prompts for {FirstName} (Personalized) */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-serif font-semibold text-heritage-brown flex items-center gap-2">
-              <span className="text-amber-600">✨</span>
-              Prompts for {firstName}
-            </h2>
+        {/* Section 2: Prompts for {FirstName} (Personalized) */}
+        <section style={{ marginTop: "32px" }}>
+          <h2
+            className="font-bold mb-4"
+            style={{
+              fontSize: "20px",
+              color: "#000000",
+              lineHeight: "1.4"
+            }}
+          >
+            Prompts for {firstName}
+          </h2>
 
+          <div
+            className="bg-white rounded-lg shadow-sm"
+            style={{
+              padding: "16px",
+              borderRadius: "8px",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+            }}
+          >
             {activeLoading ? (
               <div className="text-center py-8">
                 <p className="text-gray-500">Loading your personalized prompts...</p>
               </div>
             ) : activePrompts.length === 0 ? (
-              <Card className="bg-gradient-to-br from-[#FFFBF0] to-[#FFF5E6] border border-[#E8D5C4]">
-                <CardContent className="p-8 text-center">
-                  <p className="text-lg text-gray-600 italic font-serif">
-                    New prompts will appear as you share more stories
-                  </p>
-                  <Button
-                    onClick={() => router.push("/recording")}
-                    className="mt-6 bg-[#D4A574] hover:bg-[#C09564]"
-                  >
-                    <Mic className="w-4 h-4 mr-2" />
-                    Record Your First Story
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {activePrompts.slice(0, 6).map((prompt, index) => (
-                  <PromptCard
-                    key={prompt.id}
-                    id={prompt.id}
-                    promptText={prompt.prompt_text}
-                    contextNote={prompt.context_note}
-                    source="ai"
-                    anchorEntity={prompt.anchor_entity}
-                    anchorYear={prompt.anchor_year}
-                    variant="personalized"
-                    index={index}
-                    onRecord={handleRecord}
-                    onQueue={handleQueue}
-                    onDismiss={handleDismiss}
-                    onDelete={handleDelete}
-                    isLoading={isAnyMutationPending}
-                  />
-                ))}
+              <div className="p-8 text-center">
+                <p className="text-base text-gray-600 mb-4">
+                  New prompts will appear as you share more stories
+                </p>
+                <Button
+                  onClick={() => router.push("/recording")}
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium"
+                >
+                  <Mic className="w-4 h-4 mr-2" />
+                  Record Your First Story
+                </Button>
               </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {displayedActivePrompts.map((prompt, index) => (
+                    <PromptCard
+                      key={prompt.id}
+                      id={prompt.id}
+                      promptText={prompt.prompt_text}
+                      contextNote={prompt.context_note}
+                      source="ai"
+                      anchorEntity={prompt.anchor_entity}
+                      anchorYear={prompt.anchor_year}
+                      variant="personalized"
+                      index={index}
+                      onRecord={handleRecord}
+                      onQueue={handleQueue}
+                      onDismiss={handleDismiss}
+                      onDelete={handleDelete}
+                      isLoading={isAnyMutationPending}
+                    />
+                  ))}
+                </div>
+                {activePrompts.length > 2 && !showAllActive && (
+                  <button
+                    onClick={() => setShowAllActive(true)}
+                    className="mt-4 text-base font-medium text-gray-700 hover:text-gray-900 underline"
+                  >
+                    Show {activePrompts.length - 2} more
+                  </button>
+                )}
+                {showAllActive && activePrompts.length > 2 && (
+                  <button
+                    onClick={() => setShowAllActive(false)}
+                    className="mt-4 text-base font-medium text-gray-700 hover:text-gray-900 underline"
+                  >
+                    Show less
+                  </button>
+                )}
+              </>
             )}
           </div>
+        </section>
 
-          {/* More Ideas Section */}
-          <MoreIdeas />
+        {/* More Ideas Section */}
+        <section style={{ marginTop: "32px" }}>
+          <div
+            className="bg-white rounded-lg shadow-sm"
+            style={{
+              padding: "16px",
+              borderRadius: "8px",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+            }}
+          >
+            <MoreIdeas />
+          </div>
+        </section>
 
-          {/* Section 3: Prompt Archive (Dismissed) */}
-          <div className="space-y-4">
-            <button
-              onClick={() => setShowArchived(!showArchived)}
-              className="flex items-center gap-2 text-xl font-serif font-semibold text-heritage-brown hover:text-amber-700 transition-colors"
+        {/* Section 3: Prompt Archive (Dismissed) */}
+        <section style={{ marginTop: "32px" }}>
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className="flex items-center gap-2 font-bold w-full mb-4 hover:opacity-80 transition-opacity"
+            style={{
+              fontSize: "20px",
+              color: "#000000",
+              lineHeight: "1.4"
+            }}
+          >
+            <span className="flex-1 text-left">Prompt Archive</span>
+            {archivedLoading ? (
+              <span className="text-sm text-gray-400" style={{ opacity: 0.7 }}>(...)</span>
+            ) : (
+              <span className="text-sm text-gray-500" style={{ opacity: 0.7 }}>({archivedPrompts.length})</span>
+            )}
+            {showArchived ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
+          </button>
+
+          {showArchived && (
+            <div
+              className="bg-white rounded-lg shadow-sm"
+              style={{
+                padding: "16px",
+                borderRadius: "8px",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+              }}
             >
-              <span className="text-amber-600">📦</span>
-              Prompt Archive
-              {archivedLoading ? (
-                <span className="text-sm text-gray-400">(...)</span>
+              {archivedPrompts.length === 0 ? (
+                <p className="text-gray-500 text-base p-4">
+                  Dismissed prompts will appear here
+                </p>
               ) : (
-                <span className="text-sm text-gray-500">({archivedPrompts.length})</span>
-              )}
-              {showArchived ? (
-                <ChevronUp className="w-5 h-5" />
-              ) : (
-                <ChevronDown className="w-5 h-5" />
-              )}
-            </button>
-
-            {showArchived && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {archivedPrompts.length === 0 ? (
-                  <p className="text-gray-500 italic pl-8 col-span-full">
-                    Dismissed prompts will appear here
-                  </p>
-                ) : (
-                  archivedPrompts.map((prompt, index) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {archivedPrompts.map((prompt, index) => (
                     <PromptCard
                       key={prompt.id}
                       id={prompt.id}
@@ -463,12 +473,12 @@ export default function PromptsPage() {
                       onDelete={handleDelete}
                       isLoading={isAnyMutationPending}
                     />
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-        </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
       </div>
 
       {/* Record Modal */}

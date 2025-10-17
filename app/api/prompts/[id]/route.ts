@@ -51,25 +51,44 @@ export async function DELETE(
       );
     }
 
-    // Delete the prompt from active_prompts
-    const { error: deleteError } = await supabaseAdmin
+    // Try to delete from active_prompts first (AI prompts)
+    const { data: aiData, error: aiError } = await supabaseAdmin
       .from("active_prompts")
       .delete()
       .eq("id", promptId)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .select();
 
-    if (deleteError) {
-      logger.error("Error deleting prompt:", deleteError);
-      return NextResponse.json(
-        { error: "Failed to delete prompt" },
-        { status: 500 }
-      );
+    // If found in active_prompts, return success
+    if (!aiError && aiData && aiData.length > 0) {
+      return NextResponse.json({
+        success: true,
+        message: "Prompt permanently deleted",
+      });
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Prompt permanently deleted",
-    });
+    // If not found in active_prompts, try user_prompts (catalog prompts)
+    const { data: catalogData, error: catalogError } = await supabaseAdmin
+      .from("user_prompts")
+      .delete()
+      .eq("id", promptId)
+      .eq("user_id", user.id)
+      .select();
+
+    // If found in user_prompts, return success
+    if (!catalogError && catalogData && catalogData.length > 0) {
+      return NextResponse.json({
+        success: true,
+        message: "Prompt permanently deleted",
+      });
+    }
+
+    // If not found in either table, log and return error
+    logger.error("Prompt not found in either table:", { promptId, aiError, catalogError });
+    return NextResponse.json(
+      { error: "Prompt not found or already deleted" },
+      { status: 404 }
+    );
   } catch (err) {
     logger.error("Error in DELETE /api/prompts/[id]:", err);
     return NextResponse.json(

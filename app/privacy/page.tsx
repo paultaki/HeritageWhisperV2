@@ -70,6 +70,61 @@ export default function PrivacyPolicy() {
             </ul>
           </section>
 
+          {/* Your Security & Control */}
+          <section className="mb-12 bg-gradient-to-br from-amber-50 to-orange-50 border border-orange-200 rounded-2xl p-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              Your Security & Control
+            </h2>
+            
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                We protect your stories with:
+              </h3>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-600 font-bold mt-1">•</span>
+                  <span><strong>Bank-level 256-bit encryption</strong> for all data in transit and at rest</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-600 font-bold mt-1">•</span>
+                  <span><strong>Private by default</strong> - you choose who sees each story</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-600 font-bold mt-1">•</span>
+                  <span><strong>Automatic removal of location data</strong> from all recordings</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-600 font-bold mt-1">•</span>
+                  <span><strong>Full download of your content anytime</strong></span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-600 font-bold mt-1">•</span>
+                  <span><strong>Complete deletion rights</strong> - no questions asked</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 border border-orange-100">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                We promise:
+              </h3>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-600 font-bold mt-1">✓</span>
+                  <span><strong>Never sell or share your data</strong></span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-600 font-bold mt-1">✓</span>
+                  <span><strong>No ads or tracking</strong></span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-600 font-bold mt-1">✓</span>
+                  <span><strong>Your family's stories stay in your family</strong></span>
+                </li>
+              </ul>
+            </div>
+          </section>
+
           {/* Table of Contents */}
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">

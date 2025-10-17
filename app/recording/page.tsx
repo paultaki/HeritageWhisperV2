@@ -178,7 +178,7 @@ function PostRecordingFollowUp({
 function RecordingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
 
   // State Management
@@ -350,9 +350,9 @@ function RecordingContent() {
     return () => clearInterval(interval);
   }, [isRecording, isPaused]);
 
-  // Redirect to login if no user
+  // Redirect to login if no user (wait for auth to finish loading)
   useEffect(() => {
-    if (!user) {
+    if (!isAuthLoading && !user) {
       toast({
         title: "Authentication Required",
         description: "Please log in to record memories.",
@@ -360,7 +360,16 @@ function RecordingContent() {
       });
       router.push("/auth/login");
     }
-  }, [user, router, toast]);
+  }, [user, isAuthLoading, router, toast]);
+
+  // Show loading spinner while checking authentication
+  if (isAuthLoading) {
+    return (
+      <div className="max-w-2xl mx-auto p-6 flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

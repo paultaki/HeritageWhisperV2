@@ -108,14 +108,14 @@ export default function BookProgressBar({
       style={{ 
         display: 'block',
         position: 'fixed',
-        bottom: '80px',
+        top: '0',
         left: '0',
         right: '0',
         height: '32px',
-        borderTop: '1px solid #e5e5e5',
+        borderBottom: '1px solid #e5e5e5',
         zIndex: 50,
         backgroundColor: '#ffffff',
-        boxShadow: '0 -2px 8px rgba(0,0,0,0.08)'
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
       }}
     >
       <div className="relative px-6 max-w-7xl mx-auto flex items-center" style={{ height: '32px' }}>
@@ -175,7 +175,7 @@ export default function BookProgressBar({
             const { pageNum, year } = getHoverPageInfo();
             return (
               <div
-                className="absolute bottom-full mb-2 px-3 py-1.5 bg-gray-800 text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                className="absolute top-full mt-2 px-3 py-1.5 bg-gray-800 text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
                 style={{
                   left: `${hoverPosition}px`,
                   transform: "translateX(-50%)",
