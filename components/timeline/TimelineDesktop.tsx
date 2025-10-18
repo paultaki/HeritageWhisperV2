@@ -43,6 +43,40 @@ import { getTopTraits } from "@/utils/getTopTraits";
 
 const logoUrl = "/HW_logo_mic_clean.png";
 
+// Decade Banner Component
+interface DecadeBannerProps {
+  decade: string;
+  isDark?: boolean;
+}
+
+function DecadeBanner({ decade, isDark = false }: DecadeBannerProps) {
+  const decadeNum = decade.replace("s", "");
+
+  return (
+    <div className="relative flex items-center justify-center decade-banner md:-mt-[50px]">
+      {/* Banner label - inverted colors from story date markers */}
+      <div
+        className="relative z-20 py-1 rounded-lg shadow-sm"
+        style={{
+          backgroundColor: isDark ? '#b0b3b8' : '#6f7583',
+          border: `1px solid ${isDark ? '#b0b3b8' : '#6f7583'}`,
+          width: '90px',
+          textAlign: 'center',
+        }}
+      >
+        <h3
+          className="text-lg font-serif font-medium whitespace-nowrap"
+          style={{
+            color: '#ffffff',
+          }}
+        >
+          {decadeNum}s
+        </h3>
+      </div>
+    </div>
+  );
+}
+
 // Global audio manager to ensure only one audio plays at a time
 class AudioManager {
   private static instance: AudioManager;
@@ -119,9 +153,11 @@ interface CenteredMemoryCardProps {
   position: "left" | "right";
   index: number;
   isDark?: boolean;
+  showDecadeMarker?: boolean;
+  decadeLabel?: string;
 }
 
-function CenteredMemoryCard({ story, position, index, isDark = false }: CenteredMemoryCardProps) {
+function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel }: CenteredMemoryCardProps) {
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -408,21 +444,21 @@ function CenteredMemoryCard({ story, position, index, isDark = false }: Centered
             </div>
             {/* Photo count badge (desktop) */}
             {photoCount > 1 && (
-              <div className="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
+              <div className="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium z-10">
                 {photoCount} photos
               </div>
             )}
             
             {/* Memory Footer Overlay with Play Button */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 lg:p-4">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 md:p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg lg:text-xl font-semibold text-white mb-1 truncate pr-2">
+                  <h3 className="text-lg md:text-xl font-semibold text-white mb-1 truncate pr-2">
                     {story.title}
                   </h3>
-                  <div className="flex items-center gap-2 lg:gap-3 text-xs lg:text-sm text-white/90">
+                  <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-white/90">
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-3 lg:w-3.5 h-3 lg:h-3.5" />
+                      <Calendar className="w-3 md:w-3.5 h-3 md:h-3.5" />
                       {story.storyDate
                         ? new Date(story.storyDate).toLocaleDateString("en-US", {
                             year: "numeric",
@@ -452,10 +488,10 @@ function CenteredMemoryCard({ story, position, index, isDark = false }: Centered
                     }}
                     aria-pressed={isPlaying}
                     aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-                    className="flex-shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
+                    className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
                   >
                     {isLoading ? (
-                      <Loader2 className="w-4 lg:w-5 h-4 lg:h-5 animate-spin text-orange-500" />
+                      <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" />
                     ) : (
                       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
                         <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
@@ -511,11 +547,11 @@ function CenteredMemoryCard({ story, position, index, isDark = false }: Centered
     // No photo - render white card (existing design)
     return (
       <div
-        className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 lg:p-8 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 cursor-pointer"
+        className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 md:p-8 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 cursor-pointer"
         onClick={handleCardClick}
       >
         <div className="mb-6">
-          <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-3">
+          <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-3">
             {story.title}
           </h3>
           <div className="flex items-center gap-3 text-sm text-gray-600">
@@ -552,7 +588,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false }: Centered
               className="flex items-center gap-2 px-4 py-2 bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 rounded-full transition-all duration-200 shadow-md hover:shadow-lg"
             >
               {isLoading ? (
-                <Loader2 className="w-4 lg:w-5 h-4 lg:h-5 animate-spin text-orange-500" />
+                <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" />
               ) : (
                 <svg
                   width="20"
@@ -631,13 +667,13 @@ function CenteredMemoryCard({ story, position, index, isDark = false }: Centered
       {/* Left side content (for left-positioned cards) - Desktop only */}
       <div className={`flex-1 flex ${position === "left" ? "justify-end lg:pr-6" : ""} hidden lg:flex`}>
         {position === "left" && (
-          <div className="max-w-md w-full">
+          <div className="w-full max-w-md timeline-card-container">
             {renderCardContent()}
           </div>
         )}
       </div>
 
-      {/* Center date bubble */}
+      {/* Center date bubble or decade marker */}
       <div
         className="z-20 flex-shrink-0 timeline-dot transition-all duration-500"
         style={{
@@ -645,23 +681,33 @@ function CenteredMemoryCard({ story, position, index, isDark = false }: Centered
         }}
       >
         <div
-          className="px-4 py-1 text-lg font-serif font-medium rounded-lg whitespace-nowrap shadow-sm"
+          className="py-1 text-lg font-serif font-medium rounded-lg whitespace-nowrap shadow-sm"
           style={{
-            backgroundColor: isDark ? '#252728' : '#ffffffF2',
-            border: `1px solid ${isDark ? '#3b3d3f' : '#6f7583'}`,
-            color: isDark ? '#b0b3b8' : '#6f7583',
+            backgroundColor: showDecadeMarker
+              ? (isDark ? '#b0b3b8' : '#6f7583')
+              : (isDark ? '#252728' : '#ffffffF2'),
+            border: showDecadeMarker
+              ? `1px solid ${isDark ? '#b0b3b8' : '#6f7583'}`
+              : `1px solid ${isDark ? '#3b3d3f' : '#6f7583'}`,
+            color: showDecadeMarker ? '#ffffff' : (isDark ? '#b0b3b8' : '#6f7583'),
+            width: showDecadeMarker ? '90px' : 'auto',
+            textAlign: showDecadeMarker ? 'center' : 'left',
+            paddingLeft: showDecadeMarker ? '0' : '1rem',
+            paddingRight: showDecadeMarker ? '0' : '1rem',
           }}
         >
-          {story.storyDate
-            ? new Date(story.storyDate).getFullYear()
-            : formatYear(story.storyYear)}
+          {showDecadeMarker && decadeLabel
+            ? decadeLabel
+            : (story.storyDate
+                ? new Date(story.storyDate).getFullYear()
+                : formatYear(story.storyYear))}
         </div>
       </div>
 
       {/* Right side content (for right-positioned cards) - Desktop only */}
       <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`}>
         {position === "right" && (
-          <div className="max-w-md w-full">
+          <div className="w-full max-w-md timeline-card-container">
             {renderCardContent()}
           </div>
         )}
@@ -788,8 +834,8 @@ export function TimelineDesktop() {
     if (!storiesData) return;
 
     const handleBubbleScroll = () => {
-      const stickyTop = 65; // Sticky position from top (aligned with header)
-      const collisionThreshold = 80; // Distance before collision triggers fade
+      const stickyTop = 55; // Sticky position from top (aligned with header)
+      const collisionThreshold = -32; // Distance before collision triggers fade (negative = overlap needed)
 
       // Query all timeline-dot elements
       const bubbles = Array.from(document.querySelectorAll('.timeline-dot'));
@@ -820,7 +866,9 @@ export function TimelineDesktop() {
           // Check if next bubble is approaching (within collision threshold)
           if (nextBubbleDistance <= stickyTop + collisionThreshold) {
             // Next bubble is approaching - fade OUT this one
-            const fadeProgress = 1 - ((nextBubbleDistance - stickyTop) / collisionThreshold);
+            const fadeProgress = collisionThreshold !== 0 
+              ? 1 - ((nextBubbleDistance - stickyTop) / collisionThreshold)
+              : 1; // Instant fade if threshold is exactly 0
             bubble.style.opacity = `${Math.max(0, 1 - fadeProgress)}`; // Fade to 0% opacity
             // Preserve translateX and add scale
             bubble.style.transform = `${translateX} scale(${Math.max(0.5, 1 - (fadeProgress * 0.5))})`; // Scale down to 50%
@@ -869,6 +917,18 @@ export function TimelineDesktop() {
     return yearA - yearB;
   });
 
+  // Group stories by decade for dividers
+  const storiesByDecade = new Map<string, Story[]>();
+  sortedStories.forEach((story: Story) => {
+    const year = normalizeYear(story.storyYear);
+    const decade = Math.floor(year / 10) * 10;
+    const decadeKey = `${decade}s`;
+    if (!storiesByDecade.has(decadeKey)) {
+      storiesByDecade.set(decadeKey, []);
+    }
+    storiesByDecade.get(decadeKey)?.push(story);
+  });
+
   return (
     <div className={`min-h-screen ${isDark ? 'dark-theme' : ''}`} style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
       {/* Header */}
@@ -905,44 +965,83 @@ export function TimelineDesktop() {
 
         {/* Timeline Container */}
         <div ref={timelineContainerRef} className="relative">
-          {/* Centered Progress Line */}
+          {/* Centered Progress Line - Absolute positioning, shifted left to match cards */}
           <div
-            className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full hidden lg:block rounded-full overflow-hidden"
-            style={{ backgroundColor: isDark ? '#2a2b2c' : '#e5e7eb' }}
+            className="absolute left-1/2 w-2 md:w-1 rounded-full overflow-hidden pointer-events-none"
+            style={{
+              backgroundColor: isDark ? '#2a2b2c' : '#d1d5db',
+              transform: 'translateX(calc(-50% - 115px))',
+              top: '0',
+              bottom: '0',
+              height: '100%'
+            }}
           >
             <div
               ref={progressLineRef}
               className="w-full rounded-full transition-all duration-300 ease-out"
               style={{
                 height: "0%",
-                background: isDark ? 'linear-gradient(to bottom, #3b3d3f, #3b3d3f)' : 'linear-gradient(to bottom, #9ca3af, #6b7280)',
-                boxShadow: isDark ? '0 0 10px rgba(59, 61, 63, 0.25)' : '0 0 10px rgba(156, 163, 175, 0.2)',
+                background: isDark ? 'linear-gradient(to bottom, #3b3d3f, #3b3d3f)' : 'linear-gradient(to bottom, #6b7280, #4b5563)',
+                boxShadow: isDark ? '0 0 10px rgba(59, 61, 63, 0.25)' : '0 0 10px rgba(107, 114, 128, 0.3)',
               }}
             />
           </div>
 
           {/* Timeline Steps */}
           <div className="flex flex-col gap-2 md:gap-0">
-            {sortedStories.map((story: Story, index: number) => (
-              <div 
-                key={story.id} 
-                className="md:-mt-[50px] first:md:mt-0"
-                data-memory-id={story.id}
-                style={{
-                  transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',
-                  backgroundColor: returnHighlightId === story.id ? (isDark ? 'rgba(176, 179, 184, 0.08)' : 'rgba(251, 146, 60, 0.1)') : 'transparent',
-                  borderRadius: returnHighlightId === story.id ? '1rem' : '0',
-                  padding: returnHighlightId === story.id ? '1rem' : '0',
-                }}
-              >
-                <CenteredMemoryCard
-                  story={story}
-                  position={index % 2 === 0 ? "left" : "right"}
-                  index={index}
-                  isDark={isDark}
-                />
-              </div>
-            ))}
+            {Array.from(storiesByDecade.entries())
+              .sort(([decadeA], [decadeB]) => {
+                const yearA = parseInt(decadeA.replace('s', ''));
+                const yearB = parseInt(decadeB.replace('s', ''));
+                return yearA - yearB;
+              })
+              .map(([decade, decadeStories], decadeIndex) => {
+                // Check if the first story falls on the decade year
+                const decadeYear = parseInt(decade.replace('s', ''));
+                const firstStoryYear = decadeStories[0] ? normalizeYear(decadeStories[0].storyYear) : null;
+                const firstStoryIsOnDecade = firstStoryYear === decadeYear;
+                const decadeLabel = decade.replace('s', '') + 's';
+                // Skip decade banner entirely for the first decade
+                const isFirstDecade = decadeIndex === 0;
+                
+                return (
+                  <div key={decade}>
+                    {/* Only show standalone decade banner if: NOT first decade AND first story is NOT on the decade year */}
+                    {!isFirstDecade && !firstStoryIsOnDecade && <DecadeBanner decade={decade} isDark={isDark} />}
+                    
+                    {/* Stories in this decade */}
+                    {decadeStories.map((story: Story, storyIndex: number) => {
+                      // Calculate global index for alternating left/right positioning
+                      const globalIndex = sortedStories.findIndex(s => s.id === story.id);
+                      // First story gets decade marker if it's on the decade year AND it's not the first decade
+                      const showDecadeMarker = !isFirstDecade && storyIndex === 0 && firstStoryIsOnDecade;
+                      
+                      return (
+                        <div
+                          key={story.id}
+                          className="md:-mt-[50px] first:md:mt-0"
+                          data-memory-id={story.id}
+                          style={{
+                            transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',
+                            backgroundColor: returnHighlightId === story.id ? (isDark ? 'rgba(176, 179, 184, 0.08)' : 'rgba(251, 146, 60, 0.1)') : 'transparent',
+                            borderRadius: returnHighlightId === story.id ? '1rem' : '0',
+                            padding: returnHighlightId === story.id ? '1rem' : '0',
+                          }}
+                        >
+                          <CenteredMemoryCard
+                            story={story}
+                            position={globalIndex % 2 === 0 ? "left" : "right"}
+                            index={globalIndex}
+                            isDark={isDark}
+                            showDecadeMarker={showDecadeMarker}
+                            decadeLabel={showDecadeMarker ? decadeLabel : undefined}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
 
             {sortedStories.length === 0 && (
               <div className="text-center py-20">
@@ -976,22 +1075,34 @@ export function TimelineDesktop() {
         .timeline-step {
           position: relative;
         }
-        
+
         /* Connector line - horizontal stub from card to center timeline */
-        @media (min-width: 1024px) {
+        @media (min-width: 768px) {
+          /* Shift timeline cards and decade banners 115px left on desktop/tablet */
+          .timeline-step.translate-y-0 {
+            transform: translateX(-115px) translateY(0);
+          }
+
+          .timeline-step.translate-y-8 {
+            transform: translateX(-115px) translateY(2rem);
+          }
+
+          .decade-banner {
+            transform: translateX(-115px);
+          }
           /* Sticky date bubbles */
           .timeline-dot {
             position: sticky;
-            top: 65px;
+            top: 55px;
             z-index: 30;
             /* No transitions - scroll handler provides smooth updates */
           }
         
-          .timeline-step .max-w-md {
+          .timeline-card-container {
             position: relative;
           }
-          
-          .timeline-step .max-w-md::after {
+
+          .timeline-card-container::after {
             content: "";
             position: absolute;
             top: 50%;
@@ -1009,9 +1120,9 @@ export function TimelineDesktop() {
             transition: all 150ms ease-out;
             z-index: 1;
           }
-          
+
           /* Left-positioned cards - connector goes to the right */
-          .timeline-step .justify-end .max-w-md::after {
+          .timeline-step .justify-end .timeline-card-container::after {
             right: -26px;
             background: linear-gradient(
               to right,
@@ -1019,9 +1130,9 @@ export function TimelineDesktop() {
               rgba(156, 163, 175, 0.3)
             );
           }
-          
+
           /* Right-positioned cards - connector goes to the left */
-          .timeline-step .justify-start .max-w-md::after {
+          .timeline-step .justify-start .timeline-card-container::after {
             left: -26px;
             background: linear-gradient(
               to left,
@@ -1029,9 +1140,9 @@ export function TimelineDesktop() {
               rgba(156, 163, 175, 0.3)
             );
           }
-          
+
           /* Hover effect - extend and brighten */
-          .timeline-step:hover .max-w-md::after {
+          .timeline-step:hover .timeline-card-container::after {
             width: 26px;
             background: linear-gradient(
               to right,
@@ -1039,16 +1150,16 @@ export function TimelineDesktop() {
               rgba(107, 114, 128, 0.4)
             );
           }
-          
-          .timeline-step:hover .justify-end .max-w-md::after {
+
+          .timeline-step:hover .justify-end .timeline-card-container::after {
             background: linear-gradient(
               to right,
               rgba(107, 114, 128, 0.6),
               rgba(107, 114, 128, 0.4)
             );
           }
-          
-          .timeline-step:hover .justify-start .max-w-md::after {
+
+          .timeline-step:hover .justify-start .timeline-card-container::after {
             background: linear-gradient(
               to left,
               rgba(107, 114, 128, 0.6),
@@ -1057,10 +1168,13 @@ export function TimelineDesktop() {
           }
         }
         
-        @media (max-width: 1024px) {
+        @media (max-width: 767px) {
           .timeline-step {
             opacity: 1 !important;
-            transform: translateY(0) !important;
+            transform: translateX(0) translateY(0) !important;
+          }
+          .decade-banner {
+            transform: translateX(0) !important;
           }
           .timeline-dot {
             transform: scale(1) !important;
@@ -1069,36 +1183,36 @@ export function TimelineDesktop() {
         }
         
         @media (prefers-reduced-motion: reduce) {
-          .timeline-step .max-w-md::after {
+          .timeline-card-container::after {
             transition: none !important;
           }
         }
 
         /* Dark theme connector line overrides */
-        .dark-theme .timeline-step .max-w-md::after {
+        .dark-theme .timeline-card-container::after {
           background: linear-gradient(
             to right,
             rgba(59, 61, 63, 0.5),
             rgba(59, 61, 63, 0.8)
           ) !important;
         }
-        .dark-theme .timeline-step .justify-end .max-w-md::after {
+        .dark-theme .timeline-step .justify-end .timeline-card-container::after {
           background: linear-gradient(
             to right,
             rgba(59, 61, 63, 0.8),
             rgba(59, 61, 63, 0.5)
           ) !important;
         }
-        .dark-theme .timeline-step .justify-start .max-w-md::after {
+        .dark-theme .timeline-step .justify-start .timeline-card-container::after {
           background: linear-gradient(
             to left,
             rgba(59, 61, 63, 0.8),
             rgba(59, 61, 63, 0.5)
           ) !important;
         }
-        .dark-theme .timeline-step:hover .max-w-md::after,
-        .dark-theme .timeline-step:hover .justify-end .max-w-md::after,
-        .dark-theme .timeline-step:hover .justify-start .max-w-md::after {
+        .dark-theme .timeline-step:hover .timeline-card-container::after,
+        .dark-theme .timeline-step:hover .justify-end .timeline-card-container::after,
+        .dark-theme .timeline-step:hover .justify-start .timeline-card-container::after {
           background: linear-gradient(
             to right,
             rgba(176, 179, 184, 0.8),

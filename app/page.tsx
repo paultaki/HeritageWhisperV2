@@ -292,7 +292,7 @@ export default function HomePage() {
                   alt="Smart questions keep you going"
                   width={560}
                   height={264}
-                  className="w-full h-auto rounded-2xl shadow-2xl"
+                  className="max-h-[350px] max-w-full w-auto h-auto rounded-2xl shadow-2xl object-contain mx-auto"
                 />
               </div>
               <div>
