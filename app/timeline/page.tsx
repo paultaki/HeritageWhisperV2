@@ -3,17 +3,98 @@
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { TimelineDesktop } from "@/components/timeline/TimelineDesktop";
 import { TimelineMobile } from "@/components/timeline/TimelineMobile";
+import Link from "next/link";
+import { Home, Users, Settings, HelpCircle, Share2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
-/**
- * Unified Timeline Page
- * 
- * Renders different timeline layouts based on screen size:
- * - Desktop (≥1024px): Timeline V2 with centered vertical timeline and alternating cards
- * - Mobile (<1024px): Original timeline with decade navigation and vertical scroll
- */
 export default function TimelinePage() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const [isDark, setIsDark] = useState(false);
 
-  // Render the appropriate layout based on screen size
-  return isDesktop ? <TimelineDesktop /> : <TimelineMobile />;
+  useEffect(() => {
+    const updateFromDom = () => {
+      const dark =
+        document.documentElement.classList.contains("dark") ||
+        document.body.classList.contains("dark");
+      setIsDark(dark);
+    };
+    updateFromDom();
+    const handler = () => updateFromDom();
+    window.addEventListener("hw-theme-change", handler);
+    return () => window.removeEventListener("hw-theme-change", handler);
+  }, []);
+
+  if (!isDesktop) {
+    return <TimelineMobile />;
+  }
+
+  return (
+    <div
+      className="min-h-screen flex"
+      style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}
+    >
+      {/* Left Sidebar */}
+      <aside
+        className="hidden lg:flex lg:w-56 flex-col gap-1.5 p-2"
+        style={{
+          position: "sticky",
+          top: 72,
+          height: "100vh",
+          backgroundColor: "transparent",
+          borderRight: "none",
+          color: isDark ? "#b0b3b8" : undefined,
+          marginLeft: -1, // reset previous nudge left
+          marginRight: 9, // move block ~9px to the right
+        }}
+      >
+        <nav className="mt-4 space-y-1">
+          <Link
+            href="/"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:opacity-90"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
+          >
+            <Home className="w-4 h-4" />
+            <span>Home</span>
+          </Link>
+          <Link
+            href="/family"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:opacity-90"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
+          >
+            <Users className="w-4 h-4" />
+            <span>Family</span>
+          </Link>
+          <Link
+            href="/profile"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:opacity-90"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
+          >
+            <Settings className="w-4 h-4" />
+            <span>Settings</span>
+          </Link>
+          <Link
+            href="/help"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:opacity-90"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
+          >
+            <HelpCircle className="w-4 h-4" />
+            <span>Help</span>
+          </Link>
+          <Link
+            href="/share"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:opacity-90"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
+          >
+            <Share2 className="w-4 h-4" />
+            <span>Share</span>
+          </Link>
+        </nav>
+      </aside>
+
+      {/* Main timeline content */}
+      <main className="flex-1 min-w-0">
+        <TimelineDesktop />
+      </main>
+    </div>
+  );
 }

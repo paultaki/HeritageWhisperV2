@@ -35,7 +35,7 @@ function DesktopNavItemBottom({
   return (
     <button
       onClick={handleClick}
-      className="flex flex-col items-center justify-center p-3 rounded-lg transition-all hover:bg-gray-100 group relative"
+      className="flex flex-col items-center justify-center px-6 py-3 rounded-lg transition-all hover:bg-gray-200 group relative"
       style={{
         color: isActive ? "#D36A3D" : "hsl(210, 10%, 40%)",
       }}
@@ -47,13 +47,14 @@ function DesktopNavItemBottom({
         </div>
       </div>
 
-      {/* Active indicator bar at top */}
+      {/* Active indicator bar at top (inside) */}
       {isActive && (
         <div
-          className="absolute -top-2 left-1/2 -translate-x-1/2 h-1 rounded-full transition-all"
+          className="absolute left-1/2 -translate-x-1/2 h-1 rounded-full transition-all"
           style={{
             backgroundColor: "#D36A3D",
-            width: "52px",
+            width: "80px",
+            top: "-5px",
           }}
         />
       )}
@@ -127,7 +128,7 @@ export default function DesktopNavigationBottom({
         <div className="flex items-center nav-group-right">
           <DesktopNavItemBottom
             icon={Box}
-            label="Memories"
+            label="Memory Box"
             href="/memory-box"
             isActive={pathname === "/memory-box"}
           />
@@ -143,9 +144,16 @@ export default function DesktopNavigationBottom({
 
       {/* Record Button - Perfectly centered in viewport */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 z-50"
+        className="absolute left-1/2 -translate-x-1/2 z-50 group"
         style={{ bottom: '6px' }}
       >
+        {/* Tooltip on hover */}
+        <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          <div className="bg-gray-800 text-white text-sm font-medium px-3 py-2 rounded-lg whitespace-nowrap shadow-lg">
+            +New Memory
+          </div>
+        </div>
+
         <button
           onClick={onRecordClick}
           className="w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
