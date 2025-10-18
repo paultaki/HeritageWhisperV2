@@ -10,10 +10,17 @@ import {
   Play,
   Pause,
   RotateCcw,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { AudioRecorder, AudioRecorderHandle } from "./AudioRecorder";
 import { VoiceVisualizer } from "./VoiceVisualizer";
 import { VoiceRecordingButton } from "./VoiceRecordingButton";
@@ -23,6 +30,8 @@ import designSystem from "@/lib/designSystem";
 import { motion, AnimatePresence } from "framer-motion";
 import { getApiUrl } from "@/lib/config";
 import { supabase } from "@/lib/supabase";
+import { useAIConsent } from "@/hooks/use-ai-consent";
+import { useRouter } from "next/navigation";
 
 interface RecordModalProps {
   isOpen: boolean;
@@ -49,6 +58,9 @@ export default function RecordModal({
   initialTitle,
   initialYear,
 }: RecordModalProps) {
+  const router = useRouter();
+  const { isEnabled: isAIEnabled, isLoading: isAILoading } = useAIConsent();
+
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -955,17 +967,75 @@ export default function RecordModal({
 
                       {/* Center: Morphing Recording Button */}
                       <div className="flex flex-col items-center justify-center py-4 space-y-3">
-                        <VoiceRecordingButton
-                          isRecording={isRecording}
-                          isPaused={isPaused}
-                          recordingTime={recordingTime}
-                          onStart={startRecording}
-                          audioRecorderRef={audioRecorderRef}
-                        />
+                        {!isAIEnabled && !isAILoading ? (
+                          // AI Disabled State - Show disabled button with tooltip
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="relative">
+                                  <button
+                                    onClick={() => {
+                                      router.push("/profile#ai-processing");
+                                      onClose();
+                                    }}
+                                    className="relative w-32 h-32 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
+                                    style={{
+                                      background: "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)",
+                                      boxShadow: "0 6px 16px rgba(107, 114, 128, 0.3)",
+                                    }}
+                                  >
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                                      <Mic className="w-10 h-10 text-white/60" />
+                                      <span className="text-sm font-semibold text-white/60">Disabled</span>
+                                    </div>
+                                  </button>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-[280px]">
+                                <div className="space-y-2">
+                                  <p className="font-semibold">AI recording is disabled</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    Enable AI processing in Settings to use voice recording and transcription.
+                                  </p>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="w-full mt-2"
+                                    onClick={() => {
+                                      router.push("/profile#ai-processing");
+                                      onClose();
+                                    }}
+                                  >
+                                    <Settings className="w-4 h-4 mr-2" />
+                                    Go to Settings
+                                  </Button>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          // Normal AI Enabled State
+                          <VoiceRecordingButton
+                            isRecording={isRecording}
+                            isPaused={isPaused}
+                            recordingTime={recordingTime}
+                            onStart={startRecording}
+                            audioRecorderRef={audioRecorderRef}
+                          />
+                        )}
                         {!isRecording && (
                           <div className="text-sm text-gray-500 flex items-center gap-1.5">
-                            <span className="text-base">🔒</span>
-                            <span>Safe & Private</span>
+                            {!isAIEnabled && !isAILoading ? (
+                              <>
+                                <Settings className="w-4 h-4" />
+                                <span>Enable AI in Settings</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="text-base">🔒</span>
+                                <span>Safe & Private</span>
+                              </>
+                            )}
                           </div>
                         )}
                       </div>

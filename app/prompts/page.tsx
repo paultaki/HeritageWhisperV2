@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mic, ChevronDown, ChevronUp } from "lucide-react";
+import { Mic, ChevronDown, ChevronUp, Settings, Brain } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,7 @@ import { useRecordModal } from "@/hooks/use-record-modal";
 import RecordModal from "@/components/RecordModal";
 import MoreIdeas from "@/components/MoreIdeas";
 import PromptCard from "@/components/PromptCard";
+import { useAIConsent } from "@/hooks/use-ai-consent";
 
 interface QueuedPrompt {
   id: string;
@@ -71,6 +72,7 @@ export default function PromptsPage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { isOpen, openModal, closeModal, handleSave, initialData } = useRecordModal();
+  const { isEnabled: isAIEnabled, isLoading: isAILoading } = useAIConsent();
   const [showArchived, setShowArchived] = useState(false);
   const [showAllQueued, setShowAllQueued] = useState(false);
   const [showAllActive, setShowAllActive] = useState(false);
@@ -275,6 +277,32 @@ export default function PromptsPage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-10 space-y-10">
+        {/* AI Disabled State */}
+        {!isAILoading && !isAIEnabled && (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <Brain className="w-6 h-6 text-amber-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  AI Prompts Disabled
+                </h3>
+                <p className="text-gray-700 mb-4">
+                  AI-generated story prompts are currently disabled for your account. Enable AI processing in Settings to get personalized prompts based on your stories.
+                </p>
+                <Button
+                  onClick={() => router.push("/profile#ai-processing")}
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Go to Settings
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Section 1: Your Prompt Queue */}
         <section>
           <div className="flex items-center gap-3 mb-5">

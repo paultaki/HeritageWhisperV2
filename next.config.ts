@@ -34,6 +34,8 @@ const nextConfig: NextConfig = {
   // Security Headers - Protect against common web vulnerabilities
   async headers() {
     // Content Security Policy - Prevents XSS attacks
+    // Note: Avoid "upgrade-insecure-requests" in development to prevent https upgrade on localhost
+    const isProd = process.env.NODE_ENV === 'production';
     const cspHeader = `
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline';
@@ -47,8 +49,13 @@ const nextConfig: NextConfig = {
       base-uri 'self';
       form-action 'self';
       frame-ancestors 'none';
-      upgrade-insecure-requests;
+      ${isProd ? 'upgrade-insecure-requests;' : ''}
     `.replace(/\s{2,}/g, ' ').trim();
+
+    // CORS origin per environment (relaxed in development)
+    const devOrigin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002';
+    const prodOrigin = process.env.NEXT_PUBLIC_APP_URL || 'https://dev.heritagewhisper.com';
+    const allowOrigin = isProd ? prodOrigin : devOrigin;
 
     return [
       {
@@ -91,7 +98,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Access-Control-Allow-Origin',
-            value: process.env.NEXT_PUBLIC_APP_URL || 'https://dev.heritagewhisper.com',
+            value: allowOrigin,
           },
           {
             key: 'Access-Control-Allow-Methods',

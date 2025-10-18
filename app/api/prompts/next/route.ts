@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { generateTier1Prompts, validatePromptQuality } from "@/lib/promptGeneration";
+import { hasAIConsent } from "@/lib/aiConsent";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -133,6 +134,13 @@ export async function GET(request: NextRequest) {
 
     if (userErr || !user) {
       return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+    }
+
+    // Check AI consent - return empty if disabled
+    const aiEnabled = await hasAIConsent(user.id);
+    if (!aiEnabled) {
+      logger.debug("[Prompts Next] AI processing disabled for user, returning no prompts");
+      return NextResponse.json({ prompt: null });
     }
 
     // 1) Existing unlocked prompts, ordered by tier desc then prompt_score desc — but quality gated

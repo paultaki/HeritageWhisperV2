@@ -376,7 +376,7 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
           className="cursor-pointer"
           onClick={handleCardClick}
         >
-          <div className={`relative rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 ${
+          <div className={`relative rounded-3xl overflow-hidden shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}>
             <div className="relative w-full h-48 lg:h-64">
@@ -385,7 +385,9 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
                 alt={story.title}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
-                className="object-cover transition-transform duration-500 hover:scale-105"
+                className={`object-cover transition-transform duration-500 hover:scale-105 ${
+                  isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''
+                }`}
                 loading="eager"
                 priority={index < 8}
                 quality={85}
@@ -514,7 +516,7 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
     // No photo - render white card (existing design)
     return (
       <div
-        className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer"
+        className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 lg:p-8 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 cursor-pointer"
         onClick={handleCardClick}
       >
         <div className="mb-6">
@@ -642,13 +644,9 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
 
       {/* Center date bubble */}
       <div
-        className={`z-20 flex-shrink-0 timeline-dot transition-all duration-500 ${
-          isVisible ? "opacity-100 scale-100" : "opacity-50 scale-80"
-        }`}
+        className="z-20 flex-shrink-0 timeline-dot transition-all duration-500"
         style={{
-          transform: position === "left"
-            ? (isVisible ? "translateX(-12px)" : "translateX(-12px) scale(0.8)")
-            : (isVisible ? "translateX(12px)" : "translateX(12px) scale(0.8)"),
+          transform: position === "left" ? "translateX(-12px)" : "translateX(12px)",
         }}
       >
         <div className="px-4 py-1 bg-white/95 border border-gray-200 text-gray-400 text-lg font-serif font-medium rounded-lg whitespace-nowrap shadow-sm">
@@ -782,6 +780,69 @@ export function TimelineDesktop() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [storiesData]);
 
+  // Date bubble collision animation on scroll
+  useEffect(() => {
+    if (!storiesData) return;
+
+    const handleBubbleScroll = () => {
+      const stickyTop = 65; // Sticky position from top (aligned with header)
+      const collisionThreshold = 80; // Distance before collision triggers fade
+
+      // Query all timeline-dot elements
+      const bubbles = Array.from(document.querySelectorAll('.timeline-dot'));
+      
+      bubbles.forEach((bubble, index) => {
+        if (!(bubble instanceof HTMLElement)) return;
+
+        const rect = bubble.getBoundingClientRect();
+        const distanceFromTop = rect.top;
+        
+        // Check if there's a bubble below this one
+        const nextBubble = bubbles[index + 1];
+        let nextBubbleDistance = Infinity;
+        if (nextBubble instanceof HTMLElement) {
+          const nextRect = nextBubble.getBoundingClientRect();
+          nextBubbleDistance = nextRect.top;
+        }
+
+        // Get the base translateX from inline styles (left cards: -12px, right cards: +12px)
+        const baseTransform = bubble.style.transform || '';
+        const translateXMatch = baseTransform.match(/translateX\(([^)]+)\)/);
+        const translateX = translateXMatch ? translateXMatch[0] : '';
+
+        // This bubble is stuck at the top (CSS sticky)
+        if (distanceFromTop <= stickyTop) {
+          bubble.classList.add('is-sticky');
+          
+          // Check if next bubble is approaching (within collision threshold)
+          if (nextBubbleDistance <= stickyTop + collisionThreshold) {
+            // Next bubble is approaching - fade OUT this one
+            const fadeProgress = 1 - ((nextBubbleDistance - stickyTop) / collisionThreshold);
+            bubble.style.opacity = `${Math.max(0, 1 - fadeProgress)}`; // Fade to 0% opacity
+            // Preserve translateX and add scale
+            bubble.style.transform = `${translateX} scale(${Math.max(0.5, 1 - (fadeProgress * 0.5))})`; // Scale down to 50%
+          } else {
+            // No collision - stay bright and full size
+            bubble.style.opacity = '1';
+            // Preserve translateX
+            bubble.style.transform = `${translateX} scale(1)`;
+          }
+        } else {
+          // Bubble is below sticky position - normal state
+          bubble.classList.remove('is-sticky');
+          bubble.style.opacity = '1';
+          // Preserve translateX
+          bubble.style.transform = `${translateX} scale(1)`;
+        }
+      });
+    };
+
+    window.addEventListener("scroll", handleBubbleScroll, { passive: true });
+    handleBubbleScroll(); // Initial calculation
+
+    return () => window.removeEventListener("scroll", handleBubbleScroll);
+  }, [storiesData]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -903,6 +964,14 @@ export function TimelineDesktop() {
         
         /* Connector line - horizontal stub from card to center timeline */
         @media (min-width: 1024px) {
+          /* Sticky date bubbles */
+          .timeline-dot {
+            position: sticky;
+            top: 65px;
+            z-index: 30;
+            /* No transitions - scroll handler provides smooth updates */
+          }
+        
           .timeline-step .max-w-md {
             position: relative;
           }

@@ -95,16 +95,21 @@ export async function csrfProtection(request: NextRequest): Promise<NextResponse
 
   // Skip CSRF validation for certain endpoints that handle their own auth
   const skipPaths = [
-    '/api/auth/callback', // OAuth callback
-    '/api/webhooks/',     // Stripe webhooks use signature verification
+    '/api/auth/callback',        // OAuth callback
+    '/api/webhooks/',            // Stripe webhooks use signature verification
+    '/api/followups/contextual', // Public endpoint for generating follow-up questions
   ];
 
   const pathname = new URL(url).pathname;
-  
+
   // Skip CSRF for API routes with JWT authentication (Authorization header present)
+  // and for same-origin requests with credentials (fetch includes cookies) to avoid breaking SPA flows
   const hasAuthHeader = request.headers.get('authorization');
-  if (hasAuthHeader && pathname.startsWith('/api/')) {
-    logger.debug(`[CSRF] Skipping validation for authenticated API request: ${pathname}`);
+  const origin = request.headers.get('origin');
+  const host = request.headers.get('host');
+  const sameOrigin = !!origin && !!host && origin.includes(host);
+  if ((hasAuthHeader || sameOrigin) && pathname.startsWith('/api/')) {
+    logger.debug(`[CSRF] Skipping validation for authenticated/same-origin API request: ${pathname}`);
     return null;
   }
   
@@ -116,7 +121,7 @@ export async function csrfProtection(request: NextRequest): Promise<NextResponse
   }
 
   // Get CSRF token from request header
-  const token = request.headers.get(CSRF_HEADER_NAME);
+  const token = request.headers.get(CSRF_HEADER_NAME) || request.headers.get(CSRF_HEADER_NAME.toUpperCase());
 
   // Validate token
   const isValid = await validateCSRFToken(token);

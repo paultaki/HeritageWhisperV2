@@ -166,8 +166,59 @@ export const CreateStorySchema = z.object({
  * Story Update Schema (PUT /api/stories/[id])
  * Similar to create but all fields optional
  */
-export const UpdateStorySchema = CreateStorySchema.partial().extend({
+// IMPORTANT: Update schema must NOT carry Create defaults, otherwise
+// omitted fields (e.g., title, photos) overwrite existing data.
+export const UpdateStorySchema = z.object({
   id: z.string().uuid('Invalid story ID'),
+
+  // Core text fields (no defaults)
+  transcription: z.string().max(50000).optional(),
+  content: z.string().optional(),
+  title: z.string().max(200).optional(),
+
+  // Dates/nums (no defaults)
+  year: z.number().int().min(1900).max(new Date().getFullYear() + 10).nullable().optional(),
+  storyYear: z.number().int().min(1900).max(new Date().getFullYear() + 10).nullable().optional(),
+  lifeAge: z.number().int().min(-100).max(120).nullable().optional(),
+  age: z.number().int().min(-100).max(120).nullable().optional(),
+  durationSeconds: z.number().int().min(1).max(600).optional(),
+
+  // Media
+  audioUrl: z.union([
+    z.string().url().refine(url => !url.startsWith('blob:'), 'Blob URLs not allowed'),
+    z.null(),
+    z.undefined(),
+  ]).optional(),
+  photoUrl: z.union([
+    z.string().url().refine(url => !url.startsWith('blob:'), 'Blob URLs not allowed'),
+    z.null(),
+    z.undefined(),
+  ]).optional(),
+  photos: z.array(PhotoSchema).max(20).optional(),
+
+  // Wisdom/lesson
+  wisdomClipText: z.string().max(500).optional(),
+  wisdomTranscription: z.string().max(500).optional(),
+  wisdomClipUrl: z.string().url().optional(),
+
+  // Metadata
+  emotions: z.array(z.string()).optional(),
+  pivotalCategory: z.string().max(100).optional(),
+  storyDate: z.string().datetime().optional(),
+  photoTransform: z.object({
+    x: z.number(),
+    y: z.number(),
+    scale: z.number().min(0.1).max(5),
+    rotation: z.number().optional(),
+  }).optional(),
+
+  // Flags (no defaults applied on update)
+  includeInTimeline: z.boolean().optional(),
+  includeInBook: z.boolean().optional(),
+  isFavorite: z.boolean().optional(),
+
+  // Prompt tracking
+  sourcePromptId: z.union([z.string().uuid(), z.null(), z.undefined()]).optional(),
 });
 
 /**

@@ -10,6 +10,7 @@ import {
 import * as fs from "fs";
 import * as path from "path";
 import { nanoid } from "nanoid";
+import { checkAIConsentOrError } from "@/lib/aiConsent";
 
 // Initialize Supabase Admin client for token verification
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -344,6 +345,15 @@ export async function POST(request: NextRequest) {
 
       // Convert base64 to buffer
       audioBuffer = Buffer.from(audioBase64, "base64");
+    }
+
+    // Check AI consent (only for authenticated users)
+    if (user) {
+      const consentError = await checkAIConsentOrError(user.id);
+      if (consentError) {
+        logger.warn("[Transcribe] AI consent denied for user:", user.id);
+        return NextResponse.json(consentError, { status: 403 });
+      }
     }
 
     // Rate limiting: 30 API requests per minute per user (or IP if no auth)

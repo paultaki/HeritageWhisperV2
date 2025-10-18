@@ -635,12 +635,37 @@ Watch for in logs:
 
 ### Security & Privacy
 
-- **Rate Limiting**: Upstash Redis with lazy initialization (graceful fallback if not configured)
-- **EXIF Stripping**: All uploaded images processed with Sharp to remove metadata (GPS, camera info)
-- **Image Processing**: Photos resized to max 2400x2400, converted to JPEG at 85% quality
+**Implementation Status:** 60-70% Complete (see `SECURITY_IMPLEMENTATION_STATUS.md` for full details)
+
+**✅ Fully Implemented:**
+- **Admin RBAC**: Role-based access control with audit logging (`/lib/adminAuth.ts`)
+- **Rate Limiting**: Multi-tier limits with production enforcement (6 limiters configured)
+  - Auth: 5/10s, Upload: 10/min, API: 30/min, Tier 3: 1/5min, AI IP: 10/hr, AI Global: 1000/hr
+  - Health check: `/api/health`
+- **Row Level Security**: Enabled on all 20 database tables
+- **Security Headers**: CSP, HSTS, X-Frame-Options, CORS (`next.config.ts`)
+- **EXIF Stripping**: Automated metadata removal from all uploaded images (Sharp)
+- **Image Processing**: Photos resized to max 2400x2400, 85% quality JPEG
+- **PII Protection**: No email addresses or sensitive data in logs
 - **Account Management**:
   - `/api/user/delete` - Complete account deletion (stories, files, auth)
   - `/api/user/export` - GDPR-compliant data export
+
+**⚠️ Partially Implemented:**
+- **CSRF Protection**: Backend complete, frontend optional (JWT/same-origin bypass active)
+- **AI Cost Infrastructure**: Tables and RPC functions ready, enforcement not integrated
+- **Family Session Security**: Database schema complete, API integration pending
+
+**❌ Pending:**
+- **AI Budget Enforcement**: Need to call `check_ai_budget()` before expensive operations
+- **AI Usage Logging**: Need to call `log_ai_usage()` after GPT completions
+- **RPC Function Audit**: 9 SECURITY DEFINER functions need security review
+
+**Documentation:**
+- Full assessment: `SECURITY_IMPLEMENTATION_STATUS.md`
+- Remediation plan: `SECURITY_REMEDIATION_PLAN.md`
+- CSRF guide: `CSRF_IMPLEMENTATION.md`
+- Security overview: `SECURITY.md`
 
 ### Family Sharing
 

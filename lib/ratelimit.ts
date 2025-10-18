@@ -60,9 +60,11 @@ function getRateLimiter(type: "auth" | "upload" | "api" | "tier3" | "ai-ip" | "a
 
   // CRITICAL CHANGE: Fail in production if Redis not available
   if (!redis) {
+    // In production, don't throw; degrade gracefully to allow traffic while logging loudly
     if (process.env.NODE_ENV === 'production' || redisInitError) {
-      throw new Error(
-        `Rate limiting unavailable in production. Redis initialization failed: ${redisInitError?.message || 'No credentials'}`
+      console.error(
+        `Rate limiting unavailable. Redis initialization failed: ${redisInitError?.message || 'No credentials'}. ` +
+        `Proceeding without enforcement until Redis is configured.`
       );
     }
     return null;

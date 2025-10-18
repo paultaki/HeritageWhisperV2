@@ -279,7 +279,56 @@ function MemoryCard({
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(story.durationSeconds || 0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Check for prefers-reduced-motion preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  // Intersection Observer for Ken Burns effect trigger
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+          }
+        });
+      },
+      {
+        threshold: 0.2,
+        rootMargin: "100px 0px",
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      const currentCard = cardRef.current;
+      if (currentCard) {
+        observer.unobserve(currentCard);
+      }
+    };
+  }, [prefersReducedMotion]);
 
   // Get top trait for display
   const top = getTopTraits(story, 1, 0.6);
@@ -515,6 +564,7 @@ function MemoryCard({
   if (!displayPhoto || !displayPhoto.url) {
     return (
       <div
+        ref={cardRef}
         className={`hw-card cursor-pointer ${
           isHighlighted
             ? "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
@@ -616,6 +666,7 @@ function MemoryCard({
   // Normal format with photo
   return (
     <div
+      ref={cardRef}
       className={`hw-card cursor-pointer ${
         isHighlighted
           ? "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
@@ -641,7 +692,9 @@ function MemoryCard({
         <img
           src={displayPhoto.url}
           alt={story.title}
-          className="hw-card-media"
+          className={`hw-card-media ${
+            isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''
+          }`}
           style={
             displayPhoto.transform
               ? {
@@ -991,6 +1044,44 @@ export function TimelineMobile() {
       });
     };
   }, [user, storiesData]);
+
+  // Track decade header visibility for fade animation
+  useEffect(() => {
+    if (!user || !storiesData) return;
+
+    const updateHeaderClasses = () => {
+      const decadeBands = document.querySelectorAll('.hw-decade-band');
+      decadeBands.forEach((band) => {
+        const section = band.closest('section');
+        if (!section) return;
+        
+        const decadeId = section.getAttribute('data-decade-id');
+        const rect = section.getBoundingClientRect();
+        const headerHeight = 87; // Height of the sticky header area
+        
+        // If the section is in the viewport and its top is near/at the sticky position
+        const isSticky = rect.top <= headerHeight;
+        const isActive = decadeId === activeDecade;
+        
+        // Apply classes based on state
+        band.classList.remove('fading-out', 'current');
+        if (isSticky && isActive) {
+          band.classList.add('current');
+        } else if (isSticky && !isActive) {
+          band.classList.add('fading-out');
+        }
+      });
+    };
+
+    // Update on scroll
+    window.addEventListener('scroll', updateHeaderClasses, { passive: true });
+    // Update immediately
+    updateHeaderClasses();
+
+    return () => {
+      window.removeEventListener('scroll', updateHeaderClasses);
+    };
+  }, [user, storiesData, activeDecade]);
 
   // Handle redirect to login page in useEffect (not during render)
   useEffect(() => {

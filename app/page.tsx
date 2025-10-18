@@ -64,7 +64,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-amber-100 via-orange-100 to-rose-100 pt-20 pb-24 md:pt-32 md:pb-40">
         {/* Decorative gradient orbs */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-orange-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute top-0 w-96 h-96 bg-orange-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ left: 'calc(50% - 12rem)' }}></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-rose-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: "2s" }}></div>
 
         {/* Continue Stories Button - Upper Right */}
@@ -79,13 +79,13 @@ export default function HomePage() {
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           {/* Header with Logo */}
-          <div className="flex flex-col justify-center items-center mb-12">
+          <div className="flex flex-col justify-center items-center mb-10">
             <Image
               src="/HW_text-compress.png"
               alt="Heritage Whisper"
-              width={280}
-              height={70}
-              className="h-14 w-auto mb-3"
+              width={320}
+              height={80}
+              className="h-20 w-auto mb-3 drop-shadow-md"
               priority
             />
             {/* Trust bar */}

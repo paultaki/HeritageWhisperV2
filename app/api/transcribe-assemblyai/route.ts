@@ -11,6 +11,7 @@ import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
 import { nanoid } from "nanoid";
+import { checkAIConsentOrError } from "@/lib/aiConsent";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -310,6 +311,15 @@ export async function POST(request: NextRequest) {
       }
 
       audioBuffer = Buffer.from(audioBase64, "base64");
+    }
+
+    // Check AI consent (only for authenticated users)
+    if (user) {
+      const consentError = await checkAIConsentOrError(user.id);
+      if (consentError) {
+        logger.warn("[TranscribeAssemblyAI] AI consent denied for user:", user.id);
+        return NextResponse.json(consentError, { status: 403 });
+      }
     }
 
     // Rate limiting

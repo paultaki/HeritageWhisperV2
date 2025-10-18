@@ -145,10 +145,10 @@ export function VoiceRecordingButton({
         background: isRecording
           ? isPaused
             ? "linear-gradient(to bottom, #6b7280, #4b5563)"
-            : designSystem.colors.gradients.coral
+            : "linear-gradient(135deg, #f472b6 0%, #ec4899 50%, #e879f9 100%)"
           : designSystem.colors.gradients.coral,
         boxShadow: isRecording
-          ? "0 8px 20px rgba(251, 146, 60, 0.4)"
+          ? "0 8px 20px rgba(236, 72, 153, 0.4)"
           : "0 6px 16px rgba(251, 146, 60, 0.3)",
       }}
     >

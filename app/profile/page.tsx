@@ -49,6 +49,8 @@ import {
   Download,
   Trash2,
   FileText,
+  Sparkles,
+  Brain,
 } from "lucide-react";
 
 export default function Profile() {
@@ -72,6 +74,7 @@ export default function Profile() {
   const [familyComments, setFamilyComments] = useState(true);
   const [printedBooksNotify, setPrintedBooksNotify] = useState(false);
   const [defaultStoryVisibility, setDefaultStoryVisibility] = useState(true);
+  const [aiProcessingEnabled, setAiProcessingEnabled] = useState(true);
 
   // PDF Export
   const [isExporting, setIsExporting] = useState(false);
@@ -106,6 +109,13 @@ export default function Profile() {
     refetchOnWindowFocus: false,
   });
 
+  // Fetch AI consent status
+  const { data: aiConsentData } = useQuery({
+    queryKey: ["/api/user/ai-settings"],
+    enabled: !!user,
+    retry: false,
+  });
+
   // Populate form fields from loaded profile data
   useEffect(() => {
     if (profileData?.user) {
@@ -119,6 +129,13 @@ export default function Profile() {
       setDefaultStoryVisibility(profile.defaultStoryVisibility ?? true);
     }
   }, [profileData]);
+
+  // Populate AI consent from API
+  useEffect(() => {
+    if (aiConsentData) {
+      setAiProcessingEnabled(aiConsentData.ai_processing_enabled ?? true);
+    }
+  }, [aiConsentData]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: {
@@ -195,6 +212,33 @@ export default function Profile() {
         description: error.message || "Could not update your preferences.",
         variant: "destructive",
       });
+    },
+  });
+
+  const updateAIConsentMutation = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const response = await apiRequest("PUT", "/api/user/ai-settings", {
+        ai_processing_enabled: enabled,
+      });
+      return response.json();
+    },
+    onSuccess: (data, enabled) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user/ai-settings"] });
+      toast({
+        title: enabled ? "AI Processing Enabled" : "AI Processing Disabled",
+        description: enabled
+          ? "AI features are now active. You can record and get AI-powered prompts."
+          : "AI features are disabled. You can still type stories manually.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update failed",
+        description: error.message || "Could not update AI settings.",
+        variant: "destructive",
+      });
+      // Revert the toggle on error
+      setAiProcessingEnabled(!aiProcessingEnabled);
     },
   });
 
@@ -811,6 +855,57 @@ export default function Profile() {
                     updatePreferencesMutation.mutate({ defaultStoryVisibility: checked });
                   }}
                   aria-label="Toggle default story visibility"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI Processing Settings */}
+          <Card id="ai-processing">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg font-bold">
+                <Brain className="w-5 h-5" />
+                AI Processing
+              </CardTitle>
+              <CardDescription>
+                Control how AI is used to enhance your storytelling experience
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start justify-between py-2 gap-4">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="ai-processing" className="text-base font-medium">
+                    Enable AI Features
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    When enabled, AI transcribes your recordings, generates personalized prompts, and provides story insights. When disabled, you can still type stories manually.
+                  </p>
+                  <div className="mt-3 pt-2 border-t">
+                    <p className="text-sm font-medium text-gray-700 mb-2">What happens when disabled:</p>
+                    <ul className="space-y-1 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <span className="text-gray-400 mt-0.5">•</span>
+                        <span>Recording features will be unavailable</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-gray-400 mt-0.5">•</span>
+                        <span>No AI-generated prompts or follow-up questions</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-gray-400 mt-0.5">•</span>
+                        <span>You can still type stories and use all other features</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <CustomToggle
+                  id="ai-processing"
+                  checked={aiProcessingEnabled}
+                  onCheckedChange={(checked) => {
+                    setAiProcessingEnabled(checked);
+                    updateAIConsentMutation.mutate(checked);
+                  }}
+                  aria-label="Toggle AI processing"
                 />
               </div>
             </CardContent>

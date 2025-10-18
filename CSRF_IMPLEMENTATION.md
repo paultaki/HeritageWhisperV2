@@ -382,5 +382,17 @@ For questions or issues:
 
 ---
 
-**Last Updated**: October 2025
-**Status**: Backend Complete ✅ | Frontend Pending ⏳
+**Last Updated**: October 17, 2025
+**Status**: Backend Complete ✅ | Frontend Not Started ❌
+
+**Current Behavior:**
+- CSRF validation **bypassed** for all JWT-authenticated requests
+- CSRF validation **bypassed** for all same-origin requests
+- SPA works normally without CSRF tokens
+- Protection relies on JWT authentication instead
+
+**To Enable Full CSRF:**
+1. Remove bypass logic in `/lib/csrf.ts` lines 107-113
+2. Implement frontend hook `/hooks/use-csrf.ts`
+3. Update Supabase client configuration
+4. Test all mutation endpoints

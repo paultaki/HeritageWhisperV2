@@ -38,6 +38,28 @@ body {
   background: var(--color-border);
 }
 
+/* Ken Burns effect - subtle zoom and pan animation */
+@keyframes kenBurns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  100% {
+    transform: scale(1.08) translate(-2%, -2%);
+  }
+}
+
+.ken-burns-effect {
+  animation: kenBurns 12s ease-out forwards;
+  animation-play-state: running;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .ken-burns-effect {
+    animation: none !important;
+  }
+}
+
 /* timeline spine - gutter hosts spine and horizontal connectors */
 .hw-spine {
   position: relative;
@@ -74,6 +96,16 @@ body {
   );
   padding: 10px 16px 12px 16px;
   border-bottom: 1px solid var(--color-border);
+  transition: opacity 0.3s ease-in-out;
+  opacity: 1;
+}
+
+.hw-decade-band.fading-out {
+  opacity: 0.3;
+}
+
+.hw-decade-band.current {
+  opacity: 1;
 }
 
 @media (min-width: 768px) {
@@ -229,9 +261,14 @@ body {
   border: none;
   display: grid;
   place-items: center;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.15),
+    0 0 0 rgba(237, 108, 78, 0);
   transition:
     transform 0.1s ease-out,
-    background-color 0.1s ease-out;
+    background-color 0.1s ease-out,
+    box-shadow 0.2s ease-out;
 }
 .hw-play svg {
   width: 18px;
@@ -242,6 +279,10 @@ body {
 .hw-play:hover {
   transform: scale(1.08);
   background: rgba(128, 128, 128, 0.6); /* Slightly more opaque on hover */
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.3),
+    0 3px 8px rgba(0, 0, 0, 0.2),
+    0 0 24px rgba(237, 108, 78, 0.4);
 }
 .hw-play:hover svg {
   fill: var(--color-accent); /* Keep orange on hover */
@@ -271,9 +312,10 @@ body {
   
   /* Shadows for depth */
   box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.15),
-    0 2px 6px rgba(0, 0, 0, 0.1),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    0 4px 20px rgba(0, 0, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    0 0 0 rgba(255, 255, 255, 0);
   
   display: grid;
   place-items: center;
@@ -288,10 +330,10 @@ body {
   background: rgba(255, 255, 255, 0.35);
   border-color: rgba(255, 255, 255, 0.6);
   box-shadow: 
-    0 6px 24px rgba(0, 0, 0, 0.2),
-    0 3px 10px rgba(0, 0, 0, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 4px 12px rgba(0, 0, 0, 0.2),
     inset 0 1px 1px rgba(255, 255, 255, 0.8),
-    0 0 20px rgba(255, 255, 255, 0.3);
+    0 0 28px rgba(255, 255, 255, 0.5);
 }
 
 .glass-play-button-mobile:active {

@@ -8,6 +8,7 @@ import { logger } from "@/lib/logger";
 import { tier3Ratelimit, aiIpRatelimit, aiGlobalRatelimit, getClientIp } from "@/lib/ratelimit";
 import { CreateStorySchema, safeValidateRequestBody } from "@/lib/validationSchemas";
 import { ZodError } from "zod";
+import { hasAIConsent } from "@/lib/aiConsent";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -345,6 +346,44 @@ export async function POST(request: NextRequest) {
           promptError,
         );
       }
+    }
+
+    // ============================================================================
+    // AI CONSENT CHECK: Skip all prompt generation if AI is disabled
+    // ============================================================================
+    const aiEnabled = await hasAIConsent(user.id);
+
+    if (!aiEnabled) {
+      logger.debug("[Stories API] AI processing disabled for user, skipping prompt generation");
+
+      // Return the story immediately without generating prompts
+      const transformedStory = {
+        id: newStory.id,
+        title: newStory.title,
+        content: newStory.transcript,
+        transcription: newStory.transcript,
+        createdAt: newStory.created_at,
+        updatedAt: newStory.updated_at,
+        year: newStory.year,
+        storyYear: newStory.year,
+        lifeAge: newStory.metadata?.life_age,
+        includeInTimeline: newStory.metadata?.include_in_timeline,
+        includeInBook: newStory.metadata?.include_in_book,
+        isFavorite: newStory.metadata?.is_favorite,
+        photoUrl: newStory.photo_url,
+        photos: newStory.metadata?.photos || [],
+        audioUrl: newStory.audio_url,
+        wisdomTranscription: newStory.wisdom_text,
+        wisdomClipText: newStory.wisdom_text,
+        wisdomClipUrl: newStory.wisdom_clip_url,
+        durationSeconds: newStory.duration_seconds,
+        emotions: newStory.emotions,
+        pivotalCategory: newStory.metadata?.pivotal_category,
+        storyDate: newStory.metadata?.story_date,
+        photoTransform: newStory.metadata?.photo_transform,
+      };
+
+      return NextResponse.json({ story: transformedStory });
     }
 
     // ============================================================================
