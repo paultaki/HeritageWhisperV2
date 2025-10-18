@@ -1354,7 +1354,7 @@ export function TimelineMobile() {
         )}
 
         <div className="hw-layout">
-          <div className="hw-spine">
+          <div className="hw-spine" style={isDark ? { backgroundColor: '#ffffff', opacity: 1 } : undefined}>
             {/* All stories sorted chronologically */}
             {(() => {
               // Create chronological timeline

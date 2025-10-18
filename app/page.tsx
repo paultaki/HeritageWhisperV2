@@ -301,8 +301,8 @@ export default function HomePage() {
                 <Image
                   src="/timeline 1.png"
                   alt="Stories organize into timeline"
-                  width={600}
-                  height={304}
+                  width={560}
+                  height={264}
                   className="w-full h-auto rounded-2xl shadow-2xl"
                 />
               </div>

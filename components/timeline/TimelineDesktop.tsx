@@ -406,6 +406,12 @@ function CenteredMemoryCard({ story, position, index, isDark = false }: Centered
                 onLoad={() => console.log("[Timeline-v2] Image loaded successfully:", displayPhoto.url)}
               />
             </div>
+            {/* Photo count badge (desktop) */}
+            {photoCount > 1 && (
+              <div className="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
+                {photoCount} photos
+              </div>
+            )}
             
             {/* Memory Footer Overlay with Play Button */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 lg:p-4">
@@ -444,34 +450,22 @@ function CenteredMemoryCard({ story, position, index, isDark = false }: Centered
                       e.stopPropagation();
                       handlePlayAudio(e);
                     }}
+                    aria-pressed={isPlaying}
+                    aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
                     className="flex-shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
                   >
                     {isLoading ? (
                       <Loader2 className="w-4 lg:w-5 h-4 lg:h-5 animate-spin text-orange-500" />
                     ) : (
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        className="text-orange-500"
-                      >
+                      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
                         {isPlaying ? (
-                          <>
-                            <rect x="2" y="4" width="2" height="12" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0ms', animationDuration: '600ms' }} />
-                            <rect x="6" y="2" width="2" height="16" fill="currentColor" className="animate-pulse" style={{ animationDelay: '100ms', animationDuration: '600ms' }} />
-                            <rect x="10" y="6" width="2" height="8" fill="currentColor" className="animate-pulse" style={{ animationDelay: '200ms', animationDuration: '600ms' }} />
-                            <rect x="14" y="3" width="2" height="14" fill="currentColor" className="animate-pulse" style={{ animationDelay: '300ms', animationDuration: '600ms' }} />
-                            <rect x="18" y="5" width="2" height="10" fill="currentColor" className="animate-pulse" style={{ animationDelay: '400ms', animationDuration: '600ms' }} />
-                          </>
+                          <g>
+                            <rect x="11" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
+                            <rect x="14.8" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
+                          </g>
                         ) : (
-                          <>
-                            <rect x="2" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
-                            <rect x="6" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
-                            <rect x="10" y="4" width="2" height="12" fill="currentColor" opacity="0.6" />
-                            <rect x="14" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
-                            <rect x="18" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
-                          </>
+                          <polygon points="11,9 11,19 19,14" fill="#fb923c" />
                         )}
                       </svg>
                     )}

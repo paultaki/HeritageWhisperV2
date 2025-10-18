@@ -61,25 +61,25 @@ export default function HamburgerMenu() {
   // Initialize and persist dark theme
   useEffect(() => {
     const stored = typeof window !== "undefined" ? localStorage.getItem("hw-theme") : null;
-    const initialDark = stored ? stored === "dark" : document.documentElement.classList.contains("dark-theme") || document.body.classList.contains("dark-theme");
+    const initialDark = stored ? stored === "dark" : document.documentElement.classList.contains("dark") || document.body.classList.contains("dark");
     setIsDark(initialDark);
     if (initialDark) {
-      document.documentElement.classList.add("dark-theme");
-      document.body.classList.add("dark-theme");
+      document.documentElement.classList.add("dark");
+      document.body.classList.add("dark");
     } else {
-      document.documentElement.classList.remove("dark-theme");
-      document.body.classList.remove("dark-theme");
+      document.documentElement.classList.remove("dark");
+      document.body.classList.remove("dark");
     }
   }, []);
 
   useEffect(() => {
     if (isDark) {
-      document.documentElement.classList.add("dark-theme");
-      document.body.classList.add("dark-theme");
+      document.documentElement.classList.add("dark");
+      document.body.classList.add("dark");
       localStorage.setItem("hw-theme", "dark");
     } else {
-      document.documentElement.classList.remove("dark-theme");
-      document.body.classList.remove("dark-theme");
+      document.documentElement.classList.remove("dark");
+      document.body.classList.remove("dark");
       localStorage.setItem("hw-theme", "light");
     }
     // Broadcast theme change for interested listeners
@@ -127,25 +127,17 @@ export default function HamburgerMenu() {
 
 
   const menuItems = [
-    { icon: Home, label: "Home", href: "/" },
+    // For v3 we remove Home/Family/Share from hamburger and keep only Settings/Help/Privacy/Terms/Logout
     { icon: Settings, label: "Settings", href: "/profile" },
-    { icon: Users, label: "Family", href: "/family" },
     { icon: HelpCircle, label: "Help", href: "/help" },
   ];
 
   const actionItems = [
-    // New Memory & Share on all pages
     {
       icon: Plus,
       label: "New Memory",
       onClick: handleNewMemory,
       color: "text-heritage-coral hover:bg-heritage-coral/10",
-    },
-    {
-      icon: Share2,
-      label: "Share",
-      onClick: handleShare,
-      color: "text-blue-600 hover:bg-blue-50",
     },
   ];
 

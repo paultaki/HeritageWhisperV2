@@ -267,7 +267,7 @@ function BookStyleReviewContent() {
           isFavorite: false,
           audioUrl: null, // Will be set after upload
           wisdomClipText: wisdomText,
-          durationSeconds: 0,
+          durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 30,
           sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
         };
 
@@ -670,7 +670,7 @@ function BookStyleReviewContent() {
         photos: finalPhotos,
         audioUrl: finalAudioUrl,
         wisdomClipText: wisdomText,
-        durationSeconds: 0,
+        durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 30,
         sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
       };
 

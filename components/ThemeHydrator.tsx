@@ -8,11 +8,11 @@ export default function ThemeHydrator() {
       const stored = localStorage.getItem("hw-theme");
       const isDark = stored ? stored === "dark" : false;
       if (isDark) {
-        document.documentElement.classList.add("dark-theme");
-        document.body.classList.add("dark-theme");
+        document.documentElement.classList.add("dark");
+        document.body.classList.add("dark");
       } else {
-        document.documentElement.classList.remove("dark-theme");
-        document.body.classList.remove("dark-theme");
+        document.documentElement.classList.remove("dark");
+        document.body.classList.remove("dark");
       }
       window.dispatchEvent(new CustomEvent("hw-theme-change", { detail: { isDark } }));
     } catch {

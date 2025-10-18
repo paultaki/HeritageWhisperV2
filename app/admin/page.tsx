@@ -3,15 +3,16 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { 
-  BarChart3, 
-  CheckCircle2, 
-  TestTube2, 
+import {
+  BarChart3,
+  CheckCircle2,
+  TestTube2,
   Trash2,
   Shield,
   Sparkles,
   Users,
-  Database
+  Database,
+  Compass
 } from "lucide-react";
 
 interface AdminTool {
@@ -24,6 +25,22 @@ interface AdminTool {
 }
 
 const ADMIN_TOOLS: AdminTool[] = [
+  {
+    title: "Analytics Dashboard",
+    description: "Executive overview with user growth, engagement metrics, and top 10 power users leaderboard",
+    href: "/admin/analytics",
+    icon: <BarChart3 className="w-6 h-6" />,
+    category: "monitoring",
+    color: "text-green-600 bg-green-50",
+  },
+  {
+    title: "North Star Dashboard",
+    description: "Strategic positioning, messaging framework, competitive advantages, and product roadmap",
+    href: "/admin/north-star",
+    icon: <Compass className="w-6 h-6" />,
+    category: "monitoring",
+    color: "text-orange-600 bg-orange-50",
+  },
   {
     title: "Prompt Quality Dashboard",
     description: "View all prompts with quality scores, validation details, and rejection reasons",
@@ -55,14 +72,6 @@ const ADMIN_TOOLS: AdminTool[] = [
     icon: <Trash2 className="w-6 h-6" />,
     category: "cleanup",
     color: "text-red-600 bg-red-50",
-  },
-  {
-    title: "System Monitoring",
-    description: "View system health, API usage, and performance metrics (coming soon)",
-    href: "/admin/monitoring",
-    icon: <BarChart3 className="w-6 h-6" />,
-    category: "monitoring",
-    color: "text-green-600 bg-green-50",
   },
 ];
 
