@@ -38,10 +38,10 @@ export default function TimelineV3Page() {
         className="hidden lg:flex lg:w-56 flex-col gap-2 p-4"
         style={{
           position: "sticky",
-          top: 0,
+          top: 72,
           height: "100vh",
-          backgroundColor: isDark ? "#252728" : "#ffffff",
-          borderRight: `1px solid ${isDark ? "#3b3d3f" : "#e5e7eb"}`,
+          backgroundColor: "transparent",
+          borderRight: "none",
           color: isDark ? "#b0b3b8" : undefined,
         }}
       >

@@ -873,36 +873,26 @@ export function TimelineDesktop() {
     <div className={`min-h-screen ${isDark ? 'dark-theme' : ''}`} style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
       {/* Header */}
       <header
-        className="sticky top-0 z-50 backdrop-blur p-4"
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur"
         style={{
           backgroundColor: isDark ? '#252728' : 'rgba(255,255,255,0.95)',
           borderBottom: `1px solid ${isDark ? '#3b3d3f' : '#e5e7eb'}`,
           color: isDark ? '#b0b3b8' : undefined,
+          height: 55,
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 16px',
+          width: '100%'
         }}
       >
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-7 h-7" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
-              <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Timeline</h1>
-            </div>
-            <button
-              onClick={() => setIsDark((v) => !v)}
-              className="px-3 py-1.5 rounded-md text-sm"
-              style={{
-                backgroundColor: isDark ? '#333334' : '#f3f4f6',
-                color: isDark ? '#b0b3b8' : '#374151',
-                border: `1px solid ${isDark ? '#3b3d3f' : '#e5e7eb'}`,
-              }}
-            >
-              {isDark ? 'Light' : 'Dark'}
-            </button>
-          </div>
+        <div className="flex items-center gap-3 w-full">
+          <Calendar className="w-6 h-6" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
+          <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Timeline</h1>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-20">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-[64px] pb-12 md:pt-[64px] md:pb-20">
         {/* Title Section */}
         <div className="text-center mb-16">
           <h2 className="text-5xl md:text-7xl font-light tracking-tight mb-6" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>

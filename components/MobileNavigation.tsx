@@ -89,7 +89,15 @@ export default function MobileNavigation({
         marginBottom: 0,
       }}
     >
-      <div className="flex items-center justify-around h-20 relative">
+      <div
+        className="flex items-center h-20 relative"
+        style={{
+          justifyContent: 'space-between',
+          gap: 'clamp(16px, 8vw, 100px)',
+          paddingLeft: 12,
+          paddingRight: 12,
+        }}
+      >
         {/* Timeline */}
         <NavItem
           icon={Calendar}
@@ -107,7 +115,10 @@ export default function MobileNavigation({
         />
 
         {/* Record Button - Hero Center Element */}
-        <div className="relative flex-1 flex justify-center">
+        <div
+          className="relative flex-1 flex justify-center"
+          style={{ marginLeft: 'clamp(8px, 4vw, 32px)', marginRight: 'clamp(8px, 6vw, 48px)' }}
+        >
           <button
             onClick={onRecordClick}
             className="absolute w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
