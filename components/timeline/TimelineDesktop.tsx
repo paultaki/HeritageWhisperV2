@@ -368,7 +368,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false }: Centered
 
   // Render function for card content to avoid component definition issues
   const renderCardContent = () => {
-    console.log("[Timeline-v2] Rendering card for:", story.title, "Photo URL:", displayPhoto?.url);
+    // console debug removed
     
     // If there's a photo, render without white container
     if (displayPhoto?.url) {
@@ -403,7 +403,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false }: Centered
                     : undefined
                 }
                 onError={(e) => console.error("[Timeline-v2] Image failed to load:", displayPhoto.url)}
-                onLoad={() => console.log("[Timeline-v2] Image loaded successfully:", displayPhoto.url)}
+                onLoad={() => { /* quiet success log */ }}
               />
             </div>
             {/* Photo count badge (desktop) */}
@@ -907,7 +907,7 @@ export function TimelineDesktop() {
         <div ref={timelineContainerRef} className="relative">
           {/* Centered Progress Line */}
           <div
-            className="absolute left-1/2 transform -translate-x-0.5 w-1 h-full hidden lg:block rounded-full overflow-hidden"
+            className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full hidden lg:block rounded-full overflow-hidden"
             style={{ backgroundColor: isDark ? '#2a2b2c' : '#e5e7eb' }}
           >
             <div

@@ -88,8 +88,17 @@ export default function DesktopNavigationBottom({
         boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.08)",
       }}
     >
-      {/* Navigation Items Container - Centered */}
-      <div className="flex items-center gap-4">
+      {/* Navigation Items Container - full width with responsive spacing */}
+      <div
+        className="flex items-center w-full"
+        style={{
+          justifyContent: 'space-between',
+          gap: '100px',
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '0 16px',
+        }}
+      >
         <DesktopNavItemBottom
           icon={Calendar}
           label="Timeline"
@@ -105,7 +114,10 @@ export default function DesktopNavigationBottom({
         />
 
         {/* Record Button - Hero Center Element (matches mobile) */}
-        <div className="relative flex items-center justify-center px-4 z-50">
+        <div
+          className="relative flex items-center justify-center px-4 z-50"
+          style={{ marginInline: 'clamp(16px, 6vw, 64px)' }}
+        >
           <button
             onClick={onRecordClick}
             className="absolute w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-50"

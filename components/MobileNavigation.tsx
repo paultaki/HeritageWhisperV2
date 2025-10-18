@@ -90,12 +90,12 @@ export default function MobileNavigation({
       }}
     >
       <div
-        className="flex items-center h-20 relative"
+        className="flex items-center justify-around h-20 relative"
         style={{
-          justifyContent: 'space-between',
-          gap: 'clamp(16px, 8vw, 100px)',
+          gap: 'clamp(12px, 6vw, 60px)',
           paddingLeft: 12,
           paddingRight: 12,
+          width: '100%'
         }}
       >
         {/* Timeline */}
@@ -117,7 +117,7 @@ export default function MobileNavigation({
         {/* Record Button - Hero Center Element */}
         <div
           className="relative flex-1 flex justify-center"
-          style={{ marginLeft: 'clamp(8px, 4vw, 32px)', marginRight: 'clamp(8px, 6vw, 48px)' }}
+          style={{ marginLeft: 'clamp(8px, 4vw, 24px)', marginRight: 'clamp(8px, 6vw, 32px)' }}
         >
           <button
             onClick={onRecordClick}

@@ -35,7 +35,7 @@ export default function TimelineV3Page() {
     >
       {/* Left Sidebar */}
       <aside
-        className="hidden lg:flex lg:w-56 flex-col gap-2 p-4"
+        className="hidden lg:flex lg:w-56 flex-col gap-1.5 p-2"
         style={{
           position: "sticky",
           top: 72,
@@ -43,47 +43,49 @@ export default function TimelineV3Page() {
           backgroundColor: "transparent",
           borderRight: "none",
           color: isDark ? "#b0b3b8" : undefined,
+          marginLeft: -1, // reset previous nudge left
+          marginRight: 9, // move block ~9px to the right
         }}
       >
         <nav className="mt-4 space-y-1">
           <Link
             href="/"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:opacity-90"
-            style={{ color: isDark ? "#b0b3b8" : "#111827" }}
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:opacity-90"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
           >
-            <Home className="w-5 h-5" />
+            <Home className="w-4 h-4" />
             <span>Home</span>
           </Link>
           <Link
             href="/family"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:opacity-90"
-            style={{ color: isDark ? "#b0b3b8" : "#111827" }}
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:opacity-90"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
           >
-            <Users className="w-5 h-5" />
+            <Users className="w-4 h-4" />
             <span>Family</span>
           </Link>
           <Link
             href="/profile"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:opacity-90"
-            style={{ color: isDark ? "#b0b3b8" : "#111827" }}
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:opacity-90"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
           >
-            <Settings className="w-5 h-5" />
+            <Settings className="w-4 h-4" />
             <span>Settings</span>
           </Link>
           <Link
             href="/help"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:opacity-90"
-            style={{ color: isDark ? "#b0b3b8" : "#111827" }}
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:opacity-90"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
           >
-            <HelpCircle className="w-5 h-5" />
+            <HelpCircle className="w-4 h-4" />
             <span>Help</span>
           </Link>
           <Link
             href="/share"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:opacity-90"
-            style={{ color: isDark ? "#b0b3b8" : "#111827" }}
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:opacity-90"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
           >
-            <Share2 className="w-5 h-5" />
+            <Share2 className="w-4 h-4" />
             <span>Share</span>
           </Link>
         </nav>

@@ -127,9 +127,11 @@ export default function HamburgerMenu() {
 
 
   const menuItems = [
-    // For v3 we remove Home/Family/Share from hamburger and keep only Settings/Help/Privacy/Terms/Logout
+    { icon: Home, label: "Home", href: "/" },
+    { icon: Users, label: "Family", href: "/family" },
     { icon: Settings, label: "Settings", href: "/profile" },
     { icon: HelpCircle, label: "Help", href: "/help" },
+    { icon: Share2, label: "Share", href: "/share" },
   ];
 
   const actionItems = [
@@ -151,7 +153,7 @@ export default function HamburgerMenu() {
   const isBookPage = pathname === "/book";
 
   return (
-    <div ref={menuRef} className="fixed right-4 z-[100]" style={{ top: '5px' }}>
+    <div ref={menuRef} className="fixed right-4 z-[100] hidden md:block" style={{ top: '5px' }}>
       {/* Hamburger Button - Semi-transparent on book page */}
       <button
         onClick={() => setIsOpen(!isOpen)}
