@@ -22,9 +22,11 @@ import { useRecordModal } from "@/hooks/use-record-modal";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
+import { CustomToggle } from "@/components/ui/custom-toggle";
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -56,10 +58,43 @@ export default function HamburgerMenu() {
     };
   }, [isOpen]);
 
+  // Initialize and persist dark theme
+  useEffect(() => {
+    const stored = typeof window !== "undefined" ? localStorage.getItem("hw-theme") : null;
+    const initialDark = stored ? stored === "dark" : document.documentElement.classList.contains("dark-theme") || document.body.classList.contains("dark-theme");
+    setIsDark(initialDark);
+    if (initialDark) {
+      document.documentElement.classList.add("dark-theme");
+      document.body.classList.add("dark-theme");
+    } else {
+      document.documentElement.classList.remove("dark-theme");
+      document.body.classList.remove("dark-theme");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark-theme");
+      document.body.classList.add("dark-theme");
+      localStorage.setItem("hw-theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark-theme");
+      document.body.classList.remove("dark-theme");
+      localStorage.setItem("hw-theme", "light");
+    }
+    // Broadcast theme change for interested listeners
+    try {
+      window.dispatchEvent(new CustomEvent("hw-theme-change", { detail: { isDark } }));
+    } catch {}
+  }, [isDark]);
+
   // Close menu on route change
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
+
+  // Profile user helper for typing
+  const profileUser = (profileData as any)?.user;
 
   const handleNavigation = (href: string) => {
     router.push(href);
@@ -150,14 +185,25 @@ export default function HamburgerMenu() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden"
+            className="absolute right-0 mt-2 w-56 rounded-lg shadow-xl overflow-hidden"
+            style={{
+              backgroundColor: isDark ? '#252728' : '#ffffff',
+              border: `1px solid ${isDark ? '#3b3d3f' : '#f3f4f6'}`,
+              color: isDark ? '#b0b3b8' : undefined,
+            }}
           >
             {/* User Info */}
             {user && (
-              <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-3">
+              <div
+                className="px-4 py-3 flex items-center gap-3"
+                style={{
+                  borderBottom: `1px solid ${isDark ? '#3b3d3f' : '#f3f4f6'}`,
+                  backgroundColor: isDark ? '#252728' : '#f9fafb',
+                }}
+              >
                 <Avatar className="w-10 h-10 flex-shrink-0">
                   <AvatarImage 
-                    src={profileData?.user?.profilePhotoUrl || ""} 
+                    src={profileUser?.profilePhotoUrl || ""} 
                     alt={user.name || "User"} 
                   />
                   <AvatarFallback className="bg-heritage-coral/10 text-heritage-coral text-sm">
@@ -170,16 +216,16 @@ export default function HamburgerMenu() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium truncate" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>
                     {user.name || "User"}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  <p className="text-xs truncate" style={{ color: isDark ? '#8a8d92' : '#6b7280' }}>{user.email}</p>
                 </div>
               </div>
             )}
 
             {/* Action Items (New Memory, Share) */}
-            <div className="py-1 border-b border-gray-100">
+            <div className="py-1" style={{ borderBottom: `1px solid ${isDark ? '#3b3d3f' : '#f3f4f6'}` }}>
               {actionItems.map((item, index) => {
                 const Icon = item.icon;
                 return (
@@ -187,6 +233,7 @@ export default function HamburgerMenu() {
                     key={index}
                     onClick={item.onClick}
                     className={`w-full flex items-center px-4 py-2.5 text-sm transition-colors ${item.color}`}
+                    style={{ color: isDark ? '#b0b3b8' : undefined }}
                   >
                     <Icon className="w-4 h-4 mr-3" />
                     {item.label}
@@ -194,6 +241,19 @@ export default function HamburgerMenu() {
                 );
               })}
             </div>
+
+          {/* Appearance */}
+          <div className="py-1 border-b border-gray-100">
+            <div className="flex items-center justify-between px-4 py-2.5">
+              <span className="text-sm text-gray-700">Dark Mode</span>
+              <CustomToggle
+                id="menu-dark-toggle"
+                checked={isDark}
+                onCheckedChange={(checked) => setIsDark(checked)}
+                aria-label="Toggle dark mode"
+              />
+            </div>
+          </div>
 
             {/* Menu Items */}
             <div className="py-1">
@@ -205,11 +265,8 @@ export default function HamburgerMenu() {
                   <button
                     key={item.href}
                     onClick={() => handleNavigation(item.href)}
-                    className={`w-full flex items-center px-4 py-2.5 text-sm transition-colors ${
-                      isActive
-                        ? "bg-heritage-coral/10 text-heritage-coral"
-                        : "text-gray-700 hover:bg-gray-50"
-                    }`}
+                    className={`w-full flex items-center px-4 py-2.5 text-sm transition-colors ${isActive ? "bg-heritage-coral/10 text-heritage-coral" : "hover:bg-gray-50"}`}
+                    style={{ color: isDark ? '#b0b3b8' : '#374151', backgroundColor: isActive && isDark ? 'rgba(176,179,184,0.08)' : undefined }}
                   >
                     <Icon className="w-4 h-4 mr-3" />
                     {item.label}
@@ -219,17 +276,19 @@ export default function HamburgerMenu() {
             </div>
 
             {/* Legal Links */}
-            <div className="border-t border-gray-100 py-1">
+            <div className="py-1" style={{ borderTop: `1px solid ${isDark ? '#3b3d3f' : '#f3f4f6'}` }}>
               <button
                 onClick={() => handleNavigation("/privacy")}
-                className="w-full flex items-center px-4 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center px-4 py-2 text-xs transition-colors"
+                style={{ color: isDark ? '#8a8d92' : '#4b5563' }}
               >
                 <Shield className="w-3.5 h-3.5 mr-2" />
                 Privacy Policy
               </button>
               <button
                 onClick={() => handleNavigation("/terms")}
-                className="w-full flex items-center px-4 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center px-4 py-2 text-xs transition-colors"
+                style={{ color: isDark ? '#8a8d92' : '#4b5563' }}
               >
                 <FileText className="w-3.5 h-3.5 mr-2" />
                 Terms of Service
@@ -247,10 +306,11 @@ export default function HamburgerMenu() {
             </div>
 
             {/* Logout */}
-            <div className="border-t border-gray-100 py-1">
+            <div className="py-1" style={{ borderTop: `1px solid ${isDark ? '#3b3d3f' : '#f3f4f6'}` }}>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                className="w-full flex items-center px-4 py-2.5 text-sm hover:bg-red-50 transition-colors"
+                style={{ color: isDark ? '#ff6b6b' : '#dc2626' }}
               >
                 <LogOut className="w-4 h-4 mr-3" />
                 Logout

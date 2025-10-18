@@ -379,7 +379,7 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
           <div className={`relative rounded-3xl overflow-hidden shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}>
-            <div className="relative w-full h-48 lg:h-64">
+            <div className="relative w-full aspect-[4/3]">
               <Image
                 src={displayPhoto.url}
                 alt={story.title}
@@ -649,7 +649,14 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
           transform: position === "left" ? "translateX(-12px)" : "translateX(12px)",
         }}
       >
-        <div className="px-4 py-1 bg-white/95 border border-gray-200 text-gray-400 text-lg font-serif font-medium rounded-lg whitespace-nowrap shadow-sm">
+        <div
+          className="px-4 py-1 text-lg font-serif font-medium rounded-lg whitespace-nowrap shadow-sm"
+          style={{
+            backgroundColor: '#ffffffF2',
+            border: '1px solid #6f7583',
+            color: '#6f7583',
+          }}
+        >
           {story.storyDate
             ? new Date(story.storyDate).getFullYear()
             : formatYear(story.storyYear)}
@@ -682,6 +689,7 @@ export function TimelineDesktop() {
   const progressLineRef = useRef<HTMLDivElement>(null);
   const timelineContainerRef = useRef<HTMLDivElement>(null);
   const [returnHighlightId, setReturnHighlightId] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(false);
 
   const {
     data: storiesData,
@@ -867,15 +875,33 @@ export function TimelineDesktop() {
   });
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FFF8F3' }}>
+    <div className={`min-h-screen ${isDark ? 'dark-theme' : ''}`} style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200 p-4">
+      <header
+        className="sticky top-0 z-50 backdrop-blur p-4"
+        style={{
+          backgroundColor: isDark ? '#252728' : 'rgba(255,255,255,0.95)',
+          borderBottom: `1px solid ${isDark ? '#3b3d3f' : '#e5e7eb'}`,
+          color: isDark ? '#b0b3b8' : undefined,
+        }}
+      >
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Calendar className="w-7 h-7 text-gray-800" />
-              <h1 className="text-2xl font-bold text-gray-900">Timeline V2</h1>
+              <Calendar className="w-7 h-7" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
+              <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Timeline V2</h1>
             </div>
+            <button
+              onClick={() => setIsDark((v) => !v)}
+              className="px-3 py-1.5 rounded-md text-sm"
+              style={{
+                backgroundColor: isDark ? '#333334' : '#f3f4f6',
+                color: isDark ? '#b0b3b8' : '#374151',
+                border: `1px solid ${isDark ? '#3b3d3f' : '#e5e7eb'}`,
+              }}
+            >
+              {isDark ? 'Light' : 'Dark'}
+            </button>
           </div>
         </div>
       </header>
@@ -895,14 +921,17 @@ export function TimelineDesktop() {
         {/* Timeline Container */}
         <div ref={timelineContainerRef} className="relative">
           {/* Centered Progress Line */}
-          <div className="absolute left-1/2 transform -translate-x-0.5 w-1 h-full bg-gray-200 hidden lg:block rounded-full overflow-hidden">
+          <div
+            className="absolute left-1/2 transform -translate-x-0.5 w-1 h-full hidden lg:block rounded-full overflow-hidden"
+            style={{ backgroundColor: isDark ? '#2a2b2c' : '#e5e7eb' }}
+          >
             <div
               ref={progressLineRef}
               className="w-full rounded-full transition-all duration-300 ease-out"
               style={{
                 height: "0%",
-                background: "linear-gradient(to bottom, #9ca3af, #6b7280)",
-                boxShadow: "0 0 10px rgba(156, 163, 175, 0.2)",
+                background: isDark ? 'linear-gradient(to bottom, #3b3d3f, #3b3d3f)' : 'linear-gradient(to bottom, #9ca3af, #6b7280)',
+                boxShadow: isDark ? '0 0 10px rgba(59, 61, 63, 0.25)' : '0 0 10px rgba(156, 163, 175, 0.2)',
               }}
             />
           </div>
@@ -916,7 +945,7 @@ export function TimelineDesktop() {
                 data-memory-id={story.id}
                 style={{
                   transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',
-                  backgroundColor: returnHighlightId === story.id ? 'rgba(251, 146, 60, 0.1)' : 'transparent',
+                  backgroundColor: returnHighlightId === story.id ? (isDark ? 'rgba(176, 179, 184, 0.08)' : 'rgba(251, 146, 60, 0.1)') : 'transparent',
                   borderRadius: returnHighlightId === story.id ? '1rem' : '0',
                   padding: returnHighlightId === story.id ? '1rem' : '0',
                 }}
@@ -1057,6 +1086,38 @@ export function TimelineDesktop() {
           .timeline-step .max-w-md::after {
             transition: none !important;
           }
+        }
+
+        /* Dark theme connector line overrides */
+        .dark-theme .timeline-step .max-w-md::after {
+          background: linear-gradient(
+            to right,
+            rgba(59, 61, 63, 0.5),
+            rgba(59, 61, 63, 0.8)
+          ) !important;
+        }
+        .dark-theme .timeline-step .justify-end .max-w-md::after {
+          background: linear-gradient(
+            to right,
+            rgba(59, 61, 63, 0.8),
+            rgba(59, 61, 63, 0.5)
+          ) !important;
+        }
+        .dark-theme .timeline-step .justify-start .max-w-md::after {
+          background: linear-gradient(
+            to left,
+            rgba(59, 61, 63, 0.8),
+            rgba(59, 61, 63, 0.5)
+          ) !important;
+        }
+        .dark-theme .timeline-step:hover .max-w-md::after,
+        .dark-theme .timeline-step:hover .justify-end .max-w-md::after,
+        .dark-theme .timeline-step:hover .justify-start .max-w-md::after {
+          background: linear-gradient(
+            to right,
+            rgba(176, 179, 184, 0.8),
+            rgba(176, 179, 184, 0.5)
+          ) !important;
         }
       `}</style>
     </div>

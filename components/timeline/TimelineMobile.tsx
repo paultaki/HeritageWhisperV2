@@ -263,11 +263,13 @@ function MemoryCard({
   isHighlighted = false,
   isReturnHighlight = false,
   colorScheme = "original",
+  isDarkTheme = false,
 }: {
   story: Story;
   isHighlighted?: boolean;
   isReturnHighlight?: boolean;
   colorScheme?: ColorScheme;
+  isDarkTheme?: boolean;
 }) {
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -577,7 +579,18 @@ function MemoryCard({
         data-testid={`memory-card-${story.id}`}
       >
         {/* Year badge */}
-        <span className="hw-year">
+        <span
+          className="hw-year"
+          style={
+            isDarkTheme
+              ? {
+                  backgroundColor: "#252728F2",
+                  border: "1px solid #3b3d3f",
+                  color: "#b0b3b8",
+                }
+              : undefined
+          }
+        >
           {story.storyDate
             ? new Date(story.storyDate).toLocaleDateString("en-US", {
                 year: "numeric",
@@ -679,7 +692,18 @@ function MemoryCard({
       data-testid={`memory-card-${story.id}`}
     >
       {/* Year badge */}
-      <span className="hw-year">
+      <span
+        className="hw-year"
+        style={
+          isDarkTheme
+            ? {
+                backgroundColor: "#252728F2",
+                border: "1px solid #3b3d3f",
+                color: "#b0b3b8",
+              }
+            : undefined
+        }
+      >
         {story.storyDate
           ? new Date(story.storyDate).toLocaleDateString("en-US", {
               year: "numeric",
@@ -801,6 +825,7 @@ export function TimelineMobile() {
   const { user, session, logout, isLoading } = useAuth();
   const router = useRouter();
   const [showPaywall, setShowPaywall] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const [activeDecade, setActiveDecade] = useState<string | null>(null);
   const [highlightedStoryId, setHighlightedStoryId] = useState<string | null>(
     null,
@@ -822,6 +847,18 @@ export function TimelineMobile() {
     staleTime: 0, // Always consider data stale
     refetchOnWindowFocus: true, // Refetch when window regains focus
   });
+
+  // Sync with global dark theme
+  useEffect(() => {
+    const updateFromDom = () => {
+      const dark = document.documentElement.classList.contains('dark-theme') || document.body.classList.contains('dark-theme');
+      setIsDark(dark);
+    };
+    updateFromDom();
+    const handler = () => updateFromDom();
+    window.addEventListener('hw-theme-change', handler);
+    return () => window.removeEventListener('hw-theme-change', handler);
+  }, []);
 
   // Refetch stories when user and session are available (e.g., after login)
   useEffect(() => {
@@ -1215,43 +1252,42 @@ export function TimelineMobile() {
   const scheme = colorSchemes[currentColorScheme];
 
   // Apply styles directly to ensure they work
-  const pageStyle = {
-    backgroundColor:
-      currentColorScheme === "original"
-        ? "#FFF8F3"
-        : currentColorScheme === "white"
-          ? "#FFFFFF"
-          : currentColorScheme === "inverted"
-            ? "#FFFFFF"
-            : currentColorScheme === "soft"
-              ? "#F9FAFB"
-              : currentColorScheme === "cool"
-                ? "#F8FAFC"
-                : currentColorScheme === "dark"
-                  ? "#0F0F0F"
-                  : currentColorScheme === "retro"
-                    ? "#F5E6D3"
-                    : "#FFF8F3",
-    color:
-      currentColorScheme === "dark"
-        ? "#E5E5E5"
-        : currentColorScheme === "retro"
-          ? "#6B4E42"
-          : undefined,
-  };
+  const pageStyle = isDark
+    ? { backgroundColor: '#1c1c1d', color: '#b0b3b8' }
+    : {
+        backgroundColor:
+          currentColorScheme === "original"
+            ? "#FFF8F3"
+            : currentColorScheme === "white"
+              ? "#FFFFFF"
+              : currentColorScheme === "inverted"
+                ? "#FFFFFF"
+                : currentColorScheme === "soft"
+                  ? "#F9FAFB"
+                  : currentColorScheme === "cool"
+                    ? "#F8FAFC"
+                    : currentColorScheme === "dark"
+                      ? "#0F0F0F"
+                      : currentColorScheme === "retro"
+                        ? "#F5E6D3"
+                        : "#FFF8F3",
+        color:
+          currentColorScheme === "dark"
+            ? "#E5E5E5"
+            : currentColorScheme === "retro"
+              ? "#6B4E42"
+              : undefined,
+      };
 
   return (
     <div className={`timeline-page min-h-screen`} style={pageStyle}>
       {/* Header Navigation */}
       <header
-        className={`sticky top-0 z-50 backdrop-blur-sm p-3 ${
-          currentColorScheme === "dark"
-            ? "border-b border-gray-800"
-            : "border-b border-gray-100"
-        }`}
+        className={`sticky top-0 z-50 backdrop-blur-sm p-3 ${isDark ? '' : (currentColorScheme === "dark" ? "border-b border-gray-800" : "border-b border-gray-100")}`}
         style={{
-          backgroundColor:
-            currentColorScheme === "original"
+          backgroundColor: isDark
+            ? '#252728'
+            : currentColorScheme === "original"
               ? "rgba(255, 255, 255, 0.95)"
               : currentColorScheme === "inverted"
                 ? "rgba(255, 248, 243, 0.95)"
@@ -1264,19 +1300,15 @@ export function TimelineMobile() {
                       : currentColorScheme === "retro"
                         ? "rgba(245, 230, 211, 0.95)"
                         : "rgba(255, 255, 255, 0.95)",
-          color:
-            currentColorScheme === "dark"
-              ? "#E5E5E5"
-              : currentColorScheme === "retro"
-                ? "#6B4E42"
-                : undefined,
+          borderBottom: `1px solid ${isDark ? '#3b3d3f' : (currentColorScheme === 'dark' ? '#1f2937' : '#e5e7eb')}`,
+          color: isDark ? '#b0b3b8' : (currentColorScheme === 'retro' ? '#6B4E42' : undefined),
         }}
       >
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
-              <Calendar className="w-8 h-8" style={{ color: "#1f0f08" }} />
-              <h1 className="text-2xl font-bold">Timeline</h1>
+              <Calendar className="w-8 h-8" style={{ color: isDark ? '#b0b3b8' : '#1f0f08' }} />
+              <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : undefined }}>Timeline</h1>
             </div>
           </div>
         </div>
@@ -1497,11 +1529,23 @@ export function TimelineMobile() {
                       ref={(el) => (decadeRefs.current[item.id] = el)}
                       data-decade-id={item.id}
                       className="hw-decade"
+                      style={isDark ? { borderColor: '#3b3d3f' } : undefined}
                     >
                       {/* Decade Band - Sticky Header */}
-                      <div className="hw-decade-band">
-                        <div className="title">{item.title}</div>
-                        <div className="meta">{item.subtitle}</div>
+                      <div
+                        className="hw-decade-band"
+                        style={
+                          isDark
+                            ? {
+                                backgroundColor: '#252728',
+                                borderBottom: '1px solid #3b3d3f',
+                                color: '#b0b3b8',
+                              }
+                            : undefined
+                        }
+                      >
+                        <div className="title" style={isDark ? { color: '#b0b3b8' } : undefined}>{item.title}</div>
+                        <div className="meta" style={isDark ? { color: '#8a8d92' } : undefined}>{item.subtitle}</div>
                       </div>
 
                       {/* Spacing before first card */}
@@ -1535,6 +1579,7 @@ export function TimelineMobile() {
                                 storyOrPrompt.id === returnHighlightId
                               }
                               colorScheme={currentColorScheme}
+                              isDarkTheme={isDark}
                             />
                           );
                         })}
