@@ -70,7 +70,6 @@ export function useAgreementCheck(): AgreementStatus {
         }
 
         const data = await response.json();
-        console.log("[AgreementCheck] Agreement status:", data);
 
         setStatus({
           needsTerms: data.needsAcceptance.terms,

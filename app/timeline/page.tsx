@@ -37,14 +37,13 @@ export default function TimelinePage() {
       <aside
         className="hidden lg:flex lg:w-56 flex-col gap-1.5 p-2"
         style={{
-          position: "sticky",
+          position: "fixed",
           top: 72,
-          height: "100vh",
+          left: 0,
+          height: "calc(100vh - 72px)",
           backgroundColor: "transparent",
           borderRight: "none",
           color: isDark ? "#b0b3b8" : undefined,
-          marginLeft: -1, // reset previous nudge left
-          marginRight: 9, // move block ~9px to the right
         }}
       >
         <nav className="mt-4 space-y-1">
@@ -92,7 +91,7 @@ export default function TimelinePage() {
       </aside>
 
       {/* Main timeline content */}
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 lg:ml-56">
         <TimelineDesktop />
       </main>
     </div>

@@ -37,7 +37,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { normalizeYear, formatYear } from "@/lib/utils";
 import StoryTraits from "@/components/StoryTraits";
 import { getTopTraits } from "@/utils/getTopTraits";
@@ -844,7 +844,7 @@ export function TimelineMobile() {
   const { data: storiesData, refetch: refetchStories } = useQuery({
     queryKey: ["/api/stories"],
     enabled: !!user && !!session,
-    staleTime: 0, // Always consider data stale
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
     refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
@@ -1145,32 +1145,36 @@ export function TimelineMobile() {
     );
   }
 
-  const allStories = (storiesData as any)?.stories || [];
+  // Memoize expensive calculations to prevent re-processing on every render
+  const allStories = useMemo(() => {
+    return (storiesData as any)?.stories || [];
+  }, [storiesData]);
 
   // Filter to only show stories marked for timeline
-  const stories = allStories.filter((s: any) => s.includeInTimeline === true);
+  const stories = useMemo(() => {
+    return allStories.filter((s: any) => s.includeInTimeline === true);
+  }, [allStories]);
 
   // Generate ghost prompts based on user's TOTAL story count (not just timeline)
-  let ghostPrompts: any[] = [];
+  const ghostPrompts = useMemo(() => {
+    if (shouldShowNewUserGhosts(allStories.length)) {
+      // New user with 0 stories: show onboarding ghost prompts
+      return generateNewUserGhostPrompts(user.birthYear);
+    } else if (allStories.length < 3) {
+      // Existing user with 1-2 stories: show contextual ghost prompts
+      return generateGhostPrompts(user.birthYear);
+    }
+    return [];
+  }, [allStories.length, user.birthYear]);
 
-  if (shouldShowNewUserGhosts(allStories.length)) {
-    // New user with 0 stories: show onboarding ghost prompts
-    ghostPrompts = generateNewUserGhostPrompts(user.birthYear);
-  } else if (allStories.length < 3) {
-    // Existing user with 1-2 stories: show contextual ghost prompts
-    ghostPrompts = generateGhostPrompts(user.birthYear);
-  }
-
-  const storiesWithGhostPrompts = mergeGhostPromptsWithStories(
-    stories,
-    ghostPrompts,
-  );
+  const storiesWithGhostPrompts = useMemo(() => {
+    return mergeGhostPromptsWithStories(stories, ghostPrompts);
+  }, [stories, ghostPrompts]);
 
   // Group all items (stories + ghost prompts) by decade
-  const decadeGroups = groupStoriesByDecade(
-    storiesWithGhostPrompts,
-    user.birthYear,
-  );
+  const decadeGroups = useMemo(() => {
+    return groupStoriesByDecade(storiesWithGhostPrompts, user.birthYear);
+  }, [storiesWithGhostPrompts, user.birthYear]);
 
   const handleRecordPrompt = () => {
     // Check if user has reached story limit
@@ -1215,41 +1219,145 @@ export function TimelineMobile() {
     }
   };
 
-  // Calculate which decades have content
-  // Use centralized year normalization
-  const cleanBirthYear = formatYear(user.birthYear);
-  const normalizedBirthYear = normalizeYear(user.birthYear);
+  // Calculate which decades have content (memoized for performance)
+  const cleanBirthYear = useMemo(() => formatYear(user.birthYear), [user.birthYear]);
+  const normalizedBirthYear = useMemo(() => normalizeYear(user.birthYear), [user.birthYear]);
 
   // Filter birth year stories using normalized values
-  const birthYearStories = stories.filter((s: any) => {
-    const normalizedStoryYear = normalizeYear(s.storyYear);
-    return normalizedStoryYear === normalizedBirthYear;
-  });
+  const birthYearStories = useMemo(() => {
+    return stories.filter((s: any) => {
+      const normalizedStoryYear = normalizeYear(s.storyYear);
+      return normalizedStoryYear === normalizedBirthYear;
+    });
+  }, [stories, normalizedBirthYear]);
 
   // Filter pre-birth stories for "TOP" marker
-  const prebirthStories = stories.filter((s: any) => {
-    const normalizedStoryYear = normalizeYear(s.storyYear);
-    return normalizedStoryYear < normalizedBirthYear;
-  });
+  const prebirthStories = useMemo(() => {
+    return stories.filter((s: any) => {
+      const normalizedStoryYear = normalizeYear(s.storyYear);
+      return normalizedStoryYear < normalizedBirthYear;
+    });
+  }, [stories, normalizedBirthYear]);
 
-  const decadesWithContent = [
-    // Add TOP marker for pre-birth stories if they exist
-    ...(prebirthStories.length > 0
-      ? [{ id: "before-birth", label: "TOP", count: prebirthStories.length }]
-      : []),
-    { id: "birth-year", label: cleanBirthYear, count: birthYearStories.length },
-    ...decadeGroups.map((group) => ({
-      id: group.decade,
-      label: group.decade.replace("s", ""),
-      count: group.stories.length,
-    })),
-  ].filter((d) => d.count > 0 || d.id === "birth-year"); // Always show birth year
+  const decadesWithContent = useMemo(() => {
+    return [
+      // Add TOP marker for pre-birth stories if they exist
+      ...(prebirthStories.length > 0
+        ? [{ id: "before-birth", label: "TOP", count: prebirthStories.length }]
+        : []),
+      { id: "birth-year", label: cleanBirthYear, count: birthYearStories.length },
+      ...decadeGroups.map((group) => ({
+        id: group.decade,
+        label: group.decade.replace("s", ""),
+        count: group.stories.length,
+      })),
+    ].filter((d) => d.count > 0 || d.id === "birth-year"); // Always show birth year
+  }, [prebirthStories, cleanBirthYear, birthYearStories, decadeGroups]);
 
   // Generate share URL for this user's timeline
   const shareUrl = `${window.location.origin}/share/${user.id}`;
 
   // Get current color scheme
   const scheme = colorSchemes[currentColorScheme];
+
+  // Memoize the expensive timeline items calculation
+  const { allTimelineItems, decadeEntries } = useMemo(() => {
+    const items = [];
+    const currentYear = new Date().getFullYear();
+    const currentDecade = Math.floor(currentYear / 10) * 10;
+
+    // Pre-birth stories section - "Before I Was Born"
+    if (prebirthStories.length > 0) {
+      const earliestPrebirthYear = Math.min(
+        ...prebirthStories.map((s: any) => normalizeYear(s.storyYear)),
+      );
+      items.push({
+        type: "decade",
+        id: "before-birth",
+        year: earliestPrebirthYear,
+        title: "Before I Was Born",
+        subtitle: "Family History • Stories of those who came before",
+        stories: prebirthStories.sort((a: any, b: any) => {
+          return normalizeYear(a.storyYear) - normalizeYear(b.storyYear);
+        }),
+      });
+    }
+
+    // Birth year section (always show)
+    items.push({
+      type: "decade",
+      id: "birth-year",
+      year: normalizedBirthYear || user.birthYear,
+      title: "The Year I was Born",
+      subtitle: `${normalizedBirthYear || user.birthYear} • The Beginning`,
+      stories: birthYearStories,
+    });
+
+    // Add decade groups in chronological order (filtering out pre-birth stories)
+    decadeGroups.forEach((group) => {
+      // Filter out pre-birth stories from this decade - they're in "Before I Was Born"
+      const storiesAfterOrDuringBirth = group.stories.filter((s: any) => {
+        const storyYear = normalizeYear(s.storyYear);
+        return storyYear >= normalizedBirthYear;
+      });
+
+      // Only show this decade if it has stories after/during birth
+      if (storiesAfterOrDuringBirth.length > 0) {
+        const groupDecadeNum = parseInt(group.decade.replace("s", ""));
+        const isCurrentDecade = groupDecadeNum === currentDecade;
+
+        // If this decade contains the birth year, sort it AFTER the birth year section
+        const birthDecade = Math.floor((normalizedBirthYear || user.birthYear) / 10) * 10;
+        let sortYear = groupDecadeNum; // Default to decade start
+
+        if (groupDecadeNum === birthDecade) {
+          // This decade contains the birth year, filter to only stories AFTER birth year
+          const storiesAfterBirth = storiesAfterOrDuringBirth.filter((s: any) => {
+            const storyYear = normalizeYear(s.storyYear);
+            return storyYear > normalizedBirthYear;
+          });
+
+          if (storiesAfterBirth.length > 0) {
+            // Use the earliest story AFTER birth year for sorting
+            const earliestAfterBirth = Math.min(
+              ...storiesAfterBirth.map((s: any) => normalizeYear(s.storyYear)),
+            );
+            sortYear = earliestAfterBirth;
+          } else {
+            // No stories after birth in this decade - sort right after birth year
+            sortYear = normalizedBirthYear + 1;
+          }
+        }
+
+        items.push({
+          type: "decade",
+          id: group.decade,
+          year: sortYear, // Use earliest story year for birth decade, decade start for others
+          title: group.displayName,
+          subtitle: `${group.ageRange} • Life Chapter${isCurrentDecade ? " • Current" : ""}`,
+          stories: storiesAfterOrDuringBirth,
+          storyCount: storiesAfterOrDuringBirth.length,
+        });
+      }
+    });
+
+    // Sort by year
+    items.sort((a, b) => a.year - b.year);
+
+    // Build decade entries for navigation
+    const entries: DecadeEntry[] = items.map((item) => ({
+      id: item.id,
+      label:
+        item.id === "before-birth"
+          ? "TOP"
+          : item.id === "birth-year"
+            ? formatYear(user.birthYear)
+            : item.id.replace("decade-", "").replace("s", ""),
+      count: item.stories?.length || 0,
+    }));
+
+    return { allTimelineItems: items, decadeEntries: entries };
+  }, [stories, decadeGroups, prebirthStories, birthYearStories, normalizedBirthYear, user.birthYear]);
 
   // Apply styles directly to ensure they work
   const pageStyle = isDark
@@ -1356,240 +1464,71 @@ export function TimelineMobile() {
         <div className="hw-layout">
           <div className="hw-spine" style={isDark ? { backgroundColor: '#ffffff', opacity: 1 } : undefined}>
             {/* All stories sorted chronologically */}
-            {(() => {
-              // Create chronological timeline
-              const allTimelineItems = [];
-
-              // Use normalized birth year to handle any corrupted values
-              const normalizedBirthYear = normalizeYear(user.birthYear);
-
-              // Pre-birth stories section - "Before I Was Born"
-              const prebirthStories = stories.filter((story: any) => {
-                const normalizedStoryYear = normalizeYear(story.storyYear);
-                return normalizedStoryYear < normalizedBirthYear;
-              });
-              if (prebirthStories.length > 0) {
-                const earliestPrebirthYear = Math.min(
-                  ...prebirthStories.map((s: any) =>
-                    normalizeYear(s.storyYear),
-                  ),
-                );
-                allTimelineItems.push({
-                  type: "decade",
-                  id: "before-birth",
-                  year: earliestPrebirthYear,
-                  title: "Before I Was Born",
-                  subtitle: "Family History • Stories of those who came before",
-                  stories: prebirthStories.sort((a: any, b: any) => {
-                    return (
-                      normalizeYear(a.storyYear) - normalizeYear(b.storyYear)
-                    );
-                  }),
-                });
-              }
-
-              // Birth year section
-              const birthYearStories = stories.filter((story: any) => {
-                const normalizedStoryYear = normalizeYear(story.storyYear);
-                return normalizedStoryYear === normalizedBirthYear;
-              });
-              if (birthYearStories.length > 0 || true) {
-                // Always show birth year
-                allTimelineItems.push({
-                  type: "decade",
-                  id: "birth-year",
-                  year: normalizedBirthYear || user.birthYear,
-                  title: "The Year I was Born",
-                  subtitle: `${normalizedBirthYear || user.birthYear} • The Beginning`,
-                  stories: birthYearStories,
-                });
-              }
-
-              // Add decade groups in chronological order (filtering out pre-birth stories)
-              decadeGroups.forEach((group) => {
-                // Filter out pre-birth stories from this decade - they're in "Before I Was Born"
-                const storiesAfterOrDuringBirth = group.stories.filter(
-                  (s: any) => {
-                    const storyYear = normalizeYear(s.storyYear);
-                    return storyYear >= normalizedBirthYear;
-                  },
-                );
-
-                // Only show this decade if it has stories after/during birth
-                if (storiesAfterOrDuringBirth.length > 0) {
-                  const currentYear = new Date().getFullYear();
-                  const currentDecade = Math.floor(currentYear / 10) * 10;
-                  const groupDecadeNum = parseInt(
-                    group.decade.replace("s", ""),
-                  );
-                  const isCurrentDecade = groupDecadeNum === currentDecade;
-
-                  // CRITICAL FIX: If this decade contains the birth year, sort it AFTER the birth year section
-                  // by using the earliest actual story year instead of the decade start year
-                  const birthDecade =
-                    Math.floor((normalizedBirthYear || user.birthYear) / 10) *
-                    10;
-                  let sortYear = groupDecadeNum; // Default to decade start
-
-                  console.log(
-                    `[Decade ${group.decade}] groupDecadeNum=${groupDecadeNum}, birthDecade=${birthDecade}, match=${groupDecadeNum === birthDecade}`,
-                  );
-
-                  if (groupDecadeNum === birthDecade) {
-                    // This decade contains the birth year, so we need special handling
-                    // We want this section to show AFTER the birth year section
-                    // Filter to only stories that are AFTER the birth year
-                    const storiesAfterBirth = storiesAfterOrDuringBirth.filter(
-                      (s: any) => {
-                        const storyYear = normalizeYear(s.storyYear);
-                        return storyYear > normalizedBirthYear;
-                      },
-                    );
-
-                    console.log(
-                      `[Decade ${group.decade}] Total stories: ${storiesAfterOrDuringBirth.length}, Stories after birth: ${storiesAfterBirth.length}`,
-                    );
-
-                    if (storiesAfterBirth.length > 0) {
-                      // Use the earliest story AFTER birth year for sorting
-                      const earliestAfterBirth = Math.min(
-                        ...storiesAfterBirth.map((s: any) =>
-                          normalizeYear(s.storyYear),
-                        ),
-                      );
-                      console.log(
-                        `[Decade ${group.decade}] Using earliest story after birth: ${earliestAfterBirth}`,
-                      );
-                      sortYear = earliestAfterBirth;
-                    } else {
-                      // No stories after birth in this decade - this shouldn't happen normally
-                      // but if it does, sort it right after birth year
-                      console.log(
-                        `[Decade ${group.decade}] No stories after birth, using ${normalizedBirthYear + 1}`,
-                      );
-                      sortYear = normalizedBirthYear + 1;
-                    }
-                  }
-
-                  console.log(
-                    `[Decade ${group.decade}] Final sortYear: ${sortYear}`,
-                  );
-
-                  allTimelineItems.push({
-                    type: "decade",
-                    id: group.decade,
-                    year: sortYear, // Use earliest story year for birth decade, decade start for others
-                    title: group.displayName,
-                    subtitle: `${group.ageRange} • Life Chapter${isCurrentDecade ? " • Current" : ""}`,
-                    stories: storiesAfterOrDuringBirth,
-                    storyCount: storiesAfterOrDuringBirth.length,
-                  });
-                }
-              });
-
-              // Sort by year
-              console.log(
-                "[Timeline Sort] Before sort:",
-                allTimelineItems.map((item) => ({
-                  id: item.id,
-                  year: item.year,
-                  title: item.title,
-                })),
-              );
-              allTimelineItems.sort((a, b) => a.year - b.year);
-              console.log(
-                "[Timeline Sort] After sort:",
-                allTimelineItems.map((item) => ({
-                  id: item.id,
-                  year: item.year,
-                  title: item.title,
-                })),
-              );
-
-              // Build decade entries for navigation
-              const decadeEntries: DecadeEntry[] = allTimelineItems.map(
-                (item) => ({
-                  id: item.id,
-                  label:
-                    item.id === "before-birth"
-                      ? "TOP"
-                      : item.id === "birth-year"
-                        ? formatYear(user.birthYear)
-                        : item.id.replace("decade-", "").replace("s", ""),
-                  count: item.stories?.length || 0,
-                }),
-              );
-
-              return (
-                <>
-                  {allTimelineItems.map((item, index) => (
-                    <section
-                      key={item.id}
-                      id={item.id}
-                      ref={(el) => (decadeRefs.current[item.id] = el)}
-                      data-decade-id={item.id}
-                      className="hw-decade"
-                      style={isDark ? { borderColor: '#3b3d3f' } : undefined}
-                    >
-                      {/* Decade Band - Sticky Header */}
-                      <div
-                        className="hw-decade-band"
-                        style={
-                          isDark
-                            ? {
-                                backgroundColor: '#252728',
-                                borderBottom: '1px solid #3b3d3f',
-                                color: '#b0b3b8',
-                              }
-                            : undefined
+            {allTimelineItems.map((item, index) => (
+              <section
+                key={item.id}
+                id={item.id}
+                ref={(el) => (decadeRefs.current[item.id] = el)}
+                data-decade-id={item.id}
+                className="hw-decade"
+                style={isDark ? { borderColor: '#3b3d3f' } : undefined}
+              >
+                {/* Decade Band - Sticky Header */}
+                <div
+                  className="hw-decade-band"
+                  style={
+                    isDark
+                      ? {
+                          backgroundColor: '#252728',
+                          borderBottom: '1px solid #3b3d3f',
+                          color: '#b0b3b8',
                         }
-                      >
-                        <div className="title" style={isDark ? { color: '#b0b3b8' } : undefined}>{item.title}</div>
-                        <div className="meta" style={isDark ? { color: '#8a8d92' } : undefined}>{item.subtitle}</div>
-                      </div>
+                      : undefined
+                  }
+                >
+                  <div className="title" style={isDark ? { color: '#b0b3b8' } : undefined}>{item.title}</div>
+                  <div className="meta" style={isDark ? { color: '#8a8d92' } : undefined}>{item.subtitle}</div>
+                </div>
 
-                      {/* Spacing before first card */}
-                      <div className="hw-decade-start"></div>
+                {/* Spacing before first card */}
+                <div className="hw-decade-start"></div>
 
-                      {/* Stories Grid */}
-                      <div className="hw-grid">
-                        {/* Existing Stories and Ghost Prompts */}
-                        {item.stories.map((storyOrPrompt: any) => {
-                          // Check if this is a ghost prompt
-                          if (storyOrPrompt.isGhost) {
-                            return (
-                              <GhostPromptCard
-                                key={storyOrPrompt.id}
-                                prompt={storyOrPrompt}
-                                onClick={() =>
-                                  handleGhostPromptClick(storyOrPrompt)
-                                }
-                              />
-                            );
+                {/* Stories Grid */}
+                <div className="hw-grid">
+                  {/* Existing Stories and Ghost Prompts */}
+                  {item.stories.map((storyOrPrompt: any) => {
+                    // Check if this is a ghost prompt
+                    if (storyOrPrompt.isGhost) {
+                      return (
+                        <GhostPromptCard
+                          key={storyOrPrompt.id}
+                          prompt={storyOrPrompt}
+                          onClick={() =>
+                            handleGhostPromptClick(storyOrPrompt)
                           }
-                          // Regular story
-                          return (
-                            <MemoryCard
-                              key={storyOrPrompt.id}
-                              story={storyOrPrompt}
-                              isHighlighted={
-                                storyOrPrompt.id === highlightedStoryId
-                              }
-                              isReturnHighlight={
-                                storyOrPrompt.id === returnHighlightId
-                              }
-                              colorScheme={currentColorScheme}
-                              isDarkTheme={isDark}
-                            />
-                          );
-                        })}
-                      </div>
-                    </section>
-                  ))}
-                  <DecadeNav entries={decadeEntries} />
-                </>
-              );
-            })()}
+                        />
+                      );
+                    }
+                    // Regular story
+                    return (
+                      <MemoryCard
+                        key={storyOrPrompt.id}
+                        story={storyOrPrompt}
+                        isHighlighted={
+                          storyOrPrompt.id === highlightedStoryId
+                        }
+                        isReturnHighlight={
+                          storyOrPrompt.id === returnHighlightId
+                        }
+                        colorScheme={currentColorScheme}
+                        isDarkTheme={isDark}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+            <DecadeNav entries={decadeEntries} />
           </div>
         </div>
       </main>

@@ -261,6 +261,7 @@ body {
   border: none;
   display: grid;
   place-items: center;
+  cursor: pointer;
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.25),
     0 2px 4px rgba(0, 0, 0, 0.15),
@@ -275,6 +276,7 @@ body {
   height: 18px;
   fill: var(--color-accent); /* Orange play icon always */
   stroke: none;
+  pointer-events: none; /* Let clicks pass through to button */
 }
 .hw-play:hover {
   transform: scale(1.08);

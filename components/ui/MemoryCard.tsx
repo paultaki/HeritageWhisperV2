@@ -49,13 +49,19 @@ export default function MemoryCard(p: Props) {
           loading="lazy"
           decoding="async"
         />
+        {/* Play button overlaid on photo - matching timeline style */}
         <button
-          className="hw-play hw-play-desktop"
+          onClick={(e) => {
+            e.stopPropagation();
+            p.onPlay?.();
+          }}
           aria-label="Play memory"
-          onClick={p.onPlay}
+          className="hw-play-desktop absolute bottom-3 right-3 flex-shrink-0 w-11 h-11 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer"
+          style={{ pointerEvents: 'auto' }}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M8 5l11 7-11 7V5z" />
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style={{ pointerEvents: 'none' }}>
+            <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
+            <polygon points="11,9 11,19 19,14" fill="#fb923c" />
           </svg>
         </button>
       </div>

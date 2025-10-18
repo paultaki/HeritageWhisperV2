@@ -2,6 +2,7 @@
 
 import { Story } from "@/shared/schema";
 import { formatYear, getAge } from "@/lib/utils";
+import { useState } from "react";
 
 interface MemoryListItemProps {
   story: Story;
@@ -18,6 +19,7 @@ export function MemoryListItem({
   onToggleFavorite,
   onDelete,
 }: MemoryListItemProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   // Format duration (assuming audio_duration is in seconds)
   const formatDuration = (seconds?: number | null): string => {
     if (!seconds) return "";
@@ -37,8 +39,9 @@ export function MemoryListItem({
 
   return (
     <div
-      className="memory-row group rounded-2xl bg-white/90 hover:bg-white shadow-sm hover:shadow
-                 ring-1 ring-black/5 px-4 py-3 md:py-4 transition-all duration-200"
+      className={`memory-row group rounded-2xl bg-white/90 hover:bg-white shadow-sm hover:shadow
+                 ring-1 ring-black/5 px-4 py-3 md:py-4 transition-all duration-200 relative
+                 ${isMenuOpen ? 'z-50' : 'z-0'}`}
       role="article"
       aria-label={story.title || "Untitled memory"}
     >
@@ -132,23 +135,29 @@ export function MemoryListItem({
         <div className="actions flex items-center gap-2">
         <button
           aria-label="Play memory"
-          onClick={() => onPlay(story.id)}
-          className="play-btn grid place-items-center w-11 h-11 md:w-12 md:h-12 rounded-full
-                     bg-[#D7794F] text-white shadow-md hover:shadow-lg active:opacity-90
+          onClick={(e) => {
+            e.stopPropagation();
+            onPlay(story.id);
+          }}
+          className="play-btn flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-full
+                     bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60
+                     shadow-lg hover:shadow-xl cursor-pointer
                      focus:outline-none focus:ring-2 focus:ring-[#D7794F] focus:ring-offset-2
-                     transition-all duration-200 hover:scale-105 active:scale-95
+                     transition-all duration-200 hover:scale-110 active:scale-95
                      translate-y-[27px] md:translate-y-0"
+          style={{ pointerEvents: 'auto' }}
         >
-          <svg
-            className="w-4 h-4 md:w-5 md:h-5 ml-0.5"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M8 5v14l11-7z" />
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style={{ pointerEvents: 'none' }}>
+            <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
+            <polygon points="11,9 11,19 19,14" fill="#fb923c" />
           </svg>
         </button>
 
-        <div className="relative group/menu translate-y-[27px] md:translate-y-0">
+        <div 
+          className="relative translate-y-[27px] md:translate-y-0"
+          onMouseEnter={() => setIsMenuOpen(true)}
+          onMouseLeave={() => setIsMenuOpen(false)}
+        >
           <button
             aria-label="More options"
             className="more grid place-items-center w-10 h-10 md:w-11 md:h-11 rounded-full
@@ -165,10 +174,9 @@ export function MemoryListItem({
 
           {/* Dropdown Menu */}
           <div
-            className="absolute right-0 top-full mt-2 w-48 py-2 bg-white rounded-xl
-                          shadow-lg ring-1 ring-black/5 opacity-0 invisible
-                          group-hover/menu:opacity-100 group-hover/menu:visible
-                          transition-all duration-200 z-50"
+            className={`absolute right-0 top-full mt-2 w-48 py-2 bg-white rounded-xl
+                          shadow-xl ring-1 ring-black/10 transition-all duration-200 z-[100]
+                          ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
           >
             <button
               onClick={() => onOpen(story.id)}

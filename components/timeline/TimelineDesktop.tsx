@@ -488,12 +488,13 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                     }}
                     aria-pressed={isPlaying}
                     aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-                    className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
+                    className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer relative z-20"
+                    style={{ pointerEvents: 'auto' }}
                   >
                     {isLoading ? (
-                      <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" />
+                      <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" style={{ pointerEvents: 'none' }} />
                     ) : (
-                      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style={{ pointerEvents: 'none' }}>
                         <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
                         {isPlaying ? (
                           <g>
@@ -509,9 +510,9 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 )}
               </div>
               
-              {/* Progress Bar (shown when playing) */}
-              {story.audioUrl && (isPlaying || progress > 0) && (
-                <div className="mt-2">
+              {/* Progress Bar (always reserve space to keep button in same position) */}
+              {story.audioUrl && (
+                <div className={`mt-2 ${!(isPlaying || progress > 0) ? 'opacity-0 pointer-events-none' : ''}`}>
                   <div
                     ref={progressBarRef}
                     onClick={(e) => {
@@ -585,10 +586,11 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 e.stopPropagation();
                 handlePlayAudio(e);
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 rounded-full transition-all duration-200 shadow-md hover:shadow-lg"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 rounded-full transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
+              style={{ pointerEvents: 'auto' }}
             >
               {isLoading ? (
-                <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" />
+                <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" style={{ pointerEvents: 'none' }} />
               ) : (
                 <svg
                   width="20"
@@ -596,6 +598,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   viewBox="0 0 20 20"
                   fill="none"
                   className="text-orange-500"
+                  style={{ pointerEvents: 'none' }}
                 >
                   {isPlaying ? (
                     <>

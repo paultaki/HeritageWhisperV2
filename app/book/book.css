@@ -180,9 +180,6 @@
   padding: var(
     --content-margin
   ); /* 23px margin between dotted decor and content */
-  
-  /* TEMP DEBUG: Blue background for page-content padding area */
-  background: #ADD8E6 !important;
 }
 
 /* Optional: Page header for decade/chapter labels */

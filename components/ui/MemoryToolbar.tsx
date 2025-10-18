@@ -73,17 +73,19 @@ export default function MemoryToolbar(p: Props) {
           </button>
         </div>
 
-        <div className="hw-controls">
+        <div className="hw-controls" suppressHydrationWarning>
           <input
             className="hw-search"
             placeholder="Search"
             value={p.filter}
             onChange={(e) => p.setFilter(e.target.value)}
+            suppressHydrationWarning
           />
           <select
             className="hw-select"
             value={p.sort}
             onChange={(e) => p.setSort(e.target.value)}
+            suppressHydrationWarning
           >
             <option value="year-newest">By Year: Newest → Oldest</option>
             <option value="year-oldest">
@@ -98,12 +100,14 @@ export default function MemoryToolbar(p: Props) {
             <button
               className={p.view === "grid" ? "on" : ""}
               onClick={() => p.setView("grid")}
+              suppressHydrationWarning
             >
               Grid
             </button>
             <button
               className={p.view === "list" ? "on" : ""}
               onClick={() => p.setView("list")}
+              suppressHydrationWarning
             >
               List
             </button>
