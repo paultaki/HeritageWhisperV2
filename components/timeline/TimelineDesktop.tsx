@@ -118,9 +118,10 @@ interface CenteredMemoryCardProps {
   story: Story;
   position: "left" | "right";
   index: number;
+  isDark?: boolean;
 }
 
-function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps) {
+function CenteredMemoryCard({ story, position, index, isDark = false }: CenteredMemoryCardProps) {
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -652,9 +653,9 @@ function CenteredMemoryCard({ story, position, index }: CenteredMemoryCardProps)
         <div
           className="px-4 py-1 text-lg font-serif font-medium rounded-lg whitespace-nowrap shadow-sm"
           style={{
-            backgroundColor: '#ffffffF2',
-            border: '1px solid #6f7583',
-            color: '#6f7583',
+            backgroundColor: isDark ? '#252728' : '#ffffffF2',
+            border: `1px solid ${isDark ? '#3b3d3f' : '#6f7583'}`,
+            color: isDark ? '#b0b3b8' : '#6f7583',
           }}
         >
           {story.storyDate
@@ -889,7 +890,7 @@ export function TimelineDesktop() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Calendar className="w-7 h-7" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
-              <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Timeline V2</h1>
+              <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Timeline</h1>
             </div>
             <button
               onClick={() => setIsDark((v) => !v)}
@@ -910,10 +911,10 @@ export function TimelineDesktop() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-20">
         {/* Title Section */}
         <div className="text-center mb-16">
-          <h2 className="text-5xl md:text-7xl font-light tracking-tight text-gray-900 mb-6">
+          <h2 className="text-5xl md:text-7xl font-light tracking-tight mb-6" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>
             {user?.name ? `${user.name}'s Journey` : "Life's Journey"}
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto text-center">
+          <p className="text-xl max-w-2xl mx-auto text-center" style={{ color: isDark ? '#8a8d92' : '#4b5563' }}>
             A timeline of memories, moments, and milestones that shaped your life.
           </p>
         </div>
@@ -954,6 +955,7 @@ export function TimelineDesktop() {
                   story={story}
                   position={index % 2 === 0 ? "left" : "right"}
                   index={index}
+                  isDark={isDark}
                 />
               </div>
             ))}
