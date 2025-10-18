@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -746,6 +746,9 @@ export function TimelineDesktop() {
       return res.json();
     },
     enabled: !!user,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes even when unmounted
+    placeholderData: keepPreviousData, // Keep showing old data while refetching to prevent flash
   });
 
   // Restore scroll position when returning from book view
@@ -910,6 +913,16 @@ export function TimelineDesktop() {
   if (!isLoading && !user) {
     router.push("/auth/login");
     return null;
+  }
+
+  // Show loading state while fetching stories data
+  if (isStoriesLoading && !storiesData) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderBottomColor: isDark ? '#b0b3b8' : '#F59E0B' }}></div>
+        <p className="text-lg" style={{ color: isDark ? '#b0b3b8' : '#6B4E42' }}>Loading your timeline...</p>
+      </div>
+    );
   }
 
   const allStories = (storiesData as any)?.stories || [];

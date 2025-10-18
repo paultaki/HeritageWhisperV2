@@ -26,8 +26,9 @@ import {
   MultiPhotoUploader,
   type StoryPhoto,
 } from "@/components/MultiPhotoUploader";
-import { AudioRecorder } from "@/components/AudioRecorder";
+import { AudioRecorder, AudioRecorderHandle } from "@/components/AudioRecorder";
 import { CustomAudioPlayer } from "@/components/CustomAudioPlayer";
+import { VoiceRecordingButton } from "@/components/VoiceRecordingButton";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -81,7 +82,10 @@ export function BookStyleReview({
   const [tempYear, setTempYear] = useState(storyYear);
   const [tempWisdom, setTempWisdom] = useState(wisdomText);
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const audioRecorderRef = useRef<AudioRecorderHandle>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isGeneratingLesson, setIsGeneratingLesson] = useState(false);
   const [originalTranscription, setOriginalTranscription] = useState<string | null>(null);
@@ -96,6 +100,16 @@ export function BookStyleReview({
   const titleInputRef = useRef<HTMLInputElement>(null);
   const yearInputRef = useRef<HTMLInputElement>(null);
   const wisdomInputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Recording timer effect
+  useEffect(() => {
+    if (isRecording && !isPaused) {
+      const interval = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [isRecording, isPaused]);
 
   // Calculate age at time of story
   const age = storyYear ? parseInt(storyYear) - userBirthYear : null;
@@ -418,76 +432,143 @@ export function BookStyleReview({
                     </div>
                   </div>
                 ) : isRecording ? (
-                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <AudioRecorder
-                      onRecordingComplete={async (audioBlob) => {
-                        setIsRecording(false);
-                        setIsProcessing(true);
+                  <div className="p-8 bg-gradient-to-br from-orange-50 to-pink-50 rounded-lg border-2 border-orange-200">
+                    {/* Hidden AudioRecorder for actual recording logic */}
+                    <div className="hidden">
+                      <AudioRecorder
+                        ref={audioRecorderRef}
+                        onRecordingComplete={async (audioBlob) => {
+                          setIsRecording(false);
+                          setIsPaused(false);
+                          setRecordingTime(0);
+                          setIsProcessing(true);
 
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        onAudioChange?.(audioUrl, audioBlob);
+                          const audioUrl = URL.createObjectURL(audioBlob);
+                          onAudioChange?.(audioUrl, audioBlob);
 
-                        // Transcribe the audio
-                        const formData = new FormData();
-                        formData.append("audio", audioBlob);
+                          // Transcribe the audio
+                          const formData = new FormData();
+                          formData.append("audio", audioBlob);
 
-                        try {
-                          const { supabase } = await import("@/lib/supabase");
-                          const {
-                            data: { session },
-                          } = await supabase.auth.getSession();
+                          try {
+                            const { supabase } = await import("@/lib/supabase");
+                            const {
+                              data: { session },
+                            } = await supabase.auth.getSession();
 
-                          // Get CSRF token
-                          const csrfResponse = await fetch("/api/csrf");
-                          const { token: csrfToken } = await csrfResponse.json();
+                            // Get CSRF token
+                            const csrfResponse = await fetch("/api/csrf");
+                            const { token: csrfToken } = await csrfResponse.json();
 
-                          const headers: HeadersInit = {
-                            "x-csrf-token": csrfToken,
-                          };
-                          if (session?.access_token) {
-                            headers["Authorization"] =
-                              `Bearer ${session.access_token}`;
-                          }
-
-                          const response = await fetch("/api/transcribe", {
-                            method: "POST",
-                            headers,
-                            body: formData,
-                          });
-
-                          if (response.ok) {
-                            const data = await response.json();
-                            console.log(
-                              "[BookStyleReview] Transcribe response:",
-                              {
-                                hasTranscription: !!data.transcription,
-                                hasLessonOptions: !!data.lessonOptions,
-                                practical: data.lessonOptions?.practical,
-                                emotional: data.lessonOptions?.emotional,
-                                character: data.lessonOptions?.character,
-                              },
-                            );
-
-                            if (data.transcription) {
-                              onTranscriptionChange(data.transcription);
+                            const headers: HeadersInit = {
+                              "x-csrf-token": csrfToken,
+                            };
+                            if (session?.access_token) {
+                              headers["Authorization"] =
+                                `Bearer ${session.access_token}`;
                             }
-                            // Use practical lesson as default (user can edit later)
-                            if (data.lessonOptions?.practical) {
+
+                            const response = await fetch("/api/transcribe", {
+                              method: "POST",
+                              headers,
+                              body: formData,
+                            });
+
+                            if (response.ok) {
+                              const data = await response.json();
                               console.log(
-                                "[BookStyleReview] Setting lesson learned:",
-                                data.lessonOptions.practical,
+                                "[BookStyleReview] Transcribe response:",
+                                {
+                                  hasTranscription: !!data.transcription,
+                                  hasLessonOptions: !!data.lessonOptions,
+                                  practical: data.lessonOptions?.practical,
+                                  emotional: data.lessonOptions?.emotional,
+                                  character: data.lessonOptions?.character,
+                                },
                               );
-                              onWisdomChange(data.lessonOptions.practical);
+
+                              if (data.transcription) {
+                                onTranscriptionChange(data.transcription);
+                              }
+                              // Use practical lesson as default (user can edit later)
+                              if (data.lessonOptions?.practical) {
+                                console.log(
+                                  "[BookStyleReview] Setting lesson learned:",
+                                  data.lessonOptions.practical,
+                                );
+                                onWisdomChange(data.lessonOptions.practical);
+                              }
                             }
+                          } catch (error) {
+                            console.error("Transcription error:", error);
+                          } finally {
+                            setIsProcessing(false);
                           }
-                        } catch (error) {
-                          console.error("Transcription error:", error);
-                        } finally {
-                          setIsProcessing(false);
-                        }
-                      }}
-                      onCancel={() => setIsRecording(false)}
-                    />
+                        }}
+                        onCancel={() => {
+                          setIsRecording(false);
+                          setIsPaused(false);
+                          setRecordingTime(0);
+                        }}
+                      />
+                    </div>
+                    
+                    {/* Modern recording UI */}
+                    <div className="flex flex-col items-center gap-6">
+                      <VoiceRecordingButton
+                        isRecording={isRecording}
+                        isPaused={isPaused}
+                        recordingTime={recordingTime}
+                        onStart={() => {
+                          // Start recording via AudioRecorder ref
+                          audioRecorderRef.current?.startRecording?.();
+                        }}
+                        audioRecorderRef={audioRecorderRef}
+                      />
+                      
+                      {/* Recording controls */}
+                      {isRecording && (
+                        <div className="flex gap-3">
+                          <Button
+                            onClick={() => {
+                              if (isPaused) {
+                                audioRecorderRef.current?.resumeRecording?.();
+                                setIsPaused(false);
+                              } else {
+                                audioRecorderRef.current?.pauseRecording?.();
+                                setIsPaused(true);
+                              }
+                            }}
+                            variant="outline"
+                            size="lg"
+                            className="min-w-[120px]"
+                          >
+                            {isPaused ? "Resume" : "Pause"}
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              audioRecorderRef.current?.stopRecording?.();
+                            }}
+                            variant="default"
+                            size="lg"
+                            className="min-w-[120px] bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                          >
+                            Done
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {/* Cancel button when not recording yet */}
+                      {!isRecording && (
+                        <Button
+                          onClick={() => setIsRecording(false)}
+                          variant="ghost"
+                          className="text-gray-600"
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ) : isProcessing ? (
                   <div className="p-8 bg-gray-50 rounded-lg border border-gray-200">
@@ -671,7 +752,7 @@ export function BookStyleReview({
                     {isEnhancing && (
                       <p className="text-base text-purple-600 flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        AI is enhancing your story...
+                        Heritage Whisper Storyteller enhancing your story...
                       </p>
                     )}
                   </div>

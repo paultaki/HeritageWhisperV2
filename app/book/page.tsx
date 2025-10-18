@@ -523,54 +523,54 @@ const BookPageRenderer = ({
     );
   }
 
-  // Render whisper page - gentle prompts between stories
-  if (page.type === "whisper" && page.whisperPrompt) {
-    const handleWhisperRecord = () => {
-      // Store context for recording session
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("sourcePromptId", page.whisperPrompt!.id);
-        sessionStorage.setItem("promptText", page.whisperPrompt!.promptText);
-        sessionStorage.setItem("returnToBook", "true");
-        sessionStorage.setItem("bookPageNumber", page.pageNumber.toString());
-      }
+  // TEMPORARILY DISABLED: Render whisper page - gentle prompts between stories (needs refinement)
+  // if (page.type === "whisper" && page.whisperPrompt) {
+  //   const handleWhisperRecord = () => {
+  //     // Store context for recording session
+  //     if (typeof window !== "undefined") {
+  //       sessionStorage.setItem("sourcePromptId", page.whisperPrompt!.id);
+  //       sessionStorage.setItem("promptText", page.whisperPrompt!.promptText);
+  //       sessionStorage.setItem("returnToBook", "true");
+  //       sessionStorage.setItem("bookPageNumber", page.pageNumber.toString());
+  //     }
 
-      // Navigate to recording
-      router.push("/recording");
-    };
+  //     // Navigate to recording
+  //     router.push("/recording");
+  //   };
 
-    const handleWhisperContinue = async () => {
-      // Dismiss the prompt (add to archive)
-      try {
-        await skipMutation.mutateAsync(page.whisperPrompt!.id);
-      } catch (error) {
-        console.error("Failed to dismiss whisper prompt:", error);
-        // Continue navigation even if dismissal fails
-      }
+  //   const handleWhisperContinue = async () => {
+  //     // Dismiss the prompt (add to archive)
+  //     try {
+  //       await skipMutation.mutateAsync(page.whisperPrompt!.id);
+  //     } catch (error) {
+  //       console.error("Failed to dismiss whisper prompt:", error);
+  //       // Continue navigation even if dismissal fails
+  //     }
 
-      // Navigate to next page
-      if (onNavigateToPage) {
-        onNavigateToPage(page.pageNumber); // This will advance by 1 page (0-indexed)
-      }
-    };
+  //     // Navigate to next page
+  //     if (onNavigateToPage) {
+  //       onNavigateToPage(page.pageNumber); // This will advance by 1 page (0-indexed)
+  //     }
+  //   };
 
-    return (
-      <article
-        className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
-      >
-        <MarginClickZones />
-        <WhisperPage
-          prompt={page.whisperPrompt}
-          afterStory={{
-            year: page.afterStoryYear || "",
-            title: page.afterStoryTitle || "",
-          }}
-          onRecord={handleWhisperRecord}
-          onContinue={handleWhisperContinue}
-        />
-        <div className="page-number">{page.pageNumber}</div>
-      </article>
-    );
-  }
+  //   return (
+  //     <article
+  //       className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
+  //     >
+  //       <MarginClickZones />
+  //       <WhisperPage
+  //         prompt={page.whisperPrompt}
+  //         afterStory={{
+  //           year: page.afterStoryYear || "",
+  //           title: page.afterStoryTitle || "",
+  //         }}
+  //         onRecord={handleWhisperRecord}
+  //         onContinue={handleWhisperContinue}
+  //       />
+  //       <div className="page-number">{page.pageNumber}</div>
+  //     </article>
+  //   );
+  // }
 
   // Render story pages
   return (

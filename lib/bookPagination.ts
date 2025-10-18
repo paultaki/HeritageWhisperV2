@@ -1271,29 +1271,29 @@ export function paginateBook(
       // Increment story count and check if we should insert a whisper page
       storyCount++;
       
-      // Insert whisper page after every 3rd story (if prompts available)
-      if (storyCount % 3 === 0 && whisperIndex < whisperPrompts.length) {
-        const whisperPrompt = whisperPrompts[whisperIndex];
-        
-        // Whisper page on its own page (like pressed flower between pages)
-        tempPages.push({
-          type: "whisper",
-          pageNumber: tempPageNumber,
-          whisperPrompt: {
-            id: whisperPrompt.id,
-            promptText: whisperPrompt.promptText,
-            contextNote: whisperPrompt.contextNote,
-          },
-          afterStoryId: story.id,
-          afterStoryYear: story.year,
-          afterStoryTitle: story.title,
-          isLeftPage: tempPageNumber % 2 === 0,
-          isRightPage: tempPageNumber % 2 === 1,
-        });
-        
-        tempPageNumber++;
-        whisperIndex++;
-      }
+      // TEMPORARILY DISABLED: Insert whisper page after every 3rd story (needs refinement)
+      // if (storyCount % 3 === 0 && whisperIndex < whisperPrompts.length) {
+      //   const whisperPrompt = whisperPrompts[whisperIndex];
+      //   
+      //   // Whisper page on its own page (like pressed flower between pages)
+      //   tempPages.push({
+      //     type: "whisper",
+      //     pageNumber: tempPageNumber,
+      //     whisperPrompt: {
+      //       id: whisperPrompt.id,
+      //       promptText: whisperPrompt.promptText,
+      //       contextNote: whisperPrompt.contextNote,
+      //     },
+      //     afterStoryId: story.id,
+      //     afterStoryYear: story.year,
+      //     afterStoryTitle: story.title,
+      //     isLeftPage: tempPageNumber % 2 === 0,
+      //     isRightPage: tempPageNumber % 2 === 1,
+      //   });
+      //   
+      //   tempPageNumber++;
+      //   whisperIndex++;
+      // }
     }
 
     tocEntries.push(tocEntry);
