@@ -866,9 +866,11 @@ export function TimelineDesktop() {
           // Check if next bubble is approaching (within collision threshold)
           if (nextBubbleDistance <= stickyTop + collisionThreshold) {
             // Next bubble is approaching - fade OUT this one
-            const fadeProgress = collisionThreshold !== 0 
+            const rawProgress = collisionThreshold !== 0 
               ? 1 - ((nextBubbleDistance - stickyTop) / collisionThreshold)
               : 1; // Instant fade if threshold is exactly 0
+            // Clamp fadeProgress between 0 and 1 to prevent crazy values
+            const fadeProgress = Math.max(0, Math.min(1, rawProgress));
             bubble.style.opacity = `${Math.max(0, 1 - fadeProgress)}`; // Fade to 0% opacity
             // Preserve translateX and add scale
             bubble.style.transform = `${translateX} scale(${Math.max(0.5, 1 - (fadeProgress * 0.5))})`; // Scale down to 50%
