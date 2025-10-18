@@ -133,30 +133,6 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Enhanced Trust signals */}
-              <div className="flex flex-col items-center lg:items-start gap-4 pt-6 border-t border-[#E7DFD5]">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-[#13343B]">50,000+</div>
-                    <div className="text-sm text-[#626C71]">Families</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-[#13343B]">500,000+</div>
-                    <div className="text-sm text-[#626C71]">Stories Saved</div>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-center gap-1">
-                      <Star className="w-5 h-5 fill-[#D4853A] text-[#D4853A]" />
-                      <span className="text-2xl font-bold text-[#13343B]">4.9</span>
-                    </div>
-                    <div className="text-sm text-[#626C71]">Rating</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-[#13343B]">2,847</div>
-                    <div className="text-sm text-[#626C71]">Reviews</div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Right: Hero Image */}
@@ -745,27 +721,6 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Social Proof Bar */}
-          <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out bg-gradient-to-br from-[#FAF8F5] to-white rounded-2xl p-8 border-2 border-[#E7DFD5] shadow-lg">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              <div>
-                <div className="text-4xl font-bold text-[#13343B] mb-2">50,000+</div>
-                <div className="text-sm text-[#626C71] font-medium">Families Preserving</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-[#13343B] mb-2">500,000+</div>
-                <div className="text-sm text-[#626C71] font-medium">Stories Saved</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-[#13343B] mb-2">4.9/5</div>
-                <div className="text-sm text-[#626C71] font-medium">Average Rating</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-[#13343B] mb-2">2,847</div>
-                <div className="text-sm text-[#626C71] font-medium">Reviews</div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
