@@ -264,12 +264,14 @@ function MemoryCard({
   isReturnHighlight = false,
   colorScheme = "original",
   isDarkTheme = false,
+  birthYear,
 }: {
   story: Story;
   isHighlighted?: boolean;
   isReturnHighlight?: boolean;
   colorScheme?: ColorScheme;
   isDarkTheme?: boolean;
+  birthYear: number;
 }) {
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -786,18 +788,46 @@ function MemoryCard({
           </span>
           <span className="divider"></span>
           <span>
-            {story.lifeAge !== null &&
-              story.lifeAge !== undefined &&
-              story.lifeAge > 0 &&
-              `Age ${story.lifeAge}`}
-            {story.lifeAge !== null &&
-              story.lifeAge !== undefined &&
-              story.lifeAge === 0 &&
-              `Birth`}
-            {story.lifeAge !== null &&
-              story.lifeAge !== undefined &&
-              story.lifeAge < 0 &&
-              `Before birth`}
+            {(() => {
+              const y = normalizeYear(story.storyYear);
+              const by = normalizeYear(birthYear);
+              const computed =
+                typeof y === "number" && typeof by === "number" ? y - by : null;
+              const age =
+                typeof story.lifeAge === "number"
+                  ? (story.lifeAge < 0 && computed !== null && y >= by
+                      ? computed
+                      : story.lifeAge)
+                  : computed;
+              return age !== null && age !== undefined
+                ? age > 0
+                  ? `Age ${age}`
+                  : age === 0
+                    ? "Birthday"
+                    : "Before birth"
+                : "";
+            })()}
+          </span>
+          <span>
+            {(() => {
+              const y = normalizeYear(story.storyYear);
+              const by = normalizeYear(birthYear);
+              const computed =
+                typeof y === "number" && typeof by === "number" ? y - by : null;
+              const age =
+                typeof story.lifeAge === "number"
+                  ? (story.lifeAge < 0 && computed !== null && y >= by
+                      ? computed
+                      : story.lifeAge)
+                  : computed;
+              return age !== null && age !== undefined
+                ? age > 0
+                  ? `Age ${age}`
+                  : age === 0
+                    ? "Birthday"
+                    : "Before birth"
+                : "";
+            })()}
           </span>
           {top.length > 0 && (
             <>
@@ -1122,41 +1152,9 @@ export function TimelineMobile() {
     };
   }, [user, storiesData, activeDecade]);
 
-  // Handle redirect to login page in useEffect (not during render)
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/auth/login");
-    }
-  }, [isLoading, user, router]);
-
-  // Check if auth is still loading - don't redirect until we know auth state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  // Show loading while redirecting to login
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  // Show loading state while fetching stories data
-  if (isLoadingStories && !storiesData) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderBottomColor: isDark ? '#b0b3b8' : '#F59E0B' }}></div>
-        <p className="text-lg" style={{ color: isDark ? '#b0b3b8' : '#6B4E42' }}>Loading your timeline...</p>
-      </div>
-    );
-  }
-
+  // ALL useMemo hooks must be called before any conditional returns to follow Rules of Hooks
+  // ==================================================================================
+  
   // Memoize expensive calculations to prevent re-processing on every render
   const allStories = useMemo(() => {
     return (storiesData as any)?.stories || [];
@@ -1169,6 +1167,7 @@ export function TimelineMobile() {
 
   // Generate ghost prompts based on user's TOTAL story count (not just timeline)
   const ghostPrompts = useMemo(() => {
+    if (!user) return [];
     if (shouldShowNewUserGhosts(allStories.length)) {
       // New user with 0 stories: show onboarding ghost prompts
       return generateNewUserGhostPrompts(user.birthYear);
@@ -1177,7 +1176,7 @@ export function TimelineMobile() {
       return generateGhostPrompts(user.birthYear);
     }
     return [];
-  }, [allStories.length, user.birthYear]);
+  }, [allStories.length, user]);
 
   const storiesWithGhostPrompts = useMemo(() => {
     return mergeGhostPromptsWithStories(stories, ghostPrompts);
@@ -1185,55 +1184,13 @@ export function TimelineMobile() {
 
   // Group all items (stories + ghost prompts) by decade
   const decadeGroups = useMemo(() => {
+    if (!user) return [];
     return groupStoriesByDecade(storiesWithGhostPrompts, user.birthYear);
-  }, [storiesWithGhostPrompts, user.birthYear]);
-
-  const handleRecordPrompt = () => {
-    // Check if user has reached story limit
-    if (!user.isPaid && user.storyCount >= 3) {
-      setShowPaywall(true);
-    } else {
-      recordModal.openModal();
-    }
-  };
-
-  const handleSubscribe = () => {
-    router.push("/subscribe");
-  };
-
-  const handleGhostPromptClick = (prompt: GhostPrompt) => {
-    // Check if user has reached story limit
-    if (!user.isPaid && user.storyCount >= 3) {
-      setShowPaywall(true);
-    } else {
-      // Open record modal with pre-filled data from ghost prompt
-      recordModal.openModal({
-        title: prompt.title,
-        prompt: prompt.prompt,
-        year: prompt.year,
-      });
-    }
-  };
-
-  const handleDecadeClick = (decadeId: string) => {
-    // Scroll to the decade section
-    const element = decadeRefs.current[decadeId];
-    if (element) {
-      const headerOffset = 80; // Account for sticky header
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition =
-        elementPosition + window.pageYOffset - headerOffset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
-    }
-  };
+  }, [storiesWithGhostPrompts, user]);
 
   // Calculate which decades have content (memoized for performance)
-  const cleanBirthYear = useMemo(() => formatYear(user.birthYear), [user.birthYear]);
-  const normalizedBirthYear = useMemo(() => normalizeYear(user.birthYear), [user.birthYear]);
+  const cleanBirthYear = useMemo(() => user ? formatYear(user.birthYear) : '', [user]);
+  const normalizedBirthYear = useMemo(() => user ? normalizeYear(user.birthYear) : 0, [user]);
 
   // Filter birth year stories using normalized values
   const birthYearStories = useMemo(() => {
@@ -1266,14 +1223,10 @@ export function TimelineMobile() {
     ].filter((d) => d.count > 0 || d.id === "birth-year"); // Always show birth year
   }, [prebirthStories, cleanBirthYear, birthYearStories, decadeGroups]);
 
-  // Generate share URL for this user's timeline
-  const shareUrl = `${window.location.origin}/share/${user.id}`;
-
-  // Get current color scheme
-  const scheme = colorSchemes[currentColorScheme];
-
   // Memoize the expensive timeline items calculation
   const { allTimelineItems, decadeEntries } = useMemo(() => {
+    if (!user) return { allTimelineItems: [], decadeEntries: [] };
+    
     const items = [];
     const currentYear = new Date().getFullYear();
     const currentDecade = Math.floor(currentYear / 10) * 10;
@@ -1369,7 +1322,95 @@ export function TimelineMobile() {
     }));
 
     return { allTimelineItems: items, decadeEntries: entries };
-  }, [stories, decadeGroups, prebirthStories, birthYearStories, normalizedBirthYear, user.birthYear]);
+  }, [stories, decadeGroups, prebirthStories, birthYearStories, normalizedBirthYear, user]);
+
+  // ==================================================================================
+  // End of all useMemo hooks - conditional returns can now safely follow
+  // ==================================================================================
+
+  // Handle redirect to login page in useEffect (not during render)
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/auth/login");
+    }
+  }, [isLoading, user, router]);
+
+  // Check if auth is still loading - don't redirect until we know auth state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // Show loading while redirecting to login
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // Show loading state while fetching stories data
+  if (isLoadingStories && !storiesData) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderBottomColor: isDark ? '#b0b3b8' : '#F59E0B' }}></div>
+        <p className="text-lg" style={{ color: isDark ? '#b0b3b8' : '#6B4E42' }}>Loading your timeline...</p>
+      </div>
+    );
+  }
+
+  const handleRecordPrompt = () => {
+    // Check if user has reached story limit
+    if (!user.isPaid && user.storyCount >= 3) {
+      setShowPaywall(true);
+    } else {
+      recordModal.openModal();
+    }
+  };
+
+  const handleSubscribe = () => {
+    router.push("/subscribe");
+  };
+
+  const handleGhostPromptClick = (prompt: GhostPrompt) => {
+    // Check if user has reached story limit
+    if (!user.isPaid && user.storyCount >= 3) {
+      setShowPaywall(true);
+    } else {
+      // Open record modal with pre-filled data from ghost prompt
+      recordModal.openModal({
+        title: prompt.title,
+        prompt: prompt.prompt,
+        year: prompt.year,
+      });
+    }
+  };
+
+  const handleDecadeClick = (decadeId: string) => {
+    // Scroll to the decade section
+    const element = decadeRefs.current[decadeId];
+    if (element) {
+      const headerOffset = 80; // Account for sticky header
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition =
+        elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Generate share URL for this user's timeline
+  const shareUrl = `${window.location.origin}/share/${user.id}`;
+
+  // Get current color scheme
+  const scheme = colorSchemes[currentColorScheme];
 
   // Apply styles directly to ensure they work
   const pageStyle = isDark
@@ -1534,6 +1575,7 @@ export function TimelineMobile() {
                         }
                         colorScheme={currentColorScheme}
                         isDarkTheme={isDark}
+                        birthYear={user.birthYear}
                       />
                     );
                   })}

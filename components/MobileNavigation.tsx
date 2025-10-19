@@ -101,7 +101,7 @@ export default function MobileNavigation({
         {/* Timeline */}
         <NavItem
           icon={Calendar}
-          label="Timeline"
+          label="Timeline View"
           href="/timeline"
           isActive={pathname === "/timeline"}
         />
@@ -109,7 +109,7 @@ export default function MobileNavigation({
         {/* Book View */}
         <NavItem
           icon={BookOpen}
-          label="Book"
+          label="Book View"
           href="/book"
           isActive={pathname.startsWith("/book")}
         />
@@ -162,7 +162,7 @@ export default function MobileNavigation({
         {/* Memory Box */}
         <NavItem
           icon={Box}
-          label="Memories"
+          label="Memory Box"
           href="/memory-box"
           isActive={pathname === "/memory-box"}
         />
@@ -170,7 +170,7 @@ export default function MobileNavigation({
         {/* Prompts - Profile removed since it's in hamburger menu */}
         <NavItem
           icon={Sparkles}
-          label="Prompts"
+          label="Get Prompts"
           href="/prompts"
           isActive={pathname === "/prompts"}
         />

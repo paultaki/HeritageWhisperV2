@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post-Recording Flow - HeritageWhisper</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom HeritageWhisper color palette */
+    :root {
+      --color-coral: #D7794F;
+      --color-coral-light: #FFE4D6;
+      --color-amber: #E8B44F;
+      --color-cream: #FAF8F5;
+      --color-brown: #2c2416;
+    }
+
+    /* Serif font for warmth */
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    /* Custom animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .slide-in {
+      animation: slideIn 0.4s ease-out;
+    }
+
+    /* Photo upload slot styling */
+    .photo-slot {
+      aspect-ratio: 4/3;
+      border: 2px dashed #cbd5e0;
+      background: #f7fafc;
+      transition: all 0.2s;
+    }
+
+    .photo-slot:hover {
+      border-color: var(--color-coral);
+      background: var(--color-coral-light);
+    }
+
+    .photo-slot.has-photo {
+      border-style: solid;
+      border-color: var(--color-amber);
+    }
+
+    /* Progress dots */
+    .progress-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #cbd5e0;
+      transition: all 0.3s;
+    }
+
+    .progress-dot.active {
+      background: var(--color-coral);
+      transform: scale(1.4);
+    }
+
+    .progress-dot.completed {
+      background: var(--color-amber);
+    }
+
+    /* Collapsible section */
+    .collapsible-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+
+    .collapsible-content.open {
+      max-height: 400px;
+    }
+
+    /* Badge styling */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    /* Loading spinner */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e2e8f0;
+      border-top-color: var(--color-coral);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-amber-50 to-white min-h-screen">
+
+  <!-- Main Container -->
+  <div id="app" class="max-w-3xl mx-auto p-4 md:p-8">
+
+    <!-- Screen 1: Title & Year -->
+    <div id="screen-1" class="screen fade-in">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">Give your story context</h1>
+        <div class="flex justify-center items-center gap-2 mt-6">
+          <span class="text-sm text-gray-600">Step 1 of 4</span>
+          <div class="flex gap-2">
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Card -->
+      <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12 mb-6 slide-in">
+        <!-- Title Input -->
+        <div class="mb-8">
+          <label for="title" class="block text-lg font-semibold text-gray-700 mb-3">
+            Story Title <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="title"
+            autofocus
+            placeholder="e.g., The Day I Met Your Grandmother"
+            class="w-full px-6 py-4 text-2xl border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-amber-200 focus:border-amber-400 transition-all"
+            style="font-family: Georgia, serif;"
+          >
+          <p class="text-sm text-gray-500 mt-2">This helps family find and remember your story</p>
+        </div>
+
+        <!-- Year Input -->
+        <div>
+          <label for="year" class="block text-lg font-semibold text-gray-700 mb-3">
+            What year did this happen? <span class="text-gray-400">(Optional)</span>
+          </label>
+          <input
+            type="number"
+            id="year"
+            placeholder="e.g., 1985"
+            min="1900"
+            max="2025"
+            class="w-full px-6 py-4 text-2xl border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-amber-200 focus:border-amber-400 transition-all"
+          >
+          <p class="text-sm text-gray-500 mt-2">We'll calculate your age automatically</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4">
+        <button
+          id="next-1"
+          disabled
+          class="flex-1 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-bold py-5 px-8 rounded-full text-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+        >
+          Next
+        </button>
+        <button
+          onclick="handleCancel()"
+          class="text-gray-500 hover:text-gray-700 py-3 text-lg underline"
+        >
+          Cancel
+        </button>
+      </div>
+
+      <!-- Background Processing Indicator (hidden but running) -->
+      <div class="mt-8 text-center text-sm text-gray-400">
+        <p>✨ Transcribing your recording in the background...</p>
+      </div>
+    </div>
+
+    <!-- Screen 2: Add Photos -->
+    <div id="screen-2" class="screen hidden">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">Add photos (optional)</h1>
+        <div class="flex justify-center items-center gap-2 mt-6">
+          <span class="text-sm text-gray-600">Step 2 of 4</span>
+          <div class="flex gap-2">
+            <div class="progress-dot completed"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Photos Card -->
+      <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12 mb-6 slide-in">
+        <p class="text-lg text-gray-600 mb-6 text-center">
+          Photos help family connect to the moment
+        </p>
+
+        <!-- Photo Upload Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="photo-slot rounded-lg flex flex-col items-center justify-center cursor-pointer" onclick="handlePhotoUpload(1)">
+            <svg class="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span class="text-gray-500 text-sm">Add Photo</span>
+          </div>
+          <div class="photo-slot rounded-lg flex flex-col items-center justify-center cursor-pointer" onclick="handlePhotoUpload(2)">
+            <svg class="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span class="text-gray-500 text-sm">Add Photo</span>
+          </div>
+          <div class="photo-slot rounded-lg flex flex-col items-center justify-center cursor-pointer" onclick="handlePhotoUpload(3)">
+            <svg class="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span class="text-gray-500 text-sm">Add Photo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4">
+        <button
+          onclick="goToScreen(1)"
+          class="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-bold py-5 px-8 rounded-full text-xl transition-all"
+        >
+          ← Back
+        </button>
+        <button
+          onclick="goToScreen(3)"
+          class="flex-1 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-bold py-5 px-8 rounded-full text-xl transition-all shadow-lg"
+        >
+          Next
+        </button>
+      </div>
+
+      <div class="text-center mt-4">
+        <button
+          onclick="goToScreen(3)"
+          class="text-gray-500 hover:text-gray-700 text-lg underline"
+        >
+          Skip for now
+        </button>
+      </div>
+
+      <!-- Background Processing Indicator -->
+      <div class="mt-8 text-center text-sm text-gray-400">
+        <p>✨ Polishing your story in the background...</p>
+      </div>
+    </div>
+
+    <!-- Screen 3: Review Your Story -->
+    <div id="screen-3" class="screen hidden">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">Review your story</h1>
+        <div class="flex justify-center items-center gap-2 mt-6">
+          <span class="text-sm text-gray-600">Step 3 of 4</span>
+          <div class="flex gap-2">
+            <div class="progress-dot completed"></div>
+            <div class="progress-dot completed"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Card -->
+      <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12 mb-6 slide-in">
+
+        <!-- Loading State (shown initially, then hidden when ready) -->
+        <div id="enhancement-loading" class="text-center py-12">
+          <div class="spinner mx-auto mb-4"></div>
+          <p class="text-xl text-gray-600">Polishing your story...</p>
+          <p class="text-sm text-gray-500 mt-2">This will just take a moment</p>
+        </div>
+
+        <!-- Content (hidden until enhancement ready) -->
+        <div id="enhancement-content" class="hidden">
+          <!-- Collapsible Original -->
+          <div class="mb-6">
+            <button
+              id="toggle-original"
+              onclick="toggleOriginal()"
+              class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <span class="font-semibold text-gray-700">📝 Original Recording</span>
+              </div>
+              <svg id="toggle-icon" class="w-5 h-5 text-gray-600 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+
+            <div id="original-content" class="collapsible-content">
+              <div class="p-4 bg-gray-50 rounded-b-lg mt-1">
+                <p class="text-gray-700 leading-relaxed">
+                  So, um, you know, I met your grandmother at, uh, the county fair. I was, like, 18 and she was, you know, working at the cotton candy stand and, um, she had this really bright smile and, uh, I just knew I had to talk to her. So I, you know, I bought like three cotton candies just to, um, keep going back to her stand and, uh, eventually I got the courage to ask her out and, um, yeah, that's how it started, you know?
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enhanced Version -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                </svg>
+                <span class="font-semibold text-gray-700">✨ Your Story (Polished)</span>
+              </div>
+              <span class="badge bg-blue-100 text-blue-700">12 improvements</span>
+            </div>
+
+            <textarea
+              id="enhanced-text"
+              rows="8"
+              class="w-full px-4 py-3 text-lg text-gray-800 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-amber-200 focus:border-amber-400 leading-relaxed resize-none"
+              style="font-family: Georgia, serif;"
+            >I met your grandmother at the county fair when I was 18. She was working at the cotton candy stand, and she had the brightest smile I'd ever seen. I knew I had to talk to her, so I bought three cotton candies just to keep going back to her stand. Eventually, I gathered the courage to ask her out. That's how our story began.</textarea>
+
+            <p class="text-sm text-gray-500 mt-2">You can edit this text if you'd like</p>
+          </div>
+
+          <!-- Version Toggle -->
+          <div class="bg-gray-50 p-6 rounded-lg">
+            <p class="font-semibold text-gray-700 mb-3">Which version do you want to use?</p>
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 p-4 bg-white border-2 border-amber-400 rounded-lg cursor-pointer hover:bg-amber-50 transition-colors">
+                <input
+                  type="radio"
+                  name="version"
+                  value="polished"
+                  checked
+                  class="w-5 h-5 text-amber-500 focus:ring-amber-400"
+                >
+                <span class="text-lg">Use Polished Version (Recommended)</span>
+              </label>
+              <label class="flex items-center gap-3 p-4 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <input
+                  type="radio"
+                  name="version"
+                  value="original"
+                  class="w-5 h-5 text-gray-500 focus:ring-gray-400"
+                >
+                <span class="text-lg">Use Original Instead</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4">
+        <button
+          onclick="goToScreen(2)"
+          class="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-bold py-5 px-8 rounded-full text-xl transition-all"
+        >
+          ← Back
+        </button>
+        <button
+          onclick="goToScreen(4)"
+          class="flex-1 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-bold py-5 px-8 rounded-full text-xl transition-all shadow-lg"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+
+    <!-- Screen 4: Lesson Learned -->
+    <div id="screen-4" class="screen hidden">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">What's the takeaway?</h1>
+        <div class="flex justify-center items-center gap-2 mt-6">
+          <span class="text-sm text-gray-600">Step 4 of 4</span>
+          <div class="flex gap-2">
+            <div class="progress-dot completed"></div>
+            <div class="progress-dot completed"></div>
+            <div class="progress-dot completed"></div>
+            <div class="progress-dot active"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lesson Card -->
+      <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12 mb-6 slide-in">
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-3">
+            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+            <span class="font-semibold text-gray-700 text-xl">💡 Lesson Learned</span>
+            <span class="text-gray-400 text-lg">(Optional)</span>
+          </div>
+          <span class="badge bg-purple-100 text-purple-700">✨ Suggested from your story</span>
+        </div>
+
+        <textarea
+          id="lesson"
+          rows="4"
+          placeholder="What did you learn from this experience?"
+          class="w-full px-4 py-3 text-xl text-gray-800 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-amber-200 focus:border-amber-400 leading-relaxed resize-none italic"
+          style="font-family: Georgia, serif;"
+        >Sometimes the best things in life start with taking a small risk and showing up with courage, even if it means buying more cotton candy than you can eat.</textarea>
+
+        <p class="text-base text-gray-500 mt-3">This helps family understand the wisdom in your story</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col gap-4">
+        <button
+          onclick="handleSave()"
+          class="w-full bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-bold py-6 px-8 rounded-full text-2xl transition-all shadow-lg"
+        >
+          Save Story
+        </button>
+
+        <div class="flex gap-4">
+          <button
+            onclick="goToScreen(3)"
+            class="flex-1 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-bold py-4 px-6 rounded-full text-lg transition-all"
+          >
+            ← Back
+          </button>
+          <button
+            onclick="handleSkipLesson()"
+            class="flex-1 text-gray-500 hover:text-gray-700 text-lg underline"
+          >
+            Skip Lesson
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /*
+     * STATE MANAGEMENT
+     *
+     * This object holds all form data and processing status.
+     * In a real implementation, this would be managed by React/Vue state.
+     */
+    const state = {
+      // Form data
+      title: '',
+      year: null,
+      photos: [],
+      transcription: {
+        original: '',
+        enhanced: '',
+        useEnhanced: true
+      },
+      lessonLearned: '',
+
+      // Processing status
+      processing: {
+        transcription: 'pending',    // 'pending' | 'complete' | 'error'
+        enhancement: 'pending',      // 'pending' | 'complete' | 'error'
+        lesson: 'complete'           // 'pending' | 'complete' | 'error'
+      },
+
+      // Current screen
+      currentScreen: 1
+    };
+
+    /*
+     * SAMPLE DATA
+     *
+     * Realistic transcription and enhancement results for demo purposes.
+     */
+    const sampleData = {
+      originalTranscription: "So, um, you know, I met your grandmother at, uh, the county fair. I was, like, 18 and she was, you know, working at the cotton candy stand and, um, she had this really bright smile and, uh, I just knew I had to talk to her. So I, you know, I bought like three cotton candies just to, um, keep going back to her stand and, uh, eventually I got the courage to ask her out and, um, yeah, that's how it started, you know?",
+
+      enhancedTranscription: "I met your grandmother at the county fair when I was 18. She was working at the cotton candy stand, and she had the brightest smile I'd ever seen. I knew I had to talk to her, so I bought three cotton candies just to keep going back to her stand. Eventually, I gathered the courage to ask her out. That's how our story began.",
+
+      lessonLearned: "Sometimes the best things in life start with taking a small risk and showing up with courage, even if it means buying more cotton candy than you can eat."
+    };
+
+    /*
+     * INITIALIZATION
+     *
+     * Set up event listeners and simulate background processing.
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+      // Enable/disable Next button on Screen 1 based on title input
+      const titleInput = document.getElementById('title');
+      const nextButton = document.getElementById('next-1');
+
+      titleInput.addEventListener('input', (e) => {
+        state.title = e.target.value;
+        nextButton.disabled = state.title.length === 0;
+      });
+
+      // Year input
+      document.getElementById('year').addEventListener('input', (e) => {
+        state.year = e.target.value ? parseInt(e.target.value) : null;
+      });
+
+      // Enhanced text editing
+      const enhancedText = document.getElementById('enhanced-text');
+      if (enhancedText) {
+        enhancedText.addEventListener('input', (e) => {
+          state.transcription.enhanced = e.target.value;
+        });
+      }
+
+      // Lesson editing
+      const lessonText = document.getElementById('lesson');
+      if (lessonText) {
+        lessonText.addEventListener('input', (e) => {
+          state.lessonLearned = e.target.value;
+        });
+      }
+
+      // Version toggle
+      document.querySelectorAll('input[name="version"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          state.transcription.useEnhanced = e.target.value === 'polished';
+        });
+      });
+
+      // Next button on Screen 1
+      nextButton.addEventListener('click', () => {
+        // Start transcription when leaving Screen 1
+        simulateTranscription();
+        goToScreen(2);
+      });
+
+      console.log('App initialized. State:', state);
+    });
+
+    /*
+     * BACKGROUND PROCESSING SIMULATION
+     *
+     * These functions simulate AI processing with realistic delays.
+     * In production, these would be actual API calls.
+     */
+
+    // Simulate transcription (8 seconds)
+    function simulateTranscription() {
+      state.processing.transcription = 'pending';
+      console.log('[Transcription] Started...');
+
+      setTimeout(() => {
+        state.transcription.original = sampleData.originalTranscription;
+        state.processing.transcription = 'complete';
+        console.log('[Transcription] Complete!');
+
+        // Start enhancement once transcription is done
+        simulateEnhancement();
+      }, 8000);
+    }
+
+    // Simulate enhancement (3 seconds)
+    function simulateEnhancement() {
+      state.processing.enhancement = 'pending';
+      console.log('[Enhancement] Started...');
+
+      setTimeout(() => {
+        state.transcription.enhanced = sampleData.enhancedTranscription;
+        state.processing.enhancement = 'complete';
+        console.log('[Enhancement] Complete!');
+
+        // If user is on Screen 3, update the UI
+        if (state.currentScreen === 3) {
+          showEnhancementContent();
+        }
+      }, 3000);
+    }
+
+    // Show enhancement content on Screen 3
+    function showEnhancementContent() {
+      document.getElementById('enhancement-loading').style.display = 'none';
+      document.getElementById('enhancement-content').style.display = 'block';
+
+      // Populate with actual data
+      document.getElementById('enhanced-text').value = state.transcription.enhanced;
+    }
+
+    /*
+     * SCREEN NAVIGATION
+     *
+     * Functions to move between screens with smooth transitions.
+     */
+    function goToScreen(screenNumber) {
+      // Hide all screens
+      document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.add('hidden');
+      });
+
+      // Show target screen
+      const targetScreen = document.getElementById(`screen-${screenNumber}`);
+      targetScreen.classList.remove('hidden');
+      targetScreen.classList.add('fade-in');
+
+      // Update state
+      state.currentScreen = screenNumber;
+
+      // Screen-specific logic
+      if (screenNumber === 3) {
+        // Check if enhancement is ready
+        if (state.processing.enhancement === 'complete') {
+          showEnhancementContent();
+        } else {
+          // Show loading state
+          document.getElementById('enhancement-loading').style.display = 'block';
+          document.getElementById('enhancement-content').style.display = 'none';
+
+          // Wait for enhancement to complete
+          const checkEnhancement = setInterval(() => {
+            if (state.processing.enhancement === 'complete') {
+              clearInterval(checkEnhancement);
+              showEnhancementContent();
+            }
+          }, 500);
+        }
+      }
+
+      // Autofocus first input on each screen
+      setTimeout(() => {
+        const firstInput = targetScreen.querySelector('input, textarea');
+        if (firstInput && screenNumber !== 3) {  // Don't autofocus on review screen
+          firstInput.focus();
+        }
+      }, 100);
+
+      console.log(`Navigated to Screen ${screenNumber}`);
+    }
+
+    /*
+     * PHOTO UPLOAD HANDLER
+     *
+     * In production, this would open a file picker and handle image upload.
+     */
+    function handlePhotoUpload(slotNumber) {
+      console.log(`Photo upload clicked for slot ${slotNumber}`);
+      alert(`Photo upload would open here for slot ${slotNumber}.\n\nIn the real app, this would:\n1. Open file picker\n2. Allow crop/resize\n3. Upload to Supabase Storage\n4. Show thumbnail in slot`);
+    }
+
+    /*
+     * COLLAPSIBLE ORIGINAL TRANSCRIPT
+     */
+    function toggleOriginal() {
+      const content = document.getElementById('original-content');
+      const icon = document.getElementById('toggle-icon');
+
+      content.classList.toggle('open');
+      icon.style.transform = content.classList.contains('open')
+        ? 'rotate(180deg)'
+        : 'rotate(0deg)';
+    }
+
+    /*
+     * SAVE HANDLERS
+     */
+    function handleSave() {
+      console.log('Saving story with state:', state);
+
+      // In production, this would:
+      // 1. Validate all required fields
+      // 2. Upload audio blob to storage
+      // 3. Save story record to database
+      // 4. Trigger background Tier-3 analysis at milestones
+      // 5. Navigate to timeline view
+
+      alert('Story saved successfully! 🎉\n\nIn the real app, this would:\n1. Save to database\n2. Upload audio to storage\n3. Generate AI prompts\n4. Navigate to timeline\n\nCheck the console for the complete state object.');
+    }
+
+    function handleSkipLesson() {
+      state.lessonLearned = '';
+      handleSave();
+    }
+
+    function handleCancel() {
+      if (confirm('Are you sure you want to cancel? Your recording will be lost.')) {
+        console.log('User cancelled');
+        alert('In the real app, this would navigate back to the timeline.');
+      }
+    }
+  </script>
+
+</body>
+</html>

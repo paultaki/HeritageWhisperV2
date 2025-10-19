@@ -108,14 +108,14 @@ export default function DesktopNavigationBottom({
         <div className="flex items-center nav-group-left">
           <DesktopNavItemBottom
             icon={Calendar}
-            label="Timeline"
+            label="Timeline View"
             href="/timeline"
             isActive={pathname === "/timeline"}
           />
 
           <DesktopNavItemBottom
             icon={BookOpen}
-            label="Book"
+            label="Book View"
             href="/book"
             isActive={pathname.startsWith("/book")}
           />
@@ -135,7 +135,7 @@ export default function DesktopNavigationBottom({
 
           <DesktopNavItemBottom
             icon={Sparkles}
-            label="Prompts"
+            label="Get Prompts"
             href="/prompts"
             isActive={pathname === "/prompts"}
           />
@@ -150,7 +150,7 @@ export default function DesktopNavigationBottom({
         {/* Tooltip on hover */}
         <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
           <div className="bg-gray-800 text-white text-sm font-medium px-3 py-2 rounded-lg whitespace-nowrap shadow-lg">
-            +New Memory
+            +Record Memory
           </div>
         </div>
 

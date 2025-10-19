@@ -43,35 +43,44 @@ import { getTopTraits } from "@/utils/getTopTraits";
 
 const logoUrl = "/HW_logo_mic_clean.png";
 
-// Decade Banner Component
-interface DecadeBannerProps {
+// V3: Subtle Decade Label Component - Museum Style
+interface DecadeLabelProps {
   decade: string;
   isDark?: boolean;
 }
 
-function DecadeBanner({ decade, isDark = false }: DecadeBannerProps) {
+function DecadeLabel({ decade, isDark = false }: DecadeLabelProps) {
   const decadeNum = decade.replace("s", "");
 
   return (
-    <div className="relative flex items-center justify-center decade-banner md:-mt-[50px]">
-      {/* Banner label - inverted colors from story date markers */}
+    <div 
+      className="relative flex items-center justify-center md:-mt-[50px]"
+      style={{
+        height: '60px',
+        marginBottom: '20px',
+      }}
+    >
+      {/* Subtle decade label positioned to the right of the timeline */}
       <div
-        className="relative z-20 py-1 rounded-lg shadow-sm"
+        className="absolute z-0"
         style={{
-          backgroundColor: isDark ? '#b0b3b8' : '#6f7583',
-          border: `1px solid ${isDark ? '#b0b3b8' : '#6f7583'}`,
-          width: '90px',
-          textAlign: 'center',
+          left: '50%',
+          transform: 'translateX(calc(-50% - 95px))', // Position to right of timeline line
+          opacity: isDark ? 0.4 : 0.45,
         }}
       >
-        <h3
-          className="text-lg font-serif font-medium whitespace-nowrap"
+        <span
           style={{
-            color: '#ffffff',
+            fontSize: '11px',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontWeight: 500,
+            letterSpacing: '0.5px',
+            color: isDark ? '#b0b3b8' : '#6b7280',
+            textTransform: 'uppercase',
           }}
         >
-          {decadeNum}s
-        </h3>
+          {decadeNum}
+        </span>
       </div>
     </div>
   );
@@ -474,27 +483,16 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   <h3 className="text-lg md:text-xl font-semibold text-white mb-1 truncate pr-2">
                     {story.title}
                   </h3>
-                  <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-white/90">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 md:w-3.5 h-3 md:h-3.5" />
-                      {story.storyDate
-                        ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                          })
-                        : formatYear(story.storyYear)}
-                    </span>
-                    {displayLifeAge !== null && displayLifeAge !== undefined && (
-                      <>
-                        <span className="text-white/70">•</span>
-                        <span>
-                          {displayLifeAge > 0 && `Age ${displayLifeAge}`}
-                          {displayLifeAge === 0 && `Birthday`}
-                          {displayLifeAge < 0 && `Before birth`}
-                        </span>
-                      </>
-                    )}
-                  </div>
+                  {/* V3: Show only age, no date */}
+                  {displayLifeAge !== null && displayLifeAge !== undefined && (
+                    <div className="text-xs md:text-sm text-white/90">
+                      <span>
+                        {displayLifeAge > 0 && `Age ${displayLifeAge}`}
+                        {displayLifeAge === 0 && `Birthday`}
+                        {displayLifeAge < 0 && `Before birth`}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Play Button Overlaid on Photo */}
@@ -694,34 +692,33 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         )}
       </div>
 
-      {/* Center date bubble or decade marker */}
+      {/* V3: Year marker - more visible now as primary date indicator */}
       <div
-        className="z-20 flex-shrink-0 timeline-dot transition-all duration-500"
+        className="z-10 flex-shrink-0 timeline-dot transition-all duration-500"
         style={{
           transform: position === "left" ? "translateX(-12px)" : "translateX(12px)",
         }}
       >
         <div
-          className="py-1 text-lg font-serif font-medium rounded-lg whitespace-nowrap shadow-sm"
+          className="py-0.5 px-2.5 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
           style={{
-            backgroundColor: showDecadeMarker
-              ? (isDark ? '#b0b3b8' : '#6f7583')
-              : (isDark ? '#252728' : '#ffffffF2'),
-            border: showDecadeMarker
-              ? `1px solid ${isDark ? '#b0b3b8' : '#6f7583'}`
-              : `1px solid ${isDark ? '#3b3d3f' : '#6f7583'}`,
-            color: showDecadeMarker ? '#ffffff' : (isDark ? '#b0b3b8' : '#6f7583'),
-            width: showDecadeMarker ? '90px' : 'auto',
-            textAlign: showDecadeMarker ? 'center' : 'left',
-            paddingLeft: showDecadeMarker ? '0' : '1rem',
-            paddingRight: showDecadeMarker ? '0' : '1rem',
+            backgroundColor: isDark ? 'rgba(37, 39, 40, 0.85)' : 'rgba(255, 255, 255, 0.95)',
+            border: `1px solid ${isDark ? 'rgba(176, 179, 184, 0.3)' : 'rgba(111, 117, 131, 0.35)'}`,
+            color: isDark ? 'rgba(176, 179, 184, 0.9)' : 'rgba(75, 85, 99, 0.95)',
+            fontSize: '16px',
+            fontWeight: 500,
+            letterSpacing: '0.3px',
+            opacity: 0.92,
+            boxShadow: isDark 
+              ? '0 2px 4px rgba(0, 0, 0, 0.2)' 
+              : '0 2px 4px rgba(0, 0, 0, 0.12)',
+            borderRadius: '6px',
+            backdropFilter: 'blur(10px)',
           }}
         >
-          {showDecadeMarker && decadeLabel
-            ? decadeLabel
-            : (story.storyDate
-                ? new Date(story.storyDate).getFullYear()
-                : formatYear(story.storyYear))}
+          {story.storyDate
+            ? new Date(story.storyDate).getFullYear()
+            : formatYear(story.storyYear)}
         </div>
       </div>
 
@@ -742,7 +739,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   );
 }
 
-export function TimelineDesktop() {
+export function TimelineDesktopV3() {
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
   const { toast } = useToast();
@@ -859,7 +856,7 @@ export function TimelineDesktop() {
 
     const handleBubbleScroll = () => {
       const stickyTop = 55; // Sticky position from top (aligned with header)
-      const collisionThreshold = -32; // Distance before collision triggers fade (negative = overlap needed)
+      const collisionThreshold = 125; // Larger threshold to close the 90px gap (90px gap + ~35px box height)
 
       // Query all timeline-dot elements
       const bubbles = Array.from(document.querySelectorAll('.timeline-dot'));
@@ -895,9 +892,20 @@ export function TimelineDesktop() {
               : 1; // Instant fade if threshold is exactly 0
             // Clamp fadeProgress between 0 and 1 to prevent crazy values
             const fadeProgress = Math.max(0, Math.min(1, rawProgress));
-            bubble.style.opacity = `${Math.max(0, 1 - fadeProgress)}`; // Fade to 0% opacity
-            // Preserve translateX and add scale
-            bubble.style.transform = `${translateX} scale(${Math.max(0.5, 1 - (fadeProgress * 0.5))})`; // Scale down to 50%
+            
+            // Keep bubble visible until next one is VERY close (within 10px)
+            const proximityToNext = Math.max(0, nextBubbleDistance - stickyTop);
+            const shouldBeVisible = proximityToNext > 10;
+            
+            if (shouldBeVisible) {
+              bubble.style.opacity = `${Math.max(0.2, 1 - fadeProgress)}`; // Min 20% opacity while approaching
+              bubble.style.transform = `${translateX} scale(${Math.max(0.8, 1 - (fadeProgress * 0.2))})`; // Scale to 80%
+            } else {
+              // Next bubble is within 10px - NOW fade quickly
+              const finalFade = proximityToNext / 10; // 0 to 1 over the final 10px
+              bubble.style.opacity = `${finalFade * 0.2}`; // Fade from 20% to 0%
+              bubble.style.transform = `${translateX} scale(${0.8 * finalFade})`; // Scale from 80% to 0%
+            }
           } else {
             // No collision - stay bright and full size
             bubble.style.opacity = '1';
@@ -1001,15 +1009,16 @@ export function TimelineDesktop() {
 
         {/* Timeline Container */}
         <div ref={timelineContainerRef} className="relative">
-          {/* Centered Progress Line - Absolute positioning, shifted left to match cards */}
+          {/* V3: Subtle vertical timeline ruler - thinner and lighter */}
           <div
-            className="absolute left-1/2 w-2 md:w-1 rounded-full overflow-hidden pointer-events-none"
+            className="absolute left-1/2 md:w-[1.5px] w-[2px] rounded-full overflow-hidden pointer-events-none"
             style={{
-              backgroundColor: isDark ? '#2a2b2c' : '#d1d5db',
+              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(107, 114, 128, 0.25)',
               transform: 'translateX(calc(-50% - 115px))',
               top: '0',
               bottom: '0',
-              height: '100%'
+              height: '100%',
+              opacity: 0.6,
             }}
           >
             <div
@@ -1017,8 +1026,8 @@ export function TimelineDesktop() {
               className="w-full rounded-full transition-all duration-300 ease-out"
               style={{
                 height: "0%",
-                background: isDark ? 'linear-gradient(to bottom, #3b3d3f, #3b3d3f)' : 'linear-gradient(to bottom, #6b7280, #4b5563)',
-                boxShadow: isDark ? '0 0 10px rgba(59, 61, 63, 0.25)' : '0 0 10px rgba(107, 114, 128, 0.3)',
+                background: isDark ? 'rgba(176, 179, 184, 0.4)' : 'rgba(107, 114, 128, 0.4)',
+                boxShadow: 'none',
               }}
             />
           </div>
@@ -1042,20 +1051,20 @@ export function TimelineDesktop() {
                 
                 return (
                   <div key={decade}>
-                    {/* Only show standalone decade banner if: NOT first decade AND first story is NOT on the decade year */}
-                    {!isFirstDecade && !firstStoryIsOnDecade && <DecadeBanner decade={decade} isDark={isDark} />}
+                    {/* V3: Show subtle decade label for all decades except the first */}
+                    {!isFirstDecade && <DecadeLabel decade={decade} isDark={isDark} />}
                     
                     {/* Stories in this decade */}
                     {decadeStories.map((story: Story, storyIndex: number) => {
                       // Calculate global index for alternating left/right positioning
                       const globalIndex = sortedStories.findIndex(s => s.id === story.id);
-                      // First story gets decade marker if it's on the decade year AND it's not the first decade
-                      const showDecadeMarker = !isFirstDecade && storyIndex === 0 && firstStoryIsOnDecade;
+                      // V3: No decade markers on cards anymore
+                      const showDecadeMarker = false;
                       
                       return (
                         <div
                           key={story.id}
-                          className="md:-mt-[50px] first:md:mt-0"
+                          className="md:-mt-[152px] first:md:mt-0"
                           data-memory-id={story.id}
                           style={{
                             transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',
