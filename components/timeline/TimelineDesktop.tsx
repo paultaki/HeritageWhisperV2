@@ -1042,15 +1042,14 @@ export function TimelineDesktop() {
                 
                 return (
                   <div key={decade}>
-                    {/* Only show standalone decade banner if: NOT first decade AND first story is NOT on the decade year */}
-                    {!isFirstDecade && !firstStoryIsOnDecade && <DecadeBanner decade={decade} isDark={isDark} />}
+                    {/* Decade labels removed - cleaner timeline with just story dates */}
                     
                     {/* Stories in this decade */}
                     {decadeStories.map((story: Story, storyIndex: number) => {
                       // Calculate global index for alternating left/right positioning
                       const globalIndex = sortedStories.findIndex(s => s.id === story.id);
-                      // First story gets decade marker if it's on the decade year AND it's not the first decade
-                      const showDecadeMarker = !isFirstDecade && storyIndex === 0 && firstStoryIsOnDecade;
+                      // All cards use normal date markers now (no decade markers)
+                      const showDecadeMarker = false;
                       
                       return (
                         <div

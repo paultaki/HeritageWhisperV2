@@ -469,15 +469,38 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 onLoad={() => { /* quiet success log */ }}
               />
             </div>
-            {/* Photo count badge (desktop) */}
+            {/* Photo count badge (desktop) - top left */}
             {photoCount > 1 && (
-              <div className="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium z-10">
+              <div className="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium z-10">
                 {photoCount} photos
               </div>
             )}
             
             {/* Memory Footer Overlay with Play Button */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 md:p-4">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 md:p-4 pointer-events-none">
+              {/* Progress Bar (shows above title when playing) */}
+              {story.audioUrl && (isPlaying || progress > 0) && (
+                <div className="mb-3 pointer-events-auto">
+                  <div
+                    ref={progressBarRef}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleProgressBarClick(e);
+                    }}
+                    className="h-1.5 bg-white/20 rounded-full cursor-pointer overflow-hidden"
+                  >
+                    <div
+                      className="h-full bg-white rounded-full transition-all duration-100"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-white/80 mt-1">
+                    <span>{formatDuration(currentTime)}</span>
+                    <span>{formatDuration(duration)}</span>
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg md:text-xl font-semibold text-white mb-1 truncate pr-2">
@@ -504,13 +527,12 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                     }}
                     aria-pressed={isPlaying}
                     aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-                    className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer relative z-20"
-                    style={{ pointerEvents: 'auto' }}
+                    className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer relative z-30 pointer-events-auto"
                   >
                     {isLoading ? (
-                      <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" style={{ pointerEvents: 'none' }} />
+                      <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" />
                     ) : (
-                      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style={{ pointerEvents: 'none' }}>
+                      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
                         <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
                         {isPlaying ? (
                           <g>
@@ -525,29 +547,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   </button>
                 )}
               </div>
-              
-              {/* Progress Bar (always reserve space to keep button in same position) */}
-              {story.audioUrl && (
-                <div className={`mt-2 ${!(isPlaying || progress > 0) ? 'opacity-0 pointer-events-none' : ''}`}>
-                  <div
-                    ref={progressBarRef}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleProgressBarClick(e);
-                    }}
-                    className="h-1.5 bg-white/20 rounded-full cursor-pointer overflow-hidden"
-                  >
-                    <div
-                      className="h-full bg-white rounded-full transition-all duration-100"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-white/80 mt-1">
-                    <span>{formatDuration(currentTime)}</span>
-                    <span>{formatDuration(duration)}</span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
           
@@ -856,7 +855,7 @@ export function TimelineDesktopV3() {
 
     const handleBubbleScroll = () => {
       const stickyTop = 55; // Sticky position from top (aligned with header)
-      const collisionThreshold = 125; // Larger threshold to close the 90px gap (90px gap + ~35px box height)
+      const collisionThreshold = 163; // Increased to make markers travel closer before collision (38px more)
 
       // Query all timeline-dot elements
       const bubbles = Array.from(document.querySelectorAll('.timeline-dot'));
@@ -893,16 +892,16 @@ export function TimelineDesktopV3() {
             // Clamp fadeProgress between 0 and 1 to prevent crazy values
             const fadeProgress = Math.max(0, Math.min(1, rawProgress));
             
-            // Keep bubble visible until next one is VERY close (within 10px)
-            const proximityToNext = Math.max(0, nextBubbleDistance - stickyTop);
-            const shouldBeVisible = proximityToNext > 10;
+            // Keep bubble visible until next one is VERY close (allow negative for overlap)
+            const proximityToNext = nextBubbleDistance - stickyTop;
+            const shouldBeVisible = proximityToNext > -28; // Start fading when 28px past sticky (overlapping)
             
             if (shouldBeVisible) {
               bubble.style.opacity = `${Math.max(0.2, 1 - fadeProgress)}`; // Min 20% opacity while approaching
               bubble.style.transform = `${translateX} scale(${Math.max(0.8, 1 - (fadeProgress * 0.2))})`; // Scale to 80%
             } else {
-              // Next bubble is within 10px - NOW fade quickly
-              const finalFade = proximityToNext / 10; // 0 to 1 over the final 10px
+              // Next bubble has overlapped by more than 28px - NOW fade quickly
+              const finalFade = Math.max(0, (proximityToNext + 38) / 10); // Fade over final 10px of overlap
               bubble.style.opacity = `${finalFade * 0.2}`; // Fade from 20% to 0%
               bubble.style.transform = `${translateX} scale(${0.8 * finalFade})`; // Scale from 80% to 0%
             }
@@ -1009,9 +1008,9 @@ export function TimelineDesktopV3() {
 
         {/* Timeline Container */}
         <div ref={timelineContainerRef} className="relative">
-          {/* V3: Subtle vertical timeline ruler - thinner and lighter */}
+          {/* V3: Subtle vertical timeline ruler - slightly thicker */}
           <div
-            className="absolute left-1/2 md:w-[1.5px] w-[2px] rounded-full overflow-hidden pointer-events-none"
+            className="absolute left-1/2 md:w-[2.5px] w-[3px] rounded-full overflow-hidden pointer-events-none"
             style={{
               backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(107, 114, 128, 0.25)',
               transform: 'translateX(calc(-50% - 115px))',
@@ -1051,8 +1050,7 @@ export function TimelineDesktopV3() {
                 
                 return (
                   <div key={decade}>
-                    {/* V3: Show subtle decade label for all decades except the first */}
-                    {!isFirstDecade && <DecadeLabel decade={decade} isDark={isDark} />}
+                    {/* V3: Decade labels removed per user request */}
                     
                     {/* Stories in this decade */}
                     {decadeStories.map((story: Story, storyIndex: number) => {
@@ -1061,10 +1059,13 @@ export function TimelineDesktopV3() {
                       // V3: No decade markers on cards anymore
                       const showDecadeMarker = false;
                       
+                      // Only the very first story (first decade, first story) gets no negative margin
+                      const isVeryFirstStory = decadeIndex === 0 && storyIndex === 0;
+                      
                       return (
                         <div
                           key={story.id}
-                          className="md:-mt-[152px] first:md:mt-0"
+                          className={isVeryFirstStory ? "md:mt-0" : "md:-mt-[108px]"}
                           data-memory-id={story.id}
                           style={{
                             transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',
