@@ -9,7 +9,6 @@
  * SECURITY: This implementation follows OWASP CSRF prevention guidelines
  */
 
-import { randomBytes, timingSafeEqual } from 'crypto';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from './logger';
@@ -19,12 +18,37 @@ const CSRF_HEADER_NAME = 'x-csrf-token';
 const TOKEN_BYTE_LENGTH = 32;
 const TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
+function generateRandomToken(): string {
+  const randomValues = new Uint8Array(TOKEN_BYTE_LENGTH);
+  globalThis.crypto.getRandomValues(randomValues);
+
+  let binary = '';
+  randomValues.forEach((value) => {
+    binary += String.fromCharCode(value);
+  });
+
+  return globalThis.btoa(binary);
+}
+
+function timingSafeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  let result = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+
+  return result === 0;
+}
+
 /**
  * Generates a cryptographically secure CSRF token
  * @returns Promise<string> - Base64-encoded token
  */
 export async function generateCSRFToken(): Promise<string> {
-  const token = randomBytes(TOKEN_BYTE_LENGTH).toString('base64');
+  const token = generateRandomToken();
   const cookieStore = await cookies();
 
   cookieStore.set(CSRF_COOKIE_NAME, token, {
@@ -60,10 +84,7 @@ export async function validateCSRFToken(token: string | null): Promise<boolean> 
 
   try {
     // Constant-time comparison to prevent timing attacks
-    const isValid = timingSafeEqual(
-      Buffer.from(storedToken, 'base64'),
-      Buffer.from(token, 'base64')
-    );
+    const isValid = timingSafeCompare(storedToken, token);
 
     if (!isValid) {
       logger.warn('[CSRF] Token mismatch detected');

@@ -3495,6 +3495,7 @@ textarea:focus-visible {
   padding-top: 80px; /* Space for header */
   padding-bottom: 80px; /* Space for bottom navigation */
   min-height: 100vh;
+  background-color: #F5F2ED;
 }
 
 /* Override all previous .book-container rules with specificity */

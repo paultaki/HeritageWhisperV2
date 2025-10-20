@@ -287,13 +287,36 @@ export default function HomePage() {
             {/* Step 2 */}
             <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out grid md:grid-cols-2 gap-12 items-center">
               <div className="relative">
-                <Image
-                  src="/timeline 1.png"
-                  alt="Smart questions keep you going"
-                  width={560}
-                  height={264}
-                  className="w-full h-auto max-h-[350px] rounded-2xl shadow-2xl object-contain"
-                />
+                <div
+                  className="relative overflow-hidden rounded-2xl shadow-[0_4px_6px_rgba(0,0,0,0.07)] min-h-[280px] md:min-h-[360px] flex"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(to bottom right, #f8f9fa, #ffffff), radial-gradient(circle at top left, rgba(147,165,177,0.08) 0, rgba(147,165,177,0.08) 1px, transparent 1.5px)",
+                    backgroundSize: "100% 100%, 22px 22px",
+                    backgroundPosition: "0 0, 0 0",
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#93a5b1] to-[#c4a5a0]"
+                  />
+                  <div className="relative flex flex-col justify-between gap-8 md:gap-10 px-8 py-10 md:px-10 md:py-12 pl-12 w-full">
+                    <span className="inline-flex items-center self-start rounded-full bg-white/70 border border-white/40 px-4 py-1 text-sm font-medium text-[#5d6670] backdrop-blur">
+                      From Michael&apos;s 3rd story
+                    </span>
+                    <p className="text-2xl md:text-[28px] text-[#13343B] leading-relaxed">
+                      &ldquo;That promotion you turned down in &lsquo;92 to stay near family&mdash;do your kids know you chose them over becoming regional VP?&rdquo;
+                    </p>
+                    <div className="flex items-center gap-4 text-[#13343B] text-base font-medium">
+                      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 border border-white/70 shadow-[0_12px_20px_rgba(33,128,141,0.18)] relative before:absolute before:inset-[4px] before:rounded-full before:bg-gradient-to-br before:from-white before:to-[#f3f4f6] before:shadow-[inset_0_2px_6px_rgba(0,0,0,0.08)]">
+                        <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#21808D] to-[#2CA0AE] shadow-[0_6px_12px_rgba(33,128,141,0.35)]">
+                        <Mic className="h-6 w-6 text-white animate-pulse" />
+                        </span>
+                      </span>
+                      <span className="text-[#626C71]">Tap to record your response</span>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div>
                 <div className="flex items-center gap-4 mb-6">
