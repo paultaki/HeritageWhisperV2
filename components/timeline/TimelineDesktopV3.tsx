@@ -436,14 +436,19 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
     // If there's a photo, render without white container
     if (displayPhoto?.url) {
       return (
-        <div
-          className="cursor-pointer"
-          onClick={handleCardClick}
-        >
+        <div>
           <div className={`relative rounded-3xl overflow-hidden shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}>
-            <div className="relative w-full aspect-[4/3]">
+            <div 
+              className="relative w-full aspect-[4/3]"
+              style={{ pointerEvents: 'none' }}
+            >
+              <div 
+                className="absolute inset-0 cursor-pointer"
+                style={{ pointerEvents: 'auto', zIndex: 1 }}
+                onClick={handleCardClick}
+              />
               <Image
                 src={displayPhoto.url}
                 alt={story.title}
@@ -471,7 +476,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             </div>
             {/* Photo count badge (desktop) - top left */}
             {photoCount > 1 && (
-              <div className="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium z-10">
+              <div className="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium z-10 pointer-events-none">
                 {photoCount} photos
               </div>
             )}
@@ -527,7 +532,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                     }}
                     aria-pressed={isPlaying}
                     aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-                    className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer relative z-30 pointer-events-auto"
+                    className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer relative z-50 pointer-events-auto"
                   >
                     {isLoading ? (
                       <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" />
@@ -680,12 +685,13 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       }`}
       style={{
         transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+        pointerEvents: 'none',
       }}
     >
       {/* Left side content (for left-positioned cards) - Desktop only */}
-      <div className={`flex-1 flex ${position === "left" ? "justify-end lg:pr-6" : ""} hidden lg:flex`}>
+      <div className={`flex-1 flex ${position === "left" ? "justify-end lg:pr-6" : ""} hidden lg:flex`} style={{ pointerEvents: 'none' }}>
         {position === "left" && (
-          <div className="w-full max-w-md timeline-card-container">
+          <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
             {renderCardContent()}
           </div>
         )}
@@ -722,16 +728,16 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       </div>
 
       {/* Right side content (for right-positioned cards) - Desktop only */}
-      <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`}>
+      <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`} style={{ pointerEvents: 'none' }}>
         {position === "right" && (
-          <div className="w-full max-w-md timeline-card-container">
+          <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
             {renderCardContent()}
           </div>
         )}
       </div>
 
       {/* Mobile Card (shown on all small screens) */}
-      <div className="lg:hidden w-full">
+      <div className="lg:hidden w-full" style={{ pointerEvents: 'auto' }}>
         {renderCardContent()}
       </div>
     </div>
