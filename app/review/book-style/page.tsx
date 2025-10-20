@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { BookStyleReview } from "@/components/BookStyleReview";
+import { PostRecordingWizard } from "@/components/post-recording/PostRecordingWizard";
 import { type StoryPhoto } from "@/components/MultiPhotoUploader";
+import { type PostRecordingData, type RecordingSession } from "@/types/recording";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navCache } from "@/lib/navCache";
@@ -22,6 +24,10 @@ function BookStyleReviewContent() {
   // Support both 'edit' and 'id' parameters for compatibility
   const editId = searchParams.get("edit") || searchParams.get("id");
   const isEditing = !!editId;
+
+  // Check if we're in wizard mode (new recording flow)
+  const isWizardMode = searchParams.get("mode") === "wizard";
+  const navId = searchParams.get("nav");
 
   // Get data from URL params (passed from recording page)
   const [title, setTitle] = useState("");
@@ -842,6 +848,60 @@ function BookStyleReviewContent() {
           <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading memory...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Wizard Mode: New recording flow
+  if (isWizardMode && navId) {
+    console.log("[Wizard Mode] Loading data from NavCache with ID:", navId);
+    const cachedData = navCache.get(navId);
+
+    if (!cachedData) {
+      console.error("[Wizard Mode] No data found in NavCache");
+      toast({
+        title: "Error",
+        description: "Recording data not found. Please try recording again.",
+        variant: "destructive",
+      });
+      router.push("/timeline");
+      return null;
+    }
+
+    console.log("[Wizard Mode] NavCache data retrieved:", cachedData);
+
+    // Prepare RecordingSession from cached data
+    const recording: RecordingSession = {
+      mode: cachedData.mode || "quick",
+      audioBlob: cachedData.audioBlob,
+      duration: cachedData.duration || 0,
+      timestamp: cachedData.timestamp || new Date().toISOString(),
+      rawTranscript: cachedData.rawTranscript || "",
+      qaPairs: cachedData.qaPairs,
+    };
+
+    // Prepare initial wizard data
+    const initialData: Partial<PostRecordingData> = {
+      title: cachedData.title || "",
+      year: cachedData.storyYear ? parseInt(cachedData.storyYear, 10) : undefined,
+      photos: [],
+      originalTranscript: cachedData.rawTranscript || "",
+      enhancedTranscript: cachedData.enhancedTranscript || cachedData.rawTranscript || "",
+      useEnhanced: true,
+      lessonLearned: cachedData.lessonLearned || "",
+      recording,
+      userBirthYear: user?.birth_year,
+    };
+
+    const handleWizardComplete = () => {
+      console.log("[Wizard Mode] Story saved successfully");
+      // NavCache will be consumed by the wizard's submitStory
+      router.push("/timeline");
+    };
+
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+        <PostRecordingWizard initialData={initialData} onComplete={handleWizardComplete} />
       </div>
     );
   }

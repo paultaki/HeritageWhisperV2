@@ -9,8 +9,9 @@ import { useAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import { groupStoriesByDecade, type Story } from "@/lib/supabase";
 import { getApiUrl } from "@/lib/config";
-import { useRecordModal } from "@/hooks/use-record-modal";
-import RecordModal from "@/components/RecordModal";
+import { useModeSelection } from "@/hooks/use-mode-selection";
+import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
+import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 import {
   generateGhostPrompts,
   mergeGhostPromptsWithStories,
@@ -868,7 +869,7 @@ export function TimelineMobile() {
     useState<ColorScheme>("original");
   const [showColorPalette, setShowColorPalette] = useState(false);
   const { toast } = useToast();
-  const recordModal = useRecordModal();
+  const modeSelection = useModeSelection();
   const decadeRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   const { data: storiesData, refetch: refetchStories, isLoading: isLoadingStories } = useQuery({
@@ -1073,11 +1074,11 @@ export function TimelineMobile() {
       if (error.message.includes("Story limit reached")) {
         setShowPaywall(true);
       } else {
-        recordModal.openModal();
+        modeSelection.openModal();
       }
     },
     onSuccess: () => {
-      recordModal.openModal();
+      modeSelection.openModal();
     },
   });
 
@@ -1368,7 +1369,7 @@ export function TimelineMobile() {
     if (!user.isPaid && user.storyCount >= 3) {
       setShowPaywall(true);
     } else {
-      recordModal.openModal();
+      modeSelection.openModal();
     }
   };
 
@@ -1381,12 +1382,9 @@ export function TimelineMobile() {
     if (!user.isPaid && user.storyCount >= 3) {
       setShowPaywall(true);
     } else {
-      // Open record modal with pre-filled data from ghost prompt
-      recordModal.openModal({
-        title: prompt.title,
-        prompt: prompt.prompt,
-        year: prompt.year,
-      });
+      // Open mode selection modal (user will enter title in wizard)
+      // TODO: Consider storing ghost prompt data in NavCache for pre-filling
+      modeSelection.openModal();
     }
   };
 
@@ -1500,11 +1498,9 @@ export function TimelineMobile() {
           <div className="mb-8">
             <NextStoryCard
               onRecordClick={(promptId, promptText) => {
-                // Store promptId in modal initial data for later use
-                recordModal.openModal({
-                  prompt: promptText,
-                  title: "",
-                });
+                // Open mode selection modal (user will enter title in wizard)
+                // TODO: Consider storing prompt data in NavCache for pre-filling
+                modeSelection.openModal();
                 // We'll pass the promptId through when saving the story
                 if (promptId) {
                   sessionStorage.setItem("activePromptId", promptId);
@@ -1594,14 +1590,17 @@ export function TimelineMobile() {
         onSubscribe={handleSubscribe}
       />
 
-      {/* Record Modal */}
-      <RecordModal
-        isOpen={recordModal.isOpen}
-        onClose={recordModal.closeModal}
-        onSave={recordModal.handleSave}
-        initialTitle={recordModal.initialData?.title}
-        initialPrompt={recordModal.initialData?.prompt}
-        initialYear={recordModal.initialData?.year}
+      {/* Mode Selection Modal */}
+      <ModeSelectionModal
+        isOpen={modeSelection.isOpen}
+        onClose={modeSelection.closeModal}
+        onSelectQuickStory={modeSelection.openQuickRecorder}
+      />
+
+      {/* Quick Story Recorder */}
+      <QuickStoryRecorder
+        isOpen={modeSelection.quickRecorderOpen}
+        onClose={modeSelection.closeQuickRecorder}
       />
     </div>
   );

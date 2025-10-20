@@ -25,8 +25,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useRecordModal } from "@/hooks/use-record-modal";
-import RecordModal from "@/components/RecordModal";
+import { useModeSelection } from "@/hooks/use-mode-selection";
+import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
+import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 import FloatingInsightCard from "@/components/FloatingInsightCard";
 import { useSwipeable } from "react-swipeable";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -727,7 +728,7 @@ export default function BookViewNew() {
   const showSpreadView = viewportConfig.mode === "spread"; // Use viewport config directly
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
-  const { isOpen, open, close } = useRecordModal();
+  const modeSelection = useModeSelection();
   const [fontsReady, setFontsReady] = useState(false);
   const [isPaginationReady, setIsPaginationReady] = useState(false);
 
@@ -1022,12 +1023,24 @@ export default function BookViewNew() {
           <p className="text-muted-foreground mb-6">
             Start recording your first memory to see it here.
           </p>
-          <Button onClick={open} className="gap-2">
+          <Button onClick={modeSelection.openModal} className="gap-2">
             <Plus className="w-4 h-4" />
             Record Your First Story
           </Button>
         </div>
-        <RecordModal isOpen={isOpen} onClose={close} />
+
+        {/* Mode Selection Modal */}
+        <ModeSelectionModal
+          isOpen={modeSelection.isOpen}
+          onClose={modeSelection.closeModal}
+          onSelectQuickStory={modeSelection.openQuickRecorder}
+        />
+
+        {/* Quick Story Recorder */}
+        <QuickStoryRecorder
+          isOpen={modeSelection.quickRecorderOpen}
+          onClose={modeSelection.closeQuickRecorder}
+        />
       </div>
     );
   }
@@ -1095,8 +1108,18 @@ export default function BookViewNew() {
         </div>
       </div>
 
-      {/* Record Modal */}
-      <RecordModal isOpen={isOpen} onClose={close} />
+      {/* Mode Selection Modal */}
+      <ModeSelectionModal
+        isOpen={modeSelection.isOpen}
+        onClose={modeSelection.closeModal}
+        onSelectQuickStory={modeSelection.openQuickRecorder}
+      />
+
+      {/* Quick Story Recorder */}
+      <QuickStoryRecorder
+        isOpen={modeSelection.quickRecorderOpen}
+        onClose={modeSelection.closeQuickRecorder}
+      />
       
       {/* Desktop: Progress Bar - Above bottom navigation */}
       {!isMobile && (

@@ -7,8 +7,9 @@ import { useAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import { groupStoriesByDecade, type Story } from "@/lib/supabase";
 import { getApiUrl } from "@/lib/config";
-import { useRecordModal } from "@/hooks/use-record-modal";
-import RecordModal from "@/components/RecordModal";
+import { useModeSelection } from "@/hooks/use-mode-selection";
+import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
+import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 import {
   generateGhostPrompts,
   mergeGhostPromptsWithStories,
@@ -746,7 +747,7 @@ export function TimelineDesktop() {
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
   const { toast } = useToast();
-  const recordModal = useRecordModal();
+  const modeSelection = useModeSelection();
   const queryClient = useQueryClient();
   const progressLineRef = useRef<HTMLDivElement>(null);
   const timelineContainerRef = useRef<HTMLDivElement>(null);
@@ -1083,7 +1084,7 @@ export function TimelineDesktop() {
               <div className="text-center py-20">
                 <p className="text-gray-500 text-lg mb-6">No memories yet. Start recording your first story!</p>
                 <Button
-                  onClick={() => recordModal.openModal()}
+                  onClick={() => modeSelection.openModal()}
                   className="bg-orange-500 hover:bg-orange-600"
                 >
                   <Plus className="w-5 h-5 mr-2" />
@@ -1095,14 +1096,17 @@ export function TimelineDesktop() {
         </div>
       </main>
 
-      {/* Record Modal */}
-      <RecordModal
-        isOpen={recordModal.isOpen}
-        onClose={recordModal.closeModal}
-        onSave={recordModal.handleSave}
-        initialPrompt={recordModal.initialData?.prompt}
-        initialTitle={recordModal.initialData?.title}
-        initialYear={recordModal.initialData?.year}
+      {/* Mode Selection Modal */}
+      <ModeSelectionModal
+        isOpen={modeSelection.isOpen}
+        onClose={modeSelection.closeModal}
+        onSelectQuickStory={modeSelection.openQuickRecorder}
+      />
+
+      {/* Quick Story Recorder */}
+      <QuickStoryRecorder
+        isOpen={modeSelection.quickRecorderOpen}
+        onClose={modeSelection.closeQuickRecorder}
       />
 
       {/* Custom Styles */}

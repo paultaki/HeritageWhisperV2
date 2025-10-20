@@ -1,9 +1,11 @@
 /**
- * Conversation Mode Integration for Prototype
+ * Conversation Mode Integration
  *
- * Handles saving conversation data from production interview-chat
- * to localStorage for the post-recording flow prototype.
+ * Handles saving conversation data from interview-chat
+ * to NavCache for the wizard flow.
  */
+
+import { navCache } from "./navCache";
 
 export interface QAPair {
   question: string;
@@ -20,7 +22,8 @@ export interface ConversationData {
 }
 
 /**
- * Convert Blob to base64 string for localStorage
+ * Convert Blob to base64 string (no longer needed for NavCache, kept for compatibility)
+ * @deprecated Use NavCache which stores blobs directly
  */
 export async function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -48,7 +51,7 @@ export async function combineAudioBlobs(blobs: Blob[]): Promise<Blob> {
 }
 
 /**
- * Save conversation data to localStorage and redirect to prototype
+ * Save conversation data to NavCache and redirect to wizard
  */
 export async function completeConversationAndRedirect(
   conversationData: ConversationData
@@ -58,36 +61,26 @@ export async function completeConversationAndRedirect(
 
     const { qaPairs, audioBlob, fullTranscript, totalDuration } = conversationData;
 
-    // Convert audio blob to base64 (if exists)
-    let audioBase64: string | null = null;
     if (audioBlob) {
-      console.log('🎵 Converting audio to base64...');
-      audioBase64 = await blobToBase64(audioBlob);
-
-      // Check size (localStorage has ~5-10MB limit)
-      const sizeInMB = (audioBase64.length * 3 / 4) / (1024 * 1024);
-      console.log(`Audio size: ${sizeInMB.toFixed(2)} MB`);
-
-      if (sizeInMB > 8) {
-        console.warn('⚠️ Audio too large, skipping audio storage');
-        audioBase64 = null;
-      }
+      const sizeInMB = audioBlob.size / (1024 * 1024);
+      console.log(`🎵 Audio size: ${sizeInMB.toFixed(2)} MB`);
     }
 
-    // Create recording data object for prototype
+    // Create recording session data for wizard
     const recordingData = {
-      mode: 'conversation',
-      audioBlob: audioBase64,
+      mode: 'conversation' as const,
+      audioBlob: audioBlob || undefined,
       duration: totalDuration || 0,
       timestamp: new Date().toISOString(),
-      prompt: null, // Conversation has no single prompt
       rawTranscript: fullTranscript || '',
-      qaPairs: qaPairs || []
+      qaPairs: qaPairs || [],
     };
 
-    // Save to localStorage
-    localStorage.setItem('hw_recording_data', JSON.stringify(recordingData));
-    console.log('✓ Conversation data saved to localStorage');
+    // Generate unique ID and save to NavCache
+    const navId = navCache.generateId();
+    navCache.set(navId, recordingData);
+
+    console.log('✓ Conversation data saved to NavCache with ID:', navId);
     console.log('📊 Data:', {
       mode: recordingData.mode,
       qaPairs: recordingData.qaPairs.length,
@@ -96,9 +89,8 @@ export async function completeConversationAndRedirect(
       transcriptLength: recordingData.rawTranscript.length
     });
 
-    // Redirect to post-recording flow prototype
-    // Note: Prototype HTML files should be in /public folder for Next.js to serve them
-    window.location.href = '/post-recording-flow.html';
+    // Redirect to wizard
+    window.location.href = `/review/book-style?nav=${navId}&mode=wizard`;
 
   } catch (error) {
     console.error('❌ Failed to complete conversation:', error);

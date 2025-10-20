@@ -16,7 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { useRecordModal } from "@/hooks/use-record-modal";
+import { useModeSelection } from "@/hooks/use-mode-selection";
+import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
+import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 import MemoryToolbar from "@/components/ui/MemoryToolbar";
 import MemoryCard from "@/components/ui/MemoryCard";
 import { MemoryList } from "@/components/ui/MemoryList";
@@ -124,7 +126,7 @@ class AudioManager {
 export default function MemoryBoxPage() {
   const router = useRouter();
   const { user, session } = useAuth();
-  const { openRecordModal } = useRecordModal();
+  const modeSelection = useModeSelection();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -508,7 +510,7 @@ export default function MemoryBoxPage() {
             </p>
             {filterMode === "all" && !searchQuery && (
               <Button
-                onClick={openRecordModal}
+                onClick={modeSelection.openModal}
                 className="bg-heritage-coral hover:bg-heritage-coral/90 text-white text-lg px-6 py-3"
               >
                 Add Your First Memory
@@ -621,6 +623,19 @@ export default function MemoryBoxPage() {
           </div>
         </Card>
       </section>
+
+      {/* Mode Selection Modal */}
+      <ModeSelectionModal
+        isOpen={modeSelection.isOpen}
+        onClose={modeSelection.closeModal}
+        onSelectQuickStory={modeSelection.openQuickRecorder}
+      />
+
+      {/* Quick Story Recorder */}
+      <QuickStoryRecorder
+        isOpen={modeSelection.quickRecorderOpen}
+        onClose={modeSelection.closeQuickRecorder}
+      />
     </div>
   );
 }
