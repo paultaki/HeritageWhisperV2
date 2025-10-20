@@ -13,6 +13,7 @@ interface Step3_ReviewProps {
   onOriginalChange: (original: string) => void;
   onEnhancedChange: (enhanced: string) => void;
   onUseEnhancedChange: (use: boolean) => void;
+  isConversationMode?: boolean;
 }
 
 /**
@@ -29,6 +30,7 @@ export function Step3_Review({
   onOriginalChange,
   onEnhancedChange,
   onUseEnhancedChange,
+  isConversationMode = false,
 }: Step3_ReviewProps) {
   const [showOriginal, setShowOriginal] = useState(false);
 
@@ -38,8 +40,9 @@ export function Step3_Review({
       <div>
         <h3 className="text-lg font-medium mb-2">Review your transcript</h3>
         <p className="text-gray-600 text-sm">
-          We've enhanced your transcript for readability. You can use the enhanced version or the
-          original.
+          {isConversationMode
+            ? "We've transformed your interview answers into a flowing story while preserving your exact words and voice. You can use this version or the original Q&A format."
+            : "We've enhanced your transcript for readability. You can use the enhanced version or the original."}
         </p>
       </div>
 

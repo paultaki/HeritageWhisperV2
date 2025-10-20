@@ -566,113 +566,115 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       );
     }
     
-    // No photo - render white card (existing design)
+    // No photo - render card with placeholder that matches photo card dimensions
     return (
-      <div
-        className="bg-white/90 backdrop-blur border border-gray-200/60 rounded-3xl p-6 md:p-8 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 cursor-pointer"
-        onClick={handleCardClick}
-      >
-        <div className="mb-6">
-          <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-3">
-            {story.title}
-          </h3>
-          <div className="flex items-center gap-3 text-sm text-gray-600">
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
-              {story.storyDate
-                ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                  })
-                : formatYear(story.storyYear)}
-            </span>
-            {displayLifeAge !== null && displayLifeAge !== undefined && (
-              <>
-                <span className="text-gray-400">•</span>
-                <span>
-                  {displayLifeAge > 0 && `Age ${displayLifeAge}`}
-                  {displayLifeAge === 0 && `Birthday`}
-                  {displayLifeAge < 0 && `Before birth`}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Audio Player */}
-        {story.audioUrl && (
-          <div className="mb-4">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePlayAudio(e);
+      <div>
+        <div className={`relative rounded-3xl shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 ${
+          isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        }`}>
+          <div
+            className="relative w-full aspect-[4/3] overflow-hidden rounded-3xl"
+            style={{ pointerEvents: 'none' }}
+          >
+            <div
+              className="absolute inset-0 cursor-pointer"
+              style={{ pointerEvents: 'auto', zIndex: 1 }}
+              onClick={handleCardClick}
+            />
+            {/* Placeholder background with subtle gradient or pattern */}
+            <div
+              className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 flex items-center justify-center"
+              style={{
+                backgroundColor: isDark ? '#2a2a2a' : '#f9fafb',
+                backgroundImage: `linear-gradient(135deg, ${isDark ? '#2a2a2a' : '#f9fafb'} 0%, ${isDark ? '#1f1f1f' : '#f3f4f6'} 50%, ${isDark ? '#2a2a2a' : '#f9fafb'} 100%)`
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 rounded-full transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
-              style={{ pointerEvents: 'auto' }}
             >
-              {isLoading ? (
-                <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" style={{ pointerEvents: 'none' }} />
-              ) : (
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  className="text-orange-500"
-                  style={{ pointerEvents: 'none' }}
-                >
-                  {isPlaying ? (
-                    <>
-                      <rect x="2" y="4" width="2" height="12" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0ms', animationDuration: '600ms' }} />
-                      <rect x="6" y="2" width="2" height="16" fill="currentColor" className="animate-pulse" style={{ animationDelay: '100ms', animationDuration: '600ms' }} />
-                      <rect x="10" y="6" width="2" height="8" fill="currentColor" className="animate-pulse" style={{ animationDelay: '200ms', animationDuration: '600ms' }} />
-                      <rect x="14" y="3" width="2" height="14" fill="currentColor" className="animate-pulse" style={{ animationDelay: '300ms', animationDuration: '600ms' }} />
-                      <rect x="18" y="5" width="2" height="10" fill="currentColor" className="animate-pulse" style={{ animationDelay: '400ms', animationDuration: '600ms' }} />
-                    </>
-                  ) : (
-                    <>
-                      <rect x="2" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
-                      <rect x="6" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
-                      <rect x="10" y="4" width="2" height="12" fill="currentColor" opacity="0.6" />
-                      <rect x="14" y="6" width="2" height="8" fill="currentColor" opacity="0.6" />
-                      <rect x="18" y="8" width="2" height="4" fill="currentColor" opacity="0.6" />
-                    </>
-                  )}
-                </svg>
-              )}
-              <span className="text-sm font-medium text-orange-500">
-                {isPlaying ? "Pause" : "Listen"}
-              </span>
-            </button>
+              {/* Optional: Add a subtle icon or text in the center */}
+              <div className="text-center p-6">
+                <div className="text-5xl opacity-10 mb-4">📝</div>
+              </div>
+            </div>
+          </div>
 
-            {/* Progress Bar */}
-            {(isPlaying || progress > 0) && (
-              <div className="mt-3">
+          {/* Memory Footer Overlay with Play Button - same as photo cards */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 md:p-4 pointer-events-none rounded-b-3xl">
+            {/* Progress Bar (shows above title when playing) */}
+            {story.audioUrl && (isPlaying || progress > 0) && (
+              <div className="mb-3 pointer-events-auto">
                 <div
                   ref={progressBarRef}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleProgressBarClick(e);
                   }}
-                  className="h-1.5 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
+                  className="h-1.5 bg-white/20 rounded-full cursor-pointer overflow-hidden"
                 >
                   <div
-                    className="h-full bg-orange-500 rounded-full transition-all duration-100"
+                    className="h-full bg-white rounded-full transition-all duration-100"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
+                <div className="flex items-center justify-between text-xs text-white/80 mt-1">
                   <span>{formatDuration(currentTime)}</span>
                   <span>{formatDuration(duration)}</span>
                 </div>
               </div>
             )}
-          </div>
-        )}
 
-        {/* Traits */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg md:text-xl font-semibold text-white mb-1 truncate pr-2">
+                  {story.title}
+                </h3>
+                {/* Show only age, no date - same as photo cards */}
+                {displayLifeAge !== null && displayLifeAge !== undefined && (
+                  <div className="text-xs md:text-sm text-white/90">
+                    <span>
+                      {displayLifeAge > 0 && `Age ${displayLifeAge}`}
+                      {displayLifeAge === 0 && `Birthday`}
+                      {displayLifeAge < 0 && `Before birth`}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Play Button Overlaid - same as photo cards */}
+              {story.audioUrl && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePlayAudio(e);
+                  }}
+                  aria-pressed={isPlaying}
+                  aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+                  className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer relative z-50 pointer-events-auto"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" />
+                  ) : (
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                      <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
+                      {isPlaying ? (
+                        <g>
+                          <rect x="11" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
+                          <rect x="14.8" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
+                        </g>
+                      ) : (
+                        <polygon points="11,9 11,19 19,14" fill="#fb923c" />
+                      )}
+                    </svg>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Traits below card - same as photo cards */}
         {story.traits && story.traits.length > 0 && (
-          <StoryTraits traits={story.traits} />
+          <div className="mt-3">
+            <StoryTraits traits={story.traits} />
+          </div>
         )}
       </div>
     );

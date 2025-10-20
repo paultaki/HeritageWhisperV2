@@ -881,13 +881,23 @@ function BookStyleReviewContent() {
       qaPairs: cachedData.qaPairs,
     };
 
+    // For conversation mode, automatically create enhanced version
+    let enhancedTranscript = cachedData.enhancedTranscript || cachedData.rawTranscript || "";
+
+    // If we have Q&A pairs and no enhanced transcript yet, we'll enhance it on the fly
+    // This happens asynchronously in the wizard component
+    if (cachedData.mode === "conversation" && cachedData.qaPairs && !cachedData.enhancedTranscript) {
+      console.log("[Wizard Mode] Conversation mode detected, enhancement will be done in wizard");
+      enhancedTranscript = cachedData.rawTranscript || ""; // Start with raw, will enhance in component
+    }
+
     // Prepare initial wizard data
     const initialData: Partial<PostRecordingData> = {
       title: cachedData.title || "",
       year: cachedData.storyYear ? parseInt(cachedData.storyYear, 10) : undefined,
       photos: [],
       originalTranscript: cachedData.rawTranscript || "",
-      enhancedTranscript: cachedData.enhancedTranscript || cachedData.rawTranscript || "",
+      enhancedTranscript: enhancedTranscript,
       useEnhanced: true,
       lessonLearned: cachedData.lessonLearned || "",
       recording,

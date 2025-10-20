@@ -565,7 +565,7 @@ function MemoryCard({
             : undefined,
   };
 
-  // Render compact format for memories without photos
+  // Render format for memories without photos - now with 4:3 aspect ratio placeholder
   if (!displayPhoto || !displayPhoto.url) {
     return (
       <div
@@ -577,7 +577,7 @@ function MemoryCard({
               ? "return-highlight-animation"
               : ""
         }`}
-        style={{ "--title-offset": "22px" } as React.CSSProperties}
+        style={{ "--title-offset": "180px" } as React.CSSProperties}
         onClick={handleCardClick}
         data-testid={`memory-card-${story.id}`}
       >
@@ -600,6 +600,22 @@ function MemoryCard({
               })
             : formatYear(story.storyYear)}
         </span>
+
+        {/* 4:3 aspect ratio placeholder - matches photo cards */}
+        <div className="relative w-full aspect-[4/3] mb-3 rounded-xl overflow-hidden">
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100"
+            style={{
+              backgroundColor: isDarkTheme ? '#2a2a2a' : '#f9fafb',
+              backgroundImage: `linear-gradient(135deg, ${isDarkTheme ? '#2a2a2a' : '#f9fafb'} 0%, ${isDarkTheme ? '#1f1f1f' : '#f3f4f6'} 50%, ${isDarkTheme ? '#2a2a2a' : '#f9fafb'} 100%)`
+            }}
+          >
+            {/* Optional subtle icon in center */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-4xl opacity-10">📝</div>
+            </div>
+          </div>
+        </div>
 
         <div className="hw-card-body">
           <div className="flex items-center gap-3">

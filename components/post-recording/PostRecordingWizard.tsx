@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useRecordingWizard } from "@/hooks/use-recording-wizard";
 import { type PostRecordingData } from "@/types/recording";
+import { processConversationData } from "@/lib/conversationEnhancement";
 import { Step1_TitleYear } from "./Step1_TitleYear";
 import { Step2_Photos } from "./Step2_Photos";
 import { Step3_Review } from "./Step3_Review";
@@ -29,6 +31,44 @@ export function PostRecordingWizard({
   onComplete,
 }: PostRecordingWizardProps) {
   const wizard = useRecordingWizard({ initialData, onComplete });
+  const [isEnhancing, setIsEnhancing] = useState(false);
+
+  // Auto-enhance conversation transcripts when component mounts
+  useEffect(() => {
+    const enhanceIfNeeded = async () => {
+      // Only enhance if:
+      // 1. It's conversation mode
+      // 2. We have Q&A pairs
+      // 3. Enhanced transcript is same as original (not yet enhanced)
+      if (
+        initialData.recording?.mode === "conversation" &&
+        initialData.recording?.qaPairs &&
+        initialData.recording.qaPairs.length > 0 &&
+        initialData.enhancedTranscript === initialData.originalTranscript
+      ) {
+        console.log("[Wizard] Enhancing conversation transcript...");
+        setIsEnhancing(true);
+
+        try {
+          const enhanced = await processConversationData(
+            initialData.recording.qaPairs,
+            initialData.originalTranscript || ""
+          );
+
+          // Update the enhanced transcript
+          wizard.updateData("enhancedTranscript", enhanced.enhancedTranscript);
+          console.log("[Wizard] Transcript enhanced successfully");
+        } catch (error) {
+          console.error("[Wizard] Failed to enhance transcript:", error);
+          // On error, enhanced will be same as original
+        } finally {
+          setIsEnhancing(false);
+        }
+      }
+    };
+
+    enhanceIfNeeded();
+  }, []); // Only run once on mount
 
   const {
     currentStep,
@@ -126,18 +166,28 @@ export function PostRecordingWizard({
           )}
 
           {currentStep === 3 && (
-            <Step3_Review
-              originalTranscript={data.originalTranscript}
-              enhancedTranscript={data.enhancedTranscript}
-              useEnhanced={data.useEnhanced}
-              onOriginalChange={(original) =>
-                updateData("originalTranscript", original)
-              }
-              onEnhancedChange={(enhanced) =>
-                updateData("enhancedTranscript", enhanced)
-              }
-              onUseEnhancedChange={(use) => updateData("useEnhanced", use)}
-            />
+            <>
+              {isEnhancing && (
+                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                  <p className="text-sm text-blue-800">
+                    Enhancing your conversation transcript for better readability...
+                  </p>
+                </div>
+              )}
+              <Step3_Review
+                originalTranscript={data.originalTranscript}
+                enhancedTranscript={data.enhancedTranscript}
+                useEnhanced={data.useEnhanced}
+                onOriginalChange={(original) =>
+                  updateData("originalTranscript", original)
+                }
+                onEnhancedChange={(enhanced) =>
+                  updateData("enhancedTranscript", enhanced)
+                }
+                onUseEnhancedChange={(use) => updateData("useEnhanced", use)}
+              />
+            </>
           )}
 
           {currentStep === 4 && (
