@@ -2,6 +2,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "nextjs"
+  "installCommand": "npm ci --prefer-offline --no-audit --no-fund",
+  "framework": "nextjs",
+  "functions": {
+    "app/api/export/**": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
 }
