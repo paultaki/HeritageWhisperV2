@@ -438,11 +438,11 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
     if (displayPhoto?.url) {
       return (
         <div>
-          <div className={`relative rounded-3xl overflow-hidden shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 ${
+          <div className={`relative rounded-3xl shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}>
             <div 
-              className="relative w-full aspect-[4/3]"
+              className="relative w-full aspect-[4/3] overflow-hidden rounded-3xl"
               style={{ pointerEvents: 'none' }}
             >
               <div 
@@ -483,7 +483,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             )}
             
             {/* Memory Footer Overlay with Play Button */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 md:p-4 pointer-events-none">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 md:p-4 pointer-events-none rounded-b-3xl">
               {/* Progress Bar (shows above title when playing) */}
               {story.audioUrl && (isPlaying || progress > 0) && (
                 <div className="mb-3 pointer-events-auto">

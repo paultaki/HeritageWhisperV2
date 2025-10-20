@@ -634,19 +634,22 @@ export default function HomePage() {
                     </p>
                   </div>
                   <div className={`${index % 2 === 0 ? "md:pl-12" : "md:pr-12 md:col-start-1 md:row-start-1"}`}>
-                    <div className="relative rounded-2xl overflow-hidden shadow-2xl group border-4 border-white">
-                      <Image
-                        src={memory.img}
-                        alt={memory.title}
-                        width={500}
-                        height={350}
-                        className="w-full h-[350px] object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                      {/* Timeline dot */}
-                      <div className="hidden md:block absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-br from-[#21808D] to-[#E85D5D] rounded-full border-4 border-white shadow-xl" style={{
-                        [index % 2 === 0 ? "right" : "left"]: "-3.5rem"
-                      }}></div>
+                    <div className="w-[80%] mx-auto">
+                      <div className="relative rounded-2xl overflow-hidden shadow-2xl group aspect-[4/3] isolate">
+                        <Image
+                          src={memory.img}
+                          alt={memory.title}
+                          width={500}
+                          height={375}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          style={{ display: 'block' }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                        {/* Timeline dot */}
+                        <div className="hidden md:block absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-br from-[#21808D] to-[#E85D5D] rounded-full border-4 border-white shadow-xl" style={{
+                          [index % 2 === 0 ? "right" : "left"]: "-3.5rem"
+                        }}></div>
+                      </div>
                     </div>
                   </div>
                 </div>

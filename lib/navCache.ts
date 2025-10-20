@@ -1,12 +1,19 @@
 // Navigation cache for reliable data transfer between pages
 // Uses both memory cache (fast) and localStorage (persistent) as fallback
 
+interface QAPair {
+  question: string;
+  answer: string;
+  timestamp?: string;
+  duration?: number;
+}
+
 interface NavPayload {
   transcription?: string;
   wisdomTranscription?: string;
   audioDuration?: number;
   wisdomDuration?: number;
-  timestamp?: number;
+  timestamp?: number | string;
   audioUrl?: string;
   prompt?: {
     title: string;
@@ -27,6 +34,14 @@ interface NavPayload {
   photoUrl?: string;
   photoTransform?: { zoom: number; position: { x: number; y: number } } | null;
   wisdomClipText?: string;
+
+  // Wizard mode fields
+  mode?: 'conversation' | 'quick';
+  audioBlob?: Blob;
+  duration?: number;
+  rawTranscript?: string;
+  qaPairs?: QAPair[];
+  enhancedTranscript?: string;
 }
 
 // In-memory cache for speed
@@ -34,15 +49,32 @@ const memoryCache = new Map<string, NavPayload>();
 
 export const navCache = {
   // Store data with a unique ID
-  set(id: string, payload: NavPayload): void {
+  async set(id: string, payload: NavPayload): Promise<void> {
     try {
-      // Store in memory for immediate access
+      // Store in memory for immediate access (with Blob)
       memoryCache.set(id, payload);
 
-      // Store in localStorage as backup
-      localStorage.setItem(`nav:${id}`, JSON.stringify(payload));
+      // For localStorage, we need to serialize Blobs
+      const serializable = { ...payload };
 
-      console.log("NavCache: Stored data with ID", id, payload);
+      // Convert Blob to base64 for localStorage
+      if (payload.audioBlob) {
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(payload.audioBlob!);
+        });
+
+        const base64 = await base64Promise;
+        (serializable as any)._audioBlobBase64 = base64;
+        delete (serializable as any).audioBlob;
+      }
+
+      // Store in localStorage as backup
+      localStorage.setItem(`nav:${id}`, JSON.stringify(serializable));
+
+      console.log("NavCache: Stored data with ID", id);
     } catch (error) {
       console.error("NavCache: Error storing data", error);
     }
