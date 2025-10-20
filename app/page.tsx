@@ -242,7 +242,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-[#13343B] mb-6">
               How HeritageWhisper Works
             </h2>
-            <p className="text-xl text-[#626C71] max-w-2xl mx-auto leading-relaxed">
+            <p className="text-center text-xl text-[#626C71] max-w-2xl mx-auto leading-relaxed">
               From voice to beautiful living legacy in three effortless steps
             </p>
           </div>
