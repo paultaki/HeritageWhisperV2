@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { useRecordingWizard } from "@/hooks/use-recording-wizard";
 import { type PostRecordingData } from "@/types/recording";
 import { processConversationData } from "@/lib/conversationEnhancement";
+import { enhanceQuickStoryTranscript } from "@/lib/quickStoryEnhancement";
 import { Step1_TitleYear } from "./Step1_TitleYear";
 import { Step2_Photos } from "./Step2_Photos";
 import { Step3_Review } from "./Step3_Review";
@@ -33,30 +34,43 @@ export function PostRecordingWizard({
   const wizard = useRecordingWizard({ initialData, onComplete });
   const [isEnhancing, setIsEnhancing] = useState(false);
 
-  // Auto-enhance conversation transcripts when component mounts
+  // Auto-enhance transcripts when component mounts
   useEffect(() => {
     const enhanceIfNeeded = async () => {
-      // Only enhance if:
-      // 1. It's conversation mode
-      // 2. We have Q&A pairs
-      // 3. Enhanced transcript is same as original (not yet enhanced)
-      if (
-        initialData.recording?.mode === "conversation" &&
-        initialData.recording?.qaPairs &&
-        initialData.recording.qaPairs.length > 0 &&
-        initialData.enhancedTranscript === initialData.originalTranscript
-      ) {
-        console.log("[Wizard] Enhancing conversation transcript...");
+      // Check if we need to enhance (enhanced is same as original)
+      if (initialData.enhancedTranscript === initialData.originalTranscript && initialData.originalTranscript) {
+        console.log(`[Wizard] Enhancing ${initialData.recording?.mode} transcript...`);
         setIsEnhancing(true);
 
         try {
-          const enhanced = await processConversationData(
-            initialData.recording.qaPairs,
-            initialData.originalTranscript || ""
-          );
+          let enhancedResult = "";
+
+          // Handle conversation mode with Q&A pairs
+          if (
+            initialData.recording?.mode === "conversation" &&
+            initialData.recording?.qaPairs &&
+            initialData.recording.qaPairs.length > 0
+          ) {
+            const enhanced = await processConversationData(
+              initialData.recording.qaPairs,
+              initialData.originalTranscript || ""
+            );
+            enhancedResult = enhanced.enhancedTranscript;
+          }
+          // Handle quick story mode with self-correction processing
+          else if (initialData.recording?.mode === "quick") {
+            const enhanced = await enhanceQuickStoryTranscript(
+              initialData.originalTranscript || ""
+            );
+            enhancedResult = enhanced.enhanced;
+          }
+          // Default: just use original
+          else {
+            enhancedResult = initialData.originalTranscript || "";
+          }
 
           // Update the enhanced transcript
-          wizard.updateData("enhancedTranscript", enhanced.enhancedTranscript);
+          wizard.updateData("enhancedTranscript", enhancedResult);
           console.log("[Wizard] Transcript enhanced successfully");
         } catch (error) {
           console.error("[Wizard] Failed to enhance transcript:", error);
@@ -171,7 +185,9 @@ export function PostRecordingWizard({
                 <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
                   <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                   <p className="text-sm text-blue-800">
-                    Enhancing your conversation transcript for better readability...
+                    {data.recording?.mode === "conversation"
+                      ? "Transforming your interview into a flowing story..."
+                      : "Cleaning up self-corrections and adding punctuation..."}
                   </p>
                 </div>
               )}
@@ -179,6 +195,7 @@ export function PostRecordingWizard({
                 originalTranscript={data.originalTranscript}
                 enhancedTranscript={data.enhancedTranscript}
                 useEnhanced={data.useEnhanced}
+                isConversationMode={data.recording?.mode === "conversation"}
                 onOriginalChange={(original) =>
                   updateData("originalTranscript", original)
                 }

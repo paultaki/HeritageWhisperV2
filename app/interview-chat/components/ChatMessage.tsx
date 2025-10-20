@@ -30,7 +30,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         <div className="max-w-[75%]">
           {/* Sender label */}
           <div className="mb-1 px-3 text-xs text-gray-500 font-medium">
-            Heritage Whisper
+            Pearl
           </div>
           {/* Bubble */}
           <div

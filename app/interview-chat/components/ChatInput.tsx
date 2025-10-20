@@ -107,33 +107,33 @@ export function ChatInput({ onAudioResponse, onTextResponse, disabled }: ChatInp
   };
 
   return (
-    <div className="sticky bottom-0 border-t border-gray-200 bg-white px-6 py-4">
-      {/* Mode Toggle */}
-      <div className="flex justify-center mb-3">
-        <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-gray-50">
+    <div className="sticky bottom-0 border-t border-gray-200 bg-white px-4 sm:px-6 py-3 sm:py-4">
+      {/* Mode Toggle - more compact on mobile */}
+      <div className="flex justify-center mb-2 sm:mb-3">
+        <div className="inline-flex rounded-lg border border-gray-200 p-0.5 sm:p-1 bg-gray-50">
           <button
             onClick={() => setMode('audio')}
             disabled={disabled || isRecording}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center px-3 sm:px-4 py-1 sm:py-1.5 rounded-md text-sm font-medium transition-all ${
               mode === 'audio'
                 ? 'bg-white text-gray-900 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <Mic className="w-4 h-4 inline-block mr-1.5" />
-            Audio
+            <Mic className="w-4 h-4 mr-1" />
+            <span>Audio</span>
           </button>
           <button
             onClick={() => setMode('text')}
             disabled={disabled || isRecording}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center px-3 sm:px-4 py-1 sm:py-1.5 rounded-md text-sm font-medium transition-all ${
               mode === 'text'
                 ? 'bg-white text-gray-900 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <Type className="w-4 h-4 inline-block mr-1.5" />
-            Type
+            <Type className="w-4 h-4 mr-1" />
+            <span>Type</span>
           </button>
         </div>
       </div>
@@ -220,7 +220,7 @@ export function ChatInput({ onAudioResponse, onTextResponse, disabled }: ChatInp
 
       {/* Helper text */}
       {!isRecording && (
-        <p className="text-xs text-gray-500 text-center mt-3">
+        <p className="text-sm text-gray-500 text-center mt-3">
           {mode === 'audio'
             ? 'Speak naturally and take your time'
             : 'Press Enter to send, Shift+Enter for new line'

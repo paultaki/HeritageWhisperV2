@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { navCache } from "@/lib/navCache";
 import { type RecorderState } from "@/types/recording";
 import { toast } from "@/hooks/use-toast";
+import { useRecordingState } from "@/contexts/RecordingContext";
 
 const MAX_RECORDING_DURATION = 300; // 5 minutes in seconds
 
@@ -25,6 +26,7 @@ interface UseQuickRecorderOptions {
  */
 export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
   const router = useRouter();
+  const { startRecording: startGlobalRecording, stopRecording: stopGlobalRecording } = useRecordingState();
   const [state, setState] = useState<RecorderState>("ready");
   const [duration, setDuration] = useState(0);
   const [countdown, setCountdown] = useState(3);
@@ -53,7 +55,20 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
       countdownIntervalRef.current = null;
     }
     audioChunksRef.current = [];
-  }, []);
+
+    // Stop global recording state
+    stopGlobalRecording();
+  }, [stopGlobalRecording]);
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      // Stop recording if component unmounts
+      if (state === "recording" || state === "paused") {
+        stopGlobalRecording();
+      }
+    };
+  }, [state, stopGlobalRecording]);
 
   // Timer effect
   useEffect(() => {
@@ -135,6 +150,9 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
       mediaRecorder.start();
       setState("recording");
       setDuration(0);
+
+      // Set global recording state
+      startGlobalRecording('quick-story');
     } catch (error) {
       console.error("[useQuickRecorder] Failed to begin recording:", error);
       setState("ready");
@@ -145,7 +163,7 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
         variant: "destructive",
       });
     }
-  }, [isRestarting, options]);
+  }, [isRestarting, options, startGlobalRecording]);
 
   // Pause recording
   const pauseRecording = useCallback(() => {

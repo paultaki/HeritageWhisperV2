@@ -42,7 +42,7 @@ export function Step3_Review({
         <p className="text-gray-600 text-sm">
           {isConversationMode
             ? "We've transformed your interview answers into a flowing story while preserving your exact words and voice. You can use this version or the original Q&A format."
-            : "We've enhanced your transcript for readability. You can use the enhanced version or the original."}
+            : "We've cleaned up self-corrections, removed duplicates, and added punctuation while keeping your exact voice and personality. You can use this enhanced version or the original."}
         </p>
       </div>
 
@@ -57,13 +57,17 @@ export function Step3_Review({
           <div className="flex items-start space-x-3">
             <RadioGroupItem value="enhanced" id="enhanced" className="mt-0.5" />
             <Label htmlFor="enhanced" className="font-normal cursor-pointer flex-1 leading-normal">
-              Enhanced (recommended) - Polished for readability with grammar and flow improvements
+              {isConversationMode
+                ? "Story Format (recommended) - Your interview answers woven into a natural story"
+                : "Enhanced (recommended) - Self-corrections fixed, duplicates removed, punctuation added"}
             </Label>
           </div>
           <div className="flex items-start space-x-3">
             <RadioGroupItem value="original" id="original" className="mt-0.5" />
             <Label htmlFor="original" className="font-normal cursor-pointer flex-1 leading-normal">
-              Original - Your exact words as transcribed
+              {isConversationMode
+                ? "Raw Transcript - Your unprocessed answers without punctuation"
+                : "Original - Your exact words as transcribed"}
             </Label>
           </div>
         </RadioGroup>

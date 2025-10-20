@@ -6,6 +6,7 @@ import { Calendar, BookOpen, Box, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useRecordingState } from "@/contexts/RecordingContext";
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -67,6 +68,7 @@ export default function MobileNavigation({
 }: MobileNavigationProps) {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { isRecording, recordingType } = useRecordingState();
 
   // Don't show navigation on auth pages or home page
   const shouldShow =
@@ -120,40 +122,52 @@ export default function MobileNavigation({
           style={{ marginLeft: 'clamp(8px, 4vw, 24px)', marginRight: 'clamp(8px, 6vw, 32px)' }}
         >
           <button
-            onClick={onRecordClick}
-            className="absolute w-16 h-16 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            onClick={isRecording ? undefined : onRecordClick}
+            disabled={isRecording}
+            className={`absolute w-16 h-16 rounded-full flex items-center justify-center transition-all ${
+              isRecording
+                ? 'cursor-not-allowed opacity-50'
+                : 'hover:scale-110 active:scale-95'
+            }`}
             style={{
               bottom: "-12px",
-              background: "linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)",
-              boxShadow:
-                "0 4px 12px rgba(245, 158, 11, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
-              border: "2px solid rgba(255, 255, 255, 0.3)",
+              background: isRecording
+                ? "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)"
+                : "linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)",
+              boxShadow: isRecording
+                ? "0 2px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.2)"
+                : "0 4px 12px rgba(245, 158, 11, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
+              border: isRecording
+                ? "2px solid rgba(255, 255, 255, 0.1)"
+                : "2px solid rgba(255, 255, 255, 0.3)",
             }}
           >
-            {/* Pulse animation ring */}
-            <motion.div
-              className="absolute inset-0 rounded-full"
-              style={{
-                background: "linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)",
-              }}
-              animate={{
-                scale: [1, 1.3, 1.3],
-                opacity: [0.5, 0, 0],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                repeatDelay: 0.5,
-              }}
-            />
+            {/* Pulse animation ring - only when not recording */}
+            {!isRecording && (
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: "linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)",
+                }}
+                animate={{
+                  scale: [1, 1.3, 1.3],
+                  opacity: [0.5, 0, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 0.5,
+                }}
+              />
+            )}
 
-            {/* Icon */}
+            {/* Icon - grayscale when recording */}
             <Image
               src="/REC_Mic.png"
               alt="Record"
               width={24}
               height={24}
-              className="z-10"
+              className={`z-10 ${isRecording ? 'grayscale' : ''}`}
               style={{ width: 'auto', height: 'auto' }}
             />
           </button>

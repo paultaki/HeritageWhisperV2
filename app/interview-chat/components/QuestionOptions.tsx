@@ -99,7 +99,7 @@ export function QuestionOptions({ messageId, options, selectedOption, onSelect }
 
       {/* Helper text */}
       {!hasSelected && (
-        <p className="text-xs text-gray-400 text-center mt-2 animate-pulse">
+        <p className="text-sm text-gray-500 text-center mt-2 animate-pulse">
           Or continue with your own thoughts
         </p>
       )}

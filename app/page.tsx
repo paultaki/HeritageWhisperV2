@@ -3,11 +3,23 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Mic, Clock, Users, Heart, BookOpen, Sparkles, Star, CheckCircle, Shield, Lock, Download, AlertCircle } from "lucide-react";
+import { Mic, Clock, Users, Heart, BookOpen, Sparkles, Star, CheckCircle, Shield, Lock, Download, AlertCircle, ChevronDown } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [expandedFAQ, setExpandedFAQ] = useState<Set<number>>(new Set());
+
+  // Toggle FAQ item
+  const toggleFAQ = (index: number) => {
+    const newExpanded = new Set(expandedFAQ);
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index);
+    } else {
+      newExpanded.add(index);
+    }
+    setExpandedFAQ(newExpanded);
+  };
 
   // Check for prefers-reduced-motion preference
   useEffect(() => {
@@ -802,10 +814,35 @@ export default function HomePage() {
                 key={index}
                 data-animate
                 style={{ transitionDelay: `${index * 50}ms` }}
-                className="opacity-0 translate-y-8 transition-all duration-700 ease-out bg-white rounded-2xl p-8 border-2 border-[#E7DFD5] hover:border-[#21808D] hover:shadow-xl transition-all"
+                className="opacity-0 translate-y-8 transition-all duration-700 ease-out bg-white rounded-2xl border-2 border-[#E7DFD5] hover:border-[#21808D] hover:shadow-xl transition-all overflow-hidden"
               >
-                <h3 className="text-xl font-bold text-[#13343B] mb-3">{faq.question}</h3>
-                <p className="text-lg text-[#626C71] leading-relaxed">{faq.answer}</p>
+                <button
+                  onClick={() => toggleFAQ(index)}
+                  className="w-full p-8 text-left flex items-start justify-between gap-4 focus:outline-none focus:ring-2 focus:ring-[#21808D] focus:ring-offset-2 rounded-t-2xl"
+                  aria-expanded={expandedFAQ.has(index)}
+                  aria-controls={`faq-answer-${index}`}
+                >
+                  <h3 className="text-xl font-bold text-[#13343B] flex-1">{faq.question}</h3>
+                  <ChevronDown
+                    className={`w-6 h-6 text-[#626C71] flex-shrink-0 transition-transform duration-300 ${
+                      expandedFAQ.has(index) ? 'rotate-180' : ''
+                    }`}
+                    aria-hidden="true"
+                  />
+                </button>
+                <div
+                  id={`faq-answer-${index}`}
+                  className={`transition-all duration-300 ease-in-out ${
+                    expandedFAQ.has(index)
+                      ? 'max-h-96 opacity-100'
+                      : 'max-h-0 opacity-0'
+                  }`}
+                  aria-hidden={!expandedFAQ.has(index)}
+                >
+                  <div className="px-8 pb-8 -mt-3">
+                    <p className="text-lg text-[#626C71] leading-relaxed">{faq.answer}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

@@ -10,69 +10,76 @@ interface WelcomeModalProps {
 
 export function WelcomeModal({ userName, onDismiss }: WelcomeModalProps) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-6">
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center">
       <div
-        className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-12 animate-in fade-in slide-in-from-bottom-4 duration-300"
-        style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}
+        className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-w-2xl w-full animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col"
+        style={{
+          boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+          height: 'calc(100vh - 80px)',
+          maxHeight: '90vh',
+        }}
       >
-        {/* Welcome Header */}
-        <div className="text-center mb-10">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-6 flex items-center justify-center">
-            <MessageSquare className="w-10 h-10 text-white" />
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-6 sm:px-12 pt-8 sm:pt-12 pb-4">
+          {/* Welcome Header */}
+          <div className="text-center mb-6 sm:mb-10">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-4 sm:mb-6 flex items-center justify-center">
+              <MessageSquare className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">
+              Welcome, friend!
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 font-medium">
+              Your Guided Interview with Pearl
+            </p>
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-3">
-            Welcome, friend!
-          </h2>
-          <p className="text-xl text-gray-600 font-medium">
-            Your Heritage Whisper Guided Interview
-          </p>
+
+          {/* Instructions */}
+          <div className="space-y-4 sm:space-y-6">
+            <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+              I'll ask you questions about your life over the next 10-15 minutes.
+            </p>
+
+            {/* Features - more compact on mobile */}
+            <div className="space-y-4 sm:space-y-5">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">Record or Type</h3>
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">Answer with your voice or typing</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+                  <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-rose-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">Choose Your Path</h3>
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">Pick questions that interest you</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">Take Your Time</h3>
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">Share as much as you'd like</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Instructions */}
-        <div className="space-y-6 mb-10">
-          <p className="text-lg text-gray-700 leading-relaxed text-center">
-            Over the next 10-15 minutes, I'll ask you questions about your life.
-            This conversation will help you capture your memories in a meaningful way.
-          </p>
-
-          {/* Features */}
-          <div className="space-y-5 pt-4">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <Mic className="w-6 h-6 text-amber-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Record or Type</h3>
-                <p className="text-lg text-gray-600 leading-relaxed">Answer with your voice or by typing - whichever feels natural</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
-                <MessageSquare className="w-6 h-6 text-rose-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Choose Your Path</h3>
-                <p className="text-lg text-gray-600 leading-relaxed">Pick which follow-up questions interest you most</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Take Your Time</h3>
-                <p className="text-lg text-gray-600 leading-relaxed">There's no rush - share as much or as little as you'd like</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* CTA Button */}
-        <button
-          onClick={onDismiss}
-          className="premium-button w-full h-16 text-xl font-semibold text-white rounded-xl shadow-lg hover:shadow-xl transition-all relative overflow-hidden cursor-pointer border-none outline-none"
+        {/* Sticky Button Area */}
+        <div className="bg-white border-t border-gray-100 px-6 sm:px-12 py-4 sm:py-6">
+          <button
+            onClick={onDismiss}
+            className="premium-button w-full h-14 sm:h-16 text-lg sm:text-xl font-semibold text-white rounded-xl shadow-lg hover:shadow-xl transition-all relative overflow-hidden cursor-pointer border-none outline-none"
           style={{
             background: 'radial-gradient(65.28% 65.28% at 50% 100%, rgba(251, 146, 60, 0.8) 0%, rgba(251, 146, 60, 0) 100%), linear-gradient(135deg, #D97706 0%, #DC2626 100%)',
           }}
@@ -109,10 +116,11 @@ export function WelcomeModal({ userName, onDismiss }: WelcomeModalProps) {
           </span>
         </button>
 
-        {/* Helper text */}
-        <p className="text-center text-base text-gray-500 mt-5">
-          This usually takes 10-15 minutes
-        </p>
+          {/* Helper text */}
+          <p className="text-center text-sm sm:text-base text-gray-500 mt-2 sm:mt-3">
+            This usually takes 10-15 minutes
+          </p>
+        </div>
       </div>
 
       <style jsx>{`

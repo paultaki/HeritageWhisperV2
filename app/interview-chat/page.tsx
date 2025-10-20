@@ -15,6 +15,7 @@ import {
   extractQAPairs,
   combineAudioBlobs,
 } from "@/lib/conversationModeIntegration";
+import { useRecordingState } from "@/contexts/RecordingContext";
 
 export type MessageType =
   | 'system'
@@ -45,6 +46,7 @@ export type AudioState = {
 export default function InterviewChatPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const { startRecording, stopRecording } = useRecordingState();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showWelcome, setShowWelcome] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -71,15 +73,26 @@ export default function InterviewChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Clean up recording state on unmount
+  useEffect(() => {
+    return () => {
+      // Stop recording if user navigates away
+      stopRecording();
+    };
+  }, [stopRecording]);
+
   // Initialize conversation after welcome dismissed
   const handleWelcomeDismiss = () => {
     setShowWelcome(false);
+
+    // Start recording state for the interview
+    startRecording('conversation');
 
     // Add initial greeting
     const greeting: Message = {
       id: `msg-${Date.now()}`,
       type: 'system',
-      content: `Welcome, ${user?.user_metadata?.full_name || 'friend'}! Let's begin your Heritage Whisper guided interview.`,
+      content: `Welcome, ${user?.user_metadata?.full_name || 'friend'}! I'm Pearl, your Heritage Whisper guide. Let's begin your interview.`,
       timestamp: new Date(),
       sender: 'system',
     };
@@ -393,6 +406,9 @@ export default function InterviewChatPage() {
 
       console.log('✅ [Interview] completeConversationAndRedirect finished');
 
+      // Stop recording state when interview is completed
+      stopRecording();
+
     } catch (error) {
       console.error('❌ [Interview] Error completing interview:', error);
       alert('Failed to complete interview. Please try again.');
@@ -438,12 +454,33 @@ export default function InterviewChatPage() {
         />
       )}
 
-      {/* Chat Container */}
-      <div className="max-w-3xl mx-auto h-screen flex flex-col">
+      {/* Chat Container - adjust height to account for bottom nav on mobile */}
+      <div className="max-w-3xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 80px)', marginBottom: '80px' }}>
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col items-center gap-2 flex-1">
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-2 sm:py-4">
+          {/* Mobile Layout - stacked when complete button is visible */}
+          {messages.some(m => m.type === 'audio-response' || m.type === 'text-response') ? (
+            <div className="flex flex-col items-center gap-2">
+              <Image
+                src="/HW_text-compress.png"
+                alt="Heritage Whisper"
+                width={200}
+                height={50}
+                className="h-8 sm:h-10 w-auto"
+                priority
+              />
+              <button
+                onClick={handleCompleteInterview}
+                disabled={isProcessing}
+                className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-semibold px-5 py-2 sm:px-6 sm:py-3 rounded-full text-sm transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                style={{ minHeight: '36px' }}
+              >
+                Complete Interview
+              </button>
+            </div>
+          ) : (
+            // Original layout when no complete button
+            <div className="flex flex-col items-center gap-0.5 sm:gap-2">
               <Image
                 src="/HW_text-compress.png"
                 alt="Heritage Whisper"
@@ -452,25 +489,13 @@ export default function InterviewChatPage() {
                 className="h-10 w-auto"
                 priority
               />
-              <p className="text-sm text-gray-500">Guided Interview</p>
+              <p className="text-lg font-medium text-gray-600">Guided Interview</p>
             </div>
-
-            {/* Complete Interview Button - only show if user has responded */}
-            {messages.some(m => m.type === 'audio-response' || m.type === 'text-response') && (
-              <button
-                onClick={handleCompleteInterview}
-                disabled={isProcessing}
-                className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-semibold px-6 py-3 rounded-full text-sm transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                style={{ minHeight: '44px' }}
-              >
-                Complete Interview
-              </button>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-6 space-y-4">
           {messages.map((message) => (
             <div key={message.id}>
               {message.type === 'typing' ? (
