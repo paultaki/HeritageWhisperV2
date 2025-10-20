@@ -4,32 +4,35 @@ import React from "react";
 import DesktopNavigationBottom from "./DesktopNavigationBottom";
 import MobileNavigation from "./MobileNavigation";
 import HamburgerMenu from "./HamburgerMenu";
-import RecordModal from "./RecordModal";
-import { useRecordModal } from "@/hooks/use-record-modal";
+import { useModeSelection } from "@/hooks/use-mode-selection";
+import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
+import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 
 export default function NavigationWrapper() {
-  const { isOpen, openModal, closeModal, handleSave, initialData } =
-    useRecordModal();
+  const modeSelection = useModeSelection();
 
   return (
     <>
       {/* Desktop Navigation (bottom bar) - shows on all pages */}
-      <DesktopNavigationBottom onRecordClick={() => openModal()} />
+      <DesktopNavigationBottom onRecordClick={() => modeSelection.openModal()} />
 
       {/* Mobile Navigation (bottom bar) - shows on all pages */}
-      <MobileNavigation onRecordClick={() => openModal()} />
+      <MobileNavigation onRecordClick={() => modeSelection.openModal()} />
 
       {/* Hamburger Menu (top right) - hidden on book page per component logic */}
       <HamburgerMenu />
 
-      {/* Record Modal */}
-      <RecordModal
-        isOpen={isOpen}
-        onClose={closeModal}
-        onSave={handleSave}
-        initialPrompt={initialData?.prompt}
-        initialTitle={initialData?.title}
-        initialYear={initialData?.year}
+      {/* Mode Selection Modal */}
+      <ModeSelectionModal
+        isOpen={modeSelection.isOpen}
+        onClose={modeSelection.closeModal}
+        onSelectQuickStory={modeSelection.openQuickRecorder}
+      />
+
+      {/* Quick Story Recorder */}
+      <QuickStoryRecorder
+        isOpen={modeSelection.quickRecorderOpen}
+        onClose={modeSelection.closeQuickRecorder}
       />
     </>
   );
