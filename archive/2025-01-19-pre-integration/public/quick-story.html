@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Story - HeritageWhisper</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom color palette */
+    :root {
+      --color-coral: #D7794F;
+      --color-coral-light: #FFE4D6;
+      --color-amber: #E8B44F;
+      --color-cream: #FAF7F2;
+      --color-brown: #2c2416;
+    }
+
+    body {
+      background-color: var(--color-cream);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* Recording circle animations */
+    .recording-circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .recording-circle.ready {
+      background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .recording-circle.ready:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .recording-circle.countdown {
+      background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .recording-circle.recording {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .recording-circle.paused {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Pulsing animation for recording state */
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+      }
+    }
+
+    .recording-circle.recording {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* Countdown animation */
+    @keyframes countdownPop {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .countdown-number {
+      animation: countdownPop 0.8s ease-out;
+    }
+
+    /* Recording dot */
+    .recording-dot {
+      width: 20px;
+      height: 20px;
+      background-color: #dc2626;
+      border-radius: 50%;
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    /* Button styles */
+    .btn-primary {
+      background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+      transition: all 0.3s ease;
+      min-height: 48px;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #ea580c 0%, #db2777 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+      background: white;
+      border: 2px solid #d1d5db;
+      color: #374151;
+      transition: all 0.3s ease;
+      min-height: 48px;
+    }
+
+    .btn-secondary:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+    }
+
+    /* Fade animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Main Container -->
+  <div class="max-w-2xl mx-auto px-4 py-6 sm:py-8">
+
+    <!-- Header -->
+    <header class="flex items-center justify-between mb-6 sm:mb-8">
+      <div>
+        <h1 id="header-title" class="text-xl sm:text-2xl font-semibold text-gray-900">
+          Ready to Share a Story?
+        </h1>
+      </div>
+      <button
+        onclick="cancelRecording()"
+        class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+        style="min-width: 44px; min-height: 44px;"
+        aria-label="Cancel"
+      >
+        ✕
+      </button>
+    </header>
+
+    <!-- Main Content Card -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+
+      <!-- Prompt Section (visible in all states) -->
+      <div class="mb-8">
+        <div class="flex items-start gap-2 mb-3">
+          <span class="text-2xl">📝</span>
+          <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Prompt:</h2>
+        </div>
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+          <p id="prompt-text" class="text-base sm:text-lg text-gray-700 leading-relaxed italic">
+            "Let's start with something meaningful to you. What story have you been wanting to share?"
+          </p>
+        </div>
+      </div>
+
+      <!-- Recording Circle & Controls -->
+      <div class="text-center mb-8">
+
+        <!-- State 1: Ready to Record -->
+        <div id="state-ready" class="fade-in">
+          <div
+            class="recording-circle ready mx-auto mb-6"
+            onclick="startCountdown()"
+            role="button"
+            tabindex="0"
+            aria-label="Start recording"
+          >
+            <div class="text-center">
+              <div class="text-6xl mb-2">🎤</div>
+              <div class="text-white font-semibold text-lg">START</div>
+            </div>
+          </div>
+          <p class="text-gray-500 text-sm mb-6">🔒 Safe & Private</p>
+        </div>
+
+        <!-- State 2: Countdown -->
+        <div id="state-countdown" class="hidden fade-in">
+          <div class="recording-circle countdown mx-auto mb-6">
+            <div class="text-center">
+              <div id="countdown-number" class="countdown-number text-white text-8xl font-bold">3</div>
+            </div>
+          </div>
+          <p class="text-gray-600 text-base font-medium">Get ready...</p>
+        </div>
+
+        <!-- State 3: Recording -->
+        <div id="state-recording" class="hidden fade-in">
+          <div class="recording-circle recording mx-auto mb-6">
+            <div class="text-center">
+              <div id="timer-recording" class="text-white text-4xl font-bold mb-2">0:00</div>
+              <div class="recording-dot mx-auto"></div>
+            </div>
+          </div>
+          <div class="flex justify-center gap-4">
+            <button
+              onclick="pauseRecording()"
+              class="btn-secondary rounded-full px-6 py-3 font-semibold flex items-center gap-2"
+            >
+              <span>⏸</span>
+              <span>Pause</span>
+            </button>
+            <button
+              onclick="stopRecording()"
+              class="btn-primary rounded-full px-6 py-3 text-white font-semibold flex items-center gap-2"
+            >
+              <span>⏹</span>
+              <span>Stop & Transcribe</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- State 4: Paused -->
+        <div id="state-paused" class="hidden fade-in">
+          <div class="recording-circle paused mx-auto mb-6">
+            <div class="text-center">
+              <div id="timer-paused" class="text-white text-4xl font-bold mb-2">0:00</div>
+              <div class="text-white text-lg">Paused</div>
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row justify-center gap-4 mb-4">
+            <button
+              onclick="resumeRecording()"
+              class="btn-primary rounded-full px-6 py-3 text-white font-semibold flex items-center justify-center gap-2"
+            >
+              <span>▶</span>
+              <span>Resume</span>
+            </button>
+            <button
+              onclick="stopRecording()"
+              class="btn-secondary rounded-full px-6 py-3 font-semibold flex items-center justify-center gap-2"
+            >
+              <span>⏹</span>
+              <span>Stop & Transcribe</span>
+            </button>
+          </div>
+          <button
+            onclick="restartRecording()"
+            class="text-red-600 hover:text-red-700 font-medium underline"
+            style="min-height: 44px;"
+          >
+            🔄 Restart Recording
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Tips Section (only visible when ready) -->
+      <div id="tips-section" class="border-t border-gray-200 pt-6">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3">
+          Tips for a great recording:
+        </h3>
+        <ul class="space-y-2 text-gray-600 text-sm sm:text-base">
+          <li class="flex items-start gap-2">
+            <span class="text-blue-500">•</span>
+            <span>Speak naturally, as if telling a friend</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-blue-500">•</span>
+            <span>Don't worry about perfect grammar</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-blue-500">•</span>
+            <span>Include details that make the story come alive</span>
+          </li>
+        </ul>
+
+        <!-- Type Instead Option -->
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <button
+            onclick="showTypeMode()"
+            class="text-gray-600 hover:text-gray-900 underline text-sm sm:text-base"
+            style="min-height: 44px;"
+          >
+            I want to type my story instead →
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Type Mode Modal (initially hidden) -->
+  <div id="type-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl sm:text-2xl font-semibold text-gray-900">Type Your Story</h2>
+        <button
+          onclick="hideTypeMode()"
+          class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+          style="min-width: 44px; min-height: 44px;"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-2">Your Story:</label>
+        <textarea
+          id="typed-story"
+          class="w-full h-64 p-4 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base"
+          placeholder="Type your story here..."
+        ></textarea>
+        <p class="text-sm text-gray-500 mt-2">
+          Share as much detail as you'd like. There's no rush.
+        </p>
+      </div>
+
+      <button
+        onclick="submitTypedStory()"
+        class="btn-primary w-full rounded-full px-6 py-4 text-white font-semibold text-lg"
+      >
+        Continue to Review
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // State Management
+    // ============================================
+
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordingStartTime = null;
+    let pausedDuration = 0; // Total time spent paused
+    let pauseStartTime = null;
+    let timerInterval = null;
+    let countdownInterval = null;
+    let currentState = 'ready'; // 'ready' | 'countdown' | 'recording' | 'paused'
+    let isRestarting = false; // Flag to prevent completion handler when restarting
+
+    const MAX_RECORDING_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+    const PROMPT_TEXT = "Let's start with something meaningful to you. What story have you been wanting to share?";
+
+    // ============================================
+    // Recording Functions
+    // ============================================
+
+    /**
+     * Start countdown before recording
+     */
+    function startCountdown() {
+      updateUIState('countdown');
+
+      let count = 3;
+      const countdownElement = document.getElementById('countdown-number');
+
+      countdownInterval = setInterval(() => {
+        if (count > 0) {
+          // Update number with animation
+          countdownElement.textContent = count;
+          countdownElement.classList.remove('countdown-number');
+          void countdownElement.offsetWidth; // Trigger reflow to restart animation
+          countdownElement.classList.add('countdown-number');
+          count--;
+        } else {
+          clearInterval(countdownInterval);
+          startRecording();
+        }
+      }, 1000);
+    }
+
+    /**
+     * Start recording audio
+     */
+    async function startRecording() {
+      try {
+        // Request microphone access
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        // Initialize MediaRecorder
+        mediaRecorder = new MediaRecorder(stream);
+
+        // Collect audio data
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        };
+
+        // Handle recording stop
+        mediaRecorder.onstop = handleRecordingComplete;
+
+        // Start recording
+        mediaRecorder.start();
+        recordingStartTime = Date.now();
+        pausedDuration = 0;
+
+        // Update UI
+        updateUIState('recording');
+        startTimer();
+
+        console.log('✓ Recording started');
+
+        // Auto-stop at max duration
+        setTimeout(() => {
+          if (mediaRecorder && mediaRecorder.state === 'recording') {
+            stopRecording();
+            alert('Recording automatically stopped at 5-minute maximum.');
+          }
+        }, MAX_RECORDING_DURATION);
+
+      } catch (error) {
+        console.error('Failed to start recording:', error);
+
+        if (error.name === 'NotAllowedError') {
+          alert('Microphone access denied. Please allow microphone access to record your story.');
+        } else if (error.name === 'NotFoundError') {
+          alert('No microphone found. Please connect a microphone and try again.');
+        } else {
+          alert('Could not access microphone. Please check your settings and try again.');
+        }
+      }
+    }
+
+    /**
+     * Pause recording
+     */
+    function pauseRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.pause();
+        pauseStartTime = Date.now();
+        clearInterval(timerInterval);
+        updateUIState('paused');
+        console.log('⏸ Recording paused');
+      }
+    }
+
+    /**
+     * Resume recording
+     */
+    function resumeRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'paused') {
+        // Track how long we were paused
+        if (pauseStartTime) {
+          pausedDuration += Date.now() - pauseStartTime;
+          pauseStartTime = null;
+        }
+
+        mediaRecorder.resume();
+        updateUIState('recording');
+        startTimer();
+        console.log('▶ Recording resumed');
+      }
+    }
+
+    /**
+     * Stop recording and process audio
+     */
+    function stopRecording() {
+      if (mediaRecorder && (mediaRecorder.state === 'recording' || mediaRecorder.state === 'paused')) {
+        mediaRecorder.stop();
+
+        // Stop all audio tracks
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+
+        clearInterval(timerInterval);
+        console.log('⏹ Recording stopped');
+      }
+    }
+
+    /**
+     * Restart recording (discard current recording)
+     */
+    function restartRecording() {
+      if (confirm('This will discard your current recording. Continue?')) {
+        // Set flag to prevent completion handler
+        isRestarting = true;
+
+        // Stop current recording
+        if (mediaRecorder) {
+          mediaRecorder.stop();
+          mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+
+        // Reset state
+        audioChunks = [];
+        recordingStartTime = null;
+        pausedDuration = 0;
+        pauseStartTime = null;
+        clearInterval(timerInterval);
+        clearInterval(countdownInterval);
+        mediaRecorder = null;
+
+        // Reset flag after a brief delay
+        setTimeout(() => {
+          isRestarting = false;
+        }, 100);
+
+        // Reset UI
+        updateUIState('ready');
+        console.log('🔄 Recording restarted');
+      }
+    }
+
+    /**
+     * Cancel recording and return home
+     */
+    function cancelRecording() {
+      const hasRecording = audioChunks.length > 0 || currentState !== 'ready';
+
+      if (hasRecording) {
+        if (!confirm('Are you sure you want to cancel? Your recording will be lost.')) {
+          return;
+        }
+      }
+
+      // Clean up
+      if (mediaRecorder) {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      }
+      clearInterval(timerInterval);
+      clearInterval(countdownInterval);
+
+      // Return to home
+      window.location.href = 'index.html';
+    }
+
+    /**
+     * Handle recording completion
+     * Convert audio to blob, save to localStorage, navigate to post-recording flow
+     */
+    async function handleRecordingComplete() {
+      // Don't process if user is restarting
+      if (isRestarting) {
+        console.log('Restart in progress, skipping completion handler');
+        return;
+      }
+
+      console.log('Processing recording...');
+
+      // Create audio blob
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+
+      // Calculate actual recording duration (excluding paused time)
+      const totalElapsed = Date.now() - recordingStartTime;
+      const actualDuration = Math.floor((totalElapsed - pausedDuration) / 1000);
+
+      console.log(`Recording: ${actualDuration}s (${formatTime(actualDuration)})`);
+
+      // Convert blob to base64 for localStorage
+      const audioBase64 = await blobToBase64(audioBlob);
+
+      // Check localStorage size (quota usually 5-10MB)
+      const sizeInMB = (audioBase64.length * 3 / 4) / (1024 * 1024);
+      console.log(`Audio size: ${sizeInMB.toFixed(2)} MB`);
+
+      if (sizeInMB > 8) {
+        alert('Recording is too large to save. Please record a shorter story (under 5 minutes).');
+        return;
+      }
+
+      // Create recording data object
+      const recordingData = {
+        mode: 'quick',
+        audioBlob: audioBase64,
+        duration: actualDuration,
+        timestamp: new Date().toISOString(),
+        prompt: PROMPT_TEXT,
+        rawTranscript: null // Will be generated in post-recording flow
+      };
+
+      // Save to localStorage
+      try {
+        localStorage.setItem('hw_recording_data', JSON.stringify(recordingData));
+        console.log('✓ Recording saved to localStorage');
+
+        // Navigate to post-recording flow
+        window.location.href = 'post-recording-flow.html';
+
+      } catch (error) {
+        console.error('Failed to save recording:', error);
+        alert('Failed to save recording. Storage may be full. Please try again with a shorter recording.');
+      }
+    }
+
+    // ============================================
+    // Type Mode Functions
+    // ============================================
+
+    function showTypeMode() {
+      document.getElementById('type-modal').classList.remove('hidden');
+    }
+
+    function hideTypeMode() {
+      document.getElementById('type-modal').classList.add('hidden');
+    }
+
+    function submitTypedStory() {
+      const typedText = document.getElementById('typed-story').value.trim();
+
+      if (!typedText) {
+        alert('Please type your story before continuing.');
+        return;
+      }
+
+      if (typedText.length < 50) {
+        if (!confirm('Your story seems short. Continue anyway?')) {
+          return;
+        }
+      }
+
+      // Create recording data (no audio, just text)
+      const recordingData = {
+        mode: 'quick',
+        audioBlob: null,
+        duration: 0,
+        timestamp: new Date().toISOString(),
+        prompt: PROMPT_TEXT,
+        rawTranscript: typedText // Pre-filled transcript
+      };
+
+      // Save to localStorage
+      localStorage.setItem('hw_recording_data', JSON.stringify(recordingData));
+      console.log('✓ Typed story saved');
+
+      // Navigate to post-recording flow
+      window.location.href = 'post-recording-flow.html';
+    }
+
+    // ============================================
+    // UI Management
+    // ============================================
+
+    /**
+     * Update UI based on current state
+     */
+    function updateUIState(newState) {
+      currentState = newState;
+
+      // Hide all states
+      document.getElementById('state-ready').classList.add('hidden');
+      document.getElementById('state-countdown').classList.add('hidden');
+      document.getElementById('state-recording').classList.add('hidden');
+      document.getElementById('state-paused').classList.add('hidden');
+
+      // Show appropriate state
+      if (newState === 'ready') {
+        document.getElementById('state-ready').classList.remove('hidden');
+        document.getElementById('tips-section').classList.remove('hidden');
+        document.getElementById('header-title').textContent = 'Ready to Share a Story?';
+      } else if (newState === 'countdown') {
+        document.getElementById('state-countdown').classList.remove('hidden');
+        document.getElementById('tips-section').classList.add('hidden');
+        document.getElementById('header-title').textContent = 'Get Ready...';
+      } else if (newState === 'recording') {
+        document.getElementById('state-recording').classList.remove('hidden');
+        document.getElementById('tips-section').classList.add('hidden');
+        document.getElementById('header-title').textContent = 'Recording Your Story';
+      } else if (newState === 'paused') {
+        document.getElementById('state-paused').classList.remove('hidden');
+        document.getElementById('tips-section').classList.add('hidden');
+        document.getElementById('header-title').textContent = 'Recording Paused';
+      }
+    }
+
+    /**
+     * Start timer (counts up from 0)
+     */
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        const elapsed = Date.now() - recordingStartTime - pausedDuration;
+        const seconds = Math.floor(elapsed / 1000);
+        const timeString = formatTime(seconds);
+
+        // Update both timer displays
+        document.getElementById('timer-recording').textContent = timeString;
+        document.getElementById('timer-paused').textContent = timeString;
+      }, 1000);
+    }
+
+    /**
+     * Format seconds as MM:SS
+     */
+    function formatTime(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // ============================================
+    // Helper Functions
+    // ============================================
+
+    /**
+     * Convert Blob to base64 string for localStorage
+     */
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    // ============================================
+    // Initialization
+    // ============================================
+
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('Quick Story Recording initialized');
+
+      // Check if browser supports MediaRecorder
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Your browser does not support audio recording. Please use Chrome, Firefox, or Safari.');
+      }
+    });
+
+    // Handle page unload
+    window.addEventListener('beforeunload', (e) => {
+      if (currentState === 'recording' || currentState === 'paused') {
+        e.preventDefault();
+        e.returnValue = 'You have an active recording. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    });
+  </script>
+</body>
+</html>

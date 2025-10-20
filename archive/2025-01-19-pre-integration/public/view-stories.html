@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Stories - HeritageWhisper</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom color palette */
+    :root {
+      --color-coral: #D7794F;
+      --color-coral-light: #FFE4D6;
+      --color-amber: #E8B44F;
+      --color-cream: #FAF7F2;
+      --color-brown: #2c2416;
+    }
+
+    body {
+      background-color: var(--color-cream);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* Button styles */
+    .btn-gradient {
+      background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+      transition: all 0.3s ease;
+    }
+
+    .btn-gradient:hover {
+      background: linear-gradient(135deg, #ea580c 0%, #db2777 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Story card animations */
+    .story-card {
+      transition: all 0.3s ease;
+    }
+
+    .story-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Expandable details */
+    .story-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .story-details.expanded {
+      max-height: 2000px;
+    }
+
+    /* Fade in animation */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    /* Line clamp for text preview */
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Main Container -->
+  <div class="max-w-3xl mx-auto px-4 py-6 sm:py-8">
+
+    <!-- Header -->
+    <header class="flex items-center justify-between mb-6 sm:mb-8">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900" style="font-family: Georgia, serif;">
+        Your Stories
+      </h1>
+      <a
+        href="index.html"
+        class="text-gray-600 hover:text-gray-900 text-sm sm:text-base font-medium"
+        style="min-height: 44px; display: flex; align-items: center;"
+      >
+        Home
+      </a>
+    </header>
+
+    <!-- Story Count -->
+    <div id="story-count" class="mb-6 text-gray-600 text-sm sm:text-base">
+      Loading stories...
+    </div>
+
+    <!-- Stories Container -->
+    <div id="stories-container" class="space-y-4 sm:space-y-6 mb-8">
+      <!-- Stories will be dynamically inserted here -->
+    </div>
+
+    <!-- Empty State (hidden by default) -->
+    <div id="empty-state" class="hidden text-center py-12">
+      <div class="text-6xl mb-4">📖</div>
+      <h2 class="text-xl sm:text-2xl font-semibold text-gray-700 mb-3">
+        No stories yet
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Start capturing your memories and they'll appear here.
+      </p>
+      <a
+        href="index.html"
+        class="btn-gradient inline-block text-white rounded-full px-8 py-4 text-lg font-semibold"
+        style="min-height: 48px;"
+      >
+        Record Your First Story
+      </a>
+    </div>
+
+    <!-- Record Another Story Button -->
+    <div id="record-another" class="hidden text-center">
+      <a
+        href="index.html"
+        class="btn-gradient inline-block text-white rounded-full px-8 py-4 text-base sm:text-lg font-semibold"
+        style="min-height: 48px;"
+      >
+        + Record Another Story
+      </a>
+    </div>
+
+  </div>
+
+  <script>
+    // ============================================
+    // State Management
+    // ============================================
+
+    let stories = [];
+    let expandedStoryIds = new Set();
+
+    // ============================================
+    // Load and Render Stories
+    // ============================================
+
+    /**
+     * Load stories from localStorage
+     */
+    function loadStories() {
+      try {
+        const storiesJson = localStorage.getItem('hw_completed_stories');
+        stories = storiesJson ? JSON.parse(storiesJson) : [];
+
+        // Sort by creation date (newest first)
+        stories.sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+
+        console.log(`✓ Loaded ${stories.length} stories`);
+        return stories;
+
+      } catch (error) {
+        console.error('Failed to load stories:', error);
+        return [];
+      }
+    }
+
+    /**
+     * Render all stories to the page
+     */
+    function renderStories() {
+      const container = document.getElementById('stories-container');
+      const emptyState = document.getElementById('empty-state');
+      const recordAnother = document.getElementById('record-another');
+      const storyCount = document.getElementById('story-count');
+
+      if (stories.length === 0) {
+        // Show empty state
+        container.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        recordAnother.classList.add('hidden');
+        storyCount.classList.add('hidden');
+        return;
+      }
+
+      // Update story count
+      const countText = stories.length === 1 ? '1 story' : `${stories.length} stories`;
+      storyCount.textContent = `You have ${countText} saved`;
+
+      // Show stories
+      container.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+      recordAnother.classList.remove('hidden');
+      storyCount.classList.remove('hidden');
+
+      // Clear container
+      container.innerHTML = '';
+
+      // Render each story
+      stories.forEach((story, index) => {
+        const storyCard = createStoryCard(story, index);
+        container.appendChild(storyCard);
+      });
+    }
+
+    /**
+     * Create a story card element
+     */
+    function createStoryCard(story, index) {
+      const card = document.createElement('div');
+      card.className = 'story-card bg-white rounded-xl shadow-md p-5 sm:p-6 fade-in';
+      card.style.animationDelay = `${index * 0.1}s`;
+
+      const isExpanded = expandedStoryIds.has(story.storyId);
+
+      // Determine which transcript to show
+      const displayTranscript = story.useEnhanced && story.enhancedTranscript
+        ? story.enhancedTranscript
+        : story.originalTranscript;
+
+      // Format date
+      const recordedDate = new Date(story.recordedAt);
+      const dateStr = recordedDate.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+
+      card.innerHTML = `
+        <!-- Story Header -->
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-2xl">📖</span>
+              <h2 class="text-lg sm:text-xl font-semibold text-gray-900">
+                ${escapeHtml(story.title)}
+              </h2>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-500">
+              ${story.year ? `<span class="bg-gray-100 text-gray-600 px-2 py-1 rounded">${story.year}</span>` : ''}
+              <span>${dateStr}</span>
+              ${story.audioDuration ? `<span>• ${formatDuration(story.audioDuration)}</span>` : ''}
+              <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs capitalize">${story.mode}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Story Preview (collapsed state) -->
+        <div class="mb-4 ${isExpanded ? 'hidden' : ''}">
+          <p class="text-gray-700 text-sm sm:text-base line-clamp-3 leading-relaxed">
+            ${escapeHtml(displayTranscript).substring(0, 200)}${displayTranscript.length > 200 ? '...' : ''}
+          </p>
+        </div>
+
+        <!-- Lesson Preview (if exists) -->
+        ${story.lessonLearned ? `
+          <div class="mb-4 ${isExpanded ? 'hidden' : ''}">
+            <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r">
+              <div class="flex items-start gap-2">
+                <span class="text-lg">💡</span>
+                <p class="text-gray-700 text-sm line-clamp-2 italic">
+                  ${escapeHtml(story.lessonLearned)}
+                </p>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Expandable Details -->
+        <div class="story-details ${isExpanded ? 'expanded' : ''}" id="details-${story.storyId}">
+          <!-- Audio Player (if exists) -->
+          ${story.audioUrl ? `
+            <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+              <h3 class="text-sm font-semibold text-gray-700 mb-2">Original Recording:</h3>
+              <audio controls class="w-full" src="${story.audioUrl}">
+                Your browser does not support audio playback.
+              </audio>
+            </div>
+          ` : ''}
+
+          <!-- Full Transcript -->
+          <div class="mb-4">
+            <h3 class="text-sm font-semibold text-gray-700 mb-2">
+              ${story.useEnhanced ? 'Story (Polished)' : 'Story (Original)'}:
+            </h3>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-gray-800 text-base leading-relaxed whitespace-pre-wrap">
+                ${escapeHtml(displayTranscript)}
+              </p>
+            </div>
+          </div>
+
+          <!-- Full Lesson (if exists) -->
+          ${story.lessonLearned ? `
+            <div class="mb-4">
+              <h3 class="text-sm font-semibold text-gray-700 mb-2">Lesson Learned:</h3>
+              <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r">
+                <p class="text-gray-800 text-base italic leading-relaxed">
+                  ${escapeHtml(story.lessonLearned)}
+                </p>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Photos (if exist) -->
+          ${story.photos && story.photos.length > 0 ? `
+            <div class="mb-4">
+              <h3 class="text-sm font-semibold text-gray-700 mb-2">Photos:</h3>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                ${story.photos.map(photo => `
+                  <img
+                    src="${photo}"
+                    alt="Story photo"
+                    class="w-full h-32 object-cover rounded-lg shadow-sm"
+                  />
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+          <button
+            onclick="toggleStoryDetails('${story.storyId}')"
+            class="flex-1 min-w-[120px] bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-full px-4 py-2 text-sm font-semibold transition-all"
+            style="min-height: 44px;"
+          >
+            ${isExpanded ? '▲ Show Less' : '▼ View Details'}
+          </button>
+          <button
+            onclick="deleteStory('${story.storyId}')"
+            class="bg-white border-2 border-red-200 text-red-600 hover:bg-red-50 rounded-full px-4 py-2 text-sm font-semibold transition-all"
+            style="min-height: 44px;"
+          >
+            🗑 Delete
+          </button>
+        </div>
+      `;
+
+      return card;
+    }
+
+    // ============================================
+    // Story Actions
+    // ============================================
+
+    /**
+     * Toggle story details expanded/collapsed
+     */
+    function toggleStoryDetails(storyId) {
+      const isExpanded = expandedStoryIds.has(storyId);
+
+      if (isExpanded) {
+        expandedStoryIds.delete(storyId);
+      } else {
+        expandedStoryIds.add(storyId);
+      }
+
+      // Re-render to update UI
+      renderStories();
+    }
+
+    /**
+     * Delete a story
+     */
+    function deleteStory(storyId) {
+      const story = stories.find(s => s.storyId === storyId);
+
+      if (!story) {
+        console.error('Story not found:', storyId);
+        return;
+      }
+
+      const confirmMessage = `Are you sure you want to delete "${story.title}"? This cannot be undone.`;
+
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+
+      try {
+        // Remove from array
+        stories = stories.filter(s => s.storyId !== storyId);
+
+        // Save back to localStorage
+        localStorage.setItem('hw_completed_stories', JSON.stringify(stories));
+
+        console.log('✓ Story deleted:', storyId);
+
+        // Remove from expanded set
+        expandedStoryIds.delete(storyId);
+
+        // Re-render
+        renderStories();
+
+        // Show notification
+        showNotification('Story deleted successfully');
+
+      } catch (error) {
+        console.error('Failed to delete story:', error);
+        alert('Failed to delete story. Please try again.');
+      }
+    }
+
+    // ============================================
+    // Helper Functions
+    // ============================================
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    function escapeHtml(text) {
+      if (!text) return '';
+
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    /**
+     * Format duration in seconds as MM:SS
+     */
+    function formatDuration(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    /**
+     * Show notification message
+     */
+    function showNotification(message, duration = 2000) {
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg z-50 text-center';
+      notification.style.animation = 'fadeIn 0.3s ease-out';
+      notification.textContent = message;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, duration);
+    }
+
+    // ============================================
+    // Initialization
+    // ============================================
+
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('View Stories initialized');
+
+      // Load and render stories
+      loadStories();
+      renderStories();
+
+      // Debug: Show storage info
+      const storageUsed = new Blob([localStorage.getItem('hw_completed_stories') || '']).size;
+      console.log(`Storage used: ${(storageUsed / 1024).toFixed(2)} KB`);
+    });
+
+    // Handle storage changes (if user opens multiple tabs)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'hw_completed_stories') {
+        console.log('Stories updated in another tab, reloading...');
+        loadStories();
+        renderStories();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeritageWhisper - Capture Your Stories</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom color palette matching HeritageWhisper design */
+    :root {
+      --color-coral: #D7794F;
+      --color-coral-light: #FFE4D6;
+      --color-amber: #E8B44F;
+      --color-cream: #FAF7F2;
+      --color-brown: #2c2416;
+    }
+
+    body {
+      background-color: var(--color-cream);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* Gradient button styling */
+    .btn-gradient {
+      background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+      transition: all 0.3s ease;
+    }
+
+    .btn-gradient:hover {
+      background: linear-gradient(135deg, #ea580c 0%, #db2777 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Card hover effect */
+    .mode-card {
+      transition: all 0.3s ease;
+    }
+
+    .mode-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Fade in animation */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .fade-in-delay {
+      animation: fadeIn 0.6s ease-out 0.2s both;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Main Container -->
+  <div class="max-w-2xl mx-auto px-4 py-8 sm:py-12">
+
+    <!-- Header -->
+    <header class="text-center mb-8 sm:mb-12 fade-in">
+      <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3" style="font-family: Georgia, serif;">
+        HeritageWhisper
+      </h1>
+      <p class="text-lg sm:text-xl text-gray-600">
+        Capture stories your way
+      </p>
+    </header>
+
+    <!-- Mode Selection Cards -->
+    <div class="space-y-6 mb-8 fade-in-delay">
+
+      <!-- Conversation Mode (Recommended) -->
+      <div class="mode-card bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-4xl">💬</span>
+            <div>
+              <h2 class="text-xl sm:text-2xl font-semibold text-gray-900">
+                Conversation Mode
+              </h2>
+              <span class="inline-block mt-1 bg-blue-50 text-blue-700 text-xs sm:text-sm px-3 py-1 rounded-full font-medium">
+                Recommended
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-base sm:text-lg text-gray-600 mb-6 leading-relaxed">
+          I'll ask thoughtful questions to help you share a deeper story (10-15 minutes)
+        </p>
+
+        <button
+          onclick="startConversationMode()"
+          class="btn-gradient w-full text-white rounded-full px-6 py-4 text-base sm:text-lg font-semibold"
+          style="min-height: 48px;"
+        >
+          Let's Talk
+        </button>
+      </div>
+
+      <!-- Quick Story Mode -->
+      <div class="mode-card bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+        <div class="flex items-start gap-3 mb-4">
+          <span class="text-4xl">💭</span>
+          <div>
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-900">
+              Quick Story
+            </h2>
+          </div>
+        </div>
+
+        <p class="text-base sm:text-lg text-gray-600 mb-6 leading-relaxed">
+          Record a 2-minute memory about one meaningful moment
+        </p>
+
+        <button
+          onclick="startQuickStory()"
+          class="btn-gradient w-full text-white rounded-full px-6 py-4 text-base sm:text-lg font-semibold"
+          style="min-height: 48px;"
+        >
+          Start Recording
+        </button>
+      </div>
+    </div>
+
+    <!-- View Saved Stories Link -->
+    <div class="text-center fade-in-delay">
+      <a
+        href="view-stories.html"
+        class="inline-flex items-center gap-2 text-base sm:text-lg text-gray-600 hover:text-gray-900 transition-colors"
+        style="min-height: 44px; align-items: center;"
+      >
+        <span>View saved stories</span>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="mt-12 text-center text-sm text-gray-500">
+      <p>🔒 Your stories are private and secure</p>
+    </div>
+
+  </div>
+
+  <script>
+    // ============================================
+    // Navigation Functions
+    // ============================================
+
+    /**
+     * Start conversation mode (guided interview)
+     * Opens existing interview-chat in new window
+     */
+    function startConversationMode() {
+      // Open guided interview in new window
+      const interviewWindow = window.open(
+        'https://dev.heritagewhisper.com/interview-chat',
+        '_blank',
+        'width=1024,height=768'
+      );
+
+      if (interviewWindow) {
+        // Show instruction for returning
+        showNotification(
+          'Guided interview opened! When finished, return here to review your story.',
+          5000
+        );
+
+        // Set flag to check for returning conversation data
+        localStorage.setItem('hw_awaiting_conversation', 'true');
+
+        // Poll for conversation completion
+        startPollingForConversation();
+      } else {
+        alert('Please allow pop-ups to start the guided interview.');
+      }
+    }
+
+    /**
+     * Start quick story mode
+     * Navigate to recording interface
+     */
+    function startQuickStory() {
+      window.location.href = 'quick-story.html';
+    }
+
+    /**
+     * Poll localStorage for completed conversation data
+     * (In production, this would use postMessage or shared state)
+     */
+    function startPollingForConversation() {
+      const pollInterval = setInterval(() => {
+        const conversationData = localStorage.getItem('hw_recording_data');
+        const awaitingFlag = localStorage.getItem('hw_awaiting_conversation');
+
+        if (conversationData && awaitingFlag === 'true') {
+          // Clear flag
+          localStorage.removeItem('hw_awaiting_conversation');
+          clearInterval(pollInterval);
+
+          // Parse and check if it's from conversation mode
+          try {
+            const data = JSON.parse(conversationData);
+            if (data.mode === 'conversation') {
+              // Show notification and redirect to post-recording flow
+              showNotification('Conversation complete! Let\'s review your story.', 2000);
+              setTimeout(() => {
+                window.location.href = 'post-recording-flow.html';
+              }, 2000);
+            }
+          } catch (e) {
+            console.error('Failed to parse conversation data:', e);
+          }
+        }
+      }, 2000); // Check every 2 seconds
+
+      // Stop polling after 1 hour
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        localStorage.removeItem('hw_awaiting_conversation');
+      }, 60 * 60 * 1000);
+    }
+
+    /**
+     * Show notification message
+     */
+    function showNotification(message, duration = 3000) {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg z-50 max-w-md text-center';
+      notification.style.animation = 'fadeIn 0.3s ease-out';
+      notification.textContent = message;
+
+      document.body.appendChild(notification);
+
+      // Auto-remove after duration
+      setTimeout(() => {
+        notification.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, duration);
+    }
+
+    // ============================================
+    // Initialization
+    // ============================================
+
+    // Check if returning from conversation mode
+    window.addEventListener('DOMContentLoaded', () => {
+      const awaitingConversation = localStorage.getItem('hw_awaiting_conversation');
+      if (awaitingConversation === 'true') {
+        startPollingForConversation();
+      }
+
+      // Log story count for user
+      const stories = JSON.parse(localStorage.getItem('hw_completed_stories') || '[]');
+      if (stories.length > 0) {
+        console.log(`✓ You have ${stories.length} saved ${stories.length === 1 ? 'story' : 'stories'}`);
+      }
+    });
+  </script>
+</body>
+</html>
