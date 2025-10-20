@@ -7,6 +7,8 @@ import { MemoryMap } from "@/components/MemoryMap";
 import { ProfileInterests } from "@/components/ProfileInterests";
 import { ProfilePhotoUploader } from "@/components/ProfilePhotoUploader";
 import { Button } from "@/components/ui/button";
+import { LeftSidebar } from "@/components/LeftSidebar";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Card,
   CardContent,
@@ -57,6 +59,7 @@ export default function Profile() {
   const router = useRouter();
   const { user, logout, session, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   // User Information
   const [name, setName] = useState("");
@@ -449,8 +452,17 @@ export default function Profile() {
   );
 
   return (
-    <div className="min-h-screen bg-background album-texture pb-20 md:pb-0">
-      <div className="max-w-4xl mx-auto p-4 md:p-6">
+    <div
+      className="min-h-screen flex"
+      style={{ backgroundColor: "#FFF8F3" }}
+    >
+      {/* Left Sidebar */}
+      {isDesktop && <LeftSidebar />}
+
+      {/* Main content */}
+      <main className="flex-1 min-w-0 lg:ml-56 pb-20 md:pb-0">
+        <div className="bg-background album-texture min-h-screen">
+          <div className="max-w-4xl mx-auto p-4 md:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 md:mb-8">
           <div className="flex items-center space-x-3 md:space-x-4">
@@ -1051,18 +1063,20 @@ export default function Profile() {
             </CardContent>
           </Card>
 
-          {/* Logout Button */}
-          <div className="pt-2">
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="w-full h-12 text-base"
-            >
-              Sign Out
-            </Button>
+            {/* Logout Button */}
+            <div className="pt-2">
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="w-full h-12 text-base"
+              >
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </div>
+    </main>
     </div>
   );
 }

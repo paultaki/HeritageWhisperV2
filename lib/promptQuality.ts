@@ -209,18 +209,33 @@ export function validatePromptQuality(promptText?: string | null): boolean {
     console.log(`[Quality Gate] REJECT: Yes/no question format`);
     return false;
   }
-  
-  // Rule 5: Should have at least one emotional depth signal
+
+  // Rule 5: Must have context specificity - at least one of:
+  // - Proper name (capitalized words)
+  // - Quoted phrase
+  // - Possessive reference (my/his/her X)
+  // - Specific place/object name
+  const hasProperName = /\b[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]+)?\b/.test(trimmed);
+  const hasQuotedPhrase = /['"]/.test(trimmed);
+  const hasPossessive = /\b(my|his|her|their|our)\s+[A-Za-z]+/.test(trimmed);
+  const hasContextSpecificity = hasProperName || hasQuotedPhrase || hasPossessive;
+
+  if (!hasContextSpecificity) {
+    console.log(`[Quality Gate] REJECT: No specific context (no proper names, quotes, or possessives)`);
+    return false;
+  }
+
+  // Rule 6: Should have at least one emotional depth signal
   // (Not a hard rule, but prompts with these tend to be better)
-  const hasDepthSignal = EMOTIONAL_DEPTH_SIGNALS.some(signal => 
+  const hasDepthSignal = EMOTIONAL_DEPTH_SIGNALS.some(signal =>
     lower.includes(signal)
   );
-  
+
   if (!hasDepthSignal) {
     // Log warning but don't reject (some good prompts might not have these)
     console.log(`[Quality Gate] WARNING: No emotional depth signals in prompt`);
   }
-  
+
   return true;
 }
 

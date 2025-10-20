@@ -118,7 +118,16 @@ export function extractEntities(transcript: string): ExtractedEntities {
   
   // Extract objects (with quality filtering)
   const objects = new Set<string>();
-  
+
+  // Body parts and clothing blocklist - these should NEVER be extracted as objects
+  const bodyPartsBlocklist = new Set([
+    "chest", "knees", "legs", "arms", "hands", "feet", "head", "eyes", "ears",
+    "nose", "mouth", "back", "shoulders", "fingers", "toes", "neck", "face",
+    "heart", "stomach", "belly", "hips", "ankle", "wrist", "elbow", "knee",
+    // Common clothing (unless branded/specific)
+    "shirt", "pants", "shoes", "socks", "dress", "coat", "jacket", "hat"
+  ]);
+
   // Pattern 1: Possessive + specific vehicle/object (my Chevelle, his Harley, her ring)
   // Only match capitalized objects or specific compound nouns (workbench, toolbox)
   const possessiveObjectPattern = /\b(my|his|her|their|our)\s+(?:([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)|(?:old|blue|red|green)\s+([A-Z][a-z]+)|(workbench|toolbox|truck|car|bike|ring|watch|camera))\b/gi;
@@ -128,6 +137,13 @@ export function extractEntities(transcript: string): ExtractedEntities {
     // Filter out if it's actually a person reference
     const secondWord = obj.split(/\s+/)[1]?.toLowerCase();
     const familyRoles = ["father", "mother", "dad", "mom", "brother", "sister", "son", "daughter"];
+
+    // NEW: Filter out body parts and generic clothing
+    if (bodyPartsBlocklist.has(secondWord)) {
+      console.log(`[Entity Extraction] REJECTED body part/clothing: "${obj}"`);
+      continue;
+    }
+
     if (!familyRoles.includes(secondWord) && isWorthyEntity(obj) && !people.has(obj)) {
       objects.add(obj);
     }

@@ -23,6 +23,8 @@ import MemoryToolbar from "@/components/ui/MemoryToolbar";
 import MemoryCard from "@/components/ui/MemoryCard";
 import { MemoryList } from "@/components/ui/MemoryList";
 import { Story as SchemaStory } from "@/shared/schema";
+import { LeftSidebar } from "@/components/LeftSidebar";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface Story {
   id: string;
@@ -129,6 +131,7 @@ export default function MemoryBoxPage() {
   const modeSelection = useModeSelection();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -457,11 +460,16 @@ export default function MemoryBoxPage() {
 
   return (
     <div
-      className={`min-h-screen pb-20 md:pb-0 ${viewMode === "list" ? "hw-list" : ""}`}
-      style={{ background: "var(--color-page)" }}
+      className="min-h-screen flex"
+      style={{ backgroundColor: "#FFF8F3" }}
     >
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white border-b">
+      {/* Left Sidebar */}
+      {isDesktop && <LeftSidebar />}
+
+      {/* Main content */}
+      <main className={`flex-1 min-w-0 lg:ml-56 pb-20 md:pb-0 ${viewMode === "list" ? "hw-list" : ""}`}>
+        {/* Header */}
+        <header className="sticky top-0 z-40 bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
             <Box className="w-8 h-8" style={{ color: "#1f0f08" }} />
@@ -631,11 +639,12 @@ export default function MemoryBoxPage() {
         onSelectQuickStory={modeSelection.openQuickRecorder}
       />
 
-      {/* Quick Story Recorder */}
-      <QuickStoryRecorder
-        isOpen={modeSelection.quickRecorderOpen}
-        onClose={modeSelection.closeQuickRecorder}
-      />
+        {/* Quick Story Recorder */}
+        <QuickStoryRecorder
+          isOpen={modeSelection.quickRecorderOpen}
+          onClose={modeSelection.closeQuickRecorder}
+        />
+      </main>
     </div>
   );
 }

@@ -6,14 +6,21 @@ import { validatePromptQuality } from "./promptQuality";
 /**
  * Generate instant "echo" prompt after every story
  * This shows immediate listening and engagement
- * 
+ *
  * Always uses fast model (gpt-4o-mini) for low latency.
  */
 export async function generateEchoPrompt(transcript: string): Promise<string | null> {
   try {
-    // Take last 300 words for context (recent part of story)
-    const words = transcript.split(/\s+/);
-    const lastSection = words.slice(-300).join(' ');
+    // Minimum transcript length check - skip if too short
+    const words = transcript.split(/\s+/).filter(Boolean);
+    if (words.length < 50) {
+      logger.debug("[Echo Prompt] Transcript too short (<50 words), skipping");
+      return null;
+    }
+
+    // Use full transcript (up to 500 words) for better context
+    // This prevents the model from thinking it's receiving placeholder/incomplete text
+    const contextSection = words.slice(0, 500).join(' ');
 
     // Always use fast model for Echo (no reasoning needed)
     const modelConfig = getModelConfig("echo");
@@ -25,6 +32,8 @@ export async function generateEchoPrompt(transcript: string): Promise<string | n
           role: "system",
           content: `You are a caring grandchild listening to your grandparent's story. Generate ONE follow-up question (max 25 words).
 
+CRITICAL: This is a COMPLETE story, not a placeholder or incomplete text. Never comment on the input quality or format.
+
 Rules:
 - Reference a SPECIFIC detail they just mentioned
 - Ask about sensory details (sight, sound, smell, touch, taste)
@@ -33,6 +42,7 @@ Rules:
 - Feel natural, like continuing a conversation
 - Never be generic or therapeutic
 - No generic nouns (girl, boy, man, woman, house, room)
+- NEVER respond with meta-commentary like "seems like a placeholder" or "message got cut off"
 
 Good examples:
 "You said the sawdust smelled like home. What did Sunday mornings smell like there?"
@@ -48,7 +58,7 @@ Bad examples:
         },
         {
           role: "user",
-          content: `Generate one follow-up question for: "${lastSection}"`,
+          content: `Generate one follow-up question for: "${contextSection}"`,
         },
       ],
       temperature: 0.4,

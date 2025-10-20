@@ -14,6 +14,8 @@ import RecordModal from "@/components/RecordModal";
 import MoreIdeas from "@/components/MoreIdeas";
 import PromptCard from "@/components/PromptCard";
 import { useAIConsent } from "@/hooks/use-ai-consent";
+import { LeftSidebar } from "@/components/LeftSidebar";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface QueuedPrompt {
   id: string;
@@ -76,6 +78,7 @@ export default function PromptsPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [showAllQueued, setShowAllQueued] = useState(false);
   const [showAllActive, setShowAllActive] = useState(false);
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   // Fetch user profile to get their name
   const { data: userProfile } = useQuery<{ user: { name: string } }>({
@@ -262,13 +265,22 @@ export default function PromptsPage() {
 
   return (
     <div
-      className="min-h-screen pb-20 md:pb-0"
-      style={{
-        background: "linear-gradient(to bottom, #fafaf9 0%, #f5f5f4 50%, #fafaf9 100%)"
-      }}
+      className="min-h-screen flex"
+      style={{ backgroundColor: "#FFF8F3" }}
     >
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200/50">
+      {/* Left Sidebar */}
+      {isDesktop && <LeftSidebar />}
+
+      {/* Main content */}
+      <main className="flex-1 min-w-0 lg:ml-56 pb-20 md:pb-0">
+        <div
+          style={{
+            background: "linear-gradient(to bottom, #fafaf9 0%, #f5f5f4 50%, #fafaf9 100%)",
+            minHeight: "100vh",
+          }}
+        >
+          {/* Header */}
+          <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200/50">
         <div className="max-w-7xl mx-auto px-6 py-5">
           <h1 className="text-[26px] font-semibold tracking-tight text-gray-900">Story Prompts</h1>
           <p className="text-sm text-gray-600 mt-0.5">Thoughtful questions to spark your next memory</p>
@@ -564,15 +576,17 @@ export default function PromptsPage() {
         </section>
       </div>
 
-      {/* Record Modal */}
-      <RecordModal
-        isOpen={isOpen}
-        onClose={closeModal}
-        onSave={handleSave}
-        initialPrompt={initialData?.prompt}
-        initialTitle={initialData?.title}
-        initialYear={initialData?.year}
-      />
+          {/* Record Modal */}
+          <RecordModal
+            isOpen={isOpen}
+            onClose={closeModal}
+            onSave={handleSave}
+            initialPrompt={initialData?.prompt}
+            initialTitle={initialData?.title}
+            initialYear={initialData?.year}
+          />
+        </div>
+      </main>
     </div>
   );
 }
