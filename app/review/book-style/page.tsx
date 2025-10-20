@@ -102,8 +102,9 @@ function BookStyleReviewContent() {
 
     if (isEditing) {
       fetchStoryData();
-    } else {
+    } else if (!isWizardMode) {
       // PRIORITY 1: Check NavCache first (most reliable for new recordings)
+      // SKIP this if wizard mode - wizard will handle NavCache loading
       const navId = searchParams.get("nav");
       if (navId) {
         console.log("[Review] Loading from NavCache with ID:", navId);

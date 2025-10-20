@@ -329,11 +329,15 @@ export default function InterviewChatPage() {
 
   // Complete interview and redirect to post-recording flow prototype
   const handleCompleteInterview = async () => {
+    console.log('🎬 [Interview] handleCompleteInterview called');
+
     try {
       // Require at least one Q&A exchange
       const userResponses = messages.filter(m =>
         m.type === 'audio-response' || m.type === 'text-response'
       );
+
+      console.log('📊 [Interview] User responses:', userResponses.length);
 
       if (userResponses.length === 0) {
         alert('Please answer at least one question before completing the interview.');
@@ -346,20 +350,28 @@ export default function InterviewChatPage() {
         'You\'ll be taken to review and finalize your story.'
       );
 
+      console.log('✅ [Interview] User confirmed:', confirmComplete);
+
       if (!confirmComplete) return;
 
       // Extract Q&A pairs from messages
+      console.log('🔍 [Interview] Extracting Q&A pairs from', messages.length, 'messages');
       const qaPairs = extractQAPairs(messages);
+      console.log('📝 [Interview] Extracted Q&A pairs:', qaPairs.length);
 
       // Collect all audio blobs (if any)
       const audioBlobs = messages
         .filter(m => m.audioBlob)
         .map(m => m.audioBlob as Blob);
 
+      console.log('🎵 [Interview] Audio blobs found:', audioBlobs.length);
+
       // Combine audio blobs if multiple
       let combinedAudio: Blob | null = null;
       if (audioBlobs.length > 0) {
+        console.log('🔄 [Interview] Combining audio blobs...');
         combinedAudio = await combineAudioBlobs(audioBlobs);
+        console.log('✅ [Interview] Audio combined:', combinedAudio?.size, 'bytes');
       }
 
       // Calculate total duration
@@ -367,7 +379,11 @@ export default function InterviewChatPage() {
         .filter(m => m.audioDuration)
         .reduce((sum, m) => sum + (m.audioDuration || 0), 0);
 
+      console.log('⏱️  [Interview] Total duration:', totalDuration, 'seconds');
+      console.log('📄 [Interview] Full transcript length:', audioState.fullTranscript?.length || 0);
+
       // Complete conversation and redirect
+      console.log('🚀 [Interview] Calling completeConversationAndRedirect...');
       await completeConversationAndRedirect({
         qaPairs,
         audioBlob: combinedAudio,
@@ -375,8 +391,10 @@ export default function InterviewChatPage() {
         totalDuration,
       });
 
+      console.log('✅ [Interview] completeConversationAndRedirect finished');
+
     } catch (error) {
-      console.error('Error completing interview:', error);
+      console.error('❌ [Interview] Error completing interview:', error);
       alert('Failed to complete interview. Please try again.');
     }
   };

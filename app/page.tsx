@@ -635,16 +635,15 @@ export default function HomePage() {
                   </div>
                   <div className={`${index % 2 === 0 ? "md:pl-12" : "md:pr-12 md:col-start-1 md:row-start-1"}`}>
                     <div className="w-[80%] mx-auto">
-                      <div className="relative rounded-2xl overflow-hidden shadow-2xl group aspect-[4/3] isolate">
+                      <div className="relative rounded-[2rem] overflow-hidden shadow-2xl group aspect-[4/3] bg-white">
                         <Image
                           src={memory.img}
                           alt={memory.title}
                           width={500}
                           height={375}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          className="w-full h-full object-contain ken-burns"
                           style={{ display: 'block' }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
                         {/* Timeline dot */}
                         <div className="hidden md:block absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-br from-[#21808D] to-[#E85D5D] rounded-full border-4 border-white shadow-xl" style={{
                           [index % 2 === 0 ? "right" : "left"]: "-3.5rem"
@@ -1159,6 +1158,26 @@ export default function HomePage() {
           font-weight: 600;
           line-height: 1.5;
           transition: color 0.2s ease-in-out;
+        }
+
+        /* Ken Burns effect */
+        @keyframes kenBurns {
+          0% {
+            transform: scale(1);
+          }
+          100% {
+            transform: scale(1.08);
+          }
+        }
+
+        .ken-burns {
+          animation: kenBurns 20s ease-out infinite alternate;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .ken-burns {
+            animation: none;
+          }
         }
       `}</style>
     </div>

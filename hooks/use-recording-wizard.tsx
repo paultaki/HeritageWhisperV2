@@ -24,7 +24,7 @@ export function useRecordingWizard({
   onComplete,
 }: UseRecordingWizardOptions): WizardState {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [currentStep, setCurrentStep] = useState<WizardStep>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +77,9 @@ export function useRecordingWizard({
     setError(null);
 
     try {
+      if (!session?.access_token) {
+        throw new Error("You must be logged in to save a story");
+      }
       // 1. Upload audio if exists
       let audioUrl: string | null = null;
       if (data.recording.audioBlob) {
@@ -85,6 +88,9 @@ export function useRecordingWizard({
 
         const audioResponse = await fetch("/api/upload/audio", {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+          },
           body: formData,
         });
 
@@ -111,6 +117,9 @@ export function useRecordingWizard({
 
             const response = await fetch("/api/upload/photo", {
               method: "POST",
+              headers: {
+                Authorization: `Bearer ${session?.access_token}`,
+              },
               body: formData,
             });
 
@@ -134,7 +143,7 @@ export function useRecordingWizard({
       const storyPayload = {
         title: data.title.trim(),
         year: data.year,
-        transcript: data.useEnhanced ? data.enhancedTranscript : data.originalTranscript,
+        transcription: data.useEnhanced ? data.enhancedTranscript : data.originalTranscript,
         audioUrl,
         duration: data.recording.duration,
         wisdomClipText: data.lessonLearned.trim() || null,
@@ -148,16 +157,21 @@ export function useRecordingWizard({
         },
       };
 
+      console.log("[useRecordingWizard] Submitting story payload:", storyPayload);
+
       const response = await fetch("/api/stories", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
         },
         body: JSON.stringify(storyPayload),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("[useRecordingWizard] API error response:", errorData);
+        console.error("[useRecordingWizard] Validation details:", errorData.details);
         throw new Error(errorData.error || "Failed to save story");
       }
 
@@ -183,7 +197,7 @@ export function useRecordingWizard({
     } finally {
       setIsSubmitting(false);
     }
-  }, [data, router, onComplete]);
+  }, [data, router, onComplete, session]);
 
   return {
     currentStep,

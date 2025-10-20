@@ -57,7 +57,12 @@ export async function completeConversationAndRedirect(
   conversationData: ConversationData
 ): Promise<void> {
   try {
-    console.log('📝 Completing conversation...');
+    console.log('📝 Completing conversation...', {
+      hasAudio: !!conversationData.audioBlob,
+      transcriptLength: conversationData.fullTranscript?.length,
+      qaPairsCount: conversationData.qaPairs?.length,
+      duration: conversationData.totalDuration
+    });
 
     const { qaPairs, audioBlob, fullTranscript, totalDuration } = conversationData;
 
