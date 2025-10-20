@@ -603,10 +603,10 @@ export default function HomePage() {
 
             <div className="space-y-12">
               {[
-                { img: "/demo-dad-ww2.png", title: "Life's Challenges", subtitle: "Strength & perseverance", year: "1950s" },
-                { img: "/demo-earliest-memory.webp", title: "Earliest Memories", subtitle: "Childhood wonder", year: "1970s" },
-                { img: "/demo_meeting_a_lifelong_friend.webp", title: "Meeting a Lifelong Friend", subtitle: "Bonds that last forever", year: "1980s" },
-                { img: "/demo-hiking.png", title: "Family Traditions", subtitle: "Passing the torch", year: "2000s" },
+                { img: "/demo2-lifelong-friend-62.png", title: "Meeting a Lifelong Friend", subtitle: "First bonds take root", year: "1962", character: "Loyalty", lesson: "Choose friends who make you better" },
+                { img: "/demo2-myhero-68.png", title: "My Hero", subtitle: "Lessons that shaped me", year: "1968", character: "Integrity", lesson: "Follow examples worth imitating" },
+                { img: "/demo2-moving-away-76.png", title: "Moving Away from Home", subtitle: "Courage to begin again", year: "1976", character: "Independence", lesson: "Change grows courage and skill" },
+                { img: "/demo2-next-chapter-2017.png", title: "The Next Chapter Begins", subtitle: "Work well finished", year: "2017", character: "Gratitude", lesson: "Finish well then start anew" },
               ].map((memory, index) => (
                 <div
                   key={index}
@@ -629,7 +629,17 @@ export default function HomePage() {
                       {memory.year}
                     </div>
                     <h3 className="text-2xl md:text-3xl font-bold text-[#13343B] mb-2">{memory.title}</h3>
-                    <p className={`text-lg text-[#626C71] ${index % 2 === 0 ? "md:text-right" : "md:text-left"}`}>{memory.subtitle}</p>
+                    <p className={`text-lg text-[#626C71] mb-3 ${index % 2 === 0 ? "md:text-right" : "md:text-left"}`}>{memory.subtitle}</p>
+                    <div className={`space-y-2 ${index % 2 === 0 ? "md:items-end" : "md:items-start"} flex flex-col`}>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#21808D]/10 rounded-lg">
+                        <span className="text-sm font-semibold text-[#21808D]">Character:</span>
+                        <span className="text-sm text-[#13343B]">{memory.character}</span>
+                      </div>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#E85D5D]/10 rounded-lg">
+                        <span className="text-sm font-semibold text-[#E85D5D]">Lesson:</span>
+                        <span className="text-sm text-[#13343B]">{memory.lesson}</span>
+                      </div>
+                    </div>
                   </div>
                   <div className={`${index % 2 === 0 ? "md:pl-12" : "md:pr-12 md:col-start-1 md:row-start-1"}`}>
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl group border-4 border-white">
