@@ -272,7 +272,7 @@ export default function PromptsPage() {
       {isDesktop && <LeftSidebar />}
 
       {/* Main content */}
-      <main className="flex-1 min-w-0 lg:ml-56 pb-20 md:pb-0">
+      <main className="flex-1 min-w-0 pb-20 md:pb-0">
         <div
           style={{
             background: "linear-gradient(to bottom, #fafaf9 0%, #f5f5f4 50%, #fafaf9 100%)",
@@ -281,14 +281,14 @@ export default function PromptsPage() {
         >
           {/* Header */}
           <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200/50">
-        <div className="max-w-7xl mx-auto px-6 py-5">
+        <div className="px-6 py-5" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
           <h1 className="text-[26px] font-semibold tracking-tight text-gray-900">Story Prompts</h1>
           <p className="text-sm text-gray-600 mt-0.5">Thoughtful questions to spark your next memory</p>
         </div>
       </header>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-10 space-y-10">
+      <div className="px-6 py-10 space-y-10" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
         {/* AI Disabled State */}
         {!isAILoading && !isAIEnabled && (
           <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-6">

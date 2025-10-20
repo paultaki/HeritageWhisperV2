@@ -132,18 +132,47 @@ export async function POST(request: NextRequest) {
       if (fs.existsSync(tempFilePath)) {
         fs.unlinkSync(tempFilePath);
       }
+
+      // Log detailed error information
+      logger.error("[TranscribeChunk] OpenAI API Error:", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        // @ts-ignore - OpenAI errors may have these properties
+        code: error?.code,
+        // @ts-ignore
+        type: error?.type,
+        // @ts-ignore
+        status: error?.status,
+      });
+
       throw error;
     }
   } catch (error) {
     logger.error("[TranscribeChunk] ERROR:", error);
+
+    // Provide more specific error messages
+    let errorMessage = "Failed to transcribe audio chunk";
+    let statusCode = 500;
+
+    if (error instanceof Error) {
+      // Check for common OpenAI API errors
+      if (error.message.includes("rate_limit_exceeded")) {
+        errorMessage = "OpenAI rate limit exceeded. Please wait a moment and try again.";
+        statusCode = 429;
+      } else if (error.message.includes("insufficient_quota")) {
+        errorMessage = "OpenAI API quota exceeded. Please contact support.";
+        statusCode = 402;
+      } else if (error.message.includes("invalid_api_key")) {
+        errorMessage = "OpenAI API key is invalid. Please contact support.";
+        statusCode = 401;
+      } else {
+        errorMessage = error.message;
+      }
+    }
+
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to transcribe audio chunk",
-      },
-      { status: 500 }
+      { error: errorMessage },
+      { status: statusCode }
     );
   }
 }

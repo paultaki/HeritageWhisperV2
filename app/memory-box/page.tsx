@@ -460,16 +460,11 @@ export default function MemoryBoxPage() {
 
   return (
     <div
-      className="min-h-screen flex"
+      className="min-h-screen"
       style={{ backgroundColor: "#FFF8F3" }}
     >
-      {/* Left Sidebar */}
-      {isDesktop && <LeftSidebar />}
-
-      {/* Main content */}
-      <main className={`flex-1 min-w-0 lg:ml-56 pb-20 md:pb-0 ${viewMode === "list" ? "hw-list" : ""}`}>
-        {/* Header */}
-        <header className="sticky top-0 z-40 bg-white border-b">
+      {/* Header - Full Width */}
+      <header className="sticky top-0 z-40 bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
             <Box className="w-8 h-8" style={{ color: "#1f0f08" }} />
@@ -478,7 +473,7 @@ export default function MemoryBoxPage() {
         </div>
       </header>
 
-      {/* Toolbar with Stats and Controls */}
+      {/* Toolbar with Stats and Controls - Full Width */}
       <section className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <MemoryToolbar
@@ -495,8 +490,15 @@ export default function MemoryBoxPage() {
         </div>
       </section>
 
-      {/* Stories Content */}
-      <section className="max-w-7xl mx-auto px-6 py-6">
+      {/* Content Area with Sidebar */}
+      <div className="flex">
+        {/* Left Sidebar */}
+        {isDesktop && <LeftSidebar />}
+
+        {/* Main content */}
+        <main className={`flex-1 min-w-0 pb-20 md:pb-0 ${viewMode === "list" ? "hw-list" : ""}`}>
+          {/* Stories Content */}
+          <section className="px-6 py-6" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
         {isLoading ? (
           <div className="hw-grid-mem">
             {[...Array(8)].map((_, i) => (
@@ -607,30 +609,32 @@ export default function MemoryBoxPage() {
         )}
       </section>
 
-      {/* Export Section */}
-      <section className="max-w-7xl mx-auto px-6 pb-8">
-        <Card className="p-6 bg-gradient-to-r from-gray-50 to-gray-100">
-          <h3 className="text-xl font-bold mb-4">Export Your Memories</h3>
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-20 flex-col">
-              <Download className="w-6 h-6 mb-2" />
-              <span>Download PDF</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex-col">
-              <Printer className="w-6 h-6 mb-2" />
-              <span>Print Stories</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex-col">
-              <Archive className="w-6 h-6 mb-2" />
-              <span>Backup All</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex-col">
-              <Volume2 className="w-6 h-6 mb-2" />
-              <span>Audio Collection</span>
-            </Button>
-          </div>
-        </Card>
-      </section>
+          {/* Export Section */}
+          <section className="px-6 pb-8" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+            <Card className="p-6 bg-gradient-to-r from-gray-50 to-gray-100">
+              <h3 className="text-xl font-bold mb-4">Export Your Memories</h3>
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <Button variant="outline" className="h-20 flex-col">
+                  <Download className="w-6 h-6 mb-2" />
+                  <span>Download PDF</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex-col">
+                  <Printer className="w-6 h-6 mb-2" />
+                  <span>Print Stories</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex-col">
+                  <Archive className="w-6 h-6 mb-2" />
+                  <span>Backup All</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex-col">
+                  <Volume2 className="w-6 h-6 mb-2" />
+                  <span>Audio Collection</span>
+                </Button>
+              </div>
+            </Card>
+          </section>
+        </main>
+      </div>
 
       {/* Mode Selection Modal */}
       <ModeSelectionModal
@@ -639,12 +643,11 @@ export default function MemoryBoxPage() {
         onSelectQuickStory={modeSelection.openQuickRecorder}
       />
 
-        {/* Quick Story Recorder */}
-        <QuickStoryRecorder
-          isOpen={modeSelection.quickRecorderOpen}
-          onClose={modeSelection.closeQuickRecorder}
-        />
-      </main>
+      {/* Quick Story Recorder */}
+      <QuickStoryRecorder
+        isOpen={modeSelection.quickRecorderOpen}
+        onClose={modeSelection.closeQuickRecorder}
+      />
     </div>
   );
 }

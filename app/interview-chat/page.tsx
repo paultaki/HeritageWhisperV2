@@ -170,6 +170,24 @@ export default function InterviewChatPage() {
 
     } catch (error) {
       console.error('Error processing audio:', error);
+
+      // Show error message to user
+      const errorMsg: Message = {
+        id: `error-${Date.now()}`,
+        type: 'ai-question',
+        content: error instanceof Error
+          ? `Sorry, there was an error transcribing your audio: ${error.message}. Please try recording again.`
+          : 'Sorry, there was an error processing your response. Please try again.',
+        timestamp: new Date(),
+        sender: 'ai',
+      };
+
+      setMessages(prev => {
+        // Remove typing indicator if present
+        const filtered = prev.filter(msg => msg.id !== 'typing');
+        return [...filtered, errorMsg];
+      });
+
       setIsProcessing(false);
     }
   };
@@ -227,14 +245,33 @@ export default function InterviewChatPage() {
       return null;
     }
 
-    const newChunk = currentBlob.slice(audioState.lastBytePosition, currentBlob.size);
+    // Slice the blob and preserve the MIME type
+    const slicedChunk = currentBlob.slice(audioState.lastBytePosition, currentBlob.size);
+
+    // Create a new Blob with the correct MIME type (slice loses the type)
+    const newChunk = new Blob([slicedChunk], { type: currentBlob.type || 'audio/webm' });
+
+    console.log('[GetNewAudioChunk] Created chunk:', {
+      originalType: currentBlob.type,
+      newType: newChunk.type,
+      size: newChunk.size,
+    });
+
     return newChunk;
   };
 
   // Transcribe audio chunk
   const transcribeChunk = async (audioBlob: Blob): Promise<string> => {
+    // Create a new Blob with explicit audio/webm type to ensure OpenAI accepts it
+    const typedBlob = new Blob([audioBlob], { type: 'audio/webm' });
+
     const formData = new FormData();
-    formData.append('audio', audioBlob, 'chunk.webm');
+    formData.append('audio', typedBlob, 'chunk.webm');
+
+    console.log('[TranscribeChunk] Sending audio chunk:', {
+      size: audioBlob.size,
+      type: audioBlob.type,
+    });
 
     const response = await fetch('/api/interview-test/transcribe-chunk', {
       method: 'POST',
@@ -242,10 +279,19 @@ export default function InterviewChatPage() {
     });
 
     if (!response.ok) {
-      throw new Error('Transcription failed');
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      console.error('[TranscribeChunk] Failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+      });
+      throw new Error(`Transcription failed: ${errorData.error || response.statusText}`);
     }
 
     const data = await response.json();
+    console.log('[TranscribeChunk] Success:', {
+      transcriptionLength: data.transcription?.length || 0,
+    });
     return data.transcription;
   };
 

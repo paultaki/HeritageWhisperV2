@@ -63,11 +63,31 @@ export async function GET(request: NextRequest) {
       locked: prompts?.filter((p) => p.is_locked).length || 0,
     };
 
-    // Add word count to each prompt
+    // Check which prompts have feedback
+    const promptIds = prompts?.map((p) => p.id) || [];
+    const { data: existingFeedback } = await supabaseAdmin
+      .from("prompt_feedback")
+      .select("prompt_id, rating, feedback_notes, tags")
+      .in("prompt_id", promptIds);
+
+    // Create a map of prompt_id -> feedback
+    const feedbackMap = new Map(
+      existingFeedback?.map((f) => [f.prompt_id, f]) || []
+    );
+
+    // Add word count and feedback to each prompt
     const enrichedPrompts = (prompts || []).map((p) => ({
       ...p,
       word_count: p.prompt_text.trim().split(/\s+/).filter(Boolean).length,
+      feedback: feedbackMap.get(p.id) || null,
+      hasBeenReviewed: feedbackMap.has(p.id),
     }));
+
+    // Update stats to include feedback counts
+    stats.reviewed = enrichedPrompts.filter(p => p.hasBeenReviewed).length;
+    stats.needsReview = enrichedPrompts.filter(p => !p.hasBeenReviewed).length;
+    stats.good = existingFeedback?.filter(f => f.rating === 'good' || f.rating === 'excellent').length || 0;
+    stats.bad = existingFeedback?.filter(f => f.rating === 'bad' || f.rating === 'terrible').length || 0;
 
     return NextResponse.json({
       success: true,

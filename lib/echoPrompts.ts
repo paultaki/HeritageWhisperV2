@@ -18,9 +18,11 @@ export async function generateEchoPrompt(transcript: string): Promise<string | n
       return null;
     }
 
-    // Use full transcript (up to 500 words) for better context
-    // This prevents the model from thinking it's receiving placeholder/incomplete text
-    const contextSection = words.slice(0, 500).join(' ');
+    // Use FULL transcript - no cap needed
+    // GPT-4o-mini can handle 128K tokens (~96K words)
+    // Even 15-minute guided interviews (~3K words) are only 3% of capacity
+    // Cost: ~$0.0006 per 3K words - negligible
+    const contextSection = transcript.trim();
 
     // Always use fast model for Echo (no reasoning needed)
     const modelConfig = getModelConfig("echo");

@@ -35,15 +35,12 @@ export function LeftSidebar() {
 
   return (
     <aside
-      className="hidden lg:flex lg:w-56 flex-col gap-1.5 p-2"
+      className="hidden lg:flex lg:w-56 flex-col gap-1.5 p-2 lg:sticky lg:top-0 lg:self-start"
       style={{
-        position: "fixed",
-        top: 72,
-        left: 0,
-        height: "calc(100vh - 72px)",
         backgroundColor: "transparent",
         borderRight: "none",
         color: isDark ? "#b0b3b8" : undefined,
+        minHeight: "calc(100vh - 200px)",
       }}
     >
       <nav className="mt-8 space-y-[7px]">

@@ -97,7 +97,7 @@ export default function PromptCard({
 
         {/* Prompt text - more elegant typography */}
         <div className="flex-1 flex items-start">
-          <p className="text-[17px] leading-[1.6] text-gray-800 font-normal tracking-[-0.011em]">
+          <p className="text-[20px] leading-[1.6] text-gray-800 font-normal tracking-[-0.011em]">
             {promptText}
           </p>
         </div>
