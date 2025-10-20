@@ -1046,7 +1046,198 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 
 - **Privacy Note**: Personalized prompts are NOT visible to family members - they only see published stories on timeline/book pages
 
+## ✅ Recent Updates (October 20, 2025)
+
+### Conversation Mode & Quick Story Wizard Integration
+
+Fixed critical bugs preventing the new recording flows from saving stories successfully.
+
+#### 1. NavCache Data Race Condition
+
+- **Problem**: Wizard mode showed "No data found in NavCache" error after conversation interviews
+- **Root Cause**: Regular review code was consuming (reading + deleting) NavCache data before wizard mode could access it
+- **Fix**: Added `!isWizardMode` condition to skip regular NavCache consumption when in wizard mode
+- **Location**: `/app/review/book-style/page.tsx:105`
+- **Flow**:
+  1. Conversation completes → saves to NavCache with unique ID
+  2. Redirects to `/review/book-style?nav={id}&mode=wizard`
+  3. Wizard mode now gets first access to NavCache data
+  4. Regular review code skipped when `mode=wizard` parameter present
+
+#### 2. Authentication Headers Missing
+
+- **Problem**: API requests from wizard returned 401 Unauthorized errors
+- **Root Cause**: Fetch requests missing `Authorization: Bearer {token}` headers
+- **Fix**: Added session token to all upload and save endpoints
+- **Locations**:
+  - Audio upload: `/hooks/use-recording-wizard.tsx:92`
+  - Photo upload: `/hooks/use-recording-wizard.tsx:121`
+  - Story creation: `/hooks/use-recording-wizard.tsx:160`
+- **Changes**:
+  ```typescript
+  const { user, session } = useAuth(); // Added session
+  headers: {
+    Authorization: `Bearer ${session?.access_token}`, // Added to all requests
+  }
+  ```
+
+#### 3. API Field Name Mismatch
+
+- **Problem**: Story creation returned 400 validation error
+- **Root Cause**: Sending `transcript` but API schema expects `transcription`
+- **Fix**: Changed field name in payload to match API schema
+- **Location**: `/hooks/use-recording-wizard.tsx:140`
+- **Schema**: Defined in `/lib/validationSchemas.ts` - requires `transcription` (string, 1-50000 chars)
+
+#### 4. Debug Logging Enhancement
+
+- **Added comprehensive logging** to trace interview completion flow
+- **Location**: `/app/interview-chat/page.tsx:332-394`
+- **Console markers**:
+  - 🎬 Function called
+  - 📊 User responses count
+  - 🔍 Extracting Q&A pairs
+  - 🎵 Audio blobs found
+  - 🚀 Calling save function
+  - ✅ Success confirmations
+- **Purpose**: Easier troubleshooting of data flow from interview → NavCache → wizard
+
+#### Testing Verified
+
+**Conversation Mode (✅ Working)**:
+1. User completes guided interview at `/interview-chat`
+2. Clicks "Complete Interview" → confirms
+3. Data saves to NavCache with Q&A pairs, transcript, duration
+4. Redirects to wizard with `?mode=wizard`
+5. User fills title, year, photos, lesson
+6. Story saves successfully to database
+7. Redirects to `/timeline` with new story visible
+
+**Quick Story Mode (✅ Working)**:
+1. User clicks "+" → "Quick Story"
+2. Records 2-5 minute audio
+3. AssemblyAI transcribes automatically
+4. Same wizard flow as conversation mode
+5. Audio uploads successfully with auth header
+6. Story saves with audio URL attached
+
+### PDFShift Migration - Build Performance Optimization
+
+Replaced Puppeteer/Chromium with PDFShift API for PDF exports. Dramatically improved build speed and reduced deployment times.
+
+#### Problem
+
+- **npm install taking 7+ minutes** on Vercel builds
+- `@sparticuz/chromium` package: 141MB (heavy binary)
+- `puppeteer-core` package: 24MB
+- Total `node_modules`: 831MB
+- Builds frequently timing out or failing
+- Complex browser automation causing reliability issues
+
+#### Solution
+
+Migrated to **PDFShift** cloud PDF generation service:
+- No heavy browser dependencies
+- Simple REST API integration
+- More reliable than self-hosted Puppeteer
+- Credit-based pricing (~$0.01 per PDF)
+
+#### Implementation
+
+**New Files:**
+- `/lib/pdfshift.ts` - PDFShift client with comprehensive logging and error handling
+  - `convertUrl()` - Convert web page to PDF
+  - `checkCredits()` - Monitor API usage
+  - Lazy API key validation (allows builds without env vars)
+  - Telemetry: size, duration, errors
+
+**Updated Files:**
+- `/app/api/export/2up/route.ts` - Removed Puppeteer, uses PDFShift
+- `/app/api/export/trim/route.ts` - Removed Puppeteer, uses PDFShift
+- `package.json` - Removed `@sparticuz/chromium` and `puppeteer-core`
+- `.env.example` - Added `PDFSHIFT_API_KEY` documentation
+
+**Configuration:**
+- `.npmrc` - Added aggressive caching (`prefer-offline`, no audit/fund checks)
+- `vercel.json` - Changed to `npm ci` with optimized flags
+
+#### Performance Improvements
+
+**Before:**
+- npm install: 7 minutes
+- node_modules: 831MB
+- Total build: 5+ minutes (often timing out)
+
+**After:**
+- npm install: **15 seconds** (28x faster!)
+- node_modules: 720MB (111MB saved)
+- Total build: **59 seconds** (5x faster!)
+- 72 packages removed
+
+**Build Logs Comparison:**
+```
+# Before
+added 721 packages in 7m
+
+# After
+added 649 packages in 15s
+```
+
+#### Environment Variables
+
+Add to Vercel Dashboard:
+```bash
+PDFSHIFT_API_KEY=your_api_key_here
+```
+
+Get API key at: https://pdfshift.io
+
+**Note**: API key required in production, but builds succeed without it (lazy validation at runtime only)
+
+#### PDF Export Options
+
+Both export formats preserved with same settings:
+
+**2-up Format** (Home Printing):
+- Landscape: 11" x 8.5"
+- Zero margins
+- 3-second wait for React hydration
+
+**Trim Format** (Print-on-Demand):
+- Portrait: 5.5" x 8.5"
+- Zero margins
+- 3-second wait for React hydration
+
+#### Monitoring
+
+PDFShift client logs comprehensive telemetry:
+```typescript
+{
+  url: string,
+  format: 'Letter',
+  landscape: boolean,
+  sizeKb: number,
+  durationMs: number,
+  status: 'success' | 'error'
+}
+```
+
+Watch logs for:
+- PDF generation failures
+- Slow rendering (>5s)
+- API credit exhaustion
+
+#### Rollback Plan
+
+If PDFShift has issues:
+1. Revert commit `3a226af`
+2. Run `npm install` to restore Puppeteer/Chromium
+3. Remove `PDFSHIFT_API_KEY` from Vercel
+4. Redeploy
+
+Original Puppeteer code preserved in git history.
+
 ---
 
-_Last updated: October 17, 2025_
+_Last updated: October 20, 2025_
 _For historical fixes, feature archives, and migration notes, see CLAUDE_HISTORY.md_
