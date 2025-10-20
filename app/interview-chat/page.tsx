@@ -10,6 +10,11 @@ import { QuestionOptions } from "./components/QuestionOptions";
 import { TypingIndicator } from "./components/TypingIndicator";
 import { ChatInput } from "./components/ChatInput";
 import { StorySplitModal } from "./components/StorySplitModal";
+import {
+  completeConversationAndRedirect,
+  extractQAPairs,
+  combineAudioBlobs,
+} from "@/lib/conversationModeIntegration";
 
 export type MessageType =
   | 'system'
@@ -281,14 +286,10 @@ export default function InterviewChatPage() {
 
   // Handle question option selection
   const handleQuestionSelect = (messageId: string, optionIndex: number, questionText: string) => {
-    // Mark the selected option in the message
-    setMessages(prev => prev.map(msg =>
-      msg.id === messageId
-        ? { ...msg, selectedOption: optionIndex }
-        : msg
-    ));
+    // Immediately remove the question-options message for clean flow
+    setMessages(prev => prev.filter(msg => msg.id !== messageId));
 
-    // Add selected question as new HW question
+    // Add selected question as new HW question with smooth transition
     setTimeout(() => {
       const newQuestion: Message = {
         id: `msg-${Date.now()}`,
@@ -299,7 +300,7 @@ export default function InterviewChatPage() {
       };
 
       setMessages(prev => [...prev, newQuestion]);
-    }, 400);
+    }, 200); // Reduced delay for snappier feel
   };
 
   // Check if stories should be split
@@ -323,6 +324,60 @@ export default function InterviewChatPage() {
       }
     } catch (error) {
       console.error('Error analyzing topics:', error);
+    }
+  };
+
+  // Complete interview and redirect to post-recording flow prototype
+  const handleCompleteInterview = async () => {
+    try {
+      // Require at least one Q&A exchange
+      const userResponses = messages.filter(m =>
+        m.type === 'audio-response' || m.type === 'text-response'
+      );
+
+      if (userResponses.length === 0) {
+        alert('Please answer at least one question before completing the interview.');
+        return;
+      }
+
+      // Confirm completion
+      const confirmComplete = confirm(
+        `Complete this interview with ${userResponses.length} ${userResponses.length === 1 ? 'response' : 'responses'}?\n\n` +
+        'You\'ll be taken to review and finalize your story.'
+      );
+
+      if (!confirmComplete) return;
+
+      // Extract Q&A pairs from messages
+      const qaPairs = extractQAPairs(messages);
+
+      // Collect all audio blobs (if any)
+      const audioBlobs = messages
+        .filter(m => m.audioBlob)
+        .map(m => m.audioBlob as Blob);
+
+      // Combine audio blobs if multiple
+      let combinedAudio: Blob | null = null;
+      if (audioBlobs.length > 0) {
+        combinedAudio = await combineAudioBlobs(audioBlobs);
+      }
+
+      // Calculate total duration
+      const totalDuration = messages
+        .filter(m => m.audioDuration)
+        .reduce((sum, m) => sum + (m.audioDuration || 0), 0);
+
+      // Complete conversation and redirect
+      await completeConversationAndRedirect({
+        qaPairs,
+        audioBlob: combinedAudio,
+        fullTranscript: audioState.fullTranscript,
+        totalDuration,
+      });
+
+    } catch (error) {
+      console.error('Error completing interview:', error);
+      alert('Failed to complete interview. Please try again.');
     }
   };
 
@@ -369,16 +424,30 @@ export default function InterviewChatPage() {
       <div className="max-w-3xl mx-auto h-screen flex flex-col">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex flex-col items-center gap-2">
-            <Image
-              src="/HW_text-compress.png"
-              alt="Heritage Whisper"
-              width={200}
-              height={50}
-              className="h-10 w-auto"
-              priority
-            />
-            <p className="text-sm text-gray-500">Guided Interview</p>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col items-center gap-2 flex-1">
+              <Image
+                src="/HW_text-compress.png"
+                alt="Heritage Whisper"
+                width={200}
+                height={50}
+                className="h-10 w-auto"
+                priority
+              />
+              <p className="text-sm text-gray-500">Guided Interview</p>
+            </div>
+
+            {/* Complete Interview Button - only show if user has responded */}
+            {messages.some(m => m.type === 'audio-response' || m.type === 'text-response') && (
+              <button
+                onClick={handleCompleteInterview}
+                disabled={isProcessing}
+                className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-semibold px-6 py-3 rounded-full text-sm transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                style={{ minHeight: '44px' }}
+              >
+                Complete Interview
+              </button>
+            )}
           </div>
         </div>
 

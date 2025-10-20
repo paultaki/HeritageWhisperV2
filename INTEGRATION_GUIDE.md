@@ -2,6 +2,15 @@
 
 This guide shows how to integrate the new recording flow (index.html → quick-story.html) with the existing post-recording-flow.html.
 
+> **✅ PRODUCTION INTEGRATION COMPLETE!**
+> The conversation mode is now integrated with the production interview-chat app.
+> See `PROTOTYPE_INTEGRATION_SUMMARY.md` for details.
+>
+> **File Locations:**
+> - Prototype HTML files: `/public/` folder (served by Next.js)
+> - Integration utilities: `/lib/conversationModeIntegration.ts`
+> - Production app: `/app/interview-chat/page.tsx`
+
 ## Architecture Overview
 
 ```

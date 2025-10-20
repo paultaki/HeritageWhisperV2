@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
+import { useState } from "react";
 
 interface QuestionOptionsProps {
   messageId: string;
@@ -11,9 +12,22 @@ interface QuestionOptionsProps {
 
 export function QuestionOptions({ messageId, options, selectedOption, onSelect }: QuestionOptionsProps) {
   const hasSelected = selectedOption !== undefined;
+  const [isExiting, setIsExiting] = useState(false);
+
+  const handleSelect = (index: number, text: string) => {
+    setIsExiting(true);
+    // Small delay for fade animation before actual removal
+    setTimeout(() => {
+      onSelect(messageId, index, text);
+    }, 150);
+  };
 
   return (
-    <div className="flex flex-col items-center space-y-3 py-2">
+    <div 
+      className={`flex flex-col items-center space-y-3 py-2 transition-all duration-150 ${
+        isExiting ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+      }`}
+    >
       {/* Header */}
       <div className="text-center mb-2">
         <p className="text-sm font-medium text-gray-600">
@@ -33,7 +47,7 @@ export function QuestionOptions({ messageId, options, selectedOption, onSelect }
           return (
             <button
               key={index}
-              onClick={() => !hasSelected && onSelect(messageId, index, option)}
+              onClick={() => !hasSelected && handleSelect(index, option)}
               disabled={isDisabled}
               className={`
                 w-full px-5 py-4 rounded-2xl text-left transition-all duration-200
