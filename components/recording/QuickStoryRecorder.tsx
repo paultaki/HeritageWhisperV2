@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Mic, Pause, Play, Square, RotateCcw, X, Loader2 } from "lucide-react";
 import { useQuickRecorder } from "@/hooks/use-quick-recorder";
@@ -61,6 +61,11 @@ export function QuickStoryRecorder({ isOpen, onClose }: QuickStoryRecorderProps)
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl">
+        {/* Visually hidden title for accessibility */}
+        <DialogTitle className="sr-only">
+          Quick Story Recorder
+        </DialogTitle>
+
         <div className="relative">
           {/* Close button */}
           <button
