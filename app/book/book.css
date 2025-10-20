@@ -82,8 +82,8 @@
   height: var(--page-height);
   margin: 0 auto 24px;
 
-  /* Dotted decor border - 48px all sides */
-  padding: var(--page-border);
+  /* Dotted decor border - 48px on top/sides, slightly less on bottom */
+  padding: var(--page-border) var(--page-border) 28px;
 
   /* Paper white with whisper-level texture */
   background: #ffffff;
@@ -177,9 +177,7 @@
   width: 100%;
   height: var(--content-height);
   overflow: hidden;
-  padding: var(
-    --content-margin
-  ); /* 23px margin between dotted decor and content */
+  padding: var(--content-margin) var(--content-margin) 16px;
 }
 
 /* Optional: Page header for decade/chapter labels */

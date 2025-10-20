@@ -1713,7 +1713,7 @@ textarea:focus-visible {
         transparent 100%
       ),
       #faf8f5;
-    padding: 40px;
+    padding: 32px 40px 40px;
   }
 
   /* Page corner effect - only on outer edge, not on spine */
@@ -1757,7 +1757,7 @@ textarea:focus-visible {
 
   .page-numbers {
     position: absolute;
-    bottom: 30px;
+    bottom: 24px;
     left: 40px;
     right: 40px;
     display: flex;
@@ -1769,7 +1769,7 @@ textarea:focus-visible {
 
   .page-number {
     position: absolute;
-    bottom: 22px;
+    bottom: 16px;
     font-family: "Crimson Text", serif;
     color: #8b6f47;
     font-size: 14px;
@@ -2975,25 +2975,25 @@ textarea:focus-visible {
 }
 
 /* Book page wrapper - ensure dotted decor border is 48px on all sides */
-.book-page {
-  padding: 48px !important; /* Dotted decor border - 48px all sides */
+body .book-page {
+  padding: 48px 48px 28px !important; /* Reduce bottom padding to align dotted border */
 }
 
 /* Book page content - space between dotted decor and actual content */
-.book-page .page-content {
-  padding: 23px !important; /* 23px space between dotted decor and content on all sides (reduced from 48px) */
+body .book-page .page-content {
+  padding: 23px 23px 16px !important; /* 23px sides/top, 16px bottom to align dotted border */
 }
 
 /* Mobile book view overrides - must come after desktop with !important to override */
 @media (max-width: 640px) {
   /* Mobile: 10px dotted decor border (visual texture area) */
-  .book-page {
-    padding: 10px !important;
+  body .book-page {
+    padding: 10px 10px 8px !important;
   }
 
   /* Mobile: 20px content padding (breathing room between dotted decor and text) */
-  .book-page .page-content {
-    padding: 20px !important;
+  body .book-page .page-content {
+    padding: 20px 20px 16px !important;
   }
 
   /* Mobile running header - adjusted for smaller padding */

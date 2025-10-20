@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { pdfshift } from "@/lib/pdfshift";
 
 export const maxDuration = 60;
 export const runtime = "nodejs";
@@ -45,42 +44,6 @@ export async function POST(request: NextRequest) {
 
     logger.debug("[Export Trim] Auth successful, user:", user.id);
 
-    // Use local Chrome for development, @sparticuz/chromium for production
-    const isDev = process.env.NODE_ENV === "development";
-
-    let executablePath;
-    if (isDev) {
-      executablePath =
-        process.platform === "darwin"
-          ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-          : undefined;
-    } else {
-      executablePath = await chromium.executablePath();
-      logger.debug("[Export Trim] Chromium path:", executablePath);
-    }
-
-    const launchArgs = isDev
-      ? ["--no-sandbox"]
-      : [...chromium.args, "--disable-gpu", "--no-zygote", "--single-process"];
-
-    logger.debug("[Export Trim] Launching browser...");
-    const browser = await puppeteer.launch({
-      args: launchArgs,
-      defaultViewport: chromium.defaultViewport,
-      executablePath,
-      headless: true,
-    });
-
-    logger.debug("[Export Trim] Browser launched, creating new page...");
-    const page = await browser.newPage();
-
-    // Set viewport to match print dimensions
-    await page.setViewport({
-      width: 528, // 5.5 inches × 96 DPI
-      height: 816, // 8.5 inches × 96 DPI
-      deviceScaleFactor: 1,
-    });
-
     // Use actual domain when deployed, localhost for dev
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
@@ -88,61 +51,25 @@ export async function POST(request: NextRequest) {
         `http://127.0.0.1:${process.env.PORT || 3002}`;
 
     const printUrl = `${baseUrl}/book/print/trim?userId=${user.id}`;
-    logger.debug("[Export Trim] Navigating to:", printUrl);
+    logger.debug("[Export Trim] Generating PDF from:", printUrl);
 
-    try {
-      await page.goto(printUrl, { waitUntil: "load", timeout: 60000 });
-      logger.debug("[Export Trim] Page loaded");
-    } catch (navError) {
-      logger.debug(
-        "[Export Trim] Navigation error, trying localhost fallback...",
-      );
-      const fallbackUrl = `http://localhost:${process.env.PORT || 3002}/book/print/trim?userId=${user.id}`;
-      await page.goto(fallbackUrl, { waitUntil: "load", timeout: 60000 });
-    }
-
-    logger.debug("[Export Trim] Waiting for content...");
-
-    // Wait for React to hydrate and content to render
-    await page.waitForFunction(
-      () => {
-        const pages = document.querySelectorAll(".page");
-        const notLoading = !document.body.innerText.includes("Loading");
-        return pages.length > 0 && notLoading;
-      },
-      { timeout: 45000, polling: 500 },
-    );
-
-    // Wait for images to load
-    await page.evaluate(() => {
-      return Promise.all(
-        Array.from(document.images)
-          .filter((img) => !img.complete)
-          .map(
-            (img) =>
-              new Promise((resolve) => {
-                img.onload = img.onerror = resolve;
-              }),
-          ),
-      );
-    });
-
-    // Additional wait for rendering
-    await page.evaluate(
-      () => new Promise((resolve) => setTimeout(resolve, 2000)),
-    );
-
-    logger.debug("[Export Trim] Content loaded, generating PDF...");
-    const pdf = await page.pdf({
+    // Use PDFShift to generate PDF
+    const pdf = await pdfshift.convertUrl({
+      url: printUrl,
+      landscape: false, // Portrait for 5.5x8.5 trim size
       width: "5.5in",
       height: "8.5in",
-      printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
-      preferCSSPageSize: false,
+      margin: {
+        top: "0",
+        right: "0",
+        bottom: "0",
+        left: "0",
+      },
+      waitFor: 3000, // Wait 3s for React hydration and content rendering
+      timeout: 30000, // 30s max timeout
     });
 
-    logger.debug("[Export Trim] PDF generated, closing browser...");
-    await browser.close();
+    logger.debug("[Export Trim] PDF generated successfully");
 
     // Track PDF export
     try {
