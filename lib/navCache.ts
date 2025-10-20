@@ -85,7 +85,7 @@ export const navCache = {
     if (!id) return null;
 
     try {
-      // Try memory cache first (fastest)
+      // Try memory cache first (fastest, has Blob intact)
       const memoryData = memoryCache.get(id);
       if (memoryData) {
         console.log("NavCache: Retrieved from memory", id);
@@ -96,6 +96,25 @@ export const navCache = {
       const localData = localStorage.getItem(`nav:${id}`);
       if (localData) {
         const parsed = JSON.parse(localData);
+
+        // Convert base64 back to Blob if present
+        if ((parsed as any)._audioBlobBase64) {
+          const base64 = (parsed as any)._audioBlobBase64;
+          // Extract data from data URL (data:audio/webm;base64,...)
+          const match = base64.match(/^data:([^;]+);base64,(.+)$/);
+          if (match) {
+            const mimeType = match[1];
+            const base64Data = match[2];
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            parsed.audioBlob = new Blob([bytes], { type: mimeType });
+          }
+          delete (parsed as any)._audioBlobBase64;
+        }
+
         // Refresh memory cache
         memoryCache.set(id, parsed);
         console.log("NavCache: Retrieved from localStorage", id);

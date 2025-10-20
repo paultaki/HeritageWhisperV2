@@ -78,7 +78,7 @@ export async function completeConversationAndRedirect(
 
     // Generate unique ID and save to NavCache
     const navId = navCache.generateId();
-    navCache.set(navId, recordingData);
+    await navCache.set(navId, recordingData);
 
     console.log('✓ Conversation data saved to NavCache with ID:', navId);
     console.log('📊 Data:', {

@@ -232,7 +232,7 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
 
       // Save to NavCache
       const navId = navCache.generateId();
-      navCache.set(navId, {
+      await navCache.set(navId, {
         mode: "quick",
         rawTranscript: transcription,
         duration: duration,
