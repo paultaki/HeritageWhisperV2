@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Mic, Square, Send, Type } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -15,12 +15,23 @@ export function ChatInput({ onAudioResponse, onTextResponse, disabled }: ChatInp
   const [isRecording, setIsRecording] = useState(false);
   const [textInput, setTextInput] = useState('');
   const [recordingDuration, setRecordingDuration] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const startTimeRef = useRef<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Detect mobile vs desktop
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Start audio recording
   const startRecording = async () => {
@@ -107,7 +118,15 @@ export function ChatInput({ onAudioResponse, onTextResponse, disabled }: ChatInp
   };
 
   return (
-    <div className="sticky bottom-0 border-t border-gray-200 bg-white px-4 sm:px-6 py-3 sm:py-4">
+    <div
+      className="sticky left-0 right-0 border-t border-gray-200 bg-white px-4 sm:px-6 py-3 sm:py-4 z-40"
+      style={{
+        // On mobile: stick 80px from bottom (above mobile nav bar which is 80px tall)
+        // On desktop: stick to bottom (0px)
+        // Also account for safe area insets on notched phones
+        bottom: isMobile ? 'max(80px, env(safe-area-inset-bottom, 0px))' : '0px',
+      }}
+    >
       {/* Mode Toggle - more compact on mobile */}
       <div className="flex justify-center mb-2 sm:mb-3">
         <div className="inline-flex rounded-lg border border-gray-200 p-0.5 sm:p-1 bg-gray-50">

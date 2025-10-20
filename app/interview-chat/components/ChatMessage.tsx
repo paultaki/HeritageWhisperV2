@@ -29,8 +29,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
       <div className="flex justify-start">
         <div className="max-w-[75%]">
           {/* Sender label */}
-          <div className="mb-1 px-3 text-xs text-gray-500 font-medium">
-            Pearl
+          <div className="mb-1 px-3 text-xs font-medium">
+            <span className="shimmer-text">Pearl</span>
           </div>
           {/* Bubble */}
           <div
@@ -189,43 +189,73 @@ function AudioPlayer({ audioBlob, duration }: AudioPlayerProps) {
   const bars = [0.3, 0.7, 0.5, 0.9, 0.6, 0.4, 0.8, 0.5, 0.7, 0.3, 0.6, 0.8, 0.5, 0.4, 0.7];
 
   return (
-    <div className="flex items-center gap-3">
-      {/* Play/Pause Button */}
-      <button
-        onClick={togglePlay}
-        className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors flex-shrink-0"
-        aria-label={isPlaying ? 'Pause' : 'Play'}
-      >
-        {isPlaying ? (
-          <Pause className="w-4 h-4 text-white fill-white" />
-        ) : (
-          <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+    <>
+      <div className="flex items-center gap-3">
+        {/* Play/Pause Button */}
+        <button
+          onClick={togglePlay}
+          className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors flex-shrink-0"
+          aria-label={isPlaying ? 'Pause' : 'Play'}
+        >
+          {isPlaying ? (
+            <Pause className="w-4 h-4 text-white fill-white" />
+          ) : (
+            <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+          )}
+        </button>
+
+        {/* Waveform Visualization */}
+        <div className="flex items-center gap-0.5 flex-1 h-8">
+          {bars.map((height, i) => (
+            <div
+              key={i}
+              className="w-1 bg-white/70 rounded-full transition-all"
+              style={{
+                height: `${height * 100}%`,
+                opacity: isPlaying ? 1 : 0.7,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Duration */}
+        <div className="text-sm font-medium tabular-nums flex-shrink-0">
+          {formatTime(isPlaying ? currentTime : duration)}
+        </div>
+
+        {/* Hidden Audio Element */}
+        {audioUrl && (
+          <audio ref={audioRef} src={audioUrl} preload="metadata" />
         )}
-      </button>
-
-      {/* Waveform Visualization */}
-      <div className="flex items-center gap-0.5 flex-1 h-8">
-        {bars.map((height, i) => (
-          <div
-            key={i}
-            className="w-1 bg-white/70 rounded-full transition-all"
-            style={{
-              height: `${height * 100}%`,
-              opacity: isPlaying ? 1 : 0.7,
-            }}
-          />
-        ))}
       </div>
 
-      {/* Duration */}
-      <div className="text-sm font-medium tabular-nums flex-shrink-0">
-        {formatTime(isPlaying ? currentTime : duration)}
-      </div>
+      <style jsx>{`
+        .shimmer-text {
+          background: linear-gradient(
+            90deg,
+            #D97706 0%,
+            #F59E0B 25%,
+            #FBBF24 50%,
+            #F59E0B 75%,
+            #D97706 100%
+          );
+          background-size: 200% auto;
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: shimmer 3s linear infinite;
+          font-weight: 600;
+        }
 
-      {/* Hidden Audio Element */}
-      {audioUrl && (
-        <audio ref={audioRef} src={audioUrl} preload="metadata" />
-      )}
-    </div>
+        @keyframes shimmer {
+          0% {
+            background-position: 200% center;
+          }
+          100% {
+            background-position: -200% center;
+          }
+        }
+      `}</style>
+    </>
   );
 }

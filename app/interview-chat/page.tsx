@@ -92,7 +92,7 @@ export default function InterviewChatPage() {
     const greeting: Message = {
       id: `msg-${Date.now()}`,
       type: 'system',
-      content: `Welcome, ${user?.user_metadata?.full_name || 'friend'}! I'm Pearl, your Heritage Whisper guide. Let's begin your interview.`,
+      content: `Welcome, ${user?.name?.split(' ')[0] || 'friend'}! I'm Pearl, your Heritage Whisper guide. Let's begin your interview.`,
       timestamp: new Date(),
       sender: 'system',
     };
@@ -483,7 +483,7 @@ export default function InterviewChatPage() {
       {/* Welcome Modal */}
       {showWelcome && (
         <WelcomeModal
-          userName={user.user_metadata?.full_name || 'friend'}
+          userName={user?.name || 'friend'}
           onDismiss={handleWelcomeDismiss}
         />
       )}

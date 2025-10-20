@@ -1,3 +1,7 @@
+---
+description: Check out after completing work (aggressive cleanup mode)
+---
+
 # Check Out - Multi-Instance Coordination
 
 You are finishing work and need to check out. Follow this protocol:
