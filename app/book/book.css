@@ -22,10 +22,10 @@
   --content-height: calc(var(--page-height) - var(--margin) * 2);
 
   /* Typography for print */
-  --book-font-size: 11pt;
-  --book-line-height: 1.6;
-  --book-heading-size: 16pt;
-  --book-title-size: 20pt;
+  --book-font-size: 12.5pt;
+  --book-line-height: 1.7;
+  --book-heading-size: 18pt;
+  --book-title-size: 22pt;
 }
 
 /* ============================================
@@ -178,6 +178,7 @@
   height: var(--content-height);
   overflow: hidden;
   padding: var(--content-margin) var(--content-margin) 16px;
+  color: #111;
 }
 
 /* Optional: Page header for decade/chapter labels */
@@ -255,7 +256,7 @@
 /* Page number footer - outer corners */
 .page-number {
   position: absolute;
-  bottom: 24px;
+  bottom: 14px;
   font-family: var(--font-serif);
   font-size: 11pt;
   color: #666;
@@ -321,7 +322,7 @@
   font-family: var(--font-serif);
   font-size: var(--book-font-size);
   line-height: var(--book-line-height);
-  color: #1e1710;
+  color: #111;
   hyphens: auto;
   text-align: left;
 
@@ -345,7 +346,7 @@
   font-weight: 600;
   margin-bottom: 8pt;
   margin-top: 16pt;
-  color: #1e1710;
+  color: #111;
   break-after: avoid;
   page-break-after: avoid;
 }
@@ -355,7 +356,7 @@
   font-size: var(--book-title-size);
   font-weight: 700;
   margin-bottom: 12pt;
-  color: #1e1710;
+  color: #111;
   break-after: avoid;
   page-break-after: avoid;
 }
@@ -482,7 +483,7 @@
   }
 
   .book-text {
-    font-size: 10pt;
+    font-size: 13pt;
     text-align: left; /* Left-align on mobile for readability */
     padding: 0;
     margin: 0;

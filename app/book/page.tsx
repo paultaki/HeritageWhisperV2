@@ -731,6 +731,7 @@ export default function BookViewNew() {
   const modeSelection = useModeSelection();
   const [fontsReady, setFontsReady] = useState(false);
   const [isPaginationReady, setIsPaginationReady] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1.0); // Zoom control
 
   // Get storyId from URL parameters
   const searchParams = new URLSearchParams(
@@ -1047,9 +1048,44 @@ export default function BookViewNew() {
 
   return (
     <div className="book-view min-h-screen bg-background">
+      {/* Zoom Controls - Fixed position, always accessible */}
+      <div className="fixed top-24 right-4 z-50 flex flex-col gap-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-2">
+        <button
+          onClick={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
+          className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
+          aria-label="Zoom in"
+        >
+          +
+        </button>
+        <div className="w-10 text-center text-xs text-gray-600 font-medium">
+          {Math.round(zoomLevel * 100)}%
+        </div>
+        <button
+          onClick={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
+          className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
+          aria-label="Zoom out"
+        >
+          −
+        </button>
+        <button
+          onClick={() => setZoomLevel(1.0)}
+          className="w-10 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-600 text-xs font-medium mt-1"
+          aria-label="Reset zoom"
+        >
+          Reset
+        </button>
+      </div>
+
       {/* Book Content - Always centered, allows natural scrolling */}
       <div className="book-container-wrapper" {...swipeHandlers}>
-        <div className="book-container relative mx-auto">
+        <div 
+          className="book-container relative mx-auto"
+          style={{
+            transform: `scale(${zoomLevel})`,
+            transformOrigin: "top center",
+            transition: "transform 200ms ease-out",
+          }}
+        >
         {/* Spine hint for single-page mode - behind everything */}
         {!showSpreadView && <div className="spine-hint" aria-hidden="true" />}
 
@@ -1063,14 +1099,6 @@ export default function BookViewNew() {
         >
           <div
             className={`book-spread ${!showSpreadView ? "single-mode" : "spread-mode"}`}
-            style={{
-              transform:
-                viewportConfig.scale !== 1.0
-                  ? `scale(${viewportConfig.scale})`
-                  : undefined,
-              transformOrigin: "top center",
-              transition: "transform 140ms ease-out",
-            }}
           >
             {!showSpreadView ? (
               // Single page view - centered by explicit width
