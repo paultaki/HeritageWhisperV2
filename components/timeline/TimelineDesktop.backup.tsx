@@ -44,44 +44,35 @@ import { getTopTraits } from "@/utils/getTopTraits";
 
 const logoUrl = "/HW_logo_mic_clean.png";
 
-// V3: Subtle Decade Label Component - Museum Style
-interface DecadeLabelProps {
+// Decade Banner Component
+interface DecadeBannerProps {
   decade: string;
   isDark?: boolean;
 }
 
-function DecadeLabel({ decade, isDark = false }: DecadeLabelProps) {
+function DecadeBanner({ decade, isDark = false }: DecadeBannerProps) {
   const decadeNum = decade.replace("s", "");
 
   return (
-    <div 
-      className="relative flex items-center justify-center md:-mt-[50px]"
-      style={{
-        height: '60px',
-        marginBottom: '20px',
-      }}
-    >
-      {/* Subtle decade label positioned to the right of the timeline */}
+    <div className="relative flex items-center justify-center decade-banner md:-mt-[50px]">
+      {/* Banner label - inverted colors from story date markers */}
       <div
-        className="absolute z-0"
+        className="relative z-20 py-1 rounded-lg shadow-sm"
         style={{
-          left: '50%',
-          transform: 'translateX(calc(-50% - 95px))', // Position to right of timeline line
-          opacity: isDark ? 0.4 : 0.45,
+          backgroundColor: isDark ? '#b0b3b8' : '#6f7583',
+          border: `1px solid ${isDark ? '#b0b3b8' : '#6f7583'}`,
+          width: '90px',
+          textAlign: 'center',
         }}
       >
-        <span
+        <h3
+          className="text-lg font-serif font-medium whitespace-nowrap"
           style={{
-            fontSize: '11px',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
-            fontWeight: 500,
-            letterSpacing: '0.5px',
-            color: isDark ? '#b0b3b8' : '#6b7280',
-            textTransform: 'uppercase',
+            color: '#ffffff',
           }}
         >
-          {decadeNum}
-        </span>
+          {decadeNum}s
+        </h3>
       </div>
     </div>
   );
@@ -437,19 +428,14 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
     // If there's a photo, render without white container
     if (displayPhoto?.url) {
       return (
-        <div>
+        <div
+          className="cursor-pointer"
+          onClick={handleCardClick}
+        >
           <div className={`relative rounded-3xl overflow-hidden shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}>
-            <div 
-              className="relative w-full aspect-[4/3]"
-              style={{ pointerEvents: 'none' }}
-            >
-              <div 
-                className="absolute inset-0 cursor-pointer"
-                style={{ pointerEvents: 'auto', zIndex: 1 }}
-                onClick={handleCardClick}
-              />
+            <div className="relative w-full aspect-[4/3]">
               <Image
                 src={displayPhoto.url}
                 alt={story.title}
@@ -475,18 +461,77 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 onLoad={() => { /* quiet success log */ }}
               />
             </div>
-            {/* Photo count badge (desktop) - top left */}
+            {/* Photo count badge (desktop) */}
             {photoCount > 1 && (
-              <div className="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium z-10 pointer-events-none">
+              <div className="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium z-10">
                 {photoCount} photos
               </div>
             )}
             
             {/* Memory Footer Overlay with Play Button */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 md:p-4 pointer-events-none">
-              {/* Progress Bar (shows above title when playing) */}
-              {story.audioUrl && (isPlaying || progress > 0) && (
-                <div className="mb-3 pointer-events-auto">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 md:p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg md:text-xl font-semibold text-white mb-1 truncate pr-2">
+                    {story.title}
+                  </h3>
+                  <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-white/90">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 md:w-3.5 h-3 md:h-3.5" />
+                      {story.storyDate
+                        ? new Date(story.storyDate).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                          })
+                        : formatYear(story.storyYear)}
+                    </span>
+                    {displayLifeAge !== null && displayLifeAge !== undefined && (
+                      <>
+                        <span className="text-white/70">•</span>
+                        <span>
+                          {displayLifeAge > 0 && `Age ${displayLifeAge}`}
+                          {displayLifeAge === 0 && `Birthday`}
+                          {displayLifeAge < 0 && `Before birth`}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Play Button Overlaid on Photo */}
+                {story.audioUrl && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePlayAudio(e);
+                    }}
+                    aria-pressed={isPlaying}
+                    aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+                    className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer relative z-20"
+                    style={{ pointerEvents: 'auto' }}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" style={{ pointerEvents: 'none' }} />
+                    ) : (
+                      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style={{ pointerEvents: 'none' }}>
+                        <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
+                        {isPlaying ? (
+                          <g>
+                            <rect x="11" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
+                            <rect x="14.8" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
+                          </g>
+                        ) : (
+                          <polygon points="11,9 11,19 19,14" fill="#fb923c" />
+                        )}
+                      </svg>
+                    )}
+                  </button>
+                )}
+              </div>
+              
+              {/* Progress Bar (always reserve space to keep button in same position) */}
+              {story.audioUrl && (
+                <div className={`mt-2 ${!(isPlaying || progress > 0) ? 'opacity-0 pointer-events-none' : ''}`}>
                   <div
                     ref={progressBarRef}
                     onClick={(e) => {
@@ -506,53 +551,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   </div>
                 </div>
               )}
-              
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg md:text-xl font-semibold text-white mb-1 truncate pr-2">
-                    {story.title}
-                  </h3>
-                  {/* V3: Show only age, no date */}
-                  {displayLifeAge !== null && displayLifeAge !== undefined && (
-                    <div className="text-xs md:text-sm text-white/90">
-                      <span>
-                        {displayLifeAge > 0 && `Age ${displayLifeAge}`}
-                        {displayLifeAge === 0 && `Birthday`}
-                        {displayLifeAge < 0 && `Before birth`}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Play Button Overlaid on Photo */}
-                {story.audioUrl && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePlayAudio(e);
-                    }}
-                    aria-pressed={isPlaying}
-                    aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-                    className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer relative z-50 pointer-events-auto"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" />
-                    ) : (
-                      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                        <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
-                        {isPlaying ? (
-                          <g>
-                            <rect x="11" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
-                            <rect x="14.8" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
-                          </g>
-                        ) : (
-                          <polygon points="11,9 11,19 19,14" fill="#fb923c" />
-                        )}
-                      </svg>
-                    )}
-                  </button>
-                )}
-              </div>
             </div>
           </div>
           
@@ -686,59 +684,59 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       }`}
       style={{
         transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
-        pointerEvents: 'none',
       }}
     >
       {/* Left side content (for left-positioned cards) - Desktop only */}
-      <div className={`flex-1 flex ${position === "left" ? "justify-end lg:pr-6" : ""} hidden lg:flex`} style={{ pointerEvents: 'none' }}>
+      <div className={`flex-1 flex ${position === "left" ? "justify-end lg:pr-6" : ""} hidden lg:flex`}>
         {position === "left" && (
-          <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
+          <div className="w-full max-w-md timeline-card-container">
             {renderCardContent()}
           </div>
         )}
       </div>
 
-      {/* V3: Year marker - more visible now as primary date indicator */}
+      {/* Center date bubble or decade marker */}
       <div
-        className="z-10 flex-shrink-0 timeline-dot transition-all duration-500"
+        className="z-20 flex-shrink-0 timeline-dot transition-all duration-500"
         style={{
           transform: position === "left" ? "translateX(-12px)" : "translateX(12px)",
         }}
       >
         <div
-          className="py-0.5 px-2.5 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
+          className="py-1 text-lg font-serif font-medium rounded-lg whitespace-nowrap shadow-sm"
           style={{
-            backgroundColor: isDark ? 'rgba(37, 39, 40, 0.85)' : 'rgba(255, 255, 255, 0.95)',
-            border: `1px solid ${isDark ? 'rgba(176, 179, 184, 0.3)' : 'rgba(111, 117, 131, 0.35)'}`,
-            color: isDark ? 'rgba(176, 179, 184, 0.9)' : 'rgba(75, 85, 99, 0.95)',
-            fontSize: '16px',
-            fontWeight: 500,
-            letterSpacing: '0.3px',
-            opacity: 0.92,
-            boxShadow: isDark 
-              ? '0 2px 4px rgba(0, 0, 0, 0.2)' 
-              : '0 2px 4px rgba(0, 0, 0, 0.12)',
-            borderRadius: '6px',
-            backdropFilter: 'blur(10px)',
+            backgroundColor: showDecadeMarker
+              ? (isDark ? '#b0b3b8' : '#6f7583')
+              : (isDark ? '#252728' : '#ffffffF2'),
+            border: showDecadeMarker
+              ? `1px solid ${isDark ? '#b0b3b8' : '#6f7583'}`
+              : `1px solid ${isDark ? '#3b3d3f' : '#6f7583'}`,
+            color: showDecadeMarker ? '#ffffff' : (isDark ? '#b0b3b8' : '#6f7583'),
+            width: showDecadeMarker ? '90px' : 'auto',
+            textAlign: showDecadeMarker ? 'center' : 'left',
+            paddingLeft: showDecadeMarker ? '0' : '1rem',
+            paddingRight: showDecadeMarker ? '0' : '1rem',
           }}
         >
-          {story.storyDate
-            ? new Date(story.storyDate).getFullYear()
-            : formatYear(story.storyYear)}
+          {showDecadeMarker && decadeLabel
+            ? decadeLabel
+            : (story.storyDate
+                ? new Date(story.storyDate).getFullYear()
+                : formatYear(story.storyYear))}
         </div>
       </div>
 
       {/* Right side content (for right-positioned cards) - Desktop only */}
-      <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`} style={{ pointerEvents: 'none' }}>
+      <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`}>
         {position === "right" && (
-          <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
+          <div className="w-full max-w-md timeline-card-container">
             {renderCardContent()}
           </div>
         )}
       </div>
 
       {/* Mobile Card (shown on all small screens) */}
-      <div className="lg:hidden w-full" style={{ pointerEvents: 'auto' }}>
+      <div className="lg:hidden w-full">
         {renderCardContent()}
       </div>
     </div>
@@ -862,7 +860,7 @@ export function TimelineDesktop() {
 
     const handleBubbleScroll = () => {
       const stickyTop = 55; // Sticky position from top (aligned with header)
-      const collisionThreshold = 163; // Increased to make markers travel closer before collision (38px more)
+      const collisionThreshold = -32; // Distance before collision triggers fade (negative = overlap needed)
 
       // Query all timeline-dot elements
       const bubbles = Array.from(document.querySelectorAll('.timeline-dot'));
@@ -898,20 +896,9 @@ export function TimelineDesktop() {
               : 1; // Instant fade if threshold is exactly 0
             // Clamp fadeProgress between 0 and 1 to prevent crazy values
             const fadeProgress = Math.max(0, Math.min(1, rawProgress));
-            
-            // Keep bubble visible until next one is VERY close (allow negative for overlap)
-            const proximityToNext = nextBubbleDistance - stickyTop;
-            const shouldBeVisible = proximityToNext > -28; // Start fading when 28px past sticky (overlapping)
-            
-            if (shouldBeVisible) {
-              bubble.style.opacity = `${Math.max(0.2, 1 - fadeProgress)}`; // Min 20% opacity while approaching
-              bubble.style.transform = `${translateX} scale(${Math.max(0.8, 1 - (fadeProgress * 0.2))})`; // Scale to 80%
-            } else {
-              // Next bubble has overlapped by more than 28px - NOW fade quickly
-              const finalFade = Math.max(0, (proximityToNext + 38) / 10); // Fade over final 10px of overlap
-              bubble.style.opacity = `${finalFade * 0.2}`; // Fade from 20% to 0%
-              bubble.style.transform = `${translateX} scale(${0.8 * finalFade})`; // Scale from 80% to 0%
-            }
+            bubble.style.opacity = `${Math.max(0, 1 - fadeProgress)}`; // Fade to 0% opacity
+            // Preserve translateX and add scale
+            bubble.style.transform = `${translateX} scale(${Math.max(0.5, 1 - (fadeProgress * 0.5))})`; // Scale down to 50%
           } else {
             // No collision - stay bright and full size
             bubble.style.opacity = '1';
@@ -1015,16 +1002,15 @@ export function TimelineDesktop() {
 
         {/* Timeline Container */}
         <div ref={timelineContainerRef} className="relative">
-          {/* V3: Subtle vertical timeline ruler - slightly thicker */}
+          {/* Centered Progress Line - Absolute positioning, shifted left to match cards */}
           <div
-            className="absolute left-1/2 md:w-[2.5px] w-[3px] rounded-full overflow-hidden pointer-events-none"
+            className="absolute left-1/2 w-2 md:w-1 rounded-full overflow-hidden pointer-events-none"
             style={{
-              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(107, 114, 128, 0.25)',
+              backgroundColor: isDark ? '#2a2b2c' : '#d1d5db',
               transform: 'translateX(calc(-50% - 115px))',
               top: '0',
               bottom: '0',
-              height: '100%',
-              opacity: 0.6,
+              height: '100%'
             }}
           >
             <div
@@ -1032,8 +1018,8 @@ export function TimelineDesktop() {
               className="w-full rounded-full transition-all duration-300 ease-out"
               style={{
                 height: "0%",
-                background: isDark ? 'rgba(176, 179, 184, 0.4)' : 'rgba(107, 114, 128, 0.4)',
-                boxShadow: 'none',
+                background: isDark ? 'linear-gradient(to bottom, #3b3d3f, #3b3d3f)' : 'linear-gradient(to bottom, #6b7280, #4b5563)',
+                boxShadow: isDark ? '0 0 10px rgba(59, 61, 63, 0.25)' : '0 0 10px rgba(107, 114, 128, 0.3)',
               }}
             />
           </div>
@@ -1057,22 +1043,19 @@ export function TimelineDesktop() {
                 
                 return (
                   <div key={decade}>
-                    {/* V3: Decade labels removed per user request */}
+                    {/* Decade labels removed - cleaner timeline with just story dates */}
                     
                     {/* Stories in this decade */}
                     {decadeStories.map((story: Story, storyIndex: number) => {
                       // Calculate global index for alternating left/right positioning
                       const globalIndex = sortedStories.findIndex(s => s.id === story.id);
-                      // V3: No decade markers on cards anymore
+                      // All cards use normal date markers now (no decade markers)
                       const showDecadeMarker = false;
-                      
-                      // Only the very first story (first decade, first story) gets no negative margin
-                      const isVeryFirstStory = decadeIndex === 0 && storyIndex === 0;
                       
                       return (
                         <div
                           key={story.id}
-                          className={isVeryFirstStory ? "md:mt-0" : "md:-mt-[108px]"}
+                          className="md:-mt-[50px] first:md:mt-0"
                           data-memory-id={story.id}
                           style={{
                             transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',
