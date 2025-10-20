@@ -130,6 +130,9 @@ export function PostRecordingWizard({
               originalTranscript={data.originalTranscript}
               enhancedTranscript={data.enhancedTranscript}
               useEnhanced={data.useEnhanced}
+              onOriginalChange={(original) =>
+                updateData("originalTranscript", original)
+              }
               onEnhancedChange={(enhanced) =>
                 updateData("enhancedTranscript", enhanced)
               }

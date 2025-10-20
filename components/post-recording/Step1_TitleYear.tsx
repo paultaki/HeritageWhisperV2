@@ -53,10 +53,8 @@ export function Step1_TitleYear({
     const numValue = parseInt(value, 10);
     if (isNaN(numValue)) return;
 
-    // Validate range
-    if (numValue >= minYear && numValue <= currentYear) {
-      onYearChange(numValue);
-    }
+    // Allow any input, will validate on save
+    onYearChange(numValue);
   };
 
   return (

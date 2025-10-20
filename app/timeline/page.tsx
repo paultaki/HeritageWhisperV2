@@ -90,7 +90,7 @@ export default function TimelinePage() {
             className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
             style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
           >
-            <Home className="w-8 h-8" />
+            <Home className="w-7 h-7" />
             <span>Home</span>
           </Link>
           <Link
@@ -98,7 +98,7 @@ export default function TimelinePage() {
             className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
             style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
           >
-            <Users className="w-8 h-8" />
+            <Users className="w-7 h-7" />
             <span>Family</span>
           </Link>
           <Link
@@ -106,7 +106,7 @@ export default function TimelinePage() {
             className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
             style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
           >
-            <Settings className="w-8 h-8" />
+            <Settings className="w-7 h-7" />
             <span>Settings</span>
           </Link>
           <Link
@@ -114,7 +114,7 @@ export default function TimelinePage() {
             className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
             style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
           >
-            <HelpCircle className="w-8 h-8" />
+            <HelpCircle className="w-7 h-7" />
             <span>Help</span>
           </Link>
           <Link
@@ -122,7 +122,7 @@ export default function TimelinePage() {
             className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
             style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
           >
-            <Share2 className="w-8 h-8" />
+            <Share2 className="w-7 h-7" />
             <span>Share</span>
           </Link>
         </nav>

@@ -327,6 +327,32 @@ export function MultiPhotoUploader({
     setIsDragging(false);
   };
 
+  // Touch handlers for mobile drag support
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!editingTransform || e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({
+      x: touch.clientX - editingTransform.position.x,
+      y: touch.clientY - editingTransform.position.y,
+    });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !editingTransform || e.touches.length !== 1) return;
+    e.preventDefault(); // Prevent scrolling while dragging
+    const touch = e.touches[0];
+    const newPosition = {
+      x: touch.clientX - dragStart.x,
+      y: touch.clientY - dragStart.y,
+    };
+    setEditingTransform({ ...editingTransform, position: newPosition });
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   // Create array with 3 slots, filling with photos or nulls
   const photoSlots: (StoryPhoto | null)[] = [...photos];
   while (photoSlots.length < 3) {
@@ -533,6 +559,10 @@ export function MultiPhotoUploader({
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUp}
                     onMouseLeave={handleMouseUp}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onTouchCancel={handleTouchEnd}
                     style={{ touchAction: "none" }}
                   >
                     <img

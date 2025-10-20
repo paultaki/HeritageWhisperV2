@@ -1246,9 +1246,9 @@ export const AudioRecorder = forwardRef<
           onClick={isRecording ? stopRecording : startRecording}
           className={`w-32 h-32 rounded-full text-xl relative ${
             isRecording
-              ? "bg-gradient-to-b from-red-500 to-red-600 text-white shadow-[inset_0_-4px_8px_rgba(0,0,0,0.3),_0_6px_12px_rgba(0,0,0,0.2)] border-4 border-red-700 hover:from-red-600 hover:to-red-700 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
-              : "bg-gradient-to-b from-amber-500 to-rose-500 text-white shadow-[0_6px_12px_rgba(0,0,0,0.3),_inset_0_2px_4px_rgba(255,255,255,0.4)] border-4 border-amber-600 hover:from-amber-600 hover:to-rose-600 transform hover:scale-105 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] active:scale-95"
-          } transition-all duration-150`}
+              ? "bg-gradient-to-b from-red-500 to-red-600 text-white shadow-[inset_0_-4px_8px_rgba(0,0,0,0.3),_0_8px_16px_rgba(0,0,0,0.25),_0_0_0_4px_rgba(220,38,38,0.3)] border-4 border-red-700 hover:from-red-600 hover:to-red-700 active:shadow-[inset_0_2px_8px_rgba(0,0,0,0.4)] active:translate-y-1"
+              : "bg-gradient-to-b from-amber-400 to-rose-500 text-white shadow-[0_8px_16px_rgba(0,0,0,0.3),_inset_0_-2px_4px_rgba(0,0,0,0.2),_inset_0_2px_4px_rgba(255,255,255,0.5),_0_0_0_4px_rgba(251,191,36,0.2)] border-4 border-amber-500 hover:from-amber-500 hover:to-rose-600 hover:shadow-[0_10px_20px_rgba(0,0,0,0.35),_inset_0_-2px_4px_rgba(0,0,0,0.2),_inset_0_2px_4px_rgba(255,255,255,0.5),_0_0_0_4px_rgba(251,191,36,0.3)] transform hover:scale-105 hover:-translate-y-1 active:shadow-[inset_0_3px_8px_rgba(0,0,0,0.3),_0_2px_4px_rgba(0,0,0,0.2)] active:scale-100 active:translate-y-0"
+          } transition-all duration-200`}
           data-testid={
             isRecording ? "button-stop-recording" : "button-start-recording"
           }
