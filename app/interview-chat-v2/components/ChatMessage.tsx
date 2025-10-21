@@ -125,38 +125,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
     );
   }
 
-  return (
-    <>
-      {null}
-      <style jsx>{`
-        .shimmer-text {
-          background: linear-gradient(
-            90deg,
-            #D97706 0%,
-            #F59E0B 25%,
-            #FBBF24 50%,
-            #F59E0B 75%,
-            #D97706 100%
-          );
-          background-size: 200% auto;
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: shimmer 3s linear infinite;
-          font-weight: 600;
-        }
-
-        @keyframes shimmer {
-          0% {
-            background-position: 200% center;
-          }
-          100% {
-            background-position: -200% center;
-          }
-        }
-      `}</style>
-    </>
-  );
+  return null;
 }
 
 // Audio Player Component (simplified waveform)
@@ -259,6 +228,34 @@ function AudioPlayer({ audioBlob, duration }: AudioPlayerProps) {
           <audio ref={audioRef} src={audioUrl} preload="metadata" />
         )}
       </div>
+
+      <style jsx>{`
+        .shimmer-text {
+          background: linear-gradient(
+            90deg,
+            #D97706 0%,
+            #F59E0B 25%,
+            #FBBF24 50%,
+            #F59E0B 75%,
+            #D97706 100%
+          );
+          background-size: 200% auto;
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: shimmer 3s linear infinite;
+          font-weight: 600;
+        }
+
+        @keyframes shimmer {
+          0% {
+            background-position: 200% center;
+          }
+          100% {
+            background-position: -200% center;
+          }
+        }
+      `}</style>
     </>
   );
 }

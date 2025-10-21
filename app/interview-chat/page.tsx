@@ -39,7 +39,6 @@ export type Message = {
 
 export type AudioState = {
   chunks: Blob[];
-  lastBytePosition: number;
   fullTranscript: string;
 };
 
@@ -54,10 +53,18 @@ export default function InterviewChatPage() {
   const [followUpCount, setFollowUpCount] = useState(0);
   const [showStorySplit, setShowStorySplit] = useState(false);
 
-  // Audio state for incremental transcription
+  // Session timer state
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
+  const [sessionDuration, setSessionDuration] = useState(0); // in seconds
+  const [showTimeWarning, setShowTimeWarning] = useState(false);
+  const sessionTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check if Realtime API is enabled
+  const isRealtimeEnabled = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true';
+
+  // Audio state for tracking full conversation transcript
   const [audioState, setAudioState] = useState<AudioState>({
     chunks: [],
-    lastBytePosition: 0,
     fullTranscript: '',
   });
 
@@ -73,17 +80,51 @@ export default function InterviewChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Session timer - starts when welcome is dismissed
+  useEffect(() => {
+    if (sessionStartTime) {
+      // Update timer every second
+      sessionTimerRef.current = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+        setSessionDuration(elapsed);
+
+        // Show warning at 25 minutes (1500 seconds)
+        if (elapsed === 1500) {
+          setShowTimeWarning(true);
+        }
+
+        // Auto-complete at 30 minutes (1800 seconds)
+        if (elapsed >= 1800) {
+          console.log('[Session] 30-minute limit reached, auto-completing interview');
+          handleCompleteInterview();
+        }
+      }, 1000);
+
+      return () => {
+        if (sessionTimerRef.current) {
+          clearInterval(sessionTimerRef.current);
+        }
+      };
+    }
+  }, [sessionStartTime]);
+
   // Clean up recording state on unmount
   useEffect(() => {
     return () => {
       // Stop recording if user navigates away
       stopRecording();
+      if (sessionTimerRef.current) {
+        clearInterval(sessionTimerRef.current);
+      }
     };
   }, [stopRecording]);
 
   // Initialize conversation after welcome dismissed
   const handleWelcomeDismiss = () => {
     setShowWelcome(false);
+
+    // Start session timer
+    setSessionStartTime(Date.now());
 
     // Start recording state for the interview
     startRecording('conversation');
@@ -117,9 +158,46 @@ export default function InterviewChatPage() {
     setMessages(prev => [...prev, firstQuestion]);
   };
 
-  // Handle audio response
+  // Handle transcript updates from Realtime API
+  const handleTranscriptUpdate = (text: string, isFinal: boolean) => {
+    if (isFinal) {
+      // Final transcript received - add as user message
+      const userMessage: Message = {
+        id: `msg-${Date.now()}`,
+        type: 'audio-response',
+        content: text,
+        timestamp: new Date(),
+        sender: 'user',
+      };
+
+      setMessages(prev => [...prev, userMessage]);
+
+      // Update full transcript
+      const updatedTranscript = audioState.fullTranscript + ' ' + text;
+      setAudioState(prev => ({
+        ...prev,
+        fullTranscript: updatedTranscript,
+      }));
+
+      // Show typing indicator and generate follow-up
+      addTypingIndicator();
+      setTimeout(async () => {
+        await generateFollowUpQuestions(updatedTranscript);
+      }, 1500);
+    }
+    // Provisional transcripts are displayed in ChatInput component
+  };
+
+  // Handle audio response (traditional mode or from Realtime API after stop)
   const handleAudioResponse = async (audioBlob: Blob, duration: number) => {
-    // Add user's audio message to chat
+    if (isRealtimeEnabled) {
+      // In Realtime mode, transcripts are handled via handleTranscriptUpdate
+      // This is just called to store the audio blob for archival
+      console.log('[InterviewChat] Realtime audio blob received:', audioBlob.size, 'bytes');
+      return;
+    }
+
+    // Traditional mode - add user's audio message to chat
     const userMessage: Message = {
       id: `msg-${Date.now()}`,
       type: 'audio-response',
@@ -134,22 +212,24 @@ export default function InterviewChatPage() {
     setIsProcessing(true);
 
     try {
-      // Get new audio chunk (only the part we haven't transcribed)
-      const newChunk = getNewAudioChunk(audioBlob);
+      // Transcribe the COMPLETE audio blob (not sliced chunks)
+      // Slicing WebM creates invalid audio files - we need the full blob with headers
+      console.log('[HandleAudioResponse] Transcribing complete audio:', {
+        size: audioBlob.size,
+        type: audioBlob.type,
+        duration
+      });
 
-      if (!newChunk || newChunk.size === 0) {
-        throw new Error("No new audio to process");
-      }
+      const transcription = await transcribeChunk(audioBlob);
 
-      // Transcribe ONLY the new chunk
-      const transcription = await transcribeChunk(newChunk);
+      // Update full transcript by appending this response
+      const updatedTranscript = audioState.fullTranscript
+        ? audioState.fullTranscript + ' ' + transcription
+        : transcription;
 
-      // Update full transcript
-      const updatedTranscript = audioState.fullTranscript + ' ' + transcription;
       setAudioState(prev => ({
         ...prev,
         fullTranscript: updatedTranscript,
-        lastBytePosition: audioBlob.size,
         chunks: [...prev.chunks, audioBlob],
       }));
 
@@ -221,17 +301,24 @@ export default function InterviewChatPage() {
     }, 1500);
   };
 
-  // Add typing indicator
+  // Add typing indicator (only if not already present)
   const addTypingIndicator = () => {
-    const typingMsg: Message = {
-      id: 'typing',
-      type: 'typing',
-      content: '',
-      timestamp: new Date(),
-      sender: 'hw',
-    };
+    setMessages(prev => {
+      // Don't add if already showing typing indicator
+      if (prev.some(msg => msg.type === 'typing')) {
+        return prev;
+      }
 
-    setMessages(prev => [...prev, typingMsg]);
+      const typingMsg: Message = {
+        id: `typing-${Date.now()}`, // Unique ID to prevent React key warnings
+        type: 'typing',
+        content: '',
+        timestamp: new Date(),
+        sender: 'hw',
+      };
+
+      return [...prev, typingMsg];
+    });
   };
 
   // Remove typing indicator
@@ -239,30 +326,7 @@ export default function InterviewChatPage() {
     setMessages(prev => prev.filter(msg => msg.type !== 'typing'));
   };
 
-  // Get only NEW audio chunk (incremental processing)
-  const getNewAudioChunk = (currentBlob: Blob): Blob | null => {
-    if (audioState.lastBytePosition >= currentBlob.size) {
-      return null;
-    }
-
-    // Slice the blob and preserve the MIME type
-    const slicedChunk = currentBlob.slice(audioState.lastBytePosition, currentBlob.size);
-
-    // Create a new Blob with the EXACT same MIME type as the original
-    // Use 'audio/webm' as fallback only if original has no type
-    const mimeType = currentBlob.type || 'audio/webm';
-    const newChunk = new Blob([slicedChunk], { type: mimeType });
-
-    console.log('[GetNewAudioChunk] Created chunk:', {
-      originalType: currentBlob.type,
-      newType: newChunk.type,
-      size: newChunk.size,
-    });
-
-    return newChunk;
-  };
-
-  // Transcribe audio chunk
+  // Transcribe audio blob
   const transcribeChunk = async (audioBlob: Blob): Promise<string> => {
     // Determine file extension based on MIME type
     const mimeType = audioBlob.type;
@@ -316,7 +380,13 @@ export default function InterviewChatPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate follow-up');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('[GenerateFollowUp] API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+        });
+        throw new Error(`Failed to generate follow-up: ${errorData.error || response.statusText}`);
       }
 
       const data = await response.json();
@@ -546,6 +616,37 @@ export default function InterviewChatPage() {
               <p className="text-lg font-medium text-gray-600">Guided Interview</p>
             </div>
           )}
+
+          {/* Session Timer & Warning */}
+          {sessionStartTime && (
+            <div className="mt-2 flex flex-col items-center gap-1">
+              {/* Timer Display */}
+              <div className={`text-sm font-medium tabular-nums transition-colors ${
+                sessionDuration >= 1740 // Last 60 seconds (29 minutes)
+                  ? 'text-red-600 font-bold text-base animate-pulse'
+                  : sessionDuration >= 1500 // After 25 minutes
+                  ? 'text-amber-600'
+                  : 'text-gray-500'
+              }`}>
+                {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
+                {sessionDuration >= 1740 && ' remaining'}
+              </div>
+
+              {/* Warning Banner */}
+              {showTimeWarning && sessionDuration < 1740 && (
+                <div className="text-xs text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+                  5 minutes remaining
+                </div>
+              )}
+
+              {/* Final Minute Countdown */}
+              {sessionDuration >= 1740 && (
+                <div className="text-xs text-red-600 bg-red-50 px-3 py-1 rounded-full font-medium">
+                  Interview will auto-complete at 30:00
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Messages */}
@@ -573,7 +674,9 @@ export default function InterviewChatPage() {
         <ChatInput
           onAudioResponse={handleAudioResponse}
           onTextResponse={handleTextResponse}
+          onTranscriptUpdate={handleTranscriptUpdate}
           disabled={isProcessing}
+          useRealtime={isRealtimeEnabled}
         />
       </div>
     </div>

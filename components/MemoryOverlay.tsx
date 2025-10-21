@@ -102,6 +102,21 @@ export function MemoryOverlay({
     };
   }, [isOpen]);
 
+  // Reset audio state when story changes
+  useEffect(() => {
+    console.log('[MemoryOverlay] Story changed, resetting state for story:', story.id);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+
+    // Reset audio element if it exists
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      console.log('[MemoryOverlay] Audio element reset');
+    }
+  }, [story.id]);
+
   // Audio event listeners
   useEffect(() => {
     const audio = audioRef.current;
@@ -230,6 +245,8 @@ export function MemoryOverlay({
     } else {
       audioRef.current.play();
       setIsPlaying(true);
+      // Immediately sync currentTime to ensure progress bar updates right away
+      setCurrentTime(audioRef.current.currentTime);
     }
   };
 
@@ -335,7 +352,12 @@ export function MemoryOverlay({
           {/* Audio Player */}
           {story.audioUrl && (
             <div className="memory-overlay-audio">
-              <audio ref={audioRef} src={story.audioUrl} preload="metadata" />
+              <audio
+                key={story.id}
+                ref={audioRef}
+                src={story.audioUrl}
+                preload="metadata"
+              />
 
               <div className="memory-overlay-audio-controls">
                 <button
@@ -362,7 +384,16 @@ export function MemoryOverlay({
                     <div
                       className="memory-overlay-audio-bar-fill"
                       style={{
-                        width: duration ? `${(currentTime / duration) * 100}%` : "0%",
+                        width: (() => {
+                          const widthPercent = duration && currentTime > 0
+                            ? (currentTime / duration) * 100
+                            : 0;
+                          const calculatedWidth = `${widthPercent}%`;
+                          console.log('[MemoryOverlay] Progress bar width:', calculatedWidth, 'currentTime:', currentTime, 'duration:', duration);
+                          return calculatedWidth;
+                        })(),
+                        opacity: currentTime > 0 ? 1 : 0,
+                        borderRadius: currentTime > 0 ? '3px' : '0',
                       }}
                     />
                   </div>

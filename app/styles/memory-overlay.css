@@ -311,17 +311,17 @@
 }
 
 .memory-overlay-audio-bar-fill {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  margin-top: 0;
-  margin-bottom: 0;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  min-width: 0 !important;
   background: linear-gradient(90deg, #fb923c 0%, #f97316 100%);
   border-radius: 3px;
   transition: width 100ms linear;
   will-change: width;
-  display: block;
 }
 
 .memory-overlay-audio-times {

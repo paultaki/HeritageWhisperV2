@@ -39,9 +39,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!followUpNumber || followUpNumber < 1 || followUpNumber > 3) {
+    if (!followUpNumber || followUpNumber < 1) {
       return NextResponse.json(
-        { error: "followUpNumber must be between 1 and 3" },
+        { error: "followUpNumber must be a positive integer" },
         { status: 400 }
       );
     }

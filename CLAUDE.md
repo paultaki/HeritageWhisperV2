@@ -1046,6 +1046,106 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 
 - **Privacy Note**: Personalized prompts are NOT visible to family members - they only see published stories on timeline/book pages
 
+## ✅ Recent Updates (January 2025)
+
+### OpenAI Realtime API Integration
+
+Replaced broken Whisper blob-slicing transcription with OpenAI Realtime API for guided interviews.
+
+**Problem Solved:**
+- Old approach: Record WebM → Slice incrementally → Send to Whisper → ❌ **FAILED** (invalid fragments)
+- New approach: Stream mic via WebRTC → OpenAI Realtime → Live transcripts → ✅ **WORKS**
+
+**Architecture:**
+- **Transport**: WebRTC (48kHz Opus, negotiated automatically)
+- **Authentication**: Direct API key (30-minute TTL, no ephemeral tokens needed)
+- **Model**: `gpt-4o-realtime-preview-2024-12-17`
+- **Transcription**: Server-side Whisper-1 via `session.update` config
+- **VAD**: Server-side with 300ms silence threshold for natural turn-taking
+- **Barge-in**: Server VAD + client-side audio pause when user speaks
+- **Mixed Recording**: Mic + assistant audio combined for family book playback
+
+**Files Created/Modified:**
+- `/lib/realtimeClient.ts` - WebRTC client for OpenAI Realtime API
+- `/lib/mixedRecorder.ts` - Enhanced with Safari compatibility notes
+- `/hooks/use-realtime-interview.tsx` - React hook for interview integration
+- `/app/realtime-test/page.tsx` - Standalone test environment
+- `/app/interview-chat/components/ChatInput.tsx` - Dual-mode support (Realtime + fallback)
+- `/app/interview-chat/page.tsx` - Integrated Realtime transcription
+
+**Feature Flag:**
+```bash
+NEXT_PUBLIC_ENABLE_REALTIME=true  # Enable Realtime API
+NEXT_PUBLIC_OPENAI_API_KEY=sk-... # Exposed to browser for WebRTC
+```
+
+**UX Improvements:**
+- **Live Transcription**: Provisional text appears in real-time as user speaks
+- **Voice Toggle**: Enable/disable AI audio responses during recording
+- **Mixed Audio**: Full conversation (user + AI) saved for playback
+- **Auto-reconnect**: ICE connection failures trigger seamless reconnection
+- **Fallback Mode**: Gracefully falls back to traditional MediaRecorder when flag disabled
+
+**Cost:**
+- Realtime API: ~$1.13 per 15-min interview (gpt-realtime-mini)
+- vs Whisper: ~$0.09 per 15 min (but broken!)
+- Trade-off: 12.5x cost increase for working solution
+
+**Testing:**
+- Standalone test page: `http://localhost:3001/realtime-test`
+- Interview integration: `http://localhost:3001/interview-chat`
+- See `REALTIME_API_TESTING.md` for full testing guide
+
+**Status:** ✅ Production-ready with feature flag control
+
+## ✅ Recent Updates (October 21, 2025)
+
+### Interview Chat V1 Improvements
+
+**Reverted to Traditional Whisper Transcription:**
+- Disabled Realtime API for V1 (interview-chat) via `NEXT_PUBLIC_ENABLE_REALTIME=false`
+- V1 now uses traditional MediaRecorder + AssemblyAI batch transcription
+- Faster, simpler, cheaper flow without distracting real-time transcription
+- V2 (interview-chat-v2) still uses Realtime API for conversational Pearl
+
+**Fixed Audio Chunking Bug:**
+- **Problem**: Second audio response failed with "Invalid file format" 400 error
+- **Root Cause**: Code was slicing WebM blobs into chunks, creating invalid audio files (missing headers)
+- **Fix**: Send complete audio blob to transcription API instead of sliced chunks
+- **Changes**:
+  - Removed `getNewAudioChunk()` function that was slicing blobs
+  - Removed `lastBytePosition` tracking from `AudioState`
+  - Now transcribes full blob after each recording stops
+  - Location: `/app/interview-chat/page.tsx:176-196`
+
+**Fixed Follow-Up Question Limit:**
+- **Problem**: 4th follow-up failed with "followUpNumber must be between 1 and 3" error
+- **Root Cause**: Arbitrary validation limiting interviews to 3 follow-ups
+- **Fix**: Removed upper limit, now accepts any positive integer
+- **Location**: `/app/api/interview-test/follow-up/route.ts:42-47`
+
+**Added Session Timer & Auto-Complete:**
+- **30-minute hard limit**: Interview auto-completes at 30:00
+- **25-minute warning**: "5 minutes remaining" amber badge appears
+- **Final minute countdown**: Timer shows "0:47 remaining" with red pulsing animation
+- **Visual states**:
+  - 0-25 min: Gray timer, normal display
+  - 25-29 min: Amber timer, warning badge
+  - 29-30 min: Red pulsing timer with countdown
+- **Location**: `/app/interview-chat/page.tsx:56-109, 620-649`
+- **Timer format**: MM:SS (e.g., "12:34")
+
+**Pearl Name Shimmer Effect:**
+- Added shimmering gold gradient animation to "Pearl" name in chat messages
+- Matches welcome modal shimmer effect
+- Gradient sweeps left-to-right continuously
+- Location: `/app/interview-chat/components/ChatMessage.tsx:33, 128-159`
+
+**Better Error Logging:**
+- Follow-up API errors now show actual server error messages
+- Transcription errors include detailed status/response info
+- Easier debugging with structured console logs
+
 ## ✅ Recent Updates (October 20, 2025)
 
 ### Conversation Mode & Quick Story Wizard Integration

@@ -87,8 +87,6 @@ export function ChatInput({
             }
             setRecordingDuration(0);
           }
-          // V1: No config = default behavior with full transcription support
-          // We don't enable audio playback in the hook, so no voice output occurs
         );
       } catch (error) {
         console.error('Failed to start Realtime session:', error);

@@ -22,19 +22,22 @@
 
 ---
 
-### Instance 2: Guided Interview Enhancements
+### Instance 2: OpenAI Realtime WebRTC Integration
 **Status:** 🔄 IN PROGRESS
-**Branch:** `feature/interview-improvements` (suggested)
-**Owner:** [Active Now]
-**Focus:** Improving story output from guided interview feature
+**Branch:** `feature/realtime-webrtc` (suggested)
+**Owner:** [Active Now - Oct 20, 2025]
+**Focus:** Replace broken Whisper blob-slicing with OpenAI Realtime API via WebRTC
 
 **Files Owned:**
-- `app/interview-chat/**/*`
+- `app/interview-chat/page.tsx`
+- `app/interview-chat/components/ChatInput.tsx`
+- `app/api/realtime-session/route.ts` (new)
+- `lib/realtimeClient.ts` (new)
+- `lib/mixedRecorder.ts` (new)
 - `hooks/use-recording-wizard.tsx`
-- `contexts/InterviewContext.tsx` (if exists)
-- `lib/quickStoryEnhancement.ts`
+- `.env.example` (add NEXT_PUBLIC_ENABLE_REALTIME)
 
-**Current Task:** Enhancing the narrative quality of stories from guided interviews
+**Current Task:** Ship OpenAI Realtime API with WebRTC transport for guided interviews (fixes transcription crashes)
 
 **⚠️ DO NOT TOUCH:**
 - Any prompt generation files (Instance 1 territory)
@@ -157,6 +160,26 @@ These files are touched by multiple instances - **coordinate before editing**:
 
 ## 📚 Completed Instances
 
+### ✅ Instance 6: Timeline Memory Overlay (Oct 20, 2025)
+**Completed Tasks:**
+- Built mobile-first story modal overlay for timeline view
+- Fixed progress bar not filling during audio playback (absolute positioning fix)
+- Fixed progress bar height not covering full container (top/bottom positioning)
+- Implemented click-to-seek on audio progress bar
+- Responsive header with year/age display and close button
+- Touch gestures for swipe-to-close and swipe navigation
+- Keyboard navigation support (Escape, Arrows)
+
+**Files Modified:**
+- `components/MemoryOverlay.tsx` (new)
+- `app/styles/memory-overlay.css` (new)
+- `app/timeline-v2/page.tsx` (test integration)
+
+**Merged to:** Testing on `timeline-v2`
+**Notes:** Ready for integration into production timeline. Audio player fully functional with visual progress updates.
+
+---
+
 ### ✅ Instance 1: Prompt Quality & AI Systems (Oct 20, 2025)
 **Completed Tasks:**
 - Fixed Echo prompt to use full transcript (no 500-word cap)
@@ -204,10 +227,11 @@ These files are touched by multiple instances - **coordinate before editing**:
 | Instance | Status | Files | Branch | ETA |
 |----------|--------|-------|--------|-----|
 | 1. Prompt Quality | ✅ Done | 8 files | main | Complete |
-| 2. Interview | 🔄 Active | ~4 files | TBD | TBD |
+| 2. Realtime WebRTC | 🔄 Active | 7 files | feature/realtime-webrtc | 2-3 days |
 | 3. Navigation | 🔄 Active | ~5 files | TBD | TBD |
 | 4. Landing Page | 🔄 Active | ~4 files | TBD | TBD |
 | 5. PDF Export | ⏳ Queued | ~4 files | TBD | TBD |
+| 6. Timeline Overlay | ✅ Done | 3 files | timeline-v2 | Complete |
 
 ---
 
@@ -221,4 +245,4 @@ These files are touched by multiple instances - **coordinate before editing**:
 
 ---
 
-_Last Updated: Oct 20, 2025 - Instance 6 Complete (Timeline Overlay)_
+_Last Updated: Oct 20, 2025 - Instance 6 Checked Out (Timeline Memory Overlay Complete)_
