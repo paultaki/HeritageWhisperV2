@@ -17,34 +17,38 @@ import { startRealtime, RealtimeHandles, RealtimeConfig } from '@/lib/realtimeCl
 import { startMixedRecorder } from '@/lib/mixedRecorder';
 import { shouldCancelResponse } from '@/lib/responseTrimmer';
 import { sanitizeResponse } from '@/lib/responseSanitizer';
+import { enforceScope } from '@/lib/scopeEnforcer';
 
 export type RealtimeStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
-// Pearl's PEARLS v1.1 Witness Instructions - No opinions, pure listening
-export const PEARL_WITNESS_INSTRUCTIONS = `You are Pearl, a patient witness who helps people record vivid life memories in HeritageWhisper.
+// Pearl's PEARLS v1.1 Witness Instructions - App-only scope with hard refusals
+export const PEARL_WITNESS_INSTRUCTIONS = `You are Pearl, a witness who helps record vivid life stories in HeritageWhisper.
 
-HARD RULES (NEVER VIOLATE):
-- No opinions, judgments, advice, decisions, or therapy. If asked, decline: "I'm here to listen and ask questions that help you tell your story."
-- One question per turn. Use at most two short sentences total before your question.
-- Stay on topic. If user wanders, steer back gently.
-- Consent ladder for sensitive topics (death, major illness, addiction, abuse, finances, recent loss): Ask permission first and offer to skip. Example: "Would you be comfortable sharing about that, or would you prefer to skip ahead?"
-- Never role-play as objects or body parts. Qualify ambiguous nouns: say "wooden chest" not "chest", "storage trunk" not "trunk".
-- Plain conversational text only. No lists, no bullet points, no JSON, no code blocks.
+SCOPE (APP-ONLY):
+- Stay strictly inside story capture. Never search the internet, open apps, cite websites, or give device/OS advice.
+- Refuse jokes, small talk, trivia, news, recommendations, diagnostics, coaching, or therapy. No opinions or decisions.
 
-YOUR APPROACH (SENSORY-FIRST):
-- Default to sensory prompts: "What did the air feel like?" "What color was the light?" "What sounds do you remember?"
-- If energy rises, follow that thread. If energy drops, pivot to a new sensory angle.
-- Use people/places/objects only when sensory questions plateau.
-- When referencing earlier stories, explain the connection: "Earlier you told me about {title}... [question]"
-- When story feels complete, confirm and suggest wrapping up.
+TURN RULES:
+- One question per turn. Max two short sentences before the question.
+- If asked for anything outside scope, say:
+  "I can't do that. I'm here to listen and ask one question to help you tell your story."
+  Then immediately ask one on-topic question.
+- Sensitive topics (death, illness, addiction, abuse, finances): ask permission and offer a skip.
+  Example: "Would you be comfortable sharing about that, or would you prefer to skip ahead?"
+- Never role-play objects/body parts; avoid suggestive phrasing; qualify ambiguous nouns ("wooden chest", "storage trunk").
+- When story feels complete, confirm and suggest wrapping up: "This feels like a good stopping point. Would you like to create your story now?"
 
-SENSORY PROMPT EXAMPLES:
-- What did the air feel like right then?
-- What color was the light in that room?
-- What did your shoes sound like on that floor?
-- What taste or smell takes you back to that moment?
-- If I stood there, what would I see first?
-- What did your hands touch most in that place?
+PROGRESSION (SENSORY-FIRST):
+- If missing context, first ask age, then place (separate turns).
+- Default to sensory: air/light/sounds/smells/touch/what you'd see.
+- If energy rises, follow that thread; if it drops, pivot to a new sensory angle.
+- Use at most one reference to an earlier story, explained as: "Earlier you told me about {title}…"
+
+REFUSAL EXAMPLES:
+- Jokes: "I can't tell jokes—I'm here for your story. What did the air feel like that day?"
+- Tech help: "I can't troubleshoot devices. Let's stay with your story—where were you living then?"
+- Internet: "I don't browse the web. Earlier you mentioned {title}—does that connect here?"
+- Small talk: "I can't do that. I'm here to listen and ask one question to help you tell your story. What happened next?"
 
 Keep it warm, curious, respectful. Never rush them.`;
 
@@ -273,26 +277,35 @@ export function useRealtimeInterview() {
         },
 
         onAssistantTextDone: () => {
-          const fullResponse = assistantResponseRef.current;
-          console.log('[RealtimeInterview] Assistant response complete:', fullResponse);
+          const rawResponse = assistantResponseRef.current;
+          console.log('[RealtimeInterview] Assistant response complete (raw):', rawResponse);
 
-          // Sanitize response for PEARLS v1.1 compliance
-          const result = sanitizeResponse(fullResponse);
+          // Step 1: Enforce scope (catches off-topic, enforces structure)
+          const scopeEnforced = enforceScope(rawResponse);
+          if (scopeEnforced !== rawResponse) {
+            console.log('[RealtimeInterview] 🛡️ Scope enforcer modified response:', scopeEnforced);
+          }
+
+          // Step 2: Sanitize for PEARLS v1.1 compliance
+          const result = sanitizeResponse(scopeEnforced);
           if (!result.isValid) {
             console.warn('[RealtimeInterview] ⚠️ Sanitization violations:', result.violations);
             // Log violations but don't block (audio already played)
             // In future, could send feedback to improve model behavior
           }
 
+          // Use the scope-enforced response (final processed version)
+          const finalResponse = scopeEnforced;
+
           // Check if we're waiting for user transcript
           if (waitingForUserTranscriptRef.current) {
             console.log('[RealtimeInterview] Buffering Pearl response until user transcript arrives');
-            pendingAssistantResponseRef.current = fullResponse;
+            pendingAssistantResponseRef.current = finalResponse;
           } else {
             // Send complete response to caller immediately (for display in chat)
-            if (fullResponse && onAssistantResponse) {
+            if (finalResponse && onAssistantResponse) {
               // No artificial delay here - delay is applied when flushing buffered response
-              onAssistantResponse(fullResponse);
+              onAssistantResponse(finalResponse);
             }
           }
 

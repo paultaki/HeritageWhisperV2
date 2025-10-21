@@ -5,17 +5,22 @@ import { useState, useCallback } from "react";
  *
  * This replaces the previous useRecordModal hook with a simpler interface
  * that just handles opening/closing the mode selection dialog.
+ *
+ * Now supports passing a prompt question from the prompts page.
  */
 export function useModeSelection() {
   const [isOpen, setIsOpen] = useState(false);
   const [quickRecorderOpen, setQuickRecorderOpen] = useState(false);
+  const [promptQuestion, setPromptQuestion] = useState<string | undefined>();
 
-  const openModal = useCallback(() => {
+  const openModal = useCallback((question?: string) => {
+    setPromptQuestion(question);
     setIsOpen(true);
   }, []);
 
   const closeModal = useCallback(() => {
     setIsOpen(false);
+    setPromptQuestion(undefined); // Clear prompt on close
   }, []);
 
   const openQuickRecorder = useCallback(() => {
@@ -25,6 +30,7 @@ export function useModeSelection() {
 
   const closeQuickRecorder = useCallback(() => {
     setQuickRecorderOpen(false);
+    setPromptQuestion(undefined); // Clear prompt on close
   }, []);
 
   return {
@@ -34,5 +40,6 @@ export function useModeSelection() {
     quickRecorderOpen,
     openQuickRecorder,
     closeQuickRecorder,
+    promptQuestion,
   };
 }

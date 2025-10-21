@@ -249,6 +249,8 @@ export async function startRealtime(
           prefix_padding_ms: 300,  // Include 300ms before speech starts
           silence_duration_ms: 2000, // Wait 2 seconds of silence before ending turn (increased for natural pauses)
         },
+        // Limit response length to prevent rambling (150 tokens ≈ 2-3 sentences)
+        max_response_output_tokens: 150,
       },
     };
 

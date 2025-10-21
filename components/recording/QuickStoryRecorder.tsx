@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 interface QuickStoryRecorderProps {
   isOpen: boolean;
   onClose: () => void;
+  promptQuestion?: string; // Optional prompt question from prompts page
 }
 
 /**
@@ -19,8 +20,9 @@ interface QuickStoryRecorderProps {
  * - Pause/resume controls
  * - Visual timer
  * - Automatic transcription and navigation to wizard
+ * - Optional prompt question display
  */
-export function QuickStoryRecorder({ isOpen, onClose }: QuickStoryRecorderProps) {
+export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickStoryRecorderProps) {
   const {
     state,
     duration,
@@ -80,11 +82,30 @@ export function QuickStoryRecorder({ isOpen, onClose }: QuickStoryRecorderProps)
                 <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-100 to-rose-100 flex items-center justify-center">
                   <Mic className="w-12 h-12 text-amber-700" />
                 </div>
-                <h2 className="text-2xl font-semibold mb-4">Ready to Record</h2>
-                <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                  You'll have up to 5 minutes to record your story. You can pause and
-                  resume anytime.
-                </p>
+
+                {/* Display prompt question if provided */}
+                {promptQuestion ? (
+                  <>
+                    <h2 className="text-2xl font-semibold mb-4">Your Question</h2>
+                    <div className="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-lg p-6 mb-6 max-w-xl mx-auto">
+                      <p className="text-lg text-gray-800 font-medium leading-relaxed">
+                        {promptQuestion}
+                      </p>
+                    </div>
+                    <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                      You'll have up to 5 minutes to answer. You can pause and resume anytime.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-2xl font-semibold mb-4">Ready to Record</h2>
+                    <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                      You'll have up to 5 minutes to record your story. You can pause and
+                      resume anytime.
+                    </p>
+                  </>
+                )}
+
                 <Button
                   onClick={startRecording}
                   size="lg"

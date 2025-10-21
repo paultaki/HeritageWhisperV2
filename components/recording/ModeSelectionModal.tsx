@@ -8,6 +8,7 @@ interface ModeSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectQuickStory: () => void;
+  promptQuestion?: string; // Optional prompt question from prompts page
 }
 
 /**
@@ -21,12 +22,19 @@ export function ModeSelectionModal({
   isOpen,
   onClose,
   onSelectQuickStory,
+  promptQuestion,
 }: ModeSelectionModalProps) {
   const router = useRouter();
 
   const handleConversationMode = () => {
     onClose();
-    router.push("/interview-chat");
+    // Navigate to interview-chat-v2 (Pearl with Realtime API)
+    // Pass prompt question if provided
+    if (promptQuestion) {
+      router.push(`/interview-chat-v2?prompt=${encodeURIComponent(promptQuestion)}`);
+    } else {
+      router.push("/interview-chat-v2");
+    }
   };
 
   const handleQuickStory = () => {

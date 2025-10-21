@@ -27,12 +27,14 @@ export default function NavigationWrapper() {
         isOpen={modeSelection.isOpen}
         onClose={modeSelection.closeModal}
         onSelectQuickStory={modeSelection.openQuickRecorder}
+        promptQuestion={modeSelection.promptQuestion}
       />
 
       {/* Quick Story Recorder */}
       <QuickStoryRecorder
         isOpen={modeSelection.quickRecorderOpen}
         onClose={modeSelection.closeQuickRecorder}
+        promptQuestion={modeSelection.promptQuestion}
       />
     </>
   );

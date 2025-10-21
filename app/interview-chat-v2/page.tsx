@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { WelcomeModal } from "../interview-chat/components/WelcomeModal";
 import { ChatMessage } from "../interview-chat/components/ChatMessage";
@@ -35,6 +35,7 @@ export type Message = {
 export default function InterviewChatV2Page() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { startRecording: startRecordingState, stopRecording: stopRecordingState } = useRecordingState();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showWelcome, setShowWelcome] = useState(true);
@@ -46,6 +47,9 @@ export default function InterviewChatV2Page() {
   const [textInput, setTextInput] = useState('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+
+  // Check for prompt question in URL params
+  const promptQuestion = searchParams.get('prompt');
 
   // Handler for sending text messages
   const handleSendTextMessage = () => {
@@ -103,6 +107,7 @@ export default function InterviewChatV2Page() {
     toggleVoice,
     getMixedAudioBlob,
     sendTextMessage,
+    triggerPearlResponse,
   } = useRealtimeInterview();
 
   // Redirect if not authenticated
@@ -134,7 +139,7 @@ export default function InterviewChatV2Page() {
     const greeting: Message = {
       id: `msg-${Date.now()}`,
       type: 'system',
-      content: `Welcome, ${user?.name?.split(' ')[0] || 'friend'}! I'm Pearl, your Heritage Whisper guide. I'm listening - just start talking when you're ready!`,
+      content: `Welcome, ${user?.name?.split(' ')[0] || 'friend'}! I'm Pearl, your Heritage Whisper guide. ${promptQuestion ? 'I have a question for you!' : 'Let me ask you a question to get started.'}`,
       timestamp: new Date(),
       sender: 'system',
     };
@@ -150,6 +155,18 @@ export default function InterviewChatV2Page() {
       const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
       setRecordingDuration(elapsed);
     }, 1000);
+
+    // Build instructions with prompt question if provided
+    let sessionInstructions = PEARL_WITNESS_INSTRUCTIONS;
+    if (promptQuestion) {
+      sessionInstructions = `${PEARL_WITNESS_INSTRUCTIONS}
+
+IMPORTANT OPENING INSTRUCTION:
+Your FIRST message must be asking this specific question (do NOT greet first, jump straight to the question):
+"${promptQuestion}"
+
+After they answer, continue the conversation naturally with follow-up questions based on their response.`;
+    }
 
     // Start continuous conversation session
     try {
@@ -174,7 +191,7 @@ export default function InterviewChatV2Page() {
         },
         {
           // Enable conversational AI with PEARLS v1.1 Witness system
-          instructions: PEARL_WITNESS_INSTRUCTIONS,
+          instructions: sessionInstructions,
           modalities: ['text', 'audio'],
           voice: 'alloy',
           temperature: 0.6, // Minimum allowed by Realtime API (was 0.5 but API requires ≥ 0.6)
@@ -211,6 +228,12 @@ export default function InterviewChatV2Page() {
           }
         }
       );
+
+      // After session successfully starts, trigger Pearl to speak first
+      console.log('[InterviewChatV2] Session started, triggering Pearl to speak first...');
+      setTimeout(() => {
+        triggerPearlResponse();
+      }, 500); // Small delay to ensure session is fully connected
     } catch (error) {
       console.error('[InterviewChatV2] Failed to start session:', error);
       alert('Failed to start voice session. Please try again.');
