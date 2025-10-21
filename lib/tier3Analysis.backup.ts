@@ -166,37 +166,18 @@ function buildSystemPrompt(
     analysisType = "killer"; // Story 3 (pre-paywall)
   else if (storyCount >= 4) analysisType = "patterns"; // Story 4+
 
-  return `You are creating ${promptCount} personalized prompts for someone who has shared ${storyCount} life stories.
+  return `You are analyzing ${storyCount} stories to perform two tasks:
+1. Generate ${promptCount} memory prompts for future recordings
+2. Extract character insights and patterns
 
-YOUR MISSION:
-Create simple, personalized prompts that encourage them to continue sharing. Not creative or clever - just personal touches that show you know their story.
+LIFE PHASE CONTEXT:
+- Age range: ${ageRange}
+- Dominant life phase: ${dominantPhase}
+- Adjust prompts to match how people in this phase remember and process memories
 
-HOW TO PERSONALIZE (SIMPLE IS BETTER):
-1. Extract concrete details from their stories:
-   - Workplaces: "PG&E", "the hospital", "the factory"
-   - People: "Coach Johnson", "my sister Mary", "Dr. Smith"
-   - Places: "Brooklyn", "the farm in Iowa", "Fort Bragg"
-   - Time periods: "the 1960s", "during Vietnam", "after retirement"
-
-2. Transform generic prompts into personalized ones:
-   GENERIC: "Tell me about a challenge you overcame"
-   PERSONALIZED: "What was a challenge you faced during your time at PG&E?"
-
-   GENERIC: "Share a story from your youth"
-   PERSONALIZED: "You've mentioned Brooklyn - what was it like growing up there?"
-
-   GENERIC: "Describe someone who influenced you"
-   PERSONALIZED: "Besides Coach, who else shaped who you became?"
-
-3. Fill obvious gaps in their timeline:
-   - Missing decades: "You've shared your 20s and 40s - what about your 30s?"
-   - Missing topics: "You've talked about work - what about your family life?"
-   - Missing people: "You mention 'the kids' - tell me about them"
-
-ADD LIGHT ENCOURAGEMENT (when appropriate):
-- Story 5+: "You're building quite a collection of memories..."
-- Story 10+: "Your family will treasure these stories..."
-- Story 25+: "You've really opened up your life here..."
+PROMPT GENERATION - READ THIS CAREFULLY:
+The prompts you generate MUST prove you actually read their specific stories.
+They should make the user think: "Holy shit, this thing actually LISTENED to me."
 
 CRITICAL FORMATTING RULES:
 - MAX 30 WORDS (target 25-30)
@@ -281,46 +262,60 @@ Return JSON with this structure:
 }
 
 /**
- * Get prompt generation strategy based on story count - SIMPLIFIED
+ * Get prompt generation strategy based on story count
  */
 function getPromptStrategy(type: string, count: number): string {
   if (type === "expansion") {
-    return `EARLY STORIES STRATEGY (Stories 1-2):
-Since they're just getting started, focus on:
-- People they mentioned but didn't fully describe: "Tell me more about [person]"
-- Places they referenced: "What was [place] like?"
-- Time periods missing: "What happened before/after this?"
-- Emotions unexplored: "How did [event] make you feel?"
+    return `EXPANSION STRATEGY (Stories 1-2):
+- Find what was IMPLIED but not fully told
+- THE MOMENT BEFORE: What led up to this?
+- THE MOMENT AFTER: What happened next?
+- OTHER PEOPLE IMPLIED: Who else was there?
+- SENSORY GAPS: What did it feel/look/smell like?
+- IMPLIED BACKSTORY: References without explanation
 
-Generate ${count === 1 ? "5" : "4"} warm, inviting prompts that make sharing easy.`;
+Generate ${count === 1 ? "5" : "4"} prompts that expand on what's already shared.`;
   } else if (type === "killer") {
-    return `MILESTONE 3 STRATEGY (Getting them hooked):
-They've shared 3 stories - show them you've been listening:
-- Reference specific details from all 3 stories
-- Fill obvious gaps in their timeline
-- Ask about people mentioned multiple times
-- Explore themes that keep appearing
+    return `KILLER PROMPT STRATEGY (Story 3 - Pre-Paywall):
+This is the MOST COMPELLING prompt to convince user to pay $149/year.
 
-Generate 4 prompts that feel impossibly personal - like a friend who really knows them.`;
+PRIORITY ORDER:
+1. STRONG PATTERN - Same person/emotion/theme in 2+ stories
+2. COMPELLING GAP - 30+ year gap, all positive/all work, missing perspectives
+3. DEEP EXPANSION - Most emotionally resonant moment
+
+Generate 4 exceptional prompts. Make them think: "WOW! This thing GETS me!"`;
   } else {
-    return `ONGOING STORIES STRATEGY (Story ${count}):
+    return `PATTERN ANALYSIS STRATEGY (Story ${count}):
 
-They've built trust with you. Now personalize based on their actual details:
+CRITICAL: Generate SHORT, CONVERSATIONAL prompts! Each prompt MAX 30 WORDS.
 
-GOOD PROMPTS (simple personalization):
-✅ "What's a challenge you overcame during your time at [their workplace]?"
-✅ "You've mentioned [person] several times - what role did they play in your life?"
-✅ "You've shared stories from your 20s and 40s - what about your 30s?"
-✅ "Besides work at [company], what did you do for fun during those years?"
-✅ "You mentioned [place] - what was it like living there?"
+BAD PROMPTS:
+❌ "In 'The Marathon' you pushed through pain, in 'Recovering from the Accident' you did it again. When did you FIRST learn to push through? What happened before these?" (31 words, story titles, too formal)
+❌ "Describe a moment when you felt a profound sense of responsibility" (11 words but generic - could be anyone)
 
-SIMPLE RULES:
-1. Keep it conversational - like a friend asking
-2. Use their actual names and places
-3. 20-35 words (natural length)
-4. Focus on emotions and meaning, not facts
+GOOD PROMPTS (concise, specific, conversational):
+✅ "You pushed through a marathon, then a car accident. When did you FIRST learn to push through pain?" (18 words)
+✅ "You mention 'the girl' in three stories but never her name. Who was she?" (14 words)
+✅ "Travel made you grateful, not fancy. Being steady is your legacy. Is there tension between exploring and staying grounded?" (20 words)
+✅ "Chewy taught you responsibility. A newborn tested it. What did the dog prepare you for that the baby books didn't?" (20 words)
 
-Generate ${count <= 20 ? "3" : count <= 50 ? "2" : "1"} personalized prompts that encourage more sharing.`;
+REQUIREMENTS:
+1. MAX 30 WORDS - Be ruthless. Cut story titles, cut formal language
+2. NO STORY TITLES - Users remember their own life. Just reference the content
+3. USE ACTUAL NAMES - "Coach", "Chewy", "the girl" - not "someone" or "a person"
+4. CONVERSATIONAL TONE - Like a friend asking, not an interviewer
+5. CONNECT PATTERNS - "You did X, then Y. When did you first learn Z?"
+6. USE DIRECT QUOTES - If they said "housebroken by love", USE IT
+7. SHORT SENTENCES - Punchy. Direct. Readable in 3 seconds.
+
+FIND PATTERNS & ASK CONCISELY:
+- Same person 2+ times → "You mention [name] repeatedly but never told their story. Who were they?"
+- Same trait multiple times → "You used humor to reset tension twice. Where'd you first learn that?"
+- Time gaps → "Nothing between high school and marriage. What happened in your twenties?"
+- Unexplored people → "Who was Coach? What did they teach you?"
+
+Generate ${count <= 20 ? "3" : count <= 50 ? "2" : "1"} prompts. Each one: 25-30 words, conversational, impossible to confuse with anyone else.`;
   }
 }
 

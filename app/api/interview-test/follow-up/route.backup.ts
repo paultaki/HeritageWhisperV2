@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       followUpNumber,
     });
 
-    // System prompt for follow-up generation with story awareness
+    // System prompt for follow-up generation (multiple questions)
     const systemPrompt = `You are an empathetic interviewer helping someone record their life story.
 
 Your job: Generate 2-3 natural follow-up questions based on what they just shared.
@@ -69,13 +69,7 @@ Question types to vary between:
 2. Practical wisdom: "What would you tell someone facing a similar choice?"
 3. Reflection: "Looking back, what surprises you most about that experience?"
 4. Relationships: "How did that affect your relationships with others?"
-5. Lessons: "What did you learn that you still carry with you today?"
-6. Connections (if follow-up 3+): "This reminds me of your story about [previous detail] - how do they connect?"
-
-ENCOURAGEMENT (add occasionally):
-- After emotional shares: "Thank you for sharing that..."
-- After vivid details: "I can really picture that..."
-- When they're opening up: "Your stories are really coming to life..."`;
+5. Lessons: "What did you learn that you still carry with you today?"`;
 
     // User prompt with context
     const userPrompt = `Here's what they've shared so far:
