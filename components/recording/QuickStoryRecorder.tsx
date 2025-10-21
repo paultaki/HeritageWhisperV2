@@ -62,7 +62,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl">
         {/* Visually hidden title for accessibility */}
         <DialogTitle className="sr-only">
           Quick Story Recorder
@@ -169,8 +169,8 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 </div>
 
                 {/* Timer display */}
-                <div className="text-center mb-8">
-                  <div className="text-6xl font-mono font-bold text-gray-800 mb-2">
+                <div className="text-center mb-6 sm:mb-8">
+                  <div className="text-5xl sm:text-6xl font-mono font-bold text-gray-800 mb-2">
                     {formatDuration(duration)}
                   </div>
                   <div className="text-sm text-gray-500">
@@ -189,9 +189,9 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 </div>
 
                 {/* Waveform placeholder */}
-                <div className="flex items-center justify-center gap-1 h-24 mb-8">
+                <div className="flex items-center justify-center gap-1 h-16 sm:h-24 mb-6 sm:mb-8">
                   {state === "recording" &&
-                    Array.from({ length: 40 }).map((_, i) => (
+                    Array.from({ length: 30 }).map((_, i) => (
                       <motion.div
                         key={i}
                         className="w-1 bg-amber-500 rounded-full"
@@ -209,7 +209,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                       />
                     ))}
                   {state === "paused" &&
-                    Array.from({ length: 40 }).map((_, i) => (
+                    Array.from({ length: 30 }).map((_, i) => (
                       <div
                         key={i}
                         className="w-1 h-8 bg-gray-300 rounded-full"
@@ -218,14 +218,14 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 </div>
 
                 {/* Controls */}
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
                   {state === "recording" && (
                     <>
                       <Button
                         onClick={pauseRecording}
                         size="lg"
                         variant="outline"
-                        className="rounded-full px-8"
+                        className="rounded-full px-8 w-full sm:w-auto"
                       >
                         <Pause className="w-5 h-5 mr-2" />
                         Pause
@@ -233,7 +233,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                       <Button
                         onClick={stopRecording}
                         size="lg"
-                        className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 rounded-full px-8"
+                        className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 rounded-full px-8 w-full sm:w-auto"
                       >
                         <Square className="w-5 h-5 mr-2" />
                         Stop
@@ -245,7 +245,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                       <Button
                         onClick={resumeRecording}
                         size="lg"
-                        className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 rounded-full px-8"
+                        className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 rounded-full px-8 w-full sm:w-auto"
                       >
                         <Play className="w-5 h-5 mr-2" />
                         Resume
@@ -254,7 +254,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                         onClick={stopRecording}
                         size="lg"
                         variant="outline"
-                        className="rounded-full px-8"
+                        className="rounded-full px-8 w-full sm:w-auto"
                       >
                         <Square className="w-5 h-5 mr-2" />
                         Stop
@@ -263,7 +263,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                         onClick={restartRecording}
                         size="lg"
                         variant="outline"
-                        className="rounded-full px-8"
+                        className="rounded-full px-8 w-full sm:w-auto"
                       >
                         <RotateCcw className="w-5 h-5 mr-2" />
                         Restart

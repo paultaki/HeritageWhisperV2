@@ -19,6 +19,7 @@ export type RealtimeHandles = {
   updateInstructions: (instructions: string) => void;
   sendTextMessage: (text: string) => void;
   triggerPearlResponse: () => void;
+  toggleMic: (enabled: boolean) => void;
 };
 
 export type RealtimeCallbacks = {
@@ -358,6 +359,26 @@ export async function startRealtime(
   // 13. Trigger Pearl to speak first (no user message needed)
   const triggerPearlResponse = () => {
     console.log('[Realtime] Triggering Pearl to speak first...');
+
+    // Check if data channel is ready
+    if (!dataChannel || dataChannel.readyState !== 'open') {
+      console.warn('[Realtime] ⚠️ Data channel not ready (state:', dataChannel?.readyState || 'null', '). Retrying in 500ms...');
+
+      // Retry after a short delay
+      setTimeout(() => {
+        if (dataChannel && dataChannel.readyState === 'open') {
+          const responseCreate = {
+            type: 'response.create',
+          };
+          dataChannel.send(JSON.stringify(responseCreate));
+          console.log('[Realtime] ✅ Pearl response triggered (retry succeeded)');
+        } else {
+          console.error('[Realtime] ❌ Data channel still not ready after retry. State:', dataChannel?.readyState || 'null');
+        }
+      }, 500);
+      return;
+    }
+
     const responseCreate = {
       type: 'response.create',
     };
@@ -365,5 +386,13 @@ export async function startRealtime(
     console.log('[Realtime] ✅ Pearl response triggered');
   };
 
-  return { pc, mic, dataChannel, stop, reconnect, updateInstructions, sendTextMessage, triggerPearlResponse };
+  // 14. Toggle microphone on/off
+  const toggleMic = (enabled: boolean) => {
+    console.log('[Realtime] Toggling mic:', enabled ? 'ON' : 'OFF');
+    mic.getAudioTracks().forEach(track => {
+      track.enabled = enabled;
+    });
+  };
+
+  return { pc, mic, dataChannel, stop, reconnect, updateInstructions, sendTextMessage, triggerPearlResponse, toggleMic };
 }

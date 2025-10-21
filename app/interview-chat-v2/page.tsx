@@ -105,6 +105,7 @@ function InterviewChatV2Content() {
     startSession,
     stopSession,
     toggleVoice,
+    toggleMic,
     getMixedAudioBlob,
     sendTextMessage,
     triggerPearlResponse,
@@ -233,7 +234,7 @@ After they answer, continue the conversation naturally with follow-up questions 
       console.log('[InterviewChatV2] Session started, triggering Pearl to speak first...');
       setTimeout(() => {
         triggerPearlResponse();
-      }, 500); // Small delay to ensure session is fully connected
+      }, 1500); // Delay to ensure WebRTC data channel is fully open
     } catch (error) {
       console.error('[InterviewChatV2] Failed to start session:', error);
       alert('Failed to start voice session. Please try again.');
@@ -379,95 +380,83 @@ After they answer, continue the conversation naturally with follow-up questions 
             </div>
           )}
 
-          {/* Input Mode Toggle */}
-          <div className="flex justify-center mb-3">
-            <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1">
-              <button
-                onClick={() => setInputMode('voice')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  inputMode === 'voice'
-                    ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Mic className="w-4 h-4 inline mr-1" />
-                Voice
-              </button>
-              <button
-                onClick={() => setInputMode('text')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  inputMode === 'text'
-                    ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <MessageSquare className="w-4 h-4 inline mr-1" />
-                Type
-              </button>
-            </div>
-          </div>
+          {/* Voice/Mic Controls - Always visible when recording */}
+          {isRecording && (
+            <div className="flex flex-col gap-3 mb-3">
+              {/* Input Mode Toggle */}
+              <div className="flex justify-center">
+                <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1">
+                  <button
+                    onClick={() => setInputMode('voice')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      inputMode === 'voice'
+                        ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Mic className="w-4 h-4 inline mr-1" />
+                    Voice
+                  </button>
+                  <button
+                    onClick={() => setInputMode('text')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      inputMode === 'text'
+                        ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <MessageSquare className="w-4 h-4 inline mr-1" />
+                    Type
+                  </button>
+                </div>
+              </div>
 
-          {/* Voice Controls */}
-          {inputMode === 'voice' && isRecording && (
-            <div className="flex justify-center mb-3 gap-2">
-              {/* Mic Mute Toggle */}
-              <button
-                onClick={() => setIsMicMuted(!isMicMuted)}
-                className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isMicMuted
-                    ? 'bg-red-100 text-red-800 hover:bg-red-200'
-                    : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                }`}
-                title={isMicMuted ? 'Mic muted - Click to unmute' : 'Mic active - Click to mute'}
-              >
-                {isMicMuted ? (
-                  <><VolumeX className="w-4 h-4 mr-1" /> Mic Muted</>
-                ) : (
-                  <><Mic className="w-4 h-4 mr-1" /> Mic Active</>
-                )}
-              </button>
+              {/* Mic and Pearl Controls */}
+              <div className="flex justify-center gap-2">
+                {/* Mic Mute Toggle */}
+                <button
+                  onClick={() => {
+                    const newMutedState = !isMicMuted;
+                    setIsMicMuted(newMutedState);
+                    toggleMic(!newMutedState); // Enable mic when not muted, disable when muted
+                  }}
+                  className={`flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
+                    isMicMuted
+                      ? 'bg-red-100 text-red-800 hover:bg-red-200 border-2 border-red-300'
+                      : 'bg-blue-100 text-blue-800 hover:bg-blue-200 border-2 border-blue-300'
+                  }`}
+                  title={isMicMuted ? 'Mic muted - Click to unmute' : 'Mic active - Click to mute'}
+                >
+                  {isMicMuted ? (
+                    <><VolumeX className="w-4 h-4 mr-2" /> Mic Muted</>
+                  ) : (
+                    <><Mic className="w-4 h-4 mr-2" /> Mic Active</>
+                  )}
+                </button>
 
-              {/* Pearl Voice Toggle */}
-              <button
-                onClick={toggleVoice}
-                className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                  voiceEnabled
-                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-                title={voiceEnabled ? 'Pearl is speaking - Click to mute' : 'Pearl is muted - Click to unmute'}
-              >
-                {voiceEnabled ? (
-                  <><Volume2 className="w-4 h-4 mr-1" /> Pearl ON</>
-                ) : (
-                  <><VolumeX className="w-4 h-4 mr-1" /> Pearl OFF</>
-                )}
-              </button>
+                {/* Pearl Voice Toggle */}
+                <button
+                  onClick={toggleVoice}
+                  className={`flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
+                    voiceEnabled
+                      ? 'bg-green-100 text-green-800 hover:bg-green-200 border-2 border-green-300'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-2 border-gray-300'
+                  }`}
+                  title={voiceEnabled ? 'Pearl is speaking - Click to mute' : 'Pearl is muted - Click to unmute'}
+                >
+                  {voiceEnabled ? (
+                    <><Volume2 className="w-4 h-4 mr-2" /> Pearl ON</>
+                  ) : (
+                    <><VolumeX className="w-4 h-4 mr-2" /> Pearl OFF</>
+                  )}
+                </button>
+              </div>
             </div>
           )}
 
           {/* Text Input */}
           {inputMode === 'text' && (
             <>
-              {/* Pearl Voice Toggle for Text Mode */}
-              <div className="flex justify-center mb-3">
-                <button
-                  onClick={toggleVoice}
-                  className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    voiceEnabled
-                      ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                  title={voiceEnabled ? 'Pearl is speaking - Click to mute' : 'Pearl is muted - Click to unmute'}
-                >
-                  {voiceEnabled ? (
-                    <><Volume2 className="w-4 h-4 mr-1" /> Pearl Voice ON</>
-                  ) : (
-                    <><VolumeX className="w-4 h-4 mr-1" /> Pearl Voice OFF</>
-                  )}
-                </button>
-              </div>
-
               {/* Text Input Field */}
               <div className="flex gap-2 mb-3">
                 <input

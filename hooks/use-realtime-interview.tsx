@@ -69,6 +69,7 @@ export function useRealtimeInterview() {
   const cancelSentRef = useRef<boolean>(false); // Track if cancel already sent for this response
   const pendingAssistantResponseRef = useRef<string | null>(null); // Buffer Pearl's response until user transcript arrives
   const waitingForUserTranscriptRef = useRef<boolean>(false); // Track if we're waiting for user transcript
+  const micEnabledRef = useRef<boolean>(true); // Track if mic is enabled (for preventing barge-in when muted)
 
   // Start Realtime session
   const startSession = useCallback(async (
@@ -314,8 +315,12 @@ export function useRealtimeInterview() {
           cancelSentRef.current = false; // Reset cancel flag for next response
         },
 
-        // Barge-in: Pause audio when user speaks
+        // Barge-in: Pause audio when user speaks (only if mic is enabled)
         onSpeechStarted: () => {
+          if (!micEnabledRef.current) {
+            console.log('[RealtimeInterview] User speech detected but mic is muted - ignoring barge-in');
+            return;
+          }
           console.log('[RealtimeInterview] User speech started - pausing assistant');
           if (audioElementRef.current && !audioElementRef.current.paused) {
             audioElementRef.current.pause();
@@ -469,6 +474,19 @@ export function useRealtimeInterview() {
     }
   }, []);
 
+  // Toggle microphone on/off
+  const toggleMic = useCallback((enabled: boolean) => {
+    // Update ref to track mic state (used to prevent barge-in when muted)
+    micEnabledRef.current = enabled;
+    console.log('[RealtimeInterview] Mic state updated:', enabled ? 'ENABLED' : 'DISABLED');
+
+    if (realtimeHandlesRef.current) {
+      realtimeHandlesRef.current.toggleMic(enabled);
+    } else {
+      console.warn('[RealtimeInterview] Cannot toggle mic - no active session');
+    }
+  }, []);
+
   return {
     status,
     provisionalTranscript,
@@ -477,6 +495,7 @@ export function useRealtimeInterview() {
     startSession,
     stopSession,
     toggleVoice,
+    toggleMic,
     startMixedRecording,
     getMixedAudioBlob,
     updateInstructions,
