@@ -791,6 +791,42 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 - **PDF Export on Vercel**: Print page loads but React app not rendering (timeout waiting for `.book-spread`)
 - **Book View Cursor Hints**: Directional cursor arrows (w-resize/e-resize) randomly flicker between directions on same page despite forced styles - clicking still works correctly
 
+## ✅ Recent Updates (January 21, 2025)
+
+### Critical Security Fix - Row Level Security
+
+Fixed critical RLS vulnerabilities flagged by Supabase security linter on 4 tables.
+
+**Problem:**
+- Supabase linter reported RLS disabled on: `users`, `recording_sessions`, `stories`, `usage_tracking`
+- These tables were exposed to potential unauthorized access
+- Previous migrations may have failed silently or been incomplete
+
+**Solution:**
+- Created migration `/migrations/0011_fix_missing_rls.sql`
+- Implements defensive checks (only enables if disabled)
+- Creates comprehensive policies for each table
+- Includes verification queries
+
+**To Apply:**
+```bash
+# Run the automated script
+./scripts/apply-rls-fix.sh
+
+# Or manually via Supabase CLI
+supabase db push --include-migrations
+
+# Or directly to production (requires DATABASE_URL)
+psql $DATABASE_URL -f migrations/0011_fix_missing_rls.sql
+```
+
+**Verification:**
+1. Check Supabase Dashboard → Database → Tables (RLS badges should appear)
+2. Re-run Security Linter (warnings should be resolved)
+3. Test user data isolation (users can only see their own data)
+
+**Security Impact:** HIGH - Prevents unauthorized data access across user accounts
+
 ## ✅ Recent Updates (October 8, 2025)
 
 ### Recording UX Improvements
