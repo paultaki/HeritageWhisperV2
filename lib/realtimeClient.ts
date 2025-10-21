@@ -17,6 +17,7 @@ export type RealtimeHandles = {
   stop: () => void;
   reconnect: () => Promise<RealtimeHandles>;
   updateInstructions: (instructions: string) => void;
+  sendTextMessage: (text: string) => void;
 };
 
 export type RealtimeCallbacks = {
@@ -321,5 +322,35 @@ export async function startRealtime(
     console.log('[Realtime] ✅ Instructions updated');
   };
 
-  return { pc, mic, dataChannel, stop, reconnect, updateInstructions };
+  // 12. Send text message to conversation
+  // Docs: https://platform.openai.com/docs/guides/realtime-webrtc#conversation-item-create
+  const sendTextMessage = (text: string) => {
+    console.log('[Realtime] Sending text message:', text);
+
+    const textMessage = {
+      type: 'conversation.item.create',
+      item: {
+        type: 'message',
+        role: 'user',
+        content: [
+          {
+            type: 'input_text',
+            text: text,
+          },
+        ],
+      },
+    };
+
+    dataChannel.send(JSON.stringify(textMessage));
+    console.log('[Realtime] ✅ Text message sent');
+
+    // Trigger response generation
+    const responseCreate = {
+      type: 'response.create',
+    };
+    dataChannel.send(JSON.stringify(responseCreate));
+    console.log('[Realtime] ✅ Response generation triggered');
+  };
+
+  return { pc, mic, dataChannel, stop, reconnect, updateInstructions, sendTextMessage };
 }

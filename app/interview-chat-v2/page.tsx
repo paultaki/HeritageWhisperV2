@@ -13,7 +13,7 @@ import {
 } from "@/lib/conversationModeIntegration";
 import { useRecordingState } from "@/contexts/RecordingContext";
 import { useRealtimeInterview, PEARL_WITNESS_INSTRUCTIONS } from "@/hooks/use-realtime-interview";
-import { Mic, Square, Volume2, VolumeX } from "lucide-react";
+import { Mic, Square, Volume2, VolumeX, MessageSquare } from "lucide-react";
 
 export type MessageType =
   | 'system'
@@ -41,8 +41,56 @@ export default function InterviewChatV2Page() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
+  const [isMicMuted, setIsMicMuted] = useState(false);
+  const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
+  const [textInput, setTextInput] = useState('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+
+  // Handler for sending text messages
+  const handleSendTextMessage = () => {
+    if (!textInput.trim()) return;
+
+    console.log('[InterviewChatV2] Sending text message:', textInput);
+
+    const messageText = textInput;
+
+    // Add user message to chat immediately
+    const userMessage: Message = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      type: 'text-response',
+      content: messageText,
+      timestamp: new Date(),
+      sender: 'user',
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    setTextInput(''); // Clear input immediately
+
+    // Calculate thoughtful delay based on message length
+    const wordCount = messageText.split(/\s+/).length;
+    const baseDelay = 800;
+    const perWordDelay = 60;
+    const maxDelay = 2500;
+    const thinkingDelay = Math.min(baseDelay + (wordCount * perWordDelay), maxDelay);
+
+    console.log('[InterviewChatV2] Pearl composing... (delay:', thinkingDelay, 'ms for', wordCount, 'words)');
+
+    // Show composing indicator first
+    const typingMessage: Message = {
+      id: 'typing-indicator',
+      type: 'typing',
+      content: '',
+      timestamp: new Date(),
+      sender: 'hw',
+    };
+    setMessages(prev => [...prev, typingMessage]);
+
+    // Send text to Realtime API after delay (so Pearl has time to "think")
+    setTimeout(() => {
+      sendTextMessage(messageText);
+    }, thinkingDelay);
+  };
 
   // Realtime API integration
   const {
@@ -54,6 +102,7 @@ export default function InterviewChatV2Page() {
     stopSession,
     toggleVoice,
     getMixedAudioBlob,
+    sendTextMessage,
   } = useRealtimeInterview();
 
   // Redirect if not authenticated
@@ -307,12 +356,58 @@ export default function InterviewChatV2Page() {
             </div>
           )}
 
-          {/* Voice Toggle and Status */}
-          <div className="flex justify-center mb-3 gap-2">
-            {isRecording && (
+          {/* Input Mode Toggle */}
+          <div className="flex justify-center mb-3">
+            <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1">
+              <button
+                onClick={() => setInputMode('voice')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  inputMode === 'voice'
+                    ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Mic className="w-4 h-4 inline mr-1" />
+                Voice
+              </button>
+              <button
+                onClick={() => setInputMode('text')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  inputMode === 'text'
+                    ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <MessageSquare className="w-4 h-4 inline mr-1" />
+                Type
+              </button>
+            </div>
+          </div>
+
+          {/* Voice Controls */}
+          {inputMode === 'voice' && isRecording && (
+            <div className="flex justify-center mb-3 gap-2">
+              {/* Mic Mute Toggle */}
+              <button
+                onClick={() => setIsMicMuted(!isMicMuted)}
+                className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  isMicMuted
+                    ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                    : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                }`}
+                title={isMicMuted ? 'Mic muted - Click to unmute' : 'Mic active - Click to mute'}
+              >
+                {isMicMuted ? (
+                  <><VolumeX className="w-4 h-4 mr-1" /> Mic Muted</>
+                ) : (
+                  <><Mic className="w-4 h-4 mr-1" /> Mic Active</>
+                )}
+              </button>
+
+              {/* Pearl Voice Toggle */}
               <button
                 onClick={toggleVoice}
-                className={`flex items-center px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   voiceEnabled
                     ? 'bg-green-100 text-green-800 hover:bg-green-200'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -325,16 +420,47 @@ export default function InterviewChatV2Page() {
                   <><VolumeX className="w-4 h-4 mr-1" /> Pearl OFF</>
                 )}
               </button>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Text Input */}
+          {inputMode === 'text' && (
+            <div className="flex gap-2 mb-3">
+              <input
+                type="text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && textInput.trim()) {
+                    // TODO: Send text message
+                    setTextInput('');
+                  }
+                }}
+                placeholder="Type your response..."
+                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-base"
+              />
+              <button
+                onClick={() => {
+                  if (textInput.trim()) {
+                    // TODO: Send text message
+                    setTextInput('');
+                  }
+                }}
+                disabled={!textInput.trim()}
+                className="px-6 py-3 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-600 hover:to-rose-600 transition-all"
+              >
+                Send
+              </button>
+            </div>
+          )}
 
           {/* Conversation Status */}
           <div className="flex items-center justify-center gap-3">
-            {isRecording && (
+            {isRecording && inputMode === 'voice' && (
               <div className="flex flex-col items-center gap-2">
                 <div className="flex items-center gap-2 text-gray-600">
-                  <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                  <p className="text-sm font-medium">Conversation Active</p>
+                  <div className={`w-3 h-3 rounded-full ${isMicMuted ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`}></div>
+                  <p className="text-sm font-medium">{isMicMuted ? 'Mic Paused' : 'Conversation Active'}</p>
                 </div>
                 <p className="text-xs text-gray-500 tabular-nums">{formatTime(recordingDuration)}</p>
               </div>

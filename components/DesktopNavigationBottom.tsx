@@ -2,10 +2,9 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Calendar, BookOpen, Box, Sparkles } from "lucide-react";
+import { Calendar, BookOpen, Box, Sparkles, Mic } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { useRecordingState } from "@/contexts/RecordingContext";
 
 interface NavItemProps {
@@ -199,14 +198,12 @@ export default function DesktopNavigationBottom({
             />
           )}
 
-          {/* Icon - grayscale when recording */}
-          <Image
-            src="/REC_Mic.png"
-            alt="Record"
-            width={22}
-            height={22}
-            className={`z-10 ${isRecording ? 'grayscale' : ''}`}
-            style={{ width: 'auto', height: 'auto' }}
+          {/* Icon - opacity reduced when recording */}
+          <Mic
+            className={`z-10 ${isRecording ? 'opacity-60' : ''}`}
+            size={28}
+            strokeWidth={2}
+            color="white"
           />
         </button>
       </div>

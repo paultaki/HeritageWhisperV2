@@ -131,6 +131,8 @@ export function useRealtimeInterview() {
               console.log('[RealtimeInterview] Creating audio element for session');
               const audio = new Audio();
               audio.autoplay = true;
+              audio.muted = false;
+              audio.volume = 1.0;
               audio.srcObject = stream;
 
               // Log stream details for debugging
@@ -142,15 +144,31 @@ export function useRealtimeInterview() {
                 readyState: t.readyState
               })));
 
+              // Explicitly call play() - autoplay might be blocked by browser
               audio.play().then(() => {
                 console.log('[RealtimeInterview] ✅ Audio playback started successfully');
+                console.log('[RealtimeInterview] Audio element state:', {
+                  paused: audio.paused,
+                  muted: audio.muted,
+                  volume: audio.volume,
+                  readyState: audio.readyState
+                });
               }).catch(err => {
                 console.error('[RealtimeInterview] ❌ Audio play failed:', err);
+                console.error('[RealtimeInterview] This is usually due to browser autoplay policy');
+                console.error('[RealtimeInterview] User must interact with page first (click button, etc.)');
                 console.error('[RealtimeInterview] Stream tracks:', stream.getTracks());
               });
               audioElementRef.current = audio;
             } else {
               console.log('[RealtimeInterview] Audio element already exists, reusing it');
+              // Make sure it's not paused and stream is still connected
+              if (audioElementRef.current.paused) {
+                console.log('[RealtimeInterview] Audio was paused, resuming...');
+                audioElementRef.current.play().catch(err => {
+                  console.error('[RealtimeInterview] Failed to resume audio:', err);
+                });
+              }
             }
           } else {
             console.log('[RealtimeInterview] Voice disabled, skipping audio playback');
@@ -333,6 +351,15 @@ export function useRealtimeInterview() {
     }
   }, []);
 
+  // Send text message to conversation
+  const sendTextMessage = useCallback((text: string) => {
+    if (realtimeHandlesRef.current) {
+      realtimeHandlesRef.current.sendTextMessage(text);
+    } else {
+      console.warn('[RealtimeInterview] Cannot send text message - no active session');
+    }
+  }, []);
+
   return {
     status,
     provisionalTranscript,
@@ -344,5 +371,6 @@ export function useRealtimeInterview() {
     startMixedRecording,
     getMixedAudioBlob,
     updateInstructions,
+    sendTextMessage,
   };
 }

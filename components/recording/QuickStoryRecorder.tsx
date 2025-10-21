@@ -67,15 +67,6 @@ export function QuickStoryRecorder({ isOpen, onClose }: QuickStoryRecorderProps)
         </DialogTitle>
 
         <div className="relative">
-          {/* Close button */}
-          <button
-            onClick={handleClose}
-            className="absolute top-0 right-0 p-2 hover:bg-gray-100 rounded-full transition"
-            disabled={state === "processing"}
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-
           <AnimatePresence mode="wait">
             {/* Ready State */}
             {state === "ready" && (
