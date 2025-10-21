@@ -58,6 +58,12 @@ export async function POST(request: NextRequest) {
       type: audioFile.type,
     });
 
+    // Log the actual MIME type being sent
+    logger.debug("[TranscribeChunk] File MIME type details:", {
+      contentType: audioFile.type,
+      fileName: audioFile.name,
+    });
+
     // Convert File to Buffer
     const arrayBuffer = await audioFile.arrayBuffer();
     const audioBuffer = Buffer.from(arrayBuffer);

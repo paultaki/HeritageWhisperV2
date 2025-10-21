@@ -248,8 +248,10 @@ export default function InterviewChatPage() {
     // Slice the blob and preserve the MIME type
     const slicedChunk = currentBlob.slice(audioState.lastBytePosition, currentBlob.size);
 
-    // Create a new Blob with the correct MIME type (slice loses the type)
-    const newChunk = new Blob([slicedChunk], { type: currentBlob.type || 'audio/webm' });
+    // Create a new Blob with the EXACT same MIME type as the original
+    // Use 'audio/webm' as fallback only if original has no type
+    const mimeType = currentBlob.type || 'audio/webm';
+    const newChunk = new Blob([slicedChunk], { type: mimeType });
 
     console.log('[GetNewAudioChunk] Created chunk:', {
       originalType: currentBlob.type,
@@ -262,11 +264,17 @@ export default function InterviewChatPage() {
 
   // Transcribe audio chunk
   const transcribeChunk = async (audioBlob: Blob): Promise<string> => {
-    // Create a new Blob with explicit audio/webm type to ensure OpenAI accepts it
-    const typedBlob = new Blob([audioBlob], { type: 'audio/webm' });
+    // Determine file extension based on MIME type
+    const mimeType = audioBlob.type;
+    let extension = 'webm';
+    if (mimeType.includes('mp4')) extension = 'mp4';
+    else if (mimeType.includes('mpeg')) extension = 'mpeg';
+    else if (mimeType.includes('wav')) extension = 'wav';
+    else if (mimeType.includes('ogg')) extension = 'ogg';
 
     const formData = new FormData();
-    formData.append('audio', typedBlob, 'chunk.webm');
+    // Use the blob directly with proper file extension
+    formData.append('audio', audioBlob, `chunk.${extension}`);
 
     console.log('[TranscribeChunk] Sending audio chunk:', {
       size: audioBlob.size,

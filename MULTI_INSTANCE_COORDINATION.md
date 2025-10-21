@@ -221,4 +221,4 @@ These files are touched by multiple instances - **coordinate before editing**:
 
 ---
 
-_Last Updated: Oct 20, 2025 - Instance 1 Complete_
+_Last Updated: Oct 20, 2025 - Instance 6 Complete (Timeline Overlay)_
