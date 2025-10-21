@@ -18,6 +18,7 @@ export type RealtimeHandles = {
   reconnect: () => Promise<RealtimeHandles>;
   updateInstructions: (instructions: string) => void;
   sendTextMessage: (text: string) => void;
+  triggerPearlResponse: () => void;
 };
 
 export type RealtimeCallbacks = {
@@ -352,5 +353,15 @@ export async function startRealtime(
     console.log('[Realtime] ✅ Response generation triggered');
   };
 
-  return { pc, mic, dataChannel, stop, reconnect, updateInstructions, sendTextMessage };
+  // 13. Trigger Pearl to speak first (no user message needed)
+  const triggerPearlResponse = () => {
+    console.log('[Realtime] Triggering Pearl to speak first...');
+    const responseCreate = {
+      type: 'response.create',
+    };
+    dataChannel.send(JSON.stringify(responseCreate));
+    console.log('[Realtime] ✅ Pearl response triggered');
+  };
+
+  return { pc, mic, dataChannel, stop, reconnect, updateInstructions, sendTextMessage, triggerPearlResponse };
 }

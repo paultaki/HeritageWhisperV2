@@ -53,15 +53,36 @@ export function trimResponse(text: string): {
 export function shouldCancelResponse(accumulatedText: string): boolean {
   const normalized = accumulatedText.trim();
 
-  // Look for question mark followed by NEW SENTENCE (capital letter after space)
-  // This ensures we wait for a complete question before canceling
-  const questionWithFollowup = /\?\s+[A-Z]/.test(normalized);
+  // Count question marks to detect multiple questions
+  const questionCount = (normalized.match(/\?/g) || []).length;
+
+  // If multiple question marks detected, check if they're "Or" questions (options)
+  if (questionCount > 1) {
+    // Check if questions are connected by "or" (compound question with options)
+    const hasOrConnector = /\?\s+(Or|or)\s+/i.test(normalized);
+    if (!hasOrConnector) {
+      // Multiple separate questions without "or" = cancel
+      return true;
+    }
+    // "Or" questions are allowed (e.g., "Would you like X? Or would you prefer Y?")
+  }
+
+  // Look for question mark followed by NEW SENTENCE (not starting with "Or")
+  // This catches cases like "Question? And another sentence."
+  const questionWithFollowup = /\?\s+(?!Or|or)[A-Z]/.test(normalized);
   if (questionWithFollowup) {
-    // Pearl asked a question and started another sentence = cancel
-    return true;
+    // Extract text after the question mark
+    const afterQuestion = normalized.split('?')[1];
+
+    // If there's substantial text after (>20 chars), it's likely another question/sentence
+    // Allow short follow-ups like "? What" (compound questions)
+    if (afterQuestion && afterQuestion.trim().length > 20) {
+      return true;
+    }
   }
 
   // Count sentences (split by . ! or …)
+  // Allow up to 3 sentences for natural conversation flow
   const sentences = normalized.split(/[.!…]\s+/).filter(s => s.trim().length > 0);
-  return sentences.length > 2;
+  return sentences.length > 3;
 }

@@ -425,33 +425,49 @@ export default function InterviewChatV2Page() {
 
           {/* Text Input */}
           {inputMode === 'text' && (
-            <div className="flex gap-2 mb-3">
-              <input
-                type="text"
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && textInput.trim()) {
-                    // TODO: Send text message
-                    setTextInput('');
-                  }
-                }}
-                placeholder="Type your response..."
-                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-base"
-              />
-              <button
-                onClick={() => {
-                  if (textInput.trim()) {
-                    // TODO: Send text message
-                    setTextInput('');
-                  }
-                }}
-                disabled={!textInput.trim()}
-                className="px-6 py-3 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-600 hover:to-rose-600 transition-all"
-              >
-                Send
-              </button>
-            </div>
+            <>
+              {/* Pearl Voice Toggle for Text Mode */}
+              <div className="flex justify-center mb-3">
+                <button
+                  onClick={toggleVoice}
+                  className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    voiceEnabled
+                      ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                  title={voiceEnabled ? 'Pearl is speaking - Click to mute' : 'Pearl is muted - Click to unmute'}
+                >
+                  {voiceEnabled ? (
+                    <><Volume2 className="w-4 h-4 mr-1" /> Pearl Voice ON</>
+                  ) : (
+                    <><VolumeX className="w-4 h-4 mr-1" /> Pearl Voice OFF</>
+                  )}
+                </button>
+              </div>
+
+              {/* Text Input Field */}
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && textInput.trim()) {
+                      handleSendTextMessage();
+                    }
+                  }}
+                  placeholder="Type your response..."
+                  className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-base"
+                />
+                <button
+                  onClick={handleSendTextMessage}
+                  disabled={!textInput.trim()}
+                  className="px-6 py-3 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-600 hover:to-rose-600 transition-all"
+                >
+                  Send
+                </button>
+              </div>
+            </>
           )}
 
           {/* Conversation Status */}

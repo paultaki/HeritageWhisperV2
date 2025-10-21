@@ -129,11 +129,39 @@ export function useRealtimeInterview() {
             // Only create audio element ONCE per session (not per response)
             if (!audioElementRef.current) {
               console.log('[RealtimeInterview] Creating audio element for session');
-              const audio = new Audio();
+
+              // Create and configure audio element
+              const audio = document.createElement('audio');
               audio.autoplay = true;
               audio.muted = false;
               audio.volume = 1.0;
               audio.srcObject = stream;
+
+              // Add to DOM (hidden) - required for audio playback in some browsers
+              audio.style.display = 'none';
+              audio.id = 'pearl-audio-element';
+              document.body.appendChild(audio);
+              console.log('[RealtimeInterview] Audio element added to DOM');
+
+              // Add event listeners for debugging
+              audio.addEventListener('playing', () => {
+                console.log('[RealtimeInterview] 🔊 Audio is PLAYING');
+              });
+              audio.addEventListener('pause', () => {
+                console.log('[RealtimeInterview] ⏸️ Audio PAUSED');
+              });
+              audio.addEventListener('ended', () => {
+                console.log('[RealtimeInterview] ⏹️ Audio ENDED');
+              });
+              audio.addEventListener('error', (e) => {
+                console.error('[RealtimeInterview] ❌ Audio ERROR:', e);
+              });
+              audio.addEventListener('loadedmetadata', () => {
+                console.log('[RealtimeInterview] 📊 Audio metadata loaded, duration:', audio.duration);
+              });
+              audio.addEventListener('canplay', () => {
+                console.log('[RealtimeInterview] ✅ Audio can play');
+              });
 
               // Log stream details for debugging
               console.log('[RealtimeInterview] Stream active:', stream.active);
@@ -144,6 +172,30 @@ export function useRealtimeInterview() {
                 readyState: t.readyState
               })));
 
+              // Check if setSinkId is available (Chrome/Edge only)
+              if ('setSinkId' in audio) {
+                console.log('[RealtimeInterview] Checking audio output devices...');
+                navigator.mediaDevices.enumerateDevices().then(devices => {
+                  const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
+                  console.log('[RealtimeInterview] Available audio outputs:', audioOutputs.map(d => ({
+                    deviceId: d.deviceId,
+                    label: d.label,
+                    groupId: d.groupId
+                  })));
+
+                  // Try to set default audio output
+                  if (audioOutputs.length > 0) {
+                    (audio as any).setSinkId('').then(() => {
+                      console.log('[RealtimeInterview] Audio output set to default device');
+                    }).catch((err: any) => {
+                      console.error('[RealtimeInterview] Failed to set audio output:', err);
+                    });
+                  }
+                });
+              } else {
+                console.log('[RealtimeInterview] setSinkId not supported (Firefox/Safari)');
+              }
+
               // Explicitly call play() - autoplay might be blocked by browser
               audio.play().then(() => {
                 console.log('[RealtimeInterview] ✅ Audio playback started successfully');
@@ -152,6 +204,17 @@ export function useRealtimeInterview() {
                   muted: audio.muted,
                   volume: audio.volume,
                   readyState: audio.readyState
+                });
+
+                // Double-check stream tracks are enabled
+                const tracks = stream.getAudioTracks();
+                tracks.forEach((track, i) => {
+                  console.log(`[RealtimeInterview] Track ${i}:`, {
+                    enabled: track.enabled,
+                    muted: track.muted,
+                    readyState: track.readyState,
+                    settings: track.getSettings()
+                  });
                 });
               }).catch(err => {
                 console.error('[RealtimeInterview] ❌ Audio play failed:', err);
@@ -241,8 +304,9 @@ export function useRealtimeInterview() {
         // Barge-in: Pause audio when user speaks
         onSpeechStarted: () => {
           console.log('[RealtimeInterview] User speech started - pausing assistant');
-          if (audioElementRef.current) {
+          if (audioElementRef.current && !audioElementRef.current.paused) {
             audioElementRef.current.pause();
+            console.log('[RealtimeInterview] Audio paused for barge-in');
           }
         },
 
@@ -250,6 +314,15 @@ export function useRealtimeInterview() {
         onSpeechStopped: () => {
           console.log('[RealtimeInterview] User stopped speaking - expecting transcript soon');
           waitingForUserTranscriptRef.current = true;
+
+          // Resume audio playback after user stops speaking
+          if (audioElementRef.current && audioElementRef.current.paused && voiceEnabled) {
+            audioElementRef.current.play().then(() => {
+              console.log('[RealtimeInterview] 🔊 Audio resumed after user stopped speaking');
+            }).catch(err => {
+              console.error('[RealtimeInterview] Failed to resume audio:', err);
+            });
+          }
         },
 
         // Connection established
@@ -307,10 +380,14 @@ export function useRealtimeInterview() {
       mixedRecorderRef.current = null;
     }
 
-    // Stop audio playback
+    // Stop audio playback and remove from DOM
     if (audioElementRef.current) {
       audioElementRef.current.pause();
       audioElementRef.current.srcObject = null;
+      // Remove from DOM if it was added
+      if (audioElementRef.current.parentNode) {
+        audioElementRef.current.parentNode.removeChild(audioElementRef.current);
+      }
       audioElementRef.current = null;
     }
 
@@ -327,7 +404,17 @@ export function useRealtimeInterview() {
 
   // Toggle voice output
   const toggleVoice = useCallback(() => {
-    setVoiceEnabled(prev => !prev);
+    setVoiceEnabled(prev => {
+      const newValue = !prev;
+
+      // Mute/unmute the audio element
+      if (audioElementRef.current) {
+        audioElementRef.current.muted = !newValue;
+        console.log('[RealtimeInterview] Pearl voice', newValue ? 'ENABLED' : 'MUTED');
+      }
+
+      return newValue;
+    });
   }, []);
 
   // Get mixed audio blob for upload
@@ -360,6 +447,15 @@ export function useRealtimeInterview() {
     }
   }, []);
 
+  // Trigger Pearl to speak first (without user message)
+  const triggerPearlResponse = useCallback(() => {
+    if (realtimeHandlesRef.current) {
+      realtimeHandlesRef.current.triggerPearlResponse();
+    } else {
+      console.warn('[RealtimeInterview] Cannot trigger Pearl response - no active session');
+    }
+  }, []);
+
   return {
     status,
     provisionalTranscript,
@@ -372,5 +468,6 @@ export function useRealtimeInterview() {
     getMixedAudioBlob,
     updateInstructions,
     sendTextMessage,
+    triggerPearlResponse,
   };
 }
