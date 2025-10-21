@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useAuth } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -32,7 +32,7 @@ export type Message = {
   sender: 'hw' | 'user' | 'system';
 };
 
-export default function InterviewChatV2Page() {
+function InterviewChatV2Content() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -515,5 +515,20 @@ After they answer, continue the conversation naturally with follow-up questions 
         </div>
       </div>
     </div>
+  );
+}
+
+export default function InterviewChatV2Page() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-page)' }}>
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-4 animate-pulse" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <InterviewChatV2Content />
+    </Suspense>
   );
 }

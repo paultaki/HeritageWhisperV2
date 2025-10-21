@@ -51,27 +51,36 @@ export default function HelpPage() {
           question: "How do I record a new memory?",
           answer: (
             <div className="space-y-3">
-              <p>Recording a memory is easy:</p>
-              <ol className="list-decimal list-inside space-y-2 ml-2">
-                <li>
-                  Click the orange <strong>+</strong> button in the bottom
-                  navigation (mobile) or left sidebar (desktop)
-                </li>
-                <li>
-                  Click <strong>"Start Recording"</strong> when you're ready
-                </li>
-                <li>You'll see a 3-2-1 countdown, then recording begins</li>
-                <li>Speak naturally about your memory (up to 5 minutes)</li>
-                <li>
-                  Click <strong>"Stop"</strong> when finished
-                </li>
-                <li>
-                  Your audio will be automatically transcribed and formatted
-                </li>
-              </ol>
+              <p>You have two ways to record your memories:</p>
+
+              <div className="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-lg p-4 mt-3">
+                <strong className="block mb-2 text-amber-900">
+                  💬 Conversation Mode (Guided Interview with Pearl)
+                </strong>
+                <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                  <li>Click the <strong>+</strong> button and choose <strong>"Conversation Mode"</strong></li>
+                  <li>Pearl, your AI interviewer, will ask you thoughtful questions</li>
+                  <li>Simply answer naturally - she listens and follows up based on what you share</li>
+                  <li>Perfect for exploring memories in depth (10-15 minutes)</li>
+                  <li>Your full conversation is recorded and saved as one story</li>
+                </ul>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-3">
+                <strong className="block mb-2">
+                  🎤 Quick Story (Solo Recording)
+                </strong>
+                <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                  <li>Click the <strong>+</strong> button and choose <strong>"Quick Story"</strong></li>
+                  <li>You'll see a 3-2-1 countdown, then recording begins</li>
+                  <li>Speak naturally about your memory (2-5 minutes)</li>
+                  <li>Click <strong>"Stop"</strong> when finished</li>
+                  <li>Great for capturing quick memories on the fly</li>
+                </ul>
+              </div>
+
               <p className="text-sm text-gray-600 mt-3">
-                💡 <strong>Tip:</strong> Find a quiet space and speak clearly
-                for best transcription results.
+                💡 <strong>Tip:</strong> Both modes automatically transcribe your audio. Find a quiet space and speak clearly for best results!
               </p>
             </div>
           ),

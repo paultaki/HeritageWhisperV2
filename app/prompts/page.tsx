@@ -9,8 +9,9 @@ import { Mic, ChevronDown, ChevronUp, Settings, Brain } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useRecordModal } from "@/hooks/use-record-modal";
-import RecordModal from "@/components/RecordModal";
+import { useModeSelection } from "@/hooks/use-mode-selection";
+import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
+import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 import MoreIdeas from "@/components/MoreIdeas";
 import PromptCard from "@/components/PromptCard";
 import { useAIConsent } from "@/hooks/use-ai-consent";
@@ -73,7 +74,7 @@ export default function PromptsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { isOpen, openModal, closeModal, handleSave, initialData } = useRecordModal();
+  const modeSelection = useModeSelection();
   const { isEnabled: isAIEnabled, isLoading: isAILoading } = useAIConsent();
   const [showArchived, setShowArchived] = useState(false);
   const [showAllQueued, setShowAllQueued] = useState(false);
@@ -223,13 +224,13 @@ export default function PromptsPage() {
     return () => window.removeEventListener('refreshPrompts', handleRefresh);
   }, [queryClient]);
 
-  const handleRecord = (promptId: string, promptText: string, source: 'ai' | 'catalog') => {
+  const handleRecord = (promptId: string, promptText: string, source: 'ai' | 'catalog' | 'family') => {
     // Store prompt ID for tracking
     if (source === 'ai') {
       sessionStorage.setItem("activePromptId", promptId);
     }
-    // Open recording modal with the selected prompt
-    openModal({ prompt: promptText });
+    // Open mode selection modal with the selected prompt question
+    modeSelection.openModal(promptText);
   };
 
   const handleQueue = (id: string, text: string, source: 'ai' | 'catalog', category?: string) => {
@@ -576,14 +577,19 @@ export default function PromptsPage() {
         </section>
       </div>
 
-          {/* Record Modal */}
-          <RecordModal
-            isOpen={isOpen}
-            onClose={closeModal}
-            onSave={handleSave}
-            initialPrompt={initialData?.prompt}
-            initialTitle={initialData?.title}
-            initialYear={initialData?.year}
+          {/* Mode Selection Modal */}
+          <ModeSelectionModal
+            isOpen={modeSelection.isOpen}
+            onClose={modeSelection.closeModal}
+            onSelectQuickStory={modeSelection.openQuickRecorder}
+            promptQuestion={modeSelection.promptQuestion}
+          />
+
+          {/* Quick Story Recorder */}
+          <QuickStoryRecorder
+            isOpen={modeSelection.quickRecorderOpen}
+            onClose={modeSelection.closeQuickRecorder}
+            promptQuestion={modeSelection.promptQuestion}
           />
         </div>
       </main>

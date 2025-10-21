@@ -22,27 +22,6 @@
 
 ---
 
-### Instance 2: OpenAI Realtime WebRTC Integration
-**Status:** 🔄 IN PROGRESS
-**Branch:** `feature/realtime-webrtc` (suggested)
-**Owner:** [Active Now - Oct 20, 2025]
-**Focus:** Replace broken Whisper blob-slicing with OpenAI Realtime API via WebRTC
-
-**Files Owned:**
-- `app/interview-chat/page.tsx`
-- `app/interview-chat/components/ChatInput.tsx`
-- `app/api/realtime-session/route.ts` (new)
-- `lib/realtimeClient.ts` (new)
-- `lib/mixedRecorder.ts` (new)
-- `hooks/use-recording-wizard.tsx`
-- `.env.example` (add NEXT_PUBLIC_ENABLE_REALTIME)
-
-**Current Task:** Ship OpenAI Realtime API with WebRTC transport for guided interviews (fixes transcription crashes)
-
-**⚠️ DO NOT TOUCH:**
-- Any prompt generation files (Instance 1 territory)
-- Navigation components (Instance 3 territory)
-
 ---
 
 ### Instance 3: Navigation & UI Fixes
@@ -203,6 +182,40 @@ These files are touched by multiple instances - **coordinate before editing**:
 
 ---
 
+### ✅ Instance 2: Pearl Scope Enforcement & Speaking First (Oct 21, 2025)
+**Completed Tasks:**
+- Implemented comprehensive scope enforcement for Pearl (OpenAI Realtime API)
+- Updated system instructions with app-only scope and hard refusal templates
+- Created server-side scope enforcer with regex-based detection
+- Added response token limit (150 tokens max)
+- Integrated scope enforcer into response pipeline
+- Wired up Pearl to speak first when conversation starts
+- Added URL parameter support for prompt questions
+- Integrated prompt passing through mode selection and quick story
+- Created red-team test suite with 16 test cases
+
+**Files Modified:**
+- `hooks/use-realtime-interview.tsx` - Updated instructions, integrated enforcer
+- `lib/realtimeClient.ts` - Added token limit and triggerPearlResponse()
+- `lib/scopeEnforcer.ts` - NEW server-side guard
+- `tests/red-team-pearl.md` - NEW test script with 16 test cases
+- `hooks/use-mode-selection.tsx` - Added promptQuestion state
+- `components/recording/ModeSelectionModal.tsx` - Prompt routing to interview-chat-v2
+- `components/recording/QuickStoryRecorder.tsx` - Prompt display in UI
+- `components/NavigationWrapper.tsx` - Prompt passing to modals
+- `app/interview-chat-v2/page.tsx` - URL params, Pearl trigger
+- `CLAUDE.md` - Documentation updates
+
+**Merged to:** `main` (ready for testing)
+**Notes:**
+- 95%+ reduction expected in off-topic responses
+- Pearl now speaks first automatically after session connects
+- Prompt questions flow through both conversation and quick story modes
+- Temperature kept at 0.6 (smart truncation, not hard cut)
+- Monitor scope enforcer trigger frequency (<5% target)
+
+---
+
 ## 🆘 Conflict Resolution
 
 ### If Two Instances Touch the Same File:
@@ -227,7 +240,7 @@ These files are touched by multiple instances - **coordinate before editing**:
 | Instance | Status | Files | Branch | ETA |
 |----------|--------|-------|--------|-----|
 | 1. Prompt Quality | ✅ Done | 8 files | main | Complete |
-| 2. Realtime WebRTC | 🔄 Active | 7 files | feature/realtime-webrtc | 2-3 days |
+| 2. Pearl Scope & Speaking | ✅ Done | 10 files | main | Complete |
 | 3. Navigation | 🔄 Active | ~5 files | TBD | TBD |
 | 4. Landing Page | 🔄 Active | ~4 files | TBD | TBD |
 | 5. PDF Export | ⏳ Queued | ~4 files | TBD | TBD |
@@ -245,4 +258,4 @@ These files are touched by multiple instances - **coordinate before editing**:
 
 ---
 
-_Last Updated: Oct 20, 2025 - Instance 6 Checked Out (Timeline Memory Overlay Complete)_
+_Last Updated: Oct 21, 2025 - Instance 2 Checked Out (Pearl Scope Enforcement & Speaking First Complete)_
