@@ -29,6 +29,9 @@ function BookStyleReviewContent() {
   const isWizardMode = searchParams.get("mode") === "wizard";
   const navId = searchParams.get("nav");
 
+  // Get returnPath from URL parameters (where to go back after editing)
+  const urlReturnPath = searchParams.get("returnPath");
+
   // Get data from URL params (passed from recording page)
   const [title, setTitle] = useState("");
   const [storyYear, setStoryYear] = useState("");
@@ -55,6 +58,13 @@ function BookStyleReviewContent() {
       setIsLoading(true);
       try {
         console.log("[Edit Mode] Fetching story data for ID:", editId);
+
+        // Set returnPath from URL if provided
+        if (urlReturnPath) {
+          setReturnPath(urlReturnPath);
+          console.log("[Edit Mode] Return path set to:", urlReturnPath);
+        }
+
         const response = await apiRequest("GET", `/api/stories/${editId}`);
         if (response.ok) {
           const { story } = await response.json();
@@ -220,7 +230,7 @@ function BookStyleReviewContent() {
           .catch(console.error);
       }
     }
-  }, [searchParams, editId, isEditing, toast]);
+  }, [searchParams, editId, isEditing, toast, urlReturnPath]);
 
   // Redirect to login if not authenticated (wait for auth to finish loading)
   useEffect(() => {
@@ -714,16 +724,19 @@ function BookStyleReviewContent() {
       // Check if we should return to book after recording from whisper
       const returnToBook = sessionStorage.getItem("returnToBook");
       const bookPageNumber = sessionStorage.getItem("bookPageNumber");
-      
+
       if (returnToBook === "true" && bookPageNumber) {
         // Clean up session storage
         sessionStorage.removeItem("returnToBook");
         sessionStorage.removeItem("bookPageNumber");
         sessionStorage.removeItem("sourcePromptId");
         sessionStorage.removeItem("promptText");
-        
+
         // Return to book page
         router.push(`/book?page=${bookPageNumber}`);
+      } else if (returnPath) {
+        // Return to where we came from (book view, memory box, etc.)
+        router.push(returnPath);
       } else {
         // Navigate to timeline and scroll to top where new prompt awaits
         router.push("/timeline");
@@ -793,13 +806,8 @@ function BookStyleReviewContent() {
     sessionStorage.removeItem("recordedAudio");
     sessionStorage.removeItem("recordingTranscription");
 
-    // If editing an existing story, go back to timeline
-    // If creating a new story, go back to where we came from (or timeline as fallback)
-    if (isEditing) {
-      router.push("/timeline");
-    } else {
-      router.push(returnPath || "/timeline");
-    }
+    // Go back to where we came from (or timeline as fallback)
+    router.push(returnPath || "/timeline");
   };
 
   const handleDelete = async () => {

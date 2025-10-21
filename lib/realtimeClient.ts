@@ -16,6 +16,7 @@ export type RealtimeHandles = {
   dataChannel: RTCDataChannel;
   stop: () => void;
   reconnect: () => Promise<RealtimeHandles>;
+  updateInstructions: (instructions: string) => void;
 };
 
 export type RealtimeCallbacks = {
@@ -50,8 +51,13 @@ export async function startRealtime(
 
   // 3. Assistant audio output (receive track)
   pc.ontrack = (event) => {
-    console.log('[Realtime] Received assistant audio track');
+    console.log('[Realtime] 🔊 Received assistant audio track');
     const stream = event.streams[0];
+    console.log('[Realtime] Audio stream tracks:', stream.getTracks().map(t => ({
+      kind: t.kind,
+      enabled: t.enabled,
+      readyState: t.readyState
+    })));
     callbacks.onAssistantAudio(stream);
   };
 
@@ -67,26 +73,69 @@ export async function startRealtime(
         console.log('[Realtime] Event:', msg.type, msg);
       }
 
+      // DEBUG: Specifically log any conversation or input events
+      if (msg.type && (msg.type.includes('conversation') || msg.type.includes('input_audio'))) {
+        console.log('[Realtime] 🎤 User audio event:', msg.type, msg);
+      }
+
       // User speech transcript events (CANONICAL NAMES)
       if (msg.type === 'conversation.item.input_audio_transcription.delta') {
-        console.log('[Realtime] Transcript delta:', msg.delta);
+        console.log('[Realtime] 📝 Transcript delta:', msg.delta);
         callbacks.onTranscriptDelta(msg.delta || '');
       }
       if (msg.type === 'conversation.item.input_audio_transcription.completed') {
-        console.log('[Realtime] Transcript completed:', msg.transcript);
+        console.log('[Realtime] ✅ Transcript completed:', msg.transcript);
         callbacks.onTranscriptFinal(msg.transcript || '');
       }
       if (msg.type === 'conversation.item.input_audio_transcription.failed') {
+        console.error('[Realtime] ❌ Transcription failed:', msg.error);
         callbacks.onError(new Error('Transcription failed: ' + msg.error?.message));
       }
 
-      // Assistant text streaming (handle BOTH variants)
-      // Some SDKs emit response.text.delta, others emit response.output_text.delta
-      if (msg.type === 'response.text.delta' || msg.type === 'response.output_text.delta') {
-        callbacks.onAssistantTextDelta?.(msg.delta || '');
+      // conversation.item.created - user audio committed
+      if (msg.type === 'conversation.item.created') {
+        console.log('[Realtime] 🎤 Conversation item created:', msg.item);
+        // Check if this is a user audio item that needs transcription
+        if (msg.item?.type === 'message' && msg.item?.role === 'user') {
+          console.log('[Realtime] User message committed, waiting for transcription...');
+        }
       }
-      if (msg.type === 'response.text.done' || msg.type === 'response.output_text.done') {
+
+      // Assistant text streaming (handle ALL variants)
+      // Different event types for text depending on modality:
+      // - response.text.delta / response.text.done (text-only mode)
+      // - response.output_text.delta / response.output_text.done (some SDKs)
+      // - response.audio_transcript.delta / response.audio_transcript.done (audio mode with transcription)
+      if (msg.type === 'response.text.delta' ||
+          msg.type === 'response.output_text.delta' ||
+          msg.type === 'response.audio_transcript.delta') {
+        const delta = msg.delta || msg.text || '';
+        if (delta) {
+          console.log('[Realtime] Assistant text delta:', delta);
+          callbacks.onAssistantTextDelta?.(delta);
+        }
+      }
+      if (msg.type === 'response.text.done' ||
+          msg.type === 'response.output_text.done' ||
+          msg.type === 'response.audio_transcript.done') {
+        console.log('[Realtime] Assistant text done');
         callbacks.onAssistantTextDone?.();
+      }
+
+      // Response output item completion (contains full text)
+      if (msg.type === 'response.output_item.done') {
+        console.log('[Realtime] Output item done:', msg.item);
+        // Extract text from completed item if available
+        if (msg.item?.content) {
+          for (const content of msg.item.content) {
+            if (content.type === 'text' && content.text) {
+              console.log('[Realtime] ✅ Assistant said (full text):', content.text);
+              // DON'T call onAssistantTextDelta here - we've already accumulated deltas
+              // Just signal completion
+              callbacks.onAssistantTextDone?.();
+            }
+          }
+        }
       }
 
       // Speech detection events (for barge-in)
@@ -99,9 +148,27 @@ export async function startRealtime(
         callbacks.onSpeechStopped?.();
       }
 
-      // Session confirmation
+      // Session events
+      if (msg.type === 'session.created') {
+        console.log('[Realtime] 📋 Session created:', msg.session);
+        console.log('[Realtime] 🔍 Initial transcription config:', msg.session?.input_audio_transcription);
+      }
+
       if (msg.type === 'session.updated') {
-        console.log('[Realtime] Session updated:', msg.session);
+        console.log('[Realtime] ✅ Session updated:', msg.session);
+        console.log('[Realtime] 🔍 Transcription config:', msg.session?.input_audio_transcription);
+        console.log('[Realtime] 🔍 Modalities:', msg.session?.modalities);
+        console.log('[Realtime] 🔍 Turn detection:', msg.session?.turn_detection);
+        console.log('[Realtime] 🔍 Temperature:', msg.session?.temperature);
+      }
+
+      // Error events
+      if (msg.type === 'error') {
+        console.error('[Realtime] ❌ ERROR:', msg.error);
+        if (msg.error?.type) {
+          console.error('[Realtime] Error type:', msg.error.type);
+          console.error('[Realtime] Error message:', msg.error.message);
+        }
       }
 
     } catch (err) {
@@ -237,5 +304,22 @@ export async function startRealtime(
     pc.close();
   };
 
-  return { pc, mic, dataChannel, stop, reconnect };
+  // 11. Update instructions dynamically (session.update)
+  // Used for hint freshness and do-not-ask filtering
+  const updateInstructions = (instructions: string) => {
+    console.log('[Realtime] Updating instructions via session.update...');
+    console.log('[Realtime] New instructions preview:', instructions.substring(0, 150) + '...');
+
+    const updateMessage = {
+      type: 'session.update',
+      session: {
+        instructions: instructions,
+      },
+    };
+
+    dataChannel.send(JSON.stringify(updateMessage));
+    console.log('[Realtime] ✅ Instructions updated');
+  };
+
+  return { pc, mic, dataChannel, stop, reconnect, updateInstructions };
 }

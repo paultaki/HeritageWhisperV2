@@ -256,7 +256,9 @@ export function MemoryOverlay({
   };
 
   const handleEdit = () => {
-    router.push(`/review/book-style?id=${story.id}`);
+    // Return to book at this story's year after editing
+    const returnPath = `/book?year=${story.storyYear}`;
+    router.push(`/review/book-style?id=${story.id}&returnPath=${encodeURIComponent(returnPath)}`);
   };
 
   const handleShare = () => {

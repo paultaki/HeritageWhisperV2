@@ -12,7 +12,7 @@ import {
   extractQAPairs,
 } from "@/lib/conversationModeIntegration";
 import { useRecordingState } from "@/contexts/RecordingContext";
-import { useRealtimeInterview, PEARL_INSTRUCTIONS } from "@/hooks/use-realtime-interview";
+import { useRealtimeInterview, PEARL_WITNESS_INSTRUCTIONS } from "@/hooks/use-realtime-interview";
 import { Mic, Square, Volume2, VolumeX } from "lucide-react";
 
 export type MessageType =
@@ -77,7 +77,7 @@ export default function InterviewChatV2Page() {
   }, [stopRecordingState, stopSession]);
 
   // Initialize conversation after welcome dismissed
-  const handleWelcomeDismiss = () => {
+  const handleWelcomeDismiss = async () => {
     setShowWelcome(false);
     startRecordingState('conversation');
 
@@ -85,34 +85,32 @@ export default function InterviewChatV2Page() {
     const greeting: Message = {
       id: `msg-${Date.now()}`,
       type: 'system',
-      content: `Welcome, ${user?.name?.split(' ')[0] || 'friend'}! I'm Pearl, your Heritage Whisper guide. Click the microphone when you're ready to share a story.`,
+      content: `Welcome, ${user?.name?.split(' ')[0] || 'friend'}! I'm Pearl, your Heritage Whisper guide. I'm listening - just start talking when you're ready!`,
       timestamp: new Date(),
       sender: 'system',
     };
 
     setMessages([greeting]);
-  };
 
-  // Start recording with Realtime API
-  const handleStartRecording = async () => {
+    // Start Realtime session immediately (continuous conversation)
+    setIsRecording(true);
+    startTimeRef.current = Date.now();
+
+    // Update duration timer
+    timerRef.current = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      setRecordingDuration(elapsed);
+    }, 1000);
+
+    // Start continuous conversation session
     try {
-      setIsRecording(true);
-      startTimeRef.current = Date.now();
-
-      // Update duration timer
-      timerRef.current = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
-        setRecordingDuration(elapsed);
-      }, 1000);
-
-      // Start Realtime session with conversational AI configuration
       await startSession(
         (finalText) => {
           // Handle final user transcript
           console.log('[InterviewChatV2] User transcript:', finalText);
 
           const userMessage: Message = {
-            id: `msg-${Date.now()}`,
+            id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             type: 'audio-response',
             content: finalText,
             timestamp: new Date(),
@@ -124,28 +122,55 @@ export default function InterviewChatV2Page() {
         (error) => {
           console.error('[InterviewChatV2] Realtime error:', error);
           alert(`Realtime API error: ${error.message}`);
-          handleStopRecording();
         },
         {
-          // Enable conversational AI with Pearl's personality
-          instructions: PEARL_INSTRUCTIONS,
+          // Enable conversational AI with PEARLS v1.1 Witness system
+          instructions: PEARL_WITNESS_INSTRUCTIONS,
           modalities: ['text', 'audio'],
           voice: 'alloy',
-          temperature: 0.8,
+          temperature: 0.6, // Minimum allowed by Realtime API (was 0.5 but API requires ≥ 0.6)
+        },
+        (assistantText) => {
+          // Handle Pearl's response
+          console.log('[InterviewChatV2] Pearl said:', assistantText);
+
+          // Check if this is the "composing" signal
+          if (assistantText === '__COMPOSING__') {
+            console.log('[InterviewChatV2] Pearl is composing...');
+            // Add typing indicator
+            const typingMessage: Message = {
+              id: 'typing-indicator',
+              type: 'typing',
+              content: '',
+              timestamp: new Date(),
+              sender: 'hw',
+            };
+            setMessages(prev => [...prev, typingMessage]);
+          } else {
+            // Remove typing indicator if present, then add actual message
+            setMessages(prev => {
+              const withoutTyping = prev.filter(m => m.id !== 'typing-indicator');
+              const pearlMessage: Message = {
+                id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                type: 'question',
+                content: assistantText,
+                timestamp: new Date(),
+                sender: 'hw',
+              };
+              return [...withoutTyping, pearlMessage];
+            });
+          }
         }
       );
     } catch (error) {
-      console.error('[InterviewChatV2] Failed to start recording:', error);
+      console.error('[InterviewChatV2] Failed to start session:', error);
       alert('Failed to start voice session. Please try again.');
       setIsRecording(false);
-      setRecordingDuration(0);
     }
   };
 
-  // Stop recording
-  const handleStopRecording = () => {
-    const duration = Math.floor((Date.now() - startTimeRef.current) / 1000);
-
+  // End conversation (stop session)
+  const handleEndConversation = () => {
     // Clean up timer
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -159,7 +184,7 @@ export default function InterviewChatV2Page() {
     const mixedBlob = getMixedAudioBlob();
     stopSession();
 
-    console.log('[InterviewChatV2] Recording stopped. Mixed audio:', mixedBlob?.size || 0, 'bytes');
+    console.log('[InterviewChatV2] Conversation ended. Mixed audio:', mixedBlob?.size || 0, 'bytes');
   };
 
   // Complete interview
@@ -247,7 +272,7 @@ export default function InterviewChatV2Page() {
               priority
             />
             <p className="text-lg font-medium text-gray-600">Conversational Interview (V2)</p>
-            {messages.some(m => m.type === 'audio-response') && (
+            {isRecording && (
               <button
                 onClick={handleCompleteInterview}
                 className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-semibold px-5 py-2 sm:px-6 sm:py-3 rounded-full text-sm transition-all shadow-md"
@@ -303,31 +328,16 @@ export default function InterviewChatV2Page() {
             )}
           </div>
 
-          {/* Recording Controls */}
+          {/* Conversation Status */}
           <div className="flex items-center justify-center gap-3">
-            {!isRecording ? (
-              <button
-                onClick={handleStartRecording}
-                disabled={realtimeStatus === 'connecting'}
-                className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-semibold transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Mic className="w-5 h-5" />
-                {realtimeStatus === 'connecting' ? 'Connecting...' : 'Start Speaking'}
-              </button>
-            ) : (
-              <>
-                <div className="flex-1 text-center">
-                  <p className="text-sm text-gray-600 mb-1">Recording...</p>
-                  <p className="text-2xl font-mono font-bold text-red-600">{formatTime(recordingDuration)}</p>
+            {isRecording && (
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                  <p className="text-sm font-medium">Conversation Active</p>
                 </div>
-                <button
-                  onClick={handleStopRecording}
-                  className="flex items-center gap-2 px-6 py-3 rounded-full bg-red-500 hover:bg-red-600 text-white font-semibold transition-all shadow-md"
-                >
-                  <Square className="w-5 h-5" />
-                  Stop
-                </button>
-              </>
+                <p className="text-xs text-gray-500 tabular-nums">{formatTime(recordingDuration)}</p>
+              </div>
             )}
           </div>
 

@@ -15,42 +15,63 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { startRealtime, RealtimeHandles, RealtimeConfig } from '@/lib/realtimeClient';
 import { startMixedRecorder } from '@/lib/mixedRecorder';
+import { shouldCancelResponse } from '@/lib/responseTrimmer';
+import { sanitizeResponse } from '@/lib/responseSanitizer';
 
 export type RealtimeStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
-// Pearl's conversational AI instructions for V2
-export const PEARL_INSTRUCTIONS = `You are Pearl, a warm and empathetic interview guide for Heritage Whisper, helping seniors capture their life stories.
+// Pearl's PEARLS v1.1 Witness Instructions - No opinions, pure listening
+export const PEARL_WITNESS_INSTRUCTIONS = `You are Pearl, a patient witness who helps people record vivid life memories in HeritageWhisper.
 
-Your role:
-- After the user shares something, ask ONE brief follow-up question (10-20 words max)
-- Dig deeper into emotions, sensory details, relationships, or lessons learned
-- Show you're actively listening by referencing what they just said
-- Be warm, curious, and respectful - never rush them
+HARD RULES (NEVER VIOLATE):
+- No opinions, judgments, advice, decisions, or therapy. If asked, decline: "I'm here to listen and ask questions that help you tell your story."
+- One question per turn. Use at most two short sentences total before your question.
+- Stay on topic. If user wanders, steer back gently.
+- Consent ladder for sensitive topics (death, major illness, addiction, abuse, finances, recent loss): Ask permission first and offer to skip. Example: "Would you be comfortable sharing about that, or would you prefer to skip ahead?"
+- Never role-play as objects or body parts. Qualify ambiguous nouns: say "wooden chest" not "chest", "storage trunk" not "trunk".
+- Plain conversational text only. No lists, no bullet points, no JSON, no code blocks.
 
-Good questions explore:
-- "How did that make you feel?"
-- "What do you remember most vividly about that moment?"
-- "What did that teach you about yourself?"
-- "Who else was there, and how did they react?"
+YOUR APPROACH (SENSORY-FIRST):
+- Default to sensory prompts: "What did the air feel like?" "What color was the light?" "What sounds do you remember?"
+- If energy rises, follow that thread. If energy drops, pivot to a new sensory angle.
+- Use people/places/objects only when sensory questions plateau.
+- When referencing earlier stories, explain the connection: "Earlier you told me about {title}... [question]"
+- When story feels complete, confirm and suggest wrapping up.
 
-Keep it conversational and natural. One question at a time.`;
+SENSORY PROMPT EXAMPLES:
+- What did the air feel like right then?
+- What color was the light in that room?
+- What did your shoes sound like on that floor?
+- What taste or smell takes you back to that moment?
+- If I stood there, what would I see first?
+- What did your hands touch most in that place?
+
+Keep it warm, curious, respectful. Never rush them.`;
+
+// Legacy export for backwards compatibility
+export const PEARL_INSTRUCTIONS = PEARL_WITNESS_INSTRUCTIONS;
 
 export function useRealtimeInterview() {
   const [status, setStatus] = useState<RealtimeStatus>('disconnected');
   const [provisionalTranscript, setProvisionalTranscript] = useState('');
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true); // Enable voice by default for V2
   const [error, setError] = useState<string | null>(null);
 
   const realtimeHandlesRef = useRef<RealtimeHandles | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const mixedRecorderRef = useRef<{ stop: () => void } | null>(null);
   const mixedAudioBlobRef = useRef<Blob | null>(null);
+  const assistantResponseRef = useRef<string>(''); // Track accumulated response for trimming
+  const cancelSentRef = useRef<boolean>(false); // Track if cancel already sent for this response
+  const pendingAssistantResponseRef = useRef<string | null>(null); // Buffer Pearl's response until user transcript arrives
+  const waitingForUserTranscriptRef = useRef<boolean>(false); // Track if we're waiting for user transcript
 
   // Start Realtime session
   const startSession = useCallback(async (
     onTranscriptFinal: (text: string) => void,
     onError?: (error: Error) => void,
-    config?: RealtimeConfig
+    config?: RealtimeConfig,
+    onAssistantResponse?: (text: string) => void
   ) => {
     try {
       setStatus('connecting');
@@ -67,17 +88,72 @@ export function useRealtimeInterview() {
           console.log('[RealtimeInterview] Final transcript:', text);
           setProvisionalTranscript(''); // Clear provisional
           onTranscriptFinal(text);
+
+          // After user transcript arrives, flush any buffered Pearl response with thoughtful delay
+          if (pendingAssistantResponseRef.current) {
+            console.log('[RealtimeInterview] Flushing buffered Pearl response:', pendingAssistantResponseRef.current);
+
+            // Calculate "thinking" delay based on user message length
+            // Longer messages = Pearl takes more time to process and respond thoughtfully
+            const wordCount = text.split(/\s+/).length;
+            const baseDelay = 800; // Minimum delay (ms)
+            const perWordDelay = 60; // Additional ms per word
+            const maxDelay = 2500; // Cap at 2.5 seconds
+            const thinkingDelay = Math.min(baseDelay + (wordCount * perWordDelay), maxDelay);
+
+            console.log('[RealtimeInterview] Pearl composing response... (delay:', thinkingDelay, 'ms for', wordCount, 'words)');
+
+            // Show "composing" indicator first, then flush response after delay
+            if (onAssistantResponse) {
+              // Signal that Pearl is composing (caller will show typing indicator)
+              onAssistantResponse('__COMPOSING__');
+
+              // After thoughtful delay, show actual response
+              setTimeout(() => {
+                if (onAssistantResponse && pendingAssistantResponseRef.current) {
+                  onAssistantResponse(pendingAssistantResponseRef.current);
+                  pendingAssistantResponseRef.current = null;
+                }
+              }, thinkingDelay);
+            }
+          }
+          waitingForUserTranscriptRef.current = false;
         },
 
         // Assistant audio output (voice mode + mixed recording)
         onAssistantAudio: (stream) => {
           // Play audio if voice enabled
-          if (voiceEnabled && !audioElementRef.current) {
-            console.log('[RealtimeInterview] Playing assistant audio');
-            const audio = new Audio();
-            audio.srcObject = stream;
-            audio.play().catch(err => console.error('Audio play failed:', err));
-            audioElementRef.current = audio;
+          if (voiceEnabled) {
+            console.log('[RealtimeInterview] Playing assistant audio, voice enabled:', voiceEnabled);
+
+            // Only create audio element ONCE per session (not per response)
+            if (!audioElementRef.current) {
+              console.log('[RealtimeInterview] Creating audio element for session');
+              const audio = new Audio();
+              audio.autoplay = true;
+              audio.srcObject = stream;
+
+              // Log stream details for debugging
+              console.log('[RealtimeInterview] Stream active:', stream.active);
+              console.log('[RealtimeInterview] Audio tracks:', stream.getAudioTracks().map(t => ({
+                id: t.id,
+                enabled: t.enabled,
+                muted: t.muted,
+                readyState: t.readyState
+              })));
+
+              audio.play().then(() => {
+                console.log('[RealtimeInterview] ✅ Audio playback started successfully');
+              }).catch(err => {
+                console.error('[RealtimeInterview] ❌ Audio play failed:', err);
+                console.error('[RealtimeInterview] Stream tracks:', stream.getTracks());
+              });
+              audioElementRef.current = audio;
+            } else {
+              console.log('[RealtimeInterview] Audio element already exists, reusing it');
+            }
+          } else {
+            console.log('[RealtimeInterview] Voice disabled, skipping audio playback');
           }
 
           // Start mixed recorder if we have mic stream (use ref to access handles)
@@ -98,12 +174,64 @@ export function useRealtimeInterview() {
           }, 100);
         },
 
+        // Assistant text streaming (for response trimming)
+        onAssistantTextDelta: (text) => {
+          assistantResponseRef.current += text;
+          console.log('[RealtimeInterview] Assistant delta:', text, '(total:', assistantResponseRef.current.length, 'chars)');
+
+          // Check if we should cancel due to exceeding trim threshold (only send cancel once)
+          if (!cancelSentRef.current && shouldCancelResponse(assistantResponseRef.current)) {
+            console.log('[RealtimeInterview] ⚠️ Response exceeded trim threshold, sending cancel...');
+            if (realtimeHandlesRef.current?.dataChannel) {
+              realtimeHandlesRef.current.dataChannel.send(JSON.stringify({
+                type: 'response.cancel'
+              }));
+              cancelSentRef.current = true;
+            }
+          }
+        },
+
+        onAssistantTextDone: () => {
+          const fullResponse = assistantResponseRef.current;
+          console.log('[RealtimeInterview] Assistant response complete:', fullResponse);
+
+          // Sanitize response for PEARLS v1.1 compliance
+          const result = sanitizeResponse(fullResponse);
+          if (!result.isValid) {
+            console.warn('[RealtimeInterview] ⚠️ Sanitization violations:', result.violations);
+            // Log violations but don't block (audio already played)
+            // In future, could send feedback to improve model behavior
+          }
+
+          // Check if we're waiting for user transcript
+          if (waitingForUserTranscriptRef.current) {
+            console.log('[RealtimeInterview] Buffering Pearl response until user transcript arrives');
+            pendingAssistantResponseRef.current = fullResponse;
+          } else {
+            // Send complete response to caller immediately (for display in chat)
+            if (fullResponse && onAssistantResponse) {
+              // No artificial delay here - delay is applied when flushing buffered response
+              onAssistantResponse(fullResponse);
+            }
+          }
+
+          // Reset for next response
+          assistantResponseRef.current = '';
+          cancelSentRef.current = false; // Reset cancel flag for next response
+        },
+
         // Barge-in: Pause audio when user speaks
         onSpeechStarted: () => {
           console.log('[RealtimeInterview] User speech started - pausing assistant');
           if (audioElementRef.current) {
             audioElementRef.current.pause();
           }
+        },
+
+        // User stopped speaking - set buffering flag for message ordering
+        onSpeechStopped: () => {
+          console.log('[RealtimeInterview] User stopped speaking - expecting transcript soon');
+          waitingForUserTranscriptRef.current = true;
         },
 
         // Connection established
@@ -176,6 +304,7 @@ export function useRealtimeInterview() {
 
     setStatus('disconnected');
     setProvisionalTranscript('');
+    assistantResponseRef.current = ''; // Reset accumulated response
   }, []);
 
   // Toggle voice output
@@ -195,6 +324,15 @@ export function useRealtimeInterview() {
     };
   }, [stopSession]);
 
+  // Update instructions dynamically (session.update)
+  const updateInstructions = useCallback((instructions: string) => {
+    if (realtimeHandlesRef.current) {
+      realtimeHandlesRef.current.updateInstructions(instructions);
+    } else {
+      console.warn('[RealtimeInterview] Cannot update instructions - no active session');
+    }
+  }, []);
+
   return {
     status,
     provisionalTranscript,
@@ -205,5 +343,6 @@ export function useRealtimeInterview() {
     toggleVoice,
     startMixedRecording,
     getMixedAudioBlob,
+    updateInstructions,
   };
 }
