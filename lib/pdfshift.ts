@@ -22,6 +22,8 @@ export interface PDFShiftOptions {
   };
   timeout?: number;
   waitFor?: number;
+  javascript?: boolean; // Enable JS execution (needed for React apps)
+  delay?: number; // Additional delay after page load (ms)
 }
 
 export class PDFShiftClient {
@@ -58,22 +60,28 @@ export class PDFShiftClient {
     try {
       const body: any = {
         source: options.url,
-        landscape: options.landscape || false,
-        format: options.format || 'Letter',
         use_print: true, // Use CSS @media print styles
-        wait_for: options.waitFor || 2000, // Wait for page to render (ms)
-        timeout: options.timeout || 30000, // Max wait time (ms)
+        delay: options.delay || 2000, // Additional delay after page load (ms)
       };
 
-      // Add custom dimensions if provided
+      // Format: either standard (Letter, A4, etc) or custom (11inx8.5in)
       if (options.width && options.height) {
-        body.format = {
-          width: options.width,
-          height: options.height,
-        };
+        // Custom dimensions using format: {width}x{height}
+        // Remove any spaces and combine with 'x'
+        const width = options.width.replace(/\s/g, '');
+        const height = options.height.replace(/\s/g, '');
+        body.format = `${width}x${height}`;
+      } else {
+        // Standard format (Letter, Legal, A4, etc)
+        body.format = options.format || 'Letter';
       }
 
-      // Add margins if provided
+      // Landscape orientation
+      if (options.landscape) {
+        body.landscape = true;
+      }
+
+      // Margins
       if (options.margin) {
         body.margin = options.margin;
       }

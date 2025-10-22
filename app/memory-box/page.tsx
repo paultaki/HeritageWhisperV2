@@ -18,6 +18,7 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useModeSelection } from "@/hooks/use-mode-selection";
+import { useAccountContext } from "@/hooks/use-account-context";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
 import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 import MemoryToolbar from "@/components/ui/MemoryToolbar";
@@ -142,17 +143,25 @@ export default function MemoryBoxPage() {
     new Set(),
   );
 
+  // V3: Get active storyteller context for family sharing
+  const { activeContext } = useAccountContext();
+  const storytellerId = activeContext?.storytellerId || user?.id;
+
   const {
     data: stories = [],
     isLoading,
     refetch,
   } = useQuery<Story[]>({
-    queryKey: ["/api/stories", session?.access_token],
+    queryKey: ["/api/stories", storytellerId, session?.access_token],
     queryFn: async () => {
       const token = session?.access_token;
       if (!token) throw new Error("No authentication token");
 
-      const response = await fetch("/api/stories", {
+      const url = storytellerId
+        ? `/api/stories?storyteller_id=${storytellerId}`
+        : "/api/stories";
+
+      const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -160,7 +169,7 @@ export default function MemoryBoxPage() {
       const data = await response.json();
       return data.stories || [];
     },
-    enabled: !!session?.access_token && !!user,
+    enabled: !!session?.access_token && !!user && !!storytellerId,
   });
 
   const updateStory = useMutation({

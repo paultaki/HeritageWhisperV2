@@ -42,6 +42,7 @@ import { useState, useEffect, useRef } from "react";
 import { normalizeYear, formatYear } from "@/lib/utils";
 import StoryTraits from "@/components/StoryTraits";
 import { getTopTraits } from "@/utils/getTopTraits";
+import { useAccountContext } from "@/hooks/use-account-context";
 
 const logoUrl = "/HW_logo_mic_clean.png";
 
@@ -768,17 +769,24 @@ export function TimelineDesktop() {
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [overlayOpen, setOverlayOpen] = useState(false);
 
+  // V3: Get active storyteller context for family sharing
+  const { activeContext } = useAccountContext();
+  const storytellerId = activeContext?.storytellerId || user?.id;
+
   const {
     data: storiesData,
     isLoading: isStoriesLoading,
     error: storiesError,
   } = useQuery({
-    queryKey: ["stories"],
+    queryKey: ["stories", storytellerId], // Include storytellerId in query key
     queryFn: async () => {
-      const res = await apiRequest("GET", getApiUrl("/api/stories"));
+      const url = storytellerId
+        ? `${getApiUrl("/api/stories")}?storyteller_id=${storytellerId}`
+        : getApiUrl("/api/stories");
+      const res = await apiRequest("GET", url);
       return res.json();
     },
-    enabled: !!user,
+    enabled: !!user && !!storytellerId,
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
     gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes even when unmounted
     placeholderData: keepPreviousData, // Keep showing old data while refetching to prevent flash
@@ -1025,10 +1033,10 @@ export function TimelineDesktop() {
         {/* Title Section */}
         <div className="text-center mb-[114px]" style={{ transform: 'translateX(-115px)' }}>
           <h2 className="text-5xl md:text-7xl font-light tracking-tight mb-6" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>
-            {user?.name ? `${user.name}'s Journey` : "Life's Journey"}
+            {activeContext?.storytellerName ? `${activeContext.storytellerName}'s Journey` : "Life's Journey"}
           </h2>
           <p className="text-xl max-w-2xl mx-auto text-center" style={{ color: isDark ? '#8a8d92' : '#4b5563' }}>
-            A timeline of memories, moments, and milestones that shaped your life.
+            A timeline of memories, moments, and milestones that shaped {activeContext?.type === 'viewing' ? 'their' : 'your'} life.
           </p>
         </div>
 

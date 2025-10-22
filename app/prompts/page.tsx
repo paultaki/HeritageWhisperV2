@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
+import { useAccountContext } from "@/hooks/use-account-context";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 // Category prompts data
 const CATEGORY_PROMPTS: Record<string, string[]> = {
@@ -342,21 +346,48 @@ export default function PromptsV2Page() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [showSubmitQuestionDialog, setShowSubmitQuestionDialog] = useState(false);
+  const [questionText, setQuestionText] = useState("");
+
+  // V3: Get active storyteller context for family sharing
+  const { activeContext, isOwnAccount, canInvite } = useAccountContext();
+  const storytellerId = activeContext?.storytellerId || user?.id;
 
   // Fetch data (same queries as before)
   const { data: queuedData, isLoading: queuedLoading } = useQuery<{ prompts: QueuedPrompt[] }>({
-    queryKey: ["/api/prompts/queued"],
-    enabled: !!user,
+    queryKey: ["/api/prompts/queued", storytellerId],
+    queryFn: async () => {
+      const url = storytellerId
+        ? `/api/prompts/queued?storyteller_id=${storytellerId}`
+        : "/api/prompts/queued";
+      const res = await apiRequest("GET", url);
+      return res.json();
+    },
+    enabled: !!user && !!storytellerId,
   });
 
   const { data: activeData, isLoading: activeLoading } = useQuery<{ prompts: ActivePrompt[] }>({
-    queryKey: ["/api/prompts/active"],
-    enabled: !!user,
+    queryKey: ["/api/prompts/active", storytellerId],
+    queryFn: async () => {
+      const url = storytellerId
+        ? `/api/prompts/active?storyteller_id=${storytellerId}`
+        : "/api/prompts/active";
+      const res = await apiRequest("GET", url);
+      return res.json();
+    },
+    enabled: !!user && !!storytellerId,
   });
 
   const { data: familyData } = useQuery<{ prompts: FamilyPrompt[] }>({
-    queryKey: ["/api/prompts/family-submitted"],
-    enabled: !!user,
+    queryKey: ["/api/prompts/family-submitted", storytellerId],
+    queryFn: async () => {
+      const url = storytellerId
+        ? `/api/prompts/family-submitted?storyteller_id=${storytellerId}`
+        : "/api/prompts/family-submitted";
+      const res = await apiRequest("GET", url);
+      return res.json();
+    },
+    enabled: !!user && !!storytellerId,
     retry: false, // Don't retry if the endpoint doesn't exist
     meta: {
       errorHandler: false // Suppress error notifications
@@ -387,6 +418,39 @@ export default function PromptsV2Page() {
       toast({
         title: "Saved for later",
         description: "You can find this prompt in your saved section",
+      });
+    },
+  });
+
+  const submitQuestionMutation = useMutation({
+    mutationFn: async ({
+      storyteller_id,
+      prompt_text,
+    }: {
+      storyteller_id: string;
+      prompt_text: string;
+    }) => {
+      return apiRequest("POST", "/api/prompts/family-submit", {
+        storyteller_id,
+        prompt_text,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["/api/prompts/family-submitted", storytellerId],
+      });
+      toast({
+        title: "Question submitted!",
+        description: `Your question has been sent to ${activeContext?.storytellerName}`,
+      });
+      setShowSubmitQuestionDialog(false);
+      setQuestionText("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Unable to submit question",
+        description: error?.message || "Please try again",
+        variant: "destructive",
       });
     },
   });
@@ -455,15 +519,29 @@ export default function PromptsV2Page() {
                 </div>
               </div>
 
-              {/* Help button */}
-              <Button
-                variant="ghost"
-                size="lg"
-                onClick={() => setShowHelp(!showHelp)}
-                className="text-gray-600 hover:text-gray-900 flex-shrink-0"
-              >
-                <HelpCircle className="h-5 w-5" />
-              </Button>
+              <div className="flex items-center gap-2">
+                {/* Submit Question button for contributors viewing storyteller's prompts */}
+                {!isOwnAccount && canInvite && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => setShowSubmitQuestionDialog(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Submit Question
+                  </Button>
+                )}
+
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => setShowHelp(!showHelp)}
+                  className="text-gray-600 hover:text-gray-900 flex-shrink-0"
+                >
+                  <HelpCircle className="h-5 w-5" />
+                </Button>
+              </div>
             </div>
           </div>
         </header>
@@ -663,6 +741,75 @@ export default function PromptsV2Page() {
                 </motion.div>
               ))}
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Submit Question Dialog */}
+        <Dialog open={showSubmitQuestionDialog} onOpenChange={setShowSubmitQuestionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">
+                Submit a Question for {activeContext?.storytellerName}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="question" className="text-base font-medium">
+                  Your Question <span className="text-red-500">*</span>
+                </Label>
+                <Textarea
+                  id="question"
+                  placeholder="What question would you like them to answer?"
+                  value={questionText}
+                  onChange={(e) => setQuestionText(e.target.value)}
+                  className="min-h-[120px] text-base"
+                  maxLength={500}
+                />
+                <p className="text-sm text-gray-500">
+                  {questionText.length}/500 characters
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowSubmitQuestionDialog(false);
+                  setQuestionText("");
+                }}
+                disabled={submitQuestionMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (questionText.trim().length < 10) {
+                    toast({
+                      title: "Question too short",
+                      description: "Please write at least 10 characters",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  if (!storytellerId) {
+                    toast({
+                      title: "Error",
+                      description: "No storyteller selected",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  submitQuestionMutation.mutate({
+                    storyteller_id: storytellerId,
+                    prompt_text: questionText,
+                  });
+                }}
+                disabled={submitQuestionMutation.isPending}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {submitQuestionMutation.isPending ? "Submitting..." : "Submit Question"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </main>

@@ -47,11 +47,39 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // V3: Support storyteller_id query parameter for family sharing
+    const { searchParams } = new URL(request.url);
+    const storytellerId = searchParams.get('storyteller_id');
+    let targetUserId = user.id; // Default to own stories
+
+    // If requesting another storyteller's stories, verify access permission
+    if (storytellerId && storytellerId !== user.id) {
+      // Use RPC function to verify access
+      const { data: hasAccess, error: accessError } = await supabaseAdmin.rpc(
+        'has_collaboration_access',
+        {
+          p_user_id: user.id,
+          p_storyteller_id: storytellerId,
+        }
+      );
+
+      if (accessError || !hasAccess) {
+        logger.warn(`[Stories API] User ${user.id} denied access to ${storytellerId}'s stories`);
+        return NextResponse.json(
+          { error: "You don't have permission to view these stories" },
+          { status: 403 },
+        );
+      }
+
+      targetUserId = storytellerId;
+      logger.debug(`[Stories API] User ${user.id} viewing ${storytellerId}'s stories`);
+    }
+
     // Fetch stories from Supabase database
     const { data: stories, error: storiesError } = await supabaseAdmin
       .from("stories")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", targetUserId)
       .order("year", { ascending: false })
       .order("created_at", { ascending: false });
 

@@ -226,22 +226,46 @@ function PrintTrimPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Get userId from URL params or from session
+  // Get userId from URL params, print token, or session
   useEffect(() => {
     const userIdFromUrl = searchParams.get("userId");
-    
+    const printToken = searchParams.get("printToken");
+
+    // Priority 1: Use printToken (for PDFShift access)
+    if (printToken) {
+      console.log("[Print Trim] Validating print token...");
+      fetch(`/api/print-token/validate?token=${printToken}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.userId) {
+            console.log("[Print Trim] Using userId from print token:", data.userId);
+            setUserId(data.userId);
+          } else {
+            setError("Invalid or expired print token.");
+            setLoading(false);
+          }
+        })
+        .catch(err => {
+          console.error("[Print Trim] Token validation error:", err);
+          setError("Failed to validate print token.");
+          setLoading(false);
+        });
+      return;
+    }
+
+    // Priority 2: Use userId from URL (for direct access with auth)
     if (userIdFromUrl) {
       console.log("[Print Trim] Using userId from URL:", userIdFromUrl);
       setUserId(userIdFromUrl);
     } else {
-      // Get from Supabase session
+      // Priority 3: Get from Supabase session
       console.log("[Print Trim] No userId in URL, checking session...");
       import("@supabase/supabase-js").then(({ createClient }) => {
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL || "",
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
         );
-        
+
         supabase.auth.getSession().then(({ data: { session } }) => {
           if (session?.user?.id) {
             console.log("[Print Trim] Using userId from session:", session.user.id);

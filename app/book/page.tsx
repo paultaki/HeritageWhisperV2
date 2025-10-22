@@ -28,6 +28,7 @@ import {
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
 import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
+import { useAccountContext } from "@/hooks/use-account-context";
 import FloatingInsightCard from "@/components/FloatingInsightCard";
 import { useSwipeable } from "react-swipeable";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -739,10 +740,21 @@ export default function BookViewNew() {
   );
   const storyIdFromUrl = searchParams.get("storyId");
 
+  // V3: Get active storyteller context for family sharing
+  const { activeContext } = useAccountContext();
+  const storytellerId = activeContext?.storytellerId || user?.id;
+
   // Fetch stories - API returns { stories: [...] }
   const { data, isLoading } = useQuery<{ stories: Story[] }>({
-    queryKey: ["/api/stories"],
-    enabled: !!user,
+    queryKey: ["/api/stories", storytellerId], // Include storytellerId in query key
+    queryFn: async () => {
+      const url = storytellerId
+        ? `/api/stories?storyteller_id=${storytellerId}`
+        : "/api/stories";
+      const res = await apiRequest("GET", url);
+      return res.json();
+    },
+    enabled: !!user && !!storytellerId,
   });
 
   const stories = data?.stories || [];

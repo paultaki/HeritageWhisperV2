@@ -52,11 +52,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // V3: Support storyteller_id query parameter for family sharing
+    const { searchParams } = new URL(request.url);
+    const storytellerId = searchParams.get('storyteller_id') || user.id;
+
+    // If requesting another storyteller's prompts, verify access permission
+    if (storytellerId !== user.id) {
+      const { data: hasAccess, error: accessError } = await supabaseAdmin.rpc(
+        'has_collaboration_access',
+        {
+          p_user_id: user.id,
+          p_storyteller_id: storytellerId,
+        }
+      );
+
+      if (accessError || !hasAccess) {
+        return NextResponse.json(
+          { error: "You don't have permission to view these prompts" },
+          { status: 403 },
+        );
+      }
+    }
+
     // Fetch queued AI-generated prompts from active_prompts
     const { data: aiPrompts, error: aiError } = await supabaseAdmin
       .from("active_prompts")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", storytellerId)
       .eq("user_status", "queued")
       .order("queue_position", { ascending: true })
       .order("queued_at", { ascending: true });

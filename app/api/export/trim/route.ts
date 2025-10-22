@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { pdfshift } from "@/lib/pdfshift";
+import { generatePrintToken } from "@/lib/printToken";
 
 export const maxDuration = 60;
 export const runtime = "nodejs";
@@ -44,14 +45,29 @@ export async function POST(request: NextRequest) {
 
     logger.debug("[Export Trim] Auth successful, user:", user.id);
 
-    // Use actual domain when deployed, localhost for dev
+    // Generate a temporary print token (valid for 5 minutes)
+    const printToken = generatePrintToken(user.id);
+    logger.debug("[Export Trim] Generated print token for user:", user.id);
+
+    // Use actual domain when deployed
+    // PDFShift cannot access localhost - must use publicly accessible URL
+    // VERCEL_URL doesn't include protocol
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_SITE_URL ||
-        `http://127.0.0.1:${process.env.PORT || 3002}`;
+      : process.env.NEXT_PUBLIC_SITE_URL || 'https://dev.heritagewhisper.com';
 
-    const printUrl = `${baseUrl}/book/print/trim?userId=${user.id}`;
-    logger.debug("[Export Trim] Generating PDF from:", printUrl);
+    // Warn if using localhost (won't work with PDFShift)
+    if (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) {
+      logger.error('[Export Trim] Cannot use localhost with PDFShift. Set NEXT_PUBLIC_SITE_URL or deploy to test.');
+      return NextResponse.json(
+        { error: 'PDF export requires a publicly accessible URL. Please deploy to test this feature.' },
+        { status: 400 }
+      );
+    }
+
+    // Use print token instead of userId for secure, temporary access
+    const printUrl = `${baseUrl}/book/print/trim?printToken=${printToken}`;
+    logger.debug("[Export Trim] Generating PDF from:", printUrl.replace(printToken, 'TOKEN_REDACTED'));
 
     // Use PDFShift to generate PDF
     const pdf = await pdfshift.convertUrl({
@@ -65,8 +81,8 @@ export async function POST(request: NextRequest) {
         bottom: "0",
         left: "0",
       },
-      waitFor: 3000, // Wait 3s for React hydration and content rendering
-      timeout: 30000, // 30s max timeout
+      delay: 3000, // Wait 3s for React to hydrate and render
+      timeout: 60000, // 60s max timeout for large books
     });
 
     logger.debug("[Export Trim] PDF generated successfully");
