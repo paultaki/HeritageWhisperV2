@@ -1,26 +1,29 @@
 "use client";
 
-import { useState, useRef, useEffect, Suspense } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { WelcomeModal } from "../interview-chat/components/WelcomeModal";
-import { ChatMessage } from "../interview-chat/components/ChatMessage";
-import { TypingIndicator } from "../interview-chat/components/TypingIndicator";
+import { WelcomeModal } from "./components/WelcomeModal";
+import { ChatMessage } from "./components/ChatMessage";
+import { QuestionOptions } from "./components/QuestionOptions";
+import { TypingIndicator } from "./components/TypingIndicator";
+import { ChatInput } from "./components/ChatInput";
+import { StorySplitModal } from "./components/StorySplitModal";
 import {
   completeConversationAndRedirect,
   extractQAPairs,
+  combineAudioBlobs,
 } from "@/lib/conversationModeIntegration";
 import { useRecordingState } from "@/contexts/RecordingContext";
-import { useRealtimeInterview, PEARL_WITNESS_INSTRUCTIONS } from "@/hooks/use-realtime-interview";
-import { Mic, Square, Volume2, VolumeX, MessageSquare } from "lucide-react";
 
 export type MessageType =
   | 'system'
   | 'question'
   | 'audio-response'
   | 'text-response'
-  | 'typing';
+  | 'typing'
+  | 'question-options';
 
 export type Message = {
   id: string;
@@ -30,88 +33,42 @@ export type Message = {
   audioDuration?: number;
   timestamp: Date;
   sender: 'hw' | 'user' | 'system';
+  options?: string[];
+  selectedOption?: number;
 };
 
-function InterviewChatV2Content() {
+export type AudioState = {
+  chunks: Blob[];
+  fullTranscript: string;
+};
+
+export default function InterviewChatPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { startRecording: startRecordingState, stopRecording: stopRecordingState } = useRecordingState();
+  const { startRecording, stopRecording } = useRecordingState();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showWelcome, setShowWelcome] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingDuration, setRecordingDuration] = useState(0);
-  const [isMicMuted, setIsMicMuted] = useState(false);
-  const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
-  const [textInput, setTextInput] = useState('');
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number>(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [followUpCount, setFollowUpCount] = useState(0);
+  const [showStorySplit, setShowStorySplit] = useState(false);
 
-  // Check for prompt question in URL params
-  const promptQuestion = searchParams.get('prompt');
+  // Session timer state
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
+  const [sessionDuration, setSessionDuration] = useState(0); // in seconds
+  const [showTimeWarning, setShowTimeWarning] = useState(false);
+  const sessionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Handler for sending text messages
-  const handleSendTextMessage = () => {
-    if (!textInput.trim()) return;
+  // Check if Realtime API is enabled
+  const isRealtimeEnabled = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true';
 
-    console.log('[InterviewChatV2] Sending text message:', textInput);
+  // Audio state for tracking full conversation transcript
+  const [audioState, setAudioState] = useState<AudioState>({
+    chunks: [],
+    fullTranscript: '',
+  });
 
-    const messageText = textInput;
-
-    // Add user message to chat immediately
-    const userMessage: Message = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type: 'text-response',
-      content: messageText,
-      timestamp: new Date(),
-      sender: 'user',
-    };
-    setMessages(prev => [...prev, userMessage]);
-
-    setTextInput(''); // Clear input immediately
-
-    // Calculate thoughtful delay based on message length
-    const wordCount = messageText.split(/\s+/).length;
-    const baseDelay = 800;
-    const perWordDelay = 60;
-    const maxDelay = 2500;
-    const thinkingDelay = Math.min(baseDelay + (wordCount * perWordDelay), maxDelay);
-
-    console.log('[InterviewChatV2] Pearl composing... (delay:', thinkingDelay, 'ms for', wordCount, 'words)');
-
-    // Show composing indicator first
-    const typingMessage: Message = {
-      id: 'typing-indicator',
-      type: 'typing',
-      content: '',
-      timestamp: new Date(),
-      sender: 'hw',
-    };
-    setMessages(prev => [...prev, typingMessage]);
-
-    // Send text to Realtime API after delay (so Pearl has time to "think")
-    setTimeout(() => {
-      sendTextMessage(messageText);
-    }, thinkingDelay);
-  };
-
-  // Realtime API integration
-  const {
-    status: realtimeStatus,
-    provisionalTranscript,
-    voiceEnabled,
-    error: realtimeError,
-    startSession,
-    stopSession,
-    toggleVoice,
-    toggleMic,
-    getMixedAudioBlob,
-    sendTextMessage,
-    triggerPearlResponse,
-  } = useRealtimeInterview();
-
-  // Redirect if not authenticated
+  // Redirect if not authenticated (only after loading completes)
   useEffect(() => {
     if (!isLoading && !user) {
       router.push('/auth/login');
@@ -123,191 +80,466 @@ function InterviewChatV2Content() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Session timer - starts when welcome is dismissed
+  useEffect(() => {
+    if (sessionStartTime) {
+      // Update timer every second
+      sessionTimerRef.current = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+        setSessionDuration(elapsed);
+
+        // Show warning at 25 minutes (1500 seconds)
+        if (elapsed === 1500) {
+          setShowTimeWarning(true);
+        }
+
+        // Auto-complete at 30 minutes (1800 seconds)
+        if (elapsed >= 1800) {
+          console.log('[Session] 30-minute limit reached, auto-completing interview');
+          handleCompleteInterview();
+        }
+      }, 1000);
+
+      return () => {
+        if (sessionTimerRef.current) {
+          clearInterval(sessionTimerRef.current);
+        }
+      };
+    }
+  }, [sessionStartTime]);
+
   // Clean up recording state on unmount
   useEffect(() => {
     return () => {
-      stopRecordingState();
-      stopSession();
+      // Stop recording if user navigates away
+      stopRecording();
+      if (sessionTimerRef.current) {
+        clearInterval(sessionTimerRef.current);
+      }
     };
-  }, [stopRecordingState, stopSession]);
+  }, [stopRecording]);
 
   // Initialize conversation after welcome dismissed
-  const handleWelcomeDismiss = async () => {
+  const handleWelcomeDismiss = () => {
     setShowWelcome(false);
-    startRecordingState('conversation');
+
+    // Start session timer
+    setSessionStartTime(Date.now());
+
+    // Start recording state for the interview
+    startRecording('conversation');
 
     // Add initial greeting
     const greeting: Message = {
       id: `msg-${Date.now()}`,
       type: 'system',
-      content: `Welcome, ${user?.name?.split(' ')[0] || 'friend'}! I'm Pearl, your Heritage Whisper guide. ${promptQuestion ? 'I have a question for you!' : 'Let me ask you a question to get started.'}`,
+      content: `Welcome, ${user?.name?.split(' ')[0] || 'friend'}! I'm Pearl, your Heritage Whisper guide. Let's begin your interview.`,
       timestamp: new Date(),
       sender: 'system',
     };
 
     setMessages([greeting]);
 
-    // Start Realtime session immediately (continuous conversation)
-    setIsRecording(true);
-    startTimeRef.current = Date.now();
-
-    // Update duration timer
-    timerRef.current = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      setRecordingDuration(elapsed);
-    }, 1000);
-
-    // Build instructions with prompt question if provided
-    let sessionInstructions = PEARL_WITNESS_INSTRUCTIONS;
-    if (promptQuestion) {
-      sessionInstructions = `${PEARL_WITNESS_INSTRUCTIONS}
-
-IMPORTANT OPENING INSTRUCTION:
-Your FIRST message must be asking this specific question (do NOT greet first, jump straight to the question):
-"${promptQuestion}"
-
-After they answer, continue the conversation naturally with follow-up questions based on their response.`;
-    }
-
-    // Start continuous conversation session
-    try {
-      await startSession(
-        (finalText) => {
-          // Handle final user transcript
-          console.log('[InterviewChatV2] User transcript:', finalText);
-
-          const userMessage: Message = {
-            id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            type: 'audio-response',
-            content: finalText,
-            timestamp: new Date(),
-            sender: 'user',
-          };
-
-          setMessages(prev => [...prev, userMessage]);
-        },
-        (error) => {
-          console.error('[InterviewChatV2] Realtime error:', error);
-          alert(`Realtime API error: ${error.message}`);
-        },
-        {
-          // Enable conversational AI with PEARLS v1.1 Witness system
-          instructions: sessionInstructions,
-          modalities: ['text', 'audio'],
-          voice: 'alloy',
-          temperature: 0.6, // Minimum allowed by Realtime API (was 0.5 but API requires ≥ 0.6)
-        },
-        (assistantText) => {
-          // Handle Pearl's response
-          console.log('[InterviewChatV2] Pearl said:', assistantText);
-
-          // Check if this is the "composing" signal
-          if (assistantText === '__COMPOSING__') {
-            console.log('[InterviewChatV2] Pearl is composing...');
-            // Add typing indicator
-            const typingMessage: Message = {
-              id: 'typing-indicator',
-              type: 'typing',
-              content: '',
-              timestamp: new Date(),
-              sender: 'hw',
-            };
-            setMessages(prev => [...prev, typingMessage]);
-          } else {
-            // Remove typing indicator if present, then add actual message
-            setMessages(prev => {
-              const withoutTyping = prev.filter(m => m.id !== 'typing-indicator');
-              const pearlMessage: Message = {
-                id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                type: 'question',
-                content: assistantText,
-                timestamp: new Date(),
-                sender: 'hw',
-              };
-              return [...withoutTyping, pearlMessage];
-            });
-          }
-        }
-      );
-
-      // After session successfully starts, trigger Pearl to speak first
-      console.log('[InterviewChatV2] Session started, triggering Pearl to speak first...');
-      setTimeout(() => {
-        triggerPearlResponse();
-      }, 1500); // Delay to ensure WebRTC data channel is fully open
-    } catch (error) {
-      console.error('[InterviewChatV2] Failed to start session:', error);
-      alert('Failed to start voice session. Please try again.');
-      setIsRecording(false);
-    }
+    // Add first question after brief delay
+    setTimeout(() => {
+      addFirstQuestion();
+    }, 800);
   };
 
-  // End conversation (stop session)
-  const handleEndConversation = () => {
-    // Clean up timer
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
+  const addFirstQuestion = () => {
+    const firstQuestion: Message = {
+      id: `msg-${Date.now()}`,
+      type: 'question',
+      content: 'Tell me about a moment that changed how you saw yourself.',
+      timestamp: new Date(),
+      sender: 'hw',
+    };
 
-    setIsRecording(false);
-    setRecordingDuration(0);
-
-    // Stop Realtime session and get mixed audio
-    const mixedBlob = getMixedAudioBlob();
-    stopSession();
-
-    console.log('[InterviewChatV2] Conversation ended. Mixed audio:', mixedBlob?.size || 0, 'bytes');
+    setMessages(prev => [...prev, firstQuestion]);
   };
 
-  // Complete interview
-  const handleCompleteInterview = async () => {
-    const userResponses = messages.filter(m => m.type === 'audio-response');
+  // Handle transcript updates from Realtime API
+  const handleTranscriptUpdate = (text: string, isFinal: boolean) => {
+    if (isFinal) {
+      // Final transcript received - add as user message
+      const userMessage: Message = {
+        id: `msg-${Date.now()}`,
+        type: 'audio-response',
+        content: text,
+        timestamp: new Date(),
+        sender: 'user',
+      };
 
-    if (userResponses.length === 0) {
-      alert('Please answer at least one question before completing the interview.');
+      setMessages(prev => [...prev, userMessage]);
+
+      // Update full transcript
+      const updatedTranscript = audioState.fullTranscript + ' ' + text;
+      setAudioState(prev => ({
+        ...prev,
+        fullTranscript: updatedTranscript,
+      }));
+
+      // Show typing indicator and generate follow-up
+      addTypingIndicator();
+      setTimeout(async () => {
+        await generateFollowUpQuestions(updatedTranscript);
+      }, 1500);
+    }
+    // Provisional transcripts are displayed in ChatInput component
+  };
+
+  // Handle audio response (traditional mode or from Realtime API after stop)
+  const handleAudioResponse = async (audioBlob: Blob, duration: number) => {
+    if (isRealtimeEnabled) {
+      // In Realtime mode, transcripts are handled via handleTranscriptUpdate
+      // This is just called to store the audio blob for archival
+      console.log('[InterviewChat] Realtime audio blob received:', audioBlob.size, 'bytes');
       return;
     }
 
-    const confirmComplete = confirm(
-      `Complete this interview with ${userResponses.length} ${userResponses.length === 1 ? 'response' : 'responses'}?\n\n` +
-      'You\'ll be taken to review and finalize your story.'
-    );
+    // Traditional mode - add user's audio message to chat
+    const userMessage: Message = {
+      id: `msg-${Date.now()}`,
+      type: 'audio-response',
+      content: '', // Will be filled with transcript
+      audioBlob,
+      audioDuration: duration,
+      timestamp: new Date(),
+      sender: 'user',
+    };
 
-    if (!confirmComplete) return;
+    setMessages(prev => [...prev, userMessage]);
+    setIsProcessing(true);
 
-    // Extract Q&A pairs from messages
-    const qaPairs = extractQAPairs(messages);
+    try {
+      // Transcribe the COMPLETE audio blob (not sliced chunks)
+      // Slicing WebM creates invalid audio files - we need the full blob with headers
+      console.log('[HandleAudioResponse] Transcribing complete audio:', {
+        size: audioBlob.size,
+        type: audioBlob.type,
+        duration
+      });
 
-    // Get mixed audio blob
-    const mixedBlob = getMixedAudioBlob();
+      const transcription = await transcribeChunk(audioBlob);
 
-    // Combine all transcripts
-    const fullTranscript = userResponses.map(m => m.content).join(' ');
+      // Update full transcript by appending this response
+      const updatedTranscript = audioState.fullTranscript
+        ? audioState.fullTranscript + ' ' + transcription
+        : transcription;
 
-    const totalDuration = messages
-      .filter(m => m.audioDuration)
-      .reduce((sum, m) => sum + (m.audioDuration || 0), 0);
+      setAudioState(prev => ({
+        ...prev,
+        fullTranscript: updatedTranscript,
+        chunks: [...prev.chunks, audioBlob],
+      }));
 
-    // Complete conversation and redirect
-    await completeConversationAndRedirect({
-      qaPairs,
-      audioBlob: mixedBlob,
-      fullTranscript,
-      totalDuration,
+      // Update message with transcript
+      setMessages(prev => prev.map(msg =>
+        msg.id === userMessage.id
+          ? { ...msg, content: transcription }
+          : msg
+      ));
+
+      // Show typing indicator
+      addTypingIndicator();
+
+      // Generate follow-up questions
+      setTimeout(async () => {
+        await generateFollowUpQuestions(updatedTranscript);
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error processing audio:', error);
+
+      // Show error message to user
+      const errorMsg: Message = {
+        id: `error-${Date.now()}`,
+        type: 'ai-question',
+        content: error instanceof Error
+          ? `Sorry, there was an error transcribing your audio: ${error.message}. Please try recording again.`
+          : 'Sorry, there was an error processing your response. Please try again.',
+        timestamp: new Date(),
+        sender: 'ai',
+      };
+
+      setMessages(prev => {
+        // Remove typing indicator if present
+        const filtered = prev.filter(msg => msg.id !== 'typing');
+        return [...filtered, errorMsg];
+      });
+
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle text response
+  const handleTextResponse = async (text: string) => {
+    const userMessage: Message = {
+      id: `msg-${Date.now()}`,
+      type: 'text-response',
+      content: text,
+      timestamp: new Date(),
+      sender: 'user',
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setIsProcessing(true);
+
+    // Update transcript with text
+    const updatedTranscript = audioState.fullTranscript + ' ' + text;
+    setAudioState(prev => ({
+      ...prev,
+      fullTranscript: updatedTranscript,
+    }));
+
+    // Show typing indicator
+    addTypingIndicator();
+
+    // Generate follow-up questions
+    setTimeout(async () => {
+      await generateFollowUpQuestions(updatedTranscript);
+    }, 1500);
+  };
+
+  // Add typing indicator (only if not already present)
+  const addTypingIndicator = () => {
+    setMessages(prev => {
+      // Don't add if already showing typing indicator
+      if (prev.some(msg => msg.type === 'typing')) {
+        return prev;
+      }
+
+      const typingMsg: Message = {
+        id: `typing-${Date.now()}`, // Unique ID to prevent React key warnings
+        type: 'typing',
+        content: '',
+        timestamp: new Date(),
+        sender: 'hw',
+      };
+
+      return [...prev, typingMsg];
+    });
+  };
+
+  // Remove typing indicator
+  const removeTypingIndicator = () => {
+    setMessages(prev => prev.filter(msg => msg.type !== 'typing'));
+  };
+
+  // Transcribe audio blob
+  const transcribeChunk = async (audioBlob: Blob): Promise<string> => {
+    // Determine file extension based on MIME type
+    const mimeType = audioBlob.type;
+    let extension = 'webm';
+    if (mimeType.includes('mp4')) extension = 'mp4';
+    else if (mimeType.includes('mpeg')) extension = 'mpeg';
+    else if (mimeType.includes('wav')) extension = 'wav';
+    else if (mimeType.includes('ogg')) extension = 'ogg';
+
+    const formData = new FormData();
+    // Use the blob directly with proper file extension
+    formData.append('audio', audioBlob, `chunk.${extension}`);
+
+    console.log('[TranscribeChunk] Sending audio chunk:', {
+      size: audioBlob.size,
+      type: audioBlob.type,
     });
 
-    stopRecordingState();
+    const response = await fetch('/api/interview-test/transcribe-chunk', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      console.error('[TranscribeChunk] Failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+      });
+      throw new Error(`Transcription failed: ${errorData.error || response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('[TranscribeChunk] Success:', {
+      transcriptionLength: data.transcription?.length || 0,
+    });
+    return data.transcription;
   };
 
-  // Format recording time
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  // Generate follow-up questions
+  const generateFollowUpQuestions = async (fullTranscript: string) => {
+    try {
+      const response = await fetch('/api/interview-test/follow-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullTranscript,
+          followUpNumber: followUpCount + 1,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('[GenerateFollowUp] API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+        });
+        throw new Error(`Failed to generate follow-up: ${errorData.error || response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      removeTypingIndicator();
+
+      // Add question options
+      const optionsMessage: Message = {
+        id: `msg-${Date.now()}`,
+        type: 'question-options',
+        content: '',
+        options: data.questions || [data.followUp], // Support both new multi-question and old single
+        timestamp: new Date(),
+        sender: 'hw',
+      };
+
+      setMessages(prev => [...prev, optionsMessage]);
+      setFollowUpCount(prev => prev + 1);
+      setIsProcessing(false);
+
+      // Check if we should suggest story splitting (after 5+ exchanges)
+      if (followUpCount >= 4) {
+        setTimeout(() => {
+          checkStorySplit(fullTranscript);
+        }, 2000);
+      }
+
+    } catch (error) {
+      console.error('Error generating follow-up:', error);
+      removeTypingIndicator();
+      setIsProcessing(false);
+    }
   };
 
-  // Show loading state
+  // Handle question option selection
+  const handleQuestionSelect = (messageId: string, optionIndex: number, questionText: string) => {
+    // Immediately remove the question-options message for clean flow
+    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+
+    // Add selected question as new HW question with smooth transition
+    setTimeout(() => {
+      const newQuestion: Message = {
+        id: `msg-${Date.now()}`,
+        type: 'question',
+        content: questionText,
+        timestamp: new Date(),
+        sender: 'hw',
+      };
+
+      setMessages(prev => [...prev, newQuestion]);
+    }, 200); // Reduced delay for snappier feel
+  };
+
+  // Check if stories should be split
+  const checkStorySplit = async (fullTranscript: string) => {
+    try {
+      const response = await fetch('/api/interview-test/analyze-topics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullTranscript,
+          messages: messages.filter(m => m.type !== 'typing'),
+        }),
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (data.shouldSplit && data.stories?.length > 1) {
+        setShowStorySplit(true);
+      }
+    } catch (error) {
+      console.error('Error analyzing topics:', error);
+    }
+  };
+
+  // Complete interview and redirect to post-recording flow prototype
+  const handleCompleteInterview = async () => {
+    console.log('🎬 [Interview] handleCompleteInterview called');
+
+    try {
+      // Require at least one Q&A exchange
+      const userResponses = messages.filter(m =>
+        m.type === 'audio-response' || m.type === 'text-response'
+      );
+
+      console.log('📊 [Interview] User responses:', userResponses.length);
+
+      if (userResponses.length === 0) {
+        alert('Please answer at least one question before completing the interview.');
+        return;
+      }
+
+      // Confirm completion
+      const confirmComplete = confirm(
+        `Complete this interview with ${userResponses.length} ${userResponses.length === 1 ? 'response' : 'responses'}?\n\n` +
+        'You\'ll be taken to review and finalize your story.'
+      );
+
+      console.log('✅ [Interview] User confirmed:', confirmComplete);
+
+      if (!confirmComplete) return;
+
+      // Extract Q&A pairs from messages
+      console.log('🔍 [Interview] Extracting Q&A pairs from', messages.length, 'messages');
+      const qaPairs = extractQAPairs(messages);
+      console.log('📝 [Interview] Extracted Q&A pairs:', qaPairs.length);
+
+      // Collect all audio blobs (if any)
+      const audioBlobs = messages
+        .filter(m => m.audioBlob)
+        .map(m => m.audioBlob as Blob);
+
+      console.log('🎵 [Interview] Audio blobs found:', audioBlobs.length);
+
+      // Combine audio blobs if multiple
+      let combinedAudio: Blob | null = null;
+      if (audioBlobs.length > 0) {
+        console.log('🔄 [Interview] Combining audio blobs...');
+        combinedAudio = await combineAudioBlobs(audioBlobs);
+        console.log('✅ [Interview] Audio combined:', combinedAudio?.size, 'bytes');
+      }
+
+      // Calculate total duration
+      const totalDuration = messages
+        .filter(m => m.audioDuration)
+        .reduce((sum, m) => sum + (m.audioDuration || 0), 0);
+
+      console.log('⏱️  [Interview] Total duration:', totalDuration, 'seconds');
+      console.log('📄 [Interview] Full transcript length:', audioState.fullTranscript?.length || 0);
+
+      // Complete conversation and redirect
+      console.log('🚀 [Interview] Calling completeConversationAndRedirect...');
+      await completeConversationAndRedirect({
+        qaPairs,
+        audioBlob: combinedAudio,
+        fullTranscript: audioState.fullTranscript,
+        totalDuration,
+      });
+
+      console.log('✅ [Interview] completeConversationAndRedirect finished');
+
+      // Stop recording state when interview is completed
+      stopRecording();
+
+    } catch (error) {
+      console.error('❌ [Interview] Error completing interview:', error);
+      alert('Failed to complete interview. Please try again.');
+    }
+  };
+
+  // Show loading state while checking auth
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-page)' }}>
@@ -319,7 +551,10 @@ After they answer, continue the conversation naturally with follow-up questions 
     );
   }
 
-  if (!user) return null;
+  // Don't render if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-page)' }}>
@@ -331,29 +566,87 @@ After they answer, continue the conversation naturally with follow-up questions 
         />
       )}
 
-      {/* Chat Container */}
+      {/* Story Split Modal */}
+      {showStorySplit && (
+        <StorySplitModal
+          stories={[]} // Will be populated from API
+          onKeepTogether={() => setShowStorySplit(false)}
+          onSplit={() => {
+            setShowStorySplit(false);
+            // Handle split logic
+          }}
+        />
+      )}
+
+      {/* Chat Container - adjust height to account for bottom nav on mobile */}
       <div className="max-w-3xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 80px)', marginBottom: '80px' }}>
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-2 sm:py-4">
-          <div className="flex flex-col items-center gap-2">
-            <Image
-              src="/HW_text-compress.png"
-              alt="Heritage Whisper"
-              width={200}
-              height={50}
-              className="h-8 sm:h-10 w-auto"
-              priority
-            />
-            <p className="text-lg font-medium text-gray-600">Conversational Interview (V2)</p>
-            {isRecording && (
+          {/* Mobile Layout - stacked when complete button is visible */}
+          {messages.some(m => m.type === 'audio-response' || m.type === 'text-response') ? (
+            <div className="flex flex-col items-center gap-2">
+              <Image
+                src="/HW_text-compress.png"
+                alt="Heritage Whisper"
+                width={200}
+                height={50}
+                className="h-8 sm:h-10 w-auto"
+                priority
+              />
               <button
                 onClick={handleCompleteInterview}
-                className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-semibold px-5 py-2 sm:px-6 sm:py-3 rounded-full text-sm transition-all shadow-md"
+                disabled={isProcessing}
+                className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-semibold px-5 py-2 sm:px-6 sm:py-3 rounded-full text-sm transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                style={{ minHeight: '36px' }}
               >
                 Complete Interview
               </button>
-            )}
-          </div>
+            </div>
+          ) : (
+            // Original layout when no complete button
+            <div className="flex flex-col items-center gap-0.5 sm:gap-2">
+              <Image
+                src="/HW_text-compress.png"
+                alt="Heritage Whisper"
+                width={200}
+                height={50}
+                className="h-10 w-auto"
+                priority
+              />
+              <p className="text-lg font-medium text-gray-600">Guided Interview</p>
+            </div>
+          )}
+
+          {/* Session Timer & Warning */}
+          {sessionStartTime && (
+            <div className="mt-2 flex flex-col items-center gap-1">
+              {/* Timer Display */}
+              <div className={`text-sm font-medium tabular-nums transition-colors ${
+                sessionDuration >= 1740 // Last 60 seconds (29 minutes)
+                  ? 'text-red-600 font-bold text-base animate-pulse'
+                  : sessionDuration >= 1500 // After 25 minutes
+                  ? 'text-amber-600'
+                  : 'text-gray-500'
+              }`}>
+                {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
+                {sessionDuration >= 1740 && ' remaining'}
+              </div>
+
+              {/* Warning Banner */}
+              {showTimeWarning && sessionDuration < 1740 && (
+                <div className="text-xs text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+                  5 minutes remaining
+                </div>
+              )}
+
+              {/* Final Minute Countdown */}
+              {sessionDuration >= 1740 && (
+                <div className="text-xs text-red-600 bg-red-50 px-3 py-1 rounded-full font-medium">
+                  Interview will auto-complete at 30:00
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Messages */}
@@ -362,6 +655,13 @@ After they answer, continue the conversation naturally with follow-up questions 
             <div key={message.id}>
               {message.type === 'typing' ? (
                 <TypingIndicator />
+              ) : message.type === 'question-options' ? (
+                <QuestionOptions
+                  messageId={message.id}
+                  options={message.options || []}
+                  selectedOption={message.selectedOption}
+                  onSelect={handleQuestionSelect}
+                />
               ) : (
                 <ChatMessage message={message} />
               )}
@@ -370,154 +670,15 @@ After they answer, continue the conversation naturally with follow-up questions 
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Voice Controls */}
-        <div className="sticky left-0 right-0 border-t border-gray-200 bg-white px-4 sm:px-6 py-3 sm:py-4 z-40" style={{ bottom: '0px' }}>
-          {/* Provisional Transcript Display */}
-          {isRecording && provisionalTranscript && (
-            <div className="mb-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
-              <p className="text-xs text-gray-500 mb-1">Live transcription:</p>
-              <p className="text-sm text-gray-600 italic">{provisionalTranscript}</p>
-            </div>
-          )}
-
-          {/* Voice/Mic Controls - Always visible when recording */}
-          {isRecording && (
-            <div className="flex flex-col gap-3 mb-3">
-              {/* Input Mode Toggle */}
-              <div className="flex justify-center">
-                <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1">
-                  <button
-                    onClick={() => setInputMode('voice')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                      inputMode === 'voice'
-                        ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    <Mic className="w-4 h-4 inline mr-1" />
-                    Voice
-                  </button>
-                  <button
-                    onClick={() => setInputMode('text')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                      inputMode === 'text'
-                        ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    <MessageSquare className="w-4 h-4 inline mr-1" />
-                    Type
-                  </button>
-                </div>
-              </div>
-
-              {/* Mic and Pearl Controls */}
-              <div className="flex justify-center gap-2">
-                {/* Mic Mute Toggle */}
-                <button
-                  onClick={() => {
-                    const newMutedState = !isMicMuted;
-                    setIsMicMuted(newMutedState);
-                    toggleMic(!newMutedState); // Enable mic when not muted, disable when muted
-                  }}
-                  className={`flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
-                    isMicMuted
-                      ? 'bg-red-100 text-red-800 hover:bg-red-200 border-2 border-red-300'
-                      : 'bg-blue-100 text-blue-800 hover:bg-blue-200 border-2 border-blue-300'
-                  }`}
-                  title={isMicMuted ? 'Mic muted - Click to unmute' : 'Mic active - Click to mute'}
-                >
-                  {isMicMuted ? (
-                    <><VolumeX className="w-4 h-4 mr-2" /> Mic Muted</>
-                  ) : (
-                    <><Mic className="w-4 h-4 mr-2" /> Mic Active</>
-                  )}
-                </button>
-
-                {/* Pearl Voice Toggle */}
-                <button
-                  onClick={toggleVoice}
-                  className={`flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
-                    voiceEnabled
-                      ? 'bg-green-100 text-green-800 hover:bg-green-200 border-2 border-green-300'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-2 border-gray-300'
-                  }`}
-                  title={voiceEnabled ? 'Pearl is speaking - Click to mute' : 'Pearl is muted - Click to unmute'}
-                >
-                  {voiceEnabled ? (
-                    <><Volume2 className="w-4 h-4 mr-2" /> Pearl ON</>
-                  ) : (
-                    <><VolumeX className="w-4 h-4 mr-2" /> Pearl OFF</>
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Text Input */}
-          {inputMode === 'text' && (
-            <>
-              {/* Text Input Field */}
-              <div className="flex gap-2 mb-3">
-                <input
-                  type="text"
-                  value={textInput}
-                  onChange={(e) => setTextInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && textInput.trim()) {
-                      handleSendTextMessage();
-                    }
-                  }}
-                  placeholder="Type your response..."
-                  className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-base"
-                />
-                <button
-                  onClick={handleSendTextMessage}
-                  disabled={!textInput.trim()}
-                  className="px-6 py-3 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-600 hover:to-rose-600 transition-all"
-                >
-                  Send
-                </button>
-              </div>
-            </>
-          )}
-
-          {/* Conversation Status */}
-          <div className="flex items-center justify-center gap-3">
-            {isRecording && inputMode === 'voice' && (
-              <div className="flex flex-col items-center gap-2">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <div className={`w-3 h-3 rounded-full ${isMicMuted ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`}></div>
-                  <p className="text-sm font-medium">{isMicMuted ? 'Mic Paused' : 'Conversation Active'}</p>
-                </div>
-                <p className="text-xs text-gray-500 tabular-nums">{formatTime(recordingDuration)}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Error Display */}
-          {realtimeError && (
-            <div className="mt-2 px-3 py-2 rounded-lg bg-red-50 border border-red-200">
-              <p className="text-sm text-red-600">{realtimeError}</p>
-            </div>
-          )}
-        </div>
+        {/* Input */}
+        <ChatInput
+          onAudioResponse={handleAudioResponse}
+          onTextResponse={handleTextResponse}
+          onTranscriptUpdate={handleTranscriptUpdate}
+          disabled={isProcessing}
+          useRealtime={isRealtimeEnabled}
+        />
       </div>
     </div>
-  );
-}
-
-export default function InterviewChatV2Page() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-page)' }}>
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    }>
-      <InterviewChatV2Content />
-    </Suspense>
   );
 }

@@ -23,49 +23,49 @@ export function WelcomeModal({ userName, onDismiss }: WelcomeModalProps) {
         <div className="flex-1 overflow-y-auto px-6 sm:px-12 pt-8 sm:pt-12 pb-4">
           {/* Welcome Header */}
           <div className="text-center mb-5 sm:mb-8">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-3 sm:mb-5 flex items-center justify-center">
-              <MessageSquare className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-4 sm:mb-6 flex items-center justify-center">
+              <MessageSquare className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">
+            <h2 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-2 sm:mb-3">
               Welcome, {userName.split(' ')[0]}!
             </h2>
           </div>
 
           {/* Instructions */}
-          <div className="space-y-4 sm:space-y-5">
-            <p className="text-lg sm:text-xl text-gray-700 leading-relaxed text-center">
+          <div className="space-y-8 sm:space-y-10">
+            <p className="text-2xl sm:text-3xl text-gray-700 leading-relaxed text-center">
               I'm <span className="shimmer-text">Pearl</span>, and I look forward to our conversation. I'll ask you questions about your life over the next 10-15 minutes.
             </p>
 
             {/* Features - larger text for seniors */}
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-start gap-3 sm:gap-4">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                  <Mic className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600" />
+                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <Mic className="w-10 h-10 sm:w-11 sm:h-11 text-amber-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Record or Type</h3>
-                  <p className="text-base sm:text-lg text-gray-600 leading-relaxed">Answer with your voice or typing</p>
+                  <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-0.5">Record or Type</h3>
+                  <p className="text-xl sm:text-2xl text-gray-600 leading-tight">Answer with your voice or typing</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 sm:gap-4">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="w-6 h-6 sm:w-7 sm:h-7 text-rose-600" />
+                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+                  <MessageSquare className="w-10 h-10 sm:w-11 sm:h-11 text-rose-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Choose Your Path</h3>
-                  <p className="text-base sm:text-lg text-gray-600 leading-relaxed">Pick questions that interest you</p>
+                  <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-0.5">Choose Your Path</h3>
+                  <p className="text-xl sm:text-2xl text-gray-600 leading-tight">Pick questions that interest you</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 sm:gap-4">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle2 className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" />
+                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 className="w-10 h-10 sm:w-11 sm:h-11 text-green-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Take Your Time</h3>
-                  <p className="text-base sm:text-lg text-gray-600 leading-relaxed">Share as much as you'd like</p>
+                  <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-0.5">Take Your Time</h3>
+                  <p className="text-xl sm:text-2xl text-gray-600 leading-tight">Share as much as you'd like</p>
                 </div>
               </div>
             </div>

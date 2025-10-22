@@ -23,39 +23,145 @@ export function ChatMessage({ message }: ChatMessageProps) {
     );
   }
 
+  // Typing indicator (Pearl is composing)
+  if (message.type === 'typing') {
+    return (
+      <>
+        <div className="flex justify-start">
+          <div className="max-w-[75%]">
+            {/* Sender label */}
+            <div className="mb-1 px-3 text-xs font-medium">
+              <span className="shimmer-text">Pearl</span>
+            </div>
+            {/* Bubble with typing dots */}
+            <div
+              className="px-5 py-3 rounded-3xl rounded-tl-sm bg-white shadow-md"
+              style={{
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              }}
+            >
+              <div className="flex items-center gap-1">
+                <div className="typing-dot"></div>
+                <div className="typing-dot" style={{ animationDelay: '0.2s' }}></div>
+                <div className="typing-dot" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <style jsx>{`
+          .shimmer-text {
+            background: linear-gradient(
+              90deg,
+              #D97706 0%,
+              #F59E0B 25%,
+              #FBBF24 50%,
+              #F59E0B 75%,
+              #D97706 100%
+            );
+            background-size: 200% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+            font-weight: 600;
+          }
+
+          @keyframes shimmer {
+            0% {
+              background-position: 200% center;
+            }
+            100% {
+              background-position: -200% center;
+            }
+          }
+
+          .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #D1D5DB;
+            animation: typing 1.4s infinite;
+          }
+
+          @keyframes typing {
+            0%, 60%, 100% {
+              transform: translateY(0);
+              background-color: #D1D5DB;
+            }
+            30% {
+              transform: translateY(-10px);
+              background-color: #9CA3AF;
+            }
+          }
+        `}</style>
+      </>
+    );
+  }
+
   // Question bubbles (HW - left side)
   if (message.type === 'question') {
     return (
-      <div className="flex justify-start">
-        <div className="max-w-[75%]">
-          {/* Sender label */}
-          <div className="mb-1 px-3 text-xs font-medium">
-            <span className="shimmer-text">Pearl</span>
-          </div>
-          {/* Bubble */}
-          <div
-            className="px-5 py-3 rounded-3xl rounded-tl-sm bg-white shadow-md"
-            style={{
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            }}
-          >
-            <p
-              className="text-base leading-relaxed"
+      <>
+        <div className="flex justify-start">
+          <div className="max-w-[75%]">
+            {/* Sender label */}
+            <div className="mb-1 px-3 text-xs font-medium">
+              <span className="shimmer-text">Pearl</span>
+            </div>
+            {/* Bubble */}
+            <div
+              className="px-5 py-3 rounded-3xl rounded-tl-sm bg-white shadow-md"
               style={{
-                fontFamily: 'var(--font-serif)',
-                color: '#1f0f08',
-                fontSize: '19px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
               }}
             >
-              {message.content}
-            </p>
-          </div>
-          {/* Timestamp */}
-          <div className="mt-1 px-3 text-xs text-gray-400">
-            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              <p
+                className="text-base leading-relaxed"
+                style={{
+                  fontFamily: 'var(--font-serif)',
+                  color: '#1f0f08',
+                  fontSize: '19px',
+                }}
+              >
+                {message.content}
+              </p>
+            </div>
+            {/* Timestamp */}
+            <div className="mt-1 px-3 text-xs text-gray-400">
+              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
           </div>
         </div>
-      </div>
+
+        <style jsx>{`
+          .shimmer-text {
+            background: linear-gradient(
+              90deg,
+              #D97706 0%,
+              #F59E0B 25%,
+              #FBBF24 50%,
+              #F59E0B 75%,
+              #D97706 100%
+            );
+            background-size: 200% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+            font-weight: 600;
+          }
+
+          @keyframes shimmer {
+            0% {
+              background-position: 200% center;
+            }
+            100% {
+              background-position: -200% center;
+            }
+          }
+        `}</style>
+      </>
     );
   }
 
@@ -125,38 +231,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
     );
   }
 
-  return (
-    <>
-      {null}
-      <style jsx>{`
-        .shimmer-text {
-          background: linear-gradient(
-            90deg,
-            #D97706 0%,
-            #F59E0B 25%,
-            #FBBF24 50%,
-            #F59E0B 75%,
-            #D97706 100%
-          );
-          background-size: 200% auto;
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: shimmer 3s linear infinite;
-          font-weight: 600;
-        }
-
-        @keyframes shimmer {
-          0% {
-            background-position: 200% center;
-          }
-          100% {
-            background-position: -200% center;
-          }
-        }
-      `}</style>
-    </>
-  );
+  return null;
 }
 
 // Audio Player Component (simplified waveform)
@@ -259,6 +334,34 @@ function AudioPlayer({ audioBlob, duration }: AudioPlayerProps) {
           <audio ref={audioRef} src={audioUrl} preload="metadata" />
         )}
       </div>
+
+      <style jsx>{`
+        .shimmer-text {
+          background: linear-gradient(
+            90deg,
+            #D97706 0%,
+            #F59E0B 25%,
+            #FBBF24 50%,
+            #F59E0B 75%,
+            #D97706 100%
+          );
+          background-size: 200% auto;
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: shimmer 3s linear infinite;
+          font-weight: 600;
+        }
+
+        @keyframes shimmer {
+          0% {
+            background-position: 200% center;
+          }
+          100% {
+            background-position: -200% center;
+          }
+        }
+      `}</style>
     </>
   );
 }

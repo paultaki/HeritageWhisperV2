@@ -229,6 +229,33 @@ export async function startRealtime(
     sdp: answerSdp,
   } as RTCSessionDescriptionInit);
 
+  // Helper function to safely send data through the channel
+  const safeSend = (data: any, retryCount = 0): boolean => {
+    try {
+      if (!dataChannel || dataChannel.readyState !== 'open') {
+        if (retryCount < 3) {
+          console.warn(`[Realtime] ⚠️ Data channel not ready (state: ${dataChannel?.readyState || 'null'}). Retry ${retryCount + 1}/3 in ${500 * (retryCount + 1)}ms...`);
+          setTimeout(() => {
+            safeSend(data, retryCount + 1);
+          }, 500 * (retryCount + 1));
+        } else {
+          console.error('[Realtime] ❌ Data channel not ready after 3 retries. Message dropped.');
+        }
+        return false;
+      }
+      dataChannel.send(JSON.stringify(data));
+      return true;
+    } catch (error) {
+      console.error('[Realtime] ❌ Error sending data through channel:', error);
+      if (retryCount < 3) {
+        setTimeout(() => {
+          safeSend(data, retryCount + 1);
+        }, 500 * (retryCount + 1));
+      }
+      return false;
+    }
+  };
+
   // 8. Send session.update (REQUIRED for transcription)
   // Docs: https://platform.openai.com/docs/guides/realtime-webrtc#session-configuration
   // Why VAD params: 300ms silence/prefix = snappy turns without cutting off speech
@@ -250,8 +277,8 @@ export async function startRealtime(
           prefix_padding_ms: 300,  // Include 300ms before speech starts
           silence_duration_ms: 2000, // Wait 2 seconds of silence before ending turn (increased for natural pauses)
         },
-        // Limit response length to prevent rambling (250 tokens ≈ 3-4 sentences, more natural)
-        max_response_output_tokens: 250,
+        // Limit response length to prevent rambling (400 tokens ≈ 5-6 sentences, complete thoughts)
+        max_response_output_tokens: 400,
       },
     };
 
@@ -275,7 +302,7 @@ export async function startRealtime(
       }
     }
 
-    dataChannel.send(JSON.stringify(sessionConfig));
+    safeSend(sessionConfig);
     callbacks.onConnected?.();
   };
 
@@ -322,8 +349,11 @@ export async function startRealtime(
       },
     };
 
-    dataChannel.send(JSON.stringify(updateMessage));
-    console.log('[Realtime] ✅ Instructions updated');
+    if (safeSend(updateMessage)) {
+      console.log('[Realtime] ✅ Instructions updated');
+    } else {
+      console.error('[Realtime] ❌ Failed to update instructions');
+    }
   };
 
   // 12. Send text message to conversation
@@ -345,45 +375,34 @@ export async function startRealtime(
       },
     };
 
-    dataChannel.send(JSON.stringify(textMessage));
-    console.log('[Realtime] ✅ Text message sent');
+    if (safeSend(textMessage)) {
+      console.log('[Realtime] ✅ Text message sent');
 
-    // Trigger response generation
-    const responseCreate = {
-      type: 'response.create',
-    };
-    dataChannel.send(JSON.stringify(responseCreate));
-    console.log('[Realtime] ✅ Response generation triggered');
+      // Trigger response generation
+      const responseCreate = {
+        type: 'response.create',
+      };
+      if (safeSend(responseCreate)) {
+        console.log('[Realtime] ✅ Response generation triggered');
+      }
+    } else {
+      console.error('[Realtime] ❌ Failed to send text message');
+    }
   };
 
   // 13. Trigger Pearl to speak first (no user message needed)
   const triggerPearlResponse = () => {
     console.log('[Realtime] Triggering Pearl to speak first...');
 
-    // Check if data channel is ready
-    if (!dataChannel || dataChannel.readyState !== 'open') {
-      console.warn('[Realtime] ⚠️ Data channel not ready (state:', dataChannel?.readyState || 'null', '). Retrying in 500ms...');
-
-      // Retry after a short delay
-      setTimeout(() => {
-        if (dataChannel && dataChannel.readyState === 'open') {
-          const responseCreate = {
-            type: 'response.create',
-          };
-          dataChannel.send(JSON.stringify(responseCreate));
-          console.log('[Realtime] ✅ Pearl response triggered (retry succeeded)');
-        } else {
-          console.error('[Realtime] ❌ Data channel still not ready after retry. State:', dataChannel?.readyState || 'null');
-        }
-      }, 500);
-      return;
-    }
-
     const responseCreate = {
       type: 'response.create',
     };
-    dataChannel.send(JSON.stringify(responseCreate));
-    console.log('[Realtime] ✅ Pearl response triggered');
+
+    if (safeSend(responseCreate)) {
+      console.log('[Realtime] ✅ Pearl response triggered');
+    } else {
+      console.log('[Realtime] ⚠️ Pearl response trigger queued for retry');
+    }
   };
 
   // 14. Toggle microphone on/off

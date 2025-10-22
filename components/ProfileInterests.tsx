@@ -64,17 +64,17 @@ export function ProfileInterests({ userId, initialInterests }: ProfileInterestsP
   };
 
   return (
-    <div className="bg-white p-8 rounded-2xl border-2 border-amber-100 mb-8">
-      <h2 className="text-2xl font-serif mb-3 text-heritage-brown">
+    <div className="bg-white p-6 rounded-2xl border border-amber-100 mb-6">
+      <h2 className="text-xl font-serif mb-2 text-heritage-brown">
         Help Me Ask Better Questions
       </h2>
-      <p className="text-gray-600 mb-6">
+      <p className="text-gray-600 mb-4 text-sm">
         Share a few interests and I'll ask more personal questions
       </p>
-      
-      <div className="space-y-6">
+
+      <div className="space-y-4">
         <div>
-          <Label htmlFor="general" className="block text-lg mb-2 text-gray-700">
+          <Label htmlFor="general" className="block text-sm mb-1.5 text-gray-700 font-medium">
             What interests you most?
           </Label>
           <Input
@@ -83,13 +83,12 @@ export function ProfileInterests({ userId, initialInterests }: ProfileInterestsP
             placeholder="Jazz music, woodworking, baseball, cooking..."
             value={interests.general || ''}
             onChange={(e) => handleChange('general', e.target.value)}
-            className="w-full p-4 text-lg border-2 rounded-lg"
-            style={{ minHeight: '48px', fontSize: '18px' }}
+            className="w-full p-3 text-base border rounded-lg"
           />
         </div>
-        
+
         <div>
-          <Label htmlFor="people" className="block text-lg mb-2 text-gray-700">
+          <Label htmlFor="people" className="block text-sm mb-1.5 text-gray-700 font-medium">
             People who matter
           </Label>
           <Input
@@ -98,13 +97,12 @@ export function ProfileInterests({ userId, initialInterests }: ProfileInterestsP
             placeholder="My brother Tom, Mrs. Henderson, the grandkids..."
             value={interests.people || ''}
             onChange={(e) => handleChange('people', e.target.value)}
-            className="w-full p-4 text-lg border-2 rounded-lg"
-            style={{ minHeight: '48px', fontSize: '18px' }}
+            className="w-full p-3 text-base border rounded-lg"
           />
         </div>
-        
+
         <div>
-          <Label htmlFor="places" className="block text-lg mb-2 text-gray-700">
+          <Label htmlFor="places" className="block text-sm mb-1.5 text-gray-700 font-medium">
             Places that hold memories
           </Label>
           <Input
@@ -113,18 +111,16 @@ export function ProfileInterests({ userId, initialInterests }: ProfileInterestsP
             placeholder="The lake house, Brooklyn, our first apartment..."
             value={interests.places || ''}
             onChange={(e) => handleChange('places', e.target.value)}
-            className="w-full p-4 text-lg border-2 rounded-lg"
-            style={{ minHeight: '48px', fontSize: '18px' }}
+            className="w-full p-3 text-base border rounded-lg"
           />
         </div>
         
-        <Button 
+        <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="px-6 py-3 bg-[#D4A574] hover:bg-[#C09564] text-white rounded-lg text-lg font-semibold"
-          style={{ minHeight: '48px' }}
+          className="px-5 py-2.5 bg-[#D4A574] hover:bg-[#C09564] text-white rounded-lg font-medium"
         >
-          <Save className="w-5 h-5 mr-2" />
+          <Save className="w-4 h-4 mr-2" />
           {isSaving ? "Saving..." : "Save Interests"}
         </Button>
       </div>

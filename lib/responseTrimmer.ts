@@ -82,7 +82,7 @@ export function shouldCancelResponse(accumulatedText: string): boolean {
   }
 
   // Count sentences (split by . ! or …)
-  // Allow up to 3 sentences for natural conversation flow
+  // Allow up to 4 sentences for natural conversation flow (matches 400 token limit)
   const sentences = normalized.split(/[.!…]\s+/).filter(s => s.trim().length > 0);
-  return sentences.length > 3;
+  return sentences.length > 4;
 }

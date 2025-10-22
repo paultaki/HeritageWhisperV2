@@ -28,12 +28,12 @@ export function ModeSelectionModal({
 
   const handleConversationMode = () => {
     onClose();
-    // Navigate to interview-chat-v2 (Pearl with Realtime API)
+    // Navigate to interview-chat (Pearl with Realtime API)
     // Pass prompt question if provided
     if (promptQuestion) {
-      router.push(`/interview-chat-v2?prompt=${encodeURIComponent(promptQuestion)}`);
+      router.push(`/interview-chat?prompt=${encodeURIComponent(promptQuestion)}`);
     } else {
-      router.push("/interview-chat-v2");
+      router.push("/interview-chat");
     }
   };
 

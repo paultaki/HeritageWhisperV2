@@ -453,16 +453,13 @@ export default function Profile() {
 
   return (
     <div
-      className="min-h-screen flex"
+      className="min-h-screen"
       style={{ backgroundColor: "#FFF8F3" }}
     >
-      {/* Left Sidebar */}
-      {isDesktop && <LeftSidebar />}
-
-      {/* Main content */}
-      <main className="flex-1 min-w-0 lg:ml-56 pb-20 md:pb-0">
-        <div className="bg-background album-texture min-h-screen">
-          <div className="max-w-4xl mx-auto p-4 md:p-6">
+      {/* Main content - centered without sidebar on profile page */}
+      <main className="min-w-0 pb-20 md:pb-0">
+        <div className="bg-background album-texture min-h-screen flex justify-center">
+          <div className="w-full max-w-3xl p-4 md:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 md:mb-8">
           <div className="flex items-center space-x-3 md:space-x-4">

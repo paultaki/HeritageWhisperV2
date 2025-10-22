@@ -5,7 +5,7 @@ import { Providers } from "./providers";
 import NavigationWrapper from "@/components/NavigationWrapper";
 import AgreementGuard from "@/components/AgreementGuard";
 import LayoutContent from "@/components/LayoutContent";
-import ThemeHydrator from "@/components/ThemeHydrator";
+import DarkModeCleanup from "@/components/DarkModeCleanup";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -51,7 +51,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <AgreementGuard>
-            <ThemeHydrator />
+            <DarkModeCleanup />
             <NavigationWrapper />
             <LayoutContent>{children}</LayoutContent>
           </AgreementGuard>
