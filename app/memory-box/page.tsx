@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -467,6 +468,13 @@ export default function MemoryBoxPage() {
       <header className="sticky top-0 z-40 bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
+            <Image
+              src="/h-whiper.png"
+              alt="Heritage Whisper"
+              width={36}
+              height={36}
+              className="h-9 w-auto"
+            />
             <Box className="w-8 h-8" style={{ color: "#1f0f08" }} />
             <h1 className="text-2xl font-bold">Memory Box</h1>
           </div>

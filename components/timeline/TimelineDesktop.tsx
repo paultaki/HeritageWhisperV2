@@ -22,6 +22,7 @@ import {
 import { GhostPromptCard } from "@/components/GhostPromptCard";
 import { NextStoryCard } from "@/components/NextStoryCard";
 import { PaywallPromptCard } from "@/components/PaywallPromptCard";
+import { MemoryOverlay } from "@/components/MemoryOverlay";
 import {
   Play,
   Plus,
@@ -166,9 +167,10 @@ interface CenteredMemoryCardProps {
   showDecadeMarker?: boolean;
   decadeLabel?: string;
   birthYear: number;
+  onOpenOverlay?: (story: Story) => void;
 }
 
-function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear }: CenteredMemoryCardProps) {
+function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear, onOpenOverlay }: CenteredMemoryCardProps) {
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -409,24 +411,30 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   }, [currentAudio]);
 
   const handleCardClick = () => {
-    const navigationContext = {
-      memoryId: story.id,
-      scrollPosition: window.scrollY,
-      timestamp: Date.now(),
-      returnPath: "/timeline",
-    };
-    sessionStorage.setItem(
-      "timeline-navigation-context",
-      JSON.stringify(navigationContext),
-    );
-
-    const isBirthYearStory =
-      story.title?.toLowerCase().includes("born") ||
-      story.title?.toLowerCase().includes("birth");
-    if (isBirthYearStory) {
-      router.push(`/review?edit=${story.id}`);
+    // If overlay handler is provided, use it instead of navigation
+    if (onOpenOverlay) {
+      onOpenOverlay(story);
     } else {
-      router.push(`/book?storyId=${story.id}`);
+      // Fallback to original navigation behavior
+      const navigationContext = {
+        memoryId: story.id,
+        scrollPosition: window.scrollY,
+        timestamp: Date.now(),
+        returnPath: "/timeline",
+      };
+      sessionStorage.setItem(
+        "timeline-navigation-context",
+        JSON.stringify(navigationContext),
+      );
+
+      const isBirthYearStory =
+        story.title?.toLowerCase().includes("born") ||
+        story.title?.toLowerCase().includes("birth");
+      if (isBirthYearStory) {
+        router.push(`/review?edit=${story.id}`);
+      } else {
+        router.push(`/book?storyId=${story.id}`);
+      }
     }
   };
 
@@ -757,6 +765,8 @@ export function TimelineDesktop() {
   const timelineContainerRef = useRef<HTMLDivElement>(null);
   const [returnHighlightId, setReturnHighlightId] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [overlayOpen, setOverlayOpen] = useState(false);
 
   const {
     data: storiesData,
@@ -998,6 +1008,13 @@ export function TimelineDesktop() {
         }}
       >
         <div className="flex items-center gap-3 w-full">
+          <Image
+            src="/h-whiper.png"
+            alt="Heritage Whisper"
+            width={36}
+            height={36}
+            className="h-9 w-auto"
+          />
           <Calendar className="w-6 h-6" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
           <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Timeline</h1>
         </div>
@@ -1091,6 +1108,10 @@ export function TimelineDesktop() {
                             showDecadeMarker={showDecadeMarker}
                             decadeLabel={showDecadeMarker ? decadeLabel : undefined}
                             birthYear={user?.birthYear || normalizeYear(user?.birthYear as any) || 0}
+                            onOpenOverlay={(story) => {
+                              setSelectedStory(story);
+                              setOverlayOpen(true);
+                            }}
                           />
                         </div>
                       );
@@ -1127,6 +1148,25 @@ export function TimelineDesktop() {
         isOpen={modeSelection.quickRecorderOpen}
         onClose={modeSelection.closeQuickRecorder}
       />
+
+      {/* Memory Overlay */}
+      {selectedStory && (
+        <MemoryOverlay
+          story={selectedStory}
+          stories={sortedStories}
+          isOpen={overlayOpen}
+          onClose={() => {
+            setOverlayOpen(false);
+            setSelectedStory(null);
+          }}
+          onNavigate={(storyId) => {
+            const story = sortedStories.find(s => s.id === storyId);
+            if (story) {
+              setSelectedStory(story);
+            }
+          }}
+        />
+      )}
 
       {/* Custom Styles */}
       <style jsx global>{`

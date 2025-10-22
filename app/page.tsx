@@ -93,11 +93,11 @@ export default function HomePage() {
           {/* Header with Logo */}
           <div className="flex flex-col justify-center items-center mb-10">
             <Image
-              src="/HW_text-compress.png"
+              src="/h-whiper.png"
               alt="Heritage Whisper"
-              width={320}
-              height={80}
-              className="h-20 w-auto mb-3 drop-shadow-md"
+              width={480}
+              height={120}
+              className="h-32 md:h-40 w-auto mb-3 drop-shadow-md"
               priority
             />
           </div>

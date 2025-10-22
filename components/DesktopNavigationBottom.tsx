@@ -35,18 +35,11 @@ function DesktopNavItemBottom({
   return (
     <button
       onClick={handleClick}
-      className="flex flex-col items-center justify-center px-6 py-3 rounded-lg transition-all hover:bg-gray-200 group relative"
+      className="flex flex-col items-center justify-center px-4 py-2 rounded-lg transition-all hover:bg-gray-200 group relative"
       style={{
         color: isActive ? "#D36A3D" : "hsl(210, 10%, 40%)",
       }}
     >
-      {/* Tooltip on hover */}
-      <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-        <div className="bg-gray-800 text-white text-sm font-medium px-3 py-2 rounded-lg whitespace-nowrap shadow-lg">
-          {label}
-        </div>
-      </div>
-
       {/* Active indicator bar at top (inside) */}
       {isActive && (
         <div
@@ -59,6 +52,9 @@ function DesktopNavItemBottom({
         />
       )}
       <Icon className="w-6 flex-shrink-0" style={{ height: '26px' }} />
+      <span className="text-xs mt-1 font-medium whitespace-nowrap">
+        {label}
+      </span>
     </button>
   );
 }
@@ -98,7 +94,7 @@ export default function DesktopNavigationBottom({
       transition={{ type: "spring", damping: 20 }}
       className="hidden md:flex fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t-2 items-center justify-center px-8 z-40"
       style={{
-        height: '60px',
+        height: '72px',
         borderTopColor: "#D36A3D",
         boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.08)",
       }}
@@ -136,7 +132,7 @@ export default function DesktopNavigationBottom({
 
           <DesktopNavItemBottom
             icon={Sparkles}
-            label="Get Prompts"
+            label="Prompt Library"
             href="/prompts"
             isActive={pathname === "/prompts"}
           />

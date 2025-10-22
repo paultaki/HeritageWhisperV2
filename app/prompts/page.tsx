@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mic, ChevronDown, ChevronUp, Settings, Brain } from "lucide-react";
@@ -283,8 +284,19 @@ export default function PromptsPage() {
           {/* Header */}
           <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200/50">
         <div className="px-6 py-5" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
-          <h1 className="text-[26px] font-semibold tracking-tight text-gray-900">Story Prompts</h1>
-          <p className="text-sm text-gray-600 mt-0.5">Thoughtful questions to spark your next memory</p>
+          <div className="flex items-center gap-3">
+            <Image
+              src="/h-whiper.png"
+              alt="Heritage Whisper"
+              width={36}
+              height={36}
+              className="h-9 w-auto"
+            />
+            <div>
+              <h1 className="text-[26px] font-semibold tracking-tight text-gray-900">Story Prompts</h1>
+              <p className="text-sm text-gray-600 mt-0.5">Thoughtful questions to spark your next memory</p>
+            </div>
+          </div>
         </div>
       </header>
 

@@ -181,7 +181,7 @@ export default function MobileNavigation({
         {/* Prompts - Profile removed since it's in hamburger menu */}
         <NavItem
           icon={Sparkles}
-          label="Get Prompts"
+          label="Prompt Library"
           href="/prompts"
           isActive={pathname === "/prompts"}
         />

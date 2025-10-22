@@ -24,6 +24,7 @@ import {
 import { GhostPromptCard } from "@/components/GhostPromptCard";
 import { NextStoryCard } from "@/components/NextStoryCard";
 import { PaywallPromptCard } from "@/components/PaywallPromptCard";
+import { MemoryOverlay } from "@/components/MemoryOverlay";
 import DecadeNav, { type DecadeEntry } from "@/components/ui/DecadeNav";
 import {
   Play,
@@ -265,6 +266,7 @@ function MemoryCard({
   isReturnHighlight = false,
   colorScheme = "original",
   isDarkTheme = false,
+  onOpenOverlay,
   birthYear,
 }: {
   story: Story;
@@ -273,6 +275,7 @@ function MemoryCard({
   colorScheme?: ColorScheme;
   isDarkTheme?: boolean;
   birthYear: number;
+  onOpenOverlay?: (story: Story) => void;
 }) {
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -516,28 +519,33 @@ function MemoryCard({
   }, [currentAudio]);
 
   const handleCardClick = () => {
-    // Store navigation context in sessionStorage
-    const navigationContext = {
-      memoryId: story.id,
-      scrollPosition: window.scrollY,
-      timestamp: Date.now(),
-      returnPath: "/timeline",
-    };
-    sessionStorage.setItem(
-      "timeline-navigation-context",
-      JSON.stringify(navigationContext),
-    );
-
-    // Check if this is "The Year I was Born" story - if so, go to edit instead of book view
-    const isBirthYearStory =
-      story.title?.toLowerCase().includes("born") ||
-      story.title?.toLowerCase().includes("birth");
-    if (isBirthYearStory) {
-      // Navigate directly to edit/review page for birth year story
-      router.push(`/review?edit=${story.id}`);
+    // If overlay handler is provided, use it instead of navigation
+    if (onOpenOverlay) {
+      onOpenOverlay(story);
     } else {
-      // Navigate to book view for regular stories
-      router.push(`/book?storyId=${story.id}`);
+      // Fallback to original navigation behavior
+      const navigationContext = {
+        memoryId: story.id,
+        scrollPosition: window.scrollY,
+        timestamp: Date.now(),
+        returnPath: "/timeline",
+      };
+      sessionStorage.setItem(
+        "timeline-navigation-context",
+        JSON.stringify(navigationContext),
+      );
+
+      // Check if this is "The Year I was Born" story - if so, go to edit instead of book view
+      const isBirthYearStory =
+        story.title?.toLowerCase().includes("born") ||
+        story.title?.toLowerCase().includes("birth");
+      if (isBirthYearStory) {
+        // Navigate directly to edit/review page for birth year story
+        router.push(`/review?edit=${story.id}`);
+      } else {
+        // Navigate to book view for regular stories
+        router.push(`/book?storyId=${story.id}`);
+      }
     }
   };
 
@@ -884,6 +892,8 @@ export function TimelineMobile() {
   const [currentColorScheme, setCurrentColorScheme] =
     useState<ColorScheme>("original");
   const [showColorPalette, setShowColorPalette] = useState(false);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [overlayOpen, setOverlayOpen] = useState(false);
   const { toast } = useToast();
   const modeSelection = useModeSelection();
   const decadeRefs = useRef<{ [key: string]: HTMLElement | null }>({});
@@ -1482,6 +1492,13 @@ export function TimelineMobile() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
+              <Image
+                src="/h-whiper.png"
+                alt="Heritage Whisper"
+                width={32}
+                height={32}
+                className="h-8 w-auto"
+              />
               <Calendar className="w-8 h-8" style={{ color: isDark ? '#b0b3b8' : '#1f0f08' }} />
               <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : undefined }}>Timeline</h1>
             </div>
@@ -1587,6 +1604,10 @@ export function TimelineMobile() {
                         }
                         colorScheme={currentColorScheme}
                         isDarkTheme={isDark}
+                        onOpenOverlay={(story) => {
+                          setSelectedStory(story);
+                          setOverlayOpen(true);
+                        }}
                         birthYear={user.birthYear}
                       />
                     );
@@ -1618,6 +1639,25 @@ export function TimelineMobile() {
         isOpen={modeSelection.quickRecorderOpen}
         onClose={modeSelection.closeQuickRecorder}
       />
+
+      {/* Memory Overlay */}
+      {selectedStory && (
+        <MemoryOverlay
+          story={selectedStory}
+          stories={stories}
+          isOpen={overlayOpen}
+          onClose={() => {
+            setOverlayOpen(false);
+            setSelectedStory(null);
+          }}
+          onNavigate={(storyId) => {
+            const story = stories.find((s: any) => s.id === storyId);
+            if (story) {
+              setSelectedStory(story);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
