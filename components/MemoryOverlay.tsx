@@ -11,6 +11,7 @@ interface MemoryOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate?: (storyId: string) => void;
+  originPath?: string; // Where to return after editing
 }
 
 export function MemoryOverlay({
@@ -19,6 +20,7 @@ export function MemoryOverlay({
   isOpen,
   onClose,
   onNavigate,
+  originPath,
 }: MemoryOverlayProps) {
   const router = useRouter();
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -256,8 +258,8 @@ export function MemoryOverlay({
   };
 
   const handleEdit = () => {
-    // Return to book at this story's year after editing
-    const returnPath = `/book?year=${story.storyYear}`;
+    // Use the origin path if provided, otherwise default to book view at this story's year
+    const returnPath = originPath || `/book?year=${story.storyYear}`;
     router.push(`/review/book-style?id=${story.id}&returnPath=${encodeURIComponent(returnPath)}`);
   };
 

@@ -332,32 +332,60 @@ After they answer, continue the conversation naturally with follow-up questions 
       )}
 
       {/* Chat Container */}
-      <div className="max-w-3xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 80px)', marginBottom: '80px' }}>
+      <div className="max-w-3xl mx-auto flex flex-col h-screen">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-2 sm:py-4">
-          <div className="flex flex-col items-center gap-2">
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-2 sm:py-3">
+          <div className="flex flex-col items-center gap-1.5">
             <Image
               src="/HW_text-compress.png"
               alt="Heritage Whisper"
               width={200}
               height={50}
-              className="h-8 sm:h-10 w-auto"
+              className="h-7 sm:h-9 w-auto"
               priority
             />
-            <p className="text-lg font-medium text-gray-600">Whisper Storyteller Conversation</p>
+            <p className="text-base font-medium text-gray-600">Whisper Storyteller Conversation</p>
+
+            {/* Status and Timer */}
             {isRecording && (
-              <button
-                onClick={handleCompleteInterview}
-                className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-semibold px-5 py-2 sm:px-6 sm:py-3 rounded-full text-sm transition-all shadow-md"
-              >
-                Complete Interview
-              </button>
+              <div className="flex items-center gap-2 text-sm">
+                <div className={`w-2 h-2 rounded-full ${isMicMuted ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`}></div>
+                <span className="font-medium text-gray-700">
+                  {isMicMuted ? 'Mic Paused' : 'Conversation Active'}
+                </span>
+                <span className="text-gray-500">•</span>
+                <span className="tabular-nums text-gray-600">{formatTime(recordingDuration)}</span>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            {isRecording && (
+              <div className="flex gap-2 mt-1">
+                <button
+                  onClick={() => {
+                    if (confirm("Are you sure you want to cancel this interview?")) {
+                      stopRecording();
+                      stopRecordingState();
+                      router.push('/timeline');
+                    }
+                  }}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-1 rounded-full text-sm transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCompleteInterview}
+                  className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-medium px-4 py-1 rounded-full text-sm transition-all shadow-md"
+                >
+                  Complete Interview
+                </button>
+              </div>
             )}
           </div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-6 space-y-4 pb-20"> {/* Added pb-20 for fixed bottom controls */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-6 space-y-4 pb-24 md:pb-32"> {/* Added padding for footer and nav */}
           {messages.map((message) => (
             <div key={message.id}>
               {message.type === 'typing' ? (
@@ -370,68 +398,59 @@ After they answer, continue the conversation naturally with follow-up questions 
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Voice Controls - Compact and Sticky */}
-        <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-4 py-2 z-40 shadow-lg">
+        {/* Voice Controls - Minimal Footer Above Nav */}
+        <div className="fixed bottom-16 md:bottom-20 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-3 py-1.5 z-30 shadow-sm">
           {/* Provisional Transcript Display - Smaller */}
           {isRecording && provisionalTranscript && (
-            <div className="mb-1.5 px-2 py-1 rounded bg-gray-50 border border-gray-200">
+            <div className="mb-1 px-2 py-0.5 rounded bg-gray-50 border border-gray-100">
               <p className="text-xs text-gray-600 italic truncate">{provisionalTranscript}</p>
             </div>
           )}
 
           {/* Compact Control Bar */}
           {isRecording && (
-            <div className="flex items-center justify-between gap-2">
-              {/* Left: Recording Status */}
-              <div className="flex items-center gap-2 min-w-[80px]">
-                <div className={`w-2 h-2 rounded-full ${isMicMuted ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`}></div>
-                <span className="text-xs text-gray-600 tabular-nums">{formatTime(recordingDuration)}</span>
-              </div>
+            <div className="flex items-center justify-center gap-3">
+              {/* Mic Toggle */}
+              <button
+                onClick={() => {
+                  const newMutedState = !isMicMuted;
+                  setIsMicMuted(newMutedState);
+                  toggleMic(!newMutedState);
+                }}
+                className={`flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                  isMicMuted
+                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                }`}
+                title={isMicMuted ? 'Unmute mic' : 'Mute mic'}
+              >
+                {isMicMuted ? (
+                  <VolumeX className="w-3.5 h-3.5" />
+                ) : (
+                  <Mic className="w-3.5 h-3.5" />
+                )}
+                <span className="ml-1">{isMicMuted ? 'Muted' : 'Active'}</span>
+              </button>
 
-              {/* Center: Controls */}
-              <div className="flex items-center gap-1.5">
-                {/* Mic Toggle */}
-                <button
-                  onClick={() => {
-                    const newMutedState = !isMicMuted;
-                    setIsMicMuted(newMutedState);
-                    toggleMic(!newMutedState);
-                  }}
-                  className={`flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
-                    isMicMuted
-                      ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                  }`}
-                  title={isMicMuted ? 'Unmute mic' : 'Mute mic'}
-                >
-                  {isMicMuted ? (
-                    <VolumeX className="w-3.5 h-3.5" />
-                  ) : (
-                    <Mic className="w-3.5 h-3.5" />
-                  )}
-                  <span className="ml-1">{isMicMuted ? 'Muted' : 'Active'}</span>
-                </button>
+              {/* Pearl Voice Toggle */}
+              <button
+                onClick={toggleVoice}
+                className={`flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                  voiceEnabled
+                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title={voiceEnabled ? 'Mute Pearl' : 'Unmute Pearl'}
+              >
+                {voiceEnabled ? (
+                  <Volume2 className="w-3.5 h-3.5" />
+                ) : (
+                  <VolumeX className="w-3.5 h-3.5" />
+                )}
+                <span className="ml-1">Pearl</span>
+              </button>
 
-                {/* Pearl Voice Toggle */}
-                <button
-                  onClick={toggleVoice}
-                  className={`flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
-                    voiceEnabled
-                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                  title={voiceEnabled ? 'Mute Pearl' : 'Unmute Pearl'}
-                >
-                  {voiceEnabled ? (
-                    <Volume2 className="w-3.5 h-3.5" />
-                  ) : (
-                    <VolumeX className="w-3.5 h-3.5" />
-                  )}
-                  <span className="ml-1">Pearl</span>
-                </button>
-              </div>
-
-              {/* Right: Mode Toggle */}
+              {/* Mode Toggle */}
               <div className="flex bg-gray-100 rounded-full p-0.5">
                 <button
                   onClick={() => setInputMode('voice')}
@@ -458,50 +477,34 @@ After they answer, continue the conversation naturally with follow-up questions 
           )}
 
           {/* Text Input */}
-          {inputMode === 'text' && (
-            <>
-              {/* Text Input Field */}
-              <div className="flex gap-2 mb-3">
-                <input
-                  type="text"
-                  value={textInput}
-                  onChange={(e) => setTextInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && textInput.trim()) {
-                      handleSendTextMessage();
-                    }
-                  }}
-                  placeholder="Type your response..."
-                  className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-base"
-                />
-                <button
-                  onClick={handleSendTextMessage}
-                  disabled={!textInput.trim()}
-                  className="px-6 py-3 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-600 hover:to-rose-600 transition-all"
-                >
-                  Send
-                </button>
-              </div>
-            </>
+          {inputMode === 'text' && isRecording && (
+            <div className="flex gap-2 mt-1">
+              <input
+                type="text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && textInput.trim()) {
+                    handleSendTextMessage();
+                  }
+                }}
+                placeholder="Type your response..."
+                className="flex-1 px-3 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+              />
+              <button
+                onClick={handleSendTextMessage}
+                disabled={!textInput.trim()}
+                className="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-600 hover:to-rose-600 transition-all"
+              >
+                Send
+              </button>
+            </div>
           )}
-
-          {/* Conversation Status */}
-          <div className="flex items-center justify-center gap-3">
-            {isRecording && inputMode === 'voice' && (
-              <div className="flex flex-col items-center gap-2">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <div className={`w-3 h-3 rounded-full ${isMicMuted ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`}></div>
-                  <p className="text-sm font-medium">{isMicMuted ? 'Mic Paused' : 'Conversation Active'}</p>
-                </div>
-                <p className="text-xs text-gray-500 tabular-nums">{formatTime(recordingDuration)}</p>
-              </div>
-            )}
-          </div>
 
           {/* Error Display */}
           {realtimeError && (
-            <div className="mt-2 px-3 py-2 rounded-lg bg-red-50 border border-red-200">
-              <p className="text-sm text-red-600">{realtimeError}</p>
+            <div className="mt-1 px-2 py-1 rounded bg-red-50 border border-red-100">
+              <p className="text-xs text-red-600">{realtimeError}</p>
             </div>
           )}
         </div>

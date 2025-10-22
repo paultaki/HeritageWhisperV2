@@ -563,7 +563,10 @@ export default function MemoryBoxPage() {
                 AudioManager.getInstance().play(id, story.audioUrl);
               }
             }}
-            onOpen={(id) => router.push(`/review/book-style?edit=${id}`)}
+            onOpen={(id) => {
+              const returnPath = "/memory-box";
+              router.push(`/review/book-style?edit=${id}&returnPath=${encodeURIComponent(returnPath)}`);
+            }}
             onToggleFavorite={handleToggleFavorite}
             onDelete={(id) => {
               if (confirm("Delete this memory? This cannot be undone.")) {

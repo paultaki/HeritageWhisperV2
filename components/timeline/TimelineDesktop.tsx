@@ -1155,6 +1155,7 @@ export function TimelineDesktop() {
           story={selectedStory}
           stories={sortedStories}
           isOpen={overlayOpen}
+          originPath="/timeline"
           onClose={() => {
             setOverlayOpen(false);
             setSelectedStory(null);

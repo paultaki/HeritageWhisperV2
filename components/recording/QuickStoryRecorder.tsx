@@ -2,9 +2,12 @@
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Mic, Pause, Play, Square, RotateCcw, X, Loader2 } from "lucide-react";
+import { Mic, Pause, Play, Square, RotateCcw, X, Loader2, PenTool } from "lucide-react";
 import { useQuickRecorder } from "@/hooks/use-quick-recorder";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { NavCache } from "@/lib/navCache";
 
 interface QuickStoryRecorderProps {
   isOpen: boolean;
@@ -23,6 +26,11 @@ interface QuickStoryRecorderProps {
  * - Optional prompt question display
  */
 export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickStoryRecorderProps) {
+  const router = useRouter();
+  const [mode, setMode] = useState<'select' | 'voice' | 'text'>('select');
+  const [textStory, setTextStory] = useState('');
+  const [isSavingText, setIsSavingText] = useState(false);
+
   const {
     state,
     duration,
@@ -48,14 +56,50 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
   // Calculate progress percentage
   const progressPercent = (duration / maxDuration) * 100;
 
+  // Handle text story submission
+  const handleTextSubmit = async () => {
+    if (!textStory.trim()) return;
+
+    setIsSavingText(true);
+
+    // Save to NavCache for the wizard
+    const cacheKey = NavCache.setData({
+      recording: {
+        mode: 'text',
+        duration: 0,
+        url: null,
+        audioBlob: null,
+      },
+      transcription: {
+        raw: textStory.trim(),
+        formatted: textStory.trim(),
+      },
+      promptQuestion: promptQuestion || null,
+    });
+
+    // Navigate to wizard
+    router.push(`/review/book-style?nav=${cacheKey}&mode=wizard`);
+    onClose();
+  };
+
   const handleClose = () => {
     if (state === "recording" || state === "paused") {
       if (window.confirm("Stop recording and discard your progress?")) {
         cancelRecording();
+        setMode('select');
+        setTextStory('');
+        onClose();
+      }
+    } else if (mode === 'text' && textStory.trim()) {
+      if (window.confirm("Discard your written story?")) {
+        setMode('select');
+        setTextStory('');
         onClose();
       }
     } else {
       cancelRecording();
+      setMode('select');
+      setTextStory('');
       onClose();
     }
   };
@@ -70,10 +114,58 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
 
         <div className="relative">
           <AnimatePresence mode="wait">
-            {/* Ready State */}
-            {state === "ready" && (
+            {/* Mode Selection */}
+            {mode === 'select' && state === "ready" && (
               <motion.div
-                key="ready"
+                key="select"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="text-center py-8"
+              >
+                {/* Display prompt question if provided */}
+                {promptQuestion && (
+                  <>
+                    <h2 className="text-xl font-semibold mb-3">Your Question</h2>
+                    <div className="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-lg p-4 mb-6 max-w-xl mx-auto">
+                      <p className="text-base text-gray-800 font-medium leading-relaxed">
+                        {promptQuestion}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                <h2 className="text-2xl font-semibold mb-3">How would you like to share your story?</h2>
+                <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                  Choose to record with your voice or type your story
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button
+                    onClick={() => setMode('voice')}
+                    size="lg"
+                    className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-8 py-6 text-base rounded-full shadow-lg"
+                  >
+                    <Mic className="w-5 h-5 mr-2" />
+                    Record with Voice
+                  </Button>
+                  <Button
+                    onClick={() => setMode('text')}
+                    size="lg"
+                    variant="outline"
+                    className="px-8 py-6 text-base rounded-full border-2"
+                  >
+                    <PenTool className="w-5 h-5 mr-2" />
+                    Type Your Story
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Voice Recording Ready State */}
+            {mode === 'voice' && state === "ready" && (
+              <motion.div
+                key="voice-ready"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
@@ -83,37 +175,94 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   <Mic className="w-12 h-12 text-amber-700" />
                 </div>
 
-                {/* Display prompt question if provided */}
-                {promptQuestion ? (
-                  <>
-                    <h2 className="text-2xl font-semibold mb-4">Your Question</h2>
-                    <div className="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-lg p-6 mb-6 max-w-xl mx-auto">
-                      <p className="text-lg text-gray-800 font-medium leading-relaxed">
-                        {promptQuestion}
-                      </p>
-                    </div>
-                    <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                      You'll have up to 5 minutes to answer. You can pause and resume anytime.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <h2 className="text-2xl font-semibold mb-4">Ready to Record</h2>
-                    <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                      You'll have up to 5 minutes to record your story. You can pause and
-                      resume anytime.
-                    </p>
-                  </>
-                )}
+                <h2 className="text-2xl font-semibold mb-4">Ready to Record</h2>
+                <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                  You'll have up to 5 minutes to record. You can pause and resume anytime.
+                </p>
 
-                <Button
-                  onClick={startRecording}
-                  size="lg"
-                  className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-12 py-6 text-lg rounded-full shadow-lg"
-                >
-                  <Mic className="w-5 h-5 mr-2" />
-                  Start Recording
-                </Button>
+                <div className="flex gap-3 justify-center">
+                  <Button
+                    onClick={() => setMode('select')}
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full px-6"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={startRecording}
+                    size="lg"
+                    className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-12 py-6 text-lg rounded-full shadow-lg"
+                  >
+                    <Mic className="w-5 h-5 mr-2" />
+                    Start Recording
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Text Input Mode */}
+            {mode === 'text' && (
+              <motion.div
+                key="text"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="py-6"
+              >
+                <div className="text-center mb-6">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                    <PenTool className="w-10 h-10 text-blue-700" />
+                  </div>
+                  <h2 className="text-2xl font-semibold mb-2">Type Your Story</h2>
+                  <p className="text-gray-600 text-sm">
+                    Take your time to write your memory
+                  </p>
+                </div>
+
+                <textarea
+                  value={textStory}
+                  onChange={(e) => setTextStory(e.target.value)}
+                  placeholder={promptQuestion ? "Type your answer here..." : "Type your story here..."}
+                  className="w-full h-64 p-4 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none text-base"
+                  autoFocus
+                />
+
+                <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
+                  <span>{textStory.length} characters</span>
+                  <span>{textStory.split(/\s+/).filter(w => w.length > 0).length} words</span>
+                </div>
+
+                <div className="flex gap-3 justify-center mt-6">
+                  <Button
+                    onClick={() => {
+                      setMode('select');
+                      setTextStory('');
+                    }}
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full px-6"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={handleTextSubmit}
+                    size="lg"
+                    disabled={!textStory.trim() || isSavingText}
+                    className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-12 rounded-full shadow-lg disabled:opacity-50"
+                  >
+                    {isSavingText ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        Continue
+                      </>
+                    )}
+                  </Button>
+                </div>
               </motion.div>
             )}
 

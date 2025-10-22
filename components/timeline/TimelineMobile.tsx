@@ -1646,6 +1646,7 @@ export function TimelineMobile() {
           story={selectedStory}
           stories={stories}
           isOpen={overlayOpen}
+          originPath="/timeline"
           onClose={() => {
             setOverlayOpen(false);
             setSelectedStory(null);
