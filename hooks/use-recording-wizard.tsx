@@ -146,7 +146,7 @@ export function useRecordingWizard({
         transcription: data.useEnhanced ? data.enhancedTranscript : data.originalTranscript,
         audioUrl,
         durationSeconds: data.recording.duration || 30, // Changed from 'duration' to 'durationSeconds' with fallback
-        wisdomClipText: data.lessonLearned.trim() || null,
+        wisdomClipText: data.lessonLearned?.trim() || "",
         photos: photoUploads,
         metadata: {
           recordingMode: data.recording.mode,

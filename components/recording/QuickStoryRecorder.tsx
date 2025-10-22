@@ -1,13 +1,14 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Mic, Pause, Play, Square, RotateCcw, X, Loader2, PenTool } from "lucide-react";
+import { Mic, Pause, Play, Square, RotateCcw, X, Loader2, PenTool, Upload } from "lucide-react";
 import { useQuickRecorder } from "@/hooks/use-quick-recorder";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { NavCache } from "@/lib/navCache";
+import { navCache } from "@/lib/navCache";
+import { useAuth } from "@/lib/auth";
 
 interface QuickStoryRecorderProps {
   isOpen: boolean;
@@ -27,9 +28,12 @@ interface QuickStoryRecorderProps {
  */
 export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickStoryRecorderProps) {
   const router = useRouter();
+  const { session } = useAuth();
   const [mode, setMode] = useState<'select' | 'voice' | 'text'>('select');
   const [textStory, setTextStory] = useState('');
   const [isSavingText, setIsSavingText] = useState(false);
+  const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     state,
@@ -63,23 +67,79 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
     setIsSavingText(true);
 
     // Save to NavCache for the wizard
-    const cacheKey = NavCache.setData({
-      recording: {
-        mode: 'text',
-        duration: 0,
-        url: null,
-        audioBlob: null,
-      },
-      transcription: {
-        raw: textStory.trim(),
-        formatted: textStory.trim(),
-      },
-      promptQuestion: promptQuestion || null,
+    const cacheKey = navCache.store({
+      mode: 'quick',
+      transcription: textStory.trim(),
+      rawTranscript: textStory.trim(),
+      duration: 0,
+      prompt: promptQuestion ? {
+        title: 'Your Question',
+        text: promptQuestion,
+      } : undefined,
     });
 
     // Navigate to wizard
     router.push(`/review/book-style?nav=${cacheKey}&mode=wizard`);
     onClose();
+  };
+
+  // Handle audio file upload
+  const handleAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingAudio(true);
+
+    try {
+      // Create FormData and upload to transcription endpoint
+      const formData = new FormData();
+      formData.append('audio', file);
+
+      const response = await fetch('/api/transcribe-assemblyai', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to transcribe audio');
+      }
+
+      const data = await response.json();
+      console.log('[QuickStoryRecorder] Transcription response:', data);
+
+      // Extract transcription text (the API returns it as a string)
+      const transcriptionText = data.transcription || data.text || '';
+      console.log('[QuickStoryRecorder] Extracted transcription:', transcriptionText);
+
+      // Save to NavCache for the wizard
+      const cacheKey = navCache.store({
+        mode: 'quick',
+        transcription: transcriptionText,
+        rawTranscript: transcriptionText,
+        enhancedTranscript: transcriptionText, // Add this for the wizard
+        duration: data.duration || 30,
+        audioBlob: file,
+        prompt: promptQuestion ? {
+          title: 'Your Question',
+          text: promptQuestion,
+        } : undefined,
+      });
+
+      // Navigate to wizard
+      router.push(`/review/book-style?nav=${cacheKey}&mode=wizard`);
+      onClose();
+    } catch (error) {
+      console.error('Error uploading audio:', error);
+      alert('Failed to process audio file. Please try again.');
+    } finally {
+      setIsUploadingAudio(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   const handleClose = () => {
@@ -111,6 +171,9 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
         <DialogTitle className="sr-only">
           Quick Story Recorder
         </DialogTitle>
+        <DialogDescription className="sr-only">
+          Record or type your story. Choose between voice recording or text entry.
+        </DialogDescription>
 
         <div className="relative">
           <AnimatePresence mode="wait">
@@ -231,6 +294,35 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
                   <span>{textStory.length} characters</span>
                   <span>{textStory.split(/\s+/).filter(w => w.length > 0).length} words</span>
+                </div>
+
+                {/* Subtle upload audio link */}
+                <div className="text-center mt-4">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleAudioUpload}
+                    className="hidden"
+                    disabled={isUploadingAudio}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingAudio}
+                    className="text-sm text-gray-500 hover:text-gray-700 underline disabled:opacity-50"
+                  >
+                    {isUploadingAudio ? (
+                      <>
+                        <Loader2 className="inline w-3 h-3 mr-1 animate-spin" />
+                        Processing audio...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="inline w-3 h-3 mr-1" />
+                        or upload an audio file instead
+                      </>
+                    )}
+                  </button>
                 </div>
 
                 <div className="flex gap-3 justify-center mt-6">

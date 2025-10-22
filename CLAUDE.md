@@ -126,6 +126,25 @@ HeritageWhisperV2/
 
 ## 🤖 AI Features
 
+### Pearl - The Documentary Interviewer
+
+Pearl is HeritageWhisper's conversational AI interviewer that helps users capture vivid life stories through natural dialogue. Implemented via OpenAI Realtime API with WebRTC audio streaming.
+
+**Key Features:**
+- **Expert interviewing techniques**: Draws out sensory details, emotions, and forgotten moments
+- **Personalization**: References user's previous stories, people, and places naturally in conversation
+- **Warm personality**: Uses encouragement and gentle redirects instead of harsh refusals
+- **Multi-layer safety**: Model instructions + token limits + response trimmer + scope enforcer
+- **30-minute sessions**: With automatic completion and story saving
+
+**Implementation Files:**
+- `/hooks/use-realtime-interview.tsx` - Pearl's prompt configuration
+- `/lib/scopeEnforcer.ts` - Off-topic detection and prevention
+- `/lib/realtimeClient.ts` - WebRTC connection management
+- `/app/interview-chat/` - Conversation UI
+
+**For detailed prompt engineering documentation, see `AI_PROMPTING.md`**
+
 ### AI Prompt Generation System v1.4 (PRODUCTION READY)
 
 Intelligent reflection prompt system that helps users deepen their storytelling through AI-generated questions.
@@ -1567,5 +1586,6 @@ Wired up Pearl to speak first when conversation starts, with support for prompt 
 
 ---
 
-_Last updated: October 21, 2025_
+_Last updated: January 21, 2025_
 _For historical fixes, feature archives, and migration notes, see CLAUDE_HISTORY.md_
+_For AI prompting documentation, see AI_PROMPTING.md_

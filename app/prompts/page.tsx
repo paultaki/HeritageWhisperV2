@@ -283,7 +283,7 @@ export default function PromptsPage() {
         >
           {/* Header */}
           <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200/50">
-        <div className="px-6 py-5" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+        <div className="px-6 py-5" style={{ maxWidth: "900px", margin: "0 auto" }}>
           <div className="flex items-center gap-3">
             <Image
               src="/h-whiper.png"
@@ -301,7 +301,7 @@ export default function PromptsPage() {
       </header>
 
       {/* Content */}
-      <div className="px-6 py-10 space-y-10" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+      <div className="px-6 py-10 space-y-10" style={{ maxWidth: "900px", margin: "0 auto" }}>
         {/* AI Disabled State */}
         {!isAILoading && !isAIEnabled && (
           <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-6">
