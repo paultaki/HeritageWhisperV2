@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useRecordingWizard } from "@/hooks/use-recording-wizard";
 import { type PostRecordingData } from "@/types/recording";
 import { processConversationData } from "@/lib/conversationEnhancement";
@@ -12,6 +12,7 @@ import { Step1_TitleYear } from "./Step1_TitleYear";
 import { Step2_Photos } from "./Step2_Photos";
 import { Step3_Review } from "./Step3_Review";
 import { Step4_Lesson } from "./Step4_Lesson";
+import { useRouter } from "next/navigation";
 
 interface PostRecordingWizardProps {
   initialData: Partial<PostRecordingData>;
@@ -31,8 +32,15 @@ export function PostRecordingWizard({
   initialData,
   onComplete,
 }: PostRecordingWizardProps) {
+  const router = useRouter();
   const wizard = useRecordingWizard({ initialData, onComplete });
   const [isEnhancing, setIsEnhancing] = useState(false);
+
+  const handleCancel = () => {
+    if (window.confirm("Are you sure you want to cancel? Your progress will be lost.")) {
+      router.push("/timeline");
+    }
+  };
 
   // Auto-enhance transcripts when component mounts
   useEffect(() => {
@@ -223,15 +231,28 @@ export function PostRecordingWizard({
 
       {/* Navigation Buttons */}
       <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
-        <Button
-          onClick={prevStep}
-          disabled={!canGoPrev || isSubmitting}
-          variant="outline"
-          size="lg"
-          className="px-8"
-        >
-          Back
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={prevStep}
+            disabled={!canGoPrev || isSubmitting}
+            variant="outline"
+            size="lg"
+            className="px-8"
+          >
+            Back
+          </Button>
+
+          <Button
+            onClick={handleCancel}
+            disabled={isSubmitting}
+            variant="ghost"
+            size="lg"
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <X className="w-4 h-4 mr-2" />
+            Cancel
+          </Button>
+        </div>
 
         {!isLastStep ? (
           <Button

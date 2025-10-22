@@ -35,6 +35,96 @@ import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+// Category prompts data
+const CATEGORY_PROMPTS: Record<string, string[]> = {
+  childhood: [
+    "What's your earliest memory?",
+    "What games did you play as a child?",
+    "Who was your best friend growing up?",
+    "What was your favorite toy?",
+    "What did your childhood home look like?",
+    "What was Sunday dinner like in your family?",
+    "What was your favorite hiding spot?",
+    "What scared you most as a child?",
+  ],
+  school: [
+    "Who was your favorite teacher and why?",
+    "What was your most embarrassing moment in school?",
+    "What subject did you love or hate most?",
+    "Tell me about your first day of school",
+    "What was in your lunchbox?",
+    "What trouble did you get into at school?",
+    "What was your proudest school achievement?",
+    "Who was your first crush?",
+  ],
+  work: [
+    "What was your first job?",
+    "How much did you make at your first job?",
+    "Who taught you the most about work?",
+    "What was your biggest career mistake?",
+    "Tell me about a boss you'll never forget",
+    "What job did you dream of having?",
+    "What was the hardest day at work?",
+    "When did you know it was time to retire?",
+  ],
+  family: [
+    "How did you meet your spouse?",
+    "What was your wedding day like?",
+    "Tell me about the day your first child was born",
+    "What family tradition do you cherish most?",
+    "What's your favorite family vacation memory?",
+    "What did you learn from your parents?",
+    "What do you wish you'd asked your parents?",
+    "What's the funniest thing your kids ever did?",
+  ],
+  places: [
+    "What place feels most like home to you?",
+    "Where did you go on your honeymoon?",
+    "What's the farthest you've ever traveled?",
+    "What place would you love to see again?",
+    "Where did you feel most at peace?",
+    "What was your neighborhood like growing up?",
+    "Tell me about a place that changed your life",
+    "Where would you go if you could go anywhere?",
+  ],
+  hobbies: [
+    "What hobby brought you the most joy?",
+    "What skill are you most proud of learning?",
+    "What collection did you have?",
+    "What was your favorite way to spend a Saturday?",
+    "What book changed your life?",
+    "What music takes you back?",
+    "What sport did you love to play or watch?",
+    "What craft or art did you create?",
+  ],
+  food: [
+    "What meal reminds you most of home?",
+    "What was your grandmother's best dish?",
+    "What food did you hate as a child but love now?",
+    "What was your family's Sunday dinner like?",
+    "Tell me about a memorable holiday meal",
+    "What recipe do you wish you had?",
+    "What was your favorite restaurant?",
+    "What food takes you back to childhood?",
+  ],
+  milestones: [
+    "What was the happiest day of your life?",
+    "What achievement are you most proud of?",
+    "When did you feel most brave?",
+    "What was your biggest turning point?",
+    "Tell me about a time you surprised yourself",
+    "What risk was worth taking?",
+    "When did you know you were in love?",
+    "What moment changed everything?",
+  ],
+};
 
 // Types remain the same
 interface QueuedPrompt {
@@ -267,6 +357,10 @@ export default function PromptsV2Page() {
   const { data: familyData } = useQuery<{ prompts: FamilyPrompt[] }>({
     queryKey: ["/api/prompts/family-submitted"],
     enabled: !!user,
+    retry: false, // Don't retry if the endpoint doesn't exist
+    meta: {
+      errorHandler: false // Suppress error notifications
+    }
   });
 
   const { data: userProfile } = useQuery<{ user: { name: string } }>({
@@ -333,7 +427,7 @@ export default function PromptsV2Page() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 flex">
       {/* Left Sidebar */}
       {isDesktop && <LeftSidebar />}
 
@@ -533,6 +627,44 @@ export default function PromptsV2Page() {
           onClose={modeSelection.closeQuickRecorder}
           promptQuestion={modeSelection.promptQuestion}
         />
+
+        {/* Category Modal */}
+        <Dialog open={!!selectedCategory} onOpenChange={() => setSelectedCategory(null)}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">
+                {selectedCategory && CATEGORIES.find(c => c.id === selectedCategory)?.label} Questions
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-6 grid gap-4">
+              {selectedCategory && CATEGORY_PROMPTS[selectedCategory]?.map((question, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <SimplePromptCard
+                    prompt={{
+                      id: `${selectedCategory}-${index}`,
+                      prompt_text: question,
+                      source: 'catalog'
+                    }}
+                    icon={CATEGORIES.find(c => c.id === selectedCategory)?.icon}
+                    color={CATEGORIES.find(c => c.id === selectedCategory)?.color}
+                    onRecord={(id, text) => {
+                      handleRecord(id, text, 'catalog');
+                      setSelectedCategory(null);
+                    }}
+                    onSave={(id, text) => {
+                      handleSave(id, text, 'catalog');
+                    }}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
