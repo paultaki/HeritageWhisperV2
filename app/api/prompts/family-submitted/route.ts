@@ -43,13 +43,35 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // V3: Support storyteller_id query parameter for family sharing
+    const { searchParams } = new URL(request.url);
+    const storytellerId = searchParams.get('storyteller_id') || user.id;
+
+    // If requesting another storyteller's prompts, verify access permission
+    if (storytellerId !== user.id) {
+      const { data: hasAccess, error: accessError } = await supabaseAdmin.rpc(
+        'has_collaboration_access',
+        {
+          p_user_id: user.id,
+          p_storyteller_id: storytellerId,
+        }
+      );
+
+      if (accessError || !hasAccess) {
+        return NextResponse.json(
+          { error: "You don't have permission to view these prompts" },
+          { status: 403 }
+        );
+      }
+    }
+
     // Fetch pending family-submitted prompts with submitter information
+    // Note: Omitted 'context' field - column may not exist in current schema
     const { data: familyPrompts, error: promptsError } = await supabaseAdmin
       .from('family_prompts')
       .select(`
         id,
         prompt_text,
-        context,
         status,
         created_at,
         submitted_by_family_member_id,
@@ -60,7 +82,7 @@ export async function GET(request: NextRequest) {
           relationship
         )
       `)
-      .eq('storyteller_user_id', user.id)
+      .eq('storyteller_user_id', storytellerId)
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
@@ -78,7 +100,6 @@ export async function GET(request: NextRequest) {
       return {
         id: prompt.id,
         prompt_text: prompt.prompt_text,
-        context_note: prompt.context,
         source: 'family' as const,
         status: prompt.status,
         created_at: prompt.created_at,
