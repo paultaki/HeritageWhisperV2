@@ -4,21 +4,129 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mic, ChevronDown, ChevronUp, Settings, Brain } from "lucide-react";
+import {
+  Mic,
+  Heart,
+  Clock,
+  Sparkles,
+  BookOpen,
+  Users,
+  MapPin,
+  Calendar,
+  Star,
+  ChevronRight,
+  HelpCircle,
+  Bookmark,
+  MessageCircle,
+  Home,
+  Briefcase,
+  GraduationCap,
+  Baby,
+  Music,
+  Utensils
+} from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
 import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
-import MoreIdeas from "@/components/MoreIdeas";
-import PromptCard from "@/components/PromptCard";
-import { useAIConsent } from "@/hooks/use-ai-consent";
 import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
+// Category prompts data
+const CATEGORY_PROMPTS: Record<string, string[]> = {
+  childhood: [
+    "What's your earliest memory?",
+    "What games did you play as a child?",
+    "Who was your best friend growing up?",
+    "What was your favorite toy?",
+    "What did your childhood home look like?",
+    "What was Sunday dinner like in your family?",
+    "What was your favorite hiding spot?",
+    "What scared you most as a child?",
+  ],
+  school: [
+    "Who was your favorite teacher and why?",
+    "What was your most embarrassing moment in school?",
+    "What subject did you love or hate most?",
+    "Tell me about your first day of school",
+    "What was in your lunchbox?",
+    "What trouble did you get into at school?",
+    "What was your proudest school achievement?",
+    "Who was your first crush?",
+  ],
+  work: [
+    "What was your first job?",
+    "How much did you make at your first job?",
+    "Who taught you the most about work?",
+    "What was your biggest career mistake?",
+    "Tell me about a boss you'll never forget",
+    "What job did you dream of having?",
+    "What was the hardest day at work?",
+    "When did you know it was time to retire?",
+  ],
+  family: [
+    "How did you meet your spouse?",
+    "What was your wedding day like?",
+    "Tell me about the day your first child was born",
+    "What family tradition do you cherish most?",
+    "What's your favorite family vacation memory?",
+    "What did you learn from your parents?",
+    "What do you wish you'd asked your parents?",
+    "What's the funniest thing your kids ever did?",
+  ],
+  places: [
+    "What place feels most like home to you?",
+    "Where did you go on your honeymoon?",
+    "What's the farthest you've ever traveled?",
+    "What place would you love to see again?",
+    "Where did you feel most at peace?",
+    "What was your neighborhood like growing up?",
+    "Tell me about a place that changed your life",
+    "Where would you go if you could go anywhere?",
+  ],
+  hobbies: [
+    "What hobby brought you the most joy?",
+    "What skill are you most proud of learning?",
+    "What collection did you have?",
+    "What was your favorite way to spend a Saturday?",
+    "What book changed your life?",
+    "What music takes you back?",
+    "What sport did you love to play or watch?",
+    "What craft or art did you create?",
+  ],
+  food: [
+    "What meal reminds you most of home?",
+    "What was your grandmother's best dish?",
+    "What food did you hate as a child but love now?",
+    "What was your family's Sunday dinner like?",
+    "Tell me about a memorable holiday meal",
+    "What recipe do you wish you had?",
+    "What was your favorite restaurant?",
+    "What food takes you back to childhood?",
+  ],
+  milestones: [
+    "What was the happiest day of your life?",
+    "What achievement are you most proud of?",
+    "When did you feel most brave?",
+    "What was your biggest turning point?",
+    "Tell me about a time you surprised yourself",
+    "What risk was worth taking?",
+    "When did you know you were in love?",
+    "What moment changed everything?",
+  ],
+};
+
+// Types remain the same
 interface QueuedPrompt {
   id: string;
   prompt_text: string;
@@ -43,18 +151,6 @@ interface ActivePrompt {
   anchor_year?: number;
 }
 
-interface ArchivedPrompt {
-  id: string;
-  prompt_text: string;
-  context_note?: string | null;
-  source: 'ai' | 'catalog';
-  category?: string;
-  tier?: number;
-  dismissed_at: string;
-  anchor_entity?: string;
-  anchor_year?: number;
-}
-
 interface FamilyPrompt {
   id: string;
   prompt_text: string;
@@ -70,192 +166,257 @@ interface FamilyPrompt {
   };
 }
 
-export default function PromptsPage() {
+// Category data with icons and colors
+const CATEGORIES = [
+  { id: 'childhood', label: 'Childhood', icon: Baby, color: 'from-blue-400 to-blue-500' },
+  { id: 'school', label: 'School Days', icon: GraduationCap, color: 'from-green-400 to-green-500' },
+  { id: 'work', label: 'Work & Career', icon: Briefcase, color: 'from-purple-400 to-purple-500' },
+  { id: 'family', label: 'Family Life', icon: Home, color: 'from-pink-400 to-pink-500' },
+  { id: 'places', label: 'Places & Travel', icon: MapPin, color: 'from-orange-400 to-orange-500' },
+  { id: 'hobbies', label: 'Hobbies & Interests', icon: Music, color: 'from-indigo-400 to-indigo-500' },
+  { id: 'food', label: 'Food & Traditions', icon: Utensils, color: 'from-red-400 to-red-500' },
+  { id: 'milestones', label: 'Life Milestones', icon: Star, color: 'from-yellow-400 to-yellow-500' },
+];
+
+// Featured prompt card component
+function FeaturedPromptCard({ prompt, onRecord }: { prompt: any; onRecord: (id: string, text: string, source: string) => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 p-8 md:p-12"
+    >
+      {/* Decorative elements */}
+      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-orange-200 to-rose-200 opacity-20 blur-3xl" />
+      <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-gradient-to-br from-amber-200 to-orange-200 opacity-20 blur-3xl" />
+
+      <div className="relative">
+        {/* Badge */}
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 backdrop-blur">
+          <Sparkles className="h-5 w-5 text-orange-500" />
+          <span className="text-base font-medium text-gray-700">Today's Featured Question</span>
+        </div>
+
+        {/* Question */}
+        <h2 className="mb-4 text-3xl md:text-4xl font-semibold text-gray-900 leading-relaxed">
+          {prompt.prompt_text}
+        </h2>
+
+        {/* Context if available */}
+        {prompt.context_note && (
+          <p className="mb-8 text-xl text-gray-600">
+            {prompt.context_note}
+          </p>
+        )}
+
+        {/* Action button */}
+        <Button
+          onClick={() => onRecord(prompt.id, prompt.prompt_text, prompt.source)}
+          size="lg"
+          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 text-base md:text-lg px-6 md:px-8 py-4 md:py-6 rounded-2xl h-auto"
+        >
+          <Mic className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6 flex-shrink-0" />
+          <span>Record Your Answer</span>
+        </Button>
+      </div>
+    </motion.div>
+  );
+}
+
+// Simple prompt card for grid layout
+function SimplePromptCard({
+  prompt,
+  icon: Icon,
+  color,
+  onRecord,
+  onSave,
+  isSaved = false
+}: {
+  prompt: any;
+  icon?: any;
+  color?: string;
+  onRecord: (id: string, text: string, source: string) => void;
+  onSave?: (id: string, text: string, source: string) => void;
+  isSaved?: boolean;
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ y: -4 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      className="group relative rounded-2xl bg-white p-6 shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-100"
+    >
+      {/* Icon or category indicator */}
+      {Icon && (
+        <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${color || 'from-gray-400 to-gray-500'} text-white shadow-md`}>
+          <Icon className="h-6 w-6" />
+        </div>
+      )}
+
+      {/* Question text */}
+      <p className="mb-6 text-xl font-medium text-gray-900 leading-relaxed">
+        {prompt.prompt_text}
+      </p>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 md:gap-3">
+        {onSave && (
+          <Button
+            onClick={() => onSave(prompt.id, prompt.prompt_text, prompt.source || 'catalog')}
+            size="lg"
+            variant="outline"
+            className={`flex-shrink-0 w-12 h-12 p-0 flex items-center justify-center ${isSaved ? 'bg-orange-50 border-orange-300' : ''}`}
+          >
+            <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-orange-500 text-orange-500' : ''}`} />
+          </Button>
+        )}
+
+        <Button
+          onClick={() => onRecord(prompt.id, prompt.prompt_text, prompt.source || 'catalog')}
+          size="lg"
+          className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-lg md:text-xl py-4 md:py-5 px-6 md:px-8 h-auto font-medium rounded-full"
+        >
+          <Mic className="mr-2 md:mr-2.5 h-5 md:h-6 w-5 md:w-6 flex-shrink-0" />
+          <span className="whitespace-nowrap">Record</span>
+        </Button>
+      </div>
+    </motion.div>
+  );
+}
+
+// Family prompt card with special styling
+function FamilyPromptCard({
+  prompt,
+  onRecord
+}: {
+  prompt: FamilyPrompt;
+  onRecord: (id: string, text: string, source: string) => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ y: -4 }}
+      className="group relative rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 p-6 border-2 border-blue-200"
+    >
+      {/* From badge */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Heart className="h-5 w-5 text-blue-600 fill-blue-600" />
+          <span className="text-base font-semibold text-blue-700">
+            From {prompt.submittedBy.name}
+            {prompt.submittedBy.relationship && ` • ${prompt.submittedBy.relationship}`}
+          </span>
+        </div>
+      </div>
+
+      {/* Question */}
+      <p className="mb-6 text-xl font-medium text-gray-900 leading-relaxed">
+        {prompt.prompt_text}
+      </p>
+
+      {/* Action */}
+      <Button
+        onClick={() => onRecord(prompt.id, prompt.prompt_text, 'family')}
+        size="lg"
+        className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white text-base py-3 md:py-4 px-4 md:px-6 h-auto"
+      >
+        <MessageCircle className="mr-1.5 md:mr-2 h-4 md:h-5 w-4 md:w-5 flex-shrink-0" />
+        <span>Answer {prompt.submittedBy.name.split(' ')[0]}'s Question</span>
+      </Button>
+    </motion.div>
+  );
+}
+
+// Main component
+export default function PromptsV2Page() {
   const { user } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const modeSelection = useModeSelection();
-  const { isEnabled: isAIEnabled, isLoading: isAILoading } = useAIConsent();
-  const [showArchived, setShowArchived] = useState(false);
-  const [showAllQueued, setShowAllQueued] = useState(false);
-  const [showAllActive, setShowAllActive] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
-  // Fetch user profile to get their name
+  // Fetch data (same queries as before)
+  const { data: queuedData, isLoading: queuedLoading } = useQuery<{ prompts: QueuedPrompt[] }>({
+    queryKey: ["/api/prompts/queued"],
+    enabled: !!user,
+  });
+
+  const { data: activeData, isLoading: activeLoading } = useQuery<{ prompts: ActivePrompt[] }>({
+    queryKey: ["/api/prompts/active"],
+    enabled: !!user,
+  });
+
+  const { data: familyData } = useQuery<{ prompts: FamilyPrompt[] }>({
+    queryKey: ["/api/prompts/family-submitted"],
+    enabled: !!user,
+    retry: false, // Don't retry if the endpoint doesn't exist
+    meta: {
+      errorHandler: false // Suppress error notifications
+    }
+  });
+
   const { data: userProfile } = useQuery<{ user: { name: string } }>({
     queryKey: ["/api/user/profile"],
     enabled: !!user,
   });
 
-  // Get user's first name from database or fallback to email
+  // Get user's first name
   const firstName = userProfile?.user?.name?.split(' ')[0]
     || user?.user_metadata?.name?.split(' ')[0]
     || user?.user_metadata?.full_name?.split(' ')[0]
     || user?.email?.split('@')[0]
     || 'You';
 
-  // Fetch queued prompts
-  const { data: queuedData, isLoading: queuedLoading } = useQuery<{ prompts: QueuedPrompt[] }>({
-    queryKey: ["/api/prompts/queued"],
-    enabled: !!user,
-  });
-
-  // Fetch active (personalized) prompts
-  const { data: activeData, isLoading: activeLoading } = useQuery<{ prompts: ActivePrompt[] }>({
-    queryKey: ["/api/prompts/active"],
-    enabled: !!user,
-  });
-
-  // Fetch archived prompts (always fetch to show count, but only display when expanded)
-  const { data: archivedData, isLoading: archivedLoading } = useQuery<{ prompts: ArchivedPrompt[] }>({
-    queryKey: ["/api/prompts/archived"],
-    enabled: !!user,
-  });
-
-  // Fetch family-submitted prompts
-  const { data: familyData, isLoading: familyLoading } = useQuery<{ prompts: FamilyPrompt[] }>({
-    queryKey: ["/api/prompts/family-submitted"],
-    enabled: !!user,
-  });
-
-  // Queue mutation - adds prompts to queue
+  // Mutations
   const queueMutation = useMutation({
-    mutationFn: async ({ promptId, source, text, category }: {
-      promptId: string;
-      source: 'ai' | 'catalog';
-      text: string;
-      category?: string;
-    }) => {
-      const response = await apiRequest("POST", "/api/prompts/queue", {
-        promptId: source === 'ai' ? promptId : undefined,
-        source,
-        text: source === 'catalog' ? text : undefined,
-        category: source === 'catalog' ? category : undefined,
-      });
-      return response.json();
-    },
+    mutationFn: ({ promptId, source, text }: any) =>
+      apiRequest(`/api/prompts/queue`, {
+        method: "POST",
+        body: JSON.stringify({ promptId, source, text }),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/prompts/queued"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/active"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/archived"] });
       toast({
-        title: "Added to queue",
-        description: "This prompt is now in your queue",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to add to queue",
-        variant: "destructive",
+        title: "Saved for later",
+        description: "You can find this prompt in your saved section",
       });
     },
   });
 
-  // Dismiss mutation - moves prompts to archive
-  const dismissMutation = useMutation({
-    mutationFn: async ({ promptId, source, text, category }: {
-      promptId: string;
-      source: 'ai' | 'catalog';
-      text: string;
-      category?: string;
-    }) => {
-      const response = await apiRequest("POST", "/api/prompts/dismiss", {
-        promptId: source === 'ai' ? promptId : undefined,
-        source,
-        text: source === 'catalog' ? text : undefined,
-        category: source === 'catalog' ? category : undefined,
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/queued"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/active"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/archived"] });
-      toast({
-        title: "Moved to archive",
-        description: "This prompt has been archived",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to dismiss prompt",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Delete mutation - permanently deletes prompts
-  const deleteMutation = useMutation({
-    mutationFn: async ({ promptId, source }: {
-      promptId: string;
-      source: 'ai' | 'catalog';
-    }) => {
-      // Single endpoint handles both AI and catalog prompts
-      const response = await apiRequest("DELETE", `/api/prompts/${promptId}`, {});
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/archived"] });
-      toast({
-        title: "Prompt deleted",
-        description: "This prompt has been permanently removed",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete prompt",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Listen for refresh events from MoreIdeas component
-  useEffect(() => {
-    const handleRefresh = () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/queued"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/active"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/prompts/archived"] });
-    };
-
-    window.addEventListener('refreshPrompts', handleRefresh);
-    return () => window.removeEventListener('refreshPrompts', handleRefresh);
-  }, [queryClient]);
-
-  const handleRecord = (promptId: string, promptText: string, source: 'ai' | 'catalog' | 'family') => {
-    // Store prompt ID for tracking
+  const handleRecord = (promptId: string, promptText: string, source: string) => {
     if (source === 'ai') {
       sessionStorage.setItem("activePromptId", promptId);
     }
-    // Open mode selection modal with the selected prompt question
     modeSelection.openModal(promptText);
   };
 
-  const handleQueue = (id: string, text: string, source: 'ai' | 'catalog', category?: string) => {
-    queueMutation.mutate({ promptId: id, source, text, category });
+  const handleSave = (id: string, text: string, source: string) => {
+    queueMutation.mutate({ promptId: id, source, text });
   };
 
-  const handleDismiss = (id: string, text: string, source: 'ai' | 'catalog', category?: string) => {
-    dismissMutation.mutate({ promptId: id, source, text, category });
-  };
-
-  const handleDelete = (id: string, source: 'ai' | 'catalog') => {
-    deleteMutation.mutate({ promptId: id, source });
-  };
-
-  const isAnyMutationPending = queueMutation.isPending || dismissMutation.isPending || deleteMutation.isPending;
-
+  // Data
   const queuedPrompts = queuedData?.prompts || [];
   const activePrompts = activeData?.prompts || [];
-  const archivedPrompts = archivedData?.prompts || [];
   const familyPrompts = familyData?.prompts || [];
 
-  // Progressive disclosure: show 2 initially
-  const displayedQueuedPrompts = showAllQueued ? queuedPrompts : queuedPrompts.slice(0, 2);
-  const displayedActivePrompts = showAllActive ? activePrompts : activePrompts.slice(0, 2);
+  // Get featured prompt (first active or queued)
+  const featuredPrompt = activePrompts[0] || queuedPrompts[0] || {
+    id: 'default',
+    prompt_text: "What's a smell that instantly takes you back to childhood?",
+    context_note: "Sensory memories are often the most vivid and can unlock forgotten stories.",
+    source: 'catalog'
+  };
+
+  // Get quick start prompts (next 3)
+  const quickStartPrompts = [...activePrompts.slice(1, 4), ...queuedPrompts.slice(0, 3)].slice(0, 3);
 
   if (!user) {
     return (
@@ -266,344 +427,244 @@ export default function PromptsPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex"
-      style={{ backgroundColor: "#FFF8F3" }}
-    >
-      {/* Left Sidebar */}
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 flex flex-col md:flex-row">
+      {/* Left Sidebar - Desktop only */}
       {isDesktop && <LeftSidebar />}
 
       {/* Main content */}
-      <main className="flex-1 min-w-0 pb-20 md:pb-0">
-        <div
-          style={{
-            background: "linear-gradient(to bottom, #fafaf9 0%, #f5f5f4 50%, #fafaf9 100%)",
-            minHeight: "100vh",
-          }}
-        >
-          {/* Header */}
-          <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200/50">
-        <div className="px-6 py-5" style={{ maxWidth: "900px", margin: "0 auto" }}>
-          <div className="flex items-center gap-3">
-            <Image
-              src="/h-whiper.png"
-              alt="Heritage Whisper"
-              width={36}
-              height={36}
-              className="h-9 w-auto"
-            />
-            <div>
-              <h1 className="text-[26px] font-semibold tracking-tight text-gray-900">Story Prompts</h1>
-              <p className="text-sm text-gray-600 mt-0.5">Thoughtful questions to spark your next memory</p>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Content */}
-      <div className="px-6 py-10 space-y-10" style={{ maxWidth: "900px", margin: "0 auto" }}>
-        {/* AI Disabled State */}
-        {!isAILoading && !isAIEnabled && (
-          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <Brain className="w-6 h-6 text-amber-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  AI Prompts Disabled
-                </h3>
-                <p className="text-gray-700 mb-4">
-                  AI-generated story prompts are currently disabled for your account. Enable AI processing in Settings to get personalized prompts based on your stories.
-                </p>
-                <Button
-                  onClick={() => router.push("/profile#ai-processing")}
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium"
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Go to Settings
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Section 1: Your Prompt Queue */}
-        <section>
-          <div className="flex items-center gap-3 mb-5">
-            <h2 className="text-[19px] font-semibold tracking-tight text-gray-900">
-              Your Queue
-            </h2>
-            <span className="text-sm text-gray-500 font-medium">
-              {queuedPrompts.length} {queuedPrompts.length === 1 ? 'prompt' : 'prompts'}
-            </span>
-          </div>
-
-          <div
-            className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50"
-            style={{
-              padding: "20px",
-              borderRadius: "16px",
-            }}
-          >
-            {queuedLoading ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">Loading your queue...</p>
-              </div>
-            ) : queuedPrompts.length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="text-base text-gray-600">
-                  Your queue is empty. Add prompts from below!
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {displayedQueuedPrompts.map((prompt, index) => (
-                    <PromptCard
-                      key={prompt.id}
-                      id={prompt.id}
-                      promptText={prompt.prompt_text}
-                      contextNote={prompt.context_note}
-                      source={prompt.source}
-                      category={prompt.category}
-                      anchorEntity={prompt.anchor_entity}
-                      anchorYear={prompt.anchor_year}
-                      variant="queue"
-                      index={index}
-                      onRecord={handleRecord}
-                      onDismiss={handleDismiss}
-                      onDelete={handleDelete}
-                      isLoading={isAnyMutationPending}
-                    />
-                  ))}
+      <main className="flex-1 min-w-0 pb-24 md:pb-0">
+        {/* Header - Full width */}
+        <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-40 -mx-0">
+          <div className="px-4 md:px-6 py-4 md:py-6" style={{ maxWidth: "1200px", margin: "0 auto" }}>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
+                <Image
+                  src="/h-whiper.png"
+                  alt="Heritage Whisper"
+                  width={40}
+                  height={40}
+                  className="h-8 md:h-10 w-auto flex-shrink-0"
+                />
+                <div className="min-w-0">
+                  <h1 className="text-2xl md:text-4xl font-bold text-gray-900 truncate">
+                    Welcome back, {firstName}!
+                  </h1>
+                  <p className="text-sm md:text-lg text-gray-600 mt-0.5 md:mt-1 hidden sm:block">
+                    Choose a question below to record your next memory
+                  </p>
                 </div>
-                {queuedPrompts.length > 2 && !showAllQueued && (
-                  <button
-                    onClick={() => setShowAllQueued(true)}
-                    className="mt-5 text-[15px] font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200 underline underline-offset-2"
-                  >
-                    Show {queuedPrompts.length - 2} more
-                  </button>
-                )}
-                {showAllQueued && queuedPrompts.length > 2 && (
-                  <button
-                    onClick={() => setShowAllQueued(false)}
-                    className="mt-5 text-[15px] font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200 underline underline-offset-2"
-                  >
-                    Show less
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        </section>
+              </div>
 
-        {/* Section 2: Prompts for {FirstName} (Personalized) */}
-        <section>
-          <div className="flex items-center gap-3 mb-5">
-            <h2 className="text-[19px] font-semibold tracking-tight text-gray-900">
-              For {firstName}
-            </h2>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
-              Personalized
-            </span>
+              {/* Help button */}
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => setShowHelp(!showHelp)}
+                className="text-gray-600 hover:text-gray-900 flex-shrink-0"
+              >
+                <HelpCircle className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
+        </header>
 
-          {/* Family-Submitted Prompts (Priority Display) */}
+        {/* Help overlay */}
+        <AnimatePresence>
+          {showHelp && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-blue-50 border-b border-blue-200 px-6 py-4"
+            >
+              <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+                <h3 className="font-semibold text-blue-900 mb-2 text-lg">How to use this page:</h3>
+                <ul className="text-blue-800 space-y-1 text-base">
+                  <li>• Click "Record" on any question to start recording your story</li>
+                  <li>• Click the bookmark icon to save a question for later</li>
+                  <li>• Questions from family members appear in blue</li>
+                  <li>• Browse categories at the bottom to find more topics</li>
+                </ul>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Content */}
+        <div className="px-6 py-8" style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          {/* Featured Prompt */}
+          <section className="mb-12">
+            <FeaturedPromptCard prompt={featuredPrompt} onRecord={handleRecord} />
+          </section>
+
+          {/* Family Questions (if any) */}
           {familyPrompts.length > 0 && (
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200/50">
-                  💝 From Your Family
-                </span>
-                <span className="text-sm text-gray-500">
-                  {familyPrompts.length} {familyPrompts.length === 1 ? 'question' : 'questions'} they want answered
+            <section className="mb-12">
+              <div className="mb-6 flex items-center gap-3">
+                <Heart className="h-7 w-7 text-blue-600 fill-blue-600" />
+                <h2 className="text-3xl font-bold text-gray-900">
+                  Your Family Wants to Know
+                </h2>
+                <span className="rounded-full bg-blue-100 px-3 py-1 text-base font-medium text-blue-700">
+                  {familyPrompts.length} {familyPrompts.length === 1 ? 'question' : 'questions'}
                 </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {familyPrompts.map((prompt, index) => (
-                  <PromptCard
+
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {familyPrompts.map((prompt) => (
+                  <FamilyPromptCard
                     key={prompt.id}
-                    id={prompt.id}
-                    promptText={prompt.prompt_text}
-                    contextNote={prompt.context_note}
-                    source="family"
-                    variant="family"
-                    index={index}
-                    submittedBy={prompt.submittedBy}
+                    prompt={prompt}
                     onRecord={handleRecord}
-                    onQueue={handleQueue}
-                    onDismiss={handleDismiss}
-                    onDelete={handleDelete}
-                    isLoading={isAnyMutationPending}
                   />
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
-          {/* AI-Generated Personalized Prompts */}
-          <div
-            className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50"
-            style={{
-              padding: "20px",
-              borderRadius: "16px",
-            }}
-          >
-            {activeLoading ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">Loading your personalized prompts...</p>
-              </div>
-            ) : activePrompts.length === 0 && familyPrompts.length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="text-base text-gray-600 mb-4">
-                  New prompts will appear as you share more stories
-                </p>
-                <Button
-                  onClick={() => router.push("/recording")}
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium"
-                >
-                  <Mic className="w-4 h-4 mr-2" />
-                  Record Your First Story
-                </Button>
-              </div>
-            ) : activePrompts.length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="text-base text-gray-600">
-                  More AI-generated prompts will appear as you share stories
+          {/* Quick Start */}
+          {quickStartPrompts.length > 0 && (
+            <section className="mb-12">
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  Quick Start
+                </h2>
+                <p className="text-lg text-gray-600">
+                  Easy questions to get you started
                 </p>
               </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {displayedActivePrompts.map((prompt, index) => (
-                    <PromptCard
+
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {quickStartPrompts.map((prompt) => (
+                  <SimplePromptCard
+                    key={prompt.id}
+                    prompt={prompt}
+                    onRecord={handleRecord}
+                    onSave={handleSave}
+                    isSaved={queuedPrompts.some(q => q.id === prompt.id)}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Saved for Later */}
+          {queuedPrompts.length > 0 && (
+            <section className="mb-12">
+              <div className="mb-6 flex items-center gap-3">
+                <Bookmark className="h-7 w-7 text-orange-600 fill-orange-600" />
+                <h2 className="text-3xl font-bold text-gray-900">
+                  Saved for Later
+                </h2>
+                <span className="rounded-full bg-orange-100 px-3 py-1 text-base font-medium text-orange-700">
+                  {queuedPrompts.length} saved
+                </span>
+              </div>
+
+              <div className="rounded-2xl bg-orange-50/50 p-6 border border-orange-200">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {queuedPrompts.map((prompt) => (
+                    <SimplePromptCard
                       key={prompt.id}
-                      id={prompt.id}
-                      promptText={prompt.prompt_text}
-                      contextNote={prompt.context_note}
-                      source="ai"
-                      anchorEntity={prompt.anchor_entity}
-                      anchorYear={prompt.anchor_year}
-                      variant="personalized"
-                      index={index}
+                      prompt={prompt}
                       onRecord={handleRecord}
-                      onQueue={handleQueue}
-                      onDismiss={handleDismiss}
-                      onDelete={handleDelete}
-                      isLoading={isAnyMutationPending}
+                      onSave={handleSave}
+                      isSaved={true}
                     />
                   ))}
                 </div>
-                {activePrompts.length > 2 && !showAllActive && (
-                  <button
-                    onClick={() => setShowAllActive(true)}
-                    className="mt-5 text-[15px] font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200 underline underline-offset-2"
-                  >
-                    Show {activePrompts.length - 2} more
-                  </button>
-                )}
-                {showAllActive && activePrompts.length > 2 && (
-                  <button
-                    onClick={() => setShowAllActive(false)}
-                    className="mt-5 text-[15px] font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200 underline underline-offset-2"
-                  >
-                    Show less
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        </section>
-
-        {/* More Ideas Section */}
-        <section>
-          <div
-            className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50"
-            style={{
-              padding: "20px",
-              borderRadius: "16px",
-            }}
-          >
-            <MoreIdeas />
-          </div>
-        </section>
-
-        {/* Section 3: Prompt Archive (Dismissed) */}
-        <section>
-          <button
-            onClick={() => setShowArchived(!showArchived)}
-            className="flex items-center gap-3 w-full mb-5 hover:opacity-70 transition-opacity group"
-          >
-            <h2 className="flex-1 text-left text-[19px] font-semibold tracking-tight text-gray-900">
-              Archive
-            </h2>
-            <span className="text-sm text-gray-500 font-medium">
-              {archivedLoading ? '...' : `${archivedPrompts.length} dismissed`}
-            </span>
-            {showArchived ? (
-              <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
-            )}
-          </button>
-
-          {showArchived && (
-            <div
-              className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50"
-              style={{
-                padding: "20px",
-                borderRadius: "16px",
-              }}
-            >
-              {archivedPrompts.length === 0 ? (
-                <p className="text-gray-500 text-base p-4">
-                  Dismissed prompts will appear here
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {archivedPrompts.map((prompt, index) => (
-                    <PromptCard
-                      key={prompt.id}
-                      id={prompt.id}
-                      promptText={prompt.prompt_text}
-                      contextNote={prompt.context_note}
-                      source={prompt.source}
-                      category={prompt.category}
-                      anchorEntity={prompt.anchor_entity}
-                      anchorYear={prompt.anchor_year}
-                      variant="archived"
-                      index={index}
-                      onRecord={handleRecord}
-                      onQueue={handleQueue}
-                      onDismiss={handleDismiss}
-                      onDelete={handleDelete}
-                      isLoading={isAnyMutationPending}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+              </div>
+            </section>
           )}
-        </section>
-      </div>
 
-          {/* Mode Selection Modal */}
-          <ModeSelectionModal
-            isOpen={modeSelection.isOpen}
-            onClose={modeSelection.closeModal}
-            onSelectQuickStory={modeSelection.openQuickRecorder}
-            promptQuestion={modeSelection.promptQuestion}
-          />
+          {/* Browse by Category */}
+          <section>
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Browse Topics
+              </h2>
+              <p className="text-lg text-gray-600">
+                Explore questions by category
+              </p>
+            </div>
 
-          {/* Quick Story Recorder */}
-          <QuickStoryRecorder
-            isOpen={modeSelection.quickRecorderOpen}
-            onClose={modeSelection.closeQuickRecorder}
-            promptQuestion={modeSelection.promptQuestion}
-          />
+            <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+              {CATEGORIES.map((category) => {
+                const Icon = category.icon;
+                return (
+                  <motion.button
+                    key={category.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className="group relative overflow-hidden rounded-2xl bg-white p-6 text-left shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-100"
+                  >
+                    <div className={`mb-3 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br ${category.color} text-white shadow-md`}>
+                      <Icon className="h-7 w-7" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900 text-lg">
+                      {category.label}
+                    </h3>
+                    <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                  </motion.button>
+                );
+              })}
+            </div>
+          </section>
         </div>
+
+        {/* Mode Selection Modal */}
+        <ModeSelectionModal
+          isOpen={modeSelection.isOpen}
+          onClose={modeSelection.closeModal}
+          onSelectQuickStory={modeSelection.openQuickRecorder}
+          promptQuestion={modeSelection.promptQuestion}
+        />
+
+        {/* Quick Story Recorder */}
+        <QuickStoryRecorder
+          isOpen={modeSelection.quickRecorderOpen}
+          onClose={modeSelection.closeQuickRecorder}
+          promptQuestion={modeSelection.promptQuestion}
+        />
+
+        {/* Category Modal */}
+        <Dialog open={!!selectedCategory} onOpenChange={() => setSelectedCategory(null)}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-3xl">
+                {selectedCategory && CATEGORIES.find(c => c.id === selectedCategory)?.label} Questions
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-6 grid gap-4">
+              {selectedCategory && CATEGORY_PROMPTS[selectedCategory]?.map((question, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <SimplePromptCard
+                    prompt={{
+                      id: `${selectedCategory}-${index}`,
+                      prompt_text: question,
+                      source: 'catalog'
+                    }}
+                    icon={CATEGORIES.find(c => c.id === selectedCategory)?.icon}
+                    color={CATEGORIES.find(c => c.id === selectedCategory)?.color}
+                    onRecord={(id, text) => {
+                      handleRecord(id, text, 'catalog');
+                      setSelectedCategory(null);
+                    }}
+                    onSave={(id, text) => {
+                      handleSave(id, text, 'catalog');
+                    }}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

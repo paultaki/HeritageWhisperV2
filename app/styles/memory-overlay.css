@@ -249,8 +249,8 @@
 .memory-overlay-audio {
   background: #ffffff;
   border-radius: 12px;
-  padding-top: 0px;
-  padding-bottom: 0px;
+  padding-top: 6px;
+  padding-bottom: 6px;
   padding-left: 12px;
   padding-right: 12px;
   margin: 16px 0;
@@ -293,33 +293,28 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 8px;
   min-width: 0;
-  padding-top: 31px !important;
 }
 
 .memory-overlay-audio-bar {
-  height: 6px;
+  height: 10px;
   background: #e5e7eb;
-  border-radius: 3px;
+  border-radius: 5px;
   overflow: hidden;
   cursor: pointer;
   position: relative;
   width: 100%;
-  margin-top: auto;
-  margin-bottom: auto;
 }
 
 .memory-overlay-audio-bar-fill {
-  position: absolute !important;
-  top: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  min-width: 0 !important;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
   background: linear-gradient(90deg, #fb923c 0%, #f97316 100%);
-  border-radius: 3px;
+  border-radius: 5px;
   transition: width 100ms linear;
   will-change: width;
 }
@@ -328,7 +323,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: -16px !important;
 }
 
 .memory-overlay-audio-time {

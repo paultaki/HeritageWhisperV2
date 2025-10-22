@@ -1,7 +1,78 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { FileText } from "lucide-react";
+import { LeftSidebar } from "@/components/LeftSidebar";
+import { useMediaQuery } from "@/hooks/use-media-query";
+
 export default function TermsOfService() {
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const updateFromDom = () => {
+      const dark =
+        document.documentElement.classList.contains("dark") ||
+        document.body.classList.contains("dark");
+      setIsDark(dark);
+    };
+    updateFromDom();
+    const handler = () => updateFromDom();
+    window.addEventListener("hw-theme-change", handler);
+    return () => window.removeEventListener("hw-theme-change", handler);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex" style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}>
+      {/* Header */}
+      <header
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur"
+        style={{
+          backgroundColor: isDark ? '#252728' : 'rgba(255,255,255,0.95)',
+          borderBottom: `1px solid ${isDark ? '#3b3d3f' : '#e5e7eb'}`,
+          color: isDark ? '#b0b3b8' : undefined,
+          height: 55,
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 16px',
+          width: '100%'
+        }}
+      >
+        <div className="flex items-center gap-3 w-full">
+          <Image
+            src="/h-whiper.png"
+            alt="Heritage Whisper"
+            width={36}
+            height={36}
+            className="h-9 w-auto"
+          />
+          <FileText className="w-6 h-6" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
+          <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Terms of Service</h1>
+        </div>
+      </header>
+
+      {/* Left Sidebar - Desktop Only */}
+      {isDesktop && (
+        <aside
+          className="hidden lg:flex lg:w-56 flex-col gap-1.5 p-2"
+          style={{
+            position: "fixed",
+            top: 72,
+            left: 0,
+            height: "calc(100vh - 72px)",
+            backgroundColor: "transparent",
+            borderRight: "none",
+            color: isDark ? "#b0b3b8" : undefined,
+          }}
+        >
+          <LeftSidebar />
+        </aside>
+      )}
+
+      {/* Main content - with header and sidebar spacing */}
+      <main className="flex-1 min-w-0 pb-20 md:pb-0 lg:ml-56" style={{ marginTop: 55 }}>
+        <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -1373,7 +1444,8 @@ export default function TermsOfService() {
             </p>
           </section>
         </div>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

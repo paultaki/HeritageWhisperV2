@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   HelpCircle,
   Mic,
   Edit3,
-  Image,
+  Image as ImageIcon,
   Book,
   Printer,
   ArrowLeft,
@@ -16,7 +16,10 @@ import {
   DollarSign,
   Check,
 } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { LeftSidebar } from "@/components/LeftSidebar";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface FAQItem {
   question: string;
@@ -31,7 +34,22 @@ interface FAQCategory {
 
 export default function HelpPage() {
   const router = useRouter();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const updateFromDom = () => {
+      const dark =
+        document.documentElement.classList.contains("dark") ||
+        document.body.classList.contains("dark");
+      setIsDark(dark);
+    };
+    updateFromDom();
+    const handler = () => updateFromDom();
+    window.addEventListener("hw-theme-change", handler);
+    return () => window.removeEventListener("hw-theme-change", handler);
+  }, []);
 
   const toggleItem = (key: string) => {
     const newExpanded = new Set(expandedItems);
@@ -172,7 +190,7 @@ export default function HelpPage() {
               </p>
             </div>
           ),
-          icon: <Image className="w-5 h-5" />,
+          icon: <ImageIcon className="w-5 h-5" />,
         },
       ],
     },
@@ -509,28 +527,57 @@ export default function HelpPage() {
 
   return (
     <div
-      className="min-h-screen pb-20 md:pb-0"
-      style={{ background: "var(--color-page)" }}
+      className="min-h-screen flex"
+      style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}
     >
-      <div className="max-w-4xl mx-auto p-4 md:p-6">
-        {/* Header */}
-        <div className="flex items-center gap-2 md:gap-3 mb-6 md:mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="p-2 -ml-2"
-            size="icon"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <HelpCircle
-            className="w-6 h-6 md:w-8 md:h-8 flex-shrink-0"
-            style={{ color: "#1f0f08" }}
+      {/* Header */}
+      <header
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur"
+        style={{
+          backgroundColor: isDark ? '#252728' : 'rgba(255,255,255,0.95)',
+          borderBottom: `1px solid ${isDark ? '#3b3d3f' : '#e5e7eb'}`,
+          color: isDark ? '#b0b3b8' : undefined,
+          height: 55,
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 16px',
+          width: '100%'
+        }}
+      >
+        <div className="flex items-center gap-3 w-full">
+          <Image
+            src="/h-whiper.png"
+            alt="Heritage Whisper"
+            width={36}
+            height={36}
+            className="h-9 w-auto"
           />
-          <h1 className="text-lg md:text-3xl font-bold flex-1 pr-12 md:pr-0">
-            Help & FAQ
-          </h1>
+          <HelpCircle className="w-6 h-6" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
+          <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Help & FAQ</h1>
         </div>
+      </header>
+
+      {/* Left Sidebar - Desktop Only */}
+      {isDesktop && (
+        <aside
+          className="hidden lg:flex lg:w-56 flex-col gap-1.5 p-2"
+          style={{
+            position: "fixed",
+            top: 72,
+            left: 0,
+            height: "calc(100vh - 72px)",
+            backgroundColor: "transparent",
+            borderRight: "none",
+            color: isDark ? "#b0b3b8" : undefined,
+          }}
+        >
+          <LeftSidebar />
+        </aside>
+      )}
+
+      {/* Main content - with header and sidebar spacing */}
+      <main className="flex-1 min-w-0 pb-20 md:pb-0 lg:ml-56" style={{ marginTop: 55 }}>
+        <div className="max-w-4xl mx-auto p-4 md:p-6">
 
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-heritage-coral/5 to-heritage-coral/10 border rounded-lg mx-4 md:-mx-6 px-4 md:px-6 mb-8">
@@ -631,7 +678,8 @@ export default function HelpPage() {
             </Button>
           </div>
         </section>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

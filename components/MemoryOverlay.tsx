@@ -372,8 +372,8 @@ export function MemoryOverlay({
                   {isPlaying ? <Pause size={16} /> : <Play size={16} />}
                 </button>
 
-                <div className="memory-overlay-audio-progress" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {/* Progress Bar - Now positioned above time display */}
+                <div className="memory-overlay-audio-progress">
+                  {/* Progress Bar */}
                   <div
                     className="memory-overlay-audio-bar"
                     onClick={(e) => {
@@ -385,26 +385,18 @@ export function MemoryOverlay({
                       audioRef.current.currentTime = newTime;
                       setCurrentTime(newTime);
                     }}
-                    style={{ order: 1 }}
                   >
                     <div
                       className="memory-overlay-audio-bar-fill"
                       style={{
-                        width: (() => {
-                          const widthPercent = duration && currentTime > 0
-                            ? (currentTime / duration) * 100
-                            : 0;
-                          const calculatedWidth = `${widthPercent}%`;
-                          console.log('[MemoryOverlay] Progress bar width:', calculatedWidth, 'currentTime:', currentTime, 'duration:', duration);
-                          return calculatedWidth;
-                        })(),
-                        opacity: currentTime > 0 ? 1 : 0,
-                        borderRadius: currentTime > 0 ? '3px' : '0',
+                        width: duration && currentTime > 0
+                          ? `${(currentTime / duration) * 100}%`
+                          : '0%',
                       }}
                     />
                   </div>
-                  {/* Time Display - Now positioned below progress bar */}
-                  <div className="memory-overlay-audio-times" style={{ order: 2 }}>
+                  {/* Time Display */}
+                  <div className="memory-overlay-audio-times">
                     <span className="memory-overlay-audio-time">
                       {formatTime(currentTime)}
                     </span>
