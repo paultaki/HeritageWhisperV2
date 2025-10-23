@@ -54,4 +54,7 @@ END $$;
 -- MIGRATION COMPLETE
 -- ============================================================================
 
-RAISE NOTICE '🎉 Character traits feature successfully removed';
+DO $$
+BEGIN
+  RAISE NOTICE '🎉 Character traits feature successfully removed';
+END $$;

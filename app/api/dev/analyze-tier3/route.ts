@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     const result = await performTier3Analysis(stories, storyCount);
 
     logger.debug(
-      `[Dev Tier 3] Analysis complete: ${result.prompts.length} prompts, ${result.characterInsights.traits.length} traits`,
+      `[Dev Tier 3] Analysis complete: ${result.prompts.length} prompts`,
     );
 
     // Return results without saving to database
