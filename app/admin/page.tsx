@@ -12,7 +12,14 @@ import {
   Sparkles,
   Users,
   Database,
-  Compass
+  Compass,
+  ExternalLink,
+  Cloud,
+  Mail,
+  FileText,
+  Zap,
+  Settings,
+  MessageSquare
 } from "lucide-react";
 
 interface AdminTool {
@@ -50,12 +57,28 @@ const ADMIN_TOOLS: AdminTool[] = [
     color: "text-purple-600 bg-purple-50",
   },
   {
+    title: "Prompt Feedback & Testing",
+    description: "Review and rate AI prompts. Manual Tier 3 trigger for milestone testing.",
+    href: "/admin/prompt-feedback",
+    icon: <MessageSquare className="w-6 h-6" />,
+    category: "quality",
+    color: "text-amber-600 bg-amber-50",
+  },
+  {
     title: "Quality Gate Tester",
     description: "Test individual prompts through quality gates and see detailed validation results",
     href: "/admin/quality-tester",
     icon: <TestTube2 className="w-6 h-6" />,
     category: "testing",
     color: "text-blue-600 bg-blue-50",
+  },
+  {
+    title: "Dev Prompts Tester",
+    description: "Test Tier 3 prompt generation with existing stories (dry-run mode)",
+    href: "/dev/prompts",
+    icon: <TestTube2 className="w-6 h-6" />,
+    category: "testing",
+    color: "text-cyan-600 bg-cyan-50",
   },
   {
     title: "Test Accounts",
@@ -246,12 +269,271 @@ export default function AdminHomePage() {
           </CardContent>
         </Card>
 
+        {/* External Services */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Cloud className="w-5 h-5" />
+            <h2 className="text-xl font-semibold text-gray-900">
+              External Services
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a
+              href="https://supabase.com/dashboard/project/tjycibrhoammxohemyhq"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="p-3 rounded-lg bg-green-100 text-green-600">
+                      <Database className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                        Supabase
+                        <ExternalLink className="w-4 h-4" />
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Database, Auth & Storage
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+
+            <a
+              href="https://vercel.com/paul-heritagewhisper"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="p-3 rounded-lg bg-gray-100 text-gray-900">
+                      <Cloud className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                        Vercel
+                        <ExternalLink className="w-4 h-4" />
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Hosting & Deployments
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+
+            <a
+              href="https://vercel.com/dashboard/ai-gateway"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="p-3 rounded-lg bg-purple-100 text-purple-600">
+                      <Zap className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                        AI Gateway
+                        <ExternalLink className="w-4 h-4" />
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        AI Observability
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+
+            <a
+              href="https://pdfshift.io/dashboard"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="p-3 rounded-lg bg-red-100 text-red-600">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                        PDFShift
+                        <ExternalLink className="w-4 h-4" />
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        PDF Generation
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+
+            <a
+              href="https://resend.com/emails"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="p-3 rounded-lg bg-blue-100 text-blue-600">
+                      <Mail className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                        Resend
+                        <ExternalLink className="w-4 h-4" />
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Email Delivery
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+
+            <a
+              href="https://www.assemblyai.com/app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="p-3 rounded-lg bg-violet-100 text-violet-600">
+                      <BarChart3 className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                        AssemblyAI
+                        <ExternalLink className="w-4 h-4" />
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Audio Transcription
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+
+            <a
+              href="https://platform.openai.com/usage"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="p-3 rounded-lg bg-teal-100 text-teal-600">
+                      <Zap className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                        OpenAI
+                        <ExternalLink className="w-4 h-4" />
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        GPT Models & Whisper
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+
+            <a
+              href="https://console.upstash.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="p-3 rounded-lg bg-lime-100 text-lime-700">
+                      <Settings className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                        Upstash Redis
+                        <ExternalLink className="w-4 h-4" />
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Rate Limiting
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+
+            <a
+              href="https://dashboard.stripe.com/test/dashboard"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="p-3 rounded-lg bg-indigo-100 text-indigo-600">
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                        Stripe
+                        <ExternalLink className="w-4 h-4" />
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Payment Processing
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+          </div>
+        </div>
+
         {/* Documentation Links */}
         <Card>
           <CardHeader>
-            <CardTitle>Documentation</CardTitle>
+            <CardTitle>Documentation & Resources</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
+            <a
+              href="file:///Users/paul/Development/HW%20Strategic%20Dashboard/HeritageWhisper-Strategic-Dashboard-Unified.html"
+              target="_blank"
+              className="block p-3 hover:bg-gray-50 rounded-lg transition-colors border-2 border-blue-200 bg-blue-50"
+            >
+              <div className="font-medium text-gray-900 flex items-center gap-2">
+                <Compass className="w-5 h-5 text-blue-600" />
+                Strategic Dashboard (Local)
+              </div>
+              <div className="text-sm text-gray-600">
+                Business strategy, positioning & roadmap
+              </div>
+            </a>
             <a
               href="/PROMPT_INTIMACY_ENGINE.md"
               target="_blank"

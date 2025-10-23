@@ -292,6 +292,69 @@ export default function AdminPromptFeedbackPage() {
         </CardContent>
       </Card>
 
+      {/* Manual Tier 3 Trigger Section */}
+      <Card className="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-4">
+            <Zap className="w-8 h-8 text-amber-600 flex-shrink-0 mt-1" />
+            <div className="flex-1">
+              <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '1rem', color: '#92400e' }}>
+                ⚡ Manual Tier 3 Trigger (Testing)
+              </h2>
+              <p style={{ fontSize: '1.125rem', color: '#78350f', marginBottom: '1.5rem' }}>
+                Simulate any milestone to test Tier 3 prompt generation, even if you haven't reached that milestone yet. Your test account has {data?.stats.total || 0} stories.
+              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-sm font-medium mb-2 text-amber-900">
+                    Select Milestone to Trigger:
+                  </label>
+                  <Select value={selectedMilestone} onValueChange={setSelectedMilestone}>
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Choose milestone" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">Story 1 (First Story)</SelectItem>
+                      <SelectItem value="2">Story 2</SelectItem>
+                      <SelectItem value="3">Story 3</SelectItem>
+                      <SelectItem value="4">Story 4</SelectItem>
+                      <SelectItem value="7">Story 7</SelectItem>
+                      <SelectItem value="10">Story 10</SelectItem>
+                      <SelectItem value="15">Story 15</SelectItem>
+                      <SelectItem value="20">Story 20</SelectItem>
+                      <SelectItem value="30">Story 30 (Current)</SelectItem>
+                      <SelectItem value="50">Story 50</SelectItem>
+                      <SelectItem value="100">Story 100</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  onClick={handleTriggerTier3}
+                  disabled={isTriggering}
+                  className="bg-amber-600 hover:bg-amber-700 text-white px-6 mt-6"
+                  size="lg"
+                >
+                  {isTriggering ? (
+                    <>
+                      <span className="animate-spin mr-2">⚙️</span>
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 mr-2" />
+                      Run Analysis
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p style={{ fontSize: '0.875rem', color: '#a16207', marginTop: '1rem' }}>
+                💡 <strong>Tip:</strong> This will analyze all your stories and generate Tier 3 prompts as if you just hit that milestone. Use this to test prompt quality at different story counts.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <Card>

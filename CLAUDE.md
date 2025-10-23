@@ -250,6 +250,66 @@ Added to `stories` table:
   - Uses existing `performTier3Analysis()` from `/lib/tier3Analysis.ts`
 - **Note**: AI Gateway compatibility fix applied - JSON responses may be wrapped in markdown code fences, which are automatically stripped before parsing
 
+**Admin Prompt Feedback Page (Production Testing Tool):**
+- Review and rate AI-generated prompts for quality assurance
+- **Access**: `http://localhost:3000/admin/prompt-feedback` (authentication required)
+- **Features**:
+  - View all Tier 1 and Tier 3 prompts for logged-in user
+  - Manual Tier 3 trigger: Simulate any milestone (1-100) even if not reached yet
+  - Filter by tier, review status
+  - Rate prompts (Good/Bad/Terrible) with feedback notes and tags
+  - Export data (JSON, CSV, JSONL for training)
+  - Statistics dashboard (total, reviewed, quality metrics)
+  - Detailed trigger info for each prompt (entity, milestone, timestamp)
+- **Manual Trigger**:
+  - Select any milestone from dropdown (1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100)
+  - Runs full GPT-5 Tier 3 analysis on all user stories
+  - Generates prompts as if user just hit that milestone
+  - Perfect for testing prompt quality at different story counts
+- **Implementation**:
+  - Frontend: `/app/admin/prompt-feedback/page.tsx`
+  - Backend API: `/app/api/admin/prompts/route.ts` (list), `/app/api/admin/trigger-tier3/route.ts` (manual trigger)
+  - Uses `performTier3Analysis()` from `/lib/tier3Analysis.ts`
+- **Use Cases**:
+  - Evaluate Tier 3 prompt quality across milestones
+  - Test with existing story collections (no new recordings needed)
+  - Identify patterns in bad prompts (generic, therapy-speak, etc.)
+  - Export training data for fine-tuning models
+
+**AI Prompts Inspector (Debugging Tool):**
+- View all AI system prompts sent to OpenAI models throughout the app
+- **Access**: `http://localhost:3000/admin/ai-prompts` (authentication required)
+- **Features**:
+  - Display all 8 AI prompts used across the platform
+  - Organized by category: Conversation AI, Prompt Generation, Story Processing
+  - For each prompt, view:
+    - Full prompt text exactly as sent to OpenAI
+    - Model configuration (model ID, temperature, max tokens, reasoning effort)
+    - When/where it's used in the app
+    - Source code location (file path and line numbers)
+  - Filter by category
+  - Copy prompt text to clipboard
+  - Expandable cards for easy browsing
+- **Prompts Included**:
+  1. **Pearl Realtime Interview** - OpenAI Realtime API conversation AI
+  2. **Tier 3 Intimacy Engine** - GPT-5 milestone analysis with 4 intimacy types
+  3. **Transcript Formatting** - Clean up transcriptions with paragraphs
+  4. **Lesson Extraction** - Generate 3 wisdom options (practical/emotional/character)
+  5. **Echo Prompts** - Instant follow-up questions showing active listening
+  6. **Conversation Enhancement** - Convert Q&A into narrative format
+  7. **Quick Story Enhancement** - Format standalone recordings
+  8. **Story Lesson Suggestions** - Suggest lessons for existing stories
+- **Implementation**:
+  - Frontend: `/app/admin/ai-prompts/page.tsx`
+  - Backend API: `/app/api/admin/ai-prompts/route.ts`
+  - Imports actual prompt constants from source files
+- **Use Cases**:
+  - Diagnose issues with AI behavior
+  - Understand why model generated specific output
+  - Iterate on prompt engineering
+  - Document model configuration for team
+  - Quick reference when troubleshooting user reports
+
 #### Pending Implementation
 
 **API Endpoints (Tested, Not Yet Integrated):**
