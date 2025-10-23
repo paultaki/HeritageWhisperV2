@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import AdminSidebar from "@/components/AdminSidebar";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard - HeritageWhisper",
@@ -18,5 +19,12 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-screen bg-[#FFF8F3]">
+      <AdminSidebar />
+      <main className="flex-1 ml-64">
+        {children}
+      </main>
+    </div>
+  );
 }
