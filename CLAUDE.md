@@ -523,35 +523,115 @@ Watch for in logs:
 - CSRF guide: `CSRF_IMPLEMENTATION.md`
 - Security overview: `SECURITY.md`
 
-### Family Sharing
+### Family Sharing V3 - Multi-Tenant Account System
 
-**Current Implementation:** Magic link-based invites with session-based access
+**Status:** ✅ **Production Ready** (January 2025)
 
-- **Invite Flow**: Account holder invites family member → Secure token generated (32 bytes) → Magic link sent via email
-- **Security**: 7-day invite expiry, single-use tokens, rate limiting
-- **Session Management**:
-  - 7-day rolling expiry (extends on each login)
-  - 30-day absolute expiry (hard limit)
-  - Session rotation on verification
-- **Permissions**: Role-based (viewer, contributor)
-- **Limits**: Max 10 family members per account
-- **API Endpoints**:
-  - `/api/family/invite` - Generate invite links
-  - `/api/family/verify` - Token verification & session creation
-- **Database Tables**: `family_members`, `family_sessions`
+**Architecture:** Full user accounts for family members with seamless account switching and shared storyteller access.
 
-**⚠️ Security Review Completed (October 17, 2025):**
+#### Core Features
 
-A comprehensive analysis found security and UX limitations with the current magic link approach. Key findings:
-- **7-day invite expiry is too long** (industry standard: 10-60 minutes)
-- **Session-only access** limits multi-device usage and lacks proper revocation mechanism
-- **Email dependency** creates single point of failure
+- **Full User Accounts**: Each family member has their own Supabase auth account with email/password
+- **Account Switching**: Seamless switcher to toggle between own stories and family member stories
+- **Role-Based Permissions**: Viewer (read-only) and Contributor (can submit questions, record stories)
+- **Multi-Tenant Data Access**: All API routes support `storyteller_id` parameter for cross-account queries
+- **Submit Question Feature**: Contributors can submit custom questions that appear at top of prompts page
+- **Visual Indicators**: UI clearly shows when viewing someone else's account vs your own
 
-**See `FAMILY_SHARING_ANALYSIS.md` for:**
-- Full security assessment
-- Industry best practices comparison
-- Three implementation options (Quick Fix, Hybrid Approach, Full User Accounts)
-- Recommended migration path with effort/impact analysis
+#### Key Components
+
+**Account Context** ([/hooks/use-account-context.tsx](hooks/use-account-context.tsx)):
+- `useAccountContext()` hook provides current storyteller context
+- `switchToStoryteller(id)` function to change active account
+- Persists selection in localStorage
+- Returns: `{ storytellerId, storytellerName, type: 'own' | 'viewing', permissionLevel }`
+
+**Account Switcher** ([/components/AccountSwitcher.tsx](components/AccountSwitcher.tsx)):
+- Dropdown button showing current storyteller name
+- Lists "Your Stories" + all accessible family accounts
+- Visual indicators: User icon (own), Users icon (viewing)
+- Active account highlighted with checkmark
+- Available on: Timeline, Prompts, Memory Box, Book pages
+
+**Database Schema**:
+- `family_members` - Links family member auth accounts to storyteller accounts
+- `get_user_collaborations()` RPC - Fetches all storytellers user can access
+- `has_collaboration_access()` RPC - Permission checking for API routes
+
+#### API Endpoints
+
+**Account Management**:
+- `GET /api/accounts/available` - Lists all storytellers user can access
+  - Returns: `{ storytellers: [{ storytellerId, storytellerName, permissionLevel, relationship }] }`
+  - **Important**: Maps database snake_case to camelCase for frontend compatibility
+
+**Content APIs** (all support `storyteller_id` parameter):
+- `GET /api/stories?storyteller_id=<id>` - Fetch stories for specific account
+- `GET /api/prompts/next?storyteller_id=<id>` - Get prompts for storyteller
+- `GET /api/prompts/family-submitted?storyteller_id=<id>` - Family-submitted questions
+- `POST /api/prompts/family-submit` - Submit question to storyteller (contributors only)
+
+#### Permission Levels
+
+**Viewer**:
+- Read all stories (timeline, book, memory box)
+- View prompts (but cannot submit custom questions)
+- Cannot record or edit stories
+
+**Contributor**:
+- All viewer permissions
+- Submit custom questions via "Submit Question" button
+- Record stories for the storyteller
+- Family-submitted questions appear first on prompts page
+
+#### User Flows
+
+**Switching Accounts**:
+1. Click account switcher dropdown (shows current storyteller name)
+2. Select "Your Stories" or family member name
+3. All content immediately refreshes to show selected account's data
+4. Visual indicator shows viewing mode (User vs Users icon)
+5. Selection persists across page navigation and browser sessions
+
+**Submitting Questions** (Contributors only):
+1. Switch to family member's account
+2. Navigate to `/prompts` page
+3. Click "Submit Question" button (appears when viewing someone else's account)
+4. Enter question text (max 500 chars)
+5. Question appears at top of storyteller's prompts page with "💝 From Your Family" badge
+6. Storyteller sees: "💙 Question from [Name] • [Relationship]"
+
+#### Implementation Notes
+
+**Field Name Mapping**:
+- Database uses snake_case: `storyteller_id`, `storyteller_name`, `permission_level`
+- Frontend expects camelCase: `storytellerId`, `storytellerName`, `permissionLevel`
+- API endpoints map fields automatically (see `/api/accounts/available/route.ts`)
+
+**Query Invalidation**:
+- Switching accounts triggers TanStack Query invalidation for:
+  - Stories, prompts, family-submitted prompts, memory box items
+  - Ensures fresh data load for selected account
+
+**Security**:
+- All API routes verify access via `has_collaboration_access()` RPC
+- Permission checks prevent unauthorized data access
+- Row Level Security (RLS) enforces database-level access control
+
+#### Migration from V2
+
+**Breaking Changes**:
+- Replaced session-based access with full user accounts
+- Magic link invites replaced with standard email/password signup
+- Session tokens no longer used - JWT auth only
+
+**Backwards Compatibility**:
+- Legacy `family_sessions` table preserved but deprecated
+- Migration path: Invite existing session users to create full accounts
+
+**See Also**:
+- `FAMILY_SHARING_ANALYSIS.md` - Original V2 security review and migration rationale
+- `FAMILY_SHARING_V3_IMPLEMENTATION.md` - Detailed implementation guide (if exists)
 
 ### PDF Export
 
@@ -1421,8 +1501,76 @@ Wired up Pearl to speak first when conversation starts, with support for prompt 
 #### Status
 ✅ **Production Ready** - All paths tested and working
 
+## ✅ Recent Updates (January 22, 2025)
+
+### Family Sharing V3 - Critical Bug Fixes
+
+Fixed three critical bugs preventing account switching from working properly:
+
+#### 1. Database Field Name Mismatch (Primary Bug)
+
+**Problem**: Account switcher showed family members but clicking them didn't switch accounts. Console showed `storytellerId: undefined`.
+
+**Root Cause**: PostgreSQL returns snake_case field names (`storyteller_id`, `storyteller_name`, `permission_level`) but frontend TypeScript interfaces expect camelCase (`storytellerId`, `storytellerName`, `permissionLevel`).
+
+**Fix**: Added field mapping layer in `/api/accounts/available` endpoint:
+```typescript
+const mappedStorytellers = (storytellers || []).map((st: any) => ({
+  storytellerId: st.storyteller_id,
+  storytellerName: st.storyteller_name,
+  permissionLevel: st.permission_level,
+  relationship: st.relationship,
+  lastViewedAt: st.last_viewed_at,
+}));
+```
+
+**Location**: [/app/api/accounts/available/route.ts](app/api/accounts/available/route.ts#L66-L72)
+
+#### 2. React Key Warning on Fragment
+
+**Problem**: Console warning: "Each child in a list should have a unique 'key' prop"
+
+**Root Cause**: Fragment (`<>...</>`) wrapping "Family Stories" section lacked a key prop.
+
+**Fix**: Changed to named Fragment with key:
+```typescript
+<React.Fragment key="family-section">
+  <DropdownMenuSeparator />
+  <DropdownMenuLabel>Family Stories</DropdownMenuLabel>
+  {availableStorytellers.map(...)}
+</React.Fragment>
+```
+
+**Location**: [/components/AccountSwitcher.tsx](components/AccountSwitcher.tsx#L119-L157)
+
+#### 3. Server Build Cache Corruption
+
+**Problem**: Timeline returning 500 error with "Unexpected end of JSON input". Multiple dev server instances running simultaneously.
+
+**Fix**: Killed all conflicting processes, cleared `.next` cache, restarted dev server cleanly:
+```bash
+lsof -ti:3002 | xargs kill -9
+rm -rf .next
+PORT=3002 npm run dev
+```
+
+**Status**: ✅ All bugs fixed and verified working
+
+### Submit Question Feature Completion
+
+Contributors can now submit custom questions to storytellers:
+
+- **UI**: "Submit Question" button appears on `/prompts` page when viewing family member's account
+- **Display**: Family-submitted questions appear first with "💝 From Your Family" badge
+- **API Endpoints**:
+  - `POST /api/prompts/family-submit` - Submit new question
+  - `GET /api/prompts/family-submitted` - Fetch pending questions
+- **Location**: [/app/prompts/page.tsx](app/prompts/page.tsx), [/components/PromptCard.tsx](components/PromptCard.tsx)
+
+**Note**: Initially included `context` field but database schema uses `prompt_text` only. Removed all `context` references.
+
 ---
 
-_Last updated: January 21, 2025_
+_Last updated: January 22, 2025_
 _For historical fixes, feature archives, and migration notes, see CLAUDE_HISTORY.md_
 _For AI prompting documentation, see AI_PROMPTING.md_

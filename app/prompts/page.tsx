@@ -499,8 +499,8 @@ export default function PromptsV2Page() {
       {/* Main content */}
       <main className="flex-1 min-w-0 pb-24 md:pb-0">
         {/* Header - Full width */}
-        <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-40 -mx-0">
-          <div className="px-4 md:px-6 py-4 md:py-6" style={{ maxWidth: "1200px", margin: "0 auto" }}>
+        <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-40">
+          <div className="px-4 md:px-6 py-3 md:py-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
                 <Image
@@ -508,13 +508,13 @@ export default function PromptsV2Page() {
                   alt="Heritage Whisper"
                   width={40}
                   height={40}
-                  className="h-8 md:h-10 w-auto flex-shrink-0"
+                  className="h-8 md:h-9 w-auto flex-shrink-0"
                 />
                 <div className="min-w-0">
-                  <h1 className="text-2xl md:text-4xl font-bold text-gray-900 truncate">
+                  <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">
                     Welcome back, {firstName}!
                   </h1>
-                  <p className="text-sm md:text-lg text-gray-600 mt-0.5 md:mt-1 hidden sm:block">
+                  <p className="text-xs md:text-sm text-gray-600 mt-0.5 hidden sm:block">
                     Choose a question below to record your next memory
                   </p>
                 </div>
