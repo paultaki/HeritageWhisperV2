@@ -499,7 +499,7 @@ export default function PromptsV2Page() {
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
               <Image
-                src="/h-whiper.png"
+                src="/logo_hw.png"
                 alt="Heritage Whisper"
                 width={40}
                 height={40}
@@ -517,7 +517,9 @@ export default function PromptsV2Page() {
 
             <div className="flex items-center gap-3">
               {/* Account Switcher */}
-              <AccountSwitcher />
+              <div style={{ marginTop: '-30px' }}>
+                <AccountSwitcher />
+              </div>
 
               {/* Submit Question button for contributors viewing storyteller's prompts */}
               {!isOwnAccount && canInvite && (

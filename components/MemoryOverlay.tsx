@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { X, ChevronLeft, ChevronRight, Share2, BookOpen, Edit2, Play, Pause } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, BookOpen, Edit2, Play, Pause } from "lucide-react";
 import type { Story } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
@@ -263,11 +263,6 @@ export function MemoryOverlay({
     router.push(`/review/book-style?id=${story.id}&returnPath=${encodeURIComponent(returnPath)}`);
   };
 
-  const handleShare = () => {
-    // TODO: Implement share functionality
-    console.log("Share story:", story.id);
-  };
-
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       handleClose();
@@ -444,15 +439,6 @@ export function MemoryOverlay({
             aria-label="Previous story"
           >
             <ChevronLeft size={24} />
-          </button>
-
-          <button
-            onClick={handleShare}
-            className="memory-overlay-share-btn"
-            aria-label="Share story"
-          >
-            <Share2 size={20} />
-            Share
           </button>
 
           <button

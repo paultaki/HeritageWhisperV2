@@ -41,7 +41,7 @@ export default function TermsOfService() {
       >
         <div className="flex items-center gap-3 w-full">
           <Image
-            src="/h-whiper.png"
+            src="/logo_hw.png"
             alt="Heritage Whisper"
             width={36}
             height={36}

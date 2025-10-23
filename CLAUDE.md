@@ -155,7 +155,6 @@ Three new tables added via migration `/migrations/0002_add_ai_prompt_system.sql`
 
 - **`active_prompts`**: Currently active prompts for users (7-day expiry, 1-3 prompts from Tier 1, unlimited from Tier 3)
 - **`prompt_history`**: All generated prompts with retirement tracking (skipped/answered)
-- **`character_evolution`**: AI insights about user's character, invisible rules, contradictions, core lessons
 
 #### Tier 1: Template-Based Entity Prompts (V2 - Relationship-First)
 
@@ -175,10 +174,8 @@ Three new tables added via migration `/migrations/0002_add_ai_prompt_system.sql`
 
 - **Trigger**: At story milestones [1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100]
 - **Process**: GPT-4o analysis of all user stories (runs asynchronously in background)
-  - Analyzes entire story collection for patterns, themes, character evolution
+  - Analyzes entire story collection for patterns, themes, and connections
   - Generates 2-5 high-quality personalized prompts (simple, personal touches)
-  - Extracts character insights: traits, invisible rules, contradictions, core lessons
-  - Stores insights in `character_evolution` table (upsert on conflict)
 - **User Experience**: Story saves return instantly (2-3s), analysis completes in background
 - **Performance**: Optimized October 2025 - no longer blocks user experience at milestones
 - **Model**: GPT-4o via Vercel AI Gateway (timeout: 60s, max retries: 3)
@@ -210,7 +207,6 @@ Three new tables added via migration `/migrations/0002_add_ai_prompt_system.sql`
 
 Added to `users` table:
 
-- `character_insights` (JSONB): Stores Tier 3 character analysis
 - `milestone_reached` (INTEGER): Tracks highest milestone for Tier 3 triggers
 
 Added to `stories` table:
@@ -1787,6 +1783,30 @@ Prompts Library header now:
 
 ---
 
-_Last updated: January 22, 2025_
+## ✅ Recent Updates (January 23, 2025)
+
+### Single Story Sharing Removed
+
+Removed all single story sharing functionality while preserving family sharing features.
+
+**What Was Removed:**
+- Share button from HamburgerMenu
+- Share button from LeftSidebar navigation
+- Share button from MemoryOverlay (story detail view)
+- `/app/share` page and route
+- `/app/api/share` API endpoints
+- `Share2` icon imports from Timeline components
+
+**What Was Kept:**
+- Family sharing functionality (`/app/api/shared/*` endpoints)
+- Family member invites and permissions
+- Family timeline and book views
+- All `/app/family/*` routes
+
+**Reason:** Single story sharing was not being used and added unnecessary complexity. Family sharing provides the collaborative features needed for families to share entire collections.
+
+---
+
+_Last updated: January 23, 2025_
 _For historical fixes, feature archives, and migration notes, see CLAUDE_HISTORY.md_
 _For AI prompting documentation, see AI_PROMPTING.md_

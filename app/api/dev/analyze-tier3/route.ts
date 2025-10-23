@@ -100,12 +100,6 @@ export async function POST(request: NextRequest) {
           recordingLikelihood: p.recording_likelihood,
           reasoning: p.reasoning,
         })),
-        characterInsights: {
-          traits: result.characterInsights.traits,
-          invisibleRules: result.characterInsights.invisibleRules,
-          contradictions: result.characterInsights.contradictions,
-          coreLessons: result.characterInsights.coreLessons,
-        },
       },
       message: dryRun
         ? "Analysis complete (not saved to database)"

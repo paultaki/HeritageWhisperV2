@@ -12,7 +12,6 @@ import {
   HelpCircle,
   Home,
   Plus,
-  Share2,
   FileText,
   Shield,
 } from "lucide-react";
@@ -79,27 +78,11 @@ export default function HamburgerMenu() {
     setIsOpen(false);
   };
 
-  const handleShare = () => {
-    if (user?.id) {
-      const shareUrl = `${window.location.origin}/share/${user.id}`;
-      navigator.clipboard.writeText(shareUrl);
-      toast({
-        title: "Share link copied!",
-        description:
-          "The link has been copied to your clipboard. Share it with anyone to show your timeline.",
-      });
-    }
-    setIsOpen(false);
-  };
-
-
-
   const menuItems = [
     { icon: Home, label: "Home", href: "/" },
     { icon: Users, label: "Family", href: "/family" },
     { icon: Settings, label: "Settings", href: "/profile" },
     { icon: HelpCircle, label: "Help", href: "/help" },
-    { icon: Share2, label: "Share", href: "/share" },
   ];
 
   const actionItems = [

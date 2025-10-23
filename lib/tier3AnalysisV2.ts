@@ -33,24 +33,8 @@ interface Tier3Prompt {
   reasoning: string;
 }
 
-interface CharacterInsights {
-  traits: Array<{
-    trait: string;
-    confidence: number;
-    evidence: string[];
-  }>;
-  invisibleRules: string[];
-  contradictions: Array<{
-    stated: string;
-    lived: string;
-    tension: string;
-  }>;
-  coreLessons: string[];
-}
-
 interface Tier3Result {
   prompts: Tier3Prompt[];
-  characterInsights: CharacterInsights;
   _meta?: any; // Telemetry metadata from AI call
 }
 
@@ -142,16 +126,10 @@ export async function performTier3Analysis(
 
     const result: Tier3Result = {
       prompts: validatedPrompts,
-      characterInsights: rawResult.characterInsights || {
-        traits: [],
-        invisibleRules: [],
-        contradictions: [],
-        coreLessons: [],
-      },
     };
 
     console.log(
-      `[Tier 3 V2] Analysis complete: ${result.prompts.length} prompts (validated), ${result.characterInsights.traits?.length || 0} traits`,
+      `[Tier 3 V2] Analysis complete: ${result.prompts.length} prompts (validated)`,
     );
 
     // Return result with metadata for telemetry
@@ -217,12 +195,6 @@ CRITICAL RULES (NON-NEGOTIABLE):
 STRATEGY FOR ${analysisPhase.toUpperCase()}:
 ${getIntimacyStrategy(analysisPhase, storyCount, promptCount)}
 
-CHARACTER ANALYSIS (extract from ALL stories):
-1. TRAITS (3-5): Core characteristics with confidence scores and evidence quotes
-2. INVISIBLE RULES (2-3): Unspoken principles guiding their decisions
-3. CONTRADICTIONS (0-2): Tensions between stated values and lived behaviors
-4. CORE LESSONS: Wisdom distilled from their experiences
-
 Return JSON:
 {
   "prompts": [
@@ -233,13 +205,7 @@ Return JSON:
       "recording_likelihood": 75,
       "reasoning": "Why this prompt will make THEM want to record"
     }
-  ],
-  "characterInsights": {
-    "traits": [{"trait": "resilience", "confidence": 0.9, "evidence": ["Quote 1", "Quote 2"]}],
-    "invisibleRules": ["Never show weakness", "Family first"],
-    "contradictions": [{"stated": "I value independence", "lived": "Always seeks approval", "tension": "Needs validation while claiming autonomy"}],
-    "coreLessons": ["True courage is staying when you want to run"]
-  }
+  ]
 }`;
 }
 
@@ -393,34 +359,4 @@ export async function storeTier3Results(
       `[Tier 3 V2] Stored ${successCount} new prompts, skipped ${skipCount} duplicates ${isStory3 ? "(1 unlocked, 3 locked)" : "(all unlocked)"}`,
     );
   }
-
-  // Store character insights (upsert - update if exists)
-  const { error: characterError } = await supabase
-    .from("character_evolution")
-    .upsert(
-      {
-        user_id: userId,
-        story_count: storyCount,
-        traits: result.characterInsights.traits,
-        invisible_rules: result.characterInsights.invisibleRules,
-        contradictions: result.characterInsights.contradictions,
-        analyzed_at: new Date().toISOString(),
-        model_version: result._meta?.modelUsed || "gpt-4o-intimacy-v2",
-      },
-      {
-        onConflict: "user_id,story_count",
-      },
-    );
-
-  if (characterError) {
-    console.error(
-      "[Tier 3 V2] Failed to store character insights:",
-      characterError,
-    );
-    throw characterError;
-  }
-
-  console.log(
-    `[Tier 3 V2] Stored character insights: ${result.characterInsights.traits.length} traits, ${result.characterInsights.invisibleRules?.length || 0} rules`,
-  );
 }

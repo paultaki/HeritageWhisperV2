@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Users, Settings, HelpCircle, Share2 } from "lucide-react";
+import { Home, Users, Settings, HelpCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -100,14 +100,6 @@ export function LeftSidebar() {
         >
           <HelpCircle className="w-7 h-7" />
           <span>Help</span>
-        </Link>
-        <Link
-          href="/share"
-          className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
-          style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
-        >
-          <Share2 className="w-7 h-7" />
-          <span>Share</span>
         </Link>
       </nav>
     </aside>

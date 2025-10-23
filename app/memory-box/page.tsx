@@ -524,7 +524,7 @@ export default function MemoryBoxPage() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
             <Image
-              src="/h-whiper.png"
+              src="/logo_hw.png"
               alt="Heritage Whisper"
               width={36}
               height={36}

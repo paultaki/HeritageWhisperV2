@@ -46,7 +46,7 @@ import {
   MEASUREMENTS,
 } from "@/lib/bookPagination";
 
-const logoUrl = "/HW_logo_mic_clean.png";
+const logoUrl = "/logo_hw.png";
 
 // Dynamic pagination constants
 const LINE_GUARD = 2; // px safety margin

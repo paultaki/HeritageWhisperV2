@@ -46,24 +46,8 @@ interface Tier3Prompt {
   reasoning: string;
 }
 
-interface CharacterInsights {
-  traits: Array<{
-    trait: string;
-    confidence: number;
-    evidence: string[];
-  }>;
-  invisibleRules: string[];
-  contradictions: Array<{
-    stated: string;
-    lived: string;
-    tension: string;
-  }>;
-  coreLessons: string[];
-}
-
 interface Tier3Result {
   prompts: Tier3Prompt[];
-  characterInsights: CharacterInsights;
 }
 
 /**
@@ -142,7 +126,7 @@ export async function performTier3Analysis(
 
     const result = JSON.parse(cleanedContent);
     console.log(
-      `[Tier 3] Analysis complete: ${result.prompts?.length || 0} prompts, ${result.characterInsights?.traits?.length || 0} traits`,
+      `[Tier 3] Analysis complete: ${result.prompts?.length || 0} prompts generated`,
     );
 
     return result;
@@ -226,28 +210,6 @@ KEEP THE MAGIC:
 PROMPT GENERATION STRATEGY (${analysisType}):
 ${getPromptStrategy(analysisType, storyCount)}
 
-CHARACTER ANALYSIS:
-Extract from ALL ${storyCount} stories:
-1. CHARACTER TRAITS (3-5 core traits)
-   - Each trait needs evidence from specific stories
-   - Confidence score (0-1) based on repetition
-   - Direct quotes that demonstrate the trait
-
-2. INVISIBLE RULES (2-3 principles they live by)
-   - Patterns in their decision-making
-   - Unspoken values that guide them
-   - Rules they follow but may not articulate
-
-3. CONTRADICTIONS (if any exist)
-   - Values they state vs behaviors they show
-   - Tensions in their character
-   - Unresolved conflicts in their worldview
-
-4. CORE LESSONS (distilled wisdom)
-   - What would they tell their younger self?
-   - What did life teach them?
-   - What wisdom emerges from their stories?
-
 Return JSON with this structure:
 {
   "prompts": [
@@ -258,25 +220,7 @@ Return JSON with this structure:
       "recording_likelihood": 85,
       "reasoning": "Why THIS specific prompt will make THEM want to record (reference specific stories)"
     }
-  ],
-  "characterInsights": {
-    "traits": [
-      {
-        "trait": "resilience",
-        "confidence": 0.85,
-        "evidence": ["Quote 1", "Quote 2"]
-      }
-    ],
-    "invisibleRules": ["Rule 1", "Rule 2"],
-    "contradictions": [
-      {
-        "stated": "What they say",
-        "lived": "What they do",
-        "tension": "The conflict"
-      }
-    ],
-    "coreLessons": ["Lesson 1", "Lesson 2"]
-  }
+  ]
 }`;
 }
 
@@ -417,34 +361,4 @@ export async function storeTier3Results(
       `[Tier 3] Stored ${successCount} new prompts, skipped ${skipCount} duplicates (${isStory3 ? "1 unlocked, 3 locked" : "all unlocked"})`,
     );
   }
-
-  // Store character insights (upsert - update if exists)
-  const { error: characterError } = await supabase
-    .from("character_evolution")
-    .upsert(
-      {
-        user_id: userId,
-        story_count: storyCount,
-        traits: result.characterInsights.traits,
-        invisible_rules: result.characterInsights.invisibleRules,
-        contradictions: result.characterInsights.contradictions,
-        analyzed_at: new Date().toISOString(),
-        model_version: "gpt-4o",
-      },
-      {
-        onConflict: "user_id,story_count",
-      },
-    );
-
-  if (characterError) {
-    console.error(
-      "[Tier 3] Failed to store character insights:",
-      characterError,
-    );
-    throw characterError;
-  }
-
-  console.log(
-    `[Tier 3] Stored character insights: ${result.characterInsights.traits.length} traits, ${result.characterInsights.invisibleRules?.length || 0} rules`,
-  );
 }

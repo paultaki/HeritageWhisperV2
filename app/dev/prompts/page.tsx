@@ -19,27 +19,11 @@ interface Prompt {
   reasoning: string;
 }
 
-interface CharacterInsights {
-  traits: Array<{
-    trait: string;
-    confidence: number;
-    evidence: string[];
-  }>;
-  invisibleRules: string[];
-  contradictions: Array<{
-    stated: string;
-    lived: string;
-    tension: string;
-  }>;
-  coreLessons: string[];
-}
-
 interface AnalysisResult {
   storyCount: number;
   storiesAnalyzed: number;
   storyTitles: string[];
   prompts: Prompt[];
-  characterInsights: CharacterInsights;
   tier?: string;
 }
 
@@ -376,9 +360,6 @@ export default function PromptsTestingPage() {
                     <div>Stories Analyzed: {analysisResult.storiesAnalyzed}</div>
                     <div>Milestone: Story {analysisResult.storyCount}</div>
                     <div>Prompts Generated: {analysisResult.prompts.length}</div>
-                    {analysisResult.tier !== "tier1" && (
-                      <div>Traits Identified: {analysisResult.characterInsights.traits.length}</div>
-                    )}
                   </div>
                 </div>
 
@@ -417,82 +398,6 @@ export default function PromptsTestingPage() {
                     ))}
                   </div>
                 </div>
-
-                {/* Character Insights */}
-                <div>
-                  <h3 className="font-semibold text-[#8B4513] mb-3">
-                    Character Insights
-                  </h3>
-
-                  {analysisResult.tier === "tier1" ? (
-                    <div className="text-sm text-gray-600 italic py-4">
-                      Tier 1 focuses on entity extraction only. Character insights are only available in Tier 3 analysis.
-                    </div>
-                  ) : (
-                    <>
-                      {/* Traits */}
-                      {analysisResult.characterInsights.traits.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">
-                        Traits
-                      </h4>
-                      <div className="space-y-2">
-                        {analysisResult.characterInsights.traits.map((trait, idx) => (
-                          <div
-                            key={idx}
-                            className="bg-green-50 border border-green-200 rounded p-3"
-                          >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-medium text-green-900">
-                                {trait.trait}
-                              </span>
-                              <span className="text-sm text-green-700">
-                                {(trait.confidence * 100).toFixed(0)}% confidence
-                              </span>
-                            </div>
-                            <div className="text-xs text-green-800">
-                              Evidence: {trait.evidence.join(" • ")}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Invisible Rules */}
-                  {analysisResult.characterInsights.invisibleRules.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">
-                        Invisible Rules
-                      </h4>
-                      <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                        {analysisResult.characterInsights.invisibleRules.map(
-                          (rule, idx) => (
-                            <li key={idx}>{rule}</li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Core Lessons */}
-                  {analysisResult.characterInsights.coreLessons.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">
-                        Core Lessons
-                      </h4>
-                      <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                        {analysisResult.characterInsights.coreLessons.map(
-                          (lesson, idx) => (
-                            <li key={idx}>{lesson}</li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                    </>
-                  )}
-                  </div>
               </div>
             )}
           </div>

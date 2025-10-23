@@ -87,20 +87,6 @@ export const stories = pgTable("stories", {
   lessonAlternatives: jsonb("lesson_alternatives")
     .$type<string[]>()
     .default(sql`'[]'::jsonb`),
-  characterInsights: jsonb("character_insights").$type<{
-    traits?: Array<{
-      trait: string;
-      confidence: number;
-      evidence: string[];
-    }>;
-    invisibleRules?: string[];
-    contradictions?: Array<{
-      stated: string;
-      lived: string;
-      tension: string;
-    }>;
-    coreLessons?: string[];
-  }>(),
   entitiesExtracted: jsonb("entities_extracted").$type<{
     people: string[];
     places: string[];
@@ -384,39 +370,6 @@ export const promptHistory = pgTable("prompt_history", {
   createdAt: timestamp("created_at"),
   resolvedAt: timestamp("resolved_at").default(sql`NOW()`),
 });
-
-// Character evolution table - tracks character development across stories
-export const characterEvolution = pgTable("character_evolution", {
-  id: uuid("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  storyCount: integer("story_count").notNull(),
-
-  // Character analysis
-  traits: jsonb("traits").$type<
-    Array<{
-      trait: string;
-      confidence: number;
-      evidence: string[];
-    }>
-  >(),
-  invisibleRules: jsonb("invisible_rules").$type<string[]>(),
-  contradictions: jsonb("contradictions").$type<
-    Array<{
-      stated: string;
-      lived: string;
-      tension: string;
-    }>
-  >(),
-
-  // Metadata
-  analyzedAt: timestamp("analyzed_at").default(sql`NOW()`),
-  modelVersion: text("model_version").default("gpt-4o"),
-});
-
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -571,13 +524,6 @@ export const insertPromptHistorySchema = createInsertSchema(promptHistory).omit(
   },
 );
 
-export const insertCharacterEvolutionSchema = createInsertSchema(
-  characterEvolution,
-).omit({
-  id: true,
-  analyzedAt: true,
-});
-
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStory = z.infer<typeof insertStorySchema>;
@@ -609,7 +555,3 @@ export type InsertActivePrompt = z.infer<typeof insertActivePromptSchema>;
 export type ActivePrompt = typeof activePrompts.$inferSelect;
 export type InsertPromptHistory = z.infer<typeof insertPromptHistorySchema>;
 export type PromptHistory = typeof promptHistory.$inferSelect;
-export type InsertCharacterEvolution = z.infer<
-  typeof insertCharacterEvolutionSchema
->;
-export type CharacterEvolution = typeof characterEvolution.$inferSelect;

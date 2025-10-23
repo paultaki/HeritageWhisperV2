@@ -30,7 +30,6 @@ import {
   Play,
   Plus,
   Square,
-  Share2,
   Calendar,
   Loader2,
   AlertCircle,
@@ -45,7 +44,7 @@ import StoryTraits from "@/components/StoryTraits";
 import { getTopTraits } from "@/utils/getTopTraits";
 import { Palette } from "lucide-react";
 
-const logoUrl = "/HW_logo_mic_clean.png";
+const logoUrl = "/logo_hw.png";
 
 // Color scheme options for testing
 type ColorScheme =
@@ -1493,7 +1492,7 @@ export function TimelineMobile() {
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
               <Image
-                src="/h-whiper.png"
+                src="/logo_hw.png"
                 alt="Heritage Whisper"
                 width={32}
                 height={32}

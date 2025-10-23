@@ -116,12 +116,6 @@ export async function POST(request: NextRequest) {
 
       result = {
         prompts: allPrompts,
-        characterInsights: {
-          traits: [],
-          invisibleRules: [],
-          contradictions: [],
-          coreLessons: [],
-        },
       };
     } else if (tier === "tier3v1") {
       // Tier 3 V1: Original pattern analysis
@@ -134,7 +128,7 @@ export async function POST(request: NextRequest) {
     }
 
     logger.debug(
-      `[Dev Analysis] Analysis complete: ${result.prompts.length} prompts, ${result.characterInsights.traits.length} traits`,
+      `[Dev Analysis] Analysis complete: ${result.prompts.length} prompts generated`,
     );
 
     // Return results without saving to database
@@ -153,12 +147,6 @@ export async function POST(request: NextRequest) {
           recordingLikelihood: p.recording_likelihood || p.recordingLikelihood,
           reasoning: p.reasoning,
         })),
-        characterInsights: {
-          traits: result.characterInsights.traits,
-          invisibleRules: result.characterInsights.invisibleRules,
-          contradictions: result.characterInsights.contradictions,
-          coreLessons: result.characterInsights.coreLessons,
-        },
       },
       message: dryRun
         ? "Analysis complete (not saved to database)"

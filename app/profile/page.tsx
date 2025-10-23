@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import { MemoryMap } from "@/components/MemoryMap";
 import { ProfileInterests } from "@/components/ProfileInterests";
 import { ProfilePhotoUploader } from "@/components/ProfilePhotoUploader";
@@ -37,7 +38,6 @@ import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
-  ArrowLeft,
   User,
   Save,
   Camera,
@@ -60,6 +60,7 @@ export default function Profile() {
   const { user, logout, session, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const [showHelp, setShowHelp] = useState(false);
 
   // User Information
   const [name, setName] = useState("");
@@ -89,14 +90,14 @@ export default function Profile() {
 
   // Redirect to login if not authenticated (but wait for loading to finish)
   useEffect(() => {
-    if (!isAuthLoading && !user) {
-      router.push("/auth/login");
-    } else if (user) {
-      setName(user.name || "");
-      setEmail(user.email || "");
-      setBirthYear(user.birthYear?.toString() || "");
-    }
-  }, [user, isAuthLoading, router]);
+  if (!isAuthLoading && !user) {
+    router.push("/auth/login");
+  } else if (user) {
+    setName(user.name || "");
+    setEmail(user.email || "");
+    setBirthYear(user.birthYear?.toString() || "");
+  }
+}, [user, isAuthLoading, router]);
 
   // Fetch profile data
   const { data: profileData, isLoading } = useQuery({
@@ -451,39 +452,71 @@ export default function Profile() {
     100,
   );
 
-  return (
-    <div
-      className="min-h-screen flex"
-      style={{ backgroundColor: "#FFF8F3" }}
-    >
-      {/* Left Sidebar - Desktop Only */}
-      {isDesktop && <LeftSidebar />}
+  const firstName =
+    user.name?.split(" ")[0] ||
+    user.email?.split("@")[0] ||
+    "Friend";
 
-      {/* Main content - with sidebar spacing */}
-      <main className="flex-1 min-w-0 pb-20 md:pb-0 lg:ml-56">
-        <div className="bg-background album-texture min-h-screen flex justify-center">
-          <div className="w-full max-w-3xl p-4 md:p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6 md:mb-8">
-          <div className="flex items-center space-x-3 md:space-x-4">
-            <Button
-              variant="ghost"
-              onClick={() => router.push("/timeline")}
-              className="p-2"
-              size="icon"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                Profile Settings
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#fff7f3] via-[#ffe3d4] to-[#fde5e3] flex flex-col">
+      <header className="sticky top-0 z-50 bg-white/85 backdrop-blur border-b border-[#f5d0c5]/70 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 md:py-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+            <Avatar className="w-12 h-12 border border-white shadow-sm">
+              <AvatarImage src={profilePhoto || "/default-avatar.png"} alt={firstName} />
+              <AvatarFallback className="bg-heritage-coral/10 text-heritage-coral">
+                {firstName.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <h1 className="text-2xl md:text-3xl font-bold text-[#1f2937] truncate">
+                Welcome back, {firstName}
               </h1>
-              <p className="text-sm md:text-base text-muted-foreground">
-                Manage your account and preferences
+              <p className="text-sm md:text-base text-[#6b7280]">
+                Manage your account, privacy, and AI preferences in one place.
               </p>
             </div>
           </div>
+          <Button
+            variant="ghost"
+            size="lg"
+            onClick={() => setShowHelp((prev) => !prev)}
+            className="text-[#6b7280] hover:text-[#f59e0b]"
+          >
+            <HelpCircle className="h-5 w-5" />
+          </Button>
         </div>
+      </header>
+
+      <AnimatePresence>
+        {showHelp && (
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            className="bg-amber-50 border-b border-amber-200/70"
+          >
+            <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 text-[#7c2d12]">
+              <h3 className="font-semibold text-lg mb-2">Need a hand?</h3>
+              <ul className="space-y-1 text-base">
+                <li>• Update your photo, bio, and contact preferences here.</li>
+                <li>• Toggle AI features if you want manual-only storytelling.</li>
+                <li>• Export your entire archive or print-ready book PDFs.</li>
+                <li>• Scroll to the bottom for account deletion and logout.</li>
+              </ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-1 w-full">
+        {isDesktop && <LeftSidebar topOffsetClass="lg:top-[132px]" />}
+
+        {/* Main content - with sidebar spacing */}
+        <main className="flex-1 min-w-0 pb-20 md:pb-0 lg:ml-56">
+          <div className="bg-background album-texture min-h-screen flex justify-center">
+            <div className="w-full max-w-3xl p-4 md:p-6">
+              {/* Memory Map, etc. */}
 
         {/* Memory Map - Visual overview of decades */}
         {user && (
@@ -1063,20 +1096,21 @@ export default function Profile() {
             </CardContent>
           </Card>
 
-            {/* Logout Button */}
-            <div className="pt-2">
-              <Button
-                variant="outline"
-                onClick={handleLogout}
-                className="w-full h-12 text-base"
-              >
-                Sign Out
-              </Button>
-            </div>
+          {/* Logout Button */}
+          <div className="pt-2">
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="w-full h-12 text-base"
+            >
+              Sign Out
+            </Button>
           </div>
         </div>
+            </div>
+          </div>
+        </main>
       </div>
-    </main>
     </div>
   );
 }
