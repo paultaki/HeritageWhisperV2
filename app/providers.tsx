@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AuthProvider } from "@/lib/auth";
 import { getQueryFn } from "@/lib/queryClient";
 import { RecordingProvider } from "@/contexts/RecordingContext";
+import { Toaster } from "@/components/ui/toaster";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -25,6 +26,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         <RecordingProvider>
           {children}
+          <Toaster />
         </RecordingProvider>
       </AuthProvider>
     </QueryClientProvider>

@@ -35,11 +35,11 @@ export function Step3_Review({
   const [showOriginal, setShowOriginal] = useState(false);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {/* Header */}
       <div>
-        <h3 className="text-lg font-medium mb-2">Review your transcript</h3>
-        <p className="text-gray-600 text-sm">
+        <h3 className="text-xl font-semibold mb-3">Review your transcript</h3>
+        <p className="text-gray-700 text-base leading-relaxed">
           {isConversationMode
             ? "We've transformed your interview answers into a flowing story while preserving your exact words and voice. You can use this version or the original Q&A format."
             : "We've cleaned up self-corrections, removed duplicates, and added punctuation while keeping your exact voice and personality. You can use this enhanced version or the original."}
@@ -48,26 +48,40 @@ export function Step3_Review({
 
       {/* Version Selection */}
       <div className="space-y-4">
-        <Label className="text-base font-medium">Which version would you like to use?</Label>
+        <Label className="text-lg font-semibold text-gray-800">Which version would you like to use?</Label>
         <RadioGroup
           value={useEnhanced ? "enhanced" : "original"}
           onValueChange={(value) => onUseEnhancedChange(value === "enhanced")}
-          className="space-y-3"
+          className="flex flex-col items-start gap-4"
         >
-          <div className="flex items-start space-x-3">
-            <RadioGroupItem value="enhanced" id="enhanced" className="mt-0.5" />
-            <Label htmlFor="enhanced" className="font-normal cursor-pointer flex-1 leading-normal">
+          <div className="flex items-center gap-3">
+            <RadioGroupItem
+              value="enhanced"
+              id="enhanced"
+              className="h-5 w-5 border-2 border-gray-500 rounded-full data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 data-[state=checked]:after:bg-transparent transition"
+            />
+            <Label
+              htmlFor="enhanced"
+              className="font-medium cursor-pointer text-left text-base leading-relaxed max-w-2xl"
+            >
               {isConversationMode
-                ? "Story Format (recommended) - Your interview answers woven into a natural story"
-                : "Enhanced (recommended) - Self-corrections fixed, duplicates removed, punctuation added"}
+                ? "✓ Use our recommended edits – your answers woven into a first-person story"
+                : "✓ Use our recommended edits – duplicates removed, punctuation added, easier to read"}
             </Label>
           </div>
-          <div className="flex items-start space-x-3">
-            <RadioGroupItem value="original" id="original" className="mt-0.5" />
-            <Label htmlFor="original" className="font-normal cursor-pointer flex-1 leading-normal">
+          <div className="flex items-center gap-3">
+            <RadioGroupItem
+              value="original"
+              id="original"
+              className="h-5 w-5 border-2 border-gray-500 rounded-full data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 data-[state=checked]:after:bg-transparent transition"
+            />
+            <Label
+              htmlFor="original"
+              className="font-medium cursor-pointer text-left text-base leading-relaxed max-w-2xl"
+            >
               {isConversationMode
-                ? "Raw Transcript - Your unprocessed answers without punctuation"
-                : "Original - Your exact words as transcribed"}
+                ? "○ Original transcript – your responses exactly as spoken"
+                : "○ Original transcript – your exact words as transcribed"}
             </Label>
           </div>
         </RadioGroup>
@@ -75,8 +89,8 @@ export function Step3_Review({
 
       {/* Active Transcript Editor - shows which one is selected */}
       <div className="space-y-2">
-        <Label htmlFor="active-transcript" className="text-base font-medium">
-          {useEnhanced ? "Enhanced Transcript (Editable)" : "Original Transcript (Editable)"}
+        <Label htmlFor="active-transcript" className="text-lg font-semibold text-gray-800">
+          {useEnhanced ? "Recommended edits (editable)" : "Original transcript (editable)"}
         </Label>
         <Textarea
           id="active-transcript"
@@ -87,7 +101,7 @@ export function Step3_Review({
           className="min-h-[300px] text-base leading-relaxed"
           placeholder="Loading transcript..."
         />
-        <p className="text-xs text-gray-500">
+        <p className="text-sm text-gray-600">
           This is the version that will be saved to your story. Feel free to make any edits.
         </p>
       </div>
@@ -98,10 +112,10 @@ export function Step3_Review({
           onClick={() => setShowOriginal(!showOriginal)}
           className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
         >
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-base font-medium text-gray-700">
             {useEnhanced
-              ? "View Original Version (Editable)"
-              : "View Enhanced Version (Editable)"}
+              ? "Preview original transcript"
+              : "Preview recommended edits"}
           </span>
           {showOriginal ? (
             <ChevronDown className="w-5 h-5 text-gray-500" />
@@ -120,8 +134,8 @@ export function Step3_Review({
               className="min-h-[200px] text-base leading-relaxed"
               placeholder="Loading alternate version..."
             />
-            <p className="text-xs text-gray-500 mt-2">
-              You can edit this version too, but it won't be saved unless you select it above.
+            <p className="text-sm text-gray-600 mt-2">
+              These edits only apply if you select this version above.
             </p>
           </div>
         )}
@@ -129,7 +143,7 @@ export function Step3_Review({
 
       {/* Help Text */}
       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <p className="text-sm text-blue-800">
+        <p className="text-base text-blue-900">
           <strong>Tip:</strong> The enhanced version improves grammar and flow while keeping your
           original meaning. You can edit it further or switch to the original at any time.
         </p>

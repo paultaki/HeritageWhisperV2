@@ -27,6 +27,7 @@ import { MemoryList } from "@/components/ui/MemoryList";
 import { Story as SchemaStory } from "@/shared/schema";
 import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface Story {
   id: string;
@@ -142,6 +143,7 @@ export default function MemoryBoxPage() {
   const [selectedStories, setSelectedStories] = useState<Set<string>>(
     new Set(),
   );
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   // V3: Get active storyteller context for family sharing
   const { activeContext } = useAccountContext();
@@ -468,6 +470,50 @@ export default function MemoryBoxPage() {
     return age.toString();
   };
 
+  const handleDownloadPdf = async () => {
+    if (isExportingPdf) return;
+    setIsExportingPdf(true);
+    try {
+      toast({
+        title: "Generating PDF",
+        description: "This may take up to a minute...",
+      });
+
+      const response = await apiRequest("POST", "/api/export/trim", {
+        bookId: null,
+      });
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `heritage-book-trim-${new Date()
+        .toISOString()
+        .split("T")[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "PDF ready",
+        description: "Your book has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast({
+        title: "Export failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Could not generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   return (
     <div
       className="min-h-screen"
@@ -635,9 +681,14 @@ export default function MemoryBoxPage() {
             <Card className="p-6 bg-gradient-to-r from-gray-50 to-gray-100">
               <h3 className="text-xl font-bold mb-4">Export Your Memories</h3>
               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <Button variant="outline" className="h-20 flex-col">
+                <Button
+                  variant="outline"
+                  className="h-20 flex-col"
+                  onClick={handleDownloadPdf}
+                  disabled={isExportingPdf}
+                >
                   <Download className="w-6 h-6 mb-2" />
-                  <span>Download PDF</span>
+                  <span>{isExportingPdf ? "Preparing PDF..." : "Download PDF"}</span>
                 </Button>
                 <Button variant="outline" className="h-20 flex-col">
                   <Printer className="w-6 h-6 mb-2" />

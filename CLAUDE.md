@@ -310,6 +310,26 @@ Added to `stories` table:
   - Document model configuration for team
   - Quick reference when troubleshooting user reports
 
+**Admin Navigation Sidebar:**
+- Left sidebar navigation for all admin pages (`/components/AdminSidebar.tsx`)
+- **Features**:
+  - User avatar with admin badge
+  - Organized by sections: Dashboard, Quality Assurance, Monitoring, Testing, Cleanup, External Services
+  - Active page highlighting in coral color
+  - Collapsible External Services section (collapsed by default)
+  - "Back to App" button in footer
+  - All external links open in new tabs
+- **External Services Links**:
+  - Vercel: `https://vercel.com/pauls-projects-667765b0/heritage-whisper-v2`
+  - AI Gateway: `https://vercel.com/pauls-projects-667765b0/heritage-whisper-v2/observability/ai`
+  - PDFShift: `https://app.pdfshift.io/env/`
+  - Resend: `https://resend.com/emails`
+  - Supabase: `https://supabase.com/dashboard/project/tjycibrhoammxohemyhq`
+  - Stripe: `https://dashboard.stripe.com/test/dashboard`
+- **North Star Dashboard**: Opens local HTML file at `file:///Users/paul/Development/HW_Files/index.html`
+- **Admin Favicon**: Gear emoji (⚙️) distinguishes admin pages from customer-facing pages
+- **Implementation**: `/app/admin/layout.tsx` includes sidebar for all `/admin/*` routes
+
 #### Pending Implementation
 
 **API Endpoints (Tested, Not Yet Integrated):**

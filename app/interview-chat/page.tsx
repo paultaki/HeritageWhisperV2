@@ -7,6 +7,7 @@ import Image from "next/image";
 import { WelcomeModal } from "../interview-chat/components/WelcomeModal";
 import { ChatMessage } from "../interview-chat/components/ChatMessage";
 import { TypingIndicator } from "../interview-chat/components/TypingIndicator";
+import { ConfirmModal } from "../interview-chat/components/ConfirmModal";
 import {
   completeConversationAndRedirect,
   extractQAPairs,
@@ -45,6 +46,8 @@ function InterviewChatV2Content() {
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
   const [textInput, setTextInput] = useState('');
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
 
@@ -269,12 +272,13 @@ After they answer, continue the conversation naturally with follow-up questions 
       return;
     }
 
-    const confirmComplete = confirm(
-      `Complete this interview with ${userResponses.length} ${userResponses.length === 1 ? 'response' : 'responses'}?\n\n` +
-      'You\'ll be taken to review and finalize your story.'
-    );
+    // Show confirmation modal instead of browser confirm
+    setShowCompleteConfirm(true);
+  };
 
-    if (!confirmComplete) return;
+  // Confirm complete handler
+  const confirmCompleteInterview = async () => {
+    setShowCompleteConfirm(false);
 
     // Extract Q&A pairs from messages
     const qaPairs = extractQAPairs(messages);
@@ -331,6 +335,34 @@ After they answer, continue the conversation naturally with follow-up questions 
         />
       )}
 
+      {/* Complete Interview Confirmation */}
+      <ConfirmModal
+        isOpen={showCompleteConfirm}
+        title="Complete Interview?"
+        message={`Complete this interview with ${messages.filter(m => m.type === 'audio-response').length} ${messages.filter(m => m.type === 'audio-response').length === 1 ? 'response' : 'responses'}?\n\nYou'll be taken to review and finalize your story.`}
+        confirmText="Complete Interview"
+        cancelText="Keep Going"
+        onConfirm={confirmCompleteInterview}
+        onCancel={() => setShowCompleteConfirm(false)}
+      />
+
+      {/* Cancel Interview Confirmation */}
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        title="Cancel Interview?"
+        message="Are you sure you want to cancel this interview? Your progress will be lost."
+        confirmText="Yes, Cancel"
+        cancelText="Keep Recording"
+        onConfirm={() => {
+          setShowCancelConfirm(false);
+          stopRecording();
+          stopRecordingState();
+          router.push('/timeline');
+        }}
+        onCancel={() => setShowCancelConfirm(false)}
+        variant="danger"
+      />
+
       {/* Chat Container */}
       <div className="max-w-3xl mx-auto flex flex-col h-screen">
         {/* Header */}
@@ -362,13 +394,7 @@ After they answer, continue the conversation naturally with follow-up questions 
             {isRecording && (
               <div className="flex gap-2 mt-1">
                 <button
-                  onClick={() => {
-                    if (confirm("Are you sure you want to cancel this interview?")) {
-                      stopRecording();
-                      stopRecordingState();
-                      router.push('/timeline');
-                    }
-                  }}
+                  onClick={() => setShowCancelConfirm(true)}
                   className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-1 rounded-full text-sm transition-all"
                 >
                   Cancel
