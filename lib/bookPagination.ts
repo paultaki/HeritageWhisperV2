@@ -1321,6 +1321,14 @@ export function paginateBook(
     tempPages.forEach((page) => {
       page.pageNumber += pageNumberOffset;
     });
+
+    // FIX: Update TOC entries to reflect adjusted page numbers
+    // This ensures TOC navigation jumps to the correct page after offset
+    tocEntries.forEach(entry => {
+      entry.stories.forEach(story => {
+        story.pageNumber += pageNumberOffset;
+      });
+    });
   }
 
   // Add all other pages

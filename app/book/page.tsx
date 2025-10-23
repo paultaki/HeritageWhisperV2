@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
@@ -734,11 +734,12 @@ export default function BookViewNew() {
   const [isPaginationReady, setIsPaginationReady] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0); // Zoom control
 
-  // Get storyId from URL parameters
-  const searchParams = new URLSearchParams(
-    typeof window !== "undefined" ? window.location.search : "",
-  );
-  const storyIdFromUrl = searchParams.get("storyId");
+  // Get storyId from URL parameters (Next.js App Router hook)
+  const searchParams = useSearchParams();
+  const storyIdFromUrl = searchParams?.get("storyId") || null;
+
+  // Track if we've already navigated to prevent race conditions during font loading
+  const hasNavigatedToStory = useRef(false);
 
   // V3: Get active storyteller context for family sharing
   const { activeContext } = useAccountContext();
@@ -860,8 +861,9 @@ export default function BookViewNew() {
   }, [pages, stories]);
 
   // Navigate to story page when storyId is found
+  // Only navigate once per storyId to prevent race conditions during font loading
   useEffect(() => {
-    if (storyPageIndex >= 0) {
+    if (storyPageIndex >= 0 && storyIdFromUrl && !hasNavigatedToStory.current) {
       if (isMobile) {
         setCurrentMobilePage(storyPageIndex);
       } else {
@@ -869,8 +871,18 @@ export default function BookViewNew() {
         const spreadIndex = Math.floor(storyPageIndex / 2);
         setCurrentSpreadIndex(spreadIndex);
       }
+
+      // Mark as navigated to prevent re-triggering on re-renders
+      hasNavigatedToStory.current = true;
+
+      // Clear storyId from URL to prevent stale state
+      // This prevents confusion if pagination changes during font loading
+      if (typeof window !== "undefined") {
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, "", newUrl);
+      }
     }
-  }, [storyPageIndex, isMobile]);
+  }, [storyPageIndex, isMobile, storyIdFromUrl]);
 
   // Navigation
   const totalSpreads = spreads.length;
