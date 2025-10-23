@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAccountContext } from '@/hooks/use-account-context';
 import { useAuth } from '@/lib/auth';
 import { Check, ChevronDown, User, Users } from 'lucide-react';
@@ -46,6 +46,9 @@ export function AccountSwitcher() {
   }
 
   const handleSwitch = async (storytellerId: string) => {
+    console.log('[AccountSwitcher] handleSwitch called with storytellerId:', storytellerId);
+    console.log('[AccountSwitcher] Current user.id:', user?.id);
+    console.log('[AccountSwitcher] Current activeContext:', activeContext);
     await switchToStoryteller(storytellerId);
     setIsOpen(false);
   };
@@ -67,29 +70,29 @@ export function AccountSwitcher() {
           variant="ghost"
           size="sm"
           className={cn(
-            "gap-2 focus:ring-2 transition-colors",
+            "gap-2 focus:ring-2 transition-colors mr-4",
             isOwnAccount
               ? "hover:bg-accent focus:ring-amber-500"
               : "bg-blue-50 hover:bg-blue-100 text-blue-900 focus:ring-blue-500"
           )}
         >
           {isOwnAccount ? (
-            <User className="h-4 w-4" />
+            <User className="h-5 w-5" />
           ) : (
-            <Users className="h-4 w-4 text-blue-600" />
+            <Users className="h-5 w-5 text-blue-600" />
           )}
-          <span className="text-sm font-medium max-w-[200px] truncate">
+          <span className="text-base font-semibold max-w-[200px] truncate">
             {activeContext.storytellerName}
           </span>
           <ChevronDown className={cn(
-            "h-4 w-4 opacity-50",
+            "h-5 w-5 opacity-50",
             !isOwnAccount && "text-blue-600"
           )} />
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-[280px]">
-        <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-wider">
+      <DropdownMenuContent align="end" className="w-[300px]">
+        <DropdownMenuLabel className="text-xs text-gray-600 font-semibold uppercase tracking-wider">
           Switch Account
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -98,24 +101,24 @@ export function AccountSwitcher() {
         <DropdownMenuItem
           onClick={() => handleSwitch(user.id)}
           className={cn(
-            'flex items-center gap-3 px-3 py-2 cursor-pointer',
+            'flex items-center gap-3 px-3 py-3 cursor-pointer',
             isOwnAccount && 'bg-accent'
           )}
         >
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600">
-            <User className="h-4 w-4 text-white" />
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600">
+            <User className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user.name || 'Your Stories'}</p>
-            <p className="text-xs text-muted-foreground">Your Stories</p>
+            <p className="text-base font-semibold truncate text-gray-900">{user.name || 'Your Stories'}</p>
+            <p className="text-sm text-gray-600">Your Stories</p>
           </div>
-          {isOwnAccount && <Check className="h-4 w-4 text-amber-600" />}
+          {isOwnAccount && <Check className="h-5 w-5 text-amber-600" />}
         </DropdownMenuItem>
 
         {availableStorytellers.length > 0 && (
-          <>
+          <React.Fragment key="family-section">
             <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-wider">
+            <DropdownMenuLabel className="text-xs text-gray-600 font-semibold uppercase tracking-wider">
               Family Stories
             </DropdownMenuLabel>
 
@@ -127,31 +130,31 @@ export function AccountSwitcher() {
                   key={storyteller.storytellerId}
                   onClick={() => handleSwitch(storyteller.storytellerId)}
                   className={cn(
-                    'flex items-center gap-3 px-3 py-2 cursor-pointer',
+                    'flex items-center gap-3 px-3 py-3 cursor-pointer',
                     isActive && 'bg-accent'
                   )}
                 >
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600">
-                    <Users className="h-4 w-4 text-white" />
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600">
+                    <Users className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{storyteller.storytellerName}</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <p className="text-base font-semibold truncate text-gray-900">{storyteller.storytellerName}</p>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       {storyteller.relationship && (
                         <span className="truncate">{storyteller.relationship}</span>
                       )}
                       {storyteller.permissionLevel === 'contributor' && (
-                        <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-medium">
+                        <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
                           Contributor
                         </span>
                       )}
                     </div>
                   </div>
-                  {isActive && <Check className="h-4 w-4 text-blue-600" />}
+                  {isActive && <Check className="h-5 w-5 text-blue-600" />}
                 </DropdownMenuItem>
               );
             })}
-          </>
+          </React.Fragment>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

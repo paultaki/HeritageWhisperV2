@@ -43,6 +43,7 @@ import { normalizeYear, formatYear } from "@/lib/utils";
 import StoryTraits from "@/components/StoryTraits";
 import { getTopTraits } from "@/utils/getTopTraits";
 import { useAccountContext } from "@/hooks/use-account-context";
+import { AccountSwitcher } from "@/components/AccountSwitcher";
 
 const logoUrl = "/HW_logo_mic_clean.png";
 
@@ -1015,16 +1016,19 @@ export function TimelineDesktop() {
           width: '100%'
         }}
       >
-        <div className="flex items-center gap-3 w-full">
-          <Image
-            src="/h-whiper.png"
-            alt="Heritage Whisper"
-            width={36}
-            height={36}
-            className="h-9 w-auto"
-          />
-          <Calendar className="w-6 h-6" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
-          <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Timeline</h1>
+        <div className="flex items-center justify-between gap-3 w-full">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/h-whiper.png"
+              alt="Heritage Whisper"
+              width={36}
+              height={36}
+              className="h-9 w-auto"
+            />
+            <Calendar className="w-6 h-6" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
+            <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Timeline</h1>
+          </div>
+          <AccountSwitcher />
         </div>
       </header>
 

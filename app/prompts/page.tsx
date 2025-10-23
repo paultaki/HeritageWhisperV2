@@ -36,6 +36,7 @@ import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { motion, AnimatePresence } from "framer-motion";
+import { AccountSwitcher } from "@/components/AccountSwitcher";
 import {
   Dialog,
   DialogContent,
@@ -520,6 +521,9 @@ export default function PromptsV2Page() {
               </div>
 
               <div className="flex items-center gap-2">
+                {/* Account Switcher */}
+                <AccountSwitcher />
+
                 {/* Submit Question button for contributors viewing storyteller's prompts */}
                 {!isOwnAccount && canInvite && (
                   <Button

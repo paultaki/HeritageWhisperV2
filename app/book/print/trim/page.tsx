@@ -231,7 +231,14 @@ function PrintTrimPageContent() {
     const userIdFromUrl = searchParams.get("userId");
     const printToken = searchParams.get("printToken");
 
-    // Priority 1: Use printToken (for PDFShift access)
+    // Priority 1: Use userId from URL if provided (fastest, for PDFShift with token)
+    if (userIdFromUrl) {
+      console.log("[Print Trim] Using userId from URL:", userIdFromUrl);
+      setUserId(userIdFromUrl);
+      return;
+    }
+
+    // Priority 2: Try to validate print token (for token-only access)
     if (printToken) {
       console.log("[Print Trim] Validating print token...");
       fetch(`/api/print-token/validate?token=${printToken}`)
@@ -253,30 +260,24 @@ function PrintTrimPageContent() {
       return;
     }
 
-    // Priority 2: Use userId from URL (for direct access with auth)
-    if (userIdFromUrl) {
-      console.log("[Print Trim] Using userId from URL:", userIdFromUrl);
-      setUserId(userIdFromUrl);
-    } else {
-      // Priority 3: Get from Supabase session
-      console.log("[Print Trim] No userId in URL, checking session...");
-      import("@supabase/supabase-js").then(({ createClient }) => {
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-        );
+    // Priority 3: Get from Supabase session (for direct user access)
+    console.log("[Print Trim] No userId or token in URL, checking session...");
+    import("@supabase/supabase-js").then(({ createClient }) => {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+      );
 
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (session?.user?.id) {
-            console.log("[Print Trim] Using userId from session:", session.user.id);
-            setUserId(session.user.id);
-          } else {
-            setError("Not authenticated. Please sign in first.");
-            setLoading(false);
-          }
-        });
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user?.id) {
+          console.log("[Print Trim] Using userId from session:", session.user.id);
+          setUserId(session.user.id);
+        } else {
+          setError("Not authenticated. Please sign in first.");
+          setLoading(false);
+        }
       });
-    }
+    });
   }, [searchParams]);
 
   useEffect(() => {

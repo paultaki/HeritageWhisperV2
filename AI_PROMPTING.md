@@ -1,8 +1,15 @@
 # HeritageWhisper AI Prompting Documentation
 
-> **Last Updated:** January 2025
-> **Status:** Production Ready
+> **Last Updated:** January 22, 2025
+> **Status:** Production Ready - Synchronized with actual codebase
 > **Owner:** Paul Takisaki
+>
+> **Recent Changes (Jan 22, 2025):**
+> - Fixed Tier 1 documentation to reflect regex-based extraction (not GPT-4o-mini)
+> - Updated Tier 3 to GPT-4o (removed outdated GPT-5 references)
+> - Corrected Pearl temperature to 1.0 (Realtime API default)
+> - Removed reasoning effort parameters (not implemented)
+> - Updated cost estimates to reflect actual implementation
 
 ## 📋 Table of Contents
 
@@ -94,7 +101,7 @@ const FALLBACK_QUESTIONS = [
 ### Pearl Configuration
 
 - **Model:** GPT-4 Realtime (via OpenAI WebRTC)
-- **Temperature:** 0.6 (balanced creativity/consistency)
+- **Temperature:** 1.0 (OpenAI Realtime API default)
 - **Max Tokens:** 400 per response
 - **Audio:** Optional voice responses
 - **Session Length:** 30 minutes max
@@ -107,56 +114,58 @@ const FALLBACK_QUESTIONS = [
 
 Two-tier system that generates personalized reflection prompts based on user's stories.
 
-### Tier 1: Template-Based Entity Prompts
+### Tier 1: Template-Based Entity Prompts (V2 - Relationship-First)
 
 **Trigger:** After EVERY story save
-**Cost:** ~$0.0001 per story
-**Model:** GPT-4o-mini
+**Cost:** ~$0 (regex-based extraction, no AI calls)
+**Processing:** Pattern matching + quality gates
 
 #### Process:
-1. Extract 1-3 entities (people, places, objects, concepts)
-2. Apply templates from 5 categories
-3. Generate 1-3 prompts (25-30 words each)
-4. SHA1 deduplication
-5. 7-day expiry
+1. Extract entities using regex patterns (people, places, objects, emotions, unique phrases)
+2. Filter entities through quality gates (no generic words like "man", "house", "thing")
+3. Apply relationship-focused templates (30 words max)
+4. Validate prompt quality (no therapy-speak, no yes/no questions)
+5. SHA1 deduplication
+6. Store in active_prompts (7-day expiry)
 
-#### Template Categories:
+#### Entity Extraction Patterns:
 
 ```javascript
-const TEMPLATE_CATEGORIES = {
-  APPRECIATION: [
-    "{entity} was part of your life. What did they teach you that you didn't realize at the time?",
-    "You mentioned {entity}. What would you thank them for if you could?",
-  ],
-  PERSPECTIVE_SHIFTS: [
-    "Looking back at {entity} now, what do you understand differently?",
-    "You were {age} when {entity} happened. What would you tell that version of yourself?",
-  ],
-  UNFINISHED_BUSINESS: [
-    "Is there something you never said to {entity} that you wish you had?",
-    "What conversation with {entity} still feels incomplete?",
-  ],
-  INVISIBLE_RULES: [
-    "What unspoken rule did {entity} teach you about life?",
-    "{entity} shaped how you see the world. What belief did that create?",
-  ],
-  FUTURE_SELF: [
-    "How might {entity} show up in your life five years from now?",
-    "What part of {entity} do you hope your grandchildren inherit?",
-  ]
-};
+// People (regex-based detection)
+- Proper names: /\b([A-Z][a-z]{2,})\s+(?:said|told|taught|showed)/g
+- Possessives: /\b(my|his|her)\s+(father|mother|dad|mom|brother|sister)/gi
+
+// Quality gates prevent generic words:
+- Banned: "girl", "boy", "man", "woman", "house", "room", "chair"
+- Required: Proper nouns, possessives, or multi-word specific phrases
+```
+
+#### Template Examples (Relationship-First):
+
+```javascript
+// Person-focused (priority 95)
+"{person} mattered. What did they teach you that truly stuck?"
+"When did you first see {person} differently than before?"
+"What is a line {person} said that you still hear today?"
+
+// Place-focused (priority 80)
+"What did {place} smell like? What sounds echo when you think of it?"
+"Who did you become at {place} that you couldn't be anywhere else?"
+
+// Object-focused (priority 70)
+"You mentioned {object}. What did that mean to you then?"
+"Who gave you {object}, and what were they really giving you?"
+
+// Emotion-focused (priority 85)
+"You felt {emotion}. What invisible rule made you feel that way?"
 ```
 
 ### Tier 3: Milestone Analysis
 
 **Trigger:** Stories 1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100
-**Cost:** ~$0.02-0.15 per milestone
-**Model:** GPT-5 with reasoning effort
-
-#### Reasoning Effort by Milestone:
-- Stories 1-9: `low` (basic patterns)
-- Stories 10-49: `medium` (synthesis)
-- Stories 50+: `high` (deep insights)
+**Cost:** ~$0.02-0.08 per milestone
+**Model:** GPT-4o (via AI Gateway)
+**Processing:** Asynchronous (runs in background, no user-facing delay)
 
 #### Character Evolution Tracking:
 
@@ -311,10 +320,11 @@ POST /api/stories            // Save story + generate prompts
 
 ### 1. Temperature Settings
 
-- **Interviews (Pearl):** 0.6 - Natural but consistent
-- **Prompt Generation:** 0.8 - Creative variety
-- **Lesson Extraction:** 0.9 - Maximum creativity
-- **Transcription:** 0.3 - Accuracy focused
+- **Interviews (Pearl):** 1.0 - OpenAI Realtime API default (natural conversation)
+- **Tier 1 Prompts:** N/A - Regex-based (no AI calls)
+- **Tier 3 Analysis:** Not specified - Uses GPT-4o default (0.7-1.0)
+- **Lesson Extraction:** 0.9 - Maximum creativity with gpt-4o-mini
+- **Transcription:** 0.3 - Accuracy focused (AssemblyAI or Whisper)
 
 ### 2. Token Management
 
@@ -365,11 +375,16 @@ All prompts must pass:
 ```javascript
 // Model selection by operation
 const MODEL_SELECTION = {
-  critical: 'gpt-5',           // Tier 3 milestones
-  standard: 'gpt-4o',          // Entity extraction
-  efficient: 'gpt-4o-mini',    // Templates, lessons
-  realtime: 'gpt-4-realtime',  // Pearl conversations
+  critical: 'gpt-4o',          // Tier 3 milestone analysis
+  efficient: 'gpt-4o-mini',    // Lesson extraction only
+  realtime: 'gpt-4o-realtime', // Pearl conversations
+  templates: 'regex',          // Tier 1 prompts (no AI cost)
 };
+
+// Cost per story breakdown:
+// - Tier 1 prompts: $0 (regex-based)
+// - Lesson extraction: ~$0.0007 (gpt-4o-mini)
+// - Tier 3 analysis (milestones only): ~$0.02-0.08
 ```
 
 ---
@@ -390,18 +405,18 @@ const MODEL_SELECTION = {
 // Telemetry for all AI operations
 {
   op: "ai_call",
-  stage: "pearl" | "tier1" | "tier3" | "lesson",
-  model: "gpt-5" | "gpt-4o" | "gpt-4o-mini",
-  effort: "low" | "medium" | "high",
+  stage: "pearl" | "tier3" | "lesson",
+  model: "gpt-4o-realtime" | "gpt-4o" | "gpt-4o-mini",
   latencyMs: 1500,
   costUsd: 0.023,
   tokensUsed: {
     input: 500,
     output: 150,
-    reasoning: 300,  // GPT-5 only
-    total: 950
+    total: 650
   }
 }
+
+// Note: Tier 1 prompts use regex (no telemetry needed)
 ```
 
 ---

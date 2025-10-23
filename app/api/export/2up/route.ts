@@ -67,8 +67,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use print token instead of userId for secure, temporary access
-    const printUrl = `${baseUrl}/book/print/2up?printToken=${printToken}`;
+    // Use both print token AND userId for maximum compatibility
+    // Token for validation, userId for direct access
+    const printUrl = `${baseUrl}/book/print/2up?printToken=${printToken}&userId=${user.id}`;
     logger.debug("[Export 2up] Generating PDF from:", printUrl.replace(printToken, 'TOKEN_REDACTED'));
 
     // Use PDFShift to generate PDF

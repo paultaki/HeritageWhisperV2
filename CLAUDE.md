@@ -14,7 +14,7 @@ AI-powered storytelling platform for seniors to capture and share life memories.
 - **Database:** PostgreSQL via Supabase (project: tjycibrhoammxohemyhq)
 - **Storage:** Supabase Storage (bucket: heritage-whisper-files)
 - **State:** TanStack Query v5
-- **AI:** AssemblyAI ("universal" batch transcription, 58% cheaper) + OpenAI API (Whisper fallback) + Vercel AI Gateway (GPT-4o/GPT-5 routing)
+- **AI:** AssemblyAI ("universal" batch transcription, 58% cheaper) + OpenAI API (Whisper fallback, Realtime API) + Vercel AI Gateway (GPT-4o routing)
 - **Deployment:** Vercel (https://dev.heritagewhisper.com)
 
 ## 🔧 Quick Start
@@ -157,35 +157,36 @@ Three new tables added via migration `/migrations/0002_add_ai_prompt_system.sql`
 - **`prompt_history`**: All generated prompts with retirement tracking (skipped/answered)
 - **`character_evolution`**: AI insights about user's character, invisible rules, contradictions, core lessons
 
-#### Tier 1: Template-Based Entity Prompts
+#### Tier 1: Template-Based Entity Prompts (V2 - Relationship-First)
 
 - **Trigger**: After EVERY story save
-- **Process**: Multi-entity extraction (1-3 entities per story) using GPT-4o
-  - Extracts people, places, objects, concepts from story
-  - Generates 1-3 prompts using template library (5 categories: Appreciation, Perspective Shifts, Unfinished Business, Invisible Rules, Future Self)
+- **Process**: Regex-based entity extraction + quality gates (NO AI calls, zero cost)
+  - Extracts people (proper names, possessives like "my father"), places, objects, emotions using pattern matching
+  - Filters out generic words ("man", "woman", "house", "room", "chair")
+  - Applies relationship-focused templates (30 words max)
+  - Quality validation: no therapy-speak, no yes/no questions, no generic prompts
   - SHA1 deduplication prevents duplicate prompts
   - 7-day expiry (auto-cleanup via database trigger)
-- **Prompt Format**: 25-30 words, conversational, no story titles, specific details
-- **Location**: `/lib/promptGeneration.ts`, `/app/api/stories/route.ts:231-262`
-- **Example Output**: "You felt 'housebroken by love' with Chewy. What freedom did you trade for that love, and do you miss it?"
+- **Prompt Format**: Under 30 words, relationship-focused, uses specific details from story
+- **Location**: `/lib/promptGenerationV2.ts`, `/app/api/stories/route.ts:421-490`
+- **Example Output**: "{person} mattered. What did they teach you that truly stuck?"
 
 #### Tier 3: Milestone Analysis Prompts
 
 - **Trigger**: At story milestones [1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100]
-- **Process**: Combined GPT-5 analysis of all user stories (runs asynchronously in background)
+- **Process**: GPT-4o analysis of all user stories (runs asynchronously in background)
   - Analyzes entire story collection for patterns, themes, character evolution
-  - Generates high-quality reflection prompts (25-30 words each)
+  - Generates 2-5 high-quality personalized prompts (simple, personal touches)
   - Extracts character insights: traits, invisible rules, contradictions, core lessons
   - Stores insights in `character_evolution` table (upsert on conflict)
 - **User Experience**: Story saves return instantly (2-3s), analysis completes in background
 - **Performance**: Optimized October 2025 - no longer blocks user experience at milestones
-- **Character Insights**: Confidence scores, supporting evidence, insight categories
+- **Model**: GPT-4o via Vercel AI Gateway (timeout: 60s, max retries: 3)
 - **Location**: `/lib/tier3Analysis.ts`, `/app/api/stories/route.ts:533-583`
-- **Example Insights**:
-  - Traits: "Loyalty (0.9 confidence): Stayed at camp despite fear"
-  - Invisible Rules: "Never show weakness even when scared"
-  - Contradictions: "Values independence but craves deep connection"
-  - Core Lessons: "True courage is staying when you want to run"
+- **Example Prompts**:
+  - "What's a challenge you overcame at PG&E?"
+  - "You've mentioned Coach several times - who were they to you?"
+  - "You've shared your 20s and 40s - what about your 30s?"
 
 #### Lesson Learned Extraction
 
@@ -284,9 +285,10 @@ All GPT models (chat completions) route through Vercel AI Gateway for observabil
 
 #### What Routes Through Gateway
 
-✅ **GPT-4o** - Tier 3 analysis, lesson generation, entity extraction
-✅ **GPT-4o-mini** - Formatting, echo prompts, follow-ups
+✅ **GPT-4o** - Tier 3 milestone analysis
+✅ **GPT-4o-mini** - Lesson extraction, formatting
 ❌ **Whisper-1** - Direct OpenAI (audio not supported by Gateway)
+❌ **Tier 1 prompts** - Regex-based (no AI calls)
 
 #### Benefits
 
@@ -299,13 +301,13 @@ All GPT models (chat completions) route through Vercel AI Gateway for observabil
 #### Cost Breakdown (Per Story)
 
 **October 2025 - Optimized:**
-- Whisper transcription: ~$0.006 (direct API)
-- GPT-4o-mini formatting: ~$0.001 (Gateway)
+- AssemblyAI transcription: ~$0.0025/min (58% cheaper than Whisper)
 - GPT-4o-mini lesson generation: ~$0.0007 (Gateway) ← **90% cost reduction**
-- **Total per regular story**: ~$0.008
+- Tier 1 prompts: $0 (regex-based, no AI calls)
+- **Total per regular story**: ~$0.004-0.005
 
 **Tier 3 Milestone** (Story 3, 7, 10, etc.):
-- GPT-5 analysis (background): ~$0.02-0.15 (varies by milestone)
+- GPT-4o analysis (background): ~$0.02-0.08 (varies by milestone)
 - **User experience**: No blocking delay - runs asynchronously
 
 #### Configuration
@@ -344,172 +346,6 @@ Watch for:
 - **Caching wins**: Repeat operations showing 97% cost reduction
 - **Error rates**: Failed requests or Gateway downtime
 
-### GPT-5 Tier-3 and Whisper Upgrades (PRODUCTION)
-
-Advanced AI routing with GPT-5 reasoning for deeper synthesis in milestone analysis and whisper generation.
-
-#### Overview
-
-**Deployed:** October 14, 2025
-**Status:** Production-ready with feature flags
-**Branch:** `feature/gpt5-tier3-whispers`
-**Commit:** eeb7493
-
-Ships GPT-5 where deeper synthesis is needed (Tier-3 + Whispers) while preserving UX speed on Tier-1/Echo with fast models.
-
-#### Model Routing Architecture
-
-**Fast Operations (Always gpt-4o-mini):**
-- ✅ **Tier-1 Templates**: Entity-based prompts after every story save
-- ✅ **Echo Prompts**: Instant follow-up questions showing active listening
-- No reasoning effort parameter (optimized for speed)
-
-**Deep Synthesis Operations (GPT-5 when enabled):**
-- ✅ **Tier-3 Milestones**: Story 1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100
-  - Reasoning effort adjusts by milestone depth:
-    - Stories 1-9: `low` effort (basic pattern recognition)
-    - Stories 10-49: `medium` effort (pattern synthesis)
-    - Stories 50+: `high` effort (deep character insights)
-- ✅ **Whispers**: Context-aware prompts with `medium` effort
-- Falls back to gpt-4o-mini when flags disabled
-
-#### File Structure
-
-**New Files:**
-```
-lib/ai/
-├── modelConfig.ts        # Model selection & reasoning effort mapping
-└── gatewayClient.ts      # Gateway client with comprehensive telemetry
-
-tests/ai/
-├── routing.spec.ts       # Model routing & effort mapping tests
-└── gatewayClient.spec.ts # Gateway client configuration tests
-```
-
-**Updated Files:**
-- `/lib/tier3AnalysisV2.ts` - Now uses GPT-5 with adjustable reasoning effort
-- `/lib/whisperGeneration.ts` - Now uses GPT-5 at medium effort
-- `/lib/echoPrompts.ts` - Updated to use Gateway (stays on fast model)
-- `/app/api/stories/route.ts` - Added comprehensive telemetry logging
-
-#### Environment Variables
-
-Add to `.env.local`:
-
-```bash
-# Vercel AI Gateway (required)
-VERCEL_AI_GATEWAY_BASE_URL=https://ai-gateway.vercel.sh/v1
-VERCEL_AI_GATEWAY_API_KEY=your_vercel_ai_gateway_key
-
-# Model Configuration
-NEXT_PUBLIC_FAST_MODEL_ID=gpt-4o-mini          # Default for Tier-1/Echo
-NEXT_PUBLIC_GPT5_MODEL_ID=gpt-5                # Default for Tier-3/Whispers
-
-# Feature Flags (set to "true" to enable GPT-5)
-NEXT_PUBLIC_GPT5_TIER3_ENABLED=true            # GPT-5 for Tier-3 with reasoning effort
-NEXT_PUBLIC_GPT5_WHISPERS_ENABLED=true         # GPT-5 for Whispers at medium effort
-```
-
-**Safe Defaults:** Flags default to `false`, using fast model (gpt-4o-mini) for all operations when not set.
-
-#### Telemetry & Observability
-
-All AI calls now log comprehensive telemetry:
-
-```typescript
-{
-  op: "ai_call",
-  stage: "tier3" | "whisper" | "echo",
-  milestone?: number,
-  model: "gpt-5" | "gpt-4o-mini",
-  effort: "low" | "medium" | "high" | "n/a",
-  ttftMs: 150,              // Time to first token (from Gateway headers)
-  latencyMs: 2500,          // Total request latency
-  costUsd: 0.0234,          // Cost in USD (from Gateway headers)
-  tokensUsed: {
-    input: 1500,
-    output: 450,
-    reasoning: 2800,        // GPT-5 reasoning tokens only
-    total: 4750
-  }
-}
-```
-
-Monitor in:
-- Gateway Dashboard: https://vercel.com/dashboard/ai-gateway
-- Application logs: Server console shows per-call telemetry
-- Cost tracking: Real-time spending by model/operation
-
-#### Cost Implications
-
-**Per Story Costs (GPT-5 enabled):**
-- Tier-1 (gpt-4o-mini): ~$0.0001
-- Echo (gpt-4o-mini): ~$0.0001
-- Whisper (gpt-5 medium): ~$0.01
-- Tier-3 (gpt-5 variable):
-  - Story 3 (low effort): ~$0.02
-  - Story 10 (medium effort): ~$0.05
-  - Story 50 (high effort): ~$0.15
-
-**Monthly Costs (1,000 active users, 10 stories/user):**
-- Baseline (all gpt-4o-mini): ~$15/month
-- With GPT-5 enabled: ~$52-132/month (3.5-9x increase)
-- **ROI:** Significantly better prompt quality → higher Story 3 conversion
-
-**Cost Controls:**
-- Disable Whispers: `NEXT_PUBLIC_GPT5_WHISPERS_ENABLED=false` saves ~$10/month
-- Reduce Tier-3 frequency: Adjust milestone thresholds
-- Lower effort: Modify `effortForMilestone()` mapping
-
-#### Testing
-
-**Run Tests:**
-```bash
-npm test tests/ai/routing.spec.ts        # Model routing & effort mapping
-npm test tests/ai/gatewayClient.spec.ts  # Gateway client config
-```
-
-**Smoke Test Checklist:**
-- [ ] Flags true → Tier-3 uses GPT-5 with milestone-based effort
-- [ ] Flags false → All operations use fast model
-- [ ] Gateway dashboard shows TTFT and cost for Tier-3/Whispers
-- [ ] Quality gates still reject generic prompts (0% regression)
-- [ ] Skip/retire logic unchanged
-- [ ] Story 3 paywall: 1 unlocked + 3 locked prompts
-
-#### Rollback Plan
-
-If GPT-5 causes issues:
-
-```bash
-# Immediate rollback (set in Vercel dashboard)
-NEXT_PUBLIC_GPT5_TIER3_ENABLED=false
-NEXT_PUBLIC_GPT5_WHISPERS_ENABLED=false
-```
-
-System automatically falls back to gpt-4o-mini for all operations. No code changes needed.
-
-#### Monitoring & Alerts
-
-Watch for:
-- **Tier-3 latency**: Should be 2-5s (low), 5-10s (high effort)
-- **Prompt quality scores**: Maintain ≥70 average
-- **Story 3 conversion**: Target ≥45% (baseline: 35-40%)
-- **Error rates**: GPT-5 should have <1% failure rate
-- **Cost per user**: Track in Gateway dashboard by model
-
-#### Documentation
-
-Full implementation guide: `/GPT5_FEATURE_README.md`
-
-**Includes:**
-- Complete environment variable setup
-- Architecture diagrams
-- Cost breakdowns
-- Troubleshooting guide
-- Monitoring dashboard access
-- Rollback procedures
-
 ### AI Speed Optimization (October 2025)
 
 Performance and cost optimizations for the AI pipeline without sacrificing quality.
@@ -526,7 +362,7 @@ Achieved **14s → 6-8s** total latency (57% improvement) through model optimiza
 
 **1. Async Tier 3 Analysis (Critical Bug Fix)**
 - **Issue**: Tier 3 analysis was blocking story saves at milestones, causing 10-15 second delays
-- **Fix**: Moved Tier 3 GPT-5 analysis to background using `setImmediate()`
+- **Fix**: Moved Tier 3 GPT-4o analysis to background using `setImmediate()`
 - **Impact**: Story saves at milestones now return in **2-3 seconds** (83% faster!)
 - **User Experience**: Transcription + lesson appear instantly, Tier 3 prompts generate in background
 - **Location**: `/app/api/stories/route.ts:533-583`
@@ -558,7 +394,8 @@ Achieved **14s → 6-8s** total latency (57% improvement) through model optimiza
 
 **Quality:**
 - No degradation in lesson quality (template-driven task)
-- Tier 3 still uses GPT-5 with reasoning effort
+- Tier 3 uses GPT-4o for milestone analysis
+- Tier 1 uses regex (no AI calls, zero cost)
 - All quality gates and deduplication preserved
 
 #### Monitoring
@@ -572,7 +409,7 @@ Watch for in logs:
 
 **Telemetry includes:**
 - `stage: "tier3_background"` for async operations
-- Model used, reasoning effort, latency, cost per operation
+- Model used (GPT-4o), latency, cost per operation
 - Comprehensive error handling with fallbacks
 
 #### Phase 2 Implementations (Complete ✅)
@@ -603,8 +440,8 @@ Watch for in logs:
 #### Performance Results (Phase 1 + Phase 2)
 
 **Total Latency Reduction:**
-- Initial state: 14 seconds (GPT-5 follow-ups + Whisper)
-- After Phase 1: 8 seconds (switched to GPT-4o-mini)
+- Initial state: 14 seconds (GPT-4o follow-ups + Whisper)
+- After Phase 1: 8 seconds (switched to GPT-4o-mini for lessons)
 - After Phase 2: **6-8 seconds** (switched to AssemblyAI batch)
 - **Net improvement: 43-57% faster** ⚡
 
@@ -629,7 +466,7 @@ Watch for in logs:
 
 **Lower Priority:**
 - Response caching for lesson deduplication
-- Selective GPT-4o usage for Tier 3 (reserve GPT-5 for critical milestones)
+- Tier 3 analysis frequency adjustment (currently runs at all milestones)
 - Parallel processing of follow-up questions during recording
 
 #### Architecture Principles
