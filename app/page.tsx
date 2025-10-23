@@ -610,7 +610,7 @@ export default function HomePage() {
                 height={520}
                 className="w-full h-auto rounded-2xl shadow-2xl"
               />
-              <div className="mt-8 text-center bg-white rounded-2xl p-10 border-2 border-[#f5d0c5] shadow-lg">
+              <div className="mt-8 text-center bg-white rounded-2xl p-10 border-2 border-[#e8ddd5] shadow-lg">
                 <h4 className="text-2xl font-bold text-[#1f2937] mb-4">Your Living Digital Book</h4>
                 <p className="text-lg text-[#6b7280] leading-relaxed">Written and audio stories beautifully combined. Always up to date as you add more memories. This isn&apos;t a project that ends—it&apos;s a legacy that grows.</p>
               </div>
@@ -814,15 +814,15 @@ export default function HomePage() {
                 key={index}
                 data-animate
                 style={{ transitionDelay: `${index * 50}ms` }}
-                className="opacity-0 translate-y-8 transition-all duration-700 ease-out bg-white rounded-2xl border-2 border-[#f5d0c5] hover:border-[#f59e0b] hover:shadow-xl transition-all overflow-hidden"
+                className="opacity-0 translate-y-8 transition-all duration-700 ease-out bg-white rounded-2xl border-2 border-[#e8ddd5] hover:border-[#c9a78a] hover:shadow-xl transition-all overflow-hidden"
               >
                 <button
                   onClick={() => toggleFAQ(index)}
-                  className="w-full p-8 text-left flex items-start justify-between gap-4 focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:ring-offset-2 rounded-t-2xl"
+                  className="w-full p-8 text-left flex items-start justify-between gap-4 focus:outline-none focus:ring-2 focus:ring-[#c9a78a] focus:ring-offset-2 rounded-t-2xl"
                   aria-expanded={expandedFAQ.has(index)}
                   aria-controls={`faq-answer-${index}`}
                 >
-                  <h3 className="text-xl font-bold text-[#1f2937] flex-1">{faq.question}</h3>
+                  <h3 className="text-xl font-bold text-[#2d2520] flex-1">{faq.question}</h3>
                   <ChevronDown
                     className={`w-6 h-6 text-[#6b7280] flex-shrink-0 transition-transform duration-300 ${
                       expandedFAQ.has(index) ? 'rotate-180' : ''
@@ -853,7 +853,7 @@ export default function HomePage() {
       <section className="py-20 md:py-32 bg-white">
         <div className="max-w-5xl mx-auto px-6 lg:px-8">
           {/* Risk Reversal Banner */}
-          <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out mb-12 bg-gradient-to-r from-[#f59e0b] to-[#fb7185] rounded-3xl p-8 md:p-10 text-white text-center shadow-2xl">
+          <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out mb-12 bg-gradient-to-r from-[#8b6b7a] to-[#9d6b7c] rounded-3xl p-8 md:p-10 text-white text-center shadow-2xl">
             <h3 className="text-3xl font-bold mb-6">Try HeritageWhisper Risk-Free</h3>
             <div className="grid md:grid-cols-2 gap-4 mb-6">
               <div className="flex items-center gap-3 justify-center md:justify-start">
@@ -885,9 +885,9 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out bg-gradient-to-br from-[#fff7f3] to-white rounded-3xl p-10 md:p-12 border-4 border-[#f59e0b] shadow-2xl">
+          <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out bg-gradient-to-br from-[#faf8f5] to-white rounded-3xl p-10 md:p-12 border-4 border-[#c9a78a] shadow-2xl">
             <div className="text-center mb-8">
-              <div className="inline-block px-6 py-2 bg-gradient-to-r from-[#f59e0b] to-[#fb7185] text-white text-sm font-bold rounded-full mb-4 shadow-lg">
+              <div className="inline-block px-6 py-2 bg-gradient-to-r from-[#8b6b7a] to-[#9d6b7c] text-white text-sm font-bold rounded-full mb-4 shadow-lg">
                 MOST POPULAR
               </div>
               <h3 className="text-3xl md:text-4xl font-bold text-[#1f2937] mb-2">Complete Family Plan</h3>
@@ -911,7 +911,7 @@ export default function HomePage() {
                 "Cancel anytime",
               ].map((feature, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <CheckCircle className="w-6 h-6 text-[#f59e0b] flex-shrink-0" />
+                  <CheckCircle className="w-6 h-6 text-[#c9a78a] flex-shrink-0" />
                   <span className="text-lg text-[#1f2937]">{feature}</span>
                 </div>
               ))}
@@ -943,30 +943,30 @@ export default function HomePage() {
 
           {/* Alternative Pricing Options */}
           <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out mt-8 grid md:grid-cols-3 gap-4 text-center">
-            <div className="p-6 bg-white rounded-xl border-2 border-[#f5d0c5] shadow-md">
+            <div className="p-6 bg-white rounded-xl border-2 border-[#e8ddd5] shadow-md">
               <div className="text-sm text-[#6b7280] mb-2">Monthly Plan</div>
               <div className="text-2xl font-bold text-[#1f2937]">$14.99<span className="text-base font-normal text-[#6b7280]">/mo</span></div>
             </div>
-            <div className="p-6 bg-gradient-to-br from-[#f59e0b]/10 to-[#fb7185]/10 rounded-xl border-3 border-[#f59e0b] shadow-lg">
+            <div className="p-6 bg-gradient-to-br from-[#8b6b7a]/10 to-[#b88b94]/10 rounded-xl border-3 border-[#c9a78a] shadow-lg">
               <div className="text-sm text-[#6b7280] mb-2 font-semibold">Yearly Plan (SAVE $51!)</div>
               <div className="text-2xl font-bold text-[#1f2937]">$129<span className="text-base font-normal text-[#6b7280]">/year</span></div>
             </div>
-            <div className="p-6 bg-white rounded-xl border-2 border-[#f5d0c5] shadow-md">
+            <div className="p-6 bg-white rounded-xl border-2 border-[#e8ddd5] shadow-md">
               <div className="text-sm text-[#6b7280] mb-2">Gift Option</div>
-              <div className="text-lg font-semibold text-[#fb7185]">Give a subscription →</div>
+              <div className="text-lg font-semibold text-[#9d6b7c]">Give a subscription →</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Final CTA Section - UPDATED */}
-      <section className="py-24 md:py-32 bg-gradient-to-br from-[#fff7f3] via-[#ffe3d4] to-[#fde5e3] relative overflow-hidden">
+      <section className="py-24 md:py-32 bg-gradient-to-br from-[#faf8f5] via-[#f5ede8] to-[#f0e8e3] relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('/demo-campfire.png')] opacity-10 bg-cover bg-center"></div>
         <div className="relative max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out">
             <h2 className="text-4xl md:text-6xl font-bold text-[#1f2937] mb-8 leading-tight">
               Start Your Living Legacy—<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#f59e0b] to-[#fb7185]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8b6b7a] to-[#b88b94]">
                 Don&apos;t Let Another Story Slip Away
               </span>
             </h2>
@@ -998,15 +998,15 @@ export default function HomePage() {
 
             <div className="flex flex-wrap justify-center items-center gap-6 mt-8 text-[#6b7280]">
               <span className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-[#f59e0b]" />
+                <CheckCircle className="w-5 h-5 text-[#c9a78a]" />
                 30-Day Guarantee
               </span>
               <span className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-[#f59e0b]" />
+                <CheckCircle className="w-5 h-5 text-[#c9a78a]" />
                 No Credit Card for Trial
               </span>
               <span className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-[#f59e0b]" />
+                <CheckCircle className="w-5 h-5 text-[#c9a78a]" />
                 Cancel Anytime
               </span>
             </div>
@@ -1029,16 +1029,16 @@ export default function HomePage() {
               <span className="text-2xl font-bold">Heritage Whisper</span>
             </div>
             <div className="flex gap-8 text-base">
-              <button onClick={() => router.push("/privacy")} className="hover:text-[#f59e0b] transition-colors">
+              <button onClick={() => router.push("/privacy")} className="hover:text-[#c9a78a] transition-colors">
                 Privacy
               </button>
-              <button onClick={() => router.push("/terms")} className="hover:text-[#f59e0b] transition-colors">
+              <button onClick={() => router.push("/terms")} className="hover:text-[#c9a78a] transition-colors">
                 Terms
               </button>
-              <button onClick={() => router.push("/help")} className="hover:text-[#f59e0b] transition-colors">
+              <button onClick={() => router.push("/help")} className="hover:text-[#c9a78a] transition-colors">
                 Help
               </button>
-              <button onClick={() => router.push("/security")} className="hover:text-[#f59e0b] transition-colors">
+              <button onClick={() => router.push("/security")} className="hover:text-[#c9a78a] transition-colors">
                 Security
               </button>
             </div>
@@ -1074,8 +1074,8 @@ export default function HomePage() {
           align-items: center;
           justify-content: center;
           overflow: hidden;
-          background: radial-gradient(65.28% 65.28% at 50% 100%, rgba(33, 128, 141, 0.8) 0%, rgba(33, 128, 141, 0) 100%), 
-                      linear-gradient(135deg, #f59e0b 0%, #fb7185 100%);
+          background: radial-gradient(65.28% 65.28% at 50% 100%, rgba(139, 107, 122, 0.8) 0%, rgba(139, 107, 122, 0) 100%),
+                      linear-gradient(135deg, #8b6b7a 0%, #9d6b7c 100%);
           border: none;
           outline: none;
         }
@@ -1096,8 +1096,8 @@ export default function HomePage() {
 
         .premium-cta-button::after {
           inset: 2px;
-          background: radial-gradient(65.28% 65.28% at 50% 100%, rgba(33, 128, 141, 0.8) 0%, rgba(33, 128, 141, 0) 100%), 
-                      linear-gradient(135deg, #f59e0b 0%, #fb7185 100%);
+          background: radial-gradient(65.28% 65.28% at 50% 100%, rgba(139, 107, 122, 0.8) 0%, rgba(139, 107, 122, 0) 100%),
+                      linear-gradient(135deg, #8b6b7a 0%, #9d6b7c 100%);
           border-radius: calc(1rem - 2px);
         }
 
