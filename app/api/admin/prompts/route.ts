@@ -34,37 +34,65 @@ export async function GET(request: NextRequest) {
       userAgent: request.headers.get('user-agent') || undefined,
     });
 
-    // Fetch all active prompts
-    const { data: prompts, error: promptsError } = await supabaseAdmin
+    // Fetch prompts from BOTH active_prompts and prompt_history for the current user
+    // This gives us a complete view of all generated prompts
+    const { data: activePrompts } = await supabaseAdmin
       .from("active_prompts")
       .select("*")
-      .order("created_at", { ascending: false })
-      .limit(500); // Limit to prevent massive queries
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false });
 
-    if (promptsError) {
-      logger.error("Error fetching prompts:", promptsError);
-      return NextResponse.json(
-        { error: "Failed to fetch prompts" },
-        { status: 500 },
-      );
+    const { data: historyPrompts } = await supabaseAdmin
+      .from("prompt_history")
+      .select("*")
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false })
+      .limit(100); // Last 100 historical prompts
+
+    // Merge and deduplicate by SHA1 hash
+    const seenHashes = new Set();
+    const allPrompts = [...(activePrompts || []), ...(historyPrompts || [])]
+      .filter(p => {
+        if (seenHashes.has(p.prompt_sha1)) return false;
+        seenHashes.add(p.prompt_sha1);
+        return true;
+      })
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    if (!allPrompts || allPrompts.length === 0) {
+      return NextResponse.json({
+        success: true,
+        prompts: [],
+        stats: {
+          total: 0,
+          tier1: 0,
+          tier3: 0,
+          avgScore: 0,
+          locked: 0,
+          reviewed: 0,
+          needsReview: 0,
+          good: 0,
+          bad: 0,
+        },
+      });
     }
 
     // Calculate stats
     const stats = {
-      total: prompts?.length || 0,
-      tier1: prompts?.filter((p) => p.tier === 1).length || 0,
-      tier3: prompts?.filter((p) => p.tier === 3).length || 0,
-      avgScore: prompts?.length
+      total: allPrompts.length,
+      tier1: allPrompts.filter((p) => p.tier === 1).length,
+      tier3: allPrompts.filter((p) => p.tier === 3).length,
+      avgScore: allPrompts.length
         ? Math.round(
-            prompts.reduce((sum, p) => sum + (p.prompt_score || 0), 0) /
-              prompts.length
+            allPrompts.reduce((sum, p) => sum + (p.prompt_score || 0), 0) /
+              allPrompts.length
           )
         : 0,
-      locked: prompts?.filter((p) => p.is_locked).length || 0,
+      locked: allPrompts.filter((p) => p.is_locked).length,
     };
 
     // Check which prompts have feedback
-    const promptIds = prompts?.map((p) => p.id) || [];
+    const promptIds = allPrompts.map((p) => p.id);
     const { data: existingFeedback } = await supabaseAdmin
       .from("prompt_feedback")
       .select("prompt_id, rating, feedback_notes, tags")
@@ -75,12 +103,24 @@ export async function GET(request: NextRequest) {
       existingFeedback?.map((f) => [f.prompt_id, f]) || []
     );
 
-    // Add word count and feedback to each prompt
-    const enrichedPrompts = (prompts || []).map((p) => ({
+    // Get trigger info based on tier
+    const getTriggerInfo = (prompt: any) => {
+      if (prompt.tier === 1) {
+        return `Generated after story save • Entity: ${prompt.anchor_entity || 'N/A'}`;
+      } else if (prompt.tier === 3) {
+        return `Milestone ${prompt.milestone_reached || 'N/A'} • Deep reflection analysis`;
+      }
+      return 'Unknown trigger';
+    };
+
+    // Add word count, feedback, and trigger info to each prompt
+    const enrichedPrompts = allPrompts.map((p) => ({
       ...p,
       word_count: p.prompt_text.trim().split(/\s+/).filter(Boolean).length,
       feedback: feedbackMap.get(p.id) || null,
       hasBeenReviewed: feedbackMap.has(p.id),
+      triggerInfo: getTriggerInfo(p),
+      status: p.retired_at ? 'Retired' : (p.answered_at ? 'Answered' : 'Active'),
     }));
 
     // Update stats to include feedback counts

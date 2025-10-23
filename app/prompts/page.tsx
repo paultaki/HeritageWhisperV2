@@ -492,63 +492,65 @@ export default function PromptsV2Page() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 flex flex-col md:flex-row">
-      {/* Left Sidebar - Desktop only */}
-      {isDesktop && <LeftSidebar />}
-
-      {/* Main content */}
-      <main className="flex-1 min-w-0 pb-24 md:pb-0">
-        {/* Header - Full width */}
-        <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-40">
-          <div className="px-4 md:px-6 py-3 md:py-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
-                <Image
-                  src="/h-whiper.png"
-                  alt="Heritage Whisper"
-                  width={40}
-                  height={40}
-                  className="h-8 md:h-9 w-auto flex-shrink-0"
-                />
-                <div className="min-w-0">
-                  <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">
-                    Welcome back, {firstName}!
-                  </h1>
-                  <p className="text-xs md:text-sm text-gray-600 mt-0.5 hidden sm:block">
-                    Choose a question below to record your next memory
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {/* Account Switcher */}
-                <AccountSwitcher />
-
-                {/* Submit Question button for contributors viewing storyteller's prompts */}
-                {!isOwnAccount && canInvite && (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => setShowSubmitQuestionDialog(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0"
-                  >
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Submit Question
-                  </Button>
-                )}
-
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  onClick={() => setShowHelp(!showHelp)}
-                  className="text-gray-600 hover:text-gray-900 flex-shrink-0"
-                >
-                  <HelpCircle className="h-5 w-5" />
-                </Button>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50">
+      {/* Header - Full viewport width */}
+      <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
+        <div className="px-4 md:px-6 py-3 md:py-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
+              <Image
+                src="/h-whiper.png"
+                alt="Heritage Whisper"
+                width={40}
+                height={40}
+                className="h-8 md:h-9 w-auto flex-shrink-0"
+              />
+              <div className="min-w-0">
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">
+                  Welcome back, {firstName}!
+                </h1>
+                <p className="text-xs md:text-sm text-gray-600 mt-0.5 hidden sm:block">
+                  Choose a question below to record your next memory
+                </p>
               </div>
             </div>
+
+            <div className="flex items-center gap-3">
+              {/* Account Switcher */}
+              <AccountSwitcher />
+
+              {/* Submit Question button for contributors viewing storyteller's prompts */}
+              {!isOwnAccount && canInvite && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setShowSubmitQuestionDialog(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Submit Question
+                </Button>
+              )}
+
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => setShowHelp(!showHelp)}
+                className="text-gray-600 hover:text-gray-900 flex-shrink-0"
+              >
+                <HelpCircle className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
-        </header>
+        </div>
+      </header>
+
+      <div className="flex flex-col md:flex-row">
+        {/* Left Sidebar - Desktop only */}
+        {isDesktop && <LeftSidebar />}
+
+        {/* Main content */}
+        <main className="flex-1 min-w-0 pb-24 md:pb-0">
 
         {/* Help overlay */}
         <AnimatePresence>
@@ -817,6 +819,7 @@ export default function PromptsV2Page() {
           </DialogContent>
         </Dialog>
       </main>
+      </div>
     </div>
   );
 }

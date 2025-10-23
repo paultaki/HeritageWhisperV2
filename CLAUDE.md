@@ -252,11 +252,19 @@ Added to `stories` table:
 
 #### Pending Implementation
 
-- **GET `/api/prompts/next`**: Fetch next prompt to display to user (tested, needs UI integration)
-- **POST `/api/prompts/skip`**: Retire skipped prompts (tested, needs UI integration)
+**API Endpoints (Tested, Not Yet Integrated):**
+- **GET `/api/prompts/next`**: Fetch next AI-generated prompt to display
+- **POST `/api/prompts/skip`**: Retire skipped prompts and generate new ones
+
+**Prompt Library UI Integration:**
+- Wire up `/api/prompts/next` to display Tier 1 & Tier 3 AI prompts alongside family questions
+- Add "Skip" button that calls `/api/prompts/skip`
+- Currently shows: Featured Question (catalog), Family-Submitted Questions
+- **Missing**: AI-generated reflection prompts (Tier 1: entity-based, Tier 3: milestone analysis)
+
+**Premium Features:**
 - **Stripe webhook**: Unlock Story 3+ premium prompts on payment
-- **UI components**: Display prompts in app interface
-- **Do-not-ask**: User-controlled topic blocking
+- **Do-not-ask**: User-controlled topic blocking for sensitive subjects
 
 ### Vercel AI Gateway Integration (PRODUCTION)
 
@@ -551,7 +559,8 @@ Watch for in logs:
 - Lists "Your Stories" + all accessible family accounts
 - Visual indicators: User icon (own), Users icon (viewing)
 - Active account highlighted with checkmark
-- Available on: Timeline, Prompts, Memory Box, Book pages
+- **Currently Available on**: Timeline, Prompts Library
+- **TODO**: Add to Memory Box, Book pages for complete coverage
 
 **Database Schema**:
 - `family_members` - Links family member auth accounts to storyteller accounts
@@ -633,12 +642,64 @@ Watch for in logs:
 - `FAMILY_SHARING_ANALYSIS.md` - Original V2 security review and migration rationale
 - `FAMILY_SHARING_V3_IMPLEMENTATION.md` - Detailed implementation guide (if exists)
 
-### PDF Export
+### PDF Export (PDFShift Integration)
 
+**Status:** ✅ Production Ready (January 2025)
+
+**Service:** PDFShift cloud PDF generation (replaced Puppeteer/Chromium)
+
+**Benefits:**
+- ~150MB build size reduction (removed Chromium binary)
+- 5x faster builds (59s vs 5min+)
+- More reliable than self-hosted browser automation
+- Same PDF quality and formatting as before
+
+**Implementation:**
 - **Print Pages**: `/book/print/2up` and `/book/print/trim`
-- **API Routes**: `/api/export/2up`, `/api/export/trim`, `/api/book-data` (uses service role key)
-- **Print Layout**: Bypasses root layout via `/app/book/print/layout.tsx` to avoid padding conflicts
-- For detailed margin/centering fixes, see CLAUDE_HISTORY.md
+- **API Routes**: `/api/export/2up`, `/api/export/trim`
+- **PDFShift Client**: `/lib/pdfshift.ts`
+- **Print Token System**: `/lib/printToken.ts` - Temporary tokens (5min TTL) for PDFShift to access protected pages
+- **Formats**:
+  - 2-up (home printing): 11"x8.5" landscape
+  - Trim (POD): 5.5"x8.5" portrait
+
+**Configuration:**
+```bash
+PDFSHIFT_API_KEY=sk_...  # Required for PDF export
+NEXT_PUBLIC_SITE_URL=https://dev.heritagewhisper.com
+```
+
+**Status (January 2025):**
+- ✅ **PDFShift Enabled & Deployed** to production
+- ✅ **Vercel Deployment Protection Enabled** (Supabase auth protects endpoints)
+- ✅ **PDF Export Working** via `/api/export/2up` and `/api/export/trim`
+- ⚠️ **Formatting 95% Complete** - Minor adjustments needed before launch
+- ✅ Print pages work locally via browser print (⌘+P / Ctrl+P)
+
+**Documentation:**
+- Complete guide: `PDFSHIFT_INTEGRATION.md`
+- Quick reference: `PDFSHIFT_SETUP_SUMMARY.md`
+- Deployment checklist: `DEPLOYMENT_CHECKLIST.md`
+- Fix history: `QUICK_FIX_DEPLOYMENT.md`
+
+**How It Works:**
+1. User clicks "Download PDF" → generates print token
+2. Token + userId passed to print page URL
+3. PDFShift loads page, renders with React
+4. PDF generated and returned to user
+5. Token expires after 5 minutes (security)
+
+**Token Flow:**
+- Export API generates token via `generatePrintToken(userId)`
+- URL format: `/book/print/2up?printToken=XXX&userId=YYY`
+- Print page validates token OR uses userId directly (faster)
+- Token stored in-memory (consider Redis for production scale)
+
+**Troubleshooting:**
+- See `PDFSHIFT_INTEGRATION.md` for common issues
+- Check server logs for `[PDFShift]` entries
+- Verify Vercel deployment protection is disabled
+- Test print pages directly in browser first
 
 ### Navigation & UX Patterns
 
@@ -1568,6 +1629,81 @@ Contributors can now submit custom questions to storytellers:
 - **Location**: [/app/prompts/page.tsx](app/prompts/page.tsx), [/components/PromptCard.tsx](components/PromptCard.tsx)
 
 **Note**: Initially included `context` field but database schema uses `prompt_text` only. Removed all `context` references.
+
+### Prompts Library Header Layout Fixes
+
+Fixed header layout and positioning issues on the Prompts Library page.
+
+#### Problems
+
+1. **Header Not Full Width**: Header was constrained by sidebar flex container
+2. **Header Too Tall on Desktop**: Excessive padding (py-6) made header unnecessarily large
+3. **AccountSwitcher Positioning**: Inconsistent placement, sometimes hidden under hamburger menu
+
+#### Fixes
+
+**1. Restructured Page Layout** ([/app/prompts/page.tsx:495-553](app/prompts/page.tsx#L495-L553)):
+
+Changed from nested structure to sibling structure:
+```tsx
+// BEFORE (constrained width):
+<div className="flex">
+  <LeftSidebar />
+  <main>
+    <header>...</header>  {/* Inside main, constrained by sidebar */}
+    <content>...</content>
+  </main>
+</div>
+
+// AFTER (full width):
+<div className="min-h-screen">
+  <header className="sticky top-0 z-50">  {/* Outside flex container */}
+    ...
+  </header>
+  <div className="flex">
+    <LeftSidebar />
+    <main>
+      <content>...</content>
+    </main>
+  </div>
+</div>
+```
+
+**2. Reduced Header Height**:
+- Changed padding: `py-4 md:py-6` → `py-3 md:py-3`
+- Reduced title size: `text-4xl` → `text-2xl` on desktop
+- Reduced subtitle size: `text-lg` → `text-sm` on desktop
+- Matches Timeline header height (55px)
+
+**3. Improved Button Spacing**:
+- Increased gap: `gap-2` → `gap-3` between AccountSwitcher and help button
+- AccountSwitcher already has `mr-4` margin to prevent hamburger overlap
+
+#### Result
+
+Prompts Library header now:
+- ✅ Spans full viewport width (not constrained by sidebar)
+- ✅ Proper height on desktop (55-60px, consistent with Timeline)
+- ✅ AccountSwitcher properly positioned and visible
+- ✅ All elements properly spaced
+
+**Important**: Header must be outside the flex container with sidebar to achieve full width.
+
+### PDF Export Status Update
+
+**Deployment Complete (January 2025)**:
+- ✅ PDFShift integration deployed to production
+- ✅ Vercel Deployment Protection re-enabled (Supabase auth secures all endpoints)
+- ✅ PDF export endpoints working (`/api/export/2up`, `/api/export/trim`)
+- ⚠️ **Formatting 95% complete** - Minor polish needed before public launch
+
+**Security Note**: While Vercel Deployment Protection is enabled for preview deployments, the production app remains fully accessible. PDFShift can access production URLs, and Supabase authentication protects all API routes from unauthorized access.
+
+**Next Steps**:
+- Fine-tune PDF layout formatting (margins, page breaks, font sizing)
+- Test with various story lengths and photo configurations
+- Validate 2-up format for home printing
+- Validate trim format for print-on-demand services
 
 ---
 

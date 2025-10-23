@@ -36,6 +36,11 @@ interface Prompt {
   created_at: string;
   shown_count: number;
   hasBeenReviewed: boolean;
+  triggerInfo: string;
+  status: string;
+  milestone_reached: number | null;
+  retired_at: string | null;
+  answered_at: string | null;
   feedback: {
     rating: string;
     feedback_notes: string;
@@ -205,6 +210,44 @@ export default function AdminPromptFeedbackPage() {
         </p>
       </div>
 
+      {/* How It Works Section */}
+      <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-4 text-blue-900">📚 How AI Prompt Generation Works</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="font-semibold text-blue-800 mb-2">🎯 Tier 1: Entity-Based Prompts</h3>
+              <p className="text-sm text-gray-700 mb-2">
+                <strong>Trigger:</strong> Generated after EVERY story save
+              </p>
+              <p className="text-sm text-gray-600 mb-2">
+                Extracts 1-3 entities (people, places, objects, concepts) from the story and generates reflection prompts using template library.
+              </p>
+              <p className="text-xs text-gray-500">
+                Categories: Appreciation, Perspective Shifts, Unfinished Business, Invisible Rules, Future Self
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-blue-800 mb-2">🌟 Tier 3: Milestone Analysis</h3>
+              <p className="text-sm text-gray-700 mb-2">
+                <strong>Trigger:</strong> At story milestones [1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100]
+              </p>
+              <p className="text-sm text-gray-600 mb-2">
+                GPT-5 analyzes entire story collection for patterns, themes, and character evolution. Generates deep reflection prompts.
+              </p>
+              <p className="text-xs text-gray-500">
+                Extracts character traits, invisible rules, contradictions, and core lessons
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 p-3 bg-white rounded-lg border border-blue-200">
+            <p className="text-sm text-gray-700">
+              <strong>Note:</strong> Both tiers use SHA1 deduplication to prevent duplicate prompts. Tier 1 prompts expire after 7 days if not answered. Tier 3 prompts never expire.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <Card>
@@ -317,9 +360,23 @@ export default function AdminPromptFeedbackPage() {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-lg font-medium mb-2">
+                  <p className="text-lg font-medium mb-3">
                     {prompt.prompt_text}
                   </p>
+
+                  {/* Trigger & Status Info */}
+                  <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm font-medium text-blue-900 mb-1">
+                      🎯 Trigger: {prompt.triggerInfo}
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      Status: <strong>{prompt.status}</strong> •
+                      Created: {new Date(prompt.created_at).toLocaleDateString()}
+                      {prompt.milestone_reached && ` • Milestone: Story ${prompt.milestone_reached}`}
+                    </p>
+                  </div>
+
+                  {/* Badges */}
                   <div className="flex flex-wrap gap-2 text-sm text-gray-600">
                     <Badge variant="outline">Tier {prompt.tier}</Badge>
                     <Badge variant="outline">{prompt.memory_type}</Badge>
