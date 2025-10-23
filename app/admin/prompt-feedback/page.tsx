@@ -21,6 +21,7 @@ import {
   Download,
   Filter,
   XCircle,
+  Zap,
 } from "lucide-react";
 
 interface Prompt {
@@ -70,6 +71,8 @@ export default function AdminPromptFeedbackPage() {
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [feedbackNotes, setFeedbackNotes] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedMilestone, setSelectedMilestone] = useState<string>("30");
+  const [isTriggering, setIsTriggering] = useState(false);
 
   // Fetch all prompts
   const { data, isLoading } = useQuery<{
@@ -162,6 +165,46 @@ export default function AdminPromptFeedbackPage() {
     });
   };
 
+  // Trigger Tier 3 analysis manually
+  const handleTriggerTier3 = async () => {
+    setIsTriggering(true);
+    try {
+      const response = await fetch("/api/admin/trigger-tier3", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          milestone: parseInt(selectedMilestone),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to trigger analysis");
+      }
+
+      toast({
+        title: "✨ Tier 3 Analysis Complete!",
+        description: `Generated ${result.promptsGenerated} prompts for milestone ${result.milestone} (analyzed ${result.storiesAnalyzed} stories)`,
+      });
+
+      // Refresh prompts list
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/prompts"] });
+    } catch (error) {
+      toast({
+        title: "Analysis failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+      console.error("[Tier 3 Trigger]", error);
+    } finally {
+      setIsTriggering(false);
+    }
+  };
+
   // Filter prompts
   const filteredPrompts = data?.prompts?.filter((p) => {
     if (filterTier !== "all" && p.tier !== parseInt(filterTier)) return false;
@@ -193,9 +236,10 @@ export default function AdminPromptFeedbackPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+        <div className="space-y-4">
+          <div className="h-8 bg-gray-100 rounded w-1/4"></div>
+          <div className="h-32 bg-gray-100 rounded"></div>
+          <p className="text-gray-500 text-center py-8">Loading prompts...</p>
         </div>
       </div>
     );
@@ -204,8 +248,8 @@ export default function AdminPromptFeedbackPage() {
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Prompt Quality Feedback</h1>
-        <p className="text-gray-600">
+        <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>Prompt Quality Feedback</h1>
+        <p style={{ fontSize: '1.25rem', color: '#4b5563' }}>
           Review AI-generated prompts and provide feedback for model improvement
         </p>
       </div>
@@ -213,35 +257,35 @@ export default function AdminPromptFeedbackPage() {
       {/* How It Works Section */}
       <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
         <CardContent className="pt-6">
-          <h2 className="text-xl font-bold mb-4 text-blue-900">📚 How AI Prompt Generation Works</h2>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#1e3a8a' }}>📚 How AI Prompt Generation Works</h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-semibold text-blue-800 mb-2">🎯 Tier 1: Entity-Based Prompts</h3>
-              <p className="text-sm text-gray-700 mb-2">
+              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1e40af', marginBottom: '1rem' }}>🎯 Tier 1: Entity-Based Prompts</h3>
+              <p style={{ fontSize: '1.125rem', color: '#374151', marginBottom: '0.75rem' }}>
                 <strong>Trigger:</strong> Generated after EVERY story save
               </p>
-              <p className="text-sm text-gray-600 mb-2">
+              <p style={{ fontSize: '1.125rem', color: '#4b5563', marginBottom: '0.75rem' }}>
                 Extracts 1-3 entities (people, places, objects, concepts) from the story and generates reflection prompts using template library.
               </p>
-              <p className="text-xs text-gray-500">
+              <p style={{ fontSize: '1rem', color: '#6b7280' }}>
                 Categories: Appreciation, Perspective Shifts, Unfinished Business, Invisible Rules, Future Self
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-blue-800 mb-2">🌟 Tier 3: Milestone Analysis</h3>
-              <p className="text-sm text-gray-700 mb-2">
+              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1e40af', marginBottom: '1rem' }}>🌟 Tier 3: Milestone Analysis</h3>
+              <p style={{ fontSize: '1.125rem', color: '#374151', marginBottom: '0.75rem' }}>
                 <strong>Trigger:</strong> At story milestones [1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100]
               </p>
-              <p className="text-sm text-gray-600 mb-2">
+              <p style={{ fontSize: '1.125rem', color: '#4b5563', marginBottom: '0.75rem' }}>
                 GPT-5 analyzes entire story collection for patterns, themes, and character evolution. Generates deep reflection prompts.
               </p>
-              <p className="text-xs text-gray-500">
+              <p style={{ fontSize: '1rem', color: '#6b7280' }}>
                 Extracts character traits, invisible rules, contradictions, and core lessons
               </p>
             </div>
           </div>
-          <div className="mt-4 p-3 bg-white rounded-lg border border-blue-200">
-            <p className="text-sm text-gray-700">
+          <div className="mt-4 p-4 bg-white rounded-lg border border-blue-200">
+            <p style={{ fontSize: '1.125rem', color: '#374151' }}>
               <strong>Note:</strong> Both tiers use SHA1 deduplication to prevent duplicate prompts. Tier 1 prompts expire after 7 days if not answered. Tier 3 prompts never expire.
             </p>
           </div>
@@ -360,16 +404,16 @@ export default function AdminPromptFeedbackPage() {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-lg font-medium mb-3">
+                  <p style={{ fontSize: '2rem', lineHeight: '2.5rem', fontWeight: '500', marginBottom: '1.5rem' }}>
                     {prompt.prompt_text}
                   </p>
 
                   {/* Trigger & Status Info */}
-                  <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-sm font-medium text-blue-900 mb-1">
+                  <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p style={{ fontSize: '1.5rem', fontWeight: '500', color: '#1e40af', marginBottom: '0.75rem' }}>
                       🎯 Trigger: {prompt.triggerInfo}
                     </p>
-                    <p className="text-xs text-blue-700">
+                    <p style={{ fontSize: '1.25rem', color: '#1d4ed8' }}>
                       Status: <strong>{prompt.status}</strong> •
                       Created: {new Date(prompt.created_at).toLocaleDateString()}
                       {prompt.milestone_reached && ` • Milestone: Story ${prompt.milestone_reached}`}
@@ -377,7 +421,7 @@ export default function AdminPromptFeedbackPage() {
                   </div>
 
                   {/* Badges */}
-                  <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+                  <div className="flex flex-wrap gap-2 text-base text-gray-600">
                     <Badge variant="outline">Tier {prompt.tier}</Badge>
                     <Badge variant="outline">{prompt.memory_type}</Badge>
                     {prompt.anchor_entity && (
