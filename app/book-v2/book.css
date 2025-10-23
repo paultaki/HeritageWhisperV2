@@ -52,6 +52,13 @@
   scroll-padding-top: 26px;
 }
 
+/* V2: Mobile header spacing adjustment */
+@media (max-width: 768px) {
+  .book-wrap {
+    padding-top: 76px; /* Account for 60px mobile header + spacing */
+  }
+}
+
 .book-wrap::before {
   content: "";
   position: fixed;

@@ -32,7 +32,7 @@ export default function TimelinePage() {
       className="min-h-screen flex"
       style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}
     >
-      <LeftSidebar topOffsetClass="lg:top-[142px]" />
+      <LeftSidebar topOffsetClass="lg:top-[102px]" />
 
       {/* Main timeline content */}
       <main className="flex-1 min-w-0 lg:ml-56">

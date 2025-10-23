@@ -452,5 +452,256 @@ Timeline uses Heritage Whisper design system with semantic `hw-*` classes:
 
 ---
 
+## Recent Updates Archive (2025)
+
+### January 23, 2025 - Single Story Sharing Removed
+
+Removed all single story sharing functionality while preserving family sharing features.
+
+**What Was Removed:**
+- Share button from HamburgerMenu
+- Share button from LeftSidebar navigation
+- Share button from MemoryOverlay (story detail view)
+- `/app/share` page and route
+- `/app/api/share` API endpoints
+- `Share2` icon imports from Timeline components
+
+**What Was Kept:**
+- Family sharing functionality (`/app/api/shared/*` endpoints)
+- Family member invites and permissions
+- Family timeline and book views
+- All `/app/family/*` routes
+
+**Reason:** Single story sharing was not being used and added unnecessary complexity. Family sharing provides the collaborative features needed for families to share entire collections.
+
+### January 22, 2025 - Family Sharing V3 Critical Bug Fixes
+
+Fixed three critical bugs preventing account switching from working properly:
+
+**1. Database Field Name Mismatch (Primary Bug)**
+- **Problem**: Account switcher showed family members but clicking them didn't switch accounts
+- **Root Cause**: PostgreSQL returns snake_case field names but frontend expects camelCase
+- **Fix**: Added field mapping layer in `/api/accounts/available` endpoint
+
+**2. React Key Warning on Fragment**
+- **Problem**: Console warning about missing key prop
+- **Fix**: Changed to named Fragment with key
+
+**3. Server Build Cache Corruption**
+- **Problem**: Multiple dev server instances running simultaneously
+- **Fix**: Killed processes, cleared `.next` cache, restarted cleanly
+
+### January 22, 2025 - Prompts Library Header Layout Fixes
+
+**Problems:**
+1. Header was constrained by sidebar flex container
+2. Header too tall on desktop (excessive padding)
+3. AccountSwitcher positioning inconsistent
+
+**Fixes:**
+- Restructured page layout with header outside flex container
+- Reduced padding: `py-4 md:py-6` → `py-3 md:py-3`
+- Reduced title size: `text-4xl` → `text-2xl` on desktop
+- Matches Timeline header height (55px)
+
+### January 21, 2025 - Critical Security Fix - Row Level Security
+
+Fixed critical RLS vulnerabilities flagged by Supabase security linter on 4 tables.
+
+**Problem:**
+- RLS disabled on: `users`, `recording_sessions`, `stories`, `usage_tracking`
+- Tables exposed to potential unauthorized access
+
+**Solution:**
+- Created migration `/migrations/0011_fix_missing_rls.sql`
+- Implements defensive checks (only enables if disabled)
+- Creates comprehensive policies for each table
+
+### October 21, 2025 - Pearl Scope Enforcement
+
+Implemented comprehensive scope enforcement for Pearl (OpenAI Realtime API guided interviews) to prevent off-topic responses.
+
+**Solution: Defense in Depth**
+1. Updated system instructions with hard refusal templates
+2. Server-side scope enforcer (`/lib/scopeEnforcer.ts`) with regex detection
+3. Response token limit (150 tokens max)
+4. Integration in response pipeline
+
+**Expected Impact:**
+- 95%+ reduction in off-topic responses
+- Consistent refusal patterns
+- Automatic redirection back to story capture
+
+### October 21, 2025 - Interview Chat V1 Improvements
+
+**Reverted to Traditional Whisper Transcription:**
+- Disabled Realtime API for V1 via `NEXT_PUBLIC_ENABLE_REALTIME=false`
+- Uses traditional MediaRecorder + AssemblyAI batch transcription
+- Faster, simpler, cheaper flow
+
+**Fixed Audio Chunking Bug:**
+- Problem: Second audio response failed with "Invalid file format" 400 error
+- Root Cause: Code was slicing WebM blobs into chunks, creating invalid audio files
+- Fix: Send complete audio blob to transcription API instead of sliced chunks
+
+**Added Session Timer & Auto-Complete:**
+- 30-minute hard limit with auto-complete
+- 25-minute warning badge
+- Final minute countdown with red pulsing animation
+
+### October 20, 2025 - Conversation Mode & Quick Story Wizard Integration
+
+Fixed critical bugs preventing new recording flows from saving stories.
+
+**1. NavCache Data Race Condition:**
+- Problem: Wizard mode showed "No data found in NavCache" error
+- Fix: Added `!isWizardMode` condition to skip regular NavCache consumption
+
+**2. Authentication Headers Missing:**
+- Problem: API requests returned 401 Unauthorized errors
+- Fix: Added session token to all upload and save endpoints
+
+**3. API Field Name Mismatch:**
+- Problem: Story creation returned 400 validation error
+- Fix: Changed `transcript` to `transcription` to match API schema
+
+### October 20, 2025 - PDFShift Migration
+
+Replaced Puppeteer/Chromium with PDFShift API for PDF exports.
+
+**Problem:**
+- npm install taking 7+ minutes on Vercel builds
+- `@sparticuz/chromium` package: 141MB
+- Total `node_modules`: 831MB
+- Builds timing out
+
+**Solution:**
+- Migrated to PDFShift cloud PDF generation service
+- No heavy browser dependencies
+- Simple REST API integration
+- Credit-based pricing (~$0.01 per PDF)
+
+**Performance Improvements:**
+- npm install: 7 minutes → **15 seconds** (28x faster!)
+- node_modules: 831MB → 720MB (111MB saved)
+- Total build: 5+ minutes → **59 seconds** (5x faster!)
+
+### October 17, 2025 - Family-Submitted Prompts Feature
+
+**New API Endpoint** (`/api/prompts/family-submitted`):
+- Fetches pending prompts submitted by family contributors
+- Joins with `family_members` table to include submitter details
+- Returns: prompt text, context, submitter name/relationship
+
+**Prompts Page Integration:**
+- Family prompts display FIRST in personalized section
+- Distinct visual styling with blue/indigo gradient background
+- "💝 From Your Family" badge with count
+- Special blue gradient "Answer" button
+
+### October 10, 2025 - PDF Export Improvements
+
+**Running Headers:**
+- Now show story title, year, and age instead of generic text
+- Format: "STORY TITLE • YEAR • AGE X" (uppercase)
+
+**Lesson Learned Styling:**
+- Updated to match clean site design
+- Changed from yellow background box to simple 4px straight gold left border
+
+**Page Margins Reduced:**
+- Book View: Content margin reduced from 48px → 23px
+- PDF Export: Horizontal padding reduced from 0.5in → 0.25in per side
+
+**Bug Fixes:**
+- Added Remove button for lessons in edit mode
+- Fixed empty string handling when deleting lessons
+- Fixed running header alignment (both pages now use top: 18px)
+
+### October 9, 2025 - Lesson Learned Display & Book Layout Polish
+
+**Fixed Rendering:**
+- Lessons learned (stored as `wisdomClipText`) now display properly
+- Root cause: `lessonLearned` blocks were being included in `page.text`
+- Solution: Filter out blocks from page text AND extract to `page.lessonLearned` field
+
+**Mobile Book View Responsive Fixes:**
+- Dotted Decor Border: Desktop 48px, Mobile 10px
+- Content Padding: Desktop 48px, Mobile 20px
+- Running Header & Edit Button optimized for mobile
+- Navigation Arrows: Desktop 64px, Mobile 48px touch targets
+
+**Book Layout Polish:**
+- Text Alignment: Left-aligned (changed from justified)
+- Page Margins: Equal 48px margins with dotted decor border
+- Photo Margins: 0 top margin for clean spacing
+
+### October 8, 2025 - Recording UX & AI Transcription
+
+**Recording UX Improvements:**
+- Processing Spinner: Recording screen shows spinner while transcribing (not initial screen)
+- Cancel Navigation Fix: Returns to origin page via `returnPath` in NavCache
+
+**AI Transcription:**
+- OpenAI Whisper Integration working with GPT-4 formatting
+- Lesson Learned Generation: Automatically suggests wisdom from each story
+
+**Mobile Book View Polish:**
+- Removed Debug Badge
+- Fixed Mobile Scrolling with proper brown border spacing
+
+**Timeline Year Badges:**
+- Increased Text Size: Desktop 22px, Mobile 17px
+- Improved Positioning: Moved 5px left for better alignment
+
+### January 2025 - Navigation Redesign
+
+**Desktop Navigation Moved to Bottom:**
+- Horizontal navigation bar replacing left sidebar
+- Home, Timeline, Book, Profile icons
+- Fixed to bottom of viewport (80px from bottom)
+
+**Book View Simplified:**
+- Removed TOC sidebar and book navigation panel
+- Clean dual-page layout with only progress bar
+- Standalone progress bar component
+
+**Mobile Book View Enhanced:**
+- Restored bottom navigation bar
+- Added decades pill navigation for quick chapter jumps
+
+**Book View Enhancements:**
+- Progress Bar: Shows "Page X of Y • YEAR" tooltip
+- Page Click Navigation: Click page margins to turn pages
+- Cursor hints attempted (w-resize/e-resize) but have reliability issues
+
+### January 2025 - OpenAI Realtime API Integration
+
+Replaced broken Whisper blob-slicing transcription with OpenAI Realtime API for guided interviews.
+
+**Problem Solved:**
+- Old approach: Record WebM → Slice → Send to Whisper → FAILED (invalid fragments)
+- New approach: Stream mic via WebRTC → OpenAI Realtime → Live transcripts → WORKS
+
+**Architecture:**
+- Transport: WebRTC (48kHz Opus)
+- Model: `gpt-4o-realtime-preview-2024-12-17`
+- Transcription: Server-side Whisper-1
+- VAD: Server-side with 300ms silence threshold
+- Barge-in: Server VAD + client-side audio pause
+
+**UX Improvements:**
+- Live Transcription in real-time
+- Voice Toggle for AI audio responses
+- Mixed Audio: Full conversation saved for playback
+- Auto-reconnect on ICE connection failures
+
+**Cost:**
+- Realtime API: ~$1.13 per 15-min interview
+- vs Whisper: ~$0.09 per 15 min (but broken!)
+- Trade-off: 12.5x cost increase for working solution
+
+---
+
 _This is a historical reference document. For current documentation, see CLAUDE.md_
-_Last updated: October 8, 2025_
+_Last updated: January 23, 2025_

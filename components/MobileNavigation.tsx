@@ -91,7 +91,7 @@ export default function MobileNavigation({
       }}
     >
       <div
-        className="flex items-center justify-around h-20 relative"
+        className="flex items-center justify-around h-16 relative"
         style={{
           gap: 'clamp(12px, 6vw, 60px)',
           paddingLeft: 12,
@@ -102,7 +102,7 @@ export default function MobileNavigation({
         {/* Timeline */}
         <NavItem
           icon={Calendar}
-          label="Timeline View"
+          label="Timeline"
           href="/timeline"
           isActive={pathname === "/timeline"}
         />
@@ -110,7 +110,7 @@ export default function MobileNavigation({
         {/* Book View */}
         <NavItem
           icon={BookOpen}
-          label="Book View"
+          label="Book"
           href="/book"
           isActive={pathname.startsWith("/book")}
         />
@@ -129,7 +129,7 @@ export default function MobileNavigation({
                 : 'hover:scale-110 active:scale-95'
             }`}
             style={{
-              bottom: "-12px",
+              bottom: "-2px",
               background: isRecording
                 ? "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)"
                 : "linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)",
@@ -173,7 +173,7 @@ export default function MobileNavigation({
         {/* Memory Box */}
         <NavItem
           icon={Box}
-          label="Memory Box"
+          label="Memories"
           href="/memory-box"
           isActive={pathname === "/memory-box"}
         />
@@ -181,7 +181,7 @@ export default function MobileNavigation({
         {/* Prompts - Profile removed since it's in hamburger menu */}
         <NavItem
           icon={Sparkles}
-          label="Prompt Library"
+          label="Prompts"
           href="/prompts"
           isActive={pathname === "/prompts"}
         />

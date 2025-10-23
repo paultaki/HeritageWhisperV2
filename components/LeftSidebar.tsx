@@ -7,7 +7,11 @@ import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 
-export function LeftSidebar() {
+interface LeftSidebarProps {
+  topOffsetClass?: string;
+}
+
+export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
   const [isDark, setIsDark] = useState(false);
   const { user } = useAuth();
 
@@ -35,7 +39,7 @@ export function LeftSidebar() {
 
   return (
     <aside
-      className="hidden lg:flex lg:w-56 flex-col gap-1.5 p-2 lg:sticky lg:top-0 lg:self-start"
+      className={`hidden lg:flex lg:w-56 flex-col gap-1.5 p-2 lg:sticky ${topOffsetClass} lg:self-start`}
       style={{
         backgroundColor: "transparent",
         borderRight: "none",

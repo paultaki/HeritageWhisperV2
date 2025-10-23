@@ -199,18 +199,19 @@ export default function MemoryBoxPage() {
     onMutate: async ({ id, updates }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: ["/api/stories", session?.access_token],
+        queryKey: ["/api/stories", storytellerId, session?.access_token],
       });
 
       // Snapshot the previous value
       const previousStories = queryClient.getQueryData<Story[]>([
         "/api/stories",
+        storytellerId,
         session?.access_token,
       ]);
 
       // Optimistically update to the new value
       queryClient.setQueryData<Story[]>(
-        ["/api/stories", session?.access_token],
+        ["/api/stories", storytellerId, session?.access_token],
         (old) => {
           if (!old) return old;
           return old.map((story) =>
@@ -225,7 +226,7 @@ export default function MemoryBoxPage() {
     onSuccess: (data) => {
       console.log("Update successful, response:", data);
       queryClient.invalidateQueries({
-        queryKey: ["/api/stories", session?.access_token],
+        queryKey: ["/api/stories", storytellerId, session?.access_token],
       });
       toast({ title: "Memory updated successfully" });
     },
@@ -233,7 +234,7 @@ export default function MemoryBoxPage() {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousStories) {
         queryClient.setQueryData(
-          ["/api/stories", session?.access_token],
+          ["/api/stories", storytellerId, session?.access_token],
           context.previousStories,
         );
       }
@@ -536,23 +537,6 @@ export default function MemoryBoxPage() {
         </div>
       </header>
 
-      {/* Toolbar with Stats and Controls - Full Width */}
-      <section className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <MemoryToolbar
-            stats={toolbarStats}
-            view={viewMode}
-            setView={setViewMode}
-            filter={searchQuery}
-            setFilter={setSearchQuery}
-            sort={sortBy}
-            setSort={(s) => setSortBy(s as SortBy)}
-            filterMode={filterMode}
-            setFilterMode={(mode) => setFilterMode(mode as ViewMode)}
-          />
-        </div>
-      </section>
-
       {/* Content Area with Sidebar */}
       <div className="flex">
         {/* Left Sidebar */}
@@ -560,8 +544,25 @@ export default function MemoryBoxPage() {
 
         {/* Main content */}
         <main className={`flex-1 min-w-0 pb-20 md:pb-0 ${viewMode === "list" ? "hw-list" : ""}`}>
+          {/* Toolbar with Stats and Controls - Contained width */}
+          <section className="px-6 pt-6" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+            <div className="bg-white border rounded-xl p-6 mb-6">
+              <MemoryToolbar
+                stats={toolbarStats}
+                view={viewMode}
+                setView={setViewMode}
+                filter={searchQuery}
+                setFilter={setSearchQuery}
+                sort={sortBy}
+                setSort={(s) => setSortBy(s as SortBy)}
+                filterMode={filterMode}
+                setFilterMode={(mode) => setFilterMode(mode as ViewMode)}
+              />
+            </div>
+          </section>
+
           {/* Stories Content */}
-          <section className="px-6 py-6" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+          <section className="px-6" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
         {isLoading ? (
           <div className="hw-grid-mem">
             {[...Array(8)].map((_, i) => (

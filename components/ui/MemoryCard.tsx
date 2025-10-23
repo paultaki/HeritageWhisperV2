@@ -100,24 +100,66 @@ export default function MemoryCard(p: Props) {
         {/* Timeline/Book toggles with play and menu buttons */}
         {(p.onToggleTimeline || p.onToggleBook) && (
           <div className="hw-card-actions-row">
-            <div style={{ display: "flex", gap: "6px" }}>
+            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
               {p.onToggleTimeline && (
-                <button
-                  className={`hw-chip ${p.inTimeline ? "active" : ""}`}
-                  onClick={p.onToggleTimeline}
-                  aria-label="Toggle timeline"
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    color: "#1f0f08",
+                    userSelect: "none",
+                  }}
                 >
-                  Timeline
-                </button>
+                  <input
+                    type="checkbox"
+                    checked={p.inTimeline}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      p.onToggleTimeline?.();
+                    }}
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      cursor: "pointer",
+                      accentColor: "#fb923c",
+                    }}
+                    aria-label="Include in timeline"
+                  />
+                  <span>Timeline</span>
+                </label>
               )}
               {p.onToggleBook && (
-                <button
-                  className={`hw-chip ${p.inBook ? "active" : ""}`}
-                  onClick={p.onToggleBook}
-                  aria-label="Toggle book"
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    color: "#1f0f08",
+                    userSelect: "none",
+                  }}
                 >
-                  Book
-                </button>
+                  <input
+                    type="checkbox"
+                    checked={p.inBook}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      p.onToggleBook?.();
+                    }}
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      cursor: "pointer",
+                      accentColor: "#fb923c",
+                    }}
+                    aria-label="Include in book"
+                  />
+                  <span>Book</span>
+                </label>
               )}
             </div>
             <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>

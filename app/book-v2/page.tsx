@@ -732,6 +732,7 @@ export default function BookViewNew() {
   const [fontsReady, setFontsReady] = useState(false);
   const [isPaginationReady, setIsPaginationReady] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0); // V2: Simple zoom control
+  const [showDecadeSelector, setShowDecadeSelector] = useState(false); // Mobile decade navigation
 
   // Get storyId from URL parameters
   const searchParams = new URLSearchParams(
@@ -1048,33 +1049,74 @@ export default function BookViewNew() {
 
   return (
     <div className="book-view min-h-screen bg-background">
-      {/* V2: Zoom Controls - Fixed position, always accessible */}
-      <div className="fixed top-24 right-4 z-50 flex flex-col gap-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-2">
-        <button
-          onClick={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
-          className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
-          aria-label="Zoom in"
-        >
-          +
-        </button>
-        <div className="w-10 text-center text-xs text-gray-600 font-medium">
-          {Math.round(zoomLevel * 100)}%
+      {/* Mobile Header - Decade selector, Zoom, Hamburger */}
+      {isMobile && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200" style={{ height: '60px' }}>
+          {/* Decade Selector Button - absolute left */}
+          <button
+            onClick={() => setShowDecadeSelector(true)}
+            className="absolute w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+            style={{ left: '16px', top: '8px' }}
+            aria-label="Select decade"
+          >
+            <BookOpen className="w-4 h-4 text-gray-700" />
+          </button>
+          
+          {/* Horizontal Zoom Controls - absolutely centered */}
+          <div 
+            className="absolute flex items-center gap-1 bg-gray-100 rounded-lg p-1"
+            style={{ left: '50%', transform: 'translateX(-50%)', top: '3px' }}
+          >
+            <button
+              onClick={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
+              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white transition-colors text-gray-700 font-bold text-base"
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <div className="min-w-[45px] text-center text-xs text-gray-600 font-medium px-2">
+              {Math.round(zoomLevel * 100)}%
+            </div>
+            <button
+              onClick={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
+              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white transition-colors text-gray-700 font-bold text-base"
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
-          className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
-          aria-label="Zoom out"
-        >
-          −
-        </button>
-        <button
-          onClick={() => setZoomLevel(1.0)}
-          className="w-10 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-600 text-xs font-medium mt-1"
-          aria-label="Reset zoom"
-        >
-          Reset
-        </button>
-      </div>
+      )}
+      
+      {/* Desktop Zoom Controls - Fixed position, always accessible */}
+      {!isMobile && (
+        <div className="fixed top-24 right-4 z-50 flex flex-col gap-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-2">
+          <button
+            onClick={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
+            className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
+            aria-label="Zoom in"
+          >
+            +
+          </button>
+          <div className="w-10 text-center text-xs text-gray-600 font-medium">
+            {Math.round(zoomLevel * 100)}%
+          </div>
+          <button
+            onClick={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
+            className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
+            aria-label="Zoom out"
+          >
+            −
+          </button>
+          <button
+            onClick={() => setZoomLevel(1.0)}
+            className="w-10 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-600 text-xs font-medium mt-1"
+            aria-label="Reset zoom"
+          >
+            Reset
+          </button>
+        </div>
+      )}
 
       {/* Book Content - Always centered, allows natural scrolling */}
       <div className="book-container-wrapper" {...swipeHandlers}>
@@ -1159,13 +1201,52 @@ export default function BookViewNew() {
         />
       )}
 
-      {/* Mobile: Decades Pill - Floating navigation */}
-      {isMobile && (
-        <BookDecadesPill
-          pages={pages}
-          currentPage={currentMobilePage}
-          onNavigateToPage={navigateToPage}
-        />
+      {/* Mobile: Decades Pill - Removed, now in header */}
+      
+      {/* Mobile Decade Selector Modal */}
+      {isMobile && showDecadeSelector && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[60] flex items-end"
+          onClick={() => setShowDecadeSelector(false)}
+        >
+          <div 
+            className="bg-white rounded-t-3xl w-full max-h-[70vh] overflow-y-auto p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Jump to Decade</h3>
+              <button
+                onClick={() => setShowDecadeSelector(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {pages
+                .filter(p => p.type === 'decade-marker')
+                .map((page, idx) => {
+                  // Find the array index of this page
+                  const pageIndex = pages.findIndex(p => p.pageNumber === page.pageNumber);
+                  
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        navigateToPage(pageIndex);
+                        setShowDecadeSelector(false);
+                      }}
+                      className="flex flex-col items-center justify-center p-4 rounded-xl bg-gradient-to-br from-amber-50 to-rose-50 hover:from-amber-100 hover:to-rose-100 transition-all border-2 border-transparent hover:border-amber-300"
+                    >
+                      <span className="text-2xl font-bold text-gray-900">{page.decade}</span>
+                      <span className="text-xs text-gray-600 mt-1">{page.storiesInDecade} {page.storiesInDecade === 1 ? 'story' : 'stories'}</span>
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
