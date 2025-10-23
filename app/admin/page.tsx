@@ -19,7 +19,8 @@ import {
   FileText,
   Zap,
   Settings,
-  MessageSquare
+  MessageSquare,
+  Code
 } from "lucide-react";
 
 interface AdminTool {
@@ -43,7 +44,7 @@ const ADMIN_TOOLS: AdminTool[] = [
   {
     title: "North Star Dashboard",
     description: "Strategic positioning, messaging framework, competitive advantages, and product roadmap",
-    href: "/admin/north-star",
+    href: "file:///Users/paul/Development/HW_Files/index.html",
     icon: <Compass className="w-6 h-6" />,
     category: "monitoring",
     color: "text-orange-600 bg-orange-50",
@@ -63,6 +64,14 @@ const ADMIN_TOOLS: AdminTool[] = [
     icon: <MessageSquare className="w-6 h-6" />,
     category: "quality",
     color: "text-amber-600 bg-amber-50",
+  },
+  {
+    title: "AI Prompts Inspector",
+    description: "View all AI system prompts sent to OpenAI with model configs and source code locations",
+    href: "/admin/ai-prompts",
+    icon: <Code className="w-6 h-6" />,
+    category: "monitoring",
+    color: "text-teal-600 bg-teal-50",
   },
   {
     title: "Quality Gate Tester",
@@ -306,7 +315,7 @@ export default function AdminHomePage() {
             </a>
 
             <a
-              href="https://vercel.com/paul-heritagewhisper"
+              href="https://vercel.com/pauls-projects-667765b0/heritage-whisper-v2"
               target="_blank"
               rel="noopener noreferrer"
               className="block"
@@ -332,7 +341,7 @@ export default function AdminHomePage() {
             </a>
 
             <a
-              href="https://vercel.com/dashboard/ai-gateway"
+              href="https://vercel.com/pauls-projects-667765b0/heritage-whisper-v2/observability/ai"
               target="_blank"
               rel="noopener noreferrer"
               className="block"
@@ -358,7 +367,7 @@ export default function AdminHomePage() {
             </a>
 
             <a
-              href="https://pdfshift.io/dashboard"
+              href="https://app.pdfshift.io/env/"
               target="_blank"
               rel="noopener noreferrer"
               className="block"

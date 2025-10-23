@@ -1383,7 +1383,7 @@ Add to Vercel Dashboard:
 PDFSHIFT_API_KEY=your_api_key_here
 ```
 
-Get API key at: https://pdfshift.io
+Get API key at: https://app.pdfshift.io/env/
 
 **Note**: API key required in production, but builds succeed without it (lazy validation at runtime only)
 
