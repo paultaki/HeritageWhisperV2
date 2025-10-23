@@ -44,6 +44,13 @@ interface RecordModalProps {
     title?: string;
     year?: number;
     duration?: number;
+    lessonOptions?: {
+      practical?: string;
+      emotional?: string;
+      character?: string;
+    };
+    formattedContent?: any;
+    wisdomClipText?: string;
   }) => void;
   initialPrompt?: string;
   initialTitle?: string;
@@ -83,6 +90,13 @@ export default function RecordModal({
   const [formattedContent, setFormattedContent] = useState<any>(null);
   const [silenceTimer, setSilenceTimer] = useState(0);
   const [isTypingMode, setIsTypingMode] = useState(false);
+
+  // NEW: Audio review screen states
+  const [showAudioReview, setShowAudioReview] = useState(false);
+  const [reviewAudioUrl, setReviewAudioUrl] = useState<string | null>(null);
+  const [reviewAudioBlob, setReviewAudioBlob] = useState<Blob | null>(null);
+  const [reviewDuration, setReviewDuration] = useState(0);
+  const [lessonOptions, setLessonOptions] = useState<any>(null);
   
   // Follow-up question feature state
   const [showFollowUpButton, setShowFollowUpButton] = useState(false);
@@ -626,29 +640,34 @@ export default function RecordModal({
   };
 
   const stopRecording = async () => {
-    console.log("[RecordModal] stopRecording called");
-    
+    console.log("[RecordModal] stopRecording called - showing audio review screen");
+
     // Get the current recording from AudioRecorder before we stop it
     const blob = audioRecorderRef.current?.getCurrentRecording();
     const duration = audioRecorderRef.current?.getRecordingDuration() || 0;
-    
-    console.log("[RecordModal] Got current recording:", { 
-      hasBlob: !!blob, 
-      blobSize: blob?.size, 
-      duration 
+
+    console.log("[RecordModal] Got current recording:", {
+      hasBlob: !!blob,
+      blobSize: blob?.size,
+      duration
     });
-    
-    // If we have a recording, process it
+
+    // If we have a recording, show the audio review screen
     if (blob && blob.size > 0 && duration > 0) {
-      // IMPORTANT: AWAIT the async processing BEFORE cleanup so chunks are available
-      await handleRecordingComplete(blob, duration);
-      
-      console.log("[RecordModal] handleRecordingComplete finished, now cleaning up...");
-      
-      // Stop the actual AudioRecorder AFTER processing completes
-      if (audioRecorderRef.current) {
-        audioRecorderRef.current.cleanup();
-      }
+      // Create audio URL for playback
+      const audioUrl = URL.createObjectURL(blob);
+
+      // Store review data
+      setReviewAudioBlob(blob);
+      setReviewAudioUrl(audioUrl);
+      setReviewDuration(duration);
+
+      // Hide recording UI, show audio review
+      setIsRecording(false);
+      setIsPaused(false);
+      setShowAudioReview(true);
+
+      console.log("[RecordModal] Audio review screen displayed");
     } else {
       console.error("[RecordModal] No valid recording to process");
       toast({
@@ -658,11 +677,168 @@ export default function RecordModal({
       });
       setIsRecording(false);
       setIsPaused(false);
-      
+
       // Cleanup even on error
       if (audioRecorderRef.current) {
         audioRecorderRef.current.cleanup();
       }
+    }
+  };
+
+  // Handle re-recording from audio review screen
+  const handleReRecord = () => {
+    console.log("[RecordModal] Re-record requested");
+
+    // Clean up review audio URL
+    if (reviewAudioUrl) {
+      URL.revokeObjectURL(reviewAudioUrl);
+    }
+
+    // Reset review state
+    setShowAudioReview(false);
+    setReviewAudioUrl(null);
+    setReviewAudioBlob(null);
+    setReviewDuration(0);
+
+    // Reset recording state
+    setRecordingTime(0);
+    setFollowUpQuestions([]);
+    setContextualFollowUpQuestion(null);
+
+    // Go back to recording screen
+    setIsRecording(true);
+    setIsPaused(false);
+
+    // Start fresh recording
+    audioRecorderRef.current?.startRecording();
+  };
+
+  // Handle continue from audio review - start background transcription
+  const handleContinueFromReview = async () => {
+    if (!reviewAudioBlob) {
+      console.error("[RecordModal] No audio blob to continue with");
+      return;
+    }
+
+    console.log("[RecordModal] Continue from audio review - starting background transcription");
+
+    // Clean up AudioRecorder now that we're done with it
+    if (audioRecorderRef.current) {
+      audioRecorderRef.current.cleanup();
+    }
+
+    // Hide audio review screen
+    setShowAudioReview(false);
+
+    // Start background transcription (non-blocking)
+    startBackgroundTranscription(reviewAudioBlob, reviewDuration);
+
+    // Navigate to BookStyleReview immediately with empty transcription
+    // Transcription will be updated when it completes
+    onSave({
+      audioBlob: reviewAudioBlob,
+      transcription: "", // Empty for now, will be updated via polling
+      title: storyTitle || undefined,
+      year: storyYear || undefined,
+      duration: reviewDuration,
+    });
+  };
+
+  // Background transcription with state updates
+  const startBackgroundTranscription = async (blob: Blob, duration: number) => {
+    console.log("[RecordModal] Starting background transcription");
+
+    try {
+      // Get Supabase session for authorization
+      let {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      // If no session, try to refresh
+      if (!session || sessionError) {
+        console.log("[RecordModal] No session, attempting refresh...");
+        const {
+          data: { session: refreshedSession },
+          error: refreshError,
+        } = await supabase.auth.refreshSession();
+        if (refreshedSession) {
+          session = refreshedSession;
+        } else {
+          console.error("[RecordModal] Failed to refresh session:", refreshError);
+          throw new Error("Authentication failed. Please sign in again.");
+        }
+      }
+
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`;
+      } else {
+        throw new Error("No authentication token. Please sign in again.");
+      }
+
+      // Convert blob to base64
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Data = (reader.result as string).split(",")[1];
+          resolve(base64Data);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
+      console.log("[RecordModal] Calling transcription API in background");
+
+      // Call transcription API
+      const response = await fetch(getApiUrl("/api/transcribe-assemblyai"), {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: JSON.stringify({
+          audioBase64: base64,
+          mimeType: blob.type || "audio/webm",
+          title: storyTitle || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Transcription failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const finalTranscript = data.transcription || "";
+
+      console.log("[RecordModal] Background transcription completed:", {
+        transcriptLength: finalTranscript.length,
+        hasLessonOptions: !!data.lessonOptions,
+      });
+
+      // Store results for BookStyleReview to pick up
+      // We'll use sessionStorage as a communication channel
+      sessionStorage.setItem('hw_transcription_result', JSON.stringify({
+        transcription: finalTranscript,
+        lessonOptions: data.lessonOptions,
+        formattedContent: data.formattedContent,
+      }));
+
+      // Dispatch custom event to notify BookStyleReview
+      window.dispatchEvent(new CustomEvent('hw_transcription_complete', {
+        detail: {
+          transcription: finalTranscript,
+          lessonOptions: data.lessonOptions,
+          formattedContent: data.formattedContent,
+        }
+      }));
+
+    } catch (error) {
+      console.error("[RecordModal] Background transcription error:", error);
+
+      // Store error state
+      sessionStorage.setItem('hw_transcription_error', 'true');
+      window.dispatchEvent(new CustomEvent('hw_transcription_error'));
     }
   };
 
@@ -851,7 +1027,95 @@ export default function RecordModal({
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto px-6 py-6">
-              {!showTranscription && (
+              {/* Audio Review Screen */}
+              {showAudioReview && reviewAudioUrl && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center">
+                    <h3
+                      className="text-2xl font-bold mb-2"
+                      style={{
+                        fontFamily: designSystem.typography.fontFamilies.serif,
+                      }}
+                    >
+                      Review Your Recording
+                    </h3>
+                    <p className="text-gray-600">
+                      Listen to your recording before continuing
+                    </p>
+                  </div>
+
+                  {/* Audio Playback */}
+                  <Card className="p-6 bg-gradient-to-br from-orange-50 to-pink-50 border-2 border-orange-200">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 flex items-center justify-center">
+                            <Volume2 className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">Your Story</p>
+                            <p className="text-sm text-gray-600">{formatTime(reviewDuration)}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Audio player */}
+                      <audio
+                        controls
+                        src={reviewAudioUrl}
+                        className="w-full"
+                        style={{
+                          borderRadius: "8px",
+                          outline: "none",
+                        }}
+                      />
+
+                      <p className="text-sm text-gray-600 text-center">
+                        Listen carefully - you can re-record if needed
+                      </p>
+                    </div>
+                  </Card>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col gap-3">
+                    <Button
+                      onClick={handleContinueFromReview}
+                      size="lg"
+                      className="w-full text-lg py-6"
+                      style={{
+                        background: designSystem.colors.gradients.coral,
+                        color: "white",
+                      }}
+                    >
+                      Continue to Add Details
+                      <ChevronRight className="w-5 h-5 ml-2" />
+                    </Button>
+
+                    <Button
+                      onClick={handleReRecord}
+                      variant="outline"
+                      size="lg"
+                      className="w-full text-lg py-6"
+                    >
+                      <RotateCcw className="w-5 h-5 mr-2" />
+                      Re-record
+                    </Button>
+                  </div>
+
+                  {/* Helpful tip */}
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-900">
+                      <strong>💡 Tip:</strong> While you're adding your title, date, and photos on the next screens, we'll be transcribing your audio in the background!
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {!showTranscription && !showAudioReview && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

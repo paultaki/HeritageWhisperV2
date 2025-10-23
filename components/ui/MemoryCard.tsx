@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 
 type Props = {
+  id?: string;
   imageUrl: string;
   title: string;
   year: number | string;
@@ -22,6 +23,7 @@ type Props = {
 
 export default function MemoryCard(p: Props) {
   const [showMenu, setShowMenu] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,6 +41,24 @@ export default function MemoryCard(p: Props) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showMenu]);
+
+  // Register with AudioManager to track playing state
+  useEffect(() => {
+    if (!p.id) return;
+
+    // Import AudioManager dynamically to avoid SSR issues
+    const AudioManager = (window as any).AudioManager;
+    if (!AudioManager) return;
+
+    const manager = AudioManager.getInstance();
+    manager.register(p.id, (playing: boolean) => {
+      setIsPlaying(playing);
+    });
+
+    return () => {
+      manager.unregister(p.id);
+    };
+  }, [p.id]);
   return (
     <article className="hw-card hw-card-memorybox">
       <div style={{ position: "relative" }}>
@@ -49,19 +69,28 @@ export default function MemoryCard(p: Props) {
           loading="lazy"
           decoding="async"
         />
-        {/* Play button overlaid on photo - matching timeline style */}
+        {/* Play/Pause button overlaid on photo - matching timeline style */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             p.onPlay?.();
           }}
-          aria-label="Play memory"
+          aria-label={isPlaying ? "Pause memory" : "Play memory"}
           className="hw-play-desktop absolute bottom-3 right-3 flex-shrink-0 w-11 h-11 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer"
           style={{ pointerEvents: 'auto' }}
         >
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style={{ pointerEvents: 'none' }}>
             <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
-            <polygon points="11,9 11,19 19,14" fill="#fb923c" />
+            {isPlaying ? (
+              // Pause icon - two bars
+              <>
+                <rect x="10" y="9" width="3" height="10" fill="#fb923c" />
+                <rect x="15" y="9" width="3" height="10" fill="#fb923c" />
+              </>
+            ) : (
+              // Play icon - triangle
+              <polygon points="11,9 11,19 19,14" fill="#fb923c" />
+            )}
           </svg>
         </button>
       </div>
@@ -165,7 +194,7 @@ export default function MemoryCard(p: Props) {
             <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
               <button
                 className="hw-icon-btn hw-play-mobile"
-                aria-label="Play memory"
+                aria-label={isPlaying ? "Pause memory" : "Play memory"}
                 onClick={p.onPlay}
               >
                 <svg
@@ -174,7 +203,16 @@ export default function MemoryCard(p: Props) {
                   width="18"
                   height="18"
                 >
-                  <path d="M8 5l11 7-11 7V5z" fill="var(--color-accent)" />
+                  {isPlaying ? (
+                    // Pause icon - two bars
+                    <>
+                      <rect x="8" y="5" width="2.5" height="14" fill="var(--color-accent)" />
+                      <rect x="13.5" y="5" width="2.5" height="14" fill="var(--color-accent)" />
+                    </>
+                  ) : (
+                    // Play icon - triangle
+                    <path d="M8 5l11 7-11 7V5z" fill="var(--color-accent)" />
+                  )}
                 </svg>
               </button>
               <div style={{ position: "relative" }} ref={menuRef}>

@@ -95,6 +95,7 @@ export function BookStyleReview({
     character?: string;
   } | null>(null);
   const [showLessonOptions, setShowLessonOptions] = useState(false);
+  const [isTranscriptionLoading, setIsTranscriptionLoading] = useState(false);
 
   const { toast } = useToast();
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -135,6 +136,85 @@ export function BookStyleReview({
       wisdomInputRef.current.select();
     }
   }, [editingWisdom]);
+
+  // Listen for background transcription completion
+  useEffect(() => {
+    const handleTranscriptionComplete = (event: CustomEvent) => {
+      console.log("[BookStyleReview] Background transcription completed!", event.detail);
+
+      const { transcription: newTranscription, lessonOptions: newLessonOptions } = event.detail;
+
+      // Update transcription if we don't have one yet or if it's empty
+      if (!transcription || transcription.trim() === "") {
+        onTranscriptionChange(newTranscription);
+        setIsTranscriptionLoading(false);
+
+        toast({
+          title: "✨ Transcription ready!",
+          description: "Your story has been transcribed and is ready to review.",
+        });
+      }
+
+      // Store lesson options for user to choose from
+      if (newLessonOptions) {
+        setLessonOptions(newLessonOptions);
+
+        // Auto-set practical lesson if wisdom is empty
+        if (!wisdomText && newLessonOptions.practical) {
+          onWisdomChange(newLessonOptions.practical);
+          setTempWisdom(newLessonOptions.practical);
+        }
+      }
+
+      // Clean up sessionStorage
+      sessionStorage.removeItem('hw_transcription_result');
+    };
+
+    const handleTranscriptionError = () => {
+      console.error("[BookStyleReview] Background transcription failed");
+      setIsTranscriptionLoading(false);
+
+      toast({
+        title: "Transcription incomplete",
+        description: "You can still type your story manually.",
+        variant: "destructive",
+      });
+
+      sessionStorage.removeItem('hw_transcription_error');
+    };
+
+    // Add event listeners
+    window.addEventListener('hw_transcription_complete', handleTranscriptionComplete as EventListener);
+    window.addEventListener('hw_transcription_error', handleTranscriptionError);
+
+    // Check if transcription already completed before we mounted
+    const cachedResult = sessionStorage.getItem('hw_transcription_result');
+    if (cachedResult) {
+      try {
+        const data = JSON.parse(cachedResult);
+        handleTranscriptionComplete(new CustomEvent('hw_transcription_complete', { detail: data }));
+      } catch (error) {
+        console.error("[BookStyleReview] Error parsing cached transcription:", error);
+      }
+    }
+
+    // Check if there was an error
+    const errorFlag = sessionStorage.getItem('hw_transcription_error');
+    if (errorFlag) {
+      handleTranscriptionError();
+    }
+
+    // If transcription is empty on mount, show loading state
+    if (!transcription || transcription.trim() === "") {
+      setIsTranscriptionLoading(true);
+    }
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('hw_transcription_complete', handleTranscriptionComplete as EventListener);
+      window.removeEventListener('hw_transcription_error', handleTranscriptionError);
+    };
+  }, []); // Only run on mount
 
   const handleTitleSave = () => {
     onTitleChange(tempTitle);
@@ -733,14 +813,25 @@ export function BookStyleReview({
                     </Button>
                   </div>
                 </div>
-                <Textarea
-                  value={transcription}
-                  onChange={(e) => onTranscriptionChange(e.target.value)}
-                  className="w-full min-h-[300px] resize-none border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400"
-                  placeholder="Type or paste your story here. This is how it will appear in your book..."
-                  disabled={isEnhancing}
-                />
-                {transcription && (
+
+                {/* Show loading state while transcription is in progress */}
+                {isTranscriptionLoading ? (
+                  <div className="w-full min-h-[300px] border border-gray-300 rounded-lg p-4 bg-gradient-to-br from-blue-50 to-purple-50 flex flex-col items-center justify-center">
+                    <Loader2 className="w-10 h-10 text-coral-500 animate-spin mb-4" />
+                    <p className="text-lg font-medium text-gray-900">Transcribing your story...</p>
+                    <p className="text-sm text-gray-600 mt-2">This usually takes 10-30 seconds</p>
+                  </div>
+                ) : (
+                  <Textarea
+                    value={transcription}
+                    onChange={(e) => onTranscriptionChange(e.target.value)}
+                    className="w-full min-h-[300px] resize-none border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400"
+                    placeholder="Type or paste your story here. This is how it will appear in your book..."
+                    disabled={isEnhancing}
+                  />
+                )}
+
+                {transcription && !isTranscriptionLoading && (
                   <div className="flex items-center justify-between mt-2">
                     <p className="text-base text-gray-500">
                       {

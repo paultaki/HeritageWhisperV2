@@ -145,6 +145,13 @@ export default function MemoryBoxPage() {
   );
   const [isExportingPdf, setIsExportingPdf] = useState(false);
 
+  // Make AudioManager globally accessible for MemoryCard components
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).AudioManager = AudioManager;
+    }
+  }, []);
+
   // V3: Get active storyteller context for family sharing
   const { activeContext } = useAccountContext();
   const storytellerId = activeContext?.storytellerId || user?.id;
@@ -644,6 +651,7 @@ export default function MemoryBoxPage() {
               return (
                 <MemoryCard
                   key={story.id}
+                  id={story.id}
                   imageUrl={photoUrl}
                   title={story.title}
                   year={story.storyYear || "—"}

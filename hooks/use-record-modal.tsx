@@ -104,6 +104,7 @@ export function useRecordModal() {
         selectedPrompt: recording.selectedPrompt,
         followUpQuestions: recording.followUpQuestions,
         formattedContent: recording.formattedContent,
+        lessonOptions: recording.lessonOptions, // Pass lesson options through
         title: recording.title,
         storyYear: recording.year,
         fromModal: true,
