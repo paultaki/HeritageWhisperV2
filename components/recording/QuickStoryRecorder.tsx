@@ -246,19 +246,19 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   You'll have up to 5 minutes to record. You can pause and resume anytime.
                 </p>
 
-                <div className="flex gap-3 justify-center">
+                <div className="flex gap-3 justify-center px-4">
                   <Button
                     onClick={() => setMode('select')}
                     size="lg"
                     variant="outline"
-                    className="rounded-full px-6"
+                    className="rounded-full px-4 sm:px-6 flex-shrink"
                   >
                     Back
                   </Button>
                   <Button
                     onClick={startRecording}
                     size="lg"
-                    className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-12 py-6 text-lg rounded-full shadow-lg"
+                    className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-6 sm:px-12 py-6 text-base sm:text-lg rounded-full shadow-lg flex-shrink-0"
                   >
                     <Mic className="w-5 h-5 mr-2" />
                     Start Recording

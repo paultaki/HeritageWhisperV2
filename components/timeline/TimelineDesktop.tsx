@@ -464,9 +464,9 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 alt={story.title}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
-                className={`object-cover transition-transform duration-500 hover:scale-105 ${
-                  isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''
-                }`}
+                className={`transition-transform duration-500 hover:scale-105 ${
+                  !displayPhoto.transform ? 'object-cover' : ''
+                } ${isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''}`}
                 loading="eager"
                 priority={index < 8}
                 quality={85}
@@ -477,6 +477,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                     ? {
                         transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
                         transformOrigin: "center center",
+                        objectFit: "cover",
                       }
                     : undefined
                 }

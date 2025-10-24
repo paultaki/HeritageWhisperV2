@@ -738,7 +738,7 @@ function MemoryCard({
       </span>
 
       {/* Image container with audio overlay */}
-      <div style={{ position: "relative" }}>
+      <div style={{ position: "relative", overflow: "hidden" }}>
         <img
           src={displayPhoto.url}
           alt={story.title}
@@ -750,6 +750,7 @@ function MemoryCard({
               ? {
                   transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
                   transformOrigin: "center center",
+                  objectFit: "cover",
                 }
               : undefined
           }

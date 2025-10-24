@@ -199,6 +199,7 @@ const convertToPaginationStory = (story: Story): PaginationStory => {
     story.photos?.map((p) => ({
       id: p.id,
       url: p.url,
+      transform: p.transform,
       caption: p.caption,
       isHero: p.isHero,
     })) ||
@@ -246,11 +247,19 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
   const hasMultiplePhotos = photos.length > 1;
 
   return (
-    <div className="relative mb-4 memory-hero">
+    <div className="relative mb-4 memory-hero overflow-hidden rounded-lg">
       <img
         src={currentPhoto.url}
         alt="Memory"
         className="w-full object-cover rounded-lg memory-photo"
+        style={
+          currentPhoto.transform
+            ? {
+                transform: `scale(${currentPhoto.transform.zoom}) translate(${currentPhoto.transform.position.x / currentPhoto.transform.zoom}px, ${currentPhoto.transform.position.y / currentPhoto.transform.zoom}px)`,
+                transformOrigin: "center center",
+              }
+            : undefined
+        }
       />
       {hasMultiplePhotos && (
         <>

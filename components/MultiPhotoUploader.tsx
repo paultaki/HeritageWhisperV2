@@ -27,6 +27,7 @@ export interface StoryPhoto {
   transform?: { zoom: number; position: { x: number; y: number } };
   caption?: string;
   isHero?: boolean;
+  file?: File; // Pending file for upload (only for new uploads, not in DB)
 }
 
 interface MultiPhotoUploaderProps {
@@ -148,6 +149,7 @@ export function MultiPhotoUploader({
         const newPhoto: StoryPhoto = {
           id: `temp-${Date.now()}`,
           url,
+          file, // Include the file for later upload
           isHero: photos.length === 0, // First photo becomes hero
           transform: { zoom: 1, position: { x: 0, y: 0 } },
         };
@@ -165,10 +167,8 @@ export function MultiPhotoUploader({
           actualIndex = newPhotos.length - 1;
         }
 
-        // Store file for later upload - use the actual index where the photo was placed
-        (window as any)[`__pendingPhotoFile_${actualIndex}`] = file;
-
         onPhotosChange(newPhotos);
+        setSelectedPhotoIndex(actualIndex);
       }
     } catch (error) {
       toast({
@@ -224,13 +224,10 @@ export function MultiPhotoUploader({
         const newPhoto: StoryPhoto = {
           id: `temp-${Date.now()}`,
           url,
+          file, // Include the file for later upload
           isHero: photos.length === 0,
           transform: { zoom: 1, position: { x: 0, y: 0 } },
         };
-
-        // Store file for later upload - use the actual photo index in the array
-        const photoIndex = photos.length; // Since we're about to add this photo
-        (window as any)[`__pendingPhotoFile_${photoIndex}`] = file;
 
         const newPhotos = [...photos];
         newPhotos.push(newPhoto);
@@ -524,15 +521,15 @@ export function MultiPhotoUploader({
           />
 
           {/* Modal wrapper - Forces viewport centering */}
-          <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 overflow-x-hidden"
             style={{ pointerEvents: 'none' }}
           >
-            <Card 
+            <Card
               className="w-full max-w-2xl max-h-[90vh] flex flex-col bg-background overflow-hidden"
-              style={{ pointerEvents: 'auto' }}
+              style={{ pointerEvents: 'auto', maxWidth: 'min(672px, 100vw)' }}
             >
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-4">
             <div className="flex justify-between items-center mb-2 gap-4">
               <h3 className="text-lg font-semibold whitespace-nowrap">
                 Edit Photo
@@ -547,9 +544,9 @@ export function MultiPhotoUploader({
             </div>
 
             {/* Photo preview container - shows exactly what will be visible */}
-            <div className="relative w-full">
+            <div className="relative w-full overflow-x-hidden">
               {/* Outer container for context */}
-              <div className="relative w-full bg-gray-200 p-4 rounded-lg">
+              <div className="relative w-full bg-gray-200 p-2 sm:p-4 rounded-lg">
                 {/* The actual crop frame that matches thumbnail aspect ratio EXACTLY */}
                 <div className="relative w-full aspect-[3/2] rounded-lg overflow-hidden bg-white shadow-lg">
                   {/* Image container - must match thumbnail structure EXACTLY */}

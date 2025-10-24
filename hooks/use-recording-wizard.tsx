@@ -114,15 +114,28 @@ export function useRecordingWizard({
       }
 
       // 2. Upload photos and get paths
+      console.log("[useRecordingWizard] Starting photo uploads...");
+      console.log("[useRecordingWizard] Number of photos:", data.photos.length);
+      console.log("[useRecordingWizard] Photo data:", data.photos.map(p => ({
+        hasFile: !!p.file,
+        hasUrl: !!p.url,
+        url: p.url,
+        caption: p.caption,
+        transform: p.transform,
+        isHero: p.isHero
+      })));
+
       const photoUploads = await Promise.all(
-        data.photos.map(async (photo) => {
+        data.photos.map(async (photo, index) => {
           // If photo already has a URL (from edit mode), keep it
           if (photo.url && !photo.url.startsWith("blob:")) {
+            console.log(`[useRecordingWizard] Photo ${index}: Using existing URL`, photo.url);
             return photo;
           }
 
           // Otherwise, upload it
           if (photo.file) {
+            console.log(`[useRecordingWizard] Photo ${index}: Uploading new file...`);
             const formData = new FormData();
             formData.append("photo", photo.file);
 
@@ -135,10 +148,13 @@ export function useRecordingWizard({
             });
 
             if (!response.ok) {
+              const errorText = await response.text();
+              console.error(`[useRecordingWizard] Photo ${index} upload failed:`, errorText);
               throw new Error("Failed to upload photo");
             }
 
             const { filePath } = await response.json();
+            console.log(`[useRecordingWizard] Photo ${index}: ✅ Uploaded successfully:`, filePath);
             return {
               ...photo,
               url: filePath,
@@ -146,9 +162,17 @@ export function useRecordingWizard({
             };
           }
 
+          console.log(`[useRecordingWizard] Photo ${index}: No file or URL, returning as-is`);
           return photo;
         })
       );
+
+      console.log("[useRecordingWizard] Photo uploads complete:", photoUploads.map(p => ({
+        url: p.url,
+        caption: p.caption,
+        transform: p.transform,
+        isHero: p.isHero
+      })));
 
       // 3. Create story
       const storyPayload = {
@@ -168,7 +192,12 @@ export function useRecordingWizard({
         },
       };
 
-      console.log("[useRecordingWizard] Submitting story payload:", storyPayload);
+      console.log("[useRecordingWizard] Submitting story payload:");
+      console.log("  - Title:", storyPayload.title);
+      console.log("  - Year:", storyPayload.year);
+      console.log("  - Audio URL:", storyPayload.audioUrl);
+      console.log("  - Photos count:", storyPayload.photos.length);
+      console.log("  - Photos:", storyPayload.photos);
 
       const response = await fetch("/api/stories", {
         method: "POST",

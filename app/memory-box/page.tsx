@@ -645,6 +645,7 @@ export default function MemoryBoxPage() {
                 story.photos?.find((p) => p.isHero) || story.photos?.[0];
               const photoUrl =
                 heroPhoto?.url || story.photoUrl || "/images/placeholder.jpg";
+              const photoTransform = heroPhoto?.transform;
               const isPrivate =
                 !story.includeInTimeline && !story.includeInBook;
 
@@ -653,6 +654,7 @@ export default function MemoryBoxPage() {
                   key={story.id}
                   id={story.id}
                   imageUrl={photoUrl}
+                  photoTransform={photoTransform}
                   title={story.title}
                   year={story.storyYear || "—"}
                   age={calculateAge(story.storyYear)}

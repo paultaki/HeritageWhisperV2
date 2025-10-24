@@ -77,7 +77,7 @@ export default function HelpPage() {
                 </strong>
                 <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
                   <li>Click the <strong>+</strong> button and choose <strong>"Conversation Mode"</strong></li>
-                  <li>Pearl, your AI interviewer, will ask you thoughtful questions</li>
+                  <li>Pearl, our Storyteller, will ask you thoughtful questions</li>
                   <li>Simply answer naturally - she listens and follows up based on what you share</li>
                   <li>Perfect for exploring memories in depth (10-15 minutes)</li>
                   <li>Your full conversation is recorded and saved as one story</li>

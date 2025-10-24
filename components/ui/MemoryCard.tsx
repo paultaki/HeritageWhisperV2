@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 type Props = {
   id?: string;
   imageUrl: string;
+  photoTransform?: { zoom: number; position: { x: number; y: number } };
   title: string;
   year: number | string;
   age?: string;
@@ -61,13 +62,21 @@ export default function MemoryCard(p: Props) {
   }, [p.id]);
   return (
     <article className="hw-card hw-card-memorybox">
-      <div style={{ position: "relative" }}>
+      <div style={{ position: "relative", overflow: "hidden" }}>
         <img
           className="hw-card-media"
           src={p.imageUrl}
           alt=""
           loading="lazy"
           decoding="async"
+          style={
+            p.photoTransform
+              ? {
+                  transform: `scale(${p.photoTransform.zoom}) translate(${p.photoTransform.position.x / p.photoTransform.zoom}px, ${p.photoTransform.position.y / p.photoTransform.zoom}px)`,
+                  transformOrigin: "center center",
+                }
+              : undefined
+          }
         />
         {/* Play/Pause button overlaid on photo - matching timeline style */}
         <button
