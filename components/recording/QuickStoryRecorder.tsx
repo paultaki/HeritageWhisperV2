@@ -39,12 +39,15 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
     state,
     duration,
     countdown,
+    audioReviewUrl,
     startRecording,
     pauseRecording,
     resumeRecording,
     stopRecording,
     restartRecording,
     cancelRecording,
+    continueFromReview,
+    reRecordFromReview,
     maxDuration,
   } = useQuickRecorder({
     onComplete: onClose,
@@ -511,6 +514,82 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                       </Button>
                     </>
                   )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Audio Review Screen */}
+            {state === "review" && audioReviewUrl && (
+              <motion.div
+                key="review"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="py-8"
+              >
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-semibold mb-2">Review Your Recording</h2>
+                  <p className="text-gray-600">
+                    Listen to your recording before continuing
+                  </p>
+                </div>
+
+                {/* Audio Player Card */}
+                <div className="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-xl p-6 mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 flex items-center justify-center">
+                        <Play className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Your Story</p>
+                        <p className="text-sm text-gray-600">{formatDuration(duration)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* HTML5 Audio Player */}
+                  <audio
+                    controls
+                    src={audioReviewUrl}
+                    className="w-full rounded-lg"
+                    style={{
+                      outline: "none",
+                    }}
+                  />
+
+                  <p className="text-sm text-gray-600 text-center mt-4">
+                    Listen carefully - you can re-record if needed
+                  </p>
+                </div>
+
+                {/* Info Card */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-blue-900">
+                    <strong>💡 Tip:</strong> While you're adding your title, date, and photos on the next screens, we'll be transcribing your audio in the background!
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col gap-3">
+                  <Button
+                    onClick={continueFromReview}
+                    size="lg"
+                    className="w-full bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white py-6 text-lg rounded-full shadow-lg"
+                  >
+                    Continue to Add Details
+                    <Play className="w-5 h-5 ml-2" />
+                  </Button>
+
+                  <Button
+                    onClick={reRecordFromReview}
+                    variant="outline"
+                    size="lg"
+                    className="w-full py-6 text-lg rounded-full"
+                  >
+                    <RotateCcw className="w-5 h-5 mr-2" />
+                    Re-record
+                  </Button>
                 </div>
               </motion.div>
             )}

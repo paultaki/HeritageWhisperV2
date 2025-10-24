@@ -32,6 +32,7 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
   const [countdown, setCountdown] = useState(3);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [isRestarting, setIsRestarting] = useState(false);
+  const [audioReviewUrl, setAudioReviewUrl] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -215,22 +216,73 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
     }
   }, [cleanup]);
 
-  // Handle recording completion
+  // Handle recording completion - show audio review screen
   const handleRecordingComplete = useCallback(async () => {
     if (isRestarting) {
       console.log("[useQuickRecorder] Restart in progress, skipping completion");
       return;
     }
 
-    setState("processing");
-
     try {
       // Create blob from chunks
       const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
       setAudioBlob(blob);
 
-      console.log("[useQuickRecorder] Recording complete, transcribing...");
+      // Create audio URL for playback
+      const audioUrl = URL.createObjectURL(blob);
+      setAudioReviewUrl(audioUrl);
 
+      console.log("[useQuickRecorder] Recording complete, showing review screen");
+
+      // Show review screen (not processing yet)
+      setState("review");
+    } catch (error) {
+      console.error("[useQuickRecorder] Error creating audio blob:", error);
+      setState("ready");
+      options.onError?.(error as Error);
+      toast({
+        title: "Recording failed",
+        description: "Could not save your recording. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [isRestarting, options]);
+
+  // Handle continue from review - start background transcription
+  const continueFromReview = useCallback(async () => {
+    if (!audioBlob) {
+      console.error("[useQuickRecorder] No audio blob to process");
+      return;
+    }
+
+    console.log("[useQuickRecorder] Starting background transcription and navigating to wizard");
+
+    // Navigate to wizard immediately
+    const navId = navCache.generateId();
+    await navCache.set(navId, {
+      mode: "quick",
+      rawTranscript: "", // Empty for now, will be filled by background transcription
+      duration: duration,
+      timestamp: new Date().toISOString(),
+      audioBlob: audioBlob,
+    });
+
+    console.log("[useQuickRecorder] Navigating to wizard with ID:", navId);
+
+    // Start background transcription (non-blocking)
+    startBackgroundTranscription(audioBlob, navId);
+
+    // Cleanup and navigate
+    cleanup();
+    router.push(`/review/book-style?nav=${navId}&mode=wizard`);
+    options.onComplete?.();
+  }, [audioBlob, duration, router, cleanup, options]);
+
+  // Background transcription
+  const startBackgroundTranscription = useCallback(async (blob: Blob, navId: string) => {
+    console.log("[useQuickRecorder] Starting background transcription");
+
+    try {
       // Transcribe with AssemblyAI
       const formData = new FormData();
       formData.append("audio", blob, "recording.webm");
@@ -244,41 +296,35 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
         throw new Error("Transcription failed");
       }
 
-      const { transcription } = await response.json();
+      const data = await response.json();
+      const transcription = data.transcription || "";
 
-      console.log("[useQuickRecorder] Transcription complete:", transcription);
+      console.log("[useQuickRecorder] Background transcription complete:", transcription);
 
-      // Save to NavCache
-      const navId = navCache.generateId();
-      await navCache.set(navId, {
-        mode: "quick",
-        rawTranscript: transcription,
-        duration: duration,
-        timestamp: new Date().toISOString(),
-        audioBlob: blob,
-        fromModal: true,
-      });
+      // Store results for wizard to pick up
+      sessionStorage.setItem('hw_transcription_result', JSON.stringify({
+        transcription: transcription,
+        lessonOptions: data.lessonOptions,
+        formattedContent: data.formattedContent,
+      }));
 
-      console.log("[useQuickRecorder] Saved to NavCache with ID:", navId);
+      // Dispatch custom event to notify wizard
+      window.dispatchEvent(new CustomEvent('hw_transcription_complete', {
+        detail: {
+          transcription: transcription,
+          lessonOptions: data.lessonOptions,
+          formattedContent: data.formattedContent,
+        }
+      }));
 
-      // Cleanup
-      cleanup();
-
-      // Navigate to wizard
-      router.push(`/review/book-style?nav=${navId}&mode=wizard`);
-
-      options.onComplete?.();
     } catch (error) {
-      console.error("[useQuickRecorder] Error processing recording:", error);
-      setState("ready");
-      options.onError?.(error as Error);
-      toast({
-        title: "Processing failed",
-        description: "Could not process your recording. Please try again.",
-        variant: "destructive",
-      });
+      console.error("[useQuickRecorder] Background transcription error:", error);
+
+      // Store error state
+      sessionStorage.setItem('hw_transcription_error', 'true');
+      window.dispatchEvent(new CustomEvent('hw_transcription_error'));
     }
-  }, [isRestarting, duration, router, cleanup, options]);
+  }, []);
 
   // Cancel recording
   const cancelRecording = useCallback(() => {
@@ -292,17 +338,34 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
     setState("ready");
   }, [state, cleanup]);
 
+  // Re-record from review screen
+  const reRecordFromReview = useCallback(() => {
+    // Clean up audio review
+    if (audioReviewUrl) {
+      URL.revokeObjectURL(audioReviewUrl);
+      setAudioReviewUrl(null);
+    }
+
+    // Reset state
+    setAudioBlob(null);
+    setDuration(0);
+    setState("ready");
+  }, [audioReviewUrl]);
+
   return {
     state,
     duration,
     countdown,
     audioBlob,
+    audioReviewUrl,
     startRecording,
     pauseRecording,
     resumeRecording,
     stopRecording,
     restartRecording,
     cancelRecording,
+    continueFromReview,
+    reRecordFromReview,
     maxDuration: MAX_RECORDING_DURATION,
   };
 }

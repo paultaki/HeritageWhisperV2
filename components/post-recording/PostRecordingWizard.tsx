@@ -35,6 +35,7 @@ export function PostRecordingWizard({
   const router = useRouter();
   const wizard = useRecordingWizard({ initialData, onComplete });
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isTranscriptionLoading, setIsTranscriptionLoading] = useState(false);
 
   const handleCancel = () => {
     if (window.confirm("Are you sure you want to cancel? Your progress will be lost.")) {
@@ -91,6 +92,75 @@ export function PostRecordingWizard({
 
     enhanceIfNeeded();
   }, []); // Only run once on mount
+
+  // Listen for background transcription completion
+  useEffect(() => {
+    const handleTranscriptionComplete = (event: CustomEvent) => {
+      console.log("[PostRecordingWizard] Background transcription completed!", event.detail);
+
+      const { transcription: newTranscription, lessonOptions: newLessonOptions } = event.detail;
+
+      // Update transcription if we don't have one yet or if it's empty
+      if (!wizard.data.originalTranscript || wizard.data.originalTranscript.trim() === "") {
+        wizard.updateData("originalTranscript", newTranscription);
+        wizard.updateData("enhancedTranscript", newTranscription); // Will be enhanced later
+        setIsTranscriptionLoading(false);
+
+        console.log("[PostRecordingWizard] Transcription updated:", newTranscription);
+      }
+
+      // Store lesson options for Step 4
+      if (newLessonOptions) {
+        // Auto-set practical lesson if empty
+        if (!wizard.data.lessonLearned && newLessonOptions.practical) {
+          wizard.updateData("lessonLearned", newLessonOptions.practical);
+        }
+      }
+
+      // Clean up sessionStorage
+      sessionStorage.removeItem('hw_transcription_result');
+    };
+
+    const handleTranscriptionError = () => {
+      console.error("[PostRecordingWizard] Background transcription failed");
+      setIsTranscriptionLoading(false);
+
+      // Clean up sessionStorage
+      sessionStorage.removeItem('hw_transcription_error');
+    };
+
+    // Add event listeners
+    window.addEventListener('hw_transcription_complete', handleTranscriptionComplete as EventListener);
+    window.addEventListener('hw_transcription_error', handleTranscriptionError);
+
+    // Check if transcription already completed before we mounted
+    const cachedResult = sessionStorage.getItem('hw_transcription_result');
+    if (cachedResult) {
+      try {
+        const data = JSON.parse(cachedResult);
+        handleTranscriptionComplete(new CustomEvent('hw_transcription_complete', { detail: data }));
+      } catch (error) {
+        console.error("[PostRecordingWizard] Error parsing cached transcription:", error);
+      }
+    }
+
+    // Check if there was an error
+    const errorFlag = sessionStorage.getItem('hw_transcription_error');
+    if (errorFlag) {
+      handleTranscriptionError();
+    }
+
+    // If transcription is empty on mount, show loading state
+    if (!initialData.originalTranscript || initialData.originalTranscript.trim() === "") {
+      setIsTranscriptionLoading(true);
+    }
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('hw_transcription_complete', handleTranscriptionComplete as EventListener);
+      window.removeEventListener('hw_transcription_error', handleTranscriptionError);
+    };
+  }, []); // Only run on mount
 
   const {
     currentStep,
@@ -204,6 +274,7 @@ export function PostRecordingWizard({
                 enhancedTranscript={data.enhancedTranscript}
                 useEnhanced={data.useEnhanced}
                 isConversationMode={data.recording?.mode === "conversation"}
+                isLoading={isTranscriptionLoading}
                 onOriginalChange={(original) =>
                   updateData("originalTranscript", original)
                 }

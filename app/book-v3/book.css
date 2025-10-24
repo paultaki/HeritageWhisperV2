@@ -17,9 +17,9 @@
   --spread-gap: 30px; /* Gap between left and right pages */
   --spread-width: calc(var(--page-width) * 2 + var(--spread-gap));
 
-  /* Content area (equal margins) */
-  --content-width: calc(var(--page-width) - var(--margin) * 2);
-  --content-height: calc(var(--page-height) - var(--margin) * 2);
+  /* Content area (equal margins) - V3: Use page-border for consistency */
+  --content-width: calc(var(--page-width) - var(--page-border) * 2);
+  --content-height: calc(var(--page-height) - var(--page-border) * 2);
 
   /* Typography for print */
   --book-font-size: 12.5pt;
@@ -82,8 +82,8 @@
   height: var(--page-height);
   margin: 0 auto 24px;
 
-  /* Dotted decor border - 48px on top/sides, slightly less on bottom */
-  padding: var(--page-border) var(--page-border) 28px;
+  /* V3: Dotted decor border - EQUAL 48px on ALL 4 sides */
+  padding: var(--page-border);
 
   /* Paper white with whisper-level texture */
   background: #ffffff;

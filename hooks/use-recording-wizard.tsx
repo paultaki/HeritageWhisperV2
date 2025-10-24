@@ -80,9 +80,15 @@ export function useRecordingWizard({
       if (!session?.access_token) {
         throw new Error("You must be logged in to save a story");
       }
+
+      console.log("[useRecordingWizard] Starting story submission...");
+      console.log("[useRecordingWizard] Audio blob available:", !!data.recording.audioBlob);
+      console.log("[useRecordingWizard] Audio blob size:", data.recording.audioBlob?.size);
+
       // 1. Upload audio if exists
       let audioUrl: string | null = null;
       if (data.recording.audioBlob) {
+        console.log("[useRecordingWizard] Uploading audio...");
         const formData = new FormData();
         formData.append("audio", data.recording.audioBlob, "story.webm");
 
@@ -95,11 +101,16 @@ export function useRecordingWizard({
         });
 
         if (!audioResponse.ok) {
+          const errorText = await audioResponse.text();
+          console.error("[useRecordingWizard] Audio upload failed:", errorText);
           throw new Error("Failed to upload audio");
         }
 
-        const { audioUrl: uploadedUrl } = await audioResponse.json();
+        const { url: uploadedUrl } = await audioResponse.json();
         audioUrl = uploadedUrl;
+        console.log("[useRecordingWizard] ✅ Audio uploaded successfully:", audioUrl);
+      } else {
+        console.warn("[useRecordingWizard] ⚠️ No audio blob found in recording data");
       }
 
       // 2. Upload photos and get paths

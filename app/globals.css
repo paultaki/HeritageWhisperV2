@@ -2953,26 +2953,27 @@ textarea:focus-visible {
   align-items: center; /* Vertically center the text */
 }
 
-/* Book page wrapper - ensure dotted decor border is 48px on all sides */
+/* Book page wrapper - EQUAL dotted decor border on ALL 4 sides */
 body .book-page {
-  padding: 48px 48px 28px !important; /* Reduce bottom padding to align dotted border */
+  padding: 48px !important; /* Equal 48px on all 4 sides */
 }
 
-/* Book page content - space between dotted decor and actual content */
+/* Book page content - EQUAL space between dotted decor and actual content */
 body .book-page .page-content {
-  padding: 23px 23px 16px !important; /* 23px sides/top, 16px bottom to align dotted border */
+  padding: 23px !important; /* Equal 23px on all 4 sides */
+  box-sizing: border-box;
 }
 
 /* Mobile book view overrides - must come after desktop with !important to override */
 @media (max-width: 640px) {
-  /* Mobile: 10px dotted decor border (visual texture area) */
+  /* Mobile: EQUAL 10px dotted decor border on all 4 sides */
   body .book-page {
-    padding: 10px 10px 8px !important;
+    padding: 10px !important;
   }
 
-  /* Mobile: 20px content padding (breathing room between dotted decor and text) */
+  /* Mobile: EQUAL 20px content padding on all 4 sides */
   body .book-page .page-content {
-    padding: 20px 20px 16px !important;
+    padding: 20px !important;
   }
 
   /* Mobile running header - adjusted for smaller padding */

@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Lightbulb } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Lightbulb, Check, X } from "lucide-react";
 
 interface Step4_LessonProps {
   lessonLearned: string;
@@ -21,6 +23,18 @@ export function Step4_Lesson({
   transcript,
   onLessonChange,
 }: Step4_LessonProps) {
+  const [hasGenerated] = useState(!!lessonLearned); // Track if we started with a generated lesson
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleSkipLesson = () => {
+    onLessonChange("");
+    setIsEditing(false);
+  };
+
+  const handleEditLesson = () => {
+    setIsEditing(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -31,32 +45,101 @@ export function Step4_Lesson({
         <div className="flex-1">
           <h3 className="text-lg font-medium mb-2">What did you learn from this experience?</h3>
           <p className="text-gray-600 text-sm">
-            Reflect on any wisdom or lessons from this story. This is completely optional but adds
-            depth to your memory.
+            {hasGenerated
+              ? "We've generated a lesson suggestion based on your story. You can use it, edit it, or skip it entirely."
+              : "Reflect on any wisdom or lessons from this story. This is completely optional but adds depth to your memory."}
           </p>
         </div>
       </div>
 
-      {/* Lesson Input */}
-      <div className="space-y-2">
-        <Label htmlFor="lesson-learned" className="text-base font-medium">
-          Lesson Learned (Optional)
-        </Label>
-        <Textarea
-          id="lesson-learned"
-          value={lessonLearned}
-          onChange={(e) => onLessonChange(e.target.value)}
-          className="min-h-[150px] text-base leading-relaxed"
-          placeholder="Example: I learned that true courage isn't the absence of fear, but choosing to act despite it."
-          maxLength={500}
-        />
-        {lessonLearned.length > 0 && (
-          <p className="text-xs text-gray-500">{lessonLearned.length} / 500 characters</p>
-        )}
-      </div>
+      {/* Generated Lesson Display (if not editing) */}
+      {lessonLearned && !isEditing && (
+        <div className="space-y-4">
+          <div className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-lg">
+            <p className="text-sm font-semibold text-amber-900 mb-2 flex items-center gap-2">
+              <Lightbulb className="w-4 h-4" />
+              {hasGenerated ? "AI-Generated Lesson:" : "Your Lesson:"}
+            </p>
+            <p className="text-base text-amber-900 italic leading-relaxed">
+              "{lessonLearned}"
+            </p>
+          </div>
 
-      {/* Preview */}
-      {lessonLearned.trim() && (
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              onClick={handleEditLesson}
+              variant="outline"
+              size="lg"
+              className="flex-1 border-2"
+            >
+              Edit Lesson
+            </Button>
+            <Button
+              onClick={handleSkipLesson}
+              variant="outline"
+              size="lg"
+              className="flex-1 border-2 text-gray-600 hover:bg-gray-50"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Skip Lesson
+            </Button>
+          </div>
+
+          <p className="text-sm text-gray-600 text-center">
+            Click "Save Story" below to save with this lesson, or skip to save without one.
+          </p>
+        </div>
+      )}
+
+      {/* Editing Mode (or no lesson yet) */}
+      {(!lessonLearned || isEditing) && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="lesson-learned" className="text-base font-medium">
+              Lesson Learned (Optional)
+            </Label>
+            <Textarea
+              id="lesson-learned"
+              value={lessonLearned}
+              onChange={(e) => onLessonChange(e.target.value)}
+              className="min-h-[150px] text-base leading-relaxed"
+              placeholder="Example: I learned that true courage isn't the absence of fear, but choosing to act despite it."
+              maxLength={500}
+            />
+            {lessonLearned.length > 0 && (
+              <p className="text-xs text-gray-500">{lessonLearned.length} / 500 characters</p>
+            )}
+          </div>
+
+          {/* Action Buttons (editing mode) */}
+          {isEditing && (
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setIsEditing(false)}
+                size="lg"
+                className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                disabled={!lessonLearned.trim()}
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Keep This Lesson
+              </Button>
+              <Button
+                onClick={handleSkipLesson}
+                variant="outline"
+                size="lg"
+                className="flex-1"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Skip Lesson
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Preview (when editing and has content) */}
+      {lessonLearned.trim() && isEditing && (
         <div className="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg">
           <p className="text-sm font-medium text-amber-900 mb-1">Preview:</p>
           <p className="text-sm text-amber-800 italic leading-relaxed">

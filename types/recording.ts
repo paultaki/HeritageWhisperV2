@@ -11,7 +11,7 @@ import { type StoryPhoto } from "@/components/MultiPhotoUploader";
 export type RecordingMode = "conversation" | "quick";
 
 /** Recorder state machine states */
-export type RecorderState = "ready" | "countdown" | "recording" | "paused" | "processing";
+export type RecorderState = "ready" | "countdown" | "recording" | "paused" | "review" | "processing";
 
 /** Question-answer pair from conversation mode */
 export interface QAPair {

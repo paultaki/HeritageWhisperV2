@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 
 interface Step3_ReviewProps {
   originalTranscript: string;
@@ -14,6 +14,7 @@ interface Step3_ReviewProps {
   onEnhancedChange: (enhanced: string) => void;
   onUseEnhancedChange: (use: boolean) => void;
   isConversationMode?: boolean;
+  isLoading?: boolean;
 }
 
 /**
@@ -31,6 +32,7 @@ export function Step3_Review({
   onEnhancedChange,
   onUseEnhancedChange,
   isConversationMode = false,
+  isLoading = false,
 }: Step3_ReviewProps) {
   const [showOriginal, setShowOriginal] = useState(false);
 
@@ -45,6 +47,21 @@ export function Step3_Review({
             : "We've cleaned up self-corrections, removed duplicates, and added punctuation while keeping your exact voice and personality. You can use this enhanced version or the original."}
         </p>
       </div>
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="border-2 border-blue-200 bg-blue-50 rounded-lg p-8 flex flex-col items-center justify-center">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+          <h4 className="text-lg font-semibold text-blue-900 mb-2">Transcribing your story...</h4>
+          <p className="text-sm text-blue-700 text-center max-w-md">
+            This usually takes 10-30 seconds. Feel free to go back and add photos while you wait!
+          </p>
+        </div>
+      )}
+
+      {/* Transcript Content - only show when not loading */}
+      {!isLoading && (
+        <>
 
       {/* Version Selection */}
       <div className="space-y-4">
@@ -148,6 +165,8 @@ export function Step3_Review({
           original meaning. You can edit it further or switch to the original at any time.
         </p>
       </div>
+      </>
+      )}
     </div>
   );
 }
