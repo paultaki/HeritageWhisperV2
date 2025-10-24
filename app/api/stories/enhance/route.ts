@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { chat } from '@/lib/ai/gatewayClient';
 import { getModelConfig } from '@/lib/ai/modelConfig';
+import { toSeverity } from '@/lib/typesafe';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Allow up to 60 seconds for GPT-5 processing
@@ -70,7 +71,7 @@ Return ONLY the enhanced story text, nothing else. No preamble, no explanation.`
         { role: 'system', content: 'You are an expert at enhancing personal stories for heritage books while preserving authenticity and voice.' },
         { role: 'user', content: enhancementPrompt },
       ],
-      reasoning_effort: modelConfig.reasoning_effort,
+      reasoning_effort: toSeverity(modelConfig.reasoning_effort),
       temperature: 0.7, // Slightly higher for creativity
       max_tokens: 1500,
     });

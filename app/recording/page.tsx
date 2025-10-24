@@ -492,10 +492,10 @@ function RecordingContent() {
 
   const handleRestart = () => {
     if (!audioRecorderRef.current) return;
-    
+
     // Stop current recording
-    audioRecorderRef.current.stopRecording();
-    
+    audioRecorderRef.current.cleanup();
+
     // Reset states
     setIsRecording(false);
     setIsPaused(false);
@@ -504,7 +504,7 @@ function RecordingContent() {
     setRecordingDuration(0);
     setContextualFollowUpQuestion(null);
     setShowFollowUpButton(false);
-    
+
     // Small delay then restart
     setTimeout(() => {
       if (audioRecorderRef.current) {
@@ -529,14 +529,14 @@ function RecordingContent() {
 
     try {
       // Get current partial recording without stopping
-      const partialBlob = audioRecorderRef.current.getCurrentPartialRecording();
+      const partialRecording = audioRecorderRef.current.getCurrentPartialRecording();
 
-      if (!partialBlob || partialBlob.size === 0) {
+      if (!partialRecording.blob || partialRecording.blob.size === 0) {
         throw new Error("No audio data available");
       }
 
       // Transcribe current audio
-      const transcription = await transcribeAudio(partialBlob);
+      const transcription = await transcribeAudio(partialRecording.blob);
 
       // Generate contextual follow-up question
       const response = await fetch("/api/followups/contextual", {
@@ -773,7 +773,7 @@ function RecordingContent() {
         prompt: currentPrompt,
         timestamp: Date.now(),
         isReRecording,
-        storyId,
+        storyId: storyId ?? undefined,
         title: navData?.title || currentPrompt.title,
         formattedContent: formattedContentRef.current,
       };
@@ -798,7 +798,7 @@ function RecordingContent() {
         prompt: currentPrompt,
         timestamp: Date.now(),
         isReRecording,
-        storyId,
+        storyId: storyId ?? undefined,
         title: navData?.title || currentPrompt.title,
       });
       const reviewUrl =
@@ -826,7 +826,7 @@ function RecordingContent() {
       prompt: currentPrompt,
       timestamp: Date.now(),
       isReRecording,
-      storyId,
+      storyId: storyId ?? undefined,
       title: navData?.title || currentPrompt.title,
     });
     const reviewUrl =

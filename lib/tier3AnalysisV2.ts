@@ -9,6 +9,7 @@
  *
  * All prompts validated through quality gates before storage.
  */
+import { toSeverity } from "@/lib/typesafe";
 
 import { generateAnchorHash } from "./promptGenerationV2";
 import { sanitizeForGPT, sanitizeEntity } from "./sanitization";
@@ -72,7 +73,7 @@ export async function performTier3Analysis(
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      reasoning_effort: modelConfig.reasoning_effort,
+      reasoning_effort: toSeverity(modelConfig.reasoning_effort),
       temperature: 0.7,
       max_tokens: 2000,
     });

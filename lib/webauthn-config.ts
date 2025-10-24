@@ -5,6 +5,7 @@
  * including registration and authentication options.
  */
 
+import { fromBase64Url } from "@/lib/webauthn-bytes";
 import type {
   GenerateRegistrationOptionsOpts,
   GenerateAuthenticationOptionsOpts,
@@ -27,7 +28,7 @@ export function getRegistrationOptions(
   userDisplayName: string
 ): Omit<GenerateRegistrationOptionsOpts, "rpID" | "rpName"> {
   return {
-    userID: userId,
+    userID: fromBase64Url(userId),
     userName: userName, // Email address
     userDisplayName: userDisplayName, // Friendly name
     attestationType: "none", // No attestation required

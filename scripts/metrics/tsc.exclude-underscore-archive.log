@@ -1,0 +1,225 @@
+app/api/admin/prompts/route.ts(129,11): error TS2339: Property 'reviewed' does not exist on type '{ total: number; tier1: number; tier3: number; avgScore: number; locked: number; }'.
+app/api/admin/prompts/route.ts(130,11): error TS2339: Property 'needsReview' does not exist on type '{ total: number; tier1: number; tier3: number; avgScore: number; locked: number; }'.
+app/api/admin/prompts/route.ts(131,11): error TS2339: Property 'good' does not exist on type '{ total: number; tier1: number; tier3: number; avgScore: number; locked: number; }'.
+app/api/admin/prompts/route.ts(132,11): error TS2339: Property 'bad' does not exist on type '{ total: number; tier1: number; tier3: number; avgScore: number; locked: number; }'.
+app/api/admin/trigger-tier3/route.ts(51,65): error TS2554: Expected 2 arguments, but got 3.
+app/api/admin/trigger-tier3/route.ts(53,17): error TS2339: Property 'success' does not exist on type 'Tier3Result'.
+app/api/admin/trigger-tier3/route.ts(55,23): error TS2339: Property 'error' does not exist on type 'Tier3Result'.
+app/api/admin/trigger-tier3/route.ts(60,81): error TS2339: Property 'promptsGenerated' does not exist on type 'Tier3Result'.
+app/api/admin/trigger-tier3/route.ts(65,32): error TS2339: Property 'promptsGenerated' does not exist on type 'Tier3Result'.
+app/api/admin/trigger-tier3/route.ts(67,49): error TS2339: Property 'promptsGenerated' does not exist on type 'Tier3Result'.
+app/api/auth/login/route.ts(39,52): error TS2339: Property 'errors' does not exist on type 'ZodError<unknown>'.
+app/api/auth/login/route.ts(39,64): error TS7006: Parameter 'err' implicitly has an 'any' type.
+app/api/auth/register/route.ts(41,52): error TS2339: Property 'errors' does not exist on type 'ZodError<unknown>'.
+app/api/auth/register/route.ts(41,64): error TS7006: Parameter 'err' implicitly has an 'any' type.
+app/api/auth/register/route.ts(70,31): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/api/auth/register/route.ts(117,30): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/api/auth/register/route.ts(206,27): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/api/dev/analyze-prompts/route.ts(105,11): error TS2554: Expected 1-2 arguments, but got 3.
+app/api/dev/analyze-prompts/route.ts(109,21): error TS2339: Property 'prompt' does not exist on type 'Tier1Prompt'.
+app/api/dev/analyze-prompts/route.ts(110,22): error TS2551: Property 'memory_type' does not exist on type 'Tier1Prompt'. Did you mean 'memoryType'?
+app/api/dev/analyze-prompts/route.ts(111,27): error TS2339: Property 'anchor_entity' does not exist on type 'Tier1Prompt'.
+app/api/dev/analyze-prompts/route.ts(112,34): error TS2339: Property 'recording_likelihood' does not exist on type 'Tier1Prompt'.
+app/api/dev/analyze-prompts/route.ts(113,24): error TS2339: Property 'reasoning' does not exist on type 'Tier1Prompt'.
+app/api/export/2up/route.ts(103,29): error TS2345: Argument of type 'Buffer<ArrayBufferLike>' is not assignable to parameter of type 'BodyInit | null | undefined'.
+  Type 'Buffer<ArrayBufferLike>' is missing the following properties from type 'URLSearchParams': size, append, delete, get, and 2 more.
+app/api/export/trim/route.ts(100,29): error TS2345: Argument of type 'Buffer<ArrayBufferLike>' is not assignable to parameter of type 'BodyInit | null | undefined'.
+  Type 'Buffer<ArrayBufferLike>' is missing the following properties from type 'URLSearchParams': size, append, delete, get, and 2 more.
+app/api/passkey/auth-verify/route.ts(65,7): error TS2353: Object literal may only specify known properties, and 'authenticator' does not exist in type '{ response: AuthenticationResponseJSON; expectedChallenge: string | ((challenge: string) => boolean | Promise<boolean>); expectedOrigin: string | string[]; ... 4 more ...; advancedFIDOConfig?: { ...; } | undefined; }'.
+app/api/passkey/register-options/route.ts(76,7): error TS2322: Type '{ id: string; type: "public-key"; transports: ("ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid")[] | null; }[]' is not assignable to type '{ id: string; transports?: AuthenticatorTransportFuture[] | undefined; }[]'.
+  Type '{ id: string; type: "public-key"; transports: ("ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid")[] | null; }' is not assignable to type '{ id: string; transports?: AuthenticatorTransportFuture[] | undefined; }'.
+    Types of property 'transports' are incompatible.
+      Type '("ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid")[] | null' is not assignable to type 'AuthenticatorTransportFuture[] | undefined'.
+        Type 'null' is not assignable to type 'AuthenticatorTransportFuture[] | undefined'.
+app/api/passkey/register-verify/route.ts(60,7): error TS2339: Property 'credentialID' does not exist on type '{ fmt: AttestationFormat; aaguid: string; credential: WebAuthnCredential; credentialType: "public-key"; attestationObject: Uint8Array<ArrayBuffer>; ... 5 more ...; authenticatorExtensionResults?: unknown; }'.
+app/api/passkey/register-verify/route.ts(61,7): error TS2339: Property 'credentialPublicKey' does not exist on type '{ fmt: AttestationFormat; aaguid: string; credential: WebAuthnCredential; credentialType: "public-key"; attestationObject: Uint8Array<ArrayBuffer>; ... 5 more ...; authenticatorExtensionResults?: unknown; }'.
+app/api/passkey/register-verify/route.ts(62,7): error TS2339: Property 'counter' does not exist on type '{ fmt: AttestationFormat; aaguid: string; credential: WebAuthnCredential; credentialType: "public-key"; attestationObject: Uint8Array<ArrayBuffer>; ... 5 more ...; authenticatorExtensionResults?: unknown; }'.
+app/api/passkey/register-verify/route.ts(87,7): error TS2322: Type 'AuthenticatorTransportFuture[] | undefined' is not assignable to type '("ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid")[] | null | undefined'.
+  Type 'AuthenticatorTransportFuture[]' is not assignable to type '("ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid")[]'.
+    Type 'AuthenticatorTransportFuture' is not assignable to type '"ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid"'.
+      Type '"smart-card"' is not assignable to type '"ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid"'.
+app/api/prompts/cleanup/route.ts(98,42): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'contextNote' does not exist in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'userId' does not exist in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }[]'.
+app/api/prompts/emergency-cleanup/route.ts(79,10): error TS2872: This kind of expression is always truthy.
+app/api/prompts/next/route.ts(180,9): error TS2322: Type '({ kind: "object" | "person" | "place" | "emotion"; text: any; } | null)[]' is not assignable to type 'CandidateEntity[]'.
+  Type '{ kind: "object" | "person" | "place" | "emotion"; text: any; } | null' is not assignable to type 'CandidateEntity'.
+    Type 'null' is not assignable to type 'CandidateEntity'.
+app/family/page.tsx(777,54): error TS2339: Property 'permissionLevel' does not exist on type 'FamilyMember'.
+app/family/page.tsx(778,41): error TS2339: Property 'permissionLevel' does not exist on type 'FamilyMember'.
+app/family/page.tsx(795,43): error TS2339: Property 'permissionLevel' does not exist on type 'FamilyMember'.
+app/gift-plans/page.tsx(266,21): error TS17001: JSX elements cannot have multiple attributes with the same name.
+app/interview-chat-v2/page.tsx(257,9): error TS2820: Type '"ai-question"' is not assignable to type 'MessageType'. Did you mean '"question"'?
+app/interview-chat-v2/page.tsx(262,9): error TS2322: Type '"ai"' is not assignable to type '"user" | "hw" | "system"'.
+app/memory-box/page.tsx(594,17): error TS2322: Type '(question?: string) => void' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+  Types of parameters 'question' and 'event' are incompatible.
+    Type 'MouseEvent<HTMLButtonElement, MouseEvent>' is not assignable to type 'string'.
+app/memory-box/page.tsx(609,22): error TS2352: Conversion of type '{ id: string; title: string; content: string; year_of_event: number | null; user_birth_year: number | null; audio_duration: number | null; audio_url: string | null; cover_photo_url: string; show_in_timeline: boolean; include_in_book: boolean; is_favorite: boolean; }' to type '{ title: string; id: string; audioUrl: string | null; transcription: string | null; formattedContent: { fullText: string; paragraphs: string[]; pages: { left: string; right: string; splitIndex: number; }; questions: { ...; }[]; themes?: string[] | undefined; processedAt: string; version: string; } | null; ... 22 mor...' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ id: string; title: string; content: string; year_of_event: number | null; user_birth_year: number | null; audio_duration: number | null; audio_url: string | null; cover_photo_url: string; show_in_timeline: boolean; include_in_book: boolean; is_favorite: boolean; }' is missing the following properties from type '{ title: string; id: string; audioUrl: string | null; transcription: string | null; formattedContent: { fullText: string; paragraphs: string[]; pages: { left: string; right: string; splitIndex: number; }; questions: { ...; }[]; themes?: string[] | undefined; processedAt: string; version: string; } | null; ... 22 mor...': audioUrl, transcription, formattedContent, wisdomClipText, and 22 more.
+app/memory-box/page.tsx(648,49): error TS2339: Property 'transform' does not exist on type '{ id: string; url: string; isHero?: boolean | undefined; }'.
+app/profile/page.tsx(131,22): error TS2339: Property 'user' does not exist on type '{}'.
+app/profile/page.tsx(132,35): error TS2339: Property 'user' does not exist on type '{}'.
+app/profile/page.tsx(146,44): error TS2339: Property 'ai_processing_enabled' does not exist on type '{}'.
+app/profile/page.tsx(334,7): error TS2353: Object literal may only specify known properties, and 'profilePhotoUrl' does not exist in type '{ name: string; birthYear: number; bio?: string | undefined; }'.
+app/profile/page.tsx(553,40): error TS2339: Property 'stories' does not exist on type '{}'.
+app/profile/page.tsx(559,39): error TS2339: Property 'stories' does not exist on type '{}'.
+app/profile/page.tsx(560,46): error TS2339: Property 'stories' does not exist on type '{}'.
+app/profile/page.tsx(569,44): error TS2339: Property 'user' does not exist on type '{}'.
+app/prompts/page.tsx(419,14): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+app/prompts/page.tsx(420,14): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+app/prompts/page.tsx(427,40): error TS2345: Argument of type '{ method: string; body: string; }' is not assignable to parameter of type 'string'.
+app/review/book-style/page.tsx(131,36): error TS2339: Property 'returnPath' does not exist on type 'NavPayload'.
+app/review/book-style/page.tsx(152,26): error TS2339: Property 'returnPath' does not exist on type 'NavPayload'.
+app/review/book-style/page.tsx(153,38): error TS2339: Property 'returnPath' does not exist on type 'NavPayload'.
+app/review/book-style/page.tsx(905,7): error TS2322: Type 'string | number' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'.
+app/review/book-style/page.tsx(928,33): error TS2339: Property 'lessonLearned' does not exist on type 'NavPayload'.
+app/review/book-style/page.tsx(930,28): error TS2551: Property 'birth_year' does not exist on type 'User'. Did you mean 'birthYear'?
+components/AdminSidebar.tsx(111,37): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+components/AdminSidebar.tsx(118,22): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+components/AgreementModal.tsx(138,46): error TS2322: Type '{ children: Element[]; className: string; hideClose: true; }' is not assignable to type 'IntrinsicAttributes & Omit<DialogContentProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<...>'.
+  Property 'hideClose' does not exist on type 'IntrinsicAttributes & Omit<DialogContentProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<...>'.
+components/auth/PasskeyAuth.tsx(66,9): error TS2345: Argument of type 'PublicKeyCredentialCreationOptionsJSON' is not assignable to parameter of type '{ optionsJSON: PublicKeyCredentialCreationOptionsJSON; useAutoRegister?: boolean | undefined; }'.
+  Property 'optionsJSON' is missing in type 'PublicKeyCredentialCreationOptionsJSON' but required in type '{ optionsJSON: PublicKeyCredentialCreationOptionsJSON; useAutoRegister?: boolean | undefined; }'.
+components/auth/PasskeyAuth.tsx(123,9): error TS2345: Argument of type 'PublicKeyCredentialRequestOptionsJSON' is not assignable to parameter of type '{ optionsJSON: PublicKeyCredentialRequestOptionsJSON; useBrowserAutofill?: boolean | undefined; verifyBrowserAutofillInput?: boolean | undefined; }'.
+  Property 'optionsJSON' is missing in type 'PublicKeyCredentialRequestOptionsJSON' but required in type '{ optionsJSON: PublicKeyCredentialRequestOptionsJSON; useBrowserAutofill?: boolean | undefined; verifyBrowserAutofillInput?: boolean | undefined; }'.
+components/BookNavigation.tsx(184,14): error TS2304: Cannot find name 'X'.
+components/BookStyleReview.tsx(588,25): error TS2322: Type '{ ref: RefObject<AudioRecorderHandle | null>; onRecordingComplete: (audioBlob: Blob) => Promise<void>; onCancel: () => void; }' is not assignable to type 'IntrinsicAttributes & AudioRecorderProps & RefAttributes<AudioRecorderHandle>'.
+  Property 'onCancel' does not exist on type 'IntrinsicAttributes & AudioRecorderProps & RefAttributes<AudioRecorderHandle>'.
+components/BookStyleReview.tsx(606,25): error TS2322: Type 'RefObject<AudioRecorderHandle | null>' is not assignable to type 'RefObject<AudioRecorderHandle>'.
+  Type 'AudioRecorderHandle | null' is not assignable to type 'AudioRecorderHandle'.
+    Type 'null' is not assignable to type 'AudioRecorderHandle'.
+components/BookStyleReview.tsx(630,57): error TS2551: Property 'stopRecording' does not exist on type 'AudioRecorderHandle'. Did you mean 'isRecording'?
+components/BottomNavigation.tsx(2,29): error TS2307: Cannot find module 'wouter' or its corresponding type declarations.
+components/FloatingInsightCard.tsx(188,13): error TS2322: Type '{ hidden: { x: number; opacity: number; }; visible: { x: number; opacity: number; transition: { duration: number; ease: string; }; }; exit: { x: number; opacity: number; transition: { duration: number; ease: string; }; }; } | { ...; }' is not assignable to type 'Variants | undefined'.
+  Type '{ hidden: { x: number; opacity: number; }; visible: { x: number; opacity: number; transition: { duration: number; ease: string; }; }; exit: { x: number; opacity: number; transition: { duration: number; ease: string; }; }; }' is not assignable to type 'Variants'.
+    Property 'visible' is incompatible with index signature.
+      Type '{ x: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'Variant'.
+        Type '{ x: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+          Type '{ x: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues | undefined; }'.
+            Types of property 'transition' are incompatible.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any> | undefined'.
+                Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                  Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                    Types of property 'ease' are incompatible.
+                      Type 'string' is not assignable to type 'Easing | Easing[] | undefined'.
+components/MultiPhotoUploader.tsx(367,17): error TS2322: Type '(el: HTMLInputElement | null) => HTMLInputElement | null' is not assignable to type 'Ref<HTMLInputElement> | undefined'.
+  Type '(el: HTMLInputElement | null) => HTMLInputElement | null' is not assignable to type '(instance: HTMLInputElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLInputElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+components/RecordModal.tsx(171,23): error TS2339: Property 'workEthic' does not exist on type '{}'.
+components/RecordModal.tsx(177,23): error TS2339: Property 'familyOrientation' does not exist on type '{}'.
+components/RecordModal.tsx(183,23): error TS2339: Property 'riskTolerance' does not exist on type '{}'.
+components/RecordModal.tsx(190,45): error TS2339: Property 'birthYear' does not exist on type '{}'.
+components/RecordModal.tsx(328,68): error TS2339: Property 'size' does not exist on type '{ blob: Blob | null; chunkCount: number; }'.
+components/RecordModal.tsx(330,39): error TS2339: Property 'size' does not exist on type '{ blob: Blob | null; chunkCount: number; }'.
+components/RecordModal.tsx(343,37): error TS2345: Argument of type '{ blob: Blob | null; chunkCount: number; }' is not assignable to parameter of type 'Blob'.
+  Type '{ blob: Blob | null; chunkCount: number; }' is missing the following properties from type 'Blob': size, type, arrayBuffer, bytes, and 3 more.
+components/RecordModal.tsx(1224,33): error TS2322: Type '"warning"' is not assignable to type '"default" | "destructive" | null | undefined'.
+components/RecordModal.tsx(1287,29): error TS2322: Type 'RefObject<AudioRecorderHandle | null>' is not assignable to type 'RefObject<AudioRecorderHandle>'.
+  Type 'AudioRecorderHandle | null' is not assignable to type 'AudioRecorderHandle'.
+    Type 'null' is not assignable to type 'AudioRecorderHandle'.
+components/timeline/TimelineDesktop.tsx(215,56): error TS18047: 'normalizedStoryYear' is possibly 'null'.
+components/timeline/TimelineDesktop.tsx(578,18): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(578,34): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(580,42): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(692,16): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(692,32): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(694,40): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(925,33): error TS2367: This comparison appears to be unintentional because the types '163' and '0' have no overlap.
+components/timeline/TimelineDesktop.tsx(996,12): error TS18047: 'yearA' is possibly 'null'.
+components/timeline/TimelineDesktop.tsx(996,20): error TS18047: 'yearB' is possibly 'null'.
+components/timeline/TimelineDesktop.tsx(1003,31): error TS18047: 'year' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(823,64): error TS18047: 'y' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(823,69): error TS18047: 'by' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(844,64): error TS18047: 'y' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(844,69): error TS18047: 'by' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(860,29): error TS2339: Property 'name' does not exist on type 'Trait'.
+components/timeline/TimelineMobile.tsx(871,16): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+components/timeline/TimelineMobile.tsx(872,17): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+components/timeline/TimelineMobile.tsx(873,44): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+components/timeline/TimelineMobile.tsx(1209,50): error TS2345: Argument of type '{ year: number; isGhost: boolean; id: string; key: string; title: string; prompt: string; offsetYears: number; }[] | GhostPrompt[]' is not assignable to parameter of type 'GhostPrompt[]'.
+  Type '{ year: number; isGhost: boolean; id: string; key: string; title: string; prompt: string; offsetYears: number; }[]' is not assignable to type 'GhostPrompt[]'.
+    Property 'age' is missing in type '{ year: number; isGhost: boolean; id: string; key: string; title: string; prompt: string; offsetYears: number; }' but required in type 'GhostPrompt'.
+components/timeline/TimelineMobile.tsx(1234,14): error TS18047: 'normalizedStoryYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1234,36): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1273,18): error TS2531: Object is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1273,47): error TS2531: Object is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1293,16): error TS18047: 'storyYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1293,29): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1309,20): error TS18047: 'storyYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1309,32): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1315,15): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+components/timeline/TimelineMobile.tsx(1320,24): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1553,17): error TS2322: Type '(el: HTMLElement | null) => HTMLElement | null' is not assignable to type 'Ref<HTMLElement> | undefined'.
+  Type '(el: HTMLElement | null) => HTMLElement | null' is not assignable to type '(instance: HTMLElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+components/ui/aspect-ratio.tsx(1,39): error TS2307: Cannot find module '@radix-ui/react-aspect-ratio' or its corresponding type declarations.
+components/ui/calendar.tsx(3,27): error TS2307: Cannot find module 'react-day-picker' or its corresponding type declarations.
+components/ui/calendar.tsx(55,22): error TS7031: Binding element 'className' implicitly has an 'any' type.
+components/ui/calendar.tsx(58,23): error TS7031: Binding element 'className' implicitly has an 'any' type.
+components/ui/chart.tsx(119,7): error TS2339: Property 'payload' does not exist on type 'Omit<Omit<Props<ValueType, NameType>, PropertiesReadFromContext> & { active?: boolean | undefined; includeHidden?: boolean | undefined; ... 17 more ...; axisId?: AxisId | undefined; } & ClassAttributes<...> & HTMLAttributes<...> & { ...; }, "ref">'.
+components/ui/chart.tsx(124,7): error TS2339: Property 'label' does not exist on type 'Omit<Omit<Props<ValueType, NameType>, PropertiesReadFromContext> & { active?: boolean | undefined; includeHidden?: boolean | undefined; ... 17 more ...; axisId?: AxisId | undefined; } & ClassAttributes<...> & HTMLAttributes<...> & { ...; }, "ref">'.
+components/ui/chart.tsx(188,25): error TS7006: Parameter 'item' implicitly has an 'any' type.
+components/ui/chart.tsx(188,31): error TS7006: Parameter 'index' implicitly has an 'any' type.
+components/ui/chart.tsx(264,41): error TS2344: Type '"payload" | "verticalAlign"' does not satisfy the constraint '"string" | "d" | "k" | "r" | "x" | "y" | "z" | "version" | "filter" | "fill" | "values" | "type" | "name" | "children" | "min" | "max" | "id" | "mode" | "dur" | "in" | "method" | "end" | ... 424 more ... | "onBBoxUpdate"'.
+  Type '"payload"' is not assignable to type '"string" | "d" | "k" | "r" | "x" | "y" | "z" | "version" | "filter" | "fill" | "values" | "type" | "name" | "children" | "min" | "max" | "id" | "mode" | "dur" | "in" | "method" | "end" | ... 424 more ... | "onBBoxUpdate"'.
+components/ui/chart.tsx(275,19): error TS2339: Property 'length' does not exist on type '{}'.
+components/ui/chart.tsx(288,18): error TS2339: Property 'map' does not exist on type '{}'.
+components/ui/chart.tsx(288,23): error TS7006: Parameter 'item' implicitly has an 'any' type.
+components/ui/command.tsx(3,45): error TS2307: Cannot find module 'cmdk' or its corresponding type declarations.
+components/ui/context-menu.tsx(2,39): error TS2307: Cannot find module '@radix-ui/react-context-menu' or its corresponding type declarations.
+components/ui/hover-card.tsx(4,37): error TS2307: Cannot find module '@radix-ui/react-hover-card' or its corresponding type declarations.
+components/ui/input-otp.tsx(2,43): error TS2307: Cannot find module 'input-otp' or its corresponding type declarations.
+components/ui/input-otp.tsx(36,44): error TS18046: 'inputOTPContext' is of type 'unknown'.
+components/ui/MemoryListItem.tsx(31,41): error TS2339: Property 'audio_duration' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(33,11): error TS2339: Property 'year_of_event' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(33,34): error TS2339: Property 'user_birth_year' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(34,22): error TS2339: Property 'year_of_event' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(34,43): error TS2339: Property 'user_birth_year' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(38,26): error TS2339: Property 'cover_photo_url' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(87,20): error TS2339: Property 'year_of_event' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(88,39): error TS2339: Property 'year_of_event' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(106,20): error TS2339: Property 'show_in_timeline' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(114,20): error TS2551: Property 'include_in_book' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'. Did you mean 'includeInBook'?
+components/ui/MemoryListItem.tsx(122,20): error TS2551: Property 'is_favorite' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'. Did you mean 'isFavorite'?
+components/ui/MemoryListItem.tsx(193,22): error TS2551: Property 'is_favorite' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'. Did you mean 'isFavorite'?
+components/ui/menubar.tsx(4,35): error TS2307: Cannot find module '@radix-ui/react-menubar' or its corresponding type declarations.
+components/ui/navigation-menu.tsx(2,42): error TS2307: Cannot find module '@radix-ui/react-navigation-menu' or its corresponding type declarations.
+components/ui/popover.tsx(2,35): error TS2307: Cannot find module '@radix-ui/react-popover' or its corresponding type declarations.
+components/ui/progress.tsx(4,36): error TS2307: Cannot find module '@radix-ui/react-progress' or its corresponding type declarations.
+components/ui/resizable.tsx(4,37): error TS2307: Cannot find module 'react-resizable-panels' or its corresponding type declarations.
+components/ui/scroll-area.tsx(2,38): error TS2307: Cannot find module '@radix-ui/react-scroll-area' or its corresponding type declarations.
+components/ui/toggle-group.tsx(4,39): error TS2307: Cannot find module '@radix-ui/react-toggle-group' or its corresponding type declarations.
+components/ui/toggle.tsx(2,34): error TS2307: Cannot find module '@radix-ui/react-toggle' or its corresponding type declarations.
+hooks/use-record-modal.tsx(104,9): error TS2353: Object literal may only specify known properties, and 'selectedPrompt' does not exist in type 'NavPayload'.
+hooks/use-recording-wizard.tsx(42,26): error TS2551: Property 'birth_year' does not exist on type 'User'. Did you mean 'birthYear'?
+hooks/usePhotoUpload.ts(3,22): error TS2459: Module '"../lib/queryClient"' declares 'getApiUrl' locally, but it is not exported.
+lib/scopeEnforcer.ts(55,46): error TS1501: This regular expression flag is only available when targeting 'es2018' or later.
+lib/webauthn-config.ts(31,5): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'Uint8Array<ArrayBuffer>'.
+  Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+    Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+scripts/cleanupPrompts.ts(12,10): error TS2724: '"../lib/promptQuality"' has no exported member named 'assessPromptQuality'. Did you mean 'scorePromptQuality'?
+scripts/cleanupPrompts.ts(37,65): error TS2339: Property 'reason' does not exist on type 'QualityIssue'.
+scripts/cleanupPrompts.ts(48,46): error TS2339: Property 'wordCount' does not exist on type 'QualityReport'.
+scripts/cleanupPrompts.ts(53,40): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'contextNote' does not exist in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'userId' does not exist in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }[]'.
+scripts/trigger-prompt-regeneration.ts(119,16): error TS2339: Property 'characterInsights' does not exist on type 'Tier3Result'.
+scripts/trigger-prompt-regeneration.ts(121,39): error TS2339: Property 'characterInsights' does not exist on type 'Tier3Result'.
+scripts/trigger-prompt-regeneration.ts(121,68): error TS7006: Parameter 't' implicitly has an 'any' type.
+scripts/trigger-prompt-regeneration.ts(122,38): error TS2339: Property 'characterInsights' does not exist on type 'Tier3Result'.
+tests/setup.ts(20,1): error TS2304: Cannot find name 'beforeEach'.
+tests/utils.ts(11,31): error TS2345: Argument of type '{ headers: { authorization: string; } | { append(name: string, value: string): void; delete(name: string): void; get(name: string): string | null; getSetCookie(): string[]; ... 7 more ...; authorization: string; } | { ...; } | { ...; }; ... 13 more ...; next?: NextFetchRequestConfig | undefined; }' is not assignable to parameter of type 'RequestInit'.
+  Types of property 'signal' are incompatible.
+    Type 'AbortSignal | null | undefined' is not assignable to type 'AbortSignal | undefined'.
+      Type 'null' is not assignable to type 'AbortSignal | undefined'.

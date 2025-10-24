@@ -1,0 +1,653 @@
+.next/types/app/api/agreements/accept/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("/Users/paul/Development/HeritageWhisperV2/app/api/agreements/accept/route"), "config" | "generateStaticParams" | "revalidate" | "dynamic" | "dynamicParams" | ... 10 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+  Property 'CURRENT_TERMS_VERSION' is incompatible with index signature.
+    Type '"1.0"' is not assignable to type 'never'.
+.next/types/app/api/agreements/status/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("/Users/paul/Development/HeritageWhisperV2/app/api/agreements/status/route"), "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "DELETE" | "PATCH" | "config" | "generateStaticParams" | ... 6 more ... | "maxDuration", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+  Property 'CURRENT_TERMS_VERSION' is incompatible with index signature.
+    Type '"1.0"' is not assignable to type 'never'.
+.next/types/app/api/family/members/[id]/route.ts(244,7): error TS2344: Type '{ __tag__: "DELETE"; __param_position__: "second"; __param_type__: { params: { id: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ id: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/prompts/[id]/route.ts(244,7): error TS2344: Type '{ __tag__: "DELETE"; __param_position__: "second"; __param_type__: { params: { id: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ id: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/prompts/history/[id]/route.ts(244,7): error TS2344: Type '{ __tag__: "DELETE"; __param_position__: "second"; __param_type__: { params: { id: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ id: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/shared/[token]/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { token: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ token: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/stories/[id]/photos/[photoId]/route.ts(244,7): error TS2344: Type '{ __tag__: "DELETE"; __param_position__: "second"; __param_type__: { params: { id: string; photoId: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ id: string; photoId: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/stories/[id]/photos/[photoId]/route.ts(283,7): error TS2344: Type '{ __tag__: "PATCH"; __param_position__: "second"; __param_type__: { params: { id: string; photoId: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ id: string; photoId: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/validator.ts(972,31): error TS2344: Type 'typeof import("/Users/paul/Development/HeritageWhisperV2/app/api/family/members/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/family/members/[id]">'.
+  Types of property 'DELETE' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ success: boolean; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(1161,31): error TS2344: Type 'typeof import("/Users/paul/Development/HeritageWhisperV2/app/api/prompts/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/prompts/[id]">'.
+  Types of property 'DELETE' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ success: boolean; message: string; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(1251,31): error TS2344: Type 'typeof import("/Users/paul/Development/HeritageWhisperV2/app/api/prompts/history/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/prompts/history/[id]">'.
+  Types of property 'DELETE' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ success: boolean; message: string; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(1332,31): error TS2344: Type 'typeof import("/Users/paul/Development/HeritageWhisperV2/app/api/shared/[token]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/shared/[token]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { token: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ share: { permissionLevel: string; createdAt: Date | null; expiresAt: Date | null; }; owner: { ...; }; stories: { ...; }[]; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ token: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ token: string; }>; }' is not assignable to type '{ params: { token: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'token' is missing in type 'Promise<{ token: string; }>' but required in type '{ token: string; }'.
+.next/types/validator.ts(1350,31): error TS2344: Type 'typeof import("/Users/paul/Development/HeritageWhisperV2/app/api/stories/[id]/photos/[photoId]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/stories/[id]/photos/[photoId]">'.
+  Types of property 'PATCH' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; photoId: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ photo: any; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; photoId: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; photoId: string; }>; }' is not assignable to type '{ params: { id: string; photoId: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{ id: string; photoId: string; }>' is missing the following properties from type '{ id: string; photoId: string; }': id, photoId
+app/admin/north-star/page.tsx(704,60): error TS2322: Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type 'Ref<HTMLAnchorElement> | undefined'.
+  Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type '(instance: HTMLAnchorElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLAnchorElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+app/admin/north-star/page.tsx(709,61): error TS2322: Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type 'Ref<HTMLAnchorElement> | undefined'.
+  Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type '(instance: HTMLAnchorElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLAnchorElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+app/admin/north-star/page.tsx(714,62): error TS2322: Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type 'Ref<HTMLAnchorElement> | undefined'.
+  Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type '(instance: HTMLAnchorElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLAnchorElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+app/admin/north-star/page.tsx(719,64): error TS2322: Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type 'Ref<HTMLAnchorElement> | undefined'.
+  Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type '(instance: HTMLAnchorElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLAnchorElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+app/admin/north-star/page.tsx(724,59): error TS2322: Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type 'Ref<HTMLAnchorElement> | undefined'.
+  Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type '(instance: HTMLAnchorElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLAnchorElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+app/admin/north-star/page.tsx(729,60): error TS2322: Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type 'Ref<HTMLAnchorElement> | undefined'.
+  Type '(el: HTMLAnchorElement | null) => HTMLAnchorElement | null' is not assignable to type '(instance: HTMLAnchorElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLAnchorElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+app/admin/test-accounts/page.tsx(269,76): error TS2551: Property 'story_count' does not exist on type 'User'. Did you mean 'storyCount'?
+app/api/admin/prompts/route.ts(129,11): error TS2339: Property 'reviewed' does not exist on type '{ total: number; tier1: number; tier3: number; avgScore: number; locked: number; }'.
+app/api/admin/prompts/route.ts(130,11): error TS2339: Property 'needsReview' does not exist on type '{ total: number; tier1: number; tier3: number; avgScore: number; locked: number; }'.
+app/api/admin/prompts/route.ts(131,11): error TS2339: Property 'good' does not exist on type '{ total: number; tier1: number; tier3: number; avgScore: number; locked: number; }'.
+app/api/admin/prompts/route.ts(132,11): error TS2339: Property 'bad' does not exist on type '{ total: number; tier1: number; tier3: number; avgScore: number; locked: number; }'.
+app/api/admin/trigger-tier3/route.ts(51,65): error TS2554: Expected 2 arguments, but got 3.
+app/api/admin/trigger-tier3/route.ts(53,17): error TS2339: Property 'success' does not exist on type 'Tier3Result'.
+app/api/admin/trigger-tier3/route.ts(55,23): error TS2339: Property 'error' does not exist on type 'Tier3Result'.
+app/api/admin/trigger-tier3/route.ts(60,81): error TS2339: Property 'promptsGenerated' does not exist on type 'Tier3Result'.
+app/api/admin/trigger-tier3/route.ts(65,32): error TS2339: Property 'promptsGenerated' does not exist on type 'Tier3Result'.
+app/api/admin/trigger-tier3/route.ts(67,49): error TS2339: Property 'promptsGenerated' does not exist on type 'Tier3Result'.
+app/api/auth/login/route.ts(39,52): error TS2339: Property 'errors' does not exist on type 'ZodError<unknown>'.
+app/api/auth/login/route.ts(39,64): error TS7006: Parameter 'err' implicitly has an 'any' type.
+app/api/auth/register/route.ts(41,52): error TS2339: Property 'errors' does not exist on type 'ZodError<unknown>'.
+app/api/auth/register/route.ts(41,64): error TS7006: Parameter 'err' implicitly has an 'any' type.
+app/api/auth/register/route.ts(70,31): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/api/auth/register/route.ts(117,30): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/api/auth/register/route.ts(206,27): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/api/dev/analyze-prompts/route.ts(105,11): error TS2554: Expected 1-2 arguments, but got 3.
+app/api/dev/analyze-prompts/route.ts(109,21): error TS2339: Property 'prompt' does not exist on type 'Tier1Prompt'.
+app/api/dev/analyze-prompts/route.ts(110,22): error TS2551: Property 'memory_type' does not exist on type 'Tier1Prompt'. Did you mean 'memoryType'?
+app/api/dev/analyze-prompts/route.ts(111,27): error TS2339: Property 'anchor_entity' does not exist on type 'Tier1Prompt'.
+app/api/dev/analyze-prompts/route.ts(112,34): error TS2339: Property 'recording_likelihood' does not exist on type 'Tier1Prompt'.
+app/api/dev/analyze-prompts/route.ts(113,24): error TS2339: Property 'reasoning' does not exist on type 'Tier1Prompt'.
+app/api/export/2up/route.ts(103,29): error TS2345: Argument of type 'Buffer<ArrayBufferLike>' is not assignable to parameter of type 'BodyInit | null | undefined'.
+  Type 'Buffer<ArrayBufferLike>' is missing the following properties from type 'URLSearchParams': size, append, delete, get, and 2 more.
+app/api/export/trim/route.ts(100,29): error TS2345: Argument of type 'Buffer<ArrayBufferLike>' is not assignable to parameter of type 'BodyInit | null | undefined'.
+  Type 'Buffer<ArrayBufferLike>' is missing the following properties from type 'URLSearchParams': size, append, delete, get, and 2 more.
+app/api/passkey/auth-verify/route.ts(10,49): error TS2307: Cannot find module '@simplewebauthn/types' or its corresponding type declarations.
+app/api/passkey/auth-verify/route.ts(65,7): error TS2353: Object literal may only specify known properties, and 'authenticator' does not exist in type '{ response: AuthenticationResponseJSON; expectedChallenge: string | ((challenge: string) => boolean | Promise<boolean>); expectedOrigin: string | string[]; ... 4 more ...; advancedFIDOConfig?: { ...; } | undefined; }'.
+app/api/passkey/register-options/route.ts(76,7): error TS2322: Type '{ id: string; type: "public-key"; transports: ("ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid")[] | null; }[]' is not assignable to type '{ id: string; transports?: AuthenticatorTransportFuture[] | undefined; }[]'.
+  Type '{ id: string; type: "public-key"; transports: ("ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid")[] | null; }' is not assignable to type '{ id: string; transports?: AuthenticatorTransportFuture[] | undefined; }'.
+    Types of property 'transports' are incompatible.
+      Type '("ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid")[] | null' is not assignable to type 'AuthenticatorTransportFuture[] | undefined'.
+        Type 'null' is not assignable to type 'AuthenticatorTransportFuture[] | undefined'.
+app/api/passkey/register-verify/route.ts(9,47): error TS2307: Cannot find module '@simplewebauthn/types' or its corresponding type declarations.
+app/api/passkey/register-verify/route.ts(60,7): error TS2339: Property 'credentialID' does not exist on type '{ fmt: AttestationFormat; aaguid: string; credential: WebAuthnCredential; credentialType: "public-key"; attestationObject: Uint8Array<ArrayBuffer>; ... 5 more ...; authenticatorExtensionResults?: unknown; }'.
+app/api/passkey/register-verify/route.ts(61,7): error TS2339: Property 'credentialPublicKey' does not exist on type '{ fmt: AttestationFormat; aaguid: string; credential: WebAuthnCredential; credentialType: "public-key"; attestationObject: Uint8Array<ArrayBuffer>; ... 5 more ...; authenticatorExtensionResults?: unknown; }'.
+app/api/passkey/register-verify/route.ts(62,7): error TS2339: Property 'counter' does not exist on type '{ fmt: AttestationFormat; aaguid: string; credential: WebAuthnCredential; credentialType: "public-key"; attestationObject: Uint8Array<ArrayBuffer>; ... 5 more ...; authenticatorExtensionResults?: unknown; }'.
+app/api/prompts/cleanup/route.ts(98,42): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'contextNote' does not exist in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'userId' does not exist in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }[]'.
+app/api/prompts/emergency-cleanup/route.ts(79,10): error TS2872: This kind of expression is always truthy.
+app/api/prompts/next/route.ts(180,9): error TS2322: Type '({ kind: "object" | "person" | "place" | "emotion"; text: any; } | null)[]' is not assignable to type 'CandidateEntity[]'.
+  Type '{ kind: "object" | "person" | "place" | "emotion"; text: any; } | null' is not assignable to type 'CandidateEntity'.
+    Type 'null' is not assignable to type 'CandidateEntity'.
+app/api/stories/enhance/route.ts(73,7): error TS2322: Type 'string | undefined' is not assignable to type '"low" | "medium" | "high" | undefined'.
+  Type 'string' is not assignable to type '"low" | "medium" | "high" | undefined'.
+app/api/stories/route.ts(639,23): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+app/api/stories/route.ts(661,23): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+app/api/upload/audio/route.ts(140,27): error TS2339: Property 'statusCode' does not exist on type 'StorageError'.
+app/api/upload/audio/route.ts(141,24): error TS2339: Property 'details' does not exist on type 'StorageError'.
+app/api/user/delete/route.ts(13,3): error TS2305: Module '"@/shared/schema"' has no exported member 'userPrompts'.
+app/api/user/export/route.ts(13,3): error TS2305: Module '"@/shared/schema"' has no exported member 'userPrompts'.
+app/api/user/export/route.ts(247,26): error TS2339: Property 'source' does not exist on type '{ id: string; userId: string; promptText: string; contextNote: string | null; anchorEntity: string | null; anchorYear: number | null; anchorHash: string; tier: number; memoryType: string | null; ... 7 more ...; lastShownAt: Date | null; }'.
+app/api/user/export/route.ts(255,26): error TS2339: Property 'source' does not exist on type '{ id: string; userId: string; promptText: string; anchorHash: string | null; anchorEntity: string | null; anchorYear: number | null; tier: number | null; memoryType: string | null; promptScore: number | null; ... 4 more ...; resolvedAt: Date | null; }'.
+app/api/user/export/route.ts(256,35): error TS2339: Property 'answeredStoryId' does not exist on type '{ id: string; userId: string; promptText: string; anchorHash: string | null; anchorEntity: string | null; anchorYear: number | null; tier: number | null; memoryType: string | null; promptScore: number | null; ... 4 more ...; resolvedAt: Date | null; }'.
+app/api/user/export/route.ts(257,30): error TS2339: Property 'answeredAt' does not exist on type '{ id: string; userId: string; promptText: string; anchorHash: string | null; anchorEntity: string | null; anchorYear: number | null; tier: number | null; memoryType: string | null; promptScore: number | null; ... 4 more ...; resolvedAt: Date | null; }'.
+app/api/user/export/route.ts(258,29): error TS2339: Property 'skippedAt' does not exist on type '{ id: string; userId: string; promptText: string; anchorHash: string | null; anchorEntity: string | null; anchorYear: number | null; tier: number | null; memoryType: string | null; promptScore: number | null; ... 4 more ...; resolvedAt: Date | null; }'.
+app/api/user/export/route.ts(259,30): error TS2339: Property 'archivedAt' does not exist on type '{ id: string; userId: string; promptText: string; anchorHash: string | null; anchorEntity: string | null; anchorYear: number | null; tier: number | null; memoryType: string | null; promptScore: number | null; ... 4 more ...; resolvedAt: Date | null; }'.
+app/api/user/export/route.ts(272,26): error TS2339: Property 'usedAt' does not exist on type '{ id: string; userId: string; promptText: string; promptTitle: string; category: string; decade: string; ageRange: string; isGenerated: boolean | null; basedOnStoryId: string | null; createdAt: Date | null; }'.
+app/api/user/export/route.ts(280,32): error TS2339: Property 'profileType' does not exist on type '{ id: string; userId: string; birthYear: number; majorLifePhases: { childhood: { start: number; end: number; }; youngAdult: { start: number; end: number; }; midLife: { start: number; end: number; }; senior: { ...; }; } | null; ... 10 more ...; updatedAt: Date | null; }'.
+app/api/user/export/route.ts(281,32): error TS2339: Property 'profileData' does not exist on type '{ id: string; userId: string; birthYear: number; majorLifePhases: { childhood: { start: number; end: number; }; youngAdult: { start: number; end: number; }; midLife: { start: number; end: number; }; senior: { ...; }; } | null; ... 10 more ...; updatedAt: Date | null; }'.
+app/api/user/export/route.ts(282,36): error TS2339: Property 'confidenceScore' does not exist on type '{ id: string; userId: string; birthYear: number; majorLifePhases: { childhood: { start: number; end: number; }; youngAdult: { start: number; end: number; }; midLife: { start: number; end: number; }; senior: { ...; }; } | null; ... 10 more ...; updatedAt: Date | null; }'.
+app/api/user/export/route.ts(283,32): error TS2339: Property 'lastUpdated' does not exist on type '{ id: string; userId: string; birthYear: number; majorLifePhases: { childhood: { start: number; end: number; }; youngAdult: { start: number; end: number; }; midLife: { start: number; end: number; }; senior: { ...; }; } | null; ... 10 more ...; updatedAt: Date | null; }'.
+app/api/user/export/route.ts(287,32): error TS2339: Property 'contextType' does not exist on type '{ id: string; userId: string; decade: string; ageRange: string; facts: string[]; generatedAt: Date | null; updatedAt: Date | null; }'.
+app/api/user/export/route.ts(288,32): error TS2339: Property 'contextData' does not exist on type '{ id: string; userId: string; decade: string; ageRange: string; facts: string[]; generatedAt: Date | null; updatedAt: Date | null; }'.
+app/api/user/export/route.ts(289,35): error TS2339: Property 'relevanceScore' does not exist on type '{ id: string; userId: string; decade: string; ageRange: string; facts: string[]; generatedAt: Date | null; updatedAt: Date | null; }'.
+app/api/user/export/route.ts(290,30): error TS2339: Property 'createdAt' does not exist on type '{ id: string; userId: string; decade: string; ageRange: string; facts: string[]; generatedAt: Date | null; updatedAt: Date | null; }'.
+app/api/user/export/route.ts(338,34): error TS2339: Property 'activityData' does not exist on type '{ id: string; userId: string; familyMemberId: string; storyId: string | null; activityType: string; details: string | null; createdAt: Date | null; }'.
+app/api/user/export/route.ts(397,68): error TS2339: Property 'answeredAt' does not exist on type '{ id: string; userId: string; promptText: string; anchorHash: string | null; anchorEntity: string | null; anchorYear: number | null; tier: number | null; memoryType: string | null; promptScore: number | null; ... 4 more ...; resolvedAt: Date | null; }'.
+app/book-v2/page.tsx(1028,19): error TS2322: Type '(question?: string) => void' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+  Types of parameters 'question' and 'event' are incompatible.
+    Type 'MouseEvent<HTMLButtonElement, MouseEvent>' is not assignable to type 'string'.
+app/book-v2/print/2up/page.tsx(190,21): error TS18048: 'page.photos' is possibly 'undefined'.
+app/book-v2/print/2up/page.tsx(194,60): error TS18048: 'page.photos' is possibly 'undefined'.
+app/book-v2/print/2up/page.tsx(326,26): error TS7006: Parameter 'story' implicitly has an 'any' type.
+app/book-v2/print/2up/page.tsx(371,20): error TS2345: Argument of type '[BookPage, BookPage | null][]' is not assignable to parameter of type 'SetStateAction<BookPage[][]>'.
+  Type '[BookPage, BookPage | null][]' is not assignable to type 'BookPage[][]'.
+    Type '[BookPage, BookPage | null]' is not assignable to type 'BookPage[]'.
+      Type 'BookPage | null' is not assignable to type 'BookPage'.
+        Type 'null' is not assignable to type 'BookPage'.
+app/book-v2/print/trim/page.tsx(285,26): error TS7006: Parameter 'story' implicitly has an 'any' type.
+app/book-v3/page.tsx(1057,19): error TS2322: Type '(question?: string) => void' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+  Types of parameters 'question' and 'event' are incompatible.
+    Type 'MouseEvent<HTMLButtonElement, MouseEvent>' is not assignable to type 'string'.
+app/book-v3/print/2up/page.tsx(190,21): error TS18048: 'page.photos' is possibly 'undefined'.
+app/book-v3/print/2up/page.tsx(194,60): error TS18048: 'page.photos' is possibly 'undefined'.
+app/book-v3/print/2up/page.tsx(351,26): error TS7006: Parameter 'story' implicitly has an 'any' type.
+app/book-v3/print/2up/page.tsx(396,20): error TS2345: Argument of type '[BookPage, BookPage | null][]' is not assignable to parameter of type 'SetStateAction<BookPage[][]>'.
+  Type '[BookPage, BookPage | null][]' is not assignable to type 'BookPage[][]'.
+    Type '[BookPage, BookPage | null]' is not assignable to type 'BookPage[]'.
+      Type 'BookPage | null' is not assignable to type 'BookPage'.
+        Type 'null' is not assignable to type 'BookPage'.
+app/book-v3/print/trim/page.tsx(310,26): error TS7006: Parameter 'story' implicitly has an 'any' type.
+app/book/page.tsx(256,24): error TS2339: Property 'transform' does not exist on type 'StoryPhoto'.
+app/book/page.tsx(258,50): error TS2339: Property 'transform' does not exist on type 'StoryPhoto'.
+app/book/page.tsx(258,92): error TS2339: Property 'transform' does not exist on type 'StoryPhoto'.
+app/book/page.tsx(258,128): error TS2339: Property 'transform' does not exist on type 'StoryPhoto'.
+app/book/page.tsx(258,162): error TS2339: Property 'transform' does not exist on type 'StoryPhoto'.
+app/book/page.tsx(258,198): error TS2339: Property 'transform' does not exist on type 'StoryPhoto'.
+app/book/page.tsx(1037,19): error TS2322: Type '(question?: string) => void' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+  Types of parameters 'question' and 'event' are incompatible.
+    Type 'MouseEvent<HTMLButtonElement, MouseEvent>' is not assignable to type 'string'.
+app/book/print/2up/page.tsx(190,21): error TS18048: 'page.photos' is possibly 'undefined'.
+app/book/print/2up/page.tsx(194,60): error TS18048: 'page.photos' is possibly 'undefined'.
+app/book/print/2up/page.tsx(351,26): error TS7006: Parameter 'story' implicitly has an 'any' type.
+app/book/print/2up/page.tsx(396,20): error TS2345: Argument of type '[BookPage, BookPage | null][]' is not assignable to parameter of type 'SetStateAction<BookPage[][]>'.
+  Type '[BookPage, BookPage | null][]' is not assignable to type 'BookPage[][]'.
+    Type '[BookPage, BookPage | null]' is not assignable to type 'BookPage[]'.
+      Type 'BookPage | null' is not assignable to type 'BookPage'.
+        Type 'null' is not assignable to type 'BookPage'.
+app/book/print/trim/page.tsx(310,26): error TS7006: Parameter 'story' implicitly has an 'any' type.
+app/family/page.tsx(777,54): error TS2339: Property 'permissionLevel' does not exist on type 'FamilyMember'.
+app/family/page.tsx(778,41): error TS2339: Property 'permissionLevel' does not exist on type 'FamilyMember'.
+app/family/page.tsx(795,43): error TS2339: Property 'permissionLevel' does not exist on type 'FamilyMember'.
+app/gift-plans/page.tsx(266,21): error TS17001: JSX elements cannot have multiple attributes with the same name.
+app/interview-chat-v2/page.tsx(257,9): error TS2820: Type '"ai-question"' is not assignable to type 'MessageType'. Did you mean '"question"'?
+app/interview-chat-v2/page.tsx(262,9): error TS2322: Type '"ai"' is not assignable to type '"user" | "system" | "hw"'.
+app/memory-box/page.tsx(594,17): error TS2322: Type '(question?: string) => void' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+  Types of parameters 'question' and 'event' are incompatible.
+    Type 'MouseEvent<HTMLButtonElement, MouseEvent>' is not assignable to type 'string'.
+app/memory-box/page.tsx(609,22): error TS2352: Conversion of type '{ id: string; title: string; content: string; year_of_event: number | null; user_birth_year: number | null; audio_duration: number | null; audio_url: string | null; cover_photo_url: string; show_in_timeline: boolean; include_in_book: boolean; is_favorite: boolean; }' to type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ id: string; title: string; content: string; year_of_event: number | null; user_birth_year: number | null; audio_duration: number | null; audio_url: string | null; cover_photo_url: string; show_in_timeline: boolean; include_in_book: boolean; is_favorite: boolean; }' is missing the following properties from type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }': createdAt, userId, audioUrl, transcription, and 22 more.
+app/memory-box/page.tsx(648,49): error TS2339: Property 'transform' does not exist on type '{ id: string; url: string; isHero?: boolean | undefined; }'.
+app/profile/page.tsx(131,22): error TS2339: Property 'user' does not exist on type '{}'.
+app/profile/page.tsx(132,35): error TS2339: Property 'user' does not exist on type '{}'.
+app/profile/page.tsx(146,44): error TS2339: Property 'ai_processing_enabled' does not exist on type '{}'.
+app/profile/page.tsx(334,7): error TS2353: Object literal may only specify known properties, and 'profilePhotoUrl' does not exist in type '{ name: string; birthYear: number; bio?: string | undefined; }'.
+app/profile/page.tsx(553,40): error TS2339: Property 'stories' does not exist on type '{}'.
+app/profile/page.tsx(559,39): error TS2339: Property 'stories' does not exist on type '{}'.
+app/profile/page.tsx(560,46): error TS2339: Property 'stories' does not exist on type '{}'.
+app/profile/page.tsx(569,44): error TS2339: Property 'user' does not exist on type '{}'.
+app/prompts-old/page.tsx(93,14): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+app/prompts-old/page.tsx(94,14): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+app/prompts-old/page.tsx(375,23): error TS2322: Type '(id: string, text: string, source: "ai" | "catalog", category?: string) => void' is not assignable to type '(id: string, text: string, source: "ai" | "family" | "catalog", category?: string | undefined) => void'.
+  Types of parameters 'source' and 'source' are incompatible.
+    Type '"ai" | "family" | "catalog"' is not assignable to type '"ai" | "catalog"'.
+      Type '"family"' is not assignable to type '"ai" | "catalog"'.
+app/prompts-old/page.tsx(376,23): error TS2322: Type '(id: string, source: "ai" | "catalog") => void' is not assignable to type '(id: string, source: "ai" | "family" | "catalog") => void'.
+  Types of parameters 'source' and 'source' are incompatible.
+    Type '"ai" | "family" | "catalog"' is not assignable to type '"ai" | "catalog"'.
+      Type '"family"' is not assignable to type '"ai" | "catalog"'.
+app/prompts-old/page.tsx(436,21): error TS2322: Type '(id: string, text: string, source: "ai" | "catalog", category?: string) => void' is not assignable to type '(id: string, text: string, source: "ai" | "family" | "catalog", category?: string | undefined) => void'.
+  Types of parameters 'source' and 'source' are incompatible.
+    Type '"ai" | "family" | "catalog"' is not assignable to type '"ai" | "catalog"'.
+      Type '"family"' is not assignable to type '"ai" | "catalog"'.
+app/prompts-old/page.tsx(437,21): error TS2322: Type '(id: string, text: string, source: "ai" | "catalog", category?: string) => void' is not assignable to type '(id: string, text: string, source: "ai" | "family" | "catalog", category?: string | undefined) => void'.
+  Types of parameters 'source' and 'source' are incompatible.
+    Type '"ai" | "family" | "catalog"' is not assignable to type '"ai" | "catalog"'.
+      Type '"family"' is not assignable to type '"ai" | "catalog"'.
+app/prompts-old/page.tsx(438,21): error TS2322: Type '(id: string, source: "ai" | "catalog") => void' is not assignable to type '(id: string, source: "ai" | "family" | "catalog") => void'.
+  Types of parameters 'source' and 'source' are incompatible.
+    Type '"ai" | "family" | "catalog"' is not assignable to type '"ai" | "catalog"'.
+      Type '"family"' is not assignable to type '"ai" | "catalog"'.
+app/prompts-old/page.tsx(492,23): error TS2322: Type '(id: string, text: string, source: "ai" | "catalog", category?: string) => void' is not assignable to type '(id: string, text: string, source: "ai" | "family" | "catalog", category?: string | undefined) => void'.
+  Types of parameters 'source' and 'source' are incompatible.
+    Type '"ai" | "family" | "catalog"' is not assignable to type '"ai" | "catalog"'.
+      Type '"family"' is not assignable to type '"ai" | "catalog"'.
+app/prompts-old/page.tsx(493,23): error TS2322: Type '(id: string, text: string, source: "ai" | "catalog", category?: string) => void' is not assignable to type '(id: string, text: string, source: "ai" | "family" | "catalog", category?: string | undefined) => void'.
+  Types of parameters 'source' and 'source' are incompatible.
+    Type '"ai" | "family" | "catalog"' is not assignable to type '"ai" | "catalog"'.
+      Type '"family"' is not assignable to type '"ai" | "catalog"'.
+app/prompts-old/page.tsx(494,23): error TS2322: Type '(id: string, source: "ai" | "catalog") => void' is not assignable to type '(id: string, source: "ai" | "family" | "catalog") => void'.
+  Types of parameters 'source' and 'source' are incompatible.
+    Type '"ai" | "family" | "catalog"' is not assignable to type '"ai" | "catalog"'.
+      Type '"family"' is not assignable to type '"ai" | "catalog"'.
+app/prompts-old/page.tsx(579,23): error TS2322: Type '(id: string, text: string, source: "ai" | "catalog", category?: string) => void' is not assignable to type '(id: string, text: string, source: "ai" | "family" | "catalog", category?: string | undefined) => void'.
+  Types of parameters 'source' and 'source' are incompatible.
+    Type '"ai" | "family" | "catalog"' is not assignable to type '"ai" | "catalog"'.
+      Type '"family"' is not assignable to type '"ai" | "catalog"'.
+app/prompts-old/page.tsx(580,23): error TS2322: Type '(id: string, text: string, source: "ai" | "catalog", category?: string) => void' is not assignable to type '(id: string, text: string, source: "ai" | "family" | "catalog", category?: string | undefined) => void'.
+  Types of parameters 'source' and 'source' are incompatible.
+    Type '"ai" | "family" | "catalog"' is not assignable to type '"ai" | "catalog"'.
+      Type '"family"' is not assignable to type '"ai" | "catalog"'.
+app/prompts-old/page.tsx(581,23): error TS2322: Type '(id: string, source: "ai" | "catalog") => void' is not assignable to type '(id: string, source: "ai" | "family" | "catalog") => void'.
+  Types of parameters 'source' and 'source' are incompatible.
+    Type '"ai" | "family" | "catalog"' is not assignable to type '"ai" | "catalog"'.
+      Type '"family"' is not assignable to type '"ai" | "catalog"'.
+app/prompts/page.tsx(419,14): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+app/prompts/page.tsx(420,14): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+app/prompts/page.tsx(427,40): error TS2345: Argument of type '{ method: string; body: string; }' is not assignable to parameter of type 'string'.
+app/recording/page.tsx(236,45): error TS2339: Property 'isReRecording' does not exist on type 'NavPayload'.
+app/recording/page.tsx(237,39): error TS2339: Property 'storyId' does not exist on type 'NavPayload'.
+app/recording/page.tsx(238,44): error TS2339: Property 'returnToEdit' does not exist on type 'NavPayload'.
+app/recording/page.tsx(243,18): error TS2339: Property 'isReRecording' does not exist on type 'NavPayload'.
+app/recording/page.tsx(402,7): error TS2353: Object literal may only specify known properties, and 'formattedContent' does not exist in type 'NavPayload'.
+app/recording/page.tsx(402,64): error TS2339: Property 'formattedContent' does not exist on type 'NavPayload'.
+app/recording/page.tsx(497,30): error TS2551: Property 'stopRecording' does not exist on type 'AudioRecorderHandle'. Did you mean 'isRecording'?
+app/recording/page.tsx(534,39): error TS2339: Property 'size' does not exist on type '{ blob: Blob | null; chunkCount: number; }'.
+app/recording/page.tsx(539,51): error TS2345: Argument of type '{ blob: Blob | null; chunkCount: number; }' is not assignable to parameter of type 'Blob'.
+  Type '{ blob: Blob | null; chunkCount: number; }' is missing the following properties from type 'Blob': size, type, arrayBuffer, bytes, and 3 more.
+app/recording/page.tsx(793,9): error TS2353: Object literal may only specify known properties, and 'formattedContent' does not exist in type 'NavPayload'.
+app/recording/page.tsx(821,7): error TS2353: Object literal may only specify known properties, and 'formattedContent' does not exist in type 'NavPayload'.
+app/recording/page.tsx(873,7): error TS2353: Object literal may only specify known properties, and 'formattedContent' does not exist in type 'NavPayload'.
+app/review/book-style/page.tsx(131,36): error TS2339: Property 'returnPath' does not exist on type 'NavPayload'.
+app/review/book-style/page.tsx(152,26): error TS2339: Property 'returnPath' does not exist on type 'NavPayload'.
+app/review/book-style/page.tsx(153,38): error TS2339: Property 'returnPath' does not exist on type 'NavPayload'.
+app/review/book-style/page.tsx(905,7): error TS2322: Type 'string | number' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'.
+app/review/book-style/page.tsx(928,33): error TS2339: Property 'lessonLearned' does not exist on type 'NavPayload'.
+app/review/book-style/page.tsx(930,28): error TS2551: Property 'birth_year' does not exist on type 'User'. Did you mean 'birthYear'?
+app/timeline-test/page.tsx(993,48): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(996,41): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1007,5): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1012,10): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1012,25): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1025,10): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1025,25): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1055,37): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1056,45): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1067,12): error TS18047: 'normalizedStoryYear' is possibly 'null'.
+app/timeline-test/page.tsx(1067,34): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline-test/page.tsx(1084,55): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1171,20): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1352,57): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1357,24): error TS18047: 'normalizedStoryYear' is possibly 'null'.
+app/timeline-test/page.tsx(1357,46): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline-test/page.tsx(1373,23): error TS2531: Object is possibly 'null'.
+app/timeline-test/page.tsx(1373,52): error TS2531: Object is possibly 'null'.
+app/timeline-test/page.tsx(1389,48): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1391,55): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1402,28): error TS18047: 'storyYear' is possibly 'null'.
+app/timeline-test/page.tsx(1402,41): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline-test/page.tsx(1418,56): error TS18047: 'user' is possibly 'null'.
+app/timeline-test/page.tsx(1433,32): error TS18047: 'storyYear' is possibly 'null'.
+app/timeline-test/page.tsx(1433,44): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline-test/page.tsx(1444,25): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+app/timeline-test/page.tsx(1456,83): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline-test/page.tsx(1458,34): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline-test/page.tsx(1500,19): error TS2322: Type '(el: HTMLElement | null) => HTMLElement | null' is not assignable to type 'Ref<HTMLElement> | undefined'.
+  Type '(el: HTMLElement | null) => HTMLElement | null' is not assignable to type '(instance: HTMLElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+app/timeline/page.backup.tsx(734,29): error TS2339: Property 'name' does not exist on type 'Trait'.
+app/timeline/page.backup.tsx(745,16): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+app/timeline/page.backup.tsx(746,17): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+app/timeline/page.backup.tsx(747,44): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+app/timeline/page.backup.tsx(1110,12): error TS18047: 'normalizedStoryYear' is possibly 'null'.
+app/timeline/page.backup.tsx(1110,34): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.backup.tsx(1252,24): error TS18047: 'normalizedStoryYear' is possibly 'null'.
+app/timeline/page.backup.tsx(1252,46): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.backup.tsx(1268,23): error TS2531: Object is possibly 'null'.
+app/timeline/page.backup.tsx(1268,52): error TS2531: Object is possibly 'null'.
+app/timeline/page.backup.tsx(1297,28): error TS18047: 'storyYear' is possibly 'null'.
+app/timeline/page.backup.tsx(1297,41): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.backup.tsx(1328,32): error TS18047: 'storyYear' is possibly 'null'.
+app/timeline/page.backup.tsx(1328,44): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.backup.tsx(1339,25): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+app/timeline/page.backup.tsx(1351,83): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.backup.tsx(1353,34): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.backup.tsx(1412,23): error TS2322: Type '(el: HTMLElement | null) => HTMLElement | null' is not assignable to type 'Ref<HTMLElement> | undefined'.
+  Type '(el: HTMLElement | null) => HTMLElement | null' is not assignable to type '(instance: HTMLElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+app/timeline/page.old.tsx(734,29): error TS2339: Property 'name' does not exist on type 'Trait'.
+app/timeline/page.old.tsx(745,16): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+app/timeline/page.old.tsx(746,17): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+app/timeline/page.old.tsx(747,44): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+app/timeline/page.old.tsx(1110,12): error TS18047: 'normalizedStoryYear' is possibly 'null'.
+app/timeline/page.old.tsx(1110,34): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.old.tsx(1252,24): error TS18047: 'normalizedStoryYear' is possibly 'null'.
+app/timeline/page.old.tsx(1252,46): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.old.tsx(1268,23): error TS2531: Object is possibly 'null'.
+app/timeline/page.old.tsx(1268,52): error TS2531: Object is possibly 'null'.
+app/timeline/page.old.tsx(1297,28): error TS18047: 'storyYear' is possibly 'null'.
+app/timeline/page.old.tsx(1297,41): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.old.tsx(1328,32): error TS18047: 'storyYear' is possibly 'null'.
+app/timeline/page.old.tsx(1328,44): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.old.tsx(1339,25): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+app/timeline/page.old.tsx(1351,83): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.old.tsx(1353,34): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+app/timeline/page.old.tsx(1412,23): error TS2322: Type '(el: HTMLElement | null) => HTMLElement | null' is not assignable to type 'Ref<HTMLElement> | undefined'.
+  Type '(el: HTMLElement | null) => HTMLElement | null' is not assignable to type '(instance: HTMLElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+archive/2025-01-19-pre-integration/components/RecordModal.tsx(24,52): error TS2307: Cannot find module './AudioRecorder' or its corresponding type declarations.
+archive/2025-01-19-pre-integration/components/RecordModal.tsx(25,33): error TS2307: Cannot find module './VoiceVisualizer' or its corresponding type declarations.
+archive/2025-01-19-pre-integration/components/RecordModal.tsx(26,38): error TS2307: Cannot find module './VoiceRecordingButton' or its corresponding type declarations.
+archive/2025-01-19-pre-integration/components/RecordModal.tsx(157,23): error TS2339: Property 'workEthic' does not exist on type '{}'.
+archive/2025-01-19-pre-integration/components/RecordModal.tsx(163,23): error TS2339: Property 'familyOrientation' does not exist on type '{}'.
+archive/2025-01-19-pre-integration/components/RecordModal.tsx(169,23): error TS2339: Property 'riskTolerance' does not exist on type '{}'.
+archive/2025-01-19-pre-integration/components/RecordModal.tsx(176,45): error TS2339: Property 'birthYear' does not exist on type '{}'.
+archive/2025-01-19-pre-integration/components/RecordModal.tsx(578,9): error TS2353: Object literal may only specify known properties, and 'formattedContent' does not exist in type '{ audioBlob: Blob; transcription?: string | undefined; wisdomClip?: string | undefined; followUpQuestions?: string[] | undefined; title?: string | undefined; year?: number | undefined; duration?: number | undefined; }'.
+archive/2025-01-19-pre-integration/components/RecordModal.tsx(751,9): error TS2353: Object literal may only specify known properties, and 'formattedContent' does not exist in type '{ audioBlob: Blob; transcription?: string | undefined; wisdomClip?: string | undefined; followUpQuestions?: string[] | undefined; title?: string | undefined; year?: number | undefined; duration?: number | undefined; }'.
+archive/2025-01-19-pre-integration/components/RecordModal.tsx(950,43): error TS7006: Parameter 'remaining' implicitly has an 'any' type.
+archive/2025-01-19-pre-integration/components/RecordModal.tsx(960,33): error TS2322: Type '"warning"' is not assignable to type '"default" | "destructive" | null | undefined'.
+archive/2025-01-19-pre-integration/hooks/use-record-modal.tsx(104,9): error TS2353: Object literal may only specify known properties, and 'selectedPrompt' does not exist in type 'NavPayload'.
+components/AdminSidebar.tsx(111,37): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+components/AdminSidebar.tsx(118,22): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+components/AgreementModal.tsx(138,46): error TS2322: Type '{ children: Element[]; className: string; hideClose: true; }' is not assignable to type 'IntrinsicAttributes & Omit<DialogContentProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<...>'.
+  Property 'hideClose' does not exist on type 'IntrinsicAttributes & Omit<DialogContentProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<...>'.
+components/auth/PasskeyAuth.tsx(15,8): error TS2307: Cannot find module '@simplewebauthn/types' or its corresponding type declarations.
+components/BookNavigation.tsx(184,14): error TS2304: Cannot find name 'X'.
+components/BookStyleReview.tsx(588,25): error TS2322: Type '{ ref: RefObject<AudioRecorderHandle | null>; onRecordingComplete: (audioBlob: Blob) => Promise<void>; onCancel: () => void; }' is not assignable to type 'IntrinsicAttributes & AudioRecorderProps & RefAttributes<AudioRecorderHandle>'.
+  Property 'onCancel' does not exist on type 'IntrinsicAttributes & AudioRecorderProps & RefAttributes<AudioRecorderHandle>'.
+components/BookStyleReview.tsx(606,25): error TS2322: Type 'RefObject<AudioRecorderHandle | null>' is not assignable to type 'RefObject<AudioRecorderHandle>'.
+  Type 'AudioRecorderHandle | null' is not assignable to type 'AudioRecorderHandle'.
+    Type 'null' is not assignable to type 'AudioRecorderHandle'.
+components/BookStyleReview.tsx(630,57): error TS2551: Property 'stopRecording' does not exist on type 'AudioRecorderHandle'. Did you mean 'isRecording'?
+components/BottomNavigation.tsx(2,29): error TS2307: Cannot find module 'wouter' or its corresponding type declarations.
+components/FloatingInsightCard.tsx(188,13): error TS2322: Type '{ hidden: { x: number; opacity: number; }; visible: { x: number; opacity: number; transition: { duration: number; ease: string; }; }; exit: { x: number; opacity: number; transition: { duration: number; ease: string; }; }; } | { ...; }' is not assignable to type 'Variants | undefined'.
+  Type '{ hidden: { x: number; opacity: number; }; visible: { x: number; opacity: number; transition: { duration: number; ease: string; }; }; exit: { x: number; opacity: number; transition: { duration: number; ease: string; }; }; }' is not assignable to type 'Variants'.
+    Property 'visible' is incompatible with index signature.
+      Type '{ x: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'Variant'.
+        Type '{ x: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+          Type '{ x: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues | undefined; }'.
+            Types of property 'transition' are incompatible.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any> | undefined'.
+                Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                  Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                    Types of property 'ease' are incompatible.
+                      Type 'string' is not assignable to type 'Easing | Easing[] | undefined'.
+components/MultiPhotoUploader.tsx(367,17): error TS2322: Type '(el: HTMLInputElement | null) => HTMLInputElement | null' is not assignable to type 'Ref<HTMLInputElement> | undefined'.
+  Type '(el: HTMLInputElement | null) => HTMLInputElement | null' is not assignable to type '(instance: HTMLInputElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLInputElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+components/RecordModal.tsx(171,23): error TS2339: Property 'workEthic' does not exist on type '{}'.
+components/RecordModal.tsx(177,23): error TS2339: Property 'familyOrientation' does not exist on type '{}'.
+components/RecordModal.tsx(183,23): error TS2339: Property 'riskTolerance' does not exist on type '{}'.
+components/RecordModal.tsx(190,45): error TS2339: Property 'birthYear' does not exist on type '{}'.
+components/RecordModal.tsx(328,68): error TS2339: Property 'size' does not exist on type '{ blob: Blob | null; chunkCount: number; }'.
+components/RecordModal.tsx(330,39): error TS2339: Property 'size' does not exist on type '{ blob: Blob | null; chunkCount: number; }'.
+components/RecordModal.tsx(343,37): error TS2345: Argument of type '{ blob: Blob | null; chunkCount: number; }' is not assignable to parameter of type 'Blob'.
+  Type '{ blob: Blob | null; chunkCount: number; }' is missing the following properties from type 'Blob': size, type, arrayBuffer, bytes, and 3 more.
+components/RecordModal.tsx(1224,33): error TS2322: Type '"warning"' is not assignable to type '"default" | "destructive" | null | undefined'.
+components/RecordModal.tsx(1287,29): error TS2322: Type 'RefObject<AudioRecorderHandle | null>' is not assignable to type 'RefObject<AudioRecorderHandle>'.
+  Type 'AudioRecorderHandle | null' is not assignable to type 'AudioRecorderHandle'.
+    Type 'null' is not assignable to type 'AudioRecorderHandle'.
+components/timeline/TimelineDesktop.backup.tsx(203,56): error TS18047: 'normalizedStoryYear' is possibly 'null'.
+components/timeline/TimelineDesktop.backup.tsx(558,18): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.backup.tsx(558,34): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.backup.tsx(560,42): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.backup.tsx(672,16): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.backup.tsx(672,32): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.backup.tsx(673,38): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.backup.tsx(894,33): error TS2367: This comparison appears to be unintentional because the types '-32' and '0' have no overlap.
+components/timeline/TimelineDesktop.backup.tsx(954,12): error TS18047: 'yearA' is possibly 'null'.
+components/timeline/TimelineDesktop.backup.tsx(954,20): error TS18047: 'yearB' is possibly 'null'.
+components/timeline/TimelineDesktop.backup.tsx(961,31): error TS18047: 'year' is possibly 'null'.
+components/timeline/TimelineDesktop.tsx(215,56): error TS18047: 'normalizedStoryYear' is possibly 'null'.
+components/timeline/TimelineDesktop.tsx(578,18): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(578,34): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(580,42): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(692,16): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(692,32): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(694,40): error TS2339: Property 'traits' does not exist on type 'Story'.
+components/timeline/TimelineDesktop.tsx(925,33): error TS2367: This comparison appears to be unintentional because the types '163' and '0' have no overlap.
+components/timeline/TimelineDesktop.tsx(996,12): error TS18047: 'yearA' is possibly 'null'.
+components/timeline/TimelineDesktop.tsx(996,20): error TS18047: 'yearB' is possibly 'null'.
+components/timeline/TimelineDesktop.tsx(1003,31): error TS18047: 'year' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(823,64): error TS18047: 'y' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(823,69): error TS18047: 'by' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(844,64): error TS18047: 'y' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(844,69): error TS18047: 'by' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(860,29): error TS2339: Property 'name' does not exist on type 'Trait'.
+components/timeline/TimelineMobile.tsx(871,16): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+components/timeline/TimelineMobile.tsx(872,17): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+components/timeline/TimelineMobile.tsx(873,44): error TS2339: Property 'updatedAt' does not exist on type 'Story'.
+components/timeline/TimelineMobile.tsx(1209,50): error TS2345: Argument of type 'GhostPrompt[] | { year: number; isGhost: boolean; id: string; key: string; title: string; prompt: string; offsetYears: number; }[]' is not assignable to parameter of type 'GhostPrompt[]'.
+  Type '{ year: number; isGhost: boolean; id: string; key: string; title: string; prompt: string; offsetYears: number; }[]' is not assignable to type 'GhostPrompt[]'.
+    Property 'age' is missing in type '{ year: number; isGhost: boolean; id: string; key: string; title: string; prompt: string; offsetYears: number; }' but required in type 'GhostPrompt'.
+components/timeline/TimelineMobile.tsx(1234,14): error TS18047: 'normalizedStoryYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1234,36): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1273,18): error TS2531: Object is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1273,47): error TS2531: Object is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1293,16): error TS18047: 'storyYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1293,29): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1309,20): error TS18047: 'storyYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1309,32): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1315,15): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+components/timeline/TimelineMobile.tsx(1320,24): error TS18047: 'normalizedBirthYear' is possibly 'null'.
+components/timeline/TimelineMobile.tsx(1553,17): error TS2322: Type '(el: HTMLElement | null) => HTMLElement | null' is not assignable to type 'Ref<HTMLElement> | undefined'.
+  Type '(el: HTMLElement | null) => HTMLElement | null' is not assignable to type '(instance: HTMLElement | null) => void | (() => VoidOrUndefinedOnly)'.
+    Type 'HTMLElement | null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+      Type 'null' is not assignable to type 'void | (() => VoidOrUndefinedOnly)'.
+components/ui/aspect-ratio.tsx(1,39): error TS2307: Cannot find module '@radix-ui/react-aspect-ratio' or its corresponding type declarations.
+components/ui/calendar.tsx(3,27): error TS2307: Cannot find module 'react-day-picker' or its corresponding type declarations.
+components/ui/calendar.tsx(55,22): error TS7031: Binding element 'className' implicitly has an 'any' type.
+components/ui/calendar.tsx(58,23): error TS7031: Binding element 'className' implicitly has an 'any' type.
+components/ui/chart.tsx(119,7): error TS2339: Property 'payload' does not exist on type 'Omit<Omit<Props<ValueType, NameType>, PropertiesReadFromContext> & { active?: boolean | undefined; includeHidden?: boolean | undefined; ... 17 more ...; axisId?: AxisId | undefined; } & ClassAttributes<...> & HTMLAttributes<...> & { ...; }, "ref">'.
+components/ui/chart.tsx(124,7): error TS2339: Property 'label' does not exist on type 'Omit<Omit<Props<ValueType, NameType>, PropertiesReadFromContext> & { active?: boolean | undefined; includeHidden?: boolean | undefined; ... 17 more ...; axisId?: AxisId | undefined; } & ClassAttributes<...> & HTMLAttributes<...> & { ...; }, "ref">'.
+components/ui/chart.tsx(188,25): error TS7006: Parameter 'item' implicitly has an 'any' type.
+components/ui/chart.tsx(188,31): error TS7006: Parameter 'index' implicitly has an 'any' type.
+components/ui/chart.tsx(264,41): error TS2344: Type '"payload" | "verticalAlign"' does not satisfy the constraint '"string" | "d" | "k" | "r" | "x" | "y" | "z" | "version" | "filter" | "fill" | "values" | "type" | "name" | "children" | "min" | "max" | "id" | "mode" | "dur" | "in" | "method" | "end" | ... 424 more ... | "onBBoxUpdate"'.
+  Type '"payload"' is not assignable to type '"string" | "d" | "k" | "r" | "x" | "y" | "z" | "version" | "filter" | "fill" | "values" | "type" | "name" | "children" | "min" | "max" | "id" | "mode" | "dur" | "in" | "method" | "end" | ... 424 more ... | "onBBoxUpdate"'.
+components/ui/chart.tsx(275,19): error TS2339: Property 'length' does not exist on type '{}'.
+components/ui/chart.tsx(288,18): error TS2339: Property 'map' does not exist on type '{}'.
+components/ui/chart.tsx(288,23): error TS7006: Parameter 'item' implicitly has an 'any' type.
+components/ui/command.tsx(3,45): error TS2307: Cannot find module 'cmdk' or its corresponding type declarations.
+components/ui/context-menu.tsx(2,39): error TS2307: Cannot find module '@radix-ui/react-context-menu' or its corresponding type declarations.
+components/ui/hover-card.tsx(4,37): error TS2307: Cannot find module '@radix-ui/react-hover-card' or its corresponding type declarations.
+components/ui/input-otp.tsx(2,43): error TS2307: Cannot find module 'input-otp' or its corresponding type declarations.
+components/ui/input-otp.tsx(36,44): error TS18046: 'inputOTPContext' is of type 'unknown'.
+components/ui/MemoryListItem.tsx(31,41): error TS2339: Property 'audio_duration' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(33,11): error TS2339: Property 'year_of_event' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(33,34): error TS2339: Property 'user_birth_year' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(34,22): error TS2339: Property 'year_of_event' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(34,43): error TS2339: Property 'user_birth_year' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(38,26): error TS2339: Property 'cover_photo_url' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(87,20): error TS2339: Property 'year_of_event' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(88,39): error TS2339: Property 'year_of_event' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(106,20): error TS2339: Property 'show_in_timeline' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'.
+components/ui/MemoryListItem.tsx(114,20): error TS2551: Property 'include_in_book' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'. Did you mean 'includeInBook'?
+components/ui/MemoryListItem.tsx(122,20): error TS2551: Property 'is_favorite' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'. Did you mean 'isFavorite'?
+components/ui/MemoryListItem.tsx(193,22): error TS2551: Property 'is_favorite' does not exist on type '{ id: string; createdAt: Date | null; userId: string; title: string; audioUrl: string | null; transcription: string | null; durationSeconds: number | null; wisdomClipUrl: string | null; ... 19 more ...; extractedFacts: { ...; } | null; }'. Did you mean 'isFavorite'?
+components/ui/menubar.tsx(4,35): error TS2307: Cannot find module '@radix-ui/react-menubar' or its corresponding type declarations.
+components/ui/navigation-menu.tsx(2,42): error TS2307: Cannot find module '@radix-ui/react-navigation-menu' or its corresponding type declarations.
+components/ui/popover.tsx(2,35): error TS2307: Cannot find module '@radix-ui/react-popover' or its corresponding type declarations.
+components/ui/progress.tsx(4,36): error TS2307: Cannot find module '@radix-ui/react-progress' or its corresponding type declarations.
+components/ui/resizable.tsx(4,37): error TS2307: Cannot find module 'react-resizable-panels' or its corresponding type declarations.
+components/ui/scroll-area.tsx(2,38): error TS2307: Cannot find module '@radix-ui/react-scroll-area' or its corresponding type declarations.
+components/ui/toggle-group.tsx(4,39): error TS2307: Cannot find module '@radix-ui/react-toggle-group' or its corresponding type declarations.
+components/ui/toggle.tsx(2,34): error TS2307: Cannot find module '@radix-ui/react-toggle' or its corresponding type declarations.
+hooks/use-record-modal.tsx(104,9): error TS2353: Object literal may only specify known properties, and 'selectedPrompt' does not exist in type 'NavPayload'.
+hooks/use-recording-wizard.tsx(42,26): error TS2551: Property 'birth_year' does not exist on type 'User'. Did you mean 'birthYear'?
+hooks/usePhotoUpload.ts(3,22): error TS2459: Module '"../lib/queryClient"' declares 'getApiUrl' locally, but it is not exported.
+lib/__tests__/promptQuality.test.ts(18,1): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(19,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(20,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(21,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(22,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(23,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(24,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(25,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(26,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(27,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(28,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(29,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(32,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(33,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(34,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(35,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(36,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(40,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(41,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(42,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(43,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(44,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(45,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(48,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(49,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(50,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(51,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(52,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(55,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(56,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(57,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(58,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(61,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(62,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(63,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(64,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(67,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(68,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(69,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(70,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(74,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(75,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(76,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(77,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(78,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(79,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(84,1): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(85,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(86,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(87,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(88,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(89,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(90,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(93,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(94,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(95,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(96,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(97,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(100,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(101,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(102,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(105,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(106,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(107,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(108,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(109,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(112,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(114,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(117,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(118,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(119,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(120,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(121,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(125,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(126,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(127,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(128,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(129,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(132,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(133,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(134,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(135,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(138,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(139,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(140,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(143,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(144,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(145,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(148,5): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(150,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(151,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(156,1): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(157,3): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(163,5): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(166,3): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(172,5): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(175,3): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(181,5): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(184,3): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(188,5): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(191,3): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(199,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(200,7): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(205,1): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(206,3): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(209,5): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(213,5): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(216,5): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(219,3): error TS2582: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+lib/__tests__/promptQuality.test.ts(222,5): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(226,5): error TS2304: Cannot find name 'expect'.
+lib/__tests__/promptQuality.test.ts(230,5): error TS2304: Cannot find name 'expect'.
+lib/backup/promptGeneration copy.ts(9,65): error TS2307: Cannot find module './sanitization' or its corresponding type declarations.
+lib/backup/promptGeneration copy.ts(191,18): error TS18046: 'match' is of type 'unknown'.
+lib/backup/promptGeneration copy.ts(202,18): error TS18046: 'match' is of type 'unknown'.
+lib/backup/promptGeneration copy.ts(204,24): error TS18046: 'match' is of type 'unknown'.
+lib/backup/promptGeneration copy.ts(204,39): error TS18046: 'match' is of type 'unknown'.
+lib/backup/promptGeneration copy.ts(226,21): error TS18046: 'match' is of type 'unknown'.
+lib/backup/promptGeneration copy.ts(249,19): error TS18046: 'match' is of type 'unknown'.
+lib/scopeEnforcer.ts(55,46): error TS1501: This regular expression flag is only available when targeting 'es2018' or later.
+lib/tier3AnalysisV2.ts(75,7): error TS2322: Type 'string | undefined' is not assignable to type '"low" | "medium" | "high" | undefined'.
+  Type 'string' is not assignable to type '"low" | "medium" | "high" | undefined'.
+lib/webauthn-config.ts(30,5): error TS2322: Type 'string' is not assignable to type 'Uint8Array<ArrayBuffer>'.
+lib/whisperGeneration.ts(60,7): error TS2322: Type 'string | undefined' is not assignable to type '"low" | "medium" | "high" | undefined'.
+  Type 'string' is not assignable to type '"low" | "medium" | "high" | undefined'.
+scripts/cleanupPrompts.ts(12,10): error TS2724: '"../lib/promptQuality"' has no exported member named 'assessPromptQuality'. Did you mean 'scorePromptQuality'?
+scripts/cleanupPrompts.ts(37,65): error TS2339: Property 'reason' does not exist on type 'QualityIssue'.
+scripts/cleanupPrompts.ts(48,46): error TS2339: Property 'wordCount' does not exist on type 'QualityReport'.
+scripts/cleanupPrompts.ts(53,40): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'contextNote' does not exist in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'userId' does not exist in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }[]'.
+scripts/trigger-prompt-regeneration.ts(119,16): error TS2339: Property 'characterInsights' does not exist on type 'Tier3Result'.
+scripts/trigger-prompt-regeneration.ts(121,39): error TS2339: Property 'characterInsights' does not exist on type 'Tier3Result'.
+scripts/trigger-prompt-regeneration.ts(121,68): error TS7006: Parameter 't' implicitly has an 'any' type.
+scripts/trigger-prompt-regeneration.ts(122,38): error TS2339: Property 'characterInsights' does not exist on type 'Tier3Result'.
+tests/setup.ts(20,1): error TS2304: Cannot find name 'beforeEach'.
+tests/utils.ts(11,31): error TS2345: Argument of type '{ headers: { authorization: string; } | { append(name: string, value: string): void; delete(name: string): void; get(name: string): string | null; getSetCookie(): string[]; ... 7 more ...; authorization: string; } | { ...; } | { ...; }; ... 13 more ...; next?: NextFetchRequestConfig | undefined; }' is not assignable to parameter of type 'RequestInit'.
+  Types of property 'signal' are incompatible.
+    Type 'AbortSignal | null | undefined' is not assignable to type 'AbortSignal | undefined'.
+      Type 'null' is not assignable to type 'AbortSignal | undefined'.

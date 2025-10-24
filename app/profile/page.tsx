@@ -128,8 +128,8 @@ export default function Profile() {
 
   // Populate form fields from loaded profile data
   useEffect(() => {
-    if (profileData?.user) {
-      const profile = profileData.user;
+    if ((profileData as any)?.user) {
+      const profile = (profileData as any).user;
       setBio(profile.bio || "");
       setProfilePhoto(profile.profilePhotoUrl || "");
       setEmailNotifications(profile.emailNotifications ?? true);
@@ -143,7 +143,7 @@ export default function Profile() {
   // Populate AI consent from API
   useEffect(() => {
     if (aiConsentData) {
-      setAiProcessingEnabled(aiConsentData.ai_processing_enabled ?? true);
+      setAiProcessingEnabled((aiConsentData as any).ai_processing_enabled ?? true);
     }
   }, [aiConsentData]);
 
@@ -152,6 +152,7 @@ export default function Profile() {
       name: string;
       birthYear: number;
       bio?: string;
+      profilePhotoUrl?: string;
     }) => {
       const response = await apiRequest("PATCH", "/api/user/profile", data);
       return response.json();
@@ -550,14 +551,14 @@ export default function Profile() {
                 <p>Loading story stats...</p>
               </div>
             )}
-            {storyStats && !storyStats.stories && (
+            {storyStats && !(storyStats as any).stories && (
               <div className="p-4 bg-red-100 rounded mb-4">
                 <p>Story stats loaded but no stories array found</p>
                 <pre>{JSON.stringify(storyStats, null, 2)}</pre>
               </div>
             )}
-            {storyStats && storyStats.stories && (
-              <MemoryMap stories={storyStats.stories} />
+            {storyStats && (storyStats as any).stories && (
+              <MemoryMap stories={(storyStats as any).stories} />
             )}
           </div>
         )}
@@ -566,7 +567,7 @@ export default function Profile() {
         {user && (
           <ProfileInterests
             userId={user.id}
-            initialInterests={profileData?.user?.profile_interests}
+            initialInterests={(profileData as any)?.user?.profile_interests}
           />
         )}
 

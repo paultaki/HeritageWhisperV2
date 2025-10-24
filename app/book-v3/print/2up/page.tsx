@@ -187,11 +187,11 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
                 onError={(e) =>
                   console.error(
                     "[Print 2up] Image failed to load:",
-                    page.photos[0].url,
+                    page.photos?.[0]?.url,
                   )
                 }
                 onLoad={() =>
-                  console.log("[Print 2up] Image loaded:", page.photos[0].url)
+                  console.log("[Print 2up] Image loaded:", page.photos?.[0]?.url)
                 }
               />
             </div>
@@ -250,7 +250,7 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
 function Print2UpPageContent() {
   const searchParams = useSearchParams();
   const [pages, setPages] = useState<BookPage[]>([]);
-  const [spreads, setSpreads] = useState<BookPage[][]>([]);
+  const [spreads, setSpreads] = useState<[BookPage, BookPage | null][]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -348,7 +348,7 @@ function Print2UpPageContent() {
 
         // Group by decade
         const decadeMap = new Map<string, Story[]>();
-        stories.forEach((story) => {
+        stories.forEach((story: Story) => {
           const year = parseInt(story.storyYear?.toString() || "0");
           if (year > 0) {
             const decadeKey = `${Math.floor(year / 10) * 10}s`;

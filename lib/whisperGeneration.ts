@@ -4,6 +4,7 @@
  * 
  * Uses GPT-5 at medium effort when enabled for deeper synthesis.
  */
+import { toSeverity } from "@/lib/typesafe";
 
 import { chat } from "./ai/gatewayClient";
 import { getModelConfig } from "./ai/modelConfig";
@@ -35,7 +36,7 @@ export async function generateWhisperForStory(story: Story): Promise<string> {
         {
           role: "system",
           content: `Generate ONE question showing you heard what they DIDN'T say.
-      
+
 Look for:
 - The emotion shown but not named
 - The person mentioned briefly who clearly mattered
@@ -45,7 +46,7 @@ Look for:
 
 NEVER:
 - Ask about facts or dates
-- Use psychology language  
+- Use psychology language
 - Reference multiple stories
 - Ask yes/no questions
 - Use generic nouns (girl, boy, man, woman, house, room)
@@ -57,7 +58,7 @@ The question should be under 30 words and feel like it comes from love.`,
           content: `Story from ${story.story_year}: ${story.transcript}`,
         },
       ],
-      reasoning_effort: modelConfig.reasoning_effort,
+      reasoning_effort: toSeverity(modelConfig.reasoning_effort),
       temperature: 0.7,
       max_tokens: 60,
     });

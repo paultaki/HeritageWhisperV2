@@ -10,7 +10,6 @@ import {
   familyActivity,
   activePrompts,
   promptHistory,
-  userPrompts,
   ghostPrompts,
   historicalContext,
   profiles,
@@ -125,7 +124,6 @@ export async function GET(request: NextRequest) {
       familyPromptsRecords,
       activePromptsRecords,
       promptHistoryRecords,
-      userPromptsRecords,
       ghostPromptsRecords,
       historicalContextRecords,
       profilesRecords,
@@ -175,9 +173,6 @@ export async function GET(request: NextRequest) {
 
       // Prompt history (archive)
       db.select().from(promptHistory).where(eq(promptHistory.userId, userId)),
-
-      // User prompts (catalog)
-      db.select().from(userPrompts).where(eq(userPrompts.userId, userId)),
 
       // Ghost prompts (legacy)
       db.select().from(ghostPrompts).where(eq(ghostPrompts.userId, userId)),
@@ -244,7 +239,7 @@ export async function GET(request: NextRequest) {
           id: prompt.id,
           promptText: prompt.promptText,
           tier: prompt.tier,
-          source: prompt.source,
+          source: (prompt as any).source,
           expiresAt: prompt.expiresAt,
           createdAt: prompt.createdAt,
         })),
@@ -252,24 +247,17 @@ export async function GET(request: NextRequest) {
           id: prompt.id,
           promptText: prompt.promptText,
           tier: prompt.tier,
-          source: prompt.source,
-          answeredStoryId: prompt.answeredStoryId,
-          answeredAt: prompt.answeredAt,
-          skippedAt: prompt.skippedAt,
-          archivedAt: prompt.archivedAt,
-        })),
-        catalog: userPromptsRecords.map((prompt) => ({
-          id: prompt.id,
-          promptText: prompt.promptText,
-          category: prompt.category,
-          isActive: prompt.isActive,
-          timesUsed: prompt.timesUsed,
+          source: (prompt as any).source,
+          answeredStoryId: (prompt as any).answeredStoryId,
+          answeredAt: (prompt as any).answeredAt,
+          skippedAt: (prompt as any).skippedAt,
+          archivedAt: (prompt as any).archivedAt,
         })),
         ghost: ghostPromptsRecords.map((prompt) => ({
           id: prompt.id,
           promptText: prompt.promptText,
           category: prompt.category,
-          usedAt: prompt.usedAt,
+          usedAt: (prompt as any).usedAt,
         })),
       },
 
@@ -277,17 +265,17 @@ export async function GET(request: NextRequest) {
       personalization: {
         profiles: profilesRecords.map((profile) => ({
           id: profile.id,
-          profileType: profile.profileType,
-          profileData: profile.profileData,
-          confidenceScore: profile.confidenceScore,
-          lastUpdated: profile.lastUpdated,
+          profileType: (profile as any).profileType,
+          profileData: (profile as any).profileData,
+          confidenceScore: (profile as any).confidenceScore,
+          lastUpdated: (profile as any).lastUpdated,
         })),
         historicalContext: historicalContextRecords.map((context) => ({
           id: context.id,
-          contextType: context.contextType,
-          contextData: context.contextData,
-          relevanceScore: context.relevanceScore,
-          createdAt: context.createdAt,
+          contextType: (context as any).contextType,
+          contextData: (context as any).contextData,
+          relevanceScore: (context as any).relevanceScore,
+          createdAt: (context as any).createdAt,
         })),
       },
 
@@ -335,7 +323,7 @@ export async function GET(request: NextRequest) {
         })),
         activity: familyActivityRecords.map((activity) => ({
           activityType: activity.activityType,
-          activityData: activity.activityData,
+          activityData: (activity as any).activityData,
           createdAt: activity.createdAt,
         })),
         prompts: Array.isArray(familyPromptsRecords)
@@ -394,7 +382,7 @@ export async function GET(request: NextRequest) {
           : (familyPromptsRecords as any).rows?.length || 0,
         sharedStoriesCount: sharedAccessRecords.owned.length,
         activePromptsCount: activePromptsRecords.length,
-        answeredPromptsCount: promptHistoryRecords.filter((p) => p.answeredAt)
+        answeredPromptsCount: promptHistoryRecords.filter((p) => (p as any).answeredAt)
           .length,
         passkeysCount: passkeysRecords.length,
       },

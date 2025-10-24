@@ -282,7 +282,7 @@ function PrintTrimPageContent() {
 
         // Group by decade
         const decadeMap = new Map<string, Story[]>();
-        stories.forEach((story) => {
+        stories.forEach((story: Story) => {
           const year = parseInt(story.storyYear?.toString() || "0");
           if (year > 0) {
             const decadeKey = `${Math.floor(year / 10) * 10}s`;

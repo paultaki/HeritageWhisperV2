@@ -1034,7 +1034,7 @@ export default function BookViewNew() {
           <p className="text-muted-foreground mb-6">
             Start recording your first memory to see it here.
           </p>
-          <Button onClick={modeSelection.openModal} className="gap-2">
+          <Button onClick={() => modeSelection.openModal()} className="gap-2">
             <Plus className="w-4 h-4" />
             Record Your First Story
           </Button>

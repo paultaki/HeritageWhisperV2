@@ -636,7 +636,7 @@ export async function POST(request: NextRequest) {
                     // Perform GPT-4o/GPT-5 combined analysis
                     const tier3Result = await performTier3Analysis(
                       allStories,
-                      storyCount,
+                      storyCount ?? 0,
                     );
 
                     // Log AI call telemetry
@@ -658,7 +658,7 @@ export async function POST(request: NextRequest) {
                     await storeTier3Results(
                       supabaseAdmin,
                       user.id,
-                      storyCount,
+                      storyCount ?? 0,
                       tier3Result,
                     );
 

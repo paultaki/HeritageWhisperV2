@@ -42,6 +42,12 @@ interface NavPayload {
   rawTranscript?: string;
   qaPairs?: QAPair[];
   enhancedTranscript?: string;
+
+  // Re-recording fields
+  isReRecording?: boolean;
+  storyId?: string;
+  returnToEdit?: boolean;
+  formattedContent?: any;
 }
 
 // In-memory cache for speed

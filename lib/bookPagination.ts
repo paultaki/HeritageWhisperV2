@@ -164,6 +164,7 @@ export interface ContentMetrics {
 export interface StoryPhoto {
   id: string;
   url: string;
+  transform?: { zoom: number; position: { x: number; y: number } };
   caption?: string;
   isHero?: boolean;
 }

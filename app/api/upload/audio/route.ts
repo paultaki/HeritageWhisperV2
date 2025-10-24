@@ -137,8 +137,8 @@ export async function POST(request: NextRequest) {
       logger.error("Supabase upload error:", error);
       logger.error("Error details:", {
         message: error.message,
-        statusCode: error.statusCode,
-        details: error.details,
+        statusCode: (error as any).statusCode,
+        details: (error as any).details,
       });
       return NextResponse.json(
         {

@@ -1,0 +1,225 @@
+   ▲ Next.js 15.5.4
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ⚠ Compiled with warnings in 3.4s
+
+./app/api/user/delete/route.ts
+Attempted import error: 'userPrompts' is not exported from '@/shared/schema' (imported as 'userPrompts').
+
+Import trace for requested module:
+./app/api/user/delete/route.ts
+
+./app/api/user/delete/route.ts
+Attempted import error: 'userPrompts' is not exported from '@/shared/schema' (imported as 'userPrompts').
+
+Import trace for requested module:
+./app/api/user/delete/route.ts
+
+./app/api/user/export/route.ts
+Attempted import error: 'userPrompts' is not exported from '@/shared/schema' (imported as 'userPrompts').
+
+Import trace for requested module:
+./app/api/user/export/route.ts
+
+./app/api/user/export/route.ts
+Attempted import error: 'userPrompts' is not exported from '@/shared/schema' (imported as 'userPrompts').
+
+Import trace for requested module:
+./app/api/user/export/route.ts
+
+ ✓ Compiled successfully in 5.7s
+   Skipping validation of types
+   Skipping linting
+
+   We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
+   The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+   	- include was updated to add '.next/types/**/*.ts'
+
+   Collecting page data ...
+   Generating static pages (0/151) ...
+   Generating static pages (37/151) 
+   Generating static pages (75/151) 
+   Generating static pages (113/151) 
+ ✓ Generating static pages (151/151)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                       Size  First Load JS
+┌ ○ /                                          15.5 kB         123 kB
+├ ○ /_not-found                                   1 kB         103 kB
+├ ○ /admin                                     4.63 kB         178 kB
+├ ○ /admin/ai-prompts                          4.71 kB         175 kB
+├ ○ /admin/analytics                           3.98 kB         178 kB
+├ ○ /admin/cleanup                             7.98 kB         175 kB
+├ ○ /admin/north-star                          13.5 kB         180 kB
+├ ○ /admin/prompt-feedback                     7.95 kB         207 kB
+├ ○ /admin/prompts                              7.8 kB         175 kB
+├ ○ /admin/quality-tester                      8.34 kB         175 kB
+├ ○ /admin/test-accounts                       8.59 kB         175 kB
+├ ƒ /api/accounts/available                      375 B         102 kB
+├ ƒ /api/admin/ai-prompts                        375 B         102 kB
+├ ƒ /api/admin/analytics                         375 B         102 kB
+├ ƒ /api/admin/prompts                           375 B         102 kB
+├ ƒ /api/admin/prompts/export                    375 B         102 kB
+├ ƒ /api/admin/prompts/feedback                  375 B         102 kB
+├ ƒ /api/admin/test-accounts                     375 B         102 kB
+├ ƒ /api/admin/test-accounts/clean               375 B         102 kB
+├ ƒ /api/admin/test-accounts/clone               375 B         102 kB
+├ ƒ /api/admin/test-accounts/delete              375 B         102 kB
+├ ƒ /api/admin/test-accounts/generate-prompts    375 B         102 kB
+├ ƒ /api/admin/test-accounts/milestone           375 B         102 kB
+├ ƒ /api/admin/test-prompt                       375 B         102 kB
+├ ƒ /api/admin/trigger-tier3                     375 B         102 kB
+├ ƒ /api/agreements/accept                       375 B         102 kB
+├ ƒ /api/agreements/status                       375 B         102 kB
+├ ƒ /api/auth/change-password                    375 B         102 kB
+├ ƒ /api/auth/login                              375 B         102 kB
+├ ƒ /api/auth/logout                             375 B         102 kB
+├ ƒ /api/auth/me                                 375 B         102 kB
+├ ƒ /api/auth/register                           375 B         102 kB
+├ ƒ /api/auth/send-welcome                       375 B         102 kB
+├ ƒ /api/book-data                               375 B         102 kB
+├ ƒ /api/catalog/prompts                         375 B         102 kB
+├ ƒ /api/csrf                                    375 B         102 kB
+├ ƒ /api/debug/check-user                        375 B         102 kB
+├ ƒ /api/debug/update-user-name                  375 B         102 kB
+├ ƒ /api/dev/analyze-prompts                     375 B         102 kB
+├ ƒ /api/dev/analyze-tier3                       375 B         102 kB
+├ ƒ /api/export/2up                              375 B         102 kB
+├ ƒ /api/export/trim                             375 B         102 kB
+├ ƒ /api/extract-lesson                          375 B         102 kB
+├ ƒ /api/family/[memberId]                       375 B         102 kB
+├ ƒ /api/family/[memberId]/permissions           375 B         102 kB
+├ ƒ /api/family/[memberId]/resend                375 B         102 kB
+├ ƒ /api/family/activity                         375 B         102 kB
+├ ƒ /api/family/invite                           375 B         102 kB
+├ ƒ /api/family/members                          375 B         102 kB
+├ ƒ /api/family/members/[id]                     375 B         102 kB
+├ ƒ /api/family/prompts                          375 B         102 kB
+├ ƒ /api/family/stories/[userId]                 375 B         102 kB
+├ ƒ /api/family/verify                           375 B         102 kB
+├ ƒ /api/followups                               375 B         102 kB
+├ ƒ /api/followups/contextual                    375 B         102 kB
+├ ƒ /api/greeting                                375 B         102 kB
+├ ƒ /api/health                                  375 B         102 kB
+├ ƒ /api/interview-test/analyze-topics           375 B         102 kB
+├ ƒ /api/interview-test/follow-up                375 B         102 kB
+├ ƒ /api/interview-test/transcribe-chunk         375 B         102 kB
+├ ƒ /api/objects/upload                          375 B         102 kB
+├ ƒ /api/passkey/auth-options                    375 B         102 kB
+├ ƒ /api/passkey/auth-verify                     375 B         102 kB
+├ ƒ /api/passkey/manage                          375 B         102 kB
+├ ƒ /api/passkey/register-options                375 B         102 kB
+├ ƒ /api/passkey/register-verify                 375 B         102 kB
+├ ƒ /api/print-token/validate                    375 B         102 kB
+├ ƒ /api/profile                                 375 B         102 kB
+├ ƒ /api/profile/interests                       375 B         102 kB
+├ ƒ /api/prompts/[id]                            375 B         102 kB
+├ ƒ /api/prompts/active                          375 B         102 kB
+├ ƒ /api/prompts/answered                        375 B         102 kB
+├ ƒ /api/prompts/archived                        375 B         102 kB
+├ ƒ /api/prompts/cleanup                         375 B         102 kB
+├ ƒ /api/prompts/dismiss                         375 B         102 kB
+├ ƒ /api/prompts/dismissed                       375 B         102 kB
+├ ƒ /api/prompts/emergency-cleanup               375 B         102 kB
+├ ƒ /api/prompts/family-submit                   375 B         102 kB
+├ ƒ /api/prompts/family-submitted                375 B         102 kB
+├ ƒ /api/prompts/history/[id]                    375 B         102 kB
+├ ƒ /api/prompts/next                            375 B         102 kB
+├ ƒ /api/prompts/queue                           375 B         102 kB
+├ ƒ /api/prompts/queue-next                      375 B         102 kB
+├ ƒ /api/prompts/queued                          375 B         102 kB
+├ ƒ /api/prompts/restore                         375 B         102 kB
+├ ƒ /api/prompts/save                            375 B         102 kB
+├ ƒ /api/prompts/skip                            375 B         102 kB
+├ ƒ /api/realtime-session                        375 B         102 kB
+├ ƒ /api/shared/[token]                          375 B         102 kB
+├ ƒ /api/shared/with-me                          375 B         102 kB
+├ ƒ /api/stories                                 375 B         102 kB
+├ ƒ /api/stories/[id]                            375 B         102 kB
+├ ƒ /api/stories/[id]/photos                     375 B         102 kB
+├ ƒ /api/stories/[id]/photos/[photoId]           375 B         102 kB
+├ ƒ /api/stories/enhance                         375 B         102 kB
+├ ƒ /api/stories/stats                           375 B         102 kB
+├ ƒ /api/stories/suggest-lesson                  375 B         102 kB
+├ ƒ /api/test-realtime-access                    375 B         102 kB
+├ ƒ /api/transcribe                              375 B         102 kB
+├ ƒ /api/transcribe-assemblyai                   375 B         102 kB
+├ ƒ /api/transcripts/enhance-conversation        375 B         102 kB
+├ ƒ /api/transcripts/enhance-quick-story         375 B         102 kB
+├ ƒ /api/upload/audio                            375 B         102 kB
+├ ƒ /api/upload/photo                            375 B         102 kB
+├ ƒ /api/upload/profile-photo                    375 B         102 kB
+├ ƒ /api/user/ai-settings                        375 B         102 kB
+├ ƒ /api/user/delete                             375 B         102 kB
+├ ƒ /api/user/export                             375 B         102 kB
+├ ƒ /api/user/profile                            375 B         102 kB
+├ ƒ /api/verify-upload                           375 B         102 kB
+├ ○ /auth/callback                             2.34 kB         156 kB
+├ ○ /auth/check-email                          6.01 kB         160 kB
+├ ○ /auth/forgot-password                      5.71 kB         164 kB
+├ ○ /auth/login                                10.6 kB         187 kB
+├ ○ /auth/register                             9.36 kB         180 kB
+├ ○ /auth/reset-password                       6.72 kB         161 kB
+├ ○ /auth/set-password                         8.67 kB         175 kB
+├ ○ /auth/verified                             4.25 kB         114 kB
+├ ○ /book                                       7.5 kB         243 kB
+├ ○ /book-test                                 5.77 kB         108 kB
+├ ○ /book-test-simple                          2.47 kB         104 kB
+├ ○ /book-v2                                   7.38 kB         243 kB
+├ ○ /book-v2/export                            7.46 kB         174 kB
+├ ○ /book-v2/print/2up                         4.49 kB         110 kB
+├ ○ /book-v2/print/trim                        3.14 kB         108 kB
+├ ○ /book-v3                                   8.59 kB         245 kB
+├ ○ /book-v3/export                            7.45 kB         174 kB
+├ ○ /book-v3/print/2up                         4.63 kB         110 kB
+├ ○ /book-v3/print/trim                        3.26 kB         109 kB
+├ ○ /book/export                               7.46 kB         174 kB
+├ ○ /book/print/2up                            4.62 kB         110 kB
+├ ○ /book/print/trim                           3.25 kB         109 kB
+├ ○ /design-demo                               2.85 kB         105 kB
+├ ○ /dev/prompts                                5.5 kB         172 kB
+├ ○ /family                                    12.2 kB         229 kB
+├ ○ /family/access                             5.49 kB         115 kB
+├ ƒ /family/book/[userId]                      1.74 kB         139 kB
+├ ○ /family/expired                            4.02 kB         114 kB
+├ ƒ /family/timeline/[userId]                  1.73 kB         139 kB
+├ ○ /family/unauthorized                       3.98 kB         114 kB
+├ ○ /gift-plans                                4.97 kB         107 kB
+├ ○ /help                                      10.8 kB         190 kB
+├ ○ /interview-chat                            7.14 kB         195 kB
+├ ○ /interview-chat-v2                         11.2 kB         199 kB
+├ ○ /interview-test                            5.37 kB         115 kB
+├ ○ /landing-archive                           4.73 kB         107 kB
+├ ○ /landing-v2                                5.32 kB         107 kB
+├ ○ /landing-v3                                6.07 kB         108 kB
+├ ○ /landing-v4                                8.54 kB         110 kB
+├ ○ /landing-v5                                7.48 kB         115 kB
+├ ○ /memory-box                                8.97 kB         251 kB
+├ ○ /onboarding                                6.58 kB         173 kB
+├ ○ /privacy                                   18.9 kB         195 kB
+├ ○ /profile                                   14.1 kB         254 kB
+├ ○ /prompts                                   9.75 kB         272 kB
+├ ○ /prompts-old                               7.27 kB         269 kB
+├ ○ /realtime-test                             6.05 kB         173 kB
+├ ○ /recording                                 8.46 kB         224 kB
+├ ○ /review                                      656 B         102 kB
+├ ƒ /review/[id]                                 642 B         102 kB
+├ ○ /review/book-style                           25 kB         277 kB
+├ ○ /review/create                               648 B         102 kB
+├ ○ /terms                                     17.7 kB         194 kB
+├ ○ /timeline                                  25.1 kB         287 kB
+└ ○ /timeline-test                             23.2 kB         265 kB
++ First Load JS shared by all                   102 kB
+  ├ chunks/1255-ad92d48e3e7ce61a.js            45.5 kB
+  ├ chunks/4bd1b696-100b9d70ed4e49c1.js        54.2 kB
+  └ other shared chunks (total)                2.03 kB
+
+
+ƒ Middleware                                   38.3 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

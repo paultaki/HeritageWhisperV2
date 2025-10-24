@@ -10,7 +10,6 @@ import {
   familyActivity,
   activePrompts,
   promptHistory,
-  userPrompts,
   ghostPrompts,
   historicalContext,
   profiles,
@@ -214,7 +213,6 @@ export async function DELETE(request: NextRequest) {
     // Delete AI prompt data
     await db.delete(activePrompts).where(eq(activePrompts.userId, userId));
     await db.delete(promptHistory).where(eq(promptHistory.userId, userId));
-    await db.delete(userPrompts).where(eq(userPrompts.userId, userId));
     await db.delete(ghostPrompts).where(eq(ghostPrompts.userId, userId));
     logger.debug("[Account Deletion] Deleted AI prompt records");
 
