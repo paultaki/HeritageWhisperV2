@@ -273,12 +273,12 @@ export async function startRealtime(
         // Docs: https://platform.openai.com/docs/guides/realtime-webrtc#vad
         turn_detection: {
           type: 'server_vad',
-          threshold: 0.5,
+          threshold: 0.7,  // Higher threshold = less sensitive to ambient noise (was 0.5)
           prefix_padding_ms: 300,  // Include 300ms before speech starts
           silence_duration_ms: 2000, // Wait 2 seconds of silence before ending turn (increased for natural pauses)
         },
-        // Allow longer responses for natural conversation flow (800 tokens ≈ 10-12 sentences)
-        max_response_output_tokens: 800,
+        // Allow longer responses for natural conversation flow (1200 tokens ≈ 15-18 sentences)
+        max_response_output_tokens: 1200,
       },
     };
 

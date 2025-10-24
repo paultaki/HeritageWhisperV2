@@ -52,6 +52,33 @@ export async function combineAudioBlobs(blobs: Blob[]): Promise<Blob> {
 }
 
 /**
+ * Extract lesson learned from transcript using AI
+ */
+async function extractLessonFromTranscript(transcript: string): Promise<string> {
+  try {
+    console.log('[Conversation] Extracting lesson from transcript...');
+
+    const response = await fetch('/api/extract-lesson', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcript }),
+    });
+
+    if (!response.ok) {
+      console.error('[Conversation] Lesson extraction failed:', response.statusText);
+      return ''; // Return empty string on failure
+    }
+
+    const data = await response.json();
+    console.log('[Conversation] Lesson extracted:', data.lesson);
+    return data.lesson || '';
+  } catch (error) {
+    console.error('[Conversation] Lesson extraction error:', error);
+    return ''; // Return empty string on error
+  }
+}
+
+/**
  * Save conversation data to NavCache and redirect to wizard
  */
 export async function completeConversationAndRedirect(
@@ -77,6 +104,9 @@ export async function completeConversationAndRedirect(
       console.log(`🎵 ${audioType} audio size: ${sizeInMB.toFixed(2)} MB`);
     }
 
+    // Extract lesson learned from transcript (async, non-blocking)
+    const lessonLearned = await extractLessonFromTranscript(fullTranscript || '');
+
     // Create recording session data for wizard
     const recordingData = {
       mode: 'conversation' as const,
@@ -85,6 +115,7 @@ export async function completeConversationAndRedirect(
       timestamp: new Date().toISOString(),
       rawTranscript: fullTranscript || '',
       qaPairs: qaPairs || [],
+      lessonLearned: lessonLearned || '', // Add extracted lesson
     };
 
     // Generate unique ID and save to NavCache

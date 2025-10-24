@@ -74,10 +74,10 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#faf8f5] via-[#f5f0eb] to-[#f0ebe6]">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#faf8f5] via-[#f5ede8] to-[#f0e8e3] pt-20 pb-24 md:pt-32 md:pb-40">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#faf8f5] via-[#f8f5f2] to-[#f5f1ed] pt-20 pb-24 md:pt-32 md:pb-40">
         {/* Decorative gradient orbs - softer, more premium */}
-        <div className="absolute top-0 w-96 h-96 bg-[#d4a574] rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-pulse" style={{ left: 'calc(50% - 12rem)' }}></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#e5989b] rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-pulse" style={{ animationDelay: "2s" }}></div>
+        <div className="absolute top-0 w-96 h-96 bg-[#d4c5d8] rounded-full mix-blend-multiply filter blur-3xl opacity-12 animate-pulse" style={{ left: 'calc(50% - 12rem)' }}></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#e8d4d8] rounded-full mix-blend-multiply filter blur-3xl opacity-12 animate-pulse" style={{ animationDelay: "2s" }}></div>
 
         {/* Continue Stories Button - Upper Right */}
         <div className="absolute top-6 right-6 z-10">
@@ -93,7 +93,7 @@ export default function HomePage() {
           {/* Header with Logo */}
           <div className="flex flex-col justify-center items-center mb-10">
             <Image
-              src="/HW_text-compress.png"
+              src="/logo lower.png"
               alt="Heritage Whisper"
               width={480}
               height={120}
@@ -290,7 +290,13 @@ export default function HomePage() {
               <div className="order-1 md:order-2 relative">
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white p-16 flex items-center justify-center">
                   <div className="w-40 h-40 rounded-full bg-gradient-to-br from-[#8b6b7a] to-[#b88b94] flex items-center justify-center animate-pulse">
-                    <Mic className="w-20 h-20 text-white" />
+                    <Image
+                      src="/silver_mic_sm.png"
+                      alt="Microphone"
+                      width={80}
+                      height={80}
+                      className="w-20 h-20 object-contain"
+                    />
                   </div>
                 </div>
               </div>

@@ -68,38 +68,48 @@ export default function HelpPage() {
         {
           question: "How do I record a new memory?",
           answer: (
-            <div className="space-y-3">
-              <p>You have two ways to record your memories:</p>
+            <div className="space-y-4">
+              <p className="text-base">When you click the <strong>+ button</strong>, you'll see two recording options. Pick the one that feels right for your story:</p>
 
-              <div className="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-lg p-4 mt-3">
-                <strong className="block mb-2 text-amber-900">
-                  💬 Conversation Mode (Guided Interview with Pearl)
+              <div className="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-lg p-5 mt-3">
+                <strong className="block mb-3 text-lg text-amber-900">
+                  💬 Conversation Mode
                 </strong>
-                <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
-                  <li>Click the <strong>+</strong> button and choose <strong>"Conversation Mode"</strong></li>
-                  <li>Pearl, our Storyteller, will ask you thoughtful questions</li>
-                  <li>Simply answer naturally - she listens and follows up based on what you share</li>
-                  <li>Perfect for exploring memories in depth (10-15 minutes)</li>
-                  <li>Your full conversation is recorded and saved as one story</li>
+                <p className="text-base mb-3">A guided interview with thoughtful follow-up questions to help you share a deeper story.</p>
+                <ul className="list-none space-y-2 ml-0 text-base">
+                  <li><strong>Step 1:</strong> Click the <strong>+</strong> button</li>
+                  <li><strong>Step 2:</strong> Choose <strong>"Conversation Mode"</strong></li>
+                  <li><strong>Step 3:</strong> Answer the questions naturally - like talking to a friend</li>
+                  <li className="text-sm text-amber-800 mt-3">⏱️ Takes about 10-15 minutes</li>
                 </ul>
               </div>
 
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-3">
-                <strong className="block mb-2">
-                  🎤 Quick Story (Solo Recording)
+              <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5 mt-3">
+                <strong className="block mb-3 text-lg">
+                  🎤 Quick Story
                 </strong>
-                <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
-                  <li>Click the <strong>+</strong> button and choose <strong>"Quick Story"</strong></li>
-                  <li>You'll see a 3-2-1 countdown, then recording begins</li>
-                  <li>Speak naturally about your memory (2-5 minutes)</li>
-                  <li>Click <strong>"Stop"</strong> when finished</li>
-                  <li>Great for capturing quick memories on the fly</li>
+                <p className="text-base mb-3">Record a 2-5 minute story in one take. Simple and fast.</p>
+                <ul className="list-none space-y-2 ml-0 text-base">
+                  <li><strong>Step 1:</strong> Click the <strong>+</strong> button</li>
+                  <li><strong>Step 2:</strong> Choose <strong>"Quick Story"</strong></li>
+                  <li><strong>Step 3:</strong> Wait for the 3-2-1 countdown</li>
+                  <li><strong>Step 4:</strong> Speak about your memory</li>
+                  <li><strong>Step 5:</strong> Click <strong>"Stop"</strong> when done</li>
+                  <li className="text-sm text-gray-600 mt-3">⏱️ Takes about 5 minutes total</li>
                 </ul>
               </div>
 
-              <p className="text-sm text-gray-600 mt-3">
-                💡 <strong>Tip:</strong> Both modes automatically transcribe your audio. Find a quiet space and speak clearly for best results!
-              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  💡 <strong>Helpful Tips:</strong>
+                </p>
+                <ul className="list-disc ml-5 mt-2 space-y-1 text-base">
+                  <li>Find a quiet room</li>
+                  <li>Speak clearly and at a comfortable pace</li>
+                  <li>Your voice is automatically transcribed to text</li>
+                  <li>You can use both modes for different stories</li>
+                </ul>
+              </div>
             </div>
           ),
           icon: <Mic className="w-5 h-5" />,
@@ -107,29 +117,22 @@ export default function HelpPage() {
         {
           question: "Can I type my story instead of recording?",
           answer: (
-            <div className="space-y-3">
-              <p>
-                Yes! After recording (or even without recording), you can edit
-                and type your story:
+            <div className="space-y-4">
+              <p className="text-base">
+                <strong>Yes!</strong> You can type your stories if you prefer. Here's how:
               </p>
-              <ol className="list-decimal list-inside space-y-2 ml-2">
-                <li>
-                  Record a brief placeholder (or skip recording and create from
-                  Memory Box)
-                </li>
-                <li>
-                  On the review screen, click directly on the transcription text
-                </li>
-                <li>Delete the transcribed text and type your own story</li>
-                <li>Format it however you'd like</li>
-                <li>
-                  Click <strong>"Save Memory"</strong> when done
-                </li>
+              <ol className="list-none space-y-3 ml-0 text-base">
+                <li><strong>Step 1:</strong> Record a short placeholder audio (just say "testing" for a few seconds)</li>
+                <li><strong>Step 2:</strong> On the review screen, you'll see your transcribed text</li>
+                <li><strong>Step 3:</strong> Click on the text to edit it</li>
+                <li><strong>Step 4:</strong> Delete everything and type your own story</li>
+                <li><strong>Step 5:</strong> Click <strong>"Save Memory"</strong> when you're done</li>
               </ol>
-              <p className="text-sm text-gray-600 mt-3">
-                You have complete control to edit, rewrite, or type your
-                memories from scratch.
-              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  💡 <strong>Good to know:</strong> You can edit any text anytime. Your stories, your way!
+                </p>
+              </div>
             </div>
           ),
           icon: <Edit3 className="w-5 h-5" />,
@@ -142,28 +145,20 @@ export default function HelpPage() {
         {
           question: "How do I edit a memory?",
           answer: (
-            <div className="space-y-3">
-              <p>You can edit any memory at any time:</p>
-              <ol className="list-decimal list-inside space-y-2 ml-2">
-                <li>
-                  Go to <strong>Timeline</strong>, <strong>Book</strong>, or{" "}
-                  <strong>Memory Box</strong>
-                </li>
-                <li>Click on any memory card to open it</li>
-                <li>
-                  Click the <strong>"Edit"</strong> button at the top
-                </li>
-                <li>
-                  Edit the title, date, transcription, photos, or lesson learned
-                </li>
-                <li>
-                  Click <strong>"Save Memory"</strong> to keep your changes
-                </li>
+            <div className="space-y-4">
+              <p className="text-base"><strong>You can edit any memory anytime.</strong> Here's how:</p>
+              <ol className="list-none space-y-3 ml-0 text-base">
+                <li><strong>Step 1:</strong> Go to <strong>Timeline</strong>, <strong>Book</strong>, or <strong>Memory Box</strong></li>
+                <li><strong>Step 2:</strong> Click on a memory card to open it</li>
+                <li><strong>Step 3:</strong> Click the <strong>"Edit"</strong> button at the top</li>
+                <li><strong>Step 4:</strong> Change anything you want: title, date, text, photos, or lesson learned</li>
+                <li><strong>Step 5:</strong> Click <strong>"Save Memory"</strong> to keep your changes</li>
               </ol>
-              <p className="text-sm text-gray-600 mt-3">
-                💡 <strong>Tip:</strong> Pencil icons appear next to editable
-                fields. Click them to edit specific sections.
-              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  💡 <strong>Helpful Tip:</strong> Look for pencil icons ✏️ next to items you can edit. Click the pencil to change that section.
+                </p>
+              </div>
             </div>
           ),
           icon: <Edit3 className="w-5 h-5" />,
@@ -171,23 +166,21 @@ export default function HelpPage() {
         {
           question: "How many photos can I add to a memory?",
           answer: (
-            <div className="space-y-3">
-              <p>
-                You can add <strong>multiple photos</strong> to each memory:
+            <div className="space-y-4">
+              <p className="text-base">
+                <strong>You can add as many photos as you want</strong> to each memory. Here's what you can do:
               </p>
-              <ul className="list-disc list-inside space-y-2 ml-2">
-                <li>Upload photos during or after creating a memory</li>
-                <li>Crop and adjust each photo before saving</li>
-                <li>
-                  Select one photo as your "hero" image (the main photo
-                  displayed)
-                </li>
-                <li>Photos appear in your Timeline, Book, and Memory Box</li>
+              <ul className="list-none space-y-2 ml-0 text-base">
+                <li>✓ Upload photos when creating a story or add them later</li>
+                <li>✓ Crop and zoom each photo to look just right</li>
+                <li>✓ Pick one photo as your main "hero" image</li>
+                <li>✓ Your photos show up in Timeline, Book, and Memory Box</li>
               </ul>
-              <p className="text-sm text-gray-600 mt-3">
-                📸 <strong>Note:</strong> For privacy, we automatically remove
-                EXIF data (location, camera info) from uploaded photos.
-              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  📸 <strong>Privacy Note:</strong> We automatically remove hidden location data from your photos to protect your privacy.
+                </p>
+              </div>
             </div>
           ),
           icon: <ImageIcon className="w-5 h-5" />,
@@ -331,74 +324,65 @@ export default function HelpPage() {
         {
           question: "What's included in the subscription?",
           answer: (
-            <div className="space-y-3">
-              <p>
-                Your Heritage Whisper subscription includes everything you need
-                to preserve your family's memories:
+            <div className="space-y-4">
+              <p className="text-base">
+                <strong>Your subscription includes everything you need</strong> to preserve and share your family's memories:
               </p>
-              <ul className="space-y-2 ml-2">
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-heritage-coral mt-0.5 flex-shrink-0" />
+              <ul className="space-y-3 ml-0 text-base">
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
                   <span>
-                    <strong>One storyteller account</strong> for unlimited
-                    memories
+                    <strong>Your storyteller account</strong> with unlimited memories and photos
                   </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-heritage-coral mt-0.5 flex-shrink-0" />
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
                   <span>
-                    <strong>One year</strong> of full access to all features
+                    <strong>Family sharing</strong> - Invite unlimited family members to view and contribute
                   </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-heritage-coral mt-0.5 flex-shrink-0" />
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
                   <span>
-                    <strong>Timeline view</strong> to see your memories
-                    chronologically
+                    <strong>Timeline view</strong> to see memories organized by year
                   </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-heritage-coral mt-0.5 flex-shrink-0" />
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
                   <span>
-                    <strong>Book view</strong> with beautiful page layouts
+                    <strong>Book view</strong> with beautiful two-page layouts
                   </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-heritage-coral mt-0.5 flex-shrink-0" />
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
                   <span>
-                    <strong>Memory box</strong> to organize and manage all your
-                    stories
+                    <strong>Memory box</strong> to organize all your stories in one place
                   </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-heritage-coral mt-0.5 flex-shrink-0" />
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
                   <span>
-                    <strong>Printable book</strong> in 2-up format for home
-                    printing
+                    <strong>Print at home</strong> with 2-up format for regular printers
                   </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-heritage-coral mt-0.5 flex-shrink-0" />
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
                   <span>
-                    <strong>Downloadable book</strong> in trim format for
-                    professional printing
+                    <strong>Professional printing</strong> with trim format for book services
                   </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-heritage-coral mt-0.5 flex-shrink-0" />
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
                   <span>
-                    <strong>E-book with audio</strong> to listen and read
-                    together
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-heritage-coral mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>Stored audio clips</strong> securely saved in the
-                    cloud
+                    <strong>Secure cloud storage</strong> for all your audio recordings
                   </span>
                 </li>
               </ul>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  💡 <strong>Bonus:</strong> Wisdom highlights automatically pulled from each story
+                </p>
+              </div>
             </div>
           ),
           icon: <DollarSign className="w-5 h-5" />,
@@ -406,24 +390,21 @@ export default function HelpPage() {
         {
           question: "What comes with the free account?",
           answer: (
-            <div className="space-y-3">
-              <p>Start preserving your memories today with our free trial:</p>
-              <div className="bg-heritage-coral/5 border border-heritage-coral/20 rounded-lg p-4 mt-3">
+            <div className="space-y-4">
+              <p className="text-base"><strong>Start for free!</strong> Try Heritage Whisper with your first 3 stories:</p>
+              <div className="bg-heritage-coral/5 border-2 border-heritage-coral/20 rounded-lg p-5 mt-3">
                 <p
-                  className="font-semibold text-lg mb-2"
+                  className="font-semibold text-lg mb-3"
                   style={{ color: "#1f0f08" }}
                 >
-                  ✨ Full functionality for your first 3 stories
+                  ✨ Your First 3 Stories Are Free
                 </p>
-                <p className="text-sm text-gray-600">
-                  Try all features including recording, transcription, photo
-                  uploads, timeline view, book view, and PDF export—completely
-                  free for your first 3 memories.
+                <p className="text-base text-gray-700">
+                  Test every feature: recording, transcription, photos, Timeline, Book view, and PDF printing. All free for 3 stories.
                 </p>
               </div>
-              <p className="text-sm text-gray-600 mt-3">
-                After your 3 free stories, upgrade to a paid subscription to
-                continue adding unlimited memories.
+              <p className="text-base text-gray-700 mt-4">
+                After 3 stories, upgrade to keep adding unlimited memories and access all features.
               </p>
             </div>
           ),

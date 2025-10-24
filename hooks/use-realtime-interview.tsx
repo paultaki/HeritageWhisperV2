@@ -17,8 +17,9 @@ import { startRealtime, RealtimeHandles, RealtimeConfig } from '@/lib/realtimeCl
 import { startMixedRecorder } from '@/lib/mixedRecorder';
 import { startUserOnlyRecorder } from '@/lib/userOnlyRecorder';
 import { shouldCancelResponse } from '@/lib/responseTrimmer';
-import { sanitizeResponse } from '@/lib/responseSanitizer';
-import { enforceScope } from '@/lib/scopeEnforcer';
+// NOTE: Post-processing disabled for Realtime API to prevent audio/text mismatch
+// import { sanitizeResponse } from '@/lib/responseSanitizer';
+// import { enforceScope } from '@/lib/scopeEnforcer';
 
 export type RealtimeStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
@@ -89,6 +90,7 @@ export function useRealtimeInterview() {
   const pendingAssistantResponseRef = useRef<string | null>(null); // Buffer Pearl's response until user transcript arrives
   const waitingForUserTranscriptRef = useRef<boolean>(false); // Track if we're waiting for user transcript
   const micEnabledRef = useRef<boolean>(true); // Track if mic is enabled (for preventing barge-in when muted)
+  const bargeInTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Delay before pausing Pearl (prevents false interrupts)
 
   // Start Realtime session
   const startSession = useCallback(async (
@@ -298,22 +300,18 @@ export function useRealtimeInterview() {
           const rawResponse = assistantResponseRef.current;
           console.log('[RealtimeInterview] Assistant response complete (raw):', rawResponse);
 
-          // Step 1: Enforce scope (catches off-topic, enforces structure)
-          const scopeEnforced = enforceScope(rawResponse);
-          if (scopeEnforced !== rawResponse) {
-            console.log('[RealtimeInterview] 🛡️ Scope enforcer modified response:', scopeEnforced);
-          }
+          // DISABLED: Post-processing for Realtime API
+          // Problem: Audio has already played to user by the time text arrives
+          // If we modify text, user HEARS one thing but SEES another in chat
+          // Solution: Trust model instructions, let responses through unmodified
+          // Model instructions are strong enough to guide behavior without post-processing
 
-          // Step 2: Sanitize for PEARLS v1.1 compliance
-          const result = sanitizeResponse(scopeEnforced);
-          if (!result.isValid) {
-            console.warn('[RealtimeInterview] ⚠️ Sanitization violations:', result.violations);
-            // Log violations but don't block (audio already played)
-            // In future, could send feedback to improve model behavior
-          }
+          // OLD CODE (caused audio/text mismatch):
+          // const scopeEnforced = enforceScope(rawResponse);
+          // const result = sanitizeResponse(scopeEnforced);
 
-          // Use the scope-enforced response (final processed version)
-          const finalResponse = scopeEnforced;
+          // NEW CODE: Use raw response as-is (audio and text match)
+          const finalResponse = rawResponse;
 
           // Check if we're waiting for user transcript
           if (waitingForUserTranscriptRef.current) {
@@ -333,21 +331,42 @@ export function useRealtimeInterview() {
         },
 
         // Barge-in: Pause audio when user speaks (only if mic is enabled)
+        // Uses 400ms delay to prevent false positives from ambient noise
         onSpeechStarted: () => {
           if (!micEnabledRef.current) {
             console.log('[RealtimeInterview] User speech detected but mic is muted - ignoring barge-in');
             return;
           }
-          console.log('[RealtimeInterview] User speech started - pausing assistant');
-          if (audioElementRef.current && !audioElementRef.current.paused) {
-            audioElementRef.current.pause();
-            console.log('[RealtimeInterview] Audio paused for barge-in');
+
+          console.log('[RealtimeInterview] User speech detected - starting barge-in delay...');
+
+          // Clear any existing timeout
+          if (bargeInTimeoutRef.current) {
+            clearTimeout(bargeInTimeoutRef.current);
           }
+
+          // Wait 400ms before pausing (filters out brief noise spikes)
+          bargeInTimeoutRef.current = setTimeout(() => {
+            console.log('[RealtimeInterview] Barge-in delay complete - pausing Pearl');
+            if (audioElementRef.current && !audioElementRef.current.paused) {
+              audioElementRef.current.pause();
+              console.log('[RealtimeInterview] Audio paused for barge-in');
+            }
+            bargeInTimeoutRef.current = null;
+          }, 400); // 400ms delay filters ambient noise
         },
 
         // User stopped speaking - set buffering flag for message ordering
         onSpeechStopped: () => {
           console.log('[RealtimeInterview] User stopped speaking - expecting transcript soon');
+
+          // Cancel barge-in timeout if speech was too short (false positive)
+          if (bargeInTimeoutRef.current) {
+            clearTimeout(bargeInTimeoutRef.current);
+            bargeInTimeoutRef.current = null;
+            console.log('[RealtimeInterview] Cancelled barge-in (speech too brief)');
+          }
+
           waitingForUserTranscriptRef.current = true;
 
           // Resume audio playback after user stops speaking

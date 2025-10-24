@@ -53,6 +53,7 @@ import {
   FileText,
   Sparkles,
   Brain,
+  HelpCircle,
 } from "lucide-react";
 
 export default function Profile() {
@@ -458,30 +459,30 @@ export default function Profile() {
     "Friend";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fff7f3] via-[#ffe3d4] to-[#fde5e3] flex flex-col">
-      <header className="sticky top-0 z-50 bg-white/85 backdrop-blur border-b border-[#f5d0c5]/70 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 md:py-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 min-w-0">
-            <Avatar className="w-12 h-12 border border-white shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 flex flex-col">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-gray-200/50">
+        <div className="px-4 md:px-6 py-2 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <Avatar className="w-9 h-9 border border-white shadow-sm">
               <AvatarImage src={profilePhoto || "/default-avatar.png"} alt={firstName} />
-              <AvatarFallback className="bg-heritage-coral/10 text-heritage-coral">
+              <AvatarFallback className="bg-heritage-coral/10 text-heritage-coral text-sm">
                 {firstName.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <h1 className="text-2xl md:text-3xl font-bold text-[#1f2937] truncate">
+              <h1 className="text-xl font-bold text-gray-900 truncate">
                 Welcome back, {firstName}
               </h1>
-              <p className="text-sm md:text-base text-[#6b7280]">
+              <p className="text-sm text-gray-600 hidden sm:block">
                 Manage your account, privacy, and AI preferences in one place.
               </p>
             </div>
           </div>
           <Button
             variant="ghost"
-            size="lg"
+            size="sm"
             onClick={() => setShowHelp((prev) => !prev)}
-            className="text-[#6b7280] hover:text-[#f59e0b]"
+            className="text-gray-600 hover:text-orange-600"
           >
             <HelpCircle className="h-5 w-5" />
           </Button>
@@ -510,12 +511,11 @@ export default function Profile() {
       </AnimatePresence>
 
       <div className="flex flex-1 w-full">
-        {isDesktop && <LeftSidebar topOffsetClass="lg:top-[132px]" />}
+        {isDesktop && <LeftSidebar />}
 
-        {/* Main content - with sidebar spacing */}
-        <main className="flex-1 min-w-0 pb-20 md:pb-0 lg:ml-56">
-          <div className="bg-background album-texture min-h-screen flex justify-center">
-            <div className="w-full max-w-3xl p-4 md:p-6">
+        {/* Main content - centered */}
+        <main className="flex-1 min-w-0 pb-20 md:pb-0">
+          <div className="max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-8">
               {/* Memory Map, etc. */}
 
         {/* Memory Map - Visual overview of decades */}
@@ -1107,7 +1107,6 @@ export default function Profile() {
             </Button>
           </div>
         </div>
-            </div>
           </div>
         </main>
       </div>

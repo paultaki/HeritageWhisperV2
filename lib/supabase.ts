@@ -18,6 +18,15 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+// Admin client for server-side operations
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
+
 // SECURITY: Removed window.supabase exposure (was only for debugging)
 // Never expose auth client to window object, even in development
 

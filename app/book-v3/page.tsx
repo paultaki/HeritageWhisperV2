@@ -6,6 +6,7 @@ import React, {
   useRef,
   useCallback,
   useMemo,
+  Suspense,
 } from "react";
 import { createPortal } from "react-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -721,7 +722,16 @@ const BookPageRenderer = ({
   );
 };
 
-export default function BookViewNew() {
+// Wrapper component that extracts search params (must be wrapped in Suspense)
+function BookViewWithSearchParams() {
+  const searchParams = useSearchParams();
+  const storyIdFromUrl = searchParams?.get("storyId") || null;
+
+  return <BookViewContent storyIdFromUrl={storyIdFromUrl} />;
+}
+
+// Main component that handles all book logic
+function BookViewContent({ storyIdFromUrl }: { storyIdFromUrl: string | null }) {
   const router = useRouter();
   const { user, session } = useAuth();
   const isMobile = useIsMobile();
@@ -733,10 +743,6 @@ export default function BookViewNew() {
   const [fontsReady, setFontsReady] = useState(false);
   const [isPaginationReady, setIsPaginationReady] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0); // Zoom control
-
-  // Get storyId from URL parameters (Next.js App Router hook)
-  const searchParams = useSearchParams();
-  const storyIdFromUrl = searchParams?.get("storyId") || null;
 
   // Track if we've already navigated to prevent race conditions during font loading
   const hasNavigatedToStory = useRef(false);
@@ -1192,5 +1198,21 @@ export default function BookViewNew() {
         />
       )}
     </div>
+  );
+}
+
+// Export with Suspense boundary to handle useSearchParams() prerendering
+export default function BookViewNew() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading your book...</p>
+        </div>
+      </div>
+    }>
+      <BookViewWithSearchParams />
+    </Suspense>
   );
 }

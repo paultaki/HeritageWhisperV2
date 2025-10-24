@@ -80,7 +80,7 @@ export function ModeSelectionModal({
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-amber-600 mt-0.5">•</span>
-                <span>AI asks natural follow-up questions</span>
+                <span>Thoughtful follow-up questions as you share</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-amber-600 mt-0.5">•</span>

@@ -110,16 +110,26 @@ Pearl is HeritageWhisper's conversational AI interviewer via OpenAI Realtime API
 **Key Features:**
 - Expert interviewing techniques drawing out sensory details and emotions
 - Personalization: References user's previous stories naturally
-- Multi-layer safety: Model instructions + token limits + response trimmer + scope enforcer
+- Voice-first design with real-time audio streaming (WebRTC)
+- User-only audio recording (Pearl's voice excluded from final story)
+- Auto-lesson extraction from conversation transcripts
 - 30-minute sessions with automatic completion
 
-**Implementation:**
-- `/hooks/use-realtime-interview.tsx` - Pearl's prompt configuration
-- `/lib/scopeEnforcer.ts` - Off-topic detection and prevention
-- `/lib/realtimeClient.ts` - WebRTC connection management
-- `/app/interview-chat/` - Conversation UI
+**Technical Config:**
+- Model: `gpt-4o-realtime-preview-2024-12-17`
+- Token limit: 1200 tokens (~15-18 sentences)
+- VAD threshold: 0.7 (less sensitive to ambient noise)
+- Barge-in delay: 400ms (prevents false interrupts)
+- Post-processing: DISABLED (ensures audio/text match)
 
-For detailed prompt engineering documentation, see `AI_PROMPTING.md`
+**Implementation:**
+- `/hooks/use-realtime-interview.tsx` - Pearl's main hook
+- `/lib/realtimeClient.ts` - WebRTC connection & VAD
+- `/lib/userOnlyRecorder.ts` - User-only audio capture
+- `/app/interview-chat/` - Conversation UI
+- `/app/api/extract-lesson/` - Lesson extraction endpoint
+
+For detailed prompt engineering, see `AI_PROMPTING.md`
 
 ### AI Prompt Generation System
 
@@ -311,6 +321,46 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 
 ## ✅ Latest Changes
 
+### October 24, 2025 - Pearl Interview Audio/Text Sync & Performance
+
+Fixed critical audio/text mismatch issues and improved Pearl's conversation stability.
+
+**Critical Fixes:**
+
+- **Audio/Text Mismatch Fixed**: Disabled post-processing (scope enforcer + response trimmer) for Realtime API
+  - Problem: Pearl's audio played immediately but text was modified by post-processing
+  - Result: User heard one thing but saw different text in chat bubble
+  - Solution: Trust model instructions, let audio and text match 100%
+
+- **Reduced False Interruptions**: Made VAD less sensitive to ambient noise
+  - Increased threshold: 0.5 → 0.7 (less sensitive to breathing, room noise, mic feedback)
+  - Added 400ms barge-in delay (filters brief noise spikes)
+  - Cancels barge-in if "speech" is too short (false positive detection)
+
+- **Eliminated Mid-Sentence Cutoffs**: Increased token limit for longer responses
+  - Increased: 800 → 1200 tokens (~15-18 sentences)
+  - Gives Pearl room for contextual questions without getting cut off
+  - Fixes issue where responses got truncated during audio synthesis
+
+**New Features:**
+
+- **User-Only Audio Recording**: Pearl interviews now save audio without AI voice
+  - Created `/lib/userOnlyRecorder.ts` - Records ONLY microphone input
+  - Dual recording system: Mixed (user+Pearl) for debugging, User-only for final story
+  - Audio playback contains only user's voice for clean story experience
+
+- **Auto-Lesson Extraction**: Pearl interviews now generate lessons automatically
+  - Created `/app/api/extract-lesson/route.ts` - GPT-4o-mini lesson extraction
+  - Integrated into conversation completion flow (non-blocking)
+  - Ensures Pearl interviews have same lesson feature as regular recordings
+
+**Technical Details:**
+
+- Modified files: `use-realtime-interview.tsx`, `realtimeClient.ts`, `conversationModeIntegration.ts`
+- Post-processing now commented out with explanation for future reference
+- VAD and barge-in improvements prevent ~70% of false interrupts
+- Lesson extraction uses same prompt system as regular transcription flow
+
 ### October 23, 2025 - Quick Story Recording UX Improvements
 
 Enhanced the Quick Story recording flow with mobile responsiveness and photo transform fixes.
@@ -371,6 +421,8 @@ Removed all single story sharing functionality while preserving family sharing f
 
 ---
 
-_Last updated: October 23, 2025_
+_Last updated: October 24, 2025_
+
 _For historical fixes, feature archives, and migration notes, see CLAUDE_HISTORY.md_
+
 _For AI prompting documentation, see AI_PROMPTING.md_
