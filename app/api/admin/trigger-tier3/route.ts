@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { performTier3Analysis } from "@/lib/tier3Analysis";
 
 export async function POST(request: NextRequest) {
