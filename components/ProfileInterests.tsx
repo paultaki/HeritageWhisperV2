@@ -28,6 +28,17 @@ export function ProfileInterests({ userId, initialInterests }: ProfileInterestsP
   });
   const [isSaving, setIsSaving] = useState(false);
 
+  // Update state when initialInterests prop changes (after async load)
+  useEffect(() => {
+    if (initialInterests) {
+      setInterests({
+        general: initialInterests.general || null,
+        people: initialInterests.people || null,
+        places: initialInterests.places || null,
+      });
+    }
+  }, [initialInterests]);
+
   const handleChange = (field: keyof Interests, value: string) => {
     setInterests(prev => ({
       ...prev,
@@ -45,8 +56,9 @@ export function ProfileInterests({ userId, initialInterests }: ProfileInterestsP
           title: "✨ Interests saved!",
           description: "New personalized questions are being created for you",
         });
-        
-        // Invalidate prompts to fetch new personalized ones
+
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
         queryClient.invalidateQueries({ queryKey: ["/api/prompts/next"] });
         queryClient.invalidateQueries({ queryKey: ["/api/prompts/active"] });
       } else {

@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
       defaultStoryVisibility: dbUser.default_story_visibility ?? true,
       storyCount: dbUser.story_count || 0,
       isPaid: dbUser.is_paid || false,
+      profile_interests: dbUser.profile_interests || null,
     };
 
     return NextResponse.json({ user: profile });
@@ -172,6 +173,7 @@ export async function PATCH(request: NextRequest) {
       defaultStoryVisibility: dbUser.default_story_visibility ?? true,
       storyCount: dbUser.story_count || 0,
       isPaid: dbUser.is_paid || false,
+      profile_interests: dbUser.profile_interests || null,
     };
 
     return NextResponse.json({ user: updatedProfile });

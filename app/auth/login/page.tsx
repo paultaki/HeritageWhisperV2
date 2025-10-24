@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithGoogle } from "@/lib/supabase";
 import { Eye, EyeOff, Mail, Lock, LogIn, Feather, Mic } from "lucide-react";
+import { PasskeyAuth } from "@/components/auth/PasskeyAuth";
 
 const logoUrl = "/HW_text-compress.png";
 
@@ -69,6 +70,20 @@ export default function Login() {
         variant: "destructive",
       });
     }
+  };
+
+  const handlePasskeySuccess = () => {
+    // Passkey authentication creates a session cookie automatically
+    // Just redirect to timeline
+    router.push("/timeline");
+  };
+
+  const handlePasskeyError = (error: string) => {
+    toast({
+      title: "Passkey authentication failed",
+      description: error,
+      variant: "destructive",
+    });
   };
 
   return (
@@ -310,6 +325,13 @@ export default function Login() {
                           </svg>
                           Continue with Google
                         </button>
+
+                        {/* Passkey Sign-in */}
+                        <PasskeyAuth
+                          mode="authenticate"
+                          onSuccess={handlePasskeySuccess}
+                          onError={handlePasskeyError}
+                        />
                       </form>
 
                       <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '24px' }}>

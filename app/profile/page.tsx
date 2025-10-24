@@ -54,7 +54,11 @@ import {
   Sparkles,
   Brain,
   HelpCircle,
+  Fingerprint,
+  Plus,
 } from "lucide-react";
+import { PasskeyAuth } from "@/components/auth/PasskeyAuth";
+import { ManagePasskeys } from "@/components/auth/ManagePasskeys";
 
 export default function Profile() {
   const router = useRouter();
@@ -87,7 +91,8 @@ export default function Profile() {
   // Delete account confirmation
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
-
+  // Passkey setup
+  const [showPasskeySetup, setShowPasskeySetup] = useState(false);
 
   // Redirect to login if not authenticated (but wait for loading to finish)
   useEffect(() => {
@@ -299,6 +304,24 @@ export default function Profile() {
     await updatePasswordMutation.mutateAsync({
       currentPassword,
       newPassword,
+    });
+  };
+
+  const handlePasskeySetupSuccess = () => {
+    setShowPasskeySetup(false);
+    toast({
+      title: "Passkey added successfully",
+      description: "You can now sign in with your passkey",
+    });
+    // Refresh passkey list if the ManagePasskeys component is visible
+    queryClient.invalidateQueries({ queryKey: ["passkeys"] });
+  };
+
+  const handlePasskeySetupError = (error: string) => {
+    toast({
+      title: "Failed to set up passkey",
+      description: error,
+      variant: "destructive",
     });
   };
 
@@ -541,9 +564,9 @@ export default function Profile() {
 
         {/* Profile Interests - Help personalize prompts */}
         {user && (
-          <ProfileInterests 
+          <ProfileInterests
             userId={user.id}
-            initialInterests={profileData?.profile_interests}
+            initialInterests={profileData?.user?.profile_interests}
           />
         )}
 
@@ -770,6 +793,64 @@ export default function Profile() {
                     : "Update Password"}
                 </Button>
               </form>
+            </CardContent>
+          </Card>
+
+          {/* Passkey Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg font-bold">
+                <Fingerprint className="w-5 h-5" />
+                Passkeys
+              </CardTitle>
+              <CardDescription>
+                Sign in faster and more securely with your fingerprint, face, or security key
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-900">
+                  <strong>What are passkeys?</strong> Passkeys let you sign in using your device's built-in security
+                  like Touch ID, Face ID, or Windows Hello. They're more secure than passwords and you never have to remember them.
+                </p>
+              </div>
+
+              <ManagePasskeys />
+
+              <Button
+                type="button"
+                onClick={() => setShowPasskeySetup(true)}
+                className="w-full h-12 text-base"
+                variant="outline"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add New Passkey
+              </Button>
+
+              {/* Passkey Setup Dialog */}
+              <AlertDialog open={showPasskeySetup} onOpenChange={setShowPasskeySetup}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Set up a new passkey</AlertDialogTitle>
+                    <AlertDialogDescription className="text-base">
+                      You'll be prompted to use your device's built-in security (fingerprint, face, or security key)
+                      to create a passkey for faster sign-in.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <div className="py-4">
+                    <PasskeyAuth
+                      mode="register"
+                      email={email}
+                      password={currentPassword}
+                      onSuccess={handlePasskeySetupSuccess}
+                      onError={handlePasskeySetupError}
+                    />
+                  </div>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardContent>
           </Card>
 

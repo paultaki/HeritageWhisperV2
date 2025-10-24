@@ -1,0 +1,124 @@
+/**
+ * POST /api/passkey/register-verify
+ *
+ * Verify the WebAuthn registration response and create a new passkey.
+ */
+
+import { NextRequest, NextResponse } from "next/server";
+import { verifyRegistrationResponse } from "@simplewebauthn/server";
+import type { RegistrationResponseJSON } from "@simplewebauthn/types";
+import { createPasskey, getUserById } from "@/lib/db-admin";
+import { getExpectedOrigin, getExpectedRPID } from "@/lib/webauthn-config";
+import { logger } from "@/lib/logger";
+
+export async function POST(request: NextRequest) {
+  try {
+    const {
+      userId,
+      credential,
+      challenge,
+      friendlyName,
+    }: {
+      userId: string;
+      credential: RegistrationResponseJSON;
+      challenge: string;
+      friendlyName?: string;
+    } = await request.json();
+
+    if (!userId || !credential || !challenge) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Verify user exists
+    const user = await getUserById(userId);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Step 1: Verify the registration response
+    const verification = await verifyRegistrationResponse({
+      response: credential,
+      expectedChallenge: challenge,
+      expectedOrigin: getExpectedOrigin(),
+      expectedRPID: getExpectedRPID(),
+      requireUserVerification: true,
+    });
+
+    if (!verification.verified || !verification.registrationInfo) {
+      logger.warn("[register-verify] Verification failed");
+      return NextResponse.json(
+        { error: "Passkey verification failed" },
+        { status: 400 }
+      );
+    }
+
+    const { registrationInfo } = verification;
+    const {
+      credentialID,
+      credentialPublicKey,
+      counter,
+      credentialBackedUp,
+      credentialDeviceType,
+    } = registrationInfo;
+
+    // Step 2: Generate friendly name if not provided
+    let name = friendlyName;
+    if (!name) {
+      const deviceType =
+        credentialDeviceType === "singleDevice" ? "Device" : "Multi-Device";
+      const date = new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+      name = `${deviceType} Passkey (${date})`;
+    }
+
+    // Step 3: Store the passkey in the database
+    const passkey = await createPasskey({
+      userId: userId,
+      credentialId: Buffer.from(credentialID).toString("base64url"),
+      publicKey: Buffer.from(credentialPublicKey).toString("base64url"),
+      signCount: counter,
+      credentialBackedUp,
+      credentialDeviceType,
+      transports: credential.response.transports,
+      friendlyName: name,
+    });
+
+    if (!passkey) {
+      logger.error("[register-verify] Failed to create passkey");
+      return NextResponse.json(
+        { error: "Failed to save passkey" },
+        { status: 500 }
+      );
+    }
+
+    logger.info("[register-verify] Passkey registered successfully", {
+      userId,
+      passkeyId: passkey.id,
+    });
+
+    return NextResponse.json({
+      success: true,
+      passkey: {
+        id: passkey.id,
+        friendlyName: passkey.friendlyName,
+        credentialDeviceType: passkey.credentialDeviceType,
+        credentialBackedUp: passkey.credentialBackedUp,
+        createdAt: passkey.createdAt,
+      },
+    });
+  } catch (error) {
+    logger.error(
+      "[register-verify] Error:",
+      error instanceof Error ? error.message : "Unknown error"
+    );
+    return NextResponse.json(
+      { error: "Failed to verify registration" },
+      { status: 500 }
+    );
+  }
+}

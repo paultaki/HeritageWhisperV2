@@ -109,7 +109,6 @@ Pearl is HeritageWhisper's conversational AI interviewer via OpenAI Realtime API
 
 **Key Features:**
 - Expert interviewing techniques drawing out sensory details and emotions
-- Personalization: References user's previous stories naturally
 - Voice-first design with real-time audio streaming (WebRTC)
 - User-only audio recording (Pearl's voice excluded from final story)
 - Auto-lesson extraction from conversation transcripts
@@ -121,6 +120,7 @@ Pearl is HeritageWhisper's conversational AI interviewer via OpenAI Realtime API
 - VAD threshold: 0.7 (less sensitive to ambient noise)
 - Barge-in delay: 400ms (prevents false interrupts)
 - Post-processing: DISABLED (ensures audio/text match)
+- Personalization: TEMPORARILY DISABLED (see Known Issues)
 
 **Implementation:**
 - `/hooks/use-realtime-interview.tsx` - Pearl's main hook
@@ -319,7 +319,57 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 
 - **Book View Cursor Hints**: Directional cursor arrows (w-resize/e-resize) randomly flicker between directions despite forced styles (clicking still works correctly)
 
+- **Pearl Personalization Disabled**: Pearl's ability to reference previous stories is temporarily disabled
+  - **Root Cause**: Instructions told Pearl to reference "previous stories" but no story data was passed to session
+  - **Result**: Pearl fabricated non-existent stories ("grandparents' farm", "early days in New York")
+  - **Fix**: Commented out all personalization sections in [hooks/use-realtime-interview.tsx](hooks/use-realtime-interview.tsx)
+  - **Long-term Solution**: Fetch user's actual stories and inject into session instructions before re-enabling
+  - **Status**: Fixed October 24, 2025 - Pearl now only asks questions based on current conversation
+
 ## ✅ Latest Changes
+
+### October 24, 2025 - Pearl Hallucination Fix (Critical Privacy Issue)
+
+Fixed critical issue where Pearl was fabricating non-existent stories during interviews.
+
+**Issue Discovered:**
+
+- Brand new accounts reported Pearl saying "Last time we talked about your grandparents' farm" and "early days in New York"
+- These conversations never existed - Pearl was hallucinating or accessing cross-account memory
+- Tested in incognito browser with fresh account - issue persisted
+
+**Root Cause:**
+
+- Pearl's instructions explicitly told her to reference "previous stories" and personalize based on user's past conversations
+- BUT no actual story data was being passed to the session
+- Lines 30, 40-45, 65-70 in `use-realtime-interview.tsx` contained unfulfillable instructions
+- Pearl either hallucinated to fulfill instructions OR accessed API-key-level memory from other users
+
+**Privacy Implications:**
+
+- All users share same `NEXT_PUBLIC_OPENAI_API_KEY`
+- OpenAI Realtime API may maintain conversation context at API-key level (not per-user)
+- Potential cross-account memory contamination (User A's stories bleeding into User B's session)
+
+**Immediate Fix:**
+
+- Commented out all PERSONALIZATION sections in Pearl's instructions
+- Commented out PREVIOUS STORY AWARENESS section
+- Removed "You know their previous stories" from role description
+- Updated redirect examples to not reference non-existent data
+- File: [hooks/use-realtime-interview.tsx](hooks/use-realtime-interview.tsx:26-76)
+
+**Long-term Solution:**
+
+1. Fetch user's actual stories from database before starting session
+2. Inject story summaries into session instructions dynamically
+3. Re-enable personalization sections with real data
+4. Research per-user session isolation in Realtime API (ephemeral keys, session clearing)
+
+**Testing Needed:**
+
+- Verify Pearl no longer references non-existent stories with fresh accounts
+- If issue persists, confirms API-key-level memory contamination (requires architectural change)
 
 ### October 24, 2025 - Pearl Interview Audio/Text Sync & Performance
 

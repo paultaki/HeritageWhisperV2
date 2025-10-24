@@ -8,6 +8,8 @@ import {
   timestamp,
   uuid,
   jsonb,
+  bigint,
+  unique,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -46,6 +48,12 @@ export const users = pgTable("users", {
     .$type<string[]>()
     .default(sql`'[]'::jsonb`),
   onboardingT3RanAt: timestamp("onboarding_t3_ran_at"),
+  // Profile interests for personalized prompts
+  profileInterests: jsonb("profile_interests").$type<{
+    general: string | null;
+    people: string | null;
+    places: string | null;
+  }>(),
   // subscriptionExpires: timestamp("subscription_expires"),
   // stripeCustomerId: text("stripe_customer_id"),
   // stripeSubscriptionId: text("stripe_subscription_id"),
@@ -64,6 +72,37 @@ export const users = pgTable("users", {
   // }>(),
   createdAt: timestamp("created_at").default(sql`NOW()`),
 });
+
+// Passkeys table for WebAuthn authentication
+export const passkeys = pgTable(
+  "passkeys",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    credentialId: text("credential_id").notNull(), // Base64url encoded
+    publicKey: text("public_key").notNull(), // Base64url encoded
+    signCount: bigint("sign_count", { mode: "number" }).notNull().default(0),
+    credentialBackedUp: boolean("credential_backed_up"),
+    credentialDeviceType: text("credential_device_type"), // "singleDevice" | "multiDevice"
+    transports: jsonb("transports").$type<
+      ("ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid")[]
+    >(),
+    friendlyName: text("friendly_name"), // e.g., "iPhone 14", "MacBook Touch ID"
+    createdAt: timestamp("created_at").default(sql`NOW()`).notNull(),
+    lastUsedAt: timestamp("last_used_at"),
+  },
+  (table) => ({
+    // Unique constraint on user_id + credential_id to prevent cross-tenant clashes
+    uniqueUserCredential: unique("unique_user_credential").on(
+      table.userId,
+      table.credentialId,
+    ),
+  }),
+);
 
 export const stories = pgTable("stories", {
   id: uuid("id")
@@ -524,6 +563,12 @@ export const insertPromptHistorySchema = createInsertSchema(promptHistory).omit(
   },
 );
 
+export const insertPasskeySchema = createInsertSchema(passkeys).omit({
+  id: true,
+  createdAt: true,
+  lastUsedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStory = z.infer<typeof insertStorySchema>;
@@ -555,3 +600,5 @@ export type InsertActivePrompt = z.infer<typeof insertActivePromptSchema>;
 export type ActivePrompt = typeof activePrompts.$inferSelect;
 export type InsertPromptHistory = z.infer<typeof insertPromptHistorySchema>;
 export type PromptHistory = typeof promptHistory.$inferSelect;
+export type InsertPasskey = z.infer<typeof insertPasskeySchema>;
+export type Passkey = typeof passkeys.$inferSelect;
