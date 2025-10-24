@@ -53,6 +53,7 @@ export const navCache = {
     try {
       // Store in memory for immediate access (with Blob)
       memoryCache.set(id, payload);
+      console.log("NavCache: Stored data in memory with ID", id);
 
       // For localStorage, we need to serialize Blobs
       const serializable = { ...payload };
@@ -71,12 +72,22 @@ export const navCache = {
         delete (serializable as any).audioBlob;
       }
 
-      // Store in localStorage as backup
-      localStorage.setItem(`nav:${id}`, JSON.stringify(serializable));
-
-      console.log("NavCache: Stored data with ID", id);
+      // Try to store in localStorage as backup (may fail if quota exceeded)
+      try {
+        localStorage.setItem(`nav:${id}`, JSON.stringify(serializable));
+        console.log("NavCache: Stored data in localStorage with ID", id);
+      } catch (storageError: any) {
+        if (storageError.name === 'QuotaExceededError') {
+          console.warn("NavCache: localStorage quota exceeded, data stored in memory only", id);
+          console.warn("NavCache: Audio size:", payload.audioBlob?.size, "bytes");
+          // Memory cache still works, just skip localStorage backup
+        } else {
+          throw storageError;
+        }
+      }
     } catch (error) {
       console.error("NavCache: Error storing data", error);
+      // Even if localStorage fails, memory cache should still work
     }
   },
 
@@ -160,7 +171,10 @@ export const navCache = {
   // Store data and return the ID (convenience method)
   store(payload: NavPayload): string {
     const id = this.generateId();
-    this.set(id, payload);
+    // Fire and forget - don't await to maintain sync API
+    this.set(id, payload).catch(err => {
+      console.error('NavCache: Error in async store:', err);
+    });
     return id;
   },
 
@@ -168,4 +182,43 @@ export const navCache = {
   retrieve(id: string): NavPayload | null {
     return this.get(id);
   },
+
+  // Clean up old entries from localStorage (older than 1 hour)
+  cleanupOldEntries(): void {
+    try {
+      const now = Date.now();
+      const maxAge = 60 * 60 * 1000; // 1 hour in milliseconds
+      const keysToRemove: string[] = [];
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('nav:')) {
+          // Extract timestamp from key (format: nav:TIMESTAMP-RANDOM)
+          const match = key.match(/^nav:(\d+)-/);
+          if (match) {
+            const timestamp = parseInt(match[1], 10);
+            if (now - timestamp > maxAge) {
+              keysToRemove.push(key);
+            }
+          }
+        }
+      }
+
+      // Remove old entries
+      keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+      });
+
+      if (keysToRemove.length > 0) {
+        console.log(`NavCache: Cleaned up ${keysToRemove.length} old entries`);
+      }
+    } catch (error) {
+      console.error("NavCache: Error cleaning up old entries", error);
+    }
+  },
 };
+
+// Clean up old entries on module load
+if (typeof window !== 'undefined') {
+  navCache.cleanupOldEntries();
+}

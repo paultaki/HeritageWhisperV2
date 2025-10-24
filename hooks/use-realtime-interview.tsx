@@ -15,6 +15,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { startRealtime, RealtimeHandles, RealtimeConfig } from '@/lib/realtimeClient';
 import { startMixedRecorder } from '@/lib/mixedRecorder';
+import { startUserOnlyRecorder } from '@/lib/userOnlyRecorder';
 import { shouldCancelResponse } from '@/lib/responseTrimmer';
 import { sanitizeResponse } from '@/lib/responseSanitizer';
 import { enforceScope } from '@/lib/scopeEnforcer';
@@ -81,6 +82,8 @@ export function useRealtimeInterview() {
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const mixedRecorderRef = useRef<{ stop: () => void } | null>(null);
   const mixedAudioBlobRef = useRef<Blob | null>(null);
+  const userOnlyRecorderRef = useRef<{ stop: () => void } | null>(null); // User-only audio recorder
+  const userOnlyAudioBlobRef = useRef<Blob | null>(null); // User-only audio blob (for story playback)
   const assistantResponseRef = useRef<string>(''); // Track accumulated response for trimming
   const cancelSentRef = useRef<boolean>(false); // Track if cancel already sent for this response
   const pendingAssistantResponseRef = useRef<string | null>(null); // Buffer Pearl's response until user transcript arrives
@@ -110,32 +113,14 @@ export function useRealtimeInterview() {
           setProvisionalTranscript(''); // Clear provisional
           onTranscriptFinal(text);
 
-          // After user transcript arrives, flush any buffered Pearl response with thoughtful delay
+          // After user transcript arrives, flush any buffered Pearl response immediately
           if (pendingAssistantResponseRef.current) {
             console.log('[RealtimeInterview] Flushing buffered Pearl response:', pendingAssistantResponseRef.current);
 
-            // Calculate "thinking" delay based on user message length
-            // Longer messages = Pearl takes more time to process and respond thoughtfully
-            const wordCount = text.split(/\s+/).length;
-            const baseDelay = 800; // Minimum delay (ms)
-            const perWordDelay = 60; // Additional ms per word
-            const maxDelay = 2500; // Cap at 2.5 seconds
-            const thinkingDelay = Math.min(baseDelay + (wordCount * perWordDelay), maxDelay);
-
-            console.log('[RealtimeInterview] Pearl composing response... (delay:', thinkingDelay, 'ms for', wordCount, 'words)');
-
-            // Show "composing" indicator first, then flush response after delay
+            // Show response immediately (no artificial delay)
             if (onAssistantResponse) {
-              // Signal that Pearl is composing (caller will show typing indicator)
-              onAssistantResponse('__COMPOSING__');
-
-              // After thoughtful delay, show actual response
-              setTimeout(() => {
-                if (onAssistantResponse && pendingAssistantResponseRef.current) {
-                  onAssistantResponse(pendingAssistantResponseRef.current);
-                  pendingAssistantResponseRef.current = null;
-                }
-              }, thinkingDelay);
+              onAssistantResponse(pendingAssistantResponseRef.current);
+              pendingAssistantResponseRef.current = null;
             }
           }
           waitingForUserTranscriptRef.current = false;
@@ -258,20 +243,36 @@ export function useRealtimeInterview() {
             console.log('[RealtimeInterview] Voice disabled, skipping audio playback');
           }
 
-          // Start mixed recorder if we have mic stream (use ref to access handles)
+          // Start BOTH recorders if we have mic stream (use ref to access handles)
           setTimeout(() => {
             const micStream = realtimeHandlesRef.current?.mic;
-            if (micStream && !mixedRecorderRef.current) {
-              console.log('[RealtimeInterview] Starting mixed recorder...');
-              const recorder = startMixedRecorder({
-                micStream,
-                botStream: stream,
-                onStop: (blob) => {
-                  console.log('[RealtimeInterview] Mixed recording stopped:', blob.size, 'bytes');
-                  mixedAudioBlobRef.current = blob;
-                },
-              });
-              mixedRecorderRef.current = recorder;
+            if (micStream) {
+              // Start mixed recorder (user + Pearl for debugging)
+              if (!mixedRecorderRef.current) {
+                console.log('[RealtimeInterview] Starting mixed recorder...');
+                const mixedRecorder = startMixedRecorder({
+                  micStream,
+                  botStream: stream,
+                  onStop: (blob) => {
+                    console.log('[RealtimeInterview] Mixed recording stopped:', blob.size, 'bytes');
+                    mixedAudioBlobRef.current = blob;
+                  },
+                });
+                mixedRecorderRef.current = mixedRecorder;
+              }
+
+              // Start user-only recorder (for final story audio)
+              if (!userOnlyRecorderRef.current) {
+                console.log('[RealtimeInterview] Starting user-only recorder...');
+                const userOnlyRecorder = startUserOnlyRecorder({
+                  micStream,
+                  onStop: (blob) => {
+                    console.log('[RealtimeInterview] User-only recording stopped:', blob.size, 'bytes');
+                    userOnlyAudioBlobRef.current = blob;
+                  },
+                });
+                userOnlyRecorderRef.current = userOnlyRecorder;
+              }
             }
           }, 100);
         },
@@ -404,7 +405,7 @@ export function useRealtimeInterview() {
     mixedRecorderRef.current = recorder;
   }, []);
 
-  // Stop session and mixed recording
+  // Stop session and all recorders
   const stopSession = useCallback(() => {
     console.log('[RealtimeInterview] Stopping session...');
 
@@ -412,6 +413,12 @@ export function useRealtimeInterview() {
     if (mixedRecorderRef.current) {
       mixedRecorderRef.current.stop();
       mixedRecorderRef.current = null;
+    }
+
+    // Stop user-only recorder
+    if (userOnlyRecorderRef.current) {
+      userOnlyRecorderRef.current.stop();
+      userOnlyRecorderRef.current = null;
     }
 
     // Stop audio playback and remove from DOM
@@ -451,9 +458,14 @@ export function useRealtimeInterview() {
     });
   }, []);
 
-  // Get mixed audio blob for upload
+  // Get mixed audio blob for upload (user + Pearl for debugging)
   const getMixedAudioBlob = useCallback(() => {
     return mixedAudioBlobRef.current;
+  }, []);
+
+  // Get user-only audio blob for story playback (no Pearl voice)
+  const getUserOnlyAudioBlob = useCallback(() => {
+    return userOnlyAudioBlobRef.current;
   }, []);
 
   // Cleanup on unmount
@@ -514,6 +526,7 @@ export function useRealtimeInterview() {
     toggleMic,
     startMixedRecording,
     getMixedAudioBlob,
+    getUserOnlyAudioBlob,
     updateInstructions,
     sendTextMessage,
     triggerPearlResponse,

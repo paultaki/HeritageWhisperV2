@@ -16,7 +16,8 @@ export interface QAPair {
 
 export interface ConversationData {
   qaPairs: QAPair[];
-  audioBlob?: Blob | null;
+  audioBlob?: Blob | null; // Mixed audio (user + Pearl) - optional, for debugging
+  userOnlyAudioBlob?: Blob | null; // User-only audio (for final story) - preferred
   fullTranscript: string;
   totalDuration: number;
 }
@@ -58,23 +59,28 @@ export async function completeConversationAndRedirect(
 ): Promise<void> {
   try {
     console.log('📝 Completing conversation...', {
-      hasAudio: !!conversationData.audioBlob,
+      hasUserOnlyAudio: !!conversationData.userOnlyAudioBlob,
+      hasMixedAudio: !!conversationData.audioBlob,
       transcriptLength: conversationData.fullTranscript?.length,
       qaPairsCount: conversationData.qaPairs?.length,
       duration: conversationData.totalDuration
     });
 
-    const { qaPairs, audioBlob, fullTranscript, totalDuration } = conversationData;
+    const { qaPairs, audioBlob, userOnlyAudioBlob, fullTranscript, totalDuration } = conversationData;
 
-    if (audioBlob) {
-      const sizeInMB = audioBlob.size / (1024 * 1024);
-      console.log(`🎵 Audio size: ${sizeInMB.toFixed(2)} MB`);
+    // Prefer user-only audio (no Pearl voice) for final story
+    const finalAudioBlob = userOnlyAudioBlob || audioBlob;
+
+    if (finalAudioBlob) {
+      const sizeInMB = finalAudioBlob.size / (1024 * 1024);
+      const audioType = userOnlyAudioBlob ? 'User-only' : 'Mixed';
+      console.log(`🎵 ${audioType} audio size: ${sizeInMB.toFixed(2)} MB`);
     }
 
     // Create recording session data for wizard
     const recordingData = {
       mode: 'conversation' as const,
-      audioBlob: audioBlob || undefined,
+      audioBlob: finalAudioBlob || undefined, // Use user-only audio if available, fallback to mixed
       duration: totalDuration || 0,
       timestamp: new Date().toISOString(),
       rawTranscript: fullTranscript || '',

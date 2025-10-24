@@ -450,40 +450,48 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           <div className={`relative rounded-3xl shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}>
-            <div 
+            <div
               className="relative w-full aspect-[4/3] overflow-hidden rounded-3xl"
               style={{ pointerEvents: 'none' }}
             >
-              <div 
+              <div
                 className="absolute inset-0 cursor-pointer"
                 style={{ pointerEvents: 'auto', zIndex: 1 }}
                 onClick={handleCardClick}
               />
-              <Image
-                src={displayPhoto.url}
-                alt={story.title}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
-                className={`transition-transform duration-500 hover:scale-105 ${
-                  !displayPhoto.transform ? 'object-cover' : ''
-                } ${isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''}`}
-                loading="eager"
-                priority={index < 8}
-                quality={85}
-                placeholder="blur"
-                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
-                style={
-                  displayPhoto.transform
-                    ? {
-                        transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
-                        transformOrigin: "center center",
-                        objectFit: "cover",
-                      }
-                    : undefined
-                }
-                onError={(e) => console.error("[Timeline-v2] Image failed to load:", displayPhoto.url)}
-                onLoad={() => { /* quiet success log */ }}
-              />
+              {displayPhoto.transform ? (
+                // Use regular img tag when transform is present (Next.js Image doesn't apply inline styles with fill)
+                // Note: Don't apply ken-burns-effect or hover:scale when we have a custom transform
+                <img
+                  src={displayPhoto.url}
+                  alt={story.title}
+                  className="absolute inset-0 w-full h-full"
+                  style={{
+                    transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
+                    transformOrigin: "center center",
+                    objectFit: "cover",
+                  }}
+                  onError={(e) => console.error("[Timeline-v2] Image failed to load:", displayPhoto.url)}
+                />
+              ) : (
+                // Use Next.js Image for optimized loading when no transform
+                <Image
+                  src={displayPhoto.url}
+                  alt={story.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
+                  className={`object-cover transition-transform duration-500 hover:scale-105 ${
+                    isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''
+                  }`}
+                  loading="eager"
+                  priority={index < 8}
+                  quality={85}
+                  placeholder="blur"
+                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
+                  onError={(e) => console.error("[Timeline-v2] Image failed to load:", displayPhoto.url)}
+                  onLoad={() => { /* quiet success log */ }}
+                />
+              )}
             </div>
             {/* Photo count badge (desktop) - top left */}
             {photoCount > 1 && (

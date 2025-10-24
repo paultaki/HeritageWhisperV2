@@ -25,7 +25,8 @@ import {
   GraduationCap,
   Baby,
   Music,
-  Utensils
+  Utensils,
+  X
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useState, useEffect } from "react";
@@ -46,6 +47,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 // Category prompts data
 const CATEGORY_PROMPTS: Record<string, string[]> = {
@@ -296,10 +298,12 @@ function SimplePromptCard({
 // Family prompt card with special styling
 function FamilyPromptCard({
   prompt,
-  onRecord
+  onRecord,
+  onDismiss
 }: {
   prompt: FamilyPrompt;
   onRecord: (id: string, text: string, source: string) => void;
+  onDismiss: (id: string) => void;
 }) {
   return (
     <motion.div
@@ -308,8 +312,17 @@ function FamilyPromptCard({
       whileHover={{ y: -4 }}
       className="group relative rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 p-6 border-2 border-blue-200"
     >
+      {/* Dismiss button */}
+      <button
+        onClick={() => onDismiss(prompt.id)}
+        className="absolute top-3 right-3 p-1.5 rounded-full bg-white/80 hover:bg-white text-gray-600 hover:text-gray-900 transition-all shadow-sm hover:shadow-md"
+        aria-label="Dismiss question"
+      >
+        <X className="h-4 w-4" />
+      </button>
+
       {/* From badge */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between pr-8">
         <div className="flex items-center gap-2">
           <Heart className="h-5 w-5 text-blue-600 fill-blue-600" />
           <span className="text-base font-semibold text-blue-700">
@@ -349,6 +362,7 @@ export default function PromptsV2Page() {
   const [showHelp, setShowHelp] = useState(false);
   const [showSubmitQuestionDialog, setShowSubmitQuestionDialog] = useState(false);
   const [questionText, setQuestionText] = useState("");
+  const [promptToDismiss, setPromptToDismiss] = useState<FamilyPrompt | null>(null);
 
   // V3: Get active storyteller context for family sharing
   const { activeContext, isOwnAccount, canInvite } = useAccountContext();
@@ -456,6 +470,33 @@ export default function PromptsV2Page() {
     },
   });
 
+  const dismissFamilyPromptMutation = useMutation({
+    mutationFn: async (promptId: string) => {
+      const response = await apiRequest("DELETE", `/api/prompts/family-submitted?id=${promptId}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to dismiss prompt");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["/api/prompts/family-submitted", storytellerId],
+      });
+      toast({
+        title: "Question dismissed",
+        description: "The question has been removed from your list",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Unable to dismiss question",
+        description: error?.message || "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleRecord = (promptId: string, promptText: string, source: string) => {
     if (source === 'ai') {
       sessionStorage.setItem("activePromptId", promptId);
@@ -465,6 +506,20 @@ export default function PromptsV2Page() {
 
   const handleSave = (id: string, text: string, source: string) => {
     queueMutation.mutate({ promptId: id, source, text });
+  };
+
+  const handleDismissFamilyPrompt = (promptId: string) => {
+    const prompt = familyPrompts.find(p => p.id === promptId);
+    if (prompt) {
+      setPromptToDismiss(prompt);
+    }
+  };
+
+  const confirmDismiss = () => {
+    if (promptToDismiss) {
+      dismissFamilyPromptMutation.mutate(promptToDismiss.id);
+      setPromptToDismiss(null);
+    }
   };
 
   // Data
@@ -602,6 +657,7 @@ export default function PromptsV2Page() {
                     key={prompt.id}
                     prompt={prompt}
                     onRecord={handleRecord}
+                    onDismiss={handleDismissFamilyPrompt}
                   />
                 ))}
               </div>
@@ -751,6 +807,18 @@ export default function PromptsV2Page() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Dismiss Family Prompt Confirmation */}
+        <ConfirmModal
+          isOpen={!!promptToDismiss}
+          title="Dismiss Question?"
+          message={`Are you sure you want to dismiss this question from ${promptToDismiss?.submittedBy.name}?\n\n"${promptToDismiss?.prompt_text}"\n\nYou can always ask them to submit it again if you change your mind.`}
+          confirmText="Dismiss"
+          cancelText="Keep It"
+          onConfirm={confirmDismiss}
+          onCancel={() => setPromptToDismiss(null)}
+          variant="danger"
+        />
 
         {/* Submit Question Dialog */}
         <Dialog open={showSubmitQuestionDialog} onOpenChange={setShowSubmitQuestionDialog}>

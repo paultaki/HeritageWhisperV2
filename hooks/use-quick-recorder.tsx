@@ -191,29 +191,23 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
     }
   }, []);
 
-  // Restart recording
+  // Restart recording (confirmation should be handled by component)
   const restartRecording = useCallback(() => {
-    if (
-      window.confirm(
-        "This will discard your current recording. Are you sure you want to restart?"
-      )
-    ) {
-      setIsRestarting(true);
+    setIsRestarting(true);
 
-      if (mediaRecorderRef.current) {
-        mediaRecorderRef.current.stop();
-      }
-
-      cleanup();
-      setDuration(0);
-      setAudioBlob(null);
-      setState("ready");
-      pausedDurationRef.current = 0;
-
-      setTimeout(() => {
-        setIsRestarting(false);
-      }, 100);
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
     }
+
+    cleanup();
+    setDuration(0);
+    setAudioBlob(null);
+    setState("ready");
+    pausedDurationRef.current = 0;
+
+    setTimeout(() => {
+      setIsRestarting(false);
+    }, 100);
   }, [cleanup]);
 
   // Handle recording completion - show audio review screen

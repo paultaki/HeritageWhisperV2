@@ -31,6 +31,7 @@ export function MemoryOverlay({
   const [duration, setDuration] = useState(0);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   // Find current story index
   const currentIndex = stories.findIndex((s) => s.id === story.id);
@@ -104,12 +105,13 @@ export function MemoryOverlay({
     };
   }, [isOpen]);
 
-  // Reset audio state when story changes
+  // Reset audio state and photo index when story changes
   useEffect(() => {
     console.log('[MemoryOverlay] Story changed, resetting state for story:', story.id);
     setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
+    setCurrentPhotoIndex(0);
 
     // Reset audio element if it exists
     if (audioRef.current) {
@@ -277,8 +279,54 @@ export function MemoryOverlay({
 
   if (!isOpen) return null;
 
-  // Get hero image
-  const heroImage = story.photos?.find((p) => p.isHero)?.url || story.photoUrl;
+  // Get all photos (prefer photos array, fallback to legacy photoUrl)
+  const allPhotos = story.photos && story.photos.length > 0
+    ? story.photos
+    : story.photoUrl
+    ? [{ id: 'legacy', url: story.photoUrl, transform: story.photoTransform, isHero: true }]
+    : [];
+
+  const hasPhotos = allPhotos.length > 0;
+  const hasMultiplePhotos = allPhotos.length > 1;
+  const currentPhoto = hasPhotos ? allPhotos[currentPhotoIndex] : null;
+
+  const handlePrevPhoto = () => {
+    setCurrentPhotoIndex((prev) => (prev > 0 ? prev - 1 : allPhotos.length - 1));
+  };
+
+  const handleNextPhoto = () => {
+    setCurrentPhotoIndex((prev) => (prev < allPhotos.length - 1 ? prev + 1 : 0));
+  };
+
+  // Touch gestures for photo gallery
+  const [photoTouchStart, setPhotoTouchStart] = useState<{ x: number; y: number } | null>(null);
+
+  const handlePhotoTouchStart = (e: React.TouchEvent) => {
+    setPhotoTouchStart({
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    });
+  };
+
+  const handlePhotoTouchEnd = (e: React.TouchEvent) => {
+    if (!photoTouchStart || !hasMultiplePhotos) return;
+
+    const deltaX = e.changedTouches[0].clientX - photoTouchStart.x;
+    const deltaY = Math.abs(e.changedTouches[0].clientY - photoTouchStart.y);
+
+    // Only swipe if horizontal movement is greater than vertical (to avoid interfering with scroll)
+    if (Math.abs(deltaX) > 50 && deltaY < 30) {
+      if (deltaX < 0) {
+        // Swipe left - next photo
+        handleNextPhoto();
+      } else {
+        // Swipe right - previous photo
+        handlePrevPhoto();
+      }
+    }
+
+    setPhotoTouchStart(null);
+  };
 
   return (
     <div
@@ -324,13 +372,78 @@ export function MemoryOverlay({
 
         {/* Scrollable Body */}
         <div className="memory-overlay-body">
-          {/* Hero Image */}
-          {heroImage && (
-            <img
-              src={heroImage}
-              alt={story.title}
-              className="memory-overlay-image"
-            />
+          {/* Photo Gallery */}
+          {hasPhotos && currentPhoto && (
+            <div
+              className="relative w-full aspect-[3/2] overflow-hidden rounded-xl my-6 shadow-lg bg-gray-100"
+              onTouchStart={handlePhotoTouchStart}
+              onTouchEnd={handlePhotoTouchEnd}
+            >
+              {/* Photo */}
+              <img
+                src={currentPhoto.url}
+                alt={currentPhoto.caption || story.title}
+                className="absolute inset-0 w-full h-full select-none"
+                style={
+                  currentPhoto.transform
+                    ? {
+                        transform: `scale(${currentPhoto.transform.zoom}) translate(${currentPhoto.transform.position.x / currentPhoto.transform.zoom}px, ${currentPhoto.transform.position.y / currentPhoto.transform.zoom}px)`,
+                        transformOrigin: "center center",
+                        objectFit: "cover",
+                      }
+                    : {
+                        objectFit: "cover",
+                      }
+                }
+              />
+
+              {/* Navigation Arrows (only show if multiple photos) */}
+              {hasMultiplePhotos && (
+                <>
+                  <button
+                    onClick={handlePrevPhoto}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                    aria-label="Previous photo"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  <button
+                    onClick={handleNextPhoto}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                    aria-label="Next photo"
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                </>
+              )}
+
+              {/* Photo Indicators (dots) */}
+              {hasMultiplePhotos && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                  {allPhotos.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentPhotoIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        index === currentPhotoIndex
+                          ? "bg-white w-6"
+                          : "bg-white/50 hover:bg-white/75"
+                      }`}
+                      aria-label={`Go to photo ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Photo Caption */}
+              {currentPhoto.caption && (
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                  <p className="text-white text-sm text-center">
+                    {currentPhoto.caption}
+                  </p>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Title */}

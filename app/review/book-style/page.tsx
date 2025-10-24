@@ -232,6 +232,22 @@ function BookStyleReviewContent() {
     }
   }, [searchParams, editId, isEditing, toast, urlReturnPath]);
 
+  // Handle NavCache errors in wizard mode
+  useEffect(() => {
+    if (isWizardMode && navId) {
+      const cachedData = navCache.get(navId);
+      if (!cachedData) {
+        console.error("[Wizard Mode] No data found in NavCache");
+        toast({
+          title: "Error",
+          description: "Recording data not found. Please try recording again.",
+          variant: "destructive",
+        });
+        router.push("/timeline");
+      }
+    }
+  }, [isWizardMode, navId, toast, router]);
+
   // Redirect to login if not authenticated (wait for auth to finish loading)
   useEffect(() => {
     if (!isAuthLoading && !user) {
@@ -367,12 +383,13 @@ function BookStyleReviewContent() {
 
         for (let i = 0; i < photos.length; i++) {
           const photo = photos[i];
-          const pendingFile = (window as any)[`__pendingPhotoFile_${i}`];
+          const pendingFile = photo.file || (window as any)[`__pendingPhotoFile_${i}`];
 
           console.log(`Photo ${i}:`, {
             hasPhoto: !!photo,
             photoUrl: photo?.url,
             hasPendingFile: !!pendingFile,
+            hasPhotoFile: !!photo.file,
             isBlobUrl: photo?.url?.startsWith("blob:"),
             pendingFileName: pendingFile?.name,
           });
@@ -599,13 +616,14 @@ function BookStyleReviewContent() {
 
       for (let i = 0; i < photos.length; i++) {
         const photo = photos[i];
-        const pendingFile = (window as any)[`__pendingPhotoFile_${i}`];
+        const pendingFile = photo.file || (window as any)[`__pendingPhotoFile_${i}`];
 
         console.log(`Photo ${i}:`, {
           hasPhoto: !!photo,
           photoUrl: photo?.url,
           isBlobUrl: photo?.url?.startsWith("blob:"),
           hasPendingFile: !!pendingFile,
+          hasPhotoFile: !!photo.file,
         });
 
         // If it's a blob URL, upload it first
@@ -667,12 +685,18 @@ function BookStyleReviewContent() {
               finalPhotos.push(savedPhoto);
               console.log(`Photo ${i} saved to story metadata`);
             }
+
+            // Clean up
+            URL.revokeObjectURL(photo.url);
+            delete (window as any)[`__pendingPhotoFile_${i}`];
           } catch (error) {
             console.error(`Failed to upload photo ${i}:`, error);
           }
         } else if (!photo.url.startsWith("blob:")) {
           // Keep existing photos that are not blob URLs
-          finalPhotos.push(photo);
+          // Remove the file property if it exists (shouldn't be in DB)
+          const { file, ...photoWithoutFile } = photo;
+          finalPhotos.push(photoWithoutFile);
         }
       }
 
@@ -867,13 +891,7 @@ function BookStyleReviewContent() {
     const cachedData = navCache.get(navId);
 
     if (!cachedData) {
-      console.error("[Wizard Mode] No data found in NavCache");
-      toast({
-        title: "Error",
-        description: "Recording data not found. Please try recording again.",
-        variant: "destructive",
-      });
-      router.push("/timeline");
+      // Error handling moved to useEffect to avoid render-time state updates
       return null;
     }
 

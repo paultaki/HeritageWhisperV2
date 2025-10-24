@@ -123,3 +123,94 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * DELETE /api/prompts/family-submitted?id=<prompt_id>
+ * Dismisses/deletes a family-submitted prompt
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    // Get the Authorization header
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    // Verify the JWT token with Supabase
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.getUser(token);
+
+    if (error || !user) {
+      return NextResponse.json(
+        { error: 'Invalid authentication' },
+        { status: 401 }
+      );
+    }
+
+    // Get prompt ID from query params
+    const { searchParams } = new URL(request.url);
+    const promptId = searchParams.get('id');
+
+    if (!promptId) {
+      return NextResponse.json(
+        { error: 'Prompt ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Verify the prompt belongs to the user before deleting
+    const { data: prompt, error: fetchError } = await supabaseAdmin
+      .from('family_prompts')
+      .select('storyteller_user_id')
+      .eq('id', promptId)
+      .single();
+
+    if (fetchError || !prompt) {
+      return NextResponse.json(
+        { error: 'Prompt not found' },
+        { status: 404 }
+      );
+    }
+
+    // Verify user owns this prompt (is the storyteller)
+    if (prompt.storyteller_user_id !== user.id) {
+      return NextResponse.json(
+        { error: 'You can only dismiss your own prompts' },
+        { status: 403 }
+      );
+    }
+
+    // Update status to 'dismissed' instead of hard delete (preserves history)
+    const { error: updateError } = await supabaseAdmin
+      .from('family_prompts')
+      .update({ status: 'dismissed' })
+      .eq('id', promptId);
+
+    if (updateError) {
+      logger.error('Error dismissing family prompt:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to dismiss prompt' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Prompt dismissed successfully'
+    });
+
+  } catch (err) {
+    logger.error('Error in DELETE /api/prompts/family-submitted:', err);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+

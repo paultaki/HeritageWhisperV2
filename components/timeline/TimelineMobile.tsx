@@ -743,7 +743,7 @@ function MemoryCard({
           src={displayPhoto.url}
           alt={story.title}
           className={`hw-card-media ${
-            isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''
+            !displayPhoto.transform && isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''
           }`}
           style={
             displayPhoto.transform

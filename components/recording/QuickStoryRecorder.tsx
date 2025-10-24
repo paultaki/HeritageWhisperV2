@@ -9,6 +9,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { navCache } from "@/lib/navCache";
 import { useAuth } from "@/lib/auth";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface QuickStoryRecorderProps {
   isOpen: boolean;
@@ -33,6 +34,10 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
   const [textStory, setTextStory] = useState('');
   const [isSavingText, setIsSavingText] = useState(false);
   const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+  const [showDiscardRecordingConfirm, setShowDiscardRecordingConfirm] = useState(false);
+  const [showDiscardTextConfirm, setShowDiscardTextConfirm] = useState(false);
+  const [showRestartConfirm, setShowRestartConfirm] = useState(false);
+  const [showUploadError, setShowUploadError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -136,7 +141,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
       onClose();
     } catch (error) {
       console.error('Error uploading audio:', error);
-      alert('Failed to process audio file. Please try again.');
+      setShowUploadError(true);
     } finally {
       setIsUploadingAudio(false);
       if (fileInputRef.current) {
@@ -147,24 +152,39 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
 
   const handleClose = () => {
     if (state === "recording" || state === "paused") {
-      if (window.confirm("Stop recording and discard your progress?")) {
-        cancelRecording();
-        setMode('select');
-        setTextStory('');
-        onClose();
-      }
+      setShowDiscardRecordingConfirm(true);
     } else if (mode === 'text' && textStory.trim()) {
-      if (window.confirm("Discard your written story?")) {
-        setMode('select');
-        setTextStory('');
-        onClose();
-      }
+      setShowDiscardTextConfirm(true);
     } else {
       cancelRecording();
       setMode('select');
       setTextStory('');
       onClose();
     }
+  };
+
+  const handleConfirmDiscardRecording = () => {
+    setShowDiscardRecordingConfirm(false);
+    cancelRecording();
+    setMode('select');
+    setTextStory('');
+    onClose();
+  };
+
+  const handleConfirmDiscardText = () => {
+    setShowDiscardTextConfirm(false);
+    setMode('select');
+    setTextStory('');
+    onClose();
+  };
+
+  const handleRestartClick = () => {
+    setShowRestartConfirm(true);
+  };
+
+  const handleConfirmRestart = () => {
+    setShowRestartConfirm(false);
+    restartRecording();
   };
 
   return (
@@ -504,7 +524,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                         Stop
                       </Button>
                       <Button
-                        onClick={restartRecording}
+                        onClick={handleRestartClick}
                         size="lg"
                         variant="outline"
                         className="rounded-full px-8 w-full sm:w-auto"
@@ -614,6 +634,53 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
           </AnimatePresence>
         </div>
       </DialogContent>
+
+      {/* Discard Recording Confirmation */}
+      <ConfirmModal
+        isOpen={showDiscardRecordingConfirm}
+        title="Discard Recording?"
+        message="Stop recording and discard your progress?"
+        confirmText="Yes, Discard"
+        cancelText="Keep Recording"
+        onConfirm={handleConfirmDiscardRecording}
+        onCancel={() => setShowDiscardRecordingConfirm(false)}
+        variant="danger"
+      />
+
+      {/* Discard Text Confirmation */}
+      <ConfirmModal
+        isOpen={showDiscardTextConfirm}
+        title="Discard Story?"
+        message="Discard your written story?"
+        confirmText="Yes, Discard"
+        cancelText="Keep Writing"
+        onConfirm={handleConfirmDiscardText}
+        onCancel={() => setShowDiscardTextConfirm(false)}
+        variant="danger"
+      />
+
+      {/* Restart Recording Confirmation */}
+      <ConfirmModal
+        isOpen={showRestartConfirm}
+        title="Restart Recording?"
+        message="This will discard your current recording. Are you sure you want to restart?"
+        confirmText="Yes, Restart"
+        cancelText="Keep Recording"
+        onConfirm={handleConfirmRestart}
+        onCancel={() => setShowRestartConfirm(false)}
+        variant="danger"
+      />
+
+      {/* Upload Error */}
+      <ConfirmModal
+        isOpen={showUploadError}
+        title="Upload Failed"
+        message="Failed to process audio file. Please try again."
+        confirmText="OK"
+        onConfirm={() => setShowUploadError(false)}
+        onCancel={() => setShowUploadError(false)}
+        variant="primary"
+      />
     </Dialog>
   );
 }

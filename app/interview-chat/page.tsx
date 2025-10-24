@@ -7,7 +7,7 @@ import Image from "next/image";
 import { WelcomeModal } from "../interview-chat/components/WelcomeModal";
 import { ChatMessage } from "../interview-chat/components/ChatMessage";
 import { TypingIndicator } from "../interview-chat/components/TypingIndicator";
-import { ConfirmModal } from "../interview-chat/components/ConfirmModal";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import {
   completeConversationAndRedirect,
   extractQAPairs,
@@ -48,6 +48,8 @@ function InterviewChatV2Content() {
   const [textInput, setTextInput] = useState('');
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
 
@@ -74,29 +76,8 @@ function InterviewChatV2Content() {
 
     setTextInput(''); // Clear input immediately
 
-    // Calculate thoughtful delay based on message length
-    const wordCount = messageText.split(/\s+/).length;
-    const baseDelay = 800;
-    const perWordDelay = 60;
-    const maxDelay = 2500;
-    const thinkingDelay = Math.min(baseDelay + (wordCount * perWordDelay), maxDelay);
-
-    console.log('[InterviewChatV2] Pearl composing... (delay:', thinkingDelay, 'ms for', wordCount, 'words)');
-
-    // Show composing indicator first
-    const typingMessage: Message = {
-      id: 'typing-indicator',
-      type: 'typing',
-      content: '',
-      timestamp: new Date(),
-      sender: 'hw',
-    };
-    setMessages(prev => [...prev, typingMessage]);
-
-    // Send text to Realtime API after delay (so Pearl has time to "think")
-    setTimeout(() => {
-      sendTextMessage(messageText);
-    }, thinkingDelay);
+    // Send text to Realtime API immediately (no artificial delay)
+    sendTextMessage(messageText);
   };
 
   // Realtime API integration
@@ -110,6 +91,7 @@ function InterviewChatV2Content() {
     toggleVoice,
     toggleMic,
     getMixedAudioBlob,
+    getUserOnlyAudioBlob,
     sendTextMessage,
     triggerPearlResponse,
   } = useRealtimeInterview();
@@ -191,7 +173,8 @@ After they answer, continue the conversation naturally with follow-up questions 
         },
         (error) => {
           console.error('[InterviewChatV2] Realtime error:', error);
-          alert(`Realtime API error: ${error.message}`);
+          setErrorMessage(`Realtime API error: ${error.message}`);
+          setShowErrorModal(true);
         },
         {
           // Enable conversational AI with PEARLS v1.1 Witness system
@@ -240,7 +223,8 @@ After they answer, continue the conversation naturally with follow-up questions 
       }, 1500); // Delay to ensure WebRTC data channel is fully open
     } catch (error) {
       console.error('[InterviewChatV2] Failed to start session:', error);
-      alert('Failed to start voice session. Please try again.');
+      setErrorMessage('Failed to start voice session. Please try again.');
+      setShowErrorModal(true);
       setIsRecording(false);
     }
   };
@@ -268,7 +252,8 @@ After they answer, continue the conversation naturally with follow-up questions 
     const userResponses = messages.filter(m => m.type === 'audio-response');
 
     if (userResponses.length === 0) {
-      alert('Please answer at least one question before completing the interview.');
+      setErrorMessage('Please answer at least one question before completing the interview.');
+      setShowErrorModal(true);
       return;
     }
 
@@ -283,10 +268,17 @@ After they answer, continue the conversation naturally with follow-up questions 
     // Extract Q&A pairs from messages
     const qaPairs = extractQAPairs(messages);
 
-    // Get mixed audio blob
-    const mixedBlob = getMixedAudioBlob();
+    // Get both audio blobs
+    const mixedBlob = getMixedAudioBlob(); // User + Pearl (for debugging)
+    const userOnlyBlob = getUserOnlyAudioBlob(); // User voice only (for final story)
+
+    console.log('[InterviewChatV2] Audio blobs:', {
+      mixed: mixedBlob?.size || 0,
+      userOnly: userOnlyBlob?.size || 0
+    });
 
     // Combine all transcripts
+    const userResponses = messages.filter(m => m.type === 'audio-response');
     const fullTranscript = userResponses.map(m => m.content).join(' ');
 
     const totalDuration = messages
@@ -296,7 +288,8 @@ After they answer, continue the conversation naturally with follow-up questions 
     // Complete conversation and redirect
     await completeConversationAndRedirect({
       qaPairs,
-      audioBlob: mixedBlob,
+      audioBlob: mixedBlob, // Mixed audio (optional, for debugging)
+      userOnlyAudioBlob: userOnlyBlob, // User-only audio (preferred for final story)
       fullTranscript,
       totalDuration,
     });
@@ -355,12 +348,23 @@ After they answer, continue the conversation naturally with follow-up questions 
         cancelText="Keep Recording"
         onConfirm={() => {
           setShowCancelConfirm(false);
-          stopRecording();
+          handleEndConversation();
           stopRecordingState();
           router.push('/timeline');
         }}
         onCancel={() => setShowCancelConfirm(false)}
         variant="danger"
+      />
+
+      {/* Error Modal */}
+      <ConfirmModal
+        isOpen={showErrorModal}
+        title="Error"
+        message={errorMessage}
+        confirmText="OK"
+        onConfirm={() => setShowErrorModal(false)}
+        onCancel={() => setShowErrorModal(false)}
+        variant="primary"
       />
 
       {/* Chat Container */}

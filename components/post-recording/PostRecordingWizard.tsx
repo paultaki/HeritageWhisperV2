@@ -12,6 +12,7 @@ import { Step1_TitleYear } from "./Step1_TitleYear";
 import { Step2_Photos } from "./Step2_Photos";
 import { Step3_Review } from "./Step3_Review";
 import { Step4_Lesson } from "./Step4_Lesson";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useRouter } from "next/navigation";
 
 interface PostRecordingWizardProps {
@@ -36,11 +37,15 @@ export function PostRecordingWizard({
   const wizard = useRecordingWizard({ initialData, onComplete });
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isTranscriptionLoading, setIsTranscriptionLoading] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const handleCancel = () => {
-    if (window.confirm("Are you sure you want to cancel? Your progress will be lost.")) {
-      router.push("/timeline");
-    }
+    setShowCancelConfirm(true);
+  };
+
+  const handleConfirmCancel = () => {
+    setShowCancelConfirm(false);
+    router.push("/timeline");
   };
 
   // Auto-enhance transcripts when component mounts
@@ -352,6 +357,18 @@ export function PostRecordingWizard({
           </Button>
         )}
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        title="Cancel Story?"
+        message="Are you sure you want to cancel? Your progress will be lost."
+        confirmText="Yes, Cancel"
+        cancelText="Keep Editing"
+        onConfirm={handleConfirmCancel}
+        onCancel={() => setShowCancelConfirm(false)}
+        variant="danger"
+      />
     </div>
   );
 }
