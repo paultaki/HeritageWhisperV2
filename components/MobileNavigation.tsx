@@ -129,7 +129,7 @@ export default function MobileNavigation({
                 : 'hover:scale-110 active:scale-95'
             }`}
             style={{
-              bottom: "-2px",
+              top: '-42px',
               background: isRecording
                 ? "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)"
                 : "linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)",

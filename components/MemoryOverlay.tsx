@@ -254,12 +254,12 @@ export function MemoryOverlay({
 
   const handleViewInBook = () => {
     // Navigate to book view at this story's page
-    router.push(`/book?year=${story.storyYear}`);
+    router.push(`/book?storyId=${story.id}`);
   };
 
   const handleEdit = () => {
-    // Use the origin path if provided, otherwise default to book view at this story's year
-    const returnPath = originPath || `/book?year=${story.storyYear}`;
+    // Use the origin path if provided, otherwise default to book view at this story
+    const returnPath = originPath || `/book?storyId=${story.id}`;
     router.push(`/review/book-style?id=${story.id}&returnPath=${encodeURIComponent(returnPath)}`);
   };
 

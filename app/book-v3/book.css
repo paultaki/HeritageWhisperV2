@@ -172,12 +172,13 @@
 }
 */
 
-/* Content area within page */
+/* V3: Content area within page - EQUAL padding all sides */
 .page-content {
   width: 100%;
   height: var(--content-height);
   overflow: hidden;
-  padding: var(--content-margin) var(--content-margin) 16px;
+  padding: var(--content-margin); /* 23px on ALL four sides - equal */
+  box-sizing: border-box; /* Include padding in height calculation */
   color: #111;
 }
 
@@ -308,10 +309,26 @@
    PAGINATION HARDENING - Prevent Text Cutoff
    ============================================ */
 
-/* Audio player must reserve consistent space */
+/* V3: Audio player absolutely positioned - doesn't affect text flow */
 .audio-wrapper {
-  min-height: 70px; /* Match actual rendered height with margins */
-  box-sizing: border-box;
+  position: absolute;
+  top: var(--content-margin);
+  right: var(--content-margin);
+  width: auto;
+  max-width: 200px;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Compact audio controls */
+.audio-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ============================================
@@ -326,14 +343,17 @@
   hyphens: auto;
   text-align: left;
 
-  /* Prevent widows and orphans */
-  widows: 2;
-  orphans: 2;
+  /* V3: Enhanced widow/orphan control */
+  widows: 3;
+  orphans: 3;
 }
 
 .book-text p {
   margin-bottom: 12pt;
   text-indent: 0;
+  /* V3: Allow paragraph splits for better space utilization */
+  break-inside: auto;
+  page-break-inside: auto;
 }
 
 .book-text p:first-of-type {

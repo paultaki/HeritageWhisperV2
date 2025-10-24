@@ -26,7 +26,7 @@ export const MEASUREMENTS = {
   PHOTO_AREA: 260, // Photo carousel with all margins and spacing
   STORY_TITLE: 60, // Title with all margins (memory-title has margin: 12px 0 6px)
   STORY_DATE: 45, // Date/age line with margins
-  AUDIO_PLAYER: 70, // Audio player with margins (measured at ~70px)
+  AUDIO_PLAYER: 0, // V3: Audio absolutely positioned - doesn't affect text flow
 
   // Text properties (must match book.css for accurate measurement)
   LINE_HEIGHT: 28,
@@ -41,13 +41,13 @@ export const MEASUREMENTS = {
 
 // Calculated capacities
 export const CAPACITIES = {
-  // First page has photos, title, date, audio with spacing buffer
-  FIRST_PAGE_TEXT_HEIGHT: 700 - 260 - 60 - 45 - 70 - 40, // = 225px (~8-9 lines) - More space with absolute header
+  // V3: First page - audio removed from flow, more text capacity
+  FIRST_PAGE_TEXT_HEIGHT: 700 - 260 - 60 - 45 - 0 - 40, // = 295px (~10-11 lines) - 70px more without audio
 
   // Continuation pages - maximize available space (header is absolutely positioned)
   CONTINUATION_PAGE_HEIGHT: 680, // Increased to use more page space with new font size
 
-  FIRST_PAGE_LINES: Math.floor(225 / 28), // ~8 lines on first page
+  FIRST_PAGE_LINES: Math.floor(295 / 28), // ~10 lines on first page (was 8)
   CONTINUATION_LINES: Math.floor(680 / 28), // ~24 lines on continuation pages
 
   // Visual balance targets

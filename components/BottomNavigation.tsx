@@ -199,8 +199,10 @@ export default function BottomNavigation() {
           <div className="relative">
             <button
               onClick={() => setRecordModalOpen(true)}
-              className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95"
+              className="absolute left-1/2 w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95"
               style={{
+                top: '-42px',
+                transform: 'translateX(-50%)',
                 background: designSystem.colors.gradients.coral,
                 boxShadow: designSystem.shadows.xl,
               }}
