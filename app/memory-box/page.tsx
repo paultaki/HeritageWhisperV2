@@ -39,6 +39,7 @@ interface Story {
     id: string;
     url: string;
     isHero?: boolean;
+    transform?: { zoom: number; position: { x: number; y: number } };
   }>;
   storyYear?: number | null;
   createdAt: string;
@@ -567,7 +568,7 @@ export default function MemoryBoxPage() {
             </p>
             {filterMode === "all" && !searchQuery && (
               <Button
-                onClick={modeSelection.openModal}
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => modeSelection.openModal()}
                 className="bg-heritage-coral hover:bg-heritage-coral/90 text-white text-lg px-6 py-3"
               >
                 Add Your First Memory
@@ -594,7 +595,7 @@ export default function MemoryBoxPage() {
                 show_in_timeline: story.includeInTimeline,
                 include_in_book: story.includeInBook,
                 is_favorite: story.isFavorite,
-              } as SchemaStory;
+              } as unknown as SchemaStory;
             })}
             onPlay={(id) => {
               const story = processedStories.find((s) => s.id === id);
