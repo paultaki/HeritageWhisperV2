@@ -36,6 +36,14 @@ interface NavSection {
   items: NavItem[];
 }
 
+type UserWithMetadata = {
+  email?: string;
+  user_metadata?: {
+    avatar_url?: string;
+    full_name?: string;
+  };
+};
+
 const NAV_SECTIONS: NavSection[] = [
   {
     title: "Dashboard",
@@ -108,14 +116,14 @@ export default function AdminSidebar() {
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center gap-3 mb-2">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={user?.user_metadata?.avatar_url} />
+            <AvatarImage src={(user as Partial<UserWithMetadata>)?.user_metadata?.avatar_url} />
             <AvatarFallback className="bg-heritage-coral text-white">
               {getInitials(user?.email)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-900 truncate">
-              {user?.user_metadata?.full_name || user?.email?.split("@")[0]}
+              {(user as Partial<UserWithMetadata>)?.user_metadata?.full_name || user?.email?.split("@")[0]}
             </p>
             <p className="text-xs text-gray-500">Admin</p>
           </div>

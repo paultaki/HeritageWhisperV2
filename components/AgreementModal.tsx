@@ -135,7 +135,7 @@ export default function AgreementModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}} modal>
-      <DialogContent className="sm:max-w-md" hideClose>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl">Updated Legal Documents</DialogTitle>
           <DialogDescription className="text-base pt-2">
