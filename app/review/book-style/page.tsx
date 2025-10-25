@@ -13,6 +13,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navCache } from "@/lib/navCache";
 import { supabase } from "@/lib/supabase";
 
+// Local type for NavCache data with optional fields
+type NavPayloadExtended = {
+  returnPath?: string;
+  lessonLearned?: string;
+  [k: string]: unknown;
+};
+
 function BookStyleReviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -118,32 +125,32 @@ function BookStyleReviewContent() {
       const navId = searchParams.get("nav");
       if (navId) {
         console.log("[Review] Loading from NavCache with ID:", navId);
-        const cachedData = navCache.consume(navId);
+        const cachedData = navCache.consume(navId) as NavPayloadExtended | null;
 
         if (cachedData) {
           console.log("[Review] NavCache data retrieved:", {
-            hasTranscription: !!cachedData.transcription,
-            transcriptionLength: cachedData.transcription?.length,
-            hasMainAudioBase64: !!cachedData.mainAudioBase64,
-            base64Length: cachedData.mainAudioBase64?.length,
-            hasTitle: !!cachedData.title,
-            hasYear: !!cachedData.storyYear,
+            hasTranscription: !!(cachedData as any).transcription,
+            transcriptionLength: (cachedData as any).transcription?.length,
+            hasMainAudioBase64: !!(cachedData as any).mainAudioBase64,
+            base64Length: (cachedData as any).mainAudioBase64?.length,
+            hasTitle: !!(cachedData as any).title,
+            hasYear: !!(cachedData as any).storyYear,
             returnPath: cachedData.returnPath,
             allKeys: Object.keys(cachedData),
           });
 
-          if (cachedData.transcription) {
-            setTranscription(cachedData.transcription);
+          if ((cachedData as any).transcription) {
+            setTranscription((cachedData as any).transcription);
           }
-          if (cachedData.title) {
-            setTitle(cachedData.title);
+          if ((cachedData as any).title) {
+            setTitle((cachedData as any).title);
           }
-          if (cachedData.storyYear) {
-            setStoryYear(cachedData.storyYear);
+          if ((cachedData as any).storyYear) {
+            setStoryYear((cachedData as any).storyYear);
           }
-          if (cachedData.wisdomClipText || cachedData.wisdomTranscription) {
+          if ((cachedData as any).wisdomClipText || (cachedData as any).wisdomTranscription) {
             const wisdom =
-              cachedData.wisdomClipText || cachedData.wisdomTranscription || "";
+              (cachedData as any).wisdomClipText || (cachedData as any).wisdomTranscription || "";
             console.log("[Review] Setting wisdom text from NavCache:", wisdom);
             setWisdomText(wisdom);
           } else {
@@ -154,16 +161,16 @@ function BookStyleReviewContent() {
           }
 
           // Handle audio - convert base64 back to blob if available
-          if (cachedData.mainAudioBase64 && cachedData.mainAudioType) {
+          if ((cachedData as any).mainAudioBase64 && (cachedData as any).mainAudioType) {
             console.log("[Review] Converting base64 audio to blob");
             try {
-              const binaryString = atob(cachedData.mainAudioBase64);
+              const binaryString = atob((cachedData as any).mainAudioBase64);
               const bytes = new Uint8Array(binaryString.length);
               for (let i = 0; i < binaryString.length; i++) {
                 bytes[i] = binaryString.charCodeAt(i);
               }
               const blob = new Blob([bytes], {
-                type: cachedData.mainAudioType,
+                type: (cachedData as any).mainAudioType,
               });
               const url = URL.createObjectURL(blob);
               setMainAudioBlob(blob);
@@ -172,14 +179,14 @@ function BookStyleReviewContent() {
             } catch (err) {
               console.error("[Review] Failed to convert base64 to blob:", err);
             }
-          } else if (cachedData.audioUrl) {
-            setAudioUrl(cachedData.audioUrl);
+          } else if ((cachedData as any).audioUrl) {
+            setAudioUrl((cachedData as any).audioUrl);
           }
-          
+
           // Set audio duration from cache if available
-          if (cachedData.audioDuration) {
-            setAudioDuration(cachedData.audioDuration);
-            console.log("[Review] Audio duration from cache:", cachedData.audioDuration, "seconds");
+          if ((cachedData as any).audioDuration) {
+            setAudioDuration((cachedData as any).audioDuration);
+            console.log("[Review] Audio duration from cache:", (cachedData as any).audioDuration, "seconds");
           }
 
           return; // Data loaded from cache, skip other sources
@@ -888,7 +895,7 @@ function BookStyleReviewContent() {
   // Wizard Mode: New recording flow
   if (isWizardMode && navId) {
     console.log("[Wizard Mode] Loading data from NavCache with ID:", navId);
-    const cachedData = navCache.get(navId);
+    const cachedData = navCache.get(navId) as NavPayloadExtended | null;
 
     if (!cachedData) {
       // Error handling moved to useEffect to avoid render-time state updates
@@ -899,35 +906,35 @@ function BookStyleReviewContent() {
 
     // Prepare RecordingSession from cached data
     const recording: RecordingSession = {
-      mode: cachedData.mode || "quick",
-      audioBlob: cachedData.audioBlob,
-      duration: cachedData.duration || 0,
-      timestamp: cachedData.timestamp || new Date().toISOString(),
-      rawTranscript: cachedData.rawTranscript || "",
-      qaPairs: cachedData.qaPairs,
+      mode: (cachedData as any).mode || "quick",
+      audioBlob: (cachedData as any).audioBlob,
+      duration: (cachedData as any).duration || 0,
+      timestamp: String((cachedData as any).timestamp || new Date().toISOString()),
+      rawTranscript: (cachedData as any).rawTranscript || "",
+      qaPairs: (cachedData as any).qaPairs,
     };
 
     // For conversation mode, automatically create enhanced version
-    let enhancedTranscript = cachedData.enhancedTranscript || cachedData.rawTranscript || "";
+    let enhancedTranscript = (cachedData as any).enhancedTranscript || (cachedData as any).rawTranscript || "";
 
     // If we have Q&A pairs and no enhanced transcript yet, we'll enhance it on the fly
     // This happens asynchronously in the wizard component
-    if (cachedData.mode === "conversation" && cachedData.qaPairs && !cachedData.enhancedTranscript) {
+    if ((cachedData as any).mode === "conversation" && (cachedData as any).qaPairs && !(cachedData as any).enhancedTranscript) {
       console.log("[Wizard Mode] Conversation mode detected, enhancement will be done in wizard");
-      enhancedTranscript = cachedData.rawTranscript || ""; // Start with raw, will enhance in component
+      enhancedTranscript = (cachedData as any).rawTranscript || ""; // Start with raw, will enhance in component
     }
 
     // Prepare initial wizard data
     const initialData: Partial<PostRecordingData> = {
-      title: cachedData.title || "",
-      year: cachedData.storyYear ? parseInt(cachedData.storyYear, 10) : undefined,
+      title: (cachedData as any).title || "",
+      year: (cachedData as any).storyYear ? parseInt((cachedData as any).storyYear, 10) : undefined,
       photos: [],
-      originalTranscript: cachedData.rawTranscript || "",
+      originalTranscript: (cachedData as any).rawTranscript || "",
       enhancedTranscript: enhancedTranscript,
       useEnhanced: true,
       lessonLearned: cachedData.lessonLearned || "",
       recording,
-      userBirthYear: user?.birth_year,
+      userBirthYear: user?.birthYear,
     };
 
     const handleWizardComplete = () => {
