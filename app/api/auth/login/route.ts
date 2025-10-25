@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { ZodError } from "zod";
 import { logger } from "@/lib/logger";
 import { authRatelimit, getClientIp, checkRateLimit } from "@/lib/ratelimit";
 import { LoginUserSchema, safeValidateRequestBody } from "@/lib/validationSchemas";
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       // Format validation errors for user-friendly response
-      const errorMessages = validationResult.error.errors.map((err) => ({
+      const errorMessages = validationResult.error.issues.map((err: any) => ({
         field: err.path.join('.'),
         message: err.message,
       }));
