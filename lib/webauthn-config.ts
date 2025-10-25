@@ -28,7 +28,7 @@ export function getRegistrationOptions(
   userDisplayName: string
 ): Omit<GenerateRegistrationOptionsOpts, "rpID" | "rpName"> {
   return {
-    userID: fromBase64Url(userId),
+    userID: fromBase64Url(userId) as Uint8Array<ArrayBuffer>,
     userName: userName, // Email address
     userDisplayName: userDisplayName, // Friendly name
     attestationType: "none", // No attestation required
