@@ -84,3 +84,50 @@ export interface WizardState extends WizardNavigation {
   isSubmitting: boolean;
   error: string | null;
 }
+
+// ============================================================
+// RecordModal Types (Added January 2025 - Refactoring)
+// ============================================================
+
+/** Transcription result from AssemblyAI */
+export interface TranscriptionResult {
+  transcription: string;
+  formattedContent?: any;
+  lessonOptions?: {
+    practical?: string;
+    emotional?: string;
+    character?: string;
+  };
+}
+
+/** Options for useTranscription hook */
+export interface UseTranscriptionOptions {
+  onComplete?: (result: TranscriptionResult) => void;
+  onError?: (error: Error) => void;
+}
+
+/** Options for useFollowUpQuestions hook */
+export interface UseFollowUpQuestionsOptions {
+  audioRecorderRef: React.RefObject<any>; // AudioRecorderHandle
+  onComplete?: (questions: string[]) => void;
+  onError?: (error: Error) => void;
+}
+
+/** Options for useRecordingState hook */
+export interface UseRecordingStateOptions {
+  onSave: (recording: {
+    audioBlob: Blob;
+    transcription?: string;
+    wisdomClip?: string;
+    followUpQuestions?: string[];
+    title?: string;
+    year?: number;
+    duration?: number;
+    lessonOptions?: any;
+    formattedContent?: any;
+    wisdomClipText?: string;
+  }) => void;
+  initialPrompt?: string;
+  initialTitle?: string;
+  initialYear?: number;
+}
