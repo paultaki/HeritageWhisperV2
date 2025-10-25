@@ -964,7 +964,7 @@ export default function HomePage() {
 
       {/* Final CTA Section - UPDATED */}
       <section className="py-24 md:py-32 bg-gradient-to-br from-[#faf8f5] via-[#f5ede8] to-[#f0e8e3] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/demo-campfire.png')] opacity-10 bg-cover bg-center"></div>
+        <div className="absolute inset-0 bg-[url('/landing_footer.webp')] opacity-10 bg-cover bg-center"></div>
         <div className="relative max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out">
             <h2 className="text-4xl md:text-6xl font-bold text-[#1f2937] mb-8 leading-tight">
