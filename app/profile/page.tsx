@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { MemoryMap } from "@/components/MemoryMap";
@@ -487,6 +488,13 @@ export default function Profile() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-gray-200/50">
         <div className="px-4 md:px-6 py-2 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
+            <Image
+              src="/Logo Icon hw.svg"
+              alt="Heritage Whisper"
+              width={72}
+              height={72}
+              className="h-[72px] w-auto flex-shrink-0"
+            />
             <Avatar className="w-9 h-9 border border-white shadow-sm">
               <AvatarImage src={profilePhoto || "/default-avatar.png"} alt={firstName} />
               <AvatarFallback className="bg-heritage-coral/10 text-heritage-coral text-sm">
