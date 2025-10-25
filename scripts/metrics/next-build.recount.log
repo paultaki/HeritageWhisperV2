@@ -2,7 +2,7 @@
    - Environments: .env.local
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 5.8s
+ ✓ Compiled successfully in 4.8s
    Skipping validation of types
    Skipping linting
    Collecting page data ...

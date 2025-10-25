@@ -503,7 +503,7 @@ export default function FamilyPage() {
       >
         <div className="flex items-center gap-3 w-full">
           <Image
-            src="/logo_hw.png"
+            src="/Logo Icon hw.svg"
             alt="Heritage Whisper"
             width={36}
             height={36}

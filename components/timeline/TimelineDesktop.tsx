@@ -44,7 +44,7 @@ import { getTopTraits } from "@/utils/getTopTraits";
 import { useAccountContext } from "@/hooks/use-account-context";
 import { AccountSwitcher } from "@/components/AccountSwitcher";
 
-const logoUrl = "/logo_hw.png";
+const logoUrl = "/Logo Icon hw.svg";
 
 // Timeline item helper type
 type TimelineItem = {
@@ -1043,7 +1043,7 @@ export function TimelineDesktop() {
         <div className="flex items-center justify-between gap-3 w-full">
           <div className="flex items-center gap-3">
             <Image
-              src="/logo_hw.png"
+              src="/Logo Icon hw.svg"
               alt="Heritage Whisper"
               width={36}
               height={36}

@@ -1,0 +1,14 @@
+app/api/prompts/cleanup/route.ts(98,42): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'contextNote' does not exist in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'userId' does not exist in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; promptText: string | SQL<unknown> | Placeholder<string, any>; outcome: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; resolvedAt?: Date | ... 3 more ... | undefined; }[]'.
+app/api/prompts/emergency-cleanup/route.ts(79,10): error TS2872: This kind of expression is always truthy.
+app/api/prompts/next/route.ts(180,9): error TS2322: Type '({ kind: "object" | "person" | "place" | "emotion"; text: any; } | null)[]' is not assignable to type 'CandidateEntity[]'.
+  Type '{ kind: "object" | "person" | "place" | "emotion"; text: any; } | null' is not assignable to type 'CandidateEntity'.
+    Type 'null' is not assignable to type 'CandidateEntity'.
+app/gift-plans/page.tsx(266,21): error TS17001: JSX elements cannot have multiple attributes with the same name.
+components/BookNavigation.tsx(184,14): error TS2304: Cannot find name 'X'.
+hooks/use-record-modal.tsx(104,9): error TS2353: Object literal may only specify known properties, and 'selectedPrompt' does not exist in type 'NavPayload'.
+hooks/use-recording-wizard.tsx(42,26): error TS2551: Property 'birth_year' does not exist on type 'User'. Did you mean 'birthYear'?
+hooks/usePhotoUpload.ts(3,22): error TS2459: Module '"../lib/queryClient"' declares 'getApiUrl' locally, but it is not exported.

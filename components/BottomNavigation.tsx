@@ -266,7 +266,7 @@ export default function BottomNavigation() {
         {/* Logo/Home */}
         <div className="mb-8 p-1">
           <img
-            src="/logo_hw.png"
+            src="/Logo Icon hw.svg"
             alt="HeritageWhisper"
             className="w-12 h-12 object-contain"
             style={{ filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))" }}

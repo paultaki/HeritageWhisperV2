@@ -44,7 +44,7 @@ import StoryTraits from "@/components/StoryTraits";
 import { getTopTraits } from "@/utils/getTopTraits";
 import { Palette } from "lucide-react";
 
-const logoUrl = "/logo_hw.png";
+const logoUrl = "/Logo Icon hw.svg";
 
 // Timeline item helper type
 type TimelineItem = {
@@ -1504,7 +1504,7 @@ export function TimelineMobile() {
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
               <Image
-                src="/logo_hw.png"
+                src="/Logo Icon hw.svg"
                 alt="Heritage Whisper"
                 width={32}
                 height={32}
