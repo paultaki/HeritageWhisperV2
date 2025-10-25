@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       return `${local[0]}***@${domain}`;
     };
 
-    // Fetch all user data (comprehensive GDPR export using Supabase client)
+    // Fetch all user data (GDPR Article 20: Only data "provided by" user, not AI work product)
     const [
       { data: userRecord },
       { data: userStories },
@@ -89,21 +89,16 @@ export async function GET(request: NextRequest) {
       { data: familyMembersRecords },
       { data: familyActivityRecords },
       { data: familyPromptsRecords },
-      { data: activePromptsRecords },
-      { data: promptHistoryRecords },
       { data: userPromptsRecords },
-      { data: ghostPromptsRecords },
-      { data: historicalContextRecords },
-      { data: profilesRecords },
       { data: passkeysRecords },
     ] = await Promise.all([
       // User profile
       supabaseAdmin.from('users').select('*').eq('id', userId).single(),
 
-      // Stories
+      // Stories (user-created content)
       supabaseAdmin.from('stories').select('*').eq('user_id', userId),
 
-      // User agreements
+      // User agreements (user accepted)
       supabaseAdmin.from('user_agreements').select('*').eq('user_id', userId),
 
       // Shared access (owned)
@@ -112,36 +107,30 @@ export async function GET(request: NextRequest) {
       // Shared access (received)
       supabaseAdmin.from('shared_access').select('*').eq('shared_with_user_id', userId),
 
-      // Family members
+      // Family members (user invited)
       supabaseAdmin.from('family_members').select('*').eq('user_id', userId),
 
-      // Family activity
+      // Family activity (user's family interactions)
       supabaseAdmin.from('family_activity').select('*').eq('user_id', userId),
 
-      // Family prompts (may not exist yet)
+      // Family prompts (questions from family - USER DATA)
       supabaseAdmin.from('family_prompts').select('*').eq('storyteller_user_id', userId),
 
-      // Active prompts (AI-generated)
-      supabaseAdmin.from('active_prompts').select('*').eq('user_id', userId),
-
-      // Prompt history (archive)
-      supabaseAdmin.from('prompt_history').select('*').eq('user_id', userId),
-
-      // User prompts catalog
+      // User prompts catalog (user saved/queued - USER DATA)
       supabaseAdmin.from('user_prompts').select('*').eq('user_id', userId),
 
-      // Ghost prompts
-      supabaseAdmin.from('ghost_prompts').select('*').eq('user_id', userId),
-
-      // Historical context (personalization)
-      supabaseAdmin.from('historical_context').select('*').eq('user_id', userId),
-
-      // Profiles (personalization)
-      supabaseAdmin.from('profiles').select('*').eq('user_id', userId),
-
-      // Passkeys (WebAuthn) - may not exist yet
+      // Passkeys (WebAuthn - user created)
       supabaseAdmin.from('passkeys').select('*').eq('user_id', userId),
     ]);
+
+    // Debug logging
+    logger.debug(`[Data Export] Fetched data counts:`, {
+      userRecord: userRecord ? 'found' : 'null',
+      stories: (userStories || []).length,
+      agreements: (userAgreementsRecords || []).length,
+      familyMembers: (familyMembersRecords || []).length,
+      savedPrompts: (userPromptsRecords || []).length,
+    });
 
     // Build export data package
     const exportData = {
@@ -161,14 +150,17 @@ export async function GET(request: NextRequest) {
         storyCount: userRecord.story_count,
       } : null,
 
-      // Stories (sanitize URLs for privacy)
+      // Stories (user-created content with full data)
       stories: (userStories || []).map((story: any) => ({
         id: story.id,
         title: story.title,
         transcription: story.transcription,
+        lessonLearned: story.lesson_learned,
+        lessonAlternatives: story.lesson_alternatives,
         storyYear: story.story_year,
         storyDate: story.story_date,
         lifeAge: story.life_age,
+        lifePhase: story.life_phase,
         durationSeconds: story.duration_seconds,
         emotions: story.emotions,
         pivotalCategory: story.pivotal_category,
@@ -179,66 +171,25 @@ export async function GET(request: NextRequest) {
         wisdomClipDuration: story.wisdom_clip_duration,
         formattedContent: story.formatted_content,
         extractedFacts: story.extracted_facts,
+        entitiesExtracted: story.entities_extracted,
+        audioUrl: story.audio_url,
+        wisdomClipUrl: story.wisdom_clip_url,
+        photoUrl: story.photo_url,
+        photoTransform: story.photo_transform,
         photos: story.photos,
         createdAt: story.created_at,
-        // Note: File URLs are not included for security - use separate download
-        hasAudio: !!story.audio_url,
-        hasPhoto: !!story.photo_url,
-        photoCount: Array.isArray(story.photos) ? story.photos.length : 0,
       })),
 
-      // AI-Generated Prompts (active, expired, and history)
-      prompts: {
-        active: (activePromptsRecords || []).map((prompt: any) => ({
-          id: prompt.id,
-          promptText: prompt.prompt_text,
-          tier: prompt.tier,
-          source: prompt.source,
-          expiresAt: prompt.expires_at,
-          createdAt: prompt.created_at,
-        })),
-        history: (promptHistoryRecords || []).map((prompt: any) => ({
-          id: prompt.id,
-          promptText: prompt.prompt_text,
-          tier: prompt.tier,
-          source: prompt.source,
-          answeredStoryId: prompt.answered_story_id,
-          answeredAt: prompt.answered_at,
-          skippedAt: prompt.skipped_at,
-          archivedAt: prompt.archived_at,
-        })),
-        catalog: (userPromptsRecords || []).map((prompt: any) => ({
-          id: prompt.id,
-          promptText: prompt.prompt_text,
-          category: prompt.category,
-          isActive: prompt.is_active,
-          timesUsed: prompt.times_used,
-        })),
-        ghost: (ghostPromptsRecords || []).map((prompt: any) => ({
-          id: prompt.id,
-          promptText: prompt.prompt_text,
-          category: prompt.category,
-          usedAt: prompt.used_at,
-        })),
-      },
-
-      // Personalization Data
-      personalization: {
-        profiles: (profilesRecords || []).map((profile: any) => ({
-          id: profile.id,
-          profileType: profile.profile_type,
-          profileData: profile.profile_data,
-          confidenceScore: profile.confidence_score,
-          lastUpdated: profile.last_updated,
-        })),
-        historicalContext: (historicalContextRecords || []).map((context: any) => ({
-          id: context.id,
-          contextType: context.context_type,
-          contextData: context.context_data,
-          relevanceScore: context.relevance_score,
-          createdAt: context.created_at,
-        })),
-      },
+      // User-saved prompts (from catalog - user chose these)
+      savedPrompts: (userPromptsRecords || []).map((prompt: any) => ({
+        id: prompt.id,
+        text: prompt.text,
+        category: prompt.category,
+        source: prompt.source,
+        status: prompt.status,
+        queuePosition: prompt.queue_position,
+        createdAt: prompt.created_at,
+      })),
 
       // Legal agreements accepted (mask IP addresses per GDPR Recital 26)
       agreements: (userAgreementsRecords || []).map((agreement: any) => ({
@@ -329,9 +280,8 @@ export async function GET(request: NextRequest) {
         newestStoryYear: Math.max(...(userStories || []).map((s: any) => s.story_year || 0)),
         familyMembersCount: (familyMembersRecords || []).length,
         familyPromptsCount: (familyPromptsRecords || []).length,
+        savedPromptsCount: (userPromptsRecords || []).length,
         sharedStoriesCount: (sharedAccessOwned || []).length,
-        activePromptsCount: (activePromptsRecords || []).length,
-        answeredPromptsCount: (promptHistoryRecords || []).filter((p: any) => p.answered_at).length,
         passkeysCount: (passkeysRecords || []).length,
       },
 
@@ -344,15 +294,19 @@ export async function GET(request: NextRequest) {
         scope: {
           included: [
             "User profile and account information",
-            "All stories with transcriptions and metadata",
-            "AI-generated prompts and personalization data",
-            "Family connections, sharing activity, and submitted questions",
+            "All stories with transcriptions, lessons, and full metadata",
+            "Audio and photo file URLs for download",
+            "User-saved prompts from catalog",
+            "Family-submitted questions and activity",
+            "Family connections and sharing activity",
             "Legal agreements and consent records",
             "Security credentials (passkeys)",
             "Usage statistics",
           ],
           excluded: [
-            "Audio and photo files (download separately from your timeline)",
+            "AI-generated prompts (not user-provided data)",
+            "AI-derived personalization profiles (work product)",
+            "Historical context (AI-generated)",
             "System logs older than 90 days",
             "Encrypted authentication tokens (public keys only)",
             "Third-party email addresses (masked for privacy protection)",
