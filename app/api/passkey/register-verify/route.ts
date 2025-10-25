@@ -36,16 +36,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 1: Verify the registration response
+    const expectedOrigin = getExpectedOrigin();
+    const expectedRPID = getExpectedRPID();
+
+    logger.info("[register-verify] Verifying with:", {
+      expectedOrigin,
+      expectedRPID,
+      credentialOrigin: credential.response.clientDataJSON,
+    });
+
     const verification = await verifyRegistrationResponse({
       response: credential,
       expectedChallenge: challenge,
-      expectedOrigin: getExpectedOrigin(),
-      expectedRPID: getExpectedRPID(),
+      expectedOrigin,
+      expectedRPID,
       requireUserVerification: true,
     }) as VerifiedRegistrationResponse;
 
     if (!verification.verified || !verification.registrationInfo) {
-      logger.warn("[register-verify] Verification failed");
+      logger.warn("[register-verify] Verification failed", { verification });
       return NextResponse.json(
         { error: "Passkey verification failed" },
         { status: 400 }
@@ -116,12 +125,20 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error(
-      "[register-verify] Error:",
-      error instanceof Error ? error.message : "Unknown error"
-    );
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
+    logger.error("[register-verify] Error:", {
+      message: errorMessage,
+      stack: errorStack,
+      error,
+    });
+
     return NextResponse.json(
-      { error: "Failed to verify registration" },
+      {
+        error: "Failed to verify registration",
+        details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+      },
       { status: 500 }
     );
   }
