@@ -505,9 +505,9 @@ export default function FamilyPage() {
           <Image
             src="/Logo Icon hw.svg"
             alt="Heritage Whisper"
-            width={36}
-            height={36}
-            className="h-9 w-auto"
+            width={72}
+            height={72}
+            className="h-[72px] w-auto"
           />
           <Users className="w-6 h-6" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
           <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Family Circle</h1>

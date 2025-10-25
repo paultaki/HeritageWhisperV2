@@ -1506,9 +1506,9 @@ export function TimelineMobile() {
               <Image
                 src="/Logo Icon hw.svg"
                 alt="Heritage Whisper"
-                width={32}
-                height={32}
-                className="h-8 w-auto"
+                width={64}
+                height={64}
+                className="h-16 w-auto"
               />
               <Calendar className="w-8 h-8" style={{ color: isDark ? '#b0b3b8' : '#1f0f08' }} />
               <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : undefined }}>Timeline</h1>

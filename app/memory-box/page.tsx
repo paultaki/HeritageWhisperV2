@@ -511,9 +511,9 @@ export default function MemoryBoxPage() {
             <Image
               src="/Logo Icon hw.svg"
               alt="Heritage Whisper"
-              width={36}
-              height={36}
-              className="h-9 w-auto"
+              width={72}
+              height={72}
+              className="h-[72px] w-auto"
             />
             <Box className="w-8 h-8" style={{ color: "#1f0f08" }} />
             <h1 className="text-2xl font-bold">Memory Box</h1>

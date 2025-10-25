@@ -575,6 +575,13 @@ export default function PromptsV2Page() {
         <div className="px-4 md:px-6 py-2 md:py-2">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
+              <Image
+                src="/Logo Icon hw.svg"
+                alt="Heritage Whisper"
+                width={72}
+                height={72}
+                className="h-[72px] w-auto flex-shrink-0"
+              />
               <Library className="w-6 h-6 text-gray-700 flex-shrink-0" />
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
