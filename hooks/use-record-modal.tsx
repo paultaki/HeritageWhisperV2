@@ -101,15 +101,10 @@ export function useRecordModal() {
         wisdomAudioBase64: recording.wisdomAudioBase64,
         wisdomAudioType: recording.wisdomAudioType || "audio/webm",
         prompt: recording.prompt,
-        selectedPrompt: recording.selectedPrompt,
-        followUpQuestions: recording.followUpQuestions,
-        formattedContent: recording.formattedContent,
-        lessonOptions: recording.lessonOptions, // Pass lesson options through
         title: recording.title,
         storyYear: recording.year,
-        fromModal: true,
         returnPath: pathname, // Store where the user came from
-      });
+      } as any);
 
       console.log(
         "[useRecordModal] Stored in NavCache with ID:",

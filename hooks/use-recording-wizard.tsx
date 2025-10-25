@@ -39,7 +39,7 @@ export function useRecordingWizard({
     useEnhanced: initialData.useEnhanced ?? true,
     lessonLearned: initialData.lessonLearned || "",
     recording: initialData.recording!,
-    userBirthYear: user?.birth_year,
+    userBirthYear: user?.birthYear,
   });
 
   // Update a single field

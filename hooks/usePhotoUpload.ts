@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
-import { apiRequest, getApiUrl } from "../lib/queryClient";
+import { apiRequest } from "../lib/queryClient";
 
 export function usePhotoUpload() {
   const [uploading, setUploading] = useState(false);

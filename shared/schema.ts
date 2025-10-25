@@ -54,6 +54,12 @@ export const users = pgTable("users", {
     people: string | null;
     places: string | null;
   }>(),
+  // RBAC
+  role: text("role").notNull().default("user"), // 'user', 'admin', 'moderator'
+  // AI Budget Control
+  aiDailyBudgetUsd: integer("ai_daily_budget_usd").default(1),
+  aiMonthlyBudgetUsd: integer("ai_monthly_budget_usd").default(10),
+  aiProcessingEnabled: boolean("ai_processing_enabled").notNull().default(true),
   // subscriptionExpires: timestamp("subscription_expires"),
   // stripeCustomerId: text("stripe_customer_id"),
   // stripeSubscriptionId: text("stripe_subscription_id"),
