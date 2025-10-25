@@ -255,7 +255,7 @@ export default function GiftPlansPage() {
                     {tier.description}
                   </p>
                   <div
-                    className="text-5xl md:text-6xl font-bold bg-gradient-to-r bg-clip-text text-transparent mb-2"
+                    className={`text-5xl md:text-6xl font-bold bg-gradient-to-r bg-clip-text text-transparent mb-2 ${tier.gradient}`}
                     style={{
                       fontFamily: "Poppins, sans-serif",
                       backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))`,
@@ -263,7 +263,6 @@ export default function GiftPlansPage() {
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                     }}
-                    className={`bg-gradient-to-r ${tier.gradient}`}
                   >
                     {tier.price}
                   </div>
