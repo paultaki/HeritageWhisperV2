@@ -205,7 +205,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-[#1f2937] mb-6">
               Why Most Family Stories Disappear
             </h2>
-            <p className="text-xl text-[#6b7280] max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-[#6b7280] max-w-3xl mx-auto leading-relaxed text-center">
               You&apos;re not alone. Most families want to preserve their stories but haven&apos;t started because...
             </p>
           </div>
@@ -411,7 +411,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-[#1f2937] mb-6">
               See The Difference
             </h2>
-            <p className="text-xl text-[#6b7280] max-w-2xl mx-auto">
+            <p className="text-xl text-[#6b7280] max-w-2xl mx-auto text-center">
               Compare HeritageWhisper to traditional memory services
             </p>
           </div>
@@ -455,7 +455,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-[#2d2520] mb-6">
               Not Just Another Memory Project
             </h2>
-            <p className="text-xl text-[#5a4a3a] max-w-2xl mx-auto">
+            <p className="text-xl text-[#5a4a3a] max-w-2xl mx-auto text-center">
               This is different from anything you&apos;ve tried before
             </p>
           </div>
@@ -533,7 +533,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-[#1f2937] mb-6">
               Enterprise-Grade Security for Your Family&apos;s Stories
             </h2>
-            <p className="text-xl text-[#6b7280] max-w-2xl mx-auto">
+            <p className="text-xl text-[#6b7280] max-w-2xl mx-auto text-center">
               Your loved one&apos;s memories deserve the highest protection
             </p>
           </div>
@@ -632,7 +632,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-[#2d2520] mb-6">
               The Interactive Timeline
             </h2>
-            <p className="text-xl text-[#5a4a3a] max-w-2xl mx-auto">
+            <p className="text-xl text-[#5a4a3a] max-w-2xl mx-auto text-center">
               Every moment organized and accessible. Tap any memory to hear their voice telling the story.
             </p>
           </div>
@@ -776,7 +776,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-[#1f2937] mb-6">
               Common Questions
             </h2>
-            <p className="text-xl text-[#6b7280]">
+            <p className="text-xl text-[#6b7280] text-center">
               Everything you need to know before you start
             </p>
           </div>
@@ -886,7 +886,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-[#1f2937] mb-6">
               Your Living Legacy Plan
             </h2>
-            <p className="text-xl text-[#6b7280]">
+            <p className="text-xl text-[#6b7280] text-center">
               Pay once, keep building your legacy forever. Unlimited stories, photos, family questions, and notifications—no more &quot;just a book.&quot;
             </p>
           </div>
@@ -976,7 +976,7 @@ export default function HomePage() {
                 Don&apos;t Let Another Story Slip Away
               </span>
             </h2>
-            <p className="text-xl md:text-2xl text-[#6b7280] mb-10 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-[#6b7280] mb-10 leading-relaxed max-w-3xl mx-auto text-center">
               Future generations won&apos;t thumb through books—they&apos;ll discover you here, voice and all.
             </p>
 
