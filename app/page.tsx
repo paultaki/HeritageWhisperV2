@@ -97,7 +97,8 @@ export default function HomePage() {
               alt="Heritage Whisper"
               width={480}
               height={120}
-              className="h-32 md:h-40 w-auto mb-3 drop-shadow-sm"
+              className="h-32 md:h-40 w-auto mb-3"
+              style={{ filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))" }}
               priority
             />
           </div>
@@ -1031,6 +1032,7 @@ export default function HomePage() {
                 width={240}
                 height={60}
                 className="h-16 w-auto"
+                style={{ filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))" }}
               />
             </div>
             <div className="flex gap-8 text-base">
