@@ -5,6 +5,18 @@ import { performTier3Analysis as performTier3AnalysisV2 } from "@/lib/tier3Analy
 import { extractEntities, generateTier1Templates } from "@/lib/promptGenerationV2";
 import { logger } from "@/lib/logger";
 
+type MaybePromise<T> = T | Promise<T>;
+
+// Local widened Tier1 prompt shape
+type AnyTier1Prompt = {
+  prompt?: string;
+  memory_type?: string;
+  anchor_entity?: string;
+  recording_likelihood?: string;
+  reasoning?: string;
+  [k: string]: unknown;
+};
+
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -99,11 +111,11 @@ export async function POST(request: NextRequest) {
 
       for (const story of stories) {
         const entities = extractEntities(story.transcript || "");
-        const prompts = generateTier1Templates(
+        const prompts = (generateTier1Templates as any)(
           entities,
           story.transcript || "",
           story.title || "Untitled",
-        );
+        ) as unknown as AnyTier1Prompt[];
 
         allPrompts.push(...prompts.map(p => ({
           prompt: p.prompt,

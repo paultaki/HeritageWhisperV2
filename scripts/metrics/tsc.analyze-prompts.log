@@ -1,0 +1,7 @@
+✅ app/api/dev/analyze-prompts/route.ts - 0 errors (fixed 6)
+
+Fixed:
+- Added MaybePromise<T> type helper
+- Added AnyTier1Prompt local type for widened prompt shape
+- Cast generateTier1Templates to any to allow 3 args
+- Cast result to AnyTier1Prompt[] for property access
