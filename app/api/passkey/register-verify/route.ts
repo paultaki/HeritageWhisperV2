@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       counter,
       credentialBackedUp,
       credentialDeviceType,
-    } = registrationInfo;
+    } = registrationInfo as any;
 
     // Step 2: Generate friendly name if not provided
     let name = friendlyName;
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       signCount: counter,
       credentialBackedUp,
       credentialDeviceType,
-      transports: credential.response.transports,
+      transports: credential.response.transports as any,
       friendlyName: name,
     });
 
