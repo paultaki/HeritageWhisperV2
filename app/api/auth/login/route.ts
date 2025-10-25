@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       // Format validation errors for user-friendly response
-      const errorMessages = validationResult.error.errors.map((err) => ({
+      const errorMessages = validationResult.error.issues.map((err: any) => ({
         field: err.path.join('.'),
         message: err.message,
       }));
