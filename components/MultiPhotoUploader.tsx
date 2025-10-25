@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -364,7 +366,7 @@ export function MultiPhotoUploader({
           {photoSlots.map((photo, index) => (
             <div key={index} className="relative">
               <input
-                ref={(el) => (fileInputRefs.current[index] = el)}
+                ref={(el) => { fileInputRefs.current[index] = el ?? null }}
                 type="file"
                 accept="image/*"
                 onChange={(e) => handleFileSelect(e, index)}
