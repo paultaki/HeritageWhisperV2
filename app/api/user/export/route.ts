@@ -1,21 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { db } from "@/lib/db";
-import {
-  stories,
-  users,
-  userAgreements,
-  sharedAccess,
-  familyMembers,
-  familyActivity,
-  activePrompts,
-  promptHistory,
-  ghostPrompts,
-  historicalContext,
-  profiles,
-  passkeys,
-} from "@/shared/schema";
-import { eq, sql } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
@@ -95,101 +79,68 @@ export async function GET(request: NextRequest) {
       return `${local[0]}***@${domain}`;
     };
 
-    // Check if tables exist (conditional - early implementation)
-    // Simplified approach: try to query and catch errors if table doesn't exist
-    let passkeysTableExists = false;
-    let familyPromptsTableExists = false;
-
-    try {
-      await db.select().from(passkeys).limit(1);
-      passkeysTableExists = true;
-    } catch (error) {
-      // Table doesn't exist or query failed - skip passkeys
-      logger.debug("[Data Export] Passkeys table not available");
-    }
-
-    try {
-      const result = await db.execute(sql`SELECT 1 FROM family_prompts LIMIT 1`);
-      familyPromptsTableExists = true;
-    } catch (error) {
-      // Table doesn't exist or query failed - skip family_prompts
-      logger.debug("[Data Export] Family prompts table not available");
-    }
-
-    // Fetch all user data (comprehensive GDPR export)
+    // Fetch all user data (comprehensive GDPR export using Supabase client)
     const [
-      userRecord,
-      userStories,
-      userAgreementsRecords,
-      sharedAccessRecords,
-      familyMembersRecords,
-      familyActivityRecords,
-      familyPromptsRecords,
-      activePromptsRecords,
-      promptHistoryRecords,
-      ghostPromptsRecords,
-      historicalContextRecords,
-      profilesRecords,
-      passkeysRecords,
+      { data: userRecord },
+      { data: userStories },
+      { data: userAgreementsRecords },
+      { data: sharedAccessOwned },
+      { data: sharedAccessReceived },
+      { data: familyMembersRecords },
+      { data: familyActivityRecords },
+      { data: familyPromptsRecords },
+      { data: activePromptsRecords },
+      { data: promptHistoryRecords },
+      { data: userPromptsRecords },
+      { data: ghostPromptsRecords },
+      { data: historicalContextRecords },
+      { data: profilesRecords },
+      { data: passkeysRecords },
     ] = await Promise.all([
       // User profile
-      db
-        .select()
-        .from(users)
-        .where(eq(users.id, userId))
-        .then((res) => res[0]),
+      supabaseAdmin.from('users').select('*').eq('id', userId).single(),
 
       // Stories
-      db.select().from(stories).where(eq(stories.userId, userId)),
+      supabaseAdmin.from('stories').select('*').eq('user_id', userId),
 
-      // Agreements
-      db.select().from(userAgreements).where(eq(userAgreements.userId, userId)),
+      // User agreements
+      supabaseAdmin.from('user_agreements').select('*').eq('user_id', userId),
 
-      // Shared access (both as owner and recipient)
-      Promise.all([
-        db
-          .select()
-          .from(sharedAccess)
-          .where(eq(sharedAccess.ownerUserId, userId)),
-        db
-          .select()
-          .from(sharedAccess)
-          .where(eq(sharedAccess.sharedWithUserId, userId)),
-      ]).then(([owned, received]) => ({ owned, received })),
+      // Shared access (owned)
+      supabaseAdmin.from('shared_access').select('*').eq('owner_user_id', userId),
+
+      // Shared access (received)
+      supabaseAdmin.from('shared_access').select('*').eq('shared_with_user_id', userId),
 
       // Family members
-      db.select().from(familyMembers).where(eq(familyMembers.userId, userId)),
+      supabaseAdmin.from('family_members').select('*').eq('user_id', userId),
 
       // Family activity
-      db.select().from(familyActivity).where(eq(familyActivity.userId, userId)),
+      supabaseAdmin.from('family_activity').select('*').eq('user_id', userId),
 
-      // Family prompts (conditional)
-      familyPromptsTableExists
-        ? db.execute(sql`
-            SELECT * FROM family_prompts
-            WHERE storyteller_user_id = ${userId}
-          `)
-        : Promise.resolve({ rows: [] }),
+      // Family prompts (may not exist yet)
+      supabaseAdmin.from('family_prompts').select('*').eq('storyteller_user_id', userId),
 
       // Active prompts (AI-generated)
-      db.select().from(activePrompts).where(eq(activePrompts.userId, userId)),
+      supabaseAdmin.from('active_prompts').select('*').eq('user_id', userId),
 
       // Prompt history (archive)
-      db.select().from(promptHistory).where(eq(promptHistory.userId, userId)),
+      supabaseAdmin.from('prompt_history').select('*').eq('user_id', userId),
 
-      // Ghost prompts (legacy)
-      db.select().from(ghostPrompts).where(eq(ghostPrompts.userId, userId)),
+      // User prompts catalog
+      supabaseAdmin.from('user_prompts').select('*').eq('user_id', userId),
 
-      // Historical context
-      db.select().from(historicalContext).where(eq(historicalContext.userId, userId)),
+      // Ghost prompts
+      supabaseAdmin.from('ghost_prompts').select('*').eq('user_id', userId),
 
-      // Profiles
-      db.select().from(profiles).where(eq(profiles.userId, userId)),
+      // Historical context (personalization)
+      supabaseAdmin.from('historical_context').select('*').eq('user_id', userId),
 
-      // Passkeys (conditional)
-      passkeysTableExists
-        ? db.select().from(passkeys).where(eq(passkeys.userId, userId))
-        : Promise.resolve([]),
+      // Profiles (personalization)
+      supabaseAdmin.from('profiles').select('*').eq('user_id', userId),
+
+      // Passkeys (WebAuthn) - may not exist yet
+      supabaseAdmin.from('passkeys').select('*').eq('user_id', userId),
     ]);
 
     // Build export data package
@@ -198,196 +149,190 @@ export async function GET(request: NextRequest) {
       exportVersion: "2.0",
 
       // User Profile
-      profile: {
-        id: userRecord?.id,
-        email: userRecord?.email,
-        name: userRecord?.name,
-        birthYear: userRecord?.birthYear,
-        bio: userRecord?.bio,
-        profilePhotoUrl: userRecord?.profilePhotoUrl,
-        createdAt: userRecord?.createdAt,
-        isPaid: userRecord?.isPaid,
-        storyCount: userRecord?.storyCount,
-      },
+      profile: userRecord ? {
+        id: userRecord.id,
+        email: userRecord.email,
+        name: userRecord.name,
+        birthYear: userRecord.birth_year,
+        bio: userRecord.bio,
+        profilePhotoUrl: userRecord.profile_photo_url,
+        createdAt: userRecord.created_at,
+        isPaid: userRecord.is_paid,
+        storyCount: userRecord.story_count,
+      } : null,
 
       // Stories (sanitize URLs for privacy)
-      stories: userStories.map((story) => ({
+      stories: (userStories || []).map((story: any) => ({
         id: story.id,
         title: story.title,
         transcription: story.transcription,
-        storyYear: story.storyYear,
-        storyDate: story.storyDate,
-        lifeAge: story.lifeAge,
-        durationSeconds: story.durationSeconds,
+        storyYear: story.story_year,
+        storyDate: story.story_date,
+        lifeAge: story.life_age,
+        durationSeconds: story.duration_seconds,
         emotions: story.emotions,
-        pivotalCategory: story.pivotalCategory,
-        includeInBook: story.includeInBook,
-        includeInTimeline: story.includeInTimeline,
-        isFavorite: story.isFavorite,
-        wisdomClipText: story.wisdomClipText,
-        wisdomClipDuration: story.wisdomClipDuration,
-        formattedContent: story.formattedContent,
-        extractedFacts: story.extractedFacts,
+        pivotalCategory: story.pivotal_category,
+        includeInBook: story.include_in_book,
+        includeInTimeline: story.include_in_timeline,
+        isFavorite: story.is_favorite,
+        wisdomClipText: story.wisdom_clip_text,
+        wisdomClipDuration: story.wisdom_clip_duration,
+        formattedContent: story.formatted_content,
+        extractedFacts: story.extracted_facts,
         photos: story.photos,
-        createdAt: story.createdAt,
+        createdAt: story.created_at,
         // Note: File URLs are not included for security - use separate download
-        hasAudio: !!story.audioUrl,
-        hasPhoto: !!story.photoUrl,
+        hasAudio: !!story.audio_url,
+        hasPhoto: !!story.photo_url,
         photoCount: Array.isArray(story.photos) ? story.photos.length : 0,
       })),
 
       // AI-Generated Prompts (active, expired, and history)
       prompts: {
-        active: activePromptsRecords.map((prompt) => ({
+        active: (activePromptsRecords || []).map((prompt: any) => ({
           id: prompt.id,
-          promptText: prompt.promptText,
+          promptText: prompt.prompt_text,
           tier: prompt.tier,
-          source: (prompt as any).source,
-          expiresAt: prompt.expiresAt,
-          createdAt: prompt.createdAt,
+          source: prompt.source,
+          expiresAt: prompt.expires_at,
+          createdAt: prompt.created_at,
         })),
-        history: promptHistoryRecords.map((prompt) => ({
+        history: (promptHistoryRecords || []).map((prompt: any) => ({
           id: prompt.id,
-          promptText: prompt.promptText,
+          promptText: prompt.prompt_text,
           tier: prompt.tier,
-          source: (prompt as any).source,
-          answeredStoryId: (prompt as any).answeredStoryId,
-          answeredAt: (prompt as any).answeredAt,
-          skippedAt: (prompt as any).skippedAt,
-          archivedAt: (prompt as any).archivedAt,
+          source: prompt.source,
+          answeredStoryId: prompt.answered_story_id,
+          answeredAt: prompt.answered_at,
+          skippedAt: prompt.skipped_at,
+          archivedAt: prompt.archived_at,
         })),
-        ghost: ghostPromptsRecords.map((prompt) => ({
+        catalog: (userPromptsRecords || []).map((prompt: any) => ({
           id: prompt.id,
-          promptText: prompt.promptText,
+          promptText: prompt.prompt_text,
           category: prompt.category,
-          usedAt: (prompt as any).usedAt,
+          isActive: prompt.is_active,
+          timesUsed: prompt.times_used,
+        })),
+        ghost: (ghostPromptsRecords || []).map((prompt: any) => ({
+          id: prompt.id,
+          promptText: prompt.prompt_text,
+          category: prompt.category,
+          usedAt: prompt.used_at,
         })),
       },
 
       // Personalization Data
       personalization: {
-        profiles: profilesRecords.map((profile) => ({
+        profiles: (profilesRecords || []).map((profile: any) => ({
           id: profile.id,
-          profileType: (profile as any).profileType,
-          profileData: (profile as any).profileData,
-          confidenceScore: (profile as any).confidenceScore,
-          lastUpdated: (profile as any).lastUpdated,
+          profileType: profile.profile_type,
+          profileData: profile.profile_data,
+          confidenceScore: profile.confidence_score,
+          lastUpdated: profile.last_updated,
         })),
-        historicalContext: historicalContextRecords.map((context) => ({
+        historicalContext: (historicalContextRecords || []).map((context: any) => ({
           id: context.id,
-          contextType: (context as any).contextType,
-          contextData: (context as any).contextData,
-          relevanceScore: (context as any).relevanceScore,
-          createdAt: (context as any).createdAt,
+          contextType: context.context_type,
+          contextData: context.context_data,
+          relevanceScore: context.relevance_score,
+          createdAt: context.created_at,
         })),
       },
 
       // Legal agreements accepted (mask IP addresses per GDPR Recital 26)
-      agreements: userAgreementsRecords.map((agreement) => ({
-        agreementType: agreement.agreementType,
+      agreements: (userAgreementsRecords || []).map((agreement: any) => ({
+        agreementType: agreement.agreement_type,
         version: agreement.version,
-        acceptedAt: agreement.acceptedAt,
+        acceptedAt: agreement.accepted_at,
         method: agreement.method,
-        ipAddress: maskIp(agreement.ipAddress),
+        ipAddress: maskIp(agreement.ip_address),
       })),
 
       // Sharing activity
       sharing: {
         // Stories you've shared with others (mask third-party emails)
-        sharedByYou: sharedAccessRecords.owned.map((share) => ({
-          sharedWithEmail: maskEmail(share.sharedWithEmail),
-          permissionLevel: share.permissionLevel,
-          createdAt: share.createdAt,
-          expiresAt: share.expiresAt,
-          isActive: share.isActive,
-          lastAccessedAt: share.lastAccessedAt,
+        sharedByYou: (sharedAccessOwned || []).map((share: any) => ({
+          sharedWithEmail: maskEmail(share.shared_with_email),
+          permissionLevel: share.permission_level,
+          createdAt: share.created_at,
+          expiresAt: share.expires_at,
+          isActive: share.is_active,
+          lastAccessedAt: share.last_accessed_at,
         })),
 
         // Stories shared with you
-        sharedWithYou: sharedAccessRecords.received.map((share) => ({
-          permissionLevel: share.permissionLevel,
-          createdAt: share.createdAt,
-          expiresAt: share.expiresAt,
-          isActive: share.isActive,
-          lastAccessedAt: share.lastAccessedAt,
+        sharedWithYou: (sharedAccessReceived || []).map((share: any) => ({
+          permissionLevel: share.permission_level,
+          createdAt: share.created_at,
+          expiresAt: share.expires_at,
+          isActive: share.is_active,
+          lastAccessedAt: share.last_accessed_at,
         })),
       },
 
       // Family connections (mask third-party emails)
       family: {
-        members: familyMembersRecords.map((member) => ({
+        members: (familyMembersRecords || []).map((member: any) => ({
           email: maskEmail(member.email),
           name: member.name,
           relationship: member.relationship,
           status: member.status,
-          invitedAt: member.invitedAt,
-          acceptedAt: member.acceptedAt,
+          invitedAt: member.invited_at,
+          acceptedAt: member.accepted_at,
           permissions: member.permissions,
         })),
-        activity: familyActivityRecords.map((activity) => ({
-          activityType: activity.activityType,
-          activityData: (activity as any).activityData,
-          createdAt: activity.createdAt,
+        activity: (familyActivityRecords || []).map((activity: any) => ({
+          activityType: activity.activity_type,
+          activityData: activity.activity_data,
+          createdAt: activity.created_at,
         })),
-        prompts: Array.isArray(familyPromptsRecords)
-          ? familyPromptsRecords.map((prompt: any) => ({
-              promptText: prompt.prompt_text,
-              context: prompt.context,
-              status: prompt.status,
-              answeredStoryId: prompt.answered_story_id,
-              answeredAt: prompt.answered_at,
-              createdAt: prompt.created_at,
-            }))
-          : (familyPromptsRecords as any).rows?.map((prompt: any) => ({
-              promptText: prompt.prompt_text,
-              context: prompt.context,
-              status: prompt.status,
-              answeredStoryId: prompt.answered_story_id,
-              answeredAt: prompt.answered_at,
-              createdAt: prompt.created_at,
-            })) || [],
+        prompts: (familyPromptsRecords || []).map((prompt: any) => ({
+          promptText: prompt.prompt_text,
+          context: prompt.context,
+          status: prompt.status,
+          answeredStoryId: prompt.answered_story_id,
+          answeredAt: prompt.answered_at,
+          createdAt: prompt.created_at,
+        })),
       },
 
       // Security credentials (passkeys/WebAuthn)
       security: {
-        passkeys: passkeysRecords.map((passkey) => ({
+        passkeys: (passkeysRecords || []).map((passkey: any) => ({
           id: passkey.id,
-          credentialId: maskToken(passkey.credentialId),
-          friendlyName: passkey.friendlyName,
-          credentialBackedUp: passkey.credentialBackedUp,
-          credentialDeviceType: passkey.credentialDeviceType,
+          credentialId: maskToken(passkey.credential_id),
+          friendlyName: passkey.friendly_name,
+          credentialBackedUp: passkey.credential_backed_up,
+          credentialDeviceType: passkey.credential_device_type,
           transports: passkey.transports,
-          signCount: passkey.signCount,
-          createdAt: passkey.createdAt,
-          lastUsedAt: passkey.lastUsedAt,
+          signCount: passkey.sign_count,
+          createdAt: passkey.created_at,
+          lastUsedAt: passkey.last_used_at,
           // Note: Public key excluded for security
         })),
       },
 
       // Statistics
       statistics: {
-        totalStories: userStories.length,
+        totalStories: (userStories || []).length,
         totalRecordingMinutes: Math.round(
-          userStories.reduce((sum, s) => sum + (s.durationSeconds || 0), 0) /
-            60,
+          (userStories || []).reduce((sum: number, s: any) => sum + (s.duration_seconds || 0), 0) / 60,
         ),
-        storiesWithPhotos: userStories.filter(
-          (s) => s.photoUrl || (Array.isArray(s.photos) && s.photos.length > 0),
+        storiesWithPhotos: (userStories || []).filter(
+          (s: any) => s.photo_url || (Array.isArray(s.photos) && s.photos.length > 0),
         ).length,
-        storiesWithAudio: userStories.filter((s) => s.audioUrl).length,
+        storiesWithAudio: (userStories || []).filter((s: any) => s.audio_url).length,
         oldestStoryYear: Math.min(
-          ...userStories.map((s) => s.storyYear || 9999),
+          ...(userStories || []).map((s: any) => s.story_year || 9999),
         ),
-        newestStoryYear: Math.max(...userStories.map((s) => s.storyYear || 0)),
-        familyMembersCount: familyMembersRecords.length,
-        familyPromptsCount: Array.isArray(familyPromptsRecords)
-          ? familyPromptsRecords.length
-          : (familyPromptsRecords as any).rows?.length || 0,
-        sharedStoriesCount: sharedAccessRecords.owned.length,
-        activePromptsCount: activePromptsRecords.length,
-        answeredPromptsCount: promptHistoryRecords.filter((p) => (p as any).answeredAt)
-          .length,
-        passkeysCount: passkeysRecords.length,
+        newestStoryYear: Math.max(...(userStories || []).map((s: any) => s.story_year || 0)),
+        familyMembersCount: (familyMembersRecords || []).length,
+        familyPromptsCount: (familyPromptsRecords || []).length,
+        sharedStoriesCount: (sharedAccessOwned || []).length,
+        activePromptsCount: (activePromptsRecords || []).length,
+        answeredPromptsCount: (promptHistoryRecords || []).filter((p: any) => p.answered_at).length,
+        passkeysCount: (passkeysRecords || []).length,
       },
 
       // About this export (GDPR compliance metadata)
@@ -449,32 +394,21 @@ export async function GET(request: NextRequest) {
 
     logger.debug(`[Data Export] Export completed for user: ${userId}`);
     logger.debug(
-      `[Data Export] Exported ${userStories.length} stories, ${userAgreementsRecords.length} agreements`,
+      `[Data Export] Exported ${(userStories || []).length} stories, ${(userAgreementsRecords || []).length} agreements`,
     );
-
-    // Track data export
-    try {
-      await supabaseAdmin.rpc('increment_data_export', { user_id: userId });
-    } catch (trackError) {
-      // Don't fail the export if tracking fails
-      logger.error("[Data Export] Failed to track export:", trackError);
-    }
 
     // Return as downloadable JSON file
     return new NextResponse(JSON.stringify(exportData, null, 2), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Content-Disposition": `attachment; filename="heritagewhisper-data-export-${new Date().toISOString().split("T")[0]}.json"`,
+        "Content-Disposition": `attachment; filename="heritagewhisper-export-${new Date().toISOString().split("T")[0]}.json"`,
       },
     });
-  } catch (error) {
-    logger.error("[Data Export] Error:", error);
+  } catch (error: any) {
+    logger.error(`[Data Export] Error: ${error.message}`, error);
     return NextResponse.json(
-      {
-        error: "Failed to export data",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
+      { error: "Failed to export user data" },
       { status: 500 },
     );
   }

@@ -1,21 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { db } from "@/lib/db";
-import {
-  stories,
-  users,
-  userAgreements,
-  sharedAccess,
-  familyMembers,
-  familyActivity,
-  activePrompts,
-  promptHistory,
-  ghostPrompts,
-  historicalContext,
-  profiles,
-  passkeys,
-} from "@/shared/schema";
-import { eq, sql } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 // Initialize Supabase Admin client
@@ -163,75 +147,55 @@ export async function DELETE(request: NextRequest) {
 
     // Step 3: Delete all database records (cascade will handle related records)
     // Delete in order to avoid foreign key constraints
+    // Using Supabase client queries (graceful error handling for missing tables)
 
-    // Check if tables exist (conditional - early implementation)
-    // Simplified approach: try to delete and catch errors if table doesn't exist
-    let passkeysTableExists = false;
-    let familyPromptsTableExists = false;
+    // Delete family activity
+    await supabaseAdmin.from('family_activity').delete().eq('user_id', userId);
+    logger.debug("[Account Deletion] Deleted family activity records");
 
+    // Delete family prompts (graceful - may not exist yet)
     try {
-      await db.select().from(passkeys).limit(1);
-      passkeysTableExists = true;
+      await supabaseAdmin.from('family_prompts').delete().eq('storyteller_user_id', userId);
+      logger.debug("[Account Deletion] Deleted family prompt records");
     } catch (error) {
-      // Table doesn't exist - skip passkeys deletion
-      logger.debug("[Account Deletion] Passkeys table not available");
-    }
-
-    try {
-      await db.execute(sql`SELECT 1 FROM family_prompts LIMIT 1`);
-      familyPromptsTableExists = true;
-    } catch (error) {
-      // Table doesn't exist - skip family_prompts deletion
       logger.debug("[Account Deletion] Family prompts table not available");
     }
 
-    // Delete family activity
-    await db.delete(familyActivity).where(eq(familyActivity.userId, userId));
-    logger.debug("[Account Deletion] Deleted family activity records");
-
-    // Delete family prompts (if table exists) - must be before family_members deletion
-    if (familyPromptsTableExists) {
-      await db.execute(sql`
-        DELETE FROM family_prompts
-        WHERE storyteller_user_id = ${userId}
-      `);
-      logger.debug("[Account Deletion] Deleted family prompt records");
-    }
-
     // Delete family members
-    await db.delete(familyMembers).where(eq(familyMembers.userId, userId));
+    await supabaseAdmin.from('family_members').delete().eq('user_id', userId);
     logger.debug("[Account Deletion] Deleted family member records");
 
     // Delete shared access (both owned and shared with)
-    await db.delete(sharedAccess).where(eq(sharedAccess.ownerUserId, userId));
-    await db
-      .delete(sharedAccess)
-      .where(eq(sharedAccess.sharedWithUserId, userId));
+    await supabaseAdmin.from('shared_access').delete().eq('owner_user_id', userId);
+    await supabaseAdmin.from('shared_access').delete().eq('shared_with_user_id', userId);
     logger.debug("[Account Deletion] Deleted shared access records");
 
     // Delete user agreements
-    await db.delete(userAgreements).where(eq(userAgreements.userId, userId));
+    await supabaseAdmin.from('user_agreements').delete().eq('user_id', userId);
     logger.debug("[Account Deletion] Deleted user agreement records");
 
     // Delete AI prompt data
-    await db.delete(activePrompts).where(eq(activePrompts.userId, userId));
-    await db.delete(promptHistory).where(eq(promptHistory.userId, userId));
-    await db.delete(ghostPrompts).where(eq(ghostPrompts.userId, userId));
+    await supabaseAdmin.from('active_prompts').delete().eq('user_id', userId);
+    await supabaseAdmin.from('prompt_history').delete().eq('user_id', userId);
+    await supabaseAdmin.from('user_prompts').delete().eq('user_id', userId);
+    await supabaseAdmin.from('ghost_prompts').delete().eq('user_id', userId);
     logger.debug("[Account Deletion] Deleted AI prompt records");
 
     // Delete personalization data
-    await db.delete(historicalContext).where(eq(historicalContext.userId, userId));
-    await db.delete(profiles).where(eq(profiles.userId, userId));
+    await supabaseAdmin.from('historical_context').delete().eq('user_id', userId);
+    await supabaseAdmin.from('profiles').delete().eq('user_id', userId);
     logger.debug("[Account Deletion] Deleted personalization records");
 
-    // Delete passkeys (if table exists)
-    if (passkeysTableExists) {
-      await db.delete(passkeys).where(eq(passkeys.userId, userId));
+    // Delete passkeys (graceful - may not exist yet)
+    try {
+      await supabaseAdmin.from('passkeys').delete().eq('user_id', userId);
       logger.debug("[Account Deletion] Deleted passkey records");
+    } catch (error) {
+      logger.debug("[Account Deletion] Passkeys table not available");
     }
 
     // Delete stories (this should cascade to follow_ups via DB constraints)
-    await db.delete(stories).where(eq(stories.userId, userId));
+    await supabaseAdmin.from('stories').delete().eq('user_id', userId);
     logger.debug("[Account Deletion] Deleted story records");
 
     // Step 4: Delete user from Supabase Auth
@@ -249,7 +213,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Step 5: Delete user record from public.users
-    await db.delete(users).where(eq(users.id, userId));
+    await supabaseAdmin.from('users').delete().eq('id', userId);
     logger.debug("[Account Deletion] Deleted user record from database");
 
     logger.debug(
