@@ -10,6 +10,18 @@ import { logger } from "@/lib/logger";
 import { requireAdmin, logAdminAction } from "@/lib/adminAuth";
 import { getClientIp } from "@/lib/ratelimit";
 
+type AnyStats = {
+  total?: number;
+  tier1?: number;
+  tier3?: number;
+  avgScore?: number;
+  locked?: number;
+  reviewed?: number;
+  needsReview?: number;
+  good?: number;
+  bad?: number;
+} & Record<string, unknown>;
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -126,10 +138,11 @@ export async function GET(request: NextRequest) {
     }));
 
     // Update stats to include feedback counts
-    stats.reviewed = enrichedPrompts.filter(p => p.hasBeenReviewed).length;
-    stats.needsReview = enrichedPrompts.filter(p => !p.hasBeenReviewed).length;
-    stats.good = existingFeedback?.filter(f => f.rating === 'good' || f.rating === 'excellent').length || 0;
-    stats.bad = existingFeedback?.filter(f => f.rating === 'bad' || f.rating === 'terrible').length || 0;
+    const s = stats as AnyStats;
+    s.reviewed = enrichedPrompts.filter(p => p.hasBeenReviewed).length;
+    s.needsReview = enrichedPrompts.filter(p => !p.hasBeenReviewed).length;
+    s.good = existingFeedback?.filter(f => f.rating === 'good' || f.rating === 'excellent').length || 0;
+    s.bad = existingFeedback?.filter(f => f.rating === 'bad' || f.rating === 'terrible').length || 0;
 
     return NextResponse.json({
       success: true,
