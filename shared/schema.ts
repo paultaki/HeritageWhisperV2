@@ -2,7 +2,6 @@ import { sql } from "drizzle-orm";
 import {
   pgTable,
   text,
-  varchar,
   integer,
   boolean,
   timestamp,
@@ -10,6 +9,7 @@ import {
   jsonb,
   bigint,
   unique,
+  numeric,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -386,6 +386,12 @@ export const activePrompts = pgTable("active_prompts", {
   // Engagement tracking
   shownCount: integer("shown_count").default(0),
   lastShownAt: timestamp("last_shown_at"),
+
+  // User queue management
+  userStatus: text("user_status"), // 'available', 'queued', 'dismissed'
+  queuePosition: integer("queue_position"),
+  dismissedAt: timestamp("dismissed_at"),
+  queuedAt: timestamp("queued_at"),
 });
 
 // Prompt history table - archives used/skipped/expired prompts
@@ -454,11 +460,15 @@ export const familyMembers = pgTable("family_members", {
     .notNull(), // The storyteller
   email: text("email").notNull(),
   name: text("name"),
-  relationship: text("relationship").notNull(), // Son, Daughter, Grandchild, etc.
-  status: text("status").notNull().default("pending"), // pending, active, declined
+  relationship: text("relationship"), // Son, Daughter, Grandchild, etc.
+  status: text("status").notNull().default("pending"), // pending, active, suspended
+  permissionLevel: text("permission_level").default("viewer"), // 'viewer' or 'contributor'
   invitedAt: timestamp("invited_at").default(sql`NOW()`),
-  acceptedAt: timestamp("accepted_at"),
-  lastViewedAt: timestamp("last_viewed_at"),
+  invitedByUserId: uuid("invited_by_user_id").references(() => users.id), // Who sent the invite
+  authUserId: uuid("auth_user_id").references(() => users.id), // Their own account when registered
+  firstAccessedAt: timestamp("first_accessed_at"),
+  lastAccessedAt: timestamp("last_accessed_at"),
+  accessCount: integer("access_count").default(0),
   customMessage: text("custom_message"),
   permissions: jsonb("permissions")
     .$type<{
@@ -467,6 +477,7 @@ export const familyMembers = pgTable("family_members", {
       canDownload: boolean;
     }>()
     .default({ canView: true, canComment: true, canDownload: false }),
+  createdAt: timestamp("created_at").default(sql`NOW()`),
 });
 
 // Family activity/feed
@@ -575,6 +586,184 @@ export const insertPasskeySchema = createInsertSchema(passkeys).omit({
   lastUsedAt: true,
 });
 
+// ============================================================================
+// FAMILY SHARING V3 TABLES
+// ============================================================================
+
+// Family invites - token-based invitation system
+export const familyInvites = pgTable("family_invites", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  familyMemberId: uuid("family_member_id")
+    .references(() => familyMembers.id)
+    .notNull(),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").notNull().default(sql`NOW()`),
+});
+
+// Family collaborations - join table for multi-tenant access
+export const familyCollaborations = pgTable("family_collaborations", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  familyMemberId: uuid("family_member_id")
+    .references(() => familyMembers.id)
+    .notNull(),
+  storytellerUserId: uuid("storyteller_user_id")
+    .references(() => users.id)
+    .notNull(),
+  invitedByUserId: uuid("invited_by_user_id").references(() => users.id),
+  permissionLevel: text("permission_level")
+    .notNull()
+    .default("viewer"), // 'viewer' or 'contributor'
+  relationship: text("relationship"),
+  status: text("status").notNull().default("active"), // 'active', 'suspended', 'removed'
+  createdAt: timestamp("created_at").notNull().default(sql`NOW()`),
+  lastViewedAt: timestamp("last_viewed_at"),
+});
+
+// Family prompts - questions submitted by family members
+export const familyPrompts = pgTable("family_prompts", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  storytellerUserId: uuid("storyteller_user_id").references(() => users.id),
+  submittedByFamilyMemberId: uuid("submitted_by_family_member_id").references(
+    () => familyMembers.id,
+  ),
+  promptText: text("prompt_text").notNull(),
+  status: text("status").default("pending"), // 'pending', 'answered', 'archived'
+  answeredAt: timestamp("answered_at"),
+  createdAt: timestamp("created_at").default(sql`NOW()`),
+});
+
+// ============================================================================
+// USER PROMPTS (CATALOG) TABLE
+// ============================================================================
+
+// User prompts - saved prompts from the catalog (separate from AI-generated)
+export const userPrompts = pgTable("user_prompts", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
+  text: text("text").notNull(),
+  category: text("category").notNull(),
+  source: text("source").notNull().default("catalog"), // 'catalog' or 'ai'
+  status: text("status").notNull().default("saved"), // 'ready', 'queued', 'dismissed', 'recorded', 'deleted'
+  queuePosition: integer("queue_position"),
+  dismissedAt: timestamp("dismissed_at"),
+  queuedAt: timestamp("queued_at"),
+  createdAt: timestamp("created_at").notNull().default(sql`NOW()`),
+});
+
+// ============================================================================
+// ADMIN & MONITORING TABLES
+// ============================================================================
+
+// Admin audit log - track all admin actions for security & compliance
+export const adminAuditLog = pgTable("admin_audit_log", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  adminUserId: uuid("admin_user_id")
+    .references(() => users.id)
+    .notNull(),
+  action: text("action").notNull(),
+  targetUserId: uuid("target_user_id").references(() => users.id),
+  details: jsonb("details"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").notNull().default(sql`NOW()`),
+});
+
+// AI usage log - track AI API usage and costs
+export const aiUsageLog = pgTable("ai_usage_log", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id),
+  operation: text("operation").notNull(),
+  model: text("model").notNull(),
+  tokensUsed: integer("tokens_used"),
+  costUsd: numeric("cost_usd"),
+  ipAddress: text("ip_address"),
+  createdAt: timestamp("created_at").notNull().default(sql`NOW()`),
+});
+
+// Prompt feedback - quality ratings for AI-generated prompts (admin tool)
+export const promptFeedback = pgTable("prompt_feedback", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  promptId: uuid("prompt_id").references(() => activePrompts.id),
+  promptText: text("prompt_text").notNull(),
+  storyId: uuid("story_id").references(() => stories.id),
+  storyExcerpt: text("story_excerpt"),
+  rating: text("rating").notNull(), // 'good', 'bad', 'excellent', 'terrible'
+  feedbackNotes: text("feedback_notes"),
+  tags: text("tags").array(),
+  promptTier: integer("prompt_tier"),
+  promptType: text("prompt_type"),
+  anchorEntity: text("anchor_entity"),
+  wordCount: integer("word_count"),
+  promptScore: numeric("prompt_score"),
+  qualityReport: jsonb("quality_report"),
+  reviewedBy: uuid("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at").default(sql`NOW()`),
+  createdAt: timestamp("created_at").default(sql`NOW()`),
+  updatedAt: timestamp("updated_at").default(sql`NOW()`),
+});
+
+// Insert schemas for new tables
+export const insertFamilyInviteSchema = createInsertSchema(familyInvites).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertFamilyCollaborationSchema = createInsertSchema(
+  familyCollaborations,
+).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertFamilyPromptSchema = createInsertSchema(familyPrompts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserPromptSchema = createInsertSchema(userPrompts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAdminAuditLogSchema = createInsertSchema(adminAuditLog).omit(
+  {
+    id: true,
+    createdAt: true,
+  },
+);
+
+export const insertAiUsageLogSchema = createInsertSchema(aiUsageLog).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPromptFeedbackSchema = createInsertSchema(
+  promptFeedback,
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  reviewedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStory = z.infer<typeof insertStorySchema>;
@@ -608,3 +797,21 @@ export type InsertPromptHistory = z.infer<typeof insertPromptHistorySchema>;
 export type PromptHistory = typeof promptHistory.$inferSelect;
 export type InsertPasskey = z.infer<typeof insertPasskeySchema>;
 export type Passkey = typeof passkeys.$inferSelect;
+
+// New table types
+export type InsertFamilyInvite = z.infer<typeof insertFamilyInviteSchema>;
+export type FamilyInvite = typeof familyInvites.$inferSelect;
+export type InsertFamilyCollaboration = z.infer<
+  typeof insertFamilyCollaborationSchema
+>;
+export type FamilyCollaboration = typeof familyCollaborations.$inferSelect;
+export type InsertFamilyPrompt = z.infer<typeof insertFamilyPromptSchema>;
+export type FamilyPrompt = typeof familyPrompts.$inferSelect;
+export type InsertUserPrompt = z.infer<typeof insertUserPromptSchema>;
+export type UserPrompt = typeof userPrompts.$inferSelect;
+export type InsertAdminAuditLog = z.infer<typeof insertAdminAuditLogSchema>;
+export type AdminAuditLog = typeof adminAuditLog.$inferSelect;
+export type InsertAiUsageLog = z.infer<typeof insertAiUsageLogSchema>;
+export type AiUsageLog = typeof aiUsageLog.$inferSelect;
+export type InsertPromptFeedback = z.infer<typeof insertPromptFeedbackSchema>;
+export type PromptFeedback = typeof promptFeedback.$inferSelect;
