@@ -94,6 +94,7 @@ export default function Profile() {
 
   // Passkey setup
   const [showPasskeySetup, setShowPasskeySetup] = useState(false);
+  const [passkeyPassword, setPasskeyPassword] = useState("");
 
   // Redirect to login if not authenticated (but wait for loading to finish)
   useEffect(() => {
@@ -311,6 +312,7 @@ export default function Profile() {
 
   const handlePasskeySetupSuccess = () => {
     setShowPasskeySetup(false);
+    setPasskeyPassword("");
     toast({
       title: "Passkey added successfully",
       description: "You can now sign in with your passkey",
@@ -325,6 +327,13 @@ export default function Profile() {
       description: error,
       variant: "destructive",
     });
+  };
+
+  const handlePasskeyDialogClose = (open: boolean) => {
+    setShowPasskeySetup(open);
+    if (!open) {
+      setPasskeyPassword("");
+    }
   };
 
   const handlePhotoUpdate = async (photoUrl: string) => {
@@ -837,23 +846,38 @@ export default function Profile() {
               </Button>
 
               {/* Passkey Setup Dialog */}
-              <AlertDialog open={showPasskeySetup} onOpenChange={setShowPasskeySetup}>
+              <AlertDialog open={showPasskeySetup} onOpenChange={handlePasskeyDialogClose}>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Set up a new passkey</AlertDialogTitle>
                     <AlertDialogDescription className="text-base">
-                      You'll be prompted to use your device's built-in security (fingerprint, face, or security key)
-                      to create a passkey for faster sign-in.
+                      To verify it's you, please enter your current password first.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <div className="py-4">
-                    <PasskeyAuth
-                      mode="register"
-                      email={email}
-                      password={currentPassword}
-                      onSuccess={handlePasskeySetupSuccess}
-                      onError={handlePasskeySetupError}
-                    />
+                  <div className="py-4 space-y-4">
+                    <div>
+                      <Label htmlFor="passkey-password" className="text-base">
+                        Current Password
+                      </Label>
+                      <Input
+                        id="passkey-password"
+                        type="password"
+                        value={passkeyPassword}
+                        onChange={(e) => setPasskeyPassword(e.target.value)}
+                        className="mt-2 h-12 text-base"
+                        placeholder="Enter your password"
+                      />
+                    </div>
+
+                    {passkeyPassword && (
+                      <PasskeyAuth
+                        mode="register"
+                        email={email}
+                        password={passkeyPassword}
+                        onSuccess={handlePasskeySetupSuccess}
+                        onError={handlePasskeySetupError}
+                      />
+                    )}
                   </div>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>

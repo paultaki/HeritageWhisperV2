@@ -5,7 +5,6 @@
  * including registration and authentication options.
  */
 
-import { fromBase64Url } from "@/lib/webauthn-bytes";
 import type {
   GenerateRegistrationOptionsOpts,
   GenerateAuthenticationOptionsOpts,
@@ -27,8 +26,12 @@ export function getRegistrationOptions(
   userName: string,
   userDisplayName: string
 ): Omit<GenerateRegistrationOptionsOpts, "rpID" | "rpName"> {
+  // Convert userId (UUID string) to bytes using TextEncoder
+  // WebAuthn requires userID as Uint8Array, not a string
+  const userIdBytes = new TextEncoder().encode(userId);
+
   return {
-    userID: new Uint8Array(fromBase64Url(userId)),
+    userID: userIdBytes,
     userName: userName, // Email address
     userDisplayName: userDisplayName, // Friendly name
     attestationType: "none", // No attestation required

@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { signInWithGoogle } from "@/lib/supabase";
 import { Eye, EyeOff, Mail, Lock, LogIn, Feather, Mic } from "lucide-react";
 import { PasskeyAuth } from "@/components/auth/PasskeyAuth";
+import { PasskeySetupPrompt } from "@/components/auth/PasskeySetupPrompt";
 
 const logoUrl = "/HW_text-compress.png";
 
@@ -18,6 +19,12 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isClient, setIsClient] = useState(false);
+  const [hasPasskeys, setHasPasskeys] = useState(false);
+  const [showPasskeySetup, setShowPasskeySetup] = useState(false);
+  const [loginCredentials, setLoginCredentials] = useState<{
+    email: string;
+    password: string;
+  } | null>(null);
   const router = useRouter();
   const { login, user } = useAuth();
   const { toast } = useToast();
@@ -39,6 +46,36 @@ export default function Login() {
       setRememberMe(true);
     }
   }, [isClient]);
+
+  // Check if user has passkeys when email changes
+  useEffect(() => {
+    const checkPasskeys = async () => {
+      if (!email || !email.includes("@")) {
+        setHasPasskeys(false);
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/passkey/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setHasPasskeys(data.hasPasskeys);
+        }
+      } catch (err) {
+        // Silently fail - just don't show passkey button
+        setHasPasskeys(false);
+      }
+    };
+
+    // Debounce the check
+    const timeoutId = setTimeout(checkPasskeys, 500);
+    return () => clearTimeout(timeoutId);
+  }, [email]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -63,6 +100,31 @@ export default function Login() {
       }
 
       await login(email, password);
+
+      // After successful login, check if we should prompt for passkey setup
+      if (typeof window !== 'undefined') {
+        const dismissed = localStorage.getItem('passkey_setup_dismissed');
+
+        // Check if user has passkeys
+        const checkRes = await fetch("/api/passkey/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        });
+
+        if (checkRes.ok) {
+          const { hasPasskeys } = await checkRes.json();
+
+          // Show prompt if: no passkeys AND user hasn't dismissed it
+          if (!hasPasskeys && !dismissed) {
+            setLoginCredentials({ email, password });
+            setShowPasskeySetup(true);
+            return; // Don't redirect yet
+          }
+        }
+      }
+
+      // If we didn't show the prompt, redirect will happen via useEffect when user changes
     } catch (error: any) {
       toast({
         title: "Authentication failed",
@@ -326,12 +388,14 @@ export default function Login() {
                           Continue with Google
                         </button>
 
-                        {/* Passkey Sign-in */}
-                        <PasskeyAuth
-                          mode="authenticate"
-                          onSuccess={handlePasskeySuccess}
-                          onError={handlePasskeyError}
-                        />
+                        {/* Passkey Sign-in - only show if user has passkeys */}
+                        {hasPasskeys && (
+                          <PasskeyAuth
+                            mode="authenticate"
+                            onSuccess={handlePasskeySuccess}
+                            onError={handlePasskeyError}
+                          />
+                        )}
                       </form>
 
                       <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '24px' }}>
@@ -388,6 +452,27 @@ export default function Login() {
           }
         }
       `}</style>
+
+      {/* Passkey Setup Prompt - shown after successful email/password login */}
+      {loginCredentials && (
+        <PasskeySetupPrompt
+          email={loginCredentials.email}
+          password={loginCredentials.password}
+          isOpen={showPasskeySetup}
+          onClose={() => {
+            setShowPasskeySetup(false);
+            setLoginCredentials(null);
+            // Redirect to timeline after closing prompt
+            router.push("/timeline");
+          }}
+          onSuccess={() => {
+            toast({
+              title: "Passkey set up!",
+              description: "You can now sign in with your fingerprint or face.",
+            });
+          }}
+        />
+      )}
     </div>
   );
 }
