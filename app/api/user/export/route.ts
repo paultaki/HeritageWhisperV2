@@ -95,23 +95,26 @@ export async function GET(request: NextRequest) {
       return `${local[0]}***@${domain}`;
     };
 
-    // Check if passkeys table exists (conditional - early implementation)
-    const { rows: passkeyCheck } = await db.execute(sql`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = 'public' AND table_name = 'passkeys'
-      )
-    `);
-    const passkeysTableExists = passkeyCheck[0]?.exists ?? false;
+    // Check if tables exist (conditional - early implementation)
+    // Simplified approach: try to query and catch errors if table doesn't exist
+    let passkeysTableExists = false;
+    let familyPromptsTableExists = false;
 
-    // Check if family_prompts table exists (conditional - early implementation)
-    const { rows: familyPromptsCheck } = await db.execute(sql`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = 'public' AND table_name = 'family_prompts'
-      )
-    `);
-    const familyPromptsTableExists = familyPromptsCheck[0]?.exists ?? false;
+    try {
+      await db.select().from(passkeys).limit(1);
+      passkeysTableExists = true;
+    } catch (error) {
+      // Table doesn't exist or query failed - skip passkeys
+      logger.debug("[Data Export] Passkeys table not available");
+    }
+
+    try {
+      const result = await db.execute(sql`SELECT 1 FROM family_prompts LIMIT 1`);
+      familyPromptsTableExists = true;
+    } catch (error) {
+      // Table doesn't exist or query failed - skip family_prompts
+      logger.debug("[Data Export] Family prompts table not available");
+    }
 
     // Fetch all user data (comprehensive GDPR export)
     const [

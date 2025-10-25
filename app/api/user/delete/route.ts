@@ -164,23 +164,26 @@ export async function DELETE(request: NextRequest) {
     // Step 3: Delete all database records (cascade will handle related records)
     // Delete in order to avoid foreign key constraints
 
-    // Check if passkeys table exists (conditional - early implementation)
-    const { rows: passkeyCheck } = await db.execute(sql`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = 'public' AND table_name = 'passkeys'
-      )
-    `);
-    const passkeysTableExists = passkeyCheck[0]?.exists ?? false;
+    // Check if tables exist (conditional - early implementation)
+    // Simplified approach: try to delete and catch errors if table doesn't exist
+    let passkeysTableExists = false;
+    let familyPromptsTableExists = false;
 
-    // Check if family_prompts table exists (conditional - early implementation)
-    const { rows: familyPromptsCheck } = await db.execute(sql`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = 'public' AND table_name = 'family_prompts'
-      )
-    `);
-    const familyPromptsTableExists = familyPromptsCheck[0]?.exists ?? false;
+    try {
+      await db.select().from(passkeys).limit(1);
+      passkeysTableExists = true;
+    } catch (error) {
+      // Table doesn't exist - skip passkeys deletion
+      logger.debug("[Account Deletion] Passkeys table not available");
+    }
+
+    try {
+      await db.execute(sql`SELECT 1 FROM family_prompts LIMIT 1`);
+      familyPromptsTableExists = true;
+    } catch (error) {
+      // Table doesn't exist - skip family_prompts deletion
+      logger.debug("[Account Deletion] Family prompts table not available");
+    }
 
     // Delete family activity
     await db.delete(familyActivity).where(eq(familyActivity.userId, userId));
