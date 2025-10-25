@@ -366,7 +366,7 @@ export default function PromptsV2Page() {
   const [promptToDismiss, setPromptToDismiss] = useState<FamilyPrompt | null>(null);
 
   // V3: Get active storyteller context for family sharing
-  const { activeContext, isOwnAccount, canInvite, permissionLevel } = useAccountContext();
+  const { activeContext, isOwnAccount, canInvite } = useAccountContext();
   const storytellerId = activeContext?.storytellerId || user?.id;
 
   // Fetch data (same queries as before)
@@ -417,18 +417,19 @@ export default function PromptsV2Page() {
 
   // Get user's first name
   const firstName = userProfile?.user?.name?.split(' ')[0]
-    || user?.user_metadata?.name?.split(' ')[0]
-    || user?.user_metadata?.full_name?.split(' ')[0]
+    || (user as any)?.user_metadata?.name?.split(' ')[0]
+    || (user as any)?.user_metadata?.full_name?.split(' ')[0]
     || user?.email?.split('@')[0]
     || 'You';
 
   // Mutations
   const queueMutation = useMutation({
-    mutationFn: ({ promptId, source, text }: any) =>
-      apiRequest(`/api/prompts/queue`, {
-        method: "POST",
+    mutationFn: async ({ promptId, source, text }: any) => {
+      const res = await apiRequest("POST", `/api/prompts/queue`, {
         body: JSON.stringify({ promptId, source, text }),
-      }),
+      });
+      return res.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/prompts/queued"] });
       toast({
@@ -581,7 +582,7 @@ export default function PromptsV2Page() {
               </div>
 
               {/* Submit Question button for contributors viewing storyteller's prompts */}
-              {!isOwnAccount && permissionLevel === 'contributor' && (
+              {!isOwnAccount && (activeContext as any)?.permissionLevel === 'contributor' && (
                 <Button
                   variant="default"
                   size="sm"
