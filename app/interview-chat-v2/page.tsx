@@ -254,12 +254,12 @@ export default function InterviewChatPage() {
       // Show error message to user
       const errorMsg: Message = {
         id: `error-${Date.now()}`,
-        type: 'question',
+        type: 'ai-question',
         content: error instanceof Error
           ? `Sorry, there was an error transcribing your audio: ${error.message}. Please try recording again.`
           : 'Sorry, there was an error processing your response. Please try again.',
         timestamp: new Date(),
-        sender: 'hw',
+        sender: 'ai',
       };
 
       setMessages(prev => {

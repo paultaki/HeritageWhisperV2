@@ -14,7 +14,7 @@ import {
 } from "@/lib/conversationModeIntegration";
 import { useRecordingState } from "@/contexts/RecordingContext";
 import { useRealtimeInterview, PEARL_WITNESS_INSTRUCTIONS } from "@/hooks/use-realtime-interview";
-import { Mic, Square, Volume2, VolumeX, MessageSquare } from "lucide-react";
+import { Mic, Square, Volume2, VolumeX, MessageSquare, Play, Pause, RotateCcw } from "lucide-react";
 
 export type MessageType =
   | 'system'
@@ -43,6 +43,7 @@ function InterviewChatV2Content() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
   const [textInput, setTextInput] = useState('');
@@ -52,9 +53,76 @@ function InterviewChatV2Content() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+  const pausedTimeAccumulatedRef = useRef<number>(0);
 
   // Check for prompt question in URL params
   const promptQuestion = searchParams.get('prompt');
+
+  // Pause start time tracker
+  const pauseStartTimeRef = useRef<number>(0);
+
+  // Handler for pause/continue
+  const handlePauseContinue = () => {
+    if (isPaused) {
+      // Continue - calculate paused duration and add to accumulated time
+      const pausedDuration = Date.now() - pauseStartTimeRef.current;
+      pausedTimeAccumulatedRef.current += pausedDuration;
+      setIsPaused(false);
+      setIsMicMuted(false);
+      toggleMic(true); // Unmute mic when continuing
+
+      // Restart the timer
+      timerRef.current = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTimeRef.current - pausedTimeAccumulatedRef.current) / 1000);
+        setRecordingDuration(elapsed);
+      }, 1000);
+    } else {
+      // Pause - record when we paused and stop the timer
+      pauseStartTimeRef.current = Date.now();
+      setIsPaused(true);
+      setIsMicMuted(true);
+      toggleMic(false); // Mute mic when pausing
+
+      // Stop the timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  };
+
+  // Handler for restart conversation
+  const handleRestartConversation = () => {
+    const confirmRestart = confirm(
+      'Are you sure you want to restart the conversation? This will clear all messages and start over.'
+    );
+
+    if (confirmRestart) {
+      // Stop session
+      stopSession();
+
+      // Clear timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+
+      // Reset all state
+      setMessages([]);
+      setIsRecording(false);
+      setRecordingDuration(0);
+      setIsPaused(false);
+      setIsMicMuted(false);
+      startTimeRef.current = 0;
+      pausedTimeAccumulatedRef.current = 0;
+
+      // Stop recording state
+      stopRecordingState();
+
+      // Restart by showing welcome modal again
+      setShowWelcome(true);
+    }
+  };
 
   // Handler for sending text messages
   const handleSendTextMessage = () => {
@@ -134,11 +202,13 @@ function InterviewChatV2Content() {
 
     // Start Realtime session immediately (continuous conversation)
     setIsRecording(true);
+    setIsPaused(false);
     startTimeRef.current = Date.now();
+    pausedTimeAccumulatedRef.current = 0;
 
     // Update duration timer
     timerRef.current = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      const elapsed = Math.floor((Date.now() - startTimeRef.current - pausedTimeAccumulatedRef.current) / 1000);
       setRecordingDuration(elapsed);
     }, 1000);
 
@@ -369,25 +439,24 @@ After they answer, continue the conversation naturally with follow-up questions 
 
       {/* Chat Container */}
       <div className="max-w-3xl mx-auto flex flex-col h-screen">
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-2 sm:py-3">
-          <div className="flex flex-col items-center gap-1.5">
+        {/* Header - Compact */}
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-2">
+          <div className="flex flex-col items-center gap-1">
             <Image
-              src="/HW_text-compress.png"
+              src="/Logo Updated.png?v=2"
               alt="Heritage Whisper"
-              width={200}
-              height={50}
-              className="h-7 sm:h-9 w-auto"
+              width={300}
+              height={75}
+              className="h-10 w-auto"
               priority
             />
-            <p className="text-base font-medium text-gray-600">Whisper Storyteller Conversation</p>
 
             {/* Status and Timer */}
             {isRecording && (
-              <div className="flex items-center gap-2 text-sm">
-                <div className={`w-2 h-2 rounded-full ${isMicMuted ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`}></div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className={`w-2 h-2 rounded-full ${isPaused ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`}></div>
                 <span className="font-medium text-gray-700">
-                  {isMicMuted ? 'Mic Paused' : 'Conversation Active'}
+                  {isPaused ? 'Paused' : 'Active'}
                 </span>
                 <span className="text-gray-500">•</span>
                 <span className="tabular-nums text-gray-600">{formatTime(recordingDuration)}</span>
@@ -396,18 +465,27 @@ After they answer, continue the conversation naturally with follow-up questions 
 
             {/* Action Buttons */}
             {isRecording && (
-              <div className="flex gap-2 mt-1">
-                <button
-                  onClick={() => setShowCancelConfirm(true)}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-1 rounded-full text-sm transition-all"
-                >
-                  Cancel
-                </button>
+              <div className="flex gap-2">
                 <button
                   onClick={handleCompleteInterview}
-                  className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-medium px-4 py-1 rounded-full text-sm transition-all shadow-md"
+                  className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-medium px-3 py-1 rounded-full text-xs transition-all shadow-md"
                 >
                   Complete Interview
+                </button>
+                {isPaused && (
+                  <button
+                    onClick={handleRestartConversation}
+                    className="bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium px-3 py-1 rounded-full text-xs transition-all flex items-center gap-1"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Restart
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowCancelConfirm(true)}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-3 py-1 rounded-full text-xs transition-all"
+                >
+                  Cancel
                 </button>
               </div>
             )}
@@ -415,7 +493,7 @@ After they answer, continue the conversation naturally with follow-up questions 
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-6 space-y-4 pb-24 md:pb-32"> {/* Added padding for footer and nav */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-6 space-y-4 pb-80 md:pb-96"> {/* Added large padding for footer and text input */}
           {messages.map((message) => (
             <div key={message.id}>
               {message.type === 'typing' ? (
@@ -429,7 +507,7 @@ After they answer, continue the conversation naturally with follow-up questions 
         </div>
 
         {/* Voice Controls - Minimal Footer Above Nav */}
-        <div className="fixed bottom-16 md:bottom-20 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-3 py-1.5 z-30 shadow-sm">
+        <div className="fixed bottom-16 md:bottom-24 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-3 py-1.5 z-30 shadow-sm">
           {/* Provisional Transcript Display - Smaller */}
           {isRecording && provisionalTranscript && (
             <div className="mb-1 px-2 py-0.5 rounded bg-gray-50 border border-gray-100">
@@ -440,32 +518,28 @@ After they answer, continue the conversation naturally with follow-up questions 
           {/* Compact Control Bar */}
           {isRecording && (
             <div className="flex items-center justify-center gap-3">
-              {/* Mic Toggle */}
+              {/* Pause/Continue Toggle */}
               <button
-                onClick={() => {
-                  const newMutedState = !isMicMuted;
-                  setIsMicMuted(newMutedState);
-                  toggleMic(!newMutedState);
-                }}
-                className={`flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
-                  isMicMuted
+                onClick={handlePauseContinue}
+                className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  isPaused
                     ? 'bg-red-100 text-red-700 hover:bg-red-200'
                     : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                 }`}
-                title={isMicMuted ? 'Unmute mic' : 'Mute mic'}
+                title={isPaused ? 'Continue conversation' : 'Pause conversation'}
               >
-                {isMicMuted ? (
-                  <VolumeX className="w-3.5 h-3.5" />
+                {isPaused ? (
+                  <Play className="w-4 h-4" />
                 ) : (
-                  <Mic className="w-3.5 h-3.5" />
+                  <Pause className="w-4 h-4" />
                 )}
-                <span className="ml-1">{isMicMuted ? 'Muted' : 'Active'}</span>
+                <span className="ml-1.5">{isPaused ? 'Continue' : 'Pause'}</span>
               </button>
 
               {/* Pearl Voice Toggle */}
               <button
                 onClick={toggleVoice}
-                className={`flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                   voiceEnabled
                     ? 'bg-green-100 text-green-700 hover:bg-green-200'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -473,11 +547,11 @@ After they answer, continue the conversation naturally with follow-up questions 
                 title={voiceEnabled ? 'Mute Pearl' : 'Unmute Pearl'}
               >
                 {voiceEnabled ? (
-                  <Volume2 className="w-3.5 h-3.5" />
+                  <Volume2 className="w-4 h-4" />
                 ) : (
-                  <VolumeX className="w-3.5 h-3.5" />
+                  <VolumeX className="w-4 h-4" />
                 )}
-                <span className="ml-1">Pearl</span>
+                <span className="ml-1.5">{voiceEnabled ? 'Mute Pearl' : 'Unmute Pearl'}</span>
               </button>
 
               {/* Mode Toggle */}
@@ -508,23 +582,24 @@ After they answer, continue the conversation naturally with follow-up questions 
 
           {/* Text Input */}
           {inputMode === 'text' && isRecording && (
-            <div className="flex gap-2 mt-1">
-              <input
-                type="text"
+            <div className="flex flex-col gap-2 mt-2">
+              <textarea
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && textInput.trim()) {
+                  if (e.key === 'Enter' && !e.shiftKey && textInput.trim()) {
+                    e.preventDefault();
                     handleSendTextMessage();
                   }
                 }}
                 placeholder="Type your response..."
-                className="flex-1 px-3 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+                rows={4}
+                className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-base resize-none"
               />
               <button
                 onClick={handleSendTextMessage}
                 disabled={!textInput.trim()}
-                className="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-600 hover:to-rose-600 transition-all"
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-lg text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-600 hover:to-rose-600 transition-all shadow-md"
               >
                 Send
               </button>

@@ -774,8 +774,8 @@ export default function FamilyPage() {
                                   {member.relationship}
                                 </Badge>
                               )}
-                              <Badge variant={(member as any).permissionLevel === 'contributor' ? 'default' : 'outline'} className="text-xs">
-                                {(member as any).permissionLevel === 'contributor' ? '✏️ Contributor' : '👁 Viewer'}
+                              <Badge variant={member.permissionLevel === 'contributor' ? 'default' : 'outline'} className="text-xs">
+                                {member.permissionLevel === 'contributor' ? '✏️ Contributor' : '👁 Viewer'}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
@@ -792,8 +792,8 @@ export default function FamilyPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Select
-                            value={(member as any).permissionLevel || 'viewer'}
-                            onValueChange={(value: 'viewer' | 'contributor') =>
+                            value={member.permissionLevel || 'viewer'}
+                            onValueChange={(value: 'viewer' | 'contributor') => 
                               updatePermissionMutation.mutate({ memberId: member.id, permissionLevel: value })
                             }
                           >

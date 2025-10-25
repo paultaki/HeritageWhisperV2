@@ -32,40 +32,35 @@ export function WelcomeModal({ userName, onDismiss }: WelcomeModalProps) {
           </div>
 
           {/* Instructions */}
-          <div className="space-y-8 sm:space-y-10">
+          <div className="space-y-6 sm:space-y-8">
             <p className="text-2xl sm:text-3xl text-gray-700 leading-relaxed text-center">
               I'm <span className="shimmer-text">Pearl</span>, and I look forward to our conversation. I'll ask you questions about your life over the next 10-15 minutes.
             </p>
 
-            {/* Features - larger text for seniors */}
-            <div className="space-y-3 sm:space-y-4">
-              <div className="flex items-start gap-3 sm:gap-4">
-                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                  <Mic className="w-10 h-10 sm:w-11 sm:h-11 text-amber-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-0.5">Record or Type</h3>
-                  <p className="text-xl sm:text-2xl text-gray-600 leading-tight">Answer with your voice or typing</p>
-                </div>
-              </div>
+            {/* How It Works Section */}
+            <div className="bg-gradient-to-br from-amber-50 to-rose-50 rounded-2xl p-6 sm:p-8 border-2 border-amber-200">
+              <h3 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-6">Here's How It Works:</h3>
 
-              <div className="flex items-start gap-3 sm:gap-4">
-                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="w-10 h-10 sm:w-11 sm:h-11 text-rose-600" />
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-8 h-8 text-green-600 flex-shrink-0" />
+                  <p className="text-xl sm:text-2xl text-gray-700 leading-relaxed">
+                    <strong>Answer with your voice or by typing</strong> - use whichever feels comfortable
+                  </p>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-0.5">Choose Your Path</h3>
-                  <p className="text-xl sm:text-2xl text-gray-600 leading-tight">Pick questions that interest you</p>
-                </div>
-              </div>
 
-              <div className="flex items-start gap-3 sm:gap-4">
-                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle2 className="w-10 h-10 sm:w-11 sm:h-11 text-green-600" />
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-8 h-8 text-green-600 flex-shrink-0" />
+                  <p className="text-xl sm:text-2xl text-gray-700 leading-relaxed">
+                    <strong>Share stories that interest you</strong> - I'll guide the conversation
+                  </p>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-0.5">Take Your Time</h3>
-                  <p className="text-xl sm:text-2xl text-gray-600 leading-tight">Share as much as you'd like</p>
+
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-8 h-8 text-green-600 flex-shrink-0" />
+                  <p className="text-xl sm:text-2xl text-gray-700 leading-relaxed">
+                    <strong>Take your time</strong> - there's no rush, share as much as you'd like
+                  </p>
                 </div>
               </div>
             </div>

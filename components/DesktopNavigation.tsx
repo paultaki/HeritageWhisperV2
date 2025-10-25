@@ -87,13 +87,25 @@ export default function DesktopNavigation({
     >
       {/* Logo/Home */}
       <div className="mb-8 flex justify-center">
-        <Image
-          src="/HW_text-compress.png"
-          alt="HeritageWhisper"
-          width={80}
-          height={48}
-          className="object-contain"
-        />
+        <svg
+          viewBox="0 0 64 64"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          className="w-20 h-12 text-[#2d2520]"
+        >
+          <path fill="currentColor" d="M10 8h8v20h28V8h8v48h-8V36H18v20h-8z"/>
+          <path d="
+            M22 42
+            q-3 0 -5 2.2
+            q-2 2.2 -2 4.6
+            q0 2.8 2.1 4.8
+            q2.1 2 4.9 2
+            q4.6 0 6.6 -7.2
+            q2.2 7.2 8 7.2
+            q4.8 0 8.6 -2.9
+            q3.4 -2.1 8.6 -1.2"
+            stroke="#C9A78A" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
       </div>
 
       {/* Navigation Items - Order: Timeline, Book, Record, Memories, Prompts */}

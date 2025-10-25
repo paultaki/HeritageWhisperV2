@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { navCache } from "@/lib/navCache";
 import { useAuth } from "@/lib/auth";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import Image from "next/image";
 
 interface QuickStoryRecorderProps {
   isOpen: boolean;
@@ -197,6 +198,18 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
         <DialogDescription className="sr-only">
           Record or type your story. Choose between voice recording or text entry.
         </DialogDescription>
+
+        {/* Logo */}
+        <div className="flex justify-center mb-6 pt-2">
+          <Image
+            src="/Logo Updated.png?v=2"
+            alt="Heritage Whisper"
+            width={240}
+            height={60}
+            className="h-16 w-auto"
+            priority
+          />
+        </div>
 
         <div className="relative">
           <AnimatePresence mode="wait">

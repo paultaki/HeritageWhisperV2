@@ -128,7 +128,7 @@ function BookStyleReviewContent() {
             base64Length: cachedData.mainAudioBase64?.length,
             hasTitle: !!cachedData.title,
             hasYear: !!cachedData.storyYear,
-            returnPath: (cachedData as any).returnPath,
+            returnPath: cachedData.returnPath,
             allKeys: Object.keys(cachedData),
           });
 
@@ -149,8 +149,8 @@ function BookStyleReviewContent() {
           } else {
             console.log("[Review] No wisdom text found in NavCache");
           }
-          if ((cachedData as any).returnPath) {
-            setReturnPath((cachedData as any).returnPath);
+          if (cachedData.returnPath) {
+            setReturnPath(cachedData.returnPath);
           }
 
           // Handle audio - convert base64 back to blob if available
@@ -902,7 +902,7 @@ function BookStyleReviewContent() {
       mode: cachedData.mode || "quick",
       audioBlob: cachedData.audioBlob,
       duration: cachedData.duration || 0,
-      timestamp: String(cachedData.timestamp ?? new Date().toISOString()),
+      timestamp: cachedData.timestamp || new Date().toISOString(),
       rawTranscript: cachedData.rawTranscript || "",
       qaPairs: cachedData.qaPairs,
     };
@@ -925,9 +925,9 @@ function BookStyleReviewContent() {
       originalTranscript: cachedData.rawTranscript || "",
       enhancedTranscript: enhancedTranscript,
       useEnhanced: true,
-      lessonLearned: (cachedData as any).lessonLearned || "",
+      lessonLearned: cachedData.lessonLearned || "",
       recording,
-      userBirthYear: user?.birthYear,
+      userBirthYear: user?.birth_year,
     };
 
     const handleWizardComplete = () => {

@@ -93,7 +93,7 @@ export default function HomePage() {
           {/* Header with Logo */}
           <div className="flex flex-col justify-center items-center mb-10">
             <Image
-              src="/logo lower.png"
+              src="/Logo Updated.png?v=2"
               alt="Heritage Whisper"
               width={480}
               height={120}

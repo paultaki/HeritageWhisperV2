@@ -121,7 +121,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 style={{
                   fontFamily: 'var(--font-serif)',
                   color: '#1f0f08',
-                  fontSize: '19px',
+                  fontSize: '18px',
                 }}
               >
                 {message.content}
@@ -187,7 +187,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
               duration={message.audioDuration || 0}
             />
             {message.content && (
-              <p className="text-base mt-2 opacity-90" style={{ fontSize: '16px' }}>
+              <p className="text-base mt-2 opacity-90" style={{ fontSize: '15px' }}>
                 {message.content}
               </p>
             )}
@@ -218,7 +218,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
               boxShadow: '0 2px 8px rgba(245,158,11,0.3)',
             }}
           >
-            <p className="text-base leading-relaxed" style={{ fontSize: '18px' }}>
+            <p className="text-base leading-relaxed" style={{ fontSize: '17px' }}>
               {message.content}
             </p>
           </div>

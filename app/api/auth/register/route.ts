@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       // Format validation errors for user-friendly response
-      const errorMessages = validationResult.error.issues.map((err: any) => ({
+      const errorMessages = validationResult.error.errors.map((err) => ({
         field: err.path.join('.'),
         message: err.message,
       }));
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       options: {
         data: {
           name,
-          birthYear: parseInt(String(birthYear ?? "")),
+          birthYear: parseInt(birthYear),
         },
         // Force redirect to callback page after email confirmation
         emailRedirectTo: `https://dev.heritagewhisper.com/auth/callback`,
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
         id: data.user.id,
         email: data.user.email!,
         name: name,
-        birth_year: parseInt(String(birthYear ?? "")),
+        birth_year: parseInt(birthYear),
         story_count: 0,
         is_paid: false,
         latest_terms_version: CURRENT_TERMS_VERSION,
@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
       id: data.user.id,
       email: data.user.email,
       name: name,
-      birthYear: parseInt(String(birthYear ?? "")),
+      birthYear: parseInt(birthYear),
       storyCount: 0,
       isPaid: false,
     };
