@@ -50,6 +50,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
+// Local widened types for guards
+type AccountContextExtended = {
+  activeContext?: any;
+  isOwnAccount?: boolean;
+  canInvite?: boolean;
+  permissionLevel?: string;
+  [k: string]: unknown;
+};
+
+type UserWithMetadata = {
+  id?: string;
+  email?: string;
+  user_metadata?: {
+    name?: string;
+    full_name?: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+};
+
 // Category prompts data
 const CATEGORY_PROMPTS: Record<string, string[]> = {
   childhood: [
@@ -366,7 +386,8 @@ export default function PromptsV2Page() {
   const [promptToDismiss, setPromptToDismiss] = useState<FamilyPrompt | null>(null);
 
   // V3: Get active storyteller context for family sharing
-  const { activeContext, isOwnAccount, canInvite, permissionLevel } = useAccountContext();
+  const rawContext = useAccountContext() as AccountContextExtended;
+  const { activeContext, isOwnAccount, canInvite, permissionLevel } = rawContext;
   const storytellerId = activeContext?.storytellerId || user?.id;
 
   // Fetch data (same queries as before)
@@ -416,17 +437,17 @@ export default function PromptsV2Page() {
   });
 
   // Get user's first name
+  const u = user as unknown as UserWithMetadata;
   const firstName = userProfile?.user?.name?.split(' ')[0]
-    || user?.user_metadata?.name?.split(' ')[0]
-    || user?.user_metadata?.full_name?.split(' ')[0]
-    || user?.email?.split('@')[0]
+    || u?.user_metadata?.name?.split(' ')[0]
+    || u?.user_metadata?.full_name?.split(' ')[0]
+    || u?.email?.split('@')[0]
     || 'You';
 
   // Mutations
   const queueMutation = useMutation({
     mutationFn: ({ promptId, source, text }: any) =>
-      apiRequest(`/api/prompts/queue`, {
-        method: "POST",
+      apiRequest("POST", `/api/prompts/queue`, {
         body: JSON.stringify({ promptId, source, text }),
       }),
     onSuccess: () => {
