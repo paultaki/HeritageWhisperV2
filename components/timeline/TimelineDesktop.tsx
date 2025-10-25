@@ -68,7 +68,7 @@ function DecadeLabel({ decade, isDark = false }: DecadeLabelProps) {
         className="absolute z-0"
         style={{
           left: '50%',
-          transform: 'translateX(calc(-50% - 95px))', // Position to right of timeline line
+          transform: 'translateX(calc(-50% + 15px))', // Position to right of timeline line
           opacity: isDark ? 0.4 : 0.45,
         }}
       >
@@ -1045,7 +1045,7 @@ export function TimelineDesktop() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-[114px] pb-12 md:pt-[114px] md:pb-20">
         {/* Title Section */}
-        <div className="text-center mb-[114px]" style={{ transform: 'translateX(-115px)' }}>
+        <div className="text-center mb-[114px]" style={{ transform: 'translateX(-5px)' }}>
           <h2 className="text-5xl md:text-7xl font-light tracking-tight mb-6" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>
             {activeContext?.storytellerName ? `${activeContext.storytellerName}'s Journey` : "Life's Journey"}
           </h2>
@@ -1061,7 +1061,7 @@ export function TimelineDesktop() {
             className="absolute left-1/2 md:w-[2.5px] w-[3px] rounded-full overflow-hidden pointer-events-none"
             style={{
               backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(107, 114, 128, 0.25)',
-              transform: 'translateX(calc(-50% - 115px))',
+              transform: 'translateX(calc(-50% - 5px))',
               top: '0',
               bottom: '0',
               height: '100%',
@@ -1200,17 +1200,17 @@ export function TimelineDesktop() {
 
         /* Connector line - horizontal stub from card to center timeline */
         @media (min-width: 768px) {
-          /* Shift timeline cards and decade banners 115px left on desktop/tablet */
+          /* Shift timeline cards and decade banners 5px left on desktop/tablet */
           .timeline-step.translate-y-0 {
-            transform: translateX(-115px) translateY(0);
+            transform: translateX(-5px) translateY(0);
           }
 
           .timeline-step.translate-y-8 {
-            transform: translateX(-115px) translateY(2rem);
+            transform: translateX(-5px) translateY(2rem);
           }
 
           .decade-banner {
-            transform: translateX(-115px);
+            transform: translateX(-5px);
           }
           /* Sticky date bubbles */
           .timeline-dot {

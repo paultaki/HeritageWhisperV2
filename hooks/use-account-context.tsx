@@ -44,7 +44,6 @@ export function useAccountContext() {
     if (storedStorytellerIdOnly && !storedStorytellerIdOnly.startsWith('{')) {
       // This is just a storyteller ID, not a full context object
       // We'll fetch the full context later when availableStorytellers loads
-      console.log('Found initial storyteller ID from account creation:', storedStorytellerIdOnly);
       setIsLoading(true); // Keep loading until we fetch full context
       return;
     }
@@ -80,13 +79,11 @@ export function useAccountContext() {
   const fetchAvailableStorytellers = useCallback(async () => {
     if (!user) return;
 
-    console.log('[AccountContext] Fetching available storytellers for user:', user.id);
     try {
       const response = await apiRequest('GET', '/api/accounts/available');
       const data = await response.json();
 
       if (response.ok) {
-        console.log('[AccountContext] Received storytellers:', data.storytellers);
         setAvailableStorytellers(data.storytellers || []);
       } else {
         console.error('[AccountContext] Failed to fetch storytellers:', data.error);
@@ -95,7 +92,6 @@ export function useAccountContext() {
     } catch (err: any) {
       // Silently handle if endpoint doesn't exist yet (V3 migration in progress)
       if (err.message?.includes('Failed to fetch') || err.message?.includes('500')) {
-        console.log('[AccountContext] Available storytellers endpoint not yet available (V3 migration in progress)');
         setAvailableStorytellers([]);
         return;
       }
@@ -118,8 +114,6 @@ export function useAccountContext() {
 
     // Check if we have a simple ID (from account creation) and no active context yet
     if (storedStorytellerIdOnly && !storedStorytellerIdOnly.startsWith('{') && !activeContext) {
-      console.log('Converting initial storyteller ID to full context:', storedStorytellerIdOnly);
-
       // Find the storyteller in available list
       const storyteller = availableStorytellers.find(s => s.storytellerId === storedStorytellerIdOnly);
 
@@ -135,10 +129,8 @@ export function useAccountContext() {
         setActiveContext(newContext);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newContext));
         setIsLoading(false);
-        console.log('✅ Initial context set for new family member:', newContext);
       } else {
         // Storyteller not found in available list, default to own account
-        console.warn('Initial storyteller not found in available list, defaulting to own account');
         const ownContext: AccountContext = {
           storytellerId: user.id,
           storytellerName: user.name || 'Your Stories',
@@ -157,8 +149,6 @@ export function useAccountContext() {
   const switchToStoryteller = useCallback(async (storytellerId: string) => {
     if (!user) return;
 
-    console.log('[AccountContext] Switching to storyteller:', storytellerId);
-
     // If switching to own account
     if (storytellerId === user.id) {
       const ownContext: AccountContext = {
@@ -172,13 +162,10 @@ export function useAccountContext() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(ownContext));
 
       // Invalidate all story-related queries to trigger refetch
-      console.log('[AccountContext] Invalidating all story queries for own account');
-      // Invalidate all variations of story query keys
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['stories'] }),
         queryClient.invalidateQueries({ queryKey: ['/api/stories'] }),
       ]);
-      console.log('[AccountContext] ✅ Queries invalidated');
       return;
     }
 
@@ -203,13 +190,10 @@ export function useAccountContext() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newContext));
 
     // Invalidate all story-related queries to trigger refetch
-    console.log('[AccountContext] Invalidating all story queries for storyteller:', storytellerId);
-    // Invalidate all variations of story query keys
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ['stories'] }),
       queryClient.invalidateQueries({ queryKey: ['/api/stories'] }),
     ]);
-    console.log('[AccountContext] ✅ Queries invalidated');
   }, [user, availableStorytellers, queryClient]);
 
   // Reset to own account

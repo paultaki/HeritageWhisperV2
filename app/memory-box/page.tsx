@@ -231,7 +231,6 @@ export default function MemoryBoxPage() {
       return { previousStories };
     },
     onSuccess: (data) => {
-      console.log("Update successful, response:", data);
       queryClient.invalidateQueries({
         queryKey: ["/api/stories", storytellerId, session?.access_token],
       });
@@ -362,43 +361,20 @@ export default function MemoryBoxPage() {
   const handleToggleTimeline = (id: string) => {
     const story = stories.find((s) => s.id === id);
     if (story && story.storyYear) {
-      console.log(
-        "Toggling timeline for story:",
-        id,
-        "Current value:",
-        story.includeInTimeline,
-        "New value:",
-        !story.includeInTimeline,
-      );
       updateStory.mutate({
         id,
         updates: { includeInTimeline: !story.includeInTimeline },
       });
-    } else {
-      console.log(
-        "Cannot toggle timeline - story not found or missing year:",
-        story,
-      );
     }
   };
 
   const handleToggleBook = (id: string) => {
     const story = stories.find((s) => s.id === id);
     if (story) {
-      console.log(
-        "Toggling book for story:",
-        id,
-        "Current value:",
-        story.includeInBook,
-        "New value:",
-        !story.includeInBook,
-      );
       updateStory.mutate({
         id,
         updates: { includeInBook: !story.includeInBook },
       });
-    } else {
-      console.log("Cannot toggle book - story not found:", id);
     }
   };
 

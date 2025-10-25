@@ -49,15 +49,6 @@ const convertToPaginationStory = (story: Story): PaginationStory => {
         ]
       : []);
 
-  console.log("[Print 2up] Converting story:", {
-    title: story.title,
-    hasPhotosArray: !!story.photos,
-    photosArrayLength: story.photos?.length || 0,
-    hasPhotoUrl: !!story.photoUrl,
-    convertedPhotosLength: photos.length,
-    firstPhotoUrl: photos[0]?.url,
-  });
-
   return {
     id: story.id,
     title: story.title,
@@ -190,23 +181,9 @@ const PrintPageRenderer = ({ page }: { page: BookPage }) => {
                     page.photos?.[0]?.url,
                   )
                 }
-                onLoad={() =>
-                  console.log("[Print 2up] Image loaded:", page.photos?.[0]?.url)
-                }
               />
             </div>
           )}
-        {/* Debug: log if photos should be here but aren't */}
-        {(page.type === "story-start" || page.type === "story-complete") &&
-          (!page.photos || page.photos.length === 0) && (
-            <>
-              {console.log("[Print 2up] Story page has NO photos:", {
-                type: page.type,
-                title: page.title,
-              })}
-            </>
-          )}
-
         {/* Title only - year and age now in running header */}
         {(page.type === "story-start" || page.type === "story-complete") && (
           <div className="memory-header">
@@ -262,19 +239,16 @@ function Print2UpPageContent() {
 
     // Priority 1: Use userId from URL if provided (fastest, for PDFShift with token)
     if (userIdFromUrl) {
-      console.log("[Print 2up] Using userId from URL:", userIdFromUrl);
       setUserId(userIdFromUrl);
       return;
     }
 
     // Priority 2: Try to validate print token (for token-only access)
     if (printToken) {
-      console.log("[Print 2up] Validating print token...");
       fetch(`/api/print-token/validate?token=${printToken}`)
         .then(res => res.json())
         .then(data => {
           if (data.userId) {
-            console.log("[Print 2up] Using userId from print token:", data.userId);
             setUserId(data.userId);
           } else {
             setError("Invalid or expired print token.");
@@ -290,7 +264,6 @@ function Print2UpPageContent() {
     }
 
     // Priority 3: Get from Supabase session (for direct user access)
-    console.log("[Print 2up] No userId or token in URL, checking session...");
     import("@supabase/supabase-js").then(({ createClient }) => {
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -299,7 +272,6 @@ function Print2UpPageContent() {
 
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user?.id) {
-          console.log("[Print 2up] Using userId from session:", session.user.id);
           setUserId(session.user.id);
         } else {
           setError("Not authenticated. Please sign in first.");
@@ -324,9 +296,6 @@ function Print2UpPageContent() {
 
     async function loadStories() {
       try {
-
-        console.log("[Print 2up] Fetching stories for userId:", userId);
-
         // Fetch stories from server API (uses service role key to bypass auth)
         const response = await fetch(`/api/book-data?userId=${userId}`);
         if (!response.ok) {
@@ -337,7 +306,6 @@ function Print2UpPageContent() {
 
         const { stories } = await response.json();
         clearTimeout(loadingTimeout);
-        console.log("[Print 2up] Received", stories?.length || 0, "stories");
 
         if (!stories || stories.length === 0) {
           console.error("[Print 2up] No stories found for user");
@@ -371,26 +339,6 @@ function Print2UpPageContent() {
 
         const bookPages = paginateBook(decadeGroups);
         const bookSpreads = getPageSpreads(bookPages);
-
-        console.log(
-          "[Print 2up] Generated",
-          bookPages.length,
-          "pages,",
-          bookSpreads.length,
-          "spreads",
-        );
-
-        // Log photo data for debugging
-        const pagesWithPhotos = bookPages.filter(
-          (p) => p.photos && p.photos.length > 0,
-        );
-        console.log("[Print 2up] Pages with photos:", pagesWithPhotos.length);
-        if (pagesWithPhotos.length > 0) {
-          console.log(
-            "[Print 2up] Sample photo URL:",
-            pagesWithPhotos[0].photos?.[0]?.url,
-          );
-        }
 
         setPages(bookPages);
         setSpreads(bookSpreads);

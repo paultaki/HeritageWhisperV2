@@ -26,7 +26,8 @@ import {
   Baby,
   Music,
   Utensils,
-  X
+  X,
+  Library
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useState, useEffect } from "react";
@@ -365,7 +366,7 @@ export default function PromptsV2Page() {
   const [promptToDismiss, setPromptToDismiss] = useState<FamilyPrompt | null>(null);
 
   // V3: Get active storyteller context for family sharing
-  const { activeContext, isOwnAccount, canInvite } = useAccountContext();
+  const { activeContext, isOwnAccount, canInvite, permissionLevel } = useAccountContext();
   const storytellerId = activeContext?.storytellerId || user?.id;
 
   // Fetch data (same queries as before)
@@ -550,34 +551,37 @@ export default function PromptsV2Page() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50">
       {/* Header - Full viewport width */}
       <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
-        <div className="px-4 md:px-6 py-3 md:py-3">
+        <div className="px-4 md:px-6 py-2 md:py-2">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
-              <Image
-                src="/logo_hw.png"
-                alt="Heritage Whisper"
-                width={40}
-                height={40}
-                className="h-8 md:h-9 w-auto flex-shrink-0"
-              />
+              <Library className="w-6 h-6 text-gray-700 flex-shrink-0" />
               <div className="min-w-0">
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">
-                  Welcome back, {firstName}!
-                </h1>
-                <p className="text-xs md:text-sm text-gray-600 mt-0.5 hidden sm:block">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">
+                    Prompt Library
+                  </h1>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowHelp(!showHelp)}
+                    className="text-gray-600 hover:text-orange-600 -ml-1 flex-shrink-0"
+                  >
+                    <HelpCircle className="h-5 w-5" />
+                  </Button>
+                </div>
+                <p className="text-base text-gray-600 -mt-2 hidden sm:block">
                   Choose a question below to record your next memory
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Account Switcher */}
-              <div style={{ marginTop: '-30px' }}>
+              <div style={{ transform: 'translate(-150px, -17px)' }}>
                 <AccountSwitcher />
               </div>
 
               {/* Submit Question button for contributors viewing storyteller's prompts */}
-              {!isOwnAccount && canInvite && (
+              {!isOwnAccount && permissionLevel === 'contributor' && (
                 <Button
                   variant="default"
                   size="sm"
@@ -588,15 +592,6 @@ export default function PromptsV2Page() {
                   Submit Question
                 </Button>
               )}
-
-              <Button
-                variant="ghost"
-                size="lg"
-                onClick={() => setShowHelp(!showHelp)}
-                className="text-gray-600 hover:text-gray-900 flex-shrink-0"
-              >
-                <HelpCircle className="h-5 w-5" />
-              </Button>
             </div>
           </div>
         </div>

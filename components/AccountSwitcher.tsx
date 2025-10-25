@@ -27,16 +27,7 @@ export function AccountSwitcher() {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  console.log('[AccountSwitcher] Render state:', {
-    isLoading,
-    activeContext,
-    availableStorytellers,
-    isOwnAccount,
-    userId: user?.id,
-  });
-
   if (isLoading || !activeContext || !user) {
-    console.log('[AccountSwitcher] Showing loading state');
     return (
       <Button variant="ghost" size="sm" disabled className="gap-2">
         <User className="h-4 w-4" />
@@ -46,9 +37,6 @@ export function AccountSwitcher() {
   }
 
   const handleSwitch = async (storytellerId: string) => {
-    console.log('[AccountSwitcher] handleSwitch called with storytellerId:', storytellerId);
-    console.log('[AccountSwitcher] Current user.id:', user?.id);
-    console.log('[AccountSwitcher] Current activeContext:', activeContext);
     await switchToStoryteller(storytellerId);
     setIsOpen(false);
   };
@@ -67,26 +55,26 @@ export function AccountSwitcher() {
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           className={cn(
-            "gap-2 focus:ring-2 transition-colors mr-4",
+            "gap-2 focus:ring-2 transition-colors mr-4 border-2 shadow-sm",
             isOwnAccount
-              ? "hover:bg-accent focus:ring-amber-500"
-              : "bg-blue-50 hover:bg-blue-100 text-blue-900 focus:ring-blue-500"
+              ? "bg-white hover:bg-accent border-gray-300 hover:border-amber-400 focus:ring-amber-500"
+              : "bg-blue-50 hover:bg-blue-100 text-blue-900 border-blue-300 hover:border-blue-400 focus:ring-blue-500"
           )}
         >
           {isOwnAccount ? (
-            <User className="h-5 w-5" />
+            <User className="h-5 w-5 text-amber-600" />
           ) : (
             <Users className="h-5 w-5 text-blue-600" />
           )}
           <span className="text-base font-semibold max-w-[200px] truncate">
-            {activeContext.storytellerName}
+            {isOwnAccount ? (user?.name || activeContext.storytellerName) : activeContext.storytellerName}
           </span>
           <ChevronDown className={cn(
-            "h-5 w-5 opacity-50",
-            !isOwnAccount && "text-blue-600"
+            "h-5 w-5",
+            isOwnAccount ? "text-amber-600" : "text-blue-600"
           )} />
         </Button>
       </DropdownMenuTrigger>

@@ -233,19 +233,16 @@ function PrintTrimPageContent() {
 
     // Priority 1: Use userId from URL if provided (fastest, for PDFShift with token)
     if (userIdFromUrl) {
-      console.log("[Print Trim] Using userId from URL:", userIdFromUrl);
       setUserId(userIdFromUrl);
       return;
     }
 
     // Priority 2: Try to validate print token (for token-only access)
     if (printToken) {
-      console.log("[Print Trim] Validating print token...");
       fetch(`/api/print-token/validate?token=${printToken}`)
         .then(res => res.json())
         .then(data => {
           if (data.userId) {
-            console.log("[Print Trim] Using userId from print token:", data.userId);
             setUserId(data.userId);
           } else {
             setError("Invalid or expired print token.");
@@ -261,7 +258,6 @@ function PrintTrimPageContent() {
     }
 
     // Priority 3: Get from Supabase session (for direct user access)
-    console.log("[Print Trim] No userId or token in URL, checking session...");
     import("@supabase/supabase-js").then(({ createClient }) => {
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -270,7 +266,6 @@ function PrintTrimPageContent() {
 
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user?.id) {
-          console.log("[Print Trim] Using userId from session:", session.user.id);
           setUserId(session.user.id);
         } else {
           setError("Not authenticated. Please sign in first.");
@@ -287,9 +282,6 @@ function PrintTrimPageContent() {
 
     async function loadStories() {
       try {
-
-        console.log("[Print Trim] Fetching stories for userId:", userId);
-
         // Fetch stories from server API (uses service role key to bypass auth)
         const response = await fetch(`/api/book-data?userId=${userId}`);
         if (!response.ok) {
@@ -297,7 +289,6 @@ function PrintTrimPageContent() {
         }
 
         const { stories } = await response.json();
-        console.log("[Print Trim] Received", stories?.length || 0, "stories");
 
         if (!stories || stories.length === 0) {
           setError("No stories found");
@@ -329,7 +320,6 @@ function PrintTrimPageContent() {
           }));
 
         const bookPages = paginateBook(decadeGroups);
-        console.log("[Print Trim] Generated", bookPages.length, "pages");
 
         setPages(bookPages);
         setLoading(false);
