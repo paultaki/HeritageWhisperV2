@@ -1,0 +1,2 @@
+# This will show what columns are being fetched from stories
+grep -A 30 "// Stories" app/api/user/export/route.ts | head -40

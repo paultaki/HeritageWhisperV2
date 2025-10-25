@@ -85,8 +85,63 @@ HeritageWhisperV2/
 ├── hooks/                   # Custom React hooks
 ├── tests/                   # Test suite
 ├── migrations/             # Database migrations
-└── shared/schema.ts        # Database schema (Drizzle)
+├── shared/schema.ts        # Database schema (Drizzle ORM)
+└── docs/                    # Technical documentation
+    ├── DATA_MODEL.md       # Complete database schema reference
+    └── entity-relationship-diagram.md
 ```
+
+## 📊 Database & Data Model
+
+**Complete documentation:** See [DATA_MODEL.md](DATA_MODEL.md)
+
+### Database Overview
+
+- **21 Tables** with full TypeScript type safety via Drizzle ORM
+- **Row Level Security (RLS)** enabled on all tables
+- **50+ Performance Indexes** for optimized queries
+- **Multi-tenant Architecture** via `has_collaboration_access()` RPC
+
+### Table Categories
+
+- **Core User (3)**: users, profiles, webauthn_credentials
+- **Content (3)**: stories, photos, active_prompts
+- **AI Prompts (5)**: ai_prompts, user_prompts, family_prompts, prompt_feedback, prompt_entities
+- **Family Sharing (5)**: family_members, family_invites, family_collaborations, family_sessions, family_access_tokens
+- **Admin/Monitoring (3)**: admin_audit_log, ai_usage_log, stripe_customers
+- **Supporting (2)**: migrations, expired_prompts
+
+### Key Database Objects
+
+**Type-Safe Schema (`shared/schema.ts`):**
+- All 21 tables with Drizzle ORM definitions
+- Zod validation schemas for API requests
+- TypeScript types for type safety (100% coverage)
+
+**RPC Functions:**
+- `has_collaboration_access(user_uuid, storyteller_uuid)` - Multi-tenant access control
+- `check_ai_budget(user_uuid, cost_usd)` - AI spending enforcement
+- `log_ai_usage(user_uuid, model, tokens_in, tokens_out, cost_usd)` - Usage tracking
+- `archive_expired_prompts()` - Cleanup expired prompts (7-day TTL)
+- `cleanup_expired_family_access()` - Remove expired family tokens
+
+### Quick Reference
+
+```typescript
+// Import types from schema
+import { type Story, type InsertStory } from "@/shared/schema";
+
+// Type-safe database queries with Drizzle
+const userStories = await db.query.stories.findMany({
+  where: eq(stories.userId, userId),
+  orderBy: desc(stories.createdAt),
+});
+```
+
+**Documentation Files:**
+- [DATA_MODEL.md](DATA_MODEL.md) - Complete ER diagrams, table definitions, constraints
+- [docs/SCHEMA_UPDATE_SUMMARY.md](docs/SCHEMA_UPDATE_SUMMARY.md) - Recent schema changes
+- [docs/entity-relationship-diagram.md](docs/entity-relationship-diagram.md) - Quick reference diagrams
 
 ## 🔑 Key Features
 
