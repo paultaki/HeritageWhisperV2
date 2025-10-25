@@ -7,23 +7,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyRegistrationResponse } from "@simplewebauthn/server";
 import type { RegistrationResponseJSON } from "@simplewebauthn/types";
+import type { VerifiedRegistrationResponse } from "@simplewebauthn/server";
 import { createPasskey, getUserById } from "@/lib/db-admin";
 import { getExpectedOrigin, getExpectedRPID } from "@/lib/webauthn-config";
 import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
-    const {
-      userId,
-      credential,
-      challenge,
-      friendlyName,
-    }: {
+    const body = await request.json() as unknown as {
       userId: string;
       credential: RegistrationResponseJSON;
       challenge: string;
       friendlyName?: string;
-    } = await request.json();
+    };
+    const { userId, credential, challenge, friendlyName } = body;
 
     if (!userId || !credential || !challenge) {
       return NextResponse.json(
@@ -45,7 +42,7 @@ export async function POST(request: NextRequest) {
       expectedOrigin: getExpectedOrigin(),
       expectedRPID: getExpectedRPID(),
       requireUserVerification: true,
-    });
+    }) as VerifiedRegistrationResponse;
 
     if (!verification.verified || !verification.registrationInfo) {
       logger.warn("[register-verify] Verification failed");
@@ -56,13 +53,20 @@ export async function POST(request: NextRequest) {
     }
 
     const { registrationInfo } = verification;
-    const {
-      credentialID,
-      credentialPublicKey,
-      counter,
-      credentialBackedUp,
-      credentialDeviceType,
-    } = registrationInfo;
+    const info = registrationInfo as unknown as {
+      credentialID?: Uint8Array;
+      credentialPublicKey?: Uint8Array;
+      counter?: number;
+      aaguid?: string;
+      credentialBackedUp?: boolean;
+      credentialDeviceType?: string;
+    };
+
+    const credentialID = info.credentialID!;
+    const credentialPublicKey = info.credentialPublicKey!;
+    const counter = info.counter ?? 0;
+    const credentialBackedUp = info.credentialBackedUp ?? false;
+    const credentialDeviceType = info.credentialDeviceType ?? "singleDevice";
 
     // Step 2: Generate friendly name if not provided
     let name = friendlyName;
@@ -84,7 +88,7 @@ export async function POST(request: NextRequest) {
       signCount: counter,
       credentialBackedUp,
       credentialDeviceType,
-      transports: credential.response.transports,
+      transports: credential.response.transports as ("ble" | "internal" | "nfc" | "usb" | "cable" | "hybrid")[] | undefined,
       friendlyName: name,
     });
 

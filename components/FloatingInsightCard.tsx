@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { motion, AnimatePresence, PanInfo, Variants } from "framer-motion";
 import { X, MessageCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -141,7 +141,7 @@ export default function FloatingInsightCard({
 
   if (!questionText) return null;
 
-  const desktopVariants = {
+  const desktopVariants: Variants = {
     hidden: { x: 400, opacity: 0 },
     visible: {
       x: 0,
@@ -155,7 +155,7 @@ export default function FloatingInsightCard({
     },
   };
 
-  const mobileVariants = {
+  const mobileVariants: Variants = {
     hidden: { y: "100%", opacity: 0, scale: 1 },
     visible: {
       y: 0,

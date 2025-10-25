@@ -1,0 +1,7 @@
+✅ scripts/trigger-prompt-regeneration.ts - 0 errors (fixed 4)
+
+Fixed:
+- Added AnyTier3Result local type with characterInsights support
+- Cast performTier3Analysis result to AnyTier3Result
+- Typed map callback parameter (t: any) in traits.map
+- Maintained rawResult for storeTier3Results call

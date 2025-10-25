@@ -8,6 +8,8 @@ import { authRatelimit, getClientIp, checkRateLimit } from "@/lib/ratelimit";
 import { logger } from "@/lib/logger";
 import { RegisterUserSchema, safeValidateRequestBody } from "@/lib/validationSchemas";
 
+type MaybePromise<T> = T | Promise<T>;
+
 // Initialize Supabase client with service role key to bypass RLS
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       // Format validation errors for user-friendly response
-      const errorMessages = validationResult.error.errors.map((err) => ({
+      const errorMessages = validationResult.error.issues.map((err: any) => ({
         field: err.path.join('.'),
         message: err.message,
       }));
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
       options: {
         data: {
           name,
-          birthYear: parseInt(birthYear),
+          birthYear: parseInt(String(birthYear ?? "")),
         },
         // Force redirect to callback page after email confirmation
         emailRedirectTo: `https://dev.heritagewhisper.com/auth/callback`,
@@ -114,7 +116,7 @@ export async function POST(request: NextRequest) {
         id: data.user.id,
         email: data.user.email!,
         name: name,
-        birth_year: parseInt(birthYear),
+        birth_year: parseInt(String(birthYear ?? "")),
         story_count: 0,
         is_paid: false,
         latest_terms_version: CURRENT_TERMS_VERSION,
@@ -203,7 +205,7 @@ export async function POST(request: NextRequest) {
       id: data.user.id,
       email: data.user.email,
       name: name,
-      birthYear: parseInt(birthYear),
+      birthYear: parseInt(String(birthYear ?? "")),
       storyCount: 0,
       isPaid: false,
     };

@@ -46,6 +46,17 @@ import { Palette } from "lucide-react";
 
 const logoUrl = "/logo_hw.png";
 
+// Timeline item helper type
+type TimelineItem = {
+  id: string;
+  type?: string;
+  year?: number;
+  title?: string;
+  subtitle?: string;
+  stories?: Array<any>;
+  storyCount?: number;
+};
+
 // Color scheme options for testing
 type ColorScheme =
   | "original"
@@ -820,7 +831,7 @@ function MemoryCard({
                 typeof y === "number" && typeof by === "number" ? y - by : null;
               const age =
                 typeof story.lifeAge === "number"
-                  ? (story.lifeAge < 0 && computed !== null && y >= by
+                  ? (story.lifeAge < 0 && computed !== null && y !== null && by !== null && y >= by
                       ? computed
                       : story.lifeAge)
                   : computed;
@@ -841,7 +852,7 @@ function MemoryCard({
                 typeof y === "number" && typeof by === "number" ? y - by : null;
               const age =
                 typeof story.lifeAge === "number"
-                  ? (story.lifeAge < 0 && computed !== null && y >= by
+                  ? (story.lifeAge < 0 && computed !== null && y !== null && by !== null && y >= by
                       ? computed
                       : story.lifeAge)
                   : computed;
@@ -854,10 +865,10 @@ function MemoryCard({
                 : "";
             })()}
           </span>
-          {top.length > 0 && (
+          {(top?.length ?? 0) > 0 && (
             <>
               <span className="divider"></span>
-              <span>{top[0].name}</span>
+              <span>{(top?.[0] as any)?.name}</span>
             </>
           )}
         </div>
@@ -868,9 +879,9 @@ function MemoryCard({
         Recorded with Heritage Whisper
         {story.createdAt &&
           ` · Created ${new Date(story.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
-        {story.updatedAt &&
-          story.updatedAt !== story.createdAt &&
-          ` · Last edited ${new Date(story.updatedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
+        {(story as any).updatedAt &&
+          (story as any).updatedAt !== story.createdAt &&
+          ` · Last edited ${new Date((story as any).updatedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
       </div>
     </div>
   );
@@ -1130,12 +1141,12 @@ export function TimelineMobile() {
     );
 
     // Observe all decade sections
-    Object.values(decadeRefs.current).forEach((ref) => {
+    (Object.values(decadeRefs.current) ?? []).forEach((ref) => {
       if (ref) observer.observe(ref);
     });
 
     return () => {
-      Object.values(decadeRefs.current).forEach((ref) => {
+      (Object.values(decadeRefs.current) ?? []).forEach((ref) => {
         if (ref) observer.unobserve(ref);
       });
     };
@@ -1206,7 +1217,7 @@ export function TimelineMobile() {
   }, [allStories.length, user]);
 
   const storiesWithGhostPrompts = useMemo(() => {
-    return mergeGhostPromptsWithStories(stories, ghostPrompts);
+    return mergeGhostPromptsWithStories(stories, ghostPrompts as GhostPrompt[]);
   }, [stories, ghostPrompts]);
 
   // Group all items (stories + ghost prompts) by decade
@@ -1223,7 +1234,7 @@ export function TimelineMobile() {
   const birthYearStories = useMemo(() => {
     return stories.filter((s: any) => {
       const normalizedStoryYear = normalizeYear(s.storyYear);
-      return normalizedStoryYear === normalizedBirthYear;
+      return normalizedStoryYear !== null && normalizedBirthYear !== null && normalizedStoryYear === normalizedBirthYear;
     });
   }, [stories, normalizedBirthYear]);
 
@@ -1231,7 +1242,7 @@ export function TimelineMobile() {
   const prebirthStories = useMemo(() => {
     return stories.filter((s: any) => {
       const normalizedStoryYear = normalizeYear(s.storyYear);
-      return normalizedStoryYear < normalizedBirthYear;
+      return normalizedStoryYear !== null && normalizedBirthYear !== null && normalizedStoryYear < normalizedBirthYear;
     });
   }, [stories, normalizedBirthYear]);
 
@@ -1270,7 +1281,7 @@ export function TimelineMobile() {
         title: "Before I Was Born",
         subtitle: "Family History • Stories of those who came before",
         stories: prebirthStories.sort((a: any, b: any) => {
-          return normalizeYear(a.storyYear) - normalizeYear(b.storyYear);
+          return (normalizeYear(a.storyYear) ?? 0) - (normalizeYear(b.storyYear) ?? 0);
         }),
       });
     }
@@ -1290,7 +1301,7 @@ export function TimelineMobile() {
       // Filter out pre-birth stories from this decade - they're in "Before I Was Born"
       const storiesAfterOrDuringBirth = group.stories.filter((s: any) => {
         const storyYear = normalizeYear(s.storyYear);
-        return storyYear >= normalizedBirthYear;
+        return storyYear !== null && normalizedBirthYear !== null && storyYear >= normalizedBirthYear;
       });
 
       // Only show this decade if it has stories after/during birth
@@ -1306,18 +1317,18 @@ export function TimelineMobile() {
           // This decade contains the birth year, filter to only stories AFTER birth year
           const storiesAfterBirth = storiesAfterOrDuringBirth.filter((s: any) => {
             const storyYear = normalizeYear(s.storyYear);
-            return storyYear > normalizedBirthYear;
+            return storyYear !== null && normalizedBirthYear !== null && storyYear > normalizedBirthYear;
           });
 
           if (storiesAfterBirth.length > 0) {
             // Use the earliest story AFTER birth year for sorting
             const earliestAfterBirth = Math.min(
-              ...storiesAfterBirth.map((s: any) => normalizeYear(s.storyYear)),
+              ...storiesAfterBirth.map((s: any) => normalizeYear(s.storyYear) ?? 0),
             );
             sortYear = earliestAfterBirth;
           } else {
             // No stories after birth in this decade - sort right after birth year
-            sortYear = normalizedBirthYear + 1;
+            sortYear = (normalizedBirthYear ?? 0) + 1;
           }
         }
 
@@ -1546,12 +1557,14 @@ export function TimelineMobile() {
         <div className="hw-layout">
           <div className="hw-spine" style={isDark ? { backgroundColor: '#ffffff', opacity: 1 } : undefined}>
             {/* All stories sorted chronologically */}
-            {allTimelineItems.map((item, index) => (
+            {(allTimelineItems ?? []).map((item, index) => {
+              const it = item as Partial<TimelineItem>;
+              return (
               <section
-                key={item.id}
-                id={item.id}
-                ref={(el) => (decadeRefs.current[item.id] = el)}
-                data-decade-id={item.id}
+                key={it.id ?? String(index)}
+                id={it.id}
+                ref={(el) => { decadeRefs.current[it.id ?? String(index)] = el ?? null; }}
+                data-decade-id={it.id}
                 className="hw-decade"
                 style={isDark ? { borderColor: '#3b3d3f' } : undefined}
               >
@@ -1568,8 +1581,8 @@ export function TimelineMobile() {
                       : undefined
                   }
                 >
-                  <div className="title" style={isDark ? { color: '#b0b3b8' } : undefined}>{item.title}</div>
-                  <div className="meta" style={isDark ? { color: '#8a8d92' } : undefined}>{item.subtitle}</div>
+                  <div className="title" style={isDark ? { color: '#b0b3b8' } : undefined}>{it.title}</div>
+                  <div className="meta" style={isDark ? { color: '#8a8d92' } : undefined}>{it.subtitle}</div>
                 </div>
 
                 {/* Spacing before first card */}
@@ -1578,12 +1591,12 @@ export function TimelineMobile() {
                 {/* Stories Grid */}
                 <div className="hw-grid">
                   {/* Existing Stories and Ghost Prompts */}
-                  {item.stories.map((storyOrPrompt: any) => {
+                  {(it.stories ?? []).map((storyOrPrompt: any, storyIndex: number) => {
                     // Check if this is a ghost prompt
                     if (storyOrPrompt.isGhost) {
                       return (
                         <GhostPromptCard
-                          key={storyOrPrompt.id}
+                          key={storyOrPrompt.id ?? String(storyIndex)}
                           prompt={storyOrPrompt}
                           onClick={() =>
                             handleGhostPromptClick(storyOrPrompt)
@@ -1594,7 +1607,7 @@ export function TimelineMobile() {
                     // Regular story
                     return (
                       <MemoryCard
-                        key={storyOrPrompt.id}
+                        key={storyOrPrompt.id ?? String(storyIndex)}
                         story={storyOrPrompt}
                         isHighlighted={
                           storyOrPrompt.id === highlightedStoryId
@@ -1614,7 +1627,8 @@ export function TimelineMobile() {
                   })}
                 </div>
               </section>
-            ))}
+              );
+            })}
             <DecadeNav entries={decadeEntries} />
           </div>
         </div>

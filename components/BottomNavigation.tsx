@@ -1,5 +1,7 @@
+"use client";
+
 import React, { useState } from "react";
-import { useLocation } from "wouter";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Calendar,
   Users,
@@ -31,13 +33,13 @@ const NavItem: React.FC<NavItemProps> = ({
   isActive,
   onClick,
 }) => {
-  const [, setLocation] = useLocation();
+  const router = useRouter();
 
   const handleClick = () => {
     if (onClick) {
       onClick();
     } else {
-      setLocation(href);
+      router.push(href);
     }
   };
 
@@ -60,7 +62,8 @@ const NavItem: React.FC<NavItemProps> = ({
 };
 
 export default function BottomNavigation() {
-  const [currentPath, setLocation] = useLocation();
+  const router = useRouter();
+  const currentPath = usePathname();
   const [recordModalOpen, setRecordModalOpen] = useState(false);
   const [pulseRecord, setPulseRecord] = useState(true);
   const { user } = useAuth();
@@ -158,7 +161,7 @@ export default function BottomNavigation() {
     // Navigate to review page for editing
     const reviewUrl = `/review?nav=${navId}`;
     console.log("[BottomNavigation] Navigating to:", reviewUrl);
-    setLocation(reviewUrl);
+    router.push(reviewUrl);
   };
 
   if (!shouldShow) {
@@ -334,13 +337,13 @@ export default function BottomNavigation() {
 
 // Desktop Navigation Item Component
 function DesktopNavItem({ icon: Icon, label, href, isActive }: NavItemProps) {
-  const [, setLocation] = useLocation();
+  const router = useRouter();
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
     <div className="relative">
       <button
-        onClick={() => setLocation(href)}
+        onClick={() => router.push(href)}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         className="p-3 rounded-xl transition-all hover:bg-gray-100"

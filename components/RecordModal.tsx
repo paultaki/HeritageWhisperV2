@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   X,
@@ -32,6 +34,14 @@ import { getApiUrl } from "@/lib/config";
 import { supabase } from "@/lib/supabase";
 import { useAIConsent } from "@/hooks/use-ai-consent";
 import { useRouter } from "next/navigation";
+
+// Profile data type for narrowing
+type ProfileData = {
+  workEthic?: number;
+  familyOrientation?: number;
+  riskTolerance?: number;
+  birthYear?: number;
+};
 
 interface RecordModalProps {
   isOpen: boolean;
@@ -166,28 +176,30 @@ export default function RecordModal({
   // Generate context-aware initial prompt
   useEffect(() => {
     if (!initialPrompt && profileData && isOpen) {
+      // Narrow profile data type
+      const profile = profileData as ProfileData;
       const prompts = [];
 
-      if (profileData.workEthic > 7) {
+      if ((profile.workEthic ?? 0) > 7) {
         prompts.push(
           "Your profile shows you have a strong work ethic. Tell me about a time your dedication surprised even yourself.",
         );
       }
 
-      if (profileData.familyOrientation > 7) {
+      if ((profile.familyOrientation ?? 0) > 7) {
         prompts.push(
           "Family seems important to you. What's a family memory that still makes you smile?",
         );
       }
 
-      if (profileData.riskTolerance > 6) {
+      if ((profile.riskTolerance ?? 0) > 6) {
         prompts.push(
           "You seem comfortable with taking risks. What leap of faith changed your life?",
         );
       }
 
       const currentYear = new Date().getFullYear();
-      const age = currentYear - profileData.birthYear;
+      const age = currentYear - (profile.birthYear ?? 1950);
       if (age > 70) {
         prompts.push(
           "With all your years of experience, what wisdom would you share with someone just starting out?",
@@ -323,19 +335,20 @@ export default function RecordModal({
     try {
       // Get current partial recording without stopping
       console.log("[RecordModal] Requesting partial recording...");
-      const partialBlob = audioRecorderRef.current.getCurrentPartialRecording();
+      const partialResult = audioRecorderRef.current.getCurrentPartialRecording();
+      const partialBlob = partialResult?.blob ?? null;
 
-      console.log("[RecordModal] Partial blob size:", partialBlob?.size || 0);
+      console.log("[RecordModal] Partial blob size:", partialBlob?.size ?? 0);
 
       if (!partialBlob || partialBlob.size === 0) {
         // Fall back to using getCurrentRecording if partial doesn't work
         const fullBlob = audioRecorderRef.current.getCurrentRecording();
-        console.log("[RecordModal] Fallback to full recording, size:", fullBlob?.size || 0);
-        
+        console.log("[RecordModal] Fallback to full recording, size:", fullBlob?.size ?? 0);
+
         if (!fullBlob || fullBlob.size === 0) {
           throw new Error("No audio data available yet. Try recording for a bit longer.");
         }
-        
+
         // Use the full recording instead
         return await processFollowUpQuestion(fullBlob);
       }
@@ -1221,7 +1234,7 @@ export default function RecordModal({
                               toast({
                                 title: "30 seconds remaining",
                                 description: "Recording will stop automatically.",
-                                variant: "warning",
+                                variant: "destructive",
                               });
                             }
                           }}
@@ -1284,7 +1297,7 @@ export default function RecordModal({
                             isPaused={isPaused}
                             recordingTime={recordingTime}
                             onStart={startRecording}
-                            audioRecorderRef={audioRecorderRef}
+                            audioRecorderRef={audioRecorderRef as React.RefObject<AudioRecorderHandle>}
                           />
                         )}
                         {!isRecording && (

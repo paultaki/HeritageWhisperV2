@@ -1,0 +1,7 @@
+✅ app/api/auth/register/route.ts - 0 errors (fixed 5)
+
+Fixed:
+- Changed .errors to .issues in Zod validation
+- Typed err parameter as any in map callback
+- Wrapped birthYear with String() for parseInt (3 locations)
+- Added MaybePromise<T> type helper

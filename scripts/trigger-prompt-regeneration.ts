@@ -14,6 +14,17 @@
 import { createClient } from '@supabase/supabase-js';
 import { performTier3Analysis, storeTier3Results } from '../lib/tier3Analysis';
 
+// Local widened result type for scripts
+type AnyTier3Result = {
+  prompts: any[];
+  characterInsights?: {
+    traits: Array<{ trait: string; [k: string]: unknown }>;
+    invisibleRules: string[];
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+};
+
 // ============================================
 // CONFIGURATION - UPDATE THESE!
 // ============================================
@@ -99,7 +110,8 @@ async function generateNewPrompts(userId: string, stories: any[]) {
 
   try {
     // Perform Tier 3 analysis (this uses the updated prompt system)
-    const result = await performTier3Analysis(stories, stories.length);
+    const rawResult = await performTier3Analysis(stories, stories.length);
+    const result = rawResult as AnyTier3Result;
 
     console.log(`✅ Generated ${result.prompts.length} new prompts`);
 
@@ -111,14 +123,14 @@ async function generateNewPrompts(userId: string, stories: any[]) {
     });
 
     // Store the results
-    await storeTier3Results(supabase, userId, stories.length, result);
+    await storeTier3Results(supabase, userId, stories.length, rawResult);
 
     console.log('\n✅ Prompts stored in database');
 
     // Show character insights if any
     if (result.characterInsights) {
       console.log('\n🧠 Character Insights:');
-      console.log('  Traits:', result.characterInsights.traits.map(t => t.trait).join(', '));
+      console.log('  Traits:', result.characterInsights.traits.map((t: any) => t.trait).join(', '));
       console.log('  Rules:', result.characterInsights.invisibleRules.join(', '));
     }
 

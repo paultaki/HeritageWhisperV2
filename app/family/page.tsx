@@ -81,6 +81,7 @@ interface FamilyMember {
   access_count: number;
   created_at: string;
   inviteExpired?: boolean;
+  permissionLevel?: 'viewer' | 'contributor';
 }
 
 interface FamilyActivityItem {

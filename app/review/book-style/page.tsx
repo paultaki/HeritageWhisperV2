@@ -13,6 +13,35 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navCache } from "@/lib/navCache";
 import { supabase } from "@/lib/supabase";
 
+// Local widened NavCache payload type
+type NavPayloadExtended = {
+  returnPath?: string;
+  lessonLearned?: string;
+  timestamp?: string | number;
+  transcription?: string;
+  title?: string;
+  storyYear?: string;
+  wisdomClipText?: string;
+  wisdomTranscription?: string;
+  mainAudioBase64?: string;
+  mainAudioType?: string;
+  audioUrl?: string;
+  audioDuration?: number;
+  mode?: string;
+  audioBlob?: Blob;
+  duration?: number;
+  rawTranscript?: string;
+  qaPairs?: any;
+  enhancedTranscript?: string;
+  [k: string]: unknown;
+};
+
+// Local User type to guard birthYear access
+type UserWithBirthYear = {
+  birthYear?: number;
+  [k: string]: unknown;
+};
+
 function BookStyleReviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -118,7 +147,8 @@ function BookStyleReviewContent() {
       const navId = searchParams.get("nav");
       if (navId) {
         console.log("[Review] Loading from NavCache with ID:", navId);
-        const cachedData = navCache.consume(navId);
+        const rawCached = navCache.consume(navId);
+        const cachedData = rawCached as NavPayloadExtended;
 
         if (cachedData) {
           console.log("[Review] NavCache data retrieved:", {
@@ -888,7 +918,8 @@ function BookStyleReviewContent() {
   // Wizard Mode: New recording flow
   if (isWizardMode && navId) {
     console.log("[Wizard Mode] Loading data from NavCache with ID:", navId);
-    const cachedData = navCache.get(navId);
+    const rawCached = navCache.get(navId);
+    const cachedData = rawCached as NavPayloadExtended;
 
     if (!cachedData) {
       // Error handling moved to useEffect to avoid render-time state updates
@@ -899,10 +930,10 @@ function BookStyleReviewContent() {
 
     // Prepare RecordingSession from cached data
     const recording: RecordingSession = {
-      mode: cachedData.mode || "quick",
+      mode: (cachedData.mode || "quick") as any,
       audioBlob: cachedData.audioBlob,
       duration: cachedData.duration || 0,
-      timestamp: cachedData.timestamp || new Date().toISOString(),
+      timestamp: String(cachedData.timestamp ?? new Date().toISOString()),
       rawTranscript: cachedData.rawTranscript || "",
       qaPairs: cachedData.qaPairs,
     };
@@ -918,6 +949,7 @@ function BookStyleReviewContent() {
     }
 
     // Prepare initial wizard data
+    const u = user as unknown as UserWithBirthYear;
     const initialData: Partial<PostRecordingData> = {
       title: cachedData.title || "",
       year: cachedData.storyYear ? parseInt(cachedData.storyYear, 10) : undefined,
@@ -927,7 +959,7 @@ function BookStyleReviewContent() {
       useEnhanced: true,
       lessonLearned: cachedData.lessonLearned || "",
       recording,
-      userBirthYear: user?.birth_year,
+      userBirthYear: u?.birthYear,
     };
 
     const handleWizardComplete = () => {

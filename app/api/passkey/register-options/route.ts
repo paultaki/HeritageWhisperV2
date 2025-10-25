@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     const excludeCredentials = existingPasskeys.map((pk) => ({
       id: pk.credentialId,
       type: "public-key" as const,
-      transports: pk.transports,
+      transports: pk.transports ?? undefined,
     }));
 
     // Step 3: Generate registration options

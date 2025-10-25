@@ -62,9 +62,9 @@ export function PasskeyAuth({
       const { options, userId } = await optionsRes.json();
 
       // Step 2: Prompt user to create passkey
-      const credential = await startRegistration(
-        options as PublicKeyCredentialCreationOptionsJSON
-      );
+      const credential = await startRegistration({
+        optionsJSON: options as PublicKeyCredentialCreationOptionsJSON,
+      } as any);
 
       // Step 3: Send credential to server for verification
       const verifyRes = await fetch("/api/passkey/register-verify", {
@@ -119,9 +119,9 @@ export function PasskeyAuth({
       const { options } = await optionsRes.json();
 
       // Step 2: Prompt user to authenticate with passkey
-      const credential = await startAuthentication(
-        options as PublicKeyCredentialRequestOptionsJSON
-      );
+      const credential = await startAuthentication({
+        optionsJSON: options as PublicKeyCredentialRequestOptionsJSON,
+      } as any);
 
       // Step 3: Send credential to server for verification
       const verifyRes = await fetch("/api/passkey/auth-verify", {

@@ -1,0 +1,8 @@
+✅ app/prompts/page.tsx - 0 errors (fixed 4)
+
+Fixed:
+- Added AccountContextExtended local type for permissionLevel
+- Added UserWithMetadata local type for user_metadata access
+- Cast useAccountContext() result to AccountContextExtended
+- Cast user through unknown to UserWithMetadata
+- Fixed apiRequest call signature from (url, {method, body}) to (method, url, {body})

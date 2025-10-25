@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { performTier3Analysis } from "@/lib/tier3Analysis";
 
+type MaybePromise<T> = T | Promise<T>;
+
+// Local widened Tier3 result shape
+type AnyTier3 = {
+  success?: boolean;
+  error?: string;
+  promptsGenerated?: number;
+  [k: string]: unknown;
+};
+
 export async function POST(request: NextRequest) {
   try {
     // Get auth token
@@ -48,23 +58,24 @@ export async function POST(request: NextRequest) {
     console.log(`[Admin Tier 3 Trigger] Found ${stories.length} stories`);
 
     // Run Tier 3 analysis
-    const result = await performTier3Analysis(user.id, stories, milestone);
+    const result = await (performTier3Analysis as any)(user.id, stories, milestone);
+    const r = result as AnyTier3;
 
-    if (!result.success) {
+    if (!r.success) {
       return NextResponse.json({
-        error: result.error || 'Tier 3 analysis failed',
+        error: r.error || 'Tier 3 analysis failed',
         details: result
       }, { status: 500 });
     }
 
-    console.log(`[Admin Tier 3 Trigger] ✅ Analysis complete. Generated ${result.promptsGenerated} prompts`);
+    console.log(`[Admin Tier 3 Trigger] ✅ Analysis complete. Generated ${r.promptsGenerated} prompts`);
 
     return NextResponse.json({
       success: true,
       milestone,
-      promptsGenerated: result.promptsGenerated,
+      promptsGenerated: r.promptsGenerated,
       storiesAnalyzed: stories.length,
-      message: `Successfully generated ${result.promptsGenerated} prompts for milestone ${milestone}`
+      message: `Successfully generated ${r.promptsGenerated} prompts for milestone ${milestone}`
     });
 
   } catch (err) {
