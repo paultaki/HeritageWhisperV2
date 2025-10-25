@@ -75,15 +75,16 @@ export async function POST(request: NextRequest) {
         /\ban\s+were\b/i,
         // Multiple spaces (artifact of bad processing)
         /\s{2,}/,
-        // Missing question mark
-        !/\?$/,
-        // Too short (likely incomplete)
-        text.split(' ').length < 5,
       ];
-      
-      return brokenPatterns.some(pattern => 
-        typeof pattern === 'boolean' ? pattern : pattern.test(text)
-      );
+
+      // Check regex patterns
+      const hasPatternMatch = brokenPatterns.some(pattern => pattern.test(text));
+
+      // Check additional conditions
+      const missingQuestionMark = !/\?$/.test(text);
+      const tooShort = text.split(' ').length < 5;
+
+      return hasPatternMatch || missingQuestionMark || tooShort;
     });
 
     logger.api(`[Emergency Cleanup] Found ${brokenPrompts.length} broken prompts`);

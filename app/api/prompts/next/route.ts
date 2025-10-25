@@ -105,7 +105,7 @@ async function fetchLastStoryBundle(userId: string) {
       else if (kindRaw.includes("emotion") || kindRaw === "emo") kind = "emotion";
       return text ? { kind, text } : null;
     })
-    .filter(Boolean);
+    .filter((item): item is { kind: "person" | "place" | "object" | "emotion"; text: string } => item !== null);
 
   const emotions: string[] = Array.isArray(story.emotions)
     ? story.emotions.filter(Boolean)

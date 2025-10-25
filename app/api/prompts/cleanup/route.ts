@@ -98,8 +98,7 @@ export async function POST(request: NextRequest) {
           await db.insert(promptHistory).values({
             userId: prompt.userId,
             promptText: prompt.promptText,
-            contextNote: prompt.contextNote,
-            tier: prompt.tier,
+            tier: prompt.tier ?? undefined,
             outcome: "skipped",
             resolvedAt: new Date(),
           });
