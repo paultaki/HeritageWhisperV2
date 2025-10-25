@@ -454,6 +454,39 @@ Timeline uses Heritage Whisper design system with semantic `hw-*` classes:
 
 ## Recent Updates Archive (2025)
 
+### January 25, 2025 - RecordModal Architecture Refactoring
+
+Refactored RecordModal.tsx from 1,705-line monolithic component into 8 focused files (82% reduction).
+- Created 3 reusable hooks (use-transcription, use-follow-up-questions, use-recording-state)
+- Created 4 screen components (AudioReviewScreen, RecordingScreen, TranscriptionReview, GoDeeperOverlay)
+- All files under 200-line best practice limit
+- 100% TypeScript with proper interfaces
+
+### October 24, 2025 - Pearl Hallucination Fix
+
+Fixed critical issue where Pearl fabricated non-existent stories during interviews.
+- **Root Cause**: Instructions told Pearl to reference "previous stories" but no story data was passed
+- **Fix**: Commented out all personalization sections in use-realtime-interview.tsx
+- **Result**: Pearl now only asks questions based on current conversation
+
+### October 24, 2025 - Pearl Audio/Text Sync & Performance
+
+Fixed critical audio/text mismatch and improved conversation stability.
+- **Audio/Text Mismatch**: Disabled post-processing to ensure audio and text match 100%
+- **False Interruptions**: Increased VAD threshold (0.5 → 0.7), added 400ms barge-in delay
+- **Token Limit**: Increased 800 → 1200 tokens to prevent mid-sentence cutoffs
+- **User-Only Audio**: Created userOnlyRecorder.ts to save audio without AI voice
+- **Auto-Lesson Extraction**: Pearl interviews now generate lessons automatically
+
+### October 23, 2025 - Quick Story Recording UX Improvements
+
+Enhanced Quick Story recording flow with mobile responsiveness and photo transform fixes.
+- Fixed recording UI button overflow on mobile
+- Fixed photo crop/zoom display across all views (Timeline, Book, Memory Box, Overlay)
+- Solution: Use `<img>` tag when transform exists, Next.js `Image` when no transform
+- Fixed Edit Photo modal causing horizontal scroll on mobile
+- Increased text sizes to minimum 14px for better readability
+
 ### January 23, 2025 - Single Story Sharing Removed
 
 Removed all single story sharing functionality while preserving family sharing features.
