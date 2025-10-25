@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
 
     logger.debug("[Export 2up] Success! Returning PDF");
 
-    return new NextResponse(pdf, {
+    return new NextResponse(new Blob([new Uint8Array(pdf)]), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="heritage-book-2up.pdf"`,

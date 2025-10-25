@@ -56,17 +56,18 @@ export async function POST(request: NextRequest) {
 
     // Step 3: Verify the authentication response
     const publicKey = Buffer.from(passkey.publicKey, "base64url");
+    const credentialID = Buffer.from(passkey.credentialId, "base64url");
 
     const verification = await verifyAuthenticationResponse({
       response: credential,
       expectedChallenge: challenge,
       expectedOrigin: getExpectedOrigin(),
       expectedRPID: getExpectedRPID(),
-      authenticator: {
-        credentialID: Buffer.from(passkey.credentialId, "base64url"),
-        credentialPublicKey: publicKey,
+      credential: {
+        id: credentialID,
+        publicKey: publicKey,
         counter: passkey.signCount,
-      },
+      } as any,
       requireUserVerification: true,
     });
 
