@@ -516,7 +516,7 @@ export function BookStyleReview({
                     {/* Hidden AudioRecorder for actual recording logic */}
                     <div className="hidden">
                       <AudioRecorder
-                        ref={audioRecorderRef}
+                        ref={(el) => { audioRecorderRef.current = el ?? null }}
                         onRecordingComplete={async (audioBlob) => {
                           setIsRecording(false);
                           setIsPaused(false);
@@ -585,11 +585,6 @@ export function BookStyleReview({
                             setIsProcessing(false);
                           }
                         }}
-                        onCancel={() => {
-                          setIsRecording(false);
-                          setIsPaused(false);
-                          setRecordingTime(0);
-                        }}
                       />
                     </div>
                     
@@ -603,7 +598,7 @@ export function BookStyleReview({
                           // Start recording via AudioRecorder ref
                           audioRecorderRef.current?.startRecording?.();
                         }}
-                        audioRecorderRef={audioRecorderRef}
+                        audioRecorderRef={audioRecorderRef as any}
                       />
                       
                       {/* Recording controls */}
@@ -627,7 +622,7 @@ export function BookStyleReview({
                           </Button>
                           <Button
                             onClick={() => {
-                              audioRecorderRef.current?.stopRecording?.();
+                              (audioRecorderRef.current as any)?.stopRecording?.();
                             }}
                             variant="default"
                             size="lg"
