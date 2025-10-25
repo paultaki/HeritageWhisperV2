@@ -949,13 +949,9 @@ export default function HomePage() {
           </div>
 
           {/* Alternative Pricing Options */}
-          <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out mt-8 grid md:grid-cols-3 gap-4 text-center">
-            <div className="p-6 bg-white rounded-xl border-2 border-[#e8ddd5] shadow-md">
-              <div className="text-sm text-[#6b7280] mb-2">Monthly Plan</div>
-              <div className="text-2xl font-bold text-[#1f2937]">$14.99<span className="text-base font-normal text-[#6b7280]">/mo</span></div>
-            </div>
+          <div data-animate className="opacity-0 translate-y-8 transition-all duration-700 ease-out mt-8 grid md:grid-cols-2 gap-4 text-center max-w-2xl mx-auto">
             <div className="p-6 bg-gradient-to-br from-[#8b6b7a]/10 to-[#b88b94]/10 rounded-xl border-3 border-[#c9a78a] shadow-lg">
-              <div className="text-sm text-[#6b7280] mb-2 font-semibold">Yearly Plan (SAVE $51!)</div>
+              <div className="text-sm text-[#6b7280] mb-2 font-semibold">Yearly Plan</div>
               <div className="text-2xl font-bold text-[#1f2937]">$129<span className="text-base font-normal text-[#6b7280]">/year</span></div>
             </div>
             <div className="p-6 bg-white rounded-xl border-2 border-[#e8ddd5] shadow-md">
