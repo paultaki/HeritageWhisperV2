@@ -4,6 +4,19 @@ import { Story } from "@/shared/schema";
 import { formatYear, getAge } from "@/lib/utils";
 import { useState } from "react";
 
+// Local type for narrowing
+type StoryLite = {
+  id: string;
+  title?: string;
+  audio_duration?: number | null;
+  year_of_event?: number | null;
+  user_birth_year?: number | null;
+  cover_photo_url?: string | null;
+  show_in_timeline?: boolean;
+  include_in_book?: boolean;
+  is_favorite?: boolean;
+};
+
 interface MemoryListItemProps {
   story: Story;
   onPlay: (id: string) => void;
@@ -20,6 +33,10 @@ export function MemoryListItem({
   onDelete,
 }: MemoryListItemProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Narrow story type - id is always present
+  const s = story as StoryLite;
+
   // Format duration (assuming audio_duration is in seconds)
   const formatDuration = (seconds?: number | null): string => {
     if (!seconds) return "";
@@ -28,14 +45,14 @@ export function MemoryListItem({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const duration = formatDuration(story.audio_duration);
+  const duration = formatDuration(s.audio_duration ?? null);
   const age =
-    story.year_of_event && story.user_birth_year
-      ? getAge(story.year_of_event, story.user_birth_year)
+    s.year_of_event && s.user_birth_year
+      ? getAge(s.year_of_event, s.user_birth_year)
       : null;
 
   // Get cover image URL
-  const coverUrl = story.cover_photo_url || "/placeholder-memory.jpg";
+  const coverUrl = s.cover_photo_url ?? "/placeholder-memory.jpg";
 
   return (
     <div
@@ -43,11 +60,11 @@ export function MemoryListItem({
                  ring-1 ring-black/5 px-4 py-3 md:py-4 transition-all duration-200 relative
                  ${isMenuOpen ? 'z-50' : 'z-0'}`}
       role="article"
-      aria-label={story.title || "Untitled memory"}
+      aria-label={s.title ?? "Untitled memory"}
     >
       {/* Title - Full Width */}
       <button
-        onClick={() => onOpen(story.id)}
+        onClick={() => onOpen(s.id)}
         className="text-left w-full mb-3 focus:outline-none focus:ring-2 focus:ring-[#D7794F]
                    focus:ring-offset-2 rounded-lg px-2 -mx-2 py-1 -my-1"
       >
@@ -55,7 +72,7 @@ export function MemoryListItem({
           className="title text-[17px] md:text-[18px] font-semibold tracking-tight
                         text-[#2C1F1A] line-clamp-2 leading-snug"
         >
-          {story.title || "Untitled Memory"}
+          {s.title ?? "Untitled Memory"}
         </div>
       </button>
 
@@ -63,29 +80,29 @@ export function MemoryListItem({
       <div className="grid grid-cols-[auto,1fr,auto] items-center gap-4">
         {/* Thumbnail */}
         <button
-          onClick={() => onOpen(story.id)}
+          onClick={() => onOpen(s.id)}
           className="thumb relative overflow-hidden rounded-xl
                      w-24 md:w-28 aspect-[4/3] ring-1 ring-black/5
                      focus:outline-none focus:ring-2 focus:ring-[#D7794F] focus:ring-offset-2
                      transition-transform hover:scale-[1.02] active:scale-[0.98]"
-          aria-label={`View ${story.title || "memory"}`}
+          aria-label={`View ${s.title ?? "memory"}`}
         >
           <img
             src={coverUrl}
-            alt={story.title || "Memory cover"}
+            alt={s.title ?? "Memory cover"}
             className="h-full w-full object-cover"
           />
         </button>
 
         {/* Metadata */}
         <button
-          onClick={() => onOpen(story.id)}
+          onClick={() => onOpen(s.id)}
           className="text-left min-w-0 focus:outline-none focus:ring-2 focus:ring-[#D7794F]
                      focus:ring-offset-2 rounded-lg px-2 -mx-2 py-1 -my-1"
         >
           <div className="meta text-[13px] text-black/50 flex items-center gap-2 flex-wrap">
-            {story.year_of_event && (
-              <span>{formatYear(story.year_of_event)}</span>
+            {s.year_of_event && (
+              <span>{formatYear(s.year_of_event)}</span>
             )}
             {typeof age === "number" && (
               <>
@@ -103,7 +120,7 @@ export function MemoryListItem({
             )}
           </div>
           <div className="badges mt-1.5 hidden sm:flex items-center gap-2">
-            {story.show_in_timeline && (
+            {s.show_in_timeline && (
               <span
                 className="pill text-[11px] px-2 py-0.5 rounded-full
                              bg-[#D7794F]/10 text-[#D7794F] font-medium"
@@ -111,7 +128,7 @@ export function MemoryListItem({
                 Timeline
               </span>
             )}
-            {story.include_in_book && (
+            {s.include_in_book && (
               <span
                 className="pill text-[11px] px-2 py-0.5 rounded-full
                              bg-[#8B4513]/10 text-[#8B4513] font-medium"
@@ -119,7 +136,7 @@ export function MemoryListItem({
                 Book
               </span>
             )}
-            {story.is_favorite && (
+            {s.is_favorite && (
               <span
                 className="star text-[#D7794F]"
                 aria-label="Favorite"
@@ -135,9 +152,9 @@ export function MemoryListItem({
         <div className="actions flex items-center gap-2">
         <button
           aria-label="Play memory"
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
-            onPlay(story.id);
+            onPlay(s.id);
           }}
           className="play-btn flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-full
                      bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60
@@ -179,21 +196,21 @@ export function MemoryListItem({
                           ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
           >
             <button
-              onClick={() => onOpen(story.id)}
+              onClick={() => onOpen(s.id)}
               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50
                          transition-colors duration-150"
             >
               Edit
             </button>
             <button
-              onClick={() => onToggleFavorite(story.id)}
+              onClick={() => onToggleFavorite(s.id)}
               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50
                          transition-colors duration-150"
             >
-              {story.is_favorite ? "Remove from Favorites" : "Add to Favorites"}
+              {s.is_favorite ? "Remove from Favorites" : "Add to Favorites"}
             </button>
             <button
-              onClick={() => onDelete(story.id)}
+              onClick={() => onDelete(s.id)}
               className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50
                          transition-colors duration-150"
             >
