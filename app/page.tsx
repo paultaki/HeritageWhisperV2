@@ -1024,15 +1024,14 @@ export default function HomePage() {
       <footer className="bg-[#1f2937] text-white py-16">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
-            <div className="flex items-center gap-3">
+            <div>
               <Image
-                src="/HW_logo_circle_new_trans.webp"
+                src="/Logo Updated.png?v=2"
                 alt="Heritage Whisper"
-                width={48}
-                height={48}
-                className="w-12 h-12"
+                width={240}
+                height={60}
+                className="h-16 w-auto"
               />
-              <span className="text-2xl font-bold">Heritage Whisper</span>
             </div>
             <div className="flex gap-8 text-base">
               <button onClick={() => router.push("/privacy")} className="hover:text-[#c9a78a] transition-colors">
