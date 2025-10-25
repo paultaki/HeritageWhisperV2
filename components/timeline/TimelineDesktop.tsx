@@ -46,6 +46,18 @@ import { AccountSwitcher } from "@/components/AccountSwitcher";
 
 const logoUrl = "/logo_hw.png";
 
+// Timeline item helper type
+type TimelineItem = {
+  id: string;
+  type?: string;
+  year?: number;
+  title?: string;
+  subtitle?: string;
+  stories?: Array<any>;
+  storyCount?: number;
+  traits?: Array<{ name: string }>;
+};
+
 // V3: Subtle Decade Label Component - Museum Style
 interface DecadeLabelProps {
   decade: string;
@@ -173,6 +185,10 @@ interface CenteredMemoryCardProps {
 
 function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear, onOpenOverlay }: CenteredMemoryCardProps) {
   const router = useRouter();
+
+  // Narrow story type for traits access
+  const s = story as Story & { traits?: Array<{ name: string }> };
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -212,7 +228,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   const displayLifeAge = (() => {
     if (typeof story.lifeAge === "number") {
       // If metadata says pre-birth but the year is on/after birth year, trust computed
-      if (computedAge !== null && story.lifeAge < 0 && normalizedStoryYear >= birthYear) {
+      if (computedAge !== null && story.lifeAge < 0 && normalizedStoryYear !== null && normalizedStoryYear >= birthYear) {
         return computedAge;
       }
       return story.lifeAge;
@@ -573,11 +589,11 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </div>
             </div>
           </div>
-          
+
           {/* Traits below photo */}
-          {story.traits && story.traits.length > 0 && (
+          {(s.traits?.length ?? 0) > 0 && (
             <div className="mt-3">
-              <StoryTraits traits={story.traits} />
+              <StoryTraits traits={(s.traits ?? []).map(t => ({ label: t.name, confidence: 0.8 }))} />
             </div>
           )}
         </div>
@@ -689,9 +705,9 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         </div>
 
         {/* Traits below card - same as photo cards */}
-        {story.traits && story.traits.length > 0 && (
+        {(s.traits?.length ?? 0) > 0 && (
           <div className="mt-3">
-            <StoryTraits traits={story.traits} />
+            <StoryTraits traits={(s.traits ?? []).map(t => ({ label: t.name, confidence: 0.8 }))} />
           </div>
         )}
       </div>
@@ -891,7 +907,7 @@ export function TimelineDesktop() {
 
     const handleBubbleScroll = () => {
       const stickyTop = 55; // Sticky position from top (aligned with header)
-      const collisionThreshold = 163; // Increased to make markers travel closer before collision (38px more)
+      const collisionThreshold = 163 as number; // Increased to make markers travel closer before collision (38px more)
 
       // Query all timeline-dot elements
       const bubbles = Array.from(document.querySelectorAll('.timeline-dot'));
@@ -993,14 +1009,14 @@ export function TimelineDesktop() {
   const sortedStories = [...stories].sort((a: any, b: any) => {
     const yearA = normalizeYear(a.storyYear);
     const yearB = normalizeYear(b.storyYear);
-    return yearA - yearB;
+    return (yearA ?? 0) - (yearB ?? 0);
   });
 
   // Group stories by decade for dividers
   const storiesByDecade = new Map<string, Story[]>();
   sortedStories.forEach((story: Story) => {
     const year = normalizeYear(story.storyYear);
-    const decade = Math.floor(year / 10) * 10;
+    const decade = Math.floor((year ?? 0) / 10) * 10;
     const decadeKey = `${decade}s`;
     if (!storiesByDecade.has(decadeKey)) {
       storiesByDecade.set(decadeKey, []);
