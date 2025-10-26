@@ -744,7 +744,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         <div
           className="py-0.5 px-2.5 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
           style={{
-            backgroundColor: '#c6a07f',
+            backgroundColor: '#f9f6f3',
             border: `1px solid #8b6b7a`,
             color: '#8b6b7a',
             fontSize: '16px',
@@ -756,6 +756,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               : '0 2px 4px rgba(0, 0, 0, 0.12)',
             borderRadius: '6px',
             backdropFilter: 'blur(10px)',
+            position: 'relative',
+            top: '-2px',
           }}
         >
           {story.storyDate
@@ -1246,7 +1248,7 @@ export function TimelineDesktop() {
             top: 50%;
             transform: translateY(-50%);
             width: 20px;
-            height: 1.5px;
+            height: 2.5px;
             background: linear-gradient(
               to right,
               rgba(156, 163, 175, 0.3),
