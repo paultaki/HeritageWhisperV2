@@ -74,7 +74,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#faf8f5] via-[#f5f0eb] to-[#f0ebe6]">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#faf8f5] via-[#f8f5f2] to-[#f5f1ed] pt-20 pb-24 md:pt-32 md:pb-40">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#faf8f5] via-[#f8f5f2] to-[#f5f1ed] pt-0 pb-2 md:pt-0 md:pb-4">
         {/* Decorative gradient orbs - softer, more premium */}
         <div className="absolute top-0 w-96 h-96 bg-[#d4c5d8] rounded-full mix-blend-multiply filter blur-3xl opacity-12 animate-pulse" style={{ left: 'calc(50% - 12rem)' }}></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#e8d4d8] rounded-full mix-blend-multiply filter blur-3xl opacity-12 animate-pulse" style={{ animationDelay: "2s" }}></div>
@@ -91,19 +91,19 @@ export default function HomePage() {
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           {/* Header with Logo */}
-          <div className="flex flex-col justify-center items-center mb-10">
+          <div className="flex flex-col justify-center items-center -mb-8 md:-mb-12">
             <Image
               src="/Logo hw.svg"
               alt="Heritage Whisper"
-              width={480}
-              height={120}
-              className="h-32 md:h-40 w-auto mb-3"
+              width={1440}
+              height={360}
+              className="h-64 md:h-80 w-auto"
               style={{ filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))" }}
               priority
             />
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-4 lg:gap-6 items-center">
             {/* Left: Headline & CTA */}
             <div className="text-center lg:text-left space-y-8">
               <div className="space-y-4">
@@ -1025,9 +1025,9 @@ export default function HomePage() {
               <Image
                 src="/Logo hw.svg"
                 alt="Heritage Whisper"
-                width={240}
-                height={60}
-                className="h-16 w-auto"
+                width={480}
+                height={120}
+                className="h-32 w-auto"
                 style={{ filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))" }}
               />
             </div>

@@ -202,7 +202,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
         {/* Logo */}
         <div className="flex justify-center mb-6 pt-2">
           <Image
-            src="/Logo Updated.png?v=2"
+            src="/Logo hw.svg"
             alt="Heritage Whisper"
             width={240}
             height={60}

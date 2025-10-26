@@ -443,7 +443,7 @@ After they answer, continue the conversation naturally with follow-up questions 
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-2">
           <div className="flex flex-col items-center gap-1">
             <Image
-              src="/Logo Updated.png?v=2"
+              src="/Logo hw.svg"
               alt="Heritage Whisper"
               width={300}
               height={75}
