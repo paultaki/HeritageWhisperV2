@@ -61,7 +61,11 @@ export default function MemoryCard(p: Props) {
     };
   }, [p.id]);
   return (
-    <article className="hw-card hw-card-memorybox">
+    <article
+      className="hw-card hw-card-memorybox"
+      onClick={p.onEdit}
+      style={{ cursor: 'pointer' }}
+    >
       <div style={{ position: "relative", overflow: "hidden" }}>
         <img
           className="hw-card-media"
@@ -204,7 +208,10 @@ export default function MemoryCard(p: Props) {
               <button
                 className="hw-icon-btn hw-play-mobile"
                 aria-label={isPlaying ? "Pause memory" : "Play memory"}
-                onClick={p.onPlay}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  p.onPlay?.();
+                }}
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -228,12 +235,15 @@ export default function MemoryCard(p: Props) {
                 <button
                   className="hw-icon-btn"
                   aria-label="More options"
-                  onClick={() => setShowMenu(!showMenu)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(!showMenu);
+                  }}
                 >
                   ⋯
                 </button>
                 {showMenu && (
-                  <div className="hw-dropdown-menu">
+                  <div className="hw-dropdown-menu" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => {
                         p.onEdit?.();

@@ -258,6 +258,35 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                     Type Your Story
                   </Button>
                 </div>
+
+                {/* Upload audio file option */}
+                <div className="text-center mt-6">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleAudioUpload}
+                    className="hidden"
+                    disabled={isUploadingAudio}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingAudio}
+                    className="text-sm text-gray-600 hover:text-gray-800 underline decoration-dotted underline-offset-4 disabled:opacity-50"
+                  >
+                    {isUploadingAudio ? (
+                      <>
+                        <Loader2 className="inline w-4 h-4 mr-1 animate-spin" />
+                        Processing audio...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="inline w-4 h-4 mr-1" />
+                        or upload an audio file instead
+                      </>
+                    )}
+                  </button>
+                </div>
               </motion.div>
             )}
 
@@ -307,61 +336,34 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="py-6"
+                className="py-6 flex flex-col max-h-[70vh] sm:max-h-none"
               >
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                    <PenTool className="w-10 h-10 text-blue-700" />
+                <div className="text-center mb-4 sm:mb-6 flex-shrink-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                    <PenTool className="w-8 h-8 sm:w-10 sm:h-10 text-blue-700" />
                   </div>
-                  <h2 className="text-2xl font-semibold mb-2">Type Your Story</h2>
+                  <h2 className="text-xl sm:text-2xl font-semibold mb-1 sm:mb-2">Type Your Story</h2>
                   <p className="text-gray-600 text-sm">
                     Take your time to write your memory
                   </p>
                 </div>
 
-                <textarea
-                  value={textStory}
-                  onChange={(e) => setTextStory(e.target.value)}
-                  placeholder={promptQuestion ? "Type your answer here..." : "Type your story here..."}
-                  className="w-full h-64 p-4 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none text-base"
-                  autoFocus
-                />
-
-                <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
-                  <span>{textStory.length} characters</span>
-                  <span>{textStory.split(/\s+/).filter(w => w.length > 0).length} words</span>
-                </div>
-
-                {/* Subtle upload audio link */}
-                <div className="text-center mt-4">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="audio/*"
-                    onChange={handleAudioUpload}
-                    className="hidden"
-                    disabled={isUploadingAudio}
+                <div className="flex-1 min-h-0 flex flex-col">
+                  <textarea
+                    value={textStory}
+                    onChange={(e) => setTextStory(e.target.value)}
+                    placeholder={promptQuestion ? "Type your answer here..." : "Type your story here..."}
+                    className="w-full flex-1 min-h-[160px] sm:min-h-[200px] p-4 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none text-base"
+                    autoFocus
                   />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploadingAudio}
-                    className="text-sm text-gray-500 hover:text-gray-700 underline disabled:opacity-50"
-                  >
-                    {isUploadingAudio ? (
-                      <>
-                        <Loader2 className="inline w-3 h-3 mr-1 animate-spin" />
-                        Processing audio...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="inline w-3 h-3 mr-1" />
-                        or upload an audio file instead
-                      </>
-                    )}
-                  </button>
+
+                  <div className="flex items-center justify-between mt-3 sm:mt-4 text-sm text-gray-500 flex-shrink-0">
+                    <span>{textStory.length} characters</span>
+                    <span>{textStory.split(/\s+/).filter(w => w.length > 0).length} words</span>
+                  </div>
                 </div>
 
-                <div className="flex gap-3 justify-center mt-6">
+                <div className="flex gap-3 justify-center mt-4 sm:mt-6 flex-shrink-0">
                   <Button
                     onClick={() => {
                       setMode('select');

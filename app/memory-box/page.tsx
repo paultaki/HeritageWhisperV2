@@ -28,11 +28,13 @@ import { Story as SchemaStory } from "@/shared/schema";
 import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { apiRequest } from "@/lib/queryClient";
+import { MemoryOverlay } from "@/components/MemoryOverlay";
+import { Story as SupabaseStory } from "@/lib/supabase";
 
 interface Story {
   id: string;
   title: string;
-  transcript: string;
+  transcription: string;
   audioUrl?: string;
   photoUrl?: string;
   photos?: Array<{
@@ -145,6 +147,8 @@ export default function MemoryBoxPage() {
     new Set(),
   );
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [overlayOpen, setOverlayOpen] = useState(false);
 
   // Make AudioManager globally accessible for MemoryCard components
   useEffect(() => {
@@ -295,7 +299,7 @@ export default function MemoryBoxPage() {
       filtered = filtered.filter(
         (story) =>
           story.title.toLowerCase().includes(query) ||
-          story.transcript?.toLowerCase().includes(query),
+          story.transcription?.toLowerCase().includes(query),
       );
     }
 
@@ -347,7 +351,7 @@ export default function MemoryBoxPage() {
       undated: undatedCount,
       duration: totalDuration,
       words: stories.reduce(
-        (sum, s) => sum + (s.transcript?.split(" ").length || 0),
+        (sum, s) => sum + (s.transcription?.split(" ").length || 0),
         0,
       ),
     };
@@ -499,6 +503,43 @@ export default function MemoryBoxPage() {
     }
   };
 
+  const handleOpenOverlay = (story: Story) => {
+    // Convert local Story type to SupabaseStory type for MemoryOverlay
+    const supabaseStory: SupabaseStory = {
+      id: story.id,
+      title: story.title,
+      transcription: story.transcript,
+      audioUrl: story.audioUrl || null,
+      photoUrl: story.photoUrl || null,
+      photos: story.photos || null,
+      storyYear: story.storyYear || null,
+      createdAt: story.createdAt,
+      includeInBook: story.includeInBook,
+      includeInTimeline: story.includeInTimeline,
+      isFavorite: story.isFavorite,
+      wisdomClipText: story.metadata?.lessonsLearned || null,
+      lifeAge: calculateAge(story.storyYear) ? parseInt(calculateAge(story.storyYear)!) : null,
+      userId: user?.id || "",
+      photoTransform: null,
+      updatedAt: null,
+      wisdomClipAudio: null,
+    };
+    setSelectedStory(story);
+    setOverlayOpen(true);
+  };
+
+  const handleCloseOverlay = () => {
+    setOverlayOpen(false);
+    setSelectedStory(null);
+  };
+
+  const handleNavigateStory = (storyId: string) => {
+    const story = processedStories.find((s) => s.id === storyId);
+    if (story) {
+      setSelectedStory(story);
+    }
+  };
+
   return (
     <div
       className="min-h-screen"
@@ -513,10 +554,21 @@ export default function MemoryBoxPage() {
               alt="Heritage Whisper"
               width={72}
               height={72}
-              className="h-[72px] w-auto"
+              className="h-[72px] w-auto relative"
+              style={{ top: '-18px', left: '-69px' }}
             />
-            <Box className="w-8 h-8" style={{ color: "#1f0f08" }} />
-            <h1 className="text-2xl font-bold">Memory Box</h1>
+            <Box
+              className="w-8 h-8 relative"
+              style={{ color: "#1f0f08", top: '-21px', left: '-72px' }}
+            />
+            <div className="min-w-0 relative" style={{ top: '-24px', left: '-72px' }}>
+              <h1 className="text-2xl font-bold">
+                Memory Box
+              </h1>
+              <p className="text-base text-gray-600 -mt-2 hidden sm:block">
+                Manage your memories, add or remove them from the book or timeline
+              </p>
+            </div>
           </div>
         </div>
       </header>
@@ -586,7 +638,7 @@ export default function MemoryBoxPage() {
               return {
                 id: story.id,
                 title: story.title,
-                content: story.transcript || "",
+                content: story.transcription || "",
                 year_of_event: story.storyYear || null,
                 user_birth_year: user?.birthYear || null,
                 audio_duration: story.durationSeconds || null,
@@ -645,10 +697,7 @@ export default function MemoryBoxPage() {
                       AudioManager.getInstance().play(story.id, story.audioUrl);
                     }
                   }}
-                  onEdit={() => {
-                    const returnPath = "/memory-box";
-                    router.push(`/review/book-style?edit=${story.id}&returnPath=${encodeURIComponent(returnPath)}`);
-                  }}
+                  onEdit={() => handleOpenOverlay(story)}
                   onToggleFavorite={() => handleToggleFavorite(story.id)}
                   onDelete={() => {
                     if (confirm("Delete this memory? This cannot be undone.")) {
@@ -708,6 +757,54 @@ export default function MemoryBoxPage() {
         isOpen={modeSelection.quickRecorderOpen}
         onClose={modeSelection.closeQuickRecorder}
       />
+
+      {/* Memory Overlay */}
+      {selectedStory && (
+        <MemoryOverlay
+          story={{
+            id: selectedStory.id,
+            title: selectedStory.title,
+            transcription: selectedStory.transcription,
+            audioUrl: selectedStory.audioUrl || null,
+            photoUrl: selectedStory.photoUrl || null,
+            photos: selectedStory.photos || null,
+            storyYear: selectedStory.storyYear || null,
+            createdAt: selectedStory.createdAt,
+            includeInBook: selectedStory.includeInBook,
+            includeInTimeline: selectedStory.includeInTimeline,
+            isFavorite: selectedStory.isFavorite,
+            wisdomClipText: selectedStory.metadata?.lessonsLearned || null,
+            lifeAge: calculateAge(selectedStory.storyYear) ? parseInt(calculateAge(selectedStory.storyYear)!) : null,
+            userId: user?.id || "",
+            photoTransform: null,
+            updatedAt: null,
+            wisdomClipAudio: null,
+          }}
+          stories={processedStories.map((s) => ({
+            id: s.id,
+            title: s.title,
+            transcription: s.transcription,
+            audioUrl: s.audioUrl || null,
+            photoUrl: s.photoUrl || null,
+            photos: s.photos || null,
+            storyYear: s.storyYear || null,
+            createdAt: s.createdAt,
+            includeInBook: s.includeInBook,
+            includeInTimeline: s.includeInTimeline,
+            isFavorite: s.isFavorite,
+            wisdomClipText: s.metadata?.lessonsLearned || null,
+            lifeAge: calculateAge(s.storyYear) ? parseInt(calculateAge(s.storyYear)!) : null,
+            userId: user?.id || "",
+            photoTransform: null,
+            updatedAt: null,
+            wisdomClipAudio: null,
+          }))}
+          isOpen={overlayOpen}
+          onClose={handleCloseOverlay}
+          onNavigate={handleNavigateStory}
+          originPath="/memory-box"
+        />
+      )}
     </div>
   );
 }

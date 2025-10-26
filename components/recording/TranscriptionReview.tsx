@@ -129,7 +129,7 @@ export function TranscriptionReview(props: TranscriptionReviewProps) {
                   onChange={(e) =>
                     props.setEditedTranscription(e.target.value)
                   }
-                  className="min-h-[200px] resize-none"
+                  className="min-h-[180px] sm:min-h-[200px] resize-none"
                   placeholder={
                     props.isTypingMode
                       ? `Start typing your story here...\n\nConsider the prompt: "${props.currentPrompt}"`

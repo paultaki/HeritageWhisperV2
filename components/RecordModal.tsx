@@ -135,7 +135,7 @@ export default function RecordModal({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="w-full md:max-w-2xl bg-white rounded-t-3xl md:rounded-3xl max-h-[90vh] overflow-hidden flex flex-col"
+            className="w-full md:max-w-2xl bg-white rounded-t-3xl md:rounded-3xl max-h-[85vh] md:max-h-[90vh] overflow-hidden flex flex-col"
             style={{ background: designSystem.colors.background.creamLight }}
           >
             {/* Header */}

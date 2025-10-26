@@ -86,8 +86,8 @@ body {
 .hw-decade-band {
   position: sticky;
   top: calc(
-    env(safe-area-inset-top, 0px) + 55px
-  ); /* Mobile: moved up 32px from 87px */
+    env(safe-area-inset-top, 0px) + 87px
+  ); /* Mobile: positioned below 88px header */
   z-index: 5;
   background: color-mix(
     in srgb,
@@ -111,8 +111,8 @@ body {
 @media (min-width: 768px) {
   .hw-decade-band {
     top: calc(
-      env(safe-area-inset-top, 0px) + 54px
-    ); /* Desktop: moved up 33px from 87px */
+      env(safe-area-inset-top, 0px) + 86px
+    ); /* Desktop: positioned below header */
   }
 }
 .hw-decade-band .title {

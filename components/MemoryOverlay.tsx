@@ -383,61 +383,47 @@ export function MemoryOverlay({
               <img
                 src={currentPhoto.url}
                 alt={currentPhoto.caption || story.title}
-                className="absolute inset-0 w-full h-full select-none"
+                className="absolute inset-0 w-full h-full object-cover select-none"
                 style={
                   currentPhoto.transform
                     ? {
                         transform: `scale(${currentPhoto.transform.zoom}) translate(${currentPhoto.transform.position.x / currentPhoto.transform.zoom}px, ${currentPhoto.transform.position.y / currentPhoto.transform.zoom}px)`,
                         transformOrigin: "center center",
-                        objectFit: "cover",
                       }
-                    : {
-                        objectFit: "cover",
-                      }
+                    : undefined
                 }
               />
 
-              {/* Navigation Arrows (only show if multiple photos) */}
+              {/* Navigation Arrows */}
               {hasMultiplePhotos && (
                 <>
+                  {/* Left Arrow */}
                   <button
+                    type="button"
                     onClick={handlePrevPhoto}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                    className="absolute -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/30 hover:bg-white/50 transition-colors focus:outline-none z-20"
+                    style={{ left: '16px', top: 'calc(50% + 90px)' }}
                     aria-label="Previous photo"
                   >
-                    <ChevronLeft size={24} />
+                    <ChevronLeft className="h-6 w-6 text-white" />
                   </button>
+
+                  {/* Right Arrow */}
                   <button
+                    type="button"
                     onClick={handleNextPhoto}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                    className="absolute -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/30 hover:bg-white/50 transition-colors focus:outline-none z-20"
+                    style={{ right: '16px', top: 'calc(50% + 90px)' }}
                     aria-label="Next photo"
                   >
-                    <ChevronRight size={24} />
+                    <ChevronRight className="h-6 w-6 text-white" />
                   </button>
                 </>
               )}
 
-              {/* Photo Indicators (dots) */}
-              {hasMultiplePhotos && (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-                  {allPhotos.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentPhotoIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        index === currentPhotoIndex
-                          ? "bg-white w-6"
-                          : "bg-white/50 hover:bg-white/75"
-                      }`}
-                      aria-label={`Go to photo ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
-
               {/* Photo Caption */}
               {currentPhoto.caption && (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-10">
                   <p className="text-white text-sm text-center">
                     {currentPhoto.caption}
                   </p>
@@ -463,7 +449,7 @@ export function MemoryOverlay({
 
           {/* Audio Player */}
           {story.audioUrl && (
-            <div className="memory-overlay-audio">
+            <div className="bg-white rounded-xl px-3 py-2 my-4 shadow-sm">
               <audio
                 key={story.id}
                 ref={audioRef}
@@ -471,19 +457,22 @@ export function MemoryOverlay({
                 preload="metadata"
               />
 
-              <div className="memory-overlay-audio-controls">
+              <div className="flex items-center gap-3">
+                {/* Play/Pause Button */}
                 <button
+                  type="button"
                   onClick={toggleAudio}
-                  className="memory-overlay-audio-play"
+                  className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white shadow-md hover:shadow-lg hover:scale-105 transition-all"
                   aria-label={isPlaying ? "Pause audio" : "Play audio"}
                 >
-                  {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+                  {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
                 </button>
 
-                <div className="memory-overlay-audio-progress">
+                {/* Progress Section */}
+                <div className="flex-1 min-w-0">
                   {/* Progress Bar */}
                   <div
-                    className="memory-overlay-audio-bar"
+                    className="relative h-2.5 bg-gray-200 rounded-full overflow-hidden cursor-pointer mb-1.5"
                     onClick={(e) => {
                       if (!audioRef.current || !duration) return;
                       const rect = e.currentTarget.getBoundingClientRect();
@@ -495,22 +484,17 @@ export function MemoryOverlay({
                     }}
                   >
                     <div
-                      className="memory-overlay-audio-bar-fill"
+                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full transition-all duration-100"
                       style={{
-                        width: duration && currentTime > 0
-                          ? `${(currentTime / duration) * 100}%`
-                          : '0%',
+                        width: duration > 0 ? `${Math.max(0, Math.min(100, (currentTime / duration) * 100))}%` : '0%',
                       }}
                     />
                   </div>
+
                   {/* Time Display */}
-                  <div className="memory-overlay-audio-times">
-                    <span className="memory-overlay-audio-time">
-                      {formatTime(currentTime)}
-                    </span>
-                    <span className="memory-overlay-audio-time">
-                      {duration ? formatTime(duration) : "--:--"}
-                    </span>
+                  <div className="flex justify-between items-center text-xs text-gray-500 font-medium tabular-nums">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{duration ? formatTime(duration) : "--:--"}</span>
                   </div>
                 </div>
               </div>
