@@ -80,7 +80,7 @@ body {
 /* decade section */
 .hw-decade {
   position: relative;
-  margin-bottom: var(--space-10);
+  margin-bottom: 0; /* No gap between sections - sticky headers should touch */
 }
 
 /* decade band - sticky chapter divider */
