@@ -2,10 +2,11 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Calendar, BookOpen, Box, Sparkles, Mic } from "lucide-react";
+import { Calendar, BookOpen, Box, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
 import { useRecordingState } from "@/contexts/RecordingContext";
+import Image from "next/image";
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -132,13 +133,13 @@ export default function MobileNavigation({
               top: '-42px',
               background: isRecording
                 ? "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)"
-                : "linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)",
+                : "linear-gradient(135deg, #8b6b7a 0%, #b88b94 100%)",
               boxShadow: isRecording
                 ? "0 2px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.2)"
-                : "0 4px 12px rgba(245, 158, 11, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
+                : "0 6px 16px rgba(139, 107, 122, 0.4), inset 0 3px 6px rgba(255, 255, 255, 0.4), inset 0 -3px 6px rgba(0, 0, 0, 0.25)",
               border: isRecording
                 ? "2px solid rgba(255, 255, 255, 0.1)"
-                : "2px solid rgba(255, 255, 255, 0.3)",
+                : "2px solid rgba(255, 255, 255, 0.4)",
             }}
           >
             {/* Pulse animation ring - only when not recording */}
@@ -146,7 +147,7 @@ export default function MobileNavigation({
               <motion.div
                 className="absolute inset-0 rounded-full"
                 style={{
-                  background: "linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)",
+                  background: "linear-gradient(135deg, #8b6b7a 0%, #b88b94 100%)",
                 }}
                 animate={{
                   scale: [1, 1.3, 1.3],
@@ -161,11 +162,12 @@ export default function MobileNavigation({
             )}
 
             {/* Icon - opacity reduced when recording */}
-            <Mic
+            <Image
+              src="/silver_mic_sm.png"
+              alt="Record"
+              width={28}
+              height={28}
               className={`z-10 ${isRecording ? 'opacity-60' : ''}`}
-              size={28}
-              strokeWidth={2}
-              color="white"
             />
           </button>
         </div>

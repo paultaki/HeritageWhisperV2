@@ -226,7 +226,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 {promptQuestion && (
                   <>
                     <h2 className="text-xl font-semibold mb-3">Your Question</h2>
-                    <div className="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-lg p-4 mb-6 max-w-xl mx-auto">
+                    <div className="bg-gradient-to-br from-[#f5f0f5] to-[#f8f3f8] border-2 border-[#d4c4d4] rounded-lg p-4 mb-6 max-w-xl mx-auto">
                       <p className="text-base text-gray-800 font-medium leading-relaxed">
                         {promptQuestion}
                       </p>
@@ -243,7 +243,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   <Button
                     onClick={() => setMode('voice')}
                     size="lg"
-                    className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-8 py-6 text-base rounded-full shadow-lg"
+                    className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white px-8 py-6 text-base rounded-full shadow-lg"
                   >
                     <Mic className="w-5 h-5 mr-2" />
                     Record with Voice
@@ -299,8 +299,8 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 exit={{ opacity: 0, y: -20 }}
                 className="text-center py-12"
               >
-                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-100 to-rose-100 flex items-center justify-center">
-                  <Mic className="w-12 h-12 text-amber-700" />
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#e8dce8] to-[#f0e0e8] flex items-center justify-center">
+                  <Mic className="w-12 h-12 text-[#8b6b7a]" />
                 </div>
 
                 <h2 className="text-2xl font-semibold mb-4">Ready to Record</h2>
@@ -320,7 +320,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   <Button
                     onClick={startRecording}
                     size="lg"
-                    className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-6 sm:px-12 py-6 text-base sm:text-lg rounded-full shadow-lg flex-shrink-0"
+                    className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white px-6 sm:px-12 py-6 text-base sm:text-lg rounded-full shadow-lg flex-shrink-0"
                   >
                     <Mic className="w-5 h-5 mr-2" />
                     Start Recording
@@ -353,7 +353,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                     value={textStory}
                     onChange={(e) => setTextStory(e.target.value)}
                     placeholder={promptQuestion ? "Type your answer here..." : "Type your story here..."}
-                    className="w-full flex-1 min-h-[160px] sm:min-h-[200px] p-4 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none text-base"
+                    className="w-full flex-1 min-h-[160px] sm:min-h-[200px] p-4 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6b7a] focus:border-transparent resize-none text-base"
                     autoFocus
                   />
 
@@ -379,7 +379,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                     onClick={handleTextSubmit}
                     size="lg"
                     disabled={!textStory.trim() || isSavingText}
-                    className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-12 rounded-full shadow-lg disabled:opacity-50"
+                    className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white px-12 rounded-full shadow-lg disabled:opacity-50"
                   >
                     {isSavingText ? (
                       <>
@@ -410,7 +410,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 200 }}
-                  className="text-9xl font-bold text-amber-500 mb-4"
+                  className="text-9xl font-bold text-[#8b6b7a] mb-4"
                 >
                   {countdown}
                 </motion.div>
@@ -460,7 +460,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 {/* Progress bar */}
                 <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-8">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-amber-500 to-rose-500"
+                    className="h-full bg-gradient-to-r from-[#8b6b7a] to-[#b88b94]"
                     initial={{ width: "0%" }}
                     animate={{ width: `${progressPercent}%` }}
                     transition={{ duration: 0.3 }}
@@ -473,7 +473,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                     Array.from({ length: 30 }).map((_, i) => (
                       <motion.div
                         key={i}
-                        className="w-1 bg-amber-500 rounded-full"
+                        className="w-1 bg-[#8b6b7a] rounded-full"
                         animate={{
                           height: [
                             `${Math.random() * 60 + 20}%`,
@@ -512,7 +512,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                       <Button
                         onClick={stopRecording}
                         size="lg"
-                        className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 rounded-full px-8 w-full sm:w-auto"
+                        className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] rounded-full px-8 w-full sm:w-auto"
                       >
                         <Square className="w-5 h-5 mr-2" />
                         Stop
@@ -524,7 +524,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                       <Button
                         onClick={resumeRecording}
                         size="lg"
-                        className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 rounded-full px-8 w-full sm:w-auto"
+                        className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] rounded-full px-8 w-full sm:w-auto"
                       >
                         <Play className="w-5 h-5 mr-2" />
                         Resume
@@ -570,10 +570,10 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 </div>
 
                 {/* Audio Player Card */}
-                <div className="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-xl p-6 mb-6">
+                <div className="bg-gradient-to-br from-[#f5f0f5] to-[#f8f3f8] border-2 border-[#d4c4d4] rounded-xl p-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] flex items-center justify-center">
                         <Play className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -610,7 +610,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   <Button
                     onClick={continueFromReview}
                     size="lg"
-                    className="w-full bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white py-6 text-lg rounded-full shadow-lg"
+                    className="w-full bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white py-6 text-lg rounded-full shadow-lg"
                   >
                     Continue to Add Details
                     <Play className="w-5 h-5 ml-2" />
@@ -637,7 +637,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 animate={{ opacity: 1 }}
                 className="text-center py-16"
               >
-                <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin text-amber-500" />
+                <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin text-[#8b6b7a]" />
                 <h2 className="text-2xl font-semibold mb-2">
                   Processing your recording...
                 </h2>

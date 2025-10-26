@@ -93,7 +93,7 @@ export default function HomePage() {
           {/* Header with Logo */}
           <div className="flex flex-col justify-center items-center mb-10">
             <Image
-              src="/Logo Updated.png?v=2"
+              src="/Logo hw.svg"
               alt="Heritage Whisper"
               width={480}
               height={120}
@@ -1023,7 +1023,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
             <div>
               <Image
-                src="/Logo Updated.png?v=2"
+                src="/Logo hw.svg"
                 alt="Heritage Whisper"
                 width={240}
                 height={60}
