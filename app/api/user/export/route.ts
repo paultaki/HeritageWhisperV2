@@ -132,6 +132,18 @@ export async function GET(request: NextRequest) {
       savedPrompts: (userPromptsRecords || []).length,
     });
 
+    // Debug: Check first story structure
+    if (userStories && userStories.length > 0) {
+      logger.debug(`[Data Export] First story sample:`, {
+        id: userStories[0].id,
+        title: userStories[0].title,
+        hasTranscription: !!userStories[0].transcription,
+        transcriptionLength: userStories[0].transcription?.length || 0,
+        hasAudioUrl: !!userStories[0].audio_url,
+        allKeys: Object.keys(userStories[0]),
+      });
+    }
+
     // Build export data package
     const exportData = {
       exportedAt: new Date().toISOString(),
