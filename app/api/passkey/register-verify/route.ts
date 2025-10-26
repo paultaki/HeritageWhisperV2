@@ -62,17 +62,38 @@ export async function POST(request: NextRequest) {
     }
 
     const { registrationInfo } = verification;
+
+    // Debug: Log the actual structure
+    logger.info("[register-verify] registrationInfo structure:", {
+      keys: Object.keys(registrationInfo || {}),
+      registrationInfo,
+    });
+
     const info = registrationInfo as unknown as {
       credentialID?: Uint8Array;
       credentialPublicKey?: Uint8Array;
+      credential?: {
+        id: Uint8Array;
+        publicKey: Uint8Array;
+      };
       counter?: number;
       aaguid?: string;
       credentialBackedUp?: boolean;
       credentialDeviceType?: string;
     };
 
-    const credentialID = info.credentialID!;
-    const credentialPublicKey = info.credentialPublicKey!;
+    // Handle both possible structures (v10 vs v13+)
+    const credentialID = info.credentialID || info.credential?.id;
+    const credentialPublicKey = info.credentialPublicKey || info.credential?.publicKey;
+
+    if (!credentialID || !credentialPublicKey) {
+      logger.error("[register-verify] Missing credential data", { info });
+      return NextResponse.json(
+        { error: "Invalid credential data" },
+        { status: 400 }
+      );
+    }
+
     const counter = info.counter ?? 0;
     const credentialBackedUp = info.credentialBackedUp ?? false;
     const credentialDeviceType = info.credentialDeviceType ?? "singleDevice";
