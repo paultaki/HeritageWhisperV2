@@ -455,261 +455,243 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
     }
   };
 
-  // Render function for card content to avoid component definition issues
+  // Render function for card content - mobile style with white card below photo
   const renderCardContent = () => {
-    // console debug removed
-    
-    // If there's a photo, render without white container
+    // If there's a photo, render with white card below (mobile style)
     if (displayPhoto?.url) {
       return (
-        <div>
-          <div className={`relative rounded-3xl shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 ${
+        <div
+          className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-          }`}>
-            <div
-              className="relative w-full aspect-[4/3] overflow-hidden rounded-3xl"
-              style={{ pointerEvents: 'none' }}
-            >
-              <div
-                className="absolute inset-0 cursor-pointer"
-                style={{ pointerEvents: 'auto', zIndex: 1 }}
-                onClick={handleCardClick}
+          }`}
+          onClick={handleCardClick}
+        >
+          {/* Photo Section - 16:10 aspect ratio to match mobile, rounded top corners only */}
+          <div className="relative w-full aspect-[16/10] overflow-hidden">
+            {displayPhoto.transform ? (
+              <img
+                src={displayPhoto.url}
+                alt={story.title}
+                className="w-full h-full object-cover"
+                style={{
+                  transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
+                  transformOrigin: "center center",
+                }}
+                onError={(e) => console.error("[Timeline] Image failed to load:", displayPhoto.url)}
               />
-              {displayPhoto.transform ? (
-                // Use regular img tag when transform is present (Next.js Image doesn't apply inline styles with fill)
-                // Note: Don't apply ken-burns-effect or hover:scale when we have a custom transform
-                <img
-                  src={displayPhoto.url}
-                  alt={story.title}
-                  className="absolute inset-0 w-full h-full"
-                  style={{
-                    transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
-                    transformOrigin: "center center",
-                    objectFit: "cover",
-                  }}
-                  onError={(e) => console.error("[Timeline-v2] Image failed to load:", displayPhoto.url)}
-                />
-              ) : (
-                // Use Next.js Image for optimized loading when no transform
-                <Image
-                  src={displayPhoto.url}
-                  alt={story.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
-                  className={`object-cover transition-transform duration-500 hover:scale-105 ${
-                    isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''
-                  }`}
-                  loading="eager"
-                  priority={index < 8}
-                  quality={85}
-                  placeholder="blur"
-                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
-                  onError={(e) => console.error("[Timeline-v2] Image failed to load:", displayPhoto.url)}
-                  onLoad={() => { /* quiet success log */ }}
-                />
-              )}
-            </div>
-            {/* Photo count badge (desktop) - top left */}
+            ) : (
+              <Image
+                src={displayPhoto.url}
+                alt={story.title}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
+                className={`object-cover ${isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''}`}
+                loading="eager"
+                priority={index < 8}
+                quality={85}
+                placeholder="blur"
+                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
+                onError={(e) => console.error("[Timeline] Image failed to load:", displayPhoto.url)}
+              />
+            )}
+
+            {/* Photo count badge */}
             {photoCount > 1 && (
-              <div className="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium z-10 pointer-events-none">
+              <div className="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
                 {photoCount} photos
               </div>
             )}
-            
-            {/* Memory Footer Overlay with Play Button */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 md:p-4 pointer-events-none rounded-b-3xl">
-              {/* Progress Bar (shows above title when playing) */}
-              {story.audioUrl && (isPlaying || progress > 0) && (
-                <div className="mb-3 pointer-events-auto">
-                  <div
-                    ref={progressBarRef}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleProgressBarClick(e);
-                    }}
-                    className="h-1.5 bg-white/20 rounded-full cursor-pointer overflow-hidden"
-                  >
-                    <div
-                      className="h-full bg-white rounded-full transition-all duration-100"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-white/80 mt-1">
-                    <span>{formatDuration(currentTime)}</span>
-                    <span>{formatDuration(duration)}</span>
-                  </div>
-                </div>
-              )}
-              
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg md:text-xl font-semibold text-white mb-1 truncate pr-2">
-                    {story.title}
-                  </h3>
-                  {/* V3: Show only age, no date */}
-                  {displayLifeAge !== null && displayLifeAge !== undefined && (
-                    <div className="text-xs md:text-sm text-white/90">
-                      <span>
-                        {displayLifeAge > 0 && `Age ${displayLifeAge}`}
-                        {displayLifeAge === 0 && `Birthday`}
-                        {displayLifeAge < 0 && `Before birth`}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Play Button Overlaid on Photo */}
-                {story.audioUrl && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePlayAudio(e);
-                    }}
-                    aria-pressed={isPlaying}
-                    aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-                    className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer relative z-50 pointer-events-auto"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" />
+
+            {/* Audio play button overlaid on photo */}
+            {story.audioUrl && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePlayAudio(e);
+                }}
+                aria-pressed={isPlaying}
+                aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+                className="absolute right-4 bottom-4 w-11 h-11 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 z-10"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
+                ) : (
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
+                    {isPlaying ? (
+                      <g>
+                        <rect x="11" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
+                        <rect x="14.8" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
+                      </g>
                     ) : (
-                      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                        <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
-                        {isPlaying ? (
-                          <g>
-                            <rect x="11" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
-                            <rect x="14.8" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
-                          </g>
-                        ) : (
-                          <polygon points="11,9 11,19 19,14" fill="#fb923c" />
-                        )}
-                      </svg>
+                      <polygon points="11,9 11,19 19,14" fill="#fb923c" />
                     )}
-                  </button>
+                  </svg>
                 )}
-              </div>
-            </div>
+              </button>
+            )}
           </div>
 
-          {/* Traits below photo */}
-          {(s.traits?.length ?? 0) > 0 && (
-            <div className="mt-3">
-              <StoryTraits traits={(s.traits ?? []).map(t => ({ label: t.name, confidence: 0.8 }))} />
-            </div>
-          )}
-        </div>
-      );
-    }
-    
-    // No photo - render card with placeholder that matches photo card dimensions
-    return (
-      <div>
-        <div className={`relative rounded-3xl shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 ${
-          isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-        }`}>
-          <div
-            className="relative w-full aspect-[4/3] overflow-hidden rounded-3xl"
-            style={{ pointerEvents: 'none' }}
-          >
-            <div
-              className="absolute inset-0 cursor-pointer"
-              style={{ pointerEvents: 'auto', zIndex: 1 }}
-              onClick={handleCardClick}
-            />
-            {/* Placeholder background with subtle gradient or pattern */}
-            <div
-              className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 flex items-center justify-center"
-              style={{
-                backgroundColor: isDark ? '#2a2a2a' : '#f9fafb',
-                backgroundImage: `linear-gradient(135deg, ${isDark ? '#2a2a2a' : '#f9fafb'} 0%, ${isDark ? '#1f1f1f' : '#f3f4f6'} 50%, ${isDark ? '#2a2a2a' : '#f9fafb'} 100%)`
-              }}
-            >
-              {/* Optional: Add a subtle icon or text in the center */}
-              <div className="text-center p-6">
-                <div className="text-5xl opacity-10 mb-4">📝</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Memory Footer Overlay with Play Button - same as photo cards */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 md:p-4 pointer-events-none rounded-b-3xl">
-            {/* Progress Bar (shows above title when playing) */}
+          {/* White Card Section Below Photo */}
+          <div className="p-4 bg-white">
+            {/* Progress Bar (when playing) */}
             {story.audioUrl && (isPlaying || progress > 0) && (
-              <div className="mb-3 pointer-events-auto">
+              <div className="mb-3">
                 <div
                   ref={progressBarRef}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleProgressBarClick(e);
                   }}
-                  className="h-1.5 bg-white/20 rounded-full cursor-pointer overflow-hidden"
+                  className="h-1.5 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
                 >
                   <div
-                    className="h-full bg-white rounded-full transition-all duration-100"
+                    className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full transition-all duration-100"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <div className="flex items-center justify-between text-xs text-white/80 mt-1">
+                <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
                   <span>{formatDuration(currentTime)}</span>
                   <span>{formatDuration(duration)}</span>
                 </div>
               </div>
             )}
 
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg md:text-xl font-semibold text-white mb-1 truncate pr-2">
-                  {story.title}
-                </h3>
-                {/* Show only age, no date - same as photo cards */}
-                {displayLifeAge !== null && displayLifeAge !== undefined && (
-                  <div className="text-xs md:text-sm text-white/90">
-                    <span>
-                      {displayLifeAge > 0 && `Age ${displayLifeAge}`}
-                      {displayLifeAge === 0 && `Birthday`}
-                      {displayLifeAge < 0 && `Before birth`}
-                    </span>
-                  </div>
-                )}
-              </div>
+            {/* Title */}
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+              {story.title}
+            </h3>
 
-              {/* Play Button Overlaid - same as photo cards */}
-              {story.audioUrl && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePlayAudio(e);
-                  }}
-                  aria-pressed={isPlaying}
-                  aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-                  className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer relative z-50 pointer-events-auto"
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin text-orange-500" />
-                  ) : (
-                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                      <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
-                      {isPlaying ? (
-                        <g>
-                          <rect x="11" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
-                          <rect x="14.8" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
-                        </g>
-                      ) : (
-                        <polygon points="11,9 11,19 19,14" fill="#fb923c" />
-                      )}
-                    </svg>
-                  )}
-                </button>
+            {/* Metadata */}
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>
+                {story.storyDate
+                  ? new Date(story.storyDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                    })
+                  : formatYear(story.storyYear)}
+              </span>
+              {displayLifeAge !== null && displayLifeAge !== undefined && (
+                <>
+                  <span className="text-gray-300">•</span>
+                  <span>
+                    {displayLifeAge > 0 && `Age ${displayLifeAge}`}
+                    {displayLifeAge === 0 && `Birthday`}
+                    {displayLifeAge < 0 && `Before birth`}
+                  </span>
+                </>
               )}
             </div>
           </div>
         </div>
-
-        {/* Traits below card - same as photo cards */}
-        {(s.traits?.length ?? 0) > 0 && (
-          <div className="mt-3">
-            <StoryTraits traits={(s.traits ?? []).map(t => ({ label: t.name, confidence: 0.8 }))} />
+      );
+    }
+    
+    // No photo - render card with placeholder matching photo cards
+    return (
+      <div
+        className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer ${
+          isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        }`}
+        onClick={handleCardClick}
+      >
+        {/* Placeholder Section - 16:10 aspect ratio to match mobile */}
+        <div className="relative w-full aspect-[16/10] overflow-hidden">
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 flex items-center justify-center"
+            style={{
+              backgroundColor: isDark ? '#2a2a2a' : '#f9fafb',
+              backgroundImage: `linear-gradient(135deg, ${isDark ? '#2a2a2a' : '#f9fafb'} 0%, ${isDark ? '#1f1f1f' : '#f3f4f6'} 50%, ${isDark ? '#2a2a2a' : '#f9fafb'} 100%)`
+            }}
+          >
+            <div className="text-center p-6">
+              <div className="text-5xl opacity-10">📝</div>
+            </div>
           </div>
-        )}
+
+          {/* Audio play button overlaid on placeholder */}
+          {story.audioUrl && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePlayAudio(e);
+              }}
+              aria-pressed={isPlaying}
+              aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+              className="absolute right-4 bottom-4 w-11 h-11 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 z-10"
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
+              ) : (
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                  <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
+                  {isPlaying ? (
+                    <g>
+                      <rect x="11" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
+                      <rect x="14.8" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
+                    </g>
+                  ) : (
+                    <polygon points="11,9 11,19 19,14" fill="#fb923c" />
+                  )}
+                </svg>
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* White Card Section Below Placeholder */}
+        <div className="p-4 bg-white">
+          {/* Progress Bar (when playing) */}
+          {story.audioUrl && (isPlaying || progress > 0) && (
+            <div className="mb-3">
+              <div
+                ref={progressBarRef}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleProgressBarClick(e);
+                }}
+                className="h-1.5 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
+              >
+                <div
+                  className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full transition-all duration-100"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
+                <span>{formatDuration(currentTime)}</span>
+                <span>{formatDuration(duration)}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Title */}
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+            {story.title}
+          </h3>
+
+          {/* Metadata */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>
+              {story.storyDate
+                ? new Date(story.storyDate).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                  })
+                : formatYear(story.storyYear)}
+            </span>
+            {displayLifeAge !== null && displayLifeAge !== undefined && (
+              <>
+                <span className="text-gray-300">•</span>
+                <span>
+                  {displayLifeAge > 0 && `Age ${displayLifeAge}`}
+                  {displayLifeAge === 0 && `Birthday`}
+                  {displayLifeAge < 0 && `Before birth`}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     );
   };
@@ -744,16 +726,16 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         <div
           className="py-0.5 px-2.5 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
           style={{
-            backgroundColor: '#f9f6f3',
-            border: `1px solid #8b6b7a`,
-            color: '#8b6b7a',
+            backgroundColor: '#F9E5E8',
+            border: `1px solid rgba(139, 107, 122, 0.2)`,
+            color: '#8B6B7A',
             fontSize: '16px',
             fontWeight: 500,
             letterSpacing: '0.3px',
-            opacity: 0.92,
+            opacity: 0.95,
             boxShadow: isDark
               ? '0 2px 4px rgba(0, 0, 0, 0.2)'
-              : '0 2px 4px rgba(0, 0, 0, 0.12)',
+              : '0 2px 6px rgba(139, 107, 122, 0.12)',
             borderRadius: '6px',
             backdropFilter: 'blur(10px)',
             position: 'relative',
@@ -1074,16 +1056,16 @@ export function TimelineDesktop() {
 
         {/* Timeline Container */}
         <div ref={timelineContainerRef} className="relative">
-          {/* V3: Subtle vertical timeline ruler - slightly thicker */}
+          {/* V3: Subtle vertical timeline ruler - soft mauve for premium feel */}
           <div
             className="absolute left-1/2 md:w-[2.5px] w-[3px] rounded-full overflow-hidden pointer-events-none"
             style={{
-              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(107, 114, 128, 0.25)',
+              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(196, 167, 183, 0.35)',
               transform: 'translateX(calc(-50% - 225px))',
               top: '0',
               bottom: '0',
               height: '100%',
-              opacity: 0.6,
+              opacity: 0.8,
             }}
           >
             <div
@@ -1091,7 +1073,7 @@ export function TimelineDesktop() {
               className="w-full rounded-full transition-all duration-300 ease-out"
               style={{
                 height: "0%",
-                background: isDark ? 'rgba(176, 179, 184, 0.4)' : 'rgba(107, 114, 128, 0.4)',
+                background: isDark ? 'rgba(176, 179, 184, 0.4)' : 'rgba(196, 167, 183, 0.55)',
                 boxShadow: 'none',
               }}
             />
@@ -1251,8 +1233,8 @@ export function TimelineDesktop() {
             height: 2.5px;
             background: linear-gradient(
               to right,
-              rgba(156, 163, 175, 0.3),
-              rgba(156, 163, 175, 0.5)
+              rgba(196, 167, 183, 0.3),
+              rgba(196, 167, 183, 0.5)
             );
             border-radius: 1px;
             opacity: 1;
@@ -1266,8 +1248,8 @@ export function TimelineDesktop() {
             right: -26px;
             background: linear-gradient(
               to right,
-              rgba(156, 163, 175, 0.5),
-              rgba(156, 163, 175, 0.3)
+              rgba(196, 167, 183, 0.5),
+              rgba(196, 167, 183, 0.3)
             );
           }
 
@@ -1276,8 +1258,8 @@ export function TimelineDesktop() {
             left: -26px;
             background: linear-gradient(
               to left,
-              rgba(156, 163, 175, 0.5),
-              rgba(156, 163, 175, 0.3)
+              rgba(196, 167, 183, 0.5),
+              rgba(196, 167, 183, 0.3)
             );
           }
 
@@ -1286,24 +1268,24 @@ export function TimelineDesktop() {
             width: 26px;
             background: linear-gradient(
               to right,
-              rgba(107, 114, 128, 0.6),
-              rgba(107, 114, 128, 0.4)
+              rgba(196, 167, 183, 0.7),
+              rgba(196, 167, 183, 0.5)
             );
           }
 
           .timeline-step:hover .justify-end .timeline-card-container::after {
             background: linear-gradient(
               to right,
-              rgba(107, 114, 128, 0.6),
-              rgba(107, 114, 128, 0.4)
+              rgba(196, 167, 183, 0.7),
+              rgba(196, 167, 183, 0.5)
             );
           }
 
           .timeline-step:hover .justify-start .timeline-card-container::after {
             background: linear-gradient(
               to left,
-              rgba(107, 114, 128, 0.6),
-              rgba(107, 114, 128, 0.4)
+              rgba(196, 167, 183, 0.7),
+              rgba(196, 167, 183, 0.5)
             );
           }
         }
@@ -1328,7 +1310,7 @@ export function TimelineDesktop() {
           }
         }
 
-        /* Dark theme connector line overrides */
+        /* Dark theme connector line overrides - keep subtle gray for dark mode */
         .dark-theme .timeline-card-container::after {
           background: linear-gradient(
             to right,
