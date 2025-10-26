@@ -744,15 +744,15 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         <div
           className="py-0.5 px-2.5 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
           style={{
-            backgroundColor: isDark ? 'rgba(37, 39, 40, 0.85)' : 'rgba(255, 255, 255, 0.95)',
-            border: `1px solid ${isDark ? 'rgba(176, 179, 184, 0.3)' : 'rgba(111, 117, 131, 0.35)'}`,
-            color: isDark ? 'rgba(176, 179, 184, 0.9)' : 'rgba(75, 85, 99, 0.95)',
+            backgroundColor: '#c6a07f',
+            border: `1px solid #8b6b7a`,
+            color: '#8b6b7a',
             fontSize: '16px',
             fontWeight: 500,
             letterSpacing: '0.3px',
             opacity: 0.92,
-            boxShadow: isDark 
-              ? '0 2px 4px rgba(0, 0, 0, 0.2)' 
+            boxShadow: isDark
+              ? '0 2px 4px rgba(0, 0, 0, 0.2)'
               : '0 2px 4px rgba(0, 0, 0, 0.12)',
             borderRadius: '6px',
             backdropFilter: 'blur(10px)',

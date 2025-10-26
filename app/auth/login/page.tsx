@@ -265,6 +265,7 @@ export default function Login() {
                               style={{ fontSize: '16px', paddingRight: '40px' }}
                               placeholder="you@example.com"
                               data-testid="input-email"
+                              suppressHydrationWarning
                             />
                             <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                               <Mail className="w-5 h-5 text-slate-400" />
@@ -296,6 +297,7 @@ export default function Login() {
                               style={{ fontSize: '16px', paddingRight: '40px' }}
                               placeholder="••••••••"
                               data-testid="input-password"
+                              suppressHydrationWarning
                             />
                             <div
                               onClick={() => setShowPassword(!showPassword)}
@@ -356,6 +358,7 @@ export default function Login() {
                           className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white px-4 py-3 font-semibold shadow-lg shadow-rose-200/50 hover:brightness-110 transition"
                           style={{ fontSize: '17px', fontFamily: 'system-ui, -apple-system, sans-serif' }}
                           data-testid="button-login"
+                          suppressHydrationWarning
                         >
                           <LogIn className="w-5 h-5" />
                           Continue
@@ -378,6 +381,7 @@ export default function Login() {
                           className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-rose-100 bg-white/70 px-4 py-2.5 text-slate-800 font-medium hover:bg-white transition"
                           style={{ fontSize: '16px', fontFamily: 'system-ui, -apple-system, sans-serif' }}
                           data-testid="button-google-signin"
+                          suppressHydrationWarning
                         >
                           <svg className="h-5 w-5" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

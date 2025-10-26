@@ -12,6 +12,10 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        // Check URL parameters to determine auth type
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const type = hashParams.get('type');
+
         // Get the session from the URL hash
         const {
           data: { session },
@@ -36,9 +40,15 @@ export default function AuthCallback() {
         // Wait for the backend to process the new user and ensure database is synced
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        // After email confirmation, always go to timeline
-        // New users already provided birth year and accepted agreements at signup
-        router.push("/timeline");
+        // Route based on auth type
+        if (type === 'recovery') {
+          // Password reset - go to reset password page
+          router.push("/auth/reset-password");
+        } else {
+          // Email confirmation or other - go to timeline
+          // New users already provided birth year and accepted agreements at signup
+          router.push("/timeline");
+        }
       } catch (error) {
         console.error("Callback error:", error);
         router.push("/auth/login?error=callback_error");
