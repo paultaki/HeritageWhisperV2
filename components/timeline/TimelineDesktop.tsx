@@ -744,16 +744,16 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         <div
           className="py-0.5 px-2.5 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
           style={{
-            backgroundColor: '#f9f6f3',
-            border: `1px solid #8b6b7a`,
-            color: '#8b6b7a',
+            backgroundColor: '#F9E5E8',
+            border: `1px solid rgba(139, 107, 122, 0.2)`,
+            color: '#8B6B7A',
             fontSize: '16px',
             fontWeight: 500,
             letterSpacing: '0.3px',
-            opacity: 0.92,
+            opacity: 0.95,
             boxShadow: isDark
               ? '0 2px 4px rgba(0, 0, 0, 0.2)'
-              : '0 2px 4px rgba(0, 0, 0, 0.12)',
+              : '0 2px 6px rgba(139, 107, 122, 0.12)',
             borderRadius: '6px',
             backdropFilter: 'blur(10px)',
             position: 'relative',
@@ -1074,16 +1074,16 @@ export function TimelineDesktop() {
 
         {/* Timeline Container */}
         <div ref={timelineContainerRef} className="relative">
-          {/* V3: Subtle vertical timeline ruler - slightly thicker */}
+          {/* V3: Subtle vertical timeline ruler - soft mauve for premium feel */}
           <div
             className="absolute left-1/2 md:w-[2.5px] w-[3px] rounded-full overflow-hidden pointer-events-none"
             style={{
-              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(107, 114, 128, 0.25)',
+              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(196, 167, 183, 0.35)',
               transform: 'translateX(calc(-50% - 225px))',
               top: '0',
               bottom: '0',
               height: '100%',
-              opacity: 0.6,
+              opacity: 0.8,
             }}
           >
             <div
@@ -1091,7 +1091,7 @@ export function TimelineDesktop() {
               className="w-full rounded-full transition-all duration-300 ease-out"
               style={{
                 height: "0%",
-                background: isDark ? 'rgba(176, 179, 184, 0.4)' : 'rgba(107, 114, 128, 0.4)',
+                background: isDark ? 'rgba(176, 179, 184, 0.4)' : 'rgba(196, 167, 183, 0.55)',
                 boxShadow: 'none',
               }}
             />
@@ -1251,8 +1251,8 @@ export function TimelineDesktop() {
             height: 2.5px;
             background: linear-gradient(
               to right,
-              rgba(156, 163, 175, 0.3),
-              rgba(156, 163, 175, 0.5)
+              rgba(196, 167, 183, 0.3),
+              rgba(196, 167, 183, 0.5)
             );
             border-radius: 1px;
             opacity: 1;
@@ -1266,8 +1266,8 @@ export function TimelineDesktop() {
             right: -26px;
             background: linear-gradient(
               to right,
-              rgba(156, 163, 175, 0.5),
-              rgba(156, 163, 175, 0.3)
+              rgba(196, 167, 183, 0.5),
+              rgba(196, 167, 183, 0.3)
             );
           }
 
@@ -1276,8 +1276,8 @@ export function TimelineDesktop() {
             left: -26px;
             background: linear-gradient(
               to left,
-              rgba(156, 163, 175, 0.5),
-              rgba(156, 163, 175, 0.3)
+              rgba(196, 167, 183, 0.5),
+              rgba(196, 167, 183, 0.3)
             );
           }
 
@@ -1286,24 +1286,24 @@ export function TimelineDesktop() {
             width: 26px;
             background: linear-gradient(
               to right,
-              rgba(107, 114, 128, 0.6),
-              rgba(107, 114, 128, 0.4)
+              rgba(196, 167, 183, 0.7),
+              rgba(196, 167, 183, 0.5)
             );
           }
 
           .timeline-step:hover .justify-end .timeline-card-container::after {
             background: linear-gradient(
               to right,
-              rgba(107, 114, 128, 0.6),
-              rgba(107, 114, 128, 0.4)
+              rgba(196, 167, 183, 0.7),
+              rgba(196, 167, 183, 0.5)
             );
           }
 
           .timeline-step:hover .justify-start .timeline-card-container::after {
             background: linear-gradient(
               to left,
-              rgba(107, 114, 128, 0.6),
-              rgba(107, 114, 128, 0.4)
+              rgba(196, 167, 183, 0.7),
+              rgba(196, 167, 183, 0.5)
             );
           }
         }
@@ -1328,7 +1328,7 @@ export function TimelineDesktop() {
           }
         }
 
-        /* Dark theme connector line overrides */
+        /* Dark theme connector line overrides - keep subtle gray for dark mode */
         .dark-theme .timeline-card-container::after {
           background: linear-gradient(
             to right,
