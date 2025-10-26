@@ -466,8 +466,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           }`}
           onClick={handleCardClick}
         >
-          {/* Photo Section - 4:3 aspect ratio, rounded top corners only */}
-          <div className="relative w-full aspect-[4/3] overflow-hidden">
+          {/* Photo Section - 16:10 aspect ratio to match mobile, rounded top corners only */}
+          <div className="relative w-full aspect-[16/10] overflow-hidden">
             {displayPhoto.transform ? (
               <img
                 src={displayPhoto.url}
@@ -596,8 +596,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         }`}
         onClick={handleCardClick}
       >
-        {/* Placeholder Section - 4:3 aspect ratio */}
-        <div className="relative w-full aspect-[4/3] overflow-hidden">
+        {/* Placeholder Section - 16:10 aspect ratio to match mobile */}
+        <div className="relative w-full aspect-[16/10] overflow-hidden">
           <div
             className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 flex items-center justify-center"
             style={{
