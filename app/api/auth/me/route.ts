@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { getPasskeySession } from "@/lib/iron-session";
+import { getUserById } from "@/lib/db-admin";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -15,7 +17,35 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the Authorization header
+    // Try passkey session first (from iron-session cookie)
+    const passkeySession = await getPasskeySession();
+
+    if (passkeySession) {
+      logger.info("[auth/me] Using passkey session");
+
+      // Get user from database
+      const user = await getUserById(passkeySession.userId);
+
+      if (!user) {
+        return NextResponse.json(
+          { error: "User not found" },
+          { status: 404 },
+        );
+      }
+
+      return NextResponse.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          birthYear: user.birthYear,
+          storyCount: user.storyCount || 0,
+          isPaid: user.isPaid || false,
+        },
+      });
+    }
+
+    // Fall back to Supabase session (Authorization header)
     const authHeader = request.headers.get("authorization");
     const token = authHeader && authHeader.split(" ")[1];
 

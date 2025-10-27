@@ -52,12 +52,19 @@ export async function getUserByEmail(
  */
 export async function getUserById(
   userId: string
-): Promise<{ id: string; email: string; name: string } | null> {
+): Promise<{
+  id: string;
+  email: string;
+  name: string;
+  birthYear: number;
+  storyCount: number;
+  isPaid: boolean;
+} | null> {
   const supabase = getAdminClient();
 
   const { data, error } = await supabase
     .from("users")
-    .select("id, email, name")
+    .select("id, email, name, birth_year, story_count, is_paid")
     .eq("id", userId)
     .single();
 
@@ -66,7 +73,15 @@ export async function getUserById(
     return null;
   }
 
-  return data;
+  // Map snake_case to camelCase
+  return {
+    id: data.id,
+    email: data.email,
+    name: data.name,
+    birthYear: data.birth_year,
+    storyCount: data.story_count || 0,
+    isPaid: data.is_paid || false,
+  };
 }
 
 /**
