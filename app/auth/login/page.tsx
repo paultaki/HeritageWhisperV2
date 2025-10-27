@@ -136,8 +136,8 @@ export default function Login() {
 
   const handlePasskeySuccess = () => {
     // Passkey authentication creates a session cookie automatically
-    // Just redirect to timeline
-    router.push("/timeline");
+    // Force a hard redirect to ensure auth context refreshes
+    window.location.href = "/timeline";
   };
 
   const handlePasskeyError = (error: string) => {
