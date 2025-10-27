@@ -162,8 +162,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
       }
 
-      // Now navigate to timeline - session should be available
-      router.push("/timeline");
+      // Note: Navigation is handled by the calling component
+      // (login page checks for passkey prompt first)
     },
   });
 

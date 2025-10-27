@@ -77,12 +77,12 @@ export default function Login() {
     return () => clearTimeout(timeoutId);
   }, [email]);
 
-  // Redirect if already logged in
+  // Redirect if already logged in (but not if showing passkey setup)
   useEffect(() => {
-    if (user) {
+    if (user && !showPasskeySetup) {
       router.push("/timeline");
     }
-  }, [user, router]);
+  }, [user, router, showPasskeySetup]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +109,11 @@ export default function Login() {
       if (typeof window !== 'undefined' && result?.user) {
         const { loginCount, passkeyPromptDismissed } = result.user;
 
+        console.log('[Login] Checking passkey prompt conditions:', {
+          loginCount,
+          passkeyPromptDismissed,
+        });
+
         // Check if user has passkeys
         const checkRes = await fetch("/api/passkey/check", {
           method: "POST",
@@ -119,12 +124,15 @@ export default function Login() {
         if (checkRes.ok) {
           const { hasPasskeys } = await checkRes.json();
 
+          console.log('[Login] Passkey check result:', { hasPasskeys });
+
           // Show prompt on 2nd+ login if no passkeys and not dismissed as 'never'
           if (
             (loginCount ?? 0) >= 2 &&
             !hasPasskeys &&
             passkeyPromptDismissed !== "never"
           ) {
+            console.log('[Login] Showing passkey setup prompt');
             setLoginCredentials({ email, password });
             setShowPasskeySetup(true);
             return; // Don't redirect yet
@@ -132,7 +140,9 @@ export default function Login() {
         }
       }
 
-      // If we didn't show the prompt, redirect will happen via useEffect when user changes
+      // If we didn't show the prompt, navigate to timeline
+      console.log('[Login] No passkey prompt needed, navigating to timeline');
+      router.push("/timeline");
     } catch (error: any) {
       toast({
         title: "Authentication failed",

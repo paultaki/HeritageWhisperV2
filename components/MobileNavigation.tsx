@@ -38,7 +38,7 @@ const NavItem: React.FC<NavItemProps> = ({
       onClick={handleClick}
       className="flex flex-col items-center justify-center py-2 px-3 flex-1 transition-all relative"
       style={{
-        color: isActive ? "#D36A3D" : "hsl(210, 10%, 60%)",
+        color: isActive ? "#8b6b7a" : "hsl(210, 10%, 60%)",
       }}
     >
       {/* Active indicator bar at top */}
@@ -46,7 +46,7 @@ const NavItem: React.FC<NavItemProps> = ({
         <div
           className="absolute -top-2.5 left-1/2 -translate-x-1/2 h-1 rounded-full transition-all"
           style={{
-            backgroundColor: "#D36A3D",
+            backgroundColor: "#8b6b7a",
             width: "52px",
           }}
         />
@@ -85,7 +85,7 @@ export default function MobileNavigation({
       transition={{ type: "spring", damping: 20 }}
       className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t-2 md:hidden"
       style={{
-        borderTopColor: "#D36A3D",
+        borderTopColor: "#8b6b7a",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.08)",
         marginBottom: 0,
