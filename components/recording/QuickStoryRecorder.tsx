@@ -151,28 +151,52 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
       }
 
       const data = await response.json();
-      console.log('[QuickStoryRecorder] Transcription response:', data);
+      console.log('[QuickStoryRecorder] Upload transcription response:', data);
 
       // Extract transcription text (the API returns it as a string)
       const transcriptionText = data.transcription || data.text || '';
       console.log('[QuickStoryRecorder] Extracted transcription:', transcriptionText);
 
-      // Save to NavCache for the wizard
-      const cacheKey = navCache.store({
-        mode: 'quick',
-        transcription: transcriptionText,
+      // Get audio duration (try to calculate from file if not provided)
+      let audioDuration = data.duration || 30;
+
+      // Try to get actual duration from audio file
+      try {
+        const audioUrl = URL.createObjectURL(file);
+        const audio = new Audio(audioUrl);
+        await new Promise((resolve) => {
+          audio.addEventListener('loadedmetadata', () => {
+            audioDuration = Math.round(audio.duration);
+            URL.revokeObjectURL(audioUrl);
+            resolve(null);
+          });
+        });
+      } catch (err) {
+        console.log('[QuickStoryRecorder] Could not get audio duration, using default');
+      }
+
+      // Convert File to Blob for NavCache
+      const audioBlob = new Blob([file], { type: file.type });
+
+      // Save to NavCache for transcription-select screen (same as recording flow)
+      const navId = navCache.generateId();
+      await navCache.set(navId, {
+        mode: "quick",
+        originalTranscript: transcriptionText,
         rawTranscript: transcriptionText,
-        enhancedTranscript: transcriptionText, // Add this for the wizard
-        duration: data.duration || 30,
-        audioBlob: file,
-        prompt: promptQuestion ? {
-          title: 'Your Question',
-          text: promptQuestion,
-        } : undefined,
+        enhancedTranscript: transcriptionText,
+        duration: audioDuration,
+        timestamp: new Date().toISOString(),
+        audioBlob: audioBlob,
+        lessonOptions: data.lessonOptions,
+        formattedContent: data.formattedContent,
+        useEnhanced: false,
       });
 
-      // Navigate to wizard
-      router.push(`/review/book-style?nav=${cacheKey}&mode=wizard`);
+      console.log('[QuickStoryRecorder] Navigating to transcription-select with audio upload');
+
+      // Navigate to transcription-select (same as recording flow)
+      router.push(`/review/book-style?nav=${navId}&mode=transcription-select`);
       onClose();
     } catch (error) {
       console.error('Error uploading audio:', error);
@@ -289,7 +313,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 )}
 
                 <h2 className="text-2xl font-semibold mb-3">How would you like to share your story?</h2>
-                <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                <p className="text-5xl font-medium text-gray-700 mb-8 max-w-4xl mx-auto text-center">
                   Choose to record with your voice or type your story
                 </p>
 
