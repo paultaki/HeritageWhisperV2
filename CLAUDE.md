@@ -233,6 +233,43 @@ All GPT models route through Vercel AI Gateway for observability and caching.
 - Session retries (5x 100ms) to handle race conditions
 - JWT tokens with automatic refresh
 
+### Passkey Authentication (WebAuthn)
+
+**Status:** ✅ Production Ready (October 2025)
+
+Passwordless authentication using platform authenticators (Touch ID, Face ID, Windows Hello, Dashlane).
+
+**Features:**
+- Discoverable credentials (username-less login)
+- Iron-session encrypted httpOnly cookies
+- Dual session support (Supabase + passkey sessions in `/api/auth/me`)
+- Automatic detection (passkey button only shows if user has passkeys)
+- Platform authenticators preferred (biometric security)
+
+**Configuration:**
+- RP_ID: `heritagewhisper.com` (apex domain for all environments)
+- Library: SimpleWebAuthn v13 (`@simplewebauthn/server` + `@simplewebauthn/browser`)
+- Database: `passkeys` table with credential storage
+- Session cookie: `hw_passkey_session` (httpOnly, secure)
+
+**Environment Variables:**
+```bash
+RP_ID=heritagewhisper.com
+RP_NAME=HeritageWhisper
+ORIGIN=https://dev.heritagewhisper.com  # Production URL
+IRON_SESSION_PASSWORD=<random-32-byte-key>
+COOKIE_NAME=hw_passkey_session
+SUPABASE_JWT_SECRET=<supabase-jwt-secret>
+```
+
+**API Endpoints:**
+- `POST /api/passkey/register-options` - Generate registration options
+- `POST /api/passkey/register-verify` - Verify and store new passkey
+- `POST /api/passkey/auth-options` - Generate authentication options
+- `POST /api/passkey/auth-verify` - Verify passkey and create session
+- `GET /api/passkey/manage` - List user's passkeys
+- `POST /api/passkey/check` - Check if user has passkeys (for conditional UI)
+
 ### Security & Privacy
 
 **Implementation Status:** 60-70% Complete
