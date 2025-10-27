@@ -36,14 +36,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 1: Get the passkey from the database
-    const credentialId = Buffer.from(
-      credential.rawId,
-      "base64url"
-    ).toString("base64url");
+    // credential.rawId and credential.id are already base64url strings
+    const credentialId = credential.rawId || credential.id;
+
+    logger.info("[auth-verify] Looking up passkey:", {
+      credentialId,
+      rawIdLength: credential.rawId?.length,
+      idLength: credential.id?.length,
+    });
+
     const passkey = await getPasskeyByCredentialId(credentialId);
 
     if (!passkey) {
-      logger.warn("[auth-verify] Passkey not found");
+      logger.warn("[auth-verify] Passkey not found for credential:", credentialId);
       return NextResponse.json({ error: "Passkey not found" }, { status: 404 });
     }
 
