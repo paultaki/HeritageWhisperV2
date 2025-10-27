@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { destroyPasskeySession } from "@/lib/iron-session";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -10,12 +11,16 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function POST(request: NextRequest) {
   try {
+    // Destroy passkey session (if exists)
+    await destroyPasskeySession();
+
     // Get the Authorization header for the current session
     const authHeader = request.headers.get("authorization");
     const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
-      // No session to logout from, but that's okay
+      // No Supabase session to logout from, but that's okay
+      // (passkey session was already destroyed)
       return NextResponse.json({ success: true });
     }
 
