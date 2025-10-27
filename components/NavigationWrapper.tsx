@@ -14,10 +14,10 @@ export default function NavigationWrapper() {
   return (
     <>
       {/* Desktop Navigation (bottom bar) - shows on all pages */}
-      <DesktopNavigationBottom onRecordClick={() => modeSelection.openModal()} />
+      <DesktopNavigationBottom onRecordClick={() => modeSelection.openQuickRecorder()} />
 
       {/* Mobile Navigation (bottom bar) - shows on all pages */}
-      <MobileNavigation onRecordClick={() => modeSelection.openModal()} />
+      <MobileNavigation onRecordClick={() => modeSelection.openQuickRecorder()} />
 
       {/* Hamburger Menu (top right) - hidden on book page per component logic */}
       <HamburgerMenu />

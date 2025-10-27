@@ -22,6 +22,8 @@ interface MemoryListItemProps {
   onPlay: (id: string) => void;
   onOpen: (id: string) => void;
   onToggleFavorite: (id: string) => void;
+  onToggleTimeline?: (id: string) => void;
+  onToggleBook?: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
@@ -30,6 +32,8 @@ export function MemoryListItem({
   onPlay,
   onOpen,
   onToggleFavorite,
+  onToggleTimeline,
+  onToggleBook,
   onDelete,
 }: MemoryListItemProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -119,33 +123,64 @@ export function MemoryListItem({
               </>
             )}
           </div>
-          <div className="badges mt-1.5 hidden sm:flex items-center gap-2">
-            {s.show_in_timeline && (
-              <span
-                className="pill text-[11px] px-2 py-0.5 rounded-full
-                             bg-[#D7794F]/10 text-[#D7794F] font-medium"
-              >
-                Timeline
-              </span>
-            )}
-            {s.include_in_book && (
-              <span
-                className="pill text-[11px] px-2 py-0.5 rounded-full
-                             bg-[#8B4513]/10 text-[#8B4513] font-medium"
-              >
-                Book
-              </span>
-            )}
-            {s.is_favorite && (
-              <span
-                className="star text-[#D7794F]"
-                aria-label="Favorite"
-                role="img"
-              >
-                ⭐
-              </span>
-            )}
-          </div>
+          {/* Checkboxes for Timeline and Book - Senior Friendly */}
+          {(onToggleTimeline || onToggleBook) && (
+            <div className="badges mt-2 flex items-center gap-3">
+              {onToggleTimeline && (
+                <label
+                  className="flex items-center gap-2 cursor-pointer select-none"
+                  style={{ minHeight: '44px' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleTimeline(s.id);
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={s.show_in_timeline}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="w-5 h-5 cursor-pointer"
+                    aria-label="Include in timeline"
+                    style={{ minWidth: '20px', minHeight: '20px' }}
+                  />
+                  <span className="text-xs font-medium text-gray-700">Timeline</span>
+                </label>
+              )}
+              {onToggleBook && (
+                <label
+                  className="flex items-center gap-2 cursor-pointer select-none"
+                  style={{ minHeight: '44px' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleBook(s.id);
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={s.include_in_book}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="w-5 h-5 cursor-pointer"
+                    aria-label="Include in book"
+                    style={{ minWidth: '20px', minHeight: '20px' }}
+                  />
+                  <span className="text-xs font-medium text-gray-700">Book</span>
+                </label>
+              )}
+              {s.is_favorite && (
+                <span
+                  className="star text-[#D7794F] ml-1"
+                  aria-label="Favorite"
+                  role="img"
+                >
+                  ⭐
+                </span>
+              )}
+            </div>
+          )}
         </button>
 
         {/* Actions */}

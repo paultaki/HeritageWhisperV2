@@ -27,9 +27,10 @@ import {
   Music,
   Utensils,
   X,
-  Library
+  Lightbulb
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useModeSelection } from "@/hooks/use-mode-selection";
@@ -570,60 +571,46 @@ export default function PromptsV2Page() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50">
-      {/* Header - Full viewport width */}
-      <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
-        <div className="px-4 md:px-6 py-2 md:py-2">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
-              <Image
-                src="/Logo Icon hw.svg"
-                alt="Heritage Whisper"
-                width={72}
-                height={72}
-                className="h-[72px] w-auto flex-shrink-0"
-              />
-              <Library className="w-6 h-6 text-gray-700 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">
-                    Prompt Library
-                  </h1>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowHelp(!showHelp)}
-                    className="text-gray-600 hover:text-orange-600 -ml-1 flex-shrink-0"
-                  >
-                    <HelpCircle className="h-5 w-5" />
-                  </Button>
-                </div>
-                <p className="text-base text-gray-600 -mt-2 hidden sm:block">
-                  Choose a question below to record your next memory
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div style={{ transform: 'translate(-150px, -17px)' }}>
-                <AccountSwitcher />
-              </div>
-
-              {/* Submit Question button for contributors viewing storyteller's prompts */}
-              {!isOwnAccount && permissionLevel === 'contributor' && (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setShowSubmitQuestionDialog(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0"
-                >
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Submit Question
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Desktop Header */}
+      <DesktopPageHeader
+        icon={Lightbulb}
+        title="Story Ideas"
+        subtitle="Choose a question below to record your next memory"
+        showAccountSwitcher={true}
+        rightContent={
+          !isOwnAccount && permissionLevel === 'contributor' ? (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setShowSubmitQuestionDialog(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0"
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Submit Question
+            </Button>
+          ) : undefined
+        }
+      />
+      
+      {/* Mobile Header */}
+      <MobilePageHeader
+        icon={Lightbulb}
+        title="Story Ideas"
+        subtitle="Record your next memory"
+        rightContent={
+          !isOwnAccount && permissionLevel === 'contributor' ? (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setShowSubmitQuestionDialog(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1"
+            >
+              <MessageCircle className="h-3 w-3 mr-1" />
+              Submit
+            </Button>
+          ) : undefined
+        }
+      />
 
       <div className="flex flex-col md:flex-row">
         {/* Left Sidebar - Desktop only */}

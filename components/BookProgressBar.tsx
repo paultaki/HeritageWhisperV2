@@ -19,6 +19,10 @@ interface BookProgressBarProps {
   currentPage: number;
   totalPages: number;
   onNavigateToPage: (pageNumber: number) => void;
+  zoomLevel: number;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onOpenDecadeSelector?: () => void; // Mobile only
 }
 
 /**
@@ -59,6 +63,10 @@ export default function BookProgressBar({
   currentPage,
   totalPages,
   onNavigateToPage,
+  zoomLevel,
+  onZoomIn,
+  onZoomOut,
+  onOpenDecadeSelector,
 }: BookProgressBarProps) {
   const [isHovering, setIsHovering] = useState(false);
   const [hoverPosition, setHoverPosition] = useState(0);
@@ -78,6 +86,10 @@ export default function BookProgressBar({
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     setHoverPosition(x);
+  };
+
+  const handleDecadeClick = (pageNumber: number) => {
+    onNavigateToPage(pageNumber - 1); // Convert to 0-indexed
   };
 
   const getHoverPage = () => {
@@ -105,87 +117,203 @@ export default function BookProgressBar({
 
   return (
     <div 
+      className="fixed top-0 left-0 right-0 bg-white border-b shadow-sm"
       style={{ 
-        display: 'block',
-        position: 'fixed',
-        top: '0',
-        left: '0',
-        right: '0',
-        height: '32px',
-        borderBottom: '1px solid #e5e5e5',
         zIndex: 50,
-        backgroundColor: '#ffffff',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+        height: '56px',
       }}
     >
-      <div className="relative px-6 max-w-7xl mx-auto flex items-center" style={{ height: '32px' }}>
-        {/* Progress bar */}
-        <div
-          className="progress-bar-container relative w-full h-2 cursor-pointer overflow-visible group"
-          onClick={handleClick}
-          onMouseMove={handleMouseMove}
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
-          role="slider"
-          aria-label="Book progress"
-          aria-valuemin={1}
-          aria-valuemax={totalPages}
-          aria-valuenow={currentPage}
-        >
-          {/* Background bar that scales on hover */}
-          <div
-            className="absolute inset-0 bg-gray-200 rounded-full transition-transform duration-200"
-            style={{
-              transform: isHovering ? 'scaleY(2)' : 'scaleY(1)',
-            }}
-          />
-          
-          {/* Progress fill - scales with background */}
-          <div
-            className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-600 to-amber-500 rounded-full transition-all duration-200"
-            style={{ 
-              width: `${progress}%`,
-              transform: isHovering ? 'scaleY(2)' : 'scaleY(1)',
-            }}
-          />
-
-          {/* Decade markers */}
-          {bookStructure.decades.map((decade) => {
-            // Clamp marker position to max 98% to keep within progress bar bounds
-            const rawPosition = (decade.startPage / totalPages) * 100;
-            const markerPosition = Math.min(rawPosition, 98);
-
-            // Only show markers that are within valid range
-            if (decade.startPage > totalPages) {
-              return null;
-            }
-
-            return (
+      <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex flex-col md:flex-row md:items-center gap-2 md:gap-0 py-2 md:py-0">
+        {/* Top on mobile / Left on desktop: Progress bar area */}
+        <div className="flex-1 md:mr-4 w-full md:max-w-[calc(100%-220px)]">
+          <div className="relative">
+            {/* Progress bar */}
+            <div
+              className="progress-bar-container relative w-full h-2 cursor-pointer overflow-visible group"
+              onClick={handleClick}
+              onMouseMove={handleMouseMove}
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
+              role="slider"
+              aria-label="Book progress"
+              aria-valuemin={1}
+              aria-valuemax={totalPages}
+              aria-valuenow={currentPage}
+            >
+              {/* Background bar that scales on hover */}
               <div
-                key={decade.decade}
-                className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-amber-700 rounded-full border-2 border-white shadow-sm cursor-pointer hover:scale-150 transition-transform"
-                style={{ left: `${markerPosition}%` }}
-                title={decade.title}
-              />
-            );
-          })}
-
-          {/* Hover tooltip */}
-          {isHovering && (() => {
-            const { pageNum, year } = getHoverPageInfo();
-            return (
-              <div
-                className="absolute top-full mt-2 px-3 py-1.5 bg-gray-800 text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                className="absolute inset-0 bg-gray-200 rounded-full transition-transform duration-200"
                 style={{
-                  left: `${hoverPosition}px`,
-                  transform: "translateX(-50%)",
+                  transform: isHovering ? 'scaleY(2)' : 'scaleY(1)',
                 }}
-              >
-                Page {pageNum} of {totalPages}
-                {year && <span className="text-amber-300"> • {year}</span>}
-              </div>
-            );
-          })()}
+              />
+              
+              {/* Progress fill - scales with background */}
+              <div
+                className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-600 to-amber-500 rounded-full transition-all duration-200"
+                style={{ 
+                  width: `${progress}%`,
+                  transform: isHovering ? 'scaleY(2)' : 'scaleY(1)',
+                }}
+              />
+
+              {/* Decade markers (dots) */}
+              {bookStructure.decades.map((decade) => {
+                // Clamp marker position to max 98% to keep within progress bar bounds
+                const rawPosition = (decade.startPage / totalPages) * 100;
+                const markerPosition = Math.min(rawPosition, 98);
+
+                // Only show markers that are within valid range
+                if (decade.startPage > totalPages) {
+                  return null;
+                }
+
+                return (
+                  <div
+                    key={decade.decade}
+                    className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-amber-700 rounded-full border-2 border-white shadow-sm cursor-pointer hover:scale-150 transition-transform"
+                    style={{ left: `${markerPosition}%` }}
+                    title={decade.title}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDecadeClick(decade.startPage);
+                    }}
+                  />
+                );
+              })}
+
+              {/* Hover tooltip */}
+              {isHovering && (() => {
+                const { pageNum, year } = getHoverPageInfo();
+                return (
+                  <div
+                    className="absolute top-full mt-2 px-3 py-1.5 bg-gray-800 text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                    style={{
+                      left: `${hoverPosition}px`,
+                      transform: "translateX(-50%)",
+                      zIndex: 100,
+                    }}
+                  >
+                    Page {pageNum} of {totalPages}
+                    {year && <span className="text-amber-300"> • {year}</span>}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Decade date markers below progress bar - Timeline style (desktop only) */}
+            <div className="relative h-7 mt-1.5 hidden md:block">
+              {(() => {
+                // Collision detection: filter decades to prevent overlap
+                const MIN_SPACING = 70; // Minimum pixels between decade markers
+                const visibleDecades: DecadeSection[] = [];
+                let lastPosition = -MIN_SPACING;
+
+                bookStructure.decades.forEach((decade) => {
+                  if (decade.startPage > totalPages) return;
+                  
+                  const rawPosition = (decade.startPage / totalPages) * 100;
+                  const markerPosition = Math.min(rawPosition, 98);
+                  
+                  // Get container width to calculate pixel position
+                  const containerWidth = document.querySelector('.progress-bar-container')?.clientWidth || 1000;
+                  const pixelPosition = (markerPosition / 100) * containerWidth;
+                  
+                  // Only show if it doesn't overlap with previous
+                  if (pixelPosition - lastPosition >= MIN_SPACING) {
+                    visibleDecades.push(decade);
+                    lastPosition = pixelPosition;
+                  }
+                });
+
+                return visibleDecades.map((decade) => {
+                  const rawPosition = (decade.startPage / totalPages) * 100;
+                  const markerPosition = Math.min(rawPosition, 98);
+
+                  return (
+                    <div
+                      key={`label-${decade.decade}`}
+                      className="absolute"
+                      style={{ left: `${markerPosition}%`, transform: 'translateX(-50%)' }}
+                    >
+                      {/* Connector line - shorter */}
+                      <div
+                        style={{
+                          width: '1.5px',
+                          height: '10px',
+                          background: 'linear-gradient(to bottom, rgba(196, 167, 183, 0.5), rgba(196, 167, 183, 0.3))',
+                          margin: '0 auto 3px',
+                        }}
+                      />
+                      {/* Date box - Timeline style, very compact */}
+                      <button
+                        onClick={() => handleDecadeClick(decade.startPage)}
+                        className="decade-date-box hover:scale-105 transition-transform"
+                        style={{
+                          backgroundColor: '#F9E5E8',
+                          border: '1px solid rgba(139, 107, 122, 0.2)',
+                          color: '#8B6B7A',
+                          fontSize: '11px',
+                          fontWeight: 500,
+                          padding: '1px 6px',
+                          borderRadius: '3px',
+                          boxShadow: '0 1px 3px rgba(139, 107, 122, 0.08)',
+                          whiteSpace: 'nowrap',
+                          cursor: 'pointer',
+                          lineHeight: '1.1',
+                          height: '20px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                        aria-label={`Jump to ${decade.title}`}
+                      >
+                        {decade.decade}
+                      </button>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        </div>
+
+        {/* Right/Bottom: Zoom controls + decade selector (mobile) */}
+        <div className="flex items-center justify-center md:justify-end gap-2 flex-shrink-0">
+          {/* Mobile decade selector button */}
+          {onOpenDecadeSelector && (
+            <button
+              onClick={onOpenDecadeSelector}
+              className="md:hidden w-8 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+              aria-label="Select decade"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-700">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+            </button>
+          )}
+          
+          {/* Zoom controls */}
+          <div className="flex items-center gap-1 bg-white/95 rounded-lg border border-gray-300 overflow-hidden">
+            <button
+              onClick={onZoomOut}
+              className="w-8 h-7 md:w-9 md:h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-700 font-bold text-base md:text-lg"
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <div className="w-10 md:w-12 text-center text-xs text-gray-600 font-medium">
+              {Math.round(zoomLevel * 100)}%
+            </div>
+            <button
+              onClick={onZoomIn}
+              className="w-8 h-7 md:w-9 md:h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-700 font-bold text-base md:text-lg"
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
     </div>

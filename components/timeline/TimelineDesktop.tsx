@@ -43,6 +43,7 @@ import StoryTraits from "@/components/StoryTraits";
 import { getTopTraits } from "@/utils/getTopTraits";
 import { useAccountContext } from "@/hooks/use-account-context";
 import { AccountSwitcher } from "@/components/AccountSwitcher";
+import { DesktopPageHeader } from "@/components/PageHeader";
 
 const logoUrl = "/Logo Icon hw.svg";
 
@@ -1011,36 +1012,14 @@ export function TimelineDesktop() {
   return (
     <div className={`min-h-screen ${isDark ? 'dark-theme' : ''}`} style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
       {/* Header */}
-      <header
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur"
-        style={{
-          backgroundColor: isDark ? '#252728' : 'rgba(255,255,255,0.95)',
-          borderBottom: `1px solid ${isDark ? '#3b3d3f' : '#e5e7eb'}`,
-          color: isDark ? '#b0b3b8' : undefined,
-          height: 55,
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 16px',
-          width: '100%'
-        }}
-      >
-        <div className="flex items-center justify-between gap-3 w-full">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/Logo Icon hw.svg"
-              alt="Heritage Whisper"
-              width={72}
-              height={72}
-              className="h-[72px] w-auto"
-            />
-            <Calendar className="w-6 h-6" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
-            <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Timeline</h1>
-          </div>
-          <div style={{ marginRight: '95px' }}>
-            <AccountSwitcher />
-          </div>
-        </div>
-      </header>
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <DesktopPageHeader
+          icon={Calendar}
+          title="Timeline"
+          subtitle="A timeline of memories, moments, and milestones"
+          showAccountSwitcher={true}
+        />
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-[114px] pb-12 md:pt-[114px] md:pb-20">

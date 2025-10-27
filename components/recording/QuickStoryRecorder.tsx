@@ -2,10 +2,10 @@
 
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Mic, Pause, Play, Square, RotateCcw, X, Loader2, PenTool, Upload } from "lucide-react";
+import { Mic, Pause, Play, Square, RotateCcw, X, Loader2, PenTool, Upload, Check } from "lucide-react";
 import { useQuickRecorder } from "@/hooks/use-quick-recorder";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { navCache } from "@/lib/navCache";
 import { useAuth } from "@/lib/auth";
@@ -46,6 +46,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
     duration,
     countdown,
     audioReviewUrl,
+    transcriptionStatus,
     startRecording,
     pauseRecording,
     resumeRecording,
@@ -58,6 +59,39 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
   } = useQuickRecorder({
     onComplete: onClose,
   });
+
+  // Auto-navigate when transcription completes (for both <30s and >=30s recordings)
+  useEffect(() => {
+    console.log("[QuickStoryRecorder] Auto-nav useEffect - state:", state, "transcriptionStatus:", transcriptionStatus);
+
+    if (state === "processing" && transcriptionStatus === "complete") {
+      console.log("[QuickStoryRecorder] ✅ Transcription complete! Auto-navigating in 500ms...");
+      // Give a brief moment to show completion, then navigate
+      const timer = setTimeout(() => {
+        console.log("[QuickStoryRecorder] 🚀 Calling continueFromReview() now...");
+        continueFromReview();
+      }, 500);
+
+      return () => {
+        console.log("[QuickStoryRecorder] Cleaning up auto-navigate timer");
+        clearTimeout(timer);
+      };
+    }
+
+    // Safety fallback: If stuck in processing for >15 seconds, retry
+    if (state === "processing" && transcriptionStatus === "processing") {
+      const fallbackTimer = setTimeout(() => {
+        console.warn("[QuickStoryRecorder] ⚠️ Stuck in processing for 15s, checking sessionStorage...");
+        const existingResult = sessionStorage.getItem('hw_transcription_result');
+        if (existingResult) {
+          console.log("[QuickStoryRecorder] Found transcription result, calling continueFromReview()");
+          continueFromReview();
+        }
+      }, 15000);
+
+      return () => clearTimeout(fallbackTimer);
+    }
+  }, [state, transcriptionStatus, continueFromReview]);
 
   // Format duration as MM:SS
   const formatDuration = (seconds: number) => {
@@ -154,6 +188,9 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
   const handleClose = () => {
     if (state === "recording" || state === "paused") {
       setShowDiscardRecordingConfirm(true);
+    } else if (state === "review") {
+      // If reviewing audio, confirm before discarding
+      setShowDiscardRecordingConfirm(true);
     } else if (mode === 'text' && textStory.trim()) {
       setShowDiscardTextConfirm(true);
     } else {
@@ -188,6 +225,23 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
     restartRecording();
   };
 
+  // Reset everything when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      // Modal closed - reset everything for next time it opens
+      console.log("[QuickStoryRecorder] Modal closed, scheduling reset");
+      
+      // Use timeout to ensure cleanup happens after modal animation
+      const timeoutId = setTimeout(() => {
+        cancelRecording();
+        setMode('select');
+        setTextStory('');
+      }, 300); // Wait for dialog close animation
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isOpen, cancelRecording]); // Run when modal closes
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-[95vw] sm:max-w-2xl">
@@ -204,9 +258,9 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
           <Image
             src="/Logo hw.svg"
             alt="Heritage Whisper"
-            width={240}
-            height={60}
-            className="h-16 w-auto"
+            width={320}
+            height={80}
+            className="h-20 w-auto"
             priority
           />
         </div>
@@ -305,7 +359,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
 
                 <h2 className="text-2xl font-semibold mb-4">Ready to Record</h2>
                 <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                  You'll have up to 5 minutes to record. You can pause and resume anytime.
+                  You'll have up to 10 minutes to record. You can pause and resume anytime.
                 </p>
 
                 <div className="flex gap-3 justify-center px-4">
@@ -563,20 +617,20 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 className="py-8"
               >
                 <div className="text-center mb-6">
-                  <h2 className="text-2xl font-semibold mb-2">Review Your Recording</h2>
-                  <p className="text-gray-600">
+                  <h2 className="text-2xl font-semibold mb-2 text-center">Review Your Recording</h2>
+                  <p className="text-gray-600 text-center">
                     Listen to your recording before continuing
                   </p>
                 </div>
 
                 {/* Audio Player Card */}
                 <div className="bg-gradient-to-br from-[#f5f0f5] to-[#f8f3f8] border-2 border-[#d4c4d4] rounded-xl p-6 mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
+                  <div className="flex flex-col items-center mb-4">
+                    <div className="flex items-center gap-3 mb-4">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] flex items-center justify-center">
                         <Play className="w-6 h-6 text-white" />
                       </div>
-                      <div>
+                      <div className="text-center">
                         <p className="font-medium text-gray-900">Your Story</p>
                         <p className="text-sm text-gray-600">{formatDuration(duration)}</p>
                       </div>
@@ -598,12 +652,42 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   </p>
                 </div>
 
-                {/* Info Card */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-blue-900">
-                    <strong>💡 Tip:</strong> While you're adding your title, date, and photos on the next screens, we'll be transcribing your audio in the background!
-                  </p>
-                </div>
+                {/* Transcription Status Card */}
+                {transcriptionStatus === 'processing' && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center gap-3">
+                    <Loader2 className="w-5 h-5 animate-spin text-blue-600 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-900">
+                        Transcribing in the background...
+                      </p>
+                      <p className="text-xs text-blue-700 mt-1">
+                        Your transcription will be ready when you click "Continue"
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {transcriptionStatus === 'complete' && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-green-900">
+                        ✨ Transcription ready!
+                      </p>
+                      <p className="text-xs text-green-700 mt-1">
+                        Click "Continue" to review your transcription
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {transcriptionStatus === 'idle' && duration >= 30 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <p className="text-sm text-blue-900">
+                      <strong>💡 Tip:</strong> Take your time reviewing - we'll transcribe your audio while you listen!
+                    </p>
+                  </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-3">

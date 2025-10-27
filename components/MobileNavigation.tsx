@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Calendar, BookOpen, Box, Sparkles } from "lucide-react";
+import { Calendar, BookOpen, Box, Lightbulb } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
 import { useRecordingState } from "@/contexts/RecordingContext";
@@ -44,7 +44,7 @@ const NavItem: React.FC<NavItemProps> = ({
       {/* Active indicator bar at top */}
       {isActive && (
         <div
-          className="absolute -top-2.5 left-1/2 -translate-x-1/2 h-1 rounded-full transition-all"
+          className="absolute top-[6px] left-1/2 -translate-x-1/2 h-1 rounded-full transition-all"
           style={{
             backgroundColor: "#8b6b7a",
             width: "52px",
@@ -180,10 +180,10 @@ export default function MobileNavigation({
           isActive={pathname === "/memory-box"}
         />
 
-        {/* Prompts - Profile removed since it's in hamburger menu */}
+        {/* Story Ideas - Profile removed since it's in hamburger menu */}
         <NavItem
-          icon={Sparkles}
-          label="Prompts"
+          icon={Lightbulb}
+          label="Story Ideas"
           href="/prompts"
           isActive={pathname === "/prompts"}
         />

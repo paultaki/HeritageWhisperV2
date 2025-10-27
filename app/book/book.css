@@ -34,7 +34,7 @@
 
 .book-wrap {
   width: 100%;
-  height: calc(100vh - 112px); /* Account for progress bar (32px) + nav (80px) */
+  height: calc(100vh - 136px); /* Account for progress bar (56px) + nav (80px) */
   overflow-y: auto;
   overflow-x: hidden;
   scroll-snap-type: y mandatory;
@@ -55,7 +55,8 @@
 /* V2: Mobile header spacing adjustment */
 @media (max-width: 768px) {
   .book-wrap {
-    padding-top: 76px; /* Account for 60px mobile header + spacing */
+    padding-top: 72px; /* Account for 56px mobile progress bar + spacing */
+    height: calc(100vh - 136px); /* Account for progress bar (56px) + nav (80px) */
   }
 }
 

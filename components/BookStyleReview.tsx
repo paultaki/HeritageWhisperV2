@@ -75,11 +75,7 @@ export function BookStyleReview({
   isEditing = false,
   userBirthYear = 1950,
 }: BookStyleReviewProps) {
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [editingYear, setEditingYear] = useState(false);
   const [editingWisdom, setEditingWisdom] = useState(false);
-  const [tempTitle, setTempTitle] = useState(title);
-  const [tempYear, setTempYear] = useState(storyYear);
   const [tempWisdom, setTempWisdom] = useState(wisdomText);
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -95,11 +91,9 @@ export function BookStyleReview({
     character?: string;
   } | null>(null);
   const [showLessonOptions, setShowLessonOptions] = useState(false);
-  const [isTranscriptionLoading, setIsTranscriptionLoading] = useState(false);
 
   const { toast } = useToast();
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const yearInputRef = useRef<HTMLInputElement>(null);
   const wisdomInputRef = useRef<HTMLTextAreaElement>(null);
 
   // Recording timer effect
@@ -117,114 +111,14 @@ export function BookStyleReview({
 
   // Focus input when editing starts
   useEffect(() => {
-    if (editingTitle && titleInputRef.current) {
-      titleInputRef.current.focus();
-      titleInputRef.current.select();
-    }
-  }, [editingTitle]);
-
-  useEffect(() => {
-    if (editingYear && yearInputRef.current) {
-      yearInputRef.current.focus();
-      yearInputRef.current.select();
-    }
-  }, [editingYear]);
-
-  useEffect(() => {
     if (editingWisdom && wisdomInputRef.current) {
       wisdomInputRef.current.focus();
       wisdomInputRef.current.select();
     }
   }, [editingWisdom]);
 
-  // Listen for background transcription completion
-  useEffect(() => {
-    const handleTranscriptionComplete = (event: CustomEvent) => {
-      console.log("[BookStyleReview] Background transcription completed!", event.detail);
-
-      const { transcription: newTranscription, lessonOptions: newLessonOptions } = event.detail;
-
-      // Update transcription if we don't have one yet or if it's empty
-      if (!transcription || transcription.trim() === "") {
-        onTranscriptionChange(newTranscription);
-        setIsTranscriptionLoading(false);
-
-        toast({
-          title: "✨ Transcription ready!",
-          description: "Your story has been transcribed and is ready to review.",
-        });
-      }
-
-      // Store lesson options for user to choose from
-      if (newLessonOptions) {
-        setLessonOptions(newLessonOptions);
-
-        // Auto-set practical lesson if wisdom is empty
-        if (!wisdomText && newLessonOptions.practical) {
-          onWisdomChange(newLessonOptions.practical);
-          setTempWisdom(newLessonOptions.practical);
-        }
-      }
-
-      // Clean up sessionStorage
-      sessionStorage.removeItem('hw_transcription_result');
-    };
-
-    const handleTranscriptionError = () => {
-      console.error("[BookStyleReview] Background transcription failed");
-      setIsTranscriptionLoading(false);
-
-      toast({
-        title: "Transcription incomplete",
-        description: "You can still type your story manually.",
-        variant: "destructive",
-      });
-
-      sessionStorage.removeItem('hw_transcription_error');
-    };
-
-    // Add event listeners
-    window.addEventListener('hw_transcription_complete', handleTranscriptionComplete as EventListener);
-    window.addEventListener('hw_transcription_error', handleTranscriptionError);
-
-    // Check if transcription already completed before we mounted
-    const cachedResult = sessionStorage.getItem('hw_transcription_result');
-    if (cachedResult) {
-      try {
-        const data = JSON.parse(cachedResult);
-        handleTranscriptionComplete(new CustomEvent('hw_transcription_complete', { detail: data }));
-      } catch (error) {
-        console.error("[BookStyleReview] Error parsing cached transcription:", error);
-      }
-    }
-
-    // Check if there was an error
-    const errorFlag = sessionStorage.getItem('hw_transcription_error');
-    if (errorFlag) {
-      handleTranscriptionError();
-    }
-
-    // If transcription is empty on mount, show loading state
-    if (!transcription || transcription.trim() === "") {
-      setIsTranscriptionLoading(true);
-    }
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('hw_transcription_complete', handleTranscriptionComplete as EventListener);
-      window.removeEventListener('hw_transcription_error', handleTranscriptionError);
-    };
-  }, []); // Only run on mount
-
-  const handleTitleSave = () => {
-    onTitleChange(tempTitle);
-    setEditingTitle(false);
-  };
-
-  const handleYearSave = () => {
-    onYearChange(tempYear);
-    setEditingYear(false);
-  };
+  // Note: Background transcription logic removed - users now select transcription
+  // BEFORE reaching this screen via TranscriptionSelectionScreen component
 
   const handleWisdomSave = () => {
     onWisdomChange(tempWisdom);
@@ -347,7 +241,7 @@ export function BookStyleReview({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#2c2416] via-[#1a1410] to-[#2c2416] md:bg-gradient-to-b md:from-amber-50 md:to-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#2c2416] via-[#1a1410] to-[#2c2416] md:bg-gradient-to-b md:from-amber-50 md:to-white overflow-x-hidden">
       {/* Top Navigation */}
       <div className="sticky top-0 z-50 bg-[#faf8f5]/95 backdrop-blur-sm border-b border-[#8B6F47]/20">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
@@ -358,7 +252,7 @@ export function BookStyleReview({
             variant="outline"
             onClick={onCancel}
             disabled={isSaving}
-            className="rounded-full px-6 py-6 text-lg ml-auto mr-12 md:mr-20 2xl:mr-0"
+            className="rounded-full px-4 md:px-6 py-4 md:py-6 text-base md:text-lg ml-auto"
           >
             Cancel
           </Button>
@@ -386,77 +280,75 @@ export function BookStyleReview({
                 />
               </div>
 
-              {/* 2. Title - Inline Editable */}
+              {/* 2. Title - Always Visible Input with Border */}
               <div className="group relative">
-                {!editingTitle ? (
-                  <h2
-                    className="memory-title text-5xl font-serif text-gray-900 cursor-pointer hover:bg-amber-50 rounded px-3 -mx-3 py-2 transition-colors flex items-center gap-2"
-                    onClick={() => {
-                      setTempTitle(title);
-                      setEditingTitle(true);
-                    }}
-                  >
-                    {title || "Click to add title"}
-                    <Edit2 className="w-6 h-6 text-gray-400" />
-                  </h2>
-                ) : (
-                  <Input
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Story Title
+                </label>
+                <div className="border-2 border-gray-300 rounded-lg px-4 py-3 focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all">
+                  <input
                     ref={titleInputRef}
-                    value={tempTitle}
-                    onChange={(e) => setTempTitle(e.target.value)}
-                    onBlur={handleTitleSave}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleTitleSave();
-                      if (e.key === "Escape") {
-                        setTempTitle(title);
-                        setEditingTitle(false);
-                      }
-                    }}
-                    className="text-5xl font-serif"
-                    placeholder="Give your memory a title..."
+                    type="text"
+                    value={title}
+                    onChange={(e) => onTitleChange(e.target.value)}
+                    className="w-full text-2xl font-serif text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 p-0"
+                    placeholder="Story title"
                   />
-                )}
+                </div>
               </div>
 
-              {/* 3. Date - Inline Editable */}
+              {/* 3. Date - Always Visible with Year, Month, Day */}
               <div className="group relative">
-                {!editingYear ? (
-                  <p
-                    className="text-xl text-gray-600 cursor-pointer hover:bg-amber-50 rounded px-3 -mx-3 py-1 transition-colors inline-flex items-center gap-2"
-                    onClick={() => {
-                      setTempYear(storyYear);
-                      setEditingYear(true);
-                    }}
-                  >
-                    <Calendar className="w-6 h-6" />
-                    {storyYear || "Add year"}
-                    {age !== null && age > 0 && ` • Age ${age}`}
-                    {age !== null && age === 0 && ` • Birth`}
-                    {age !== null && age < 0 && ` • Before birth`}
-                    <Edit2 className="w-5 h-5 text-gray-400" />
-                  </p>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-6 h-6 text-gray-600" />
-                    <Input
-                      ref={yearInputRef}
-                      type="number"
-                      value={tempYear}
-                      onChange={(e) => setTempYear(e.target.value)}
-                      onBlur={handleYearSave}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleYearSave();
-                        if (e.key === "Escape") {
-                          setTempYear(storyYear);
-                          setEditingYear(false);
-                        }
-                      }}
-                      className="w-32 text-xl"
-                      placeholder="Year"
-                      min="1900"
-                      max={new Date().getFullYear()}
+                <label className="text-sm font-medium text-gray-700 mb-2 block flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Story Date
+                </label>
+                <div className="flex gap-3 items-center">
+                  {/* Year Selector */}
+                  <div className="border-2 border-gray-300 rounded-lg focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all">
+                    <select
+                      value={storyYear}
+                      onChange={(e) => onYearChange(e.target.value)}
+                      className="px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg cursor-pointer"
+                    >
+                      <option value="">Year</option>
+                      {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => {
+                        const year = new Date().getFullYear() - i;
+                        return (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+
+                  {/* Month Input */}
+                  <div className="border-2 border-gray-300 rounded-lg focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all">
+                    <input
+                      type="text"
+                      placeholder="Month"
+                      className="w-24 px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg"
+                      maxLength={2}
                     />
                   </div>
+
+                  {/* Day Input */}
+                  <div className="border-2 border-gray-300 rounded-lg focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all">
+                    <input
+                      type="text"
+                      placeholder="Day"
+                      className="w-20 px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg"
+                      maxLength={2}
+                    />
+                  </div>
+                </div>
+                {storyYear && age !== null && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    {age === 0 && "Birth year"}
+                    {age > 0 && `You were ${age} years old`}
+                    {age < 0 && "Before you were born"}
+                  </p>
                 )}
               </div>
 
@@ -775,24 +667,62 @@ export function BookStyleReview({
                     Your Story
                   </h3>
                   <div className="flex items-center gap-2">
+                    {/* Desktop: Show both buttons when originalTranscription exists */}
                     {originalTranscription && (
                       <Button
                         onClick={handleUndoEnhancement}
                         disabled={isEnhancing}
                         size="sm"
                         variant="outline"
-                        className="text-gray-600 hover:text-gray-900"
+                        className="hidden md:flex text-gray-600 hover:text-gray-900"
                       >
                         <Undo2 className="w-4 h-4 mr-1.5" />
                         Undo Enhancement
                       </Button>
                     )}
+                    
+                    {/* Mobile: Show "Undo" when originalTranscription exists, otherwise show "Enhance Story" */}
+                    {/* Desktop: Always show "Enhance Story" */}
+                    {originalTranscription ? (
+                      <Button
+                        onClick={handleUndoEnhancement}
+                        disabled={isEnhancing}
+                        size="sm"
+                        variant="outline"
+                        className="md:hidden text-gray-600 hover:text-gray-900"
+                      >
+                        <Undo2 className="w-4 h-4 mr-1.5" />
+                        Undo
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleEnhanceStory}
+                        disabled={isEnhancing || !transcription?.trim()}
+                        size="sm"
+                        variant="outline"
+                        className="md:hidden text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200"
+                      >
+                        {isEnhancing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                            Enhancing...
+                          </>
+                        ) : (
+                          <>
+                            <Wand2 className="w-4 h-4 mr-1.5" />
+                            Enhance Story
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    
+                    {/* Desktop only: Always show Enhance Story button */}
                     <Button
                       onClick={handleEnhanceStory}
                       disabled={isEnhancing || !transcription?.trim()}
                       size="sm"
                       variant="outline"
-                      className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200"
+                      className="hidden md:flex text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200"
                     >
                       {isEnhancing ? (
                         <>
@@ -809,24 +739,16 @@ export function BookStyleReview({
                   </div>
                 </div>
 
-                {/* Show loading state while transcription is in progress */}
-                {isTranscriptionLoading ? (
-                  <div className="w-full min-h-[300px] border border-gray-300 rounded-lg p-4 bg-gradient-to-br from-blue-50 to-purple-50 flex flex-col items-center justify-center">
-                    <Loader2 className="w-10 h-10 text-coral-500 animate-spin mb-4" />
-                    <p className="text-lg font-medium text-gray-900">Transcribing your story...</p>
-                    <p className="text-sm text-gray-600 mt-2">This usually takes 10-30 seconds</p>
-                  </div>
-                ) : (
-                  <Textarea
-                    value={transcription}
-                    onChange={(e) => onTranscriptionChange(e.target.value)}
-                    className="w-full min-h-[300px] resize-none border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400"
-                    placeholder="Type or paste your story here. This is how it will appear in your book..."
-                    disabled={isEnhancing}
-                  />
-                )}
+                {/* Transcription textarea */}
+                <Textarea
+                  value={transcription}
+                  onChange={(e) => onTranscriptionChange(e.target.value)}
+                  className="w-full min-h-[300px] resize-none border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400"
+                  placeholder="Type or paste your story here. This is how it will appear in your book..."
+                  disabled={isEnhancing}
+                />
 
-                {transcription && !isTranscriptionLoading && (
+                {transcription && (
                   <div className="flex items-center justify-between mt-2">
                     <p className="text-base text-gray-500">
                       {
@@ -928,7 +850,21 @@ export function BookStyleReview({
                         {wisdomText ||
                           "Click to add a lesson or wisdom from this memory..."}
                       </p>
-                      <Edit2 className="w-5 h-5 text-gray-400 mt-2" />
+                      <div className="flex items-center gap-2 mt-2">
+                        <Edit2 className="w-5 h-5 text-gray-400" />
+                        {wisdomText && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent triggering edit mode
+                              onWisdomChange("");
+                            }}
+                            className="text-gray-400 hover:text-red-600 transition-colors"
+                            title="Delete lesson"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -987,11 +923,6 @@ export function BookStyleReview({
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Instructions */}
-      <div className="max-w-3xl mx-auto px-4 pb-4 text-center text-lg text-gray-600">
-        <p>Click on any element to edit it inline.</p>
       </div>
 
       {/* Bottom Action Buttons */}

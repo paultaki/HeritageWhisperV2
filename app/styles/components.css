@@ -552,6 +552,27 @@ body {
   }
 }
 
+/* Mobile 2-column grid for compact senior-friendly view */
+.hw-grid-mem.mobile-grid-2col {
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+@media (min-width: 768px) {
+  .hw-grid-mem.mobile-grid-2col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 1200px) {
+  .hw-grid-mem.mobile-grid-2col {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+@media (min-width: 1600px) {
+  .hw-grid-mem.mobile-grid-2col {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+}
+
 /* Memory Box cards - no connectors */
 .hw-card-memorybox::before {
   display: none !important;

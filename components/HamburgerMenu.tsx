@@ -74,7 +74,7 @@ export default function HamburgerMenu() {
   };
 
   const handleNewMemory = () => {
-    modeSelection.openModal();
+    modeSelection.openQuickRecorder();
     setIsOpen(false);
   };
 

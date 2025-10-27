@@ -4,8 +4,10 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import { BookStyleReview } from "@/components/BookStyleReview";
 import { PostRecordingWizard } from "@/components/post-recording/PostRecordingWizard";
+import { TranscriptionSelectionScreen } from "@/components/recording/TranscriptionSelectionScreen";
 import { type StoryPhoto } from "@/components/MultiPhotoUploader";
 import { type PostRecordingData, type RecordingSession } from "@/types/recording";
 import { apiRequest } from "@/lib/queryClient";
@@ -54,8 +56,10 @@ function BookStyleReviewContent() {
   const editId = searchParams.get("edit") || searchParams.get("id");
   const isEditing = !!editId;
 
-  // Check if we're in wizard mode (new recording flow)
-  const isWizardMode = searchParams.get("mode") === "wizard";
+  // Check what mode we're in
+  const mode = searchParams.get("mode");
+  const isWizardMode = mode === "wizard";
+  const isTranscriptionSelectMode = mode === "transcription-select";
   const navId = searchParams.get("nav");
 
   // Get returnPath from URL parameters (where to go back after editing)
@@ -141,18 +145,21 @@ function BookStyleReviewContent() {
 
     if (isEditing) {
       fetchStoryData();
-    } else if (!isWizardMode) {
+    } else if (!isWizardMode && !isTranscriptionSelectMode) {
       // PRIORITY 1: Check NavCache first (most reliable for new recordings)
-      // SKIP this if wizard mode - wizard will handle NavCache loading
+      // SKIP this if wizard mode OR transcription-select mode - they handle their own NavCache loading
       const navId = searchParams.get("nav");
       if (navId) {
         console.log("[Review] Loading from NavCache with ID:", navId);
-        const rawCached = navCache.consume(navId);
+        const rawCached = navCache.get(navId); // Use get instead of consume for now
         const cachedData = rawCached as NavPayloadExtended;
 
         if (cachedData) {
           console.log("[Review] NavCache data retrieved:", {
             hasTranscription: !!cachedData.transcription,
+            hasOriginalTranscript: !!cachedData.originalTranscript,
+            hasEnhancedTranscript: !!cachedData.enhancedTranscript,
+            useEnhanced: cachedData.useEnhanced,
             transcriptionLength: cachedData.transcription?.length,
             hasMainAudioBase64: !!cachedData.mainAudioBase64,
             base64Length: cachedData.mainAudioBase64?.length,
@@ -162,9 +169,45 @@ function BookStyleReviewContent() {
             allKeys: Object.keys(cachedData),
           });
 
-          if (cachedData.transcription) {
+          // For edit mode coming from transcription selection, use the selected transcript
+          if (mode === "edit") {
+            const selectedTranscript = cachedData.useEnhanced 
+              ? (cachedData.enhancedTranscript || cachedData.originalTranscript || "")
+              : (cachedData.originalTranscript || "");
+            
+            console.log("[Review] Edit mode - using", cachedData.useEnhanced ? "enhanced" : "original", "transcript");
+            setTranscription(selectedTranscript);
+
+            // Load audio blob if available
+            if (cachedData.audioBlob) {
+              const url = URL.createObjectURL(cachedData.audioBlob);
+              setMainAudioBlob(cachedData.audioBlob);
+              setAudioUrl(url);
+              console.log("[Review] Audio blob loaded from cache, size:", cachedData.audioBlob.size);
+            } else {
+              console.log("[Review] No audio blob in cache");
+            }
+
+            // Set duration
+            if (cachedData.duration) {
+              setAudioDuration(cachedData.duration);
+              console.log("[Review] Audio duration from cache:", cachedData.duration, "seconds");
+            }
+
+            // Load lesson options if available
+            if (cachedData.lessonOptions?.practical) {
+              setWisdomText(cachedData.lessonOptions.practical);
+            }
+
+            // Consume the cache now that we've loaded it
+            navCache.consume(navId);
+          } else if (cachedData.transcription) {
+            // Legacy support for old flow
             setTranscription(cachedData.transcription);
+          } else if (cachedData.originalTranscript) {
+            setTranscription(cachedData.originalTranscript);
           }
+
           if (cachedData.title) {
             setTitle(cachedData.title);
           }
@@ -217,6 +260,9 @@ function BookStyleReviewContent() {
           console.warn("[Review] No data found in NavCache for ID:", navId);
         }
       }
+    }
+
+    if (!isWizardMode && !isTranscriptionSelectMode && !navId) {
 
       // PRIORITY 2: Fall back to URL search params
       const urlTranscription = searchParams.get("transcription");
@@ -915,7 +961,82 @@ function BookStyleReviewContent() {
     );
   }
 
-  // Wizard Mode: New recording flow
+  // Transcription Selection Mode: Choose original vs enhanced
+  if (isTranscriptionSelectMode && navId) {
+    console.log("[Transcription Select Mode] Loading data from NavCache with ID:", navId);
+    const rawCached = navCache.get(navId);
+    const cachedData = rawCached as NavPayloadExtended;
+
+    if (!cachedData) {
+      console.error("[Transcription Select Mode] No data found in NavCache");
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">Recording data not found</p>
+            <Button onClick={() => router.push("/timeline")}>Go to Timeline</Button>
+          </div>
+        </div>
+      );
+    }
+
+    const handleTranscriptionSelect = async (useEnhanced: boolean) => {
+      console.log("[Transcription Select] User selected:", useEnhanced ? "enhanced" : "original");
+
+      // Get the actual transcription text (it should be in originalTranscript or rawTranscript)
+      const transcriptionText = cachedData.originalTranscript || cachedData.rawTranscript || "";
+      
+      console.log("[Transcription Select] Available transcription:", {
+        originalTranscript: cachedData.originalTranscript?.substring(0, 50),
+        rawTranscript: cachedData.rawTranscript?.substring(0, 50),
+        enhancedTranscript: cachedData.enhancedTranscript?.substring(0, 50),
+      });
+
+      // Update cached data with selection and ensure transcription is set
+      const updatedData = {
+        ...cachedData,
+        useEnhanced,
+        originalTranscript: transcriptionText,
+        enhancedTranscript: transcriptionText, // For now, both are the same
+        selectedTranscript: transcriptionText,
+      };
+
+      console.log("[Transcription Select] Saving to cache:", {
+        hasOriginalTranscript: !!updatedData.originalTranscript,
+        hasEnhancedTranscript: !!updatedData.enhancedTranscript,
+        textLength: transcriptionText.length,
+      });
+
+      // Save back to cache
+      await navCache.set(navId, updatedData);
+
+      // Navigate to edit memory screen (BookStyleReview) - NOT wizard
+      router.push(`/review/book-style?nav=${navId}&mode=edit`);
+    };
+
+    const handleCancel = () => {
+      // Clear cache and go back
+      navCache.consume(navId);
+      router.push("/timeline");
+    };
+
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+        <TranscriptionSelectionScreen
+          originalTranscript={cachedData.originalTranscript || cachedData.rawTranscript || ""}
+          enhancedTranscript={cachedData.enhancedTranscript || cachedData.originalTranscript || cachedData.rawTranscript || ""}
+          isLoading={false}
+          onSelect={handleTranscriptionSelect}
+          onCancel={handleCancel}
+        />
+      </div>
+    );
+  }
+
+  // Edit Mode: Coming from transcription selection, show BookStyleReview with pre-filled data
+  // Data loading will be handled by the useEffect that checks for NavCache
+  // No early return needed here - let it fall through to the BookStyleReview component
+
+  // Wizard Mode: New recording flow (DEPRECATED - keeping for backward compatibility)
   if (isWizardMode && navId) {
     console.log("[Wizard Mode] Loading data from NavCache with ID:", navId);
     const rawCached = navCache.get(navId);

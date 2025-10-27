@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Shield } from "lucide-react";
 import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 
 export default function PrivacyPolicy() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -25,32 +26,19 @@ export default function PrivacyPolicy() {
 
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}>
-      {/* Header */}
-      <header
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur"
-        style={{
-          backgroundColor: isDark ? '#252728' : 'rgba(255,255,255,0.95)',
-          borderBottom: `1px solid ${isDark ? '#3b3d3f' : '#e5e7eb'}`,
-          color: isDark ? '#b0b3b8' : undefined,
-          height: 55,
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 16px',
-          width: '100%'
-        }}
-      >
-        <div className="flex items-center gap-3 w-full">
-          <Image
-            src="/logo_hw.png"
-            alt="Heritage Whisper"
-            width={36}
-            height={36}
-            className="h-9 w-auto"
-          />
-          <Shield className="w-6 h-6" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
-          <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Privacy Policy</h1>
-        </div>
-      </header>
+      {/* Desktop Header */}
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <DesktopPageHeader
+          icon={Shield}
+          title="Privacy Policy"
+          subtitle="How we protect and handle your data"
+        />
+        <MobilePageHeader
+          icon={Shield}
+          title="Privacy Policy"
+          subtitle="Data protection"
+        />
+      </div>
 
       {/* Left Sidebar - Desktop Only */}
       {isDesktop && (

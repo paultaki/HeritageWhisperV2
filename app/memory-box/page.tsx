@@ -21,8 +21,8 @@ import { useModeSelection } from "@/hooks/use-mode-selection";
 import { useAccountContext } from "@/hooks/use-account-context";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
 import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
-import MemoryToolbar from "@/components/ui/MemoryToolbar";
-import MemoryCard from "@/components/ui/MemoryCard";
+import MemoryToolbarV2 from "@/components/ui/MemoryToolbarV2";
+import MemoryCardCompact from "@/components/ui/MemoryCardCompact";
 import { MemoryList } from "@/components/ui/MemoryList";
 import { Story as SchemaStory } from "@/shared/schema";
 import { LeftSidebar } from "@/components/LeftSidebar";
@@ -30,6 +30,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { apiRequest } from "@/lib/queryClient";
 import { MemoryOverlay } from "@/components/MemoryOverlay";
 import { Story as SupabaseStory } from "@/lib/supabase";
+import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 
 interface Story {
   id: string;
@@ -140,7 +141,8 @@ export default function MemoryBoxPage() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  // Desktop default: list view, Mobile default: grid view
+  const [viewMode, setViewMode] = useState<"grid" | "list">(isDesktop ? "list" : "grid");
   const [filterMode, setFilterMode] = useState<ViewMode>("all");
   const [sortBy, setSortBy] = useState<SortBy>("added-newest");
   const [selectedStories, setSelectedStories] = useState<Set<string>>(
@@ -438,12 +440,15 @@ export default function MemoryBoxPage() {
     }
   };
 
-  const toolbarStats = [
-    { label: "Memories", value: stats.total },
-    { label: "In Timeline", value: stats.timeline },
-    { label: "In Book", value: stats.book },
-    { label: "Private", value: stats.private },
-  ];
+  // All 6 stats for senior-friendly toolbar
+  const toolbarStats = {
+    total: stats.total,
+    timeline: stats.timeline,
+    book: stats.book,
+    private: stats.private,
+    undated: stats.undated,
+    favorites: stats.favorites,
+  };
 
   const formatDurationShort = (seconds?: number) => {
     if (!seconds) return "0:00";
@@ -545,33 +550,20 @@ export default function MemoryBoxPage() {
       className="min-h-screen"
       style={{ backgroundColor: "#FFF8F3" }}
     >
-      {/* Header - Full Width */}
-      <header className="sticky top-0 z-40 bg-white border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/Logo Icon hw.svg"
-              alt="Heritage Whisper"
-              width={72}
-              height={72}
-              className="h-[72px] w-auto relative"
-              style={{ top: '-18px', left: '-69px' }}
-            />
-            <Box
-              className="w-8 h-8 relative"
-              style={{ color: "#1f0f08", top: '-21px', left: '-72px' }}
-            />
-            <div className="min-w-0 relative" style={{ top: '-24px', left: '-72px' }}>
-              <h1 className="text-2xl font-bold">
-                Memory Box
-              </h1>
-              <p className="text-base text-gray-600 -mt-2 hidden sm:block">
-                Manage your memories, add or remove them from the book or timeline
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Desktop Header */}
+      <DesktopPageHeader
+        icon={Box}
+        title="Memory Box"
+        subtitle="Manage your memories, add or remove them from the book or timeline"
+        showAccountSwitcher={true}
+      />
+      
+      {/* Mobile Header */}
+      <MobilePageHeader
+        icon={Box}
+        title="Memory Box"
+        subtitle="Manage your memories"
+      />
 
       {/* Content Area with Sidebar */}
       <div className="flex">
@@ -583,7 +575,7 @@ export default function MemoryBoxPage() {
           {/* Toolbar with Stats and Controls - Contained width */}
           <section className="px-6 pt-6" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
             <div className="bg-white border rounded-xl p-6 mb-6">
-              <MemoryToolbar
+              <MemoryToolbarV2
                 stats={toolbarStats}
                 view={viewMode}
                 setView={setViewMode}
@@ -660,6 +652,8 @@ export default function MemoryBoxPage() {
               router.push(`/review/book-style?edit=${id}&returnPath=${encodeURIComponent(returnPath)}`);
             }}
             onToggleFavorite={handleToggleFavorite}
+            onToggleTimeline={handleToggleTimeline}
+            onToggleBook={handleToggleBook}
             onDelete={(id) => {
               if (confirm("Delete this memory? This cannot be undone.")) {
                 deleteStory.mutate(id);
@@ -668,7 +662,7 @@ export default function MemoryBoxPage() {
             density="comfortable"
           />
         ) : (
-          <div className="hw-grid-mem">
+          <div className={`hw-grid-mem ${!isDesktop ? 'mobile-grid-2col' : ''}`}>
             {processedStories.map((story) => {
               const heroPhoto =
                 story.photos?.find((p) => p.isHero) || story.photos?.[0];
@@ -679,7 +673,7 @@ export default function MemoryBoxPage() {
                 !story.includeInTimeline && !story.includeInBook;
 
               return (
-                <MemoryCard
+                <MemoryCardCompact
                   key={story.id}
                   id={story.id}
                   imageUrl={photoUrl}

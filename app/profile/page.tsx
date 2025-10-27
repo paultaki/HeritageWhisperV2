@@ -60,6 +60,7 @@ import {
 } from "lucide-react";
 import { PasskeyAuth } from "@/components/auth/PasskeyAuth";
 import { ManagePasskeys } from "@/components/auth/ManagePasskeys";
+import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 
 export default function Profile() {
   const router = useRouter();
@@ -494,31 +495,12 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 flex flex-col">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-gray-200/50">
-        <div className="px-4 md:px-6 py-2 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <Image
-              src="/Logo Icon hw.svg"
-              alt="Heritage Whisper"
-              width={72}
-              height={72}
-              className="h-[72px] w-auto flex-shrink-0"
-            />
-            <Avatar className="w-9 h-9 border border-white shadow-sm">
-              <AvatarImage src={profilePhoto || "/default-avatar.png"} alt={firstName} />
-              <AvatarFallback className="bg-heritage-coral/10 text-heritage-coral text-sm">
-                {firstName.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0">
-              <h1 className="text-xl font-bold text-gray-900 truncate">
-                Welcome back, {firstName}
-              </h1>
-              <p className="text-sm text-gray-600 hidden sm:block">
-                Manage your account, privacy, and AI preferences in one place.
-              </p>
-            </div>
-          </div>
+      {/* Desktop Header */}
+      <DesktopPageHeader
+        icon={User}
+        title={`Welcome back, ${firstName}`}
+        subtitle="Manage your account, privacy, and AI preferences"
+        rightContent={
           <Button
             variant="ghost"
             size="sm"
@@ -527,8 +509,25 @@ export default function Profile() {
           >
             <HelpCircle className="h-5 w-5" />
           </Button>
-        </div>
-      </header>
+        }
+      />
+      
+      {/* Mobile Header */}
+      <MobilePageHeader
+        icon={User}
+        title={`Welcome, ${firstName}`}
+        subtitle="Manage your account"
+        rightContent={
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowHelp((prev) => !prev)}
+            className="text-gray-600 hover:text-orange-600"
+          >
+            <HelpCircle className="h-5 w-5" />
+          </Button>
+        }
+      />
 
       <AnimatePresence>
         {showHelp && (

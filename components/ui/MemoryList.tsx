@@ -8,6 +8,8 @@ interface MemoryListProps {
   onPlay: (id: string) => void;
   onOpen: (id: string) => void;
   onToggleFavorite: (id: string) => void;
+  onToggleTimeline?: (id: string) => void;
+  onToggleBook?: (id: string) => void;
   onDelete: (id: string) => void;
   density?: "comfortable" | "compact";
 }
@@ -17,6 +19,8 @@ export function MemoryList({
   onPlay,
   onOpen,
   onToggleFavorite,
+  onToggleTimeline,
+  onToggleBook,
   onDelete,
   density = "comfortable",
 }: MemoryListProps) {
@@ -31,6 +35,8 @@ export function MemoryList({
           onPlay={onPlay}
           onOpen={onOpen}
           onToggleFavorite={onToggleFavorite}
+          onToggleTimeline={onToggleTimeline}
+          onToggleBook={onToggleBook}
           onDelete={onDelete}
         />
       ))}

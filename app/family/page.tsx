@@ -67,6 +67,7 @@ import {
   Activity,
   Link as LinkIcon,
 } from "lucide-react";
+import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 
 interface FamilyMember {
   id: string;
@@ -488,31 +489,19 @@ export default function FamilyPage() {
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}>
       {/* Header */}
-      <header
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur"
-        style={{
-          backgroundColor: isDark ? '#252728' : 'rgba(255,255,255,0.95)',
-          borderBottom: `1px solid ${isDark ? '#3b3d3f' : '#e5e7eb'}`,
-          color: isDark ? '#b0b3b8' : undefined,
-          height: 55,
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 16px',
-          width: '100%'
-        }}
-      >
-        <div className="flex items-center gap-3 w-full">
-          <Image
-            src="/Logo Icon hw.svg"
-            alt="Heritage Whisper"
-            width={72}
-            height={72}
-            className="h-[72px] w-auto"
-          />
-          <Users className="w-6 h-6" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
-          <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Family Circle</h1>
-        </div>
-      </header>
+      {/* Desktop Header */}
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <DesktopPageHeader
+          icon={Users}
+          title="Family Circle"
+          subtitle="Share your stories with loved ones"
+        />
+        <MobilePageHeader
+          icon={Users}
+          title="Family Circle"
+          subtitle="Share your stories"
+        />
+      </div>
 
       {/* Left Sidebar - Desktop Only */}
       {isDesktop && (

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Calendar, BookOpen, Box, Sparkles } from "lucide-react";
+import { Calendar, BookOpen, Box, Lightbulb } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
 import { useRecordingState } from "@/contexts/RecordingContext";
@@ -38,7 +38,7 @@ function DesktopNavItemBottom({
       onClick={handleClick}
       className="flex flex-col items-center justify-center px-4 py-2 rounded-lg transition-all hover:bg-gray-200 group relative"
       style={{
-        color: isActive ? "#D36A3D" : "hsl(210, 10%, 40%)",
+        color: isActive ? "#8b6b7a" : "hsl(210, 10%, 40%)",
       }}
     >
       {/* Active indicator bar at top (inside) */}
@@ -46,7 +46,7 @@ function DesktopNavItemBottom({
         <div
           className="absolute left-1/2 -translate-x-1/2 h-1 rounded-full transition-all"
           style={{
-            backgroundColor: "#D36A3D",
+            backgroundColor: "#8b6b7a",
             width: "80px",
             top: "-5px",
           }}
@@ -96,7 +96,7 @@ export default function DesktopNavigationBottom({
       className="hidden md:flex fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t-2 items-center justify-center px-8 z-40"
       style={{
         height: '72px',
-        borderTopColor: "#D36A3D",
+        borderTopColor: "#8b6b7a",
         boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.08)",
       }}
     >
@@ -132,8 +132,8 @@ export default function DesktopNavigationBottom({
           />
 
           <DesktopNavItemBottom
-            icon={Sparkles}
-            label="Prompt Library"
+            icon={Lightbulb}
+            label="Story Ideas"
             href="/prompts"
             isActive={pathname === "/prompts"}
           />
