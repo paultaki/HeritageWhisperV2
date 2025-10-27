@@ -407,9 +407,9 @@ export function MultiPhotoUploader({
                             ? {
                                 transform: `scale(${photo.transform.zoom}) translate(${photo.transform.position.x / photo.transform.zoom}px, ${photo.transform.position.y / photo.transform.zoom}px)`,
                                 transformOrigin: "center center",
-                                objectFit: "cover",
+                                objectFit: "contain",
                               }
-                            : { objectFit: "cover" }
+                            : { objectFit: "contain" }
                         }
                       />
                     </div>
@@ -571,7 +571,7 @@ export function MultiPhotoUploader({
                       style={{
                         transform: `scale(${editingTransform.zoom}) translate(${editingTransform.position.x / editingTransform.zoom}px, ${editingTransform.position.y / editingTransform.zoom}px)`,
                         transformOrigin: "center center",
-                        objectFit: "cover",
+                        objectFit: "contain",
                       }}
                       draggable={false}
                     />

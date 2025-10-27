@@ -278,37 +278,23 @@ export default function BookProgressBar({
           </div>
         </div>
 
-        {/* Right/Bottom: Zoom controls + decade selector (mobile) */}
-        <div className="flex items-center justify-center md:justify-end gap-2 flex-shrink-0">
-          {/* Mobile decade selector button */}
-          {onOpenDecadeSelector && (
-            <button
-              onClick={onOpenDecadeSelector}
-              className="md:hidden w-8 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
-              aria-label="Select decade"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-700">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-              </svg>
-            </button>
-          )}
-          
-          {/* Zoom controls */}
+        {/* Right: Zoom controls (desktop only) */}
+        <div className="hidden md:flex items-center justify-end gap-2 flex-shrink-0">
+          {/* Zoom controls - desktop only */}
           <div className="flex items-center gap-1 bg-white/95 rounded-lg border border-gray-300 overflow-hidden">
             <button
               onClick={onZoomOut}
-              className="w-8 h-7 md:w-9 md:h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-700 font-bold text-base md:text-lg"
+              className="w-9 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
               aria-label="Zoom out"
             >
               −
             </button>
-            <div className="w-10 md:w-12 text-center text-xs text-gray-600 font-medium">
+            <div className="w-12 text-center text-xs text-gray-600 font-medium">
               {Math.round(zoomLevel * 100)}%
             </div>
             <button
               onClick={onZoomIn}
-              className="w-8 h-7 md:w-9 md:h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-700 font-bold text-base md:text-lg"
+              className="w-9 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
               aria-label="Zoom in"
             >
               +
