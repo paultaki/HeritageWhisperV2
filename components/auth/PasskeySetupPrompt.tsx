@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { logger } from "@/lib/logger";
+import { apiRequest } from "@/lib/queryClient";
 
 interface PasskeySetupPromptProps {
   email: string;
@@ -102,9 +103,14 @@ export function PasskeySetupPrompt({
     }
   };
 
-  const handleSkip = () => {
-    // Store that user dismissed this prompt (localStorage)
-    localStorage.setItem("passkey_setup_dismissed", "true");
+  const handleSkip = async (preference: "later" | "never") => {
+    try {
+      // Store preference in database
+      await apiRequest("POST", "/api/user/passkey-preference", { preference });
+    } catch (err) {
+      logger.error("[PasskeySetupPrompt] Failed to save preference:", err);
+      // Still close the dialog even if API fails
+    }
     onClose();
   };
 
@@ -144,7 +150,7 @@ export function PasskeySetupPrompt({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleSkip}
+                  onClick={() => handleSkip("later")}
                   className="h-8 w-8 p-0"
                 >
                   <X className="w-4 h-4" />
@@ -200,14 +206,24 @@ export function PasskeySetupPrompt({
                   </>
                 )}
               </Button>
-              <Button
-                variant="ghost"
-                onClick={handleSkip}
-                disabled={isLoading}
-                className="w-full text-gray-600"
-              >
-                Maybe later
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2 w-full">
+                <Button
+                  variant="outline"
+                  onClick={() => handleSkip("later")}
+                  disabled={isLoading}
+                  className="flex-1 text-gray-700"
+                >
+                  Maybe later
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSkip("never")}
+                  disabled={isLoading}
+                  className="flex-1 text-gray-500"
+                >
+                  Don't show again
+                </Button>
+              </div>
             </DialogFooter>
           </>
         )}

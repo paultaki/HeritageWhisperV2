@@ -88,10 +88,23 @@ export function PasskeyAuth({
       // Success!
       onSuccess({ id: userId, email, name: email.split("@")[0] });
     } catch (err: any) {
-      const message =
-        err.name === "NotAllowedError"
-          ? "Passkey setup was cancelled"
-          : err.message || "Failed to set up passkey";
+      let message: string;
+
+      if (err.name === "NotAllowedError") {
+        message = "Passkey setup was cancelled";
+      } else if (err.message?.includes("RP ID") || err.message?.includes("invalid for this domain")) {
+        // RP_ID mismatch error - provide helpful troubleshooting
+        message =
+          "Passkey configuration error. This usually resolves by refreshing the page. " +
+          "If the issue persists, please contact support.";
+        logger.error(
+          "[PasskeyAuth] RP_ID mismatch detected. Check ORIGIN and RP_ID environment variables. " +
+            "For localhost, use RP_ID=localhost. For production, ensure RP_ID matches your domain.",
+          err.message
+        );
+      } else {
+        message = err.message || "Failed to set up passkey";
+      }
 
       logger.error("[PasskeyAuth] Registration error:", message);
       setError(message);
@@ -152,10 +165,23 @@ export function PasskeyAuth({
       // Success!
       onSuccess(user);
     } catch (err: any) {
-      const message =
-        err.name === "NotAllowedError"
-          ? "Sign-in was cancelled"
-          : err.message || "Failed to sign in with passkey";
+      let message: string;
+
+      if (err.name === "NotAllowedError") {
+        message = "Sign-in was cancelled";
+      } else if (err.message?.includes("RP ID") || err.message?.includes("invalid for this domain")) {
+        // RP_ID mismatch error - provide helpful troubleshooting
+        message =
+          "Passkey configuration error. This usually resolves by refreshing the page. " +
+          "If the issue persists, please contact support.";
+        logger.error(
+          "[PasskeyAuth] RP_ID mismatch detected. Check ORIGIN and RP_ID environment variables. " +
+            "For localhost, use RP_ID=localhost. For production, ensure RP_ID matches your domain.",
+          err.message
+        );
+      } else {
+        message = err.message || "Failed to sign in with passkey";
+      }
 
       logger.error("[PasskeyAuth] Authentication error:", message);
       setError(message);

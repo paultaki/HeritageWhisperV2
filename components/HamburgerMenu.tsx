@@ -17,8 +17,9 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRecordModal } from "@/hooks/use-record-modal";
-import { useToast } from "@/hooks/use-toast";
+import { useModeSelection } from "@/hooks/use-mode-selection";
+import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
+import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 
@@ -28,8 +29,7 @@ export default function HamburgerMenu() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const recordModal = useRecordModal();
-  const { toast } = useToast();
+  const modeSelection = useModeSelection();
 
   // Fetch profile data for profile photo
   const { data: profileData } = useQuery({
@@ -74,7 +74,7 @@ export default function HamburgerMenu() {
   };
 
   const handleNewMemory = () => {
-    recordModal.openModal();
+    modeSelection.openModal();
     setIsOpen(false);
   };
 
@@ -104,7 +104,8 @@ export default function HamburgerMenu() {
   const isBookPage = pathname === "/book";
 
   return (
-    <div ref={menuRef} className="fixed right-4 z-[100]" style={{ top: '5px' }}>
+    <>
+      <div ref={menuRef} className="fixed right-4 z-[100]" style={{ top: '5px' }}>
       {/* Hamburger Button - Semi-transparent on book page */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -237,6 +238,22 @@ export default function HamburgerMenu() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+
+      {/* Mode Selection Modal */}
+      <ModeSelectionModal
+        isOpen={modeSelection.isOpen}
+        onClose={modeSelection.closeModal}
+        onSelectQuickStory={modeSelection.openQuickRecorder}
+        promptQuestion={modeSelection.promptQuestion}
+      />
+
+      {/* Quick Story Recorder */}
+      <QuickStoryRecorder
+        isOpen={modeSelection.quickRecorderOpen}
+        onClose={modeSelection.closeQuickRecorder}
+        promptQuestion={modeSelection.promptQuestion}
+      />
+    </>
   );
 }

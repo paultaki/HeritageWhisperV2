@@ -99,11 +99,15 @@ export default function Login() {
         }
       }
 
-      await login(email, password);
+      const result = await login(email, password);
 
       // After successful login, check if we should prompt for passkey setup
-      if (typeof window !== 'undefined') {
-        const dismissed = localStorage.getItem('passkey_setup_dismissed');
+      // Show prompt if:
+      // 1. loginCount >= 2 (not first login)
+      // 2. User doesn't have passkeys
+      // 3. User hasn't permanently dismissed the prompt
+      if (typeof window !== 'undefined' && result?.user) {
+        const { loginCount, passkeyPromptDismissed } = result.user;
 
         // Check if user has passkeys
         const checkRes = await fetch("/api/passkey/check", {
@@ -115,8 +119,12 @@ export default function Login() {
         if (checkRes.ok) {
           const { hasPasskeys } = await checkRes.json();
 
-          // Show prompt if: no passkeys AND user hasn't dismissed it
-          if (!hasPasskeys && !dismissed) {
+          // Show prompt on 2nd+ login if no passkeys and not dismissed as 'never'
+          if (
+            (loginCount ?? 0) >= 2 &&
+            !hasPasskeys &&
+            passkeyPromptDismissed !== "never"
+          ) {
             setLoginCredentials({ email, password });
             setShowPasskeySetup(true);
             return; // Don't redirect yet

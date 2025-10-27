@@ -92,3 +92,60 @@ export function getExpectedOrigin(): string {
 export function getExpectedRPID(): string {
   return RP_ID;
 }
+
+/**
+ * Validate WebAuthn configuration and log warnings if suspicious
+ *
+ * This is a defensive check to catch common misconfigurations.
+ * Does NOT throw errors to avoid breaking working setups.
+ */
+export function validateWebAuthnConfig(): {
+  isValid: boolean;
+  warnings: string[];
+} {
+  const warnings: string[] = [];
+
+  // Check 1: RP_ID and ORIGIN domain should be compatible
+  try {
+    const originUrl = new URL(ORIGIN);
+    const originHostname = originUrl.hostname;
+
+    // For localhost, RP_ID should be "localhost"
+    if (originHostname === "localhost" || originHostname === "127.0.0.1") {
+      if (RP_ID !== "localhost") {
+        warnings.push(
+          `⚠️  RP_ID mismatch: Running on ${originHostname} but RP_ID is "${RP_ID}". ` +
+            `For local development, set RP_ID=localhost in .env.local`
+        );
+      }
+    }
+    // For production domains, RP_ID should match or be a suffix
+    else if (
+      !originHostname.endsWith(RP_ID) &&
+      originHostname !== RP_ID
+    ) {
+      warnings.push(
+        `⚠️  RP_ID mismatch: Origin is ${ORIGIN} but RP_ID is "${RP_ID}". ` +
+          `RP_ID should match the domain (e.g., ${originHostname}) or be a valid suffix.`
+      );
+    }
+  } catch (err) {
+    warnings.push(`⚠️  Invalid ORIGIN URL: "${ORIGIN}"`);
+  }
+
+  // Check 2: Production should use HTTPS
+  if (
+    !ORIGIN.startsWith("https://") &&
+    !ORIGIN.includes("localhost") &&
+    !ORIGIN.includes("127.0.0.1")
+  ) {
+    warnings.push(
+      `⚠️  Production should use HTTPS. Current ORIGIN: ${ORIGIN}`
+    );
+  }
+
+  return {
+    isValid: warnings.length === 0,
+    warnings,
+  };
+}

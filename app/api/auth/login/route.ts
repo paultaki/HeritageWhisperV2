@@ -4,6 +4,8 @@ import { ZodError } from "zod";
 import { logger } from "@/lib/logger";
 import { authRatelimit, getClientIp, checkRateLimit } from "@/lib/ratelimit";
 import { LoginUserSchema, safeValidateRequestBody } from "@/lib/validationSchemas";
+import { db, users } from "@/lib/db";
+import { eq, sql } from "drizzle-orm";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -115,25 +117,77 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Login failed" }, { status: 401 });
     }
 
-    // Return user data from Supabase Auth metadata
-    // This simplified version doesn't require a separate database
-    const userData = {
-      id: data.user.id,
-      email: data.user.email,
-      name:
-        data.user.user_metadata?.name ||
-        data.user.email?.split("@")[0] ||
-        "User",
-      birthYear:
-        data.user.user_metadata?.birthYear || new Date().getFullYear() - 50,
-      storyCount: 0,
-      isPaid: false,
-    };
+    // Increment login count and get user data from database
+    try {
+      // Increment login_count
+      await db
+        .update(users)
+        .set({
+          loginCount: sql`COALESCE(login_count, 0) + 1`
+        })
+        .where(eq(users.id, data.user.id));
 
-    return NextResponse.json({
-      user: userData,
-      session: data.session,
-    });
+      // Fetch updated user data including login tracking fields
+      const [dbUser] = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          name: users.name,
+          birthYear: users.birthYear,
+          storyCount: users.storyCount,
+          isPaid: users.isPaid,
+          loginCount: users.loginCount,
+          passkeyPromptDismissed: users.passkeyPromptDismissed,
+        })
+        .from(users)
+        .where(eq(users.id, data.user.id))
+        .limit(1);
+
+      // Fallback to Supabase metadata if database user not found
+      const userData = dbUser || {
+        id: data.user.id,
+        email: data.user.email,
+        name:
+          data.user.user_metadata?.name ||
+          data.user.email?.split("@")[0] ||
+          "User",
+        birthYear:
+          data.user.user_metadata?.birthYear || new Date().getFullYear() - 50,
+        storyCount: 0,
+        isPaid: false,
+        loginCount: 1,
+        passkeyPromptDismissed: null,
+      };
+
+      return NextResponse.json({
+        user: userData,
+        session: data.session,
+      });
+    } catch (dbError) {
+      // Log database error but still allow login
+      logger.error("Database error during login:", dbError);
+
+      // Return basic user data from Supabase
+      const userData = {
+        id: data.user.id,
+        email: data.user.email,
+        name:
+          data.user.user_metadata?.name ||
+          data.user.email?.split("@")[0] ||
+          "User",
+        birthYear:
+          data.user.user_metadata?.birthYear || new Date().getFullYear() - 50,
+        storyCount: 0,
+        isPaid: false,
+        loginCount: 1,
+        passkeyPromptDismissed: null,
+      };
+
+      return NextResponse.json({
+        user: userData,
+        session: data.session,
+      });
+    }
   } catch (error) {
     // Log error without exposing PII or credentials
     logger.error("Login error:", error instanceof Error ? error.message : 'Unknown error');

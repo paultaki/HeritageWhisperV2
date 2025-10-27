@@ -60,6 +60,10 @@ export const users = pgTable("users", {
   aiDailyBudgetUsd: integer("ai_daily_budget_usd").default(1),
   aiMonthlyBudgetUsd: integer("ai_monthly_budget_usd").default(10),
   aiProcessingEnabled: boolean("ai_processing_enabled").notNull().default(true),
+  // Passkey Prompt Tracking
+  loginCount: integer("login_count").default(0),
+  passkeyPromptDismissed: text("passkey_prompt_dismissed"), // null | 'later' | 'never'
+  lastPasskeyPromptAt: timestamp("last_passkey_prompt_at"),
   // subscriptionExpires: timestamp("subscription_expires"),
   // stripeCustomerId: text("stripe_customer_id"),
   // stripeSubscriptionId: text("stripe_subscription_id"),
