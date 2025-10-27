@@ -8,6 +8,10 @@
     "app/api/export/**": {
       "memory": 1024,
       "maxDuration": 60
+    },
+    "app/api/transcribe-assemblyai/**": {
+      "memory": 1024,
+      "maxDuration": 60
     }
   }
 }

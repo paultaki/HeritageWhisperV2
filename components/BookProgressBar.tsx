@@ -150,10 +150,11 @@ export default function BookProgressBar({
               
               {/* Progress fill - scales with background */}
               <div
-                className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-600 to-amber-500 rounded-full transition-all duration-200"
+                className="absolute left-0 top-0 h-full rounded-full transition-all duration-200"
                 style={{ 
                   width: `${progress}%`,
                   transform: isHovering ? 'scaleY(2)' : 'scaleY(1)',
+                  background: 'linear-gradient(135deg, #8b6b7a 0%, #b88b94 100%)',
                 }}
               />
 
@@ -171,8 +172,11 @@ export default function BookProgressBar({
                 return (
                   <div
                     key={decade.decade}
-                    className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-amber-700 rounded-full border-2 border-white shadow-sm cursor-pointer hover:scale-150 transition-transform"
-                    style={{ left: `${markerPosition}%` }}
+                    className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border-2 border-white shadow-sm cursor-pointer hover:scale-150 transition-transform"
+                    style={{ 
+                      left: `${markerPosition}%`,
+                      backgroundColor: '#8b6b7a',
+                    }}
                     title={decade.title}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -195,7 +199,7 @@ export default function BookProgressBar({
                     }}
                   >
                     Page {pageNum} of {totalPages}
-                    {year && <span className="text-amber-300"> • {year}</span>}
+                    {year && <span style={{ color: '#b88b94' }}> • {year}</span>}
                   </div>
                 );
               })()}
@@ -260,11 +264,15 @@ export default function BookProgressBar({
                           boxShadow: '0 1px 3px rgba(139, 107, 122, 0.08)',
                           whiteSpace: 'nowrap',
                           cursor: 'pointer',
-                          lineHeight: '1.1',
+                          lineHeight: '1',
                           height: '20px',
+                          minHeight: '20px',
+                          maxHeight: '20px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          boxSizing: 'border-box',
+                          margin: 0,
                         }}
                         aria-label={`Jump to ${decade.title}`}
                       >

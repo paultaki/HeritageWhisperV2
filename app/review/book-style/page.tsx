@@ -375,7 +375,7 @@ function BookStyleReviewContent() {
           includeInBook: true,
           isFavorite: false,
           audioUrl: null, // Will be set after upload
-          wisdomClipText: wisdomText,
+          wisdomClipText: wisdomText || "", // Ensure it's always a string
           durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 30,
           sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
         };
@@ -586,7 +586,7 @@ function BookStyleReviewContent() {
               includeInTimeline: currentStory.includeInTimeline,
               includeInBook: currentStory.includeInBook,
               isFavorite: currentStory.isFavorite,
-              wisdomClipText: currentStory.wisdomClipText,
+              wisdomClipText: currentStory.wisdomClipText || "", // Ensure it's always a string
               durationSeconds: currentStory.durationSeconds,
               audioUrl: finalAudioUrl, // THIS is the only field we're updating
               photos: currentStory.photos || [],
@@ -786,7 +786,7 @@ function BookStyleReviewContent() {
         isFavorite: false,
         photos: finalPhotos,
         audioUrl: finalAudioUrl,
-        wisdomClipText: wisdomText,
+        wisdomClipText: wisdomText || "", // Ensure it's always a string
         durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 30,
         sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
       };

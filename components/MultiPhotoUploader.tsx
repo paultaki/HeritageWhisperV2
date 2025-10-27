@@ -402,15 +402,14 @@ export function MultiPhotoUploader({
                         src={normalizePhotoUrl(photo.url)}
                         alt={`Photo ${index + 1}`}
                         className="absolute inset-0 w-full h-full"
-                        style={
-                          photo.transform
-                            ? {
-                                transform: `scale(${photo.transform.zoom}) translate(${photo.transform.position.x / photo.transform.zoom}px, ${photo.transform.position.y / photo.transform.zoom}px)`,
-                                transformOrigin: "center center",
-                                objectFit: "contain",
-                              }
-                            : { objectFit: "contain" }
-                        }
+                        style={{
+                          transform: photo.transform
+                            ? `scale(${photo.transform.zoom}) translate(${photo.transform.position.x / photo.transform.zoom}px, ${photo.transform.position.y / photo.transform.zoom}px)`
+                            : 'scale(1) translate(0px, 0px)',
+                          transformOrigin: "center center",
+                          objectFit: "contain",
+                          objectPosition: "center center",
+                        }}
                       />
                     </div>
 
@@ -572,6 +571,7 @@ export function MultiPhotoUploader({
                         transform: `scale(${editingTransform.zoom}) translate(${editingTransform.position.x / editingTransform.zoom}px, ${editingTransform.position.y / editingTransform.zoom}px)`,
                         transformOrigin: "center center",
                         objectFit: "contain",
+                        objectPosition: "center center",
                       }}
                       draggable={false}
                     />

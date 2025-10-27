@@ -11,6 +11,7 @@ import { navCache } from "@/lib/navCache";
 import { useAuth } from "@/lib/auth";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
 
 interface QuickStoryRecorderProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ interface QuickStoryRecorderProps {
 export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickStoryRecorderProps) {
   const router = useRouter();
   const { session } = useAuth();
+  const { toast } = useToast();
   const [mode, setMode] = useState<'select' | 'voice' | 'text'>('select');
   const [textStory, setTextStory] = useState('');
   const [isSavingText, setIsSavingText] = useState(false);
@@ -131,6 +133,18 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file size (max 25MB)
+    const maxSize = 25 * 1024 * 1024; // 25MB in bytes
+    if (file.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: `Audio file must be less than 25MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)}MB.`,
+        variant: "destructive",
+      });
+      event.target.value = ''; // Reset input
+      return;
+    }
+
     setIsUploadingAudio(true);
 
     try {
@@ -147,6 +161,9 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
       });
 
       if (!response.ok) {
+        if (response.status === 413) {
+          throw new Error('Audio file is too large. Please use a file under 25MB or record directly instead.');
+        }
         throw new Error('Failed to transcribe audio');
       }
 
@@ -200,6 +217,11 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
       onClose();
     } catch (error) {
       console.error('Error uploading audio:', error);
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Could not upload audio file. Please try again or record directly.",
+        variant: "destructive",
+      });
       setShowUploadError(true);
     } finally {
       setIsUploadingAudio(false);
@@ -277,14 +299,14 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
           Record or type your story. Choose between voice recording or text entry.
         </DialogDescription>
 
-        {/* Logo */}
+        {/* Logo - 3x larger */}
         <div className="flex justify-center mb-6 pt-2">
           <Image
             src="/Logo hw.svg"
             alt="Heritage Whisper"
-            width={320}
-            height={80}
-            className="h-20 w-auto"
+            width={960}
+            height={240}
+            className="h-60 w-auto"
             priority
           />
         </div>
@@ -313,7 +335,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 )}
 
                 <h2 className="text-2xl font-semibold mb-3">How would you like to share your story?</h2>
-                <p className="text-5xl font-medium text-gray-700 mb-8 max-w-4xl mx-auto text-center">
+                <p className="text-gray-600 mb-8 max-w-md mx-auto text-center">
                   Choose to record with your voice or type your story
                 </p>
 
