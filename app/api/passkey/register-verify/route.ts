@@ -111,9 +111,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 3: Store the passkey in the database
+    // IMPORTANT: Use credential.id from the browser (not credentialID from verification)
+    // The browser sends credential.rawId during auth, which matches credential.id from registration
     const passkey = await createPasskey({
       userId: userId,
-      credentialId: Buffer.from(credentialID).toString("base64url"),
+      credentialId: credential.id, // Use browser's credential.id directly
       publicKey: Buffer.from(credentialPublicKey).toString("base64url"),
       signCount: counter,
       credentialBackedUp,
