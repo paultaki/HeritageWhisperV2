@@ -14,6 +14,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navCache } from "@/lib/navCache";
 import { supabase } from "@/lib/supabase";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 // Local widened NavCache payload type
 type NavPayloadExtended = {
@@ -76,6 +77,7 @@ function BookStyleReviewContent() {
   const [audioDuration, setAudioDuration] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(isEditing);
   const [returnPath, setReturnPath] = useState<string | null>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const handleAudioChange = (url: string | null, blob?: Blob | null) => {
     setAudioUrl(url);
@@ -896,12 +898,19 @@ function BookStyleReviewContent() {
   const handleCancel = () => {
     // Ask for confirmation if there's content
     if (transcription || title || photos.length > 0) {
-      const confirmed = confirm(
-        "Are you sure you want to cancel? Your changes will be lost.",
-      );
-      if (!confirmed) return;
+      setShowCancelConfirm(true);
+      return;
     }
 
+    // Clear session storage
+    sessionStorage.removeItem("recordedAudio");
+    sessionStorage.removeItem("recordingTranscription");
+
+    // Go back to where we came from (or timeline as fallback)
+    router.push(returnPath || "/timeline");
+  };
+
+  const handleConfirmCancel = () => {
     // Clear session storage
     sessionStorage.removeItem("recordedAudio");
     sessionStorage.removeItem("recordingTranscription");
@@ -1097,27 +1106,41 @@ function BookStyleReviewContent() {
   }
 
   return (
-    <BookStyleReview
-      title={title}
-      storyYear={storyYear}
-      transcription={transcription}
-      photos={photos}
-      wisdomText={wisdomText}
-      audioUrl={audioUrl}
-      audioDuration={audioDuration}
-      onTitleChange={setTitle}
-      onYearChange={setStoryYear}
-      onTranscriptionChange={setTranscription}
-      onPhotosChange={setPhotos}
-      onWisdomChange={setWisdomText}
-      onAudioChange={handleAudioChange}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      onDelete={handleDelete}
-      isSaving={saveMutation.isPending}
-      isEditing={isEditing}
-      userBirthYear={user.birthYear}
-    />
+    <>
+      <BookStyleReview
+        title={title}
+        storyYear={storyYear}
+        transcription={transcription}
+        photos={photos}
+        wisdomText={wisdomText}
+        audioUrl={audioUrl}
+        audioDuration={audioDuration}
+        onTitleChange={setTitle}
+        onYearChange={setStoryYear}
+        onTranscriptionChange={setTranscription}
+        onPhotosChange={setPhotos}
+        onWisdomChange={setWisdomText}
+        onAudioChange={handleAudioChange}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        onDelete={handleDelete}
+        isSaving={saveMutation.isPending}
+        isEditing={isEditing}
+        userBirthYear={user.birthYear}
+      />
+
+      {/* Cancel Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        title="Cancel Changes?"
+        message="Are you sure you want to cancel? Your changes will be lost."
+        confirmText="Yes, Cancel"
+        cancelText="Keep Editing"
+        onConfirm={handleConfirmCancel}
+        onCancel={() => setShowCancelConfirm(false)}
+        variant="danger"
+      />
+    </>
   );
 }
 

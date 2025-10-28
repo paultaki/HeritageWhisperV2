@@ -531,46 +531,19 @@ body {
    MEMORY BOX COMPONENTS
    ============================================ */
 
-/* grid */
+/* grid - Fixed 160px cards for dense management interface */
 .hw-grid-mem {
   display: grid;
-  gap: var(--space-6);
-}
-@media (min-width: 768px) {
-  .hw-grid-mem {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-@media (min-width: 1200px) {
-  .hw-grid-mem {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-@media (min-width: 1600px) {
-  .hw-grid-mem {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-  }
+  grid-template-columns: repeat(auto-fill, 160px);
+  gap: 16px;
+  justify-content: start;
 }
 
 /* Mobile 2-column grid for compact senior-friendly view */
 .hw-grid-mem.mobile-grid-2col {
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
-}
-@media (min-width: 768px) {
-  .hw-grid-mem.mobile-grid-2col {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-@media (min-width: 1200px) {
-  .hw-grid-mem.mobile-grid-2col {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-@media (min-width: 1600px) {
-  .hw-grid-mem.mobile-grid-2col {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-  }
+  grid-template-columns: repeat(auto-fill, 160px);
+  gap: 16px;
+  justify-content: start;
 }
 
 /* Memory Box cards - no connectors */

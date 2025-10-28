@@ -573,7 +573,7 @@ export default function MemoryBoxPage() {
         {/* Main content */}
         <main className={`flex-1 min-w-0 pb-20 md:pb-0 ${viewMode === "list" ? "hw-list" : ""}`}>
           {/* Toolbar with Stats and Controls - Contained width */}
-          <section className="px-6 pt-6" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+          <section className="px-3 pt-6" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
             <div className="bg-white border rounded-xl p-6 mb-6">
               <MemoryToolbarV2
                 stats={toolbarStats}
@@ -590,7 +590,7 @@ export default function MemoryBoxPage() {
           </section>
 
           {/* Stories Content */}
-          <section className="px-6" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+          <section className="px-3" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
         {isLoading ? (
           <div className="hw-grid-mem">
             {[...Array(8)].map((_, i) => (
@@ -708,7 +708,7 @@ export default function MemoryBoxPage() {
       </section>
 
           {/* Export Section */}
-          <section className="px-6 pb-8" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+          <section className="px-3 pb-8" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
             <Card className="p-6 bg-gradient-to-r from-gray-50 to-gray-100">
               <h3 className="text-xl font-bold mb-4">Export Your Memories</h3>
               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
