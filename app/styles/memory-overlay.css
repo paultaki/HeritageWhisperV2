@@ -296,6 +296,7 @@
   color: #4a4a4a;
   cursor: pointer;
   transition: all 150ms ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .memory-overlay-action-btn:hover {

@@ -712,14 +712,16 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   </div>
                 </div>
 
-                {/* Progress bar */}
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-[#8b6b7a] to-[#b88b94]"
-                    initial={{ width: "0%" }}
-                    animate={{ width: `${progressPercent}%` }}
-                    transition={{ duration: 0.3 }}
-                  />
+                {/* Progress bar - Max width 490px on desktop */}
+                <div className="mx-auto w-full max-w-[490px]">
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-[#8b6b7a] to-[#b88b94]"
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${progressPercent}%` }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
                 </div>
 
                 <p className="mt-3 text-xs text-center text-[#99898C]">
@@ -744,21 +746,23 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   </p>
                 </div>
 
-                {/* Waveform Audio Player */}
-                <WaveformAudioPlayer
-                  audioUrl={audioReviewUrl}
-                  duration={duration}
-                />
+                {/* Waveform Audio Player - Max width 490px on desktop */}
+                <div className="mx-auto w-full max-w-[490px] mb-6">
+                  <WaveformAudioPlayer
+                    audioUrl={audioReviewUrl}
+                    duration={duration}
+                  />
+                </div>
 
-                {/* Transcription Status Card */}
+                {/* Transcription Status Card - Max width 490px on desktop */}
                 {transcriptionStatus === 'processing' && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center gap-3">
-                    <Loader2 className="w-5 h-5 animate-spin text-blue-600 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-blue-900">
+                  <div className="mx-auto w-full max-w-[490px] mb-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-5 text-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto mb-3" />
+                      <p className="text-base font-semibold text-blue-900 mb-2">
                         Transcribing in the background...
                       </p>
-                      <p className="text-xs text-blue-700 mt-1">
+                      <p className="text-sm text-blue-700">
                         Your transcription will be ready when you click "Continue"
                       </p>
                     </div>
@@ -766,13 +770,13 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 )}
                 
                 {transcriptionStatus === 'complete' && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-green-900">
+                  <div className="mx-auto w-full max-w-[490px] mb-6">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-5 text-center">
+                      <Check className="w-6 h-6 text-green-600 mx-auto mb-3" />
+                      <p className="text-base font-semibold text-green-900 mb-2">
                         ✨ Transcription ready!
                       </p>
-                      <p className="text-xs text-green-700 mt-1">
+                      <p className="text-sm text-green-700">
                         Click "Continue" to review your transcription
                       </p>
                     </div>
@@ -780,33 +784,37 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 )}
 
                 {transcriptionStatus === 'idle' && duration >= 30 && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <p className="text-sm text-blue-900">
-                      <strong>💡 Tip:</strong> Take your time reviewing - we'll transcribe your audio while you listen!
-                    </p>
+                  <div className="mx-auto w-full max-w-[490px] mb-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-5 text-center">
+                      <p className="text-base text-blue-900">
+                        <strong>💡 Tip:</strong> Take your time reviewing - we'll transcribe your audio while you listen!
+                      </p>
+                    </div>
                   </div>
                 )}
 
-                {/* Action Buttons */}
-                <div className="flex flex-col gap-3">
-                  <Button
-                    onClick={continueFromReview}
-                    size="lg"
-                    className="w-full bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white py-6 text-lg rounded-full shadow-lg"
-                  >
-                    Continue to Add Details
-                    <Play className="w-5 h-5 ml-2" />
-                  </Button>
+                {/* Action Buttons - Max width 490px on desktop */}
+                <div className="mx-auto w-full max-w-[490px]">
+                  <div className="flex flex-col gap-3">
+                    <Button
+                      onClick={continueFromReview}
+                      size="lg"
+                      className="w-full bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white py-6 text-lg rounded-full shadow-lg"
+                    >
+                      Continue to Add Details
+                      <Play className="w-5 h-5 ml-2" />
+                    </Button>
 
-                  <Button
-                    onClick={reRecordFromReview}
-                    variant="outline"
-                    size="lg"
-                    className="w-full py-6 text-lg rounded-full"
-                  >
-                    <RotateCcw className="w-5 h-5 mr-2" />
-                    Re-record
-                  </Button>
+                    <Button
+                      onClick={reRecordFromReview}
+                      variant="outline"
+                      size="lg"
+                      className="w-full py-6 text-lg rounded-full"
+                    >
+                      <RotateCcw className="w-5 h-5 mr-2" />
+                      Re-record
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             )}

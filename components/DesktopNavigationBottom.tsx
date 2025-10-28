@@ -199,8 +199,8 @@ export default function DesktopNavigationBottom({
           <Image
             src="/silver_mic_sm.png"
             alt="Record"
-            width={28}
-            height={28}
+            width={25}
+            height={25}
             className={`z-10 ${isRecording ? 'opacity-60' : ''}`}
           />
         </button>

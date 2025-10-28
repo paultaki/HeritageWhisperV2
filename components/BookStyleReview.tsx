@@ -259,13 +259,6 @@ export function BookStyleReview({
                 {isSaving ? "Saving..." : "Save"}
               </Button>
             )}
-            <Button
-              onClick={onCancel}
-              disabled={isSaving}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded-full px-4 md:px-6 py-4 md:py-6 text-base md:text-lg"
-            >
-              Cancel
-            </Button>
           </div>
         </div>
       </div>
@@ -950,6 +943,13 @@ export function BookStyleReview({
             className="flex-1 bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full py-3 text-base font-medium"
           >
             {isSaving ? "Saving..." : "Save"}
+          </Button>
+          <Button
+            onClick={onCancel}
+            disabled={isSaving}
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded-full py-3 text-base font-medium"
+          >
+            Cancel
           </Button>
           {isEditing && onDelete && (
             <Button
