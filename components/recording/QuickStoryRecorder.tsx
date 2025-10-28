@@ -627,14 +627,14 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                         <>
                           <button
                             onClick={pauseRecording}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-[#E0D9D7] bg-[#FAF8F6] px-2.5 py-1.5 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#E0D9D7] bg-[#FAF8F6] w-[77px] py-2 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
                           >
                             <Pause className="h-4 w-4" />
                             Pause
                           </button>
                           <button
                             onClick={stopRecording}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-[#E0D9D7] bg-[#FAF8F6] px-2.5 py-1.5 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#E0D9D7] bg-[#FAF8F6] w-[77px] py-2 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
                           >
                             <Square className="h-4 w-4" />
                             Stop
@@ -645,21 +645,21 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                         <>
                           <button
                             onClick={resumeRecording}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-[#7C6569] bg-[#7C6569] px-2.5 py-1.5 text-[13px] text-[#FAF8F6] shadow-sm ring-1 ring-inset ring-[#9C7280]/40 transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[#9C7280]/60 active:scale-[0.99]"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#7C6569] bg-[#7C6569] w-[77px] py-2 text-[13px] text-[#FAF8F6] shadow-sm ring-1 ring-inset ring-[#9C7280]/40 transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[#9C7280]/60 active:scale-[0.99]"
                           >
                             <Play className="h-4 w-4" />
                             Resume
                           </button>
                           <button
                             onClick={stopRecording}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-[#E0D9D7] bg-[#FAF8F6] px-2.5 py-1.5 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#E0D9D7] bg-[#FAF8F6] w-[77px] py-2 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
                           >
                             <Square className="h-4 w-4" />
                             Stop
                           </button>
                           <button
                             onClick={handleRestartClick}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-[#E0D9D7] bg-[#FAF8F6] px-2.5 py-1.5 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#E0D9D7] bg-[#FAF8F6] w-[77px] py-2 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
                           >
                             <RotateCcw className="h-4 w-4" />
                             Restart

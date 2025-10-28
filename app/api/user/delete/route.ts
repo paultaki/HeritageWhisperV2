@@ -181,6 +181,10 @@ export async function DELETE(request: NextRequest) {
     await supabaseAdmin.from('ghost_prompts').delete().eq('user_id', userId);
     logger.debug("[Account Deletion] Deleted AI prompt records");
 
+    // Delete AI usage logs
+    await supabaseAdmin.from('ai_usage_log').delete().eq('user_id', userId);
+    logger.debug("[Account Deletion] Deleted AI usage log records");
+
     // Delete personalization data
     await supabaseAdmin.from('historical_context').delete().eq('user_id', userId);
     await supabaseAdmin.from('profiles').delete().eq('user_id', userId);
