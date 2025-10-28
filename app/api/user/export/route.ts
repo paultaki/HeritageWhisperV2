@@ -55,14 +55,19 @@ export async function GET(request: NextRequest) {
 
     logger.debug(`[Data Export] Starting GDPR-compliant export for user: ${userId}`);
 
+    // Check for bypass parameter (development only)
+    const bypassRateLimit = request.nextUrl.searchParams.get('bypass_rate_limit') === 'true'
+      && process.env.NODE_ENV === 'development';
+
     // Rate limiting: 1 export per 24 hours (GDPR compliance best practice)
+    // Fetch current export data for rate limiting and update
     const { data: rateLimitCheck } = await supabaseAdmin
       .from('users')
       .select('last_data_export_at, data_exports_count')
       .eq('id', userId)
       .single();
 
-    if (rateLimitCheck?.last_data_export_at) {
+    if (!bypassRateLimit && rateLimitCheck?.last_data_export_at) {
       const lastExport = new Date(rateLimitCheck.last_data_export_at);
       const now = new Date();
       const hoursSinceLastExport = (now.getTime() - lastExport.getTime()) / (1000 * 60 * 60);
@@ -84,6 +89,10 @@ export async function GET(request: NextRequest) {
           },
         );
       }
+    }
+
+    if (bypassRateLimit) {
+      logger.debug(`[Data Export] Rate limit bypassed (development mode)`);
     }
 
     // Update last export timestamp
@@ -135,8 +144,7 @@ export async function GET(request: NextRequest) {
       { data: activePromptsRecords },
       { data: promptHistoryRecords },
       { data: profilesRecord },
-      { data: followUpsRecords },
-      // TIER 2: Transparency data (Auth tables via Supabase API)
+      // TIER 2: Transparency data
       { data: historicalContextRecords },
       { data: aiUsageLogRecords },
     ] = await Promise.all([
@@ -179,17 +187,18 @@ export async function GET(request: NextRequest) {
       // TIER 1: User personality profile
       supabaseAdmin.from('profiles').select('*').eq('user_id', userId).single(),
 
-      // TIER 1: AI follow-up questions shown to user
-      supabaseAdmin.from('follow_ups').select('*').in('story_id',
-        (userStories || []).map((s: any) => s.id).filter(Boolean)
-      ),
-
       // TIER 2: Historical context (personalized AI facts)
       supabaseAdmin.from('historical_context').select('*').eq('user_id', userId),
 
       // TIER 2: AI usage (with cost/model masking below)
       supabaseAdmin.from('ai_usage_log').select('*').eq('user_id', userId),
     ]);
+
+    // TIER 1: Fetch follow-ups separately (needs story IDs first)
+    const storyIds = (userStories || []).map((s: any) => s.id).filter(Boolean);
+    const { data: followUpsRecords } = storyIds.length > 0
+      ? await supabaseAdmin.from('follow_ups').select('*').in('story_id', storyIds)
+      : { data: [] };
 
     // TIER 2: Fetch Supabase Auth tables (separate calls required for auth schema)
     const [

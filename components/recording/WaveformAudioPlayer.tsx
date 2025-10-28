@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState, useCallback, useMemo } from "react";
-import { useWavesurfer } from "@wavesurfer/react";
+import { useRef, useState, useCallback, useEffect } from "react";
+import WaveSurfer from "wavesurfer.js";
 import { Play, Pause } from "lucide-react";
 
 interface WaveformAudioPlayerProps {
@@ -15,7 +15,10 @@ interface WaveformAudioPlayerProps {
  */
 export function WaveformAudioPlayer({ audioUrl, duration }: WaveformAudioPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
 
   // Format time as MM:SS
   const formatTime = (seconds: number) => {
@@ -25,62 +28,84 @@ export function WaveformAudioPlayer({ audioUrl, duration }: WaveformAudioPlayerP
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Memoize onReady callback to prevent recreating on every render
-  const handleReady = useCallback(() => {
-    setIsReady(true);
-  }, []);
+  // Initialize WaveSurfer
+  useEffect(() => {
+    if (!containerRef.current) return;
 
-  // Memoize wavesurfer options to prevent infinite re-renders
-  const wavesurferOptions = useMemo(() => ({
-    container: containerRef,
-    url: audioUrl,
-    waveColor: "#BFA9AB", // Lighter mauve for background
-    progressColor: "#7C6569", // Darker mauve for progress
-    cursorColor: "#5a4a4d", // Dark cursor
-    cursorWidth: 2,
-    barWidth: 3,
-    barGap: 2,
-    barRadius: 2,
-    height: 80,
-    normalize: true,
-    dragToSeek: true, // Enable click/drag to seek
-    hideScrollbar: true,
-    mediaControls: false,
-    onReady: handleReady,
-  }), [audioUrl, handleReady]);
+    console.log("[WaveformAudioPlayer] Initializing with URL:", audioUrl);
 
-  const { wavesurfer, isPlaying, currentTime } = useWavesurfer(wavesurferOptions);
+    const ws = WaveSurfer.create({
+      container: containerRef.current,
+      waveColor: "#BFA9AB",
+      progressColor: "#7C6569",
+      cursorColor: "#5a4a4d",
+      cursorWidth: 2,
+      barWidth: 3,
+      barGap: 2,
+      barRadius: 2,
+      height: 60,
+      normalize: true,
+      dragToSeek: true,
+      hideScrollbar: true,
+      backend: "WebAudio",
+    });
+
+    wavesurferRef.current = ws;
+
+    // Load audio
+    ws.load(audioUrl);
+
+    // Event listeners
+    ws.on("ready", () => {
+      console.log("[WaveformAudioPlayer] Waveform ready");
+      setIsReady(true);
+    });
+
+    ws.on("play", () => setIsPlaying(true));
+    ws.on("pause", () => setIsPlaying(false));
+    ws.on("timeupdate", (time) => setCurrentTime(time));
+
+    ws.on("error", (error) => {
+      console.error("[WaveformAudioPlayer] Error loading waveform:", error);
+    });
+
+    // Cleanup
+    return () => {
+      console.log("[WaveformAudioPlayer] Cleaning up");
+      ws.destroy();
+    };
+  }, [audioUrl]);
 
   const onPlayPause = useCallback(() => {
-    wavesurfer && wavesurfer.playPause();
-  }, [wavesurfer]);
+    wavesurferRef.current?.playPause();
+  }, []);
 
-  const audioDuration = wavesurfer?.getDuration() || duration;
+  const audioDuration = wavesurferRef.current?.getDuration() || duration;
 
   return (
-    <div className="bg-gradient-to-br from-[#f5f0f5] to-[#f8f3f8] border-2 border-[#d4c4d4] rounded-xl p-6 mb-6">
+    <div className="bg-gradient-to-br from-[#f5f0f5] to-[#f8f3f8] border-2 border-[#d4c4d4] rounded-xl px-[10px] py-4 mb-6">
       {/* Title */}
-      <div className="text-center mb-4">
+      <div className="text-center mb-3">
         <p className="font-medium text-gray-900 text-lg">Your Story</p>
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-sm text-gray-600 mt-1 text-center">
           Listen carefully - you can re-record if needed
         </p>
       </div>
 
-      {/* Waveform Container */}
-      <div className="mb-4 bg-white/50 rounded-lg p-3 border border-[#E0D9D7]">
+      {/* Waveform Container - Reduced height */}
+      <div className="mb-3 bg-white/50 rounded-lg px-[10px] py-2 border border-[#E0D9D7]">
         <div ref={containerRef} className="w-full" />
 
         {/* Loading state */}
         {!isReady && (
-          <div className="flex items-center justify-center h-20 text-gray-500 text-sm">
+          <div className="flex items-center justify-center h-20 text-gray-500 text-sm text-center">
             Loading waveform...
           </div>
         )}
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center justify-between">
+      {/* Controls - Centered */}
+      <div className="flex items-center justify-center gap-4 mb-3">
         {/* Play/Pause Button */}
         <button
           onClick={onPlayPause}
@@ -103,7 +128,7 @@ export function WaveformAudioPlayer({ audioUrl, duration }: WaveformAudioPlayerP
       </div>
 
       {/* Instruction */}
-      <p className="text-xs text-center text-gray-500 mt-3">
+      <p className="text-xs text-center text-gray-500">
         Click or drag on the waveform to jump to any part
       </p>
     </div>

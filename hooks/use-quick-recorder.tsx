@@ -5,7 +5,7 @@ import { type RecorderState } from "@/types/recording";
 import { toast } from "@/hooks/use-toast";
 import { useRecordingState } from "@/contexts/RecordingContext";
 
-const MAX_RECORDING_DURATION = 180; // 3 minutes in seconds
+const MAX_RECORDING_DURATION = 120; // 2 minutes in seconds
 
 interface UseQuickRecorderOptions {
   onComplete?: () => void;
@@ -20,7 +20,7 @@ interface UseQuickRecorderOptions {
  * Features:
  * - 3-2-1 countdown before recording
  * - Pause/resume functionality
- * - 5-minute max recording with auto-stop
+ * - 2-minute max recording with auto-stop
  * - Automatic transcription via AssemblyAI
  * - NavCache storage for wizard integration
  */
@@ -81,7 +81,7 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
         setDuration((prev) => {
           const newDuration = prev + 1;
           durationRef.current = newDuration; // Keep ref in sync
-          // Auto-stop at 10 minutes
+          // Auto-stop at 2 minutes
           if (newDuration >= MAX_RECORDING_DURATION) {
             stopRecording();
           }
@@ -349,36 +349,68 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
 
       // Navigate to transcription selection screen with completed data
       const navId = navCache.generateId();
-      await navCache.set(navId, {
-        mode: "quick",
-        originalTranscript: transcription,
-        rawTranscript: transcription, // Also set rawTranscript for compatibility
-        enhancedTranscript: transcription, // Will be same initially, user chooses on next screen
-        duration: duration,
-        timestamp: new Date().toISOString(),
-        audioBlob: audioBlob,
-        lessonOptions: lessonOptions,
-        formattedContent: formattedContent,
-        useEnhanced: false, // Default to original
-      });
 
-      console.log("[useQuickRecorder] NavCache populated with:", {
-        hasTranscription: !!transcription,
-        transcriptionLength: transcription.length,
-        hasLessonOptions: !!lessonOptions,
-        hasDuration: !!duration,
-        hasAudioBlob: !!audioBlob,
-      });
+      try {
+        await navCache.set(navId, {
+          mode: "quick",
+          originalTranscript: transcription,
+          rawTranscript: transcription, // Also set rawTranscript for compatibility
+          enhancedTranscript: transcription, // Will be same initially, user chooses on next screen
+          duration: duration,
+          timestamp: new Date().toISOString(),
+          audioBlob: audioBlob,
+          lessonOptions: lessonOptions,
+          formattedContent: formattedContent,
+          useEnhanced: false, // Default to original
+        });
 
-      // Cleanup sessionStorage
-      sessionStorage.removeItem('hw_transcription_result');
-      sessionStorage.removeItem('hw_transcription_error');
+        console.log("[useQuickRecorder] NavCache populated with navId:", navId, {
+          hasTranscription: !!transcription,
+          transcriptionLength: transcription.length,
+          hasLessonOptions: !!lessonOptions,
+          hasDuration: !!duration,
+          hasAudioBlob: !!audioBlob,
+        });
 
-      // Cleanup and navigate - transcription ready!
-      cleanup();
-      router.push(`/review/book-style?nav=${navId}&mode=transcription-select`);
-      options.onComplete?.();
-      return;
+        // Verify data was actually saved
+        const verifyData = await navCache.get(navId);
+        if (!verifyData) {
+          console.error("[useQuickRecorder] NavCache verification failed - data not found after save!");
+          toast({
+            title: "Error saving recording",
+            description: "Could not save your recording data. Please try again.",
+            variant: "destructive",
+          });
+          setState("review");
+          return;
+        }
+
+        console.log("[useQuickRecorder] NavCache verified successfully");
+
+        // Cleanup sessionStorage
+        sessionStorage.removeItem('hw_transcription_result');
+        sessionStorage.removeItem('hw_transcription_error');
+
+        // Cleanup and navigate - transcription ready!
+        cleanup();
+
+        // Small delay to ensure state updates
+        setTimeout(() => {
+          router.push(`/review/book-style?nav=${navId}&mode=transcription-select`);
+          options.onComplete?.();
+        }, 100);
+
+        return;
+      } catch (error) {
+        console.error("[useQuickRecorder] Error saving to NavCache:", error);
+        toast({
+          title: "Error saving recording",
+          description: "Could not save your recording data. Please try again.",
+          variant: "destructive",
+        });
+        setState("review");
+        return;
+      }
     }
 
     // PATH B: Transcription not complete → Show processing, don't navigate yet

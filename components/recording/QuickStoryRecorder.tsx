@@ -45,7 +45,16 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [showUploadError, setShowUploadError] = useState(false);
   const [isRecordButtonHovered, setIsRecordButtonHovered] = useState(false);
+  const [processingMessageIndex, setProcessingMessageIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Processing messages that cycle through
+  const processingMessages = [
+    { text: "Listening to your story...", duration: 3000 },
+    { text: "Preserving your words...", duration: 5000 },
+    { text: "Finding the right question...", duration: 3000 },
+    { text: "Almost ready...", duration: 0 }, // No duration, stays until complete
+  ];
 
   // Audio analyzer for waveform visualization
   const { frequencyData, decibelLevel, connect, disconnect } = useAudioAnalyzer({
@@ -71,6 +80,36 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
   } = useQuickRecorder({
     onComplete: onClose,
   });
+
+  // Cycle through processing messages
+  useEffect(() => {
+    if (state === "processing") {
+      setProcessingMessageIndex(0); // Reset to first message
+
+      let currentIndex = 0;
+      const timers: NodeJS.Timeout[] = [];
+
+      const scheduleNextMessage = () => {
+        const currentMessage = processingMessages[currentIndex];
+
+        // If this message has a duration (not the last one), schedule the next
+        if (currentMessage.duration > 0 && currentIndex < processingMessages.length - 1) {
+          const timer = setTimeout(() => {
+            currentIndex++;
+            setProcessingMessageIndex(currentIndex);
+            scheduleNextMessage();
+          }, currentMessage.duration);
+          timers.push(timer);
+        }
+      };
+
+      scheduleNextMessage();
+
+      return () => {
+        timers.forEach(timer => clearTimeout(timer));
+      };
+    }
+  }, [state, processingMessages]);
 
   // Auto-navigate when transcription completes (for both <30s and >=30s recordings)
   useEffect(() => {
@@ -373,16 +412,16 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 {/* Display prompt question if provided */}
                 {promptQuestion && (
                   <>
-                    <h2 className="text-xl font-semibold mb-3">Your Question</h2>
+                    <h2 className="text-xl font-semibold mb-3 text-center">Your Question</h2>
                     <div className="bg-gradient-to-br from-[#f5f0f5] to-[#f8f3f8] border-2 border-[#d4c4d4] rounded-lg p-4 mb-6 max-w-xl mx-auto">
-                      <p className="text-base text-gray-800 font-medium leading-relaxed">
+                      <p className="text-base text-gray-800 font-medium leading-relaxed text-center">
                         {promptQuestion}
                       </p>
                     </div>
                   </>
                 )}
 
-                <h2 className="text-2xl font-semibold mb-16">Share Your Story</h2>
+                <h2 className="text-2xl font-semibold mb-16 text-center">Share Your Story</h2>
 
                 {/* Hero Record Button */}
                 <div className="flex flex-col items-center">
@@ -490,8 +529,8 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
                     <PenTool className="w-8 h-8 sm:w-10 sm:h-10 text-blue-700" />
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-semibold mb-1 sm:mb-2">Type Your Story</h2>
-                  <p className="text-gray-600 text-sm">
+                  <h2 className="text-xl sm:text-2xl font-semibold mb-1 sm:mb-2 text-center">Type Your Story</h2>
+                  <p className="text-gray-600 text-sm text-center">
                     Take your time to write your memory
                   </p>
                 </div>
@@ -575,10 +614,10 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 exit={{ opacity: 0 }}
                 className="px-6"
               >
-                {/* Recording Story title centered below logo */}
+                {/* Whisper Capture title centered below logo */}
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-semibold text-[#322B27]">
-                    Recording Story
+                    Whisper Capture
                   </h3>
                 </div>
 
@@ -620,7 +659,9 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   {/* Controls inside the card */}
                   <div className="mt-4 flex items-center justify-between border-t border-[#E0D9D7] pt-3">
                     <div className="text-[13px] text-[#99898C]">
-                      {formatDuration(maxDuration - duration)} remaining
+                      {(maxDuration - duration) <= 30
+                        ? "30 seconds left to finish"
+                        : `${formatDuration(maxDuration - duration)} remaining`}
                     </div>
                     <div className="flex items-center gap-2">
                       {state === "recording" && (
@@ -779,12 +820,21 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 className="text-center py-16"
               >
                 <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin text-[#8b6b7a]" />
-                <h2 className="text-2xl font-semibold mb-2">
+                <h2 className="text-2xl font-semibold mb-2 text-center">
                   Processing your recording...
                 </h2>
-                <p className="text-gray-600">
-                  Transcribing audio and preparing your story for review
-                </p>
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={processingMessageIndex}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-gray-600 text-center"
+                  >
+                    {processingMessages[processingMessageIndex].text}
+                  </motion.p>
+                </AnimatePresence>
               </motion.div>
             )}
           </AnimatePresence>
