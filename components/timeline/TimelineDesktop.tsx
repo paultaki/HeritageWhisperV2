@@ -475,7 +475,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 alt={story.title}
                 className="w-full h-full object-cover"
                 style={{
-                  transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
+                  transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x}%, ${displayPhoto.transform.position.y}%)`,
                   transformOrigin: "center center",
                 }}
                 onError={(e) => console.error("[Timeline] Image failed to load:", displayPhoto.url)}

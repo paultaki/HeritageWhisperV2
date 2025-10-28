@@ -387,7 +387,7 @@ export function MemoryOverlay({
                 style={
                   currentPhoto.transform
                     ? {
-                        transform: `scale(${currentPhoto.transform.zoom}) translate(${currentPhoto.transform.position.x / currentPhoto.transform.zoom}px, ${currentPhoto.transform.position.y / currentPhoto.transform.zoom}px)`,
+                        transform: `scale(${currentPhoto.transform.zoom}) translate(${currentPhoto.transform.position.x}%, ${currentPhoto.transform.position.y}%)`,
                         transformOrigin: "center center",
                       }
                     : undefined
