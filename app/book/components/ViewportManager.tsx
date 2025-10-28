@@ -53,8 +53,11 @@ function bodyFontAt(scale: number): number {
  * Calculate optimal viewport configuration
  */
 function calculateViewportConfig(viewportWidth: number): ViewportConfig {
-  // Try spread at 1.0 scale
-  if (viewportWidth >= spreadWidthNeeded(1.0)) {
+  // Use 1330px as the breakpoint - below this, switch to single page mode
+  const SPREAD_BREAKPOINT = 1330;
+  
+  // If viewport is at or above 1330px, show spread
+  if (viewportWidth >= SPREAD_BREAKPOINT) {
     return {
       mode: "spread",
       scale: 1.0,
@@ -63,22 +66,7 @@ function calculateViewportConfig(viewportWidth: number): ViewportConfig {
     };
   }
 
-  // Try spread at 0.95 scale (only if body font stays ≥ 18px)
-  const scaleAt95 = 0.95;
-  if (
-    viewportWidth >= spreadWidthNeeded(scaleAt95) &&
-    bodyFontAt(scaleAt95) >= MIN_BODY_SIZE
-  ) {
-    return {
-      mode: "spread",
-      scale: scaleAt95,
-      bodyFontSize: bodyFontAt(scaleAt95),
-      scaledWidth:
-        (PAGE_WIDTH * 2 + SPREAD_GAP) * scaleAt95 + SPREAD_PADDING * 2,
-    };
-  }
-
-  // Default: single page at 1.0 scale, centered
+  // Below 1330px: single page at 1.0 scale, centered
   return {
     mode: "single",
     scale: 1.0,

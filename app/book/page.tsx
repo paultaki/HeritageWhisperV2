@@ -875,29 +875,29 @@ export default function BookViewNew() {
   const totalPages = pages.length;
 
   const goToPrevious = () => {
-    if (isMobile) {
-      setCurrentMobilePage((prev) => Math.max(0, prev - 1));
-    } else {
+    if (showSpreadView) {
       setCurrentSpreadIndex((prev) => Math.max(0, prev - 1));
+    } else {
+      setCurrentMobilePage((prev) => Math.max(0, prev - 1));
     }
   };
 
   const goToNext = () => {
-    if (isMobile) {
-      setCurrentMobilePage((prev) => Math.min(totalPages - 1, prev + 1));
-    } else {
+    if (showSpreadView) {
       setCurrentSpreadIndex((prev) => Math.min(totalSpreads - 1, prev + 1));
+    } else {
+      setCurrentMobilePage((prev) => Math.min(totalPages - 1, prev + 1));
     }
   };
 
   const navigateToPage = (pageIndex: number) => {
-    if (isMobile) {
-      setCurrentMobilePage(Math.min(Math.max(0, pageIndex), totalPages - 1));
-    } else {
+    if (showSpreadView) {
       const spreadIndex = Math.floor(pageIndex / 2);
       setCurrentSpreadIndex(
         Math.min(Math.max(0, spreadIndex), totalSpreads - 1),
       );
+    } else {
+      setCurrentMobilePage(Math.min(Math.max(0, pageIndex), totalPages - 1));
     }
   };
 

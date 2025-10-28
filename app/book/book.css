@@ -699,13 +699,7 @@
       }
     }
 
-    /* Tighter brown border in single-page view */
-    @media (max-width: 1329px) {
-      .book-container {
-        max-width: 650px;
-        padding: 1.5rem;
-      }
-    }
+
 
     /* Z-index hierarchy (screen only) */
     .book-wrap {

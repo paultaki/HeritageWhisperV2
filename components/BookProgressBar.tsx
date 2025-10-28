@@ -123,9 +123,9 @@ export default function BookProgressBar({
         height: '56px',
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex flex-col md:flex-row md:items-center gap-2 md:gap-0 py-2 md:py-0">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex flex-col md:flex-row md:items-center gap-2 md:gap-0 pt-[20px] md:pt-0 py-2 md:py-0">
         {/* Top on mobile / Left on desktop: Progress bar area */}
-        <div className="flex-1 md:mr-4 w-full md:max-w-[calc(100%-220px)]">
+        <div className="flex-1 md:mr-4 w-full max-w-[calc(100%-90px)] md:max-w-[calc(100%-220px)]">
           <div className="relative">
             {/* Progress bar */}
             <div

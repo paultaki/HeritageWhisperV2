@@ -183,7 +183,7 @@ export default function MobileNavigation({
         {/* Story Ideas - Profile removed since it's in hamburger menu */}
         <NavItem
           icon={Lightbulb}
-          label="Story Ideas"
+          label="Story"
           href="/prompts"
           isActive={pathname === "/prompts"}
         />
