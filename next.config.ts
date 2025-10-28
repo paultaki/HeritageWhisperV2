@@ -44,7 +44,7 @@ const nextConfig: NextConfig = {
       img-src 'self' data: blob: https://*.supabase.co;
       font-src 'self' https://fonts.gstatic.com;
       media-src 'self' blob: https://*.supabase.co;
-      connect-src 'self' https://*.supabase.co https://api.openai.com https://ai-gateway.vercel.sh https://api.assemblyai.com wss://*.supabase.co;
+      connect-src 'self' blob: https://*.supabase.co https://api.openai.com https://ai-gateway.vercel.sh https://api.assemblyai.com wss://*.supabase.co;
       worker-src 'self' blob:;
       object-src 'none';
       base-uri 'self';

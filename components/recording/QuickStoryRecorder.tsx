@@ -14,7 +14,7 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { WaveformVisualizer } from "./WaveformVisualizer";
 import { useAudioAnalyzer } from "@/hooks/use-audio-analyzer";
-import { CustomAudioPlayer } from "./CustomAudioPlayer";
+import { WaveformAudioPlayer } from "./WaveformAudioPlayer";
 
 interface QuickStoryRecorderProps {
   isOpen: boolean;
@@ -607,14 +607,15 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   )}
                 </div>
 
-                {/* Waveform Visualizer */}
-                <div className="rounded-xl border border-[#E0D9D7] bg-[#EBE8E6] p-4 shadow-sm ring-1 ring-inset ring-[#E0D9D7] mb-6">
-                  <WaveformVisualizer
-                    frequencyData={frequencyData}
-                    isRecording={state === "recording"}
-                    isPaused={state === "paused"}
-                    decibelLevel={decibelLevel}
-                  />
+                {/* Waveform Visualizer - Max width 490px on desktop */}
+                <div className="mx-auto w-full max-w-[490px] mb-6">
+                  <div className="rounded-xl border border-[#E0D9D7] bg-[#EBE8E6] p-4 shadow-sm ring-1 ring-inset ring-[#E0D9D7]">
+                    <WaveformVisualizer
+                      frequencyData={frequencyData}
+                      isRecording={state === "recording"}
+                      isPaused={state === "paused"}
+                      decibelLevel={decibelLevel}
+                    />
 
                   {/* Controls inside the card */}
                   <div className="mt-4 flex items-center justify-between border-t border-[#E0D9D7] pt-3">
@@ -667,6 +668,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                       )}
                     </div>
                   </div>
+                  </div>
                 </div>
 
                 {/* Progress bar */}
@@ -701,8 +703,8 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   </p>
                 </div>
 
-                {/* Custom Audio Player Card */}
-                <CustomAudioPlayer
+                {/* Waveform Audio Player */}
+                <WaveformAudioPlayer
                   audioUrl={audioReviewUrl}
                   duration={duration}
                 />
