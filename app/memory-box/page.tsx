@@ -31,6 +31,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { MemoryOverlay } from "@/components/MemoryOverlay";
 import { Story as SupabaseStory } from "@/lib/supabase";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface Story {
   id: string;
@@ -136,6 +137,8 @@ export default function MemoryBoxPage() {
   const router = useRouter();
   const { user, session } = useAuth();
   const modeSelection = useModeSelection();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -655,9 +658,8 @@ export default function MemoryBoxPage() {
             onToggleTimeline={handleToggleTimeline}
             onToggleBook={handleToggleBook}
             onDelete={(id) => {
-              if (confirm("Delete this memory? This cannot be undone.")) {
-                deleteStory.mutate(id);
-              }
+              setStoryToDelete(id);
+              setShowDeleteConfirm(true);
             }}
             density="comfortable"
           />
@@ -694,9 +696,8 @@ export default function MemoryBoxPage() {
                   onEdit={() => handleOpenOverlay(story)}
                   onToggleFavorite={() => handleToggleFavorite(story.id)}
                   onDelete={() => {
-                    if (confirm("Delete this memory? This cannot be undone.")) {
-                      deleteStory.mutate(story.id);
-                    }
+                    setStoryToDelete(story.id);
+                    setShowDeleteConfirm(true);
                   }}
                   onToggleTimeline={() => handleToggleTimeline(story.id)}
                   onToggleBook={() => handleToggleBook(story.id)}
@@ -799,6 +800,27 @@ export default function MemoryBoxPage() {
           originPath="/memory-box"
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete Memory?"
+        message="Are you sure you want to delete this memory? This action cannot be undone."
+        confirmText="Yes, Delete"
+        cancelText="Keep Memory"
+        onConfirm={() => {
+          if (storyToDelete) {
+            deleteStory.mutate(storyToDelete);
+          }
+          setShowDeleteConfirm(false);
+          setStoryToDelete(null);
+        }}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setStoryToDelete(null);
+        }}
+        variant="danger"
+      />
     </div>
   );
 }

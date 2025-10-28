@@ -91,6 +91,7 @@ export function BookStyleReview({
     character?: string;
   } | null>(null);
   const [showLessonOptions, setShowLessonOptions] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { toast } = useToast();
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -248,14 +249,24 @@ export function BookStyleReview({
           <h1 className="text-2xl md:text-3xl font-serif text-gray-800 flex-shrink-0">
             Review Memory
           </h1>
-          <Button
-            variant="outline"
-            onClick={onCancel}
-            disabled={isSaving}
-            className="rounded-full px-4 md:px-6 py-4 md:py-6 text-base md:text-lg ml-auto"
-          >
-            Cancel
-          </Button>
+          <div className="flex items-center gap-2 md:gap-3 ml-auto">
+            {isEditing && (
+              <Button
+                onClick={onSave}
+                disabled={isSaving}
+                className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white rounded-full px-4 md:px-6 py-4 md:py-6 text-base md:text-lg"
+              >
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
+            )}
+            <Button
+              onClick={onCancel}
+              disabled={isSaving}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded-full px-4 md:px-6 py-4 md:py-6 text-base md:text-lg"
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -942,7 +953,7 @@ export function BookStyleReview({
         {isEditing && onDelete && (
           <Button
             variant="outline"
-            onClick={onDelete}
+            onClick={() => setShowDeleteConfirm(true)}
             disabled={isSaving}
             className="w-full rounded-full py-7 text-xl font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
           >
@@ -951,6 +962,52 @@ export function BookStyleReview({
           </Button>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {onDelete && (
+        <div className={showDeleteConfirm ? "block" : "hidden"}>
+          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
+            <div
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in fade-in slide-in-from-bottom-4 duration-300"
+              style={{
+                boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+              }}
+            >
+              {/* Content */}
+              <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-4">
+                {/* Title */}
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+                  Delete Memory?
+                </h2>
+
+                {/* Message */}
+                <p className="text-lg sm:text-xl text-gray-700 leading-relaxed whitespace-pre-line">
+                  Are you sure you want to delete this memory? This action cannot be undone.
+                </p>
+              </div>
+
+              {/* Buttons */}
+              <div className="bg-gray-50 px-6 sm:px-8 py-4 sm:py-5 rounded-b-2xl flex flex-col-reverse sm:flex-row gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 bg-white hover:bg-gray-100 text-gray-700 font-semibold px-6 py-3 rounded-xl border-2 border-gray-300 text-base sm:text-lg transition-all"
+                >
+                  Keep Memory
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    onDelete();
+                  }}
+                  className="flex-1 font-semibold px-6 py-3 rounded-xl text-base sm:text-lg transition-all shadow-md hover:shadow-lg bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white"
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
