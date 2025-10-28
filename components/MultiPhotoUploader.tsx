@@ -57,6 +57,32 @@ const normalizePhotoUrl = (url: string) => {
   return url;
 };
 
+// Migration helper: Convert legacy pixel-based transforms to percentage-based
+const normalizeTransform = (transform?: { zoom: number; position: { x: number; y: number } }): { zoom: number; position: { x: number; y: number } } => {
+  if (!transform) return { zoom: 1, position: { x: 0, y: 0 } };
+
+  const { zoom, position } = transform;
+
+  // Detect old pixel-based transforms (typically > 100 in absolute value)
+  // Legacy transforms used pixels, new ones use percentages (-100 to +100)
+  if (Math.abs(position.x) > 100 || Math.abs(position.y) > 100) {
+    // Legacy pixel values - convert to percentage
+    // Assume original container was ~600px wide (typical modal size)
+    const LEGACY_CONTAINER_WIDTH = 600;
+    const LEGACY_CONTAINER_HEIGHT = 400; // 3:2 aspect ratio
+    return {
+      zoom,
+      position: {
+        x: (position.x / LEGACY_CONTAINER_WIDTH) * 100,
+        y: (position.y / LEGACY_CONTAINER_HEIGHT) * 100,
+      }
+    };
+  }
+
+  // Already percentage-based (or zero)
+  return transform;
+};
+
 export function MultiPhotoUploader({
   storyId,
   photos,
@@ -73,6 +99,8 @@ export function MultiPhotoUploader({
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null]);
+  const containerRef = useRef<HTMLDivElement>(null); // For edit modal container dimensions
+  const imageRef = useRef<HTMLImageElement>(null); // For edit modal image dimensions
   const { toast } = useToast();
 
   // Transform state for selected photo editing
@@ -84,13 +112,13 @@ export function MultiPhotoUploader({
   } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [initialTransform, setInitialTransform] = useState<{ x: number; y: number } | null>(null);
 
   // Initialize editing transform when selecting a photo
   useEffect(() => {
     if (selectedPhoto) {
-      setEditingTransform(
-        selectedPhoto.transform || { zoom: 1, position: { x: 0, y: 0 } },
-      );
+      // Use normalizeTransform to convert legacy pixel-based transforms to percentages
+      setEditingTransform(normalizeTransform(selectedPhoto.transform));
       // Prevent body scroll when modal is open
       document.body.style.overflow = "hidden";
     } else {
@@ -305,21 +333,50 @@ export function MultiPhotoUploader({
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!editingTransform) return;
+    if (!editingTransform || !containerRef.current) return;
     setIsDragging(true);
+
+    // Store the starting mouse position (in pixels)
     setDragStart({
-      x: e.clientX - editingTransform.position.x,
-      y: e.clientY - editingTransform.position.y,
+      x: e.clientX,
+      y: e.clientY,
+    });
+
+    // Store the initial transform position (in percentages)
+    setInitialTransform({
+      x: editingTransform.position.x,
+      y: editingTransform.position.y,
     });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !editingTransform) return;
-    const newPosition = {
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
-    };
-    setEditingTransform({ ...editingTransform, position: newPosition });
+    if (!isDragging || !editingTransform || !containerRef.current || !initialTransform) return;
+
+    // Calculate pixel delta from drag start
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+
+    // Get container dimensions
+    const containerRect = containerRef.current.getBoundingClientRect();
+
+    // Convert pixel delta to percentage of container width/height
+    const percentDeltaX = (deltaX / containerRect.width) * 100;
+    const percentDeltaY = (deltaY / containerRect.height) * 100;
+
+    // Add percentage delta to initial position
+    const newX = initialTransform.x + percentDeltaX;
+    const newY = initialTransform.y + percentDeltaY;
+
+    // Clamp to reasonable bounds (considering zoom level)
+    // Allow more movement at higher zoom levels
+    const maxPercent = 50 * editingTransform.zoom;
+    const clampedX = Math.max(-maxPercent, Math.min(maxPercent, newX));
+    const clampedY = Math.max(-maxPercent, Math.min(maxPercent, newY));
+
+    setEditingTransform({
+      ...editingTransform,
+      position: { x: clampedX, y: clampedY },
+    });
   };
 
   const handleMouseUp = () => {
@@ -328,24 +385,52 @@ export function MultiPhotoUploader({
 
   // Touch handlers for mobile drag support
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (!editingTransform || e.touches.length !== 1) return;
+    if (!editingTransform || e.touches.length !== 1 || !containerRef.current) return;
     const touch = e.touches[0];
     setIsDragging(true);
+
+    // Store the starting touch position (in pixels)
     setDragStart({
-      x: touch.clientX - editingTransform.position.x,
-      y: touch.clientY - editingTransform.position.y,
+      x: touch.clientX,
+      y: touch.clientY,
+    });
+
+    // Store the initial transform position (in percentages)
+    setInitialTransform({
+      x: editingTransform.position.x,
+      y: editingTransform.position.y,
     });
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !editingTransform || e.touches.length !== 1) return;
+    if (!isDragging || !editingTransform || e.touches.length !== 1 || !containerRef.current || !initialTransform) return;
     e.preventDefault(); // Prevent scrolling while dragging
     const touch = e.touches[0];
-    const newPosition = {
-      x: touch.clientX - dragStart.x,
-      y: touch.clientY - dragStart.y,
-    };
-    setEditingTransform({ ...editingTransform, position: newPosition });
+
+    // Calculate pixel delta from drag start
+    const deltaX = touch.clientX - dragStart.x;
+    const deltaY = touch.clientY - dragStart.y;
+
+    // Get container dimensions
+    const containerRect = containerRef.current.getBoundingClientRect();
+
+    // Convert pixel delta to percentage of container width/height
+    const percentDeltaX = (deltaX / containerRect.width) * 100;
+    const percentDeltaY = (deltaY / containerRect.height) * 100;
+
+    // Add percentage delta to initial position
+    const newX = initialTransform.x + percentDeltaX;
+    const newY = initialTransform.y + percentDeltaY;
+
+    // Clamp to reasonable bounds (considering zoom level)
+    const maxPercent = 50 * editingTransform.zoom;
+    const clampedX = Math.max(-maxPercent, Math.min(maxPercent, newX));
+    const clampedY = Math.max(-maxPercent, Math.min(maxPercent, newY));
+
+    setEditingTransform({
+      ...editingTransform,
+      position: { x: clampedX, y: clampedY },
+    });
   };
 
   const handleTouchEnd = () => {
@@ -404,10 +489,10 @@ export function MultiPhotoUploader({
                         className="absolute inset-0 w-full h-full"
                         style={{
                           transform: photo.transform
-                            ? `scale(${photo.transform.zoom}) translate(${photo.transform.position.x / photo.transform.zoom}px, ${photo.transform.position.y / photo.transform.zoom}px)`
-                            : 'scale(1) translate(0px, 0px)',
+                            ? `scale(${photo.transform.zoom}) translate(${photo.transform.position.x}%, ${photo.transform.position.y}%)`
+                            : 'scale(1) translate(0%, 0%)',
                           transformOrigin: "center center",
-                          objectFit: "contain",
+                          objectFit: "cover",
                           objectPosition: "center center",
                         }}
                       />
@@ -552,6 +637,7 @@ export function MultiPhotoUploader({
                 <div className="relative w-full aspect-[3/2] rounded-lg overflow-hidden bg-white shadow-lg">
                   {/* Image container - must match thumbnail structure EXACTLY */}
                   <div
+                    ref={containerRef}
                     className="absolute inset-0 overflow-hidden select-none"
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
@@ -564,13 +650,14 @@ export function MultiPhotoUploader({
                     style={{ touchAction: "none" }}
                   >
                     <img
+                      ref={imageRef}
                       src={normalizePhotoUrl(selectedPhoto.url)}
                       alt="Edit photo"
                       className="absolute inset-0 w-full h-full transition-transform cursor-move"
                       style={{
-                        transform: `scale(${editingTransform.zoom}) translate(${editingTransform.position.x / editingTransform.zoom}px, ${editingTransform.position.y / editingTransform.zoom}px)`,
+                        transform: `scale(${editingTransform.zoom}) translate(${editingTransform.position.x}%, ${editingTransform.position.y}%)`,
                         transformOrigin: "center center",
-                        objectFit: "contain",
+                        objectFit: "cover",
                         objectPosition: "center center",
                       }}
                       draggable={false}

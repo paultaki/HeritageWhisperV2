@@ -527,7 +527,7 @@ export const MemoryCard = React.memo(
             style={
               displayPhoto.transform
                 ? {
-                    transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x / displayPhoto.transform.zoom}px, ${displayPhoto.transform.position.y / displayPhoto.transform.zoom}px)`,
+                    transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x}%, ${displayPhoto.transform.position.y}%)`,
                     transformOrigin: "center center",
                     objectFit: "cover",
                   }
