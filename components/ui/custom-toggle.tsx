@@ -27,7 +27,7 @@ export function CustomToggle({
     const label = labelRef.current;
 
     // Apply styles based on checked state
-    container.style.backgroundColor = checked ? "#f3b519" : "#e8e8e8";
+    container.style.backgroundColor = checked ? "#7C6569" : "#e8e8e8";
     knob.style.left = checked ? "1.5625em" : ".0625em";
     label.textContent = checked ? "On" : "Off";
     label.className = `text-xs w-7 text-right select-none ${
@@ -86,7 +86,7 @@ export function CustomToggle({
             borderRadius: ".375em",
             width: "3em",
             height: "1.5em",
-            backgroundColor: checked ? "#f3b519" : "#e8e8e8",
+            backgroundColor: checked ? "#7C6569" : "#e8e8e8",
             boxShadow:
               "inset 0 0 .0625em .125em rgb(255 255 255 / .2), inset 0 .0625em .125em rgb(0 0 0 / .4)",
             transition: "background-color .4s linear",

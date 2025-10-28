@@ -12,6 +12,8 @@ import { useAuth } from "@/lib/auth";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import { WaveformVisualizer } from "./WaveformVisualizer";
+import { useAudioAnalyzer } from "@/hooks/use-audio-analyzer";
 
 interface QuickStoryRecorderProps {
   isOpen: boolean;
@@ -41,7 +43,14 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
   const [showDiscardTextConfirm, setShowDiscardTextConfirm] = useState(false);
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [showUploadError, setShowUploadError] = useState(false);
+  const [isRecordButtonHovered, setIsRecordButtonHovered] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Audio analyzer for waveform visualization
+  const { frequencyData, decibelLevel, connect, disconnect } = useAudioAnalyzer({
+    fftSize: 128, // 64 frequency bins for 28 bars
+    smoothingTimeConstant: 0.75,
+  });
 
   const {
     state,
@@ -271,11 +280,35 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
     restartRecording();
   };
 
+  // Connect audio analyzer when recording starts
+  useEffect(() => {
+    if (state === "recording" && !audioReviewUrl) {
+      // Get the microphone stream from getUserMedia
+      navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+        connect(stream);
+      }).catch((err) => {
+        console.error("[QuickStoryRecorder] Failed to connect audio analyzer:", err);
+      });
+    } else if (state !== "recording" && state !== "paused") {
+      // Disconnect when not recording
+      disconnect();
+    }
+
+    return () => {
+      if (state !== "recording" && state !== "paused") {
+        disconnect();
+      }
+    };
+  }, [state, audioReviewUrl, connect, disconnect]);
+
   // Reset everything when modal closes
   useEffect(() => {
     if (!isOpen) {
       // Modal closed - reset everything for next time it opens
       console.log("[QuickStoryRecorder] Modal closed, scheduling reset");
+      
+      // Disconnect audio analyzer
+      disconnect();
       
       // Use timeout to ensure cleanup happens after modal animation
       const timeoutId = setTimeout(() => {
@@ -286,11 +319,25 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
       
       return () => clearTimeout(timeoutId);
     }
-  }, [isOpen, cancelRecording]); // Run when modal closes
+  }, [isOpen, cancelRecording, disconnect]); // Run when modal closes
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-2xl">
+      <DialogContent
+        className="max-w-full sm:max-w-full p-0 gap-0"
+        style={{
+          margin: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          transform: 'none',
+          height: '100vh',
+          width: '100vw',
+          maxHeight: '100vh',
+          borderRadius: 0
+        }}
+      >
         {/* Visually hidden title for accessibility */}
         <DialogTitle className="sr-only">
           Quick Story Recorder
@@ -300,7 +347,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
         </DialogDescription>
 
         {/* Logo - 3x larger */}
-        <div className="flex justify-center mb-6 pt-2">
+        <div className="flex justify-center" style={{ marginTop: '-50px', marginBottom: '-110px' }}>
           <Image
             src="/Logo hw.svg"
             alt="Heritage Whisper"
@@ -320,7 +367,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="text-center py-8"
+                className="text-center py-4"
               >
                 {/* Display prompt question if provided */}
                 {promptQuestion && (
@@ -334,100 +381,100 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   </>
                 )}
 
-                <h2 className="text-2xl font-semibold mb-3">How would you like to share your story?</h2>
-                <p className="text-gray-600 mb-8 max-w-md mx-auto text-center">
-                  Choose to record with your voice or type your story
-                </p>
+                <h2 className="text-2xl font-semibold mb-16">Share Your Story</h2>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button
-                    onClick={() => setMode('voice')}
-                    size="lg"
-                    className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white px-8 py-6 text-base rounded-full shadow-lg"
+                {/* Hero Record Button */}
+                <div className="flex flex-col items-center">
+                  <div
+                    className="relative mb-4"
+                    onMouseEnter={() => setIsRecordButtonHovered(true)}
+                    onMouseLeave={() => setIsRecordButtonHovered(false)}
                   >
-                    <Mic className="w-5 h-5 mr-2" />
-                    Record with Voice
-                  </Button>
-                  <Button
-                    onClick={() => setMode('text')}
-                    size="lg"
-                    variant="outline"
-                    className="px-8 py-6 text-base rounded-full border-2"
-                  >
-                    <PenTool className="w-5 h-5 mr-2" />
-                    Type Your Story
-                  </Button>
-                </div>
+                    <button
+                      onClick={startRecording}
+                      className="relative w-32 h-32 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-[#8b6b7a]/30"
+                      style={{
+                        background: "linear-gradient(135deg, #8b6b7a 0%, #b88b94 100%)",
+                        boxShadow: "0 8px 24px rgba(139, 107, 122, 0.5), inset 0 4px 8px rgba(255, 255, 255, 0.4), inset 0 -4px 8px rgba(0, 0, 0, 0.25)",
+                        border: "2px solid rgba(255, 255, 255, 0.4)",
+                      }}
+                    >
+                      {/* Pulse animation ring - only on hover */}
+                      {isRecordButtonHovered && (
+                        <motion.div
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: "linear-gradient(135deg, #8b6b7a 0%, #b88b94 100%)",
+                          }}
+                          animate={{
+                            scale: [1, 1.25, 1.25],
+                            opacity: [0.5, 0, 0],
+                          }}
+                          transition={{
+                            duration: 2.6,
+                            repeat: Infinity,
+                            repeatDelay: 0.65,
+                          }}
+                        />
+                      )}
 
-                {/* Upload audio file option */}
-                <div className="text-center mt-6">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="audio/*"
-                    onChange={handleAudioUpload}
-                    className="hidden"
-                    disabled={isUploadingAudio}
-                  />
+                      {/* Icon */}
+                      <Image
+                        src="/silver_mic_sm.png"
+                        alt="Record"
+                        width={32}
+                        height={32}
+                        className="z-10"
+                      />
+                    </button>
+                  </div>
+
+                  {/* Label below button - centered */}
+                  <p className="text-center text-gray-600 font-medium mb-12 w-full">
+                    Tap to Record
+                  </p>
+
+                  {/* Type option - subtle text link - centered */}
                   <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploadingAudio}
-                    className="text-sm text-gray-600 hover:text-gray-800 underline decoration-dotted underline-offset-4 disabled:opacity-50"
+                    onClick={() => setMode('text')}
+                    className="flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-gray-700 opacity-60 hover:opacity-100 transition-all mb-6 hover:underline decoration-dotted underline-offset-4 w-full"
                   >
-                    {isUploadingAudio ? (
-                      <>
-                        <Loader2 className="inline w-4 h-4 mr-1 animate-spin" />
-                        Processing audio...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="inline w-4 h-4 mr-1" />
-                        or upload an audio file instead
-                      </>
-                    )}
+                    <PenTool className="w-4 h-4" />
+                    <span>or type your story instead</span>
                   </button>
+
+                  {/* Upload option - even more subtle - centered */}
+                  <div className="flex justify-center w-full">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="audio/*"
+                      onChange={handleAudioUpload}
+                      className="hidden"
+                      disabled={isUploadingAudio}
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploadingAudio}
+                      className="flex items-center justify-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 opacity-50 hover:opacity-80 transition-all disabled:opacity-50 hover:underline decoration-dotted underline-offset-4"
+                    >
+                      {isUploadingAudio ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Processing audio...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>or upload an audio file</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}
 
-            {/* Voice Recording Ready State */}
-            {mode === 'voice' && state === "ready" && (
-              <motion.div
-                key="voice-ready"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="text-center py-12"
-              >
-                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#e8dce8] to-[#f0e0e8] flex items-center justify-center">
-                  <Mic className="w-12 h-12 text-[#8b6b7a]" />
-                </div>
-
-                <h2 className="text-2xl font-semibold mb-4">Ready to Record</h2>
-                <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                  You'll have up to 10 minutes to record. You can pause and resume anytime.
-                </p>
-
-                <div className="flex gap-3 justify-center px-4">
-                  <Button
-                    onClick={() => setMode('select')}
-                    size="lg"
-                    variant="outline"
-                    className="rounded-full px-4 sm:px-6 flex-shrink"
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    onClick={startRecording}
-                    size="lg"
-                    className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white px-6 sm:px-12 py-6 text-base sm:text-lg rounded-full shadow-lg flex-shrink-0"
-                  >
-                    <Mic className="w-5 h-5 mr-2" />
-                    Start Recording
-                  </Button>
-                </div>
-              </motion.div>
-            )}
 
             {/* Text Input Mode */}
             {mode === 'text' && (
@@ -503,7 +550,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 1.2, opacity: 0 }}
-                className="text-center py-16"
+                className="flex flex-col items-center justify-center text-center py-16"
               >
                 <motion.div
                   key={countdown}
@@ -514,7 +561,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 >
                   {countdown}
                 </motion.div>
-                <p className="text-gray-600 text-lg">Get ready...</p>
+                <p className="text-gray-600 text-lg text-center">Get ready...</p>
               </motion.div>
             )}
 
@@ -525,40 +572,104 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="py-8"
+                className="px-6"
               >
-                {/* Status indicator */}
-                <div className="flex items-center justify-center gap-2 mb-6">
+                {/* Recording Story title centered below logo */}
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-semibold text-[#322B27]">
+                    Recording Story
+                  </h3>
+                </div>
+
+                {/* Timer and status badges */}
+                <div className="mb-6 flex items-center justify-center gap-3">
+                  <div className="flex items-center gap-1.5 rounded-md border border-[#E0D9D7] bg-[#EBE8E6] px-2.5 py-1.5 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7]">
+                    <span className="tabular-nums font-mono">{formatDuration(duration)}</span>
+                  </div>
                   {state === "recording" && (
-                    <>
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ repeat: Infinity, duration: 1.5 }}
-                        className="w-3 h-3 rounded-full bg-red-500"
-                      />
-                      <span className="text-red-600 font-semibold">Recording</span>
-                    </>
+                    <div className="inline-flex items-center gap-2 rounded-md border border-[#7C6569] bg-[#7C6569] px-3 py-1.5 text-[13px] text-[#FAF8F6] shadow-sm ring-1 ring-inset ring-[#9C7280]/40">
+                      <span className="relative inline-flex h-2.5 w-2.5 items-center justify-center">
+                        <motion.span
+                          className="absolute inline-block h-2.5 w-2.5 rounded-full bg-[#FAF8F6] shadow-[0_0_0_1px_rgba(50,43,39,0.08)]"
+                          animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
+                          transition={{ repeat: Infinity, duration: 1.5 }}
+                        />
+                        <span className="absolute inline-block h-2.5 w-2.5 rounded-full bg-[#BFA9AB] blur-[2px]" />
+                      </span>
+                      Recording
+                    </div>
                   )}
                   {state === "paused" && (
-                    <>
-                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                      <span className="text-yellow-600 font-semibold">Paused</span>
-                    </>
+                    <div className="inline-flex items-center gap-2 rounded-md border border-[#99898C] bg-[#99898C] px-3 py-1.5 text-[13px] text-white shadow-sm">
+                      Paused
+                    </div>
                   )}
                 </div>
 
-                {/* Timer display */}
-                <div className="text-center mb-6 sm:mb-8">
-                  <div className="text-5xl sm:text-6xl font-mono font-bold text-gray-800 mb-2">
-                    {formatDuration(duration)}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {formatDuration(maxDuration - duration)} remaining
+                {/* Waveform Visualizer */}
+                <div className="rounded-xl border border-[#E0D9D7] bg-[#EBE8E6] p-4 shadow-sm ring-1 ring-inset ring-[#E0D9D7] mb-6">
+                  <WaveformVisualizer
+                    frequencyData={frequencyData}
+                    isRecording={state === "recording"}
+                    isPaused={state === "paused"}
+                    decibelLevel={decibelLevel}
+                  />
+
+                  {/* Controls inside the card */}
+                  <div className="mt-4 flex items-center justify-between border-t border-[#E0D9D7] pt-3">
+                    <div className="text-[13px] text-[#99898C]">
+                      {formatDuration(maxDuration - duration)} remaining
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {state === "recording" && (
+                        <>
+                          <button
+                            onClick={pauseRecording}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-[#E0D9D7] bg-[#FAF8F6] px-2.5 py-1.5 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
+                          >
+                            <Pause className="h-4 w-4" />
+                            Pause
+                          </button>
+                          <button
+                            onClick={stopRecording}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-[#E0D9D7] bg-[#FAF8F6] px-2.5 py-1.5 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
+                          >
+                            <Square className="h-4 w-4" />
+                            Stop
+                          </button>
+                        </>
+                      )}
+                      {state === "paused" && (
+                        <>
+                          <button
+                            onClick={resumeRecording}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-[#7C6569] bg-[#7C6569] px-2.5 py-1.5 text-[13px] text-[#FAF8F6] shadow-sm ring-1 ring-inset ring-[#9C7280]/40 transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[#9C7280]/60 active:scale-[0.99]"
+                          >
+                            <Play className="h-4 w-4" />
+                            Resume
+                          </button>
+                          <button
+                            onClick={stopRecording}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-[#E0D9D7] bg-[#FAF8F6] px-2.5 py-1.5 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
+                          >
+                            <Square className="h-4 w-4" />
+                            Stop
+                          </button>
+                          <button
+                            onClick={handleRestartClick}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-[#E0D9D7] bg-[#FAF8F6] px-2.5 py-1.5 text-[13px] text-[#322B27] shadow-sm ring-1 ring-inset ring-[#E0D9D7] transition hover:bg-[#EBE8E6] focus:outline-none focus:ring-2 focus:ring-[#9C7280]/50 active:scale-[0.99]"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                            Restart
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-8">
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                   <motion.div
                     className="h-full bg-gradient-to-r from-[#8b6b7a] to-[#b88b94]"
                     initial={{ width: "0%" }}
@@ -567,89 +678,9 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   />
                 </div>
 
-                {/* Waveform placeholder */}
-                <div className="flex items-center justify-center gap-1 h-16 sm:h-24 mb-6 sm:mb-8">
-                  {state === "recording" &&
-                    Array.from({ length: 30 }).map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="w-1 bg-[#8b6b7a] rounded-full"
-                        animate={{
-                          height: [
-                            `${Math.random() * 60 + 20}%`,
-                            `${Math.random() * 60 + 20}%`,
-                          ],
-                        }}
-                        transition={{
-                          repeat: Infinity,
-                          duration: 0.5,
-                          delay: i * 0.02,
-                        }}
-                      />
-                    ))}
-                  {state === "paused" &&
-                    Array.from({ length: 30 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="w-1 h-8 bg-gray-300 rounded-full"
-                      />
-                    ))}
-                </div>
-
-                {/* Controls */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-                  {state === "recording" && (
-                    <>
-                      <Button
-                        onClick={pauseRecording}
-                        size="lg"
-                        variant="outline"
-                        className="rounded-full px-8 w-full sm:w-auto"
-                      >
-                        <Pause className="w-5 h-5 mr-2" />
-                        Pause
-                      </Button>
-                      <Button
-                        onClick={stopRecording}
-                        size="lg"
-                        className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] rounded-full px-8 w-full sm:w-auto"
-                      >
-                        <Square className="w-5 h-5 mr-2" />
-                        Stop
-                      </Button>
-                    </>
-                  )}
-                  {state === "paused" && (
-                    <>
-                      <Button
-                        onClick={resumeRecording}
-                        size="lg"
-                        className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] rounded-full px-8 w-full sm:w-auto"
-                      >
-                        <Play className="w-5 h-5 mr-2" />
-                        Resume
-                      </Button>
-                      <Button
-                        onClick={stopRecording}
-                        size="lg"
-                        variant="outline"
-                        className="rounded-full px-8 w-full sm:w-auto"
-                      >
-                        <Square className="w-5 h-5 mr-2" />
-                        Stop
-                      </Button>
-                      <Button
-                        onClick={handleRestartClick}
-                        size="lg"
-                        variant="outline"
-                        className="rounded-full px-8 w-full sm:w-auto"
-                      >
-                        <RotateCcw className="w-5 h-5 mr-2" />
-                        Restart
-                      </Button>
-                    </>
-                  )}
-                </div>
+                <p className="mt-3 text-xs text-center text-[#99898C]">
+                  Tip: For best results, speak clearly and minimize background noise
+                </p>
               </motion.div>
             )}
 

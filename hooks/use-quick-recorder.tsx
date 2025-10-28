@@ -5,7 +5,7 @@ import { type RecorderState } from "@/types/recording";
 import { toast } from "@/hooks/use-toast";
 import { useRecordingState } from "@/contexts/RecordingContext";
 
-const MAX_RECORDING_DURATION = 600; // 10 minutes in seconds
+const MAX_RECORDING_DURATION = 180; // 3 minutes in seconds
 
 interface UseQuickRecorderOptions {
   onComplete?: () => void;

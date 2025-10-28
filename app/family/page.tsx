@@ -168,7 +168,7 @@ export default function FamilyPage() {
       particleCount: 100,
       spread: 70,
       origin: origin,
-      colors: ['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5'],
+      colors: ['#7C6569', '#9C7280', '#BFA9AB', '#F9E5E8', '#FAF8F6'],
     });
 
     // Second burst (slight delay)
@@ -178,7 +178,7 @@ export default function FamilyPage() {
         angle: 60,
         spread: 55,
         origin: origin,
-        colors: ['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5'],
+        colors: ['#7C6569', '#9C7280', '#BFA9AB', '#F9E5E8', '#FAF8F6'],
       });
     }, 150);
 
@@ -189,7 +189,7 @@ export default function FamilyPage() {
         angle: 120,
         spread: 55,
         origin: origin,
-        colors: ['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5'],
+        colors: ['#7C6569', '#9C7280', '#BFA9AB', '#F9E5E8', '#FAF8F6'],
       });
     }, 300);
   };
@@ -534,7 +534,12 @@ export default function FamilyPage() {
 
             <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="h-12 px-4 md:px-6">
+              <Button
+                className="h-12 px-4 md:px-6"
+                style={{ backgroundColor: '#7C6569', color: 'white' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+              >
                 <UserPlus className="w-4 h-4 mr-2" />
                 Invite Family
               </Button>
@@ -666,6 +671,9 @@ export default function FamilyPage() {
                     type="submit"
                     disabled={inviteMutation.isPending}
                     className="h-12"
+                    style={{ backgroundColor: '#7C6569', color: 'white' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
                   >
                     <Mail className="w-4 h-4 mr-2" />
                     {inviteMutation.isPending
@@ -686,7 +694,7 @@ export default function FamilyPage() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-center">
-                    <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
+                    <Users className="w-8 h-8 mx-auto mb-2" style={{ color: '#7C6569' }} />
                     <p className="text-3xl font-bold">{totalMembers}</p>
                     <p className="text-sm text-muted-foreground">
                       Family Members
@@ -698,7 +706,7 @@ export default function FamilyPage() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-center">
-                    <Share2 className="w-8 h-8 mx-auto mb-2 text-primary" />
+                    <Share2 className="w-8 h-8 mx-auto mb-2" style={{ color: '#7C6569' }} />
                     <p className="text-3xl font-bold">{sharedStories}</p>
                     <p className="text-sm text-muted-foreground">
                       Shared Stories
@@ -710,7 +718,7 @@ export default function FamilyPage() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-center">
-                    <Eye className="w-8 h-8 mx-auto mb-2 text-primary" />
+                    <Eye className="w-8 h-8 mx-auto mb-2" style={{ color: '#7C6569' }} />
                     <p className="text-3xl font-bold">{totalViews}</p>
                     <p className="text-sm text-muted-foreground">Total Views</p>
                   </div>
@@ -736,7 +744,12 @@ export default function FamilyPage() {
                     <p className="text-muted-foreground mb-4">
                       No family members yet
                     </p>
-                    <Button onClick={() => setInviteDialogOpen(true)}>
+                    <Button
+                      onClick={() => setInviteDialogOpen(true)}
+                      style={{ backgroundColor: '#7C6569', color: 'white' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+                    >
                       <UserPlus className="w-4 h-4 mr-2" />
                       Invite Your First Family Member
                     </Button>
@@ -750,7 +763,7 @@ export default function FamilyPage() {
                       >
                         <div className="flex items-center gap-3 flex-1">
                           <Avatar className="w-12 h-12">
-                            <AvatarFallback className="bg-primary/10 text-primary">
+                            <AvatarFallback style={{ backgroundColor: '#F9E5E8', color: '#7C6569' }}>
                               {(member.name || member.email)[0].toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
@@ -764,7 +777,11 @@ export default function FamilyPage() {
                                   {member.relationship}
                                 </Badge>
                               )}
-                              <Badge variant={member.permissionLevel === 'contributor' ? 'default' : 'outline'} className="text-xs">
+                              <Badge
+                                variant={member.permissionLevel === 'contributor' ? 'default' : 'outline'}
+                                className="text-xs"
+                                style={member.permissionLevel === 'contributor' ? { backgroundColor: '#7C6569', color: 'white' } : {}}
+                              >
                                 {member.permissionLevel === 'contributor' ? '✏️ Contributor' : '👁 Viewer'}
                               </Badge>
                             </div>
@@ -962,8 +979,8 @@ export default function FamilyPage() {
                       return (
                         <div key={activity.id} className="flex gap-3">
                           <div className="flex-shrink-0">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                              <ActivityIcon className="w-4 h-4 text-primary" />
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F9E5E8' }}>
+                              <ActivityIcon className="w-4 h-4" style={{ color: '#7C6569' }} />
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">

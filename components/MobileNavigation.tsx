@@ -154,9 +154,9 @@ export default function MobileNavigation({
                   opacity: [0.5, 0, 0],
                 }}
                 transition={{
-                  duration: 2,
+                  duration: 2.6,
                   repeat: Infinity,
-                  repeatDelay: 0.5,
+                  repeatDelay: 0.65,
                 }}
               />
             )}
@@ -165,8 +165,8 @@ export default function MobileNavigation({
             <Image
               src="/silver_mic_sm.png"
               alt="Record"
-              width={28}
-              height={28}
+              width={25}
+              height={25}
               className={`z-10 ${isRecording ? 'opacity-60' : ''}`}
             />
           </button>

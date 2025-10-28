@@ -708,8 +708,8 @@ export default function MemoryBoxPage() {
         )}
       </section>
 
-          {/* Export Section */}
-          <section className="px-3 pb-8" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+          {/* Export Section - Hidden until feature is ready */}
+          {/* <section className="px-3 pb-8" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
             <Card className="p-6 bg-gradient-to-r from-gray-50 to-gray-100">
               <h3 className="text-xl font-bold mb-4">Export Your Memories</h3>
               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -736,7 +736,7 @@ export default function MemoryBoxPage() {
                 </Button>
               </div>
             </Card>
-          </section>
+          </section> */}
         </main>
       </div>
 

@@ -242,7 +242,10 @@ function FeaturedPromptCard({ prompt, onRecord }: { prompt: any; onRecord: (id: 
         <Button
           onClick={() => onRecord(prompt.id, prompt.prompt_text, prompt.source)}
           size="lg"
-          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 text-base md:text-lg px-6 md:px-8 py-4 md:py-6 rounded-2xl h-auto"
+          className="text-white shadow-lg hover:shadow-xl transition-all duration-200 text-base md:text-lg px-6 md:px-8 py-4 md:py-6 rounded-2xl h-auto"
+          style={{ background: 'linear-gradient(to right, #7C6569, #9C7280)' }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #9C7280, #BFA9AB)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #7C6569, #9C7280)'}
         >
           <Mic className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6 flex-shrink-0" />
           <span>Record Your Answer</span>
@@ -298,16 +301,20 @@ function SimplePromptCard({
             onClick={() => onSave(prompt.id, prompt.prompt_text, prompt.source || 'catalog')}
             size="lg"
             variant="outline"
-            className={`flex-shrink-0 w-12 h-12 p-0 flex items-center justify-center ${isSaved ? 'bg-orange-50 border-orange-300' : ''}`}
+            className={`flex-shrink-0 w-12 h-12 p-0 flex items-center justify-center ${isSaved ? 'border-2' : ''}`}
+            style={isSaved ? { backgroundColor: '#F9E5E8', borderColor: '#BFA9AB' } : {}}
           >
-            <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-orange-500 text-orange-500' : ''}`} />
+            <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-current' : ''}`} style={isSaved ? { color: '#7C6569' } : {}} />
           </Button>
         )}
 
         <Button
           onClick={() => onRecord(prompt.id, prompt.prompt_text, prompt.source || 'catalog')}
           size="lg"
-          className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-lg md:text-xl py-4 md:py-5 px-6 md:px-8 h-auto font-medium rounded-full"
+          className="flex-1 text-white text-lg md:text-xl py-4 md:py-5 px-6 md:px-8 h-auto font-medium rounded-full"
+          style={{ background: 'linear-gradient(to right, #7C6569, #9C7280)' }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #9C7280, #BFA9AB)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #7C6569, #9C7280)'}
         >
           <Mic className="mr-2 md:mr-2.5 h-5 md:h-6 w-5 md:w-6 flex-shrink-0" />
           <span className="whitespace-nowrap">Record</span>
@@ -363,7 +370,10 @@ function FamilyPromptCard({
       <Button
         onClick={() => onRecord(prompt.id, prompt.prompt_text, 'family')}
         size="lg"
-        className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white text-base py-3 md:py-4 px-4 md:px-6 h-auto"
+        className="w-full text-white text-base py-3 md:py-4 px-4 md:px-6 h-auto"
+        style={{ background: 'linear-gradient(to right, #7C6569, #9C7280)' }}
+        onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #9C7280, #BFA9AB)'}
+        onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #7C6569, #9C7280)'}
       >
         <MessageCircle className="mr-1.5 md:mr-2 h-4 md:h-5 w-4 md:w-5 flex-shrink-0" />
         <span>Answer {prompt.submittedBy.name.split(' ')[0]}'s Question</span>
@@ -583,7 +593,10 @@ export default function PromptsV2Page() {
               variant="default"
               size="sm"
               onClick={() => setShowSubmitQuestionDialog(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0"
+              className="text-white flex-shrink-0"
+              style={{ backgroundColor: '#7C6569' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Submit Question
@@ -603,7 +616,10 @@ export default function PromptsV2Page() {
               variant="default"
               size="sm"
               onClick={() => setShowSubmitQuestionDialog(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1"
+              className="text-white text-xs px-2 py-1"
+              style={{ backgroundColor: '#7C6569' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
             >
               <MessageCircle className="h-3 w-3 mr-1" />
               Submit
@@ -891,7 +907,9 @@ export default function PromptsV2Page() {
                   });
                 }}
                 disabled={submitQuestionMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
+                style={{ backgroundColor: '#7C6569', color: 'white' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
               >
                 {submitQuestionMutation.isPending ? "Submitting..." : "Submit Question"}
               </Button>

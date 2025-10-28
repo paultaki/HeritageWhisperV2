@@ -499,19 +499,22 @@ export default function Profile() {
       <DesktopPageHeader
         icon={User}
         title={`Welcome back, ${firstName}`}
-        subtitle="Manage your account, privacy, and AI preferences"
+        subtitle="Manage your account, privacy, and preferences"
         rightContent={
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowHelp((prev) => !prev)}
-            className="text-gray-600 hover:text-orange-600"
+            className="text-gray-600"
+            style={{ color: '#99898C' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#7C6569'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#99898C'}
           >
             <HelpCircle className="h-5 w-5" />
           </Button>
         }
       />
-      
+
       {/* Mobile Header */}
       <MobilePageHeader
         icon={User}
@@ -522,7 +525,10 @@ export default function Profile() {
             variant="ghost"
             size="sm"
             onClick={() => setShowHelp((prev) => !prev)}
-            className="text-gray-600 hover:text-orange-600"
+            className="text-gray-600"
+            style={{ color: '#99898C' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#7C6569'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#99898C'}
           >
             <HelpCircle className="h-5 w-5" />
           </Button>
@@ -535,9 +541,10 @@ export default function Profile() {
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
-            className="bg-amber-50 border-b border-amber-200/70"
+            className="border-b"
+            style={{ backgroundColor: '#F9E5E8', borderColor: '#E0D9D7' }}
           >
-            <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 text-[#7c2d12]">
+            <div className="max-w-6xl mx-auto px-4 md:px-6 py-4" style={{ color: '#7C6569' }}>
               <h3 className="font-semibold text-lg mb-2">Need a hand?</h3>
               <ul className="space-y-1 text-base">
                 <li>• Update your photo, bio, and contact preferences here.</li>
@@ -555,7 +562,7 @@ export default function Profile() {
 
         {/* Main content - centered */}
         <main className="flex-1 min-w-0 pb-20 md:pb-0">
-          <div className="max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-8">
+          <div className="max-w-3xl px-4 md:px-6 py-6 md:py-8" style={{ marginLeft: 0, marginRight: "auto" }}>
               {/* Memory Map, etc. */}
 
         {/* Memory Map - Visual overview of decades */}
@@ -692,6 +699,9 @@ export default function Profile() {
                 <Button
                   type="submit"
                   className="w-full h-12 text-base"
+                  style={{ backgroundColor: '#7C6569', color: 'white' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
                   disabled={updateProfileMutation.isPending}
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -730,14 +740,23 @@ export default function Profile() {
                   </div>
                   <div className="w-full bg-muted rounded-full h-2">
                     <div
-                      className="bg-primary rounded-full h-2 transition-all"
-                      style={{ width: `${storagePercent}%` }}
+                      className="rounded-full h-2 transition-all"
+                      style={{
+                        width: `${storagePercent}%`,
+                        backgroundColor: '#7C6569'
+                      }}
                     />
                   </div>
                 </div>
 
                 {!user.isPaid && (
-                  <Button className="w-full h-12" variant="default">
+                  <Button
+                    className="w-full h-12"
+                    variant="default"
+                    style={{ backgroundColor: '#7C6569', color: 'white' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+                  >
                     <ArrowUpCircle className="w-4 h-4 mr-2" />
                     Upgrade to Premium
                   </Button>
@@ -802,6 +821,9 @@ export default function Profile() {
                 <Button
                   type="submit"
                   className="w-full h-12 text-base"
+                  style={{ backgroundColor: '#7C6569', color: 'white' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
                   disabled={updatePasswordMutation.isPending}
                 >
                   <Lock className="w-4 h-4 mr-2" />
@@ -1096,9 +1118,9 @@ export default function Profile() {
                 </p>
               </div>
 
-              <Separator />
+              {/* PDF Export feature hidden - keeping functionality for future use */}
+              {/* <Separator />
 
-              {/* Export Book PDFs */}
               <div>
                 <h3 className="text-base font-semibold mb-3">Export as PDF Book</h3>
                 <div className="space-y-3">
@@ -1128,7 +1150,7 @@ export default function Profile() {
                     Individual 5.5×8.5" pages for professional printing services
                   </p>
                 </div>
-              </div>
+              </div> */}
             </CardContent>
           </Card>
 

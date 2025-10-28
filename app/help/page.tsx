@@ -653,7 +653,10 @@ export default function HelpPage() {
               onClick={() =>
                 (window.location.href = "mailto:support@heritagewhisper.com")
               }
-              className="bg-heritage-coral hover:bg-heritage-coral/90 text-white px-6 py-3 rounded-full"
+              className="text-white px-6 py-3 rounded-full"
+              style={{ backgroundColor: '#7C6569' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
             >
               Contact Support
             </Button>
