@@ -937,30 +937,32 @@ export function BookStyleReview({
       </div>
 
       {/* Bottom Action Buttons */}
-      <div className="max-w-3xl mx-auto px-4 pb-8 space-y-3">
-        <Button
-          onClick={() => {
-            console.log(
-              "BookStyleReview: Bottom Save button clicked, calling onSave",
-            );
-            onSave();
-          }}
-          disabled={isSaving}
-          className="w-full bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full py-7 text-xl font-medium"
-        >
-          {isSaving ? "Saving..." : "Save"}
-        </Button>
-        {isEditing && onDelete && (
+      <div className="max-w-3xl mx-auto px-4 pb-8">
+        <div className="flex gap-3">
           <Button
-            variant="outline"
-            onClick={() => setShowDeleteConfirm(true)}
+            onClick={() => {
+              console.log(
+                "BookStyleReview: Bottom Save button clicked, calling onSave",
+              );
+              onSave();
+            }}
             disabled={isSaving}
-            className="w-full rounded-full py-7 text-xl font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+            className="flex-1 bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full py-3 text-base font-medium"
           >
-            <Trash2 className="w-6 h-6 mr-2" />
-            Delete Memory
+            {isSaving ? "Saving..." : "Save"}
           </Button>
-        )}
+          {isEditing && onDelete && (
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={isSaving}
+              className="flex-1 rounded-full py-3 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+            >
+              <Trash2 className="w-4 h-4 mr-1.5" />
+              Delete
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Delete Confirmation Modal */}
