@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { WaveformVisualizer } from "./WaveformVisualizer";
 import { useAudioAnalyzer } from "@/hooks/use-audio-analyzer";
+import { CustomAudioPlayer } from "./CustomAudioPlayer";
 
 interface QuickStoryRecorderProps {
   isOpen: boolean;
@@ -358,7 +359,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
           />
         </div>
 
-        <div className="relative">
+        <div className="relative pb-24">
           <AnimatePresence mode="wait">
             {/* Mode Selection */}
             {mode === 'select' && state === "ready" && (
@@ -700,34 +701,11 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                   </p>
                 </div>
 
-                {/* Audio Player Card */}
-                <div className="bg-gradient-to-br from-[#f5f0f5] to-[#f8f3f8] border-2 border-[#d4c4d4] rounded-xl p-6 mb-6">
-                  <div className="flex flex-col items-center mb-4">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] flex items-center justify-center">
-                        <Play className="w-6 h-6 text-white" />
-                      </div>
-                      <div className="text-center">
-                        <p className="font-medium text-gray-900">Your Story</p>
-                        <p className="text-sm text-gray-600">{formatDuration(duration)}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* HTML5 Audio Player */}
-                  <audio
-                    controls
-                    src={audioReviewUrl}
-                    className="w-full rounded-lg"
-                    style={{
-                      outline: "none",
-                    }}
-                  />
-
-                  <p className="text-sm text-gray-600 text-center mt-4">
-                    Listen carefully - you can re-record if needed
-                  </p>
-                </div>
+                {/* Custom Audio Player Card */}
+                <CustomAudioPlayer
+                  audioUrl={audioReviewUrl}
+                  duration={duration}
+                />
 
                 {/* Transcription Status Card */}
                 {transcriptionStatus === 'processing' && (
@@ -808,6 +786,25 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* Bottom Navigation Bar - Fixed */}
+        <div
+          className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-[#E0D9D7] px-6 py-4 flex items-center justify-between z-50"
+          style={{
+            boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.05)',
+          }}
+        >
+          <button
+            onClick={handleClose}
+            className="flex items-center gap-2 text-sm text-[#7C6569] hover:text-[#5a4a4d] transition-colors font-medium"
+          >
+            <X className="w-4 h-4" />
+            <span>Cancel</span>
+          </button>
+
+          {/* Empty space on right for future additions */}
+          <div className="w-20"></div>
         </div>
       </DialogContent>
 
