@@ -392,32 +392,25 @@ export async function GET(request: NextRequest) {
       // AI Prompts System
       prompts: {
         active: (activePromptsRecords || []).map((prompt: any) => ({
+          // IP Protection: Remove internal scoring/classification metadata
+          // Keep only user-facing data and interaction history
           id: prompt.id,
           prompt_text: prompt.prompt_text,
-          context_note: prompt.context_note,
-          anchor_entity: prompt.anchor_entity,
-          anchor_year: prompt.anchor_year,
-          tier: prompt.tier,
-          memory_type: prompt.memory_type,
-          prompt_score: prompt.prompt_score,
-          score_reason: prompt.score_reason,
           user_status: prompt.user_status,
           queue_position: prompt.queue_position,
           shown_count: prompt.shown_count,
           created_at: prompt.created_at,
+          // ❌ Removed: tier, memory_type, prompt_score, score_reason, anchor_entity, anchor_year, context_note
         })),
         history: (promptHistoryRecords || []).map((prompt: any) => ({
+          // IP Protection: Remove internal scoring/classification metadata
           id: prompt.id,
           prompt_text: prompt.prompt_text,
-          anchor_entity: prompt.anchor_entity,
-          anchor_year: prompt.anchor_year,
-          tier: prompt.tier,
-          memory_type: prompt.memory_type,
-          prompt_score: prompt.prompt_score,
           shown_count: prompt.shown_count,
           outcome: prompt.outcome,
           story_id: prompt.story_id,
           archived_at: prompt.archived_at,
+          // ❌ Removed: tier, memory_type, prompt_score, anchor_entity, anchor_year
         })),
         catalog: (userPromptsRecords || []).map((prompt: any) => {
           // IP Protection: Mask catalog prompts to prevent competitors from stealing prompt library
