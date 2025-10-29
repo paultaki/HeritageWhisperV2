@@ -1063,7 +1063,8 @@ export function TimelineDesktop() {
               bottom: '0',
               height: '100%',
               opacity: 0.8,
-              boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1)',
+              border: '1.5px solid #B89B8D',
+              boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)',
             }}
           >
             <div
