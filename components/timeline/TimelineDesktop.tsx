@@ -467,14 +467,14 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           }`}
           onClick={handleCardClick}
           style={{
-            boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.25), 0 4px 8px -2px rgba(0, 0, 0, 0.18)',
+            boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)',
             border: '1.5px solid #B89B8D',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = '0 12px 28px -6px rgba(0, 0, 0, 0.3), 0 6px 12px -3px rgba(0, 0, 0, 0.22)';
+            e.currentTarget.style.boxShadow = '0 16px 40px -6px rgba(0, 0, 0, 0.4), 0 8px 18px -3px rgba(0, 0, 0, 0.3)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = '0 8px 20px -4px rgba(0, 0, 0, 0.25), 0 4px 8px -2px rgba(0, 0, 0, 0.18)';
+            e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)';
           }}
         >
           {/* Photo Section - 16:10 aspect ratio to match mobile, rounded top corners only */}
@@ -607,14 +607,14 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         }`}
         onClick={handleCardClick}
         style={{
-          boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.25), 0 4px 8px -2px rgba(0, 0, 0, 0.18)',
+          boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)',
           border: '1.5px solid #B89B8D',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = '0 12px 28px -6px rgba(0, 0, 0, 0.3), 0 6px 12px -3px rgba(0, 0, 0, 0.22)';
+          e.currentTarget.style.boxShadow = '0 16px 40px -6px rgba(0, 0, 0, 0.4), 0 8px 18px -3px rgba(0, 0, 0, 0.3)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow = '0 8px 20px -4px rgba(0, 0, 0, 0.25), 0 4px 8px -2px rgba(0, 0, 0, 0.18)';
+          e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)';
         }}
       >
         {/* Placeholder Section - 16:10 aspect ratio to match mobile */}
