@@ -222,6 +222,7 @@ export async function PUT(
     const body = validationResult.data;
 
     // First, fetch the existing story to get current values
+    logger.debug(`[PUT /api/stories/${id}] Fetching story for user:`, user.id);
     const { data: existingStory, error: fetchError } = await supabaseAdmin
       .from("stories")
       .select("*")
@@ -230,7 +231,13 @@ export async function PUT(
       .single();
 
     if (fetchError || !existingStory) {
-      logger.error("Story fetch error:", fetchError);
+      logger.error("Story fetch error:", {
+        storyId: id,
+        userId: user.id,
+        error: fetchError,
+        message: fetchError?.message,
+        code: fetchError?.code
+      });
       return NextResponse.json(
         { error: "Story not found or unauthorized" },
         { status: 404 },

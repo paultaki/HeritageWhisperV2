@@ -372,6 +372,9 @@ function BookStyleReviewContent() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       console.log("Starting save mutation...");
+      console.log("[SAVE DEBUG] User ID:", user?.id);
+      console.log("[SAVE DEBUG] Edit ID:", editId);
+      console.log("[SAVE DEBUG] Is Editing:", isEditing);
 
       // Calculate age at the time of the story
       const age =
@@ -853,6 +856,10 @@ function BookStyleReviewContent() {
 
       const url = isEditing ? `/api/stories/${editId}` : "/api/stories";
       const method = isEditing ? "PUT" : "POST";
+
+      console.log("[SAVE DEBUG] Request URL:", url);
+      console.log("[SAVE DEBUG] Request Method:", method);
+      console.log("[SAVE DEBUG] Story Data Keys:", Object.keys(storyData));
 
       const response = await apiRequest(method, url, storyData);
 
