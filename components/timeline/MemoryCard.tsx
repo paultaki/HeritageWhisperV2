@@ -349,7 +349,7 @@ export const MemoryCard = React.memo(
                 ? "return-highlight-animation"
                 : ""
           }`}
-          style={{ "--title-offset": "180px", border: "1.5px solid #D4BDB0" } as React.CSSProperties}
+          style={{ "--title-offset": "180px", border: "2px solid #B89B8D" } as React.CSSProperties}
           onClick={handleCardClick}
           data-testid={`memory-card-${story.id}`}
         >
@@ -481,7 +481,7 @@ export const MemoryCard = React.memo(
               ? "return-highlight-animation"
               : ""
         }`}
-        style={{ "--title-offset": titleOffset, border: "1.5px solid #D4BDB0" } as React.CSSProperties}
+        style={{ "--title-offset": titleOffset, border: "2px solid #B89B8D" } as React.CSSProperties}
         onClick={handleCardClick}
         data-testid={`memory-card-${story.id}`}
       >
