@@ -556,7 +556,7 @@ export function BookStyleReview({
                             )
                           ) {
                             onAudioChange?.(null, null);
-                            setIsRecording(true);
+                            setShowRecordingOverlay(true);
                           }
                         }}
                         className="flex items-center gap-2"

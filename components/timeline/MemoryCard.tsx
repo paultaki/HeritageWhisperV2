@@ -328,17 +328,8 @@ export const MemoryCard = React.memo(
           JSON.stringify(navigationContext),
         );
 
-        // Check if this is "The Year I was Born" story - if so, go to edit instead of book view
-        const isBirthYearStory =
-          story.title?.toLowerCase().includes("born") ||
-          story.title?.toLowerCase().includes("birth");
-        if (isBirthYearStory) {
-          // Navigate directly to edit/review page for birth year story
-          router.push(`/review?edit=${story.id}`);
-        } else {
-          // Navigate to book view for regular stories
-          router.push(`/book?storyId=${story.id}`);
-        }
+        // Navigate to book view for all stories
+        router.push(`/book?storyId=${story.id}`);
       }
     };
 
