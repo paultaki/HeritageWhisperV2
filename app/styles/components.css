@@ -90,7 +90,7 @@ body {
     env(safe-area-inset-top, 0px) + 71px
   ); /* Mobile: positioned 16px higher */
   z-index: 5;
-  background: rgba(250, 248, 245, 0.7); /* Semi-transparent background */
+  background: rgba(250, 248, 245, 0.5); /* More transparent on mobile */
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
   padding: 5px 16px 6px 16px;
