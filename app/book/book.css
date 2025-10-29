@@ -37,8 +37,9 @@
   height: calc(100vh - 136px); /* Account for progress bar (56px) + nav (80px) */
   overflow-y: auto;
   overflow-x: hidden;
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: none; /* Disabled to prevent jittering on iOS */
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* Smooth momentum scrolling on iOS */
 
   /* Rich leather desk gradient with subtle vignette */
   background: linear-gradient(135deg, #2c1f1a 0%, #3a2a22 100%);
@@ -117,8 +118,7 @@
     0 2px 4px rgba(0, 0, 0, 0.06),
     0 10px 24px rgba(0, 0, 0, 0.1);
 
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  /* Scroll snap disabled to prevent jittering on iOS */
   overflow: hidden;
   z-index: 2;
 
@@ -223,8 +223,7 @@
   justify-content: center;
   margin: 0 auto 24px;
   width: var(--spread-width);
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  /* Scroll snap disabled to prevent jittering on iOS */
   position: relative;
   z-index: 2;
 }

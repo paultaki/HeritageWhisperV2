@@ -129,7 +129,7 @@ export default function BookProgressBar({
           <div className="relative">
             {/* Progress bar */}
             <div
-              className="progress-bar-container relative w-full h-2 cursor-pointer overflow-visible group"
+              className="progress-bar-container relative w-full h-4 md:h-4 cursor-pointer overflow-visible group"
               onClick={handleClick}
               onMouseMove={handleMouseMove}
               onMouseEnter={() => setIsHovering(true)}
@@ -140,20 +140,16 @@ export default function BookProgressBar({
               aria-valuemax={totalPages}
               aria-valuenow={currentPage}
             >
-              {/* Background bar that scales on hover */}
+              {/* Background bar - doubled in height, no animation */}
               <div
-                className="absolute inset-0 bg-gray-200 rounded-full transition-transform duration-200"
-                style={{
-                  transform: isHovering ? 'scaleY(2)' : 'scaleY(1)',
-                }}
+                className="absolute inset-0 bg-gray-200 rounded-full"
               />
-              
-              {/* Progress fill - scales with background */}
+
+              {/* Progress fill - doubled in height, no animation */}
               <div
                 className="absolute left-0 top-0 h-full rounded-full transition-all duration-200"
-                style={{ 
+                style={{
                   width: `${progress}%`,
-                  transform: isHovering ? 'scaleY(2)' : 'scaleY(1)',
                   background: 'linear-gradient(135deg, #8b6b7a 0%, #b88b94 100%)',
                 }}
               />
@@ -238,7 +234,7 @@ export default function BookProgressBar({
                     <div
                       key={`label-${decade.decade}`}
                       className="absolute"
-                      style={{ left: `${markerPosition}%`, transform: 'translateX(-50%)' }}
+                      style={{ left: `calc(${markerPosition}% + 3px)`, transform: 'translateX(-50%)' }}
                     >
                       {/* Connector line - shorter */}
                       <div

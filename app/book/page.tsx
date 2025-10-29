@@ -248,7 +248,7 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
   const hasMultiplePhotos = photos.length > 1;
 
   return (
-    <div className="relative mb-4 memory-hero overflow-hidden rounded-lg">
+    <div className="relative mb-4 memory-hero overflow-hidden rounded-lg z-50">
       <img
         src={currentPhoto.url}
         alt="Memory"
@@ -264,11 +264,14 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
       />
       {hasMultiplePhotos && (
         <>
-          {/* Navigation arrows with cleaner design */}
+          {/* Navigation arrows with cleaner design - higher z-index to be above page navigation */}
           {currentPhotoIndex > 0 && (
             <button
-              onClick={() => setCurrentPhotoIndex(currentPhotoIndex - 1)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentPhotoIndex(currentPhotoIndex - 1);
+              }}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg z-[60]"
               aria-label="Previous photo"
             >
               <ChevronLeft className="w-5 h-5 text-gray-700" />
@@ -277,8 +280,11 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
 
           {currentPhotoIndex < photos.length - 1 && (
             <button
-              onClick={() => setCurrentPhotoIndex(currentPhotoIndex + 1)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentPhotoIndex(currentPhotoIndex + 1);
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg z-[60]"
               aria-label="Next photo"
             >
               <ChevronRight className="w-5 h-5 text-gray-700" />
@@ -286,7 +292,7 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
           )}
 
           {/* Photo counter */}
-          <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm">
+          <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm z-[60]">
             <span className="text-white text-sm font-medium">
               {currentPhotoIndex + 1} / {photos.length}
             </span>
@@ -1082,8 +1088,8 @@ export default function BookViewNew() {
 
   return (
     <div className="book-view min-h-screen bg-background">
-      {/* Mobile: Progress Bar with integrated zoom controls */}
-      {isMobile && (
+      {/* Mobile/Tablet: Progress Bar with integrated zoom controls (single-page mode) */}
+      {!showSpreadView && (
         <BookProgressBar
           pages={pages}
           currentPage={currentMobilePage}
@@ -1092,7 +1098,7 @@ export default function BookViewNew() {
           zoomLevel={zoomLevel}
           onZoomIn={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
           onZoomOut={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
-          onOpenDecadeSelector={() => setShowDecadeSelector(true)}
+          onOpenDecadeSelector={isMobile ? () => setShowDecadeSelector(true) : undefined}
         />
       )}
 
@@ -1169,9 +1175,9 @@ export default function BookViewNew() {
         isOpen={modeSelection.quickRecorderOpen}
         onClose={modeSelection.closeQuickRecorder}
       />
-      
-      {/* Desktop: Progress Bar with integrated zoom controls */}
-      {!isMobile && (
+
+      {/* Desktop: Progress Bar with integrated zoom controls (spread mode) */}
+      {showSpreadView && (
         <BookProgressBar
           pages={pages}
           currentPage={currentSpreadIndex * 2}

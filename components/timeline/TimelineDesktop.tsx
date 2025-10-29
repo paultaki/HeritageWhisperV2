@@ -1126,10 +1126,6 @@ export function TimelineDesktop() {
                             showDecadeMarker={showDecadeMarker}
                             decadeLabel={showDecadeMarker ? decadeLabel : undefined}
                             birthYear={user?.birthYear || normalizeYear(user?.birthYear as any) || 0}
-                            onOpenOverlay={(story) => {
-                              setSelectedStory(story);
-                              setOverlayOpen(true);
-                            }}
                           />
                         </div>
                       );

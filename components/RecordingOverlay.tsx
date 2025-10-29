@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AudioRecorder, AudioRecorderHandle } from "@/components/AudioRecorder";
 import { WaveformVisualizer } from "@/components/recording/WaveformVisualizer";
 import { useAudioAnalyzer } from "@/hooks/use-audio-analyzer";
+import { useRecordingState as useGlobalRecordingState } from "@/contexts/RecordingContext";
 import { cn } from "@/lib/utils";
 
 interface RecordingOverlayProps {
@@ -32,6 +33,9 @@ export function RecordingOverlay({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Global recording state for navigation
+  const globalRecording = useGlobalRecordingState();
 
   // Audio analyzer for waveform visualization
   const { frequencyData, decibelLevel, connect, disconnect } = useAudioAnalyzer({
@@ -96,6 +100,9 @@ export function RecordingOverlay({
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setCountdown(null);
 
+      // Update global recording state
+      globalRecording.startRecording('quick-story');
+
       // Start recording after countdown
       await audioRecorderRef.current?.startRecording();
       setIsPaused(false);
@@ -119,6 +126,9 @@ export function RecordingOverlay({
       setHasRecording(true);
       setIsRecording(false);
       setIsPaused(false);
+
+      // Update global recording state
+      globalRecording.stopRecording();
     }
   };
 
@@ -135,6 +145,8 @@ export function RecordingOverlay({
 
   const handleContinue = () => {
     if (audioBlob && audioDuration > 0) {
+      // Update global recording state before continuing
+      globalRecording.stopRecording();
       onContinue(audioBlob, audioDuration);
       // Cleanup happens in parent
     }
@@ -156,6 +168,10 @@ export function RecordingOverlay({
       audioRecorderRef.current.cleanup();
     }
     disconnect();
+
+    // Update global recording state
+    globalRecording.stopRecording();
+
     setAudioBlob(null);
     setAudioUrl(null);
     setHasRecording(false);
@@ -289,20 +305,38 @@ export function RecordingOverlay({
                 </Button>
               </div>
             ) : isRecording ? (
-              <Button
-                onClick={handleStopRecording}
-                variant="destructive"
-                className="w-full"
-              >
-                Stop Recording
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleClose}
+                  variant="outline"
+                  className="flex-1 border-[#E8DDD3] text-[#8B7355] hover:bg-[#FAF8F6]"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleStopRecording}
+                  variant="destructive"
+                  className="flex-1"
+                >
+                  Stop Recording
+                </Button>
+              </div>
             ) : (
-              <Button
-                onClick={handleStartRecording}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
-              >
-                Start Recording
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleClose}
+                  variant="outline"
+                  className="flex-1 border-[#E8DDD3] text-[#8B7355] hover:bg-[#FAF8F6]"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleStartRecording}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
+                >
+                  Start Recording
+                </Button>
+              </div>
             )}
           </div>
         </div>

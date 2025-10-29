@@ -390,7 +390,7 @@ export function BookStyleReview({
           <h1 className="text-2xl md:text-3xl font-serif text-gray-800 flex-shrink-0">
             Review Memory
           </h1>
-          <div className="flex items-center gap-2 md:gap-3 ml-auto">
+          <div className="flex items-center gap-2 md:gap-3 ml-auto mr-[75px] md:mr-0">
             {isEditing && (
               <Button
                 onClick={onSave}
@@ -977,11 +977,14 @@ export function BookStyleReview({
               {/* 6. Lesson Learned */}
               <div>
                 <div className="group relative">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-medium text-gray-700 flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-amber-500" />
-                      Lesson Learned
-                    </h3>
+                  {/* Centered Heading */}
+                  <h3 className="text-lg font-medium text-gray-700 flex items-center justify-center gap-2 mb-3">
+                    <Sparkles className="w-5 h-5 text-amber-500" />
+                    Lesson Learned
+                  </h3>
+
+                  {/* Centered Button */}
+                  <div className="flex justify-center mb-3">
                     <Button
                       onClick={handleGenerateLesson}
                       disabled={isGeneratingLesson || !transcription?.trim()}

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Calendar, BookOpen, Box, Lightbulb } from "lucide-react";
+import { Calendar, BookOpen, User, Lightbulb } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
 import { useRecordingState } from "@/contexts/RecordingContext";
@@ -122,20 +122,20 @@ export default function DesktopNavigationBottom({
         {/* Spacer for record button - 110px on each side, responsive */}
         <div style={{ width: 'clamp(120px, 20vw, 220px)' }} />
 
-        {/* Right section - Memories and Prompts */}
+        {/* Right section - Ideas and Profile */}
         <div className="flex items-center nav-group-right">
-          <DesktopNavItemBottom
-            icon={Box}
-            label="Memory Box"
-            href="/memory-box"
-            isActive={pathname === "/memory-box"}
-          />
-
           <DesktopNavItemBottom
             icon={Lightbulb}
             label="Story Ideas"
             href="/prompts"
             isActive={pathname === "/prompts"}
+          />
+
+          <DesktopNavItemBottom
+            icon={User}
+            label="Profile"
+            href="/profile"
+            isActive={pathname === "/profile"}
           />
         </div>
       </div>

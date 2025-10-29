@@ -239,10 +239,10 @@ export default function Profile() {
     onSuccess: (data, enabled) => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/ai-settings"] });
       toast({
-        title: enabled ? "AI Processing Enabled" : "AI Processing Disabled",
+        title: enabled ? "Storyteller Features Enabled" : "Storyteller Features Disabled",
         description: enabled
-          ? "AI features are now active. You can record and get AI-powered prompts."
-          : "AI features are disabled. You can still type stories manually.",
+          ? "Storyteller features are now active. You can record and get personalized prompts."
+          : "Storyteller features are disabled. You can still type stories manually.",
       });
     },
     onError: (error: any) => {
@@ -1052,25 +1052,25 @@ export default function Profile() {
             </CardContent>
           </Card>
 
-          {/* AI Processing Settings */}
+          {/* Heritage Whisper Storyteller Settings */}
           <Card id="ai-processing">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg font-bold">
                 <Brain className="w-5 h-5" />
-                AI Processing
+                Heritage Whisper Storyteller
               </CardTitle>
               <CardDescription>
-                Control how AI is used to enhance your storytelling experience
+                Enable Storyteller features
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-start justify-between py-2 gap-4">
                 <div className="space-y-0.5 flex-1">
                   <Label htmlFor="ai-processing" className="text-base font-medium">
-                    Enable AI Features
+                    Enable Storyteller Features
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    When enabled, AI transcribes your recordings, generates personalized prompts, and provides story insights. When disabled, you can still type stories manually.
+                    When enabled, AI transcribes your recordings. When disabled, you can still type stories manually.
                   </p>
                   <div className="mt-3 pt-2 border-t">
                     <p className="text-sm font-medium text-gray-700 mb-2">What happens when disabled:</p>
@@ -1081,7 +1081,7 @@ export default function Profile() {
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-gray-400 mt-0.5">•</span>
-                        <span>No AI-generated prompts or follow-up questions</span>
+                        <span>No Storyteller-generated prompts or follow-up questions</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-gray-400 mt-0.5">•</span>
@@ -1097,7 +1097,7 @@ export default function Profile() {
                     setAiProcessingEnabled(checked);
                     updateAIConsentMutation.mutate(checked);
                   }}
-                  aria-label="Toggle AI processing"
+                  aria-label="Toggle Storyteller features"
                 />
               </div>
             </CardContent>

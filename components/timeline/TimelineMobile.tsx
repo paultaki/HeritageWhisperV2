@@ -330,7 +330,6 @@ export function TimelineMobile() {
                 birthYear={user.birthYear}
                 onRegisterRef={navigation.registerDecadeRef}
                 onGhostPromptClick={handleGhostPromptClick}
-                onOpenOverlay={handleOpenOverlay}
                 highlightedStoryId={navigation.highlightedStoryId}
                 returnHighlightId={navigation.returnHighlightId}
               />

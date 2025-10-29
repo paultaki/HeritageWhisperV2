@@ -99,13 +99,13 @@ export function CustomAudioPlayer({ src, knownDuration, className = "" }: Custom
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
       <audio ref={audioRef} src={src} preload="metadata" />
-      
-      <div className="flex items-center gap-3">
+
+      <div className="flex items-center gap-2 md:gap-3 w-full">
         <Button
           onClick={togglePlayPause}
           size="sm"
           variant="outline"
-          className="flex-shrink-0"
+          className="flex-shrink-0 h-10 w-10 p-0 rounded-full"
         >
           {isPlaying ? (
             <Pause className="w-4 h-4" />
@@ -114,14 +114,14 @@ export function CustomAudioPlayer({ src, knownDuration, className = "" }: Custom
           )}
         </Button>
 
-        <div className="flex-1 flex items-center gap-2">
-          <span className="text-sm text-gray-600 min-w-[40px] text-right">
+        <div className="flex-1 flex items-center gap-2 min-w-0">
+          <span className="text-xs md:text-sm text-gray-600 min-w-[35px] md:min-w-[40px] text-right flex-shrink-0">
             {formatTime(currentTime)}
           </span>
 
-          <div className="flex-1 relative h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className="absolute left-0 top-0 h-full bg-coral-500 transition-all"
+          <div className="flex-1 relative h-2 bg-gray-200 rounded-full overflow-hidden min-w-0">
+            <div
+              className="absolute left-0 top-0 h-full bg-heritage-coral transition-all"
               style={{ width: `${progress}%` }}
             />
             <input
@@ -139,7 +139,7 @@ export function CustomAudioPlayer({ src, knownDuration, className = "" }: Custom
             />
           </div>
 
-          <span className="text-sm text-gray-600 min-w-[40px]">
+          <span className="text-xs md:text-sm text-gray-600 min-w-[35px] md:min-w-[40px] flex-shrink-0">
             {formatTime(duration)}
           </span>
         </div>
