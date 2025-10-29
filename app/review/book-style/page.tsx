@@ -80,6 +80,7 @@ function BookStyleReviewContent() {
   const [isLoading, setIsLoading] = useState(isEditing);
   const [returnPath, setReturnPath] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [storyNotFound, setStoryNotFound] = useState(false);
 
   const handleAudioChange = (url: string | null, blob?: Blob | null) => {
     console.log("[handleAudioChange] Setting audio URL:", url);
@@ -105,62 +106,66 @@ function BookStyleReviewContent() {
         }
 
         const response = await apiRequest("GET", `/api/stories/${editId}`);
+        const { story } = await response.json();
+        console.log("[Edit Mode] Received story data:", story);
 
-        // If story not found, redirect to create new story (remove edit param)
-        if (response.status === 404) {
-          console.warn("[Edit Mode] Story not found, redirecting to create new");
-          toast({
-            title: "Story not found",
-            description: "This story may have been deleted. Creating a new one instead.",
-            variant: "destructive",
-          });
-          // Remove edit parameter to switch to create mode
-          router.push("/review/book-style");
-          return;
+        // Populate form with existing story data
+        setTitle(story.title || "");
+        setTranscription(story.transcription || story.content || "");
+        setStoryYear(
+          story.storyYear?.toString() || story.year?.toString() || "",
+        );
+
+        // Parse storyDate if available to extract month and day
+        if (story.storyDate) {
+          const date = new Date(story.storyDate);
+          setStoryMonth((date.getMonth() + 1).toString()); // 0-indexed, so add 1
+          setStoryDay(date.getDate().toString());
         }
 
-        if (response.ok) {
-          const { story } = await response.json();
-          console.log("[Edit Mode] Received story data:", story);
+        setWisdomText(
+          story.wisdomClipText || story.wisdomTranscription || "",
+        );
+        setAudioUrl(story.audioUrl || null);
 
-          // Populate form with existing story data
-          setTitle(story.title || "");
-          setTranscription(story.transcription || story.content || "");
-          setStoryYear(
-            story.storyYear?.toString() || story.year?.toString() || "",
-          );
-
-          // Parse storyDate if available to extract month and day
-          if (story.storyDate) {
-            const date = new Date(story.storyDate);
-            setStoryMonth((date.getMonth() + 1).toString()); // 0-indexed, so add 1
-            setStoryDay(date.getDate().toString());
-          }
-
-          setWisdomText(
-            story.wisdomClipText || story.wisdomTranscription || "",
-          );
-          setAudioUrl(story.audioUrl || null);
-
-          // Handle photos
-          if (story.photos && Array.isArray(story.photos)) {
-            console.log("[Edit Mode] Setting photos from API:", story.photos);
-            setPhotos(story.photos);
-          } else if (story.photoUrl) {
-            console.log("[Edit Mode] Setting legacy photo:", story.photoUrl);
-            setPhotos([
-              {
-                id: "legacy",
-                url: story.photoUrl,
-                transform: story.photoTransform,
-              },
-            ]);
-          } else {
-            console.log("[Edit Mode] No photos found in story");
-          }
+        // Handle photos
+        if (story.photos && Array.isArray(story.photos)) {
+          console.log("[Edit Mode] Setting photos from API:", story.photos);
+          setPhotos(story.photos);
+        } else if (story.photoUrl) {
+          console.log("[Edit Mode] Setting legacy photo:", story.photoUrl);
+          setPhotos([
+            {
+              id: "legacy",
+              url: story.photoUrl,
+              transform: story.photoTransform,
+            },
+          ]);
+        } else {
+          console.log("[Edit Mode] No photos found in story");
         }
       } catch (error) {
         console.error("Failed to fetch story:", error);
+
+        // If story not found (404), redirect to timeline
+        if (error instanceof Error &&
+            (error.message.toLowerCase().includes("not found") ||
+             error.message.toLowerCase().includes("unauthorized"))) {
+          console.warn("[Edit Mode] Story not found or unauthorized, redirecting to timeline");
+          setStoryNotFound(true);
+          toast({
+            title: "Story not found",
+            description: "This story may have been deleted or you don't have access. Redirecting...",
+            variant: "destructive",
+          });
+          // Redirect to timeline instead of staying on broken edit page
+          setTimeout(() => {
+            router.push("/timeline");
+          }, 1000);
+          return;
+        }
+
+        // For other errors, show generic error
         toast({
           title: "Error loading story",
           description: "Failed to load the story data.",
@@ -901,6 +906,21 @@ function BookStyleReviewContent() {
     },
     onError: (error: any) => {
       console.error("Save error:", error);
+
+      // If story not found during save, redirect to timeline
+      if (error.message &&
+          (error.message.toLowerCase().includes("not found") ||
+           error.message.toLowerCase().includes("unauthorized"))) {
+        toast({
+          title: "Story not found",
+          description: "This story may have been deleted. Redirecting to timeline.",
+          variant: "destructive",
+        });
+        setTimeout(() => router.push("/timeline"), 2000);
+        return;
+      }
+
+      // Generic error message
       toast({
         title: "Failed to save story",
         description: error.message || "Please try again.",
@@ -1001,6 +1021,18 @@ function BookStyleReviewContent() {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If story not found, show message and prevent interaction
+  if (storyNotFound) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Story not found. Redirecting to timeline...</p>
         </div>
       </div>
     );

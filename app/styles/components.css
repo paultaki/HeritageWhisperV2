@@ -150,7 +150,7 @@ body {
 /* story card */
 .hw-card {
   background: #fff;
-  border: 1.5px solid #FF0000;
+  border: 3px solid #FF0000 !important;
   border-radius: 16px;
   box-shadow: var(--shadow-card);
   position: relative;
@@ -492,6 +492,7 @@ body {
   /* connectors more visible and longer */
   .hw-card {
     position: relative;
+    border: 3px solid #FF0000 !important;
   }
   .hw-card::before {
     content: "";
