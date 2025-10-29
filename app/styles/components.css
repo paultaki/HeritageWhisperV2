@@ -150,7 +150,7 @@ body {
 /* story card */
 .hw-card {
   background: #fff;
-  border: 1.5px solid #E8DDD3;
+  border: 1.5px solid #FF0000;
   border-radius: 16px;
   box-shadow: var(--shadow-card);
   position: relative;

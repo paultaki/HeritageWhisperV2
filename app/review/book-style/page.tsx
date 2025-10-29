@@ -105,6 +105,20 @@ function BookStyleReviewContent() {
         }
 
         const response = await apiRequest("GET", `/api/stories/${editId}`);
+
+        // If story not found, redirect to create new story (remove edit param)
+        if (response.status === 404) {
+          console.warn("[Edit Mode] Story not found, redirecting to create new");
+          toast({
+            title: "Story not found",
+            description: "This story may have been deleted. Creating a new one instead.",
+            variant: "destructive",
+          });
+          // Remove edit parameter to switch to create mode
+          router.push("/review/book-style");
+          return;
+        }
+
         if (response.ok) {
           const { story } = await response.json();
           console.log("[Edit Mode] Received story data:", story);
