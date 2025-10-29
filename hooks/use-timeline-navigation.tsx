@@ -56,12 +56,15 @@ export function useTimelineNavigation({
 
     // Check for return navigation context from BookView
     const contextStr = sessionStorage.getItem("timeline-navigation-context");
+    console.log('[TimelineNav] Checking for navigation context:', contextStr);
     if (contextStr) {
       try {
         const context = JSON.parse(contextStr);
         const isExpired = Date.now() - context.timestamp > 5 * 60 * 1000; // 5 minutes expiry
+        console.log('[TimelineNav] Parsed context:', context, 'isExpired:', isExpired);
 
         if (!isExpired && context.returnPath === "/timeline") {
+          console.log('[TimelineNav] Valid context found, setting up navigation to:', context.memoryId);
           // Set the return highlight
           setReturnHighlightId(context.memoryId);
 
@@ -76,15 +79,20 @@ export function useTimelineNavigation({
             const memoryCard = document.querySelector(
               `[data-testid="memory-card-${context.memoryId}"]`,
             ) as HTMLElement;
+            console.log('[TimelineNav] Looking for memory card with selector:', `[data-testid="memory-card-${context.memoryId}"]`);
+            console.log('[TimelineNav] Found memory card:', memoryCard);
             if (memoryCard) {
               const rect = memoryCard.getBoundingClientRect();
               const absoluteTop = rect.top + window.pageYOffset;
               const offset = window.innerHeight / 2 - rect.height / 2; // Center the card
 
+              console.log('[TimelineNav] Scrolling to position:', absoluteTop - offset);
               window.scrollTo({
                 top: absoluteTop - offset,
                 behavior: "smooth",
               });
+            } else {
+              console.warn('[TimelineNav] Memory card not found in DOM');
             }
           }, 100);
 
@@ -96,8 +104,11 @@ export function useTimelineNavigation({
             setReturnHighlightId(null);
           }, 3000);
         } else if (isExpired) {
+          console.log('[TimelineNav] Context expired, clearing');
           // Clear expired context
           sessionStorage.removeItem("timeline-navigation-context");
+        } else {
+          console.log('[TimelineNav] Context returnPath mismatch:', context.returnPath);
         }
       } catch (e) {
         console.error("Failed to parse navigation context:", e);

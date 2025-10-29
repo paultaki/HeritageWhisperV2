@@ -356,6 +356,18 @@ export default function Profile() {
 
       const response = await apiRequest("GET", "/api/user/export");
 
+      // Handle rate limit error (429)
+      if (response.status === 429) {
+        const errorData = await response.json();
+        const hoursRemaining = errorData.retry_after_hours || 24;
+        toast({
+          title: "Export limit reached",
+          description: `You can only export your data once every 24 hours. Please try again in ${hoursRemaining} hours.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (!response.ok) {
         throw new Error("Failed to export data");
       }

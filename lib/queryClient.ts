@@ -133,7 +133,10 @@ export async function apiRequest(
     }
   }
 
-  await throwIfResNotOk(res);
+  // Don't throw for 429 rate limit errors - let the caller handle them
+  if (res.status !== 429) {
+    await throwIfResNotOk(res);
+  }
   return res;
 }
 

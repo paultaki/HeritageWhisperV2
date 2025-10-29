@@ -419,15 +419,24 @@ export async function GET(request: NextRequest) {
           story_id: prompt.story_id,
           archived_at: prompt.archived_at,
         })),
-        catalog: (userPromptsRecords || []).map((prompt: any) => ({
-          id: prompt.id,
-          text: prompt.text,
-          category: prompt.category,
-          source: prompt.source,
-          status: prompt.status,
-          queue_position: prompt.queue_position,
-          created_at: prompt.created_at,
-        })),
+        catalog: (userPromptsRecords || []).map((prompt: any) => {
+          // IP Protection: Mask catalog prompts to prevent competitors from stealing prompt library
+          // GDPR Recital 63: Right to portability should not adversely affect trade secrets
+          const isCatalogPrompt = prompt.source === 'catalog';
+
+          return {
+            id: prompt.id,
+            // Mask catalog prompt text, keep AI-generated personalized prompts
+            text: isCatalogPrompt
+              ? "[Catalog prompt - removed for IP protection]"
+              : prompt.text,
+            // Remove source and category fields entirely (system architecture & classification)
+            // Note: source & category fields excluded from export to protect competitive advantage
+            status: prompt.status,
+            queue_position: prompt.queue_position,
+            created_at: prompt.created_at,
+          };
+        }),
       },
 
       // Follow-up questions

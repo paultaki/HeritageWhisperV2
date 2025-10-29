@@ -24,6 +24,7 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
+  Clock,
 } from "lucide-react";
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
@@ -607,22 +608,46 @@ const BookPageRenderer = ({
             page.age < 0 &&
             ` • Before birth`}
         </div>
-        {/* Edit button for this story */}
+        {/* Edit and Timeline buttons for this story */}
         {(page.type === "story-start" || page.type === "story-complete") &&
           page.storyId && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                router.push(
-                  `/review/book-style?id=${page.storyId}&returnPath=${encodeURIComponent(`/book?storyId=${page.storyId}`)}`,
-                )
-              }
-              className="gap-1 text-xs px-2 py-1 h-auto"
-            >
-              <Pencil className="w-3 h-3" />
-              <span>Edit</span>
-            </Button>
+            <div className="flex gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  router.push(
+                    `/review/book-style?id=${page.storyId}&returnPath=${encodeURIComponent(`/book?storyId=${page.storyId}`)}`,
+                  )
+                }
+                className="flex-1 gap-1 text-xs px-2 py-1 h-auto"
+              >
+                <Pencil className="w-3 h-3" />
+                <span>Edit</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  // Store navigation context for timeline to pick up
+                  const context = {
+                    memoryId: page.storyId,
+                    scrollPosition: 0, // Start at top, will scroll to card
+                    timestamp: Date.now(),
+                    returnPath: '/timeline', // Required by timeline navigation logic
+                  };
+                  console.log('[BookView] Setting timeline navigation context:', context);
+                  sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
+
+                  // Navigate to timeline
+                  router.push('/timeline');
+                }}
+                className="flex-1 gap-1 text-xs px-2 py-1 h-auto"
+              >
+                <Clock className="w-3 h-3" />
+                <span>Timeline</span>
+              </Button>
+            </div>
           )}
       </div>
 
