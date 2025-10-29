@@ -384,15 +384,13 @@ export function BookStyleReview({
             Review Memory
           </h1>
           <div className="flex items-center gap-2 md:gap-3 ml-auto mr-[75px] md:mr-0">
-            {isEditing && (
-              <Button
-                onClick={onSave}
-                disabled={isSaving}
-                className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white rounded-full px-4 md:px-6 py-4 md:py-6 text-base md:text-lg"
-              >
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
-            )}
+            <Button
+              onClick={onSave}
+              disabled={isSaving}
+              className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white rounded-full px-4 md:px-6 py-4 md:py-6 text-base md:text-lg"
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
           </div>
         </div>
       </div>
