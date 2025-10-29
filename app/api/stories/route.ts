@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
           durationSeconds: story.duration_seconds,
           emotions: story.emotions,
           pivotalCategory: story.metadata?.pivotal_category,
-          storyDate: story.metadata?.story_date,
+          storyDate: story.story_date || story.metadata?.story_date, // Read from column first, fallback to metadata for legacy data
           photoTransform: story.metadata?.photo_transform,
         };
       }),
@@ -258,6 +258,7 @@ export async function POST(request: NextRequest) {
       title: body.title || "Untitled Story",
       transcript: body.transcription || body.content,
       year: body.year || body.storyYear,
+      story_date: body.storyDate || null, // Store full date with month/day
       audio_url:
         body.audioUrl && !body.audioUrl.startsWith("blob:")
           ? body.audioUrl
@@ -279,7 +280,6 @@ export async function POST(request: NextRequest) {
         is_favorite: body.isFavorite ?? false,
         photos: processedPhotos,
         pivotal_category: body.pivotalCategory,
-        story_date: body.storyDate,
         photo_transform: body.photoTransform,
         actual_duration: body.durationSeconds, // Store actual validated duration in metadata
       },
@@ -720,7 +720,7 @@ export async function POST(request: NextRequest) {
       durationSeconds: newStory.duration_seconds,
       emotions: newStory.emotions,
       pivotalCategory: newStory.metadata?.pivotal_category,
-      storyDate: newStory.metadata?.story_date,
+      storyDate: newStory.story_date || newStory.metadata?.story_date, // Read from column first, fallback to metadata for legacy data
       photoTransform: newStory.metadata?.photo_transform,
     };
 

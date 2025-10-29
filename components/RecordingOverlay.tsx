@@ -70,6 +70,28 @@ export function RecordingOverlay({
     };
   }, [isRecording, isPaused]);
 
+  // Reset state when overlay opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      // Clean up when closing
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+      disconnect();
+
+      // Reset all recording state
+      setIsRecording(false);
+      setIsPaused(false);
+      setRecordingTime(0);
+      setHasRecording(false);
+      setAudioBlob(null);
+      setAudioDuration(0);
+      setAudioUrl(null);
+      setCountdown(null);
+      setShowConfirmDialog(false);
+    }
+  }, [isOpen, audioUrl, disconnect]);
+
   // Cleanup audio URL on unmount
   useEffect(() => {
     return () => {

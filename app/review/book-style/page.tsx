@@ -69,6 +69,8 @@ function BookStyleReviewContent() {
   // Get data from URL params (passed from recording page)
   const [title, setTitle] = useState("");
   const [storyYear, setStoryYear] = useState("");
+  const [storyMonth, setStoryMonth] = useState("");
+  const [storyDay, setStoryDay] = useState("");
   const [transcription, setTranscription] = useState("");
   const [photos, setPhotos] = useState<StoryPhoto[]>([]);
   const [wisdomText, setWisdomText] = useState("");
@@ -113,6 +115,14 @@ function BookStyleReviewContent() {
           setStoryYear(
             story.storyYear?.toString() || story.year?.toString() || "",
           );
+
+          // Parse storyDate if available to extract month and day
+          if (story.storyDate) {
+            const date = new Date(story.storyDate);
+            setStoryMonth((date.getMonth() + 1).toString()); // 0-indexed, so add 1
+            setStoryDay(date.getDate().toString());
+          }
+
           setWisdomText(
             story.wisdomClipText || story.wisdomTranscription || "",
           );
@@ -369,11 +379,22 @@ function BookStyleReviewContent() {
         );
         console.log("Has audio blob:", !!hasNewAudio);
 
+        // Construct storyDate if we have year, month, and day
+        let storyDate = null;
+        if (storyYear && storyMonth && storyDay) {
+          try {
+            storyDate = new Date(parseInt(storyYear), parseInt(storyMonth) - 1, parseInt(storyDay)).toISOString();
+          } catch (e) {
+            console.error("Failed to construct storyDate:", e);
+          }
+        }
+
         // Step 1: Create the story WITHOUT media to get an ID
         const tempStoryData = {
           title: title || `Memory from ${storyYear || "the past"}`,
           transcription,
           storyYear: parseInt(storyYear) || new Date().getFullYear(),
+          storyDate,
           lifeAge: age,
           includeInTimeline: true,
           includeInBook: true,
@@ -780,10 +801,21 @@ function BookStyleReviewContent() {
         }
       }
 
+      // Construct storyDate if we have year, month, and day
+      let storyDate = null;
+      if (storyYear && storyMonth && storyDay) {
+        try {
+          storyDate = new Date(parseInt(storyYear), parseInt(storyMonth) - 1, parseInt(storyDay)).toISOString();
+        } catch (e) {
+          console.error("Failed to construct storyDate:", e);
+        }
+      }
+
       const storyData = {
         title: title || `Memory from ${storyYear || "the past"}`,
         transcription,
         storyYear: parseInt(storyYear) || new Date().getFullYear(),
+        storyDate,
         lifeAge: age,
         includeInTimeline: true,
         includeInBook: true,
@@ -1115,6 +1147,8 @@ function BookStyleReviewContent() {
       <BookStyleReview
         title={title}
         storyYear={storyYear}
+        storyMonth={storyMonth}
+        storyDay={storyDay}
         transcription={transcription}
         photos={photos}
         wisdomText={wisdomText}
@@ -1122,6 +1156,8 @@ function BookStyleReviewContent() {
         audioDuration={audioDuration}
         onTitleChange={setTitle}
         onYearChange={setStoryYear}
+        onMonthChange={setStoryMonth}
+        onDayChange={setStoryDay}
         onTranscriptionChange={setTranscription}
         onPhotosChange={setPhotos}
         onWisdomChange={setWisdomText}

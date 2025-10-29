@@ -144,7 +144,7 @@ export async function GET(
       durationSeconds: story.duration_seconds,
       emotions: story.emotions,
       pivotalCategory: story.metadata?.pivotal_category,
-      storyDate: story.metadata?.story_date,
+      storyDate: story.story_date || story.metadata?.story_date, // Read from column first, fallback to metadata for legacy data
       photoTransform: story.metadata?.photo_transform,
     };
 
@@ -297,6 +297,9 @@ export async function PUT(
     }
     if (body.year !== undefined || body.storyYear !== undefined) {
       storyData.year = body.year || body.storyYear;
+    }
+    if (body.storyDate !== undefined) {
+      storyData.story_date = body.storyDate || null; // Store full date with month/day
     }
     if (body.audioUrl !== undefined) {
       storyData.audio_url =
@@ -456,7 +459,7 @@ export async function PUT(
       durationSeconds: updatedStory.duration_seconds,
       emotions: updatedStory.emotions,
       pivotalCategory: updatedStory.metadata?.pivotal_category,
-      storyDate: updatedStory.metadata?.story_date,
+      storyDate: updatedStory.story_date || updatedStory.metadata?.story_date, // Read from column first, fallback to metadata for legacy data
       photoTransform: updatedStory.metadata?.photo_transform,
     };
 
