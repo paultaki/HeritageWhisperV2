@@ -2043,7 +2043,7 @@ textarea:focus-visible {
   .memory-photo {
     width: 85%;
     max-width: 400px;
-    aspect-ratio: 4/3;
+    /* No forced aspect-ratio - preserve original dimensions for transform accuracy */
     object-fit: cover;
     filter: sepia(15%) contrast(95%);
     border: 8px solid white;
@@ -2262,7 +2262,7 @@ textarea:focus-visible {
     .memory-photo {
       width: 98%;
       max-width: 98%;
-      aspect-ratio: 16 / 9;
+      /* No forced aspect-ratio - preserve original dimensions for transform accuracy */
       max-height: none;
       margin: 0 auto 1rem; /* Center and minimal bottom margin */
       object-fit: cover;
@@ -2404,10 +2404,10 @@ textarea:focus-visible {
     }
   }
 
-  /* Ensure landscape aspect ratio on desktop too */
+  /* Photo sizing on desktop */
   @media (min-width: 900px) {
     .memory-photo {
-      aspect-ratio: 16 / 9;
+      /* No forced aspect-ratio - preserve original dimensions for transform accuracy */
       max-height: 400px;
       object-fit: cover;
     }
@@ -3056,7 +3056,7 @@ body .book-page .page-content {
 
 .memory-photo {
   width: 100%;
-  aspect-ratio: 3/2;
+  /* No forced aspect-ratio - preserve original dimensions for transform accuracy */
   object-fit: cover;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);

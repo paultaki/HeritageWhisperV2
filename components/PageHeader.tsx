@@ -19,6 +19,8 @@ interface PageHeaderProps {
   subtitle?: string;
   /** Whether to show account switcher (desktop only, when viewing another account) */
   showAccountSwitcher?: boolean;
+  /** Custom content to render on the left side of the header (mobile only) */
+  leftContent?: React.ReactNode;
   /** Custom content to render on the right side of the header */
   rightContent?: React.ReactNode;
 }
@@ -131,16 +133,24 @@ export function MobilePageHeader({
   icon: Icon,
   title,
   subtitle,
+  leftContent,
   rightContent,
 }: Omit<PageHeaderProps, 'showAccountSwitcher'>): JSX.Element {
   return (
-    <header 
+    <header
       className="md:hidden sticky top-0 z-40 bg-white border-b"
       role="banner"
     >
       <div className="px-4 py-1.5">
-        <div className="flex items-center justify-between gap-3">
-          {/* Left section - Compact branding and page identity */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Left section with hamburger menu */}
+          {leftContent && (
+            <div className="flex-shrink-0">
+              {leftContent}
+            </div>
+          )}
+
+          {/* Center section - Compact branding and page identity */}
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {/* Logo - Smaller for mobile */}
             <Image
@@ -152,14 +162,14 @@ export function MobilePageHeader({
               style={{ top: '-8px' }}
               priority
             />
-            
+
             {/* Page Icon */}
-            <Icon 
+            <Icon
               className="w-6 h-6 text-gray-700 flex-shrink-0 relative"
               style={{ top: '-11px' }}
               aria-hidden="true"
             />
-            
+
             {/* Page Title and Subtitle */}
             <div className="min-w-0 flex flex-col justify-center">
               <h1 className="text-lg font-bold text-gray-900 truncate leading-tight">

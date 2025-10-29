@@ -61,6 +61,8 @@ import {
 import { PasskeyAuth } from "@/components/auth/PasskeyAuth";
 import { ManagePasskeys } from "@/components/auth/ManagePasskeys";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
 
 export default function Profile() {
   const router = useRouter();
@@ -532,6 +534,23 @@ export default function Profile() {
         icon={User}
         title={`Welcome, ${firstName}`}
         subtitle="Manage your account"
+        leftContent={
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-600 md:hidden"
+                style={{ color: '#99898C' }}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-64 p-0">
+              <LeftSidebar />
+            </SheetContent>
+          </Sheet>
+        }
         rightContent={
           <Button
             variant="ghost"

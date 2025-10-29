@@ -64,30 +64,28 @@ export function MemoryMap({ stories }: MemoryMapProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-2xl mb-6">
+    <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-4 md:p-6 rounded-2xl mb-6">
       {/* Collapsed Summary View */}
       <div
         className="cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h2 className="text-xl font-serif mb-2 text-heritage-brown">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg md:text-xl font-serif text-heritage-brown mb-1.5">
               Your Life's Timeline
             </h2>
-            <div className="space-y-1">
-              <p className="text-gray-700 text-sm">
-                <span className="font-semibold">{stories.length} {stories.length === 1 ? 'story' : 'stories'}</span> across <span className="font-semibold">{decadeEntries.length} {decadeEntries.length === 1 ? 'decade' : 'decades'}</span>
+            <p className="text-gray-700 text-sm md:text-base">
+              <span className="font-semibold">{stories.length} {stories.length === 1 ? 'story' : 'stories'}</span> across <span className="font-semibold">{decadeEntries.length} {decadeEntries.length === 1 ? 'decade' : 'decades'}</span>
+            </p>
+            {leastCoveredDecade && (
+              <p className="text-gray-600 italic text-xs md:text-sm mt-1">
+                💡 Your {leastCoveredDecade}s have stories waiting to be told
               </p>
-              {leastCoveredDecade && (
-                <p className="text-gray-600 italic text-sm">
-                  💡 Your {leastCoveredDecade}s have stories waiting to be told
-                </p>
-              )}
-            </div>
+            )}
           </div>
           <button
-            className="ml-4 p-1 hover:bg-amber-100 rounded-lg transition-colors"
+            className="flex-shrink-0 p-1.5 hover:bg-amber-100 rounded-lg transition-colors self-start"
             aria-label={isExpanded ? "Collapse" : "Expand"}
           >
             {isExpanded ? (
