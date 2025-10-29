@@ -95,9 +95,16 @@ function BookStyleReviewContent() {
     const fetchStoryData = async () => {
       if (!editId) return;
 
+      // Don't fetch if auth is still loading or user is not available
+      if (isAuthLoading || !user) {
+        console.log("[Edit Mode] Waiting for auth to load...");
+        return;
+      }
+
       setIsLoading(true);
       try {
         console.log("[Edit Mode] Fetching story data for ID:", editId);
+        console.log("[Edit Mode] User authenticated:", user.id);
 
         // Set returnPath from URL if provided
         if (urlReturnPath) {
@@ -339,7 +346,7 @@ function BookStyleReviewContent() {
           .catch(console.error);
       }
     }
-  }, [searchParams, editId, isEditing, toast, urlReturnPath]);
+  }, [searchParams, editId, isEditing, toast, urlReturnPath, user, isAuthLoading, router]);
 
   // Handle NavCache errors in wizard mode
   useEffect(() => {
