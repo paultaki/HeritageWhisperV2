@@ -11,6 +11,7 @@ export interface TimingBreakdown {
   transcriptionMs: number;
   formattingMs: number;
   lessonExtractionMs?: number;
+  audioCleanMs?: number;
   totalMs: number;
 }
 
@@ -18,6 +19,7 @@ export interface CostBreakdown {
   transcription: number;
   formatting: number;
   lessonExtraction?: number;
+  audioCleaning?: number;
   total: number;
 }
 

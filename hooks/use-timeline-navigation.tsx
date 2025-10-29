@@ -68,33 +68,40 @@ export function useTimelineNavigation({
           // Set the return highlight
           setReturnHighlightId(context.memoryId);
 
-          // Restore scroll position after a brief delay to ensure DOM is ready
-          setTimeout(() => {
-            window.scrollTo({
-              top: context.scrollPosition,
-              behavior: "instant",
-            });
+          // Retry mechanism to wait for DOM to be ready
+          const scrollToMemory = (attempt = 0) => {
+            const maxAttempts = 20; // Try for up to 2 seconds (20 * 100ms)
 
-            // Then apply smooth scroll to the specific card for visual feedback
-            const memoryCard = document.querySelector(
+            // Try both selectors: mobile uses data-testid, desktop uses data-memory-id
+            let memoryCard = document.querySelector(
               `[data-testid="memory-card-${context.memoryId}"]`,
             ) as HTMLElement;
-            console.log('[TimelineNav] Looking for memory card with selector:', `[data-testid="memory-card-${context.memoryId}"]`);
-            console.log('[TimelineNav] Found memory card:', memoryCard);
-            if (memoryCard) {
-              const rect = memoryCard.getBoundingClientRect();
-              const absoluteTop = rect.top + window.pageYOffset;
-              const offset = window.innerHeight / 2 - rect.height / 2; // Center the card
 
-              console.log('[TimelineNav] Scrolling to position:', absoluteTop - offset);
-              window.scrollTo({
-                top: absoluteTop - offset,
-                behavior: "smooth",
-              });
-            } else {
-              console.warn('[TimelineNav] Memory card not found in DOM');
+            if (!memoryCard) {
+              memoryCard = document.querySelector(
+                `[data-memory-id="${context.memoryId}"]`,
+              ) as HTMLElement;
             }
-          }, 100);
+
+            console.log(`[TimelineNav] Attempt ${attempt + 1}/${maxAttempts} - Looking for memory card:`, memoryCard);
+
+            if (memoryCard) {
+              // Found it! Scroll to it
+              console.log('[TimelineNav] Found memory card, scrolling into view');
+              memoryCard.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            } else if (attempt < maxAttempts) {
+              // Not found yet, retry after 100ms
+              setTimeout(() => scrollToMemory(attempt + 1), 100);
+            } else {
+              console.warn('[TimelineNav] Memory card not found after', maxAttempts, 'attempts');
+            }
+          };
+
+          // Start scrolling attempt after initial delay
+          setTimeout(() => scrollToMemory(0), 200);
 
           // Clear the context after using it
           sessionStorage.removeItem("timeline-navigation-context");

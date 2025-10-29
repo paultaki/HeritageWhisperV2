@@ -738,3 +738,267 @@ Replaced broken Whisper blob-slicing transcription with OpenAI Realtime API for 
 
 _This is a historical reference document. For current documentation, see CLAUDE.md_
 _Last updated: January 23, 2025_
+
+---
+
+## 📋 Detailed Implementation Notes
+
+### GDPR Data Export with IP Protection (October 28, 2025)
+
+**Complete Implementation**
+
+User data export system that balances GDPR compliance with intellectual property protection.
+
+**IP Protection Strategy:**
+
+1. **Catalog Prompts** (`user_prompts` table):
+   - Mask text: `"[Catalog prompt - removed for IP protection]"`
+   - Remove `source` and `category` fields
+   - Keep user interaction: `id`, `status`, `queue_position`, `created_at`
+
+2. **AI-Generated Prompts** (`active_prompts` & `prompt_history`):
+   - Keep full personalized text (references user's stories)
+   - Remove metadata: `tier`, `memory_type`, `prompt_score`, `score_reason`, `anchor_entity`, `anchor_year`, `context_note`
+   - Keep user data: `id`, `prompt_text`, `user_status`, `shown_count`, `outcome`, `story_id`, timestamps
+
+3. **Other Protected Data:**
+   - AI costs: `cost_usd → null`
+   - AI models: `model → "AI model"`
+   - IP addresses: Partial masking (`xxx.xxx.xxx.123`)
+   - Third-party emails: `j***@gmail.com`
+
+**Rate Limiting:**
+- 1 export per 24 hours tracked via `users.last_data_export_at`
+- Custom 429 error handling in `lib/queryClient.ts` (doesn't throw, returns response)
+- User-friendly message in `app/profile/page.tsx`
+- Dev bypass: `?bypass_rate_limit=true`
+
+**Legal Basis:** GDPR Recital 63 - trade secrets protection
+
+**Files Modified:**
+- `/app/api/user/export/route.ts` - IP filtering logic
+- `/lib/queryClient.ts` - Allow 429 through
+- `/app/profile/page.tsx` - Custom error handling
+
+---
+
+### RecordModal Architecture Refactoring (January 25, 2025)
+
+**Status:** ✅ Complete (Merged to main)
+
+Refactored RecordModal.tsx from monolithic 1,705-line component into 8 focused, reusable files.
+
+**Architecture Changes:**
+- **RecordModal.tsx**: 1,705 → 310 lines (82% reduction)
+- Extracted 3 reusable custom hooks (~580 lines total)
+- Created 4 screen components (~660 lines total)
+- All files under 200-line best practice limit
+
+**New Hooks (hooks/):**
+
+1. **use-transcription.tsx** (~210 lines)
+   - Reusable audio transcription via AssemblyAI
+   - Supports foreground (blocking) and background (non-blocking) transcription
+   - Session management with retry logic
+
+2. **use-follow-up-questions.tsx** (~180 lines)
+   - Generates contextual follow-up questions during recording
+   - Partial audio capture without stopping recording
+   - AI-generated questions (3 at a time) via GPT-4o-mini
+   - Chunk tracking to avoid re-transcribing
+
+3. **use-recording-state.tsx** (~190 lines)
+   - Main state orchestrator composing transcription + follow-up hooks
+   - Recording state machine (start/pause/resume/stop)
+   - Audio review flow, Go Deeper questions, typing mode
+
+**New Components (components/recording/):**
+
+1. **AudioReviewScreen.tsx** (~150 lines) - Audio review interface
+2. **RecordingScreen.tsx** (~180 lines) - Main recording interface
+3. **TranscriptionReview.tsx** (~180 lines) - Transcription editing
+4. **GoDeeperOverlay.tsx** (~150 lines) - AI follow-up questions modal
+
+**Type Safety:**
+- Added interfaces to `types/recording.ts`
+- 100% TypeScript with no 'any' types
+- Full type safety across refactored code
+
+---
+
+### Pearl - The Documentary Interviewer (Implementation Details)
+
+**Technical Configuration:**
+- Model: `gpt-4o-realtime-preview-2024-12-17`
+- Token limit: 1200 tokens (~15-18 sentences)
+- VAD threshold: 0.7 (less sensitive to ambient noise)
+- Barge-in delay: 400ms (prevents false interrupts)
+- Post-processing: DISABLED (ensures audio/text match)
+- Personalization: TEMPORARILY DISABLED
+
+**Implementation Files:**
+- `/hooks/use-realtime-interview.tsx` - Pearl's main hook
+- `/lib/realtimeClient.ts` - WebRTC connection & VAD
+- `/lib/userOnlyRecorder.ts` - User-only audio capture
+- `/app/interview-chat/` - Conversation UI
+- `/app/api/extract-lesson/` - Lesson extraction endpoint
+
+For prompt engineering details, see `AI_PROMPTING.md`
+
+---
+
+### AI Prompt Generation System (Detailed)
+
+**Tier 1: Template-Based Entity Prompts**
+- Trigger: After EVERY story save
+- Process: Regex-based entity extraction (people, places, objects, emotions)
+- Zero cost, 7-day expiry
+- Example: "{person} mattered. What did they teach you that truly stuck?"
+
+**Tier 3: Milestone Analysis Prompts**
+- Trigger: At story milestones [1, 2, 3, 4, 7, 10, 15, 20, 30, 50, 100]
+- Process: GPT-4o analysis of all user stories (async background)
+- Generates 2-5 high-quality personalized prompts
+- Example: "You've mentioned Coach several times - who were they to you?"
+
+**Lesson Learned Extraction**
+- Trigger: During transcription (every story)
+- Process: GPT-4o-mini generates 3 lesson options (1-2 sentences, first-person)
+- User picks one or writes their own
+- Displayed in book view with gold left border callout
+
+**Cost per Story (October 2025):**
+- AssemblyAI transcription: ~$0.0025/min
+- GPT-4o-mini lesson generation: ~$0.0007
+- Tier 1 prompts: $0 (regex-based)
+- **Total per regular story**: ~$0.004-0.005
+
+---
+
+### Passkey Authentication (WebAuthn) - Detailed Implementation
+
+**Status:** ✅ Production Ready (October 2025)
+
+Passwordless authentication using platform authenticators (Touch ID, Face ID, Windows Hello, Dashlane).
+
+**Features:**
+- Discoverable credentials (username-less login)
+- Iron-session encrypted httpOnly cookies
+- Dual session support (Supabase + passkey sessions in `/api/auth/me`)
+- Automatic detection (passkey button only shows if user has passkeys)
+- Platform authenticators preferred (biometric security)
+
+**Configuration:**
+- RP_ID: `heritagewhisper.com` (apex domain for all environments)
+- Library: SimpleWebAuthn v13
+- Database: `passkeys` table with credential storage
+- Session cookie: `hw_passkey_session` (httpOnly, secure)
+
+**API Endpoints:**
+- `POST /api/passkey/register-options` - Generate registration options
+- `POST /api/passkey/register-verify` - Verify and store new passkey
+- `POST /api/passkey/auth-options` - Generate authentication options
+- `POST /api/passkey/auth-verify` - Verify passkey and create session
+- `GET /api/passkey/manage` - List user's passkeys
+- `POST /api/passkey/check` - Check if user has passkeys
+
+---
+
+### Family Sharing V3 - Multi-Tenant System (Detailed)
+
+**Status:** ✅ Production Ready (January 2025)
+
+**Core Features:**
+- Full user accounts for each family member (Supabase auth)
+- Seamless account switching between own stories and family member stories
+- Role-based permissions: Viewer (read-only) and Contributor (can submit questions, record stories)
+- Multi-tenant data access: All API routes support `storyteller_id` parameter
+
+**Key Components:**
+- `useAccountContext()` hook - Current storyteller context
+- `AccountSwitcher` component - Dropdown for switching accounts
+- Database: `family_members` table, `get_user_collaborations()` RPC, `has_collaboration_access()` RPC
+
+**API Endpoints:**
+- `GET /api/accounts/available` - Lists accessible storytellers
+- `GET /api/stories?storyteller_id=<id>` - Fetch stories for specific account
+- `POST /api/prompts/family-submit` - Submit custom question (contributors only)
+
+**Important:** Database uses snake_case but frontend expects camelCase. API endpoints map fields automatically.
+
+---
+
+### PDF Export via PDFShift (Detailed)
+
+**Status:** ✅ Production Ready (January 2025)
+
+Replaced Puppeteer/Chromium with PDFShift cloud service.
+
+**Benefits:**
+- ~150MB build size reduction
+- 5x faster builds (59s vs 5min+)
+- More reliable than self-hosted browser automation
+
+**Formats:**
+- 2-up (home printing): 11"x8.5" landscape
+- Trim (POD): 5.5"x8.5" portrait
+
+**Documentation:** See `PDFSHIFT_INTEGRATION.md` for complete guide
+
+---
+
+### Security & Privacy Implementation
+
+**Implementation Status:** 60-70% Complete
+
+**✅ Fully Implemented:**
+- Admin RBAC with audit logging
+- Rate limiting (6 limiters configured)
+- Row Level Security on all 20 database tables
+- Security headers (CSP, HSTS, X-Frame-Options, CORS)
+- EXIF stripping from all uploaded images
+- PII protection (no email addresses in logs)
+- Account management (delete, GDPR-compliant export)
+
+**Documentation:**
+- Full assessment: `SECURITY_IMPLEMENTATION_STATUS.md`
+- Remediation plan: `SECURITY_REMEDIATION_PLAN.md`
+- Security overview: `SECURITY.md`
+
+---
+
+### Navigation & UX Patterns
+
+- **Cancel Button**: Editing existing story → `/timeline`, Creating new story → origin page via `returnPath`
+- **Recording Flow**: "+" → Start Recording → Countdown → Recording → Processing → Review page
+- **Age Display**: Age > 0: "Age X", Age = 0: "Birth", Age < 0: "Before birth"
+- **Memory Card Actions**: Dropdown menu (⋯) with Edit, Favorite/Unfavorite, Delete
+- **Book Navigation**: Collapsed by default, click progress bar for navigation
+
+---
+
+### Deployment Details
+
+**Vercel (Frontend):**
+- Auto-deploys from GitHub main branch
+- Live: https://dev.heritagewhisper.com
+- Set all environment variables in Vercel dashboard
+
+**Database & Storage:**
+- **Supabase Project:** tjycibrhoammxohemyhq
+- **Bucket:** heritage-whisper-files (PUBLIC)
+- **Schema:** Managed via SQL migrations in `/migrations`
+- **RLS Policies**: Enabled on all tables with optimized `(SELECT auth.uid())` pattern
+
+---
+
+### Vercel AI Gateway Integration
+
+All GPT models route through Vercel AI Gateway for observability and caching.
+
+**Benefits:**
+- Cost visibility and tracking per model/endpoint
+- Performance metrics (TTFT tracking)
+- Automatic caching (70-90% cost reduction on repeat operations)
+- Failover with automatic retry
+

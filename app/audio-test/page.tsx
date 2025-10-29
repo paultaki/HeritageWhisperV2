@@ -18,6 +18,7 @@ export default function AudioTestPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [testResults, setTestResults] = useState<{
     pathA: PathResult | null;
+    pathB: PathResult | null;
     pathC: PathResult | null;
     testTotalTimeMs: number;
   } | null>(null);
@@ -102,6 +103,7 @@ export default function AudioTestPage() {
       const data = await response.json();
       setTestResults({
         pathA: data.results.pathA,
+        pathB: data.results.pathB,
         pathC: data.results.pathC,
         testTotalTimeMs: data.testTotalTimeMs,
       });
@@ -159,6 +161,14 @@ export default function AudioTestPage() {
                 ⏱ Timing
               </div>
               <div className="space-y-1 text-sm">
+                {result.timing.audioCleanMs !== undefined && (
+                  <div className="flex justify-between">
+                    <span className="text-[#6B5744]">Audio Cleaning:</span>
+                    <span className="font-mono text-[#4A3428]">
+                      {formatDuration(result.timing.audioCleanMs)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-[#6B5744]">Transcription:</span>
                   <span className="font-mono text-[#4A3428]">
@@ -186,6 +196,15 @@ export default function AudioTestPage() {
                 💰 Cost
               </div>
               <div className="space-y-1 text-sm">
+                {result.cost.audioCleaning !== undefined && (
+                  <div className="flex justify-between">
+                    <span className="text-[#6B5744]">Audio Cleaning:</span>
+                    <span className="font-mono text-[#4A3428]">
+                      {formatCost(result.cost.audioCleaning)}
+                      <span className="text-xs text-[#8B7355] ml-1">(free tier)</span>
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-[#6B5744]">Transcription:</span>
                   <span className="font-mono text-[#4A3428]">
@@ -279,26 +298,34 @@ export default function AudioTestPage() {
   };
 
   const renderComparison = () => {
-    if (!testResults?.pathA || !testResults?.pathC) return null;
+    if (!testResults?.pathA || !testResults?.pathB || !testResults?.pathC) return null;
 
-    const { pathA, pathC } = testResults;
+    const { pathA, pathB, pathC } = testResults;
 
-    const speedWinner =
-      pathA.timing.totalMs < pathC.timing.totalMs ? "Path A" : "Path C";
-    const speedDiff = Math.abs(pathA.timing.totalMs - pathC.timing.totalMs);
+    // Find fastest path
+    const times = [
+      { name: 'Path A', time: pathA.timing.totalMs },
+      { name: 'Path B', time: pathB.timing.totalMs },
+      { name: 'Path C', time: pathC.timing.totalMs },
+    ];
+    const fastestPath = times.reduce((prev, curr) => prev.time < curr.time ? prev : curr);
+    const slowestPath = times.reduce((prev, curr) => prev.time > curr.time ? prev : curr);
+    const speedDiff = slowestPath.time - fastestPath.time;
 
-    const costWinner = pathA.cost.total < pathC.cost.total ? "Path A" : "Path C";
-    const costDiff = Math.abs(pathA.cost.total - pathC.cost.total);
+    // Find cheapest path
+    const costs = [
+      { name: 'Path A', cost: pathA.cost.total },
+      { name: 'Path B', cost: pathB.cost.total },
+      { name: 'Path C', cost: pathC.cost.total },
+    ];
+    const cheapestPath = costs.reduce((prev, curr) => prev.cost < curr.cost ? prev : curr);
+    const costDiff = Math.max(...costs.map(c => c.cost)) - cheapestPath.cost;
 
-    const textDiff = calculateTextDifference(
-      pathA.quality.transcription,
-      pathC.quality.transcription
-    );
-
-    const wordDiff = findDifferentWords(
-      pathA.quality.transcription,
-      pathC.quality.transcription
-    );
+    // Compare all transcriptions
+    const diffAB = calculateTextDifference(pathA.quality.transcription, pathB.quality.transcription);
+    const diffAC = calculateTextDifference(pathA.quality.transcription, pathC.quality.transcription);
+    const diffBC = calculateTextDifference(pathB.quality.transcription, pathC.quality.transcription);
+    const avgDiff = Math.round((diffAB + diffAC + diffBC) / 3);
 
     return (
       <div className="mt-6 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
@@ -306,69 +333,75 @@ export default function AudioTestPage() {
           📊 Comparison Summary
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="p-4 bg-white rounded-lg border border-purple-200">
             <div className="text-sm font-medium text-purple-700 mb-2">
-              ⚡ Speed Winner
+              ⚡ Fastest
             </div>
-            <div className="text-lg font-bold text-[#4A3428]">{speedWinner}</div>
+            <div className="text-lg font-bold text-[#4A3428]">{fastestPath.name}</div>
             <div className="text-xs text-[#6B5744] mt-1">
-              {formatDuration(speedDiff)} faster
+              {formatDuration(fastestPath.time)}
             </div>
           </div>
 
           <div className="p-4 bg-white rounded-lg border border-purple-200">
             <div className="text-sm font-medium text-purple-700 mb-2">
-              💰 Cost Winner
+              🐢 Slowest
             </div>
-            <div className="text-lg font-bold text-[#4A3428]">{costWinner}</div>
+            <div className="text-lg font-bold text-[#4A3428]">{slowestPath.name}</div>
             <div className="text-xs text-[#6B5744] mt-1">
-              {formatCost(costDiff)} cheaper
+              +{formatDuration(speedDiff)} slower
             </div>
           </div>
 
           <div className="p-4 bg-white rounded-lg border border-purple-200">
             <div className="text-sm font-medium text-purple-700 mb-2">
-              📝 Text Difference
+              💰 Cheapest
             </div>
-            <div className="text-lg font-bold text-[#4A3428]">{textDiff}%</div>
+            <div className="text-lg font-bold text-[#4A3428]">{cheapestPath.name}</div>
             <div className="text-xs text-[#6B5744] mt-1">
-              {textDiff < 10 ? "Very similar" : textDiff < 25 ? "Somewhat different" : "Quite different"}
+              {formatCost(cheapestPath.cost)}
+            </div>
+          </div>
+
+          <div className="p-4 bg-white rounded-lg border border-purple-200">
+            <div className="text-sm font-medium text-purple-700 mb-2">
+              📝 Avg Difference
+            </div>
+            <div className="text-lg font-bold text-[#4A3428]">{avgDiff}%</div>
+            <div className="text-xs text-[#6B5744] mt-1">
+              A↔B: {diffAB}%, A↔C: {diffAC}%, B↔C: {diffBC}%
             </div>
           </div>
         </div>
 
-        {wordDiff.onlyInFirst.length > 0 || wordDiff.onlyInSecond.length > 0 ? (
-          <div className="p-4 bg-white rounded-lg border border-purple-200">
-            <div className="text-sm font-medium text-purple-700 mb-2">
-              📖 Word Differences
+        <div className="p-4 bg-white rounded-lg border border-purple-200">
+          <div className="text-sm font-medium text-purple-700 mb-2">
+            📊 Detailed Comparison
+          </div>
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-[#6B5744]">Path A Word Count:</span>
+              <span className="font-mono text-[#4A3428]">{pathA.quality.wordCount}</span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              {wordDiff.onlyInFirst.length > 0 && (
-                <div>
-                  <div className="font-medium text-[#8B7355] mb-1">
-                    Only in AssemblyAI:
-                  </div>
-                  <div className="text-[#6B5744]">
-                    {wordDiff.onlyInFirst.slice(0, 10).join(", ")}
-                    {wordDiff.onlyInFirst.length > 10 && "..."}
-                  </div>
-                </div>
-              )}
-              {wordDiff.onlyInSecond.length > 0 && (
-                <div>
-                  <div className="font-medium text-[#8B7355] mb-1">
-                    Only in Whisper:
-                  </div>
-                  <div className="text-[#6B5744]">
-                    {wordDiff.onlyInSecond.slice(0, 10).join(", ")}
-                    {wordDiff.onlyInSecond.length > 10 && "..."}
-                  </div>
-                </div>
-              )}
+            <div className="flex justify-between">
+              <span className="text-[#6B5744]">Path B Word Count:</span>
+              <span className="font-mono text-[#4A3428]">{pathB.quality.wordCount}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[#6B5744]">Path C Word Count:</span>
+              <span className="font-mono text-[#4A3428]">{pathC.quality.wordCount}</span>
+            </div>
+            <div className="pt-2 border-t border-purple-100">
+              <div className="font-medium text-[#8B7355] mb-1">Text Similarity:</div>
+              <div className="text-[#6B5744]">
+                A ↔ B: {diffAB < 10 ? "Very similar" : diffAB < 25 ? "Somewhat different" : "Quite different"} ({diffAB}%)<br />
+                A ↔ C: {diffAC < 10 ? "Very similar" : diffAC < 25 ? "Somewhat different" : "Quite different"} ({diffAC}%)<br />
+                B ↔ C: {diffBC < 10 ? "Very similar" : diffBC < 25 ? "Somewhat different" : "Quite different"} ({diffBC}%)
+              </div>
             </div>
           </div>
-        ) : null}
+        </div>
       </div>
     );
   };
@@ -391,7 +424,7 @@ export default function AudioTestPage() {
                 Audio Processing Test Lab
               </h1>
               <p className="text-sm text-[#8B7355]">
-                Compare AssemblyAI vs Whisper transcription quality
+                Compare AssemblyAI vs 2 Auphonic presets (Cleaner vs Cutter)
               </p>
             </div>
           </div>
@@ -445,15 +478,24 @@ export default function AudioTestPage() {
               onClick={runTest}
               className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg hover:opacity-90 transition-opacity shadow-lg"
             >
-              🚀 Run Parallel Test (AssemblyAI vs Whisper)
+              🚀 Run 3-Way Test (A vs B vs C)
             </button>
           )}
 
           {isProcessing && (
-            <div className="text-center py-4">
+            <div className="text-center py-6">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-600 border-t-transparent"></div>
-              <div className="mt-2 text-[#8B7355]">
-                Testing both paths in parallel...
+              <div className="mt-3 text-[#4A3428] font-semibold">
+                Testing 3 paths in parallel...
+              </div>
+              <div className="mt-2 text-sm text-[#8B7355]">
+                Path A: ~7-9 seconds
+              </div>
+              <div className="text-sm text-[#8B7355]">
+                Path B & C: ~1-2 minutes (Auphonic processing)
+              </div>
+              <div className="mt-3 text-xs text-[#6B5744] italic">
+                ⏳ Auphonic needs time to clean/cut audio - please be patient
               </div>
             </div>
           )}
@@ -486,9 +528,10 @@ export default function AudioTestPage() {
               2. Compare Results
             </h2>
 
-            <div className="flex flex-col lg:flex-row gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
               {renderPathResult(testResults.pathA, "Path A: AssemblyAI")}
-              {renderPathResult(testResults.pathC, "Path C: Whisper")}
+              {renderPathResult(testResults.pathB, "Path B: Auphonic Cleaner")}
+              {renderPathResult(testResults.pathC, "Path C: Auphonic Cutter")}
             </div>
 
             {renderComparison()}
