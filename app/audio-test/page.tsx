@@ -19,7 +19,6 @@ export default function AudioTestPage() {
   const [testResults, setTestResults] = useState<{
     pathA: PathResult | null;
     pathB: PathResult | null;
-    pathC: PathResult | null;
     testTotalTimeMs: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +119,6 @@ export default function AudioTestPage() {
       setTestResults({
         pathA: data.results.pathA,
         pathB: data.results.pathB,
-        pathC: data.results.pathC,
         testTotalTimeMs: data.testTotalTimeMs,
       });
     } catch (err) {
@@ -185,18 +183,22 @@ export default function AudioTestPage() {
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span className="text-[#6B5744]">Transcription:</span>
-                  <span className="font-mono text-[#4A3428]">
-                    {formatDuration(result.timing.transcriptionMs)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#6B5744]">Formatting:</span>
-                  <span className="font-mono text-[#4A3428]">
-                    {formatDuration(result.timing.formattingMs)}
-                  </span>
-                </div>
+                {result.timing.transcriptionMs !== undefined && (
+                  <div className="flex justify-between">
+                    <span className="text-[#6B5744]">Transcription:</span>
+                    <span className="font-mono text-[#4A3428]">
+                      {formatDuration(result.timing.transcriptionMs)}
+                    </span>
+                  </div>
+                )}
+                {result.timing.formattingMs !== undefined && (
+                  <div className="flex justify-between">
+                    <span className="text-[#6B5744]">Formatting:</span>
+                    <span className="font-mono text-[#4A3428]">
+                      {formatDuration(result.timing.formattingMs)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between pt-2 border-t border-[#E8DDD3] font-semibold">
                   <span className="text-[#4A3428]">Total:</span>
                   <span className="font-mono text-[#4A3428]">
@@ -221,18 +223,22 @@ export default function AudioTestPage() {
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span className="text-[#6B5744]">Transcription:</span>
-                  <span className="font-mono text-[#4A3428]">
-                    {formatCost(result.cost.transcription)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#6B5744]">Formatting:</span>
-                  <span className="font-mono text-[#4A3428]">
-                    {formatCost(result.cost.formatting)}
-                  </span>
-                </div>
+                {result.cost.transcription !== undefined && (
+                  <div className="flex justify-between">
+                    <span className="text-[#6B5744]">Transcription:</span>
+                    <span className="font-mono text-[#4A3428]">
+                      {formatCost(result.cost.transcription)}
+                    </span>
+                  </div>
+                )}
+                {result.cost.formatting !== undefined && (
+                  <div className="flex justify-between">
+                    <span className="text-[#6B5744]">Formatting:</span>
+                    <span className="font-mono text-[#4A3428]">
+                      {formatCost(result.cost.formatting)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between pt-2 border-t border-[#E8DDD3] font-semibold">
                   <span className="text-[#4A3428]">Total:</span>
                   <span className="font-mono text-[#4A3428]">
@@ -252,71 +258,98 @@ export default function AudioTestPage() {
               </div>
             )}
 
-            {/* Quality Card */}
-            <div className="mb-4 p-4 bg-white rounded-lg border border-[#E8DDD3]">
-              <div className="text-sm font-medium text-[#8B7355] mb-2">
-                📊 Quality
-              </div>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-[#6B5744]">Word Count:</span>
-                  <span className="font-mono text-[#4A3428]">
-                    {result.quality.wordCount}
-                  </span>
+            {/* Path B: Show cleaned audio info */}
+            {label.includes("Path B") && result.quality.cleanedAudioBase64 && (
+              <div className="mb-4 p-4 bg-white rounded-lg border border-[#E8DDD3]">
+                <div className="text-sm font-medium text-[#8B7355] mb-2">
+                  🎵 Cleaned Audio
                 </div>
-                {result.quality.confidence && (
-                  <div className="flex justify-between">
-                    <span className="text-[#6B5744]">Confidence:</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[#6B5744]">File Size:</span>
                     <span className="font-mono text-[#4A3428]">
-                      {(result.quality.confidence * 100).toFixed(1)}%
+                      {((result.quality.cleanedAudioSizeBytes || 0) / 1024).toFixed(1)} KB
                     </span>
                   </div>
+                  <div className="text-xs text-[#6B5744] italic">
+                    ℹ️ Cleaned audio available in Auphonic dashboard for comparison
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Path A: Show transcription quality */}
+            {label.includes("Path A") && result.quality.wordCount !== undefined && (
+              <>
+                {/* Quality Card */}
+                <div className="mb-4 p-4 bg-white rounded-lg border border-[#E8DDD3]">
+                  <div className="text-sm font-medium text-[#8B7355] mb-2">
+                    📊 Quality
+                  </div>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-[#6B5744]">Word Count:</span>
+                      <span className="font-mono text-[#4A3428]">
+                        {result.quality.wordCount}
+                      </span>
+                    </div>
+                    {result.quality.confidence && (
+                      <div className="flex justify-between">
+                        <span className="text-[#6B5744]">Confidence:</span>
+                        <span className="font-mono text-[#4A3428]">
+                          {(result.quality.confidence * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Transcription */}
+                <div className="mb-4">
+                  <div className="text-sm font-medium text-[#8B7355] mb-2">
+                    📝 Transcription
+                  </div>
+                  <div className="p-3 bg-white rounded-lg border border-[#E8DDD3] text-sm text-[#4A3428] max-h-40 overflow-y-auto">
+                    {result.quality.transcription || "(empty)"}
+                  </div>
+                </div>
+
+                {/* Lessons */}
+                {result.quality.lessons && (
+                  <div>
+                    <div className="text-sm font-medium text-[#8B7355] mb-2">
+                      💡 Extracted Lessons
+                    </div>
+                    <div className="space-y-2">
+                      <div className="p-3 bg-white rounded-lg border border-[#E8DDD3]">
+                        <div className="text-xs font-medium text-[#8B7355] mb-1">
+                          Practical:
+                        </div>
+                        <div className="text-sm text-[#4A3428]">
+                          {result.quality.lessons.practical}
+                        </div>
+                      </div>
+                      <div className="p-3 bg-white rounded-lg border border-[#E8DDD3]">
+                        <div className="text-xs font-medium text-[#8B7355] mb-1">
+                          Emotional:
+                        </div>
+                        <div className="text-sm text-[#4A3428]">
+                          {result.quality.lessons.emotional}
+                        </div>
+                      </div>
+                      <div className="p-3 bg-white rounded-lg border border-[#E8DDD3]">
+                        <div className="text-xs font-medium text-[#8B7355] mb-1">
+                          Character:
+                        </div>
+                        <div className="text-sm text-[#4A3428]">
+                          {result.quality.lessons.character}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
-              </div>
-            </div>
-
-            {/* Transcription */}
-            <div className="mb-4">
-              <div className="text-sm font-medium text-[#8B7355] mb-2">
-                📝 Transcription
-              </div>
-              <div className="p-3 bg-white rounded-lg border border-[#E8DDD3] text-sm text-[#4A3428] max-h-40 overflow-y-auto">
-                {result.quality.transcription || "(empty)"}
-              </div>
-            </div>
-
-            {/* Lessons */}
-            <div>
-              <div className="text-sm font-medium text-[#8B7355] mb-2">
-                💡 Extracted Lessons
-              </div>
-              <div className="space-y-2">
-                <div className="p-3 bg-white rounded-lg border border-[#E8DDD3]">
-                  <div className="text-xs font-medium text-[#8B7355] mb-1">
-                    Practical:
-                  </div>
-                  <div className="text-sm text-[#4A3428]">
-                    {result.quality.lessons.practical}
-                  </div>
-                </div>
-                <div className="p-3 bg-white rounded-lg border border-[#E8DDD3]">
-                  <div className="text-xs font-medium text-[#8B7355] mb-1">
-                    Emotional:
-                  </div>
-                  <div className="text-sm text-[#4A3428]">
-                    {result.quality.lessons.emotional}
-                  </div>
-                </div>
-                <div className="p-3 bg-white rounded-lg border border-[#E8DDD3]">
-                  <div className="text-xs font-medium text-[#8B7355] mb-1">
-                    Character:
-                  </div>
-                  <div className="text-sm text-[#4A3428]">
-                    {result.quality.lessons.character}
-                  </div>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </>
         )}
       </div>
@@ -324,15 +357,14 @@ export default function AudioTestPage() {
   };
 
   const renderComparison = () => {
-    if (!testResults?.pathA || !testResults?.pathB || !testResults?.pathC) return null;
+    if (!testResults?.pathA || !testResults?.pathB) return null;
 
-    const { pathA, pathB, pathC } = testResults;
+    const { pathA, pathB } = testResults;
 
     // Find fastest path
     const times = [
       { name: 'Path A', time: pathA.timing.totalMs },
       { name: 'Path B', time: pathB.timing.totalMs },
-      { name: 'Path C', time: pathC.timing.totalMs },
     ];
     const fastestPath = times.reduce((prev, curr) => prev.time < curr.time ? prev : curr);
     const slowestPath = times.reduce((prev, curr) => prev.time > curr.time ? prev : curr);
@@ -342,16 +374,8 @@ export default function AudioTestPage() {
     const costs = [
       { name: 'Path A', cost: pathA.cost.total },
       { name: 'Path B', cost: pathB.cost.total },
-      { name: 'Path C', cost: pathC.cost.total },
     ];
     const cheapestPath = costs.reduce((prev, curr) => prev.cost < curr.cost ? prev : curr);
-    const costDiff = Math.max(...costs.map(c => c.cost)) - cheapestPath.cost;
-
-    // Compare all transcriptions
-    const diffAB = calculateTextDifference(pathA.quality.transcription, pathB.quality.transcription);
-    const diffAC = calculateTextDifference(pathA.quality.transcription, pathC.quality.transcription);
-    const diffBC = calculateTextDifference(pathB.quality.transcription, pathC.quality.transcription);
-    const avgDiff = Math.round((diffAB + diffAC + diffBC) / 3);
 
     return (
       <div className="mt-6 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
@@ -359,7 +383,7 @@ export default function AudioTestPage() {
           📊 Comparison Summary
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="p-4 bg-white rounded-lg border border-purple-200">
             <div className="text-sm font-medium text-purple-700 mb-2">
               ⚡ Fastest
@@ -389,16 +413,6 @@ export default function AudioTestPage() {
               {formatCost(cheapestPath.cost)}
             </div>
           </div>
-
-          <div className="p-4 bg-white rounded-lg border border-purple-200">
-            <div className="text-sm font-medium text-purple-700 mb-2">
-              📝 Avg Difference
-            </div>
-            <div className="text-lg font-bold text-[#4A3428]">{avgDiff}%</div>
-            <div className="text-xs text-[#6B5744] mt-1">
-              A↔B: {diffAB}%, A↔C: {diffAC}%, B↔C: {diffBC}%
-            </div>
-          </div>
         </div>
 
         <div className="p-4 bg-white rounded-lg border border-purple-200">
@@ -407,23 +421,16 @@ export default function AudioTestPage() {
           </div>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
-              <span className="text-[#6B5744]">Path A Word Count:</span>
-              <span className="font-mono text-[#4A3428]">{pathA.quality.wordCount}</span>
+              <span className="text-[#6B5744]">Path A (Transcription):</span>
+              <span className="font-mono text-[#4A3428]">{pathA.quality.wordCount} words</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#6B5744]">Path B Word Count:</span>
-              <span className="font-mono text-[#4A3428]">{pathB.quality.wordCount}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[#6B5744]">Path C Word Count:</span>
-              <span className="font-mono text-[#4A3428]">{pathC.quality.wordCount}</span>
+              <span className="text-[#6B5744]">Path B (Cleaned Audio):</span>
+              <span className="font-mono text-[#4A3428]">{((pathB.quality.cleanedAudioSizeBytes || 0) / 1024).toFixed(1)} KB</span>
             </div>
             <div className="pt-2 border-t border-purple-100">
-              <div className="font-medium text-[#8B7355] mb-1">Text Similarity:</div>
-              <div className="text-[#6B5744]">
-                A ↔ B: {diffAB < 10 ? "Very similar" : diffAB < 25 ? "Somewhat different" : "Quite different"} ({diffAB}%)<br />
-                A ↔ C: {diffAC < 10 ? "Very similar" : diffAC < 25 ? "Somewhat different" : "Quite different"} ({diffAC}%)<br />
-                B ↔ C: {diffBC < 10 ? "Very similar" : diffBC < 25 ? "Somewhat different" : "Quite different"} ({diffBC}%)
+              <div className="text-[#6B5744] italic">
+                💡 Compare original audio (Path A) vs cleaned audio in Auphonic dashboard
               </div>
             </div>
           </div>
@@ -512,7 +519,7 @@ export default function AudioTestPage() {
             <div className="text-center py-6">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-600 border-t-transparent"></div>
               <div className="mt-3 text-[#4A3428] font-semibold">
-                Testing 3 paths in parallel...
+                Testing 2 paths in parallel...
               </div>
               <div className="mt-2 text-sm text-[#8B7355]">
                 Path A: ~7-9 seconds
@@ -554,10 +561,9 @@ export default function AudioTestPage() {
               2. Compare Results
             </h2>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {renderPathResult(testResults.pathA, "Path A: AssemblyAI")}
               {renderPathResult(testResults.pathB, "Path B: Auphonic Cleaner")}
-              {renderPathResult(testResults.pathC, "Path C: Auphonic Cutter")}
             </div>
 
             {renderComparison()}

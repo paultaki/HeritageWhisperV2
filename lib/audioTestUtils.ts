@@ -8,16 +8,16 @@
  */
 
 export interface TimingBreakdown {
-  transcriptionMs: number;
-  formattingMs: number;
+  transcriptionMs?: number;
+  formattingMs?: number;
   lessonExtractionMs?: number;
   audioCleanMs?: number;
   totalMs: number;
 }
 
 export interface CostBreakdown {
-  transcription: number;
-  formatting: number;
+  transcription?: number;
+  formatting?: number;
   lessonExtraction?: number;
   audioCleaning?: number;
   total: number;
@@ -29,15 +29,18 @@ export interface PathResult {
   timing: TimingBreakdown;
   cost: CostBreakdown;
   quality: {
-    transcription: string;
-    formatted: string;
-    lessons: {
+    transcription?: string;
+    formatted?: string;
+    lessons?: {
       practical: string;
       emotional: string;
       character: string;
     };
-    wordCount: number;
+    wordCount?: number;
     confidence?: number;
+    // Path B fields (Auphonic audio only)
+    cleanedAudioBase64?: string;
+    cleanedAudioSizeBytes?: number;
   };
   error?: string;
 }

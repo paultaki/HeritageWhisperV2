@@ -25,16 +25,17 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 /**
- * Path A: Current Production (AssemblyAI + GPT-4o-mini)
+ * Path A: AssemblyAI transcription + GPT formatting/lessons
  * Expected: 7-9s total
+ * Note: /api/transcribe handles AssemblyAI + GPT processing internally
  */
 async function pathA_AssemblyAI(audioBuffer: Buffer, token: string): Promise<PathResult> {
   const startTime = Date.now();
   
   try {
-    logger.api("[PathA] Starting AssemblyAI transcription");
+    logger.api("[PathA] Starting AssemblyAI transcription + GPT processing");
     
-    // Call existing AssemblyAI endpoint
+    // Call transcribe endpoint (does AssemblyAI + GPT formatting + lessons)
     const formData = new FormData();
     const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
     formData.append('audio', audioBlob, 'test-audio.webm');
@@ -49,11 +50,13 @@ async function pathA_AssemblyAI(audioBuffer: Buffer, token: string): Promise<Pat
     
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`AssemblyAI failed: ${response.status} - ${errorText}`);
+      throw new Error(`Transcription failed: ${response.status} - ${errorText}`);
     }
     
     const result = await response.json();
     const endTime = Date.now();
+    
+    logger.api("[PathA] ✅ Complete!", { totalMs: endTime - startTime });
     
     // Extract timing from response metadata
     const transcriptionMs = result._meta?.transcriptionLatencyMs || 0;
@@ -66,7 +69,7 @@ async function pathA_AssemblyAI(audioBuffer: Buffer, token: string): Promise<Pat
     const formattingCost = calculateGPT4oMiniCost(result.transcription?.length || 0);
     
     return {
-      pathName: 'Path A: AssemblyAI (Current)',
+      pathName: 'Path A: AssemblyAI + GPT',
       status: 'success',
       timing: {
         transcriptionMs,
@@ -123,8 +126,8 @@ async function pathA_AssemblyAI(audioBuffer: Buffer, token: string): Promise<Pat
 }
 
 /**
- * Path B: Auphonic Cleaner (leveler, loudness, noise reduction)
- * Expected: 37-42s total (30s cleaning + 7-9s transcription)
+ * Path B: Auphonic Cleaner - Returns cleaned audio only (no transcription)
+ * Expected: 30-40s total (Auphonic cleaning)
  */
 async function pathB_AuphonicCleaner(audioBuffer: Buffer, token: string): Promise<PathResult> {
   const startTime = Date.now();
@@ -132,7 +135,7 @@ async function pathB_AuphonicCleaner(audioBuffer: Buffer, token: string): Promis
   try {
     logger.api("[PathB] Starting Auphonic Cleaner (leveler, loudness, noise)");
     
-    // Step 1: Clean audio with Auphonic (cleaner preset or mode)
+    // Clean audio with Auphonic (cleaner preset or mode)
     const auphonicFormData = new FormData();
     const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
     auphonicFormData.append('audio', audioBlob, 'test-audio.webm');
@@ -158,70 +161,28 @@ async function pathB_AuphonicCleaner(audioBuffer: Buffer, token: string): Promis
     
     const auphonicResult = await auphonicResponse.json();
     const audioCleanMs = auphonicResult._meta?.totalLatencyMs || 0;
-    logger.api("[PathB] ✅ Auphonic complete, starting transcription...");
-    
-    // Step 2: Transcribe cleaned audio with AssemblyAI
-    const cleanedAudioBuffer = Buffer.from(auphonicResult.cleanedAudioBase64, 'base64');
-    logger.api("[PathB] 📝 Sending to AssemblyAI...", { sizeBytes: cleanedAudioBuffer.length });
-    
-    const transcribeFormData = new FormData();
-    const cleanedBlob = new Blob([cleanedAudioBuffer], { type: 'audio/mp3' });
-    transcribeFormData.append('audio', cleanedBlob, 'cleaned-audio.mp3');
-    
-    const transcribeResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/transcribe`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: transcribeFormData,
-    });
-    
-    if (!transcribeResponse.ok) {
-      const errorText = await transcribeResponse.text();
-      throw new Error(`AssemblyAI transcription failed: ${transcribeResponse.status} - ${errorText}`);
-    }
-    
-    const transcribeResult = await transcribeResponse.json();
     const endTime = Date.now();
+    
     logger.api("[PathB] ✅ Complete!", { totalMs: endTime - startTime });
     
-    // Extract timing from response metadata
-    const transcriptionMs = transcribeResult._meta?.transcriptionLatencyMs || 0;
-    const formattingMs = transcribeResult._meta?.formattingLatencyMs || 0;
-    const totalMs = endTime - startTime;
-    
-    // Calculate costs
-    const durationMinutes = estimateAudioDuration(audioBuffer.length);
-    const transcriptionCost = calculateAssemblyAICost(durationMinutes);
-    const formattingCost = calculateGPT4oMiniCost(transcribeResult.transcription?.length || 0);
+    // Return cleaned audio (as base64 for storage/download)
+    const cleanedAudioBuffer = Buffer.from(auphonicResult.cleanedAudioBase64, 'base64');
     const auphonicCost = 0; // Using free tier for testing
     
     return {
-      pathName: 'Path B: Auphonic Cleaner + AssemblyAI',
+      pathName: 'Path B: Auphonic Cleaner (Audio Only)',
       status: 'success',
       timing: {
-        transcriptionMs,
-        formattingMs,
         audioCleanMs,
-        totalMs,
+        totalMs: endTime - startTime,
       },
       cost: {
-        transcription: transcriptionCost,
-        formatting: formattingCost,
         audioCleaning: auphonicCost,
-        total: transcriptionCost + formattingCost + auphonicCost,
+        total: auphonicCost,
       },
       quality: {
-        transcription: transcribeResult.text || transcribeResult.transcription || '',
-        formatted: transcribeResult.text || transcribeResult.transcription || '',
-        lessons: transcribeResult.lessonOptions || {
-          practical: "Every experience teaches something if you're willing to learn from it",
-          emotional: "The heart remembers what the mind forgets",
-          character: "Who you become matters more than what you achieve",
-        },
-        wordCount: countWords(transcribeResult.text || transcribeResult.transcription || ''),
-        confidence: transcribeResult.confidence,
-        cleanedAudioSizeBytes: auphonicResult.cleanedAudioSize,
+        cleanedAudioBase64: auphonicResult.cleanedAudioBase64,
+        cleanedAudioSizeBytes: cleanedAudioBuffer.length,
       },
     };
   } catch (error) {
@@ -229,28 +190,17 @@ async function pathB_AuphonicCleaner(audioBuffer: Buffer, token: string): Promis
     logger.error("[PathB] Error:", error);
     
     return {
-      pathName: 'Path B: Auphonic Cleaner + AssemblyAI',
+      pathName: 'Path B: Auphonic Cleaner (Audio Only)',
       status: 'error',
       timing: {
-        transcriptionMs: 0,
-        formattingMs: 0,
+        audioCleanMs: 0,
         totalMs: endTime - startTime,
       },
       cost: {
-        transcription: 0,
-        formatting: 0,
+        audioCleaning: 0,
         total: 0,
       },
-      quality: {
-        transcription: '',
-        formatted: '',
-        lessons: {
-          practical: '',
-          emotional: '',
-          character: '',
-        },
-        wordCount: 0,
-      },
+      quality: {},
       error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
@@ -466,7 +416,7 @@ export async function POST(request: NextRequest) {
       estimatedDuration: estimateAudioDuration(audioBuffer.length),
     });
     
-    // Execute all three paths in parallel with timeout
+    // Execute both paths in parallel with timeout
     const testStartTime = Date.now();
     
     const results = await Promise.allSettled([
@@ -480,11 +430,6 @@ export async function POST(request: NextRequest) {
         150000, // 150s timeout (Auphonic can take 2-3 minutes)
         'PathB'
       ),
-      withTimeout(
-        pathC_AuphonicCutter(audioBuffer, token),
-        150000, // 150s timeout (Auphonic can take 2-3 minutes)
-        'PathC'
-      ),
     ]);
     
     const testTotalTime = Date.now() - testStartTime;
@@ -492,7 +437,6 @@ export async function POST(request: NextRequest) {
     // Process results
     const pathAResult = results[0];
     const pathBResult = results[1];
-    const pathCResult = results[2];
     
     const pathA: PathResult = pathAResult.status === 'fulfilled'
       ? pathAResult.value
@@ -534,35 +478,13 @@ export async function POST(request: NextRequest) {
             : undefined,
         };
     
-    const pathC: PathResult = pathCResult.status === 'fulfilled'
-      ? pathCResult.value
-      : {
-          pathName: 'Path C: Auphonic Cutter + AssemblyAI',
-          status: pathCResult.status === 'rejected' && pathCResult.reason?.message?.includes('timeout')
-            ? 'timeout'
-            : 'error',
-          timing: { transcriptionMs: 0, formattingMs: 0, totalMs: 150000 },
-          cost: { transcription: 0, formatting: 0, total: 0 },
-          quality: {
-            transcription: '',
-            formatted: '',
-            lessons: { practical: '', emotional: '', character: '' },
-            wordCount: 0,
-          },
-          error: pathCResult.status === 'rejected'
-            ? (pathCResult.reason?.message || 'Unknown error')
-            : undefined,
-        };
-    
     logger.api("[TestAudioProcessing] Test completed", {
       userId: user.id,
       testTotalTimeMs: testTotalTime,
       pathAStatus: pathA.status,
       pathBStatus: pathB.status,
-      pathCStatus: pathC.status,
       pathATime: pathA.timing.totalMs,
       pathBTime: pathB.timing.totalMs,
-      pathCTime: pathC.timing.totalMs,
     });
     
     return NextResponse.json({
@@ -575,7 +497,6 @@ export async function POST(request: NextRequest) {
       results: {
         pathA,
         pathB,
-        pathC,
       },
     });
   } catch (error) {
