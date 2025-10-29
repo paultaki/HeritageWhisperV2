@@ -64,28 +64,28 @@ export function MemoryMap({ stories }: MemoryMapProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-4 md:p-6 rounded-2xl mb-6">
+    <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-3 md:p-6 rounded-2xl mb-6 w-full">
       {/* Collapsed Summary View */}
       <div
-        className="cursor-pointer"
+        className="cursor-pointer w-full"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <h2 className="text-lg md:text-xl font-serif text-heritage-brown mb-1.5">
+        <div className="flex flex-row items-start justify-between gap-2 w-full">
+          <div className="flex-1 min-w-0 max-w-full">
+            <h2 className="text-base md:text-xl font-serif text-heritage-brown mb-1 leading-tight whitespace-normal break-words">
               Your Life's Timeline
             </h2>
-            <p className="text-gray-700 text-sm md:text-base">
+            <p className="text-gray-700 text-sm md:text-base leading-snug whitespace-normal break-words">
               <span className="font-semibold">{stories.length} {stories.length === 1 ? 'story' : 'stories'}</span> across <span className="font-semibold">{decadeEntries.length} {decadeEntries.length === 1 ? 'decade' : 'decades'}</span>
             </p>
             {leastCoveredDecade && (
-              <p className="text-gray-600 italic text-xs md:text-sm mt-1">
-                💡 Your {leastCoveredDecade}s have stories waiting to be told
+              <p className="text-gray-600 text-xs md:text-sm mt-1 leading-snug whitespace-normal break-words">
+                Your {leastCoveredDecade}s have stories waiting to be told
               </p>
             )}
           </div>
           <button
-            className="flex-shrink-0 p-1.5 hover:bg-amber-100 rounded-lg transition-colors self-start"
+            className="flex-shrink-0 p-1 hover:bg-amber-100 rounded-lg transition-colors"
             aria-label={isExpanded ? "Collapse" : "Expand"}
           >
             {isExpanded ? (
