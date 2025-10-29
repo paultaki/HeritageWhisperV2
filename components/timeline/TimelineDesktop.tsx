@@ -468,7 +468,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           onClick={handleCardClick}
           style={{
             boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1)',
-            border: '2px solid #B89B8D',
+            border: '1.5px solid #B89B8D',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.boxShadow = '0 12px 28px -6px rgba(0, 0, 0, 0.2), 0 6px 12px -3px rgba(0, 0, 0, 0.15)';
@@ -608,7 +608,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         onClick={handleCardClick}
         style={{
           boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1)',
-          border: '2px solid #B89B8D',
+          border: '1.5px solid #B89B8D',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.boxShadow = '0 12px 28px -6px rgba(0, 0, 0, 0.2), 0 6px 12px -3px rgba(0, 0, 0, 0.15)';
