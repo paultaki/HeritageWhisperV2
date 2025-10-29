@@ -31,6 +31,7 @@ import { normalizeYear, formatYear } from "@/lib/utils";
 import { getTopTraits } from "@/utils/getTopTraits";
 import { audioManager } from "@/lib/audioManager";
 import type { MemoryCardProps } from "@/types/timeline";
+import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormatting";
 
 /**
  * MemoryCard - Story card component with audio playback
@@ -366,11 +367,7 @@ export const MemoryCard = React.memo(
                 : undefined
             }
           >
-            {story.storyDate
-              ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                  year: "numeric",
-                })
-              : formatYear(story.storyYear)}
+            {formatStoryDate(story.storyDate, story.storyYear, "badge")}
           </span>
 
           {/* 4:3 aspect ratio placeholder - matches photo cards */}
@@ -427,12 +424,7 @@ export const MemoryCard = React.memo(
                 </h3>
                 <div className="hw-meta">
                   <span>
-                    {story.storyDate
-                      ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                        })
-                      : formatYear(story.storyYear)}
+                    {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
                   </span>
                   <span className="divider"></span>
                   <span>
@@ -498,11 +490,7 @@ export const MemoryCard = React.memo(
               : undefined
           }
         >
-          {story.storyDate
-            ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                year: "numeric",
-              })
-            : formatYear(story.storyYear)}
+          {formatStoryDate(story.storyDate, story.storyYear, "badge")}
         </span>
 
         {/* Image container with audio overlay */}
@@ -574,12 +562,7 @@ export const MemoryCard = React.memo(
           {/* Metadata */}
           <div className="hw-meta">
             <span>
-              {story.storyDate
-                ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                  })
-                : formatYear(story.storyYear)}
+              {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
             </span>
             <span className="divider"></span>
             <span>

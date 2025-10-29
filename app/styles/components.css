@@ -74,7 +74,6 @@ body {
   width: 4px;
   /* Soft mauve gradient for premium warm feel */
   background: linear-gradient(180deg, rgba(196, 167, 183, 0.3), rgba(196, 167, 183, 0.5));
-  border: 1.5px solid #B89B8D;
   box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25);
 }
 
@@ -174,7 +173,7 @@ body {
   border-radius: 1px;
   opacity: 1;
   pointer-events: none;
-  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25);
   transition:
     width 120ms ease-out,
     background 120ms ease-out,
@@ -458,7 +457,7 @@ body {
   .hw-year {
     left: -45px;
     top: calc(var(--title-offset, 22px) - 40px);
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1;
     padding: 2px 7px 8px 7px;
   }
@@ -507,6 +506,7 @@ body {
     border-radius: 1px;
     opacity: 0.95;
     pointer-events: none;
+    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25);
   }
   .hw-card:hover::before,
   .hw-card:focus-visible::before {

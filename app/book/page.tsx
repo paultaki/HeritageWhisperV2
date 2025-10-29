@@ -45,6 +45,7 @@ import {
   type DecadeGroup,
   MEASUREMENTS,
 } from "@/lib/bookPagination";
+import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormatting";
 
 const logoUrl = "/HW_logo_mic_clean.png";
 
@@ -521,7 +522,9 @@ const BookPageRenderer = ({
                         {story.title}
                       </span>
                       <span className="text-gray-500 text-xs whitespace-nowrap">
-                        {story.year} • p.{story.pageNumber}
+                        {story.date
+                          ? formatStoryDateForMetadata(story.date, parseInt(story.year))
+                          : story.year} • p.{story.pageNumber}
                       </span>
                     </button>
                   ))}
@@ -612,7 +615,11 @@ const BookPageRenderer = ({
         <div className="story-header-title">
           {page.title ||
             (page.isLeftPage ? "Heritage Whisper" : "Family Memories")}
-          {page.year && !page.title?.includes(page.year) && ` • ${page.year}`}
+          {page.year && !page.title?.includes(page.year) && ` • ${
+            page.date
+              ? formatStoryDateForMetadata(page.date, parseInt(page.year))
+              : page.year
+          }`}
           {page.age !== null &&
             page.age !== undefined &&
             page.age > 0 &&

@@ -187,6 +187,7 @@ export interface TableOfContentsEntry {
   stories: Array<{
     title: string;
     year: string;
+    date?: string;
     pageNumber: number;
   }>;
 }
@@ -1266,6 +1267,7 @@ export function paginateBook(
       tocEntry.stories.push({
         title: story.title,
         year: story.year,
+        date: story.date,
         pageNumber: storyStartPage,
       });
       
