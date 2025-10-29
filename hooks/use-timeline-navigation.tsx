@@ -56,15 +56,12 @@ export function useTimelineNavigation({
 
     // Check for return navigation context from BookView
     const contextStr = sessionStorage.getItem("timeline-navigation-context");
-    console.log('[TimelineNav] Checking for navigation context:', contextStr);
     if (contextStr) {
       try {
         const context = JSON.parse(contextStr);
         const isExpired = Date.now() - context.timestamp > 5 * 60 * 1000; // 5 minutes expiry
-        console.log('[TimelineNav] Parsed context:', context, 'isExpired:', isExpired);
 
         if (!isExpired && context.returnPath === "/timeline") {
-          console.log('[TimelineNav] Valid context found, setting up navigation to:', context.memoryId);
           // Set the return highlight
           setReturnHighlightId(context.memoryId);
 
@@ -83,11 +80,8 @@ export function useTimelineNavigation({
               ) as HTMLElement;
             }
 
-            console.log(`[TimelineNav] Attempt ${attempt + 1}/${maxAttempts} - Looking for memory card:`, memoryCard);
-
             if (memoryCard) {
               // Found it! Scroll to it
-              console.log('[TimelineNav] Found memory card, scrolling into view');
               memoryCard.scrollIntoView({
                 behavior: "smooth",
                 block: "center",
@@ -95,8 +89,6 @@ export function useTimelineNavigation({
             } else if (attempt < maxAttempts) {
               // Not found yet, retry after 100ms
               setTimeout(() => scrollToMemory(attempt + 1), 100);
-            } else {
-              console.warn('[TimelineNav] Memory card not found after', maxAttempts, 'attempts');
             }
           };
 
@@ -111,11 +103,8 @@ export function useTimelineNavigation({
             setReturnHighlightId(null);
           }, 3000);
         } else if (isExpired) {
-          console.log('[TimelineNav] Context expired, clearing');
           // Clear expired context
           sessionStorage.removeItem("timeline-navigation-context");
-        } else {
-          console.log('[TimelineNav] Context returnPath mismatch:', context.returnPath);
         }
       } catch (e) {
         console.error("Failed to parse navigation context:", e);

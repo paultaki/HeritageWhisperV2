@@ -175,7 +175,7 @@ export function getAgeRangeForDecade(
  */
 export function getDecadeDisplayName(decade: string): string {
   const year = decade.replace("s", "");
-  return `THE ${year}s`;
+  return `${year}s`;
 }
 
 /**

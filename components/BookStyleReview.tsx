@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,8 +30,16 @@ import {
 import { AudioRecorder, AudioRecorderHandle } from "@/components/AudioRecorder";
 import { CustomAudioPlayer } from "@/components/CustomAudioPlayer";
 import { VoiceRecordingButton } from "@/components/VoiceRecordingButton";
+import { RecordingOverlay } from "@/components/RecordingOverlay";
+import { AudioProcessingCard } from "@/components/AudioProcessingCard";
+import { ProcessingStatus } from "@/components/ProcessingStatus";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import type {
+  AudioProcessingStatus,
+  TranscriptionStatus,
+  AudioSource,
+} from "@/types/recording";
 
 interface BookStyleReviewProps {
   title: string;
@@ -93,6 +102,22 @@ export function BookStyleReview({
   const [showLessonOptions, setShowLessonOptions] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Recording overlay state
+  const [showRecordingOverlay, setShowRecordingOverlay] = useState(false);
+  const [hasExistingRecording, setHasExistingRecording] = useState(false);
+
+  // Processing states
+  const [audioProcessingStatus, setAudioProcessingStatus] =
+    useState<AudioProcessingStatus>("idle");
+  const [transcriptionStatus, setTranscriptionStatus] =
+    useState<TranscriptionStatus>("idle");
+  const [cleanedAudioUrl, setCleanedAudioUrl] = useState<string | null>(
+    audioUrl || null
+  );
+  const [audioSource, setAudioSource] = useState<AudioSource>("original");
+  const [processingError, setProcessingError] = useState<string | null>(null);
+
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const titleInputRef = useRef<HTMLInputElement>(null);
   const wisdomInputRef = useRef<HTMLTextAreaElement>(null);
@@ -118,8 +143,124 @@ export function BookStyleReview({
     }
   }, [editingWisdom]);
 
+  // Check for recording overlay on mount (only once)
+  useEffect(() => {
+    const isDraft = searchParams?.get("draft") === "true";
+    const isNew = searchParams?.get("new") === "true";
+
+    // Only show overlay if we don't already have a recording
+    if ((isNew || (isDraft && !audioUrl)) && !cleanedAudioUrl) {
+      setShowRecordingOverlay(true);
+    }
+
+    if (audioUrl) {
+      setHasExistingRecording(true);
+      setCleanedAudioUrl(audioUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]); // Only run when searchParams change, not audioUrl
+
   // Note: Background transcription logic removed - users now select transcription
   // BEFORE reaching this screen via TranscriptionSelectionScreen component
+
+  const handleContinueRecording = async (audioBlob: Blob, duration: number) => {
+    // Close overlay
+    setShowRecordingOverlay(false);
+
+    // Clear existing transcription if re-recording
+    if (hasExistingRecording) {
+      onTranscriptionChange("");
+      setTempWisdom("");
+      onWisdomChange("");
+      setLessonOptions(null);
+    }
+
+    // Start processing
+    setAudioProcessingStatus("uploading");
+    setTranscriptionStatus("transcribing");
+    setProcessingError(null);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session");
+
+      // Generate or get memoryId (you may want to pass this as a prop)
+      const memoryId = crypto.randomUUID();
+
+      // Upload and process
+      const formData = new FormData();
+      formData.append("audio", audioBlob);
+      formData.append("memoryId", memoryId);
+
+      setAudioProcessingStatus("enhancing");
+
+      const response = await fetch("/api/process-recording", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        console.error("[BookStyleReview] API Error:", {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+        });
+        throw new Error(errorData.error || `API request failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // Update audio
+      setCleanedAudioUrl(result.audio.url);
+      setAudioSource(result.audio.source);
+      setAudioProcessingStatus("complete");
+
+      // Call the parent callback with audio URL
+      if (onAudioChange) {
+        onAudioChange(result.audio.url, audioBlob);
+      }
+
+      // Update transcription
+      onTranscriptionChange(result.transcription.formatted);
+      setTranscriptionStatus("complete");
+
+      // Update lessons
+      if (result.transcription.lessons) {
+        setLessonOptions(result.transcription.lessons);
+        // Set default lesson (practical)
+        if (result.transcription.lessons.practical) {
+          onWisdomChange(result.transcription.lessons.practical);
+          setTempWisdom(result.transcription.lessons.practical);
+        }
+      }
+
+      toast({
+        title: "Recording processed!",
+        description: "Your memory has been transcribed and enhanced.",
+      });
+    } catch (error) {
+      console.error("[BookStyleReview] Processing error:", error);
+      setAudioProcessingStatus("error");
+      setTranscriptionStatus("error");
+      setProcessingError(
+        error instanceof Error ? error.message : "Processing failed"
+      );
+
+      toast({
+        title: "Processing failed",
+        description: "Please try recording again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReRecord = () => {
+    setShowRecordingOverlay(true);
+  };
 
   const handleWisdomSave = () => {
     onWisdomChange(tempWisdom);
@@ -270,6 +411,41 @@ export function BookStyleReview({
           {/* Page content - cream background like book pages */}
           <div className="bg-[#faf8f5] rounded-lg shadow-[0_2px_12px_rgba(139,111,71,0.15)] md:shadow-[0_0_40px_rgba(0,0,0,0.1)_inset,0_0_2px_rgba(0,0,0,0.1)]">
             <div className="p-6 md:p-12 space-y-8">
+              {/* Recording Overlay */}
+              <RecordingOverlay
+                isOpen={showRecordingOverlay}
+                onClose={() => setShowRecordingOverlay(false)}
+                onContinue={handleContinueRecording}
+                existingAudioUrl={cleanedAudioUrl || undefined}
+              />
+
+              {/* Audio Processing Card - Only show during active processing */}
+              {audioProcessingStatus !== "idle" && audioProcessingStatus !== "complete" && (
+                <AudioProcessingCard
+                  status={audioProcessingStatus}
+                  audioUrl={cleanedAudioUrl}
+                  audioSource={audioSource}
+                  error={processingError}
+                />
+              )}
+
+              {/* Re-record button for existing recordings */}
+              {hasExistingRecording &&
+                audioProcessingStatus === "complete" &&
+                cleanedAudioUrl && (
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleReRecord}
+                      variant="outline"
+                      size="sm"
+                      className="border-[#E8DDD3] text-[#8B7355] hover:bg-[#FAF8F6]"
+                    >
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Re-record
+                    </Button>
+                  </div>
+                )}
+
               {/* 1. Photo Section */}
               <div>
                 <h3 className="text-lg font-medium text-gray-700 mb-3 flex items-center gap-2">
@@ -743,13 +919,40 @@ export function BookStyleReview({
                   </div>
                 </div>
 
+                {/* Processing Status */}
+                {transcriptionStatus !== "idle" &&
+                  transcriptionStatus !== "complete" &&
+                  transcriptionStatus !== "error" && (
+                    <div className="mb-4">
+                      <ProcessingStatus
+                        status={transcriptionStatus}
+                        type="transcription"
+                      />
+                    </div>
+                  )}
+
                 {/* Transcription textarea */}
                 <Textarea
                   value={transcription}
                   onChange={(e) => onTranscriptionChange(e.target.value)}
-                  className="w-full min-h-[300px] resize-none border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400"
-                  placeholder="Type or paste your story here. This is how it will appear in your book..."
-                  disabled={isEnhancing}
+                  className={cn(
+                    "w-full min-h-[300px] resize-none border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400",
+                    (transcriptionStatus !== "complete" &&
+                      transcriptionStatus !== "idle") &&
+                      "opacity-60 cursor-not-allowed"
+                  )}
+                  placeholder={
+                    transcriptionStatus === "transcribing"
+                      ? "Transcribing your story..."
+                      : transcriptionStatus === "extracting"
+                      ? "Extracting insights..."
+                      : "Type or paste your story here. This is how it will appear in your book..."
+                  }
+                  disabled={
+                    isEnhancing ||
+                    (transcriptionStatus !== "complete" &&
+                      transcriptionStatus !== "idle")
+                  }
                 />
 
                 {transcription && (

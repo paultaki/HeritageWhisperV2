@@ -81,13 +81,13 @@ function DecadeLabel({ decade, isDark = false }: DecadeLabelProps) {
         className="absolute z-0"
         style={{
           left: '50%',
-          transform: 'translateX(calc(-50% - 205px))', // Position to right of timeline line
+          transform: 'translateX(calc(-50% - 163px))', // Position to right of timeline line, moved 42px closer
           opacity: isDark ? 0.4 : 0.45,
         }}
       >
         <span
           style={{
-            fontSize: '11px',
+            fontSize: '12px',
             fontFamily: 'system-ui, -apple-system, sans-serif',
             fontWeight: 500,
             letterSpacing: '0.5px',
@@ -462,10 +462,19 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
     if (displayPhoto?.url) {
       return (
         <div
-          className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer ${
+          className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}
           onClick={handleCardClick}
+          style={{
+            boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = '0 12px 28px -6px rgba(0, 0, 0, 0.2), 0 6px 12px -3px rgba(0, 0, 0, 0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = '0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1)';
+          }}
         >
           {/* Photo Section - 16:10 aspect ratio to match mobile, rounded top corners only */}
           <div className="relative w-full aspect-[16/10] overflow-hidden">
@@ -592,10 +601,19 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
     // No photo - render card with placeholder matching photo cards
     return (
       <div
-        className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer ${
+        className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer ${
           isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}
         onClick={handleCardClick}
+        style={{
+          boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1)',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = '0 12px 28px -6px rgba(0, 0, 0, 0.2), 0 6px 12px -3px rgba(0, 0, 0, 0.15)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = '0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1)';
+        }}
       >
         {/* Placeholder Section - 16:10 aspect ratio to match mobile */}
         <div className="relative w-full aspect-[16/10] overflow-hidden">
@@ -734,9 +752,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             fontWeight: 500,
             letterSpacing: '0.3px',
             opacity: 0.95,
-            boxShadow: isDark
-              ? '0 2px 4px rgba(0, 0, 0, 0.2)'
-              : '0 2px 6px rgba(139, 107, 122, 0.12)',
+            boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1)',
             borderRadius: '6px',
             backdropFilter: 'blur(10px)',
             position: 'relative',
@@ -1037,7 +1053,7 @@ export function TimelineDesktop() {
         <div ref={timelineContainerRef} className="relative">
           {/* V3: Subtle vertical timeline ruler - soft mauve for premium feel */}
           <div
-            className="absolute left-1/2 md:w-[2.5px] w-[3px] rounded-full overflow-hidden pointer-events-none"
+            className="absolute left-1/2 md:w-[3.5px] w-[4px] rounded-full overflow-hidden pointer-events-none"
             style={{
               backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(196, 167, 183, 0.35)',
               transform: 'translateX(calc(-50% - 225px))',
@@ -1045,6 +1061,7 @@ export function TimelineDesktop() {
               bottom: '0',
               height: '100%',
               opacity: 0.8,
+              boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1)',
             }}
           >
             <div
@@ -1209,7 +1226,7 @@ export function TimelineDesktop() {
             top: 50%;
             transform: translateY(-50%);
             width: 20px;
-            height: 2.5px;
+            height: 3.5px;
             background: linear-gradient(
               to right,
               rgba(196, 167, 183, 0.3),
@@ -1220,6 +1237,7 @@ export function TimelineDesktop() {
             pointer-events: none;
             transition: all 150ms ease-out;
             z-index: 1;
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1);
           }
 
           /* Left-positioned cards - connector goes to the right */

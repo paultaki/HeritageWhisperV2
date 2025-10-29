@@ -131,3 +131,44 @@ export interface UseRecordingStateOptions {
   initialTitle?: string;
   initialYear?: number;
 }
+
+// ============================================================
+// Process Recording Types (Added January 2025 - Parallel Processing)
+// ============================================================
+
+/** Audio processing status */
+export type AudioProcessingStatus =
+  | "idle"
+  | "uploading"
+  | "enhancing"
+  | "complete"
+  | "error";
+
+/** Transcription processing status */
+export type TranscriptionStatus =
+  | "idle"
+  | "transcribing"
+  | "extracting"
+  | "complete"
+  | "error";
+
+/** Audio source after processing */
+export type AudioSource = "auphonic" | "original";
+
+/** Complete processed recording result */
+export interface ProcessedRecording {
+  audio: {
+    url: string;
+    source: AudioSource;
+    sizeBytes: number;
+  };
+  transcription: {
+    text: string;
+    formatted: string;
+    lessons: {
+      practical: string;
+      emotional: string;
+      character: string;
+    };
+  };
+}

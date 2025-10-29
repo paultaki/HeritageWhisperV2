@@ -636,7 +636,6 @@ const BookPageRenderer = ({
                     timestamp: Date.now(),
                     returnPath: '/timeline', // Required by timeline navigation logic
                   };
-                  console.log('[BookView] Setting timeline navigation context:', context);
                   sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
 
                   // Navigate to timeline

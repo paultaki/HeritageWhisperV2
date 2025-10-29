@@ -80,6 +80,8 @@ function BookStyleReviewContent() {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const handleAudioChange = (url: string | null, blob?: Blob | null) => {
+    console.log("[handleAudioChange] Setting audio URL:", url);
+    console.log("[handleAudioChange] Setting audio blob:", !!blob);
     setAudioUrl(url);
     if (blob) {
       setMainAudioBlob(blob);
@@ -794,6 +796,9 @@ function BookStyleReviewContent() {
       };
 
       console.log("Saving story with data:", storyData);
+      console.log("[SAVE DEBUG] audioUrl state:", audioUrl);
+      console.log("[SAVE DEBUG] finalAudioUrl:", finalAudioUrl);
+      console.log("[SAVE DEBUG] mainAudioBlob:", !!mainAudioBlob);
 
       const url = isEditing ? `/api/stories/${editId}` : "/api/stories";
       const method = isEditing ? "PUT" : "POST";
