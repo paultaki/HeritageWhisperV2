@@ -120,8 +120,20 @@ class AudioManager {
         this.currentId = null;
       });
 
-      this.currentAudio.addEventListener("timeupdate", () => {
+      this.currentAudio.addEventListener("pause", () => {
         if (this.currentAudio) {
+          this.notifyListeners(id, false, this.currentAudio.currentTime);
+        }
+      });
+
+      this.currentAudio.addEventListener("play", () => {
+        if (this.currentAudio) {
+          this.notifyListeners(id, true, this.currentAudio.currentTime);
+        }
+      });
+
+      this.currentAudio.addEventListener("timeupdate", () => {
+        if (this.currentAudio && !this.currentAudio.paused) {
           this.notifyListeners(id, true, this.currentAudio.currentTime);
         }
       });
