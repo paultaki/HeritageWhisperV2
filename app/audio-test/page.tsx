@@ -29,8 +29,24 @@ export default function AudioTestPage() {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          channelCount: 1,
+          sampleRate: 48000, // High quality sample rate
+          echoCancellation: true,
+          noiseSuppression: false, // Let Auphonic handle this
+          autoGainControl: false, // Let Auphonic handle this
+        }
+      });
+      
+      // Use highest quality WebM with high bitrate
+      // Browser natively supports this, better than compressed WebM default
+      const mimeType = 'audio/webm;codecs=opus';
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: mimeType,
+        audioBitsPerSecond: 128000, // High bitrate for better quality
+      });
+      
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
@@ -41,7 +57,7 @@ export default function AudioTestPage() {
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: mimeType });
         setAudioBlob(blob);
         setAudioUrl(URL.createObjectURL(blob));
         stream.getTracks().forEach((track) => track.stop());
@@ -225,6 +241,16 @@ export default function AudioTestPage() {
                 </div>
               </div>
             </div>
+
+            {/* Audio Player - Show for Path A */}
+            {label.includes("Path A") && audioUrl && (
+              <div className="mb-4">
+                <div className="text-sm font-medium text-[#8B7355] mb-2">
+                  🎵 Original Audio
+                </div>
+                <audio src={audioUrl} controls className="w-full" />
+              </div>
+            )}
 
             {/* Quality Card */}
             <div className="mb-4 p-4 bg-white rounded-lg border border-[#E8DDD3]">

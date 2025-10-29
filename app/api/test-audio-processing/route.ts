@@ -132,12 +132,18 @@ async function pathB_AuphonicCleaner(audioBuffer: Buffer, token: string): Promis
   try {
     logger.api("[PathB] Starting Auphonic Cleaner (leveler, loudness, noise)");
     
-    // Step 1: Clean audio with Auphonic (cleaner mode)
+    // Step 1: Clean audio with Auphonic (cleaner preset or mode)
     const auphonicFormData = new FormData();
     const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
     auphonicFormData.append('audio', audioBlob, 'test-audio.webm');
     
-    const auphonicResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auphonic-clean?mode=cleaner`, {
+    // Use preset if available, otherwise use cleaner mode with built-in algorithms
+    const auphonicCleanerPreset = process.env.AUPHONIC_CLEANER_PRESET_ID;
+    const auphonicUrl = auphonicCleanerPreset
+      ? `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auphonic-clean?preset=${auphonicCleanerPreset}`
+      : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auphonic-clean?mode=cleaner`;
+    
+    const auphonicResponse = await fetch(auphonicUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -152,9 +158,11 @@ async function pathB_AuphonicCleaner(audioBuffer: Buffer, token: string): Promis
     
     const auphonicResult = await auphonicResponse.json();
     const audioCleanMs = auphonicResult._meta?.totalLatencyMs || 0;
+    logger.api("[PathB] ✅ Auphonic complete, starting transcription...");
     
     // Step 2: Transcribe cleaned audio with AssemblyAI
     const cleanedAudioBuffer = Buffer.from(auphonicResult.cleanedAudioBase64, 'base64');
+    logger.api("[PathB] 📝 Sending to AssemblyAI...", { sizeBytes: cleanedAudioBuffer.length });
     
     const transcribeFormData = new FormData();
     const cleanedBlob = new Blob([cleanedAudioBuffer], { type: 'audio/mp3' });
@@ -175,6 +183,7 @@ async function pathB_AuphonicCleaner(audioBuffer: Buffer, token: string): Promis
     
     const transcribeResult = await transcribeResponse.json();
     const endTime = Date.now();
+    logger.api("[PathB] ✅ Complete!", { totalMs: endTime - startTime });
     
     // Extract timing from response metadata
     const transcriptionMs = transcribeResult._meta?.transcriptionLatencyMs || 0;
@@ -263,9 +272,9 @@ async function pathC_AuphonicCutter(audioBuffer: Buffer, token: string): Promise
     auphonicFormData.append('audio', audioBlob, 'test-audio.webm');
     
     // Use preset if available, otherwise use cutter mode
-    const auphonicPresetId = process.env.AUPHONIC_PRESET_ID;
-    const auphonicUrl = auphonicPresetId
-      ? `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auphonic-clean?preset=${auphonicPresetId}`
+    const auphonicCutterPreset = process.env.AUPHONIC_CUTTER_PRESET_ID;
+    const auphonicUrl = auphonicCutterPreset
+      ? `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auphonic-clean?preset=${auphonicCutterPreset}`
       : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auphonic-clean?mode=cutter`;
     
     const auphonicResponse = await fetch(auphonicUrl, {
@@ -283,9 +292,11 @@ async function pathC_AuphonicCutter(audioBuffer: Buffer, token: string): Promise
     
     const auphonicResult = await auphonicResponse.json();
     const audioCleanMs = auphonicResult._meta?.totalLatencyMs || 0;
+    logger.api("[PathC] ✅ Auphonic complete, starting transcription...");
     
     // Step 2: Transcribe cut audio with AssemblyAI
     const cleanedAudioBuffer = Buffer.from(auphonicResult.cleanedAudioBase64, 'base64');
+    logger.api("[PathC] 📝 Sending to AssemblyAI...", { sizeBytes: cleanedAudioBuffer.length });
     
     const transcribeFormData = new FormData();
     const cleanedBlob = new Blob([cleanedAudioBuffer], { type: 'audio/mp3' });
@@ -306,6 +317,7 @@ async function pathC_AuphonicCutter(audioBuffer: Buffer, token: string): Promise
     
     const transcribeResult = await transcribeResponse.json();
     const endTime = Date.now();
+    logger.api("[PathC] ✅ Complete!", { totalMs: endTime - startTime });
     
     // Extract timing from response metadata
     const transcriptionMs = transcribeResult._meta?.transcriptionLatencyMs || 0;

@@ -17,7 +17,8 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 const AUPHONIC_API_KEY = process.env.AUPHONIC_API_KEY;
-const AUPHONIC_PRESET_ID = process.env.AUPHONIC_PRESET_ID;
+const AUPHONIC_CLEANER_PRESET_ID = process.env.AUPHONIC_CLEANER_PRESET_ID;
+const AUPHONIC_CUTTER_PRESET_ID = process.env.AUPHONIC_CUTTER_PRESET_ID;
 
 if (!AUPHONIC_API_KEY) {
   logger.warn("[AuphonicClean] AUPHONIC_API_KEY not set - Auphonic features disabled");
@@ -114,7 +115,7 @@ async function createAuphonicProduction(
   const createData = await createResponse.json() as { data: { uuid: string } };
   const productionUuid = createData.data.uuid;
 
-  logger.api("[AuphonicClean] Created production:", productionUuid);
+  logger.api("[AuphonicClean] ✅ Step 1/4: Created production:", productionUuid);
 
   // Upload the audio file to the production using native FormData
   const uploadFormData = new FormData();
@@ -134,7 +135,7 @@ async function createAuphonicProduction(
     throw new Error(`Failed to upload audio to Auphonic: ${uploadResponse.status} - ${errorText}`);
   }
 
-  logger.api("[AuphonicClean] Uploaded audio to production:", productionUuid);
+  logger.api("[AuphonicClean] ✅ Step 2/4: Uploaded audio to production:", productionUuid);
 
   // Start the production
   const startResponse = await fetch(`https://auphonic.com/api/production/${productionUuid}/start.json`, {
@@ -149,7 +150,7 @@ async function createAuphonicProduction(
     throw new Error(`Failed to start Auphonic production: ${startResponse.status} - ${errorText}`);
   }
 
-  logger.api("[AuphonicClean] Started production:", productionUuid);
+  logger.api("[AuphonicClean] ✅ Step 3/4: Started production:", productionUuid);
 
   return productionUuid;
 }
@@ -174,15 +175,32 @@ async function pollProductionStatus(productionUuid: string, maxAttempts = 36): P
     const statusData = await statusResponse.json() as { data: AuphonicProduction };
     const production = statusData.data;
 
-    logger.api("[AuphonicClean] Poll attempt", attempts + 1, "/", maxAttempts, "- Status:", production.status_string);
+    logger.api("[AuphonicClean] Poll attempt", attempts + 1, "/", maxAttempts, "- status:", production.status, "- status_string:", production.status_string);
 
-    if (production.status === 'done') {
+    // Check status_string for completion (most reliable)
+    if (production.status_string === 'Done') {
+      logger.api("[AuphonicClean] ✅ Production completed!", {
+        uuid: productionUuid,
+        status: production.status,
+        outputFiles: production.output_files?.length || 0,
+      });
       return production;
     }
 
-    if (production.status === 'error') {
+    // Check for ACTUAL errors (only if error_message or error_status exist)
+    // Don't check status numbers - they're unreliable
+    if (production.error_message || production.error_status) {
+      logger.error("[AuphonicClean] ❌ Auphonic error:", {
+        status: production.status,
+        status_string: production.status_string,
+        error_message: production.error_message,
+        error_status: production.error_status,
+      });
       throw new Error(`Auphonic processing failed: ${production.error_message || production.error_status}`);
     }
+    
+    // Otherwise, still processing (Waiting, Audio Processing, Encoding, etc.)
+    logger.api("[AuphonicClean] ⏳ Still processing, waiting 5s...");
 
     // Wait 5 seconds before next poll
     await new Promise(resolve => setTimeout(resolve, 5000));
@@ -196,14 +214,26 @@ async function pollProductionStatus(productionUuid: string, maxAttempts = 36): P
  * Download cleaned audio from Auphonic
  */
 async function downloadCleanedAudio(downloadUrl: string): Promise<Buffer> {
-  const response = await fetch(downloadUrl);
+  logger.api("[AuphonicClean] 📥 Fetching cleaned audio from:", downloadUrl.substring(0, 80) + "...");
+  
+  // Add authentication to download request
+  const response = await fetch(downloadUrl, {
+    headers: {
+      'Authorization': `Bearer ${AUPHONIC_API_KEY}`,
+    },
+  });
   
   if (!response.ok) {
+    logger.error("[AuphonicClean] ❌ Download failed:", response.status, response.statusText);
     throw new Error(`Failed to download cleaned audio: ${response.status}`);
   }
 
+  logger.api("[AuphonicClean] 📦 Converting to buffer...");
   const arrayBuffer = await response.arrayBuffer();
-  return Buffer.from(arrayBuffer);
+  const buffer = Buffer.from(arrayBuffer);
+  logger.api("[AuphonicClean] ✅ Downloaded:", buffer.length, "bytes");
+  
+  return buffer;
 }
 
 /**
@@ -320,20 +350,30 @@ export async function POST(request: NextRequest) {
     const createLatency = Date.now() - createStart;
 
     // Step 2: Poll until processing is complete
+    logger.api("[AuphonicClean] 🔄 Step 4/4: Starting polling...");
     const pollStart = Date.now();
     const production = await pollProductionStatus(productionUuid);
     const pollLatency = Date.now() - pollStart;
+    logger.api("[AuphonicClean] ✅ Polling complete in", pollLatency + "ms");
 
     // Step 3: Download cleaned audio
+    logger.api("[AuphonicClean] 📥 Step 5/4: Downloading cleaned audio...");
     const downloadStart = Date.now();
     const mp3Output = production.output_files?.find(f => f.format === 'mp3');
     
     if (!mp3Output?.download_url) {
+      logger.error("[AuphonicClean] ❌ No MP3 output file!", { production });
       throw new Error('No MP3 output file found in Auphonic production');
     }
+    
+    logger.api("[AuphonicClean] Download URL:", mp3Output.download_url);
 
     const cleanedAudioBuffer = await downloadCleanedAudio(mp3Output.download_url);
     const downloadLatency = Date.now() - downloadStart;
+    logger.api("[AuphonicClean] ✅ Download complete!", { 
+      downloadLatencyMs: downloadLatency,
+      sizeBytes: cleanedAudioBuffer.length 
+    });
 
     const totalLatency = Date.now() - startTime;
 
