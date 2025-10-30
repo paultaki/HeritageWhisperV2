@@ -361,7 +361,7 @@ export default function BookV4Page() {
     return (
       <div className={`h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
         {/* Header */}
-        <div className="fixed top-0 left-0 right-0 z-50 no-print">
+        <div className="fixed top-0 left-0 right-0 z-50 no-print -mt-[15px]">
           <div className="mx-auto max-w-[1800px] px-6">
             <div className="relative h-16 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -421,7 +421,7 @@ export default function BookV4Page() {
         onZoomOut={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
       />
     
-      <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6" style={{ marginTop: '66px', paddingTop: '0px' }}>
+      <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6" style={{ marginTop: '51px', paddingTop: '0px' }}>
         {/* Compact Header */}
         <div className="mx-auto max-w-[1600px] mb-6">
           <div className="flex items-center justify-between">
@@ -539,7 +539,7 @@ export default function BookV4Page() {
     
         {/* TOC Drawer - Above Bottom Nav */}
         {showToc && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-[520px] max-w-[calc(100vw-3rem)]">
+          <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[520px] max-w-[calc(100vw-3rem)]">
             <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-4 py-3 text-sm text-black shadow-2xl">
               <div className="mb-2 flex items-center justify-between">
                 <div className="font-medium tracking-tight">Table of Contents</div>
@@ -576,13 +576,22 @@ export default function BookV4Page() {
       </div>
 
       {/* Bottom Navigation Controls - Thinner mobile-optimized version */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-2">
+      <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-[52px] md:pb-2">
         <div className="mx-auto max-w-md px-4">
           <div className="flex items-center justify-between rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 shadow-2xl">
             {/* Previous button */}
             <button
-              onClick={goToPrevSpread}
-              disabled={currentSpreadIndex === 0}
+              onClick={() => {
+                // On mobile use mobile page navigation, on desktop use spread navigation
+                if (window.innerWidth < 1024) {
+                  if (currentMobilePage > 0) {
+                    setCurrentMobilePage(currentMobilePage - 1);
+                  }
+                } else {
+                  goToPrevSpread();
+                }
+              }}
+              disabled={window.innerWidth < 1024 ? currentMobilePage === 0 : currentSpreadIndex === 0}
               className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
               title="Previous"
             >
@@ -594,7 +603,8 @@ export default function BookV4Page() {
             {/* Page indicator and TOC */}
             <div className="flex items-center gap-3">
               <span className="text-white font-medium text-sm whitespace-nowrap">
-                {currentSpreadIndex + 1} / {spreads.length}
+                <span className="lg:hidden">{currentMobilePage + 1} / {mobilePages.length}</span>
+                <span className="hidden lg:inline">{currentSpreadIndex + 1} / {spreads.length}</span>
               </span>
               <button
                 onClick={() => setShowToc(!showToc)}
@@ -618,8 +628,17 @@ export default function BookV4Page() {
 
             {/* Next button */}
             <button
-              onClick={goToNextSpread}
-              disabled={currentSpreadIndex === spreads.length - 1}
+              onClick={() => {
+                // On mobile use mobile page navigation, on desktop use spread navigation
+                if (window.innerWidth < 1024) {
+                  if (currentMobilePage < mobilePages.length - 1) {
+                    setCurrentMobilePage(currentMobilePage + 1);
+                  }
+                } else {
+                  goToNextSpread();
+                }
+              }}
+              disabled={window.innerWidth < 1024 ? currentMobilePage === mobilePages.length - 1 : currentSpreadIndex === spreads.length - 1}
               className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
               title="Next"
             >
@@ -885,13 +904,13 @@ function MobileView({
   };
 
   return (
-    <div className="lg:hidden" style={{ marginTop: '-12px' }}>
-      <div className="relative -mx-2 px-2">
+    <div className="lg:hidden" style={{ marginTop: '0px' }}>
+      <div className="relative" style={{ height: 'calc(100vh - 180px)' }}>
         {/* Mobile prev/next controls */}
         <button 
           onClick={handlePrev}
           disabled={currentPage === 0}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 ml-1 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="m15 18-6-6 6-6"></path>
@@ -900,7 +919,7 @@ function MobileView({
         <button 
           onClick={handleNext}
           disabled={currentPage === allPages.length - 1}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 mr-1 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="m9 18 6-6-6-6"></path>
@@ -912,11 +931,11 @@ function MobileView({
           onScroll={handleScroll}
           onTouchStart={() => setIsDragging(true)}
           onTouchEnd={() => setTimeout(() => setIsDragging(false), 100)}
-          className="flex snap-x snap-mandatory overflow-x-auto gap-6 pb-4 hide-scrollbar"
+          className="h-full flex items-center justify-center snap-x snap-mandatory overflow-x-auto hide-scrollbar px-4"
           style={{ scrollSnapType: 'x mandatory' }}
         >
           {allPages.map((page, index) => (
-            <div key={index} className="snap-center shrink-0" style={{ width: 'calc(100vw - 3rem)' }}>
+            <div key={index} className="snap-center shrink-0 flex items-center justify-center" style={{ width: '100vw', height: '100%' }}>
               <MobilePage page={page} pageNum={index + 1} allStories={sortedStories} />
             </div>
           ))}
@@ -1012,12 +1031,12 @@ function MobilePage({
   // Intro page
   if (page.type === 'intro') {
     return (
-      <div className="mobile-page relative mx-auto w-full aspect-[55/85] [perspective:1600px]">
+      <div className="mobile-page relative mx-auto h-[85%] w-auto aspect-[55/85] [perspective:1600px]">
         <div 
           aria-hidden="true" 
           className="pointer-events-none absolute rounded-[24px]" 
           style={{ 
-            inset: "-12px", 
+            inset: "-16px", 
             background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
             boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
           }}
@@ -1042,12 +1061,12 @@ function MobilePage({
   // TOC page
   if (page.type === 'toc') {
     return (
-      <div className="mobile-page relative mx-auto w-full aspect-[55/85] [perspective:1600px]">
+      <div className="mobile-page relative mx-auto h-[85%] w-auto aspect-[55/85] [perspective:1600px]">
         <div 
           aria-hidden="true" 
           className="pointer-events-none absolute rounded-[24px]" 
           style={{ 
-            inset: "-12px", 
+            inset: "-16px", 
             background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
             boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
           }}
@@ -1086,13 +1105,13 @@ function MobilePage({
   if (!story) return null;
   
   return (
-    <div className="mobile-page relative mx-auto w-full aspect-[55/85] [perspective:1600px]">
+    <div className="mobile-page relative mx-auto h-[85%] w-auto aspect-[55/85] [perspective:1600px]">
       {/* Outer book cover/border */}
       <div 
         aria-hidden="true" 
         className="pointer-events-none absolute rounded-[24px]" 
         style={{ 
-          inset: "-12px", 
+          inset: "-16px", 
           background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
           boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
         }}

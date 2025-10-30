@@ -251,7 +251,7 @@ erDiagram
         text memoryType
         int promptScore
         int shownCount
-        text outcome "used | skipped | expired | dismissed"
+        text outcome "used | skipped | expired"
         uuid storyId FK
         timestamp createdAt
         timestamp resolvedAt
@@ -284,8 +284,6 @@ erDiagram
         timestamp firstAccessedAt
         timestamp lastAccessedAt
         int accessCount
-        text customMessage
-        jsonb permissions
         timestamp createdAt
     }
 
@@ -862,13 +860,13 @@ increment_view_count(share_code_param TEXT) → VOID
 update_updated_at_column() → TRIGGER
 ```
 - Auto-updates `updated_at` timestamp on row modification
-- Applied to: `users`, `profiles`, `prompt_feedback`
+- Applied to: `users`, `prompt_feedback`
 
 ```sql
 trigger_cleanup_expired_sessions() → TRIGGER
 ```
-- 10% probability cleanup on INSERT to `family_sessions`
-- Keeps table size manageable
+- ⚠️ **Legacy trigger** - References deleted `family_sessions` table
+- **Not functional** - table no longer exists
 
 ```sql
 update_prompt_feedback_updated_at() → TRIGGER
@@ -900,8 +898,7 @@ All tables use UUID primary keys with `gen_random_uuid()` default
 - `passkeys(user_id, credential_id)` - Composite unique (prevents cross-tenant clashes)
 - `active_prompts.anchor_hash` - Deduplication across prompt generations
 - `family_invites.token` - Unique invite tokens
-- `shared_access.share_token` - Unique share URLs
-- `profiles.user_id` - One profile per user
+- `shares.share_code` - Unique share URLs
 
 ### Foreign Key Cascades
 - `passkeys.user_id` → ON DELETE CASCADE
@@ -909,29 +906,37 @@ All tables use UUID primary keys with `gen_random_uuid()` default
 - `prompt_history.user_id` → ON DELETE CASCADE
 - `user_prompts.user_id` → ON DELETE CASCADE
 - `family_members.user_id` → ON DELETE CASCADE
-- `family_activity.user_id` → ON DELETE CASCADE
-- `family_activity.family_member_id` → ON DELETE CASCADE
+- `audio_files.story_id` → Likely CASCADE (verify in migrations)
 - `admin_audit_log.target_user_id` → ON DELETE SET NULL
 - `prompt_feedback.story_id` → ON DELETE SET NULL
 
 ### CHECK Constraints
 - `stories.duration_seconds` - Between 1 and 120 (database-level clamp)
+- `stories.life_phase` - 'childhood', 'teen', 'early_adult', 'mid_adult', 'late_adult', 'senior'
 - `active_prompts.tier` - Integer 0-3
-- `active_prompts.prompt_score` - Integer 0-100
+- `active_prompts.prompt_score` - Integer 0-100 (or NULL)
+- `active_prompts.user_status` - 'available', 'queued', 'dismissed'
 - `users.role` - 'user', 'admin', 'moderator'
 - `users.subscription_status` - 'none', 'active', 'cancelled', 'expired'
+- `user_agreements.agreement_type` - 'terms', 'privacy'
+- `user_agreements.method` - 'signup', 'reacceptance', 'oauth'
 - `family_members.status` - 'pending', 'active', 'suspended'
-- `family_members.relationship` - 'spouse', 'partner', 'child', 'parent', 'sibling', 'grandparent', 'grandchild', 'other'
+- `family_members.permission_level` - 'viewer', 'contributor'
 - `user_prompts.source` - 'catalog', 'ai'
 - `user_prompts.status` - 'ready', 'queued', 'dismissed', 'recorded', 'deleted'
 - `family_collaborations.status` - 'active', 'suspended', 'removed'
+- `family_collaborations.permission_level` - 'viewer', 'contributor'
+- `family_prompts.status` - 'pending', 'answered', 'archived'
+- `prompt_history.outcome` - 'used', 'skipped', 'expired'
 - `prompt_feedback.rating` - 'good', 'bad', 'excellent', 'terrible'
+- `subscriptions.status` - 'trialing', 'active', 'canceled', 'incomplete', 'past_due'
 
 ### Indexes (50+ for performance)
 - **User lookups:** `idx_users_role`, `idx_users_subscription_status`
-- **Story queries:** `idx_stories_user_id`, `idx_stories_created_at DESC`, `idx_stories_story_year`
+- **Story queries:** `idx_stories_user_id`, `idx_stories_created_at DESC`, `idx_stories_year`
 - **Prompt system:** `idx_active_prompts_user`, `idx_active_prompts_tier`, `idx_active_prompts_expires`
-- **Family features:** `idx_family_members_user_status`, `idx_family_sessions_token`
+- **Family features:** `idx_family_members_user_status`, `idx_family_invites_token`
+- **Sharing:** `idx_shares_share_code`, `idx_shares_story_id`
 - **Admin functions:** `idx_admin_audit_log_created_at DESC`
 
 ---

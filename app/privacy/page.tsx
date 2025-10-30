@@ -66,7 +66,7 @@ export default function PrivacyPolicy() {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Privacy Policy
           </h1>
-          <p className="text-lg text-gray-600">Last Updated: October 4, 2025</p>
+          <p className="text-lg text-gray-600">Last Updated: October 30, 2025</p>
         </div>
 
         {/* Content */}
@@ -248,7 +248,7 @@ export default function PrivacyPolicy() {
                   href="#section-11"
                   className="text-coral-600 hover:underline"
                 >
-                  Elder User Protection
+                  Children's Privacy
                 </a>
               </li>
               <li>
@@ -256,7 +256,7 @@ export default function PrivacyPolicy() {
                   href="#section-12"
                   className="text-coral-600 hover:underline"
                 >
-                  Children's Privacy
+                  Cookies and Tracking
                 </a>
               </li>
               <li>
@@ -264,7 +264,7 @@ export default function PrivacyPolicy() {
                   href="#section-13"
                   className="text-coral-600 hover:underline"
                 >
-                  Cookies and Tracking
+                  California Privacy Rights
                 </a>
               </li>
               <li>
@@ -272,7 +272,7 @@ export default function PrivacyPolicy() {
                   href="#section-14"
                   className="text-coral-600 hover:underline"
                 >
-                  California Privacy Rights
+                  Other US State Privacy Rights
                 </a>
               </li>
               <li>
@@ -280,7 +280,7 @@ export default function PrivacyPolicy() {
                   href="#section-15"
                   className="text-coral-600 hover:underline"
                 >
-                  Other US State Privacy Rights
+                  International Users
                 </a>
               </li>
               <li>
@@ -288,7 +288,7 @@ export default function PrivacyPolicy() {
                   href="#section-16"
                   className="text-coral-600 hover:underline"
                 >
-                  International Users
+                  Changes to This Policy
                 </a>
               </li>
               <li>
@@ -296,20 +296,12 @@ export default function PrivacyPolicy() {
                   href="#section-17"
                   className="text-coral-600 hover:underline"
                 >
-                  Changes to This Policy
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#section-18"
-                  className="text-coral-600 hover:underline"
-                >
                   Contact Us
                 </a>
               </li>
               <li>
                 <a
-                  href="#section-19"
+                  href="#section-18"
                   className="text-coral-600 hover:underline"
                 >
                   How to Exercise Your Rights
@@ -1177,104 +1169,11 @@ export default function PrivacyPolicy() {
             </ul>
           </section>
 
+
           {/* Section 11 */}
           <section id="section-11" className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              11. Elder User Protection
-            </h2>
-
-            <p className="text-gray-700 mb-6">
-              We designed HeritageWhisper with senior users in mind. We take
-              additional steps to protect our older users.
-            </p>
-
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              Monitoring for Exploitation
-            </h3>
-
-            <p className="text-gray-700 mb-2">
-              We may flag accounts for review if we detect:
-            </p>
-            <ul className="list-disc list-inside space-y-1 text-gray-700 mb-6">
-              <li>Sudden sharing of all stories with a new user</li>
-              <li>Mass deletions shortly after family member gains access</li>
-              <li>Unusual payment changes or subscription cancellations</li>
-              <li>Multiple failed login attempts from new locations</li>
-              <li>Account settings changed dramatically in short time</li>
-            </ul>
-
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              Collaborative Timeline Monitoring
-            </h3>
-
-            <p className="text-gray-700 mb-2">
-              For collaborative accounts with senior users, we monitor for:
-            </p>
-            <ul className="list-disc list-inside space-y-1 text-gray-700 mb-6">
-              <li>
-                Sudden addition of collaborators followed by content changes
-              </li>
-              <li>Mass story deletions after new collaborator joins</li>
-              <li>Account owner losing control of their timeline</li>
-              <li>Content added without account owner's knowledge</li>
-              <li>Permission changes the owner didn't initiate</li>
-            </ul>
-
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              What We Do If Concerned
-            </h3>
-
-            <p className="text-gray-700 mb-2">
-              If we suspect exploitation or account compromise:
-            </p>
-            <ul className="list-disc list-inside space-y-1 text-gray-700 mb-4">
-              <li>We temporarily freeze account changes</li>
-              <li>We contact you at your registered email</li>
-              <li>We contact your designated trusted contact (if provided)</li>
-              <li>We require identity verification to unlock</li>
-            </ul>
-
-            <p className="text-gray-700 mb-2">
-              If we suspect exploitation through collaboration features:
-            </p>
-            <ul className="list-disc list-inside space-y-1 text-gray-700 mb-6">
-              <li>We freeze all collaborator permissions</li>
-              <li>We contact the account owner directly (phone if possible)</li>
-              <li>We may temporarily disable story additions</li>
-              <li>We require identity verification to unlock</li>
-            </ul>
-
-            <p className="text-gray-700 mb-6">
-              This is NOT to restrict your access—it's to ensure the account
-              changes reflect your actual wishes, not coercion or fraud.
-            </p>
-
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              Trusted Contact Option
-            </h3>
-
-            <p className="text-gray-700 mb-2">
-              You can designate a "trusted contact" (adult child, lawyer,
-              friend) who we can notify if:
-            </p>
-            <ul className="list-disc list-inside space-y-1 text-gray-700 mb-4">
-              <li>We detect suspicious activity</li>
-              <li>You haven't logged in for 6+ months</li>
-              <li>We need to verify account security</li>
-            </ul>
-
-            <p className="text-gray-700 mb-2">Trusted contacts cannot:</p>
-            <ul className="list-disc list-inside space-y-1 text-gray-700">
-              <li>Access your account without proper succession process</li>
-              <li>Make changes to your settings</li>
-              <li>View your stories</li>
-            </ul>
-          </section>
-
-          {/* Section 12 */}
-          <section id="section-12" className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              12. Children's Privacy
+              11. Children's Privacy
             </h2>
 
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -1305,10 +1204,10 @@ export default function PrivacyPolicy() {
             </p>
           </section>
 
-          {/* Section 13 */}
-          <section id="section-13" className="mb-12">
+          {/* Section 12 */}
+          <section id="section-12" className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              13. Cookies and Tracking
+              12. Cookies and Tracking
             </h2>
 
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -1375,10 +1274,10 @@ export default function PrivacyPolicy() {
             </p>
           </section>
 
-          {/* Section 14 */}
-          <section id="section-14" className="mb-12">
+          {/* Section 13 */}
+          <section id="section-13" className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              14. California Privacy Rights
+              13. California Privacy Rights
             </h2>
 
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -1600,18 +1499,17 @@ export default function PrivacyPolicy() {
             </p>
           </section>
 
-          {/* Section 15 */}
-          <section id="section-15" className="mb-12">
+          {/* Section 14 */}
+          <section id="section-14" className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              15. Other US State Privacy Rights
+              14. Other US State Privacy Rights
             </h2>
 
             <p className="text-gray-700 mb-4">
-              If you're a resident of Colorado, Connecticut, Delaware, Florida,
-              Indiana, Iowa, Kentucky, Maryland, Minnesota, Montana, Nebraska,
-              New Hampshire, New Jersey, Oregon, Rhode Island, Tennessee, Texas,
-              Utah, or Virginia, you have similar rights to California
-              residents:
+              If you're a resident of Colorado, Connecticut, Delaware, Iowa,
+              Maryland, Minnesota, Montana, Nebraska, New Hampshire, New Jersey,
+              Oregon, Tennessee, Texas, Utah, or Virginia, you have similar rights
+              to California residents:
             </p>
 
             <div className="mb-6">
@@ -1642,10 +1540,10 @@ export default function PrivacyPolicy() {
             </p>
           </section>
 
-          {/* Section 16 */}
-          <section id="section-16" className="mb-12">
+          {/* Section 15 */}
+          <section id="section-15" className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              16. International Users
+              15. International Users
             </h2>
 
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -1684,10 +1582,10 @@ export default function PrivacyPolicy() {
             </p>
           </section>
 
-          {/* Section 17 */}
-          <section id="section-17" className="mb-12">
+          {/* Section 16 */}
+          <section id="section-16" className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              17. Changes to This Policy
+              16. Changes to This Policy
             </h2>
 
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -1723,10 +1621,10 @@ export default function PrivacyPolicy() {
             </p>
           </section>
 
-          {/* Section 18 */}
-          <section id="section-18" className="mb-12 bg-gray-100 p-8 rounded-lg">
+          {/* Section 17 */}
+          <section id="section-17" className="mb-12 bg-gray-100 p-8 rounded-lg">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              18. Contact Us
+              17. Contact Us
             </h2>
 
             <div className="space-y-4 text-gray-700">
@@ -1770,10 +1668,10 @@ export default function PrivacyPolicy() {
             </div>
           </section>
 
-          {/* Section 19 */}
-          <section id="section-19" className="mb-12">
+          {/* Section 18 */}
+          <section id="section-18" className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              19. How to Exercise Your Rights
+              18. How to Exercise Your Rights
             </h2>
 
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -1811,7 +1709,7 @@ export default function PrivacyPolicy() {
                 Mail:
               </h4>
               <p className="text-gray-700">
-                Send written request to address in Section 18
+                Send written request to address in Section 17
               </p>
             </div>
 
@@ -1885,7 +1783,10 @@ export default function PrivacyPolicy() {
               Version 1.0: October 4, 2025 (Initial publication)
             </p>
             <p className="text-gray-600 text-sm">
-              Effective Date: October 4, 2025
+              Version 1.1: October 30, 2025 (Simplified to focus on legal requirements)
+            </p>
+            <p className="text-gray-600 text-sm">
+              Effective Date: October 30, 2025
             </p>
             <p className="text-gray-600 text-sm mt-2">
               Heritage Whisper LLC reserves the right to update this document.

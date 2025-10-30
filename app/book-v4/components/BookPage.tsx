@@ -39,29 +39,57 @@ interface BookPageProps {
 export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
   ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory }, ref) => {
     const pageRef = React.useRef<HTMLDivElement>(null);
-    const [hasScroll, setHasScroll] = React.useState(false);
+    const [scrollState, setScrollState] = React.useState<{ hasScroll: boolean; isAnimating: boolean }>({
+      hasScroll: false,
+      isAnimating: false
+    });
+    const currentPageIdRef = React.useRef<string>('');
 
-    // Check if content is scrollable
+    // Single effect to manage everything
     React.useEffect(() => {
-      const checkScroll = () => {
-        if (ref && typeof ref !== 'function' && ref.current) {
-          const element = ref.current;
-          const isScrollable = element.scrollHeight > element.clientHeight + 5; // 5px buffer
-          setHasScroll(isScrollable);
-        }
-      };
+      // Generate unique page ID
+      const pageId = typeof story === 'string' ? story : 
+                     (story && typeof story === 'object' && 'id' in story) ? story.id : 
+                     `page-${pageNum}`;
       
-      checkScroll();
-      const timer1 = setTimeout(checkScroll, 100);
-      const timer2 = setTimeout(checkScroll, 500);
-      const timer3 = setTimeout(checkScroll, 1000);
+      // Check if this is a new page
+      const isNewPage = pageId !== currentPageIdRef.current;
       
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-        clearTimeout(timer3);
-      };
-    }, [ref, story]);
+      if (isNewPage) {
+        currentPageIdRef.current = pageId;
+        
+        // Reset state for new page
+        setScrollState({ hasScroll: false, isAnimating: false });
+        
+        let stopAnimationTimer: NodeJS.Timeout | null = null;
+        
+        // Check for scroll after content loads
+        const checkScrollTimer = setTimeout(() => {
+          if (ref && typeof ref !== 'function' && ref.current) {
+            const element = ref.current;
+            const isScrollable = element.scrollHeight > element.clientHeight + 5;
+            
+            if (isScrollable) {
+              // Start bouncing
+              setScrollState({ hasScroll: true, isAnimating: true });
+              
+              // Stop bouncing after 1.5 seconds
+              stopAnimationTimer = setTimeout(() => {
+                setScrollState({ hasScroll: true, isAnimating: false });
+              }, 1500);
+            }
+          }
+        }, 1200);
+        
+        // Cleanup
+        return () => {
+          clearTimeout(checkScrollTimer);
+          if (stopAnimationTimer) {
+            clearTimeout(stopAnimationTimer);
+          }
+        };
+      }
+    }, [story, pageNum, ref]);
 
     // Handle intro page
     if (story === 'intro') {
@@ -232,9 +260,9 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               </div>
               
               {/* Scroll indicator - appears on outer edge */}
-              {hasScroll && (
-                <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} animate-bounce pointer-events-none`} style={{ zIndex: 40 }}>
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-200/80 shadow-md">
+              {scrollState.hasScroll && (
+                <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} ${scrollState.isAnimating ? 'animate-bounce' : ''} pointer-events-none`} style={{ zIndex: 40 }}>
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all duration-300 ${!scrollState.isAnimating ? 'bg-neutral-200/40' : 'bg-neutral-200/80'}`}>
                     <svg 
                       xmlns="http://www.w3.org/2000/svg" 
                       className="h-5 w-5 text-neutral-600" 
@@ -316,9 +344,9 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               </div>
               
               {/* Scroll indicator - appears on outer edge */}
-              {hasScroll && (
-                <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} animate-bounce pointer-events-none`} style={{ zIndex: 40 }}>
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-200/80 shadow-md">
+              {scrollState.hasScroll && (
+                <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} ${scrollState.isAnimating ? 'animate-bounce' : ''} pointer-events-none`} style={{ zIndex: 40 }}>
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all duration-300 ${!scrollState.isAnimating ? 'bg-neutral-200/40' : 'bg-neutral-200/80'}`}>
                     <svg 
                       xmlns="http://www.w3.org/2000/svg" 
                       className="h-5 w-5 text-neutral-600" 
