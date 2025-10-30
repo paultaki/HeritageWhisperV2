@@ -322,13 +322,13 @@ export function TimelineMobileV2() {
               rgba(245, 158, 11, 0) 100%),
             linear-gradient(135deg, #D97706, #F59E0B, #FBBF24);
           border: none;
-          padding: 12px 20px;
-          min-height: 48px;
-          max-height: 48px;
-          height: 48px;
+          padding: 8px 16px;
+          min-height: 38px;
+          max-height: 38px;
+          height: 38px;
           width: auto;
           max-width: 160px;
-          font-size: 15px;
+          font-size: 14px;
           box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
           border-radius: 9999px;
           overflow: hidden;

@@ -254,7 +254,7 @@ export default function BookV4Page() {
                   {user?.name ? `${user.name}'s Story` : "Your Story"}
                 </h1>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  {sortedStories.length} {sortedStories.length === 1 ? 'memory' : 'memories'} • Spread {currentSpreadIndex + 1} of {spreads.length}
+                  {sortedStories.length} {sortedStories.length === 1 ? 'memory' : 'memories'} • Pages {currentSpreadIndex * 2 + 1}-{currentSpreadIndex * 2 + 2} of {spreads.length * 2}
                 </p>
               </div>
             </div>
@@ -345,15 +345,15 @@ export default function BookV4Page() {
         {/* Mobile & Tablet: Single page with horizontal swipe */}
         <MobileView stories={sortedStories} />
     
-        {/* TOC Drawer - Top Right */}
+        {/* TOC Drawer - Above Bottom Nav */}
         {showToc && (
-          <div className="fixed top-24 right-6 z-40 w-[320px] max-w-[calc(100vw-3rem)]">
-            <div className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 text-sm text-slate-200 shadow-2xl">
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-[520px] max-w-[calc(100vw-3rem)]">
+            <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-4 py-3 text-sm text-black shadow-2xl">
               <div className="mb-2 flex items-center justify-between">
                 <div className="font-medium tracking-tight">Table of Contents</div>
                 <button 
                   onClick={() => setShowToc(false)}
-                  className="p-1 rounded-md hover:bg-white/10"
+                  className="p-1 rounded-md hover:bg-black/10"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
@@ -369,7 +369,7 @@ export default function BookV4Page() {
                           setCurrentSpreadIndex(Math.floor(index / 2));
                           setShowToc(false);
                         }}
-                        className="w-full text-left px-2 py-1.5 rounded-md hover:bg-white/10 transition-colors"
+                        className="w-full text-left px-2 py-1.5 rounded-md hover:bg-black/10 transition-colors"
                       >
                         {story.title} ({story.storyYear})
                       </button>
@@ -391,7 +391,7 @@ export default function BookV4Page() {
               onClick={goToPrevSpread}
               disabled={currentSpreadIndex === 0}
               className="flex items-center gap-2.5 px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-200 text-xl font-medium"
-              title="Previous spread (or use Left Arrow key)"
+              title="Previous page (or use Left Arrow key)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="m15 18-6-6 6-6"></path>
@@ -401,7 +401,7 @@ export default function BookV4Page() {
 
             <div className="flex items-center gap-4">
               <span className="text-white font-medium text-xl">
-                Spread {currentSpreadIndex + 1} of {spreads.length}
+                Pages {currentSpreadIndex * 2 + 1}-{currentSpreadIndex * 2 + 2} of {spreads.length * 2}
               </span>
               <button
                 onClick={() => setShowToc(!showToc)}
@@ -427,7 +427,7 @@ export default function BookV4Page() {
               onClick={goToNextSpread}
               disabled={currentSpreadIndex === spreads.length - 1}
               className="flex items-center gap-2.5 px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-200 text-xl font-medium"
-              title="Next spread (or use Right Arrow key)"
+              title="Next page (or use Right Arrow key)"
             >
               <span className="hidden sm:inline">Next</span>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
