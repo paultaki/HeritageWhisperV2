@@ -346,8 +346,12 @@ export default function BookV4Page() {
           <div className="mx-auto max-w-[1800px] px-6">
             <div className="relative h-16 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="h-7 w-7 grid place-items-center rounded-md ring-1 bg-white/5 ring-white/10">
-                  <span className="text-xs font-semibold tracking-tight">BK</span>
+                <div className="h-7 w-7 flex items-center justify-center">
+                  <img 
+                    src="/circle logo white.svg" 
+                    alt="Heritage Whisper" 
+                    className="h-7 w-7"
+                  />
                 </div>
                 <div>
                   <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
@@ -395,8 +399,12 @@ export default function BookV4Page() {
         <div className="mx-auto max-w-[1600px] mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="h-7 w-7 grid place-items-center rounded-md ring-1 bg-white/5 ring-white/10">
-                <span className="text-xs font-semibold tracking-tight">BK</span>
+              <div className="h-7 w-7 flex items-center justify-center">
+                <img 
+                  src="/circle logo white.svg" 
+                  alt="Heritage Whisper" 
+                  className="h-7 w-7"
+                />
               </div>
               <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
                 {user?.name ? `${user.name}'s Story` : "Your Story"}

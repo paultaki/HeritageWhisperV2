@@ -2,7 +2,7 @@
 
 > **Version:** 3.0  
 > **Last Updated:** October 30, 2025  
-> **Schema Version:** 21 production tables + 1 view, verified against live Supabase database  
+> **Schema Version:** 22 production tables + 1 view, verified against live Supabase database  
 > **Purpose:** Developer-focused documentation of database schemas, service models, and UI data structures  
 > **Note:** This doc uses TypeScript conventions (camelCase). Database uses snake_case - see [Field Naming](#field-naming-convention) for details.  
 > ⚠️ **Important:** `shared/schema.ts` defines types for both production tables AND planned/legacy tables. Always verify table exists in database before querying.
@@ -27,7 +27,7 @@
 
 HeritageWhisperV2 uses a **three-layer data architecture**:
 
-- **Database Layer (PostgreSQL):** 21 production tables + 1 view managed via Supabase
+- **Database Layer (PostgreSQL):** 22 production tables + 1 view managed via Supabase
 - **Service Layer (Next.js API Routes):** REST API with JWT authentication, direct Supabase client queries
 - **UI Layer (React/TypeScript):** TanStack Query v5 for state management
 
@@ -44,6 +44,22 @@ HeritageWhisperV2 uses a **three-layer data architecture**:
 **Important:** While Drizzle ORM provides type definitions, API routes query the database using Supabase client methods (`.from("table_name")`) rather than ORM queries.
 
 **Schema vs Database:** The Drizzle schema in `shared/schema.ts` defines types for planned features and legacy tables that may not exist in the production database. Always verify a table exists in Supabase before writing queries. See [Legacy/Planned Tables](#legacy-planned-tables) section for tables defined in code but not in production.
+
+### Table Inventory
+
+**Production Database (22 tables + 1 view):**
+- Core User & Auth: `users`, `passkeys`, `user_agreements`
+- Content: `stories`, `audio_files`, `shares`
+- AI Prompts: `active_prompts`, `prompt_history`, `user_prompts`, `prompt_feedback`
+- Family Sharing: `family_members`, `family_invites`, `family_collaborations`, `family_prompts`
+- Admin/Monitoring: `admin_audit_log`, `ai_usage_log`
+- System/Future: `recording_sessions`, `subscriptions`, `gift_passes`, `events`, `usage_tracking`, `activity_notifications`
+- Views: `prompt_quality_stats`
+
+**Code-Only Tables (7 in schema.ts, NOT in production):**
+- `profiles`, `follow_ups`, `historical_context`, `ghost_prompts`, `demo_stories`, `shared_access`, `family_activity`
+
+**Total:** 22 production tables + 7 code-only = 29 table definitions in `shared/schema.ts`
 
 ---
 
@@ -80,7 +96,7 @@ const mappedStory = { storyYear: data.story_year, audioUrl: data.audio_url }
 
 ### Entity-Relationship Diagram (Production Tables)
 
-> **Note:** This diagram shows the 21 production tables that exist in the Supabase database. System/future tables (`recording_sessions`, `subscriptions`, `gift_passes`, `events`, `usage_tracking`, `activity_notifications`) are documented separately in the [Auxiliary Tables Reference](#auxiliary-tables-reference) section. Tables defined in `shared/schema.ts` but not in production are listed in [Legacy/Planned Tables](#legacy-planned-tables).
+> **Note:** This diagram shows the 16 core production tables used in primary features. System/future tables (`audio_files`, `shares`, `recording_sessions`, `subscriptions`, `gift_passes`, `events`, `usage_tracking`, `activity_notifications`) are documented in the [Auxiliary Tables Reference](#auxiliary-tables-reference) section. Tables defined in `shared/schema.ts` but not in production (7 legacy/planned tables) are listed in [Legacy/Planned Tables](#legacy-planned-tables).
 
 ```mermaid
 erDiagram
@@ -415,14 +431,40 @@ erDiagram
 - **Core content table** with audio, transcription, photos
 - **Processing pipeline**: `status` tracks workflow (recorded → enhanced), `isSaved`, `isEnhanced` flags
 - **Audio management**: `audioUrl`, `audioRawPath`, `audioCleanPath` for file paths
-- **Transcription**: `transcript` (main), `transcriptFast`/`transcriptClean` (JSONB) for AI results
+- **Transcription**: `transcript` (main text), `transcriptFast`/`transcriptClean` (JSONB for AI processing results)
 - **Engagement tracking**: `playCount`, `shareCount`, `wordCount`
-- **JSONB metadata column**: Contains structured data for photos, formatted_content, and other complex fields
-- **AI features**: `lessonLearned`, `lessonAlternatives` (JSONB), `followupsInitial` (JSONB)
 - **Display flags**: `includeInBook`, `includeInTimeline`, `isFavorite`
-- **Async processing**: `enhancementJobId`, `enhancementError` for background jobs
-- **Metadata**: `year`, `storyDate`, `lifePhase`, `emotions` (array type), `photoUrl`
+- **Metadata**: `year`, `storyDate`, `lifePhase`, `emotions` (text[] array), `photoUrl`
+- **AI features**: `lessonLearned` (text), `lessonAlternatives` (JSONB), `followupsInitial` (JSONB)
+- **Async processing**: `enhancementJobId`, `enhancementError`, `sessionId`
 - **Source tracking**: `sourcePromptId` links to the prompt that inspired this story
+- **JSONB metadata column**: Contains additional structured data (see below)
+
+**stories.metadata JSONB Structure:**
+```typescript
+{
+  life_age?: number,              // User's age at time of story
+  include_in_timeline?: boolean,  // Timeline visibility (default true)
+  include_in_book?: boolean,      // Book inclusion (default true)
+  is_favorite?: boolean,          // Favorite flag
+  photos?: Array<{                // Multiple photos with transforms
+    id: string,
+    url: string,
+    transform?: { zoom: number, position: {x: number, y: number} },
+    caption?: string,
+    isHero?: boolean
+  }>,
+  photo_transform?: {             // Legacy single photo transform
+    zoom: number,
+    position: {x: number, y: number}
+  },
+  pivotal_category?: string,      // Story category
+  formatted_content?: object,     // AI-formatted story content
+  actual_duration?: number        // Original duration if clamped for DB
+}
+```
+
+**Why JSONB?** Flexible storage for optional fields and evolving features without schema migrations. Query with: `.select('metadata->photos')` or access via TypeScript after fetch.
 
 **5. audioFiles** - Storage metadata for audio recordings
 - Links to stories table
@@ -473,9 +515,9 @@ erDiagram
 - Links to prompt and resulting story
 - Used to improve prompt generation over time
 
-#### Family Sharing V3 Tables (5)
+#### Family Sharing V3 Tables (4)
 
-**12. familyMembers** - Family member invitations and access
+**11. familyMembers** - Family member invitations and access
 - Storyteller invites family members via email
 - Three user references:
   - `userId`: The storyteller
@@ -485,66 +527,38 @@ erDiagram
 - Status: pending, active, suspended
 - Access tracking: first/last accessed, access count
 
-**13. familyInvites** - Token-based invitation system
-- Unique tokens for invite links
+**12. familyInvites** - Token-based invitation system
+- Unique tokens for invite links (7-day expiration)
 - Expiration tracking
-- Tracks when invite was used
+- Tracks when invite was used (one-time use)
 
-**14. familyCollaborations** - Multi-tenant access control (JOIN table)
+**13. familyCollaborations** - Multi-tenant access control (JOIN table)
 - Links family members to storyteller accounts
 - Permission management per collaboration
 - Status tracking (active, suspended, removed)
 - Last viewed tracking for engagement analytics
+- **Critical for multi-tenant security** (used by `has_collaboration_access()` RPC)
 
-**15. familyPrompts** - Family-submitted questions
+**14. familyPrompts** - Family-submitted questions
 - Contributors can submit custom questions to storytellers
 - Status: pending, answered, archived
 - Links to resulting story when answered
 
-**16. familyActivity** - Family engagement tracking
-- Activity feed for storyteller dashboard
-- Types: viewed, commented, favorited, shared
-- Links to specific story and family member
+#### Admin & Monitoring Tables (2)
 
-#### Admin & Monitoring Tables (3)
-
-**17. adminAuditLog** - Admin action audit trail
+**15. adminAuditLog** - Admin action audit trail
 - Security and compliance requirement
 - Tracks all admin actions (user management, content moderation)
 - IP address and user agent logging
 - JSONB details for action-specific data
 - **Critical for GDPR compliance**
 
-**18. aiUsageLog** - AI API usage and cost tracking
+**16. aiUsageLog** - AI API usage and cost tracking
 - Tracks every AI operation (transcription, prompt generation, etc.)
-- Cost tracking in USD (decimal precision)
-- Used by `check_ai_budget()` RPC for enforcement
+- Cost tracking in USD (numeric/decimal type with 6 decimal precision)
+- Used by `check_ai_budget()` RPC for budget enforcement
 - Analytics for AI feature usage
-
-**19. promptFeedback** - Prompt quality ratings
-- Admin tool for monitoring prompt system health
-- Detailed quality metrics and reports
-- Used to improve prompt generation over time
-
-#### Supporting Tables (2)
-
-**20. sharedAccess** - Timeline/book sharing with permissions
-- Token-based sharing (no login required initially)
-- Links email to user account when they register
-- Permission levels: view, edit
-- Optional expiration dates
-- **Note:** Single story sharing removed January 2025
-
-**21. userAgreements** - Terms of Service and Privacy Policy tracking
-- Legal compliance requirement
-- Version tracking for terms/privacy changes
-- Method tracking (signup, reacceptance, OAuth)
-- IP address and user agent for audit trail
-
-**22. historicalContext** - Cached decade-specific historical facts
-- AI-generated context for user's life decades
-- Reduces API calls by caching results
-- Per-user, per-decade storage
+- Enables cost visibility and budget limits per user
 
 ---
 
@@ -779,21 +793,21 @@ log_ai_usage(
 ```sql
 cleanup_expired_family_access() → VOID
 ```
-- Deletes expired unused invites from `family_invites`
-- Deletes expired sessions from `family_sessions`
+- ⚠️ **Legacy function** - References deleted `family_sessions` table
+- Attempts to delete expired invites from `family_invites`
+- **Not functional** due to missing table dependency
 
 ```sql
 cleanup_expired_family_sessions() → VOID
 ```
-- Removes all expired family sessions
-- Checks both regular and absolute expiry
+- ⚠️ **Legacy function** - References deleted `family_sessions` table
+- **Not functional** - table no longer exists
 
 ```sql
 rotate_family_session_token(p_session_id UUID) → TEXT
 ```
-- Rotates session token for security
-- Extends expiry (up to absolute limit)
-- Returns new token
+- ⚠️ **Legacy function** - References deleted `family_sessions` table
+- **Not functional** - table no longer exists
 
 **Multi-Tenant Access Control:**
 ```sql
@@ -810,27 +824,37 @@ has_collaboration_access(
 
 **Export Tracking:**
 ```sql
-increment_pdf_export(user_id UUID) → VOID
-increment_data_export(user_id UUID) → VOID
+increment_pdf_export(user_uuid UUID) → VOID
+increment_data_export(user_uuid UUID) → VOID
 ```
-- Increments export counters in `users` table
-- Updates `lastPdfExportAt` / `lastDataExportAt`
+- ⚠️ **Partially broken** - References old column names
+- Attempts to update `users.pdf_exports` (actual column: `pdf_exports_count`)
+- Attempts to update `users.data_exports` (actual column: `data_exports_count`)
+- **Recommendation**: Update functions or call with correct column names in application code
 
 **Queue Management:**
 ```sql
 get_next_queue_position(p_user_id UUID) → INTEGER
 ```
+- ⚠️ **Partially broken** - References `user_prompts_catalog` table which doesn't exist
+- Should reference `user_prompts` table instead
 - Returns next available queue position
-- Checks both `active_prompts` and `user_prompts`
+- Checks both `active_prompts` and user prompts table
 
-**Test Infrastructure (Development Only):**
+**Additional Functions:**
 ```sql
-clone_user_account(p_source_user_id UUID, p_target_email TEXT) → UUID
-set_user_story_milestone(p_user_id UUID, p_story_count INTEGER) → VOID
-clean_test_prompts(p_user_id UUID) → VOID
-delete_test_account(p_user_id UUID) → VOID
-get_test_account_info(p_user_id UUID) → TABLE
+get_user_collaborations(p_user_id UUID) → TABLE
 ```
+- Returns all storyteller accounts this user can access
+- Joins `family_collaborations`, `family_members`, and `users`
+- Filters for active collaborations only
+
+```sql
+increment_view_count(share_code_param TEXT) → VOID
+```
+- Increments view count for shared story
+- Updates `shares.view_count` and `shares.last_viewed_at`
+- Also updates `stories.play_count`
 
 ### Triggers
 
@@ -857,10 +881,11 @@ update_family_prompts_updated_at() → TRIGGER
 ```sql
 prompt_quality_stats (VIEW)
 ```
-- Aggregated statistics for prompt feedback dashboard
+- ✅ **Production view** - Aggregated statistics for prompt feedback dashboard
 - Groups by: rating, prompt_tier, prompt_type
 - Metrics: COUNT, AVG(prompt_score), AVG(word_count), common tags
-- Used by admin dashboard
+- Used by admin dashboard for prompt system health monitoring
+- **Note**: This is the only view in the production database
 
 ---
 
@@ -919,48 +944,11 @@ All tables use UUID primary keys with `gen_random_uuid()` default
 
 ## Auxiliary Tables Reference
 
-These tables support system operations, analytics, and payments but are not part of core features. Documented here for completeness.
+These tables exist in production but support system operations, analytics, payments, or future features. They're not part of the primary user workflows. Documented here for completeness.
 
-### audio_files (76 rows - Active)
-**Purpose:** Storage metadata for audio recordings
+**Production Count:** 6 auxiliary tables + 16 core tables (in ERD) = 22 total production tables
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | uuid | Primary key |
-| story_id | uuid | FK to stories table |
-| storage_path | text | Supabase Storage path |
-| mime_type | text | Audio format (default: audio/webm) |
-| size_bytes | integer | File size for storage tracking |
-| duration_seconds | integer | Audio duration |
-| sample_rate | integer | Audio quality metric |
-| channels | integer | Mono (1) or stereo (2) |
-| created_at | timestamp | Upload timestamp |
-
-**Usage:** Tracks uploaded audio files separately from story metadata. Enables storage cleanup and migration.
-
----
-
-### shares (76 rows - Active)
-**Purpose:** Public share links for individual stories
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | uuid | Primary key |
-| story_id | uuid | FK to stories table |
-| share_code | text | Unique URL slug |
-| created_by | uuid | FK to users table |
-| view_count | integer | Analytics counter |
-| last_viewed_at | timestamp | Last access time |
-| is_active | boolean | Enable/disable sharing |
-| expires_at | timestamp | Optional expiration |
-| share_metadata | jsonb | Additional share config |
-| created_at | timestamp | Share creation time |
-
-**Usage:** Public story sharing (distinct from family sharing). Used for social media, embedding.
-
-**Note:** Single-story sharing was considered for removal in January 2025 but remains active.
-
----
+> **Note:** `audio_files` and `shares` are documented in the core Content Tables section and shown in the ERD.
 
 ### recording_sessions (57 rows - Active)
 **Purpose:** Temporary state for multi-step recording flow
@@ -976,7 +964,7 @@ These tables support system operations, analytics, and payments but are not part
 | context | text | Additional context notes |
 | followup_count | integer | Number of followups asked |
 | followups_asked | jsonb | Array of followup questions |
-| status | text | 'recording' | 'completed' |
+| status | text | Status: recording or completed |
 | main_audio_url | text | Primary audio URL |
 | wisdom_audio_url | text | Wisdom clip URL |
 | wisdom_clip_text | text | Wisdom transcription |
@@ -1092,6 +1080,64 @@ These tables support system operations, analytics, and payments but are not part
 
 ---
 
+## Legacy/Planned Tables
+
+**⚠️ Important:** These tables are defined in `shared/schema.ts` (Drizzle ORM) but **DO NOT exist in the production Supabase database**. TypeScript types exist, but queries will fail. Do not use these tables in new code.
+
+### profiles (Code Only - Not in Production)
+**Drizzle Definition:** Extended user personalization settings  
+**Status:** Defined in schema.ts but migration never applied  
+**Contains:** Life phase definitions, character traits (work ethic, risk tolerance, family orientation, spirituality), communication preferences  
+**Why it exists:** Originally planned for AI personalization  
+**Current state:** Profile data stored in `users.profile_interests` JSONB instead  
+**Action needed:** Either migrate to production or remove from schema.ts
+
+### follow_ups (Code Only - Not in Production)
+**Drizzle Definition:** AI-generated follow-up questions for stories  
+**Status:** Defined in schema.ts but never migrated  
+**Contains:** `questionText`, `questionType`, `wasAnswered`  
+**Current state:** Follow-up questions stored in `stories.followups_initial` JSONB  
+**Action needed:** Remove from schema.ts (functionality already exists differently)
+
+### historical_context (Code Only - Limited Usage)
+**Drizzle Definition:** Cached decade-specific historical facts  
+**Status:** Defined in schema.ts, used only in export/delete operations  
+**Contains:** `decade`, `ageRange`, `facts` (JSONB)  
+**Usage:** Only 3 file references (export, delete, schema definition)  
+**Current state:** Not actively used for prompt generation  
+**Action needed:** Either implement caching feature or remove from schema
+
+### ghost_prompts (Code Only - Legacy)
+**Drizzle Definition:** Original manually-created prompt system  
+**Status:** Removed from database, still in schema.ts and UI components  
+**Usage:** `GhostPromptCard.tsx` and timeline components still reference it  
+**Current state:** Replaced by `activePrompts` + `userPrompts` system  
+**Action needed:** Complete UI migration to new prompt system, remove from schema.ts  
+**Timeline:** Removal planned with Timeline V4 (Q1 2026)
+
+### demo_stories (Code Only - Not in Production)
+**Drizzle Definition:** Demo account stories for onboarding  
+**Status:** Defined in schema.ts but no table in production database  
+**Contains:** Mirrors stories table structure with public URLs  
+**Current state:** Demo functionality likely uses regular stories table  
+**Action needed:** Either create demo infrastructure or remove from schema
+
+### shared_access (Code Only - Replaced)
+**Drizzle Definition:** Timeline/book sharing with permissions  
+**Status:** Defined in schema.ts but replaced by `shares` table in production  
+**Original purpose:** Token-based sharing for timelines/books  
+**Current state:** `shares` table handles story sharing instead  
+**Action needed:** Remove from schema.ts (functionality exists in shares table)
+
+### family_activity (Code Only - Not Implemented)
+**Drizzle Definition:** Family engagement tracking  
+**Status:** Defined in schema.ts but feature never implemented  
+**Planned purpose:** Activity feed for storyteller dashboard  
+**Current state:** No production table or feature  
+**Action needed:** Either implement feature or remove from schema
+
+---
+
 _For complete documentation including Service Layer, UI Layer, and Data Flow Patterns, see the full DATA_MODEL.md file._
 
 ---
@@ -1100,12 +1146,15 @@ _For complete documentation including Service Layer, UI Layer, and Data Flow Pat
 
 **Production Database:** Supabase project tjycibrhoammxohemyhq (PostgreSQL 17+)
 
-**Row Level Security:** Enabled on all 23 tables with optimized `(SELECT auth.uid())` pattern
+**Row Level Security:** Enabled on all 22 production tables with optimized `(SELECT auth.uid())` pattern
 
-**Core Tables:** 18 actively used tables with full documentation above
+**Database Objects:** 
+- 22 production tables (16 core + 6 auxiliary)
+- 1 view (`prompt_quality_stats`)
+- 7 code-only tables in schema.ts not in production
 
-**Auxiliary Tables:** 5 system/future tables documented in Auxiliary Tables section
+**Schema Definitions:** 29 total table definitions in `shared/schema.ts` (22 production + 7 legacy/planned)
 
 ---
 
-_Last verified: October 30, 2025 - All 23 tables synchronized with production database_
+_Last verified: October 30, 2025 - All 22 production tables synchronized with live Supabase database via MCP_

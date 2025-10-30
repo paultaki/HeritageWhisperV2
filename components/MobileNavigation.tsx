@@ -41,13 +41,14 @@ const NavItem: React.FC<NavItemProps> = ({
         color: isActive ? "#8b6b7a" : "hsl(210, 10%, 60%)",
       }}
     >
-      {/* Active indicator bar at top */}
+      {/* Active indicator bar at top - positioned inside the nav bar */}
       {isActive && (
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all"
+          className="absolute left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all"
           style={{
             backgroundColor: "#8b6b7a",
             width: "32px",
+            top: "3px", // Position inside the bar, below the border
           }}
         />
       )}
@@ -91,12 +92,13 @@ export default function MobileNavigation({
       }}
     >
       <div
-        className="flex items-center justify-around h-8 relative"
+        className="flex items-center justify-around relative"
         style={{
           gap: 'clamp(12px, 6vw, 60px)',
           paddingLeft: 12,
           paddingRight: 12,
-          width: '100%'
+          width: '100%',
+          height: '37px', // 5px taller than original 32px (h-8)
         }}
       >
         {/* Timeline */}

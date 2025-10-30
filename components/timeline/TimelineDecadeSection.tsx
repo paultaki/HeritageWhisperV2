@@ -61,11 +61,12 @@ export const TimelineDecadeSection = React.memo(
           style={
             isDarkTheme
               ? {
-                  // Enhanced glassmorphism for dark theme
-                  backgroundColor: "rgba(37, 39, 40, 0.75)",
-                  backdropFilter: "blur(16px) saturate(180%)",
-                  WebkitBackdropFilter: "blur(16px) saturate(180%)",
-                  borderBottom: "1px solid rgba(59, 61, 63, 0.4)",
+                  // Enhanced glassmorphism for dark theme - more transparent
+                  backgroundColor: "rgba(37, 39, 40, 0.60)",
+                  backdropFilter: "blur(20px) saturate(180%)",
+                  WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                  borderBottom: "1px solid rgba(59, 61, 63, 0.5)",
+                  borderTop: "1px solid rgba(255, 255, 255, 0.1)",
                   color: "#b0b3b8",
                 }
               : undefined

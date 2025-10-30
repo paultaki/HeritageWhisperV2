@@ -468,13 +468,6 @@ export const MemoryCard = React.memo(
               </button>
             )}
           </div>
-
-          {/* Provenance on hover */}
-          <div className="hw-card-provenance">
-            Recorded with Heritage Whisper
-            {story.createdAt &&
-              ` · Created ${new Date(story.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
-          </div>
         </div>
       );
     }
@@ -632,16 +625,6 @@ export const MemoryCard = React.memo(
               </span>
             </button>
           )}
-        </div>
-
-        {/* Provenance on hover */}
-        <div className="hw-card-provenance">
-          Recorded with Heritage Whisper
-          {story.createdAt &&
-            ` · Created ${new Date(story.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
-          {(story as any).updatedAt &&
-            (story as any).updatedAt !== story.createdAt &&
-            ` · Last edited ${new Date((story as any).updatedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`}
         </div>
       </div>
     );
