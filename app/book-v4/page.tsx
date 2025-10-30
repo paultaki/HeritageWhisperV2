@@ -57,6 +57,7 @@ export default function BookV4Page() {
   
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
+  const [currentMobilePage, setCurrentMobilePage] = useState(0);
   const [showToc, setShowToc] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   
@@ -226,6 +227,24 @@ export default function BookV4Page() {
     return pages;
   }, [spreads]);
 
+  // Create mobile pages array (intro + TOC + all stories)
+  const mobilePages = useMemo(() => {
+    const pages: Array<{ type: 'intro' | 'toc' | 'story'; story?: Story; index: number }> = [];
+    
+    // Add intro page
+    pages.push({ type: 'intro', index: 0 });
+    
+    // Add TOC page
+    pages.push({ type: 'toc', index: 1 });
+    
+    // Add all story pages
+    sortedStories.forEach((story, idx) => {
+      pages.push({ type: 'story', story, index: idx + 2 });
+    });
+    
+    return pages;
+  }, [sortedStories]);
+
   // Navigate to specific page from progress bar
   const handleNavigateToPage = useCallback((pageIndex: number) => {
     const spreadIndex = Math.floor(pageIndex / 2);
@@ -345,12 +364,12 @@ export default function BookV4Page() {
         <div className="fixed top-0 left-0 right-0 z-50 no-print">
           <div className="mx-auto max-w-[1800px] px-6">
             <div className="relative h-16 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="h-7 w-7 flex items-center justify-center">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 flex items-center justify-center">
                   <img 
                     src="/circle logo white.svg" 
                     alt="Heritage Whisper" 
-                    className="h-7 w-7"
+                    className="h-9 w-9"
                   />
                 </div>
                 <div>
@@ -359,12 +378,20 @@ export default function BookV4Page() {
                   </h1>
                 </div>
               </div>
-              <button
-                onClick={() => router.push("/")}
-                className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
-              >
-                ← Back to Home
-              </button>
+              <div className="flex items-center gap-3">
+                <div className="lg:hidden flex items-center gap-2 text-xs text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 Z"></path>
+                  </svg>
+                  <span>Swipe</span>
+                </div>
+                <button
+                  onClick={() => router.push("/")}
+                  className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
+                >
+                  ← Back to Home
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -398,24 +425,32 @@ export default function BookV4Page() {
         {/* Compact Header */}
         <div className="mx-auto max-w-[1600px] mb-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="h-7 w-7 flex items-center justify-center">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 flex items-center justify-center">
                 <img 
                   src="/circle logo white.svg" 
                   alt="Heritage Whisper" 
-                  className="h-7 w-7"
+                  className="h-9 w-9"
                 />
               </div>
               <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
                 {user?.name ? `${user.name}'s Story` : "Your Story"}
               </h1>
             </div>
-            <button
-              onClick={() => router.push("/")}
-              className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
-            >
-              ← Back to Home
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="lg:hidden flex items-center gap-2 text-xs text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 Z"></path>
+                </svg>
+                <span>Swipe</span>
+              </div>
+              <button
+                onClick={() => router.push("/")}
+                className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
+              >
+                ← Back to Home
+              </button>
+            </div>
           </div>
     
         </div>
@@ -495,7 +530,12 @@ export default function BookV4Page() {
         </div>
     
         {/* Mobile & Tablet: Single page with horizontal swipe */}
-        <MobileView stories={sortedStories} />
+        <MobileView 
+          allPages={mobilePages}
+          currentPage={currentMobilePage}
+          onPageChange={setCurrentMobilePage}
+          sortedStories={sortedStories}
+        />
     
         {/* TOC Drawer - Above Bottom Nav */}
         {showToc && (
@@ -535,34 +575,35 @@ export default function BookV4Page() {
 
       </div>
 
-      {/* Bottom Navigation Controls - positioned just above where nav bar was */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-4">
-        <div className="mx-auto max-w-[608px] px-6">
-          <div className="flex items-center justify-center gap-6 rounded-full bg-white/10 backdrop-blur-md border-2 border-white/20 px-8 py-4 shadow-2xl">
+      {/* Bottom Navigation Controls - Thinner mobile-optimized version */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-2">
+        <div className="mx-auto max-w-md px-4">
+          <div className="flex items-center justify-between rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 shadow-2xl">
+            {/* Previous button */}
             <button
               onClick={goToPrevSpread}
               disabled={currentSpreadIndex === 0}
-              className="flex items-center gap-2.5 px-6 py-3 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white text-xl font-medium"
-              title="Previous page (or use Left Arrow key)"
+              className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
+              title="Previous"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="m15 18-6-6 6-6"></path>
               </svg>
-              <span className="hidden sm:inline">Previous</span>
             </button>
 
-            <div className="flex items-center gap-4">
-              <span className="text-white font-medium text-xl">
-                Page {currentSpreadIndex * 2 + 1} of {spreads.length * 2}
+            {/* Page indicator and TOC */}
+            <div className="flex items-center gap-3">
+              <span className="text-white font-medium text-sm whitespace-nowrap">
+                {currentSpreadIndex + 1} / {spreads.length}
               </span>
               <button
                 onClick={() => setShowToc(!showToc)}
-                className="px-4 py-2.5 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-all text-white"
+                className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-all text-white min-w-[40px] min-h-[40px] flex items-center justify-center"
                 title="Table of Contents"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -575,14 +616,14 @@ export default function BookV4Page() {
               </button>
             </div>
 
+            {/* Next button */}
             <button
               onClick={goToNextSpread}
               disabled={currentSpreadIndex === spreads.length - 1}
-              className="flex items-center gap-2.5 px-6 py-3 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white text-xl font-medium"
-              title="Next page (or use Right Arrow key)"
+              className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
+              title="Next"
             >
-              <span className="hidden sm:inline">Next</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="m9 18 6-6-6-6"></path>
               </svg>
             </button>
@@ -793,57 +834,91 @@ function StoryContent({ story }: { story: Story }) {
 }
 
 // Mobile View Component
-function MobileView({ stories }: { stories: Story[] }) {
+function MobileView({ 
+  allPages,
+  currentPage,
+  onPageChange,
+  sortedStories
+}: { 
+  allPages: Array<{ type: 'intro' | 'toc' | 'story'; story?: Story; index: number }>;
+  currentPage: number;
+  onPageChange: (index: number) => void;
+  sortedStories: Story[];
+}) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Scroll to current page when it changes
+  useEffect(() => {
+    if (scrollerRef.current && !isDragging) {
+      const pageWidth = scrollerRef.current.clientWidth;
+      scrollerRef.current.scrollTo({
+        left: currentPage * (pageWidth + 24), // 24 is the gap
+        behavior: 'smooth'
+      });
+    }
+  }, [currentPage, isDragging]);
+
+  // Detect page change from scroll
+  const handleScroll = () => {
+    if (!scrollerRef.current || isDragging) return;
+    
+    const pageWidth = scrollerRef.current.clientWidth + 24; // Add gap
+    const scrollLeft = scrollerRef.current.scrollLeft;
+    const newPage = Math.round(scrollLeft / pageWidth);
+    
+    if (newPage !== currentPage && newPage >= 0 && newPage < allPages.length) {
+      onPageChange(newPage);
+    }
+  };
 
   const handlePrev = () => {
-    if (scrollerRef.current) {
-      scrollerRef.current.scrollBy({ left: -(scrollerRef.current.clientWidth + 24), behavior: 'smooth' });
+    if (currentPage > 0) {
+      onPageChange(currentPage - 1);
     }
   };
 
   const handleNext = () => {
-    if (scrollerRef.current) {
-      scrollerRef.current.scrollBy({ left: scrollerRef.current.clientWidth + 24, behavior: 'smooth' });
+    if (currentPage < allPages.length - 1) {
+      onPageChange(currentPage + 1);
     }
   };
 
   return (
-    <div className="lg:hidden">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-slate-300">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 Z"></path>
-          </svg>
-          <span className="text-slate-400">Swipe to navigate</span>
-        </div>
-      </div>
-
+    <div className="lg:hidden" style={{ marginTop: '-12px' }}>
       <div className="relative -mx-2 px-2">
         {/* Mobile prev/next controls */}
         <button 
           onClick={handlePrev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 ml-1 h-9 w-9 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center"
+          disabled={currentPage === 0}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 ml-1 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="m15 18-6-6 6-6"></path>
           </svg>
         </button>
         <button 
           onClick={handleNext}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 mr-1 h-9 w-9 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center"
+          disabled={currentPage === allPages.length - 1}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 mr-1 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="m9 18 6-6-6-6"></path>
           </svg>
         </button>
 
         <div 
           ref={scrollerRef}
-          className="flex snap-x snap-mandatory overflow-x-auto gap-6 pb-4"
+          onScroll={handleScroll}
+          onTouchStart={() => setIsDragging(true)}
+          onTouchEnd={() => setTimeout(() => setIsDragging(false), 100)}
+          className="flex snap-x snap-mandatory overflow-x-auto gap-6 pb-4 hide-scrollbar"
+          style={{ scrollSnapType: 'x mandatory' }}
         >
-          {stories.map((story, index) => (
-            <MobilePage key={story.id} story={story} pageNum={index + 1} />
+          {allPages.map((page, index) => (
+            <div key={index} className="snap-center shrink-0" style={{ width: 'calc(100vw - 3rem)' }}>
+              <MobilePage page={page} pageNum={index + 1} allStories={sortedStories} />
+            </div>
           ))}
         </div>
       </div>
@@ -925,9 +1000,93 @@ function ClosedBookCover({
 }
 
 // Mobile Page Component  
-function MobilePage({ story, pageNum }: { story: Story; pageNum: number }) {
+function MobilePage({ 
+  page, 
+  pageNum,
+  allStories
+}: { 
+  page: { type: 'intro' | 'toc' | 'story'; story?: Story; index: number };
+  pageNum: number;
+  allStories: Story[];
+}) {
+  // Intro page
+  if (page.type === 'intro') {
+    return (
+      <div className="mobile-page relative mx-auto w-full aspect-[55/85] [perspective:1600px]">
+        <div 
+          aria-hidden="true" 
+          className="pointer-events-none absolute rounded-[24px]" 
+          style={{ 
+            inset: "-12px", 
+            background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
+            boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
+          }}
+        ></div>
+        <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
+          <div className="relative h-full w-full p-6 flex items-center justify-center">
+            <div className="text-center space-y-6">
+              <h1 className="text-4xl font-serif text-gray-800" style={{ fontFamily: "Crimson Text, serif" }}>
+                Family Memories
+              </h1>
+              <div className="w-20 h-1 bg-indigo-500 mx-auto"></div>
+              <p className="text-base text-gray-600 leading-relaxed italic px-4">
+                A collection of cherished moments, stories, and lessons from a life well-lived.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // TOC page
+  if (page.type === 'toc') {
+    return (
+      <div className="mobile-page relative mx-auto w-full aspect-[55/85] [perspective:1600px]">
+        <div 
+          aria-hidden="true" 
+          className="pointer-events-none absolute rounded-[24px]" 
+          style={{ 
+            inset: "-12px", 
+            background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
+            boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
+          }}
+        ></div>
+        <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
+          <div className="relative h-full w-full p-6">
+            <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden">
+              <div className="h-full w-full rounded-[12px] text-neutral-900 outline-none p-5 overflow-y-auto">
+                <h1 className="text-3xl font-serif text-center mb-6 text-gray-800">
+                  Table of Contents
+                </h1>
+                <div className="space-y-3">
+                  {allStories.map((storyItem) => (
+                    <div
+                      key={storyItem.id}
+                      className="text-sm border-b border-gray-200 pb-2"
+                    >
+                      <div className="font-medium text-gray-700">{storyItem.title}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {storyItem.storyYear}
+                        {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Story page
+  const story = page.story;
+  if (!story) return null;
+  
   return (
-    <div className="mobile-page relative mx-auto w-[min(92vw,520px)] aspect-[55/85] snap-center shrink-0 [perspective:1600px]">
+    <div className="mobile-page relative mx-auto w-full aspect-[55/85] [perspective:1600px]">
       {/* Outer book cover/border */}
       <div 
         aria-hidden="true" 

@@ -89,8 +89,8 @@ body {
   position: sticky;
   top: calc(env(safe-area-inset-top, 0px) + 52px); /* Mobile: reduced by 19px to close gap with header */
   z-index: 5;
-  /* Enhanced glassmorphism effect - more transparent to see through */
-  background: rgba(250, 248, 245, 0.60);
+  /* Enhanced glassmorphism effect - very transparent to see spine through */
+  background: rgba(250, 248, 245, 0.40);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   padding: 5px 16px 6px 16px;
