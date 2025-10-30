@@ -88,10 +88,10 @@ body {
 .hw-decade-band {
   position: sticky;
   top: calc(
-    env(safe-area-inset-top, 0px) + 71px
-  ); /* Mobile: positioned 16px higher */
+    env(safe-area-inset-top, 0px) + 52px
+  ); /* Mobile: reduced by 19px to close gap with header */
   z-index: 5;
-  background: rgba(250, 248, 245, 0.5); /* More transparent on mobile */
+  background: rgba(250, 248, 245, 0.35); /* More transparent when sticky */
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
   padding: 5px 16px 6px 16px;
@@ -445,7 +445,7 @@ body {
   /* Mauve text on soft rose background */
   color: #6A4D58 !important;
   background: #F9E5E8 !important;
-  padding: 4px 10px 10px 10px;
+  padding: 6px 10px 8px 10px;
   border: 1px solid rgba(139, 107, 122, 0.2) !important;
   border-radius: 8px;
   opacity: 1;
@@ -456,7 +456,7 @@ body {
 
 @media (max-width: 767px) {
   .hw-year {
-    left: -45px;
+    left: -48px;
     top: calc(var(--title-offset, 22px) - 40px);
     font-size: 16px;
     line-height: 1;

@@ -782,7 +782,9 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             top: '-2px',
           }}
         >
-          {formatStoryDate(story.storyDate, story.storyYear, "badge")}
+          <span style={{ position: 'relative', top: '-2px' }}>
+            {formatStoryDate(story.storyDate, story.storyYear, "badge")}
+          </span>
         </div>
       </div>
 
@@ -928,7 +930,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     if (!storiesData) return;
 
     const handleBubbleScroll = () => {
-      const stickyTop = 80; // Sticky position from top (aligned with header)
+      const stickyTop = 61; // Sticky position from top (aligned with header, reduced by 19px)
       const collisionThreshold = 10 as number; // Very small threshold - stay visible longer
 
       // Query all timeline-dot elements
@@ -953,43 +955,47 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
         const translateXMatch = baseTransform.match(/translateX\(([^)]+)\)/);
         const translateX = translateXMatch ? translateXMatch[0] : '';
 
-        // This bubble is stuck at the top (CSS sticky)
+        // This bubble is at or above sticky position
         if (distanceFromTop <= stickyTop) {
           bubble.classList.add('is-sticky');
           
-          // Check if next bubble is approaching (within collision threshold)
-          if (nextBubbleDistance <= stickyTop + collisionThreshold) {
-            // Next bubble is approaching - fade OUT this one
-            const rawProgress = collisionThreshold !== 0 
-              ? 1 - ((nextBubbleDistance - stickyTop) / collisionThreshold)
-              : 1; // Instant fade if threshold is exactly 0
-            // Clamp fadeProgress between 0 and 1 to prevent crazy values
-            const fadeProgress = Math.max(0, Math.min(1, rawProgress));
-            
-            // Keep bubble visible until next one is VERY close (allow negative for overlap)
-            const proximityToNext = nextBubbleDistance - stickyTop;
-            const shouldBeVisible = proximityToNext > -50; // Hold on until 50px overlap
-            
-            if (shouldBeVisible) {
-              bubble.style.opacity = `${Math.max(0.2, 1 - fadeProgress)}`; // Min 20% opacity while approaching
-              bubble.style.transform = `${translateX} scale(${Math.max(0.8, 1 - (fadeProgress * 0.2))})`; // Scale to 80%
-            } else {
-              // Next bubble has overlapped by more than 50px - NOW fade quickly
-              const finalFade = Math.max(0, (proximityToNext + 60) / 10); // Fade over final 10px of overlap
-              bubble.style.opacity = `${finalFade * 0.2}`; // Fade from 20% to 0%
-              bubble.style.transform = `${translateX} scale(${0.8 * finalFade})`; // Scale from 80% to 0%
-            }
+          // Check if next bubble is approaching
+          const proximityToNext = nextBubbleDistance - stickyTop;
+          
+          // CRITICAL FIX: Force fixed positioning when next bubble is approaching
+          // This prevents CSS sticky from "releasing" prematurely
+          if (proximityToNext <= 100) {
+            // Next bubble is within 100px - LOCK current marker with fixed positioning
+            bubble.style.position = 'fixed';
+            bubble.style.top = `${stickyTop}px`;
+            bubble.style.left = bubble.getBoundingClientRect().left + 'px';
+            bubble.style.width = bubble.offsetWidth + 'px'; // Preserve width
           } else {
-            // No collision - stay bright and full size
+            // Far apart - use normal sticky
+            bubble.style.position = '';
+            bubble.style.top = '';
+            bubble.style.left = '';
+            bubble.style.width = '';
+          }
+          
+          // Fade logic - only when deeply overlapping
+          if (proximityToNext > -50) {
+            // Stay FULLY visible until 50px deep overlap
             bubble.style.opacity = '1';
-            // Preserve translateX
             bubble.style.transform = `${translateX} scale(1)`;
+          } else {
+            // Fade out over 30px of overlap
+            const overlapProgress = Math.min(1, Math.abs(proximityToNext + 50) / 30);
+            bubble.style.opacity = `${Math.max(0, 1 - overlapProgress)}`;
+            bubble.style.transform = `${translateX} scale(${Math.max(0.9, 1 - (overlapProgress * 0.1))})`;
           }
         } else {
           // Bubble is below sticky position - normal state
           bubble.classList.remove('is-sticky');
+          bubble.style.position = '';
+          bubble.style.top = '';
+          bubble.style.left = '';
           bubble.style.opacity = '1';
-          // Preserve translateX
           bubble.style.transform = `${translateX} scale(1)`;
         }
       });
@@ -1222,7 +1228,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           /* Sticky date bubbles */
           .timeline-dot {
             position: sticky;
-            top: 80px;
+            top: 61px;
             z-index: 30;
             /* No transitions - scroll handler provides smooth updates */
           }

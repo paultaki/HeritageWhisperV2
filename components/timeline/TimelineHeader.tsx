@@ -21,12 +21,14 @@ import { MobilePageHeader } from "@/components/PageHeader";
 export function TimelineHeader({
   isDark,
   currentColorScheme,
-}: TimelineHeaderProps) {
+  rightContent,
+}: TimelineHeaderProps & { rightContent?: React.ReactNode }) {
   return (
     <MobilePageHeader
       icon={Calendar}
       title="Timeline"
       subtitle="Your life's journey"
+      rightContent={rightContent}
     />
   );
 }

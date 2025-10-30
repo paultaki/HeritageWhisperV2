@@ -59,19 +59,20 @@ export function DesktopPageHeader({
     <header 
       className="hidden md:block sticky top-0 z-40 bg-white border-b"
       role="banner"
+      style={{ height: '62px' }}
     >
-      <div className="max-w-7xl mx-auto px-6 py-1">
+      <div className="max-w-7xl mx-auto px-6" style={{ paddingTop: '2px', paddingBottom: '2px' }}>
         <div className="flex items-center justify-between gap-4">
           {/* Left section - Branding and page identity */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Logo */}
             <Image
-              src="/logo circle.svg"
+              src="/circle logo hw.svg"
               alt="Heritage Whisper Logo"
               width={65}
               height={65}
               className="w-[65px] h-[65px] flex-shrink-0 relative"
-              style={{ top: '-14px' }}
+              style={{ top: '-10px' }}
               priority
             />
             
@@ -140,8 +141,9 @@ export function MobilePageHeader({
     <header
       className="md:hidden sticky top-0 z-40 bg-white border-b"
       role="banner"
+      style={{ height: '52px' }}
     >
-      <div className="px-4 py-1.5">
+      <div className="px-4" style={{ paddingTop: '2px', paddingBottom: '2px' }}>
         <div className="flex items-center justify-between gap-2">
           {/* Left section with hamburger menu */}
           {leftContent && (
@@ -154,12 +156,12 @@ export function MobilePageHeader({
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {/* Logo - Smaller for mobile */}
             <Image
-              src="/logo circle.svg"
+              src="/circle logo hw.svg"
               alt="Heritage Whisper Logo"
               width={48}
               height={48}
               className="w-[48px] h-[48px] flex-shrink-0 relative"
-              style={{ top: '-8px' }}
+              style={{ top: '-6px' }}
               priority
             />
 

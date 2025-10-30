@@ -18,7 +18,7 @@ interface Story {
 }
 
 interface BookPageProps {
-  story?: Story | 'intro' | 'toc';
+  story?: Story | 'intro' | 'toc-left' | 'toc-right';
   pageNum: number;
   onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
   position: "left" | "right";
@@ -76,8 +76,11 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
       );
     }
 
-    // Handle table of contents page
-    if (story === 'toc') {
+    // Handle table of contents left page
+    if (story === 'toc-left') {
+      const midpoint = Math.ceil(allStories.length / 2);
+      const leftStories = allStories.slice(0, midpoint);
+      
       return (
         <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
           {/* Main page */}
@@ -112,17 +115,82 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">
                     Table of Contents
                   </h1>
-                  <div className="space-y-3">
-                    {allStories.map((storyItem, idx) => (
+                  <div className="space-y-4">
+                    {leftStories.map((storyItem, idx) => (
                       <button
                         key={storyItem.id}
                         onClick={() => onNavigateToStory && onNavigateToStory(idx)}
-                        className="flex justify-between items-baseline text-sm w-full hover:bg-gray-100 px-3 py-2 rounded transition-colors cursor-pointer text-left"
+                        className="flex justify-between items-baseline text-base w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left"
                       >
-                        <span className="text-gray-700 flex-1 pr-2 hover:text-indigo-600">
+                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
                           {storyItem.title}
                         </span>
-                        <span className="text-gray-500 text-xs whitespace-nowrap">
+                        <span className="text-gray-500 text-sm whitespace-nowrap">
+                          {storyItem.storyYear}
+                          {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
+                {position === "left" && <span className="tracking-tight">{pageNum}</span>}
+                {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Handle table of contents right page
+    if (story === 'toc-right') {
+      const midpoint = Math.ceil(allStories.length / 2);
+      const rightStories = allStories.slice(midpoint);
+      
+      return (
+        <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
+          {/* Main page */}
+          <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
+            {/* Paper texture/vignette */}
+            <div
+              className="absolute inset-0 pointer-events-none z-10"
+              style={{
+                backgroundImage: position === "left"
+                  ? `radial-gradient(160% 85% at 110% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
+                     radial-gradient(120% 60% at -10% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%)`
+                  : `radial-gradient(160% 85% at -10% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
+                     radial-gradient(120% 60% at 110% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%)`,
+              }}
+            ></div>
+
+            {/* Inner gutter shadow */}
+            <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
+
+            <div className="relative h-full w-full p-7 md:p-8 lg:p-10">
+              <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60">
+                <div
+                  ref={ref}
+                  onScroll={onScroll}
+                  className="h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
+                  style={{
+                    scrollBehavior: 'smooth',
+                    WebkitOverflowScrolling: 'touch',
+                    willChange: 'scroll-position'
+                  }}
+                >
+                  <div className="space-y-4 pt-[72px]">
+                    {rightStories.map((storyItem, idx) => (
+                      <button
+                        key={storyItem.id}
+                        onClick={() => onNavigateToStory && onNavigateToStory(midpoint + idx)}
+                        className="flex justify-between items-baseline text-base w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left"
+                      >
+                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
+                          {storyItem.title}
+                        </span>
+                        <span className="text-gray-500 text-sm whitespace-nowrap">
                           {storyItem.storyYear}
                           {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
                         </span>

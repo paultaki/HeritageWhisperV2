@@ -79,11 +79,11 @@ export default function BookV4Page() {
     [bookStories]
   );
 
-  // Create spreads - intro, TOC, then story pairs
+  // Create spreads - intro, TOC (2 pages), then story pairs
   const spreads = useMemo(() => {
     const result: Array<{ 
-      left?: Story | 'intro' | 'toc'; 
-      right?: Story | 'intro' | 'toc';
+      left?: Story | 'intro' | 'toc-left' | 'toc-right'; 
+      right?: Story | 'intro' | 'toc-left' | 'toc-right';
       type: 'intro' | 'toc' | 'stories';
     }> = [];
     
@@ -94,15 +94,15 @@ export default function BookV4Page() {
       type: 'intro'
     });
     
-    // Second spread: table of contents left, first story (or empty) right
+    // Second spread: table of contents across both pages
     result.push({
-      left: 'toc',
-      right: sortedStories[0],
+      left: 'toc-left',
+      right: 'toc-right',
       type: 'toc'
     });
     
-    // Remaining story spreads (starting from second story)
-    for (let i = 1; i < sortedStories.length; i += 2) {
+    // Story spreads (starting from first story)
+    for (let i = 0; i < sortedStories.length; i += 2) {
       result.push({
         left: sortedStories[i],
         right: sortedStories[i + 1],
@@ -201,8 +201,9 @@ export default function BookV4Page() {
 
   // Navigate to a story from TOC
   const handleNavigateToStory = (storyIndex: number) => {
-    // Story index 0 is on spread 1 (right side), story index 1 is on spread 2 (left side), etc.
-    const spreadIndex = Math.floor((storyIndex + 2) / 2); // +2 because first two spreads are intro/toc
+    // Stories start at spread 2 (after intro spread and TOC spread)
+    // Story index 0 and 1 are on spread 2, story index 2 and 3 are on spread 3, etc.
+    const spreadIndex = 2 + Math.floor(storyIndex / 2);
     setCurrentSpreadIndex(spreadIndex);
   };
 

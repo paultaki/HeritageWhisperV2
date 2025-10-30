@@ -174,6 +174,11 @@ export function TimelineMobileV2() {
       <TimelineHeader
         isDark={ui.isDark}
         currentColorScheme={ui.currentColorScheme}
+        rightContent={
+          <div className="decade-selector-header">
+            <DecadeNav entries={timelineData.decadeEntries} />
+          </div>
+        }
       />
 
       {/* Timeline Content */}
@@ -240,46 +245,126 @@ export function TimelineMobileV2() {
         </div>
       </main>
 
-      {/* CHANGE 5: Floating toolbar above nav bar - Add Memory + Decade Selector side by side */}
-      <div className="fixed left-0 right-0 px-4 py-2 flex items-center justify-between gap-3 z-40 md:hidden" 
-        style={{ 
-          bottom: '40px', // Just above the 32px nav bar + 8px gap
-          pointerEvents: 'none' // Allow clicks through to content
-        }}>
-        {/* Add Memory button on left */}
-        <button
-          onClick={handleAddMemory}
-          className="particle-button-mobile text-white font-medium rounded-full transition-all relative overflow-hidden"
-          style={{ 
-            maxHeight: '48px',
-            pointerEvents: 'auto' // Re-enable clicks on button
-          }}
-        >
-          <div className="points-wrapper-mobile">
-            <i className="point-mobile"></i>
-            <i className="point-mobile"></i>
-            <i className="point-mobile"></i>
-            <i className="point-mobile"></i>
-            <i className="point-mobile"></i>
-            <i className="point-mobile"></i>
-            <i className="point-mobile"></i>
-            <i className="point-mobile"></i>
-            <i className="point-mobile"></i>
-            <i className="point-mobile"></i>
-          </div>
-
-          <span className="button-inner-mobile">
-            + Add Memory
-          </span>
-        </button>
-
-        {/* Decade selector on right */}
-        <div style={{ pointerEvents: 'auto' }}>
-          <DecadeNav entries={timelineData.decadeEntries} />
+      {/* CHANGE 5: Add Memory button - bottom right corner on mobile */}
+      <button
+        onClick={handleAddMemory}
+        className="particle-button-mobile-corner text-white font-medium rounded-full transition-all relative overflow-hidden md:hidden"
+        style={{
+          position: 'fixed',
+          right: '16px',
+          bottom: '48px',
+          zIndex: 40,
+        }}
+      >
+        <div className="points-wrapper-mobile">
+          <i className="point-mobile"></i>
+          <i className="point-mobile"></i>
+          <i className="point-mobile"></i>
+          <i className="point-mobile"></i>
+          <i className="point-mobile"></i>
+          <i className="point-mobile"></i>
+          <i className="point-mobile"></i>
+          <i className="point-mobile"></i>
+          <i className="point-mobile"></i>
+          <i className="point-mobile"></i>
         </div>
-      </div>
 
-      <style jsx>{`
+        <span className="button-inner-mobile">
+          + Add Memory
+        </span>
+      </button>
+
+      <style jsx global>{`
+        /* Override DecadeNav to work in header */
+        .decade-selector-header .hw-decade-nav {
+          display: none !important; /* Hide desktop sidebar version */
+        }
+
+        .decade-selector-header .hw-decade-fab {
+          position: relative !important;
+          display: flex !important;
+          bottom: auto !important;
+          right: 50px !important;
+        }
+
+        .decade-selector-header .hw-decade-pill {
+          min-width: 80px;
+          height: 36px;
+          min-height: 36px;
+          font-size: 13px;
+          box-shadow: none;
+          border: 1px solid #ddd;
+          position: relative;
+          top: -2px;
+        }
+
+        .decade-selector-header .hw-decade-sheet {
+          position: absolute;
+          right: 0;
+          top: 42px;
+          bottom: auto;
+        }
+
+        @media (min-width: 768px) {
+          .decade-selector-header {
+            display: none;
+          }
+        }
+
+        .particle-button-mobile-corner {
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: radial-gradient(65.28% 65.28% at 50% 100%,
+              rgba(245, 158, 11, 0.6) 0%,
+              rgba(217, 119, 6, 0.3) 50%,
+              rgba(245, 158, 11, 0) 100%),
+            linear-gradient(135deg, #D97706, #F59E0B, #FBBF24);
+          border: none;
+          padding: 12px 20px;
+          min-height: 48px;
+          max-height: 48px;
+          height: 48px;
+          width: auto;
+          max-width: 160px;
+          font-size: 15px;
+          box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+          border-radius: 9999px;
+          overflow: hidden;
+        }
+
+        .particle-button-mobile-corner::before,
+        .particle-button-mobile-corner::after {
+          content: "";
+          position: absolute;
+          transition: all 0.5s ease-in-out;
+          z-index: 0;
+        }
+
+        .particle-button-mobile-corner::before {
+          inset: 1px;
+          background: linear-gradient(135deg,
+              rgba(255, 255, 255, 0.2) 0%,
+              rgba(255, 255, 255, 0.05) 50%,
+              rgba(255, 255, 255, 0) 100%);
+          border-radius: 9999px;
+        }
+
+        .particle-button-mobile-corner::after {
+          inset: 2px;
+          background: radial-gradient(65.28% 65.28% at 50% 100%,
+              rgba(245, 158, 11, 0.4) 0%,
+              rgba(217, 119, 6, 0.2) 50%,
+              rgba(245, 158, 11, 0) 100%),
+            linear-gradient(135deg, #D97706, #F59E0B, #FBBF24);
+          border-radius: 9999px;
+        }
+
+        .particle-button-mobile-corner:active {
+          transform: scale(0.95);
+        }
+
         .particle-button-mobile {
           cursor: pointer;
           display: inline-flex;
