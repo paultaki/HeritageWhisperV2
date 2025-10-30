@@ -209,35 +209,6 @@ WHERE name = 'heritage-whisper-files';
 
 ---
 
-## 📁 Key File Locations
-
-### Audio Management
-
-- `/app/api/upload/audio/route.ts` - Audio file upload to Supabase
-- `/components/AudioRecorder.tsx` - Web Audio API recording component
-- `/components/BookStyleReview.tsx` - Audio playback and controls
-
-### Photo Management
-
-- `/app/api/upload/photo/route.ts` - Photo upload to Supabase
-- `/app/api/stories/[id]/photos/route.ts` - Add photos to stories
-- `/components/MultiPhotoUploader.tsx` - Photo upload with cropping
-
-### Timeline & Book View
-
-- `/app/timeline/page.tsx` - Timeline with decade organization
-- `/app/book/page.tsx` - Book view with pagination
-- `/lib/bookPagination.ts` - Text measurement and page splitting
-
-### Authentication
-
-- `/app/api/auth/login/route.ts` - Email/password login
-- `/app/api/auth/register/route.ts` - User registration with agreements
-- `/lib/auth.tsx` - Auth context and provider
-- `/app/auth/callback/page.tsx` - OAuth callback handler
-
----
-
 ## 🔧 Database Schema Changes
 
 ### October 4, 2025 - Legal Compliance
@@ -281,28 +252,6 @@ CREATE TABLE public.shared_access (
   last_accessed_at TIMESTAMPTZ
 );
 ```
-
----
-
-## 📊 Performance Improvements
-
-### Image Optimization
-
-- Next.js Image component with automatic optimization
-- 40-60% faster page loads
-- Lazy loading for off-screen images
-
-### Code Splitting
-
-- Dynamic imports for heavy components
-- Route-based splitting with App Router
-- Reduced initial bundle size
-
-### Query Caching
-
-- TanStack Query with 30-minute stale time
-- Optimistic updates for better UX
-- Automatic background refetching
 
 ---
 
@@ -409,46 +358,6 @@ CREATE TABLE public.shared_access (
 
 - 37 obsolete files removed (test scripts, old page versions, one-time fix docs)
 - Migrations and schema files preserved in `/migrations` and `/scripts`
-
----
-
-## 🎨 Design System Details (October 2025)
-
-Timeline uses Heritage Whisper design system with semantic `hw-*` classes:
-
-**Component Classes:**
-
-- `.hw-spine` - Timeline container with vertical spine and gutter spacing
-- `.hw-decade` - Decade section wrapper
-- `.hw-decade-band` - Sticky decade headers (87px offset for perfect alignment with app header)
-- `.hw-grid` - Responsive grid (1 col mobile, 2 cols desktop)
-- `.hw-card` - Story card with horizontal connectors to timeline spine
-- `.hw-card-media` - 16:10 aspect ratio images
-- `.hw-card-body` - Card content wrapper
-- `.hw-card-title` - Story title
-- `.hw-meta` - Metadata row with hairline dividers
-- `.hw-card-provenance` - Hover details (creation/edit dates)
-- `.hw-year` - Year badge (appears on hover/focus)
-- `.hw-play` - Play button with heritage palette
-
-**Design Tokens:**
-
-- Primary accent: `#D36A3D` (clay/terracotta)
-- Secondary accent: `#B89B5E` (soft gold)
-- Focus ring: `#B89B5E`
-- Card shadow: `0 6px 20px rgba(0,0,0,0.10)`
-- Semantic spacing scale in `tokens.css`
-
-**Implementation Details:**
-
-- Horizontal connectors aligned to title baseline via `--title-offset` CSS custom property
-- 180px offset for cards with images (16:10 aspect ratio), 22px for text-only
-- Play button: stroke outline at rest, fills on hover
-- Sticky decade bands with soft tinted background (88% page, 12% accent)
-- Year badges show on card hover for temporal context
-- Provenance details on hover (creation/edit dates)
-- Mobile-optimized: 40px gutter, 14px spine position, 18px×2px connectors
-- Desktop: 56px gutter, 20px spine position, 18px connectors (14px default, expands to 24px on hover)
 
 ---
 
@@ -737,7 +646,8 @@ Replaced broken Whisper blob-slicing transcription with OpenAI Realtime API for 
 ---
 
 _This is a historical reference document. For current documentation, see CLAUDE.md_
-_Last updated: January 23, 2025_
+
+_Last updated: October 30, 2025_
 
 ---
 
@@ -965,40 +875,4 @@ Replaced Puppeteer/Chromium with PDFShift cloud service.
 - Remediation plan: `SECURITY_REMEDIATION_PLAN.md`
 - Security overview: `SECURITY.md`
 
----
-
-### Navigation & UX Patterns
-
-- **Cancel Button**: Editing existing story → `/timeline`, Creating new story → origin page via `returnPath`
-- **Recording Flow**: "+" → Start Recording → Countdown → Recording → Processing → Review page
-- **Age Display**: Age > 0: "Age X", Age = 0: "Birth", Age < 0: "Before birth"
-- **Memory Card Actions**: Dropdown menu (⋯) with Edit, Favorite/Unfavorite, Delete
-- **Book Navigation**: Collapsed by default, click progress bar for navigation
-
----
-
-### Deployment Details
-
-**Vercel (Frontend):**
-- Auto-deploys from GitHub main branch
-- Live: https://dev.heritagewhisper.com
-- Set all environment variables in Vercel dashboard
-
-**Database & Storage:**
-- **Supabase Project:** tjycibrhoammxohemyhq
-- **Bucket:** heritage-whisper-files (PUBLIC)
-- **Schema:** Managed via SQL migrations in `/migrations`
-- **RLS Policies**: Enabled on all tables with optimized `(SELECT auth.uid())` pattern
-
----
-
-### Vercel AI Gateway Integration
-
-All GPT models route through Vercel AI Gateway for observability and caching.
-
-**Benefits:**
-- Cost visibility and tracking per model/endpoint
-- Performance metrics (TTFT tracking)
-- Automatic caching (70-90% cost reduction on repeat operations)
-- Failover with automatic retry
 

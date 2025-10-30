@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { BookPage } from "./components/BookPage";
-import { DecadeIntroPage } from "@/components/BookDecadePages";
+import DarkBookProgressBar from "./components/DarkBookProgressBar";
+import { BookPage as BookPageType } from "@/lib/bookPagination";
 import "./book.css";
 
 // Import handwriting font
@@ -56,8 +57,8 @@ export default function BookV4Page() {
   
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [showToc, setShowToc] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1.0);
   
   const flowLeftRef = useRef<HTMLDivElement>(null);
   const flowRightRef = useRef<HTMLDivElement>(null);
@@ -101,14 +102,14 @@ export default function BookV4Page() {
   // Create spreads - intro, TOC (2 pages), decade pages, then story pairs
   const spreads = useMemo(() => {
     const result: Array<{ 
-      left?: Story | 'intro' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number }; 
-      right?: Story | 'intro' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number };
+      left?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number }; 
+      right?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number };
       type: 'intro' | 'toc' | 'decade' | 'stories';
     }> = [];
     
-    // First spread: empty left, intro right
+    // First spread: endpaper left, intro right
     result.push({
-      left: undefined,
+      left: 'endpaper',
       right: 'intro',
       type: 'intro'
     });
@@ -121,7 +122,7 @@ export default function BookV4Page() {
     });
     
     // Add decade pages and stories for each decade
-    decadeGroups.forEach(([decade, stories], decadeIndex) => {
+    decadeGroups.forEach(([decade, stories]) => {
       const decadeYear = decade.replace('s', '');
       const decadePage = {
         type: 'decade' as const,
@@ -130,46 +131,119 @@ export default function BookV4Page() {
         count: stories.length
       };
       
-      // Add decade page spread (empty left, decade right)
-      result.push({
-        left: undefined,
-        right: decadePage,
-        type: 'decade'
-      });
+      // Check if we need to add decade marker on left or right
+      const lastSpread = result[result.length - 1];
+      const needsNewSpread = !lastSpread || (lastSpread.left && lastSpread.right);
       
-      // Add story spreads for this decade
-      for (let i = 0; i < stories.length; i += 2) {
+      if (needsNewSpread) {
+        // Create new spread with decade on left
         result.push({
-          left: stories[i],
-          right: stories[i + 1],
+          left: decadePage,
+          right: stories[0],
           type: 'stories'
         });
+        
+        // Add remaining story spreads
+        for (let i = 1; i < stories.length; i += 2) {
+          result.push({
+            left: stories[i],
+            right: stories[i + 1],
+            type: 'stories'
+          });
+        }
+      } else {
+        // Fill the empty right slot with decade marker
+        lastSpread.right = decadePage;
+        lastSpread.type = 'decade';
+        
+        // Add all story spreads for this decade
+        for (let i = 0; i < stories.length; i += 2) {
+          result.push({
+            left: stories[i],
+            right: stories[i + 1],
+            type: 'stories'
+          });
+        }
       }
     });
     
     return result;
   }, [decadeGroups]);
 
-  // Update scroll progress
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget;
-    const max = Math.max(1, target.scrollHeight - target.clientHeight);
-    const pct = Math.max(0, Math.min(100, (target.scrollTop / max) * 100));
-    setScrollProgress(pct);
-  };
+  // Create book pages array for progress bar
+  const bookPages: BookPageType[] = useMemo(() => {
+    const pages: BookPageType[] = [];
+    let pageNum = 1;
+    
+    spreads.forEach((spread) => {
+      // Left page
+      if (spread.left) {
+        let pageType: 'intro' | 'table-of-contents' | 'decade-marker' | 'story-start' = 'intro';
+        if (typeof spread.left === 'string') {
+          if (spread.left === 'intro' || spread.left === 'endpaper') pageType = 'intro';
+          else if (spread.left === 'toc-left' || spread.left === 'toc-right') pageType = 'table-of-contents';
+        } else if ('type' in spread.left) {
+          pageType = 'decade-marker';
+        } else {
+          pageType = 'story-start';
+        }
+        
+        const leftPage: BookPageType = {
+          pageNumber: pageNum++,
+          type: pageType,
+          isLeftPage: true,
+          isRightPage: false,
+          decade: typeof spread.left === 'object' && 'decade' in spread.left ? spread.left.decade : undefined,
+          year: typeof spread.left === 'object' && 'storyYear' in spread.left ? spread.left.storyYear.toString() : undefined,
+        };
+        pages.push(leftPage);
+      }
+      
+      // Right page
+      if (spread.right) {
+        let pageType: 'intro' | 'table-of-contents' | 'decade-marker' | 'story-start' = 'intro';
+        if (typeof spread.right === 'string') {
+          if (spread.right === 'intro' || spread.right === 'endpaper') pageType = 'intro';
+          else if (spread.right === 'toc-left' || spread.right === 'toc-right') pageType = 'table-of-contents';
+        } else if ('type' in spread.right) {
+          pageType = 'decade-marker';
+        } else {
+          pageType = 'story-start';
+        }
+        
+        const rightPage: BookPageType = {
+          pageNumber: pageNum++,
+          type: pageType,
+          isLeftPage: false,
+          isRightPage: true,
+          decade: typeof spread.right === 'object' && 'decade' in spread.right ? spread.right.decade : undefined,
+          year: typeof spread.right === 'object' && 'storyYear' in spread.right ? spread.right.storyYear.toString() : undefined,
+        };
+        pages.push(rightPage);
+      }
+    });
+    
+    return pages;
+  }, [spreads]);
+
+  // Navigate to specific page from progress bar
+  const handleNavigateToPage = useCallback((pageIndex: number) => {
+    const spreadIndex = Math.floor(pageIndex / 2);
+    setCurrentSpreadIndex(Math.min(Math.max(0, spreadIndex), spreads.length - 1));
+  }, [spreads.length]);
 
   // Navigate spreads
-  const goToPrevSpread = () => {
+  const goToPrevSpread = useCallback(() => {
     if (currentSpreadIndex > 0) {
       setCurrentSpreadIndex(currentSpreadIndex - 1);
     }
-  };
+  }, [currentSpreadIndex]);
 
-  const goToNextSpread = () => {
+  const goToNextSpread = useCallback(() => {
     if (currentSpreadIndex < spreads.length - 1) {
       setCurrentSpreadIndex(currentSpreadIndex + 1);
     }
-  };
+  }, [currentSpreadIndex, spreads.length]);
 
   // Prevent page scrolling
   useEffect(() => {
@@ -198,7 +272,7 @@ export default function BookV4Page() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentSpreadIndex, spreads.length]);
+  }, [currentSpreadIndex, spreads.length, goToPrevSpread, goToNextSpread]);
 
   // Loading state
   if (isLoading) {
@@ -299,71 +373,34 @@ export default function BookV4Page() {
             onOpen={() => setIsBookOpen(true)}
           />
         </div>
-
-        {/* Footer with "Tap to open" */}
-        <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-4">
-          <div className="mx-auto max-w-[608px] px-6">
-            <div className="flex items-center justify-center gap-6 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-8 py-4 shadow-2xl">
-              <span className="text-white font-medium text-xl">
-                Tap to open
-              </span>
-            </div>
-          </div>
-        </div>
       </div>
     );
   }
 
   return (
     <div className={`h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
-      {/* Top progress bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 no-print">
-        <div className="mx-auto max-w-[1800px] px-6">
-          <div className="relative h-8 flex items-center">
-            <div 
-              className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden ring-1 ring-white/10 cursor-pointer hover:h-2 transition-all"
-              title={`${Math.round(scrollProgress)}% scrolled - Click to jump`}
-              onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const percent = (e.clientX - rect.left) / rect.width;
-                const currentSpread = spreads[currentSpreadIndex];
-                
-                // Try to scroll both pages to the clicked position
-                if (flowLeftRef.current && currentSpread?.left) {
-                  const maxScroll = flowLeftRef.current.scrollHeight - flowLeftRef.current.clientHeight;
-                  flowLeftRef.current.scrollTop = maxScroll * percent;
-                }
-                if (flowRightRef.current && currentSpread?.right) {
-                  const maxScroll = flowRightRef.current.scrollHeight - flowRightRef.current.clientHeight;
-                  flowRightRef.current.scrollTop = maxScroll * percent;
-                }
-              }}
-            >
-              <div 
-                className="h-full bg-indigo-400/70 transition-all pointer-events-none"
-                style={{ width: `${scrollProgress}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Dark Book Progress Bar */}
+      <DarkBookProgressBar
+        pages={bookPages}
+        currentPage={currentSpreadIndex * 2}
+        totalPages={bookPages.length}
+        onNavigateToPage={handleNavigateToPage}
+        zoomLevel={zoomLevel}
+        onZoomIn={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
+        onZoomOut={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
+      />
     
-      <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pt-6 pr-6 pb-24 pl-6">
+      <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6" style={{ marginTop: '66px', paddingTop: '0px' }}>
         {/* Compact Header */}
         <div className="mx-auto max-w-[1600px] mb-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="h-7 w-7 grid place-items-center rounded-md ring-1 bg-white/5 ring-white/10">
                 <span className="text-xs font-semibold tracking-tight">BK</span>
               </div>
-              <div>
-                <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
-                  {user?.name ? `${user.name}'s Story` : "Your Story"}
-                </h1>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {sortedStories.length} {sortedStories.length === 1 ? 'memory' : 'memories'} • Pages {currentSpreadIndex * 2 + 1}-{currentSpreadIndex * 2 + 2} of {spreads.length * 2}
-                </p>
-              </div>
+              <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
+                {user?.name ? `${user.name}'s Story` : "Your Story"}
+              </h1>
             </div>
             <button
               onClick={() => router.push("/")}
@@ -408,7 +445,7 @@ export default function BookV4Page() {
             <BookPage 
               story={currentSpread.left} 
               pageNum={currentSpreadIndex * 2 + 1} 
-              onScroll={handleScroll} 
+              onScroll={() => {}} 
               ref={flowLeftRef}
               position="left"
               allStories={sortedStories}
@@ -419,7 +456,7 @@ export default function BookV4Page() {
             <BookPage 
               story={currentSpread.right} 
               pageNum={currentSpreadIndex * 2 + 2} 
-              onScroll={handleScroll} 
+              onScroll={() => {}} 
               ref={flowRightRef}
               position="right"
               allStories={sortedStories}
@@ -473,7 +510,7 @@ export default function BookV4Page() {
                     <li key={story.id}>
                       <button
                         onClick={() => {
-                          setCurrentSpreadIndex(Math.floor(index / 2));
+                          handleNavigateToStory(index);
                           setShowToc(false);
                         }}
                         className="w-full text-left px-2 py-1.5 rounded-md hover:bg-black/10 transition-colors"
@@ -493,11 +530,11 @@ export default function BookV4Page() {
       {/* Bottom Navigation Controls - positioned just above where nav bar was */}
       <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-4">
         <div className="mx-auto max-w-[608px] px-6">
-          <div className="flex items-center justify-center gap-6 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-8 py-4 shadow-2xl">
+          <div className="flex items-center justify-center gap-6 rounded-full bg-white/10 backdrop-blur-md border-2 border-white/20 px-8 py-4 shadow-2xl">
             <button
               onClick={goToPrevSpread}
               disabled={currentSpreadIndex === 0}
-              className="flex items-center gap-2.5 px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-200 text-xl font-medium"
+              className="flex items-center gap-2.5 px-6 py-3 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white text-xl font-medium"
               title="Previous page (or use Left Arrow key)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -508,11 +545,11 @@ export default function BookV4Page() {
 
             <div className="flex items-center gap-4">
               <span className="text-white font-medium text-xl">
-                Pages {currentSpreadIndex * 2 + 1}-{currentSpreadIndex * 2 + 2} of {spreads.length * 2}
+                Page {currentSpreadIndex * 2 + 1} of {spreads.length * 2}
               </span>
               <button
                 onClick={() => setShowToc(!showToc)}
-                className="px-4 py-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-all text-white"
+                className="px-4 py-2.5 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-all text-white"
                 title="Table of Contents"
               >
                 <svg
@@ -521,7 +558,7 @@ export default function BookV4Page() {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="1.5"
+                  strokeWidth="2"
                 >
                   <path d="M4 6h16"></path>
                   <path d="M4 12h16"></path>
@@ -533,7 +570,7 @@ export default function BookV4Page() {
             <button
               onClick={goToNextSpread}
               disabled={currentSpreadIndex === spreads.length - 1}
-              className="flex items-center gap-2.5 px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-200 text-xl font-medium"
+              className="flex items-center gap-2.5 px-6 py-3 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white text-xl font-medium"
               title="Next page (or use Right Arrow key)"
             >
               <span className="hidden sm:inline">Next</span>
@@ -875,77 +912,6 @@ function ClosedBookCover({
         <div className="absolute bottom-6 left-6 w-12 h-12 border-l-2 border-b-2 border-amber-200/30 rounded-bl-lg"></div>
         <div className="absolute bottom-6 right-6 w-12 h-12 border-r-2 border-b-2 border-amber-200/30 rounded-br-lg"></div>
       </button>
-    </div>
-  );
-}
-
-// Endpaper Pattern Component (Inside Cover)
-function EndpaperPage({ pageNum, position }: { pageNum: number; position: "left" | "right" }) {
-  return (
-    <div className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
-      <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15`}
-        style={{
-          background: "linear-gradient(135deg, #F5E6D3 0%, #EAD5BA 50%, #F5E6D3 100%)"
-        }}
-      >
-        {/* Marbled texture pattern */}
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='marble'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='8' seed='2' /%3E%3CfeColorMatrix type='saturate' values='0.3'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23marble)' fill='%23D4B896'/%3E%3C/svg%3E")`,
-            backgroundSize: '400px 400px',
-          }}
-        ></div>
-
-        {/* Subtle swirl pattern */}
-        <div 
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `radial-gradient(ellipse at 20% 30%, rgba(139,111,71,0.3) 0%, transparent 50%),
-                              radial-gradient(ellipse at 80% 70%, rgba(139,111,71,0.25) 0%, transparent 50%),
-                              radial-gradient(ellipse at 40% 80%, rgba(139,111,71,0.2) 0%, transparent 40%)`,
-          }}
-        ></div>
-
-        {/* HeritageWhisper watermark logo in center */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center opacity-[0.08]">
-            <svg 
-              width="120" 
-              height="120" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="1.5"
-              className="text-gray-700"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-              <path d="M2 17l10 5 10-5"></path>
-              <path d="M2 12l10 5 10-5"></path>
-            </svg>
-            <p className="mt-2 text-xs tracking-widest font-serif text-gray-700">HERITAGE WHISPER</p>
-          </div>
-        </div>
-
-        {/* Inner gutter shadow */}
-        <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
-
-        {/* Subtle vignette */}
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: position === "left"
-              ? "radial-gradient(ellipse at 90% 50%, rgba(0,0,0,0.08) 0%, transparent 60%)"
-              : "radial-gradient(ellipse at 10% 50%, rgba(0,0,0,0.08) 0%, transparent 60%)"
-          }}
-        ></div>
-
-        {/* Page number */}
-        <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
-          {position === "left" && <span className="tracking-tight">{pageNum}</span>}
-          {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
-        </div>
-      </div>
     </div>
   );
 }

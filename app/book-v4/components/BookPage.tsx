@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
+import { Pencil, Clock } from "lucide-react";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
 
 interface Story {
@@ -26,7 +28,7 @@ interface DecadePage {
 }
 
 interface BookPageProps {
-  story?: Story | 'intro' | 'toc-left' | 'toc-right' | DecadePage;
+  story?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | DecadePage;
   pageNum: number;
   onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
   position: "left" | "right";
@@ -37,6 +39,29 @@ interface BookPageProps {
 export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
   ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory }, ref) => {
     const pageRef = React.useRef<HTMLDivElement>(null);
+    const [hasScroll, setHasScroll] = React.useState(false);
+
+    // Check if content is scrollable
+    React.useEffect(() => {
+      const checkScroll = () => {
+        if (ref && typeof ref !== 'function' && ref.current) {
+          const element = ref.current;
+          const isScrollable = element.scrollHeight > element.clientHeight + 5; // 5px buffer
+          setHasScroll(isScrollable);
+        }
+      };
+      
+      checkScroll();
+      const timer1 = setTimeout(checkScroll, 100);
+      const timer2 = setTimeout(checkScroll, 500);
+      const timer3 = setTimeout(checkScroll, 1000);
+      
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+      };
+    }, [ref, story]);
 
     // Handle intro page
     if (story === 'intro') {
@@ -58,18 +83,18 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
 
             <div className="relative h-full w-full p-7 md:p-8 lg:p-10">
               <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 flex items-center justify-center">
-                <div className="text-center space-y-8 p-8">
+                <div className="text-center space-y-8 p-8 w-full flex flex-col items-center">
                   <h1
-                    className="text-5xl font-serif text-gray-800 mb-4"
+                    className="text-5xl font-serif text-gray-800 mb-4 text-center"
                     style={{ fontFamily: "Crimson Text, serif" }}
                   >
                     Family Memories
                   </h1>
-                  <div className="w-24 h-1 bg-indigo-500 mx-auto"></div>
-                  <p className="text-lg text-gray-600 leading-relaxed max-w-md mx-auto italic">
+                  <div className="w-24 h-1 bg-indigo-500"></div>
+                  <p className="text-lg text-gray-600 leading-relaxed max-w-md text-center italic">
                     A collection of cherished moments, stories, and lessons from a life well-lived.
                   </p>
-                  <p className="text-base text-gray-500 mt-8">
+                  <p className="text-base text-gray-500 mt-8 text-center">
                     These pages hold the precious memories that shaped our family&apos;s journey.
                   </p>
                 </div>
@@ -78,6 +103,69 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 {position === "left" && <span className="tracking-tight">{pageNum}</span>}
                 {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
               </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Handle endpaper page
+    if (story === 'endpaper') {
+      return (
+        <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
+          <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15`}
+            style={{
+              background: "linear-gradient(135deg, #F5E6D3 0%, #EAD5BA 50%, #F5E6D3 100%)"
+            }}
+          >
+            {/* Marbled texture pattern */}
+            <div 
+              className="absolute inset-0 opacity-30"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='marble'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='8' seed='2' /%3E%3CfeColorMatrix type='saturate' values='0.3'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23marble)' fill='%23D4B896'/%3E%3C/svg%3E")`,
+                backgroundSize: '400px 400px',
+              }}
+            ></div>
+
+            {/* Subtle swirl pattern */}
+            <div 
+              className="absolute inset-0 opacity-10"
+              style={{
+                backgroundImage: `radial-gradient(ellipse at 20% 30%, rgba(139,111,71,0.3) 0%, transparent 50%),
+                                  radial-gradient(ellipse at 80% 70%, rgba(139,111,71,0.25) 0%, transparent 50%),
+                                  radial-gradient(ellipse at 40% 80%, rgba(139,111,71,0.2) 0%, transparent 40%)`,
+              }}
+            ></div>
+
+            {/* HW watermark logo in center */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="opacity-[0.08]">
+                <img 
+                  src="/circle logo hw.svg" 
+                  alt="Heritage Whisper" 
+                  className="w-32 h-32"
+                  style={{ filter: 'grayscale(100%)' }}
+                />
+              </div>
+            </div>
+
+            {/* Inner gutter shadow */}
+            <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
+
+            {/* Subtle vignette */}
+            <div 
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: position === "left"
+                  ? "radial-gradient(ellipse at 90% 50%, rgba(0,0,0,0.08) 0%, transparent 60%)"
+                  : "radial-gradient(ellipse at 10% 50%, rgba(0,0,0,0.08) 0%, transparent 60%)"
+              }}
+            ></div>
+
+            {/* Page number */}
+            <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
+              {position === "left" && <span className="tracking-tight">{pageNum}</span>}
+              {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
             </div>
           </div>
         </div>
@@ -120,7 +208,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                     willChange: 'scroll-position'
                   }}
                 >
-                  <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">
+                  <h1 className="text-5xl font-serif text-center mb-8 text-gray-800">
                     Table of Contents
                   </h1>
                   <div className="space-y-4">
@@ -128,12 +216,12 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                       <button
                         key={storyItem.id}
                         onClick={() => onNavigateToStory && onNavigateToStory(idx)}
-                        className="flex justify-between items-baseline text-base w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left"
+                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left"
                       >
                         <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
                           {storyItem.title}
                         </span>
-                        <span className="text-gray-500 text-sm whitespace-nowrap">
+                        <span className="text-gray-500 text-base whitespace-nowrap">
                           {storyItem.storyYear}
                           {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
                         </span>
@@ -142,6 +230,25 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   </div>
                 </div>
               </div>
+              
+              {/* Scroll indicator - appears on outer edge */}
+              {hasScroll && (
+                <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} animate-bounce pointer-events-none`} style={{ zIndex: 40 }}>
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-200/80 shadow-md">
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className="h-5 w-5 text-neutral-600" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2.5"
+                    >
+                      <path d="M12 5v14M19 12l-7 7-7-7"/>
+                    </svg>
+                  </div>
+                </div>
+              )}
+              
               <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
                 {position === "left" && <span className="tracking-tight">{pageNum}</span>}
                 {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
@@ -193,12 +300,12 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                       <button
                         key={storyItem.id}
                         onClick={() => onNavigateToStory && onNavigateToStory(midpoint + idx)}
-                        className="flex justify-between items-baseline text-base w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left"
+                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left"
                       >
                         <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
                           {storyItem.title}
                         </span>
-                        <span className="text-gray-500 text-sm whitespace-nowrap">
+                        <span className="text-gray-500 text-base whitespace-nowrap">
                           {storyItem.storyYear}
                           {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
                         </span>
@@ -207,6 +314,25 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   </div>
                 </div>
               </div>
+              
+              {/* Scroll indicator - appears on outer edge */}
+              {hasScroll && (
+                <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} animate-bounce pointer-events-none`} style={{ zIndex: 40 }}>
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-200/80 shadow-md">
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className="h-5 w-5 text-neutral-600" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2.5"
+                    >
+                      <path d="M12 5v14M19 12l-7 7-7-7"/>
+                    </svg>
+                  </div>
+                </div>
+              )}
+              
               <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
                 {position === "left" && <span className="tracking-tight">{pageNum}</span>}
                 {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
@@ -301,9 +427,28 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   willChange: 'scroll-position'
                 }}
               >
-                <StoryContent story={story} />
+                <StoryContent story={story as Story} position={position} />
               </div>
             </div>
+            
+            {/* Scroll indicator - appears on outer edge */}
+            {hasScroll && (
+              <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} animate-bounce pointer-events-none`} style={{ zIndex: 40 }}>
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-200/80 shadow-md">
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-5 w-5 text-neutral-600" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2.5"
+                  >
+                    <path d="M12 5v14M19 12l-7 7-7-7"/>
+                  </svg>
+                </div>
+              </div>
+            )}
+            
             <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
               {position === "left" && <span className="tracking-tight">{pageNum}</span>}
               {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
@@ -317,9 +462,45 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
 BookPage.displayName = "BookPage";
 
 // Story Content Component
-function StoryContent({ story }: { story: Story }) {
+function StoryContent({ story, position }: { story: Story; position: "left" | "right" }) {
+  const router = useRouter();
+
   return (
     <>
+      {/* Edit and Timeline buttons */}
+      <div className={`flex gap-2 mb-4 -mt-2.5 ${position === "right" ? "justify-end" : ""}`}>
+        <button
+          onClick={() =>
+            router.push(
+              `/review/book-style?id=${story.id}&returnPath=${encodeURIComponent(`/book-v4?storyId=${story.id}`)}`,
+            )
+          }
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+        >
+          <Pencil className="w-3.5 h-3.5" />
+          <span>Edit</span>
+        </button>
+        <button
+          onClick={() => {
+            // Store navigation context for timeline to pick up
+            const context = {
+              memoryId: story.id,
+              scrollPosition: 0, // Start at top, will scroll to card
+              timestamp: Date.now(),
+              returnPath: '/timeline', // Required by timeline navigation logic
+            };
+            sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
+
+            // Navigate to timeline
+            router.push('/timeline');
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+        >
+          <Clock className="w-3.5 h-3.5" />
+          <span>Timeline</span>
+        </button>
+      </div>
+
       {/* Photo at top if available */}
       {story.photos && story.photos.length > 0 && (
         <div className="mb-4">
@@ -343,11 +524,11 @@ function StoryContent({ story }: { story: Story }) {
         {story.title}
       </h2>
 
-      {/* Year and age */}
+      {/* Age and year */}
       <div className="mb-4 flex items-center justify-between">
-        <div className="text-sm text-neutral-600">
+        <div className="text-base text-neutral-600">
+          {story.lifeAge !== undefined && `Age ${story.lifeAge} • `}
           {story.storyYear}
-          {story.lifeAge !== undefined && ` • Age ${story.lifeAge}`}
         </div>
       </div>
 
@@ -422,3 +603,4 @@ function StoryContent({ story }: { story: Story }) {
     </>
   );
 }
+

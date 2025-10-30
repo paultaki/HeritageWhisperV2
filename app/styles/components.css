@@ -87,15 +87,14 @@ body {
 /* decade band - sticky chapter divider */
 .hw-decade-band {
   position: sticky;
-  top: calc(
-    env(safe-area-inset-top, 0px) + 52px
-  ); /* Mobile: reduced by 19px to close gap with header */
+  top: calc(env(safe-area-inset-top, 0px) + 52px); /* Mobile: reduced by 19px to close gap with header */
   z-index: 5;
-  background: rgba(250, 248, 245, 0.35); /* More transparent when sticky */
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  /* Enhanced glassmorphism effect - always visible */
+  background: rgba(250, 248, 245, 0.75);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   padding: 5px 16px 6px 16px;
-  border-bottom: 1px solid rgba(234, 234, 234, 0.3);
+  border-bottom: 1px solid rgba(234, 234, 234, 0.4);
   box-shadow: var(--shadow-card);
   transition: opacity 0.3s ease-in-out;
   opacity: 1;
@@ -104,6 +103,9 @@ body {
   margin-right: calc(-12px - env(safe-area-inset-right, 0px));
   padding-left: calc(12px + env(safe-area-inset-left, 0px));
   padding-right: calc(16px + env(safe-area-inset-right, 0px));
+  /* Center between cards - equal spacing above and below */
+  margin-top: 18px;
+  margin-bottom: 18px;
 }
 
 .hw-decade-band.fading-out {
@@ -143,9 +145,9 @@ body {
   color: var(--color-text-muted);
 }
 
-/* spacing before first card */
+/* spacing before first card - removed, handled by decade-band margin-bottom */
 .hw-decade-start {
-  margin-top: 12px;
+  margin-top: 0;
 }
 
 /* story card */

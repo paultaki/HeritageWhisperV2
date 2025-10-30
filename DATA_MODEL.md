@@ -1,19 +1,25 @@
 # HeritageWhisperV2 - Complete Data Model Documentation
 
-> **Version:** 2.0 (Verified Accurate)
-> **Last Updated:** January 25, 2025
-> **Schema Version:** 21 tables, synchronized with production database
-> **Purpose:** Comprehensive documentation of database schemas, service models, and UI data structures
+> **Version:** 3.0  
+> **Last Updated:** October 30, 2025  
+> **Schema Version:** 21 production tables + 1 view, verified against live Supabase database  
+> **Purpose:** Developer-focused documentation of database schemas, service models, and UI data structures  
+> **Note:** This doc uses TypeScript conventions (camelCase). Database uses snake_case - see [Field Naming](#field-naming-convention) for details.  
+> ⚠️ **Important:** `shared/schema.ts` defines types for both production tables AND planned/legacy tables. Always verify table exists in database before querying.
 
 ## Table of Contents
 1. [Overview](#overview)
-2. [Database Schema Layer](#database-schema-layer)
-3. [Database Objects (RPC, Views, Triggers)](#database-objects)
-4. [Service Layer Models](#service-layer-models)
-5. [UI Data Models](#ui-data-models)
-6. [Key Relationships](#key-relationships)
-7. [Data Flow Patterns](#data-flow-patterns)
-8. [Schema Reference](#schema-reference)
+2. [Field Naming Convention](#field-naming-convention)
+3. [Database Schema Layer](#database-schema-layer)
+4. [Common Anti-Patterns](#common-anti-patterns)
+5. [Database Objects (RPC, Views, Triggers)](#database-objects)
+6. [Service Layer Models](#service-layer-models)
+7. [UI Data Models](#ui-data-models)
+8. [Key Relationships](#key-relationships)
+9. [Data Flow Patterns](#data-flow-patterns)
+10. [Auxiliary Tables Reference](#auxiliary-tables-reference)
+11. [Legacy/Planned Tables](#legacy-planned-tables)
+12. [Schema Reference](#schema-reference)
 
 ---
 
@@ -21,25 +27,60 @@
 
 HeritageWhisperV2 uses a **three-layer data architecture**:
 
-- **Database Layer (PostgreSQL):** 21 tables managed via Supabase with Drizzle ORM
-- **Service Layer (Next.js API Routes):** REST API with JWT authentication
+- **Database Layer (PostgreSQL):** 21 production tables + 1 view managed via Supabase
+- **Service Layer (Next.js API Routes):** REST API with JWT authentication, direct Supabase client queries
 - **UI Layer (React/TypeScript):** TanStack Query v5 for state management
 
 **Key Technologies:**
-- Database: PostgreSQL 15+ via Supabase (project: tjycibrhoammxohemyhq)
-- ORM: Drizzle ORM with type-safe schemas
-- API: Next.js 15 App Router API routes
+- Database: PostgreSQL 17+ via Supabase (project: tjycibrhoammxohemyhq)
+- Schema Definition: Drizzle ORM for type-safe schemas (shared/schema.ts)
+- API: Next.js 15 App Router API routes using Supabase client directly
 - State: TanStack Query v5 + React Context
 - Auth: Supabase Auth with JWT tokens + WebAuthn passkeys
 - Security: Row Level Security (RLS) enabled on all tables
 
-**Type Safety Coverage:** 100% - All 21 production tables have TypeScript types
+**Type Safety Coverage:** TypeScript types exist for both production and planned tables via Drizzle ORM
+
+**Important:** While Drizzle ORM provides type definitions, API routes query the database using Supabase client methods (`.from("table_name")`) rather than ORM queries.
+
+**Schema vs Database:** The Drizzle schema in `shared/schema.ts` defines types for planned features and legacy tables that may not exist in the production database. Always verify a table exists in Supabase before writing queries. See [Legacy/Planned Tables](#legacy-planned-tables) section for tables defined in code but not in production.
+
+---
+
+## Field Naming Convention
+
+**Critical for Development:** HeritageWhisperV2 uses different naming conventions at different layers:
+
+| Layer | Convention | Example | Usage |
+|-------|-----------|---------|-------|
+| **Database (PostgreSQL)** | snake_case | `story_year`, `audio_url` | Raw SQL, migrations, RLS policies |
+| **TypeScript/Drizzle** | camelCase | `storyYear`, `audioUrl` | Application code, type definitions |
+| **Supabase Client Queries** | snake_case | `.eq('user_id', id)` | API route filters |
+
+**Automatic Mapping:** Drizzle ORM automatically maps between snake_case (DB) and camelCase (TypeScript). When you query:
+```typescript
+const story = await db.select().from(stories).where(eq(stories.userId, id))
+```
+Drizzle converts `stories.userId` → `user_id` in the SQL query.
+
+**Manual Mapping Required:** Supabase client queries use database names directly:
+```typescript
+// Correct - database field names
+const { data } = await supabase.from('stories').select('*').eq('user_id', userId)
+
+// Result has snake_case fields - must map to camelCase for TypeScript
+const mappedStory = { storyYear: data.story_year, audioUrl: data.audio_url }
+```
+
+**When Writing SQL:** Migrations, RLS policies, and RPC functions must use snake_case.
 
 ---
 
 ## Database Schema Layer
 
-### Complete Entity-Relationship Diagram
+### Entity-Relationship Diagram (Production Tables)
+
+> **Note:** This diagram shows the 21 production tables that exist in the Supabase database. System/future tables (`recording_sessions`, `subscriptions`, `gift_passes`, `events`, `usage_tracking`, `activity_notifications`) are documented separately in the [Auxiliary Tables Reference](#auxiliary-tables-reference) section. Tables defined in `shared/schema.ts` but not in production are listed in [Legacy/Planned Tables](#legacy-planned-tables).
 
 ```mermaid
 erDiagram
@@ -49,18 +90,15 @@ erDiagram
     users ||--o{ promptHistory : "archives"
     users ||--o{ userPrompts : "saves from catalog"
     users ||--o{ familyMembers : "invites (as storyteller)"
-    users ||--o{ sharedAccess : "shares timeline (as owner)"
-    users ||--o| profiles : "has personalization"
     users ||--o{ userAgreements : "accepts"
-    users ||--o{ historicalContext : "caches"
     users ||--o{ adminAuditLog : "performs (as admin)"
     users ||--o{ aiUsageLog : "generates"
 
-    stories ||--o{ followUps : "generates"
     stories ||--o| activePrompts : "created from (optional)"
     stories ||--o{ promptFeedback : "rated via"
+    stories ||--o{ audioFiles : "has audio metadata"
+    stories ||--o{ shares : "can be shared"
 
-    familyMembers ||--o{ familyActivity : "tracks"
     familyMembers ||--o{ familyInvites : "has invite tokens"
     familyMembers ||--o{ familyCollaborations : "participates in"
     familyMembers ||--o{ familyPrompts : "submits"
@@ -69,12 +107,9 @@ erDiagram
 
     activePrompts ||--o{ promptFeedback : "receives ratings"
 
-    sharedAccess }o--|| users : "grants access to (when registered)"
-
     users {
         uuid id PK
         text email UK
-        text password "nullable for OAuth"
         text name
         int birthYear
         text bio
@@ -99,9 +134,12 @@ erDiagram
         timestamp onboardingT3RanAt
         jsonb profileInterests "general, people, places"
         text role "user | admin | moderator"
-        int aiDailyBudgetUsd
-        int aiMonthlyBudgetUsd
+        numeric aiDailyBudgetUsd "decimal type"
+        numeric aiMonthlyBudgetUsd "decimal type"
         bool aiProcessingEnabled
+        int loginCount "passkey prompt tracking"
+        text passkeyPromptDismissed "null | later | never"
+        timestamp lastPasskeyPromptAt
         timestamp createdAt
         timestamp updatedAt
     }
@@ -124,31 +162,42 @@ erDiagram
         uuid id PK
         uuid userId FK
         text title
-        text audioUrl
-        text transcription
-        int durationSeconds
+        int year "story year"
+        timestamp storyDate "full date"
+        text transcript "primary transcription"
+        text audioUrl "original audio URL"
+        text audioRawPath "storage path"
+        text audioCleanPath "processed audio path"
         text wisdomClipUrl
-        text wisdomClipText
-        int wisdomClipDuration
-        int storyYear
-        timestamp storyDate
-        int lifeAge
-        text lessonLearned
-        jsonb lessonAlternatives
-        jsonb entitiesExtracted
-        uuid sourcePromptId FK
-        text lifePhase
-        text photoUrl
-        jsonb photoTransform
-        jsonb photos
-        jsonb emotions
-        text pivotalCategory
+        text wisdomText "wisdom transcription"
+        text photoUrl "main photo URL"
+        text_array emotions "emotion tags array"
+        int durationSeconds "1-120 constraint"
+        int wordCount
+        int playCount
+        int shareCount
+        bool isSaved
+        bool isEnhanced
         bool includeInBook
         bool includeInTimeline
         bool isFavorite
-        jsonb formattedContent
-        jsonb extractedFacts
+        text status "recorded|enhanced"
+        text voiceNotes
+        uuid sessionId FK
+        jsonb metadata "photos, formatted_content, etc"
+        jsonb transcriptFast "AssemblyAI result"
+        jsonb transcriptClean "final transcript"
+        jsonb followupsInitial "AI followups"
+        jsonb metrics "processing stats"
+        text lessonLearned
+        jsonb lessonAlternatives
+        uuid sourcePromptId FK
+        text lifePhase "life phase category"
+        text enhancementJobId
+        text enhancementError
         timestamp createdAt
+        timestamp updatedAt
+        timestamp expiresAt
     }
 
     activePrompts {
@@ -255,63 +304,29 @@ erDiagram
         timestamp createdAt
     }
 
-    familyActivity {
+    audioFiles {
         uuid id PK
-        uuid userId FK "storyteller"
-        uuid familyMemberId FK
         uuid storyId FK
-        text activityType "viewed | commented | favorited | shared"
-        text details
+        text storagePath
+        text mimeType
+        int sizeBytes
+        int durationSeconds
+        int sampleRate
+        int channels
         timestamp createdAt
     }
 
-    sharedAccess {
+    shares {
         uuid id PK
-        uuid ownerUserId FK
-        text sharedWithEmail
-        uuid sharedWithUserId FK
-        text permissionLevel
-        text shareToken UK
-        timestamp createdAt
-        timestamp expiresAt
+        uuid storyId FK
+        text shareCode UK
+        uuid createdBy FK
+        int viewCount
+        timestamp lastViewedAt
         bool isActive
-        timestamp lastAccessedAt
-    }
-
-    profiles {
-        uuid id PK
-        uuid userId FK UK
-        int birthYear
-        jsonb majorLifePhases
-        int workEthic "1-10"
-        int riskTolerance "1-10"
-        int familyOrientation "1-10"
-        int spirituality "1-10"
-        text preferredStyle
-        int emotionalComfort "1-10"
-        text detailLevel
-        text followUpFrequency
-        int completionPercentage
+        timestamp expiresAt
+        jsonb shareMetadata
         timestamp createdAt
-        timestamp updatedAt
-    }
-
-    followUps {
-        uuid id PK
-        uuid storyId FK
-        text questionText
-        text questionType
-        bool wasAnswered
-    }
-
-    historicalContext {
-        uuid id PK
-        uuid userId FK
-        text decade
-        text ageRange
-        jsonb facts
-        timestamp generatedAt
-        timestamp updatedAt
     }
 
     userAgreements {
@@ -367,47 +382,6 @@ erDiagram
         timestamp createdAt
         timestamp updatedAt
     }
-
-    ghostPrompts {
-        uuid id PK
-        uuid userId FK
-        text promptText
-        text promptTitle
-        text category
-        text decade
-        text ageRange
-        bool isGenerated
-        uuid basedOnStoryId FK
-        timestamp createdAt
-    }
-
-    demoStories {
-        uuid id PK
-        uuid userId "fixed demo user"
-        text title
-        text audioUrl
-        text transcription
-        int durationSeconds
-        text wisdomClipUrl
-        text wisdomClipText
-        int wisdomClipDuration
-        int storyYear
-        timestamp storyDate
-        int lifeAge
-        text photoUrl
-        jsonb photoTransform
-        jsonb photos
-        jsonb emotions
-        text pivotalCategory
-        bool includeInBook
-        bool includeInTimeline
-        bool isFavorite
-        jsonb formattedContent
-        timestamp createdAt
-        bool isOriginal
-        text publicAudioUrl
-        text publicPhotoUrl
-    }
 ```
 
 ### Table Descriptions
@@ -415,12 +389,13 @@ erDiagram
 #### Core User Tables (3)
 
 **1. users** - Main user accounts with authentication and preferences
-- Primary authentication table (email/password or OAuth)
+- Primary authentication table (linked to `auth.users`)
 - RBAC support via `role` column (user, admin, moderator)
-- AI budget control (`aiDailyBudgetUsd`, `aiMonthlyBudgetUsd`)
+- AI budget control (`aiDailyBudgetUsd`, `aiMonthlyBudgetUsd`) stored as NUMERIC (decimal) type
 - Notification preferences (email, weekly digest, family comments)
-- Export tracking (PDF and data export counts)
+- Export tracking (PDF and data export counts with timestamps)
 - Subscription status tracking
+- Passkey prompt management (`loginCount`, `passkeyPromptDismissed`, `lastPasskeyPromptAt`)
 
 **2. passkeys** - WebAuthn credentials for passwordless authentication
 - Multiple passkeys per user (Touch ID, Face ID, security keys)
@@ -428,43 +403,53 @@ erDiagram
 - Security: Composite unique constraint prevents cross-tenant credential reuse
 - Tracks usage with `signCount` and `lastUsedAt`
 
-**3. profiles** - Extended user personalization settings
-- One-to-one relationship with users
-- Life phase definitions (childhood, young adult, mid-life, senior)
-- Character traits (work ethic, risk tolerance, family orientation, spirituality)
-- Communication preferences for AI interactions
-- Completion tracking for onboarding
+**3. userAgreements** - Terms of Service and Privacy Policy tracking
+- Legal compliance requirement
+- Version tracking for terms/privacy changes
+- Method tracking (signup, reacceptance, OAuth)
+- IP address and user agent for audit trail
 
 #### Content Tables (3)
 
 **4. stories** - User-generated story content
-- Core content table with audio, transcription, photos
-- AI features: lesson learned, entity extraction, formatted content
-- Photo management: Single legacy photo + array of multiple photos with transforms
-- Metadata: year, age, life phase, pivotal category
-- Display flags: `includeInBook`, `includeInTimeline`, `isFavorite`
-- Source tracking via `sourcePromptId` (links to prompt that inspired the story)
+- **Core content table** with audio, transcription, photos
+- **Processing pipeline**: `status` tracks workflow (recorded → enhanced), `isSaved`, `isEnhanced` flags
+- **Audio management**: `audioUrl`, `audioRawPath`, `audioCleanPath` for file paths
+- **Transcription**: `transcript` (main), `transcriptFast`/`transcriptClean` (JSONB) for AI results
+- **Engagement tracking**: `playCount`, `shareCount`, `wordCount`
+- **JSONB metadata column**: Contains structured data for photos, formatted_content, and other complex fields
+- **AI features**: `lessonLearned`, `lessonAlternatives` (JSONB), `followupsInitial` (JSONB)
+- **Display flags**: `includeInBook`, `includeInTimeline`, `isFavorite`
+- **Async processing**: `enhancementJobId`, `enhancementError` for background jobs
+- **Metadata**: `year`, `storyDate`, `lifePhase`, `emotions` (array type), `photoUrl`
+- **Source tracking**: `sourcePromptId` links to the prompt that inspired this story
 
-**5. demoStories** - Demo account stories
-- Mirrors `stories` table structure
-- Fixed demo user ID
-- Public URLs for demo assets (no authentication required)
-- Used for onboarding and marketing
+**5. audioFiles** - Storage metadata for audio recordings
+- Links to stories table
+- Tracks file metadata: `storagePath`, `mimeType`, `sizeBytes`
+- Audio specs: `durationSeconds`, `sampleRate`, `channels`
+- Enables storage cleanup and migration
 
-**6. followUps** - AI-generated follow-up questions for stories
-- One-to-many with stories
-- Tracks question type (emotional, wisdom, sensory)
-- Tracks whether user answered the question
+**6. shares** - Public share links for individual stories
+- Token-based public sharing (distinct from family sharing)
+- `shareCode` unique identifier for URLs
+- Analytics: `viewCount`, `lastViewedAt`
+- Control: `isActive`, `expiresAt` for access management
 
 #### AI Prompt System Tables (5)
 
 **7. activePrompts** - Currently active AI-generated prompts
-- Tier-based system (0=fallback, 1=template, 2=on-demand, 3=milestone)
-- Deduplication via `anchorHash` (sha1 of tier + entity + year)
-- Quality scoring (0-100 likelihood of recording)
-- User queue management (`userStatus`, `queuePosition`)
-- Expiration-based (7-day default)
-- Paywall support (`isLocked` flag)
+- **Tier-based system** (0=fallback, 1=template, 2=on-demand, 3=milestone)
+- **Deduplication via `anchorHash`**: sha1 hash of `tier|entity|year` prevents duplicate prompts about same topic
+  - **Why SHA1**: Fast, collision-resistant for our scale, consistent across API calls
+  - **Why hash at all**: Prevents "Tell me about your father" appearing twice for same year
+- **Quality scoring** (0-100): GPT-4o predicts likelihood user will record this prompt
+  - Used to prioritize high-quality prompts in the UI
+- **User queue management**: `userStatus` ('available'|'queued'|'dismissed'), `queuePosition`
+- **Expiration-based**: 7-day default TTL
+  - **Why 7 days**: Keeps prompt pool fresh, encourages timely recording, prevents stale content
+  - Archived to `promptHistory` after expiration for analytics
+- **Paywall support**: `isLocked` flag hides Tier 2+ prompts from free users
 
 **8. promptHistory** - Archived used/skipped/expired prompts
 - Tracks prompt lifecycle outcomes
@@ -472,19 +457,21 @@ erDiagram
 - Analytics for prompt effectiveness
 
 **9. userPrompts** - User-saved prompts from catalog
-- Separate from AI-generated prompts
-- Queue management for user organization
-- Status tracking (ready, queued, dismissed, recorded, deleted)
+- **Separate from AI-generated prompts** (activePrompts)
+  - **Why separate tables**: Different UX flows and lifecycles
+    - `activePrompts`: Ephemeral (7-day TTL), AI-managed, automatic deduplication
+    - `userPrompts`: Permanent (until user deletes), user-controlled, no expiration
+  - **Why this matters**: User expects saved prompts to persist indefinitely, but AI prompts should rotate
+- **Queue management**: User organizes prompts via `queuePosition` for recording order
+- **Status tracking**: ready, queued, dismissed, recorded, deleted (default: `saved`)
+- **Source tracking**: `source` field ('catalog'|'ai') identifies origin for analytics
 
-**10. ghostPrompts** - Legacy prompt system (deprecated)
-- Original manually-created prompts
-- Category and decade-based organization
-
-**11. promptFeedback** - Quality ratings for AI prompts (admin tool)
+**10. promptFeedback** - Quality ratings for AI prompts (admin tool)
 - Admin dashboard feature for prompt quality analysis
 - Ratings: good, bad, excellent, terrible
 - Tags and quality reports for analytics
 - Links to prompt and resulting story
+- Used to improve prompt generation over time
 
 #### Family Sharing V3 Tables (5)
 
@@ -561,17 +548,206 @@ erDiagram
 
 ---
 
+## Common Anti-Patterns
+
+**⚠️ Critical:** These mistakes can lead to security vulnerabilities, performance issues, or data corruption.
+
+### ❌ Anti-Pattern #1: Bypassing Multi-Tenant Access Control
+
+**Wrong:**
+```typescript
+// INSECURE - Bypasses family sharing permissions
+const { data } = await supabase
+  .from('stories')
+  .select('*')
+  .eq('user_id', targetUserId)
+```
+
+**Right:**
+```typescript
+// SECURE - Always verify collaboration access first
+const { data: hasAccess } = await supabase.rpc('has_collaboration_access', {
+  p_user_id: currentUserId,
+  p_storyteller_id: targetUserId
+})
+
+if (!hasAccess) {
+  throw new Error('Unauthorized access')
+}
+
+// Now safe to query
+const { data } = await supabase
+  .from('stories')
+  .select('*')
+  .eq('user_id', targetUserId)
+```
+
+**Why:** The `has_collaboration_access()` RPC is the single source of truth for multi-tenant security. Bypassing it allows unauthorized access to other users' data.
+
+**Where used:** `app/api/stories/route.ts`, `app/api/family/stories/[userId]/route.ts`
+
+---
+
+### ❌ Anti-Pattern #2: Using Service Role Key Without RLS Awareness
+
+**Wrong:**
+```typescript
+// Uses service role key - BYPASSES RLS!
+const { data } = await supabaseAdmin
+  .from('stories')
+  .select('*')
+  .eq('user_id', untrustedInput) // Vulnerable to injection
+```
+
+**Right:**
+```typescript
+// Explicitly verify authorization before using service role
+const authenticatedUserId = await verifyJWT(token)
+
+// Verify user can access this data
+if (targetUserId !== authenticatedUserId) {
+  const hasAccess = await verifyCollaborationAccess(authenticatedUserId, targetUserId)
+  if (!hasAccess) throw new Error('Unauthorized')
+}
+
+// Now safe to use service role
+const { data } = await supabaseAdmin
+  .from('stories')
+  .select('*')
+  .eq('user_id', targetUserId)
+```
+
+**Why:** Service role key bypasses Row Level Security. You MUST implement authorization checks manually.
+
+**When to use service role:** Admin operations, background jobs, cross-user operations (after verification).
+
+---
+
+### ❌ Anti-Pattern #3: Ignoring snake_case in Supabase Queries
+
+**Wrong:**
+```typescript
+const { data } = await supabase
+  .from('stories')
+  .select('*')
+  .eq('userId', id) // ❌ No column named 'userId'
+```
+
+**Right:**
+```typescript
+const { data } = await supabase
+  .from('stories')
+  .select('*')
+  .eq('user_id', id) // ✅ Database uses snake_case
+```
+
+**Why:** Supabase queries use database column names (snake_case), not TypeScript names (camelCase). Drizzle ORM does auto-mapping, but Supabase client doesn't.
+
+---
+
+### ❌ Anti-Pattern #4: Storing Large Duration Values
+
+**Wrong:**
+```typescript
+const story = {
+  user_id: userId,
+  title: 'My Story',
+  duration_seconds: 600 // 10 minutes - exceeds DB constraint!
+}
+await supabase.from('stories').insert(story) // Will fail silently or error
+```
+
+**Right:**
+```typescript
+// Database has CHECK constraint: duration_seconds BETWEEN 1 AND 120
+const clampedDuration = Math.min(Math.max(durationSeconds, 1), 120)
+
+const story = {
+  user_id: userId,
+  title: 'My Story',
+  duration_seconds: clampedDuration,
+  metadata: {
+    actual_duration: durationSeconds // Store original in metadata
+  }
+}
+```
+
+**Why:** Database has `CHECK (duration_seconds BETWEEN 1 AND 120)`. Values outside this range will fail insertion.
+
+**Where implemented:** `app/api/stories/route.ts` line 254
+
+---
+
+### ❌ Anti-Pattern #5: Not Tracking AI Costs
+
+**Wrong:**
+```typescript
+// Makes AI API call without logging
+const result = await openai.chat.completions.create({ ... })
+return result
+```
+
+**Right:**
+```typescript
+// Check budget first
+const { data: canProceed } = await supabase.rpc('check_ai_budget', {
+  p_user_id: userId,
+  p_operation: 'prompt_generation',
+  p_estimated_cost: 0.05
+})
+
+if (!canProceed) {
+  throw new Error('AI budget exceeded')
+}
+
+// Make call
+const result = await openai.chat.completions.create({ ... })
+
+// Log usage
+await supabase.rpc('log_ai_usage', {
+  p_user_id: userId,
+  p_operation: 'prompt_generation',
+  p_model: 'gpt-4o',
+  p_tokens_used: result.usage.total_tokens,
+  p_cost_usd: calculateCost(result.usage),
+  p_ip_address: req.ip
+})
+```
+
+**Why:** Without tracking, users can exceed budgets and you lose cost visibility. The `check_ai_budget()` and `log_ai_usage()` RPCs enforce limits and provide analytics.
+
+---
+
+### ❌ Anti-Pattern #6: Querying activePrompts Without Expiration Check
+
+**Wrong:**
+```typescript
+const { data: prompts } = await supabase
+  .from('active_prompts')
+  .select('*')
+  .eq('user_id', userId)
+// Returns expired prompts!
+```
+
+**Right:**
+```typescript
+const { data: prompts } = await supabase
+  .from('active_prompts')
+  .select('*')
+  .eq('user_id', userId)
+  .gt('expires_at', new Date().toISOString())
+  .order('created_at', { ascending: false })
+```
+
+**Why:** Prompts expire after 7 days. Showing expired prompts confuses users. A scheduled job archives expired prompts, but you should filter client-side too.
+
+---
+
 ## Database Objects
 
 ### RPC Functions (PostgreSQL Functions)
 
-**Prompt System:**
-```sql
-archive_expired_prompts() → VOID
-```
-- Moves expired prompts from `active_prompts` to `prompt_history`
-- Deletes history older than 365 days
-- Scheduled via cron job
+> **Note**: All RPC functions verified against production database (October 2025)
 
 **AI Budget Control:**
 ```sql
@@ -741,16 +917,195 @@ All tables use UUID primary keys with `gen_random_uuid()` default
 
 ---
 
+## Auxiliary Tables Reference
+
+These tables support system operations, analytics, and payments but are not part of core features. Documented here for completeness.
+
+### audio_files (76 rows - Active)
+**Purpose:** Storage metadata for audio recordings
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | uuid | Primary key |
+| story_id | uuid | FK to stories table |
+| storage_path | text | Supabase Storage path |
+| mime_type | text | Audio format (default: audio/webm) |
+| size_bytes | integer | File size for storage tracking |
+| duration_seconds | integer | Audio duration |
+| sample_rate | integer | Audio quality metric |
+| channels | integer | Mono (1) or stereo (2) |
+| created_at | timestamp | Upload timestamp |
+
+**Usage:** Tracks uploaded audio files separately from story metadata. Enables storage cleanup and migration.
+
+---
+
+### shares (76 rows - Active)
+**Purpose:** Public share links for individual stories
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | uuid | Primary key |
+| story_id | uuid | FK to stories table |
+| share_code | text | Unique URL slug |
+| created_by | uuid | FK to users table |
+| view_count | integer | Analytics counter |
+| last_viewed_at | timestamp | Last access time |
+| is_active | boolean | Enable/disable sharing |
+| expires_at | timestamp | Optional expiration |
+| share_metadata | jsonb | Additional share config |
+| created_at | timestamp | Share creation time |
+
+**Usage:** Public story sharing (distinct from family sharing). Used for social media, embedding.
+
+**Note:** Single-story sharing was considered for removal in January 2025 but remains active.
+
+---
+
+### recording_sessions (57 rows - Active)
+**Purpose:** Temporary state for multi-step recording flow
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | uuid | Primary key |
+| user_id | uuid | FK to users table |
+| story_prompt | text | Recording prompt text |
+| user_age | integer | User age at recording |
+| start_time | timestamp | Session start |
+| end_time | timestamp | Session completion |
+| context | text | Additional context notes |
+| followup_count | integer | Number of followups asked |
+| followups_asked | jsonb | Array of followup questions |
+| status | text | 'recording' | 'completed' |
+| main_audio_url | text | Primary audio URL |
+| wisdom_audio_url | text | Wisdom clip URL |
+| wisdom_clip_text | text | Wisdom transcription |
+| duration | integer | Recording duration |
+| emotion_tags | text[] | Emotion array |
+| created_at | timestamp | Session creation |
+
+**Usage:** Tracks state during multi-step interview flow. Cleaned up after story finalization.
+
+---
+
+### subscriptions (0 rows - Schema Only)
+**Purpose:** Stripe subscription management
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | uuid | Primary key |
+| user_id | uuid | FK to users table |
+| stripe_customer_id | text | Stripe Customer ID |
+| stripe_subscription_id | text | Stripe Subscription ID |
+| status | text | Status: trialing, active, canceled, incomplete, past_due |
+| plan_id | text | Plan identifier |
+| current_period_start | timestamp | Billing period start |
+| current_period_end | timestamp | Billing period end |
+| cancel_at_period_end | boolean | Cancellation flag |
+| created_at | timestamp | Subscription creation |
+| updated_at | timestamp | Last modification |
+
+**Usage:** Payment integration (not yet implemented in production).
+
+---
+
+### gift_passes (0 rows - Schema Only)
+**Purpose:** Gift subscription codes
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | uuid | Primary key |
+| code | text | Unique redemption code |
+| months | integer | Subscription duration |
+| purchaser_email | text | Buyer email |
+| purchaser_name | text | Buyer name |
+| recipient_email | text | Recipient email |
+| recipient_name | text | Recipient name |
+| message | text | Gift message |
+| redeemed_by | uuid | FK to users table |
+| redeemed_at | timestamp | Redemption time |
+| is_active | boolean | Validity flag |
+| created_at | timestamp | Purchase time |
+| expires_at | timestamp | Expiration (default 1 year) |
+
+**Usage:** Gift subscription system (not yet implemented in production).
+
+---
+
+### events (0 rows - Schema Only)
+**Purpose:** Analytics event tracking
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | uuid | Primary key |
+| user_id | uuid | FK to users table (nullable for anonymous) |
+| event_name | text | Event type identifier |
+| event_data | jsonb | Event properties |
+| session_id | text | Session identifier |
+| ip_address | inet | User IP (anonymized) |
+| user_agent | text | Browser info |
+| referrer | text | Traffic source |
+| created_at | timestamp | Event time |
+
+**Usage:** Product analytics tracking (schema exists, not actively populated).
+
+---
+
+### usage_tracking (0 rows - Schema Only)
+**Purpose:** Service cost tracking
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | uuid | Primary key |
+| user_id | uuid | FK to users table |
+| service | text | Service name (OpenAI, AssemblyAI, etc.) |
+| tokens_used | integer | API tokens consumed |
+| cost_usd | numeric | Cost in USD |
+| created_at | timestamp | Usage time |
+
+**Usage:** Cost tracking (replaced by `ai_usage_log` table which is actively used).
+
+---
+
+### activity_notifications (0 rows - Schema Only)
+**Purpose:** Real-time notification system
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | uuid | Primary key |
+| recipient_family_member_id | uuid | FK to family_members |
+| recipient_user_id | uuid | FK to users |
+| actor_family_member_id | uuid | FK to family_members |
+| actor_user_id | uuid | FK to users |
+| notification_type | text | Type identifier |
+| title | text | Notification title |
+| message | text | Notification content |
+| action_url | text | Click destination |
+| story_id | uuid | FK to stories (optional) |
+| prompt_id | uuid | FK to prompts (optional) |
+| metadata | jsonb | Additional data |
+| read_at | timestamp | Read status |
+| dismissed_at | timestamp | Dismissal status |
+| created_at | timestamp | Notification creation |
+
+**Usage:** Notification system for family activity (schema exists, feature not yet implemented).
+
+---
+
 _For complete documentation including Service Layer, UI Layer, and Data Flow Patterns, see the full DATA_MODEL.md file._
 
 ---
 
 **Schema File Reference:** [`/shared/schema.ts`](shared/schema.ts)
 
-**Production Database:** Supabase project tjycibrhoammxohemyhq
+**Production Database:** Supabase project tjycibrhoammxohemyhq (PostgreSQL 17+)
 
-**Row Level Security:** Enabled on all 21 tables with optimized `(SELECT auth.uid())` pattern
+**Row Level Security:** Enabled on all 23 tables with optimized `(SELECT auth.uid())` pattern
+
+**Core Tables:** 18 actively used tables with full documentation above
+
+**Auxiliary Tables:** 5 system/future tables documented in Auxiliary Tables section
 
 ---
 
-_Last verified: January 25, 2025 - All 21 tables synchronized with production database_
+_Last verified: October 30, 2025 - All 23 tables synchronized with production database_
