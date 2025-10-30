@@ -79,15 +79,37 @@ export default function BookV4Page() {
     [bookStories]
   );
 
-  // Create spreads - pairs of stories for left/right pages
+  // Create spreads - intro, TOC, then story pairs
   const spreads = useMemo(() => {
-    const result: Array<{ left?: Story; right?: Story }> = [];
-    for (let i = 0; i < sortedStories.length; i += 2) {
+    const result: Array<{ 
+      left?: Story | 'intro' | 'toc'; 
+      right?: Story | 'intro' | 'toc';
+      type: 'intro' | 'toc' | 'stories';
+    }> = [];
+    
+    // First spread: empty left, intro right
+    result.push({
+      left: undefined,
+      right: 'intro',
+      type: 'intro'
+    });
+    
+    // Second spread: table of contents left, first story (or empty) right
+    result.push({
+      left: 'toc',
+      right: sortedStories[0],
+      type: 'toc'
+    });
+    
+    // Remaining story spreads (starting from second story)
+    for (let i = 1; i < sortedStories.length; i += 2) {
       result.push({
         left: sortedStories[i],
         right: sortedStories[i + 1],
+        type: 'stories'
       });
     }
+    
     return result;
   }, [sortedStories]);
 
@@ -175,7 +197,14 @@ export default function BookV4Page() {
     );
   }
 
-  const currentSpread = spreads[currentSpreadIndex] || { left: undefined, right: undefined };
+  const currentSpread = spreads[currentSpreadIndex] || { left: undefined, right: undefined, type: 'stories' as const };
+
+  // Navigate to a story from TOC
+  const handleNavigateToStory = (storyIndex: number) => {
+    // Story index 0 is on spread 1 (right side), story index 1 is on spread 2 (left side), etc.
+    const spreadIndex = Math.floor((storyIndex + 2) / 2); // +2 because first two spreads are intro/toc
+    setCurrentSpreadIndex(spreadIndex);
+  };
 
   return (
     <div className={`h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
@@ -274,6 +303,8 @@ export default function BookV4Page() {
               onScroll={handleScroll} 
               ref={flowLeftRef}
               position="left"
+              allStories={sortedStories}
+              onNavigateToStory={handleNavigateToStory}
             />
     
             {/* Right page */}
@@ -283,6 +314,8 @@ export default function BookV4Page() {
               onScroll={handleScroll} 
               ref={flowRightRef}
               position="right"
+              allStories={sortedStories}
+              onNavigateToStory={handleNavigateToStory}
             />
     
             {/* Refined spine */}
@@ -351,32 +384,32 @@ export default function BookV4Page() {
 
       {/* Bottom Navigation Controls - positioned just above where nav bar was */}
       <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-4">
-        <div className="mx-auto max-w-3xl px-6">
+        <div className="mx-auto max-w-[608px] px-6">
           <div className="flex items-center justify-center gap-6 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-8 py-4 shadow-2xl">
             <button
               onClick={goToPrevSpread}
               disabled={currentSpreadIndex === 0}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-200 text-base font-medium"
+              className="flex items-center gap-2.5 px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-200 text-xl font-medium"
               title="Previous spread (or use Left Arrow key)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="m15 18-6-6 6-6"></path>
               </svg>
               <span className="hidden sm:inline">Previous</span>
             </button>
 
             <div className="flex items-center gap-4">
-              <span className="text-white font-medium text-base">
+              <span className="text-white font-medium text-xl">
                 Spread {currentSpreadIndex + 1} of {spreads.length}
               </span>
               <button
                 onClick={() => setShowToc(!showToc)}
-                className="px-3 py-2 rounded-full bg-white/5 hover:bg-white/10 transition-all text-white"
+                className="px-4 py-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-all text-white"
                 title="Table of Contents"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
+                  className="h-6 w-6"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -392,11 +425,11 @@ export default function BookV4Page() {
             <button
               onClick={goToNextSpread}
               disabled={currentSpreadIndex === spreads.length - 1}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-200 text-base font-medium"
+              className="flex items-center gap-2.5 px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-200 text-xl font-medium"
               title="Next spread (or use Right Arrow key)"
             >
               <span className="hidden sm:inline">Next</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="m9 18 6-6-6-6"></path>
               </svg>
             </button>
@@ -570,12 +603,14 @@ function StoryContent({ story }: { story: Story }) {
       </h2>
 
       {story.photos && story.photos.length > 0 && (
-        <div className="mb-4">
-          <img
-            src={story.photos[0].url}
-            alt={story.title}
-            className="w-full max-w-sm rounded-md shadow ring-1 ring-black/5"
-          />
+        <div className="mb-4 max-w-sm">
+          <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
+            <img
+              src={story.photos[0].url}
+              alt={story.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
           {story.photos[0].caption && (
             <p className="text-[12px] text-neutral-600 mt-1">
               {story.photos[0].caption}
@@ -712,11 +747,13 @@ function MobilePage({ story, pageNum }: { story: Story; pageNum: number }) {
 
               {story.photos && story.photos.length > 0 && (
                 <div className="mb-3">
-                  <img
-                    src={story.photos[0].url}
-                    alt={story.title}
-                    className="w-full rounded-md shadow ring-1 ring-black/5"
-                  />
+                  <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
+                    <img
+                      src={story.photos[0].url}
+                      alt={story.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 </div>
               )}
 

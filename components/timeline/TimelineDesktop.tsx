@@ -928,8 +928,8 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     if (!storiesData) return;
 
     const handleBubbleScroll = () => {
-      const stickyTop = 55; // Sticky position from top (aligned with header)
-      const collisionThreshold = 163 as number; // Increased to make markers travel closer before collision (38px more)
+      const stickyTop = 80; // Sticky position from top (aligned with header)
+      const collisionThreshold = 10 as number; // Very small threshold - stay visible longer
 
       // Query all timeline-dot elements
       const bubbles = Array.from(document.querySelectorAll('.timeline-dot'));
@@ -968,14 +968,14 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             
             // Keep bubble visible until next one is VERY close (allow negative for overlap)
             const proximityToNext = nextBubbleDistance - stickyTop;
-            const shouldBeVisible = proximityToNext > -28; // Start fading when 28px past sticky (overlapping)
+            const shouldBeVisible = proximityToNext > -50; // Hold on until 50px overlap
             
             if (shouldBeVisible) {
               bubble.style.opacity = `${Math.max(0.2, 1 - fadeProgress)}`; // Min 20% opacity while approaching
               bubble.style.transform = `${translateX} scale(${Math.max(0.8, 1 - (fadeProgress * 0.2))})`; // Scale to 80%
             } else {
-              // Next bubble has overlapped by more than 28px - NOW fade quickly
-              const finalFade = Math.max(0, (proximityToNext + 38) / 10); // Fade over final 10px of overlap
+              // Next bubble has overlapped by more than 50px - NOW fade quickly
+              const finalFade = Math.max(0, (proximityToNext + 60) / 10); // Fade over final 10px of overlap
               bubble.style.opacity = `${finalFade * 0.2}`; // Fade from 20% to 0%
               bubble.style.transform = `${translateX} scale(${0.8 * finalFade})`; // Scale from 80% to 0%
             }
@@ -1001,23 +1001,16 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     return () => window.removeEventListener("scroll", handleBubbleScroll);
   }, [storiesData]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
+  // Single unified loading state - centered with timeline spine
+  if (isLoading || !user || (isStoriesLoading && !storiesData)) {
+    // Redirect if no user
+    if (!isLoading && !user) {
+      router.push("/auth/login");
+      return null;
+    }
 
-  if (!isLoading && !user) {
-    router.push("/auth/login");
-    return null;
-  }
-
-  // Show loading state while fetching stories data
-  if (isStoriesLoading && !storiesData) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3', transform: 'translateX(-337px)' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderBottomColor: isDark ? '#b0b3b8' : '#F59E0B' }}></div>
         <p className="text-lg" style={{ color: isDark ? '#b0b3b8' : '#6B4E42' }}>Loading your timeline...</p>
       </div>
@@ -1229,7 +1222,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           /* Sticky date bubbles */
           .timeline-dot {
             position: sticky;
-            top: 55px;
+            top: 80px;
             z-index: 30;
             /* No transitions - scroll handler provides smooth updates */
           }

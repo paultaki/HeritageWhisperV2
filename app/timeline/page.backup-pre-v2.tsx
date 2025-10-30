@@ -1,16 +1,13 @@
 "use client";
 
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { useRouter } from "next/navigation";
 import { TimelineDesktop } from "@/components/timeline/TimelineDesktop";
-import { TimelineMobileV2 } from "@/components/timeline-v2/TimelineMobileV2";
-import FloatingAddButton from "@/components/timeline-v2/FloatingAddButton";
+import { TimelineMobile } from "@/components/timeline/TimelineMobile";
 import { useEffect, useState } from "react";
 import { LeftSidebar } from "@/components/LeftSidebar";
 
-export default function TimelineV2Page() {
+export default function TimelinePage() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-  const router = useRouter();
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -27,7 +24,7 @@ export default function TimelineV2Page() {
   }, []);
 
   if (!isDesktop) {
-    return <TimelineMobileV2 />;
+    return <TimelineMobile />;
   }
 
   return (
@@ -39,12 +36,8 @@ export default function TimelineV2Page() {
 
       {/* Main timeline content */}
       <main className="flex-1 min-w-0 lg:ml-56">
-        <TimelineDesktop useV2Features={true} />
+        <TimelineDesktop />
       </main>
-
-      {/* CHANGE 5: Floating Add Memory button for desktop */}
-      <FloatingAddButton onClick={() => router.push("/review/book-style?new=true")} />
     </div>
   );
 }
-

@@ -18,45 +18,128 @@ interface Story {
 }
 
 interface BookPageProps {
-  story?: Story;
+  story?: Story | 'intro' | 'toc';
   pageNum: number;
   onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
   position: "left" | "right";
+  allStories?: Story[]; // For TOC
+  onNavigateToStory?: (storyIndex: number) => void; // For TOC navigation
 }
 
 export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
-  ({ story, pageNum, onScroll, position }, ref) => {
+  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory }, ref) => {
     const pageRef = React.useRef<HTMLDivElement>(null);
 
-    // Forward wheel events from anywhere on the page to the scrollable content with native acceleration
-    React.useEffect(() => {
-      const pageElement = pageRef.current;
-      const scrollElement = ref && 'current' in ref ? ref.current : null;
-      
-      if (!pageElement || !scrollElement) return;
+    // Handle intro page
+    if (story === 'intro') {
+      return (
+        <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
+          {/* Main page */}
+          <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
+            {/* Paper texture/vignette */}
+            <div
+              className="absolute inset-0 pointer-events-none z-10"
+              style={{
+                backgroundImage: position === "left"
+                  ? `radial-gradient(160% 85% at 110% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
+                     radial-gradient(120% 60% at -10% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%)`
+                  : `radial-gradient(160% 85% at -10% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
+                     radial-gradient(120% 60% at 110% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%)`,
+              }}
+            ></div>
 
-      const handleWheel = (e: WheelEvent) => {
-        // Check if the event target is already the scroll container or inside it
-        if (scrollElement.contains(e.target as Node)) {
-          // Let it scroll naturally
-          return;
-        }
-        
-        // Only intercept if the event is outside the scroll container
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Forward scroll with acceleration multiplier for smooth scrolling
-        const multiplier = e.deltaMode === 0 ? 1.5 : 50; // Pixel vs line mode
-        scrollElement.scrollTop += e.deltaY * multiplier;
-      };
+            <div className="relative h-full w-full p-7 md:p-8 lg:p-10">
+              <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 flex items-center justify-center">
+                <div className="text-center space-y-8 p-8">
+                  <h1
+                    className="text-5xl font-serif text-gray-800 mb-4"
+                    style={{ fontFamily: "Crimson Text, serif" }}
+                  >
+                    Family Memories
+                  </h1>
+                  <div className="w-24 h-1 bg-indigo-500 mx-auto"></div>
+                  <p className="text-lg text-gray-600 leading-relaxed max-w-md mx-auto italic">
+                    A collection of cherished moments, stories, and lessons from a life well-lived.
+                  </p>
+                  <p className="text-base text-gray-500 mt-8">
+                    These pages hold the precious memories that shaped our family&apos;s journey.
+                  </p>
+                </div>
+              </div>
+              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
+                {position === "left" && <span className="tracking-tight">{pageNum}</span>}
+                {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
-      pageElement.addEventListener('wheel', handleWheel, { passive: false });
-      
-      return () => {
-        pageElement.removeEventListener('wheel', handleWheel);
-      };
-    }, [ref]);
+    // Handle table of contents page
+    if (story === 'toc') {
+      return (
+        <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
+          {/* Main page */}
+          <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
+            {/* Paper texture/vignette */}
+            <div
+              className="absolute inset-0 pointer-events-none z-10"
+              style={{
+                backgroundImage: position === "left"
+                  ? `radial-gradient(160% 85% at 110% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
+                     radial-gradient(120% 60% at -10% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%)`
+                  : `radial-gradient(160% 85% at -10% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
+                     radial-gradient(120% 60% at 110% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%)`,
+              }}
+            ></div>
+
+            {/* Inner gutter shadow */}
+            <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
+
+            <div className="relative h-full w-full p-7 md:p-8 lg:p-10">
+              <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60">
+                <div
+                  ref={ref}
+                  onScroll={onScroll}
+                  className="h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
+                  style={{
+                    scrollBehavior: 'smooth',
+                    WebkitOverflowScrolling: 'touch',
+                    willChange: 'scroll-position'
+                  }}
+                >
+                  <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">
+                    Table of Contents
+                  </h1>
+                  <div className="space-y-3">
+                    {allStories.map((storyItem, idx) => (
+                      <button
+                        key={storyItem.id}
+                        onClick={() => onNavigateToStory && onNavigateToStory(idx)}
+                        className="flex justify-between items-baseline text-sm w-full hover:bg-gray-100 px-3 py-2 rounded transition-colors cursor-pointer text-left"
+                      >
+                        <span className="text-gray-700 flex-1 pr-2 hover:text-indigo-600">
+                          {storyItem.title}
+                        </span>
+                        <span className="text-gray-500 text-xs whitespace-nowrap">
+                          {storyItem.storyYear}
+                          {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
+                {position === "left" && <span className="tracking-tight">{pageNum}</span>}
+                {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     if (!story) {
       return (
@@ -115,7 +198,12 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 ref={ref}
                 onScroll={onScroll}
                 tabIndex={0}
-                className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-6"
+                className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
+                style={{
+                  scrollBehavior: 'smooth',
+                  WebkitOverflowScrolling: 'touch',
+                  willChange: 'scroll-position'
+                }}
               >
                 <StoryContent story={story} />
               </div>
@@ -139,11 +227,13 @@ function StoryContent({ story }: { story: Story }) {
       {/* Photo at top if available */}
       {story.photos && story.photos.length > 0 && (
         <div className="mb-4">
-          <img
-            src={story.photos[0].url}
-            alt={story.title}
-            className="w-full rounded-md shadow ring-1 ring-black/5"
-          />
+          <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
+            <img
+              src={story.photos[0].url}
+              alt={story.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
           {story.photos[0].caption && (
             <p className="text-[12px] text-neutral-600 mt-1">
               {story.photos[0].caption}

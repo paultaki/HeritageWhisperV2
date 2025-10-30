@@ -298,6 +298,7 @@ export function TimelineMobileV2() {
           width: auto;
           max-width: 140px;
           font-size: 14px;
+          
           box-shadow: 0 4px 12px -4px rgba(245, 158, 11, 0.6),
                       0 0 0 1px rgba(255, 255, 255, 0.1);
         }
@@ -470,7 +471,7 @@ export function TimelineMobileV2() {
           story={ui.selectedStory}
           stories={timelineData.stories}
           isOpen={ui.overlayOpen}
-          originPath="/timeline-v2"
+          originPath="/timeline"
           onClose={handleCloseOverlay}
           onNavigate={handleNavigateStory}
         />
