@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AudioRecorder, AudioRecorderHandle } from "@/components/AudioRecorder";
@@ -43,6 +43,30 @@ export function RecordingOverlay({
     smoothingTimeConstant: 0.75,
   });
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleStopRecording = useCallback(() => {
+    disconnect(); // Disconnect audio analyzer
+    const blob = audioRecorderRef.current?.getCurrentRecording();
+    const duration = audioRecorderRef.current?.getRecordingDuration() || 0;
+
+    if (blob && blob.size > 0) {
+      setAudioBlob(blob);
+      setAudioDuration(duration);
+      setAudioUrl(URL.createObjectURL(blob));
+      setHasRecording(true);
+      setIsRecording(false);
+      setIsPaused(false);
+
+      // Update global recording state
+      globalRecording.stopRecording();
+    }
+  }, [disconnect, globalRecording]);
+
   // Recording timer with 2-minute max
   useEffect(() => {
     if (isRecording && !isPaused) {
@@ -68,7 +92,7 @@ export function RecordingOverlay({
         clearInterval(timerRef.current);
       }
     };
-  }, [isRecording, isPaused]);
+  }, [isRecording, isPaused, handleStopRecording]);
 
   // Reset state when overlay opens/closes
   useEffect(() => {
@@ -102,12 +126,6 @@ export function RecordingOverlay({
     };
   }, [audioUrl, disconnect]);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -136,33 +154,31 @@ export function RecordingOverlay({
     }
   };
 
-  const handleStopRecording = () => {
-    disconnect(); // Disconnect audio analyzer
-    const blob = audioRecorderRef.current?.getCurrentRecording();
-    const duration = audioRecorderRef.current?.getRecordingDuration() || 0;
-
-    if (blob && blob.size > 0) {
-      setAudioBlob(blob);
-      setAudioDuration(duration);
-      setAudioUrl(URL.createObjectURL(blob));
-      setHasRecording(true);
-      setIsRecording(false);
-      setIsPaused(false);
-
-      // Update global recording state
-      globalRecording.stopRecording();
-    }
-  };
-
-  const handleReRecord = () => {
+  const handleReRecord = async () => {
+    // Clean up existing recording
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
+    
+    // Clean up audio recorder
+    if (audioRecorderRef.current) {
+      audioRecorderRef.current.cleanup();
+    }
+    
+    // Reset all state
     setAudioBlob(null);
     setAudioUrl(null);
     setHasRecording(false);
     setRecordingTime(0);
-    handleStartRecording();
+    setIsRecording(false);
+    setIsPaused(false);
+    setCountdown(null);
+    
+    // Wait a bit for cleanup to complete
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Start new recording
+    await handleStartRecording();
   };
 
   const handleContinue = () => {
@@ -299,13 +315,18 @@ export function RecordingOverlay({
               </div>
             )}
 
-            {/* Recording Instructions - Centered */}
-            {!isRecording && !hasRecording && !countdown && (
+            {/* Recording Instructions or Status - Centered */}
+            {isRecording && !countdown ? (
+              <div className="flex items-center gap-2 text-[#4A3428] text-center">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                <p className="text-lg font-medium">Recording</p>
+              </div>
+            ) : !isRecording && !hasRecording && !countdown ? (
               <p className="text-[#8B7355] text-center max-w-md px-4">
                 Press the record button to start capturing your memory. Take your time
                 and speak naturally.
               </p>
-            )}
+            ) : null}
           </div>
 
           {/* Action Buttons - Fixed at bottom, safe area aware */}

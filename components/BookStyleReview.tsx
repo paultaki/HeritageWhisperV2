@@ -136,6 +136,9 @@ export function BookStyleReview({
     }
   }, [editingWisdom]);
 
+  // Track if this is the initial automatic show
+  const [isInitialRecordingShow, setIsInitialRecordingShow] = useState(false);
+
   // Check for recording overlay on mount (only once)
   useEffect(() => {
     const isDraft = searchParams?.get("draft") === "true";
@@ -144,6 +147,7 @@ export function BookStyleReview({
     // Only show overlay if we don't already have a recording
     if ((isNew || (isDraft && !audioUrl)) && !cleanedAudioUrl) {
       setShowRecordingOverlay(true);
+      setIsInitialRecordingShow(true);
     }
 
     if (audioUrl) {
@@ -159,6 +163,7 @@ export function BookStyleReview({
   const handleContinueRecording = async (audioBlob: Blob, duration: number) => {
     // Close overlay
     setShowRecordingOverlay(false);
+    setIsInitialRecordingShow(false); // No longer initial show
 
     // Clear existing transcription if re-recording
     if (hasExistingRecording) {
@@ -253,6 +258,18 @@ export function BookStyleReview({
 
   const handleReRecord = () => {
     setShowRecordingOverlay(true);
+    setIsInitialRecordingShow(false); // This is a manual re-record, not initial
+  };
+  
+  const handleRecordingOverlayClose = () => {
+    setShowRecordingOverlay(false);
+    
+    // If this was the initial automatic show (new/draft without audio),
+    // and user cancels, navigate back
+    if (isInitialRecordingShow && !hasExistingRecording) {
+      setIsInitialRecordingShow(false);
+      onCancel();
+    }
   };
 
   const handleWisdomSave = () => {
@@ -405,7 +422,7 @@ export function BookStyleReview({
               {/* Recording Overlay */}
               <RecordingOverlay
                 isOpen={showRecordingOverlay}
-                onClose={() => setShowRecordingOverlay(false)}
+                onClose={handleRecordingOverlayClose}
                 onContinue={handleContinueRecording}
                 existingAudioUrl={cleanedAudioUrl || undefined}
               />
@@ -561,6 +578,7 @@ export function BookStyleReview({
                             )
                           ) {
                             onAudioChange?.(null, null);
+                            setIsInitialRecordingShow(false); // Manual re-record
                             setShowRecordingOverlay(true);
                           }
                         }}
@@ -608,7 +626,10 @@ export function BookStyleReview({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setShowRecordingOverlay(true)}
+                        onClick={() => {
+                          setIsInitialRecordingShow(false); // Manual recording
+                          setShowRecordingOverlay(true);
+                        }}
                         className="flex items-center gap-2"
                       >
                         <Mic className="w-4 h-4" />
