@@ -44,6 +44,7 @@ import { getTopTraits } from "@/utils/getTopTraits";
 import { useAccountContext } from "@/hooks/use-account-context";
 import { AccountSwitcher } from "@/components/AccountSwitcher";
 import { DesktopPageHeader } from "@/components/PageHeader";
+import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormatting";
 
 const logoUrl = "/Logo Icon hw.svg";
 
@@ -576,12 +577,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             {/* Metadata */}
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span>
-                {story.storyDate
-                  ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                    })
-                  : formatYear(story.storyYear)}
+                {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
               </span>
               {displayLifeAge !== null && displayLifeAge !== undefined && (
                 <>
@@ -694,12 +690,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           {/* Metadata */}
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>
-              {story.storyDate
-                ? new Date(story.storyDate).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                  })
-                : formatYear(story.storyYear)}
+              {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
             </span>
             {displayLifeAge !== null && displayLifeAge !== undefined && (
               <>
@@ -761,9 +752,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             top: '-2px',
           }}
         >
-          {story.storyDate
-            ? new Date(story.storyDate).getFullYear()
-            : formatYear(story.storyYear)}
+          {formatStoryDate(story.storyDate, story.storyYear, "badge")}
         </div>
       </div>
 

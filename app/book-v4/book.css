@@ -1,0 +1,42 @@
+/* Book V4 Styles */
+
+/* Hide scrollbars but keep functionality */
+.js-flow::-webkit-scrollbar {
+  display: none;
+}
+
+.js-flow {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Perspective and 3D transforms */
+[style*="perspective"] {
+  transform-style: preserve-3d;
+}
+
+/* Mobile snap scroll */
+#mobileScroller::-webkit-scrollbar {
+  display: none;
+}
+
+#mobileScroller {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Smooth transitions with reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

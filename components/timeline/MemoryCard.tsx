@@ -6,7 +6,7 @@
  * Features:
  * - Photo display with hero image selection
  * - Audio playback with progress bar
- * - Ken Burns effect on images (scroll-triggered)
+ * - Scroll-triggered card animation (fade + slide)
  * - Age calculation and display
  * - Multi-photo badge
  * - Story provenance on hover
@@ -14,7 +14,7 @@
  *
  * Performance:
  * - React.memo with custom comparison
- * - IntersectionObserver for Ken Burns trigger
+ * - IntersectionObserver for card scroll animation
  * - AudioManager integration for single playback
  *
  * Created: January 25, 2025
@@ -67,7 +67,7 @@ export const MemoryCard = React.memo(
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     // ==================================================================================
-    // Ken Burns Effect State
+    // Card Scroll Animation State
     // ==================================================================================
 
     const [isVisible, setIsVisible] = useState(false);
@@ -87,7 +87,7 @@ export const MemoryCard = React.memo(
       return () => mediaQuery.removeEventListener("change", handleChange);
     }, []);
 
-    // IntersectionObserver for Ken Burns effect trigger
+    // IntersectionObserver for card scroll animation trigger
     useEffect(() => {
       if (prefersReducedMotion) {
         setIsVisible(true);
@@ -349,7 +349,7 @@ export const MemoryCard = React.memo(
               : isReturnHighlight
                 ? "return-highlight-animation"
                 : ""
-          }`}
+          } ${isVisible ? "hw-card-visible" : "hw-card-hidden"}`}
           style={{ "--title-offset": "180px", border: "1.5px solid #B89B8D" } as React.CSSProperties}
           onClick={handleCardClick}
           data-testid={`memory-card-${story.id}`}
@@ -472,7 +472,7 @@ export const MemoryCard = React.memo(
             : isReturnHighlight
               ? "return-highlight-animation"
               : ""
-        }`}
+        } ${isVisible ? "hw-card-visible" : "hw-card-hidden"}`}
         style={{ "--title-offset": titleOffset, border: "1.5px solid #B89B8D" } as React.CSSProperties}
         onClick={handleCardClick}
         data-testid={`memory-card-${story.id}`}
@@ -498,11 +498,7 @@ export const MemoryCard = React.memo(
           <img
             src={displayPhoto.url}
             alt={story.title}
-            className={`hw-card-media ${
-              !displayPhoto.transform && isVisible && !prefersReducedMotion
-                ? "ken-burns-effect"
-                : ""
-            }`}
+            className="hw-card-media"
             style={
               displayPhoto.transform
                 ? {
