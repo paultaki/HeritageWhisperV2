@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { DecadeIntroPage } from "@/components/BookDecadePages";
 
 interface Story {
   id: string;
@@ -17,8 +18,15 @@ interface Story {
   wisdomClipText?: string;
 }
 
+interface DecadePage {
+  type: 'decade';
+  decade: string;
+  title: string;
+  count: number;
+}
+
 interface BookPageProps {
-  story?: Story | 'intro' | 'toc-left' | 'toc-right';
+  story?: Story | 'intro' | 'toc-left' | 'toc-right' | DecadePage;
   pageNum: number;
   onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
   position: "left" | "right";
@@ -203,6 +211,26 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 {position === "left" && <span className="tracking-tight">{pageNum}</span>}
                 {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
               </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Handle decade page
+    if (story && typeof story !== 'string' && 'type' in story && story.type === 'decade') {
+      return (
+        <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
+          {/* Main page */}
+          <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
+            <DecadeIntroPage
+              decade={story.decade}
+              title={story.title}
+              storiesCount={story.count}
+            />
+            <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
+              {position === "left" && <span className="tracking-tight">{pageNum}</span>}
+              {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
             </div>
           </div>
         </div>

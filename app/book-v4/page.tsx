@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { BookPage } from "./components/BookPage";
+import { DecadeIntroPage } from "@/components/BookDecadePages";
 import "./book.css";
 
 // Import handwriting font
@@ -53,6 +54,7 @@ export default function BookV4Page() {
   const { user } = useAuth();
   const router = useRouter();
   
+  const [isBookOpen, setIsBookOpen] = useState(false);
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showToc, setShowToc] = useState(false);
@@ -79,12 +81,29 @@ export default function BookV4Page() {
     [bookStories]
   );
 
-  // Create spreads - intro, TOC (2 pages), then story pairs
+  // Group stories by decade
+  const decadeGroups = useMemo(() => {
+    const groups = new Map<string, Story[]>();
+    
+    sortedStories.forEach((story) => {
+      const year = story.storyYear;
+      const decade = `${Math.floor(year / 10) * 10}s`;
+      
+      if (!groups.has(decade)) {
+        groups.set(decade, []);
+      }
+      groups.get(decade)!.push(story);
+    });
+    
+    return Array.from(groups.entries()).sort(([a], [b]) => parseInt(a) - parseInt(b));
+  }, [sortedStories]);
+
+  // Create spreads - intro, TOC (2 pages), decade pages, then story pairs
   const spreads = useMemo(() => {
     const result: Array<{ 
-      left?: Story | 'intro' | 'toc-left' | 'toc-right'; 
-      right?: Story | 'intro' | 'toc-left' | 'toc-right';
-      type: 'intro' | 'toc' | 'stories';
+      left?: Story | 'intro' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number }; 
+      right?: Story | 'intro' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number };
+      type: 'intro' | 'toc' | 'decade' | 'stories';
     }> = [];
     
     // First spread: empty left, intro right
@@ -101,17 +120,35 @@ export default function BookV4Page() {
       type: 'toc'
     });
     
-    // Story spreads (starting from first story)
-    for (let i = 0; i < sortedStories.length; i += 2) {
+    // Add decade pages and stories for each decade
+    decadeGroups.forEach(([decade, stories], decadeIndex) => {
+      const decadeYear = decade.replace('s', '');
+      const decadePage = {
+        type: 'decade' as const,
+        decade,
+        title: `The ${decadeYear}s`,
+        count: stories.length
+      };
+      
+      // Add decade page spread (empty left, decade right)
       result.push({
-        left: sortedStories[i],
-        right: sortedStories[i + 1],
-        type: 'stories'
+        left: undefined,
+        right: decadePage,
+        type: 'decade'
       });
-    }
+      
+      // Add story spreads for this decade
+      for (let i = 0; i < stories.length; i += 2) {
+        result.push({
+          left: stories[i],
+          right: stories[i + 1],
+          type: 'stories'
+        });
+      }
+    });
     
     return result;
-  }, [sortedStories]);
+  }, [decadeGroups]);
 
   // Update scroll progress
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -201,11 +238,81 @@ export default function BookV4Page() {
 
   // Navigate to a story from TOC
   const handleNavigateToStory = (storyIndex: number) => {
-    // Stories start at spread 2 (after intro spread and TOC spread)
-    // Story index 0 and 1 are on spread 2, story index 2 and 3 are on spread 3, etc.
-    const spreadIndex = 2 + Math.floor(storyIndex / 2);
-    setCurrentSpreadIndex(spreadIndex);
+    // Find which spread contains this story
+    let currentStoryCount = 0;
+    
+    for (let i = 0; i < spreads.length; i++) {
+      const spread = spreads[i];
+      
+      // Count stories in this spread
+      let storiesInSpread = 0;
+      if (spread.left && typeof spread.left !== 'string' && !('type' in spread.left)) {
+        storiesInSpread++;
+      }
+      if (spread.right && typeof spread.right !== 'string' && !('type' in spread.right)) {
+        storiesInSpread++;
+      }
+      
+      // Check if our target story is in this spread
+      if (currentStoryCount + storiesInSpread > storyIndex) {
+        setCurrentSpreadIndex(i);
+        return;
+      }
+      
+      currentStoryCount += storiesInSpread;
+    }
   };
+
+  // Render closed book cover state
+  if (!isBookOpen) {
+    return (
+      <div className={`h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
+        {/* Header */}
+        <div className="fixed top-0 left-0 right-0 z-50 no-print">
+          <div className="mx-auto max-w-[1800px] px-6">
+            <div className="relative h-16 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="h-7 w-7 grid place-items-center rounded-md ring-1 bg-white/5 ring-white/10">
+                  <span className="text-xs font-semibold tracking-tight">BK</span>
+                </div>
+                <div>
+                  <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
+                    {user?.name ? `${user.name}'s Story` : "Your Story"}
+                  </h1>
+                </div>
+              </div>
+              <button
+                onClick={() => router.push("/")}
+                className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
+              >
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Closed book cover - centered */}
+        <div className="flex items-center justify-center" style={{ height: "calc(100vh - 64px)", paddingTop: "64px" }}>
+          <ClosedBookCover
+            userName={user?.name || "Your"}
+            storyCount={sortedStories.length}
+            onOpen={() => setIsBookOpen(true)}
+          />
+        </div>
+
+        {/* Footer with "Tap to open" */}
+        <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-4">
+          <div className="mx-auto max-w-[608px] px-6">
+            <div className="flex items-center justify-center gap-6 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-8 py-4 shadow-2xl">
+              <span className="text-white font-medium text-xl">
+                Tap to open
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
@@ -693,6 +800,150 @@ function MobileView({ stories }: { stories: Story[] }) {
           {stories.map((story, index) => (
             <MobilePage key={story.id} story={story} pageNum={index + 1} />
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Closed Book Cover Component
+function ClosedBookCover({ 
+  userName, 
+  storyCount, 
+  onOpen 
+}: { 
+  userName: string; 
+  storyCount: number; 
+  onOpen: () => void;
+}) {
+  return (
+    <div className="relative mx-auto" style={{ 
+      width: "min(95vw, calc((100vh - 180px) * 0.647))",
+      aspectRatio: "5.5 / 8.5",
+      maxWidth: "800px"
+    }}>
+      {/* Ambient shadow */}
+      <div className="pointer-events-none absolute -inset-8 rounded-2xl bg-[radial-gradient(1000px_400px_at_50%_30%,rgba(139,111,71,0.15)_0%,rgba(139,111,71,0.08)_35%,transparent_70%)]"></div>
+      <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[0_40px_120px_-30px_rgba(0,0,0,0.6)]"></div>
+
+      {/* Book cover */}
+      <button
+        onClick={onOpen}
+        className="relative w-full h-full rounded-[24px] cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.99]"
+        style={{
+          background: "linear-gradient(135deg, #8B6F47 0%, #6B5537 100%)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04)"
+        }}
+        aria-label="Open book"
+      >
+        {/* Leather texture overlay */}
+        <div 
+          className="absolute inset-0 opacity-[0.15] rounded-[24px] pointer-events-none"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E")`,
+          }}
+        ></div>
+
+        {/* Content */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
+          <h1 
+            className="text-4xl md:text-5xl lg:text-6xl font-serif mb-6 text-amber-50 tracking-tight"
+            style={{ 
+              fontFamily: "Crimson Text, serif",
+              textShadow: "0 2px 8px rgba(0,0,0,0.3)"
+            }}
+          >
+            {userName}&apos;s Story
+          </h1>
+          
+          <div className="w-32 h-0.5 bg-amber-200/50 mb-6"></div>
+          
+          <p className="text-xl md:text-2xl text-amber-100/90 font-medium">
+            {storyCount} {storyCount === 1 ? 'memory' : 'memories'}
+          </p>
+
+          <div className="mt-12 px-6 py-3 rounded-full bg-amber-50/10 border border-amber-200/30">
+            <p className="text-amber-100 text-sm md:text-base font-medium">
+              Tap to open
+            </p>
+          </div>
+        </div>
+
+        {/* Decorative corner elements */}
+        <div className="absolute top-6 left-6 w-12 h-12 border-l-2 border-t-2 border-amber-200/30 rounded-tl-lg"></div>
+        <div className="absolute top-6 right-6 w-12 h-12 border-r-2 border-t-2 border-amber-200/30 rounded-tr-lg"></div>
+        <div className="absolute bottom-6 left-6 w-12 h-12 border-l-2 border-b-2 border-amber-200/30 rounded-bl-lg"></div>
+        <div className="absolute bottom-6 right-6 w-12 h-12 border-r-2 border-b-2 border-amber-200/30 rounded-br-lg"></div>
+      </button>
+    </div>
+  );
+}
+
+// Endpaper Pattern Component (Inside Cover)
+function EndpaperPage({ pageNum, position }: { pageNum: number; position: "left" | "right" }) {
+  return (
+    <div className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
+      <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15`}
+        style={{
+          background: "linear-gradient(135deg, #F5E6D3 0%, #EAD5BA 50%, #F5E6D3 100%)"
+        }}
+      >
+        {/* Marbled texture pattern */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='marble'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='8' seed='2' /%3E%3CfeColorMatrix type='saturate' values='0.3'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23marble)' fill='%23D4B896'/%3E%3C/svg%3E")`,
+            backgroundSize: '400px 400px',
+          }}
+        ></div>
+
+        {/* Subtle swirl pattern */}
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `radial-gradient(ellipse at 20% 30%, rgba(139,111,71,0.3) 0%, transparent 50%),
+                              radial-gradient(ellipse at 80% 70%, rgba(139,111,71,0.25) 0%, transparent 50%),
+                              radial-gradient(ellipse at 40% 80%, rgba(139,111,71,0.2) 0%, transparent 40%)`,
+          }}
+        ></div>
+
+        {/* HeritageWhisper watermark logo in center */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center opacity-[0.08]">
+            <svg 
+              width="120" 
+              height="120" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="1.5"
+              className="text-gray-700"
+            >
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5"></path>
+              <path d="M2 12l10 5 10-5"></path>
+            </svg>
+            <p className="mt-2 text-xs tracking-widest font-serif text-gray-700">HERITAGE WHISPER</p>
+          </div>
+        </div>
+
+        {/* Inner gutter shadow */}
+        <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
+
+        {/* Subtle vignette */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: position === "left"
+              ? "radial-gradient(ellipse at 90% 50%, rgba(0,0,0,0.08) 0%, transparent 60%)"
+              : "radial-gradient(ellipse at 10% 50%, rgba(0,0,0,0.08) 0%, transparent 60%)"
+          }}
+        ></div>
+
+        {/* Page number */}
+        <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
+          {position === "left" && <span className="tracking-tight">{pageNum}</span>}
+          {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
         </div>
       </div>
     </div>
