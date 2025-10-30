@@ -1,0 +1,128 @@
+/* Print 2-up Layout CSS */
+/* Clean, standalone CSS for PDF generation */
+
+@page {
+  size: 11in 8.5in;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.print-2up {
+  width: 11in;
+  height: 8.5in;
+}
+
+/* Each spread is one full page */
+.book-spread {
+  width: 11in;
+  height: 8.5in;
+  display: block;
+  page-break-after: always;
+  background: white;
+  margin: 0;
+  padding: 0.25in;
+  box-sizing: border-box;
+}
+
+.book-spread:last-child {
+  page-break-after: auto;
+}
+
+/* Wrapper for the two-page content with margins */
+.spread-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 0; /* Pages should touch in the middle */
+  background: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  padding: 0;
+}
+
+/* Individual page */
+.page {
+  width: 5.25in;
+  height: 8in;
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.5in;
+  background: white;
+  overflow: hidden;
+}
+
+/* Override any imported styles */
+.page-content {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.running-header {
+  position: absolute;
+  top: -0.35in;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9pt;
+  color: #666;
+  font-family: Georgia, serif;
+}
+
+.page-number {
+  position: absolute;
+  bottom: -0.35in;
+  font-size: 10pt;
+  color: #666;
+  font-family: Georgia, serif;
+}
+
+.page--left .page-number {
+  left: 0;
+}
+
+.page--right .page-number {
+  right: 0;
+}
+
+/* Story content styles */
+.memory-header {
+  margin-bottom: 0.25in;
+}
+
+.memory-title {
+  font-size: 18pt;
+  font-weight: bold;
+  margin-bottom: 0.1in;
+  font-family: Georgia, serif;
+}
+
+.memory-year {
+  font-size: 10pt;
+  color: #666;
+}
+
+.memory-body {
+  font-size: 11pt;
+  line-height: 1.5;
+  text-align: justify;
+}
+
+.memory-photo {
+  max-width: 100%;
+  margin-bottom: 0.25in;
+}
+
+/* Hide any UI elements */
+.hw-hamburger-menu,
+.navigation-wrapper,
+button {
+  display: none !important;
+}

@@ -13,19 +13,20 @@ interface DraggablePhotoProps {
   onLayoutChange: (zone: SnapZone, width: number) => void;
 }
 
-// Snap zone definitions with CSS classes
+// Snap zone definitions - 3x3 grid (Left/Center/Right x Top/Middle/Bottom)
 const SNAP_ZONES: Record<SnapZone, { 
   name: string;
   float?: "left" | "right";
   margin: string;
   description: string;
+  region: { x: number; y: number }; // Position in 3x3 grid (0-2, 0-2)
 }> = {
-  1: { name: "top-left", float: "left", margin: "0 16px 8px 0", description: "Top Left" },
-  2: { name: "top-right", float: "right", margin: "0 0 8px 16px", description: "Top Right" },
-  3: { name: "middle-left", float: "left", margin: "0 16px 8px 0", description: "Middle Left" },
-  4: { name: "middle-right", float: "right", margin: "0 0 8px 16px", description: "Middle Right" },
-  5: { name: "center-full", margin: "0 auto 12px auto", description: "Center" },
-  6: { name: "bottom-center", margin: "12px auto 0 auto", description: "Bottom" },
+  1: { name: "top-left", float: "left", margin: "0 16px 8px 0", description: "Top Left", region: { x: 0, y: 0 } },
+  2: { name: "top-right", float: "right", margin: "0 0 8px 16px", description: "Top Right", region: { x: 2, y: 0 } },
+  3: { name: "middle-left", float: "left", margin: "0 16px 8px 0", description: "Middle Left", region: { x: 0, y: 1 } },
+  4: { name: "middle-right", float: "right", margin: "0 0 8px 16px", description: "Middle Right", region: { x: 2, y: 1 } },
+  5: { name: "center-full", margin: "0 auto 12px auto", description: "Center", region: { x: 1, y: 1 } },
+  6: { name: "bottom-center", margin: "12px auto 0 auto", description: "Bottom", region: { x: 1, y: 2 } },
 };
 
 const DEFAULT_WIDTH = 320;
@@ -57,12 +58,54 @@ export function DraggablePhoto({
     setIsDragging(false);
     setShowZoneIndicators(false);
 
-    // Calculate which zone we're closest to based on drag position
-    // For now, keep the current zone (we'll add snap logic next)
-    onLayoutChange(zone, width);
+    // Calculate which zone based on drag position
+    // Get container dimensions to normalize position
+    if (nodeRef.current) {
+      const container = nodeRef.current.closest('.js-flow');
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        const x = data.x + rect.width / 2; // Center point
+        const y = data.y + rect.height / 2;
+        
+        // Normalize to 0-1
+        const normX = Math.max(0, Math.min(1, x / rect.width));
+        const normY = Math.max(0, Math.min(1, y / rect.height));
+        
+        // Convert to grid position (0, 1, or 2)
+        let gridX = 1; // Default center
+        let gridY = 1; // Default middle
+        
+        if (normX < 0.33) gridX = 0; // Left
+        else if (normX > 0.67) gridX = 2; // Right
+        else gridX = 1; // Center
+        
+        if (normY < 0.33) gridY = 0; // Top
+        else if (normY > 0.67) gridY = 2; // Bottom
+        else gridY = 1; // Middle
+        
+        // Find zone that matches grid position
+        let newZone: SnapZone = zone;
+        for (const [zoneKey, zoneConfig] of Object.entries(SNAP_ZONES)) {
+          if (zoneConfig.region.x === gridX && zoneConfig.region.y === gridY) {
+            newZone = parseInt(zoneKey) as SnapZone;
+            break;
+          }
+        }
+        
+        console.log('Snap to zone:', newZone, SNAP_ZONES[newZone].description);
+        setZone(newZone);
+        onLayoutChange(newZone, width);
+        
+        // Reset drag position
+        if (nodeRef.current) {
+          nodeRef.current.style.transform = '';
+        }
+      }
+    }
   };
 
   const handleZoneChange = (newZone: SnapZone) => {
+    console.log('handleZoneChange called:', newZone);
     setZone(newZone);
     onLayoutChange(newZone, width);
   };
@@ -93,28 +136,27 @@ export function DraggablePhoto({
         </div>
       )}
 
-      <figure className="relative group">
+      <figure className="relative group" style={photoStyle}>
         <Draggable
           nodeRef={nodeRef}
           onStart={handleDragStart}
           onStop={handleDragStop}
           position={{ x: 0, y: 0 }}
         >
-          <div ref={nodeRef} className="cursor-move">
+          <div ref={nodeRef} className="relative cursor-move">
             <img
               src={photoUrl}
               alt={caption || "Story photo"}
-              className="rounded-md shadow ring-1 ring-black/5 select-none"
-              style={photoStyle}
+              className="rounded-md shadow ring-1 ring-black/5 select-none w-full"
               draggable={false}
             />
-            
-            {/* Edit controls - shown on hover */}
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-              <ZoneSelector currentZone={zone} onZoneChange={handleZoneChange} />
-            </div>
           </div>
         </Draggable>
+        
+        {/* Edit controls - ALWAYS VISIBLE for now */}
+        <div className="absolute top-2 right-2 flex gap-1 pointer-events-auto" style={{ zIndex: 9999 }}>
+          <ZoneSelector currentZone={zone} onZoneChange={handleZoneChange} />
+        </div>
 
         {caption && (
           <figcaption className="text-[12px] text-neutral-600 mt-1">
@@ -137,28 +179,36 @@ function ZoneSelector({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="relative">
+    <div className="relative pointer-events-auto">
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="px-2 py-1 text-xs bg-white/90 backdrop-blur rounded shadow-lg border border-black/10 hover:bg-white transition-colors"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        className="px-2 py-1 text-xs bg-white backdrop-blur rounded shadow-lg border border-black/10 hover:bg-white transition-colors pointer-events-auto"
       >
         📍 Position
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-1 w-40 bg-white/95 backdrop-blur rounded-md shadow-xl border border-black/10 overflow-hidden z-50">
+        <div className="absolute top-full right-0 mt-1 w-40 bg-white rounded-md shadow-xl border border-black/10 overflow-hidden" style={{ zIndex: 9999 }}>
           {(Object.keys(SNAP_ZONES) as unknown as SnapZone[]).map((zoneNum) => (
             <button
               key={zoneNum}
-              onClick={() => {
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Zone clicked:', zoneNum, SNAP_ZONES[zoneNum].description);
                 onZoneChange(zoneNum);
                 setIsOpen(false);
               }}
-              className={`w-full text-left px-3 py-2 text-xs hover:bg-indigo-50 transition-colors ${
+              className={`block w-full text-left px-3 py-2 text-xs hover:bg-indigo-50 transition-colors cursor-pointer ${
                 currentZone === zoneNum ? "bg-indigo-100 font-semibold" : ""
               }`}
+              style={{ pointerEvents: 'auto' }}
             >
-              {SNAP_ZONES[zoneNum].description}
+              <span className="pointer-events-none">{SNAP_ZONES[zoneNum].description}</span>
             </button>
           ))}
         </div>

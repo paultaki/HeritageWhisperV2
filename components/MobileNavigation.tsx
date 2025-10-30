@@ -36,7 +36,7 @@ const NavItem: React.FC<NavItemProps> = ({
   return (
     <button
       onClick={handleClick}
-      className="flex flex-col items-center justify-center py-2 px-3 flex-1 transition-all relative"
+      className="flex items-center justify-center px-2 flex-1 transition-all relative"
       style={{
         color: isActive ? "#8b6b7a" : "hsl(210, 10%, 60%)",
       }}
@@ -44,17 +44,16 @@ const NavItem: React.FC<NavItemProps> = ({
       {/* Active indicator bar at top */}
       {isActive && (
         <div
-          className="absolute top-[6px] left-1/2 -translate-x-1/2 h-1 rounded-full transition-all"
+          className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all"
           style={{
             backgroundColor: "#8b6b7a",
-            width: "52px",
+            width: "32px",
           }}
         />
       )}
       <Icon
-        className={`w-6 h-6 mb-1 transition-transform ${isActive ? "scale-110" : ""}`}
+        className={`w-5 h-5 transition-transform ${isActive ? "scale-110" : ""}`}
       />
-      <span className="text-xs font-medium">{label}</span>
     </button>
   );
 };
@@ -87,12 +86,12 @@ export default function MobileNavigation({
       style={{
         borderTopColor: "#8b6b7a",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.08)",
+        boxShadow: "0 -2px 6px rgba(0, 0, 0, 0.04)",
         marginBottom: 0,
       }}
     >
       <div
-        className="flex items-center justify-around h-16 relative"
+        className="flex items-center justify-around h-8 relative"
         style={{
           gap: 'clamp(12px, 6vw, 60px)',
           paddingLeft: 12,
@@ -116,63 +115,7 @@ export default function MobileNavigation({
           isActive={pathname.startsWith("/book")}
         />
 
-        {/* Record Button - Hero Center Element */}
-        <div
-          className="relative flex-1 flex justify-center"
-          style={{ marginLeft: 'clamp(8px, 4vw, 24px)', marginRight: 'clamp(8px, 6vw, 32px)' }}
-        >
-          <button
-            onClick={isRecording ? undefined : onRecordClick}
-            disabled={isRecording}
-            className={`absolute w-16 h-16 rounded-full flex items-center justify-center transition-all ${
-              isRecording
-                ? 'cursor-not-allowed opacity-50'
-                : 'hover:scale-110 active:scale-95'
-            }`}
-            style={{
-              top: '-42px',
-              background: isRecording
-                ? "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)"
-                : "linear-gradient(135deg, #8b6b7a 0%, #b88b94 100%)",
-              boxShadow: isRecording
-                ? "0 2px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.2)"
-                : "0 6px 16px rgba(139, 107, 122, 0.4), inset 0 3px 6px rgba(255, 255, 255, 0.4), inset 0 -3px 6px rgba(0, 0, 0, 0.25)",
-              border: isRecording
-                ? "2px solid rgba(255, 255, 255, 0.1)"
-                : "2px solid rgba(255, 255, 255, 0.4)",
-            }}
-          >
-            {/* Pulse animation ring - only when not recording */}
-            {!isRecording && (
-              <motion.div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: "linear-gradient(135deg, #8b6b7a 0%, #b88b94 100%)",
-                }}
-                animate={{
-                  scale: [1, 1.3, 1.3],
-                  opacity: [0.5, 0, 0],
-                }}
-                transition={{
-                  duration: 2.6,
-                  repeat: Infinity,
-                  repeatDelay: 0.65,
-                }}
-              />
-            )}
-
-            {/* Icon - opacity reduced when recording */}
-            <Image
-              src="/silver_mic_sm.png"
-              alt="Record"
-              width={25}
-              height={25}
-              className={`z-10 ${isRecording ? 'opacity-60' : ''}`}
-            />
-          </button>
-        </div>
-
-        {/* Ideas (moved from last position) */}
+        {/* Ideas */}
         <NavItem
           icon={Lightbulb}
           label="Ideas"
@@ -180,7 +123,7 @@ export default function MobileNavigation({
           isActive={pathname === "/prompts"}
         />
 
-        {/* Profile (moved from hamburger menu) */}
+        {/* Profile */}
         <NavItem
           icon={User}
           label="Profile"

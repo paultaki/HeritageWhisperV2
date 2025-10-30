@@ -1,0 +1,384 @@
+/* ============================================
+   TIMELINE V2 STYLES
+   Senior-friendly UX improvements
+   ============================================ */
+
+/* CHANGE 1: Audio indicator with circular progress */
+.timeline-v2-audio-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(251, 191, 36, 0.1);
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.timeline-v2-audio-button:hover {
+  background: rgba(251, 191, 36, 0.2);
+}
+
+.timeline-v2-audio-progress-ring {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.timeline-v2-audio-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #F59E0B;
+}
+
+.timeline-v2-audio-label {
+  flex: 1;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1F2937;
+}
+
+.timeline-v2-audio-time {
+  font-size: 14px;
+  color: #6B7280;
+  margin-top: 4px;
+}
+
+/* CHANGE 2: Mobile year scrubber */
+.timeline-v2-year-scrubber {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+}
+
+.timeline-v2-year-pill {
+  height: 60px;
+  min-width: 60px;
+  background: #F59E0B;
+  color: white;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 0 16px;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.timeline-v2-year-pill:hover {
+  background: #D97706;
+  transform: scale(1.05);
+}
+
+.timeline-v2-year-list {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.timeline-v2-year-item {
+  padding: 16px 24px;
+  font-size: 18px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.timeline-v2-year-item:hover {
+  background: #F9FAFB;
+}
+
+.timeline-v2-year-item.active {
+  background: #FEF3C7;
+  color: #92400E;
+  font-weight: 600;
+}
+
+/* CHANGE 3: Photo carousel */
+.timeline-v2-photo-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  background: #F3F4F6;
+}
+
+.timeline-v2-photo-count {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 10;
+}
+
+.timeline-v2-arrow-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.timeline-v2-arrow-button:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.timeline-v2-arrow-button:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.timeline-v2-arrow-button.left {
+  left: 8px;
+}
+
+.timeline-v2-arrow-button.right {
+  right: 8px;
+}
+
+.timeline-v2-photo-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.timeline-v2-photo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+}
+
+.timeline-v2-photo-dot.active {
+  background: white;
+  width: 16px;
+}
+
+/* CHANGE 4: Desktop metadata format (Age 7 • Summer 1962) */
+.timeline-v2-metadata {
+  font-size: 14px;
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timeline-v2-metadata-divider {
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: #D1D5DB;
+}
+
+@media (min-width: 768px) {
+  .timeline-v2-metadata {
+    font-size: 15px;
+  }
+}
+
+/* CHANGE 5: Floating Add Memory button */
+.timeline-v2-floating-add {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  background: #F59E0B;
+  color: white;
+  border-radius: 9999px;
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 50;
+}
+
+.timeline-v2-floating-add:hover {
+  background: #D97706;
+  transform: scale(1.05);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+.timeline-v2-floating-add:active {
+  transform: scale(0.95);
+}
+
+.timeline-v2-floating-add svg {
+  transition: transform 0.3s ease;
+}
+
+.timeline-v2-floating-add:hover svg {
+  transform: rotate(90deg);
+}
+
+/* Mobile bottom nav with Add Memory */
+.timeline-v2-mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #E5E7EB;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.timeline-v2-mobile-add-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F59E0B;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 32px;
+}
+
+.timeline-v2-mobile-add-button:hover {
+  background: #D97706;
+}
+
+.timeline-v2-mobile-add-button:active {
+  transform: scale(0.95);
+}
+
+/* CHANGE 6: Empty state styling */
+.timeline-v2-empty-state {
+  background: rgba(251, 191, 36, 0.1);
+  border: 2px solid #FCD34D;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  margin-top: 48px;
+}
+
+.timeline-v2-empty-state h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 12px;
+}
+
+.timeline-v2-empty-state p {
+  font-size: 16px;
+  color: #6B7280;
+  margin-bottom: 16px;
+}
+
+.timeline-v2-empty-year {
+  font-size: 14px;
+  color: #9CA3AF;
+  margin-bottom: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  /* Hide floating add button on mobile */
+  .timeline-v2-floating-add {
+    display: none;
+  }
+
+  /* Show mobile nav */
+  .timeline-v2-mobile-nav {
+    display: flex;
+  }
+
+  /* Year scrubber only on mobile */
+  .timeline-v2-year-scrubber {
+    display: flex;
+  }
+}
+
+@media (min-width: 768px) {
+  /* Hide mobile nav on desktop */
+  .timeline-v2-mobile-nav {
+    display: none;
+  }
+
+  /* Hide year scrubber on desktop */
+  .timeline-v2-year-scrubber {
+    display: none;
+  }
+
+  /* Show floating add button on desktop */
+  .timeline-v2-floating-add {
+    display: flex;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .timeline-v2-arrow-button,
+  .timeline-v2-arrow-button:hover,
+  .timeline-v2-floating-add,
+  .timeline-v2-floating-add:hover,
+  .timeline-v2-year-pill,
+  .timeline-v2-year-pill:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .timeline-v2-floating-add:hover svg {
+    transform: none !important;
+  }
+}
+
+/* Focus states for keyboard navigation */
+.timeline-v2-arrow-button:focus-visible,
+.timeline-v2-year-pill:focus-visible,
+.timeline-v2-floating-add:focus-visible,
+.timeline-v2-mobile-add-button:focus-visible {
+  outline: 3px solid #F59E0B;
+  outline-offset: 3px;
+}
+

@@ -1,15 +1,3 @@
-/**
- * BOOK VIEW V2 - Scrollable Single-Page Stories
- * 
- * Key Differences from V1:
- * - Each story is complete on ONE page (no wrapping to next page)
- * - Pages are scrollable internally when content exceeds visible area
- * - No dynamic pagination or content redistribution between pages
- * - Simpler pagination logic using bookPaginationV2
- * 
- * Navigate to: /book-v2
- */
-
 "use client";
 
 import React, {
@@ -36,6 +24,7 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
+  Clock,
 } from "lucide-react";
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
@@ -49,17 +38,36 @@ import BookProgressBar from "@/components/BookProgressBar";
 import BookDecadesPill from "@/components/BookDecadesPill";
 import WhisperPage from "@/components/WhisperPage";
 import {
-  paginateBookV2,
-  getPageSpreadsV2,
+  paginateBook,
+  getPageSpreads,
   type Story as PaginationStory,
   type BookPage,
   type DecadeGroup,
-} from "@/lib/bookPaginationV2";
-import "./book.css"; // V2: Import book-specific styles
+  MEASUREMENTS,
+} from "@/lib/bookPagination";
+import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormatting";
 
 const logoUrl = "/HW_logo_mic_clean.png";
 
-// V2: No dynamic pagination constants needed - pages scroll internally
+// Dynamic pagination constants
+const LINE_GUARD = 2; // px safety margin
+const HERO_MIN_TOP = 0; // minimum top margin for hero (matches side margins)
+const HERO_MAX_TOP = 37; // maximum top margin if space is available
+const MIN_MOVE_UNIT = 12; // don't chase tiny adjustments
+
+// Helper: Get element height including margins
+function outerHeightWithMargins(el: HTMLElement): number {
+  const r = el.getBoundingClientRect();
+  const cs = window.getComputedStyle(el);
+  const mt = parseFloat(cs.marginTop) || 0;
+  const mb = parseFloat(cs.marginBottom) || 0;
+  return r.height + mt + mb;
+}
+
+// Helper: Get page content container
+function pageContent(el: HTMLElement | null): HTMLElement | null {
+  return el?.querySelector<HTMLElement>(".book-page-content") || el;
+}
 
 // Audio Manager for single playback
 class AudioManager {
@@ -113,8 +121,20 @@ class AudioManager {
         this.currentId = null;
       });
 
-      this.currentAudio.addEventListener("timeupdate", () => {
+      this.currentAudio.addEventListener("pause", () => {
         if (this.currentAudio) {
+          this.notifyListeners(id, false, this.currentAudio.currentTime);
+        }
+      });
+
+      this.currentAudio.addEventListener("play", () => {
+        if (this.currentAudio) {
+          this.notifyListeners(id, true, this.currentAudio.currentTime);
+        }
+      });
+
+      this.currentAudio.addEventListener("timeupdate", () => {
+        if (this.currentAudio && !this.currentAudio.paused) {
           this.notifyListeners(id, true, this.currentAudio.currentTime);
         }
       });
@@ -193,6 +213,7 @@ const convertToPaginationStory = (story: Story): PaginationStory => {
     story.photos?.map((p) => ({
       id: p.id,
       url: p.url,
+      transform: p.transform,
       caption: p.caption,
       isHero: p.isHero,
     })) ||
@@ -240,19 +261,30 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
   const hasMultiplePhotos = photos.length > 1;
 
   return (
-    <div className="relative mb-4 memory-hero">
+    <div className="relative mb-4 memory-hero overflow-hidden rounded-lg z-50">
       <img
         src={currentPhoto.url}
         alt="Memory"
         className="w-full object-cover rounded-lg memory-photo"
+        style={
+          currentPhoto.transform
+            ? {
+                transform: `scale(${currentPhoto.transform.zoom}) translate(${currentPhoto.transform.position.x}%, ${currentPhoto.transform.position.y}%)`,
+                transformOrigin: "center center",
+              }
+            : undefined
+        }
       />
       {hasMultiplePhotos && (
         <>
-          {/* Navigation arrows with cleaner design */}
+          {/* Navigation arrows with cleaner design - higher z-index to be above page navigation */}
           {currentPhotoIndex > 0 && (
             <button
-              onClick={() => setCurrentPhotoIndex(currentPhotoIndex - 1)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentPhotoIndex(currentPhotoIndex - 1);
+              }}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg z-[60]"
               aria-label="Previous photo"
             >
               <ChevronLeft className="w-5 h-5 text-gray-700" />
@@ -261,8 +293,11 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
 
           {currentPhotoIndex < photos.length - 1 && (
             <button
-              onClick={() => setCurrentPhotoIndex(currentPhotoIndex + 1)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentPhotoIndex(currentPhotoIndex + 1);
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg z-[60]"
               aria-label="Next photo"
             >
               <ChevronRight className="w-5 h-5 text-gray-700" />
@@ -270,7 +305,7 @@ const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
           )}
 
           {/* Photo counter */}
-          <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm">
+          <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm z-[60]">
             <span className="text-white text-sm font-medium">
               {currentPhotoIndex + 1} / {photos.length}
             </span>
@@ -487,7 +522,9 @@ const BookPageRenderer = ({
                         {story.title}
                       </span>
                       <span className="text-gray-500 text-xs whitespace-nowrap">
-                        {story.year} • p.{story.pageNumber}
+                        {story.date
+                          ? formatStoryDateForMetadata(story.date, parseInt(story.year))
+                          : story.year} • p.{story.pageNumber}
                       </span>
                     </button>
                   ))}
@@ -578,7 +615,11 @@ const BookPageRenderer = ({
         <div className="story-header-title">
           {page.title ||
             (page.isLeftPage ? "Heritage Whisper" : "Family Memories")}
-          {page.year && !page.title?.includes(page.year) && ` • ${page.year}`}
+          {page.year && !page.title?.includes(page.year) && ` • ${
+            page.date
+              ? formatStoryDateForMetadata(page.date, parseInt(page.year))
+              : page.year
+          }`}
           {page.age !== null &&
             page.age !== undefined &&
             page.age > 0 &&
@@ -592,22 +633,45 @@ const BookPageRenderer = ({
             page.age < 0 &&
             ` • Before birth`}
         </div>
-        {/* Edit button for this story */}
+        {/* Edit and Timeline buttons for this story */}
         {(page.type === "story-start" || page.type === "story-complete") &&
           page.storyId && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                router.push(
-                  `/review/book-style?id=${page.storyId}&returnPath=${encodeURIComponent(`/book?storyId=${page.storyId}`)}`,
-                )
-              }
-              className="gap-1 text-xs px-2 py-1 h-auto"
-            >
-              <Pencil className="w-3 h-3" />
-              <span>Edit</span>
-            </Button>
+            <div className="flex gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  router.push(
+                    `/review/book-style?id=${page.storyId}&returnPath=${encodeURIComponent(`/book?storyId=${page.storyId}`)}`,
+                  )
+                }
+                className="flex-1 gap-1 text-xs px-2 py-1 h-auto"
+              >
+                <Pencil className="w-3 h-3" />
+                <span>Edit</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  // Store navigation context for timeline to pick up
+                  const context = {
+                    memoryId: page.storyId,
+                    scrollPosition: 0, // Start at top, will scroll to card
+                    timestamp: Date.now(),
+                    returnPath: '/timeline', // Required by timeline navigation logic
+                  };
+                  sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
+
+                  // Navigate to timeline
+                  router.push('/timeline');
+                }}
+                className="flex-1 gap-1 text-xs px-2 py-1 h-auto"
+              >
+                <Clock className="w-3 h-3" />
+                <span>Timeline</span>
+              </Button>
+            </div>
           )}
       </div>
 
@@ -816,9 +880,9 @@ export default function BookViewNew() {
           .map(convertToPaginationStory),
       }));
 
-    // V2: Paginate the entire book - each story gets ONE scrollable page
-    const bookPages = paginateBookV2(decadeGroups, whisperPrompts);
-    const bookSpreads = getPageSpreadsV2(bookPages);
+    // Paginate the entire book with whisper pages (optimistically, will re-run when fonts load)
+    const bookPages = paginateBook(decadeGroups, whisperPrompts);
+    const bookSpreads = getPageSpreads(bookPages);
 
     // Find the page index for the story if storyId is provided
     let pageIndex = -1;
@@ -860,29 +924,29 @@ export default function BookViewNew() {
   const totalPages = pages.length;
 
   const goToPrevious = () => {
-    if (isMobile) {
-      setCurrentMobilePage((prev) => Math.max(0, prev - 1));
-    } else {
+    if (showSpreadView) {
       setCurrentSpreadIndex((prev) => Math.max(0, prev - 1));
+    } else {
+      setCurrentMobilePage((prev) => Math.max(0, prev - 1));
     }
   };
 
   const goToNext = () => {
-    if (isMobile) {
-      setCurrentMobilePage((prev) => Math.min(totalPages - 1, prev + 1));
-    } else {
+    if (showSpreadView) {
       setCurrentSpreadIndex((prev) => Math.min(totalSpreads - 1, prev + 1));
+    } else {
+      setCurrentMobilePage((prev) => Math.min(totalPages - 1, prev + 1));
     }
   };
 
   const navigateToPage = (pageIndex: number) => {
-    if (isMobile) {
-      setCurrentMobilePage(Math.min(Math.max(0, pageIndex), totalPages - 1));
-    } else {
+    if (showSpreadView) {
       const spreadIndex = Math.floor(pageIndex / 2);
       setCurrentSpreadIndex(
         Math.min(Math.max(0, spreadIndex), totalSpreads - 1),
       );
+    } else {
+      setCurrentMobilePage(Math.min(Math.max(0, pageIndex), totalPages - 1));
     }
   };
 
@@ -910,7 +974,86 @@ export default function BookViewNew() {
     audioManager.stopAll();
   }, [currentMobilePage, currentSpreadIndex]);
 
-  // V2: No dynamic pagination needed - each page is self-contained and scrolls
+  // Dynamic pagination: Maximize first page usage
+  useEffect(() => {
+    // Only run for spread view with 2+ pages
+    if (isMobile || !showSpreadView || spreads.length === 0) return;
+    if (currentSpreadIndex >= spreads.length) return;
+
+    const spread = spreads[currentSpreadIndex];
+    if (!spread || !spread[1]) return; // Need 2 pages
+
+    // Wait for next frame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      const bookStage = document.querySelector(".book-stage");
+      if (!bookStage) return;
+
+      const pageElements =
+        bookStage.querySelectorAll<HTMLElement>(".book-page");
+      if (pageElements.length < 2) return;
+
+      const page1 = pageElements[0];
+      const page2 = pageElements[1];
+      const c1 = pageContent(page1);
+      const c2 = pageContent(page2);
+      if (!c1 || !c2) return;
+
+      // 1) Adjust hero top margin if needed (starts at 0, can go up to 37px for balance)
+      const hero = page1.querySelector<HTMLElement>(".memory-hero");
+      if (hero) {
+        const fits = () => {
+          const h = c1.scrollHeight - c1.clientHeight;
+          return h <= LINE_GUARD;
+        };
+
+        // Start at minimum (0) for maximum content space
+        page1.style.setProperty("--hero-top", `${HERO_MIN_TOP}px`);
+
+        // If we have excess headroom, we can add some top margin for visual balance
+        const headroom = c1.clientHeight - c1.scrollHeight;
+        if (headroom > HERO_MAX_TOP) {
+          // Can afford to add some margin for visual breathing room
+          page1.style.setProperty("--hero-top", `${HERO_MAX_TOP}px`);
+        } else if (headroom > MIN_MOVE_UNIT) {
+          // Add partial margin based on available space
+          const margin = Math.floor(headroom / 2); // Use half the headroom
+          page1.style.setProperty(
+            "--hero-top",
+            `${Math.min(margin, HERO_MAX_TOP)}px`,
+          );
+        }
+      }
+
+      // 2) Pull blocks back from page 2 while there's headroom on page 1
+      const getHeadroom = () => c1.clientHeight - c1.scrollHeight;
+
+      // Find next movable block
+      const movable = () =>
+        Array.from(c2.children).find((n) => n instanceof HTMLElement) as
+          | HTMLElement
+          | undefined;
+
+      let guard = 64; // prevent runaway loops
+      while (getHeadroom() > LINE_GUARD && guard-- > 0) {
+        const next = movable();
+        if (!next) break;
+        const need = outerHeightWithMargins(next);
+        if (need <= getHeadroom() - LINE_GUARD) {
+          c1.appendChild(next);
+        } else {
+          break;
+        }
+      }
+
+      // 3) Ensure callouts and elements never split visually
+      bookStage
+        .querySelectorAll<HTMLElement>(".lesson-callout, p, figure, img, audio")
+        .forEach((el) => {
+          el.style.breakInside = "avoid";
+          el.style.pageBreakInside = "avoid";
+        });
+    });
+  }, [currentSpreadIndex, spreads, isMobile, showSpreadView, pages]);
 
   // Show loading state while fetching stories OR pagination is not ready yet
   if (isLoading || !isPaginationReady) {
@@ -964,74 +1107,20 @@ export default function BookViewNew() {
 
   return (
     <div className="book-view min-h-screen bg-background">
-      {/* Mobile Header - Decade selector, Zoom, Hamburger */}
-      {isMobile && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200" style={{ height: '60px' }}>
-          {/* Decade Selector Button - absolute left */}
-          <button
-            onClick={() => setShowDecadeSelector(true)}
-            className="absolute w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
-            style={{ left: '16px', top: '8px' }}
-            aria-label="Select decade"
-          >
-            <BookOpen className="w-4 h-4 text-gray-700" />
-          </button>
-          
-          {/* Horizontal Zoom Controls - absolutely centered */}
-          <div 
-            className="absolute flex items-center gap-1 bg-gray-100 rounded-lg p-1"
-            style={{ left: '50%', transform: 'translateX(-50%)', top: '3px' }}
-          >
-            <button
-              onClick={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
-              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white transition-colors text-gray-700 font-bold text-base"
-              aria-label="Zoom out"
-            >
-              −
-            </button>
-            <div className="min-w-[45px] text-center text-xs text-gray-600 font-medium px-2">
-              {Math.round(zoomLevel * 100)}%
-            </div>
-            <button
-              onClick={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
-              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white transition-colors text-gray-700 font-bold text-base"
-              aria-label="Zoom in"
-            >
-              +
-            </button>
-          </div>
-        </div>
+      {/* Mobile/Tablet: Progress Bar with integrated zoom controls (single-page mode) */}
+      {!showSpreadView && (
+        <BookProgressBar
+          pages={pages}
+          currentPage={currentMobilePage}
+          totalPages={totalPages}
+          onNavigateToPage={navigateToPage}
+          zoomLevel={zoomLevel}
+          onZoomIn={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
+          onZoomOut={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
+          onOpenDecadeSelector={isMobile ? () => setShowDecadeSelector(true) : undefined}
+        />
       )}
-      
-      {/* Desktop Zoom Controls - Fixed position, always accessible */}
-      {!isMobile && (
-        <div className="fixed top-24 right-4 z-50 flex flex-col gap-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-2">
-          <button
-            onClick={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
-            className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
-            aria-label="Zoom in"
-          >
-            +
-          </button>
-          <div className="w-10 text-center text-xs text-gray-600 font-medium">
-            {Math.round(zoomLevel * 100)}%
-          </div>
-          <button
-            onClick={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
-            className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
-            aria-label="Zoom out"
-          >
-            −
-          </button>
-          <button
-            onClick={() => setZoomLevel(1.0)}
-            className="w-10 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-600 text-xs font-medium mt-1"
-            aria-label="Reset zoom"
-          >
-            Reset
-          </button>
-        </div>
-      )}
+
 
       {/* Book Content - Always centered, allows natural scrolling */}
       <div className="book-container-wrapper" {...swipeHandlers}>
@@ -1105,14 +1194,17 @@ export default function BookViewNew() {
         isOpen={modeSelection.quickRecorderOpen}
         onClose={modeSelection.closeQuickRecorder}
       />
-      
-      {/* Desktop: Progress Bar - Above bottom navigation */}
-      {!isMobile && (
+
+      {/* Desktop: Progress Bar with integrated zoom controls (spread mode) */}
+      {showSpreadView && (
         <BookProgressBar
           pages={pages}
           currentPage={currentSpreadIndex * 2}
           totalPages={totalPages}
           onNavigateToPage={navigateToPage}
+          zoomLevel={zoomLevel}
+          onZoomIn={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
+          onZoomOut={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
         />
       )}
 

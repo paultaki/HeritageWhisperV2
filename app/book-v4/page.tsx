@@ -5,8 +5,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { BookPage } from "./components/BookPage";
-import { BottomNav } from "./components/BottomNav";
 import "./book.css";
+
+// Import handwriting font
+import { Caveat } from "next/font/google";
+
+const caveat = Caveat({ 
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  display: "swap",
+});
 
 // Story interface matching your API structure
 interface Story {
@@ -104,6 +112,19 @@ export default function BookV4Page() {
     }
   };
 
+  // Prevent page scrolling
+  useEffect(() => {
+    // Lock body scroll
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    return () => {
+      // Restore scroll on unmount
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, []);
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -157,17 +178,32 @@ export default function BookV4Page() {
   const currentSpread = spreads[currentSpreadIndex] || { left: undefined, right: undefined };
 
   return (
-    <div className="h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12]">
+    <div className={`h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
       {/* Top progress bar */}
       <div className="fixed top-0 left-0 right-0 z-50 no-print">
         <div className="mx-auto max-w-[1800px] px-6">
           <div className="relative h-8 flex items-center">
             <div 
-              className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden ring-1 ring-white/10 cursor-pointer"
-              title={`${Math.round(scrollProgress)}% scrolled`}
+              className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden ring-1 ring-white/10 cursor-pointer hover:h-2 transition-all"
+              title={`${Math.round(scrollProgress)}% scrolled - Click to jump`}
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                const currentSpread = spreads[currentSpreadIndex];
+                
+                // Try to scroll both pages to the clicked position
+                if (flowLeftRef.current && currentSpread?.left) {
+                  const maxScroll = flowLeftRef.current.scrollHeight - flowLeftRef.current.clientHeight;
+                  flowLeftRef.current.scrollTop = maxScroll * percent;
+                }
+                if (flowRightRef.current && currentSpread?.right) {
+                  const maxScroll = flowRightRef.current.scrollHeight - flowRightRef.current.clientHeight;
+                  flowRightRef.current.scrollTop = maxScroll * percent;
+                }
+              }}
             >
               <div 
-                className="h-full bg-indigo-400/70 transition-all"
+                className="h-full bg-indigo-400/70 transition-all pointer-events-none"
                 style={{ width: `${scrollProgress}%` }}
               />
             </div>
@@ -175,26 +211,26 @@ export default function BookV4Page() {
         </div>
       </div>
     
-      <div className="md:py-12 max-w-[1800px] mr-auto ml-auto pt-12 pr-6 pb-8 pl-6">
-        {/* Header */}
-        <div className="mx-auto max-w-[1600px] mb-8 md:mb-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 grid place-items-center rounded-md ring-1 bg-white/5 ring-white/10">
+      <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pt-6 pr-6 pb-24 pl-6">
+        {/* Compact Header */}
+        <div className="mx-auto max-w-[1600px] mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-7 w-7 grid place-items-center rounded-md ring-1 bg-white/5 ring-white/10">
                 <span className="text-xs font-semibold tracking-tight">BK</span>
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl tracking-tight font-semibold text-white">
+                <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
                   {user?.name ? `${user.name}'s Story` : "Your Story"}
                 </h1>
-                <p className="text-sm text-slate-400">
+                <p className="text-xs text-slate-400 mt-0.5">
                   {sortedStories.length} {sortedStories.length === 1 ? 'memory' : 'memories'} • Spread {currentSpreadIndex + 1} of {spreads.length}
                 </p>
               </div>
             </div>
             <button
               onClick={() => router.push("/")}
-              className="hidden md:flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+              className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
             >
               ← Back to Home
             </button>
@@ -204,13 +240,13 @@ export default function BookV4Page() {
     
         {/* Desktop: Dual-page spread */}
         <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100vh - 180px)" }}>
-          {/* Book container with viewport constraints */}
+          {/* Book container with fixed aspect ratio: 11" x 8.5" (dual-page spread) */}
           <div 
-            className="relative w-full h-full [perspective:2000px]" 
+            className="relative [perspective:2000px]" 
             style={{ 
-              maxWidth: "min(95vw, 1600px)",
-              maxHeight: "min(85vh, 900px)",
-              aspectRatio: "110 / 85"
+              width: "min(95vw, calc((100vh - 180px) * 1.294))",
+              aspectRatio: "11 / 8.5",
+              maxWidth: "1600px"
             }}
           >
             {/* Ambient shadow/vignette */}
@@ -275,9 +311,9 @@ export default function BookV4Page() {
         {/* Mobile & Tablet: Single page with horizontal swipe */}
         <MobileView stories={sortedStories} />
     
-        {/* TOC Drawer - Bottom Right */}
+        {/* TOC Drawer - Top Right */}
         {showToc && (
-          <div className="fixed bottom-24 right-6 z-40 w-[320px] max-w-[calc(100vw-3rem)]">
+          <div className="fixed top-24 right-6 z-40 w-[320px] max-w-[calc(100vw-3rem)]">
             <div className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 text-sm text-slate-200 shadow-2xl">
               <div className="mb-2 flex items-center justify-between">
                 <div className="font-medium tracking-tight">Table of Contents</div>
@@ -311,14 +347,61 @@ export default function BookV4Page() {
           </div>
         )}
 
-        {/* Bottom Navigation Bar */}
-        <BottomNav
-          currentStory={currentSpreadIndex * 2}
-          totalStories={sortedStories.length}
-          onPrevious={goToPrevSpread}
-          onNext={goToNextSpread}
-          onTocClick={() => setShowToc(!showToc)}
-        />
+      </div>
+
+      {/* Bottom Navigation Controls - positioned just above where nav bar was */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-4">
+        <div className="mx-auto max-w-3xl px-6">
+          <div className="flex items-center justify-center gap-6 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-8 py-4 shadow-2xl">
+            <button
+              onClick={goToPrevSpread}
+              disabled={currentSpreadIndex === 0}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-200 text-base font-medium"
+              title="Previous spread (or use Left Arrow key)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="m15 18-6-6 6-6"></path>
+              </svg>
+              <span className="hidden sm:inline">Previous</span>
+            </button>
+
+            <div className="flex items-center gap-4">
+              <span className="text-white font-medium text-base">
+                Spread {currentSpreadIndex + 1} of {spreads.length}
+              </span>
+              <button
+                onClick={() => setShowToc(!showToc)}
+                className="px-3 py-2 rounded-full bg-white/5 hover:bg-white/10 transition-all text-white"
+                title="Table of Contents"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path d="M4 6h16"></path>
+                  <path d="M4 12h16"></path>
+                  <path d="M4 18h16"></path>
+                </svg>
+              </button>
+            </div>
+
+            <button
+              onClick={goToNextSpread}
+              disabled={currentSpreadIndex === spreads.length - 1}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-200 text-base font-medium"
+              title="Next spread (or use Right Arrow key)"
+            >
+              <span className="hidden sm:inline">Next</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

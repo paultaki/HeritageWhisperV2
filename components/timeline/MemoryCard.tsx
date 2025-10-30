@@ -25,7 +25,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Play, Pause, Loader2, AlertCircle } from "lucide-react";
+import { Play, Pause, Loader2, AlertCircle, ChevronLeft, ChevronRight, Volume2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { normalizeYear, formatYear } from "@/lib/utils";
 import { getTopTraits } from "@/utils/getTopTraits";
@@ -47,6 +47,7 @@ export const MemoryCard = React.memo(
     isDarkTheme = false,
     birthYear,
     onOpenOverlay,
+    useV2Features = false,
   }: MemoryCardProps) {
     const router = useRouter();
 
@@ -65,6 +66,14 @@ export const MemoryCard = React.memo(
     const [duration, setDuration] = useState(story.durationSeconds || 0);
     const progressBarRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    // ==================================================================================
+    // V2: Photo Carousel State
+    // ==================================================================================
+
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
 
     // ==================================================================================
     // Card Scroll Animation State
@@ -386,10 +395,10 @@ export const MemoryCard = React.memo(
             </div>
           </div>
 
-          <div className="hw-card-body">
+          <div className="hw-card-body relative">
             <div className="flex items-center gap-3">
-              {/* Audio play button */}
-              {story.audioUrl && (
+              {/* Original audio button (only show if NOT V2) */}
+              {story.audioUrl && !useV2Features && (
                 <button
                   onClick={handlePlayAudio}
                   className="glass-play-button-mobile"
@@ -444,6 +453,20 @@ export const MemoryCard = React.memo(
                 </div>
               </div>
             </div>
+
+            {/* V2: Small audio icon in bottom right corner */}
+            {useV2Features && story.audioUrl && (
+              <button
+                onClick={handlePlayAudio}
+                className="absolute bottom-4 right-4 flex flex-col items-center gap-0.5 group"
+                aria-label={isPlaying ? "Pause audio" : "Play audio"}
+              >
+                <Volume2 className="w-5 h-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
+                <span className="text-xs text-gray-600 font-medium">
+                  {formatDuration(duration)}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Provenance on hover */}
@@ -517,8 +540,8 @@ export const MemoryCard = React.memo(
             </div>
           )}
 
-          {/* Audio play button overlay */}
-          {story.audioUrl && (
+          {/* Audio play button overlay (hidden in V2, V2 shows below photo) */}
+          {story.audioUrl && !useV2Features && (
             <button
               onClick={handlePlayAudio}
               className="hw-play"
@@ -549,7 +572,7 @@ export const MemoryCard = React.memo(
           )}
         </div>
 
-        <div className="hw-card-body">
+        <div className="hw-card-body relative">
           {/* Title */}
           <h3 className="hw-card-title" data-testid={`story-title-${story.id}`}>
             {story.title}
@@ -595,6 +618,20 @@ export const MemoryCard = React.memo(
               </>
             )}
           </div>
+
+          {/* V2: Small audio icon in bottom right corner */}
+          {useV2Features && story.audioUrl && (
+            <button
+              onClick={handlePlayAudio}
+              className="absolute bottom-4 right-4 flex flex-col items-center gap-0.5 group"
+              aria-label={isPlaying ? "Pause audio" : "Play audio"}
+            >
+              <Volume2 className="w-5 h-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
+              <span className="text-xs text-gray-600 font-medium">
+                {formatDuration(duration)}
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Provenance on hover */}
@@ -617,7 +654,8 @@ export const MemoryCard = React.memo(
       prevProps.isReturnHighlight === nextProps.isReturnHighlight &&
       prevProps.isDarkTheme === nextProps.isDarkTheme &&
       prevProps.colorScheme === nextProps.colorScheme &&
-      prevProps.birthYear === nextProps.birthYear
+      prevProps.birthYear === nextProps.birthYear &&
+      prevProps.useV2Features === nextProps.useV2Features
     );
   },
 );

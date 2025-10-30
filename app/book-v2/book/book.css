@@ -34,11 +34,12 @@
 
 .book-wrap {
   width: 100%;
-  height: calc(100vh - 112px); /* Account for progress bar (32px) + nav (80px) */
+  height: calc(100vh - 136px); /* Account for progress bar (56px) + nav (80px) */
   overflow-y: auto;
   overflow-x: hidden;
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: none; /* Disabled to prevent jittering on iOS */
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* Smooth momentum scrolling on iOS */
 
   /* Rich leather desk gradient with subtle vignette */
   background: linear-gradient(135deg, #2c1f1a 0%, #3a2a22 100%);
@@ -55,7 +56,8 @@
 /* V2: Mobile header spacing adjustment */
 @media (max-width: 768px) {
   .book-wrap {
-    padding-top: 76px; /* Account for 60px mobile header + spacing */
+    padding-top: 72px; /* Account for 56px mobile progress bar + spacing */
+    height: calc(100vh - 136px); /* Account for progress bar (56px) + nav (80px) */
   }
 }
 
@@ -117,7 +119,7 @@
     0 10px 24px rgba(0, 0, 0, 0.1);
 
   /* Scroll snap disabled to prevent jittering on iOS */
-  overflow: hidden; /* V2: Clip page boundaries, but allow .page-content to scroll */
+  overflow: hidden;
   z-index: 2;
 
   /* Smooth page transitions */
@@ -178,84 +180,14 @@
 }
 */
 
-/* Content area within page - V2: Scrollable for complete stories */
+/* Content area within page */
 .page-content {
   width: 100%;
-  /* V2: Fixed height to enable scrolling - accounts for page padding minus running header space */
-  height: calc(var(--content-height) - 60px); /* 640px = 700px - 60px for header */
-  max-height: calc(var(--content-height) - 60px); 
-  min-height: calc(var(--content-height) - 60px); /* Enforce consistent height */
-  overflow-y: scroll !important; /* V2: Always show scroll capability */
-  overflow-x: hidden; /* Prevent horizontal scroll */
-  -webkit-overflow-scrolling: touch; /* Smooth momentum scrolling on iOS */
+  height: var(--content-height);
+  overflow: hidden;
   padding: var(
     --content-margin
   ); /* 23px margin between dotted decor and content */
-  scroll-behavior: smooth; /* Smooth scrolling */
-  position: relative; /* For scroll indicator positioning */
-  box-sizing: border-box; /* Include padding in height calculation */
-}
-
-/* V2: Force scrolling with high specificity - override any conflicting styles */
-.book-page .page-content,
-.book-page .book-page-content,
-.page.book-page .page-content,
-.page .book-page-content {
-  overflow-y: scroll !important;
-  overflow-x: hidden !important;
-  height: calc(var(--content-height) - 60px) !important;
-  max-height: calc(var(--content-height) - 60px) !important;
-  min-height: calc(var(--content-height) - 60px) !important;
-}
-
-/* V2: Debug helper - show scrollable area with subtle background (remove later) */
-.page-content {
-  /* Uncomment to debug scrolling:
-  background: linear-gradient(to bottom, 
-    rgba(255,0,0,0.05) 0%, 
-    rgba(0,255,0,0.05) 50%, 
-    rgba(0,0,255,0.05) 100%);
-  */
-}
-
-/* V2: Custom scrollbar styling for book pages */
-.page-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.page-content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-  margin: 8px 0; /* Add margin to match page padding */
-}
-
-.page-content::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-  transition: background 0.2s ease;
-}
-
-.page-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-/* V2: Scroll fade indicator at bottom (shows there's more content) */
-.page-content::after {
-  content: '';
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 40px;
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.9) 0%, transparent 100%);
-  pointer-events: none; /* Don't block clicks */
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-/* Show scroll indicator when content is scrollable and not at bottom */
-.page-content:not(.at-bottom)::after {
-  opacity: 1;
 }
 
 /* Optional: Page header for decade/chapter labels */
@@ -291,8 +223,7 @@
   justify-content: center;
   margin: 0 auto 24px;
   width: var(--spread-width);
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  /* Scroll snap disabled to prevent jittering on iOS */
   position: relative;
   z-index: 2;
 }
@@ -557,10 +488,6 @@
     /* Content wrapper provides additional 16px breathing room from dotted area to text */
     padding: 16px;
     margin: 0;
-    /* V2: Ensure scrolling is preserved on mobile */
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
   }
 
   .book-text {
@@ -771,13 +698,7 @@
       }
     }
 
-    /* Tighter brown border in single-page view */
-    @media (max-width: 1329px) {
-      .book-container {
-        max-width: 650px;
-        padding: 1.5rem;
-      }
-    }
+
 
     /* Z-index hierarchy (screen only) */
     .book-wrap {

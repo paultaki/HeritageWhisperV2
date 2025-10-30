@@ -45,6 +45,7 @@ export const TimelineDecadeSection = React.memo(
     onOpenOverlay,
     highlightedStoryId,
     returnHighlightId,
+    useV2Features = false,
   }: TimelineDecadeSectionProps) {
     return (
       <section
@@ -108,6 +109,7 @@ export const TimelineDecadeSection = React.memo(
                 isDarkTheme={isDarkTheme}
                 onOpenOverlay={onOpenOverlay}
                 birthYear={birthYear}
+                useV2Features={useV2Features}
               />
             );
           })}

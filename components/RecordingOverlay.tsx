@@ -140,17 +140,21 @@ export function RecordingOverlay({
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setCountdown(null);
 
+      // Set recording state immediately for instant UI feedback
+      setIsRecording(true);
+      setIsPaused(false);
+      setHasRecording(false);
+      setRecordingTime(0);
+
       // Update global recording state
       globalRecording.startRecording('quick-story');
 
       // Start recording after countdown
       await audioRecorderRef.current?.startRecording();
-      setIsPaused(false);
-      setHasRecording(false);
-      setRecordingTime(0);
     } catch (error) {
       console.error("Failed to start recording:", error);
       setCountdown(null);
+      setIsRecording(false);
     }
   };
 

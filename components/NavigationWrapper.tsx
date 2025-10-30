@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import DesktopNavigationBottom from "./DesktopNavigationBottom";
 import MobileNavigation from "./MobileNavigation";
 import HamburgerMenu from "./HamburgerMenu";
 import { useModeSelection } from "@/hooks/use-mode-selection";
@@ -35,9 +34,6 @@ export default function NavigationWrapper() {
 
   return (
     <>
-      {/* Desktop Navigation (bottom bar) - shows on all pages */}
-      <DesktopNavigationBottom onRecordClick={handleRecordClick} />
-
       {/* Mobile Navigation (bottom bar) - shows on all pages */}
       <MobileNavigation onRecordClick={handleRecordClick} />
 

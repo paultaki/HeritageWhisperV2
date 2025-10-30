@@ -127,6 +127,7 @@ export interface MemoryCardProps {
   isDarkTheme?: boolean;
   birthYear: number;
   onOpenOverlay?: (story: Story) => void;
+  useV2Features?: boolean; // Enable V2 senior-friendly UX improvements
 }
 
 /** Props for TimelineDecadeSection component */
@@ -144,6 +145,7 @@ export interface TimelineDecadeSectionProps {
   onOpenOverlay: (story: Story) => void;
   highlightedStoryId: string | null;
   returnHighlightId: string | null;
+  useV2Features?: boolean; // Enable V2 senior-friendly UX improvements
 }
 
 /** Props for TimelineHeader component */

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "./styles/memory-overlay.css";
+import "./styles/timeline-v2.css";
 import { Providers } from "./providers";
 import NavigationWrapper from "@/components/NavigationWrapper";
 import AgreementGuard from "@/components/AgreementGuard";

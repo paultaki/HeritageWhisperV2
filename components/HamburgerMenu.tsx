@@ -106,14 +106,10 @@ export default function HamburgerMenu() {
   return (
     <>
       <div ref={menuRef} className="fixed right-4 z-[100]" style={{ top: '5px' }}>
-      {/* Hamburger Button - Semi-transparent on book page */}
+      {/* Hamburger Button - Just lines, no circle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`p-3 rounded-full transition-all ${
-          isBookPage
-            ? "bg-white/70 backdrop-blur-md border-2 border-white/30 shadow-lg hover:shadow-xl hover:bg-white/80"
-            : "bg-white/90 backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-md rounded-lg p-2"
-        }`}
+        className="p-2 transition-all"
         aria-label="Menu"
       >
         {isOpen ? (

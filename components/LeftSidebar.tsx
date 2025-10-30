@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Users, Settings, HelpCircle, FolderOpen } from "lucide-react";
+import { Calendar, BookOpen, Lightbulb } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -74,44 +74,28 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
         )}
 
         <Link
-          href="/"
+          href="/timeline"
           className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
           style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
         >
-          <Home className="w-7 h-7" />
-          <span>Home</span>
+          <Calendar className="w-7 h-7" />
+          <span>Timeline</span>
         </Link>
         <Link
-          href="/family"
+          href="/book"
           className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
           style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
         >
-          <Users className="w-7 h-7" />
-          <span>Family</span>
+          <BookOpen className="w-7 h-7" />
+          <span>Book</span>
         </Link>
         <Link
-          href="/memory-box"
+          href="/prompts"
           className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
           style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
         >
-          <FolderOpen className="w-7 h-7" />
-          <span>Manage Stories</span>
-        </Link>
-        <Link
-          href="/profile"
-          className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
-          style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
-        >
-          <Settings className="w-7 h-7" />
-          <span>Settings</span>
-        </Link>
-        <Link
-          href="/help"
-          className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
-          style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
-        >
-          <HelpCircle className="w-7 h-7" />
-          <span>Help</span>
+          <Lightbulb className="w-7 h-7" />
+          <span>Story Ideas</span>
         </Link>
       </nav>
     </aside>

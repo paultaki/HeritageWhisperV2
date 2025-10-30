@@ -34,6 +34,7 @@ import {
   X,
   BookOpen,
   Clock,
+  Volume2,
 } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
@@ -183,9 +184,10 @@ interface CenteredMemoryCardProps {
   decadeLabel?: string;
   birthYear: number;
   onOpenOverlay?: (story: Story) => void;
+  useV2Features?: boolean;
 }
 
-function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear, onOpenOverlay }: CenteredMemoryCardProps) {
+function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear, onOpenOverlay, useV2Features = false }: CenteredMemoryCardProps) {
   const router = useRouter();
 
   // Narrow story type for traits access
@@ -468,11 +470,11 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           }`}
           onClick={handleCardClick}
           style={{
-            boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)',
+            boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
             border: '1.5px solid #B89B8D',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = '0 16px 40px -6px rgba(0, 0, 0, 0.4), 0 8px 18px -3px rgba(0, 0, 0, 0.3)';
+            e.currentTarget.style.boxShadow = '0 8px 20px -3px rgba(0, 0, 0, 0.2), 0 4px 9px -1px rgba(0, 0, 0, 0.15)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)';
@@ -514,8 +516,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </div>
             )}
 
-            {/* Audio play button overlaid on photo */}
-            {story.audioUrl && (
+            {/* Audio play button overlaid on photo (hidden in V2) */}
+            {story.audioUrl && !useV2Features && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -545,9 +547,9 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           </div>
 
           {/* White Card Section Below Photo */}
-          <div className="p-4 bg-white">
-            {/* Progress Bar (when playing) */}
-            {story.audioUrl && (isPlaying || progress > 0) && (
+          <div className="p-4 bg-white relative">
+            {/* Original Progress Bar (when playing, only if NOT V2) */}
+            {story.audioUrl && (isPlaying || progress > 0) && !useV2Features && (
               <div className="mb-3">
                 <div
                   ref={progressBarRef}
@@ -590,6 +592,20 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 </>
               )}
             </div>
+
+            {/* V2: Small audio icon in bottom right corner */}
+            {useV2Features && story.audioUrl && (
+              <button
+                onClick={handlePlayAudio}
+                className="absolute bottom-4 right-4 flex flex-col items-center gap-0.5 group"
+                aria-label={isPlaying ? "Pause audio" : "Play audio"}
+              >
+                <Volume2 className="w-5 h-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
+                <span className="text-xs text-gray-600 font-medium">
+                  {formatDuration(duration)}
+                </span>
+              </button>
+            )}
           </div>
         </div>
       );
@@ -603,7 +619,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         }`}
         onClick={handleCardClick}
         style={{
-          boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)',
+          boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
           border: '1.5px solid #B89B8D',
         }}
         onMouseEnter={(e) => {
@@ -627,8 +643,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             </div>
           </div>
 
-          {/* Audio play button overlaid on placeholder */}
-          {story.audioUrl && (
+          {/* Audio play button overlaid on placeholder (hidden in V2) */}
+          {story.audioUrl && !useV2Features && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -658,9 +674,9 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         </div>
 
         {/* White Card Section Below Placeholder */}
-        <div className="p-4 bg-white">
-          {/* Progress Bar (when playing) */}
-          {story.audioUrl && (isPlaying || progress > 0) && (
+        <div className="p-4 bg-white relative">
+          {/* Progress Bar (when playing, only if NOT V2) */}
+          {story.audioUrl && (isPlaying || progress > 0) && !useV2Features && (
             <div className="mb-3">
               <div
                 ref={progressBarRef}
@@ -703,6 +719,20 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </>
             )}
           </div>
+
+          {/* V2: Small audio icon in bottom right corner */}
+          {useV2Features && story.audioUrl && (
+            <button
+              onClick={handlePlayAudio}
+              className="absolute bottom-4 right-4 flex flex-col items-center gap-0.5 group"
+              aria-label={isPlaying ? "Pause audio" : "Play audio"}
+            >
+              <Volume2 className="w-5 h-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
+              <span className="text-xs text-gray-600 font-medium">
+                {formatDuration(duration)}
+              </span>
+            </button>
+          )}
         </div>
       </div>
     );
@@ -745,7 +775,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             fontWeight: 500,
             letterSpacing: '0.3px',
             opacity: 0.95,
-            boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.25), 0 4px 8px -2px rgba(0, 0, 0, 0.18)',
+            boxShadow: '0 4px 10px -2px rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.09)',
             borderRadius: '6px',
             backdropFilter: 'blur(10px)',
             position: 'relative',
@@ -773,7 +803,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   );
 }
 
-export function TimelineDesktop() {
+export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boolean } = {}) {
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
   const { toast } = useToast();
@@ -1052,7 +1082,7 @@ export function TimelineDesktop() {
               bottom: '0',
               height: '100%',
               opacity: 0.8,
-              boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)',
+              boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
             }}
           >
             <div
@@ -1117,6 +1147,7 @@ export function TimelineDesktop() {
                             showDecadeMarker={showDecadeMarker}
                             decadeLabel={showDecadeMarker ? decadeLabel : undefined}
                             birthYear={user?.birthYear || normalizeYear(user?.birthYear as any) || 0}
+                            useV2Features={useV2Features}
                           />
                         </div>
                       );
