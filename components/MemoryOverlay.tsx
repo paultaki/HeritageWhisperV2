@@ -440,6 +440,24 @@ export function MemoryOverlay({
           {/* Lesson Learned Card */}
           {story.wisdomClipText && (
             <div className="memory-overlay-lesson">
+              {/* Tape at top corners */}
+              <div 
+                className="absolute -top-2 left-6 w-12 h-5 opacity-40 pointer-events-none"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,240,0.7) 0%, rgba(255,250,230,0.8) 100%)',
+                  transform: 'rotate(-2deg)',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                }}
+              ></div>
+              <div 
+                className="absolute -top-2 right-6 w-12 h-5 opacity-40 pointer-events-none"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,240,0.7) 0%, rgba(255,250,230,0.8) 100%)',
+                  transform: 'rotate(2deg)',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                }}
+              ></div>
+              
               <div className="memory-overlay-lesson-label">Lesson Learned</div>
               <p className="memory-overlay-lesson-text">
                 {story.wisdomClipText}

@@ -460,70 +460,70 @@ export function TimelineMobileV2() {
         .points-wrapper-mobile .point-mobile:nth-child(1) {
           left: 15%;
           opacity: 0.9;
-          animation-duration: 6.5s;
+          animation-duration: 9.5s;
           animation-delay: 0.3s;
         }
 
         .points-wrapper-mobile .point-mobile:nth-child(2) {
           left: 25%;
           opacity: 0.7;
-          animation-duration: 7.0s;
+          animation-duration: 10.0s;
           animation-delay: 0.7s;
         }
 
         .points-wrapper-mobile .point-mobile:nth-child(3) {
           left: 35%;
           opacity: 0.8;
-          animation-duration: 6.0s;
+          animation-duration: 8.5s;
           animation-delay: 0.2s;
         }
 
         .points-wrapper-mobile .point-mobile:nth-child(4) {
           left: 50%;
           opacity: 0.6;
-          animation-duration: 5.5s;
+          animation-duration: 8.0s;
           animation-delay: 0.1s;
         }
 
         .points-wrapper-mobile .point-mobile:nth-child(5) {
           left: 60%;
           opacity: 0.9;
-          animation-duration: 5.0s;
+          animation-duration: 7.5s;
           animation-delay: 0s;
         }
 
         .points-wrapper-mobile .point-mobile:nth-child(6) {
           left: 70%;
           opacity: 0.5;
-          animation-duration: 6.8s;
+          animation-duration: 9.8s;
           animation-delay: 1.2s;
         }
 
         .points-wrapper-mobile .point-mobile:nth-child(7) {
           left: 80%;
           opacity: 0.8;
-          animation-duration: 6.2s;
+          animation-duration: 9.0s;
           animation-delay: 0.4s;
         }
 
         .points-wrapper-mobile .point-mobile:nth-child(8) {
           left: 45%;
           opacity: 0.7;
-          animation-duration: 7.2s;
+          animation-duration: 10.5s;
           animation-delay: 0.6s;
         }
 
         .points-wrapper-mobile .point-mobile:nth-child(9) {
           left: 85%;
           opacity: 0.6;
-          animation-duration: 5.2s;
+          animation-duration: 7.8s;
           animation-delay: 0.8s;
         }
 
         .points-wrapper-mobile .point-mobile:nth-child(10) {
           left: 65%;
           opacity: 0.9;
-          animation-duration: 5.8s;
+          animation-duration: 8.2s;
           animation-delay: 0.5s;
         }
 
