@@ -450,25 +450,30 @@ export default function BookV4Page() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="lg:hidden flex items-center gap-2 text-xs text-slate-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 Z"></path>
-                  </svg>
-                  <span>Swipe</span>
-                </div>
                 <button
-                  onClick={() => router.push("/")}
-                  className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
+                  onClick={() => router.push("/timeline")}
+                  className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium mr-[70px]"
                 >
-                  ← Back to Home
+                  ← Timeline
                 </button>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Swipe indicator - mobile only */}
+        <div className="lg:hidden flex items-center justify-center gap-3 pt-[44px] pb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+          <span className="text-sm text-slate-400">Swipe</span>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </div>
+
         {/* Closed book cover - centered */}
-        <div className="flex items-center justify-center" style={{ height: "calc(100vh - 64px)", paddingTop: "64px" }}>
+        <div className="flex items-start md:items-center justify-center pt-[39px] md:pt-[64px]" style={{ height: "calc(100vh - 64px)" }}>
           <ClosedBookCover
             userName={user?.name || "Your"}
             storyCount={sortedStories.length}
@@ -481,18 +486,20 @@ export default function BookV4Page() {
 
   return (
     <div className={`h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
-      {/* Dark Book Progress Bar */}
-      <DarkBookProgressBar
-        pages={bookPages}
-        currentPage={currentSpreadIndex * 2}
-        totalPages={bookPages.length}
-        onNavigateToPage={handleNavigateToPage}
-        zoomLevel={zoomLevel}
-        onZoomIn={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
-        onZoomOut={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
-      />
+      {/* Dark Book Progress Bar - hidden on mobile */}
+      <div className="hidden md:block">
+        <DarkBookProgressBar
+          pages={bookPages}
+          currentPage={currentSpreadIndex * 2}
+          totalPages={bookPages.length}
+          onNavigateToPage={handleNavigateToPage}
+          zoomLevel={zoomLevel}
+          onZoomIn={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
+          onZoomOut={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
+        />
+      </div>
     
-      <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6" style={{ marginTop: '51px', paddingTop: '0px' }}>
+      <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6 mt-0 md:mt-[51px]" style={{ paddingTop: '0px' }}>
         {/* Compact Header */}
         <div className="mx-auto max-w-[1600px] mb-6">
           <div className="flex items-center justify-between">
@@ -509,17 +516,11 @@ export default function BookV4Page() {
               </h1>
             </div>
             <div className="flex items-center gap-3">
-              <div className="lg:hidden flex items-center gap-2 text-xs text-slate-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 Z"></path>
-                </svg>
-                <span>Swipe</span>
-              </div>
               <button
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/timeline")}
                 className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
               >
-                ← Back to Home
+                ← Timeline
               </button>
             </div>
           </div>
@@ -649,7 +650,7 @@ export default function BookV4Page() {
       {/* Bottom Navigation Controls - Thinner mobile-optimized version */}
       <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-[52px] md:pb-2">
         <div className="mx-auto max-w-md px-4">
-          <div className="flex items-center justify-between rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 shadow-2xl">
+          <div className="flex items-center justify-between rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 shadow-2xl" style={{ transform: 'translateY(12px)' }}>
             {/* Previous button */}
             <button
               onClick={() => {
@@ -979,13 +980,24 @@ function MobileView({
   };
 
   return (
-    <div className="lg:hidden w-full" style={{ marginTop: '0px' }}>
+    <div className="lg:hidden w-full" style={{ marginTop: '-20px' }}>
+      {/* Swipe indicator */}
+      <div className="flex items-center justify-center gap-3 pb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="m15 18-6-6 6-6"></path>
+        </svg>
+        <span className="text-sm text-slate-400">Swipe</span>
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="m9 18 6-6-6-6"></path>
+        </svg>
+      </div>
       <div className="relative w-full" style={{ height: 'calc(100vh - 180px)' }}>
         {/* Mobile prev/next controls */}
         <button 
           onClick={handlePrev}
           disabled={currentPage === 0}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
+          className="absolute left-2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
+          style={{ top: 'calc(50% + 12px)' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="m15 18-6-6 6-6"></path>
@@ -994,7 +1006,8 @@ function MobileView({
         <button 
           onClick={handleNext}
           disabled={currentPage === allPages.length - 1}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
+          className="absolute right-2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
+          style={{ top: 'calc(50% + 12px)' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="m9 18 6-6-6-6"></path>
@@ -1006,7 +1019,7 @@ function MobileView({
           onScroll={handleScroll}
           onTouchStart={() => setIsDragging(true)}
           onTouchEnd={() => setTimeout(() => setIsDragging(false), 100)}
-          className="h-full w-full flex items-center justify-center snap-x snap-mandatory overflow-x-auto hide-scrollbar"
+          className="h-full w-full flex items-start md:items-center justify-center snap-x snap-mandatory overflow-x-auto hide-scrollbar -mt-[26px] md:mt-0"
           style={{ scrollSnapType: 'x mandatory' }}
         >
           {allPages.map((page, index) => (
