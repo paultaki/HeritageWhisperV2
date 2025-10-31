@@ -17,7 +17,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { NextStoryCard } from "@/components/NextStoryCard";
 import { PaywallPromptCard } from "@/components/PaywallPromptCard";
-import { MemoryOverlay } from "@/components/MemoryOverlay";
 import DecadeNav from "@/components/ui/DecadeNav";
 import { useToast } from "@/hooks/use-toast";
 import { type Story } from "@/lib/supabase";
@@ -66,28 +65,6 @@ export function TimelineMobileV2() {
     router.push("/subscribe");
   }, [router]);
 
-  const handleOpenOverlay = useCallback(
-    (story: Story) => {
-      ui.setSelectedStory(story);
-      ui.setOverlayOpen(true);
-    },
-    [ui],
-  );
-
-  const handleCloseOverlay = useCallback(() => {
-    ui.setOverlayOpen(false);
-    ui.setSelectedStory(null);
-  }, [ui]);
-
-  const handleNavigateStory = useCallback(
-    (storyId: string) => {
-      const story = timelineData.stories.find((s: Story) => s.id === storyId);
-      if (story) {
-        ui.setSelectedStory(story);
-      }
-    },
-    [timelineData.stories, ui],
-  );
 
   // CHANGE 5: Handle Add Memory button click
   const handleAddMemory = useCallback(() => {
@@ -235,7 +212,6 @@ export function TimelineMobileV2() {
                 birthYear={user.birthYear}
                 onRegisterRef={navigation.registerDecadeRef}
                 onGhostPromptClick={handleGhostPromptClick}
-                onOpenOverlay={handleOpenOverlay}
                 highlightedStoryId={navigation.highlightedStoryId}
                 returnHighlightId={navigation.returnHighlightId}
                 useV2Features={true}
@@ -549,18 +525,6 @@ export function TimelineMobileV2() {
         onClose={() => ui.setShowPaywall(false)}
         onSubscribe={handleSubscribe}
       />
-
-      {/* Memory Overlay */}
-      {ui.selectedStory && (
-        <MemoryOverlay
-          story={ui.selectedStory}
-          stories={timelineData.stories}
-          isOpen={ui.overlayOpen}
-          originPath="/timeline"
-          onClose={handleCloseOverlay}
-          onNavigate={handleNavigateStory}
-        />
-      )}
     </div>
   );
 }

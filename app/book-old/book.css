@@ -1,0 +1,962 @@
+/* ============================================
+   BOOK PAGINATION SYSTEM - 5.5×8.5 Half-Letter Pages
+   ============================================ */
+
+:root {
+  /* Half-Letter dimensions at 96 DPI (5.5×8.5 in) */
+  --page-width: 528px; /* 5.5in × 96 */
+  --page-height: 816px; /* 8.5in × 96 */
+
+  /* Dotted decor border and content margins */
+  --page-border: 48px; /* Dotted decor width on all sides */
+  --content-margin: 23px; /* Space between dotted decor and content (reduced from 48px) */
+  --margin: 58px; /* Legacy - deprecated, use --page-border */
+  --gutter-boost: 24px; /* ~0.25in added ONLY in POD print mode (future) */
+
+  /* Spread layout */
+  --spread-gap: 30px; /* Gap between left and right pages */
+  --spread-width: calc(var(--page-width) * 2 + var(--spread-gap));
+
+  /* Content area (equal margins) */
+  --content-width: calc(var(--page-width) - var(--margin) * 2);
+  --content-height: calc(var(--page-height) - var(--margin) * 2);
+
+  /* Typography for print */
+  --book-font-size: 11pt;
+  --book-line-height: 1.6;
+  --book-heading-size: 16pt;
+  --book-title-size: 20pt;
+}
+
+/* ============================================
+   BOOK WRAPPER - Scroll Container
+   ============================================ */
+
+.book-wrap {
+  width: 100%;
+  height: calc(100vh - 136px); /* Account for progress bar (56px) + nav (80px) */
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: none; /* Disabled to prevent jittering on iOS */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* Smooth momentum scrolling on iOS */
+
+  /* Rich leather desk gradient with subtle vignette */
+  background: linear-gradient(135deg, #2c1f1a 0%, #3a2a22 100%);
+  background-attachment: fixed;
+  padding: 26px 0 24px 0; /* Reduced top padding - closer to bottom spacing */
+
+  /* Subtle vignette to draw eye to center */
+  position: relative;
+
+  /* Offset scroll-snap padding to account for top padding */
+  scroll-padding-top: 26px;
+}
+
+/* V2: Mobile header spacing adjustment */
+@media (max-width: 768px) {
+  .book-wrap {
+    padding-top: 72px; /* Account for 56px mobile progress bar + spacing */
+    height: calc(100vh - 136px); /* Account for progress bar (56px) + nav (80px) */
+  }
+}
+
+.book-wrap::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 30%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.book-wrap:focus {
+  outline: none;
+}
+
+/* ============================================
+   PAGE - 5.5×8.5 Half-Letter Size
+   ============================================ */
+
+.page {
+  position: relative;
+  width: var(--page-width);
+  height: var(--page-height);
+  margin: 0 auto 24px;
+
+  /* Dotted decor border - 48px all sides */
+  padding: var(--page-border);
+
+  /* Paper white with whisper-level texture */
+  background: #ffffff;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.01) 2px,
+      rgba(0, 0, 0, 0.01) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.01) 2px,
+      rgba(0, 0, 0, 0.01) 4px
+    );
+
+  /* Soft drop shadow with depth and subtle paper lip */
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 10px 24px rgba(0, 0, 0, 0.1);
+
+  /* Scroll snap disabled to prevent jittering on iOS */
+  overflow: hidden;
+  z-index: 2;
+
+  /* Smooth page transitions */
+  transition:
+    transform 140ms ease-out,
+    box-shadow 140ms ease-out;
+  
+  /* Default cursor */
+  cursor: default;
+}
+
+/* Page navigation - default cursor, margins clickable via React components */
+.book-spread .page {
+  cursor: default;
+}
+
+/* Interactive elements keep pointer cursor */
+.page button,
+.page a,
+.page .audio-controls,
+.page .toc-entry {
+  cursor: pointer;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    transition: none;
+  }
+}
+
+/* Subtle page-turn animation on navigation */
+.page.page-turning-next {
+  transform: translateX(3px);
+}
+
+.page.page-turning-prev {
+  transform: translateX(-3px);
+}
+
+/* Keep left/right classes for page number positioning, but no margin differences */
+.page.left {
+  /* Equal margins - no gutter boost for web reading */
+}
+
+.page.right {
+  /* Equal margins - no gutter boost for web reading */
+}
+
+/* Future: POD print mode with gutter boost */
+/* Uncomment when implementing print preview mode
+.page.print-preview.left {
+  padding-right: calc(var(--margin) + var(--gutter-boost));
+}
+
+.page.print-preview.right {
+  padding-left: calc(var(--margin) + var(--gutter-boost));
+}
+*/
+
+/* Content area within page */
+.page-content {
+  width: 100%;
+  height: var(--content-height);
+  overflow: hidden;
+  padding: var(
+    --content-margin
+  ); /* 23px margin between dotted decor and content */
+}
+
+/* Optional: Page header for decade/chapter labels */
+.page-header {
+  position: absolute;
+  top: 24px;
+  font-family: var(--font-serif);
+  font-size: 9pt;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 300;
+  user-select: none;
+}
+
+/* Left page: header in top-left */
+.page.left .page-header {
+  left: var(--margin);
+}
+
+/* Right page: header in top-right */
+.page.right .page-header {
+  right: var(--margin);
+}
+
+/* ============================================
+   SPREAD VIEW - Two Facing Pages
+   ============================================ */
+
+.spread {
+  display: flex;
+  gap: var(--spread-gap);
+  justify-content: center;
+  margin: 0 auto 24px;
+  width: var(--spread-width);
+  /* Scroll snap disabled to prevent jittering on iOS */
+  position: relative;
+  z-index: 2;
+}
+
+.spread .page,
+.book-spread .page {
+  margin: 0; /* Remove individual page margins in spread - padding handled by .book-spread */
+  flex-shrink: 0;
+}
+
+/* Spine shadow between pages in spread (visual only - does not affect layout) */
+.spread::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.08) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  /* Fade at top and bottom so it doesn't read as a hard rule */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 5%,
+    black 95%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Page number footer - outer corners */
+.page-number {
+  position: absolute;
+  bottom: 24px;
+  font-family: var(--font-serif);
+  font-size: 11pt;
+  color: #666;
+  opacity: 1;
+  user-select: none;
+  font-weight: 400;
+  z-index: 10;
+}
+
+/* Left page: page number in bottom-left corner */
+.page--left .page-number {
+  left: var(--margin);
+}
+
+/* Right page: page number in bottom-right corner */
+.page--right .page-number {
+  right: var(--margin);
+}
+
+/* ============================================
+   NO-BREAK REGIONS
+   ============================================ */
+
+.no-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  display: block;
+}
+
+/* Images should not break */
+.book-image,
+.book-audio-player,
+.book-callout,
+.book-caption {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Book images use 16:10 aspect ratio (same as timeline/memory box) */
+.book-image {
+  aspect-ratio: 16/10;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  margin: 12pt 0;
+}
+
+/* ============================================
+   PAGINATION HARDENING - Prevent Text Cutoff
+   ============================================ */
+
+/* Audio player must reserve consistent space */
+.audio-wrapper {
+  min-height: 70px; /* Match actual rendered height with margins */
+  box-sizing: border-box;
+}
+
+/* ============================================
+   TYPOGRAPHY - Print-optimized
+   ============================================ */
+
+.book-text {
+  font-family: var(--font-serif);
+  font-size: var(--book-font-size);
+  line-height: var(--book-line-height);
+  color: #1e1710;
+  hyphens: auto;
+  text-align: left;
+
+  /* Prevent widows and orphans */
+  widows: 2;
+  orphans: 2;
+}
+
+.book-text p {
+  margin-bottom: 12pt;
+  text-indent: 0;
+}
+
+.book-text p:first-of-type {
+  text-indent: 0;
+}
+
+.book-heading {
+  font-family: var(--font-serif);
+  font-size: var(--book-heading-size);
+  font-weight: 600;
+  margin-bottom: 8pt;
+  margin-top: 16pt;
+  color: #1e1710;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.book-title {
+  font-family: var(--font-serif);
+  font-size: var(--book-title-size);
+  font-weight: 700;
+  margin-bottom: 12pt;
+  color: #1e1710;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/* ============================================
+   PRINT MEDIA QUERIES
+   ============================================ */
+
+@media print {
+  /* Default print: 5.5×8.5 with equal margins (home print) */
+  @page {
+    size: 5.5in 8.5in;
+    margin: 0.6in; /* Equal margins for home printing */
+  }
+
+  html,
+  body {
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+  }
+
+  .book-wrap {
+    height: auto;
+    overflow: visible;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .page {
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    break-after: page;
+    page-break-after: always;
+    scroll-snap-align: none;
+  }
+
+  .page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .spread {
+    display: block;
+    width: auto;
+  }
+
+  .page-number {
+    position: static;
+    transform: none;
+    text-align: center;
+    margin-top: 24pt;
+  }
+
+  /* Hide navigation elements in print */
+  .book-nav,
+  .book-controls,
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   RESPONSIVE - Smaller Screens
+   ============================================ */
+
+@media (max-width: 900px) {
+  :root {
+    /* Tablet: 18-20px breathing room for content */
+    --margin: 20px;
+  }
+
+  .book-wrap {
+    padding: 12px;
+  }
+
+  .page {
+    max-width: calc(100% - 24px); /* Leave room for brown borders */
+    box-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.08),
+      0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    /* Mobile: 10px for dotted decor visual area */
+    --margin: 10px;
+  }
+
+  .book-wrap {
+    /* Thin brown border around page edges */
+    padding: 26px 10px 24px 10px;
+    /* Account for header (~80px) + top padding (26px) - adjust for perfect alignment */
+    scroll-padding-top: 101px;
+  }
+
+  /* Mobile: Remove .book-stage explicit width, let it flow naturally */
+  .book-stage {
+    width: auto !important;
+    max-width: 100%;
+  }
+
+  /* Mobile: Minimal padding on .book-spread */
+  .book-spread.single-mode,
+  .book-spread.spread-mode {
+    padding: 10px;
+  }
+
+  .page {
+    /* Page width leaves room for brown borders */
+    max-width: calc(100% - 20px);
+    /* 10px page padding shows dotted texture area */
+    padding: 10px;
+  }
+
+  .page-content {
+    /* Content wrapper provides additional 16px breathing room from dotted area to text */
+    padding: 16px;
+    margin: 0;
+  }
+
+  .book-text {
+    font-size: 10pt;
+    text-align: left; /* Left-align on mobile for readability */
+    padding: 0;
+    margin: 0;
+  }
+
+  .book-text p {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .book-heading {
+    margin-top: 20px; /* Extra space at top of page to first heading */
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .page-number {
+    /* Page numbers positioned within the 16px padding */
+    left: 16px !important;
+    bottom: 16px !important;
+  }
+
+  .page.right .page-number {
+    right: 16px !important;
+    left: auto !important;
+  }
+}
+
+/* ============================================
+   SCREEN-ONLY ENHANCEMENTS - Premium Book Experience
+   ============================================
+
+   These styles apply ONLY to screen viewing, never to print.
+   Wrapped in @layer to prevent any bleed into print output.
+   ============================================ */
+
+@layer book-screen {
+  @media screen {
+    /* Single source of truth for page content height */
+    :root {
+      --book-content-height: 700px; /* Exact inner content box at scale 1.0 */
+    }
+
+    /* Book stage - explicit width container for proper centering */
+    .book-stage {
+      margin-inline: auto;
+      position: relative;
+      /* Width set inline via JS based on viewport config */
+    }
+
+    /* Screen typography - larger for readability (print uses 11pt) */
+    .book-text {
+      font-size: 20px; /* Base screen size (vs 11pt/~14.67px for print) */
+      line-height: 1.7;
+    }
+
+    .book-heading {
+      font-size: 24px; /* vs 16pt for print */
+    }
+
+    .book-title {
+      font-size: 28px; /* vs 20pt for print */
+    }
+
+    /* Prevent breaking of images, audio, and other non-text content */
+    .no-break {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    /* Debug overlay for pagination (enabled with ?debug=1) */
+    .debug-pagination-lines {
+      position: absolute;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .debug-content-height-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: red;
+      opacity: 0.6;
+    }
+
+    .debug-used-height-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: green;
+      opacity: 0.6;
+    }
+
+    .debug-info {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-family: monospace;
+      border-radius: 4px;
+      z-index: 10000;
+      pointer-events: none;
+    }
+
+    /* Premium desk with subtle vignette */
+    .book-wrap {
+      background:
+        radial-gradient(
+          ellipse at center,
+          transparent 30%,
+          rgba(0, 0, 0, 0.08) 100%
+        ),
+        linear-gradient(135deg, #2c1f1a 0%, #3a2a22 100%);
+    }
+
+    /* Enhanced page shadow for screen - more depth */
+    .page {
+      box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+        0 14px 40px rgba(0, 0, 0, 0.12),
+        0 4px 12px rgba(0, 0, 0, 0.08);
+      background-clip: padding-box;
+    }
+
+    /* Spine hint in single-page mode - suggests facing page */
+    .spine-hint {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 816px; /* Match page height */
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0, 0, 0, 0.08) 50%,
+        transparent 100%
+      );
+      /* Fade at top and bottom */
+      mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        black 8%,
+        black 92%,
+        transparent 100%
+      );
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+      /* Smooth fade in/out with mode changes */
+      transition: opacity 140ms ease-out;
+    }
+
+    /* Single-page mode: breathing space around page */
+    .single-wrap {
+      padding-inline: clamp(32px, 6vw, 80px);
+      padding-block: 32px;
+    }
+
+    /* Navigation arrows - premium 64px touch targets */
+    .nav-arrow {
+      width: 64px;
+      height: 64px;
+      z-index: 20;
+      /* Subtle entrance animation */
+      animation: fadeIn 200ms ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    /* Mode transition polish - smooth crossfade */
+    .spread,
+    .page {
+      transition:
+        transform 140ms ease-out,
+        opacity 140ms ease-out,
+        box-shadow 140ms ease-out;
+    }
+
+    /* Respect reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      .spine-hint,
+      .nav-arrow,
+      .spread,
+      .page {
+        transition: none;
+        animation: none;
+      }
+    }
+
+
+
+    /* Z-index hierarchy (screen only) */
+    .book-wrap {
+      z-index: 0;
+    }
+
+    .spine-hint {
+      z-index: 1;
+    }
+
+    .page,
+    .spread {
+      z-index: 10;
+    }
+
+    .nav-arrow {
+      z-index: 20;
+    }
+
+    /* Mic FAB and menus handled by global z-index in main app */
+
+    /* ============================================
+       BOOK NAVIGATION STYLES
+       ============================================ */
+
+    /* TOC Trigger Tab */
+    .toc-trigger {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 300ms ease;
+      z-index: 30;
+    }
+
+    .toc-trigger:hover {
+      width: 48px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Safe area padding for mobile (iPhone notches, etc.) */
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Mobile bottom sheet animations */
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(100%);
+      }
+    }
+
+    /* Prevent scrolling when bottom sheet is open */
+    body.bottom-sheet-open {
+      overflow: hidden;
+    }
+
+    /* Mobile navigation polish */
+    @media (max-width: 768px) {
+      /* Increase touch target for decade grid */
+      .decade-grid-button {
+        min-height: 88px;
+      }
+
+      /* Increase touch target for story list */
+      .story-list-button {
+        min-height: 64px;
+      }
+
+      /* Smooth transitions for mobile interactions */
+      button {
+        -webkit-tap-highlight-color: transparent;
+      }
+    }
+
+    /* Desktop progress bar hover effects */
+    @media (min-width: 769px) {
+      /* Progress bar already has height transition in component */
+
+      .progress-bar-container .decade-marker {
+        transition: transform 200ms ease;
+      }
+
+      .progress-bar-container .decade-marker:hover {
+        transform: translateY(-50%) scale(1.5);
+      }
+    }
+
+    /* Scrollbar styling for TOC sidebar */
+    .toc-sidebar-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .toc-sidebar-content::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .toc-sidebar-content::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+
+    .toc-sidebar-content::-webkit-scrollbar-thumb:hover {
+      background: #a1a1a1;
+    }
+  }
+}
+
+/* ============================================
+   WHISPER PAGES - Gentle Prompts Between Stories
+   ============================================ */
+
+/* Whisper pages have warmer, more inviting tone */
+.whisper-page {
+  /* Better vertical distribution */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 2rem;
+  min-height: 100%;
+  position: relative;
+  
+  /* Warmer paper color - like aged parchment */
+  background: linear-gradient(
+    135deg, 
+    #FFFEF8 0%, 
+    #FFF9F0 50%, 
+    #FFFDF5 100%
+  );
+  
+  /* Subtle inner shadow for organic depth */
+  box-shadow: 
+    inset 0 0 30px rgba(220, 190, 140, 0.03),
+    inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+/* Subtle background pattern instead of lonely emoji */
+.whisper-page::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  right: 10%;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.whisper-content {
+  max-width: 42rem;
+  margin: 0 auto;
+  animation: whisper-fade-in 0.8s ease-out;
+}
+
+/* Make the "After reading..." much more subtle */
+.whisper-context {
+  font-size: 0.875rem;
+  color: #D4C4B0;
+  opacity: 0.7;
+  margin-bottom: 2.5rem;
+  font-style: italic;
+}
+
+/* The question - bigger, more readable, no hyphens */
+.whisper-question {
+  font-size: 1.875rem; /* 30px */
+  line-height: 1.6;
+  color: #3A3A3A;
+  font-family: 'Crimson Text', Georgia, serif;
+  hyphens: none;
+  word-break: normal;
+  margin: 0 auto 3rem;
+  max-width: 85%; /* Prevent edge-to-edge */
+}
+
+/* More elegant buttons - no underlines */
+.whisper-actions {
+  margin-top: 2rem;
+}
+
+.whisper-action-primary {
+  /* "I want to tell this story" - prominent */
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: white;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.whisper-action-secondary {
+  /* "Continue reading" - subtle */
+  background: transparent;
+  color: #9CA3AF;
+  border: 1px solid #E5E7EB;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+/* Gentle fade-in animation when whisper appears */
+@keyframes whisper-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .whisper-page {
+    padding: 2rem 1.5rem;
+  }
+  
+  .whisper-question {
+    font-size: 1.5rem;
+    max-width: 90%;
+  }
+  
+  .whisper-context {
+    font-size: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  
+  .whisper-action-primary,
+  .whisper-action-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}

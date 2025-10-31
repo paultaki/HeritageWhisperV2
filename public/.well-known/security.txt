@@ -1,23 +1,36 @@
-# Security Contact Information for HeritageWhisper
-# If you discover a security vulnerability, please report it responsibly
-
 Contact: mailto:security@heritagewhisper.com
-Expires: 2026-12-31T23:59:59.000Z
+Expires: 2026-10-31T23:59:59.000Z
 Preferred-Languages: en
 Canonical: https://heritagewhisper.com/.well-known/security.txt
 
-# Security Policy
-Policy: https://heritagewhisper.com/privacy
+# Security Vulnerability Disclosure
 
-# Please report security vulnerabilities privately before public disclosure
-# We appreciate responsible disclosure and will respond within 48 hours
-# Do not exploit vulnerabilities - report them so we can fix them
+Thank you for helping keep HeritageWhisper and our users safe. We appreciate your efforts to responsibly disclose security vulnerabilities.
 
-# Our commitment:
-# - We will acknowledge your report within 48 hours
-# - We will provide regular updates on our investigation
-# - We will credit you for responsible disclosure (if desired)
-# - We will not take legal action for good-faith security research
+## Reporting Process
 
-# Thank you for helping keep HeritageWhisper secure!
+1. Email security@heritagewhisper.com with details of the vulnerability
+2. Include steps to reproduce, potential impact, and any proof-of-concept code
+3. Allow up to 48 hours for initial response
+4. Do not publicly disclose the vulnerability until we have addressed it
 
+## What to Expect
+
+- We will acknowledge receipt within 48 hours
+- We will provide a timeline for addressing the vulnerability
+- We will work with you on coordinated disclosure timing
+- We will credit you for the discovery (unless you prefer to remain anonymous)
+
+## Out of Scope
+
+- Social engineering attacks
+- Physical attacks against HeritageWhisper infrastructure
+- Attacks requiring access to a user's device or credentials
+- Denial of service attacks
+
+## Safe Harbor
+
+We support safe harbor for security researchers who:
+- Make a good faith effort to avoid privacy violations and data destruction
+- Report vulnerabilities privately and allow reasonable time for patching
+- Do not exploit vulnerabilities beyond what is necessary to demonstrate the issue

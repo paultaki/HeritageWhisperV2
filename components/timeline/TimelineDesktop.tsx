@@ -741,7 +741,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   return (
     <div
       ref={cardRef}
-      className={`timeline-step flex flex-col lg:flex-row items-center gap-6 lg:gap-4 transition-all duration-500 ${
+      className={`timeline-step flex flex-col lg:flex-row items-center gap-6 lg:gap-0 transition-all duration-500 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
       style={{
@@ -930,7 +930,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     if (!storiesData) return;
 
     const handleBubbleScroll = () => {
-      const stickyTop = 61; // Sticky position from top (aligned with header, reduced by 19px)
+      const stickyTop = 62; // Sticky position from top (aligned with header bottom edge)
       const collisionThreshold = 10 as number; // Very small threshold - stay visible longer
 
       // Query all timeline-dot elements
@@ -961,40 +961,25 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           
           // Check if next bubble is approaching
           const proximityToNext = nextBubbleDistance - stickyTop;
-          
-          // CRITICAL FIX: Force fixed positioning when next bubble is approaching
-          // This prevents CSS sticky from "releasing" prematurely
-          if (proximityToNext <= 100) {
-            // Next bubble is within 100px - LOCK current marker with fixed positioning
-            bubble.style.position = 'fixed';
-            bubble.style.top = `${stickyTop}px`;
-            bubble.style.left = bubble.getBoundingClientRect().left + 'px';
-            bubble.style.width = bubble.offsetWidth + 'px'; // Preserve width
-          } else {
-            // Far apart - use normal sticky
-            bubble.style.position = '';
-            bubble.style.top = '';
-            bubble.style.left = '';
-            bubble.style.width = '';
-          }
-          
-          // Fade logic - only when deeply overlapping
-          if (proximityToNext > -50) {
-            // Stay FULLY visible until 50px deep overlap
+
+          // Fade logic - stay visible until next bubble is very close
+          if (proximityToNext > 0) {
+            // Stay FULLY visible until next bubble touches sticky position
             bubble.style.opacity = '1';
             bubble.style.transform = `${translateX} scale(1)`;
-          } else {
-            // Fade out over 30px of overlap
-            const overlapProgress = Math.min(1, Math.abs(proximityToNext + 50) / 30);
+          } else if (proximityToNext > -65) {
+            // Fade out over the last 65px of overlap (matching gap issue)
+            const overlapProgress = Math.abs(proximityToNext) / 65;
             bubble.style.opacity = `${Math.max(0, 1 - overlapProgress)}`;
             bubble.style.transform = `${translateX} scale(${Math.max(0.9, 1 - (overlapProgress * 0.1))})`;
+          } else {
+            // Fully faded when deep overlap
+            bubble.style.opacity = '0';
+            bubble.style.transform = `${translateX} scale(0.9)`;
           }
         } else {
           // Bubble is below sticky position - normal state
           bubble.classList.remove('is-sticky');
-          bubble.style.position = '';
-          bubble.style.top = '';
-          bubble.style.left = '';
           bubble.style.opacity = '1';
           bubble.style.transform = `${translateX} scale(1)`;
         }
@@ -1129,7 +1114,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                       return (
                         <div
                           key={story.id}
-                          className={isVeryFirstStory ? "md:mt-0" : "md:-mt-[108px]"}
+                          className={isVeryFirstStory ? "md:mt-0" : "md:-mt-[147px]"}
                           data-memory-id={story.id}
                           style={{
                             transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',
@@ -1228,7 +1213,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           /* Sticky date bubbles */
           .timeline-dot {
             position: sticky;
-            top: 61px;
+            top: 62px;
             z-index: 30;
             /* No transitions - scroll handler provides smooth updates */
           }

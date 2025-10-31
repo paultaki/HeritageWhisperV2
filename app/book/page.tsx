@@ -1,180 +1,25 @@
 "use client";
 
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
-import { createPortal } from "react-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
-import { apiRequest } from "@/lib/queryClient";
-import {
-  ArrowLeft,
-  BookOpen,
-  Play,
-  Pause,
-  Pencil,
-  Sparkles,
-  MessageCircle,
-  Plus,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-} from "lucide-react";
-import { useModeSelection } from "@/hooks/use-mode-selection";
-import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
-import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
-import FloatingInsightCard from "@/components/FloatingInsightCard";
-import { useSwipeable } from "react-swipeable";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { DecadeIntroPage } from "@/components/BookDecadePages";
-import { useViewportConfig } from "./components/ViewportManager";
-import BookProgressBar from "@/components/BookProgressBar";
-import BookDecadesPill from "@/components/BookDecadesPill";
-import WhisperPage from "@/components/WhisperPage";
-import {
-  paginateBook,
-  getPageSpreads,
-  type Story as PaginationStory,
-  type BookPage,
-  type DecadeGroup,
-  MEASUREMENTS,
-} from "@/lib/bookPagination";
-import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormatting";
+import { Volume2, Pause, Loader2 } from "lucide-react";
+import { BookPage } from "./components/BookPage";
+import DarkBookProgressBar from "./components/DarkBookProgressBar";
+import { BookPage as BookPageType } from "@/lib/bookPagination";
+import "./book.css";
 
-const logoUrl = "/HW_logo_mic_clean.png";
+// Import handwriting font
+import { Caveat } from "next/font/google";
 
-// Dynamic pagination constants
-const LINE_GUARD = 2; // px safety margin
-const HERO_MIN_TOP = 0; // minimum top margin for hero (matches side margins)
-const HERO_MAX_TOP = 37; // maximum top margin if space is available
-const MIN_MOVE_UNIT = 12; // don't chase tiny adjustments
+const caveat = Caveat({ 
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  display: "swap",
+});
 
-// Helper: Get element height including margins
-function outerHeightWithMargins(el: HTMLElement): number {
-  const r = el.getBoundingClientRect();
-  const cs = window.getComputedStyle(el);
-  const mt = parseFloat(cs.marginTop) || 0;
-  const mb = parseFloat(cs.marginBottom) || 0;
-  return r.height + mt + mb;
-}
-
-// Helper: Get page content container
-function pageContent(el: HTMLElement | null): HTMLElement | null {
-  return el?.querySelector<HTMLElement>(".book-page-content") || el;
-}
-
-// Audio Manager for single playback
-class AudioManager {
-  private static instance: AudioManager;
-  private currentAudio: HTMLAudioElement | null = null;
-  private currentId: string | null = null;
-  private listeners: Map<string, (playing: boolean, time: number) => void> =
-    new Map();
-
-  static getInstance() {
-    if (!AudioManager.instance) {
-      AudioManager.instance = new AudioManager();
-    }
-    return AudioManager.instance;
-  }
-
-  register(id: string, callback: (playing: boolean, time: number) => void) {
-    this.listeners.set(id, callback);
-  }
-
-  unregister(id: string) {
-    if (this.currentId === id && this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio = null;
-      this.currentId = null;
-    }
-    this.listeners.delete(id);
-  }
-
-  async play(id: string, audioUrl: string): Promise<void> {
-    if (this.currentAudio && this.currentId !== id) {
-      this.currentAudio.pause();
-      this.notifyListeners(this.currentId!, false, 0);
-    }
-
-    if (this.currentId === id && this.currentAudio) {
-      if (this.currentAudio.paused) {
-        await this.currentAudio.play();
-        this.notifyListeners(id, true, this.currentAudio.currentTime);
-      } else {
-        this.currentAudio.pause();
-        this.notifyListeners(id, false, this.currentAudio.currentTime);
-      }
-    } else {
-      this.currentAudio = new Audio(audioUrl);
-      this.currentId = id;
-
-      this.currentAudio.addEventListener("ended", () => {
-        this.notifyListeners(id, false, 0);
-        this.currentAudio = null;
-        this.currentId = null;
-      });
-
-      this.currentAudio.addEventListener("pause", () => {
-        if (this.currentAudio) {
-          this.notifyListeners(id, false, this.currentAudio.currentTime);
-        }
-      });
-
-      this.currentAudio.addEventListener("play", () => {
-        if (this.currentAudio) {
-          this.notifyListeners(id, true, this.currentAudio.currentTime);
-        }
-      });
-
-      this.currentAudio.addEventListener("timeupdate", () => {
-        if (this.currentAudio && !this.currentAudio.paused) {
-          this.notifyListeners(id, true, this.currentAudio.currentTime);
-        }
-      });
-
-      this.currentAudio.addEventListener("loadedmetadata", () => {
-        if (this.currentAudio) {
-          this.notifyListeners(id, false, 0);
-        }
-      });
-
-      await this.currentAudio.play();
-      this.notifyListeners(id, true, 0);
-    }
-  }
-
-  stopAll() {
-    if (this.currentAudio) {
-      this.currentAudio.pause();
-      if (this.currentId) {
-        this.notifyListeners(this.currentId, false, 0);
-      }
-      this.currentAudio = null;
-      this.currentId = null;
-    }
-  }
-
-  private notifyListeners(id: string, playing: boolean, time: number) {
-    const callback = this.listeners.get(id);
-    if (callback) callback(playing, time);
-  }
-
-  getDuration(id: string): number {
-    if (this.currentId === id && this.currentAudio) {
-      return this.currentAudio.duration || 0;
-    }
-    return 0;
-  }
-}
-
-// Map the existing Story interface to our pagination Story type
+// Story interface matching your API structure
 interface Story {
   id: string;
   userId: string;
@@ -207,1054 +52,1391 @@ interface Story {
   createdAt: string;
 }
 
-// Convert Story to PaginationStory
-const convertToPaginationStory = (story: Story): PaginationStory => {
-  const photos =
-    story.photos?.map((p) => ({
-      id: p.id,
-      url: p.url,
-      transform: p.transform,
-      caption: p.caption,
-      isHero: p.isHero,
-    })) ||
-    (story.photoUrl
-      ? [
-          {
-            id: "legacy",
-            url: story.photoUrl,
-            isHero: true,
-          },
-        ]
-      : []);
-
-  return {
-    id: story.id,
-    title: story.title,
-    content: story.transcription || "",
-    year: story.storyYear.toString(),
-    date: story.storyDate,
-    age: story.lifeAge,
-    audioUrl: story.audioUrl || undefined,
-    photos,
-    lessonLearned: story.wisdomClipText || undefined,
-  };
-};
-
-// Lesson Learned callout component
-const LessonCallout = ({ text }: { text: string }) => {
-  if (!text) return null;
-  return (
-    <aside className="lesson-callout">
-      <div className="title">Lesson Learned</div>
-      <p className="lesson-text">{text}</p>
-    </aside>
-  );
-};
-
-// Photo carousel component
-const PhotoCarousel = ({ photos }: { photos: PaginationStory["photos"] }) => {
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-
-  if (photos.length === 0) return null;
-
-  const currentPhoto = photos[currentPhotoIndex];
-  const hasMultiplePhotos = photos.length > 1;
-
-  return (
-    <div className="relative mb-4 memory-hero overflow-hidden rounded-lg z-50">
-      <img
-        src={currentPhoto.url}
-        alt="Memory"
-        className="w-full object-cover rounded-lg memory-photo"
-        style={
-          currentPhoto.transform
-            ? {
-                transform: `scale(${currentPhoto.transform.zoom}) translate(${currentPhoto.transform.position.x}%, ${currentPhoto.transform.position.y}%)`,
-                transformOrigin: "center center",
-              }
-            : undefined
-        }
-      />
-      {hasMultiplePhotos && (
-        <>
-          {/* Navigation arrows with cleaner design - higher z-index to be above page navigation */}
-          {currentPhotoIndex > 0 && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setCurrentPhotoIndex(currentPhotoIndex - 1);
-              }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg z-[60]"
-              aria-label="Previous photo"
-            >
-              <ChevronLeft className="w-5 h-5 text-gray-700" />
-            </button>
-          )}
-
-          {currentPhotoIndex < photos.length - 1 && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setCurrentPhotoIndex(currentPhotoIndex + 1);
-              }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all shadow-md hover:shadow-lg z-[60]"
-              aria-label="Next photo"
-            >
-              <ChevronRight className="w-5 h-5 text-gray-700" />
-            </button>
-          )}
-
-          {/* Photo counter */}
-          <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm z-[60]">
-            <span className="text-white text-sm font-medium">
-              {currentPhotoIndex + 1} / {photos.length}
-            </span>
-          </div>
-        </>
-      )}
-    </div>
-  );
-};
-
-// Single page renderer
-const BookPageRenderer = ({
-  page,
-  onNavigateToPage,
-  onNavigatePrevious,
-  onNavigateNext,
-}: {
-  page: BookPage;
-  onNavigateToPage?: (pageNumber: number) => void;
-  onNavigatePrevious?: () => void;
-  onNavigateNext?: () => void;
-}) => {
+export default function BookV4Page() {
+  const { user } = useAuth();
   const router = useRouter();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const audioManager = AudioManager.getInstance();
-  const audioId = page.storyId || page.pageNumber.toString();
-  const pageContentRef = useRef<HTMLDivElement>(null);
-  const [hasOverflow, setHasOverflow] = useState(false);
-
-  const playbackProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  // Skip mutation to dismiss whisper prompts (must be at top level, not conditional)
-  const skipMutation = useMutation({
-    mutationFn: async (promptId: string) => {
-      return apiRequest("POST", "/api/prompts/skip", { promptId });
-    },
-  });
-
-  // Register with audio manager
-  useEffect(() => {
-    audioManager.register(audioId, (playing, time) => {
-      setIsPlaying(playing);
-      setCurrentTime(time);
-      if (playing) {
-        const dur = audioManager.getDuration(audioId);
-        if (dur > 0) setDuration(dur);
-      }
-    });
-
-    // Load duration for this audio
-    if (page.audioUrl) {
-      const audio = new Audio(page.audioUrl);
-      audio.addEventListener("loadedmetadata", () => {
-        setDuration(audio.duration);
-      });
-    }
-
-    return () => {
-      audioManager.unregister(audioId);
-    };
-  }, [audioId, page.audioUrl]);
-
-  // Overflow detection - check if content exceeds page capacity
-  useEffect(() => {
-    const checkOverflow = () => {
-      if (!pageContentRef.current) return;
-
-      const element = pageContentRef.current;
-      const isOverflowing = element.scrollHeight > element.clientHeight;
-
-      if (isOverflowing && !hasOverflow) {
-        setHasOverflow(true);
-        console.warn(`Page ${page.pageNumber} has overflow:`, {
-          scrollHeight: element.scrollHeight,
-          clientHeight: element.clientHeight,
-          overflow: element.scrollHeight - element.clientHeight,
-          pageType: page.type,
-          storyId: page.storyId,
-          hasAudio: !!page.audioUrl,
-        });
-      } else if (!isOverflowing && hasOverflow) {
-        setHasOverflow(false);
-      }
-    };
-
-    // Check overflow after render and when content changes
-    const timeoutId = setTimeout(checkOverflow, 100);
-
-    return () => clearTimeout(timeoutId);
-  }, [page, hasOverflow]);
-
-  const toggleAudio = async () => {
-    if (!page.audioUrl) return;
-    await audioManager.play(audioId, page.audioUrl);
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  // Handle margin clicks for navigation
-  const handleLeftMarginClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event bubbling
-    if (onNavigatePrevious) {
-      onNavigatePrevious();
-    }
-  };
-
-  const handleRightMarginClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event bubbling
-    if (onNavigateNext) {
-      onNavigateNext();
-    }
-  };
-
-  // Margin click zones - left goes back, right goes forward
-  const MarginClickZones = () => {
-    return (
-      <>
-        {/* Left margin - previous page */}
-        <div
-          className="absolute top-0 bottom-0 left-0 w-[15%] z-10 hover:bg-black/5 transition-all duration-200 cursor-pointer group"
-          onClick={handleLeftMarginClick}
-          aria-label="Previous page"
-          role="button"
-          tabIndex={-1}
-        >
-          <div className="absolute top-1/2 left-2 -translate-y-1/2 opacity-0 group-hover:opacity-40 transition-opacity duration-200 pointer-events-none">
-            <ChevronLeft className="w-8 h-8 text-gray-700" />
-          </div>
-        </div>
-        {/* Right margin - next page */}
-        <div
-          className="absolute top-0 bottom-0 right-0 w-[15%] z-10 hover:bg-black/5 transition-all duration-200 cursor-pointer group"
-          onClick={handleRightMarginClick}
-          aria-label="Next page"
-          role="button"
-          tabIndex={-1}
-        >
-          <div className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 group-hover:opacity-40 transition-opacity duration-200 pointer-events-none">
-            <ChevronRight className="w-8 h-8 text-gray-700" />
-          </div>
-        </div>
-      </>
-    );
-  };
-
-  // Render intro page
-  if (page.type === "intro") {
-    return (
-      <article
-        className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
-      >
-        <MarginClickZones />
-        <div
-          ref={pageContentRef}
-          className="page-content px-8 py-16 flex flex-col items-center justify-center text-center h-full"
-        >
-          <div className="space-y-8">
-            <h1
-              className="text-5xl font-serif text-gray-800 mb-4"
-              style={{ fontFamily: "Crimson Text, serif" }}
-            >
-              Family Memories
-            </h1>
-            <div className="w-24 h-1 bg-coral-600 mx-auto"></div>
-            <p className="text-lg text-gray-600 leading-relaxed max-w-md mx-auto italic">
-              A collection of cherished moments, stories, and lessons from a
-              life well-lived.
-            </p>
-            <p className="text-base text-gray-500 mt-8">
-              These pages hold the precious memories that shaped our family's
-              journey.
-            </p>
-          </div>
-        </div>
-        <div className="page-number">{page.pageNumber}</div>
-      </article>
-    );
-  }
-
-  // Render table of contents
-  if (page.type === "table-of-contents") {
-    return (
-      <article
-        className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
-      >
-        <MarginClickZones />
-        <div ref={pageContentRef} className="page-content px-8 py-12">
-          <h1 className="text-4xl font-serif text-center mb-8 text-gray-800">
-            Table of Contents
-          </h1>
-          <div className="space-y-6">
-            {page.tocEntries?.map((entry) => (
-              <div key={entry.decade} className="space-y-2">
-                <h2 className="text-xl font-serif font-semibold text-gray-700 border-b border-gray-300 pb-1">
-                  {entry.decadeTitle}
-                </h2>
-                <div className="space-y-1 pl-4">
-                  {entry.stories.map((story, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() =>
-                        onNavigateToPage &&
-                        onNavigateToPage(story.pageNumber - 1)
-                      }
-                      className="flex justify-between items-baseline text-sm w-full hover:bg-gray-50 px-2 py-1 rounded transition-colors cursor-pointer text-left"
-                    >
-                      <span className="text-gray-700 flex-1 pr-2 hover:text-coral-600">
-                        {story.title}
-                      </span>
-                      <span className="text-gray-500 text-xs whitespace-nowrap">
-                        {story.date
-                          ? formatStoryDateForMetadata(story.date, parseInt(story.year))
-                          : story.year} • p.{story.pageNumber}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="page-number">{page.pageNumber}</div>
-      </article>
-    );
-  }
-
-  // Render decade marker
-  if (page.type === "decade-marker") {
-    return (
-      <article
-        className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
-      >
-        <MarginClickZones />
-        <DecadeIntroPage
-          decade={page.decade || ""}
-          title={page.decadeTitle || ""}
-          storiesCount={page.storiesInDecade || 0}
-        />
-        <div className="page-number">{page.pageNumber}</div>
-      </article>
-    );
-  }
-
-  // TEMPORARILY DISABLED: Render whisper page - gentle prompts between stories (needs refinement)
-  // if (page.type === "whisper" && page.whisperPrompt) {
-  //   const handleWhisperRecord = () => {
-  //     // Store context for recording session
-  //     if (typeof window !== "undefined") {
-  //       sessionStorage.setItem("sourcePromptId", page.whisperPrompt!.id);
-  //       sessionStorage.setItem("promptText", page.whisperPrompt!.promptText);
-  //       sessionStorage.setItem("returnToBook", "true");
-  //       sessionStorage.setItem("bookPageNumber", page.pageNumber.toString());
-  //     }
-
-  //     // Navigate to recording
-  //     router.push("/recording");
-  //   };
-
-  //   const handleWhisperContinue = async () => {
-  //     // Dismiss the prompt (add to archive)
-  //     try {
-  //       await skipMutation.mutateAsync(page.whisperPrompt!.id);
-  //     } catch (error) {
-  //       console.error("Failed to dismiss whisper prompt:", error);
-  //       // Continue navigation even if dismissal fails
-  //     }
-
-  //     // Navigate to next page
-  //     if (onNavigateToPage) {
-  //       onNavigateToPage(page.pageNumber); // This will advance by 1 page (0-indexed)
-  //     }
-  //   };
-
-  //   return (
-  //     <article
-  //       className={`page ${page.isLeftPage ? "page--left" : "page--right"}`}
-  //     >
-  //       <MarginClickZones />
-  //       <WhisperPage
-  //         prompt={page.whisperPrompt}
-  //         afterStory={{
-  //           year: page.afterStoryYear || "",
-  //           title: page.afterStoryTitle || "",
-  //         }}
-  //         onRecord={handleWhisperRecord}
-  //         onContinue={handleWhisperContinue}
-  //       />
-  //       <div className="page-number">{page.pageNumber}</div>
-  //     </article>
-  //   );
-  // }
-
-  // Render story pages
-  return (
-    <article
-      className={`page book-page ${page.isLeftPage ? "page--left" : "page--right"}`}
-    >
-      <MarginClickZones />
-      <div className="running-header">
-        {/* Story title with year and age - single line */}
-        <div className="story-header-title">
-          {page.title ||
-            (page.isLeftPage ? "Heritage Whisper" : "Family Memories")}
-          {page.year && !page.title?.includes(page.year) && ` • ${
-            page.date
-              ? formatStoryDateForMetadata(page.date, parseInt(page.year))
-              : page.year
-          }`}
-          {page.age !== null &&
-            page.age !== undefined &&
-            page.age > 0 &&
-            ` • Age ${page.age}`}
-          {page.age !== null &&
-            page.age !== undefined &&
-            page.age === 0 &&
-            ` • Birth`}
-          {page.age !== null &&
-            page.age !== undefined &&
-            page.age < 0 &&
-            ` • Before birth`}
-        </div>
-        {/* Edit and Timeline buttons for this story */}
-        {(page.type === "story-start" || page.type === "story-complete") &&
-          page.storyId && (
-            <div className="flex gap-1.5">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  router.push(
-                    `/review/book-style?id=${page.storyId}&returnPath=${encodeURIComponent(`/book?storyId=${page.storyId}`)}`,
-                  )
-                }
-                className="flex-1 gap-1 text-xs px-2 py-1 h-auto"
-              >
-                <Pencil className="w-3 h-3" />
-                <span>Edit</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  // Store navigation context for timeline to pick up
-                  const context = {
-                    memoryId: page.storyId,
-                    scrollPosition: 0, // Start at top, will scroll to card
-                    timestamp: Date.now(),
-                    returnPath: '/timeline', // Required by timeline navigation logic
-                  };
-                  sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
-
-                  // Navigate to timeline
-                  router.push('/timeline');
-                }}
-                className="flex-1 gap-1 text-xs px-2 py-1 h-auto"
-              >
-                <Clock className="w-3 h-3" />
-                <span>Timeline</span>
-              </Button>
-            </div>
-          )}
-      </div>
-
-      <div ref={pageContentRef} className="page-content book-page-content">
-        {/* Photos - only on first page of story */}
-        {(page.type === "story-start" || page.type === "story-complete") &&
-          page.photos && <PhotoCarousel photos={page.photos} />}
-
-        {/* Title - only on first page (date moved to header) */}
-        {(page.type === "story-start" || page.type === "story-complete") && (
-          <div className="memory-header">
-            <h2 className="memory-title">{page.title}</h2>
-          </div>
-        )}
-
-        {/* Audio player - only on first page */}
-        {(page.type === "story-start" || page.type === "story-complete") &&
-          page.audioUrl && (
-            <div className="audio-wrapper">
-              <div className="audio-wrap">
-                <div className="flex items-center gap-2 md:gap-3">
-                  <button
-                    onClick={toggleAudio}
-                    className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full border-2 border-primary/30 bg-primary/5 hover:bg-primary/15 hover:border-primary/50 transition-all flex-shrink-0"
-                  >
-                    {isPlaying ? (
-                      <Pause className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
-                    ) : (
-                      <Play className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary ml-0.5" />
-                    )}
-                  </button>
-                  <div className="flex-1 audio-progress-container">
-                    <div
-                      className="audio-bar"
-                      style={{
-                        background: "rgba(0,0,0,0.1)",
-                        height: "6px",
-                        minHeight: "6px",
-                        maxHeight: "6px",
-                        position: "relative",
-                        overflow: "hidden",
-                        borderRadius: "999px",
-                        display: "block",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: `${playbackProgress}%`,
-                          height: "6px",
-                          minHeight: "6px",
-                          maxHeight: "6px",
-                          background:
-                            "linear-gradient(90deg, #E85D5D, #FF935F)",
-                          position: "absolute",
-                          top: "0",
-                          left: "0",
-                          borderRadius: "3px",
-                          zIndex: 1,
-                          display: "block",
-                          fontSize: "0",
-                          lineHeight: "0",
-                          padding: "0",
-                          margin: "0",
-                          boxSizing: "border-box",
-                          transition: "width 0.1s linear",
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap">
-                    {formatTime(currentTime)}
-                  </span>
-                  <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap">
-                    {formatTime(duration)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-        {/* Story text */}
-        {page.text && (
-          <div className="memory-body">
-            <div className="prose prose-lg max-w-none">
-              {page.text.split("\n\n").map((paragraph, index) => (
-                <p
-                  key={index}
-                  className="mb-4 last:mb-0 leading-relaxed text-justify"
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Lesson learned - only on last page */}
-        {(page.type === "story-end" || page.type === "story-complete") &&
-          page.lessonLearned && <LessonCallout text={page.lessonLearned} />}
-      </div>
-
-      <div className="page-number">{page.pageNumber}</div>
-    </article>
-  );
-};
-
-export default function BookViewNew() {
-  const router = useRouter();
-  const { user, session } = useAuth();
-  const isMobile = useIsMobile();
-  const viewportConfig = useViewportConfig(); // Intelligent viewport detection
-  const showSpreadView = viewportConfig.mode === "spread"; // Use viewport config directly
+  
+  const [isBookOpen, setIsBookOpen] = useState(false);
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
-  const modeSelection = useModeSelection();
-  const [fontsReady, setFontsReady] = useState(false);
-  const [isPaginationReady, setIsPaginationReady] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1.0); // V2: Simple zoom control
-  const [showDecadeSelector, setShowDecadeSelector] = useState(false); // Mobile decade navigation
+  const [showToc, setShowToc] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1.0);
+  
+  const flowLeftRef = useRef<HTMLDivElement>(null);
+  const flowRightRef = useRef<HTMLDivElement>(null);
 
-  // Get storyId from URL parameters
-  const searchParams = new URLSearchParams(
-    typeof window !== "undefined" ? window.location.search : "",
-  );
-  const storyIdFromUrl = searchParams.get("storyId");
-
-  // Fetch stories - API returns { stories: [...] }
+  // Fetch stories - same as main book
   const { data, isLoading } = useQuery<{ stories: Story[] }>({
     queryKey: ["/api/stories"],
     enabled: !!user,
   });
 
   const stories = data?.stories || [];
-  
-  // Fetch active prompts for whisper pages
-  const { data: promptsData } = useQuery<{ prompts: Array<{id: string; prompt_text: string}> }>({
-    queryKey: ["/api/prompts/active"],
-    enabled: !!user,
-  });
 
-  const whisperPrompts = (promptsData?.prompts || []).map(p => ({
-    id: p.id,
-    promptText: p.prompt_text,
-    contextNote: undefined, // Can be added later if needed
-  }));
+  // Filter stories that should be included in book (must be explicitly true)
+  const bookStories = stories.filter(
+    (s) => s.includeInBook === true && s.storyYear && s.transcription
+  );
 
-  // Wait for fonts to be ready for accurate measurements
-  // But don't block initial render - use optimistic pagination
-  useEffect(() => {
-    async function waitForFonts() {
-      if (typeof window === "undefined" || typeof document === "undefined") {
-        return;
+  // Sort by year
+  const sortedStories = useMemo(() => 
+    [...bookStories].sort((a, b) => a.storyYear - b.storyYear),
+    [bookStories]
+  );
+
+  // Group stories by decade
+  const decadeGroups = useMemo(() => {
+    const groups = new Map<string, Story[]>();
+    
+    sortedStories.forEach((story) => {
+      const year = story.storyYear;
+      const decade = `${Math.floor(year / 10) * 10}s`;
+      
+      if (!groups.has(decade)) {
+        groups.set(decade, []);
       }
+      groups.get(decade)!.push(story);
+    });
+    
+    return Array.from(groups.entries()).sort(([a], [b]) => parseInt(a) - parseInt(b));
+  }, [sortedStories]);
 
-      try {
-        // Wait for fonts with timeout fallback
-        const fontsPromise = document.fonts.ready;
-        const timeoutPromise = new Promise((resolve) =>
-          setTimeout(resolve, 1000),
-        );
-
-        await Promise.race([fontsPromise, timeoutPromise]);
-
-        // Mark fonts as ready for re-pagination with accurate metrics
-        setFontsReady(true);
-      } catch (error) {
-        console.error("Error waiting for fonts:", error);
-        // Mark as ready anyway to not block
-        setFontsReady(true);
-      }
-    }
-
-    waitForFonts();
-  }, []); // Run once on mount
-
-  // Convert to book data structure with optimistic rendering
-  const { pages, spreads, storyPageIndex } = useMemo(() => {
-    if (!stories || stories.length === 0) {
-      return { pages: [], spreads: [], storyPageIndex: -1 };
-    }
-
-    // Group stories by decade (only stories marked for book)
-    const decadeMap = new Map<string, Story[]>();
-
-    stories
-      .filter((story) => story.includeInBook === true)
-      .forEach((story) => {
-        const year = parseInt(story.storyYear?.toString() || "0");
-        if (year > 0) {
-          const decadeKey = `${Math.floor(year / 10) * 10}s`;
-          if (!decadeMap.has(decadeKey)) {
-            decadeMap.set(decadeKey, []);
-          }
-          decadeMap.get(decadeKey)!.push(story);
-        }
-      });
-
-    // Convert to DecadeGroup array
-    const decadeGroups: DecadeGroup[] = Array.from(decadeMap.entries())
-      .sort(([a], [b]) => parseInt(a) - parseInt(b))
-      .map(([decade, storyList]) => ({
+  // Create spreads - intro, TOC (2 pages), decade pages, then story pairs
+  const spreads = useMemo(() => {
+    const result: Array<{ 
+      left?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number }; 
+      right?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number };
+      type: 'intro' | 'toc' | 'decade' | 'stories';
+    }> = [];
+    
+    // First spread: endpaper left, intro right
+    result.push({
+      left: 'endpaper',
+      right: 'intro',
+      type: 'intro'
+    });
+    
+    // Second spread: table of contents across both pages
+    result.push({
+      left: 'toc-left',
+      right: 'toc-right',
+      type: 'toc'
+    });
+    
+    // Add decade pages and stories for each decade
+    decadeGroups.forEach(([decade, stories]) => {
+      const decadeYear = decade.replace('s', '');
+      const decadePage = {
+        type: 'decade' as const,
         decade,
-        title: `The ${decade}`,
-        stories: storyList
-          .sort((a, b) => (a.storyYear || 0) - (b.storyYear || 0)) // Sort stories within decade chronologically
-          .map(convertToPaginationStory),
-      }));
-
-    // Paginate the entire book with whisper pages (optimistically, will re-run when fonts load)
-    const bookPages = paginateBook(decadeGroups, whisperPrompts);
-    const bookSpreads = getPageSpreads(bookPages);
-
-    // Find the page index for the story if storyId is provided
-    let pageIndex = -1;
-    if (storyIdFromUrl) {
-      pageIndex = bookPages.findIndex(
-        (page) => page.storyId === storyIdFromUrl,
-      );
-    }
-
-    return {
-      pages: bookPages,
-      spreads: bookSpreads,
-      storyPageIndex: pageIndex,
-    };
-  }, [stories, storyIdFromUrl, fontsReady]); // Re-paginate when fonts load
-
-  // Signal that pagination is complete when pages are ready
-  useEffect(() => {
-    if (pages.length > 0 || (stories && stories.length === 0)) {
-      setIsPaginationReady(true);
-    }
-  }, [pages, stories]);
-
-  // Navigate to story page when storyId is found
-  useEffect(() => {
-    if (storyPageIndex >= 0) {
-      if (isMobile) {
-        setCurrentMobilePage(storyPageIndex);
+        title: `The ${decadeYear}s`,
+        count: stories.length
+      };
+      
+      // Check if we need to add decade marker on left or right
+      const lastSpread = result[result.length - 1];
+      const needsNewSpread = !lastSpread || (lastSpread.left && lastSpread.right);
+      
+      if (needsNewSpread) {
+        // Create new spread with decade on left
+        result.push({
+          left: decadePage,
+          right: stories[0],
+          type: 'stories'
+        });
+        
+        // Add remaining story spreads
+        for (let i = 1; i < stories.length; i += 2) {
+          result.push({
+            left: stories[i],
+            right: stories[i + 1],
+            type: 'stories'
+          });
+        }
       } else {
-        // For desktop, find the spread that contains this page
-        const spreadIndex = Math.floor(storyPageIndex / 2);
-        setCurrentSpreadIndex(spreadIndex);
+        // Fill the empty right slot with decade marker
+        lastSpread.right = decadePage;
+        lastSpread.type = 'decade';
+        
+        // Add all story spreads for this decade
+        for (let i = 0; i < stories.length; i += 2) {
+          result.push({
+            left: stories[i],
+            right: stories[i + 1],
+            type: 'stories'
+          });
+        }
       }
+    });
+    
+    return result;
+  }, [decadeGroups]);
+
+  // Create book pages array for progress bar
+  const bookPages: BookPageType[] = useMemo(() => {
+    const pages: BookPageType[] = [];
+    let pageNum = 1;
+    
+    spreads.forEach((spread) => {
+      // Left page
+      if (spread.left) {
+        let pageType: 'intro' | 'table-of-contents' | 'decade-marker' | 'story-start' = 'intro';
+        if (typeof spread.left === 'string') {
+          if (spread.left === 'intro' || spread.left === 'endpaper') pageType = 'intro';
+          else if (spread.left === 'toc-left' || spread.left === 'toc-right') pageType = 'table-of-contents';
+        } else if ('type' in spread.left) {
+          pageType = 'decade-marker';
+        } else {
+          pageType = 'story-start';
+        }
+        
+        const leftPage: BookPageType = {
+          pageNumber: pageNum++,
+          type: pageType,
+          isLeftPage: true,
+          isRightPage: false,
+          decade: typeof spread.left === 'object' && 'decade' in spread.left ? spread.left.decade : undefined,
+          year: typeof spread.left === 'object' && 'storyYear' in spread.left ? spread.left.storyYear.toString() : undefined,
+        };
+        pages.push(leftPage);
+      }
+      
+      // Right page
+      if (spread.right) {
+        let pageType: 'intro' | 'table-of-contents' | 'decade-marker' | 'story-start' = 'intro';
+        if (typeof spread.right === 'string') {
+          if (spread.right === 'intro' || spread.right === 'endpaper') pageType = 'intro';
+          else if (spread.right === 'toc-left' || spread.right === 'toc-right') pageType = 'table-of-contents';
+        } else if ('type' in spread.right) {
+          pageType = 'decade-marker';
+        } else {
+          pageType = 'story-start';
+        }
+        
+        const rightPage: BookPageType = {
+          pageNumber: pageNum++,
+          type: pageType,
+          isLeftPage: false,
+          isRightPage: true,
+          decade: typeof spread.right === 'object' && 'decade' in spread.right ? spread.right.decade : undefined,
+          year: typeof spread.right === 'object' && 'storyYear' in spread.right ? spread.right.storyYear.toString() : undefined,
+        };
+        pages.push(rightPage);
+      }
+    });
+    
+    return pages;
+  }, [spreads]);
+
+  // Create mobile pages array (intro + TOC + all stories)
+  const mobilePages = useMemo(() => {
+    const pages: Array<{ type: 'intro' | 'toc' | 'story'; story?: Story; index: number }> = [];
+    
+    // Add intro page
+    pages.push({ type: 'intro', index: 0 });
+    
+    // Add TOC page
+    pages.push({ type: 'toc', index: 1 });
+    
+    // Add all story pages
+    sortedStories.forEach((story, idx) => {
+      pages.push({ type: 'story', story, index: idx + 2 });
+    });
+    
+    return pages;
+  }, [sortedStories]);
+
+  // Navigate to specific page from progress bar
+  const handleNavigateToPage = useCallback((pageIndex: number) => {
+    const spreadIndex = Math.floor(pageIndex / 2);
+    setCurrentSpreadIndex(Math.min(Math.max(0, spreadIndex), spreads.length - 1));
+  }, [spreads.length]);
+
+  // Navigate spreads
+  const goToPrevSpread = useCallback(() => {
+    if (currentSpreadIndex > 0) {
+      setCurrentSpreadIndex(currentSpreadIndex - 1);
     }
-  }, [storyPageIndex, isMobile]);
+  }, [currentSpreadIndex]);
 
-  // Navigation
-  const totalSpreads = spreads.length;
-  const totalPages = pages.length;
-
-  const goToPrevious = () => {
-    if (showSpreadView) {
-      setCurrentSpreadIndex((prev) => Math.max(0, prev - 1));
-    } else {
-      setCurrentMobilePage((prev) => Math.max(0, prev - 1));
+  const goToNextSpread = useCallback(() => {
+    if (currentSpreadIndex < spreads.length - 1) {
+      setCurrentSpreadIndex(currentSpreadIndex + 1);
     }
-  };
+  }, [currentSpreadIndex, spreads.length]);
 
-  const goToNext = () => {
-    if (showSpreadView) {
-      setCurrentSpreadIndex((prev) => Math.min(totalSpreads - 1, prev + 1));
-    } else {
-      setCurrentMobilePage((prev) => Math.min(totalPages - 1, prev + 1));
+  // Prevent page scrolling
+  useEffect(() => {
+    // Lock body scroll
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    return () => {
+      // Restore scroll on unmount
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, []);
+
+  // Reset scroll position and stop audio when spread changes
+  useEffect(() => {
+    if (flowLeftRef.current) {
+      flowLeftRef.current.scrollTop = 0;
     }
-  };
-
-  const navigateToPage = (pageIndex: number) => {
-    if (showSpreadView) {
-      const spreadIndex = Math.floor(pageIndex / 2);
-      setCurrentSpreadIndex(
-        Math.min(Math.max(0, spreadIndex), totalSpreads - 1),
-      );
-    } else {
-      setCurrentMobilePage(Math.min(Math.max(0, pageIndex), totalPages - 1));
+    if (flowRightRef.current) {
+      flowRightRef.current.scrollTop = 0;
     }
-  };
+    
+    // Stop all audio elements when navigating
+    const audioElements = document.querySelectorAll('audio');
+    audioElements.forEach(audio => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
+  }, [currentSpreadIndex]);
 
-  // Swipe handling for mobile
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: goToNext,
-    onSwipedRight: goToPrevious,
-    trackMouse: false,
-  });
-
-  // Keyboard navigation for arrow keys only (BookNavigation handles other shortcuts)
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") goToPrevious();
-      if (e.key === "ArrowRight") goToNext();
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        goToPrevSpread();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        goToNextSpread();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isMobile, totalPages, totalSpreads]);
+  }, [currentSpreadIndex, spreads.length, goToPrevSpread, goToNextSpread]);
 
-  // Stop audio when page changes
-  useEffect(() => {
-    const audioManager = AudioManager.getInstance();
-    audioManager.stopAll();
-  }, [currentMobilePage, currentSpreadIndex]);
-
-  // Dynamic pagination: Maximize first page usage
-  useEffect(() => {
-    // Only run for spread view with 2+ pages
-    if (isMobile || !showSpreadView || spreads.length === 0) return;
-    if (currentSpreadIndex >= spreads.length) return;
-
-    const spread = spreads[currentSpreadIndex];
-    if (!spread || !spread[1]) return; // Need 2 pages
-
-    // Wait for next frame to ensure DOM is ready
-    requestAnimationFrame(() => {
-      const bookStage = document.querySelector(".book-stage");
-      if (!bookStage) return;
-
-      const pageElements =
-        bookStage.querySelectorAll<HTMLElement>(".book-page");
-      if (pageElements.length < 2) return;
-
-      const page1 = pageElements[0];
-      const page2 = pageElements[1];
-      const c1 = pageContent(page1);
-      const c2 = pageContent(page2);
-      if (!c1 || !c2) return;
-
-      // 1) Adjust hero top margin if needed (starts at 0, can go up to 37px for balance)
-      const hero = page1.querySelector<HTMLElement>(".memory-hero");
-      if (hero) {
-        const fits = () => {
-          const h = c1.scrollHeight - c1.clientHeight;
-          return h <= LINE_GUARD;
-        };
-
-        // Start at minimum (0) for maximum content space
-        page1.style.setProperty("--hero-top", `${HERO_MIN_TOP}px`);
-
-        // If we have excess headroom, we can add some top margin for visual balance
-        const headroom = c1.clientHeight - c1.scrollHeight;
-        if (headroom > HERO_MAX_TOP) {
-          // Can afford to add some margin for visual breathing room
-          page1.style.setProperty("--hero-top", `${HERO_MAX_TOP}px`);
-        } else if (headroom > MIN_MOVE_UNIT) {
-          // Add partial margin based on available space
-          const margin = Math.floor(headroom / 2); // Use half the headroom
-          page1.style.setProperty(
-            "--hero-top",
-            `${Math.min(margin, HERO_MAX_TOP)}px`,
-          );
-        }
-      }
-
-      // 2) Pull blocks back from page 2 while there's headroom on page 1
-      const getHeadroom = () => c1.clientHeight - c1.scrollHeight;
-
-      // Find next movable block
-      const movable = () =>
-        Array.from(c2.children).find((n) => n instanceof HTMLElement) as
-          | HTMLElement
-          | undefined;
-
-      let guard = 64; // prevent runaway loops
-      while (getHeadroom() > LINE_GUARD && guard-- > 0) {
-        const next = movable();
-        if (!next) break;
-        const need = outerHeightWithMargins(next);
-        if (need <= getHeadroom() - LINE_GUARD) {
-          c1.appendChild(next);
-        } else {
-          break;
-        }
-      }
-
-      // 3) Ensure callouts and elements never split visually
-      bookStage
-        .querySelectorAll<HTMLElement>(".lesson-callout, p, figure, img, audio")
-        .forEach((el) => {
-          el.style.breakInside = "avoid";
-          el.style.pageBreakInside = "avoid";
-        });
-    });
-  }, [currentSpreadIndex, spreads, isMobile, showSpreadView, pages]);
-
-  // Show loading state while fetching stories OR pagination is not ready yet
-  if (isLoading || !isPaginationReady) {
+  // Loading state
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-[#0b0d12] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">
-            {isLoading ? "Loading your stories..." : "Preparing your book..."}
-          </p>
-          {!fontsReady && !isLoading && (
-            <p className="mt-2 text-sm text-muted-foreground/70">
-              Loading fonts...
-            </p>
-          )}
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+          <p className="text-slate-300">Loading your stories...</p>
         </div>
       </div>
     );
   }
 
-  if (!stories || stories.length === 0) {
+  // No stories state
+  if (sortedStories.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">No Stories Yet</h2>
-          <p className="text-muted-foreground mb-6">
-            Start recording your first memory to see it here.
+      <div className="min-h-screen bg-[#0b0d12] flex items-center justify-center">
+        <div className="text-center max-w-md px-4">
+          <h2 className="text-2xl font-semibold text-white mb-4">
+            Your Book is Empty
+          </h2>
+          <p className="text-slate-300 mb-6">
+            Start creating memories to see them appear here.
           </p>
-          <Button onClick={() => modeSelection.openModal()} className="gap-2">
-            <Plus className="w-4 h-4" />
-            Record Your First Story
-          </Button>
+          <button
+            onClick={() => router.push("/")}
+            className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-md transition-all"
+          >
+            Create Your First Memory
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const currentSpread = spreads[currentSpreadIndex] || { left: undefined, right: undefined, type: 'stories' as const };
+
+  // Navigate to a story from TOC
+  const handleNavigateToStory = (storyIndex: number) => {
+    // Find which spread contains this story
+    let currentStoryCount = 0;
+    
+    for (let i = 0; i < spreads.length; i++) {
+      const spread = spreads[i];
+      
+      // Count stories in this spread
+      let storiesInSpread = 0;
+      if (spread.left && typeof spread.left !== 'string' && !('type' in spread.left)) {
+        storiesInSpread++;
+      }
+      if (spread.right && typeof spread.right !== 'string' && !('type' in spread.right)) {
+        storiesInSpread++;
+      }
+      
+      // Check if our target story is in this spread
+      if (currentStoryCount + storiesInSpread > storyIndex) {
+        setCurrentSpreadIndex(i);
+        return;
+      }
+      
+      currentStoryCount += storiesInSpread;
+    }
+  };
+
+  // Render closed book cover state
+  if (!isBookOpen) {
+    return (
+      <div className={`h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
+        {/* Header */}
+        <div className="fixed top-0 left-0 right-0 z-50 no-print -mt-[15px]">
+          <div className="mx-auto max-w-[1800px] px-6">
+            <div className="relative h-16 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 flex items-center justify-center">
+                  <img 
+                    src="/circle logo white.svg" 
+                    alt="Heritage Whisper" 
+                    className="h-9 w-9"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
+                    {user?.name ? `${user.name}'s Story` : "Your Story"}
+                  </h1>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="lg:hidden flex items-center gap-2 text-xs text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 Z"></path>
+                  </svg>
+                  <span>Swipe</span>
+                </div>
+                <button
+                  onClick={() => router.push("/")}
+                  className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
+                >
+                  ← Back to Home
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Mode Selection Modal */}
-        <ModeSelectionModal
-          isOpen={modeSelection.isOpen}
-          onClose={modeSelection.closeModal}
-          onSelectQuickStory={modeSelection.openQuickRecorder}
-        />
-
-        {/* Quick Story Recorder */}
-        <QuickStoryRecorder
-          isOpen={modeSelection.quickRecorderOpen}
-          onClose={modeSelection.closeQuickRecorder}
-        />
+        {/* Closed book cover - centered */}
+        <div className="flex items-center justify-center" style={{ height: "calc(100vh - 64px)", paddingTop: "64px" }}>
+          <ClosedBookCover
+            userName={user?.name || "Your"}
+            storyCount={sortedStories.length}
+            onOpen={() => setIsBookOpen(true)}
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="book-view min-h-screen bg-background">
-      {/* Mobile/Tablet: Progress Bar with integrated zoom controls (single-page mode) */}
-      {!showSpreadView && (
-        <BookProgressBar
-          pages={pages}
-          currentPage={currentMobilePage}
-          totalPages={totalPages}
-          onNavigateToPage={navigateToPage}
-          zoomLevel={zoomLevel}
-          onZoomIn={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
-          onZoomOut={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
-          onOpenDecadeSelector={isMobile ? () => setShowDecadeSelector(true) : undefined}
-        />
-      )}
-
-
-      {/* Book Content - Always centered, allows natural scrolling */}
-      <div className="book-container-wrapper" {...swipeHandlers}>
-        <div 
-          className="book-container relative mx-auto"
-          style={{
-            transform: `scale(${zoomLevel})`,
-            transformOrigin: "top center",
-            transition: "transform 200ms ease-out",
-          }}
-        >
-        {/* Spine hint for single-page mode - behind everything */}
-        {!showSpreadView && <div className="spine-hint" aria-hidden="true" />}
-
-        {/* Book stage - explicit width for centering */}
-        <div
-          className="book-stage mx-auto relative"
-          style={{
-            width: `${viewportConfig.scaledWidth}px`,
-            transition: "width 140ms ease-out",
-          }}
-        >
-          <div
-            className={`book-spread ${!showSpreadView ? "single-mode" : "spread-mode"}`}
+    <div className={`h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
+      {/* Dark Book Progress Bar */}
+      <DarkBookProgressBar
+        pages={bookPages}
+        currentPage={currentSpreadIndex * 2}
+        totalPages={bookPages.length}
+        onNavigateToPage={handleNavigateToPage}
+        zoomLevel={zoomLevel}
+        onZoomIn={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
+        onZoomOut={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
+      />
+    
+      <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6" style={{ marginTop: '51px', paddingTop: '0px' }}>
+        {/* Compact Header */}
+        <div className="mx-auto max-w-[1600px] mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 flex items-center justify-center">
+                <img 
+                  src="/circle logo white.svg" 
+                  alt="Heritage Whisper" 
+                  className="h-9 w-9"
+                />
+              </div>
+              <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
+                {user?.name ? `${user.name}'s Story` : "Your Story"}
+              </h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="lg:hidden flex items-center gap-2 text-xs text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 Z"></path>
+                </svg>
+                <span>Swipe</span>
+              </div>
+              <button
+                onClick={() => router.push("/")}
+                className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
+              >
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+    
+        </div>
+    
+        {/* Desktop: Dual-page spread */}
+        <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100vh - 180px)" }}>
+          {/* Book container with fixed aspect ratio: 11" x 8.5" (dual-page spread) */}
+          <div 
+            className="relative [perspective:2000px]" 
+            style={{ 
+              width: "min(95vw, calc((100vh - 180px) * 1.294))",
+              aspectRatio: "11 / 8.5",
+              maxWidth: "1600px"
+            }}
           >
-            {!showSpreadView ? (
-              // Single page view - centered by explicit width
-              <BookPageRenderer
-                page={pages[currentMobilePage]}
-                onNavigateToPage={navigateToPage}
-                onNavigatePrevious={goToPrevious}
-                onNavigateNext={goToNext}
-              />
-            ) : (
-              // Spread view - two pages side-by-side
-              <>
-                {spreads[currentSpreadIndex] && (
-                  <>
-                    <BookPageRenderer
-                      page={spreads[currentSpreadIndex][0]}
-                      onNavigateToPage={navigateToPage}
-                      onNavigatePrevious={goToPrevious}
-                      onNavigateNext={goToNext}
-                    />
-                    {spreads[currentSpreadIndex][1] && (
-                      <BookPageRenderer
-                        page={spreads[currentSpreadIndex][1]}
-                        onNavigateToPage={navigateToPage}
-                        onNavigatePrevious={goToPrevious}
-                        onNavigateNext={goToNext}
-                      />
-                    )}
-                  </>
-                )}
-              </>
-            )}
+            {/* Ambient shadow/vignette */}
+            <div className="pointer-events-none absolute -inset-8 rounded-2xl bg-[radial-gradient(1000px_400px_at_50%_30%,rgba(59,130,246,0.08)_0%,rgba(59,130,246,0.04)_35%,transparent_70%)]"></div>
+            <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[0_40px_120px_-30px_rgba(0,0,0,0.6)]"></div>
+    
+            {/* Outer book cover/border - wider on left/right */}
+            <div 
+              aria-hidden="true" 
+              className="pointer-events-none absolute rounded-[28px]" 
+              style={{ 
+                top: "-14px",
+                bottom: "-14px",
+                left: "-29px",
+                right: "-29px",
+                background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
+                boxShadow: "0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04)" 
+              }}
+            ></div>
+    
+            {/* Left page */}
+            <BookPage 
+              story={currentSpread.left} 
+              pageNum={currentSpreadIndex * 2 + 1} 
+              onScroll={() => {}} 
+              ref={flowLeftRef}
+              position="left"
+              allStories={sortedStories}
+              onNavigateToStory={handleNavigateToStory}
+            />
+    
+            {/* Right page */}
+            <BookPage 
+              story={currentSpread.right} 
+              pageNum={currentSpreadIndex * 2 + 2} 
+              onScroll={() => {}} 
+              ref={flowRightRef}
+              position="right"
+              allStories={sortedStories}
+              onNavigateToStory={handleNavigateToStory}
+            />
+    
+            {/* Refined spine */}
+            <div className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 w-12 md:w-14 lg:w-16">
+              <div className="absolute inset-y-6 left-0 w-1/2 bg-gradient-to-r from-black/30 via-black/10 to-transparent opacity-20"></div>
+              <div className="absolute inset-y-6 right-0 w-1/2 bg-gradient-to-l from-black/30 via-black/10 to-transparent opacity-20"></div>
+              <div className="absolute inset-y-6 left-1/2 -translate-x-1/2 w-px bg-white/70 opacity-60"></div>
+              <div className="absolute inset-y-6 left-1/2 -translate-x-1/2 w-0.5 opacity-20 shadow-[inset_1px_0_0_rgba(0,0,0,0.35),0_0_0_1px_rgba(255,255,255,0.45)]"></div>
+              <div 
+                className="absolute left-1/2 -translate-x-1/2 top-3 h-1.5 w-14 rounded-sm ring-1 ring-black/10 shadow-sm" 
+                style={{ background: "repeating-linear-gradient(90deg, rgba(59,130,246,0.25) 0 6px, rgba(99,102,241,0.25) 6px 12px, rgba(16,185,129,0.25) 12px 18px, rgba(253,186,116,0.25) 18px 24px, rgba(244,63,94,0.25) 24px 30px)" }}
+              ></div>
+              <div 
+                className="absolute left-1/2 -translate-x-1/2 bottom-3 h-1.5 w-14 rounded-sm ring-1 ring-black/10 shadow-sm" 
+                style={{ background: "repeating-linear-gradient(90deg, rgba(59,130,246,0.25) 0 6px, rgba(99,102,241,0.25) 6px 12px, rgba(16,185,129,0.25) 12px 18px, rgba(253,186,116,0.25) 18px 24px, rgba(244,63,94,0.25) 24px 30px)" }}
+              ></div>
+            </div>
+    
+            {/* Navigation removed from center - now in bottom bar */}
+    
+            {/* Ground shadow */}
+            <div className="pointer-events-none absolute -bottom-10 left-1/2 -translate-x-1/2 h-16 w-[80%] rounded-[100%] blur-2xl bg-black/60"></div>
           </div>
         </div>
+    
+        {/* Mobile & Tablet: Single page with horizontal swipe */}
+        <MobileView 
+          allPages={mobilePages}
+          currentPage={currentMobilePage}
+          onPageChange={setCurrentMobilePage}
+          sortedStories={sortedStories}
+        />
+    
+        {/* TOC Drawer - Above Bottom Nav */}
+        {showToc && (
+          <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[520px] max-w-[calc(100vw-3rem)]">
+            <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-4 py-3 text-sm text-black shadow-2xl">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="font-medium tracking-tight">Table of Contents</div>
+                <button 
+                  onClick={() => setShowToc(false)}
+                  className="p-1 rounded-md hover:bg-black/10"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+                  </svg>
+                </button>
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto">
+                <ul className="space-y-1.5">
+                  {sortedStories.map((story, index) => (
+                    <li key={story.id}>
+                      <button
+                        onClick={() => {
+                          handleNavigateToStory(index);
+                          setShowToc(false);
+                        }}
+                        className="w-full text-left px-2 py-1.5 rounded-md hover:bg-black/10 transition-colors"
+                      >
+                        {story.title} ({story.storyYear})
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* Bottom Navigation Controls - Thinner mobile-optimized version */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-[52px] md:pb-2">
+        <div className="mx-auto max-w-md px-4">
+          <div className="flex items-center justify-between rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 shadow-2xl">
+            {/* Previous button */}
+            <button
+              onClick={() => {
+                // On mobile use mobile page navigation, on desktop use spread navigation
+                if (window.innerWidth < 1024) {
+                  if (currentMobilePage > 0) {
+                    setCurrentMobilePage(currentMobilePage - 1);
+                  }
+                } else {
+                  goToPrevSpread();
+                }
+              }}
+              disabled={window.innerWidth < 1024 ? currentMobilePage === 0 : currentSpreadIndex === 0}
+              className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
+              title="Previous"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="m15 18-6-6 6-6"></path>
+              </svg>
+            </button>
+
+            {/* Page indicator and TOC */}
+            <div className="flex items-center gap-3">
+              <span className="text-white font-medium text-sm whitespace-nowrap">
+                <span className="lg:hidden">{currentMobilePage + 1} / {mobilePages.length}</span>
+                <span className="hidden lg:inline">{currentSpreadIndex + 1} / {spreads.length}</span>
+              </span>
+              <button
+                onClick={() => setShowToc(!showToc)}
+                className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-all text-white min-w-[40px] min-h-[40px] flex items-center justify-center"
+                title="Table of Contents"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M4 6h16"></path>
+                  <path d="M4 12h16"></path>
+                  <path d="M4 18h16"></path>
+                </svg>
+              </button>
+            </div>
+
+            {/* Next button */}
+            <button
+              onClick={() => {
+                // On mobile use mobile page navigation, on desktop use spread navigation
+                if (window.innerWidth < 1024) {
+                  if (currentMobilePage < mobilePages.length - 1) {
+                    setCurrentMobilePage(currentMobilePage + 1);
+                  }
+                } else {
+                  goToNextSpread();
+                }
+              }}
+              disabled={window.innerWidth < 1024 ? currentMobilePage === mobilePages.length - 1 : currentSpreadIndex === spreads.length - 1}
+              className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
+              title="Next"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Left Page Component
+const LeftPage = React.forwardRef<HTMLDivElement, { story?: Story; pageNum: number; onScroll: (e: React.UIEvent<HTMLDivElement>) => void }>(
+  ({ story, pageNum, onScroll }, ref) => {
+    if (!story) {
+      return (
+        <div className="absolute inset-y-0 left-0 w-1/2 [transform-style:preserve-3d]">
+          {/* Page stack layers */}
+          <div className="absolute inset-0 translate-y-0.5 -translate-x-0.5 scale-[0.998] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] opacity-70 bg-neutral-50 ring-black/10"></div>
+          <div className="absolute inset-0 translate-y-1 -translate-x-[3px] scale-[0.996] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] opacity-55 bg-neutral-50 ring-black/10"></div>
+          <div className="-translate-x-[6px] bg-neutral-50 opacity-35 ring-black/10 ring-1 rounded-[18px] absolute top-0 right-0 bottom-0 left-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] translate-y-[6px] scale-[0.992]"></div>
+          
+          {/* Main page - Empty */}
+          <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(3deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
+            <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
+              <span className="text-sm">No story</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="absolute inset-y-0 left-0 w-1/2 [transform-style:preserve-3d]">
+        {/* Page stack layers */}
+        <div className="absolute inset-0 translate-y-0.5 -translate-x-0.5 scale-[0.998] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] opacity-70 bg-neutral-50 ring-black/10"></div>
+        <div className="absolute inset-0 translate-y-1 -translate-x-[3px] scale-[0.996] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] opacity-55 bg-neutral-50 ring-black/10"></div>
+        <div className="-translate-x-[6px] bg-neutral-50 opacity-35 ring-black/10 ring-1 rounded-[18px] absolute top-0 right-0 bottom-0 left-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] translate-y-[6px] scale-[0.992]"></div>
+
+        {/* Main page */}
+        <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(3deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
+          {/* Paper texture/vignette */}
+          <div 
+            className="absolute inset-0 pointer-events-none" 
+            style={{
+              backgroundImage: `
+                radial-gradient(160% 85% at 110% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
+                radial-gradient(120% 60% at -10% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%),
+                linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.85))
+              `
+            }}
+          ></div>
+          {/* Inner gutter shadow */}
+          <div className="absolute inset-y-0 right-0 w-10 pointer-events-none bg-gradient-to-l to-transparent from-black/12 via-black/6"></div>
+          {/* Outer edge lines */}
+          <div 
+            className="absolute inset-y-0 left-0 w-3 pointer-events-none" 
+            style={{ 
+              backgroundImage: "repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)", 
+              opacity: 0.25 
+            }}
+          ></div>
+
+          <div className="md:p-8 lg:p-10 w-full h-full pt-7 pr-7 pb-7 pl-7 relative">
+            <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden">
+              <div 
+                ref={ref}
+                onScroll={onScroll}
+                className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
+              >
+                <StoryContent story={story} />
+              </div>
+            </div>
+            <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80">
+              <span className="tracking-tight">{pageNum}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+LeftPage.displayName = "LeftPage";
+
+// Right Page Component
+const RightPage = React.forwardRef<HTMLDivElement, { story?: Story; pageNum: number; onScroll: (e: React.UIEvent<HTMLDivElement>) => void }>(
+  ({ story, pageNum, onScroll }, ref) => {
+    if (!story) {
+      return (
+        <div className="absolute inset-y-0 right-0 w-1/2 [transform-style:preserve-3d]">
+          {/* Page stack layers */}
+          <div className="absolute inset-0 translate-y-0.5 translate-x-0.5 scale-[0.998] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] opacity-70 bg-neutral-50 ring-black/10"></div>
+          <div className="absolute inset-0 translate-y-1 translate-x-[3px] scale-[0.996] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] opacity-55 bg-neutral-50 ring-black/10"></div>
+          <div className="absolute inset-0 translate-y-[6px] translate-x-[6px] scale-[0.992] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] opacity-35 bg-neutral-50 ring-black/10"></div>
+
+          {/* Main page - Empty */}
+          <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(-3deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
+            <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
+              <span className="text-sm">No story</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="absolute inset-y-0 right-0 w-1/2 [transform-style:preserve-3d]">
+        {/* Page stack layers */}
+        <div className="absolute inset-0 translate-y-0.5 translate-x-0.5 scale-[0.998] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] opacity-70 bg-neutral-50 ring-black/10"></div>
+        <div className="absolute inset-0 translate-y-1 translate-x-[3px] scale-[0.996] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] opacity-55 bg-neutral-50 ring-black/10"></div>
+        <div className="absolute inset-0 translate-y-[6px] translate-x-[6px] scale-[0.992] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] opacity-35 bg-neutral-50 ring-black/10"></div>
+
+        {/* Main page */}
+        <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(-3deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
+          {/* Paper texture/vignette */}
+          <div 
+            className="absolute inset-0 pointer-events-none" 
+            style={{
+              backgroundImage: `
+                radial-gradient(160% 85% at -10% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
+                radial-gradient(120% 60% at 110% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%),
+                linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.85))
+              `
+            }}
+          ></div>
+          {/* Inner gutter shadow */}
+          <div className="absolute inset-y-0 left-0 w-10 pointer-events-none bg-gradient-to-r to-transparent from-black/12 via-black/6"></div>
+          {/* Outer edge lines */}
+          <div 
+            className="absolute inset-y-0 right-0 w-3 pointer-events-none" 
+            style={{ 
+              backgroundImage: "repeating-linear-gradient(270deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)", 
+              opacity: 0.25 
+            }}
+          ></div>
+
+          <div className="relative h-full w-full p-7 md:p-8 lg:p-10">
+            <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden">
+              <div 
+                ref={ref}
+                onScroll={onScroll}
+                className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
+              >
+                <StoryContent story={story} />
+              </div>
+            </div>
+            <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80">
+              <span className="tracking-tight"></span>
+              <span className="tracking-tight">{pageNum}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+RightPage.displayName = "RightPage";
+
+// Story Content Component
+function StoryContent({ story }: { story: Story }) {
+  return (
+    <>
+      <div className="mb-3 flex items-center justify-between">
+        <div className="text-sm text-neutral-600">
+          {story.storyYear}
+          {story.lifeAge !== undefined && ` • Age ${story.lifeAge}`}
         </div>
       </div>
 
-      {/* Mode Selection Modal */}
-      <ModeSelectionModal
-        isOpen={modeSelection.isOpen}
-        onClose={modeSelection.closeModal}
-        onSelectQuickStory={modeSelection.openQuickRecorder}
-      />
+      <h2 className="text-2xl tracking-tight font-semibold mb-3 text-neutral-900">
+        {story.title}
+      </h2>
 
-      {/* Quick Story Recorder */}
-      <QuickStoryRecorder
-        isOpen={modeSelection.quickRecorderOpen}
-        onClose={modeSelection.closeQuickRecorder}
-      />
-
-      {/* Desktop: Progress Bar with integrated zoom controls (spread mode) */}
-      {showSpreadView && (
-        <BookProgressBar
-          pages={pages}
-          currentPage={currentSpreadIndex * 2}
-          totalPages={totalPages}
-          onNavigateToPage={navigateToPage}
-          zoomLevel={zoomLevel}
-          onZoomIn={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
-          onZoomOut={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
-        />
+      {story.photos && story.photos.length > 0 && (
+        <div className="mb-4 max-w-sm">
+          <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
+            <img
+              src={story.photos[0].url}
+              alt={story.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          {story.photos[0].caption && (
+            <p className="text-[12px] text-neutral-600 mt-1">
+              {story.photos[0].caption}
+            </p>
+          )}
+        </div>
       )}
 
-      {/* Mobile: Decades Pill - Removed, now in header */}
-      
-      {/* Mobile Decade Selector Modal */}
-      {isMobile && showDecadeSelector && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-[60] flex items-end"
-          onClick={() => setShowDecadeSelector(false)}
+      <div className="text-[15.5px] leading-7 text-neutral-800/95 space-y-3">
+        {story.transcription?.split('\n\n').map((paragraph, i) => (
+          <p key={i}>{paragraph}</p>
+        ))}
+      </div>
+
+      {story.wisdomClipText && (
+        <div className="mt-6 p-4 bg-amber-50/80 rounded-lg border-l-4 border-amber-400">
+          <p className="text-sm font-semibold text-amber-900 mb-1">
+            Lesson Learned
+          </p>
+          <p className="text-[14px] text-neutral-700 italic leading-6">
+            {story.wisdomClipText}
+          </p>
+        </div>
+      )}
+    </>
+  );
+}
+
+// Mobile View Component
+function MobileView({ 
+  allPages,
+  currentPage,
+  onPageChange,
+  sortedStories
+}: { 
+  allPages: Array<{ type: 'intro' | 'toc' | 'story'; story?: Story; index: number }>;
+  currentPage: number;
+  onPageChange: (index: number) => void;
+  sortedStories: Story[];
+}) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Scroll to current page when it changes
+  useEffect(() => {
+    if (scrollerRef.current && !isDragging) {
+      const pageWidth = scrollerRef.current.clientWidth;
+      scrollerRef.current.scrollTo({
+        left: currentPage * (pageWidth + 24), // 24 is the gap
+        behavior: 'smooth'
+      });
+    }
+  }, [currentPage, isDragging]);
+
+  // Detect page change from scroll
+  const handleScroll = () => {
+    if (!scrollerRef.current || isDragging) return;
+    
+    const pageWidth = scrollerRef.current.clientWidth + 24; // Add gap
+    const scrollLeft = scrollerRef.current.scrollLeft;
+    const newPage = Math.round(scrollLeft / pageWidth);
+    
+    if (newPage !== currentPage && newPage >= 0 && newPage < allPages.length) {
+      onPageChange(newPage);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentPage > 0) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < allPages.length - 1) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  return (
+    <div className="lg:hidden w-full" style={{ marginTop: '0px' }}>
+      <div className="relative w-full" style={{ height: 'calc(100vh - 180px)' }}>
+        {/* Mobile prev/next controls */}
+        <button 
+          onClick={handlePrev}
+          disabled={currentPage === 0}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          <div 
-            className="bg-white rounded-t-3xl w-full max-h-[70vh] overflow-y-auto p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Jump to Decade</h3>
-              <button
-                onClick={() => setShowDecadeSelector(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-              >
-                ✕
-              </button>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+        </button>
+        <button 
+          onClick={handleNext}
+          disabled={currentPage === allPages.length - 1}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </button>
+
+        <div 
+          ref={scrollerRef}
+          onScroll={handleScroll}
+          onTouchStart={() => setIsDragging(true)}
+          onTouchEnd={() => setTimeout(() => setIsDragging(false), 100)}
+          className="h-full w-full flex items-center justify-center snap-x snap-mandatory overflow-x-auto hide-scrollbar"
+          style={{ scrollSnapType: 'x mandatory' }}
+        >
+          {allPages.map((page, index) => (
+            <div key={index} className="snap-center shrink-0 flex items-center justify-center px-4" style={{ minWidth: '100%', height: '100%' }}>
+              <MobilePage page={page} pageNum={index + 1} allStories={sortedStories} />
             </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Closed Book Cover Component
+function ClosedBookCover({ 
+  userName, 
+  storyCount, 
+  onOpen 
+}: { 
+  userName: string; 
+  storyCount: number; 
+  onOpen: () => void;
+}) {
+  return (
+    <div className="relative mx-auto" style={{ 
+      width: "min(95vw, calc((100vh - 180px) * 0.647))",
+      aspectRatio: "5.5 / 8.5",
+      maxWidth: "800px"
+    }}>
+      {/* Ambient shadow */}
+      <div className="pointer-events-none absolute -inset-8 rounded-2xl bg-[radial-gradient(1000px_400px_at_50%_30%,rgba(139,111,71,0.15)_0%,rgba(139,111,71,0.08)_35%,transparent_70%)]"></div>
+      <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[0_40px_120px_-30px_rgba(0,0,0,0.6)]"></div>
+
+      {/* Book cover with spine */}
+      <div className="relative w-full h-full">
+        {/* Book spine (left edge) */}
+        <div 
+          className="absolute left-0 top-0 bottom-0 rounded-l-lg pointer-events-none"
+          style={{
+            width: '32px',
+            background: "linear-gradient(90deg, #1a0f08 0%, #2d1f12 50%, #3a2818 100%)",
+            boxShadow: "inset -2px 0 8px rgba(0,0,0,0.6), inset 2px 0 4px rgba(0,0,0,0.3)",
+            borderRight: '1px solid rgba(0,0,0,0.4)',
+          }}
+        >
+          {/* Spine ridges */}
+          <div className="absolute inset-y-8 left-1/2 -translate-x-1/2 w-0.5 bg-black/20"></div>
+          <div className="absolute inset-y-8 left-1/3 w-px bg-black/15"></div>
+          <div className="absolute inset-y-8 right-1/3 w-px bg-black/15"></div>
+        </div>
+
+        {/* Main cover button */}
+        <button
+          onClick={onOpen}
+          className="relative w-full h-full cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.99]"
+          style={{
+            borderRadius: '0 12px 12px 0',
+            background: "linear-gradient(145deg, #4a3420 0%, #2d1f12 50%, #1a0f08 100%)",
+            boxShadow: "0 25px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(139,111,71,0.15), inset 0 -1px 0 rgba(0,0,0,0.5), inset -3px 0 10px rgba(0,0,0,0.4)"
+          }}
+          aria-label="Open book"
+        >
+          {/* Leather grain texture */}
+          <div 
+            className="absolute inset-0 opacity-40 pointer-events-none"
+            style={{
+              borderRadius: '0 12px 12px 0',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='1' /%3E%3CfeColorMatrix type='saturate' values='0.1'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23leather)' opacity='0.6'/%3E%3C/svg%3E")`,
+              backgroundSize: '200px 200px',
+            }}
+          ></div>
+
+          {/* Subtle highlight along edges */}
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              borderRadius: '0 12px 12px 0',
+              background: "radial-gradient(ellipse at 20% 20%, rgba(139,111,71,0.25) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(139,111,71,0.15) 0%, transparent 50%)",
+            }}
+          ></div>
+
+          {/* Vignette for depth */}
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              borderRadius: '0 12px 12px 0',
+              background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%)",
+            }}
+          ></div>
+
+          {/* Embossed border frame (like real book covers) */}
+          <div 
+            className="absolute pointer-events-none"
+            style={{
+              top: '48px',
+              left: '48px',
+              right: '48px',
+              bottom: '48px',
+              border: '2px solid rgba(0,0,0,0.3)',
+              borderRadius: '8px',
+              boxShadow: 'inset 0 1px 0 rgba(139,111,71,0.15), 0 1px 2px rgba(0,0,0,0.5)',
+            }}
+          ></div>
+
+          {/* Content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
+            <h1 
+              className="text-4xl md:text-5xl lg:text-6xl font-serif mb-6 tracking-tight"
+              style={{ 
+                fontFamily: "Crimson Text, serif",
+                color: "#d4af87",
+                textShadow: "0 3px 6px rgba(0,0,0,0.9), 0 -1px 2px rgba(255,255,255,0.1)",
+                fontWeight: 600,
+              }}
+            >
+              {userName}&apos;s Story
+            </h1>
             
-            <div className="grid grid-cols-2 gap-3">
-              {pages
-                .filter(p => p.type === 'decade-marker')
-                .map((page, idx) => {
-                  // Find the array index of this page
-                  const pageIndex = pages.findIndex(p => p.pageNumber === page.pageNumber);
-                  
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        navigateToPage(pageIndex);
-                        setShowDecadeSelector(false);
-                      }}
-                      className="flex flex-col items-center justify-center p-4 rounded-xl bg-gradient-to-br from-amber-50 to-rose-50 hover:from-amber-100 hover:to-rose-100 transition-all border-2 border-transparent hover:border-amber-300"
-                    >
-                      <span className="text-2xl font-bold text-gray-900">{page.decade}</span>
-                      <span className="text-xs text-gray-600 mt-1">{page.storiesInDecade} {page.storiesInDecade === 1 ? 'story' : 'stories'}</span>
-                    </button>
-                  );
-                })}
+            <div className="w-32 h-0.5 mb-6" style={{ background: "linear-gradient(90deg, transparent, #d4af87, transparent)" }}></div>
+            
+            <p className="text-xl md:text-2xl font-medium" style={{ color: "#c4a87a", textShadow: "0 2px 4px rgba(0,0,0,0.7)" }}>
+              {storyCount} {storyCount === 1 ? 'memory' : 'memories'}
+            </p>
+
+            <div className="mt-12 px-6 py-3 rounded-full border" style={{ 
+              backgroundColor: "rgba(212, 175, 135, 0.08)",
+              borderColor: "rgba(212, 175, 135, 0.25)"
+            }}>
+              <p className="text-sm md:text-base font-medium" style={{ color: "#d4af87" }}>
+                Tap to open
+              </p>
+            </div>
+          </div>
+
+          {/* Decorative embossed corner accents inside the border */}
+          <div className="absolute top-14 left-14 w-8 h-8 border-l border-t rounded-tl" style={{ borderColor: "rgba(212, 175, 135, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
+          <div className="absolute top-14 right-14 w-8 h-8 border-r border-t rounded-tr" style={{ borderColor: "rgba(212, 175, 135, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
+          <div className="absolute bottom-14 left-14 w-8 h-8 border-l border-b rounded-bl" style={{ borderColor: "rgba(212, 175, 135, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
+          <div className="absolute bottom-14 right-14 w-8 h-8 border-r border-b rounded-br" style={{ borderColor: "rgba(212, 175, 135, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Mobile Audio Player Component
+function MobileAudioPlayer({ story }: { story: Story }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  // Initialize audio element on mount - ONLY ONCE per story
+  useEffect(() => {
+    if (!story.audioUrl) return;
+    if (audioRef.current) return;
+    
+    console.log(`Initializing mobile audio for ${story.title}`);
+    const audio = new Audio();
+    audio.preload = 'metadata';
+    audio.src = story.audioUrl;
+    audioRef.current = audio;
+    
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+      console.log(`Mobile audio loaded for ${story.title}, duration:`, audio.duration);
+    };
+    
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+    
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+    
+    const handlePause = () => {
+      setIsPlaying(false);
+    };
+    
+    const handlePlay = () => {
+      setIsPlaying(true);
+    };
+    
+    const handleError = (err: Event) => {
+      console.error(`Mobile audio error for ${story.title}:`, err);
+      if (audio.error) {
+        console.error('Error code:', audio.error.code);
+      }
+      setIsLoading(false);
+    };
+    
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('error', handleError);
+    
+    return () => {
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('error', handleError);
+      audio.pause();
+      audio.src = '';
+      audioRef.current = null;
+    };
+  }, [story.id]);
+  
+  const toggleAudio = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!audioRef.current) return;
+    
+    try {
+      // Stop other audio elements first
+      const allAudioElements = document.querySelectorAll('audio');
+      allAudioElements.forEach(audio => {
+        if (audio !== audioRef.current) {
+          audio.pause();
+        }
+      });
+      
+      if (audioRef.current.paused) {
+        setIsLoading(true);
+        await audioRef.current.play();
+        setIsLoading(false);
+        console.log('Mobile audio started playing');
+      } else {
+        audioRef.current.pause();
+        console.log('Mobile audio paused');
+      }
+    } catch (error) {
+      console.error('Mobile audio playback error:', error);
+      setIsLoading(false);
+    }
+  };
+  
+  return (
+    <div className="mb-3">
+      <div className="flex items-center gap-2.5">
+        <button
+          onClick={toggleAudio}
+          className="relative flex-shrink-0 hover:scale-105 transition-transform"
+          aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+        >
+          <svg className="w-9 h-9 -rotate-90">
+            <circle
+              cx="18"
+              cy="18"
+              r="14"
+              fill="none"
+              stroke="rgba(139,107,122,0.15)"
+              strokeWidth="2"
+            />
+            {isPlaying && (
+              <circle
+                cx="18"
+                cy="18"
+                r="14"
+                fill="none"
+                stroke="rgba(139,107,122,0.5)"
+                strokeWidth="2"
+                strokeDasharray={`${2 * Math.PI * 14}`}
+                strokeDashoffset={`${2 * Math.PI * 14 * (1 - progress / 100)}`}
+                strokeLinecap="round"
+                className="transition-all duration-300"
+              />
+            )}
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            {isLoading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-neutral-600" />
+            ) : isPlaying ? (
+              <Pause className="w-3.5 h-3.5 text-neutral-600 fill-neutral-600" />
+            ) : (
+              <Volume2 className="w-3.5 h-3.5 text-neutral-600" />
+            )}
+          </div>
+        </button>
+        
+        <div className="flex-1">
+          <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-neutral-400 transition-all duration-100" 
+              style={{ width: `${progress}%` }} 
+            />
+          </div>
+        </div>
+        
+        <span className="text-[11px] text-neutral-500 whitespace-nowrap tabular-nums">
+          {formatTime(currentTime)} / {formatTime(duration)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Mobile Page Component  
+function MobilePage({ 
+  page, 
+  pageNum,
+  allStories
+}: { 
+  page: { type: 'intro' | 'toc' | 'story'; story?: Story; index: number };
+  pageNum: number;
+  allStories: Story[];
+}) {
+  // Intro page
+  if (page.type === 'intro') {
+    return (
+      <div className="mobile-page relative mx-auto w-[min(90vw,600px)] aspect-[55/85] [perspective:1600px]" style={{ maxHeight: '85%' }}>
+        <div 
+          aria-hidden="true" 
+          className="pointer-events-none absolute rounded-[24px]" 
+          style={{ 
+            inset: "-16px", 
+            background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
+            boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
+          }}
+        ></div>
+        <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
+          <div className="relative h-full w-full p-6 flex items-center justify-center">
+            <div className="text-center space-y-6">
+              <h1 className="text-4xl font-serif text-gray-800" style={{ fontFamily: "Crimson Text, serif" }}>
+                Family Memories
+              </h1>
+              <div className="w-20 h-1 bg-indigo-500 mx-auto"></div>
+              <p className="text-base text-gray-600 leading-relaxed italic px-4">
+                A collection of cherished moments, stories, and lessons from a life well-lived.
+              </p>
             </div>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
+  
+  // TOC page
+  if (page.type === 'toc') {
+    return (
+      <div className="mobile-page relative mx-auto w-[min(90vw,600px)] aspect-[55/85] [perspective:1600px]" style={{ maxHeight: '85%' }}>
+        <div 
+          aria-hidden="true" 
+          className="pointer-events-none absolute rounded-[24px]" 
+          style={{ 
+            inset: "-16px", 
+            background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
+            boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
+          }}
+        ></div>
+        <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
+          <div className="relative h-full w-full p-6">
+            <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden">
+              <div className="h-full w-full rounded-[12px] text-neutral-900 outline-none p-5 overflow-y-auto">
+                <h1 className="text-3xl font-serif text-center mb-6 text-gray-800">
+                  Table of Contents
+                </h1>
+                <div className="space-y-3">
+                  {allStories.map((storyItem) => (
+                    <div
+                      key={storyItem.id}
+                      className="text-sm border-b border-gray-200 pb-2"
+                    >
+                      <div className="font-medium text-gray-700">{storyItem.title}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {storyItem.storyYear}
+                        {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Story page
+  const story = page.story;
+  if (!story) return null;
+  
+  return (
+    <div className="mobile-page relative mx-auto w-[min(90vw,600px)] aspect-[55/85] [perspective:1600px]" style={{ maxHeight: '85%' }}>
+      {/* Outer book cover/border */}
+      <div 
+        aria-hidden="true" 
+        className="pointer-events-none absolute rounded-[24px]" 
+        style={{ 
+          inset: "-16px", 
+          background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
+          boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
+        }}
+      ></div>
+
+      <div className="absolute inset-0 translate-y-[5px] -translate-x-[5px] scale-[0.994] rounded-[18px] ring-1 opacity-35 bg-neutral-50 ring-black/10"></div>
+      <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
+        <div 
+          className="absolute inset-0" 
+          style={{
+            backgroundImage: `
+              radial-gradient(120% 65% at 110% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 60%),
+              linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.9))
+            `
+          }}
+        ></div>
+        <div className="absolute inset-y-0 right-0 w-8 pointer-events-none bg-gradient-to-l to-transparent from-black/10 via-black/5"></div>
+        <div 
+          className="absolute inset-y-0 left-0 w-3 pointer-events-none" 
+          style={{ 
+            backgroundImage: "repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)", 
+            opacity: 0.22 
+          }}
+        ></div>
+
+        <div className="relative h-full w-full p-6">
+          <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden">
+            <div className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-5 overflow-y-auto">
+              {/* Photo first if available */}
+              {story.photos && story.photos.length > 0 && (
+                <div className="mb-3">
+                  <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
+                    <img
+                      src={story.photos[0].url}
+                      alt={story.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {/* Title */}
+              <h2 className="mb-2.5 text-[19px] tracking-tight font-semibold text-neutral-900">
+                {story.title}
+              </h2>
+              
+              {/* Age and year */}
+              <div className="text-[13px] text-neutral-600 mb-3">
+                {story.lifeAge !== undefined && `Age ${story.lifeAge} • `}
+                {story.storyYear}
+              </div>
+
+              {/* Audio Player - Mobile */}
+              {story.audioUrl && <MobileAudioPlayer story={story} />}
+
+              {/* Story text */}
+              <div className="text-[14.5px] leading-6 text-neutral-800/95 space-y-2.5">
+                {story.transcription?.split('\n\n').map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
+
+              {/* Lesson learned */}
+              {story.wisdomClipText && (
+                <div className="mt-4 p-3 bg-amber-50/80 rounded-lg border-l-4 border-amber-400">
+                  <p className="text-xs font-semibold text-amber-900 mb-1">
+                    Lesson Learned
+                  </p>
+                  <p className="text-[13px] text-neutral-700 italic leading-5">
+                    {story.wisdomClipText}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="absolute bottom-3 left-0 right-0 px-6 text-right text-[12px] text-neutral-500/80">
+            {pageNum}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

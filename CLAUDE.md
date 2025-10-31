@@ -280,6 +280,22 @@ HeritageWhisperV2/
 - **Without transforms:** Use Next.js `<Image>` component
 - **Signed URLs:** Regenerate with 1-week expiry if expired
 
+### Sticky Header Gap Issues (Timeline)
+
+**Mobile Timeline - Decade Headers:**
+- **Symptom:** Decade headers "unstick" too early, leaving visible gap before next header takes over
+- **Root Cause:** `margin-top` and `margin-bottom` on `.hw-decade-band` cause premature release
+- **Solution:** Remove margins on sticky elements - set both to `0px` in `/app/styles/components.css`
+- **Why it happens:** Sticky positioning calculates release point based on margin edges, not element edges
+- **File:** `/app/styles/components.css` lines ~107-109 (`.hw-decade-band` margins)
+
+**Desktop Timeline - Year Badges:**
+- **Symptom:** Year badges along spine "unstick" too early with ~30px gap, cards flicker during transition
+- **Root Cause:** Insufficient negative margin on timeline cards - next badge doesn't get close enough before current releases
+- **Solution:** Increase negative margin from `-mt-[108px]` to `-mt-[147px]` on timeline card wrappers
+- **Additional fixes:** Update `stickyTop` to `62px`, remove forced `position: fixed` override, adjust fade timing
+- **File:** `/components/timeline/TimelineDesktop.tsx` line ~1117 (card wrapper className)
+
 ## 🎯 Known Issues & Workarounds
 
 ### Book View Cursor Issue
@@ -367,7 +383,7 @@ Keep the file under 400 lines.
 
 ---
 
-_Last updated: October 30, 2025_
+_Last updated: October 31, 2025_
 
 **Other Documentation:**
 - [@CLAUDE_HISTORY.md](CLAUDE_HISTORY.md) - Historical fixes, feature archives, and migration notes

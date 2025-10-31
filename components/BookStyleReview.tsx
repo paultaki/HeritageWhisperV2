@@ -139,6 +139,18 @@ export function BookStyleReview({
   // Track if this is the initial automatic show
   const [isInitialRecordingShow, setIsInitialRecordingShow] = useState(false);
 
+  // Sync audioUrl to cleanedAudioUrl (especially important for edit mode)
+  useEffect(() => {
+    if (audioUrl) {
+      setCleanedAudioUrl(audioUrl);
+      setHasExistingRecording(true);
+    } else {
+      // Clear cleanedAudioUrl when audioUrl is removed
+      setCleanedAudioUrl(null);
+      setHasExistingRecording(false);
+    }
+  }, [audioUrl]);
+
   // Check for recording overlay on mount (only once)
   useEffect(() => {
     const isDraft = searchParams?.get("draft") === "true";
@@ -148,11 +160,6 @@ export function BookStyleReview({
     if ((isNew || (isDraft && !audioUrl)) && !cleanedAudioUrl) {
       setShowRecordingOverlay(true);
       setIsInitialRecordingShow(true);
-    }
-
-    if (audioUrl) {
-      setHasExistingRecording(true);
-      setCleanedAudioUrl(audioUrl);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]); // Only run when searchParams change, not audioUrl
@@ -394,6 +401,14 @@ export function BookStyleReview({
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#2c2416] via-[#1a1410] to-[#2c2416] md:bg-gradient-to-b md:from-amber-50 md:to-white overflow-x-hidden">
+      {/* Recording Overlay - Rendered at top level for proper z-index */}
+      <RecordingOverlay
+        isOpen={showRecordingOverlay}
+        onClose={handleRecordingOverlayClose}
+        onContinue={handleContinueRecording}
+        existingAudioUrl={cleanedAudioUrl || undefined}
+      />
+
       {/* Top Navigation */}
       <div className="sticky top-0 z-50 bg-[#faf8f5]/95 backdrop-blur-sm border-b border-[#8B6F47]/20">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
@@ -419,14 +434,6 @@ export function BookStyleReview({
           {/* Page content - cream background like book pages */}
           <div className="bg-[#faf8f5] rounded-lg shadow-[0_2px_12px_rgba(139,111,71,0.15)] md:shadow-[0_0_40px_rgba(0,0,0,0.1)_inset,0_0_2px_rgba(0,0,0,0.1)]">
             <div className="p-6 md:p-12 space-y-8">
-              {/* Recording Overlay */}
-              <RecordingOverlay
-                isOpen={showRecordingOverlay}
-                onClose={handleRecordingOverlayClose}
-                onContinue={handleContinueRecording}
-                existingAudioUrl={cleanedAudioUrl || undefined}
-              />
-
               {/* Audio Processing Card - Only show during active processing */}
               {audioProcessingStatus !== "idle" && audioProcessingStatus !== "complete" && (
                 <AudioProcessingCard
@@ -639,84 +646,99 @@ export function BookStyleReview({
                         variant="outline"
                         size="sm"
                         onClick={async () => {
-                          const input = document.createElement("input");
-                          input.type = "file";
-                          input.accept = "audio/*";
-                          input.onchange = async (e) => {
-                            const file = (e.target as HTMLInputElement)
-                              .files?.[0];
-                            if (file) {
-                              setIsProcessing(true);
+                          try {
+                            const input = document.createElement("input");
+                            input.type = "file";
+                            input.accept = "audio/*";
+                            input.onchange = async (e) => {
+                              const file = (e.target as HTMLInputElement)
+                                .files?.[0];
+                              if (file) {
+                                setIsProcessing(true);
 
-                              const audioUrl = URL.createObjectURL(file);
-                              onAudioChange?.(audioUrl, file);
+                                const audioUrl = URL.createObjectURL(file);
+                                onAudioChange?.(audioUrl, file);
 
-                              // Transcribe the audio
-                              const formData = new FormData();
-                              formData.append("audio", file);
+                                // Transcribe the audio
+                                const formData = new FormData();
+                                formData.append("audio", file);
 
-                              try {
-                                const { supabase } = await import(
-                                  "@/lib/supabase"
-                                );
-                                const {
-                                  data: { session },
-                                } = await supabase.auth.getSession();
+                                try {
+                                  const { supabase } = await import(
+                                    "@/lib/supabase"
+                                  );
+                                  const {
+                                    data: { session },
+                                  } = await supabase.auth.getSession();
 
-                                // Get CSRF token
-                                const csrfResponse = await fetch("/api/csrf");
-                                const { token: csrfToken } = await csrfResponse.json();
+                                  // Get CSRF token
+                                  const csrfResponse = await fetch("/api/csrf");
+                                  const { token: csrfToken } = await csrfResponse.json();
 
-                                const headers: HeadersInit = {
-                                  "x-csrf-token": csrfToken,
-                                };
-                                if (session?.access_token) {
-                                  headers["Authorization"] =
-                                    `Bearer ${session.access_token}`;
-                                }
+                                  const headers: HeadersInit = {
+                                    "x-csrf-token": csrfToken,
+                                  };
+                                  if (session?.access_token) {
+                                    headers["Authorization"] =
+                                      `Bearer ${session.access_token}`;
+                                  }
 
-                                const response = await fetch(
-                                  "/api/transcribe",
-                                  {
-                                    method: "POST",
-                                    headers,
-                                    body: formData,
-                                  },
-                                );
-
-                                if (response.ok) {
-                                  const data = await response.json();
-                                  console.log(
-                                    "[BookStyleReview] Upload transcribe response:",
+                                  const response = await fetch(
+                                    "/api/transcribe",
                                     {
-                                      hasTranscription: !!data.transcription,
-                                      hasLessonOptions: !!data.lessonOptions,
-                                      practical: data.lessonOptions?.practical,
+                                      method: "POST",
+                                      headers,
+                                      body: formData,
                                     },
                                   );
 
-                                  if (data.transcription) {
-                                    onTranscriptionChange(data.transcription);
+                                  if (response.ok) {
+                                    const data = await response.json();
+
+                                    if (data.transcription) {
+                                      onTranscriptionChange(data.transcription);
+                                    }
+                                    // Use practical lesson as default (user can edit later)
+                                    if (data.lessonOptions?.practical) {
+                                      onWisdomChange(
+                                        data.lessonOptions.practical,
+                                      );
+                                    }
+                                  } else {
+                                    toast({
+                                      title: "Transcription failed",
+                                      description: "Could not transcribe the audio. The audio file will still be saved.",
+                                      variant: "destructive",
+                                    });
                                   }
-                                  // Use practical lesson as default (user can edit later)
-                                  if (data.lessonOptions?.practical) {
-                                    console.log(
-                                      "[BookStyleReview] Setting lesson from upload:",
-                                      data.lessonOptions.practical,
-                                    );
-                                    onWisdomChange(
-                                      data.lessonOptions.practical,
-                                    );
-                                  }
+                                } catch {
+                                  toast({
+                                    title: "Error",
+                                    description: "An error occurred while processing the audio. The audio file will still be saved.",
+                                    variant: "destructive",
+                                  });
+                                } finally {
+                                  setIsProcessing(false);
                                 }
-                              } catch (error) {
-                                console.error("Transcription error:", error);
-                              } finally {
-                                setIsProcessing(false);
                               }
-                            }
-                          };
-                          input.click();
+                            };
+                            
+                            // Append to DOM to ensure it works in all browsers
+                            input.style.display = "none";
+                            document.body.appendChild(input);
+                            input.click();
+                            
+                            // Clean up after a delay
+                            setTimeout(() => {
+                              document.body.removeChild(input);
+                            }, 1000);
+                          } catch {
+                            toast({
+                              title: "Error",
+                              description: "Could not open file picker. Please try again.",
+                              variant: "destructive",
+                            });
+                          }
                         }}
                         className="flex items-center gap-2"
                       >
@@ -942,17 +964,69 @@ export function BookStyleReview({
 
                   {!editingWisdom ? (
                     <div
-                      className="wisdom-quote p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border-l-4 border-amber-400 cursor-pointer hover:from-amber-100 hover:to-orange-100 transition-colors"
+                      className="wisdom-quote relative p-6 clear-both cursor-pointer hover:shadow-lg transition-shadow"
                       onClick={() => {
                         setTempWisdom(wisdomText);
                         setEditingWisdom(true);
                       }}
+                      style={{
+                        background: 'linear-gradient(135deg, #fef9e7 0%, #faf3dd 100%)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
+                        transform: 'rotate(-0.5deg)',
+                        borderRadius: '2px',
+                        border: '1px solid rgba(139, 107, 122, 0.2)',
+                      }}
                     >
-                      <p className="text-lg text-gray-700 italic">
+                      {/* Paper texture overlay */}
+                      <div 
+                        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E")`,
+                        }}
+                      ></div>
+                      
+                      {/* Tape at top corners */}
+                      <div 
+                        className="absolute -top-2 left-6 w-12 h-5 opacity-40 pointer-events-none"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(255,255,240,0.7) 0%, rgba(255,250,230,0.8) 100%)',
+                          transform: 'rotate(-2deg)',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        }}
+                      ></div>
+                      <div 
+                        className="absolute -top-2 right-6 w-12 h-5 opacity-40 pointer-events-none"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(255,255,240,0.7) 0%, rgba(255,250,230,0.8) 100%)',
+                          transform: 'rotate(2deg)',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        }}
+                      ></div>
+
+                      <p 
+                        className="text-sm mb-2 relative z-10"
+                        style={{
+                          fontFamily: '"Caveat", cursive',
+                          fontSize: '20px',
+                          color: '#8b6b7a',
+                          fontWeight: 600,
+                        }}
+                      >
+                        Lesson Learned
+                      </p>
+                      <p 
+                        className="leading-7 relative z-10"
+                        style={{
+                          fontFamily: '"Caveat", cursive',
+                          fontSize: '24px',
+                          color: '#4a4a4a',
+                          lineHeight: '1.8',
+                        }}
+                      >
                         {wisdomText ||
                           "Click to add a lesson or wisdom from this memory..."}
                       </p>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center gap-2 mt-2 relative z-10">
                         <Edit2 className="w-5 h-5 text-gray-400" />
                         {wisdomText && (
                           <button

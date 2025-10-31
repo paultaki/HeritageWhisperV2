@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Clock } from "lucide-react";
+import { Pencil, Clock, Volume2, Pause, Loader2 } from "lucide-react";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
 
 interface Story {
@@ -11,6 +11,7 @@ interface Story {
   storyYear: number;
   lifeAge?: number;
   transcription?: string;
+  audioUrl?: string;
   photos?: Array<{
     id: string;
     url: string;
@@ -510,6 +511,127 @@ BookPage.displayName = "BookPage";
 // Story Content Component
 function StoryContent({ story, position }: { story: Story; position: "left" | "right" }) {
   const router = useRouter();
+  
+  // Audio state
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Calculate progress percentage
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  
+  // Format time helper
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  // Initialize audio element on mount - ONLY ONCE per story
+  useEffect(() => {
+    if (!story.audioUrl) return;
+    
+    // Only initialize if we don't already have an audio element
+    if (audioRef.current) return;
+    
+    console.log(`Initializing audio for ${story.title} (${position} page)`);
+    const audio = new Audio();
+    audio.preload = 'metadata';
+    audio.src = story.audioUrl;
+    audioRef.current = audio;
+    
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+      console.log(`Audio loaded for ${story.title} (${position} page), duration:`, audio.duration);
+    };
+    
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+    
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+    
+    const handlePause = () => {
+      setIsPlaying(false);
+    };
+    
+    const handlePlay = () => {
+      setIsPlaying(true);
+    };
+    
+    const handleError = (err: Event) => {
+      console.error(`Audio error for ${story.title} (${position} page):`, err);
+      if (audio.error) {
+        console.error('Error code:', audio.error.code, 'Message:', audio.error.message);
+      }
+      setIsLoading(false);
+      setIsPlaying(false);
+    };
+    
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('error', handleError);
+    
+    // Cleanup only on unmount
+    return () => {
+      console.log(`Cleaning up audio for ${story.title} (${position} page)`);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('error', handleError);
+      audio.pause();
+      audio.src = '';
+      audioRef.current = null;
+    };
+  }, [story.id]);
+
+  // Toggle audio playback
+  const toggleAudio = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!audioRef.current) {
+      console.log('No audio element initialized for', position, 'page');
+      return;
+    }
+    
+    console.log(`Toggle audio on ${position} page, currently paused:`, audioRef.current.paused);
+    
+    try {
+      // Stop other audio on the page first
+      const allAudioElements = document.querySelectorAll('audio');
+      allAudioElements.forEach(audio => {
+        if (audio !== audioRef.current) {
+          audio.pause();
+        }
+      });
+      
+      if (audioRef.current.paused) {
+        setIsLoading(true);
+        await audioRef.current.play();
+        setIsLoading(false);
+        console.log(`Audio started playing on ${position} page`);
+      } else {
+        audioRef.current.pause();
+        console.log(`Audio paused on ${position} page`);
+      }
+    } catch (error) {
+      console.error(`Audio playback error on ${position} page:`, error);
+      setIsLoading(false);
+      setIsPlaying(false);
+    }
+  };
 
   return (
     <>
@@ -578,6 +700,74 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
         </div>
       </div>
 
+      {/* Audio Player */}
+      {story.audioUrl && (
+        <div className="mb-4">
+          {/* Debug: Show if audio exists */}
+          {/* <div className="text-xs text-red-500 mb-1">Audio URL: {story.audioUrl.substring(0, 50)}...</div> */}
+          <div className="flex items-center gap-3">
+            {/* Circular play button with progress ring */}
+            <button
+              onClick={toggleAudio}
+              className="relative flex-shrink-0 hover:scale-105 transition-transform"
+              aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+            >
+              <svg className="w-10 h-10 -rotate-90">
+                {/* Background ring - very subtle */}
+                <circle
+                  cx="20"
+                  cy="20"
+                  r="16"
+                  fill="none"
+                  stroke="rgba(139,107,122,0.15)"
+                  strokeWidth="2"
+                />
+                {/* Progress ring - sepia tone */}
+                {isPlaying && (
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="16"
+                    fill="none"
+                    stroke="rgba(139,107,122,0.5)"
+                    strokeWidth="2"
+                    strokeDasharray={`${2 * Math.PI * 16}`}
+                    strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
+                    strokeLinecap="round"
+                    className="transition-all duration-300"
+                  />
+                )}
+              </svg>
+              {/* Icon in center */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
+                ) : isPlaying ? (
+                  <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
+                ) : (
+                  <Volume2 className="w-4 h-4 text-neutral-600" />
+                )}
+              </div>
+            </button>
+
+            {/* Linear progress bar - subtle, book-style */}
+            <div className="flex-1">
+              <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-neutral-400 transition-all duration-100" 
+                  style={{ width: `${progress}%` }} 
+                />
+              </div>
+            </div>
+
+            {/* Timestamps - small, subtle */}
+            <span className="text-xs text-neutral-500 whitespace-nowrap tabular-nums">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Story text */}
       <div className="text-[15.5px] leading-7 text-neutral-800/95 space-y-3">
         {story.transcription?.split("\n\n").map((paragraph, i) => (
@@ -626,7 +816,7 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
             className="text-sm mb-2"
             style={{
               fontFamily: '"Caveat", cursive',
-              fontSize: '15px',
+              fontSize: '20px',
               color: '#8b6b7a',
               fontWeight: 600,
             }}
@@ -637,7 +827,7 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
             className="leading-7"
             style={{
               fontFamily: '"Caveat", cursive',
-              fontSize: '18px',
+              fontSize: '24px',
               color: '#4a4a4a',
               lineHeight: '1.8',
             }}

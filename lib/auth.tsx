@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import type { User } from "./supabase";
 import { supabase } from "./supabase";
 import type { Session } from "@supabase/supabase-js";
+import { useActivityTracker } from "@/hooks/useActivityTracker";
+import { SessionTimeoutWarning } from "@/components/SessionTimeoutWarning";
 
 interface AuthContextType {
   user: User | null;
@@ -300,6 +302,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await logoutMutation.mutateAsync();
   };
 
+  // Activity tracking for session timeout (only when Remember Me is disabled)
+  const rememberMe = typeof window !== 'undefined' 
+    ? localStorage.getItem('rememberMe') === 'true'
+    : true; // Default to true (no timeout) if window is not available
+  
+  const shouldTrackActivity = !!session && !rememberMe;
+
+  const activityTracker = useActivityTracker({
+    enabled: shouldTrackActivity,
+    timeoutDuration: 30 * 60 * 1000, // 30 minutes
+    warningDuration: 5 * 60 * 1000, // 5 minutes
+    onTimeout: () => {
+      console.log('[Auth] Session timed out due to inactivity');
+      logout();
+    },
+  });
+
+  const handleContinueSession = () => {
+    console.log('[Auth] User chose to continue session');
+    activityTracker.resetTimer();
+  };
+
+  const handleTimeoutLogout = () => {
+    console.log('[Auth] User logged out from timeout warning');
+    logout();
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -312,6 +341,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
+      
+      {/* Session timeout warning modal */}
+      {shouldTrackActivity && (
+        <SessionTimeoutWarning
+          isOpen={activityTracker.isWarning}
+          secondsRemaining={activityTracker.secondsRemaining}
+          onContinue={handleContinueSession}
+          onLogout={handleTimeoutLogout}
+        />
+      )}
     </AuthContext.Provider>
   );
 }

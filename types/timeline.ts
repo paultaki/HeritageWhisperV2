@@ -142,7 +142,7 @@ export interface TimelineDecadeSectionProps {
   birthYear: number;
   onRegisterRef: (decadeId: string, el: HTMLElement | null) => void;
   onGhostPromptClick: (prompt: GhostPrompt) => void;
-  onOpenOverlay: (story: Story) => void;
+  onOpenOverlay?: (story: Story) => void; // Optional - if not provided, cards will navigate to book view
   highlightedStoryId: string | null;
   returnHighlightId: string | null;
   useV2Features?: boolean; // Enable V2 senior-friendly UX improvements
