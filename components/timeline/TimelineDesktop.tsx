@@ -516,7 +516,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </div>
             )}
 
-            {/* Audio play button overlaid on photo (hidden in V2) */}
+            {/* Book-style audio button overlaid on photo (hidden in V2) */}
             {story.audioUrl && !useV2Features && (
               <button
                 onClick={(e) => {
@@ -525,52 +525,57 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 }}
                 aria-pressed={isPlaying}
                 aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-                className="absolute right-4 bottom-4 w-11 h-11 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 z-10"
+                className="absolute right-4 bottom-4 hover:scale-105 transition-transform z-10"
               >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
-                ) : (
-                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                    <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
-                    {isPlaying ? (
-                      <g>
-                        <rect x="11" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
-                        <rect x="14.8" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
-                      </g>
-                    ) : (
-                      <polygon points="11,9 11,19 19,14" fill="#fb923c" />
-                    )}
-                  </svg>
-                )}
+                <svg className="w-11 h-11 -rotate-90">
+                  {/* Background ring */}
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    fill="white"
+                    fillOpacity="0.9"
+                  />
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    fill="none"
+                    stroke="rgba(139,107,122,0.15)"
+                    strokeWidth="2"
+                  />
+                  {/* Progress ring */}
+                  {isPlaying && (
+                    <circle
+                      cx="22"
+                      cy="22"
+                      r="18"
+                      fill="none"
+                      stroke="rgba(139,107,122,0.5)"
+                      strokeWidth="2"
+                      strokeDasharray={`${2 * Math.PI * 18}`}
+                      strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
+                      strokeLinecap="round"
+                      className="transition-all duration-300"
+                    />
+                  )}
+                </svg>
+                {/* Icon in center */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
+                  ) : isPlaying ? (
+                    <Pause className="w-5 h-5 text-neutral-600 fill-neutral-600" />
+                  ) : (
+                    <Volume2 className="w-5 h-5 text-neutral-600" />
+                  )}
+                </div>
               </button>
             )}
           </div>
 
           {/* White Card Section Below Photo */}
           <div className="p-4 bg-white relative">
-            {/* Original Progress Bar (when playing, only if NOT V2) */}
-            {story.audioUrl && (isPlaying || progress > 0) && !useV2Features && (
-              <div className="mb-3">
-                <div
-                  ref={progressBarRef}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleProgressBarClick(e);
-                  }}
-                  className="h-1.5 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
-                >
-                  <div
-                    className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full transition-all duration-100"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
-                  <span>{formatDuration(currentTime)}</span>
-                  <span>{formatDuration(duration)}</span>
-                </div>
-              </div>
-            )}
-
             {/* Title */}
             <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
               {story.title}
@@ -593,17 +598,49 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               )}
             </div>
 
-            {/* V2: Small audio icon in bottom right corner */}
+            {/* V2: Book-style circular audio button */}
             {useV2Features && story.audioUrl && (
               <button
                 onClick={handlePlayAudio}
-                className="absolute bottom-4 right-4 flex flex-col items-center gap-0.5 group"
+                className="absolute bottom-4 right-4 hover:scale-105 transition-transform"
                 aria-label={isPlaying ? "Pause audio" : "Play audio"}
               >
-                <Volume2 className="w-5 h-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
-                <span className="text-xs text-gray-600 font-medium">
-                  {formatDuration(duration)}
-                </span>
+                <svg className="w-10 h-10 -rotate-90">
+                  {/* Background ring */}
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="16"
+                    fill="none"
+                    stroke="rgba(139,107,122,0.15)"
+                    strokeWidth="2"
+                  />
+                  {/* Progress ring */}
+                  {isPlaying && (
+                    <circle
+                      cx="20"
+                      cy="20"
+                      r="16"
+                      fill="none"
+                      stroke="rgba(139,107,122,0.5)"
+                      strokeWidth="2"
+                      strokeDasharray={`${2 * Math.PI * 16}`}
+                      strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
+                      strokeLinecap="round"
+                      className="transition-all duration-300"
+                    />
+                  )}
+                </svg>
+                {/* Icon in center */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
+                  ) : isPlaying ? (
+                    <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
+                  ) : (
+                    <Volume2 className="w-4 h-4 text-neutral-600" />
+                  )}
+                </div>
               </button>
             )}
           </div>
@@ -643,7 +680,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             </div>
           </div>
 
-          {/* Audio play button overlaid on placeholder (hidden in V2) */}
+          {/* Book-style audio button overlaid on placeholder (hidden in V2) */}
           {story.audioUrl && !useV2Features && (
             <button
               onClick={(e) => {
@@ -652,52 +689,57 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               }}
               aria-pressed={isPlaying}
               aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-              className="absolute right-4 bottom-4 w-11 h-11 rounded-full bg-gray-500/40 backdrop-blur-sm hover:bg-gray-500/60 flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 z-10"
+              className="absolute right-4 bottom-4 hover:scale-105 transition-transform z-10"
             >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
-              ) : (
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                  <circle cx="14" cy="14" r="13" fill="white" fillOpacity="0.9" />
-                  {isPlaying ? (
-                    <g>
-                      <rect x="11" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
-                      <rect x="14.8" y="9" width="2.8" height="10" rx="0.6" fill="#fb923c" />
-                    </g>
-                  ) : (
-                    <polygon points="11,9 11,19 19,14" fill="#fb923c" />
-                  )}
-                </svg>
-              )}
+              <svg className="w-11 h-11 -rotate-90">
+                {/* Background ring */}
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="18"
+                  fill="white"
+                  fillOpacity="0.9"
+                />
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="18"
+                  fill="none"
+                  stroke="rgba(139,107,122,0.15)"
+                  strokeWidth="2"
+                />
+                {/* Progress ring */}
+                {isPlaying && (
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    fill="none"
+                    stroke="rgba(139,107,122,0.5)"
+                    strokeWidth="2"
+                    strokeDasharray={`${2 * Math.PI * 18}`}
+                    strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
+                    strokeLinecap="round"
+                    className="transition-all duration-300"
+                  />
+                )}
+              </svg>
+              {/* Icon in center */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
+                ) : isPlaying ? (
+                  <Pause className="w-5 h-5 text-neutral-600 fill-neutral-600" />
+                ) : (
+                  <Volume2 className="w-5 h-5 text-neutral-600" />
+                )}
+              </div>
             </button>
           )}
         </div>
 
         {/* White Card Section Below Placeholder */}
         <div className="p-4 bg-white relative">
-          {/* Progress Bar (when playing, only if NOT V2) */}
-          {story.audioUrl && (isPlaying || progress > 0) && !useV2Features && (
-            <div className="mb-3">
-              <div
-                ref={progressBarRef}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleProgressBarClick(e);
-                }}
-                className="h-1.5 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
-              >
-                <div
-                  className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full transition-all duration-100"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
-                <span>{formatDuration(currentTime)}</span>
-                <span>{formatDuration(duration)}</span>
-              </div>
-            </div>
-          )}
-
           {/* Title */}
           <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
             {story.title}
@@ -720,17 +762,49 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             )}
           </div>
 
-          {/* V2: Small audio icon in bottom right corner */}
+          {/* V2: Book-style circular audio button */}
           {useV2Features && story.audioUrl && (
             <button
               onClick={handlePlayAudio}
-              className="absolute bottom-4 right-4 flex flex-col items-center gap-0.5 group"
+              className="absolute bottom-4 right-4 hover:scale-105 transition-transform"
               aria-label={isPlaying ? "Pause audio" : "Play audio"}
             >
-              <Volume2 className="w-5 h-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
-              <span className="text-xs text-gray-600 font-medium">
-                {formatDuration(duration)}
-              </span>
+              <svg className="w-10 h-10 -rotate-90">
+                {/* Background ring */}
+                <circle
+                  cx="20"
+                  cy="20"
+                  r="16"
+                  fill="none"
+                  stroke="rgba(139,107,122,0.15)"
+                  strokeWidth="2"
+                />
+                {/* Progress ring */}
+                {isPlaying && (
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="16"
+                    fill="none"
+                    stroke="rgba(139,107,122,0.5)"
+                    strokeWidth="2"
+                    strokeDasharray={`${2 * Math.PI * 16}`}
+                    strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
+                    strokeLinecap="round"
+                    className="transition-all duration-300"
+                  />
+                )}
+              </svg>
+              {/* Icon in center */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
+                ) : isPlaying ? (
+                  <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
+                ) : (
+                  <Volume2 className="w-4 h-4 text-neutral-600" />
+                )}
+              </div>
             </button>
           )}
         </div>

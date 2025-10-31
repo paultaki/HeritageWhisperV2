@@ -417,6 +417,7 @@ export function BookStyleReview({
           </h1>
           <div className="flex items-center gap-2 md:gap-3 ml-auto mr-[75px] md:mr-0">
             <Button
+              type="button"
               onClick={onSave}
               disabled={isSaving}
               className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white rounded-full px-4 md:px-6 py-4 md:py-6 text-base md:text-lg"
@@ -450,6 +451,7 @@ export function BookStyleReview({
                 cleanedAudioUrl && (
                   <div className="flex justify-end">
                     <Button
+                      type="button"
                       onClick={handleReRecord}
                       variant="outline"
                       size="sm"
@@ -567,6 +569,12 @@ export function BookStyleReview({
                   <Mic className="w-5 h-5" />
                   Audio Recording (Optional)
                 </h3>
+                {(() => {
+                  console.log("[Audio Section] audioUrl:", audioUrl);
+                  console.log("[Audio Section] isProcessing:", isProcessing);
+                  console.log("[Audio Section] Rendering:", audioUrl ? "with audio" : isProcessing ? "processing" : "no audio (buttons)");
+                  return null;
+                })()}
                 {audioUrl ? (
                   <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <CustomAudioPlayer 
@@ -576,6 +584,7 @@ export function BookStyleReview({
                     />
                     <div className="flex gap-2">
                       <Button
+                        type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => {
@@ -595,6 +604,7 @@ export function BookStyleReview({
                         Re-record
                       </Button>
                       <Button
+                        type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => {
@@ -629,119 +639,133 @@ export function BookStyleReview({
                   </div>
                 ) : (
                   <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    {(() => {
+                      console.log("[Button Container] Rendering buttons container");
+                      return null;
+                    })()}
                     <div className="flex gap-2">
                       <Button
+                        type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          console.log('[BookStyleReview] REC Memory clicked');
+                        onClick={(e) => {
+                          console.log("[REC Memory] Button clicked!");
+                          console.log("[REC Memory] Event:", e);
+                          e.preventDefault();
+                          e.stopPropagation();
                           setIsInitialRecordingShow(false); // Manual recording
                           setShowRecordingOverlay(true);
-                          console.log('[BookStyleReview] showRecordingOverlay set to true');
+                          console.log("[REC Memory] setShowRecordingOverlay(true) called");
                         }}
+                        onMouseEnter={() => console.log("[REC Memory] Mouse entered button")}
+                        onMouseDown={() => console.log("[REC Memory] Mouse down on button")}
                         className="flex items-center gap-2"
+                        data-testid="rec-memory-btn"
                       >
                         <Mic className="w-4 h-4" />
                         REC Memory
                       </Button>
                       <Button
+                        type="button"
                         variant="outline"
                         size="sm"
-                        onClick={async () => {
-                          console.log('[BookStyleReview] Upload Audio clicked');
-                          try {
-                            const input = document.createElement("input");
-                            input.type = "file";
-                            input.accept = "audio/*";
-                            input.onchange = async (e) => {
-                              const file = (e.target as HTMLInputElement)
-                                .files?.[0];
-                              if (file) {
-                                setIsProcessing(true);
+                        onClick={(e) => {
+                          console.log("[Upload Audio] Button clicked!");
+                          console.log("[Upload Audio] Event:", e);
+                          e.preventDefault();
+                          e.stopPropagation();
+                          
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "audio/*";
+                          console.log("[Upload Audio] Input element created");
+                          input.onchange = async (e) => {
+                            console.log("[Upload Audio] File selected!");
+                            const file = (e.target as HTMLInputElement)
+                              .files?.[0];
+                            if (file) {
+                              setIsProcessing(true);
 
-                                const audioUrl = URL.createObjectURL(file);
-                                onAudioChange?.(audioUrl, file);
+                              const audioUrl = URL.createObjectURL(file);
+                              onAudioChange?.(audioUrl, file);
 
-                                // Transcribe the audio
-                                const formData = new FormData();
-                                formData.append("audio", file);
+                              // Transcribe the audio
+                              const formData = new FormData();
+                              formData.append("audio", file);
 
-                                try {
-                                  const { supabase } = await import(
-                                    "@/lib/supabase"
-                                  );
-                                  const {
-                                    data: { session },
-                                  } = await supabase.auth.getSession();
+                              try {
+                                const { supabase } = await import(
+                                  "@/lib/supabase"
+                                );
+                                const {
+                                  data: { session },
+                                } = await supabase.auth.getSession();
 
-                                  // Get CSRF token
-                                  const csrfResponse = await fetch("/api/csrf");
-                                  const { token: csrfToken } = await csrfResponse.json();
+                                // Get CSRF token
+                                const csrfResponse = await fetch("/api/csrf");
+                                const { token: csrfToken } = await csrfResponse.json();
 
-                                  const headers: HeadersInit = {
-                                    "x-csrf-token": csrfToken,
-                                  };
-                                  if (session?.access_token) {
-                                    headers["Authorization"] =
-                                      `Bearer ${session.access_token}`;
+                                const headers: HeadersInit = {
+                                  "x-csrf-token": csrfToken,
+                                };
+                                if (session?.access_token) {
+                                  headers["Authorization"] =
+                                    `Bearer ${session.access_token}`;
+                                }
+
+                                const response = await fetch(
+                                  "/api/transcribe",
+                                  {
+                                    method: "POST",
+                                    headers,
+                                    body: formData,
+                                  },
+                                );
+
+                                if (response.ok) {
+                                  const data = await response.json();
+
+                                  if (data.transcription) {
+                                    onTranscriptionChange(data.transcription);
                                   }
-
-                                  const response = await fetch(
-                                    "/api/transcribe",
-                                    {
-                                      method: "POST",
-                                      headers,
-                                      body: formData,
-                                    },
-                                  );
-
-                                  if (response.ok) {
-                                    const data = await response.json();
-
-                                    if (data.transcription) {
-                                      onTranscriptionChange(data.transcription);
-                                    }
-                                    // Use practical lesson as default (user can edit later)
-                                    if (data.lessonOptions?.practical) {
-                                      onWisdomChange(
-                                        data.lessonOptions.practical,
-                                      );
-                                    }
-                                  } else {
-                                    toast({
-                                      title: "Transcription failed",
-                                      description: "Could not transcribe the audio. The audio file will still be saved.",
-                                      variant: "destructive",
-                                    });
+                                  // Use practical lesson as default (user can edit later)
+                                  if (data.lessonOptions?.practical) {
+                                    onWisdomChange(
+                                      data.lessonOptions.practical,
+                                    );
                                   }
-                                } catch {
+                                } else {
                                   toast({
-                                    title: "Error",
-                                    description: "An error occurred while processing the audio. The audio file will still be saved.",
+                                    title: "Transcription failed",
+                                    description: "Could not transcribe the audio. The audio file will still be saved.",
                                     variant: "destructive",
                                   });
-                                } finally {
-                                  setIsProcessing(false);
                                 }
+                              } catch {
+                                toast({
+                                  title: "Error",
+                                  description: "An error occurred while processing the audio. The audio file will still be saved.",
+                                  variant: "destructive",
+                                });
+                              } finally {
+                                setIsProcessing(false);
                               }
-                            };
-                            
-                            // Append to DOM to ensure it works in all browsers
-                            input.style.display = "none";
-                            document.body.appendChild(input);
-                            input.click();
-                            
-                            // Clean up after a delay
-                            setTimeout(() => {
+                            }
+                          };
+                          
+                          // Append to DOM and trigger synchronously
+                          input.style.display = "none";
+                          document.body.appendChild(input);
+                          console.log("[Upload Audio] Input appended to DOM, calling click()");
+                          input.click();
+                          console.log("[Upload Audio] Click called");
+                          
+                          // Clean up after a delay
+                          setTimeout(() => {
+                            if (document.body.contains(input)) {
                               document.body.removeChild(input);
-                            }, 1000);
-                          } catch {
-                            toast({
-                              title: "Error",
-                              description: "Could not open file picker. Please try again.",
-                              variant: "destructive",
-                            });
-                          }
+                            }
+                          }, 1000);
                         }}
                         className="flex items-center gap-2"
                       >
@@ -767,6 +791,7 @@ export function BookStyleReview({
                     {/* Desktop: Show both buttons when originalTranscription exists */}
                     {originalTranscription && (
                       <Button
+                        type="button"
                         onClick={handleUndoEnhancement}
                         disabled={isEnhancing}
                         size="sm"
@@ -782,6 +807,7 @@ export function BookStyleReview({
                     {/* Desktop: Always show "Enhance Story" */}
                     {originalTranscription ? (
                       <Button
+                        type="button"
                         onClick={handleUndoEnhancement}
                         disabled={isEnhancing}
                         size="sm"
@@ -793,6 +819,7 @@ export function BookStyleReview({
                       </Button>
                     ) : (
                       <Button
+                        type="button"
                         onClick={handleEnhanceStory}
                         disabled={isEnhancing || !transcription?.trim()}
                         size="sm"
@@ -815,6 +842,7 @@ export function BookStyleReview({
                     
                     {/* Desktop only: Always show Enhance Story button */}
                     <Button
+                      type="button"
                       onClick={handleEnhanceStory}
                       disabled={isEnhancing || !transcription?.trim()}
                       size="sm"
@@ -903,6 +931,7 @@ export function BookStyleReview({
                   {/* Centered Button */}
                   <div className="flex justify-center mb-3">
                     <Button
+                      type="button"
                       onClick={handleGenerateLesson}
                       disabled={isGeneratingLesson || !transcription?.trim()}
                       size="sm"
@@ -955,6 +984,7 @@ export function BookStyleReview({
                         </button>
                       )}
                       <Button
+                        type="button"
                         onClick={() => setShowLessonOptions(false)}
                         size="sm"
                         variant="ghost"
@@ -1062,6 +1092,7 @@ export function BookStyleReview({
                       />
                       <div className="flex gap-2">
                         <Button
+                          type="button"
                           size="sm"
                           variant="outline"
                           onClick={handleWisdomSave}
@@ -1071,6 +1102,7 @@ export function BookStyleReview({
                           Save
                         </Button>
                         <Button
+                          type="button"
                           size="sm"
                           variant="outline"
                           onClick={() => {
@@ -1083,6 +1115,7 @@ export function BookStyleReview({
                           Remove
                         </Button>
                         <Button
+                          type="button"
                           size="sm"
                           variant="outline"
                           onClick={() => {
@@ -1108,6 +1141,7 @@ export function BookStyleReview({
       <div className="max-w-3xl mx-auto px-4 pb-8">
         <div className="flex gap-3">
           <Button
+            type="button"
             onClick={() => {
               console.log(
                 "BookStyleReview: Bottom Save button clicked, calling onSave",
@@ -1120,6 +1154,7 @@ export function BookStyleReview({
             {isSaving ? "Saving..." : "Save"}
           </Button>
           <Button
+            type="button"
             onClick={onCancel}
             disabled={isSaving}
             className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded-full py-3 text-base font-medium"
@@ -1128,6 +1163,7 @@ export function BookStyleReview({
           </Button>
           {isEditing && onDelete && (
             <Button
+              type="button"
               variant="outline"
               onClick={() => setShowDeleteConfirm(true)}
               disabled={isSaving}

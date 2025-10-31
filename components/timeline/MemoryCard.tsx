@@ -397,11 +397,11 @@ export const MemoryCard = React.memo(
 
           <div className="hw-card-body relative">
             <div className="flex items-center gap-3">
-              {/* Original audio button (only show if NOT V2) */}
+              {/* Book-style circular audio button with progress ring */}
               {story.audioUrl && !useV2Features && (
                 <button
                   onClick={handlePlayAudio}
-                  className="glass-play-button-mobile"
+                  className="relative flex-shrink-0 hover:scale-105 transition-transform"
                   data-testid={`button-play-${story.id}`}
                   aria-label={
                     isPlaying
@@ -411,15 +411,44 @@ export const MemoryCard = React.memo(
                         : "Play audio"
                   }
                 >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-white" />
-                  ) : hasError ? (
-                    <AlertCircle className="w-5 h-5 text-red-500" />
-                  ) : isPlaying ? (
-                    <Pause className="w-5 h-5 text-white fill-white" />
-                  ) : (
-                    <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-                  )}
+                  <svg className="w-10 h-10 -rotate-90">
+                    {/* Background ring */}
+                    <circle
+                      cx="20"
+                      cy="20"
+                      r="16"
+                      fill="none"
+                      stroke="rgba(139,107,122,0.15)"
+                      strokeWidth="2"
+                    />
+                    {/* Progress ring */}
+                    {isPlaying && (
+                      <circle
+                        cx="20"
+                        cy="20"
+                        r="16"
+                        fill="none"
+                        stroke="rgba(139,107,122,0.5)"
+                        strokeWidth="2"
+                        strokeDasharray={`${2 * Math.PI * 16}`}
+                        strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
+                        strokeLinecap="round"
+                        className="transition-all duration-300"
+                      />
+                    )}
+                  </svg>
+                  {/* Icon in center */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
+                    ) : hasError ? (
+                      <AlertCircle className="w-4 h-4 text-red-500" />
+                    ) : isPlaying ? (
+                      <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
+                    ) : (
+                      <Volume2 className="w-4 h-4 text-neutral-600" />
+                    )}
+                  </div>
                 </button>
               )}
 
@@ -533,11 +562,11 @@ export const MemoryCard = React.memo(
             </div>
           )}
 
-          {/* Audio play button overlay (hidden in V2, V2 shows below photo) */}
+          {/* Book-style audio button overlay on photo (hidden in V2) */}
           {story.audioUrl && !useV2Features && (
             <button
               onClick={handlePlayAudio}
-              className="hw-play"
+              className="absolute right-4 bottom-4 hover:scale-105 transition-transform"
               data-testid={`button-play-${story.id}`}
               aria-label={
                 isPlaying
@@ -547,20 +576,51 @@ export const MemoryCard = React.memo(
                     : "Play audio"
               }
             >
-              {isLoading ? (
-                <Loader2
-                  className="w-4 h-4 animate-spin"
-                  style={{ fill: "var(--color-accent)" }}
+              <svg className="w-11 h-11 -rotate-90">
+                {/* Background ring */}
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="18"
+                  fill="white"
+                  fillOpacity="0.9"
                 />
-              ) : hasError ? (
-                <AlertCircle className="w-4 h-4 text-red-500" />
-              ) : isPlaying ? (
-                <Pause style={{ fill: "var(--color-accent)" }} />
-              ) : (
-                <Play
-                  style={{ fill: "var(--color-accent)", marginLeft: "2px" }}
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="18"
+                  fill="none"
+                  stroke="rgba(139,107,122,0.15)"
+                  strokeWidth="2"
                 />
-              )}
+                {/* Progress ring */}
+                {isPlaying && (
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    fill="none"
+                    stroke="rgba(139,107,122,0.5)"
+                    strokeWidth="2"
+                    strokeDasharray={`${2 * Math.PI * 18}`}
+                    strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
+                    strokeLinecap="round"
+                    className="transition-all duration-300"
+                  />
+                )}
+              </svg>
+              {/* Icon in center */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
+                ) : hasError ? (
+                  <AlertCircle className="w-5 h-5 text-red-500" />
+                ) : isPlaying ? (
+                  <Pause className="w-5 h-5 text-neutral-600 fill-neutral-600" />
+                ) : (
+                  <Volume2 className="w-5 h-5 text-neutral-600" />
+                )}
+              </div>
             </button>
           )}
         </div>
@@ -612,17 +672,49 @@ export const MemoryCard = React.memo(
             )}
           </div>
 
-          {/* V2: Small audio icon in bottom right corner */}
+          {/* V2: Book-style circular audio button */}
           {useV2Features && story.audioUrl && (
             <button
               onClick={handlePlayAudio}
-              className="absolute bottom-4 right-4 flex flex-col items-center gap-0.5 group"
+              className="absolute bottom-4 right-4 hover:scale-105 transition-transform"
               aria-label={isPlaying ? "Pause audio" : "Play audio"}
             >
-              <Volume2 className="w-5 h-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
-              <span className="text-xs text-gray-600 font-medium">
-                {formatDuration(duration)}
-              </span>
+              <svg className="w-10 h-10 -rotate-90">
+                {/* Background ring */}
+                <circle
+                  cx="20"
+                  cy="20"
+                  r="16"
+                  fill="none"
+                  stroke="rgba(139,107,122,0.15)"
+                  strokeWidth="2"
+                />
+                {/* Progress ring */}
+                {isPlaying && (
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="16"
+                    fill="none"
+                    stroke="rgba(139,107,122,0.5)"
+                    strokeWidth="2"
+                    strokeDasharray={`${2 * Math.PI * 16}`}
+                    strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
+                    strokeLinecap="round"
+                    className="transition-all duration-300"
+                  />
+                )}
+              </svg>
+              {/* Icon in center */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
+                ) : isPlaying ? (
+                  <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
+                ) : (
+                  <Volume2 className="w-4 h-4 text-neutral-600" />
+                )}
+              </div>
             </button>
           )}
         </div>

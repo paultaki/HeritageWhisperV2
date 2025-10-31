@@ -245,12 +245,13 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                       <button
                         key={storyItem.id}
                         onClick={() => onNavigateToStory && onNavigateToStory(idx)}
-                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left"
+                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left relative z-10"
+                        style={{ pointerEvents: 'auto' }}
                       >
-                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
+                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium pointer-events-none select-none">
                           {storyItem.title}
                         </span>
-                        <span className="text-gray-500 text-base whitespace-nowrap">
+                        <span className="text-gray-500 text-base whitespace-nowrap pointer-events-none select-none">
                           {storyItem.storyYear}
                           {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
                         </span>
@@ -338,12 +339,13 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                       <button
                         key={storyItem.id}
                         onClick={() => onNavigateToStory && onNavigateToStory(midpoint + idx)}
-                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left"
+                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left relative z-10"
+                        style={{ pointerEvents: 'auto' }}
                       >
-                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
+                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium pointer-events-none select-none">
                           {storyItem.title}
                         </span>
-                        <span className="text-gray-500 text-base whitespace-nowrap">
+                        <span className="text-gray-500 text-base whitespace-nowrap pointer-events-none select-none">
                           {storyItem.storyYear}
                           {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
                         </span>
@@ -713,7 +715,7 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
       {story.audioUrl && (
         <div className="mb-4">
           {/* Debug: Show if audio exists */}
-          {/* <div className="text-xs text-red-500 mb-1">Audio URL: {story.audioUrl.substring(0, 50)}...</div> */}
+          <div className="text-xs text-red-500 mb-1">Audio URL exists: {story.audioUrl ? 'YES' : 'NO'} | Duration: {duration}s</div>
           <div className="flex items-center gap-3">
             {/* Circular play button with progress ring */}
             <button

@@ -61,6 +61,7 @@ export default function BookV4Page() {
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
   const [showToc, setShowToc] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [hasNavigatedToStory, setHasNavigatedToStory] = useState(false);
   
   const flowLeftRef = useRef<HTMLDivElement>(null);
   const flowRightRef = useRef<HTMLDivElement>(null);
@@ -310,6 +311,58 @@ export default function BookV4Page() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentSpreadIndex, spreads.length, goToPrevSpread, goToNextSpread]);
+
+  // Navigate to story from URL parameter (from timeline)
+  useEffect(() => {
+    if (hasNavigatedToStory || sortedStories.length === 0 || spreads.length === 0) return;
+    
+    // Check for storyId in URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const storyId = urlParams.get('storyId');
+    
+    if (storyId) {
+      // Find the story index
+      const storyIndex = sortedStories.findIndex(s => s.id === storyId);
+      
+      if (storyIndex !== -1) {
+        // Desktop: Find which spread contains this story
+        let targetSpreadIndex = 0;
+        let storyCount = 0;
+        
+        for (let i = 0; i < spreads.length; i++) {
+          const spread = spreads[i];
+          
+          // Check left page
+          if (spread.left && typeof spread.left !== 'string' && !('type' in spread.left)) {
+            if ((spread.left as Story).id === storyId) {
+              targetSpreadIndex = i;
+              break;
+            }
+            storyCount++;
+          }
+          
+          // Check right page
+          if (spread.right && typeof spread.right !== 'string' && !('type' in spread.right)) {
+            if ((spread.right as Story).id === storyId) {
+              targetSpreadIndex = i;
+              break;
+            }
+            storyCount++;
+          }
+        }
+        
+        setCurrentSpreadIndex(targetSpreadIndex);
+        
+        // Mobile: Navigate to story page (intro + toc + stories)
+        setCurrentMobilePage(storyIndex + 2);
+        
+        setHasNavigatedToStory(true);
+        
+        // Clean up URL
+        window.history.replaceState({}, '', '/book');
+      }
+    }
+  }, [sortedStories, spreads, hasNavigatedToStory]);
 
   // Loading state
   if (isLoading) {
