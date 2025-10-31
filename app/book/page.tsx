@@ -1495,11 +1495,36 @@ function MobilePage({
 
               {/* Lesson learned */}
               {story.wisdomClipText && (
-                <div className="mt-4 p-3 bg-amber-50/80 rounded-lg border-l-4 border-amber-400">
-                  <p className="text-xs font-semibold text-amber-900 mb-1">
+                <div 
+                  className="mt-6 mb-3 p-5 clear-both relative"
+                  style={{
+                    background: 'linear-gradient(135deg, #fef9e7 0%, #faf3dd 100%)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
+                    transform: 'rotate(-0.5deg)',
+                    borderRadius: '2px',
+                    border: '1px solid rgba(139, 107, 122, 0.2)',
+                  }}
+                >
+                  <p 
+                    className="text-sm mb-2"
+                    style={{
+                      fontFamily: '"Caveat", cursive',
+                      fontSize: '18px',
+                      color: '#8b6b7a',
+                      fontWeight: 600,
+                    }}
+                  >
                     Lesson Learned
                   </p>
-                  <p className="text-[13px] text-neutral-700 italic leading-5">
+                  <p 
+                    className="leading-7"
+                    style={{
+                      fontFamily: '"Caveat", cursive',
+                      fontSize: '22px',
+                      color: '#4a4a4a',
+                      lineHeight: '1.8',
+                    }}
+                  >
                     {story.wisdomClipText}
                   </p>
                 </div>
