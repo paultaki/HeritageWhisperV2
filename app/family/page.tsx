@@ -215,16 +215,17 @@ export default function FamilyPage() {
         description: "Your family member will receive an email invitation.",
       });
 
+      // Invalidate cache to fetch fresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+
       // Wait for confetti animation to finish (500ms) before closing dialog
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Close dialog and refetch data
+      // Close dialog
       setInviteDialogOpen(false);
       setInviteEmail("");
       setInviteRelationship("");
       setInviteMessage("");
-
-      await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
 
       // Show invite URL in development
       if (data.inviteUrl) {
@@ -304,8 +305,8 @@ export default function FamilyPage() {
       );
       return response.json();
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
       toast({
         title: "Invitation resent! 📧",
         description: "A new invitation email has been sent.",
@@ -330,8 +331,8 @@ export default function FamilyPage() {
       );
       return response.json();
     },
-    onSuccess: async (data, variables) => {
-      await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
       const newLevel = variables.permissionLevel === 'contributor' ? 'Contributor' : 'Viewer';
       toast({
         title: "Permissions updated",

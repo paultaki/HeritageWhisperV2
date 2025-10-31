@@ -104,6 +104,42 @@ onSuccess: () => {
 }
 ```
 
+### 4. `/app/family/page.tsx`
+**What it does:** Manages family member invitations, permissions, and access
+
+**Fix applied:**
+```typescript
+// Invite mutation - Changed from refetchQueries to invalidateQueries
+onSuccess: async (data) => {
+  celebrateInvite();
+  toast({ title: "Invitation sent! 🎉" });
+  
+  // Invalidate cache to fetch fresh data
+  queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+  
+  // Close dialog after confetti animation
+  await new Promise(resolve => setTimeout(resolve, 500));
+  setInviteDialogOpen(false);
+}
+
+// Resend mutation - Changed from refetchQueries to invalidateQueries
+onSuccess: () => {
+  queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+  toast({ title: "Invitation resent! 📧" });
+}
+
+// Update permission mutation - Changed from refetchQueries to invalidateQueries
+onSuccess: (data, variables) => {
+  queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+  toast({ title: "Permissions updated" });
+}
+
+// Remove mutation - Already had invalidateQueries (kept as-is) ✅
+onSuccess: async () => {
+  await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+}
+```
+
 ## Best Practices
 
 ### 1. **Always Invalidate After Mutations**
@@ -126,11 +162,16 @@ Different components may use different query keys for the same data:
 - `["/api/stories"]` - used by some components
 - `["stories", storytellerId]` - used by timeline with storyteller context
 - `["/api/stories", storytellerId, session?.access_token]` - used by memory box
+- `["/api/family/members"]` - used by family sharing page
 
 To ensure all components refresh, invalidate all relevant keys:
 ```typescript
+// For stories
 queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
 queryClient.invalidateQueries({ queryKey: ["stories"] });
+
+// For family members
+queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
 ```
 
 ### 3. **Consider Optimistic Updates** (Advanced)
@@ -171,7 +212,28 @@ const updateStory = useMutation({
 });
 ```
 
-### 4. **Use Mutation Hooks Consistently**
+### 4. **Use `invalidateQueries` Instead of `refetchQueries`**
+Both work, but `invalidateQueries` is the recommended approach:
+
+```typescript
+// ❌ AVOID - refetchQueries forces immediate refetch
+onSuccess: async () => {
+  await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
+}
+
+// ✅ BETTER - invalidateQueries marks as stale and refetches when needed
+onSuccess: () => {
+  queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+}
+```
+
+**Why invalidateQueries is better:**
+- More efficient - only refetches when data is actually used
+- No need for async/await in most cases
+- Better performance with multiple simultaneous invalidations
+- Standard React Query pattern
+
+### 5. **Use Mutation Hooks Consistently**
 ```typescript
 // ✅ GOOD - using useMutation properly
 const saveMutation = useMutation({
@@ -197,6 +259,7 @@ Here are all the query keys used for stories in the app:
 | `["stories", storytellerId]` | `TimelineDesktop.tsx` | Timeline with storyteller context |
 | `["/api/stories", storytellerId, token]` | `memory-box/page.tsx` | Memory box with auth |
 | `["/api/family/stories", userId]` | Family timeline pages | Family member stories |
+| `["/api/family/members"]` | `family/page.tsx` | Family member list and invitations |
 
 ## Testing Your Fix
 
@@ -217,6 +280,18 @@ After implementing cache invalidation:
 3. **Delete a memory:**
    - Delete a story from memory box
    - ✅ Should disappear immediately without refresh
+
+4. **Invite a family member:**
+   - Send an invitation from Family Circle page
+   - ✅ Should appear in pending list immediately
+
+5. **Revoke an invitation:**
+   - Revoke a pending invitation
+   - ✅ Should disappear from pending list immediately
+
+6. **Update permissions:**
+   - Change a family member from Viewer to Contributor
+   - ✅ Permission badge should update immediately
 
 ## Additional Resources
 
