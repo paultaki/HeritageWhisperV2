@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { toast } from "@/hooks/use-toast";
 import { type PostRecordingData, type WizardStep, type WizardState } from "@/types/recording";
@@ -25,6 +26,7 @@ export function useRecordingWizard({
 }: UseRecordingWizardOptions): WizardState {
   const router = useRouter();
   const { user, session } = useAuth();
+  const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState<WizardStep>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -221,6 +223,10 @@ export function useRecordingWizard({
         title: "Story saved!",
         description: `"${data.title}" has been added to your timeline.`,
       });
+
+      // Invalidate queries to fetch fresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
 
       onComplete?.();
 

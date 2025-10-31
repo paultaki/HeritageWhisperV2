@@ -898,8 +898,10 @@ function BookStyleReviewContent() {
       sessionStorage.removeItem("recordingTranscription");
       sessionStorage.removeItem("activePromptId"); // Clear prompt ID after save
 
-      // Invalidate prompts query to fetch next prompt
+      // Invalidate queries to fetch fresh data
       queryClient.invalidateQueries({ queryKey: ["/api/prompts/next"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
 
       // Check if we should return to book after recording from whisper
       const returnToBook = sessionStorage.getItem("returnToBook");

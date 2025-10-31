@@ -1097,6 +1097,15 @@ function ClosedBookCover({
             }}
           ></div>
 
+          {/* Book crease shadow (where the book opens) */}
+          <div 
+            className="absolute top-0 bottom-0 left-0 pointer-events-none"
+            style={{
+              width: '24px',
+              background: "linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 20%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 80%, transparent 100%)",
+            }}
+          ></div>
+
           {/* Embossed border frame (like real book covers) */}
           <div 
             className="absolute pointer-events-none"
@@ -1131,11 +1140,11 @@ function ClosedBookCover({
               {storyCount} {storyCount === 1 ? 'memory' : 'memories'}
             </p>
 
-            <div className="mt-12 px-6 py-3 rounded-full border" style={{ 
+            <div className="mt-12 px-5 py-2 rounded-full border" style={{ 
               backgroundColor: "rgba(212, 175, 135, 0.08)",
               borderColor: "rgba(212, 175, 135, 0.25)"
             }}>
-              <p className="text-sm md:text-base font-medium" style={{ color: "#d4af87" }}>
+              <p className="text-sm font-medium" style={{ color: "#d4af87" }}>
                 Tap to open
               </p>
             </div>

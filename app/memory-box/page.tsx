@@ -241,9 +241,12 @@ export default function MemoryBoxPage() {
       return { previousStories };
     },
     onSuccess: (data) => {
+      // Invalidate all story queries to refresh timeline, memory box, etc.
       queryClient.invalidateQueries({
         queryKey: ["/api/stories", storytellerId, session?.access_token],
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
       toast({ title: "Memory updated successfully" });
     },
     onError: (error: Error, variables, context) => {
@@ -271,7 +274,12 @@ export default function MemoryBoxPage() {
       if (!response.ok) throw new Error("Failed to delete story");
     },
     onSuccess: () => {
-      refetch();
+      // Invalidate all story queries to refresh timeline, memory box, etc.
+      queryClient.invalidateQueries({
+        queryKey: ["/api/stories", storytellerId, session?.access_token],
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
       toast({ title: "Memory deleted successfully" });
     },
   });
