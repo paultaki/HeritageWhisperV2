@@ -460,9 +460,9 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             </div>
             
             {/* Scroll indicator - appears on outer edge */}
-            {hasScroll && (
-              <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} animate-bounce pointer-events-none`} style={{ zIndex: 40 }}>
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-200/80 shadow-md">
+            {scrollState.hasScroll && (
+              <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} ${scrollState.isAnimating ? 'animate-bounce' : ''} pointer-events-none`} style={{ zIndex: 40 }}>
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all duration-300 ${!scrollState.isAnimating ? 'bg-neutral-200/40' : 'bg-neutral-200/80'}`}>
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
                     className="h-5 w-5 text-neutral-600" 
