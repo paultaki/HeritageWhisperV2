@@ -402,7 +402,11 @@ export default function BookV4Page() {
 
   // Navigate to a story from TOC
   const handleNavigateToStory = (storyIndex: number) => {
-    // Find which spread contains this story
+    // For mobile: navigate to the story page directly
+    // Mobile pages: 0=intro, 1=toc, 2+=stories
+    setCurrentMobilePage(storyIndex + 2);
+    
+    // For desktop: find which spread contains this story
     let currentStoryCount = 0;
     
     for (let i = 0; i < spreads.length; i++) {
