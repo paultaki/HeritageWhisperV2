@@ -462,7 +462,7 @@ export default function BookV4Page() {
         </div>
 
         {/* Closed book cover - centered */}
-        <div className="flex items-start md:items-center justify-center pt-[39px] md:pt-[64px]" style={{ height: "calc(100vh - 64px)" }}>
+        <div className="flex items-start md:items-center justify-center pt-[109px] md:pt-[64px]" style={{ height: "calc(100vh - 64px)" }}>
           <ClosedBookCover
             userName={user?.name || "Your"}
             storyCount={sortedStories.length}
