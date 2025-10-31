@@ -103,6 +103,7 @@ export function BookStyleReview({
   } | null>(null);
   const [showLessonOptions, setShowLessonOptions] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showRemoveAudioConfirm, setShowRemoveAudioConfirm] = useState(false);
 
   // Recording overlay state
   const [showRecordingOverlay, setShowRecordingOverlay] = useState(false);
@@ -569,12 +570,6 @@ export function BookStyleReview({
                   <Mic className="w-5 h-5" />
                   Audio Recording (Optional)
                 </h3>
-                {(() => {
-                  console.log("[Audio Section] audioUrl:", audioUrl);
-                  console.log("[Audio Section] isProcessing:", isProcessing);
-                  console.log("[Audio Section] Rendering:", audioUrl ? "with audio" : isProcessing ? "processing" : "no audio (buttons)");
-                  return null;
-                })()}
                 {audioUrl ? (
                   <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <CustomAudioPlayer 
@@ -587,17 +582,7 @@ export function BookStyleReview({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          if (
-                            confirm(
-                              "Are you sure you want to re-record? This will replace your current audio.",
-                            )
-                          ) {
-                            onAudioChange?.(null, null);
-                            setIsInitialRecordingShow(false); // Manual re-record
-                            setShowRecordingOverlay(true);
-                          }
-                        }}
+                        onClick={() => setShowRemoveAudioConfirm(true)}
                         className="flex items-center gap-2"
                       >
                         <RotateCcw className="w-4 h-4" />
@@ -607,15 +592,7 @@ export function BookStyleReview({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          if (
-                            confirm(
-                              "Are you sure you want to remove this audio?",
-                            )
-                          ) {
-                            onAudioChange?.(null, null);
-                          }
-                        }}
+                        onClick={() => setShowRemoveAudioConfirm(true)}
                         className="text-red-600 hover:text-red-700"
                       >
                         <X className="w-4 h-4 mr-1" />
@@ -639,28 +616,16 @@ export function BookStyleReview({
                   </div>
                 ) : (
                   <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                    {(() => {
-                      console.log("[Button Container] Rendering buttons container");
-                      return null;
-                    })()}
                     <div className="flex gap-2">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={(e) => {
-                          console.log("[REC Memory] Button clicked!");
-                          console.log("[REC Memory] Event:", e);
-                          e.preventDefault();
-                          e.stopPropagation();
+                        onClick={() => {
                           setIsInitialRecordingShow(false); // Manual recording
                           setShowRecordingOverlay(true);
-                          console.log("[REC Memory] setShowRecordingOverlay(true) called");
                         }}
-                        onMouseEnter={() => console.log("[REC Memory] Mouse entered button")}
-                        onMouseDown={() => console.log("[REC Memory] Mouse down on button")}
                         className="flex items-center gap-2"
-                        data-testid="rec-memory-btn"
                       >
                         <Mic className="w-4 h-4" />
                         REC Memory
@@ -669,22 +634,19 @@ export function BookStyleReview({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={(e) => {
-                          console.log("[Upload Audio] Button clicked!");
-                          console.log("[Upload Audio] Event:", e);
-                          e.preventDefault();
-                          e.stopPropagation();
-                          
+                        onClick={() => {
                           const input = document.createElement("input");
                           input.type = "file";
                           input.accept = "audio/*";
-                          console.log("[Upload Audio] Input element created");
                           input.onchange = async (e) => {
-                            console.log("[Upload Audio] File selected!");
                             const file = (e.target as HTMLInputElement)
                               .files?.[0];
                             if (file) {
                               setIsProcessing(true);
+
+                              // Clear existing transcription and wisdom when uploading new audio
+                              onTranscriptionChange("");
+                              onWisdomChange("");
 
                               const audioUrl = URL.createObjectURL(file);
                               onAudioChange?.(audioUrl, file);
@@ -756,9 +718,7 @@ export function BookStyleReview({
                           // Append to DOM and trigger synchronously
                           input.style.display = "none";
                           document.body.appendChild(input);
-                          console.log("[Upload Audio] Input appended to DOM, calling click()");
                           input.click();
-                          console.log("[Upload Audio] Click called");
                           
                           // Clean up after a delay
                           setTimeout(() => {
@@ -1173,6 +1133,50 @@ export function BookStyleReview({
               Delete
             </Button>
           )}
+        </div>
+      </div>
+
+      {/* Remove Audio Confirmation Modal */}
+      <div className={showRemoveAudioConfirm ? "block" : "hidden"}>
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in fade-in slide-in-from-bottom-4 duration-300"
+            style={{
+              boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+            }}
+          >
+            {/* Content */}
+            <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-4">
+              {/* Title */}
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+                Remove Audio Recording?
+              </h2>
+
+              {/* Message */}
+              <p className="text-lg sm:text-xl text-gray-700 leading-relaxed whitespace-pre-line">
+                This will remove the audio recording from this memory. Your story text and photos will remain unchanged.
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="bg-gray-50 px-6 sm:px-8 py-4 sm:py-5 rounded-b-2xl flex flex-col-reverse sm:flex-row gap-3">
+              <button
+                onClick={() => setShowRemoveAudioConfirm(false)}
+                className="flex-1 bg-white hover:bg-gray-100 text-gray-700 font-semibold px-6 py-3 rounded-xl border-2 border-gray-300 text-base sm:text-lg transition-all"
+              >
+                Keep Audio
+              </button>
+              <button
+                onClick={() => {
+                  setShowRemoveAudioConfirm(false);
+                  onAudioChange?.(null, null);
+                }}
+                className="flex-1 font-semibold px-6 py-3 rounded-xl text-base sm:text-lg transition-all shadow-md hover:shadow-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
+              >
+                Remove Audio
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

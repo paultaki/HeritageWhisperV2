@@ -69,10 +69,10 @@ export default function DesktopNavigationBottom({
   const { user } = useAuth();
   const { isRecording, recordingType } = useRecordingState();
 
-  // Don't show navigation on auth pages, home page, or book-v4 (has its own compact nav)
+  // Don't show navigation on auth pages, home page, or book (has its own compact nav)
   const shouldShow =
     user &&
-    !["/auth/login", "/auth/register", "/", "/book-v4"].includes(pathname);
+    !["/auth/login", "/auth/register", "/", "/book"].includes(pathname);
 
   if (!shouldShow) {
     return null;

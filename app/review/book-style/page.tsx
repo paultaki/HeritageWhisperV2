@@ -409,7 +409,7 @@ function BookStyleReviewContent() {
         console.log("Has audio blob:", !!hasNewAudio);
 
         // Construct storyDate if we have year, month, and day
-        let storyDate = null;
+        let storyDate: string | undefined = undefined;
         if (storyYear && storyMonth && storyDay) {
           try {
             storyDate = new Date(parseInt(storyYear), parseInt(storyMonth) - 1, parseInt(storyDay)).toISOString();
@@ -419,11 +419,10 @@ function BookStyleReviewContent() {
         }
 
         // Step 1: Create the story WITHOUT media to get an ID
-        const tempStoryData = {
+        const tempStoryData: any = {
           title: title || `Memory from ${storyYear || "the past"}`,
           transcription,
           storyYear: parseInt(storyYear) || new Date().getFullYear(),
-          storyDate,
           lifeAge: age,
           includeInTimeline: true,
           includeInBook: true,
@@ -433,6 +432,11 @@ function BookStyleReviewContent() {
           durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 30,
           sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
         };
+        
+        // Only include storyDate if it's defined (not null)
+        if (storyDate) {
+          tempStoryData.storyDate = storyDate;
+        }
 
         console.log("Creating story first...");
         const createResponse = await apiRequest(
@@ -831,7 +835,7 @@ function BookStyleReviewContent() {
       }
 
       // Construct storyDate if we have year, month, and day
-      let storyDate = null;
+      let storyDate: string | undefined = undefined;
       if (storyYear && storyMonth && storyDay) {
         try {
           storyDate = new Date(parseInt(storyYear), parseInt(storyMonth) - 1, parseInt(storyDay)).toISOString();
@@ -840,11 +844,10 @@ function BookStyleReviewContent() {
         }
       }
 
-      const storyData = {
+      const storyData: any = {
         title: title || `Memory from ${storyYear || "the past"}`,
         transcription,
         storyYear: parseInt(storyYear) || new Date().getFullYear(),
-        storyDate,
         lifeAge: age,
         includeInTimeline: true,
         includeInBook: true,
@@ -855,6 +858,11 @@ function BookStyleReviewContent() {
         durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 30,
         sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
       };
+      
+      // Only include storyDate if it's defined (not null)
+      if (storyDate) {
+        storyData.storyDate = storyDate;
+      }
 
       console.log("Saving story with data:", storyData);
       console.log("[SAVE DEBUG] audioUrl state:", audioUrl);

@@ -431,18 +431,33 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
     }
 
     return (
-      <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
+      <div 
+        ref={pageRef} 
+        className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`} 
+        style={{ 
+          zIndex: position === "right" ? 50 : 40,
+          pointerEvents: 'none', // Don't catch clicks at this level
+          overflow: 'visible'
+        }}
+      >
         {/* Page stack layers (3 behind) - HIDDEN FOR NOW */}
         <div className={`absolute inset-0 translate-y-0.5 ${position === "left" ? "-translate-x-0.5" : "translate-x-0.5"} scale-[0.998] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] opacity-70 bg-neutral-50 ring-black/10`} style={{ display: 'none' }}></div>
         <div className={`absolute inset-0 translate-y-1 ${position === "left" ? "-translate-x-[3px]" : "translate-x-[3px]"} scale-[0.996] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] opacity-55 bg-neutral-50 ring-black/10`} style={{ display: 'none' }}></div>
         <div className={`absolute inset-0 translate-y-[6px] ${position === "left" ? "-translate-x-[6px]" : "translate-x-[6px]"} scale-[0.992] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] opacity-35 bg-neutral-50 ring-black/10`} style={{ display: 'none' }}></div>
 
         {/* Main page */}
-        <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
+        <div 
+          className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}
+          style={{
+            maxWidth: '100%',
+            pointerEvents: 'auto'
+          }}
+        >
           {/* Paper texture/vignette */}
           <div
-            className="absolute inset-0 pointer-events-none z-10"
+            className="absolute inset-0 pointer-events-none"
             style={{
+              zIndex: 1,
               backgroundImage: position === "left"
                 ? `radial-gradient(160% 85% at 110% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
                    radial-gradient(120% 60% at -10% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%)`
@@ -451,20 +466,21 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             }}
           ></div>
 
-          {/* Inner gutter shadow */}
-          <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
+          {/* Inner gutter shadow - does not block interactions */}
+          <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`} style={{ zIndex: 2 }}></div>
 
           {/* Outer edge lines */}
           <div
-            className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-3 pointer-events-none z-10`}
+            className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-3 pointer-events-none`}
             style={{
+              zIndex: 2,
               backgroundImage: `repeating-linear-gradient(${position === "left" ? "90deg" : "270deg"}, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)`,
-              opacity: 0.25,
+              opacity: 0.25
             }}
           ></div>
 
-          <div className="relative h-full w-full p-7 md:p-8 lg:p-10">
-            <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60">
+          <div className="relative h-full w-full p-7 md:p-8 lg:p-10" style={{ zIndex: 10 }}>
+            <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ position: 'relative', zIndex: 15 }}>
               <div
                 ref={ref}
                 onScroll={onScroll}
@@ -473,10 +489,12 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 style={{
                   scrollBehavior: 'smooth',
                   WebkitOverflowScrolling: 'touch',
-                  willChange: 'scroll-position'
+                  willChange: 'scroll-position',
+                  position: 'relative',
+                  zIndex: 20
                 }}
               >
-                <StoryContent story={story as Story} position={position} />
+                <StoryContent story={story as Story} position={position} pageNum={pageNum} />
               </div>
             </div>
             
@@ -511,7 +529,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
 BookPage.displayName = "BookPage";
 
 // Story Content Component
-function StoryContent({ story, position }: { story: Story; position: "left" | "right" }) {
+function StoryContent({ story, position, pageNum }: { story: Story; position: "left" | "right"; pageNum: number }) {
   const router = useRouter();
   
   // Audio state
@@ -538,18 +556,15 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
     
     // Only initialize if we don't already have an audio element
     if (audioRef.current) {
-      console.log(`Audio already initialized for ${story.title} (${position} page)`);
       return;
     }
     
-    console.log(`Initializing audio for ${story.title} (${position} page), URL:`, story.audioUrl);
     const audio = new Audio(story.audioUrl);
     audio.preload = 'auto';
     audioRef.current = audio;
     
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
-      console.log(`Audio loaded for ${story.title} (${position} page), duration:`, audio.duration);
     };
     
     const handleTimeUpdate = () => {
@@ -594,7 +609,6 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
     
     // Cleanup only on unmount
     return () => {
-      console.log(`Cleaning up audio for ${story.title} (${position} page)`);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
@@ -605,6 +619,7 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
       audio.src = '';
       audioRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [story.id]);
 
   // Toggle audio playback
@@ -613,11 +628,8 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
     e.stopPropagation();
     
     if (!audioRef.current) {
-      console.log('No audio element initialized for', position, 'page');
       return;
     }
-    
-    console.log(`Toggle audio on ${position} page, currently paused:`, audioRef.current.paused);
     
     try {
       // Stop other audio on the page first
@@ -632,10 +644,8 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
         setIsLoading(true);
         await audioRef.current.play();
         setIsLoading(false);
-        console.log(`Audio started playing on ${position} page`);
       } else {
         audioRef.current.pause();
-        console.log(`Audio paused on ${position} page`);
       }
     } catch (error) {
       console.error(`Audio playback error on ${position} page:`, error);
@@ -651,7 +661,7 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
         <button
           onClick={() =>
             router.push(
-              `/review/book-style?id=${story.id}&returnPath=${encodeURIComponent(`/book-v4?storyId=${story.id}`)}`,
+              `/review/book-style?id=${story.id}&returnPath=${encodeURIComponent(`/book?page=${pageNum}`)}`,
             )
           }
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
@@ -681,22 +691,26 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
       </div>
 
       {/* Photo at top if available */}
-      {story.photos && story.photos.length > 0 && (
-        <div className="mb-4">
-          <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
-            <img
-              src={story.photos[0].url}
-              alt={story.title}
-              className="w-full h-full object-cover"
-            />
+      {story.photos && story.photos.length > 0 && (() => {
+        // Find the hero photo, or use the first photo as fallback
+        const heroPhoto = story.photos.find(p => p.isHero) || story.photos[0];
+        return (
+          <div className="mb-4">
+            <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
+              <img
+                src={heroPhoto.url}
+                alt={story.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            {heroPhoto.caption && (
+              <p className="text-[12px] text-neutral-600 mt-1">
+                {heroPhoto.caption}
+              </p>
+            )}
           </div>
-          {story.photos[0].caption && (
-            <p className="text-[12px] text-neutral-600 mt-1">
-              {story.photos[0].caption}
-            </p>
-          )}
-        </div>
-      )}
+        );
+      })()}
 
       {/* Title */}
       <h2 className="text-2xl tracking-tight font-semibold mb-3 text-neutral-900">
@@ -713,15 +727,18 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
 
       {/* Audio Player */}
       {story.audioUrl && (
-        <div className="mb-4">
-          {/* Debug: Show if audio exists */}
-          <div className="text-xs text-red-500 mb-1">Audio URL exists: {story.audioUrl ? 'YES' : 'NO'} | Duration: {duration}s</div>
+        <div className="mb-4 relative" style={{ zIndex: 9999 }}>
           <div className="flex items-center gap-3">
             {/* Circular play button with progress ring */}
             <button
               onClick={toggleAudio}
-              className="relative flex-shrink-0 hover:scale-105 transition-transform"
+              className="relative flex-shrink-0 hover:scale-105 transition-transform cursor-pointer"
               aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+              style={{ 
+                pointerEvents: 'auto',
+                zIndex: 9999,
+                position: 'relative'
+              }}
             >
               <svg className="w-10 h-10 -rotate-90">
                 {/* Background ring - very subtle */}

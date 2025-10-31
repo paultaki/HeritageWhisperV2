@@ -555,6 +555,17 @@ export default function BookV4Page() {
               }}
             ></div>
     
+            {/* Right page - RENDERED FIRST so it's on top in case of overlap */}
+            <BookPage 
+              story={currentSpread.right} 
+              pageNum={currentSpreadIndex * 2 + 2} 
+              onScroll={() => {}} 
+              ref={flowRightRef}
+              position="right"
+              allStories={sortedStories}
+              onNavigateToStory={handleNavigateToStory}
+            />
+            
             {/* Left page */}
             <BookPage 
               story={currentSpread.left} 
@@ -562,17 +573,6 @@ export default function BookV4Page() {
               onScroll={() => {}} 
               ref={flowLeftRef}
               position="left"
-              allStories={sortedStories}
-              onNavigateToStory={handleNavigateToStory}
-            />
-    
-            {/* Right page */}
-            <BookPage 
-              story={currentSpread.right} 
-              pageNum={currentSpreadIndex * 2 + 2} 
-              onScroll={() => {}} 
-              ref={flowRightRef}
-              position="right"
               allStories={sortedStories}
               onNavigateToStory={handleNavigateToStory}
             />
@@ -886,22 +886,26 @@ function StoryContent({ story }: { story: Story }) {
         {story.title}
       </h2>
 
-      {story.photos && story.photos.length > 0 && (
-        <div className="mb-4 max-w-sm">
-          <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
-            <img
-              src={story.photos[0].url}
-              alt={story.title}
-              className="w-full h-full object-cover"
-            />
+      {story.photos && story.photos.length > 0 && (() => {
+        // Find the hero photo, or use the first photo as fallback
+        const heroPhoto = story.photos.find(p => p.isHero) || story.photos[0];
+        return (
+          <div className="mb-4 max-w-sm">
+            <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
+              <img
+                src={heroPhoto.url}
+                alt={story.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            {heroPhoto.caption && (
+              <p className="text-[12px] text-neutral-600 mt-1">
+                {heroPhoto.caption}
+              </p>
+            )}
           </div>
-          {story.photos[0].caption && (
-            <p className="text-[12px] text-neutral-600 mt-1">
-              {story.photos[0].caption}
-            </p>
-          )}
-        </div>
-      )}
+        );
+      })()}
 
       <div className="text-[15.5px] leading-7 text-neutral-800/95 space-y-3">
         {story.transcription?.split('\n\n').map((paragraph, i) => (
@@ -1441,17 +1445,21 @@ function MobilePage({
           <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden">
             <div className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-5 overflow-y-auto">
               {/* Photo first if available */}
-              {story.photos && story.photos.length > 0 && (
-                <div className="mb-3">
-                  <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
-                    <img
-                      src={story.photos[0].url}
-                      alt={story.title}
-                      className="w-full h-full object-cover"
-                    />
+              {story.photos && story.photos.length > 0 && (() => {
+                // Find the hero photo, or use the first photo as fallback
+                const heroPhoto = story.photos.find(p => p.isHero) || story.photos[0];
+                return (
+                  <div className="mb-3">
+                    <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
+                      <img
+                        src={heroPhoto.url}
+                        alt={story.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
               
               {/* Title */}
               <h2 className="mb-2.5 text-[19px] tracking-tight font-semibold text-neutral-900">
