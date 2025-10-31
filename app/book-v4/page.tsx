@@ -904,8 +904,8 @@ function MobileView({
   };
 
   return (
-    <div className="lg:hidden" style={{ marginTop: '0px' }}>
-      <div className="relative" style={{ height: 'calc(100vh - 180px)' }}>
+    <div className="lg:hidden w-full" style={{ marginTop: '0px' }}>
+      <div className="relative w-full" style={{ height: 'calc(100vh - 180px)' }}>
         {/* Mobile prev/next controls */}
         <button 
           onClick={handlePrev}
@@ -931,11 +931,11 @@ function MobileView({
           onScroll={handleScroll}
           onTouchStart={() => setIsDragging(true)}
           onTouchEnd={() => setTimeout(() => setIsDragging(false), 100)}
-          className="h-full flex items-center justify-center snap-x snap-mandatory overflow-x-auto hide-scrollbar px-4"
+          className="h-full w-full flex items-center justify-center snap-x snap-mandatory overflow-x-auto hide-scrollbar"
           style={{ scrollSnapType: 'x mandatory' }}
         >
           {allPages.map((page, index) => (
-            <div key={index} className="snap-center shrink-0 flex items-center justify-center" style={{ width: '100vw', height: '100%' }}>
+            <div key={index} className="snap-center shrink-0 flex items-center justify-center px-4" style={{ minWidth: '100%', height: '100%' }}>
               <MobilePage page={page} pageNum={index + 1} allStories={sortedStories} />
             </div>
           ))}
@@ -970,49 +970,71 @@ function ClosedBookCover({
         onClick={onOpen}
         className="relative w-full h-full rounded-[24px] cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.99]"
         style={{
-          background: "linear-gradient(135deg, #8B6F47 0%, #6B5537 100%)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04)"
+          background: "linear-gradient(145deg, #4a3420 0%, #2d1f12 50%, #1a0f08 100%)",
+          boxShadow: "0 25px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(139,111,71,0.15), inset 0 -1px 0 rgba(0,0,0,0.5)"
         }}
         aria-label="Open book"
       >
-        {/* Leather texture overlay */}
+        {/* Leather grain texture */}
         <div 
-          className="absolute inset-0 opacity-[0.15] rounded-[24px] pointer-events-none"
+          className="absolute inset-0 opacity-40 rounded-[24px] pointer-events-none"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='1' /%3E%3CfeColorMatrix type='saturate' values='0.1'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23leather)' opacity='0.6'/%3E%3C/svg%3E")`,
+            backgroundSize: '200px 200px',
+          }}
+        ></div>
+
+        {/* Subtle highlight along edges */}
+        <div 
+          className="absolute inset-0 rounded-[24px] pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at 20% 20%, rgba(139,111,71,0.25) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(139,111,71,0.15) 0%, transparent 50%)",
+          }}
+        ></div>
+
+        {/* Vignette for depth */}
+        <div 
+          className="absolute inset-0 rounded-[24px] pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%)",
           }}
         ></div>
 
         {/* Content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
           <h1 
-            className="text-4xl md:text-5xl lg:text-6xl font-serif mb-6 text-amber-50 tracking-tight"
+            className="text-4xl md:text-5xl lg:text-6xl font-serif mb-6 tracking-tight"
             style={{ 
               fontFamily: "Crimson Text, serif",
-              textShadow: "0 2px 8px rgba(0,0,0,0.3)"
+              color: "#d4af87",
+              textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 -1px 1px rgba(255,255,255,0.1)",
+              fontWeight: 600,
             }}
           >
             {userName}&apos;s Story
           </h1>
           
-          <div className="w-32 h-0.5 bg-amber-200/50 mb-6"></div>
+          <div className="w-32 h-0.5 mb-6" style={{ background: "linear-gradient(90deg, transparent, #d4af87, transparent)" }}></div>
           
-          <p className="text-xl md:text-2xl text-amber-100/90 font-medium">
+          <p className="text-xl md:text-2xl font-medium" style={{ color: "#c4a87a", textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}>
             {storyCount} {storyCount === 1 ? 'memory' : 'memories'}
           </p>
 
-          <div className="mt-12 px-6 py-3 rounded-full bg-amber-50/10 border border-amber-200/30">
-            <p className="text-amber-100 text-sm md:text-base font-medium">
+          <div className="mt-12 px-6 py-3 rounded-full border" style={{ 
+            backgroundColor: "rgba(212, 175, 135, 0.08)",
+            borderColor: "rgba(212, 175, 135, 0.25)"
+          }}>
+            <p className="text-sm md:text-base font-medium" style={{ color: "#d4af87" }}>
               Tap to open
             </p>
           </div>
         </div>
 
-        {/* Decorative corner elements */}
-        <div className="absolute top-6 left-6 w-12 h-12 border-l-2 border-t-2 border-amber-200/30 rounded-tl-lg"></div>
-        <div className="absolute top-6 right-6 w-12 h-12 border-r-2 border-t-2 border-amber-200/30 rounded-tr-lg"></div>
-        <div className="absolute bottom-6 left-6 w-12 h-12 border-l-2 border-b-2 border-amber-200/30 rounded-bl-lg"></div>
-        <div className="absolute bottom-6 right-6 w-12 h-12 border-r-2 border-b-2 border-amber-200/30 rounded-br-lg"></div>
+        {/* Decorative embossed corner elements */}
+        <div className="absolute top-6 left-6 w-12 h-12 border-l-2 border-t-2 rounded-tl-lg" style={{ borderColor: "rgba(212, 175, 135, 0.2)", filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.5))" }}></div>
+        <div className="absolute top-6 right-6 w-12 h-12 border-r-2 border-t-2 rounded-tr-lg" style={{ borderColor: "rgba(212, 175, 135, 0.2)", filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.5))" }}></div>
+        <div className="absolute bottom-6 left-6 w-12 h-12 border-l-2 border-b-2 rounded-bl-lg" style={{ borderColor: "rgba(212, 175, 135, 0.2)", filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.5))" }}></div>
+        <div className="absolute bottom-6 right-6 w-12 h-12 border-r-2 border-b-2 rounded-br-lg" style={{ borderColor: "rgba(212, 175, 135, 0.2)", filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.5))" }}></div>
       </button>
     </div>
   );
@@ -1031,7 +1053,7 @@ function MobilePage({
   // Intro page
   if (page.type === 'intro') {
     return (
-      <div className="mobile-page relative mx-auto h-[85%] w-auto aspect-[55/85] [perspective:1600px]">
+      <div className="mobile-page relative mx-auto w-[min(90vw,600px)] aspect-[55/85] [perspective:1600px]" style={{ maxHeight: '85%' }}>
         <div 
           aria-hidden="true" 
           className="pointer-events-none absolute rounded-[24px]" 
@@ -1061,7 +1083,7 @@ function MobilePage({
   // TOC page
   if (page.type === 'toc') {
     return (
-      <div className="mobile-page relative mx-auto h-[85%] w-auto aspect-[55/85] [perspective:1600px]">
+      <div className="mobile-page relative mx-auto w-[min(90vw,600px)] aspect-[55/85] [perspective:1600px]" style={{ maxHeight: '85%' }}>
         <div 
           aria-hidden="true" 
           className="pointer-events-none absolute rounded-[24px]" 
@@ -1105,7 +1127,7 @@ function MobilePage({
   if (!story) return null;
   
   return (
-    <div className="mobile-page relative mx-auto h-[85%] w-auto aspect-[55/85] [perspective:1600px]">
+    <div className="mobile-page relative mx-auto w-[min(90vw,600px)] aspect-[55/85] [perspective:1600px]" style={{ maxHeight: '85%' }}>
       {/* Outer book cover/border */}
       <div 
         aria-hidden="true" 
