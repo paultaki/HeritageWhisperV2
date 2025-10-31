@@ -634,8 +634,10 @@ export function BookStyleReview({
                         variant="outline"
                         size="sm"
                         onClick={() => {
+                          console.log('[BookStyleReview] REC Memory clicked');
                           setIsInitialRecordingShow(false); // Manual recording
                           setShowRecordingOverlay(true);
+                          console.log('[BookStyleReview] showRecordingOverlay set to true');
                         }}
                         className="flex items-center gap-2"
                       >
@@ -646,6 +648,7 @@ export function BookStyleReview({
                         variant="outline"
                         size="sm"
                         onClick={async () => {
+                          console.log('[BookStyleReview] Upload Audio clicked');
                           try {
                             const input = document.createElement("input");
                             input.type = "file";

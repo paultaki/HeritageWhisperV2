@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "./queryClient";
 import { useRouter } from "next/navigation";
@@ -303,31 +303,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Activity tracking for session timeout (only when Remember Me is disabled)
-  const rememberMe = typeof window !== 'undefined' 
-    ? localStorage.getItem('rememberMe') === 'true'
-    : true; // Default to true (no timeout) if window is not available
+  const [rememberMe, setRememberMe] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('rememberMe') === 'true';
+    }
+    return true; // Default to true (no timeout) if window is not available
+  });
+
+  // Update rememberMe state when session changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && session) {
+      const stored = localStorage.getItem('rememberMe') === 'true';
+      setRememberMe(stored);
+    }
+  }, [session]);
   
-  const shouldTrackActivity = !!session && !rememberMe;
+  const shouldTrackActivity = useMemo(
+    () => !!session && !rememberMe,
+    [session, rememberMe]
+  );
+
+  // Memoize callbacks to prevent re-initialization of activity tracker
+  const handleTimeout = useCallback(() => {
+    console.log('[Auth] Session timed out due to inactivity');
+    logout();
+  }, [logout]);
+
+  const handleTimeoutLogout = useCallback(() => {
+    console.log('[Auth] User logged out from timeout warning');
+    logout();
+  }, [logout]);
 
   const activityTracker = useActivityTracker({
     enabled: shouldTrackActivity,
     timeoutDuration: 30 * 60 * 1000, // 30 minutes
     warningDuration: 5 * 60 * 1000, // 5 minutes
-    onTimeout: () => {
-      console.log('[Auth] Session timed out due to inactivity');
-      logout();
-    },
+    onTimeout: handleTimeout,
   });
 
-  const handleContinueSession = () => {
+  // Handle continue session - use resetTimer directly to avoid recreating callback
+  const handleContinueSession = useCallback(() => {
     console.log('[Auth] User chose to continue session');
     activityTracker.resetTimer();
-  };
-
-  const handleTimeoutLogout = () => {
-    console.log('[Auth] User logged out from timeout warning');
-    logout();
-  };
+  }, [activityTracker.resetTimer]); // Only depend on the function, not the whole object
 
   return (
     <AuthContext.Provider

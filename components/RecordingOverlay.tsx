@@ -224,7 +224,12 @@ export function RecordingOverlay({
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    console.log('[RecordingOverlay] isOpen is false, not rendering');
+    return null;
+  }
+
+  console.log('[RecordingOverlay] Rendering overlay, isOpen:', isOpen);
 
   return (
     <>

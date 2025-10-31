@@ -50,6 +50,7 @@ export function SessionTimeoutWarning({
   };
 
   // Auto-logout when time runs out
+  // Note: onLogout should be memoized by parent to prevent re-renders
   useEffect(() => {
     if (isOpen && secondsRemaining === 0) {
       onLogout();
