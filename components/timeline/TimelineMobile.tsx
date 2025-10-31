@@ -274,7 +274,7 @@ export function TimelineMobile() {
       />
 
       {/* Timeline Content with Vertical Timeline Design */}
-      <main className="max-w-6xl mx-auto px-3 py-6 pb-20 md:p-6 md:pb-6 md:pr-20">
+      <main className="max-w-6xl mx-auto px-3 pb-20 md:p-6 md:pb-6 md:pr-20" style={{ paddingTop: '58px' }}>
         {/* Paywall Prompt for Story 3 (if applicable) */}
         {user?.freeStoriesUsed === 3 &&
           user?.subscriptionStatus !== "active" && (

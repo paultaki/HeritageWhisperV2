@@ -235,7 +235,7 @@ export function RecordingOverlay({
       />
 
       {/* Overlay Card */}
-      <div className="fixed inset-x-4 md:inset-x-0 md:left-1/2 md:-translate-x-1/2 top-[5%] md:top-[10%] z-50 md:mx-auto max-w-2xl">
+      <div className="fixed inset-x-4 md:inset-x-0 md:left-1/2 md:-translate-x-1/2 top-[calc(5%+30px)] md:top-[calc(10%+30px)] z-50 md:mx-auto max-w-2xl">
         <div
           className={cn(
             "relative rounded-3xl border border-[#E8DDD3]",

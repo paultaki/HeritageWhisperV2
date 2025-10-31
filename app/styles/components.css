@@ -431,7 +431,7 @@ body {
 
 @media (max-width: 767px) {
   .hw-year {
-    left: -48px;
+    left: -50px; /* Moved 2px left from -48px */
     top: calc(var(--title-offset, 22px) - 40px);
     font-size: 16px;
     line-height: 1;

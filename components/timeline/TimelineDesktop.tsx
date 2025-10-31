@@ -783,7 +783,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           }}
         >
           <span style={{ position: 'relative', top: '-2px' }}>
-            {formatStoryDate(story.storyDate, story.storyYear, "badge")}
+            {formatStoryDate(story.storyDate, story.storyYear, "year-only")}
           </span>
         </div>
       </div>

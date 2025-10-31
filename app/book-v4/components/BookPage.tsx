@@ -261,8 +261,17 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               
               {/* Scroll indicator - appears on outer edge */}
               {scrollState.hasScroll && (
-                <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} ${scrollState.isAnimating ? 'animate-bounce' : ''} pointer-events-none`} style={{ zIndex: 40 }}>
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all duration-300 ${!scrollState.isAnimating ? 'bg-neutral-200/40' : 'bg-neutral-200/80'}`}>
+                <button
+                  onClick={() => {
+                    if (ref && typeof ref !== 'function' && ref.current) {
+                      ref.current.scrollBy({ top: 200, behavior: 'smooth' });
+                    }
+                  }}
+                  className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} ${scrollState.isAnimating ? 'animate-bounce' : ''} cursor-pointer hover:scale-110 transition-transform`} 
+                  style={{ zIndex: 40 }}
+                  aria-label="Scroll down"
+                >
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all duration-300 ${!scrollState.isAnimating ? 'bg-neutral-200/40 hover:bg-neutral-200/60' : 'bg-neutral-200/80 hover:bg-neutral-200/90'}`}>
                     <svg 
                       xmlns="http://www.w3.org/2000/svg" 
                       className="h-5 w-5 text-neutral-600" 
@@ -274,7 +283,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                       <path d="M12 5v14M19 12l-7 7-7-7"/>
                     </svg>
                   </div>
-                </div>
+                </button>
               )}
               
               <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
@@ -345,8 +354,17 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               
               {/* Scroll indicator - appears on outer edge */}
               {scrollState.hasScroll && (
-                <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} ${scrollState.isAnimating ? 'animate-bounce' : ''} pointer-events-none`} style={{ zIndex: 40 }}>
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all duration-300 ${!scrollState.isAnimating ? 'bg-neutral-200/40' : 'bg-neutral-200/80'}`}>
+                <button
+                  onClick={() => {
+                    if (ref && typeof ref !== 'function' && ref.current) {
+                      ref.current.scrollBy({ top: 200, behavior: 'smooth' });
+                    }
+                  }}
+                  className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} ${scrollState.isAnimating ? 'animate-bounce' : ''} cursor-pointer hover:scale-110 transition-transform`} 
+                  style={{ zIndex: 40 }}
+                  aria-label="Scroll down"
+                >
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all duration-300 ${!scrollState.isAnimating ? 'bg-neutral-200/40 hover:bg-neutral-200/60' : 'bg-neutral-200/80 hover:bg-neutral-200/90'}`}>
                     <svg 
                       xmlns="http://www.w3.org/2000/svg" 
                       className="h-5 w-5 text-neutral-600" 
@@ -358,7 +376,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                       <path d="M12 5v14M19 12l-7 7-7-7"/>
                     </svg>
                   </div>
-                </div>
+                </button>
               )}
               
               <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">

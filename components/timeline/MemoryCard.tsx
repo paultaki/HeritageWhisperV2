@@ -376,7 +376,7 @@ export const MemoryCard = React.memo(
                 : undefined
             }
           >
-            {formatStoryDate(story.storyDate, story.storyYear, "badge")}
+            {formatStoryDate(story.storyDate, story.storyYear, "year-only")}
           </span>
 
           {/* 4:3 aspect ratio placeholder - matches photo cards */}
@@ -506,7 +506,7 @@ export const MemoryCard = React.memo(
               : undefined
           }
         >
-          {formatStoryDate(story.storyDate, story.storyYear, "badge")}
+          {formatStoryDate(story.storyDate, story.storyYear, "year-only")}
         </span>
 
         {/* Image container with audio overlay */}
