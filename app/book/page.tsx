@@ -607,10 +607,19 @@ export default function BookV4Page() {
           <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[520px] max-w-[calc(100vw-3rem)]">
             <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-4 py-3 text-sm text-black shadow-2xl">
               <div className="mb-2 flex items-center justify-between gap-4">
-                <div className="font-semibold tracking-tight text-base whitespace-nowrap">Table of Contents</div>
+                <button 
+                  onClick={() => {
+                    // Navigate to TOC page (index 1 on mobile)
+                    setCurrentMobilePage(1);
+                    setShowToc(false);
+                  }}
+                  className="font-semibold tracking-tight text-base whitespace-nowrap hover:text-indigo-600 transition-colors cursor-pointer"
+                >
+                  Table of Contents
+                </button>
                 <button 
                   onClick={() => setShowToc(false)}
-                  className="p-1 rounded-md hover:bg-black/10 flex-shrink-0 mr-[-150px]"
+                  className="p-1 rounded-md hover:bg-black/10 flex-shrink-0 mr-[-150px] md:mr-0"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
