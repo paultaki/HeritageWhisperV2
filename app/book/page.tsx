@@ -461,17 +461,6 @@ export default function BookV4Page() {
           </div>
         </div>
 
-        {/* Swipe indicator - mobile only */}
-        <div className="lg:hidden flex items-center justify-center gap-3 pt-[54px] pb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="m15 18-6-6 6-6"></path>
-          </svg>
-          <span className="text-sm text-slate-400">Swipe</span>
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="m9 18 6-6-6-6"></path>
-          </svg>
-        </div>
-
         {/* Closed book cover - centered */}
         <div className="flex items-start md:items-center justify-center pt-[39px] md:pt-[64px]" style={{ height: "calc(100vh - 64px)" }}>
           <ClosedBookCover
@@ -613,13 +602,13 @@ export default function BookV4Page() {
         {showToc && (
           <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[520px] max-w-[calc(100vw-3rem)]">
             <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-4 py-3 text-sm text-black shadow-2xl">
-              <div className="mb-2 flex items-center justify-between">
-                <div className="font-medium tracking-tight">Table of Contents</div>
+              <div className="mb-2 flex items-center justify-between gap-4">
+                <div className="font-semibold tracking-tight text-base whitespace-nowrap">Table of Contents</div>
                 <button 
                   onClick={() => setShowToc(false)}
-                  className="p-1 rounded-md hover:bg-black/10"
+                  className="p-1 rounded-md hover:bg-black/10 flex-shrink-0 mr-[-150px]"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
                   </svg>
                 </button>
