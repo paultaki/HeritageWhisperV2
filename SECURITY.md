@@ -61,16 +61,38 @@ Uploaded images are processed to protect user privacy:
 
 **Implementation**: `lib/imageProcessor.ts` using Sharp
 
-### 6. Authentication & Authorization
+### 6. CSRF Protection
+
+Cross-Site Request Forgery (CSRF) protection on all state-changing API requests:
+
+- **Token generation**: Cryptographically secure 32-byte tokens
+- **Storage**: httpOnly cookies with secure, SameSite=strict flags
+- **Validation**: Constant-time comparison to prevent timing attacks
+- **Token rotation**: 7-day token expiry with automatic refresh
+- **Middleware integration**: Automatic validation via Next.js middleware
+
+**Implementation**: `lib/csrf.ts` and `middleware.ts`
+
+**Headers Required**:
+- Cookie: `csrf-token` (httpOnly, secure)
+- Header: `x-csrf-token` (client must send)
+
+**Protected Methods**: POST, PUT, PATCH, DELETE (GET, HEAD, OPTIONS are safe)
+
+### 7. Authentication & Authorization
 
 - **JWT tokens**: Secure session management via Supabase Auth
-- **Row Level Security (RLS)**: Database-level access control
-- **Service role key isolation**: Admin credentials only used server-side
-- **Session timeouts**: Automatic logout on inactivity (with "Remember Me" option)
+- **WebAuthn passkeys**: Passwordless authentication with Touch ID/Face ID
+- **Custom JWT for passkeys**: Supabase-compatible tokens stored in httpOnly cookies
+- **Row Level Security (RLS)**: Database-level access control on all 22 tables
+- **Service role key isolation**: Admin credentials only used server-side (⚠️ 107 files)
+- **Session timeouts**: 
+  - Remember Me enabled: 7-day token expiry, no inactivity timeout
+  - Remember Me disabled: 30-minute inactivity timeout with 5-minute warning
 
-**Implementation**: Supabase Auth + custom hooks in `lib/auth.tsx`
+**Implementation**: Supabase Auth + WebAuthn in `lib/auth.tsx`, `lib/jwt.ts`, `hooks/useActivityTracker.ts`
 
-### 7. Privacy-First Logging
+### 8. Privacy-First Logging
 
 - **No PII in logs**: Email addresses, names, and personal data are never logged
 - **Hashed identifiers**: Sensitive data is hashed before logging
@@ -79,14 +101,14 @@ Uploaded images are processed to protect user privacy:
 
 **Implementation**: `lib/logger.ts` and `lib/securityLogger.ts`
 
-### 8. File Upload Security
+### 9. File Upload Security
 
 - **MIME type validation**: Ensures files are the correct type
-- **Size limits**: 25MB max for audio, reasonable limits for images
-- **Virus scanning ready**: Architecture supports ClamAV integration
+- **Size limits**: 25MB max for audio, 5MB max for images
+- **Virus scanning**: Architecture supports ClamAV integration (planned)
 - **Filename sanitization**: Prevents directory traversal attacks
 
-**Implementation**: API routes in `app/api/upload/`
+**Implementation**: API routes in `app/api/upload/`, `lib/validationSchemas.ts`
 
 ## Security Best Practices for Developers
 
@@ -174,6 +196,8 @@ npm run verify:env
 ### Completed ✅
 
 - Security headers (CSP, HSTS, X-Frame-Options, etc.)
+- CSRF protection on all state-changing requests
+- Middleware for route protection
 - Rate limiting on all critical endpoints
 - Input sanitization for AI prompts
 - EXIF stripping for image uploads
@@ -181,17 +205,19 @@ npm run verify:env
 - Security logging infrastructure
 - CORS configuration
 - Environment variable documentation
+- Session timeout with inactivity tracking
+- WebAuthn passkey authentication
 
 ### In Progress 🚧
 
-- Middleware for route protection
-- Zod validation on all API endpoints
-- Session fingerprinting
+- Zod validation on all API endpoints (partially implemented)
 - Account lockout after failed attempts
+- Service role key usage audit (107 files to review)
 
 ### Planned 📋
 
 - Virus scanning for file uploads (ClamAV integration)
+- Session fingerprinting and device management
 - Advanced threat detection
 - Automated security testing in CI/CD
 - Penetration testing (annual)
@@ -203,11 +229,20 @@ npm run verify:env
 - **Privacy Questions**: privacy@heritagewhisper.com
 - **General Support**: support@heritagewhisper.com
 
+## Known Limitations
+
+While HeritageWhisper implements comprehensive security measures, the following areas require attention:
+
+1. **Extensive Service Role Key Usage**: Currently used in 107 files - comprehensive audit recommended to ensure no client-side exposure and proper justification for each use
+2. **Zod Validation Coverage**: Not uniformly applied across all API routes - some routes use ad-hoc validation instead of schema validation
+3. **No Session Fingerprinting**: Users cannot view active sessions or revoke them remotely - device management feature not yet implemented
+4. **Account Lockout**: No automatic account lockout after failed login attempts - relies on rate limiting only
+
 ## Last Updated
 
-October 17, 2025
+October 31, 2025
 
 ## Version
 
-Security Documentation v1.0
+Security Documentation v2.0
 

@@ -535,12 +535,14 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
     if (!story.audioUrl) return;
     
     // Only initialize if we don't already have an audio element
-    if (audioRef.current) return;
+    if (audioRef.current) {
+      console.log(`Audio already initialized for ${story.title} (${position} page)`);
+      return;
+    }
     
-    console.log(`Initializing audio for ${story.title} (${position} page)`);
-    const audio = new Audio();
-    audio.preload = 'metadata';
-    audio.src = story.audioUrl;
+    console.log(`Initializing audio for ${story.title} (${position} page), URL:`, story.audioUrl);
+    const audio = new Audio(story.audioUrl);
+    audio.preload = 'auto';
     audioRef.current = audio;
     
     const handleLoadedMetadata = () => {
@@ -568,7 +570,14 @@ function StoryContent({ story, position }: { story: Story; position: "left" | "r
     const handleError = (err: Event) => {
       console.error(`Audio error for ${story.title} (${position} page):`, err);
       if (audio.error) {
-        console.error('Error code:', audio.error.code, 'Message:', audio.error.message);
+        const errorMessages = [
+          'MEDIA_ERR_ABORTED', // 1
+          'MEDIA_ERR_NETWORK', // 2  
+          'MEDIA_ERR_DECODE',  // 3
+          'MEDIA_ERR_SRC_NOT_SUPPORTED' // 4
+        ];
+        console.error('Error code:', audio.error.code, '-', errorMessages[audio.error.code - 1] || 'UNKNOWN');
+        console.error('Audio src:', audio.src);
       }
       setIsLoading(false);
       setIsPlaying(false);

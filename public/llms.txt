@@ -1,0 +1,134 @@
+# HeritageWhisper Documentation Index
+
+> LLM-optimized documentation index for HeritageWhisper V2
+> Updated: October 31, 2025
+
+## Data Model Documentation
+
+- [DATA_MODEL.md](/DATA_MODEL.md): Overview, ERD, quick reference, field naming conventions
+- [SCHEMA_REFERENCE.md](/SCHEMA_REFERENCE.md): Detailed documentation of all 22 database tables
+- [RPC_FUNCTIONS.md](/RPC_FUNCTIONS.md): PostgreSQL functions, triggers, and views
+- [ANTI_PATTERNS.md](/ANTI_PATTERNS.md): Common mistakes and best practices
+- [DATA_FLOW_PATTERNS.md](/DATA_FLOW_PATTERNS.md): Operation workflows and sequences
+
+## Security Documentation
+
+- [SECURITY.md](/SECURITY.md): Comprehensive security measures and compliance
+- [.well-known/security.txt](/.well-known/security.txt): Security contact information (RFC 9116)
+
+## Important Notes
+
+### Database Field Naming
+- **Database (PostgreSQL)**: snake_case (e.g., `story_year`, `audio_url`)
+- **TypeScript/Drizzle**: camelCase (e.g., `storyYear`, `audioUrl`)
+- **Supabase Client Queries**: snake_case (e.g., `.eq('user_id', id)`)
+
+### Row Level Security
+- All 22 tables have RLS enabled
+- Use `supabase` client for user queries (respects RLS)
+- Use `supabaseAdmin` ONLY for admin operations
+- Service role key used in 107 files - audit recommended
+
+### Technology Stack
+- Database: PostgreSQL 17+ via Supabase (project: tjycibrhoammxohemyhq)
+- API: Next.js 15 App Router with TypeScript
+- Auth: Supabase Auth + WebAuthn passkeys
+- State: TanStack Query v5
+- Security: CSRF protection, rate limiting, input sanitization
+
+### Critical Functions
+- `check_ai_budget()`: Validates AI spending limits before operations
+- `has_collaboration_access()`: Multi-tenant security check
+- `archive_expired_prompts()`: Moves expired prompts to history
+
+### Common Operations
+- Story creation: Upload audio → transcribe → create record → enhance
+- Prompt generation: Check budget → generate with AI → deduplicate → store
+- Family sharing: Invite → generate token → accept → create collaboration
+- Export: Fetch data → generate PDF/JSON → track → return signed URL
+
+### Session Management
+- Remember Me = true: 7-day token expiry, no inactivity timeout
+- Remember Me = false: 30-minute inactivity timeout, auto-logout
+- Passkey auth: WebAuthn with httpOnly cookies and custom JWT
+
+## Quick Reference
+
+### Most Common Queries
+
+**Get User Stories:**
+```typescript
+const { data } = await supabase
+  .from('stories')
+  .select('*')
+  .eq('user_id', userId)
+  .order('created_at', { ascending: false });
+```
+
+**Check AI Budget:**
+```typescript
+const { data } = await supabase.rpc('check_ai_budget', { 
+  p_user_id: userId,
+  p_operation: 'transcription',
+  p_estimated_cost: 0.25
+});
+```
+
+**Get Active Prompts:**
+```typescript
+const { data } = await supabase
+  .from('active_prompts')
+  .select('*')
+  .eq('user_id', userId)
+  .eq('user_status', 'available')
+  .limit(10);
+```
+
+### Data Validation
+
+**Story Duration (DB constraint):**
+```sql
+CHECK (duration_seconds BETWEEN 1 AND 120)
+```
+
+**File Upload Size (API validation):**
+```typescript
+const MAX_SIZE = 25 * 1024 * 1024; // 25MB
+if (buffer.length > MAX_SIZE) throw new Error('File too large');
+```
+
+## Documentation Structure
+
+All documentation follows Claude AI best practices:
+- Concise, scannable format
+- Progressive disclosure (main file < 500 lines)
+- Consistent terminology
+- Code examples with ✅/❌ patterns
+- Cross-references between files
+
+## For Developers
+
+When working with HeritageWhisper:
+1. Always use snake_case in Supabase queries
+2. Never expose service role key to client
+3. Always validate input server-side
+4. Filter queries at database level, not client-side
+5. Use RLS policies instead of manual access checks
+
+## For AI Assistants
+
+When answering questions about HeritageWhisper:
+1. Refer to specific documentation files
+2. Use snake_case for all database field names
+3. Recommend RLS-safe patterns
+4. Provide complete, working code examples
+5. Cite anti-patterns to avoid
+
+---
+
+_Schema File Reference: /shared/schema.ts_
+
+_Production Database: Supabase project tjycibrhoammxohemyhq_
+
+_Last verified: October 31, 2025_
+

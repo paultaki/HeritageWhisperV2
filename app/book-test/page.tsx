@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import BookWrap from "../book/components/BookWrap";
-import { ContentBlock } from "../book/components/AutoPaginator";
-import SpreadPaginator from "../book/components/SpreadPaginator";
-import { useViewportMode } from "../book/components/ViewportManager";
+import BookWrap from "../book-old/components/BookWrap";
+import { ContentBlock } from "../book-old/components/AutoPaginator";
+import SpreadPaginator from "../book-old/components/SpreadPaginator";
+import { useViewportMode } from "../book-old/components/ViewportManager";
 
 // Complete memory example with all components
 const completeMemory = {

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Page from "../book/components/Page";
-import BookWrap from "../book/components/BookWrap";
+import Page from "../book-old/components/Page";
+import BookWrap from "../book-old/components/BookWrap";
 
 export default function SimpleTestPage() {
   const [currentPage, setCurrentPage] = useState(0);

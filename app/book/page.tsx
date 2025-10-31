@@ -1115,12 +1115,14 @@ function MobileAudioPlayer({ story }: { story: Story }) {
   // Initialize audio element on mount - ONLY ONCE per story
   useEffect(() => {
     if (!story.audioUrl) return;
-    if (audioRef.current) return;
+    if (audioRef.current) {
+      console.log(`Mobile audio already initialized for ${story.title}`);
+      return;
+    }
     
-    console.log(`Initializing mobile audio for ${story.title}`);
-    const audio = new Audio();
-    audio.preload = 'metadata';
-    audio.src = story.audioUrl;
+    console.log(`Initializing mobile audio for ${story.title}, URL:`, story.audioUrl);
+    const audio = new Audio(story.audioUrl);
+    audio.preload = 'auto';
     audioRef.current = audio;
     
     const handleLoadedMetadata = () => {
