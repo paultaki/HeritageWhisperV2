@@ -91,10 +91,8 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* Ensure all overlays don't block scroll events */
-[class*="pointer-events-none"] {
-  pointer-events: none !important;
-}
+/* Removed overly broad pointer-events rule that was blocking all buttons 
+   with Tailwind classes like disabled:pointer-events-none */
 
 /* Make the entire page area scrollable by forwarding events to content */
 .page {
