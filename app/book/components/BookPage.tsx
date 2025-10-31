@@ -225,8 +225,8 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             {/* Inner gutter shadow */}
             <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
 
-            <div className="relative h-full w-full p-7 md:p-8 lg:p-10">
-              <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60">
+            <div className="relative h-full w-full p-7 md:p-8 lg:p-10" style={{ pointerEvents: 'auto' }}>
+              <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
                   onScroll={onScroll}
@@ -234,24 +234,29 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   style={{
                     scrollBehavior: 'smooth',
                     WebkitOverflowScrolling: 'touch',
-                    willChange: 'scroll-position'
+                    willChange: 'scroll-position',
+                    pointerEvents: 'auto'
                   }}
                 >
                   <h1 className="text-5xl font-serif text-center mb-8 text-gray-800">
                     Table of Contents
                   </h1>
-                  <div className="space-y-4">
+                  <div className="space-y-4" style={{ pointerEvents: 'auto' }}>
                     {leftStories.map((storyItem, idx) => (
                       <button
                         key={storyItem.id}
-                        onClick={() => onNavigateToStory && onNavigateToStory(idx)}
-                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left relative z-10"
-                        style={{ pointerEvents: 'auto' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onNavigateToStory) {
+                            onNavigateToStory(idx);
+                          }
+                        }}
+                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left block"
                       >
-                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium pointer-events-none select-none">
+                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
                           {storyItem.title}
                         </span>
-                        <span className="text-gray-500 text-base whitespace-nowrap pointer-events-none select-none">
+                        <span className="text-gray-500 text-base whitespace-nowrap">
                           {storyItem.storyYear}
                           {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
                         </span>
@@ -260,6 +265,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   </div>
                 </div>
               </div>
+              
               
               {/* Scroll indicator - appears on outer edge */}
               {scrollState.hasScroll && (
@@ -304,9 +310,16 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
       const rightStories = allStories.slice(midpoint);
       
       return (
-        <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
+        <div 
+          ref={pageRef} 
+          className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}
+          style={{ pointerEvents: 'none' }}
+        >
           {/* Main page */}
-          <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
+          <div 
+            className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}
+            style={{ pointerEvents: 'auto' }}
+          >
             {/* Paper texture/vignette */}
             <div
               className="absolute inset-0 pointer-events-none z-10"
@@ -322,8 +335,8 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             {/* Inner gutter shadow */}
             <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
 
-            <div className="relative h-full w-full p-7 md:p-8 lg:p-10">
-              <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60">
+            <div className="relative h-full w-full p-7 md:p-8 lg:p-10" style={{ pointerEvents: 'auto' }}>
+              <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
                   onScroll={onScroll}
@@ -331,21 +344,26 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   style={{
                     scrollBehavior: 'smooth',
                     WebkitOverflowScrolling: 'touch',
-                    willChange: 'scroll-position'
+                    willChange: 'scroll-position',
+                    pointerEvents: 'auto'
                   }}
                 >
-                  <div className="space-y-4 pt-[72px]">
+                  <div className="space-y-4 pt-[72px]" style={{ pointerEvents: 'auto' }}>
                     {rightStories.map((storyItem, idx) => (
                       <button
                         key={storyItem.id}
-                        onClick={() => onNavigateToStory && onNavigateToStory(midpoint + idx)}
-                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left relative z-10"
-                        style={{ pointerEvents: 'auto' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onNavigateToStory) {
+                            onNavigateToStory(midpoint + idx);
+                          }
+                        }}
+                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left block"
                       >
-                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium pointer-events-none select-none">
+                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
                           {storyItem.title}
                         </span>
-                        <span className="text-gray-500 text-base whitespace-nowrap pointer-events-none select-none">
+                        <span className="text-gray-500 text-base whitespace-nowrap">
                           {storyItem.storyYear}
                           {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
                         </span>
@@ -354,6 +372,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   </div>
                 </div>
               </div>
+              
               
               {/* Scroll indicator - appears on outer edge */}
               {scrollState.hasScroll && (

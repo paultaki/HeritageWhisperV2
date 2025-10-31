@@ -104,6 +104,7 @@ export function BookStyleReview({
   const [showLessonOptions, setShowLessonOptions] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showRemoveAudioConfirm, setShowRemoveAudioConfirm] = useState(false);
+  const [removeAudioAction, setRemoveAudioAction] = useState<'remove' | 'rerecord'>('remove');
 
   // Recording overlay state
   const [showRecordingOverlay, setShowRecordingOverlay] = useState(false);
@@ -582,7 +583,10 @@ export function BookStyleReview({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setShowRemoveAudioConfirm(true)}
+                        onClick={() => {
+                          setRemoveAudioAction('rerecord');
+                          setShowRemoveAudioConfirm(true);
+                        }}
                         className="flex items-center gap-2"
                       >
                         <RotateCcw className="w-4 h-4" />
@@ -592,7 +596,10 @@ export function BookStyleReview({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setShowRemoveAudioConfirm(true)}
+                        onClick={() => {
+                          setRemoveAudioAction('remove');
+                          setShowRemoveAudioConfirm(true);
+                        }}
                         className="text-red-600 hover:text-red-700"
                       >
                         <X className="w-4 h-4 mr-1" />
@@ -1149,12 +1156,14 @@ export function BookStyleReview({
             <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-4">
               {/* Title */}
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
-                Remove Audio Recording?
+                {removeAudioAction === 'rerecord' ? 'Re-record Your Memory?' : 'Remove Audio Recording?'}
               </h2>
 
               {/* Message */}
               <p className="text-lg sm:text-xl text-gray-700 leading-relaxed whitespace-pre-line">
-                This will remove the audio recording from this memory. Your story text and photos will remain unchanged.
+                {removeAudioAction === 'rerecord' 
+                  ? 'This will replace your current audio recording with a new one.'
+                  : 'This will remove the audio recording from this memory. Your story text and photos will remain unchanged.'}
               </p>
             </div>
 
@@ -1170,10 +1179,14 @@ export function BookStyleReview({
                 onClick={() => {
                   setShowRemoveAudioConfirm(false);
                   onAudioChange?.(null, null);
+                  if (removeAudioAction === 'rerecord') {
+                    setIsInitialRecordingShow(false);
+                    setShowRecordingOverlay(true);
+                  }
                 }}
                 className="flex-1 font-semibold px-6 py-3 rounded-xl text-base sm:text-lg transition-all shadow-md hover:shadow-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
               >
-                Remove Audio
+                {removeAudioAction === 'rerecord' ? 'Yes, Re-record' : 'Remove Audio'}
               </button>
             </div>
           </div>
