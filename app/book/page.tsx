@@ -637,7 +637,7 @@ export default function BookV4Page() {
                         }}
                         className="w-full text-left px-2 py-1.5 rounded-md hover:bg-black/10 transition-colors"
                       >
-                        {story.title} ({story.storyYear})
+                        {story.title} ({story.storyDate || story.storyYear})
                       </button>
                     </li>
                   ))}
@@ -649,8 +649,8 @@ export default function BookV4Page() {
 
       </div>
 
-      {/* Bottom Navigation Controls - Thinner mobile-optimized version */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 no-print pb-[52px] md:pb-2">
+      {/* Bottom Navigation Controls - Positioned above footer nav */}
+      <div className="fixed bottom-[48px] left-0 right-0 z-30 no-print">
         <div className="mx-auto max-w-md px-4">
           <div className="flex items-center justify-between rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 shadow-2xl" style={{ transform: 'translateY(12px)' }}>
             {/* Previous button */}
@@ -880,7 +880,7 @@ function StoryContent({ story }: { story: Story }) {
     <>
       <div className="mb-3 flex items-center justify-between">
         <div className="text-sm text-neutral-600">
-          {story.storyYear}
+          {story.storyDate || story.storyYear}
           {story.lifeAge !== undefined && ` • Age ${story.lifeAge}`}
         </div>
       </div>
@@ -1414,7 +1414,7 @@ function MobilePage({
                     >
                       <div className="font-medium text-gray-700">{storyItem.title}</div>
                       <div className="text-xs text-gray-500 mt-0.5">
-                        {storyItem.storyYear}
+                        {storyItem.storyDate || storyItem.storyYear}
                         {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
                       </div>
                     </div>
@@ -1493,7 +1493,7 @@ function MobilePage({
               {/* Age and year */}
               <div className="text-[13px] text-neutral-600 mb-3">
                 {story.lifeAge !== undefined && `Age ${story.lifeAge} • `}
-                {story.storyYear}
+                {story.storyDate || story.storyYear}
               </div>
 
               {/* Audio Player - Mobile */}

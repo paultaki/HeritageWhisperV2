@@ -242,9 +242,9 @@ export function ProfilePhotoUploader({
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled}
-          className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-12 h-12 flex items-center justify-center bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <Camera className="w-4 h-4" />
+          <Camera className="w-5 h-5" />
         </button>
 
         <input

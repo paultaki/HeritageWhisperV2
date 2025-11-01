@@ -36,9 +36,11 @@ const NavItem: React.FC<NavItemProps> = ({
   return (
     <button
       onClick={handleClick}
-      className="flex items-center justify-center px-2 flex-1 transition-all relative"
+      className="flex items-center justify-center transition-all relative"
       style={{
         color: isActive ? "#ffffff" : "rgba(255, 255, 255, 0.6)",
+        width: "48px",
+        height: "37px",
       }}
     >
       {/* Active indicator bar at top - positioned inside the nav bar */}
@@ -48,7 +50,7 @@ const NavItem: React.FC<NavItemProps> = ({
           style={{
             backgroundColor: "#ffffff",
             width: "32px",
-            top: "3px", // Position inside the bar, below the border
+            top: "3px",
           }}
         />
       )}
@@ -83,7 +85,7 @@ export default function MobileNavigation({
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", damping: 20 }}
-      className="fixed bottom-0 left-0 right-0 z-50 bg-[#0b0d12]/95 backdrop-blur-md border-t-2 md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-[#0b0d12]/95 backdrop-blur-md border-t-2"
       style={{
         borderTopColor: "rgba(255, 255, 255, 0.1)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
@@ -92,13 +94,13 @@ export default function MobileNavigation({
       }}
     >
       <div
-        className="flex items-center justify-around relative"
+        className="flex items-center justify-center relative"
         style={{
-          gap: 'clamp(12px, 6vw, 60px)',
+          gap: 'clamp(80px, 12vw, 150px)',
           paddingLeft: 12,
           paddingRight: 12,
           width: '100%',
-          height: '37px', // 5px taller than original 32px (h-8)
+          height: '37px',
         }}
       >
         {/* Timeline */}

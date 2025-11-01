@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { MemoryMap } from "@/components/MemoryMap";
 import { ProfileInterests } from "@/components/ProfileInterests";
 import { ProfilePhotoUploader } from "@/components/ProfilePhotoUploader";
 import { Button } from "@/components/ui/button";
@@ -114,14 +113,6 @@ export default function Profile() {
   const { data: profileData, isLoading } = useQuery({
     queryKey: ["/api/user/profile"],
     enabled: !!user,
-  });
-
-  // Fetch story statistics
-  const { data: storyStats } = useQuery({
-    queryKey: ["/api/stories/stats"],
-    enabled: !!user,
-    retry: false,
-    refetchOnWindowFocus: false,
   });
 
   // Fetch AI consent status
@@ -508,7 +499,7 @@ export default function Profile() {
     "Friend";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 flex flex-col overflow-x-hidden">
       {/* Desktop Header */}
       <DesktopPageHeader
         icon={User}
@@ -588,35 +579,12 @@ export default function Profile() {
         )}
       </AnimatePresence>
 
-      <div className="flex flex-1 w-full">
+      <div className="flex flex-1 w-full overflow-x-visible">
         {isDesktop && <LeftSidebar />}
 
         {/* Main content - centered */}
-        <main className="flex-1 min-w-0 pb-20 md:pb-0">
+        <main className="flex-1 min-w-0 pb-20 md:pb-0 overflow-x-visible">
           <div className="max-w-3xl px-4 md:px-6 py-6 md:py-8" style={{ marginLeft: 0, marginRight: "auto" }}>
-              {/* Memory Map, etc. */}
-
-        {/* Memory Map - Visual overview of decades */}
-        {user && (
-          <div>
-            {/* Debug info */}
-            {!storyStats && (
-              <div className="p-4 bg-yellow-100 rounded mb-4">
-                <p>Loading story stats...</p>
-              </div>
-            )}
-            {storyStats && !(storyStats as any).stories && (
-              <div className="p-4 bg-red-100 rounded mb-4">
-                <p>Story stats loaded but no stories array found</p>
-                <pre>{JSON.stringify(storyStats, null, 2)}</pre>
-              </div>
-            )}
-            {storyStats && (storyStats as any).stories && (
-              <MemoryMap stories={(storyStats as any).stories} />
-            )}
-          </div>
-        )}
-
         {/* Profile Interests - Help personalize prompts */}
         {user && (
           <ProfileInterests

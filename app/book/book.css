@@ -10,33 +10,34 @@
   touch-action: pan-y;
 }
 
-/* Styled scrollbar - always visible and shorter */
+/* Styled scrollbar - always visible and more compact */
 .js-flow::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 .js-flow::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-  margin: 8px 0;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 5px;
+  margin: 100px 0;
 }
 
 .js-flow::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 5px;
   transition: background 0.2s ease;
-  min-height: 60px;
-  max-height: 120px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 .js-flow::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.55);
+  background-clip: padding-box;
 }
 
 /* Firefox scrollbar styling */
 .js-flow {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.05);
+  scrollbar-color: rgba(0, 0, 0, 0.4) rgba(0, 0, 0, 0.08);
 }
 
 /* Ensure parent allows scrolling */

@@ -71,7 +71,7 @@ export function MemoryMap({ stories }: MemoryMapProps) {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex flex-row items-start justify-between gap-3 w-full">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-[300px]">
             <h2 className="text-lg md:text-xl font-serif text-heritage-brown mb-1 leading-tight">
               Your Life's Timeline
             </h2>
