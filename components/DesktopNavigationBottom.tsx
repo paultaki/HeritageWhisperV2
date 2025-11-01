@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Calendar, BookOpen, User, Lightbulb } from "lucide-react";
+import { Clock3, BookOpen, User, Lightbulb } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
 
@@ -55,17 +55,10 @@ function DesktopNavItemBottom({
 }
 
 export default function DesktopNavigationBottom() {
-  const pathname = usePathname();
-  const { user } = useAuth();
-
-  // Don't show navigation on auth pages, home page, or book (has its own compact nav)
-  const shouldShow =
-    user &&
-    !["/auth/login", "/auth/register", "/", "/book"].includes(pathname);
-
-  if (!shouldShow) {
-    return null;
-  }
+  // Desktop bottom navigation is no longer used - navigation is in left sidebar
+  // Mobile navigation remains in MobileNavigation component
+  // Book pages use CompactNav
+  return null;
 
   return (
     <>
@@ -90,7 +83,7 @@ export default function DesktopNavigationBottom() {
       {/* Navigation Items - evenly distributed */}
       <div className="flex items-center justify-center gap-6">
         <DesktopNavItemBottom
-          icon={Calendar}
+          icon={Clock3}
           href="/timeline"
           isActive={pathname === "/timeline"}
         />

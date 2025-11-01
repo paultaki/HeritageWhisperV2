@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Calendar, BookOpen, User, Lightbulb } from "lucide-react";
+import { Clock3, BookOpen, User, Lightbulb } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function CompactNav() {
@@ -40,7 +40,7 @@ export function CompactNav() {
               }}
             />
           )}
-          <Calendar className="w-5 h-5" />
+          <Clock3 className="w-5 h-5" />
         </button>
 
         <button

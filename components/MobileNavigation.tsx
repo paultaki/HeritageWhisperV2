@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Calendar, BookOpen, User, Lightbulb } from "lucide-react";
+import { Clock3, BookOpen, User, Lightbulb } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
 
@@ -103,7 +103,7 @@ export default function MobileNavigation() {
       >
         {/* Timeline */}
         <NavItem
-          icon={Calendar}
+          icon={Clock3}
           href="/timeline"
           isActive={pathname === "/timeline"}
           isDarkMode={isBookPage}
