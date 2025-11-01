@@ -8,6 +8,7 @@ import { Volume2, Pause, Loader2 } from "lucide-react";
 import { BookPage } from "./components/BookPage";
 import DarkBookProgressBar from "./components/DarkBookProgressBar";
 import { BookPage as BookPageType } from "@/lib/bookPagination";
+import { ScrollIndicator } from "@/components/ScrollIndicators";
 import "./book.css";
 
 // Import handwriting font
@@ -1373,6 +1374,30 @@ function MobilePage({
   pageNum: number;
   allStories: Story[];
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  
+  // Check if content is scrollable and track user scroll
+  useEffect(() => {
+    const checkScroll = () => {
+      if (scrollRef.current) {
+        const isScrollable = scrollRef.current.scrollHeight > scrollRef.current.clientHeight + 5;
+        setShowScrollIndicator(isScrollable);
+      }
+    };
+    
+    checkScroll();
+    setTimeout(checkScroll, 500); // Recheck after content loads
+    
+    return () => {};
+  }, [page]);
+  
+  const handleScrollClick = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ top: 300, behavior: 'smooth' });
+      setShowScrollIndicator(false);
+    }
+  };
   // Intro page
   if (page.type === 'intro') {
     return (
@@ -1484,7 +1509,15 @@ function MobilePage({
 
         <div className="relative h-full w-full p-6">
           <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden">
-            <div className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-5 overflow-y-auto">
+            <div 
+              ref={scrollRef}
+              className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-5 overflow-y-auto"
+              onScroll={() => {
+                if (scrollRef.current && scrollRef.current.scrollTop > 50) {
+                  setShowScrollIndicator(false);
+                }
+              }}
+            >
               {/* Photo first if available */}
               {story.photos && story.photos.length > 0 && (() => {
                 // Find the hero photo, or use the first photo as fallback
@@ -1560,6 +1593,16 @@ function MobilePage({
                 </div>
               )}
             </div>
+            
+            {/* Mobile scroll indicator */}
+            {showScrollIndicator && (
+              <ScrollIndicator 
+                show={true}
+                position="right"
+                contentType="book"
+                onScrollClick={handleScrollClick}
+              />
+            )}
           </div>
           <div className="absolute bottom-3 left-0 right-0 px-6 text-right text-[12px] text-neutral-500/80">
             {pageNum}

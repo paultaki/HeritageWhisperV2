@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Clock, Volume2, Pause, Loader2 } from "lucide-react";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
+import { ScrollIndicator } from "@/components/ScrollIndicators";
 
 interface Story {
   id: string;
@@ -40,9 +41,14 @@ interface BookPageProps {
 export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
   ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory }, ref) => {
     const pageRef = React.useRef<HTMLDivElement>(null);
-    const [scrollState, setScrollState] = React.useState<{ hasScroll: boolean; isAnimating: boolean }>({
+    const [scrollState, setScrollState] = React.useState<{ 
+      hasScroll: boolean; 
+      isAnimating: boolean;
+      hasUserScrolled: boolean;
+    }>({
       hasScroll: false,
-      isAnimating: false
+      isAnimating: false,
+      hasUserScrolled: false
     });
     const currentPageIdRef = React.useRef<string>('');
 
@@ -60,7 +66,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
         currentPageIdRef.current = pageId;
         
         // Reset state for new page
-        setScrollState({ hasScroll: false, isAnimating: false });
+        setScrollState({ hasScroll: false, isAnimating: false, hasUserScrolled: false });
         
         let stopAnimationTimer: NodeJS.Timeout | null = null;
         
@@ -71,12 +77,12 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             const isScrollable = element.scrollHeight > element.clientHeight + 5;
             
             if (isScrollable) {
-              // Start bouncing
-              setScrollState({ hasScroll: true, isAnimating: true });
+              // Start showing indicators (bouncing for first 1.5 seconds)
+              setScrollState({ hasScroll: true, isAnimating: true, hasUserScrolled: false });
               
-              // Stop bouncing after 1.5 seconds
+              // Stop bouncing animation after 1.5 seconds, but KEEP indicators visible
               stopAnimationTimer = setTimeout(() => {
-                setScrollState({ hasScroll: true, isAnimating: false });
+                setScrollState(prev => ({ ...prev, isAnimating: false }));
               }, 1500);
             }
           }
@@ -91,6 +97,27 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
         };
       }
     }, [story, pageNum, ref]);
+    
+    // Track user scroll to hide indicators
+    React.useEffect(() => {
+      if (!ref || typeof ref === 'function' || !ref.current) return;
+      
+      const element = ref.current;
+      
+      const handleScroll = () => {
+        const scrollTop = element.scrollTop;
+        
+        if (scrollTop > 50) { // User scrolled at least 50px
+          setScrollState(prev => ({ ...prev, hasUserScrolled: true }));
+        }
+      };
+      
+      element.addEventListener('scroll', handleScroll, { passive: true });
+      
+      return () => {
+        element.removeEventListener('scroll', handleScroll);
+      };
+    }, [ref]);
 
     // Handle intro page
     if (story === 'intro') {
@@ -266,32 +293,19 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 </div>
               </div>
               
-              
-              {/* Scroll indicator - appears on outer edge */}
-              {scrollState.hasScroll && (
-                <button
-                  onClick={() => {
+              {/* Senior-friendly scroll indicator for TOC left */}
+              {scrollState.hasScroll && !scrollState.hasUserScrolled && (
+                <ScrollIndicator 
+                  show={true}
+                  position={position}
+                  contentType="book"
+                  onScrollClick={() => {
                     if (ref && typeof ref !== 'function' && ref.current) {
-                      ref.current.scrollBy({ top: 200, behavior: 'smooth' });
+                      ref.current.scrollBy({ top: 300, behavior: 'smooth' });
+                      setScrollState(prev => ({ ...prev, hasUserScrolled: true }));
                     }
                   }}
-                  className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} ${scrollState.isAnimating ? 'animate-bounce' : ''} cursor-pointer hover:scale-110 transition-transform`} 
-                  style={{ zIndex: 40 }}
-                  aria-label="Scroll down"
-                >
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all duration-300 ${!scrollState.isAnimating ? 'bg-neutral-200/40 hover:bg-neutral-200/60' : 'bg-neutral-200/80 hover:bg-neutral-200/90'}`}>
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className="h-5 w-5 text-neutral-600" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2.5"
-                    >
-                      <path d="M12 5v14M19 12l-7 7-7-7"/>
-                    </svg>
-                  </div>
-                </button>
+                />
               )}
               
               <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
@@ -374,31 +388,19 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               </div>
               
               
-              {/* Scroll indicator - appears on outer edge */}
-              {scrollState.hasScroll && (
-                <button
-                  onClick={() => {
+              {/* Senior-friendly scroll indicator for TOC right */}
+              {scrollState.hasScroll && !scrollState.hasUserScrolled && (
+                <ScrollIndicator 
+                  show={true}
+                  position={position}
+                  contentType="book"
+                  onScrollClick={() => {
                     if (ref && typeof ref !== 'function' && ref.current) {
-                      ref.current.scrollBy({ top: 200, behavior: 'smooth' });
+                      ref.current.scrollBy({ top: 300, behavior: 'smooth' });
+                      setScrollState(prev => ({ ...prev, hasUserScrolled: true }));
                     }
                   }}
-                  className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} ${scrollState.isAnimating ? 'animate-bounce' : ''} cursor-pointer hover:scale-110 transition-transform`} 
-                  style={{ zIndex: 40 }}
-                  aria-label="Scroll down"
-                >
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all duration-300 ${!scrollState.isAnimating ? 'bg-neutral-200/40 hover:bg-neutral-200/60' : 'bg-neutral-200/80 hover:bg-neutral-200/90'}`}>
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className="h-5 w-5 text-neutral-600" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2.5"
-                    >
-                      <path d="M12 5v14M19 12l-7 7-7-7"/>
-                    </svg>
-                  </div>
-                </button>
+                />
               )}
               
               <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
@@ -499,7 +501,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
           ></div>
 
           <div className="relative h-full w-full p-7 md:p-8 lg:p-10" style={{ zIndex: 10 }}>
-            <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ position: 'relative', zIndex: 15 }}>
+            <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
               <div
                 ref={ref}
                 onScroll={onScroll}
@@ -512,28 +514,27 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   position: 'relative',
                   zIndex: 20
                 }}
+                aria-label="Scroll down to continue reading"
               >
                 <StoryContent story={story as Story} position={position} pageNum={pageNum} />
               </div>
+              
+              {/* Scroll indicators - stay visible until user scrolls */}
+              {scrollState.hasScroll && !scrollState.hasUserScrolled && (
+                <ScrollIndicator 
+                  show={true}
+                  position={position}
+                  contentType="book"
+                  onScrollClick={() => {
+                    if (ref && typeof ref !== 'function' && ref.current) {
+                      ref.current.scrollBy({ top: 300, behavior: 'smooth' });
+                      // Immediately hide indicator on click
+                      setScrollState(prev => ({ ...prev, hasUserScrolled: true }));
+                    }
+                  }}
+                />
+              )}
             </div>
-            
-            {/* Scroll indicator - appears on outer edge */}
-            {scrollState.hasScroll && (
-              <div className={`absolute bottom-16 ${position === "left" ? "left-4" : "right-4"} ${scrollState.isAnimating ? 'animate-bounce' : ''} pointer-events-none`} style={{ zIndex: 40 }}>
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all duration-300 ${!scrollState.isAnimating ? 'bg-neutral-200/40' : 'bg-neutral-200/80'}`}>
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5 text-neutral-600" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2.5"
-                  >
-                    <path d="M12 5v14M19 12l-7 7-7-7"/>
-                  </svg>
-                </div>
-              </div>
-            )}
             
             <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
               {position === "left" && <span className="tracking-tight">{pageNum}</span>}
@@ -897,6 +898,7 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
           </p>
         </div>
       )}
+      
     </>
   );
 }
