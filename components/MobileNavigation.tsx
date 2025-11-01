@@ -5,23 +5,21 @@ import { usePathname, useRouter } from "next/navigation";
 import { Calendar, BookOpen, User, Lightbulb } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
-import { useRecordingState } from "@/contexts/RecordingContext";
-import Image from "next/image";
 
 interface NavItemProps {
   icon: React.ElementType;
-  label: string;
   href: string;
   isActive?: boolean;
   onClick?: () => void;
+  isDarkMode?: boolean;
 }
 
 const NavItem: React.FC<NavItemProps> = ({
   icon: Icon,
-  label,
   href,
   isActive,
   onClick,
+  isDarkMode = false,
 }) => {
   const router = useRouter();
 
@@ -38,7 +36,9 @@ const NavItem: React.FC<NavItemProps> = ({
       onClick={handleClick}
       className="flex items-center justify-center transition-all relative"
       style={{
-        color: isActive ? "#ffffff" : "rgba(255, 255, 255, 0.6)",
+        color: isDarkMode 
+          ? (isActive ? "#ffffff" : "rgba(255, 255, 255, 0.6)")
+          : (isActive ? "#8b6b7a" : "hsl(210, 10%, 40%)"),
         width: "48px",
         height: "37px",
       }}
@@ -48,7 +48,7 @@ const NavItem: React.FC<NavItemProps> = ({
         <div
           className="absolute left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all"
           style={{
-            backgroundColor: "#ffffff",
+            backgroundColor: isDarkMode ? "#ffffff" : "#8b6b7a",
             width: "32px",
             top: "3px",
           }}
@@ -61,16 +61,9 @@ const NavItem: React.FC<NavItemProps> = ({
   );
 };
 
-interface MobileNavigationProps {
-  onRecordClick: () => void;
-}
-
-export default function MobileNavigation({
-  onRecordClick,
-}: MobileNavigationProps) {
+export default function MobileNavigation() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { isRecording, recordingType } = useRecordingState();
 
   // Don't show navigation on auth pages or home page
   const shouldShow =
@@ -80,14 +73,19 @@ export default function MobileNavigation({
     return null;
   }
 
+  // Check if we're on a book page
+  const isBookPage = pathname.startsWith("/book");
+
   return (
     <motion.nav
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", damping: 20 }}
-      className="fixed bottom-0 left-0 right-0 z-50 bg-[#0b0d12]/95 backdrop-blur-md border-t-2"
+      className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-md border-t-2 ${
+        isBookPage ? "bg-[#0b0d12]/95" : "bg-white/95"
+      }`}
       style={{
-        borderTopColor: "rgba(255, 255, 255, 0.1)",
+        borderTopColor: isBookPage ? "rgba(255, 255, 255, 0.1)" : "#8b6b7a",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         boxShadow: "0 -2px 6px rgba(0, 0, 0, 0.04)",
         marginBottom: 0,
@@ -96,7 +94,7 @@ export default function MobileNavigation({
       <div
         className="flex items-center justify-center relative"
         style={{
-          gap: 'clamp(80px, 12vw, 150px)',
+          gap: 'clamp(55px, 9vw, 125px)',
           paddingLeft: 12,
           paddingRight: 12,
           width: '100%',
@@ -106,33 +104,33 @@ export default function MobileNavigation({
         {/* Timeline */}
         <NavItem
           icon={Calendar}
-          label="Timeline"
           href="/timeline"
           isActive={pathname === "/timeline"}
+          isDarkMode={isBookPage}
         />
 
         {/* Book View */}
         <NavItem
           icon={BookOpen}
-          label="Book"
           href="/book"
           isActive={pathname.startsWith("/book")}
+          isDarkMode={isBookPage}
         />
 
         {/* Ideas */}
         <NavItem
           icon={Lightbulb}
-          label="Ideas"
           href="/prompts"
           isActive={pathname === "/prompts"}
+          isDarkMode={isBookPage}
         />
 
         {/* Profile */}
         <NavItem
           icon={User}
-          label="Profile"
           href="/profile"
           isActive={pathname === "/profile"}
+          isDarkMode={isBookPage}
         />
       </div>
     </motion.nav>

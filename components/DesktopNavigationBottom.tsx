@@ -5,12 +5,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { Calendar, BookOpen, User, Lightbulb } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
-import { useRecordingState } from "@/contexts/RecordingContext";
-import Image from "next/image";
 
 interface NavItemProps {
   icon: React.ElementType;
-  label: string;
   href: string;
   isActive?: boolean;
   onClick?: () => void;
@@ -18,7 +15,6 @@ interface NavItemProps {
 
 function DesktopNavItemBottom({
   icon: Icon,
-  label,
   href,
   isActive,
   onClick,
@@ -58,16 +54,9 @@ function DesktopNavItemBottom({
   );
 }
 
-interface DesktopNavigationBottomProps {
-  onRecordClick: () => void;
-}
-
-export default function DesktopNavigationBottom({
-  onRecordClick,
-}: DesktopNavigationBottomProps) {
+export default function DesktopNavigationBottom() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { isRecording, recordingType } = useRecordingState();
 
   // Don't show navigation on auth pages, home page, or book (has its own compact nav)
   const shouldShow =
@@ -99,31 +88,27 @@ export default function DesktopNavigationBottom({
       }}
     >
       {/* Navigation Items - evenly distributed */}
-      <div className="flex items-center justify-center gap-8">
+      <div className="flex items-center justify-center gap-6">
         <DesktopNavItemBottom
           icon={Calendar}
-          label="Timeline"
           href="/timeline"
           isActive={pathname === "/timeline"}
         />
 
         <DesktopNavItemBottom
           icon={BookOpen}
-          label="Book"
           href="/book"
           isActive={pathname.startsWith("/book")}
         />
 
         <DesktopNavItemBottom
           icon={Lightbulb}
-          label="Ideas"
           href="/prompts"
           isActive={pathname === "/prompts"}
         />
 
         <DesktopNavItemBottom
           icon={User}
-          label="Profile"
           href="/profile"
           isActive={pathname === "/profile"}
         />
