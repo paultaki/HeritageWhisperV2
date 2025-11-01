@@ -609,7 +609,7 @@ export default function BookV4Page() {
         {showToc && (
           <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[520px] max-w-[calc(100vw-3rem)]">
             <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-4 py-3 text-sm text-black shadow-2xl">
-              <div className="mb-2 flex items-center justify-between gap-4">
+              <div className="mb-3 flex items-center justify-center relative">
                 <button 
                   onClick={() => {
                     // Navigate to TOC page
@@ -629,13 +629,13 @@ export default function BookV4Page() {
                     
                     setShowToc(false);
                   }}
-                  className="font-semibold tracking-tight text-base whitespace-nowrap hover:text-indigo-600 transition-colors cursor-pointer"
+                  className="font-semibold tracking-tight text-xl whitespace-nowrap hover:text-indigo-600 transition-colors cursor-pointer"
                 >
                   Table of Contents
                 </button>
                 <button 
                   onClick={() => setShowToc(false)}
-                  className="p-1 rounded-md hover:bg-black/10 flex-shrink-0 mr-[-150px] md:mr-0"
+                  className="absolute right-0 p-1 rounded-md hover:bg-black/10 flex-shrink-0"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
@@ -643,7 +643,7 @@ export default function BookV4Page() {
                 </button>
               </div>
               <div className="max-h-[60vh] overflow-y-auto">
-                <ul className="space-y-1.5">
+                <ul className="space-y-2">
                   {sortedStories.map((story, index) => (
                     <li key={story.id}>
                       <button
@@ -651,7 +651,7 @@ export default function BookV4Page() {
                           handleNavigateToStory(index);
                           setShowToc(false);
                         }}
-                        className="w-full text-left px-2 py-1.5 rounded-md hover:bg-black/10 transition-colors"
+                        className="w-full text-left px-3 py-2 rounded-md hover:bg-black/10 transition-colors text-base font-medium"
                       >
                         {story.title} ({story.storyDate || story.storyYear})
                       </button>

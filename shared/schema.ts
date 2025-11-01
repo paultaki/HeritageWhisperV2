@@ -17,7 +17,6 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: uuid("id").primaryKey(),
   email: text("email").notNull().unique(),
-  password: text("password"), // Made optional for OAuth users
   name: text("name").notNull().default("User"),
   birthYear: integer("birth_year").notNull(),
   bio: text("bio"), // User bio/about section

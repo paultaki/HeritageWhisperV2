@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-import bcrypt from "bcryptjs";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -62,46 +61,46 @@ export async function POST(request: NextRequest) {
       logger.api("Changing password for user:", authUser.id);
     }
 
-    // Get user from database using Supabase client
-    const { data: user, error: userError } = await supabaseAdmin
-      .from("users")
-      .select("id, password")
-      .eq("id", authUser.id)
-      .single();
+    // Get user email from Supabase Auth to verify current password
+    const { data: { user: authUserData }, error: userFetchError } = 
+      await supabaseAdmin.auth.admin.getUserById(authUser.id);
 
-    if (userError || !user || !user.password) {
-      logger.error("User lookup error:", userError?.message || 'User not found');
+    if (userFetchError || !authUserData) {
+      logger.error("User lookup error:", userFetchError?.message || 'User not found');
       return NextResponse.json(
-        { error: "User not found or password not set" },
+        { error: "User not found" },
         { status: 404 },
       );
     }
 
-    // Verify current password
-    const isValidPassword = await bcrypt.compare(
-      currentPassword,
-      user.password,
-    );
+    // Verify current password by attempting sign-in
+    // This is the correct way - matching forgot password flow
+    const { error: verifyError } = await supabaseAdmin.auth.signInWithPassword({
+      email: authUserData.email!,
+      password: currentPassword,
+    });
 
-    if (!isValidPassword) {
+    if (verifyError) {
+      logger.warn("Current password verification failed");
       return NextResponse.json(
         { error: "Current password is incorrect" },
         { status: 400 },
       );
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update password in database using Supabase client
-    const { error: updateError } = await supabaseAdmin
-      .from("users")
-      .update({ password: hashedPassword })
-      .eq("id", authUser.id);
+    // Update password using Supabase Auth admin API
+    // This is how reset-password works - we use the same pattern
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+      authUser.id,
+      { password: newPassword }
+    );
 
     if (updateError) {
       logger.error("Password update error:", updateError.message);
-      throw new Error("Failed to update password in database");
+      return NextResponse.json(
+        { error: "Failed to update password" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({

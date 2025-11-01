@@ -131,12 +131,13 @@ export default function FamilyPage() {
   }, [user, isAuthLoading, router]);
 
   // Fetch family members
-  const { data: familyMembersData, isLoading: loadingMembers } = useQuery<{
+  const { data: familyMembersData, isLoading: loadingMembers, refetch: refetchMembers } = useQuery<{
     members: FamilyMember[];
     total: number;
   }>({
     queryKey: ["/api/family/members"],
     enabled: !!user,
+    staleTime: 0, // Always consider stale so invalidation works immediately
   });
 
   const familyMembers = familyMembersData?.members || [];
@@ -215,8 +216,9 @@ export default function FamilyPage() {
         description: "Your family member will receive an email invitation.",
       });
 
-      // Invalidate cache to fetch fresh data
-      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+      // Invalidate and refetch to ensure fresh data
+      await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+      await refetchMembers();
 
       // Wait for confetti animation to finish (500ms) before closing dialog
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -280,8 +282,9 @@ export default function FamilyPage() {
       return { previousData };
     },
     onSuccess: async () => {
-      // Invalidate to ensure fresh data
+      // Invalidate and refetch to ensure fresh data
       await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+      await refetchMembers();
     },
     onError: (error: any, memberId, context) => {
       // Rollback on error
@@ -305,8 +308,9 @@ export default function FamilyPage() {
       );
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+      await refetchMembers();
       toast({
         title: "Invitation resent! 📧",
         description: "A new invitation email has been sent.",
@@ -331,8 +335,9 @@ export default function FamilyPage() {
       );
       return response.json();
     },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+    onSuccess: async (data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+      await refetchMembers();
       const newLevel = variables.permissionLevel === 'contributor' ? 'Contributor' : 'Viewer';
       toast({
         title: "Permissions updated",

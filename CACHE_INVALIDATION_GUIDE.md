@@ -8,6 +8,14 @@ When using **TanStack Query (React Query)** for data fetching, the library cache
 - Adding a memory to timeline doesn't show until page refresh
 - Editing a memory doesn't reflect changes until page refresh
 - Deleting a memory doesn't remove it from view until page refresh
+- Inviting a family member doesn't show in pending list
+- Revoking an invite doesn't remove it from the list
+
+### Why Does This Happen?
+
+React Query caches data with a `staleTime` setting. If your global config has `staleTime: 1000 * 60 * 30` (30 minutes), data is considered "fresh" for that period. Even when you call `invalidateQueries`, if the data is still "fresh" and not actively being observed, it might not refetch immediately.
+
+**The solution:** Set `staleTime: 0` on queries that need immediate updates + explicitly call `refetch()`.
 
 ## The Solution
 
@@ -109,34 +117,45 @@ onSuccess: () => {
 
 **Fix applied:**
 ```typescript
-// Invite mutation - Changed from refetchQueries to invalidateQueries
+// First: Get the refetch function from useQuery
+const { data, refetch: refetchMembers } = useQuery({
+  queryKey: ["/api/family/members"],
+  enabled: !!user,
+  staleTime: 0, // Always consider stale so invalidation works immediately
+});
+
+// Invite mutation - Invalidate + explicit refetch
 onSuccess: async (data) => {
   celebrateInvite();
   toast({ title: "Invitation sent! 🎉" });
   
-  // Invalidate cache to fetch fresh data
-  queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+  // Invalidate and refetch to ensure fresh data
+  await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+  await refetchMembers();
   
   // Close dialog after confetti animation
   await new Promise(resolve => setTimeout(resolve, 500));
   setInviteDialogOpen(false);
 }
 
-// Resend mutation - Changed from refetchQueries to invalidateQueries
-onSuccess: () => {
-  queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+// Resend mutation - Invalidate + explicit refetch
+onSuccess: async () => {
+  await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+  await refetchMembers();
   toast({ title: "Invitation resent! 📧" });
 }
 
-// Update permission mutation - Changed from refetchQueries to invalidateQueries
-onSuccess: (data, variables) => {
-  queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+// Update permission mutation - Invalidate + explicit refetch
+onSuccess: async (data, variables) => {
+  await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+  await refetchMembers();
   toast({ title: "Permissions updated" });
 }
 
-// Remove mutation - Already had invalidateQueries (kept as-is) ✅
+// Remove mutation - Invalidate + explicit refetch
 onSuccess: async () => {
   await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+  await refetchMembers();
 }
 ```
 
@@ -212,26 +231,33 @@ const updateStory = useMutation({
 });
 ```
 
-### 4. **Use `invalidateQueries` Instead of `refetchQueries`**
-Both work, but `invalidateQueries` is the recommended approach:
+### 4. **For Immediate Updates: Combine Invalidation with Explicit Refetch**
+When you need the UI to update immediately (not just mark as stale), use both:
 
 ```typescript
-// ❌ AVOID - refetchQueries forces immediate refetch
-onSuccess: async () => {
-  await queryClient.refetchQueries({ queryKey: ["/api/family/members"] });
-}
+// First: Get the refetch function from useQuery
+const { data, refetch } = useQuery({
+  queryKey: ["/api/family/members"],
+  staleTime: 0, // Set to 0 for immediate updates
+});
 
-// ✅ BETTER - invalidateQueries marks as stale and refetches when needed
-onSuccess: () => {
-  queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+// Then: In your mutation, invalidate AND refetch
+onSuccess: async () => {
+  await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+  await refetch(); // Explicitly refetch
 }
 ```
 
-**Why invalidateQueries is better:**
-- More efficient - only refetches when data is actually used
-- No need for async/await in most cases
-- Better performance with multiple simultaneous invalidations
-- Standard React Query pattern
+**Why this approach works best:**
+- `invalidateQueries` marks the query as stale
+- `refetch()` immediately fetches fresh data
+- `staleTime: 0` ensures invalidation always triggers updates
+- Guarantees the UI reflects changes without page refresh
+
+**When to use explicit refetch:**
+- ✅ User-initiated actions (invite, delete, update)
+- ✅ When data must update immediately
+- ❌ Background syncs (invalidation alone is fine)
 
 ### 5. **Use Mutation Hooks Consistently**
 ```typescript
