@@ -22,7 +22,7 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
     retry: false,
   });
 
-  const profileUser = (profileData as any)?.user;
+  const profileUser = (profileData as { user?: { profilePhotoUrl?: string } })?.user;
 
   useEffect(() => {
     const updateFromDom = () => {

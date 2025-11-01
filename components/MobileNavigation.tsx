@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 
 interface NavItemProps {
   icon: React.ElementType;
+  label: string;
   href: string;
   isActive?: boolean;
   onClick?: () => void;
@@ -16,6 +17,7 @@ interface NavItemProps {
 
 const NavItem: React.FC<NavItemProps> = ({
   icon: Icon,
+  label,
   href,
   isActive,
   onClick,
@@ -34,12 +36,12 @@ const NavItem: React.FC<NavItemProps> = ({
   return (
     <button
       onClick={handleClick}
-      className="flex items-center justify-center transition-all relative"
+      className="flex flex-col items-center justify-center transition-all relative gap-0.5"
       style={{
         color: isDarkMode 
           ? (isActive ? "#ffffff" : "rgba(255, 255, 255, 0.6)")
           : (isActive ? "#8b6b7a" : "hsl(210, 10%, 40%)"),
-        width: "48px",
+        width: "56px",
         height: "37px",
       }}
     >
@@ -50,13 +52,22 @@ const NavItem: React.FC<NavItemProps> = ({
           style={{
             backgroundColor: isDarkMode ? "#ffffff" : "#8b6b7a",
             width: "32px",
-            top: "3px",
+            top: "2px",
           }}
         />
       )}
       <Icon
         className={`w-5 h-5 transition-transform ${isActive ? "scale-110" : ""}`}
       />
+      <span
+        className="leading-none font-medium"
+        style={{
+          fontSize: "7.5px",
+          marginTop: "1px",
+        }}
+      >
+        {label}
+      </span>
     </button>
   );
 };
@@ -81,7 +92,7 @@ export default function MobileNavigation() {
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", damping: 20 }}
-      className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-md border-t-2 ${
+      className={`md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-md border-t-2 ${
         isBookPage ? "bg-[#0b0d12]/95" : "bg-white/95"
       }`}
       style={{
@@ -104,14 +115,16 @@ export default function MobileNavigation() {
         {/* Timeline */}
         <NavItem
           icon={Clock3}
+          label="Timeline"
           href="/timeline"
           isActive={pathname === "/timeline"}
           isDarkMode={isBookPage}
         />
 
-        {/* Book View */}
+        {/* Book */}
         <NavItem
           icon={BookOpen}
+          label="Book"
           href="/book"
           isActive={pathname.startsWith("/book")}
           isDarkMode={isBookPage}
@@ -120,6 +133,7 @@ export default function MobileNavigation() {
         {/* Ideas */}
         <NavItem
           icon={Lightbulb}
+          label="Ideas"
           href="/prompts"
           isActive={pathname === "/prompts"}
           isDarkMode={isBookPage}
@@ -128,6 +142,7 @@ export default function MobileNavigation() {
         {/* Profile */}
         <NavItem
           icon={User}
+          label="Profile"
           href="/profile"
           isActive={pathname === "/profile"}
           isDarkMode={isBookPage}

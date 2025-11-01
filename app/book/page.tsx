@@ -9,6 +9,7 @@ import { BookPage } from "./components/BookPage";
 import DarkBookProgressBar from "./components/DarkBookProgressBar";
 import { BookPage as BookPageType } from "@/lib/bookPagination";
 import { ScrollIndicator } from "@/components/ScrollIndicators";
+import { CompactNav } from "./components/CompactNav";
 import "./book.css";
 
 // Import handwriting font
@@ -727,6 +728,9 @@ export default function BookV4Page() {
           </button>
         </div>
       </div>
+
+      {/* Desktop Navigation Bar */}
+      <CompactNav />
     </div>
   );
 }
