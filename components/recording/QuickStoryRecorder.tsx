@@ -113,18 +113,13 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
 
   // Auto-navigate when transcription completes (for both <30s and >=30s recordings)
   useEffect(() => {
-    console.log("[QuickStoryRecorder] Auto-nav useEffect - state:", state, "transcriptionStatus:", transcriptionStatus);
-
     if (state === "processing" && transcriptionStatus === "complete") {
-      console.log("[QuickStoryRecorder] ✅ Transcription complete! Auto-navigating in 500ms...");
       // Give a brief moment to show completion, then navigate
       const timer = setTimeout(() => {
-        console.log("[QuickStoryRecorder] 🚀 Calling continueFromReview() now...");
         continueFromReview();
       }, 500);
 
       return () => {
-        console.log("[QuickStoryRecorder] Cleaning up auto-navigate timer");
         clearTimeout(timer);
       };
     }
@@ -132,10 +127,8 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
     // Safety fallback: If stuck in processing for >15 seconds, retry
     if (state === "processing" && transcriptionStatus === "processing") {
       const fallbackTimer = setTimeout(() => {
-        console.warn("[QuickStoryRecorder] ⚠️ Stuck in processing for 15s, checking sessionStorage...");
         const existingResult = sessionStorage.getItem('hw_transcription_result');
         if (existingResult) {
-          console.log("[QuickStoryRecorder] Found transcription result, calling continueFromReview()");
           continueFromReview();
         }
       }, 15000);
@@ -217,11 +210,9 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
       }
 
       const data = await response.json();
-      console.log('[QuickStoryRecorder] Upload transcription response:', data);
 
       // Extract transcription text (the API returns it as a string)
       const transcriptionText = data.transcription || data.text || '';
-      console.log('[QuickStoryRecorder] Extracted transcription:', transcriptionText);
 
       // Get audio duration (try to calculate from file if not provided)
       let audioDuration = data.duration || 30;
@@ -237,8 +228,8 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
             resolve(null);
           });
         });
-      } catch (err) {
-        console.log('[QuickStoryRecorder] Could not get audio duration, using default');
+      } catch {
+        // Could not get audio duration, using default
       }
 
       // Convert File to Blob for NavCache
@@ -258,8 +249,6 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
         formattedContent: data.formattedContent,
         useEnhanced: false,
       });
-
-      console.log('[QuickStoryRecorder] Navigating to transcription-select with audio upload');
 
       // Navigate to transcription-select (same as recording flow)
       router.push(`/review/book-style?nav=${navId}&mode=transcription-select`);
@@ -345,8 +334,6 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
   useEffect(() => {
     if (!isOpen) {
       // Modal closed - reset everything for next time it opens
-      console.log("[QuickStoryRecorder] Modal closed, scheduling reset");
-      
       // Disconnect audio analyzer
       disconnect();
       

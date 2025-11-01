@@ -5,8 +5,17 @@ import { logger } from "@/lib/logger";
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
+
+// Regular Supabase client for password verification
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
@@ -65,43 +74,54 @@ export async function POST(request: NextRequest) {
     const { data: { user: authUserData }, error: userFetchError } = 
       await supabaseAdmin.auth.admin.getUserById(authUser.id);
 
-    if (userFetchError || !authUserData) {
-      logger.error("User lookup error:", userFetchError?.message || 'User not found');
+    if (userFetchError || !authUserData || !authUserData.email) {
+      logger.error("User lookup error:", userFetchError?.message || 'User not found or no email');
       return NextResponse.json(
-        { error: "User not found" },
+        { error: "User not found or missing email" },
         { status: 404 },
       );
     }
 
-    // Verify current password by attempting sign-in
-    // This is the correct way - matching forgot password flow
-    const { error: verifyError } = await supabaseAdmin.auth.signInWithPassword({
-      email: authUserData.email!,
+    // Verify current password by attempting sign-in with regular client
+    // Admin client doesn't support signInWithPassword the same way
+    const { data: signInData, error: verifyError } = await supabase.auth.signInWithPassword({
+      email: authUserData.email,
       password: currentPassword,
     });
 
     if (verifyError) {
-      logger.warn("Current password verification failed");
+      logger.warn("Current password verification failed:", verifyError.message);
       return NextResponse.json(
         { error: "Current password is incorrect" },
         { status: 400 },
       );
     }
 
+    logger.info("Password verification successful, updating password...");
+
     // Update password using Supabase Auth admin API
     // This is how reset-password works - we use the same pattern
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+    const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       authUser.id,
       { password: newPassword }
     );
 
     if (updateError) {
-      logger.error("Password update error:", updateError.message);
+      logger.error("Password update error:", updateError.message, updateError);
+      
+      // Handle weak password errors (422) separately from server errors (500)
+      const isWeakPassword = (updateError as any).status === 422 || (updateError as any).code === 'weak_password';
+      
       return NextResponse.json(
-        { error: "Failed to update password" },
-        { status: 500 },
+        { 
+          error: updateError.message,
+          code: (updateError as any).code || 'update_failed'
+        },
+        { status: isWeakPassword ? 400 : 500 },
       );
     }
+
+    logger.info("Password updated successfully for user:", authUser.id);
 
     return NextResponse.json({
       success: true,
