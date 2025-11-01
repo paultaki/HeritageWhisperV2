@@ -327,7 +327,6 @@ export default function BookV4Page() {
       if (storyIndex !== -1) {
         // Desktop: Find which spread contains this story
         let targetSpreadIndex = 0;
-        let storyCount = 0;
         
         for (let i = 0; i < spreads.length; i++) {
           const spread = spreads[i];
@@ -338,7 +337,6 @@ export default function BookV4Page() {
               targetSpreadIndex = i;
               break;
             }
-            storyCount++;
           }
           
           // Check right page
@@ -347,7 +345,6 @@ export default function BookV4Page() {
               targetSpreadIndex = i;
               break;
             }
-            storyCount++;
           }
         }
         
@@ -489,9 +486,7 @@ export default function BookV4Page() {
           currentPage={currentSpreadIndex * 2}
           totalPages={bookPages.length}
           onNavigateToPage={handleNavigateToPage}
-          zoomLevel={zoomLevel}
-          onZoomIn={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
-          onZoomOut={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
+          onTocClick={() => setShowToc(!showToc)}
         />
       </div>
     
@@ -525,6 +520,48 @@ export default function BookV4Page() {
     
         {/* Desktop: Dual-page spread */}
         <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100vh - 180px)" }}>
+          {/* Clickable Navigation Zones - Left margin for previous */}
+          <button
+            onClick={goToPrevSpread}
+            disabled={currentSpreadIndex === 0}
+            className="absolute left-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
+            style={{ 
+              width: "calc((100vw - min(95vw, calc((100vh - 180px) * 1.294))) / 2 + 11px)",
+              background: "transparent"
+            }}
+            aria-label="Previous page"
+            onMouseEnter={(e) => {
+              if (currentSpreadIndex > 0) {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                e.currentTarget.style.cursor = "pointer";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          />
+          
+          {/* Clickable Navigation Zones - Right margin for next */}
+          <button
+            onClick={goToNextSpread}
+            disabled={currentSpreadIndex >= spreads.length - 1}
+            className="absolute right-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
+            style={{ 
+              width: "calc((100vw - min(95vw, calc((100vh - 180px) * 1.294))) / 2 + 11px)",
+              background: "transparent"
+            }}
+            aria-label="Next page"
+            onMouseEnter={(e) => {
+              if (currentSpreadIndex < spreads.length - 1) {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                e.currentTarget.style.cursor = "pointer";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          />
+
           {/* Book container with fixed aspect ratio: 11" x 8.5" (dual-page spread) */}
           <div 
             className="relative [perspective:2000px]" 
@@ -607,9 +644,9 @@ export default function BookV4Page() {
     
         {/* TOC Drawer - Above Bottom Nav */}
         {showToc && (
-          <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[520px] max-w-[calc(100vw-3rem)]">
-            <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-4 py-3 text-sm text-black shadow-2xl">
-              <div className="mb-3 flex items-center justify-center relative">
+          <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[580px] max-w-[calc(100vw-3rem)]">
+            <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-6 py-4 text-black shadow-2xl">
+              <div className="mb-4 flex items-center justify-center relative">
                 <button 
                   onClick={() => {
                     // Navigate to TOC page
@@ -629,7 +666,7 @@ export default function BookV4Page() {
                     
                     setShowToc(false);
                   }}
-                  className="font-semibold tracking-tight text-xl whitespace-nowrap hover:text-indigo-600 transition-colors cursor-pointer"
+                  className="font-semibold tracking-tight text-2xl whitespace-nowrap hover:text-indigo-600 transition-colors cursor-pointer"
                 >
                   Table of Contents
                 </button>
@@ -643,7 +680,7 @@ export default function BookV4Page() {
                 </button>
               </div>
               <div className="max-h-[60vh] overflow-y-auto">
-                <ul className="space-y-2">
+                <ul className="space-y-2.5">
                   {sortedStories.map((story, index) => (
                     <li key={story.id}>
                       <button
@@ -651,7 +688,7 @@ export default function BookV4Page() {
                           handleNavigateToStory(index);
                           setShowToc(false);
                         }}
-                        className="w-full text-left px-3 py-2 rounded-md hover:bg-black/10 transition-colors text-base font-medium"
+                        className="w-full text-center px-3 py-2.5 rounded-md hover:bg-black/10 transition-colors text-lg font-medium"
                       >
                         {story.title} ({story.storyDate || story.storyYear})
                       </button>
@@ -665,78 +702,28 @@ export default function BookV4Page() {
 
       </div>
 
-      {/* Bottom Navigation Controls - Positioned above footer nav */}
-      <div className="fixed bottom-[48px] left-0 right-0 z-30 no-print">
-        <div className="mx-auto max-w-md px-4">
-          <div className="flex items-center justify-between rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 shadow-2xl" style={{ transform: 'translateY(12px)' }}>
-            {/* Previous button */}
-            <button
-              onClick={() => {
-                // On mobile use mobile page navigation, on desktop use spread navigation
-                if (window.innerWidth < 1024) {
-                  if (currentMobilePage > 0) {
-                    setCurrentMobilePage(currentMobilePage - 1);
-                  }
-                } else {
-                  goToPrevSpread();
-                }
-              }}
-              disabled={window.innerWidth < 1024 ? currentMobilePage === 0 : currentSpreadIndex === 0}
-              className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
-              title="Previous"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="m15 18-6-6 6-6"></path>
-              </svg>
-            </button>
-
-            {/* Page indicator and TOC */}
-            <div className="flex items-center gap-3">
-              <span className="text-white font-medium text-sm whitespace-nowrap">
-                <span className="lg:hidden">{currentMobilePage + 1} / {mobilePages.length}</span>
-                <span className="hidden lg:inline">{currentSpreadIndex + 1} / {spreads.length}</span>
-              </span>
-              <button
-                onClick={() => setShowToc(!showToc)}
-                className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-all text-white min-w-[40px] min-h-[40px] flex items-center justify-center"
-                title="Table of Contents"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M4 6h16"></path>
-                  <path d="M4 12h16"></path>
-                  <path d="M4 18h16"></path>
-                </svg>
-              </button>
-            </div>
-
-            {/* Next button */}
-            <button
-              onClick={() => {
-                // On mobile use mobile page navigation, on desktop use spread navigation
-                if (window.innerWidth < 1024) {
-                  if (currentMobilePage < mobilePages.length - 1) {
-                    setCurrentMobilePage(currentMobilePage + 1);
-                  }
-                } else {
-                  goToNextSpread();
-                }
-              }}
-              disabled={window.innerWidth < 1024 ? currentMobilePage === mobilePages.length - 1 : currentSpreadIndex === spreads.length - 1}
-              className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
-              title="Next"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="m9 18 6-6-6-6"></path>
-              </svg>
-            </button>
+      {/* Floating Zoom Controls - Bottom right corner (desktop only) */}
+      <div className="hidden lg:block fixed bottom-6 right-6 z-30 no-print">
+        <div className="flex flex-col gap-2 rounded-lg border-2 border-white/30 overflow-hidden backdrop-blur-sm bg-white/5 p-1">
+          <button
+            onClick={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
+            className="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-colors text-white font-bold text-xl rounded"
+            aria-label="Zoom in"
+            title="Zoom in"
+          >
+            +
+          </button>
+          <div className="w-10 text-center text-xs text-white font-medium py-1">
+            {Math.round(zoomLevel * 100)}%
           </div>
+          <button
+            onClick={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
+            className="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-colors text-white font-bold text-xl rounded"
+            aria-label="Zoom out"
+            title="Zoom out"
+          >
+            −
+          </button>
         </div>
       </div>
     </div>
@@ -1270,6 +1257,7 @@ function MobileAudioPlayer({ story }: { story: Story }) {
       audio.src = '';
       audioRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [story.id]);
   
   const toggleAudio = async (e: React.MouseEvent) => {
@@ -1346,9 +1334,22 @@ function MobileAudioPlayer({ story }: { story: Story }) {
         </button>
         
         <div className="flex-1">
-          <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
+          <div 
+            className="h-1.5 bg-neutral-200 rounded-full overflow-hidden cursor-pointer hover:h-2 transition-all"
+            onClick={(e) => {
+              if (!audioRef.current || !duration) return;
+              
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const percentage = x / rect.width;
+              const newTime = percentage * duration;
+              
+              audioRef.current.currentTime = newTime;
+              setCurrentTime(newTime);
+            }}
+          >
             <div 
-              className="h-full bg-neutral-400 transition-all duration-100" 
+              className="h-full bg-neutral-400 transition-all duration-100 pointer-events-none" 
               style={{ width: `${progress}%` }} 
             />
           </div>

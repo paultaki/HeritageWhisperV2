@@ -799,9 +799,23 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
 
             {/* Linear progress bar - subtle, book-style */}
             <div className="flex-1">
-              <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
+              <div 
+                className="h-1.5 bg-neutral-200 rounded-full overflow-hidden cursor-pointer hover:h-2 transition-all"
+                onClick={(e) => {
+                  if (!audioRef.current || !duration) return;
+                  
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const percentage = x / rect.width;
+                  const newTime = percentage * duration;
+                  
+                  audioRef.current.currentTime = newTime;
+                  setCurrentTime(newTime);
+                }}
+                style={{ pointerEvents: 'auto', zIndex: 9999 }}
+              >
                 <div 
-                  className="h-full bg-neutral-400 transition-all duration-100" 
+                  className="h-full bg-neutral-400 transition-all duration-100 pointer-events-none" 
                   style={{ width: `${progress}%` }} 
                 />
               </div>

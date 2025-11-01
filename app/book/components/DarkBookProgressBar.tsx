@@ -19,9 +19,7 @@ interface DarkBookProgressBarProps {
   currentPage: number;
   totalPages: number;
   onNavigateToPage: (pageNumber: number) => void;
-  zoomLevel: number;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
+  onTocClick: () => void;
 }
 
 /**
@@ -61,9 +59,7 @@ export default function DarkBookProgressBar({
   currentPage,
   totalPages,
   onNavigateToPage,
-  zoomLevel,
-  onZoomIn,
-  onZoomOut,
+  onTocClick,
 }: DarkBookProgressBarProps) {
   const [isHovering, setIsHovering] = useState(false);
   const [hoverPosition, setHoverPosition] = useState(0);
@@ -280,28 +276,29 @@ export default function DarkBookProgressBar({
           </div>
         </div>
 
-        {/* Right: Zoom controls (desktop only) */}
+        {/* Right: Table of Contents button */}
         <div className="hidden md:flex items-center justify-end gap-2 flex-shrink-0">
-          {/* Zoom controls - white outline style */}
-          <div className="flex items-center gap-1 rounded-full border-2 border-white/30 overflow-hidden backdrop-blur-sm bg-white/5">
-            <button
-              onClick={onZoomOut}
-              className="w-9 h-8 flex items-center justify-center hover:bg-white/10 transition-colors text-white font-bold text-lg"
-              aria-label="Zoom out"
+          {/* TOC button - white outline style matching progress bar aesthetic */}
+          <button
+            onClick={onTocClick}
+            className="flex items-center gap-2 px-4 h-9 rounded-full border-2 border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white font-medium"
+            aria-label="Table of Contents"
+            title="Table of Contents"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
             >
-              −
-            </button>
-            <div className="w-12 text-center text-xs text-white font-medium">
-              {Math.round(zoomLevel * 100)}%
-            </div>
-            <button
-              onClick={onZoomIn}
-              className="w-9 h-8 flex items-center justify-center hover:bg-white/10 transition-colors text-white font-bold text-lg"
-              aria-label="Zoom in"
-            >
-              +
-            </button>
-          </div>
+              <path d="M4 6h16"></path>
+              <path d="M4 12h16"></path>
+              <path d="M4 18h16"></path>
+            </svg>
+            <span className="text-sm">Contents</span>
+          </button>
         </div>
       </div>
     </div>

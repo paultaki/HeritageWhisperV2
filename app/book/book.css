@@ -13,6 +13,7 @@
 /* Styled scrollbar - always visible and more compact */
 .js-flow::-webkit-scrollbar {
   width: 10px;
+  -webkit-appearance: none;
 }
 
 .js-flow::-webkit-scrollbar-track {
@@ -27,6 +28,7 @@
   transition: background 0.2s ease;
   border: 2px solid transparent;
   background-clip: padding-box;
+  min-height: 40px; /* Ensure thumb is always visible */
 }
 
 .js-flow::-webkit-scrollbar-thumb:hover {
@@ -34,10 +36,16 @@
   background-clip: padding-box;
 }
 
-/* Firefox scrollbar styling */
+/* Force scrollbar to always be visible (not auto-hide) */
+.js-flow::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Firefox scrollbar styling - force always visible */
 .js-flow {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.4) rgba(0, 0, 0, 0.08);
+  scrollbar-gutter: stable; /* Reserve space for scrollbar */
 }
 
 /* Ensure parent allows scrolling */
