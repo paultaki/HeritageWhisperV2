@@ -157,3 +157,33 @@ body {
     animation: none !important;
   }
 }
+
+/* Mobile scroll-snap improvements */
+.snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.snap-center {
+  scroll-snap-align: center;
+}
+
+.snap-always {
+  scroll-snap-stop: always;
+}
+
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Improve mobile swipe performance */
+@media (max-width: 1024px) {
+  .snap-x {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .snap-x::-webkit-scrollbar {
+    display: none;
+  }
+}

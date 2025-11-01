@@ -948,13 +948,18 @@ function MobileView({
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  
+  // Touch tracking for velocity detection
+  const [touchStart, setTouchStart] = useState<{x: number; y: number; time: number} | null>(null);
+  const [touchCurrent, setTouchCurrent] = useState<{x: number; y: number} | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'horizontal' | 'vertical' | null>(null);
 
   // Scroll to current page when it changes
   useEffect(() => {
     if (scrollerRef.current && !isDragging) {
       const pageWidth = scrollerRef.current.clientWidth;
       scrollerRef.current.scrollTo({
-        left: currentPage * (pageWidth + 24), // 24 is the gap
+        left: currentPage * pageWidth,
         behavior: 'smooth'
       });
     }
@@ -964,7 +969,7 @@ function MobileView({
   const handleScroll = () => {
     if (!scrollerRef.current || isDragging) return;
     
-    const pageWidth = scrollerRef.current.clientWidth + 24; // Add gap
+    const pageWidth = scrollerRef.current.clientWidth;
     const scrollLeft = scrollerRef.current.scrollLeft;
     const newPage = Math.round(scrollLeft / pageWidth);
     
@@ -983,6 +988,82 @@ function MobileView({
     if (currentPage < allPages.length - 1) {
       onPageChange(currentPage + 1);
     }
+  };
+  
+  // Custom touch handlers with velocity detection
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart({
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      time: Date.now()
+    });
+    setTouchCurrent({
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY
+    });
+    setSwipeDirection(null);
+    setIsDragging(true);
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+    
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    setTouchCurrent({ x: currentX, y: currentY });
+    
+    // Detect swipe direction early (first 10px of movement)
+    if (!swipeDirection) {
+      const deltaX = Math.abs(currentX - touchStart.x);
+      const deltaY = Math.abs(currentY - touchStart.y);
+      
+      if (deltaX > 10 || deltaY > 10) {
+        // Lock direction based on primary movement
+        setSwipeDirection(deltaX > deltaY ? 'horizontal' : 'vertical');
+      }
+    }
+  };
+  
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart || !touchCurrent || !scrollerRef.current) {
+      setIsDragging(false);
+      return;
+    }
+    
+    const touchEnd = e.changedTouches[0].clientX;
+    const distance = touchEnd - touchStart.x;
+    const duration = Date.now() - touchStart.time;
+    const velocity = Math.abs(distance) / duration; // px/ms
+    
+    const threshold = window.innerWidth * 0.25; // 25% of screen width
+    const velocityThreshold = 0.5; // Fast flick threshold (px/ms)
+    
+    // Only process horizontal swipes
+    if (swipeDirection === 'horizontal') {
+      if (Math.abs(distance) > threshold || velocity > velocityThreshold) {
+        // Commit to page change
+        if (distance > 0 && currentPage > 0) {
+          handlePrev();
+        } else if (distance < 0 && currentPage < allPages.length - 1) {
+          handleNext();
+        }
+      } else {
+        // Snap back to current page
+        const pageWidth = scrollerRef.current.clientWidth;
+        scrollerRef.current.scrollTo({
+          left: currentPage * pageWidth,
+          behavior: 'smooth'
+        });
+      }
+    }
+    
+    // Reset touch state
+    setTimeout(() => {
+      setIsDragging(false);
+      setTouchStart(null);
+      setTouchCurrent(null);
+      setSwipeDirection(null);
+    }, 100);
   };
 
   return (
@@ -1023,13 +1104,29 @@ function MobileView({
         <div 
           ref={scrollerRef}
           onScroll={handleScroll}
-          onTouchStart={() => setIsDragging(true)}
-          onTouchEnd={() => setTimeout(() => setIsDragging(false), 100)}
-          className="h-full w-full flex items-start md:items-center justify-center snap-x snap-mandatory overflow-x-auto hide-scrollbar -mt-[26px] md:mt-0"
-          style={{ scrollSnapType: 'x mandatory' }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="h-full w-full flex items-start md:items-center justify-center snap-x snap-mandatory overflow-x-auto hide-scrollbar scroll-smooth -mt-[26px] md:mt-0"
+          style={{ 
+            scrollSnapType: 'x mandatory',
+            scrollSnapStop: 'always',
+            WebkitOverflowScrolling: 'touch',
+            touchAction: swipeDirection === 'horizontal' ? 'pan-x' : 'pan-y',
+            transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
         >
           {allPages.map((page, index) => (
-            <div key={index} className="snap-center shrink-0 flex items-center justify-center px-4" style={{ minWidth: '100%', height: '100%' }}>
+            <div 
+              key={index} 
+              className="snap-center snap-always shrink-0 flex items-center justify-center" 
+              style={{ 
+                minWidth: '100%', 
+                width: '100%',
+                height: '100%',
+                padding: '0 1rem'
+              }}
+            >
               <MobilePage page={page} pageNum={index + 1} allStories={sortedStories} />
             </div>
           ))}
