@@ -356,6 +356,9 @@ export default function BookV4Page() {
         // Mobile: Navigate to story page (intro + toc + stories)
         setCurrentMobilePage(storyIndex + 2);
         
+        // Open the book automatically when navigating from timeline
+        setIsBookOpen(true);
+        
         setHasNavigatedToStory(true);
         
         // Clean up URL
@@ -609,8 +612,21 @@ export default function BookV4Page() {
               <div className="mb-2 flex items-center justify-between gap-4">
                 <button 
                   onClick={() => {
-                    // Navigate to TOC page (index 1 on mobile)
+                    // Navigate to TOC page
+                    // Mobile: Navigate to page 1 (intro is 0, TOC is 1)
                     setCurrentMobilePage(1);
+                    
+                    // Desktop: Find the spread containing TOC
+                    // TOC is typically on spread index 1 (after intro on spread 0)
+                    const tocSpreadIndex = spreads.findIndex(spread => 
+                      spread.left === 'toc-left' || spread.right === 'toc-right' ||
+                      spread.left === 'toc-right' || spread.right === 'toc-left'
+                    );
+                    
+                    if (tocSpreadIndex !== -1) {
+                      setCurrentSpreadIndex(tocSpreadIndex);
+                    }
+                    
                     setShowToc(false);
                   }}
                   className="font-semibold tracking-tight text-base whitespace-nowrap hover:text-indigo-600 transition-colors cursor-pointer"

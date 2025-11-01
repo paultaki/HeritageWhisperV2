@@ -683,9 +683,9 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
               `/review/book-style?id=${story.id}&returnPath=${encodeURIComponent(`/book?page=${pageNum}`)}`,
             )
           }
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-lg font-medium text-gray-700"
         >
-          <Pencil className="w-3.5 h-3.5" />
+          <Pencil className="w-4.5 h-4.5" />
           <span>Edit</span>
         </button>
         <button
@@ -702,9 +702,9 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
             // Navigate to timeline
             router.push('/timeline');
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-lg font-medium text-gray-700"
         >
-          <Clock className="w-3.5 h-3.5" />
+          <Clock className="w-4.5 h-4.5" />
           <span>Timeline</span>
         </button>
       </div>
@@ -738,7 +738,7 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
 
       {/* Age and year */}
       <div className="mb-4 flex items-center justify-between">
-        <div className="text-base text-neutral-600">
+        <div className="text-xl text-neutral-600 font-medium">
           {story.lifeAge !== undefined && `Age ${story.lifeAge} • `}
           {story.storyYear}
         </div>

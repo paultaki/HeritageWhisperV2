@@ -105,6 +105,18 @@ export function BookStyleReview({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showRemoveAudioConfirm, setShowRemoveAudioConfirm] = useState(false);
   const [removeAudioAction, setRemoveAudioAction] = useState<'remove' | 'rerecord'>('remove');
+  
+  // Transcription replacement confirmation
+  const [showTranscriptionReplaceConfirm, setShowTranscriptionReplaceConfirm] = useState(false);
+  const [pendingTranscription, setPendingTranscription] = useState<string>("");
+  const [pendingLessonOptions, setPendingLessonOptions] = useState<{
+    practical?: string;
+    emotional?: string;
+    character?: string;
+  } | null>(null);
+  const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null);
+  const [pendingAudioBlob, setPendingAudioBlob] = useState<Blob | null>(null);
+  const [pendingAudioDuration, setPendingAudioDuration] = useState<number>(0);
 
   // Recording overlay state
   const [showRecordingOverlay, setShowRecordingOverlay] = useState(false);
@@ -174,14 +186,6 @@ export function BookStyleReview({
     setShowRecordingOverlay(false);
     setIsInitialRecordingShow(false); // No longer initial show
 
-    // Clear existing transcription if re-recording
-    if (hasExistingRecording) {
-      onTranscriptionChange("");
-      setTempWisdom("");
-      onWisdomChange("");
-      setLessonOptions(null);
-    }
-
     // Start processing
     setAudioProcessingStatus("uploading");
     setTranscriptionStatus("transcribing");
@@ -231,24 +235,38 @@ export function BookStyleReview({
         onAudioChange(result.audio.url, audioBlob);
       }
 
-      // Update transcription
-      onTranscriptionChange(result.transcription.formatted);
       setTranscriptionStatus("complete");
 
-      // Update lessons
-      if (result.transcription.lessons) {
-        setLessonOptions(result.transcription.lessons);
-        // Set default lesson (practical)
-        if (result.transcription.lessons.practical) {
-          onWisdomChange(result.transcription.lessons.practical);
-          setTempWisdom(result.transcription.lessons.practical);
-        }
-      }
+      // Check if there's existing transcription text
+      const hasExistingText = transcription && transcription.trim().length > 0;
+      
+      if (hasExistingText) {
+        // Store the new transcription and show confirmation modal
+        setPendingTranscription(result.transcription.formatted);
+        setPendingLessonOptions(result.transcription.lessons || null);
+        setPendingAudioUrl(result.audio.url);
+        setPendingAudioBlob(audioBlob);
+        setPendingAudioDuration(duration);
+        setShowTranscriptionReplaceConfirm(true);
+      } else {
+        // No existing text, apply transcription directly
+        onTranscriptionChange(result.transcription.formatted);
 
-      toast({
-        title: "Recording processed!",
-        description: "Your memory has been transcribed and enhanced.",
-      });
+        // Update lessons
+        if (result.transcription.lessons) {
+          setLessonOptions(result.transcription.lessons);
+          // Set default lesson (practical)
+          if (result.transcription.lessons.practical) {
+            onWisdomChange(result.transcription.lessons.practical);
+            setTempWisdom(result.transcription.lessons.practical);
+          }
+        }
+
+        toast({
+          title: "Recording processed!",
+          description: "Your memory has been transcribed and enhanced.",
+        });
+      }
     } catch (error) {
       console.error("[BookStyleReview] Processing error:", error);
       setAudioProcessingStatus("error");
@@ -651,12 +669,8 @@ export function BookStyleReview({
                             if (file) {
                               setIsProcessing(true);
 
-                              // Clear existing transcription and wisdom when uploading new audio
-                              onTranscriptionChange("");
-                              onWisdomChange("");
-
                               const audioUrl = URL.createObjectURL(file);
-                              onAudioChange?.(audioUrl, file);
+                              const hasExistingText = transcription && transcription.trim().length > 0;
 
                               // Transcribe the audio
                               const formData = new FormData();
@@ -694,14 +708,28 @@ export function BookStyleReview({
                                 if (response.ok) {
                                   const data = await response.json();
 
-                                  if (data.transcription) {
-                                    onTranscriptionChange(data.transcription);
-                                  }
-                                  // Use practical lesson as default (user can edit later)
-                                  if (data.lessonOptions?.practical) {
-                                    onWisdomChange(
-                                      data.lessonOptions.practical,
-                                    );
+                                  if (hasExistingText && data.transcription) {
+                                    // Store pending data and show confirmation
+                                    setPendingTranscription(data.transcription);
+                                    setPendingLessonOptions(data.lessonOptions || null);
+                                    setPendingAudioUrl(audioUrl);
+                                    setPendingAudioBlob(file);
+                                    setPendingAudioDuration(0); // Duration not available from upload
+                                    onAudioChange?.(audioUrl, file);
+                                    setShowTranscriptionReplaceConfirm(true);
+                                  } else {
+                                    // No existing text or no transcription, apply directly
+                                    onAudioChange?.(audioUrl, file);
+                                    
+                                    if (data.transcription) {
+                                      onTranscriptionChange(data.transcription);
+                                    }
+                                    // Use practical lesson as default (user can edit later)
+                                    if (data.lessonOptions?.practical) {
+                                      onWisdomChange(
+                                        data.lessonOptions.practical,
+                                      );
+                                    }
                                   }
                                 } else {
                                   toast({
@@ -709,6 +737,8 @@ export function BookStyleReview({
                                     description: "Could not transcribe the audio. The audio file will still be saved.",
                                     variant: "destructive",
                                   });
+                                  // Still set the audio even if transcription failed
+                                  onAudioChange?.(audioUrl, file);
                                 }
                               } catch {
                                 toast({
@@ -716,6 +746,8 @@ export function BookStyleReview({
                                   description: "An error occurred while processing the audio. The audio file will still be saved.",
                                   variant: "destructive",
                                 });
+                                // Still set the audio even if error
+                                onAudioChange?.(audioUrl, file);
                               } finally {
                                 setIsProcessing(false);
                               }
@@ -1140,6 +1172,81 @@ export function BookStyleReview({
               Delete
             </Button>
           )}
+        </div>
+      </div>
+
+      {/* Transcription Replacement Confirmation Modal */}
+      <div className={showTranscriptionReplaceConfirm ? "block" : "hidden"}>
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in fade-in slide-in-from-bottom-4 duration-300"
+            style={{
+              boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+            }}
+          >
+            {/* Content */}
+            <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-4">
+              {/* Title */}
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+                Replace Story Text?
+              </h2>
+
+              {/* Message */}
+              <p className="text-lg sm:text-xl text-gray-700 leading-relaxed whitespace-pre-line">
+                You have existing story text. Would you like to replace it with the new transcription from this audio?
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="bg-gray-50 px-6 sm:px-8 py-4 sm:py-5 rounded-b-2xl flex flex-col-reverse sm:flex-row gap-3">
+              <button
+                onClick={() => {
+                  setShowTranscriptionReplaceConfirm(false);
+                  // Keep current text and lesson, audio already set
+                  toast({
+                    title: "Audio updated",
+                    description: "Your audio has been updated. Story text remains unchanged.",
+                  });
+                  // Clear pending data
+                  setPendingTranscription("");
+                  setPendingLessonOptions(null);
+                  setPendingAudioUrl(null);
+                  setPendingAudioBlob(null);
+                }}
+                className="flex-1 bg-white hover:bg-gray-100 text-gray-700 font-semibold px-6 py-3 rounded-xl border-2 border-gray-300 text-base sm:text-lg transition-all"
+              >
+                Keep Current Text
+              </button>
+              <button
+                onClick={() => {
+                  setShowTranscriptionReplaceConfirm(false);
+                  // Apply new transcription, keep old lesson
+                  onTranscriptionChange(pendingTranscription);
+                  
+                  // Note: Keep the old lesson as per user requirement (2a)
+                  // Only update if there was no lesson before
+                  if (!wisdomText && pendingLessonOptions?.practical) {
+                    onWisdomChange(pendingLessonOptions.practical);
+                    setTempWisdom(pendingLessonOptions.practical);
+                  }
+                  
+                  toast({
+                    title: "Story updated!",
+                    description: "Your story has been replaced with the new transcription.",
+                  });
+                  
+                  // Clear pending data
+                  setPendingTranscription("");
+                  setPendingLessonOptions(null);
+                  setPendingAudioUrl(null);
+                  setPendingAudioBlob(null);
+                }}
+                className="flex-1 font-semibold px-6 py-3 rounded-xl text-base sm:text-lg transition-all shadow-md hover:shadow-lg bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
+              >
+                Use New Transcription
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
