@@ -997,6 +997,15 @@ textarea:focus-visible {
     margin-left: 32px;
   }
 
+  /* Mobile: Layer spine ABOVE sticky headers with transparency */
+  @media (max-width: 767px) {
+    .timeline-spine {
+      z-index: 10;
+      opacity: 0.85;
+      mix-blend-mode: multiply;
+    }
+  }
+
   /* Timeline markers will be added as separate elements */
   .timeline-marker {
     position: absolute;

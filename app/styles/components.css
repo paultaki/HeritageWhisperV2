@@ -88,7 +88,7 @@ body {
 .hw-decade-band {
   position: sticky;
   top: calc(env(safe-area-inset-top, 0px) + 52px); /* Mobile: reduced by 19px to close gap with header */
-  z-index: 5;
+  z-index: 5; /* Above cards */
   /* Enhanced glassmorphism effect - very transparent to see spine through */
   background: rgba(250, 248, 245, 0.40);
   backdrop-filter: blur(20px) saturate(180%);
@@ -469,9 +469,9 @@ body {
     box-shadow: 0 3px 8px -2px rgba(0, 0, 0, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
-  /* Decade band edge-to-edge on mobile: px-3 (12px) + .hw-spine (40px) = 52px total */
+  /* Decade band starts from spine on mobile instead of edge-to-edge */
   .hw-decade-band {
-    margin-left: calc(-52px - env(safe-area-inset-left, 0px));
+    margin-left: calc(-22px - env(safe-area-inset-left, 0px)); /* Start from spine position (~30px from edge) */
     box-shadow: 0 3px 8px -2px rgba(0, 0, 0, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
