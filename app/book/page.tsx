@@ -635,11 +635,12 @@ export default function BookV4Page() {
             {currentSpreadIndex > 0 && (
               <button
                 onClick={() => setCurrentSpreadIndex(currentSpreadIndex - 1)}
-                className="group absolute left-0 top-0 bottom-0 w-24 flex items-center justify-start pl-4 opacity-0 hover:opacity-100 transition-opacity duration-300 z-40"
+                className="group absolute top-0 bottom-0 w-24 flex items-center justify-start pl-4 opacity-30 hover:opacity-100 transition-opacity duration-300"
+                style={{ zIndex: 9999, left: '-21px' }}
                 aria-label="Previous page"
               >
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/90 shadow-lg group-hover:bg-white group-hover:scale-110 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-xl border border-neutral-300 group-hover:bg-white group-hover:scale-110 transition-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="m15 18-6-6 6-6"></path>
                   </svg>
                 </div>
@@ -650,11 +651,12 @@ export default function BookV4Page() {
             {currentSpreadIndex < spreads.length - 1 && (
               <button
                 onClick={() => setCurrentSpreadIndex(currentSpreadIndex + 1)}
-                className="group absolute right-0 top-0 bottom-0 w-24 flex items-center justify-end pr-4 opacity-0 hover:opacity-100 transition-opacity duration-300 z-40"
+                className="group absolute top-0 bottom-0 w-24 flex items-center justify-end pr-4 opacity-30 hover:opacity-100 transition-opacity duration-300"
+                style={{ zIndex: 9999, right: '-21px' }}
                 aria-label="Next page"
               >
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/90 shadow-lg group-hover:bg-white group-hover:scale-110 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-xl border border-neutral-300 group-hover:bg-white group-hover:scale-110 transition-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="m9 18 6-6-6-6"></path>
                   </svg>
                 </div>
@@ -1019,17 +1021,7 @@ function MobileView({
   };
 
   return (
-    <div className="lg:hidden w-full" style={{ marginTop: '-10px' }}>
-      {/* Swipe indicator */}
-      <div className="flex items-center justify-center gap-3 pb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="m15 18-6-6 6-6"></path>
-        </svg>
-        <span className="text-sm text-slate-400">Swipe</span>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="m9 18 6-6-6-6"></path>
-        </svg>
-      </div>
+    <div className="lg:hidden w-full" style={{ marginTop: '-30px' }}>
       <div className="relative w-full" style={{ height: 'calc(100vh - 180px)' }}>
         {/* Mobile prev/next controls */}
         <button 
@@ -1446,7 +1438,11 @@ function MobilePage({
   // Intro page
   if (page.type === 'intro') {
     return (
-      <div className="mobile-page relative mx-auto w-[min(90vw,600px)] aspect-[55/85] [perspective:1600px]" style={{ maxHeight: '85%' }}>
+      <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
+        width: "min(95vw, calc((100vh - 160px) * 0.647))",
+        aspectRatio: "5.5 / 8.5",
+        maxWidth: "800px"
+      }}>
         <div 
           aria-hidden="true" 
           className="pointer-events-none absolute rounded-[24px]" 
@@ -1476,7 +1472,11 @@ function MobilePage({
   // TOC page
   if (page.type === 'toc') {
     return (
-      <div className="mobile-page relative mx-auto w-[min(90vw,600px)] aspect-[55/85] [perspective:1600px]" style={{ maxHeight: '85%' }}>
+      <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
+        width: "min(95vw, calc((100vh - 160px) * 0.647))",
+        aspectRatio: "5.5 / 8.5",
+        maxWidth: "800px"
+      }}>
         <div 
           aria-hidden="true" 
           className="pointer-events-none absolute rounded-[24px]" 
@@ -1520,7 +1520,11 @@ function MobilePage({
   if (!story) return null;
   
   return (
-    <div className="mobile-page relative mx-auto w-[min(90vw,600px)] aspect-[55/85] [perspective:1600px]" style={{ maxHeight: '85%' }}>
+    <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
+      width: "min(95vw, calc((100vh - 160px) * 0.647))",
+      aspectRatio: "5.5 / 8.5",
+      maxWidth: "800px"
+    }}>
       {/* Outer book cover/border */}
       <div 
         aria-hidden="true" 
