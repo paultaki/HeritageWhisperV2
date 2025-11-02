@@ -22,8 +22,10 @@
 
 # misc
 .DS_Store
+**/.DS_Store
 *.pem
 .mcp.json
+*.tsbuildinfo
 
 # debug
 npm-debug.log*

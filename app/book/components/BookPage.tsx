@@ -717,7 +717,7 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
         // Find the hero photo, or use the first photo as fallback
         const heroPhoto = story.photos.find(p => p.isHero) || story.photos[0];
         return (
-          <div className="mb-4">
+          <div className="mb-2">
             <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
               <img
                 src={heroPhoto.url}
@@ -735,12 +735,12 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
       })()}
 
       {/* Title */}
-      <h2 className="text-2xl tracking-tight font-semibold mb-3 text-neutral-900">
+      <h2 className="text-2xl tracking-tight font-semibold mb-2 text-neutral-900">
         {story.title}
       </h2>
 
       {/* Age and year */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between">
         <div className="text-xl text-neutral-600 font-medium">
           {story.lifeAge !== undefined && `Age ${story.lifeAge} • `}
           {story.storyYear}
@@ -749,7 +749,7 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
 
       {/* Audio Player */}
       {story.audioUrl && (
-        <div className="mb-4 relative" style={{ zIndex: 9999 }}>
+        <div className="mb-2 relative" style={{ zIndex: 9999 }}>
           <div className="flex items-center gap-3">
             {/* Circular play button with progress ring */}
             <button
@@ -841,7 +841,7 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
 
       {story.wisdomClipText && (
         <div 
-          className="mt-8 mb-4 p-6 clear-both relative"
+          className="mt-6 mb-4 p-6 clear-both relative"
           style={{
             background: 'linear-gradient(135deg, #fef9e7 0%, #faf3dd 100%)',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)',

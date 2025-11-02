@@ -27,6 +27,7 @@ export function VoiceRecordingButton({
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Format time as MM:SS
   const formatTime = (seconds: number): string => {
@@ -98,12 +99,15 @@ export function VoiceRecordingButton({
       setCountdown(3);
 
       let count = 3;
-      const countdownInterval = setInterval(() => {
+      countdownIntervalRef.current = setInterval(() => {
         count--;
         if (count > 0) {
           setCountdown(count);
         } else {
-          clearInterval(countdownInterval);
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+          }
           setShowCountdown(false);
           setCountdown(0);
           // Use setTimeout to avoid calling setState during render
@@ -112,6 +116,15 @@ export function VoiceRecordingButton({
       }, 500); // 0.5s per count = 1.5s total
     }
   };
+
+  // Cleanup countdown interval on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, []);
 
   // Voice level circular gradient fill
   const CircularGradientFill = () => {

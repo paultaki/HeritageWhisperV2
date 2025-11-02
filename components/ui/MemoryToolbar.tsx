@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 
+type FilterMode = "all" | "favorites" | "timeline" | "book" | "undated" | "private";
+
 type Props = {
   stats: { label: string; value: number }[];
   view: "grid" | "list";
@@ -9,23 +11,23 @@ type Props = {
   setFilter: (s: string) => void;
   sort: string;
   setSort: (s: string) => void;
-  filterMode?: string;
-  setFilterMode?: (mode: string) => void;
+  filterMode?: FilterMode;
+  setFilterMode?: (mode: FilterMode) => void;
 };
 
-export default function MemoryToolbar(p: Props) {
-  const handleChipClick = (chipName: string) => {
+export default function MemoryToolbar(props: Props) {
+  const handleChipClick = (chipName: FilterMode) => {
     // Toggle: if already active, deactivate it; otherwise activate it
-    const newMode = p.filterMode === chipName ? "all" : chipName;
-    if (p.setFilterMode) {
-      p.setFilterMode(newMode);
+    const newMode = props.filterMode === chipName ? "all" : chipName;
+    if (props.setFilterMode) {
+      props.setFilterMode(newMode);
     }
   };
 
   return (
     <header className="hw-toolbar">
       <div className="hw-kpi-row">
-        {p.stats.map((s) => (
+        {props.stats.map((s) => (
           <div key={s.label} className="hw-kpi">
             <div className="n">{s.value}</div>
             <div className="l">{s.label}</div>
@@ -36,37 +38,37 @@ export default function MemoryToolbar(p: Props) {
       <div className="hw-toolbar-row">
         <div className="hw-chip-grid">
           <button
-            className={`hw-chip selectable ${p.filterMode === "all" || !p.filterMode ? "active" : ""}`}
+            className={`hw-chip selectable ${props.filterMode === "all" || !props.filterMode ? "active" : ""}`}
             onClick={() => handleChipClick("all")}
           >
             All
           </button>
           <button
-            className={`hw-chip selectable ${p.filterMode === "favorites" ? "active" : ""}`}
+            className={`hw-chip selectable ${props.filterMode === "favorites" ? "active" : ""}`}
             onClick={() => handleChipClick("favorites")}
           >
             ⭐ Favorites
           </button>
           <button
-            className={`hw-chip selectable ${p.filterMode === "timeline" ? "active" : ""}`}
+            className={`hw-chip selectable ${props.filterMode === "timeline" ? "active" : ""}`}
             onClick={() => handleChipClick("timeline")}
           >
             Timeline
           </button>
           <button
-            className={`hw-chip selectable ${p.filterMode === "book" ? "active" : ""}`}
+            className={`hw-chip selectable ${props.filterMode === "book" ? "active" : ""}`}
             onClick={() => handleChipClick("book")}
           >
             Book
           </button>
           <button
-            className={`hw-chip selectable ${p.filterMode === "undated" ? "active" : ""}`}
+            className={`hw-chip selectable ${props.filterMode === "undated" ? "active" : ""}`}
             onClick={() => handleChipClick("undated")}
           >
             No date
           </button>
           <button
-            className={`hw-chip selectable warn ${p.filterMode === "private" ? "active" : ""}`}
+            className={`hw-chip selectable warn ${props.filterMode === "private" ? "active" : ""}`}
             onClick={() => handleChipClick("private")}
           >
             Private
@@ -77,14 +79,14 @@ export default function MemoryToolbar(p: Props) {
           <input
             className="hw-search"
             placeholder="Search"
-            value={p.filter}
-            onChange={(e) => p.setFilter(e.target.value)}
+            value={props.filter}
+            onChange={(e) => props.setFilter(e.target.value)}
             suppressHydrationWarning
           />
           <select
             className="hw-select"
-            value={p.sort}
-            onChange={(e) => p.setSort(e.target.value)}
+            value={props.sort}
+            onChange={(e) => props.setSort(e.target.value)}
             suppressHydrationWarning
           >
             <option value="year-newest">By Year: Newest → Oldest</option>
@@ -98,15 +100,15 @@ export default function MemoryToolbar(p: Props) {
           </select>
           <div className="hw-toggle">
             <button
-              className={p.view === "grid" ? "on" : ""}
-              onClick={() => p.setView("grid")}
+              className={props.view === "grid" ? "on" : ""}
+              onClick={() => props.setView("grid")}
               suppressHydrationWarning
             >
               Grid
             </button>
             <button
-              className={p.view === "list" ? "on" : ""}
-              onClick={() => p.setView("list")}
+              className={props.view === "list" ? "on" : ""}
+              onClick={() => props.setView("list")}
               suppressHydrationWarning
             >
               List

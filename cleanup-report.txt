@@ -1,0 +1,40 @@
+# Cleanup Report - Moderate Option
+# Date: 2025-11-02
+# Option: Conservative + Landing Pages + Duplicates
+
+## Files to be removed:
+
+### Backup Files
+.env.backup
+app/page_OLD_BACKUP.tsx
+app/timeline/page.backup-pre-v2.tsx
+app/timeline/page.backup.tsx
+lib/tier3Analysis.backup.ts
+T&C_COMPARISON_OLD_VS_NEW.md
+
+### Temp Files
+temp book.html
+temp/
+
+### System Files
+All .DS_Store files (18 total)
+tsconfig.build.tsbuildinfo
+tsconfig.tsbuildinfo
+
+### Duplicate Files
+app/globals 2.css
+lib/_archive/promptGeneration copy.ts
+app/api/prompts/next/backup/route copy.ts
+app/api/prompts/skip/backup/route copy.ts
+
+### Landing Page Versions
+app/landing-archive/
+app/landing-v2/
+app/landing-v3/
+app/landing-v4/
+app/landing-v5/
+
+## Estimated space savings: ~300 KB
+
+## Backup location: This file serves as a record
+## Can be restored from git history if needed
