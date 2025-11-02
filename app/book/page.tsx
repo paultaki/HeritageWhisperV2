@@ -1453,9 +1453,12 @@ function MobilePage({
   if (page.type === 'intro') {
     return (
       <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
-        width: "min(100vw, calc((100dvh - 80px) * 0.647))",
+        width: "100%",
+        height: "100%",
+        maxWidth: "calc(100vw + 20px)",
+        maxHeight: "calc(100dvh - 90px)",
         aspectRatio: "5.5 / 8.5",
-        maxWidth: "100vw"
+        objectFit: "contain"
       }}>
         <div 
           aria-hidden="true" 
@@ -1487,9 +1490,12 @@ function MobilePage({
   if (page.type === 'toc') {
     return (
       <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
-        width: "min(100vw, calc((100dvh - 80px) * 0.647))",
+        width: "100%",
+        height: "100%",
+        maxWidth: "calc(100vw + 20px)",
+        maxHeight: "calc(100dvh - 90px)",
         aspectRatio: "5.5 / 8.5",
-        maxWidth: "100vw"
+        objectFit: "contain"
       }}>
         <div 
           aria-hidden="true" 
@@ -1535,9 +1541,12 @@ function MobilePage({
   
   return (
     <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
-      width: "min(100vw, calc((100dvh - 80px) * 0.647))",
+      width: "100%",
+      height: "100%",
+      maxWidth: "calc(100vw + 20px)",
+      maxHeight: "calc(100dvh - 64px)",
       aspectRatio: "5.5 / 8.5",
-      maxWidth: "100vw"
+      objectFit: "contain"
     }}>
       {/* Outer book cover/border */}
       <div 
