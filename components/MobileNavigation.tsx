@@ -92,12 +92,14 @@ export default function MobileNavigation() {
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", damping: 20 }}
-      className={`md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-md border-t-2 ${
+      className={`md:hidden fixed bottom-0 left-0 right-0 backdrop-blur-md border-t-2 ${
         isBookPage ? "bg-[#0b0d12]/95" : "bg-white/95"
       }`}
       style={{
         borderTopColor: isBookPage ? "rgba(255, 255, 255, 0.1)" : "#8b6b7a",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        zIndex: 9999,
+        position: 'fixed',
         boxShadow: "0 -2px 6px rgba(0, 0, 0, 0.04)",
         marginBottom: 0,
       }}

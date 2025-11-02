@@ -983,21 +983,35 @@ function MobileView({
   sortedStories: Story[];
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const isProgrammaticScroll = useRef(false);
 
   // Scroll to current page when it changes
   useEffect(() => {
     if (scrollerRef.current) {
       const pageWidth = scrollerRef.current.clientWidth;
-      scrollerRef.current.scrollTo({
-        left: currentPage * pageWidth,
-        behavior: 'smooth'
+      isProgrammaticScroll.current = true;
+      
+      // Use requestAnimationFrame to ensure scroll happens after render
+      requestAnimationFrame(() => {
+        if (scrollerRef.current) {
+          scrollerRef.current.scrollTo({
+            left: currentPage * pageWidth,
+            behavior: 'smooth'
+          });
+          
+          // Reset flag after scroll completes
+          setTimeout(() => {
+            isProgrammaticScroll.current = false;
+          }, 500);
+        }
       });
     }
   }, [currentPage]);
 
   // Detect page change from scroll (throttled for performance)
   const handleScroll = useCallback(() => {
-    if (!scrollerRef.current) return;
+    // Ignore scroll events triggered by programmatic scrolling
+    if (isProgrammaticScroll.current || !scrollerRef.current) return;
     
     const pageWidth = scrollerRef.current.clientWidth;
     const scrollLeft = scrollerRef.current.scrollLeft;
@@ -1021,8 +1035,8 @@ function MobileView({
   };
 
   return (
-    <div className="lg:hidden w-full" style={{ marginTop: '-20px' }}>
-      <div className="relative w-full" style={{ height: 'calc(100vh - 140px)' }}>
+    <div className="lg:hidden w-full" style={{ marginTop: '-10px' }}>
+      <div className="relative w-full" style={{ height: 'calc(100vh - 90px)' }}>
         {/* Mobile prev/next controls */}
         <button 
           onClick={handlePrev}
@@ -1051,7 +1065,7 @@ function MobileView({
           className="h-full w-full flex items-start md:items-center justify-center overflow-x-scroll hide-scrollbar -mt-[26px] md:mt-0"
           style={{ 
             scrollSnapType: 'x mandatory',
-            scrollSnapStop: 'normal',
+            scrollSnapStop: 'always',
             WebkitOverflowScrolling: 'touch',
             scrollBehavior: 'smooth',
             overscrollBehaviorX: 'contain'
@@ -1439,7 +1453,7 @@ function MobilePage({
   if (page.type === 'intro') {
     return (
       <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
-        width: "min(95vw, calc((100vh - 120px) * 0.647))",
+        width: "min(98vw, calc((100vh - 70px) * 0.647))",
         aspectRatio: "5.5 / 8.5",
         maxWidth: "800px"
       }}>
@@ -1447,13 +1461,13 @@ function MobilePage({
           aria-hidden="true" 
           className="pointer-events-none absolute rounded-[24px]" 
           style={{ 
-            inset: "-16px", 
+            inset: "-10px", 
             background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
             boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
           }}
         ></div>
         <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
-          <div className="relative h-full w-full p-6 flex items-center justify-center">
+          <div className="relative h-full w-full p-4 flex items-center justify-center">
             <div className="text-center space-y-6">
               <h1 className="text-4xl font-serif text-gray-800" style={{ fontFamily: "Crimson Text, serif" }}>
                 Family Memories
@@ -1473,7 +1487,7 @@ function MobilePage({
   if (page.type === 'toc') {
     return (
       <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
-        width: "min(95vw, calc((100vh - 120px) * 0.647))",
+        width: "min(98vw, calc((100vh - 70px) * 0.647))",
         aspectRatio: "5.5 / 8.5",
         maxWidth: "800px"
       }}>
@@ -1481,13 +1495,13 @@ function MobilePage({
           aria-hidden="true" 
           className="pointer-events-none absolute rounded-[24px]" 
           style={{ 
-            inset: "-16px", 
+            inset: "-10px", 
             background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
             boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
           }}
         ></div>
         <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
-          <div className="relative h-full w-full p-6">
+          <div className="relative h-full w-full p-4">
             <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden">
               <div className="h-full w-full rounded-[12px] text-neutral-900 outline-none p-5 overflow-y-auto">
                 <h1 className="text-3xl font-serif text-center mb-6 text-gray-800">
@@ -1521,7 +1535,7 @@ function MobilePage({
   
   return (
     <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
-      width: "min(95vw, calc((100vh - 120px) * 0.647))",
+      width: "min(98vw, calc((100vh - 90px) * 0.647))",
       aspectRatio: "5.5 / 8.5",
       maxWidth: "800px"
     }}>
@@ -1530,7 +1544,7 @@ function MobilePage({
         aria-hidden="true" 
         className="pointer-events-none absolute rounded-[24px]" 
         style={{ 
-          inset: "-16px", 
+          inset: "-10px", 
           background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
           boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
         }}
@@ -1556,7 +1570,7 @@ function MobilePage({
           }}
         ></div>
 
-        <div className="relative h-full w-full p-6">
+        <div className="relative h-full w-full p-4">
           <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden">
             <div 
               ref={scrollRef}
