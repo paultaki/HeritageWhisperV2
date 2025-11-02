@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,8 +12,6 @@ import {
   Mic,
   Image as ImageIcon,
   Lightbulb,
-  ArrowUp,
-  ArrowDown,
   Trophy,
   Crown,
   Medal,

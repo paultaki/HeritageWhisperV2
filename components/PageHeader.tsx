@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { type ReactElement } from "react";
 import Image from "next/image";
 import { type LucideIcon } from "lucide-react";
 import { AccountSwitcher } from "./AccountSwitcher";
@@ -52,7 +52,7 @@ export function DesktopPageHeader({
   subtitle,
   showAccountSwitcher = false,
   rightContent,
-}: PageHeaderProps): JSX.Element {
+}: PageHeaderProps): ReactElement {
   const { isOwnAccount } = useAccountContext();
   
   return (
@@ -136,7 +136,7 @@ export function MobilePageHeader({
   subtitle,
   leftContent,
   rightContent,
-}: Omit<PageHeaderProps, 'showAccountSwitcher'>): JSX.Element {
+}: Omit<PageHeaderProps, 'showAccountSwitcher'>): ReactElement {
   return (
     <header
       className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b"

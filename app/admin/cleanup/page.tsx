@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState } from "react";
@@ -117,7 +116,7 @@ export default function CleanupPage() {
                 🚨 Emergency: Delete Broken Prompts
               </h3>
               <p className="text-sm text-red-800 mb-3">
-                Remove prompts with grammar errors like "impress the said", "the told", etc.
+                Remove prompts with grammar errors like &quot;impress the said&quot;, &quot;the told&quot;, etc.
                 These are BUGS, not quality issues.
               </p>
               <Button
@@ -268,7 +267,7 @@ export default function CleanupPage() {
                           className="p-3 bg-green-50 border border-green-200 rounded-lg"
                         >
                           <p className="text-sm mb-2 text-gray-800 italic">
-                            "{prompt.text}"
+                            &quot;{prompt.text}&quot;
                           </p>
                           <div className="flex items-center justify-end text-xs">
                             <span className="text-green-700 font-medium">
@@ -295,7 +294,7 @@ export default function CleanupPage() {
                         className="p-3 bg-red-50 border border-red-200 rounded-lg"
                       >
                         <p className="text-sm mb-2 text-gray-800 italic">
-                          "{issue.text}"
+                          &quot;{issue.text}&quot;
                         </p>
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-red-700 font-medium">
@@ -336,7 +335,7 @@ export default function CleanupPage() {
                 <div>
                   <span className="font-medium">Too Generic:</span>{' '}
                   <span className="text-gray-600">
-                    "Tell me more", "What else", "How did that make you feel"
+                    &quot;Tell me more&quot;, &quot;What else&quot;, &quot;How did that make you feel&quot;
                   </span>
                 </div>
               </div>
@@ -354,7 +353,7 @@ export default function CleanupPage() {
                 <div>
                   <span className="font-medium">Lacks Specificity:</span>{' '}
                   <span className="text-gray-600">
-                    No references to user's actual stories
+                    No references to user&apos;s actual stories
                   </span>
                 </div>
               </div>
@@ -364,7 +363,7 @@ export default function CleanupPage() {
                 <div>
                   <span className="font-medium">Psychology Jargon:</span>{' '}
                   <span className="text-gray-600">
-                    "journey", "growth", "resilience", "shaped you"
+                    &quot;journey&quot;, &quot;growth&quot;, &quot;resilience&quot;, &quot;shaped you&quot;
                   </span>
                 </div>
               </div>
@@ -374,7 +373,7 @@ export default function CleanupPage() {
                 <div>
                   <span className="font-medium">Yes/No Questions:</span>{' '}
                   <span className="text-gray-600">
-                    "Did you...", "Was it...", "Were you..."
+                    &quot;Did you...&quot;, &quot;Was it...&quot;, &quot;Were you...&quot;
                   </span>
                 </div>
               </div>

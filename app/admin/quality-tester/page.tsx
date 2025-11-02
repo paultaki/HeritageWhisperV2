@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState } from "react";
@@ -125,7 +124,7 @@ export default function QualityTesterPage() {
                     {example.label}
                   </div>
                   <div className="text-xs text-gray-500 italic line-clamp-2">
-                    "{example.text}"
+                    &quot;{example.text}&quot;
                   </div>
                 </button>
               ))}

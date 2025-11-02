@@ -679,16 +679,16 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
   return (
     <>
       {/* Edit and Timeline buttons */}
-      <div className={`flex gap-2 mb-1.5 ${position === "right" ? "justify-end" : ""}`}>
+      <div className={`flex gap-2 mb-1.5 -mt-5 ${position === "right" ? "justify-end" : ""}`}>
         <button
           onClick={() =>
             router.push(
               `/review/book-style?id=${story.id}&returnPath=${encodeURIComponent(`/book?page=${pageNum}`)}`,
             )
           }
-          className="flex items-center gap-1.5 px-3 py-0.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-lg font-medium text-gray-700"
+          className="flex items-center gap-1.5 px-2.5 py-0 min-h-[34px] rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-base font-medium text-gray-700"
         >
-          <Pencil className="w-4.5 h-4.5" />
+          <Pencil className="w-4 h-4" />
           <span>Edit</span>
         </button>
         <button
@@ -705,9 +705,9 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
             // Navigate to timeline
             router.push('/timeline');
           }}
-          className="flex items-center gap-1.5 px-3 py-0.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-lg font-medium text-gray-700"
+          className="flex items-center gap-1.5 px-2.5 py-0 min-h-[34px] rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-base font-medium text-gray-700"
         >
-          <Clock className="w-4.5 h-4.5" />
+          <Clock className="w-4 h-4" />
           <span>Timeline</span>
         </button>
       </div>

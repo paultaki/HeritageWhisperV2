@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -746,7 +745,7 @@ export default function NorthStarPage() {
 
             <div className="ns-mission-box">
               <p className="ns-mission-text">
-                We capture wisdom before it's gone. Every story becomes a lesson your family can replay forever.
+                We capture wisdom before it&apos;s gone. Every story becomes a lesson your family can replay forever.
               </p>
             </div>
 
@@ -756,7 +755,7 @@ export default function NorthStarPage() {
                 <p className="ns-card-content">
                   HeritageWhisper captures wisdom, not just memories. Press record, tell a 2-minute story, and our story
                   system asks one meaningful follow-up to extract the lesson learned. Every insight lives in the
-                  cloud—accessible on every family member's phone, growing with each recording, never gathering dust on a
+                  cloud—accessible on every family member&apos;s phone, growing with each recording, never gathering dust on a
                   shelf.
                 </p>
               </div>
@@ -772,7 +771,7 @@ export default function NorthStarPage() {
                 <h3 className="ns-card-title">Target Audience</h3>
                 <div className="ns-card-content">
                   <p>
-                    <strong>Buyer:</strong> Adult child (30-55) who wants an easy, respectful way to capture a parent's
+                    <strong>Buyer:</strong> Adult child (30-55) who wants an easy, respectful way to capture a parent&apos;s
                     stories
                   </p>
                   <p style={{ marginTop: '12px' }}>
@@ -892,14 +891,14 @@ export default function NorthStarPage() {
                   </div>
                   <div className="ns-message-item">
                     <div className="ns-message-label">Solution Statement:</div>
-                    <div className="ns-message-text">Living digital stories accessible in everyone's pocket</div>
+                    <div className="ns-message-text">Living digital stories accessible in everyone&apos;s pocket</div>
                   </div>
                   <div className="ns-message-item">
                     <div className="ns-message-label">Marketing Copy:</div>
                     <div className="ns-message-text">
-                      "The memoir book nobody will read vs. the living story everyone hears. HeritageWhisper delivers
+                      &quot;The memoir book nobody will read vs. the living story everyone hears. HeritageWhisper delivers
                       stories where your family already is—on their phones—with updates every time you share something
-                      new."
+                      new.&quot;
                     </div>
                   </div>
                   <div className="ns-message-item">

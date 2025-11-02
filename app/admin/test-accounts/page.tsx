@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { 
   Loader2, 
   Copy,
-  Target,
   Trash2,
   RefreshCw,
   Sparkles,
@@ -267,8 +265,8 @@ export default function TestAccountsPage() {
             </Button>
 
             <p className="text-sm text-gray-500">
-              This creates a complete copy of your account with all {user?.story_count || 0} stories and photos. 
-              Prompts are NOT copied (you'll generate them fresh for testing).
+              This creates a complete copy of your account with all {user?.storyCount || 0} stories and photos. 
+              Prompts are NOT copied (you&apos;ll generate them fresh for testing).
             </p>
           </CardContent>
         </Card>
