@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { Volume2, Pause, Loader2 } from "lucide-react";
+import { Volume2, Pause, Loader2, Clock3, Pencil } from "lucide-react";
 import { BookPage } from "./components/BookPage";
 import DarkBookProgressBar from "./components/DarkBookProgressBar";
 import { BookPage as BookPageType } from "@/lib/bookPagination";
@@ -451,11 +451,27 @@ export default function BookV4Page() {
                 </div>
                 <div>
                   <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
-                    {user?.name ? `${user.name}'s Story` : "Your Story"}
+                    {user?.name ? `${user.name.split(' ')[0]}'s Story` : "Your Story"}
                   </h1>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 mr-10">
+                {/* Mobile: Show icons only, Desktop: Show full buttons */}
+                <button
+                  onClick={() => router.push("/timeline")}
+                  className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                  aria-label="Timeline"
+                >
+                  <Clock3 className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => router.push("/timeline")}
+                  className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                  aria-label="Edit"
+                >
+                  <Pencil className="w-5 h-5" />
+                </button>
+                {/* Desktop: Original button */}
                 <button
                   onClick={() => router.push("/timeline")}
                   className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium mr-[70px]"
@@ -505,10 +521,26 @@ export default function BookV4Page() {
                 />
               </div>
               <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
-                {user?.name ? `${user.name}'s Story` : "Your Story"}
+                {user?.name ? `${user.name.split(' ')[0]}'s Story` : "Your Story"}
               </h1>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 mr-10">
+              {/* Mobile: Show icons only, Desktop: Show full button */}
+              <button
+                onClick={() => router.push("/timeline")}
+                className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                aria-label="Timeline"
+              >
+                <Clock3 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => router.push("/timeline")}
+                className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                aria-label="Edit"
+              >
+                <Pencil className="w-5 h-5" />
+              </button>
+              {/* Desktop: Original button */}
               <button
                 onClick={() => router.push("/timeline")}
                 className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
@@ -1068,7 +1100,8 @@ function MobileView({
             scrollSnapStop: 'always',
             WebkitOverflowScrolling: 'touch',
             scrollBehavior: 'smooth',
-            overscrollBehaviorX: 'contain'
+            overscrollBehaviorX: 'contain',
+            touchAction: 'pan-x'
           }}
         >
           {allPages.map((page, index) => (
@@ -1081,7 +1114,8 @@ function MobileView({
                 height: '100%',
                 padding: '0',
                 scrollSnapAlign: 'center',
-                scrollSnapStop: 'always'
+                scrollSnapStop: 'always',
+                touchAction: 'pan-x'
               }}
             >
               <MobilePage page={page} pageNum={index + 1} allStories={sortedStories} />
@@ -1458,7 +1492,8 @@ function MobilePage({
         maxWidth: "calc(100vw + 20px)",
         maxHeight: "calc(100dvh - 100px)",
         aspectRatio: "5.5 / 8.5",
-        objectFit: "contain"
+        objectFit: "contain",
+        touchAction: 'pan-x'
       }}>
         <div 
           aria-hidden="true" 
@@ -1495,7 +1530,8 @@ function MobilePage({
         maxWidth: "calc(100vw + 20px)",
         maxHeight: "calc(100dvh - 100px)",
         aspectRatio: "5.5 / 8.5",
-        objectFit: "contain"
+        objectFit: "contain",
+        touchAction: 'pan-x'
       }}>
         <div 
           aria-hidden="true" 
@@ -1546,7 +1582,8 @@ function MobilePage({
       maxWidth: "calc(100vw + 20px)",
       maxHeight: "calc(100dvh - 100px)",
       aspectRatio: "5.5 / 8.5",
-      objectFit: "contain"
+      objectFit: "contain",
+      touchAction: 'pan-x'
     }}>
       {/* Outer book cover/border */}
       <div 
@@ -1584,6 +1621,7 @@ function MobilePage({
             <div 
               ref={scrollRef}
               className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-3 overflow-y-auto"
+              style={{ touchAction: 'pan-y pan-x' }}
               onScroll={() => {
                 if (scrollRef.current && scrollRef.current.scrollTop > 50) {
                   setShowScrollIndicator(false);

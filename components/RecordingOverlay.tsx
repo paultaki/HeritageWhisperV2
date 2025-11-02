@@ -241,7 +241,7 @@ export function RecordingOverlay({
             "relative rounded-3xl border border-[#E8DDD3]",
             "bg-gradient-to-b from-[#FAF8F6]/95 to-[#F5EDE4]/95",
             "backdrop-blur-xl shadow-2xl",
-            "min-h-[70vh] md:h-[75vh] flex flex-col",
+            "min-h-[calc(70vh-60px)] md:h-[calc(75vh-60px)] flex flex-col",
             "overflow-hidden"
           )}
         >
@@ -262,7 +262,7 @@ export function RecordingOverlay({
           </div>
 
           {/* Recording Area */}
-          <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 space-y-6 md:space-y-8 overflow-y-auto">
+          <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 space-y-3 md:space-y-4 overflow-y-auto">
             {/* Hidden AudioRecorder for actual recording logic */}
             <div className="hidden">
               <AudioRecorder
@@ -307,7 +307,7 @@ export function RecordingOverlay({
 
             {/* Max time indicator */}
             {isRecording && (
-              <p className="text-sm text-[#8B7355] text-center">
+              <p className="text-sm text-[#8B7355] text-center -mt-2">
                 Maximum: 2:00
               </p>
             )}
@@ -321,12 +321,12 @@ export function RecordingOverlay({
 
             {/* Recording Instructions or Status - Centered */}
             {isRecording && !countdown ? (
-              <div className="flex items-center gap-2 text-[#4A3428] text-center">
+              <div className="flex items-center gap-2 text-[#4A3428] text-center -mt-1">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
                 <p className="text-lg font-medium">Recording</p>
               </div>
             ) : !isRecording && !hasRecording && !countdown ? (
-              <p className="text-[#8B7355] text-center max-w-md px-4">
+              <p className="text-[#8B7355] text-center max-w-md px-4 -mt-2">
                 Press the record button to start capturing your memory. Take your time
                 and speak naturally.
               </p>
@@ -334,7 +334,7 @@ export function RecordingOverlay({
           </div>
 
           {/* Action Buttons - Fixed at bottom, safe area aware */}
-          <div className="p-4 md:p-6 border-t border-[#E8DDD3]/50 space-y-3 pb-safe">
+          <div className="p-3 md:p-4 border-t border-[#E8DDD3]/50 space-y-3 pb-safe">
             {hasRecording ? (
               <div className="flex gap-3">
                 <Button

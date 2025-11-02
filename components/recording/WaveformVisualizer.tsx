@@ -53,7 +53,7 @@ export function WaveformVisualizer({
   return (
     <div className={`relative w-full ${className}`}>
       {/* Input label and Live indicator */}
-      <div className="mb-3 flex items-center justify-between text-[13px] text-[#99898C]">
+      <div className="mb-2 flex items-center justify-between text-[13px] text-[#99898C]">
         <div>Input: Internal Mic</div>
         <div className="inline-flex items-center gap-2">
           <span className="inline-flex h-2.5 w-2.5 items-center justify-center">

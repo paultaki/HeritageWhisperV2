@@ -107,23 +107,25 @@ export default function MobileNavigation() {
       <div
         className="flex items-center justify-center relative"
         style={{
-          gap: 'clamp(55px, 9vw, 125px)',
+          gap: 'clamp(27px, 6vw, 85px)',
           paddingLeft: 12,
           paddingRight: 12,
           width: '100%',
           height: '37px',
         }}
       >
-        {/* Timeline */}
-        <NavItem
-          icon={Clock3}
-          label="Timeline"
-          href="/timeline"
-          isActive={pathname === "/timeline"}
-          isDarkMode={isBookPage}
-        />
+        {/* Timeline - moved right 45px from edge */}
+        <div style={{ marginLeft: '45px' }}>
+          <NavItem
+            icon={Clock3}
+            label="Timeline"
+            href="/timeline"
+            isActive={pathname === "/timeline"}
+            isDarkMode={isBookPage}
+          />
+        </div>
 
-        {/* Book */}
+        {/* Book - evenly spaced */}
         <NavItem
           icon={BookOpen}
           label="Book"
@@ -132,7 +134,7 @@ export default function MobileNavigation() {
           isDarkMode={isBookPage}
         />
 
-        {/* Ideas */}
+        {/* Ideas - evenly spaced */}
         <NavItem
           icon={Lightbulb}
           label="Ideas"
@@ -141,14 +143,16 @@ export default function MobileNavigation() {
           isDarkMode={isBookPage}
         />
 
-        {/* Profile */}
-        <NavItem
-          icon={User}
-          label="Profile"
-          href="/profile"
-          isActive={pathname === "/profile"}
-          isDarkMode={isBookPage}
-        />
+        {/* Profile - moved left 45px from edge */}
+        <div style={{ marginRight: '45px' }}>
+          <NavItem
+            icon={User}
+            label="Profile"
+            href="/profile"
+            isActive={pathname === "/profile"}
+            isDarkMode={isBookPage}
+          />
+        </div>
       </div>
     </motion.nav>
   );
