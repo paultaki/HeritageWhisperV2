@@ -1021,8 +1021,8 @@ function MobileView({
   };
 
   return (
-    <div className="lg:hidden w-full" style={{ marginTop: '-30px' }}>
-      <div className="relative w-full" style={{ height: 'calc(100vh - 180px)' }}>
+    <div className="lg:hidden w-full" style={{ marginTop: '-20px' }}>
+      <div className="relative w-full" style={{ height: 'calc(100vh - 140px)' }}>
         {/* Mobile prev/next controls */}
         <button 
           onClick={handlePrev}
@@ -1439,7 +1439,7 @@ function MobilePage({
   if (page.type === 'intro') {
     return (
       <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
-        width: "min(95vw, calc((100vh - 160px) * 0.647))",
+        width: "min(95vw, calc((100vh - 120px) * 0.647))",
         aspectRatio: "5.5 / 8.5",
         maxWidth: "800px"
       }}>
@@ -1473,7 +1473,7 @@ function MobilePage({
   if (page.type === 'toc') {
     return (
       <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
-        width: "min(95vw, calc((100vh - 160px) * 0.647))",
+        width: "min(95vw, calc((100vh - 120px) * 0.647))",
         aspectRatio: "5.5 / 8.5",
         maxWidth: "800px"
       }}>
@@ -1521,7 +1521,7 @@ function MobilePage({
   
   return (
     <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
-      width: "min(95vw, calc((100vh - 160px) * 0.647))",
+      width: "min(95vw, calc((100vh - 120px) * 0.647))",
       aspectRatio: "5.5 / 8.5",
       maxWidth: "800px"
     }}>
