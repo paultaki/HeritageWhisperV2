@@ -1219,18 +1219,15 @@ function MobileAudioPlayer({ story }: { story: Story }) {
   useEffect(() => {
     if (!story.audioUrl) return;
     if (audioRef.current) {
-      console.log(`Mobile audio already initialized for ${story.title}`);
       return;
     }
     
-    console.log(`Initializing mobile audio for ${story.title}, URL:`, story.audioUrl);
     const audio = new Audio(story.audioUrl);
     audio.preload = 'auto';
     audioRef.current = audio;
     
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
-      console.log(`Mobile audio loaded for ${story.title}, duration:`, audio.duration);
     };
     
     const handleTimeUpdate = () => {
@@ -1276,6 +1273,8 @@ function MobileAudioPlayer({ story }: { story: Story }) {
       audio.src = '';
       audioRef.current = null;
     };
+    // Only re-run when story.id changes, not when other story properties change.
+    // This prevents recreating the audio element unnecessarily which would cause playback issues.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [story.id]);
   
@@ -1298,10 +1297,8 @@ function MobileAudioPlayer({ story }: { story: Story }) {
         setIsLoading(true);
         await audioRef.current.play();
         setIsLoading(false);
-        console.log('Mobile audio started playing');
       } else {
         audioRef.current.pause();
-        console.log('Mobile audio paused');
       }
     } catch (error) {
       console.error('Mobile audio playback error:', error);

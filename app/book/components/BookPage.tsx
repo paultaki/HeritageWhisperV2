@@ -97,27 +97,6 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
         };
       }
     }, [story, pageNum, ref]);
-    
-    // Track user scroll to hide indicators
-    React.useEffect(() => {
-      if (!ref || typeof ref === 'function' || !ref.current) return;
-      
-      const element = ref.current;
-      
-      const handleScroll = () => {
-        const scrollTop = element.scrollTop;
-        
-        if (scrollTop > 50) { // User scrolled at least 50px
-          setScrollState(prev => ({ ...prev, hasUserScrolled: true }));
-        }
-      };
-      
-      element.addEventListener('scroll', handleScroll, { passive: true });
-      
-      return () => {
-        element.removeEventListener('scroll', handleScroll);
-      };
-    }, [ref]);
 
     // Handle intro page
     if (story === 'intro') {
@@ -256,7 +235,13 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
-                  onScroll={onScroll}
+                  onScroll={(e) => {
+                    onScroll(e);
+                    const element = e.currentTarget;
+                    if (element.scrollTop > 50) {
+                      setScrollState(prev => ({ ...prev, hasUserScrolled: true }));
+                    }
+                  }}
                   className="h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
                   style={{
                     scrollBehavior: 'smooth',
@@ -353,7 +338,13 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
-                  onScroll={onScroll}
+                  onScroll={(e) => {
+                    onScroll(e);
+                    const element = e.currentTarget;
+                    if (element.scrollTop > 50) {
+                      setScrollState(prev => ({ ...prev, hasUserScrolled: true }));
+                    }
+                  }}
                   className="h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
                   style={{
                     scrollBehavior: 'smooth',
@@ -504,7 +495,16 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
               <div
                 ref={ref}
-                onScroll={onScroll}
+                onScroll={(e) => {
+                  // Call parent scroll handler
+                  onScroll(e);
+                  
+                  // Check scroll position to hide indicator
+                  const element = e.currentTarget;
+                  if (element.scrollTop > 50) {
+                    setScrollState(prev => ({ ...prev, hasUserScrolled: true }));
+                  }
+                }}
                 tabIndex={0}
                 className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
                 style={{
@@ -639,6 +639,8 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
       audio.src = '';
       audioRef.current = null;
     };
+    // Only re-run when story.id changes, not when other story properties change.
+    // This prevents recreating the audio element unnecessarily which would cause playback issues.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [story.id]);
 
@@ -677,14 +679,14 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
   return (
     <>
       {/* Edit and Timeline buttons */}
-      <div className={`flex gap-2 mb-4 -mt-2.5 ${position === "right" ? "justify-end" : ""}`}>
+      <div className={`flex gap-2 mb-1.5 ${position === "right" ? "justify-end" : ""}`}>
         <button
           onClick={() =>
             router.push(
               `/review/book-style?id=${story.id}&returnPath=${encodeURIComponent(`/book?page=${pageNum}`)}`,
             )
           }
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-lg font-medium text-gray-700"
+          className="flex items-center gap-1.5 px-3 py-0.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-lg font-medium text-gray-700"
         >
           <Pencil className="w-4.5 h-4.5" />
           <span>Edit</span>
@@ -703,7 +705,7 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
             // Navigate to timeline
             router.push('/timeline');
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-lg font-medium text-gray-700"
+          className="flex items-center gap-1.5 px-3 py-0.5 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-lg font-medium text-gray-700"
         >
           <Clock className="w-4.5 h-4.5" />
           <span>Timeline</span>

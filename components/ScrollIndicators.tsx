@@ -38,7 +38,7 @@ export function ScrollIndicator({
         style={{
           height: '120px',
           background: 'linear-gradient(to bottom, transparent 0%, transparent 20%, rgba(250, 248, 245, 0.3) 50%, rgba(250, 248, 245, 0.7) 75%, rgba(250, 248, 245, 0.95) 100%)',
-          zIndex: 30,
+          zIndex: 50,
           opacity: show ? 1 : 0,
           pointerEvents: onScrollClick ? 'auto' : 'none',
           cursor: onScrollClick ? 'pointer' : 'default'
@@ -55,12 +55,13 @@ export function ScrollIndicator({
           }}
         />
         
-        {/* Layer 3: "Continue reading" text hint - Clickable, larger, moved down */}
+        {/* Layer 3: "Continue reading" text hint - Clickable, larger, stays within bounds */}
         <button 
           className="absolute left-0 right-0 flex items-center justify-center animate-pulse-subtle hover:scale-105 transition-transform"
           style={{ 
-            bottom: '-12px',
-            animationIterationCount: 3 
+            bottom: '8px',
+            animationIterationCount: 3,
+            zIndex: 51
           }}
           onClick={(e) => {
             e.stopPropagation();
@@ -70,12 +71,12 @@ export function ScrollIndicator({
           }}
           aria-label="Scroll down to continue reading"
         >
-          <div className="flex items-center gap-3 px-6 py-3 bg-neutral-50/95 rounded-full border-2 border-neutral-400/70 shadow-lg hover:shadow-xl hover:bg-white/95 transition-all cursor-pointer">
-            <ChevronDown className="w-6 h-6 text-neutral-700" />
-            <span className="text-xl text-neutral-800 font-bold">
+          <div className="flex items-center gap-2 px-5 py-1.5 bg-neutral-50/95 rounded-full border-2 border-neutral-400/70 shadow-lg hover:shadow-xl hover:bg-white/95 transition-all cursor-pointer">
+            <ChevronDown className="w-5 h-5 text-neutral-700" />
+            <span className="text-lg text-neutral-800 font-bold">
               Continue reading below
             </span>
-            <ChevronDown className="w-6 h-6 text-neutral-700" />
+            <ChevronDown className="w-5 h-5 text-neutral-700" />
           </div>
         </button>
       </div>

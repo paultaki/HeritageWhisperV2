@@ -49,6 +49,7 @@ npm run dev              # Start dev server (http://localhost:3000)
 npm run build           # Production build
 npm run check           # TypeScript type checking
 npm test                # Run test suite
+npm run lint            # Run ESLint
 ```
 
 ### Database
@@ -57,12 +58,26 @@ npm run db:push         # Sync schema to Supabase
 npx supabase gen types typescript --project-id tjycibrhoammxohemyhq  # Generate types
 ```
 
+### Pre-Commit Quality Gate
+```bash
+npm run check && npm run lint && npm test && npm run build
+```
+Or use: `/pre-commit` (custom command)
+
 ### Troubleshooting
 ```bash
 rm -rf .next            # Clear Next.js cache
 lsof -ti:3000 | xargs kill -9  # Kill processes on port 3000
 npm rebuild vite tsx    # Fix Vite/TSX issues
 ```
+
+### Custom Slash Commands
+Available in `.claude/commands/`:
+- `/api-route` - Generate new API route with boilerplate
+- `/component` - Create new component with TypeScript pattern
+- `/db-query` - Add database query with RLS checks
+- `/pre-commit` - Run full quality gate
+- `/family-access` - Add family sharing access control
 
 ## 📋 Project Overview
 
@@ -81,31 +96,74 @@ AI-powered storytelling platform for seniors to capture and share life memories.
 
 ## 📝 Code Style & Conventions
 
+### Universal Rules (RFC-2119 Language)
+
+#### MUST (Non-negotiable)
+- **MUST** validate user session before any database access
+- **MUST** use TypeScript for all new files (no `.js` or `.jsx`)
+- **MUST** filter database queries by `user_id` or `storyteller_id`
+- **MUST** check `has_collaboration_access()` for multi-tenant queries
+- **MUST** map database fields from `snake_case` to `camelCase` in API responses
+- **MUST** use RLS policies with `(SELECT auth.uid())` pattern for performance
+- **MUST** test on mobile viewport (375px minimum width)
+- **MUST NOT** expose internal metadata: `tier`, `prompt_score`, `cost_usd`, `anchor_entity`
+- **MUST NOT** commit secrets, API keys, or tokens
+- **MUST NOT** use `console.log` with sensitive data (emails, tokens, passwords)
+- **MUST NOT** bypass TypeScript errors with `@ts-ignore` without justification
+
+#### SHOULD (Strongly recommended)
+- **SHOULD** use functional components with hooks (not class components)
+- **SHOULD** import types from `@/shared/schema` for database entities
+- **SHOULD** use `type` over `interface` for props
+- **SHOULD** use TanStack Query for data fetching
+- **SHOULD** use Tailwind utility classes only (no hardcoded colors)
+- **SHOULD** run `/pre-commit` before creating PRs
+- **SHOULD** add tests for new features
+- **SHOULD** use descriptive variable names (no single letters except loops)
+
+#### MAY (Optional)
+- **MAY** use `@ts-ignore` if absolutely necessary (document reason in comment)
+- **MAY** use service role key if RLS needs bypassing (document why in comment)
+
 ### TypeScript
-- Use TypeScript for all new files (no .js or .jsx)
-- Import types from `@/shared/schema` for database entities
-- Prefer `type` over `interface` for props
-- Example: `import { type Story, type InsertStory } from "@/shared/schema";`
+- Import types: `import { type Story, type InsertStory } from "@/shared/schema";`
+- File naming: PascalCase for components (`BookView.tsx`)
+- Example type definition:
+  ```typescript
+  type ComponentProps = {
+    id: string;
+    title: string;
+    onSubmit: (data: FormData) => void;
+  };
+  ```
 
 ### Components
-- Use functional components with hooks (no class components)
-- File naming: PascalCase for components (`BookView.tsx`)
+- Functional components with hooks only
+- File structure: One component per file
 - Co-locate styles with components when possible
 - Minimum 44x44px tap targets for mobile buttons
+- Example:
+  ```typescript
+  "use client";
+  import { type ReactNode } from "react";
+  
+  type Props = { children?: ReactNode };
+  
+  export function Component({ children }: Props) {
+    return <div>{children}</div>;
+  }
+  ```
 
 ### API Routes
+See detailed patterns in [@app/api/CLAUDE.md](app/api/CLAUDE.md)
 - Always validate user session first
-- Use service role key ONLY when necessary (document why in comments)
 - Map snake_case DB fields to camelCase for frontend responses
-- Return proper HTTP status codes (200, 201, 400, 401, 404, 500)
-- Check `has_collaboration_access()` for multi-tenant queries
+- Return proper HTTP status codes (200, 201, 400, 401, 403, 404, 429, 500)
+- Use `@lib/logger` not `console.log`
 
 ### Database
-- Always use RLS policies with `(SELECT auth.uid())` pattern for performance
-- Never expose internal metadata in API responses:
-  - ❌ `tier`, `prompt_score`, `score_reason`, `cost_usd`, `anchor_entity`
-  - ✅ User-facing data only
 - Store file paths in DB, generate signed URLs on-demand (1-week expiry)
+- Full schema reference: [@DATA_MODEL.md](DATA_MODEL.md)
 
 ### Mobile-First
 - Test all changes on mobile viewport (responsive design critical)
@@ -163,10 +221,208 @@ HeritageWhisperV2/
 - `@lib/queryClient.ts` - API wrapper with custom 429 handling
 - `@lib/supabase.ts` - Supabase client configuration
 - `@hooks/use-recording-state.tsx` - Recording orchestration
+- `@app/api/CLAUDE.md` - API route patterns and boilerplate
 - `@DATA_MODEL.md` - Complete database schema reference
 - `@AI_PROMPTING.md` - Pearl & prompt engineering docs
 - `@SECURITY.md` - Security implementation status
 - `@FAMILY_SHARING_README.md` - Multi-tenant system documentation
+
+## 🔍 JIT Search Commands (Quick Navigation)
+
+Use these ripgrep commands to quickly find code patterns:
+
+### Find Components
+```bash
+# Find component definition
+rg -n "^export (function|const) .*[A-Z]" components/
+
+# Find component usage
+rg -n "<ComponentName" app/ components/
+
+# Find props interface/type
+rg -n "type.*Props.*=|interface.*Props" components/
+```
+
+### Find API Routes
+```bash
+# Find all API route handlers
+rg -n "export async function (GET|POST|PUT|DELETE)" app/api/
+
+# Find API routes using specific table
+rg -n "from\(\"table_name\"\)" app/api/
+
+# Find routes with RLS checks
+rg -n "has_collaboration_access" app/api/
+```
+
+### Find Hooks
+```bash
+# Find custom hook definitions
+rg -n "export (function|const) use[A-Z]" hooks/
+
+# Find hook usage
+rg -n "use[A-Z][a-zA-Z]+\(" app/ components/
+
+# Find TanStack Query hooks
+rg -n "useQuery|useMutation" --type tsx
+```
+
+### Find Database Queries
+```bash
+# Find queries on specific table
+rg -n "\.from\(\"stories\"\)" app/api/ lib/
+
+# Find INSERT operations
+rg -n "\.insert\(" app/api/
+
+# Find UPDATE operations
+rg -n "\.update\(" app/api/
+
+# Find DELETE operations
+rg -n "\.delete\(" app/api/
+```
+
+### Find Types & Schemas
+```bash
+# Find type definition
+rg -n "^export (type|interface) YourType" shared/ types/
+
+# Find Zod schemas
+rg -n "z\.(object|string|number)" lib/ shared/
+
+# Find type imports
+rg -n "import.*type.*from.*schema" app/ components/
+```
+
+### Find Styling
+```bash
+# Find Tailwind classes with specific color
+rg -n "className=.*bg-primary" app/ components/
+
+# Find inline styles (anti-pattern)
+rg -n "style=" app/ components/
+
+# Find responsive breakpoints
+rg -n "md:|lg:|xl:" app/ components/
+```
+
+### Security Scans
+```bash
+# Find potential secret leaks
+rg -n "console\.log.*token|password|email" app/ lib/
+
+# Find service role key usage
+rg -n "SUPABASE_SERVICE_ROLE_KEY" app/api/
+
+# Find RLS bypass attempts
+rg -n "\.rpc\(\"bypass" app/api/
+```
+
+### Find by Feature
+```bash
+# Family sharing features
+rg -n "storyteller_id|has_collaboration_access" app/
+
+# Authentication code
+rg -n "auth\.getUser|auth\.getSession" app/api/
+
+# File uploads
+rg -n "supabaseStorage|\.upload\(" app/api/
+
+# Rate limiting
+rg -n "rateLimit\.check" app/api/
+```
+
+## 🔌 MCP Server Usage Guide
+
+### Available MCP Servers
+
+Configured in `~/.mcp.json`:
+
+#### **Supabase MCP** - Database Operations
+**When to use:**
+- "Show me the schema for stories table"
+- "Check if RLS policy exists for family_prompts"
+- "Query the database for users with email X"
+- "Inspect the has_collaboration_access RPC function"
+
+**Common commands:**
+```typescript
+// Via Claude: "Use Supabase MCP to show me the stories table schema"
+// Via Claude: "Check RLS policies on active_prompts table"
+```
+
+#### **GitHub MCP** - Repository Management
+**When to use:**
+- "Create a GitHub issue for this bug"
+- "Show me recent PRs on this repo"
+- "Create a PR with these changes"
+- "Check CI/CD workflow status"
+
+**Common commands:**
+```bash
+# Via Claude: "Create an issue titled 'Fix prompt dismiss bug'"
+# Via Claude: "Show me the last 5 pull requests"
+```
+
+#### **Vercel MCP** - Deployment Management
+**When to use:**
+- "Check latest deployment status"
+- "Show me environment variables on Vercel"
+- "Check deployment logs for errors"
+- "View build output for latest deployment"
+
+**Common commands:**
+```bash
+# Via Claude: "Check if the latest deployment succeeded"
+# Via Claude: "Show me the build logs from 2 hours ago"
+```
+
+#### **Stripe MCP** - Payment Operations
+**When to use:**
+- "Check if user X has an active subscription"
+- "Show me recent payment failures"
+- "List all active subscriptions"
+- "Get customer details for user Y"
+
+**Common commands:**
+```bash
+# Via Claude: "Check subscription status for customer cus_ABC123"
+# Via Claude: "Show me failed payments from last week"
+```
+
+#### **Resend MCP** - Email Operations
+**When to use:**
+- "Check if email to user X was delivered"
+- "Show me recent email bounces"
+- "Test email sending for new feature"
+- "Check email delivery logs"
+
+**Common commands:**
+```bash
+# Via Claude: "Check delivery status for email to test@example.com"
+# Via Claude: "Show me emails sent in the last hour"
+```
+
+### MCP Best Practices
+
+**✅ DO:**
+- Use MCP for read operations (checking status, viewing logs)
+- Use MCP to inspect database schema and RLS policies
+- Use MCP to create issues/PRs for tracking work
+- Use MCP to verify deployment success
+
+**❌ DON'T:**
+- Use MCP for destructive operations without confirmation
+- Bypass MCP when direct file access is more efficient
+- Use MCP for sensitive data without verifying permissions
+
+### When NOT to Use MCP
+
+- **File operations**: Use Read/Edit/Create tools instead
+- **Local development**: Use Execute for npm commands
+- **Code refactoring**: Use Edit tools, not MCP
+- **Quick reads**: MCP has overhead - use Read for simple file access
 
 ## 📊 Database & Data Model
 
@@ -357,6 +613,34 @@ Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
 - ✅ Stripe MCP - Payment APIs
 - ✅ Resend MCP - Email sending
 
+**See detailed usage guide in the "MCP Server Usage Guide" section above.**
+
+## ⚙️ Claude Code Automation
+
+### Hooks (`.claude/settings.json`)
+
+Automated safety and quality checks:
+
+**PreToolUse Hooks (Before executing):**
+- 🚫 Block dangerous commands (`rm -rf`, `git push --force`, `DROP TABLE`)
+- ⚠️  Warn when editing API routes (RLS reminder)
+- ⚠️  Warn when editing `.env` files (secrets reminder)
+
+**PostToolUse Hooks (After executing):**
+- ✨ Auto-format TypeScript files with Prettier
+- 🔍 Type-check API routes after editing
+
+### Custom Slash Commands (`.claude/commands/`)
+
+Five productivity commands for common workflows:
+- `/api-route` - Generate new API route with boilerplate
+- `/component` - Create new component with TypeScript pattern
+- `/db-query` - Add database query with RLS checks
+- `/pre-commit` - Run full quality gate
+- `/family-access` - Add family sharing access control
+
+Each command includes step-by-step instructions and code templates.
+
 ---
 
 ## 📋 Update Protocol
@@ -372,7 +656,7 @@ Before updating:
 3. Remove any obsolete information
 4. If this is historical/implementation detail, add to CLAUDE_HISTORY.md instead
 
-Keep the file under 400 lines.
+Aim to keep the file under 700 lines (~5,000 tokens).
 ```
 
 **Examples:**
@@ -383,7 +667,7 @@ Keep the file under 400 lines.
 
 ---
 
-_Last updated: October 31, 2025_
+_Last updated: November 2, 2025_
 
 **Other Documentation:**
 - [@CLAUDE_HISTORY.md](CLAUDE_HISTORY.md) - Historical fixes, feature archives, and migration notes

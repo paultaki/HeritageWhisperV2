@@ -92,7 +92,6 @@ export function DraggablePhoto({
           }
         }
         
-        console.log('Snap to zone:', newZone, SNAP_ZONES[newZone].description);
         setZone(newZone);
         onLayoutChange(newZone, width);
         
@@ -105,7 +104,6 @@ export function DraggablePhoto({
   };
 
   const handleZoneChange = (newZone: SnapZone) => {
-    console.log('handleZoneChange called:', newZone);
     setZone(newZone);
     onLayoutChange(newZone, width);
   };
@@ -199,7 +197,6 @@ function ZoneSelector({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Zone clicked:', zoneNum, SNAP_ZONES[zoneNum].description);
                 onZoneChange(zoneNum);
                 setIsOpen(false);
               }}

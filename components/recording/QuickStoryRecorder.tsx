@@ -239,7 +239,6 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
       const navId = navCache.generateId();
       await navCache.set(navId, {
         mode: "quick",
-        originalTranscript: transcriptionText,
         rawTranscript: transcriptionText,
         enhancedTranscript: transcriptionText,
         duration: audioDuration,

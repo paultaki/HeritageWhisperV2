@@ -353,8 +353,7 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
       try {
         await navCache.set(navId, {
           mode: "quick",
-          originalTranscript: transcription,
-          rawTranscript: transcription, // Also set rawTranscript for compatibility
+          rawTranscript: transcription,
           enhancedTranscript: transcription, // Will be same initially, user chooses on next screen
           duration: duration,
           timestamp: new Date().toISOString(),

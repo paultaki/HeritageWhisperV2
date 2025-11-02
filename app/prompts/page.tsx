@@ -343,9 +343,14 @@ function FamilyPromptCard({
     >
       {/* Dismiss button */}
       <button
-        onClick={() => onDismiss(prompt.id)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDismiss(prompt.id);
+        }}
         className="absolute top-3 right-3 p-1.5 rounded-full bg-white/80 hover:bg-white text-gray-600 hover:text-gray-900 transition-all shadow-sm hover:shadow-md"
         aria-label="Dismiss question"
+        type="button"
       >
         <X className="h-4 w-4" />
       </button>
@@ -505,12 +510,16 @@ export default function PromptsV2Page() {
 
   const dismissFamilyPromptMutation = useMutation({
     mutationFn: async (promptId: string) => {
+      console.log("Dismissing family prompt:", promptId);
       const response = await apiRequest("DELETE", `/api/prompts/family-submitted?id=${promptId}`);
       if (!response.ok) {
         const error = await response.json();
+        console.error("Error dismissing prompt:", error);
         throw new Error(error.error || "Failed to dismiss prompt");
       }
-      return response.json();
+      const result = await response.json();
+      console.log("Successfully dismissed prompt:", result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -522,6 +531,7 @@ export default function PromptsV2Page() {
       });
     },
     onError: (error: any) => {
+      console.error("Mutation error:", error);
       toast({
         title: "Unable to dismiss question",
         description: error?.message || "Please try again",
@@ -542,16 +552,23 @@ export default function PromptsV2Page() {
   };
 
   const handleDismissFamilyPrompt = (promptId: string) => {
+    console.log("handleDismissFamilyPrompt called with promptId:", promptId);
     const prompt = familyPrompts.find(p => p.id === promptId);
+    console.log("Found prompt:", prompt);
     if (prompt) {
       setPromptToDismiss(prompt);
+    } else {
+      console.error("Prompt not found in familyPrompts array");
     }
   };
 
   const confirmDismiss = () => {
+    console.log("confirmDismiss called, promptToDismiss:", promptToDismiss);
     if (promptToDismiss) {
       dismissFamilyPromptMutation.mutate(promptToDismiss.id);
       setPromptToDismiss(null);
+    } else {
+      console.error("No prompt to dismiss");
     }
   };
 

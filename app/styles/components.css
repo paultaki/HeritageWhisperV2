@@ -178,9 +178,9 @@ body {
   left: -27px; /* reaches toward spine inside gutter */
   top: calc(var(--title-offset, 22px)); /* aligns to title baseline */
   width: 24px;
-  height: 3px;
-  /* Soft mauve connector to match timeline spine */
-  background: rgba(196, 167, 183, 0.4);
+  height: 4px;
+  /* Match timeline spine color and weight */
+  background: rgba(132, 92, 113, 0.7);
   border-radius: 1px;
   opacity: 1;
   pointer-events: none;
@@ -195,7 +195,7 @@ body {
 .hw-card:hover::before,
 .hw-card:focus-visible::before {
   width: 30px;
-  background: rgba(196, 167, 183, 0.7);
+  background: rgba(132, 92, 113, 0.9);
   opacity: 1;
 }
 
@@ -486,18 +486,18 @@ body {
     left: -23px;
     top: calc(var(--title-offset, 22px));
     width: 21px;
-    height: 2px;
-    /* Soft mauve connector for mobile */
-    background: rgba(196, 167, 183, 0.5);
+    height: 4px;
+    /* Match timeline spine color and weight */
+    background: rgba(132, 92, 113, 0.7);
     border-radius: 1px;
-    opacity: 0.95;
+    opacity: 1;
     pointer-events: none;
     box-shadow: 0 3px 8px -2px rgba(0, 0, 0, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   .hw-card:hover::before,
   .hw-card:focus-visible::before {
     width: 39px;
-    background: rgba(196, 167, 183, 0.8);
+    background: rgba(132, 92, 113, 0.9);
   }
 
   /* timeline nodes align with tighter gutter */

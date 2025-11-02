@@ -136,7 +136,7 @@ export function TimelineMobile() {
   const handleGhostPromptClick = useCallback(
     (prompt: GhostPrompt) => {
       // Check if user has reached story limit
-      if (!user.isPaid && user.storyCount >= 3) {
+      if (user && !user.isPaid && user.storyCount >= 3) {
         ui.setShowPaywall(true);
       } else {
         // Open mode selection modal

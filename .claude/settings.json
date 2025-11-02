@@ -1,0 +1,66 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "name": "block-dangerous-commands",
+        "matcher": "Execute",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_TOOL_INPUT\" == *\"rm -rf /\"* ]] || [[ \"$CLAUDE_TOOL_INPUT\" == *\"rm -rf ~\"* ]]; then echo '🚫 BLOCKED: Dangerous rm -rf command detected' && exit 2; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_TOOL_INPUT\" == *\"git push --force\"* ]] && [[ \"$CLAUDE_TOOL_INPUT\" == *\"main\"* ]]; then echo '🚫 BLOCKED: Force push to main branch' && exit 2; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_TOOL_INPUT\" == *\"DROP TABLE\"* ]] || [[ \"$CLAUDE_TOOL_INPUT\" == *\"DELETE FROM users\"* ]]; then echo '🚫 BLOCKED: Dangerous database command' && exit 2; fi"
+          }
+        ]
+      },
+      {
+        "name": "warn-api-route-edits",
+        "matcher": "Edit|Create",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATHS\" == *\"app/api/\"* ]] && [[ \"$CLAUDE_FILE_PATHS\" == *\"route.ts\"* ]]; then echo '⚠️  REMINDER: API route - validate session, check RLS policies, map snake_case → camelCase' || true; fi"
+          }
+        ]
+      },
+      {
+        "name": "warn-secrets-editing",
+        "matcher": "Edit|Create",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATHS\" == *\".env\"* ]]; then echo '⚠️  WARNING: Editing environment file - never commit secrets!' || true; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "name": "auto-format-typescript",
+        "matcher": "Edit|Create",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATHS\" =~ \\.(ts|tsx)$ ]] && [ -f \"$CLAUDE_FILE_PATHS\" ]; then prettier --write \"$CLAUDE_FILE_PATHS\" 2>/dev/null || true; fi"
+          }
+        ]
+      },
+      {
+        "name": "typecheck-api-routes",
+        "matcher": "Edit|Create",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATHS\" == *\"app/api/\"*\".ts\" ]] && [ -f \"$CLAUDE_FILE_PATHS\" ]; then echo '✓ Type checking...' && tsc --noEmit \"$CLAUDE_FILE_PATHS\" 2>&1 | head -20 || true; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
