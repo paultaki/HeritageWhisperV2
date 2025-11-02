@@ -1101,7 +1101,9 @@ function MobileView({
             WebkitOverflowScrolling: 'touch',
             scrollBehavior: 'smooth',
             overscrollBehaviorX: 'contain',
-            touchAction: 'pan-x'
+            touchAction: 'pan-x',
+            zIndex: 10,
+            position: 'relative'
           }}
         >
           {allPages.map((page, index) => (
@@ -1114,8 +1116,7 @@ function MobileView({
                 height: '100%',
                 padding: '0',
                 scrollSnapAlign: 'center',
-                scrollSnapStop: 'always',
-                touchAction: 'pan-x'
+                scrollSnapStop: 'always'
               }}
             >
               <MobilePage page={page} pageNum={index + 1} allStories={sortedStories} />
@@ -1460,7 +1461,10 @@ function MobilePage({
   allStories: Story[];
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const pageWrapperRef = useRef<HTMLDivElement>(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const touchStartRef = useRef<{ x: number; y: number; scrollTop: number; pageScrollLeft: number } | null>(null);
+  const directionLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
   
   // Check if content is scrollable and track user scroll
   useEffect(() => {
@@ -1493,7 +1497,7 @@ function MobilePage({
         maxHeight: "calc(100dvh - 100px)",
         aspectRatio: "5.5 / 8.5",
         objectFit: "contain",
-        touchAction: 'pan-x'
+        pointerEvents: 'none'
       }}>
         <div 
           aria-hidden="true" 
@@ -1531,7 +1535,7 @@ function MobilePage({
         maxHeight: "calc(100dvh - 100px)",
         aspectRatio: "5.5 / 8.5",
         objectFit: "contain",
-        touchAction: 'pan-x'
+        pointerEvents: 'none'
       }}>
         <div 
           aria-hidden="true" 
@@ -1582,8 +1586,7 @@ function MobilePage({
       maxWidth: "calc(100vw + 20px)",
       maxHeight: "calc(100dvh - 100px)",
       aspectRatio: "5.5 / 8.5",
-      objectFit: "contain",
-      touchAction: 'pan-x'
+      objectFit: "contain"
     }}>
       {/* Outer book cover/border */}
       <div 
@@ -1619,15 +1622,61 @@ function MobilePage({
         <div className="relative h-full w-full p-2">
           <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden">
             <div 
-              ref={scrollRef}
-              className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-3 overflow-y-auto"
-              style={{ touchAction: 'pan-y pan-x' }}
-              onScroll={() => {
-                if (scrollRef.current && scrollRef.current.scrollTop > 50) {
-                  setShowScrollIndicator(false);
+              ref={pageWrapperRef}
+              className="h-full w-full rounded-[12px] overflow-hidden"
+              style={{ touchAction: 'none' }}
+              onTouchStart={(e) => {
+                const touch = e.touches[0];
+                const parentScroller = document.querySelector('.overflow-x-scroll') as HTMLElement;
+                touchStartRef.current = {
+                  x: touch.clientX,
+                  y: touch.clientY,
+                  scrollTop: scrollRef.current?.scrollTop || 0,
+                  pageScrollLeft: parentScroller?.scrollLeft || 0
+                };
+                directionLockedRef.current = null;
+              }}
+              onTouchMove={(e) => {
+                if (!touchStartRef.current || !scrollRef.current) return;
+                
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - touchStartRef.current.x;
+                const deltaY = touch.clientY - touchStartRef.current.y;
+                const parentScroller = document.querySelector('.overflow-x-scroll') as HTMLElement;
+                
+                // Lock direction on first significant movement
+                if (!directionLockedRef.current) {
+                  if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+                    directionLockedRef.current = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
+                  }
+                }
+                
+                // Handle based on locked direction
+                if (directionLockedRef.current === 'vertical') {
+                  // Vertical scrolling - scroll the content
+                  const newScrollTop = touchStartRef.current.scrollTop - deltaY;
+                  scrollRef.current.scrollTop = Math.max(0, Math.min(newScrollTop, scrollRef.current.scrollHeight - scrollRef.current.clientHeight));
+                } else if (directionLockedRef.current === 'horizontal' && parentScroller) {
+                  // Horizontal scrolling - scroll the parent (page navigation)
+                  const newScrollLeft = touchStartRef.current.pageScrollLeft - deltaX;
+                  parentScroller.scrollLeft = newScrollLeft;
                 }
               }}
+              onTouchEnd={() => {
+                touchStartRef.current = null;
+                directionLockedRef.current = null;
+              }}
             >
+              <div 
+                ref={scrollRef}
+                className="js-flow h-full w-full text-neutral-900 outline-none p-3 overflow-y-scroll"
+                style={{ pointerEvents: 'none' }}
+                onScroll={() => {
+                  if (scrollRef.current && scrollRef.current.scrollTop > 50) {
+                    setShowScrollIndicator(false);
+                  }
+                }}
+              >
               {/* Photo first if available */}
               {story.photos && story.photos.length > 0 && (() => {
                 // Find the hero photo, or use the first photo as fallback
@@ -1702,6 +1751,7 @@ function MobilePage({
                   </p>
                 </div>
               )}
+            </div>
             </div>
             
             {/* Mobile scroll indicator */}
