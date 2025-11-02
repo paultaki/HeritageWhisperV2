@@ -1456,7 +1456,7 @@ function MobilePage({
         width: "100%",
         height: "100%",
         maxWidth: "calc(100vw + 20px)",
-        maxHeight: "calc(100dvh - 90px)",
+        maxHeight: "calc(100dvh - 100px)",
         aspectRatio: "5.5 / 8.5",
         objectFit: "contain"
       }}>
@@ -1493,7 +1493,7 @@ function MobilePage({
         width: "100%",
         height: "100%",
         maxWidth: "calc(100vw + 20px)",
-        maxHeight: "calc(100dvh - 90px)",
+        maxHeight: "calc(100dvh - 100px)",
         aspectRatio: "5.5 / 8.5",
         objectFit: "contain"
       }}>
@@ -1544,7 +1544,7 @@ function MobilePage({
       width: "100%",
       height: "100%",
       maxWidth: "calc(100vw + 20px)",
-      maxHeight: "calc(100dvh - 64px)",
+      maxHeight: "calc(100dvh - 100px)",
       aspectRatio: "5.5 / 8.5",
       objectFit: "contain"
     }}>
