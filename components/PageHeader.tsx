@@ -77,14 +77,14 @@ export function DesktopPageHeader({
             />
             
             {/* Page Icon */}
-            <Icon 
-              className="w-7 h-7 text-gray-700 flex-shrink-0 relative" 
-              style={{ top: '-17px' }}
+            <Icon
+              className="w-7 h-7 text-gray-700 flex-shrink-0 relative"
+              style={{ top: '-10px' }}
               aria-hidden="true"
             />
-            
+
             {/* Page Title and Subtitle */}
-            <div className="min-w-0 flex flex-col justify-center">
+            <div className="min-w-0 flex flex-col justify-center relative" style={{ top: '-10px' }}>
               <h1 className="text-2xl font-bold text-gray-900 truncate leading-tight">
                 {title}
               </h1>
@@ -168,12 +168,12 @@ export function MobilePageHeader({
             {/* Page Icon */}
             <Icon
               className="w-6 h-6 text-gray-700 flex-shrink-0 relative"
-              style={{ top: '-11px' }}
+              style={{ top: '-6px' }}
               aria-hidden="true"
             />
 
             {/* Page Title and Subtitle */}
-            <div className="min-w-0 flex flex-col justify-center">
+            <div className="min-w-0 flex flex-col justify-center relative" style={{ top: '-6px' }}>
               <h1 className="text-lg font-bold text-gray-900 truncate leading-tight">
                 {title}
               </h1>

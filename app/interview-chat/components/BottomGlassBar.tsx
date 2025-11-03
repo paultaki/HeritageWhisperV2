@@ -22,11 +22,11 @@ export function BottomGlassBar({ onEnd, onPauseResume, onCancel, isPaused }: Bot
     return (
       <button
         onClick={onClick}
-        className={`flex flex-col items-center justify-center gap-1 flex-1 py-3 rounded-xl transition-colors transition-transform active:scale-95 text-[#4B5563] hover:text-[#111827] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/10 ${className}`}
+        className={`flex flex-col items-center justify-center gap-1.5 flex-1 py-3 rounded-xl transition-colors transition-transform active:scale-95 text-[#4B5563] hover:text-[#111827] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/10 ${className}`}
         aria-label={label}
         title={titleHint || label}
       >
-        <div className="h-5 w-5 mx-auto flex items-center justify-center" aria-hidden="true">
+        <div className="flex items-center justify-center w-full" style={{ height: '20px' }} aria-hidden="true">
           {icon}
         </div>
         <span className="text-[12px] font-medium tracking-tight whitespace-nowrap">{label}</span>

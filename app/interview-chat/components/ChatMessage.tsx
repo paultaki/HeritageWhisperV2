@@ -7,9 +7,10 @@ import { ChatWaveform } from "./ChatWaveform";
 
 interface ChatMessageProps {
   message: Message;
+  getMicStream?: () => MediaStream | null;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, getMicStream }: ChatMessageProps) {
   const isUser = message.sender === 'user';
   const isSystem = message.sender === 'system';
   const isPearl = message.sender === 'hw';
@@ -203,7 +204,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
             role="status"
             aria-label="You are speaking"
           >
-            <ChatWaveform isActive={true} isPearl={false} />
+            <ChatWaveform isActive={true} isPearl={false} getMicStream={getMicStream} />
           </div>
           {/* Timestamp */}
           <div className="mt-1 px-3 text-[12px] text-[#6B7280] text-right">

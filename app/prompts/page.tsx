@@ -280,17 +280,17 @@ function SimplePromptCard({
       whileHover={{ y: -4 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      className="group relative rounded-2xl bg-white p-6 shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-100"
+      className="group relative rounded-2xl bg-white p-4 shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-100"
     >
       {/* Icon or category indicator */}
       {Icon && (
-        <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${color || 'from-gray-400 to-gray-500'} text-white shadow-md`}>
+        <div className={`mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${color || 'from-gray-400 to-gray-500'} text-white shadow-md`}>
           <Icon className="h-6 w-6" />
         </div>
       )}
 
       {/* Question text */}
-      <p className="mb-6 text-xl font-medium text-gray-900 leading-relaxed">
+      <p className="mb-4 text-lg font-medium text-gray-900 leading-relaxed">
         {prompt.prompt_text}
       </p>
 
@@ -602,7 +602,6 @@ export default function PromptsV2Page() {
       <DesktopPageHeader
         icon={Lightbulb}
         title="Story Ideas"
-        subtitle="Choose a question below to record your next memory"
         showAccountSwitcher={true}
         rightContent={
           !isOwnAccount && permissionLevel === 'contributor' ? (
@@ -626,7 +625,6 @@ export default function PromptsV2Page() {
       <MobilePageHeader
         icon={Lightbulb}
         title="Story Ideas"
-        subtitle="Record your next memory"
         rightContent={
           !isOwnAccount && permissionLevel === 'contributor' ? (
             <Button
@@ -689,9 +687,6 @@ export default function PromptsV2Page() {
                 <h2 className="text-3xl font-bold text-gray-900">
                   Your Family Wants to Know
                 </h2>
-                <span className="rounded-full bg-blue-100 px-3 py-1 text-base font-medium text-blue-700">
-                  {familyPrompts.length} {familyPrompts.length === 1 ? 'question' : 'questions'}
-                </span>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -741,9 +736,6 @@ export default function PromptsV2Page() {
                 <h2 className="text-3xl font-bold text-gray-900">
                   Saved for Later
                 </h2>
-                <span className="rounded-full bg-orange-100 px-3 py-1 text-base font-medium text-orange-700">
-                  {queuedPrompts.length} saved
-                </span>
               </div>
 
               <div className="rounded-2xl bg-orange-50/50 p-6 border border-orange-200">
@@ -782,7 +774,7 @@ export default function PromptsV2Page() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSelectedCategory(category.id)}
-                    className="group relative overflow-hidden rounded-2xl bg-white p-6 text-left shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-100"
+                    className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-100 flex flex-col items-center justify-center text-center"
                   >
                     <div className={`mb-3 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br ${category.color} text-white shadow-md`}>
                       <Icon className="h-7 w-7" />
@@ -790,7 +782,6 @@ export default function PromptsV2Page() {
                     <h3 className="font-semibold text-gray-900 text-lg">
                       {category.label}
                     </h3>
-                    <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400 group-hover:text-gray-600 transition-colors" />
                   </motion.button>
                 );
               })}
@@ -835,8 +826,6 @@ export default function PromptsV2Page() {
                       prompt_text: question,
                       source: 'catalog'
                     }}
-                    icon={CATEGORIES.find(c => c.id === selectedCategory)?.icon}
-                    color={CATEGORIES.find(c => c.id === selectedCategory)?.color}
                     onRecord={(id, text) => {
                       handleRecord(id, text, 'catalog');
                       setSelectedCategory(null);

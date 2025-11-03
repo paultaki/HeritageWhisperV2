@@ -146,6 +146,7 @@ function InterviewChatContent() {
     toggleMic,
     getMixedAudioBlob,
     getUserOnlyAudioBlob,
+    getMicStream,
     sendTextMessage,
     triggerPearlResponse,
   } = useRealtimeInterview();
@@ -514,7 +515,7 @@ After they answer, continue the conversation naturally with follow-up questions 
                       {message.type === 'typing' ? (
                         <TypingIndicator reduceMotion={reduceMotion} />
                       ) : (
-                        <ChatMessage message={message} />
+                        <ChatMessage message={message} getMicStream={getMicStream} />
                       )}
                     </div>
                   ))}

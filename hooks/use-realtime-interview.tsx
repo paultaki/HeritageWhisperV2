@@ -550,6 +550,11 @@ export function useRealtimeInterview() {
     }
   }, []);
 
+  // Get the active microphone stream for waveform visualization
+  const getMicStream = useCallback(() => {
+    return realtimeHandlesRef.current?.mic || null;
+  }, []);
+
   return {
     status,
     provisionalTranscript,
@@ -562,6 +567,7 @@ export function useRealtimeInterview() {
     startMixedRecording,
     getMixedAudioBlob,
     getUserOnlyAudioBlob,
+    getMicStream,
     updateInstructions,
     sendTextMessage,
     triggerPearlResponse,

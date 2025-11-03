@@ -186,10 +186,10 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Update status to 'dismissed' instead of hard delete (preserves history)
+    // Update status to 'archived' instead of hard delete (preserves history)
     const { error: updateError } = await supabaseAdmin
       .from('family_prompts')
-      .update({ status: 'dismissed' })
+      .update({ status: 'archived' })
       .eq('id', promptId);
 
     if (updateError) {
