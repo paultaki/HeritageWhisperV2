@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeritageWhisper - Your Parents' Stories, Actually in Their Voice</title>
+  <meta name="description" content="AI-powered family storytelling platform that preserves seniors' life stories through voice recordings, not printed books.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Custom animations and utilities */
+    @keyframes waveform {
+      0%, 100% { transform: scaleY(0.5); }
+      50% { transform: scaleY(1); }
+    }
+
+    .waveform-bar {
+      animation: waveform 1s ease-in-out infinite;
+    }
+
+    .waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+    .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+    .waveform-bar:nth-child(4) { animation-delay: 0.3s; }
+    .waveform-bar:nth-child(5) { animation-delay: 0.4s; }
+
+    /* Smooth scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Respect reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      html {
+        scroll-behavior: auto;
+      }
+    }
+
+    /* Focus visible styles for accessibility */
+    *:focus-visible {
+      outline: 3px solid #2563EB;
+      outline-offset: 2px;
+    }
+
+    /* Skip to content link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: #2563EB;
+      color: white;
+      padding: 8px;
+      text-decoration: none;
+      z-index: 100;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* Sticky CTA bar - hidden by default, shown on scroll */
+    .sticky-cta {
+      transform: translateY(100%);
+      transition: transform 0.3s ease-out;
+    }
+
+    .sticky-cta.visible {
+      transform: translateY(0);
+    }
+
+    /* Chevron rotation for accordion */
+    .chevron {
+      transition: transform 0.3s ease;
+    }
+
+    .chevron.open {
+      transform: rotate(180deg);
+    }
+
+    /* Accordion content animation */
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .accordion-content.open {
+      max-height: 1000px;
+    }
+  </style>
+</head>
+<body class="antialiased">
+
+  <!-- Skip to content link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 py-4 px-6">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="text-2xl font-bold text-slate-900">HeritageWhisper</div>
+      <nav class="hidden md:flex space-x-8">
+        <a href="#how-it-works" class="text-slate-600 hover:text-slate-900 transition-colors text-lg">How It Works</a>
+        <a href="#pricing" class="text-slate-600 hover:text-slate-900 transition-colors text-lg">Pricing</a>
+        <a href="#faq" class="text-slate-600 hover:text-slate-900 transition-colors text-lg">FAQ</a>
+      </nav>
+      <a href="#pricing" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors text-base md:text-lg min-h-[44px] flex items-center">
+        Start Free
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="main-content">
+
+    <!-- Hero Section -->
+    <section class="bg-white py-16 md:py-24 px-6">
+      <div class="max-w-6xl mx-auto">
+
+        <!-- Headline -->
+        <h1 class="text-5xl md:text-7xl font-bold text-slate-900 tracking-tight text-center leading-tight">
+          Your Parents' Stories,<br>
+          <span class="text-blue-600">Actually in Their Voice</span>
+        </h1>
+
+        <!-- Subheadline -->
+        <p class="text-2xl md:text-3xl text-slate-600 text-center mt-6 leading-relaxed max-w-4xl mx-auto">
+          Books collect dust. Their voice stays with you forever.
+        </p>
+
+        <!-- CTA -->
+        <div class="mt-12 flex flex-col items-center space-y-4">
+          <button class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white text-xl font-semibold px-12 py-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 min-h-[80px] md:min-h-[72px] flex items-center justify-center" aria-label="Start recording your first three stories free">
+            Start Recording Free
+          </button>
+          <p class="text-slate-500 text-lg text-center leading-relaxed">
+            First 3 stories free • No credit card • 2-5 minutes per story
+          </p>
+        </div>
+
+        <!-- Visual: iPhone Mockup with Audio Player -->
+        <div class="mt-16 flex justify-center">
+          <div class="relative max-w-sm w-full">
+            <!-- Placeholder for iPhone mockup - Replace with actual image -->
+            <div class="bg-slate-100 rounded-3xl shadow-2xl p-4 aspect-[9/19] flex flex-col items-center justify-center border-8 border-slate-800">
+              <div class="bg-white rounded-2xl w-full h-full p-6 overflow-hidden flex flex-col">
+                <!-- Mock timeline view -->
+                <div class="text-sm font-semibold text-slate-900 mb-4">Your Stories</div>
+
+                <!-- Story card 1 -->
+                <div class="bg-slate-50 rounded-xl p-4 mb-3 border border-slate-200">
+                  <div class="text-xs text-slate-500 mb-1">Yesterday</div>
+                  <div class="text-sm font-semibold text-slate-900 mb-2">The Day I Met Your Dad</div>
+                  <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
+                      <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                      </svg>
+                    </div>
+                    <!-- Waveform visualization -->
+                    <div class="flex items-center space-x-1 flex-1" id="waveform-static">
+                      <div class="w-1 bg-blue-400 rounded-full waveform-bar" style="height: 12px;"></div>
+                      <div class="w-1 bg-blue-400 rounded-full waveform-bar" style="height: 20px;"></div>
+                      <div class="w-1 bg-blue-400 rounded-full waveform-bar" style="height: 16px;"></div>
+                      <div class="w-1 bg-blue-400 rounded-full waveform-bar" style="height: 24px;"></div>
+                      <div class="w-1 bg-blue-400 rounded-full waveform-bar" style="height: 14px;"></div>
+                      <div class="w-1 bg-blue-400 rounded-full waveform-bar" style="height: 18px;"></div>
+                      <div class="w-1 bg-blue-400 rounded-full waveform-bar" style="height: 22px;"></div>
+                      <div class="w-1 bg-blue-400 rounded-full waveform-bar" style="height: 16px;"></div>
+                    </div>
+                    <div class="text-xs text-slate-500">3:42</div>
+                  </div>
+                </div>
+
+                <!-- Story card 2 -->
+                <div class="bg-slate-50 rounded-xl p-4 mb-3 border border-slate-200">
+                  <div class="text-xs text-slate-500 mb-1">3 days ago</div>
+                  <div class="text-sm font-semibold text-slate-900 mb-2">My First Job</div>
+                  <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center">
+                      <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                      </svg>
+                    </div>
+                    <div class="h-1 bg-slate-200 rounded-full flex-1"></div>
+                    <div class="text-xs text-slate-500">2:18</div>
+                  </div>
+                </div>
+
+                <!-- Story card 3 -->
+                <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                  <div class="text-xs text-slate-500 mb-1">Last week</div>
+                  <div class="text-sm font-semibold text-slate-900 mb-2">Learning to Drive</div>
+                  <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center">
+                      <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                      </svg>
+                    </div>
+                    <div class="h-1 bg-slate-200 rounded-full flex-1"></div>
+                    <div class="text-xs text-slate-500">4:05</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive audio player button overlay -->
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
+              <button
+                id="audioPlayerBtn"
+                class="bg-white rounded-full shadow-2xl p-4 hover:scale-105 transition-transform cursor-pointer min-w-[56px] min-h-[56px] flex items-center justify-center"
+                aria-label="Play audio sample"
+              >
+                <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Problem/Differentiator Section -->
+    <section class="bg-slate-50 py-16 md:py-24 px-6">
+      <div class="max-w-6xl mx-auto">
+
+        <h2 class="text-4xl md:text-6xl font-bold text-slate-900 text-center mb-16 tracking-tight">
+          Why Families Switch from StoryWorth
+        </h2>
+
+        <!-- Comparison Grid -->
+        <div class="grid md:grid-cols-2 gap-8 md:gap-12 mb-16">
+
+          <!-- StoryWorth Column -->
+          <div class="bg-white rounded-2xl p-8 shadow-md opacity-75">
+            <div class="text-2xl font-bold text-slate-400 mb-8 line-through">StoryWorth</div>
+            <div class="space-y-6">
+              <div class="flex items-start space-x-4">
+                <span class="text-2xl">❌</span>
+                <p class="text-lg text-slate-600 leading-relaxed">Typed words (audio discarded)</p>
+              </div>
+              <div class="flex items-start space-x-4">
+                <span class="text-2xl">❌</span>
+                <p class="text-lg text-slate-600 leading-relaxed">Annual book project (ends after 52 weeks)</p>
+              </div>
+              <div class="flex items-start space-x-4">
+                <span class="text-2xl">❌</span>
+                <p class="text-lg text-slate-600 leading-relaxed">Generic weekly prompts</p>
+              </div>
+              <div class="flex items-start space-x-4">
+                <span class="text-2xl">❌</span>
+                <p class="text-lg text-slate-600 leading-relaxed">Family waits a year to read</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- HeritageWhisper Column -->
+          <div class="bg-white rounded-2xl p-8 shadow-md border-l-4 border-blue-600">
+            <div class="text-2xl font-bold text-blue-600 mb-8">HeritageWhisper</div>
+            <div class="space-y-6">
+              <div class="flex items-start space-x-4">
+                <span class="text-2xl">✅</span>
+                <p class="text-lg text-slate-900 font-semibold leading-relaxed">Voice, text, photos together</p>
+              </div>
+              <div class="flex items-start space-x-4">
+                <span class="text-2xl">✅</span>
+                <p class="text-lg text-slate-900 font-semibold leading-relaxed">Timeline grows forever</p>
+              </div>
+              <div class="flex items-start space-x-4">
+                <span class="text-2xl">✅</span>
+                <p class="text-lg text-slate-900 font-semibold leading-relaxed">AI asks personalized questions</p>
+              </div>
+              <div class="flex items-start space-x-4">
+                <span class="text-2xl">✅</span>
+                <p class="text-lg text-slate-900 font-semibold leading-relaxed">Family notified in real-time</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Testimonial -->
+        <div class="bg-white rounded-2xl p-8 md:p-12 shadow-lg max-w-4xl mx-auto">
+          <div class="text-xl md:text-2xl text-slate-700 italic leading-relaxed mb-6">
+            "We tried StoryWorth. Mom answered 3 questions in 6 months. With HeritageWhisper she's recorded 40 stories in 2 months."
+          </div>
+          <div class="text-lg text-slate-600">
+            — Sarah K., San Diego
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="bg-white py-16 md:py-24 px-6">
+      <div class="max-w-6xl mx-auto">
+
+        <h2 class="text-4xl md:text-6xl font-bold text-slate-900 text-center mb-16 tracking-tight">
+          How It Actually Works
+        </h2>
+
+        <!-- Steps Grid -->
+        <div class="grid md:grid-cols-2 gap-12 md:gap-16 mb-16">
+
+          <!-- Step 1 -->
+          <div class="flex flex-col items-center text-center space-y-6">
+            <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center">
+              <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="text-3xl font-bold text-slate-900 mb-4">Step 1: Press Record</div>
+              <div class="text-xl text-slate-600 leading-relaxed mb-4">(2-5 minutes)</div>
+              <div class="text-lg text-slate-700 italic">"I met your dad at a dance..."</div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="flex flex-col items-center text-center space-y-6">
+            <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center">
+              <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="text-3xl font-bold text-slate-900 mb-4">Step 2: AI Asks Follow-Ups</div>
+              <div class="text-xl text-slate-600 leading-relaxed mb-4">While You Talk</div>
+              <div class="space-y-2 text-lg text-slate-700">
+                <div class="flex items-center justify-center space-x-2">
+                  <span class="text-blue-600">→</span>
+                  <span>"What song was playing?"</span>
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                  <span class="text-blue-600">→</span>
+                  <span>"What did you notice first?"</span>
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                  <span class="text-blue-600">→</span>
+                  <span>"What made you laugh?"</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="flex flex-col items-center text-center space-y-6">
+            <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center relative">
+              <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <span class="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold">3</span>
+            </div>
+            <div>
+              <div class="text-3xl font-bold text-slate-900 mb-4">Step 3: Story Joins Timeline</div>
+              <div class="text-xl text-slate-600 leading-relaxed mb-4">Instantly</div>
+              <div class="text-lg text-slate-700 leading-relaxed">
+                Your kids get notified. They listen that night.<br>
+                <span class="font-semibold">Voice + transcript + photos, all in one place.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="flex flex-col items-center text-center space-y-6">
+            <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center">
+              <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </div>
+            <div>
+              <div class="text-3xl font-bold text-slate-900 mb-4">Step 4: AI Asks Your Next Question</div>
+              <div class="text-lg text-slate-700 italic leading-relaxed mb-4">
+                "You mentioned that dance—did you ever go back to that place?"
+              </div>
+              <div class="text-lg text-slate-600 leading-relaxed">
+                This repeats forever. Your legacy grows with every recording.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Demo Video Placeholder -->
+        <div class="flex flex-col items-center space-y-6">
+          <div class="bg-slate-100 rounded-2xl w-full max-w-2xl aspect-video flex items-center justify-center border-2 border-slate-300">
+            <div class="text-center space-y-4">
+              <svg class="w-20 h-20 text-slate-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <p class="text-slate-500 text-lg">30-Second Demo Video</p>
+              <p class="text-slate-400 text-base">(Placeholder - Replace with actual video)</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Feature Deep Dive Section -->
+    <section class="bg-slate-50 py-16 md:py-24 px-6">
+      <div class="max-w-6xl mx-auto">
+
+        <h2 class="text-4xl md:text-6xl font-bold text-slate-900 text-center mb-16 tracking-tight">
+          Built Different From Day One
+        </h2>
+
+        <!-- Feature Cards Grid -->
+        <div class="grid md:grid-cols-3 gap-8">
+
+          <!-- Card 1 -->
+          <div class="bg-white rounded-2xl p-8 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+            <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-4">Interview Mode Without Scheduling</h3>
+            <div class="space-y-4 text-lg text-slate-700 leading-relaxed">
+              <p>Tell Mel makes you schedule calls. We let you record anytime.</p>
+              <p>3am memory? Capture it. Sunday reflection? Record it.</p>
+              <p class="font-semibold text-slate-900">The best stories happen spontaneously.</p>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="bg-white rounded-2xl p-8 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+            <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-4">Personalized Questions, Not Generic Prompts</h3>
+            <div class="space-y-4 text-lg text-slate-700 leading-relaxed">
+              <p>After you say "I had a teacher who changed everything"</p>
+              <p class="text-blue-600 font-medium">→ AI asks: "What did they say that you still remember?"</p>
+              <p>StoryWorth sends everyone the same 52 questions.</p>
+              <p class="font-semibold text-slate-900">We ask questions nobody else can—because they're yours.</p>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="bg-white rounded-2xl p-8 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+            <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-4">Real-Time Family Engagement</h3>
+            <div class="space-y-4 text-lg text-slate-700 leading-relaxed">
+              <p><span class="font-semibold">StoryWorth:</span> Family waits a year for the book</p>
+              <p><span class="font-semibold text-blue-600">HeritageWhisper:</span> Family notified the moment you record</p>
+              <p class="font-semibold text-slate-900">Your daughter listens during lunch. Your grandson asks a question. You answer that weekend.</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="bg-white py-16 md:py-24 px-6">
+      <div class="max-w-6xl mx-auto">
+
+        <h2 class="text-4xl md:text-6xl font-bold text-slate-900 text-center mb-8 tracking-tight">
+          $149/year — Unlimited Stories, Forever
+        </h2>
+
+        <p class="text-2xl text-slate-600 text-center mb-16 leading-relaxed max-w-3xl mx-auto">
+          No per-story fees. No surprise charges. Just unlimited recording and sharing.
+        </p>
+
+        <!-- Pricing Card -->
+        <div class="bg-gradient-to-br from-blue-50 to-white rounded-3xl p-8 md:p-12 shadow-xl max-w-3xl mx-auto border-2 border-blue-100">
+
+          <!-- Features Checklist -->
+          <div class="space-y-6 mb-12">
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p class="text-xl text-slate-900 leading-relaxed font-medium">First 3 stories free (no credit card)</p>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p class="text-xl text-slate-900 leading-relaxed font-medium">Unlimited recording after that</p>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p class="text-xl text-slate-900 leading-relaxed font-medium">AI interview mode (no scheduling)</p>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p class="text-xl text-slate-900 leading-relaxed font-medium">Family sharing & notifications</p>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p class="text-xl text-slate-900 leading-relaxed font-medium">Timeline + Book views</p>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p class="text-xl text-slate-900 leading-relaxed font-medium">Export PDF anytime</p>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p class="text-xl text-slate-900 leading-relaxed font-medium">30-day money-back guarantee</p>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <button class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xl font-semibold px-12 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 min-h-[80px] flex items-center justify-center" aria-label="Start recording your first three stories free">
+            Start Recording Free
+          </button>
+
+          <p class="text-slate-500 text-lg text-center mt-6 leading-relaxed">
+            No credit card required for your first 3 stories
+          </p>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="bg-slate-50 py-16 md:py-24 px-6">
+      <div class="max-w-4xl mx-auto">
+
+        <h2 class="text-4xl md:text-6xl font-bold text-slate-900 text-center mb-16 tracking-tight">
+          Questions?
+        </h2>
+
+        <!-- Accordion Items -->
+        <div class="space-y-4">
+
+          <!-- FAQ 1 -->
+          <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <button
+              class="w-full text-left px-8 py-6 flex items-center justify-between min-h-[56px] hover:bg-slate-50 transition-colors"
+              onclick="toggleAccordion(0)"
+              aria-expanded="false"
+              aria-controls="faq-content-0"
+            >
+              <span class="text-xl font-semibold text-slate-900 pr-4">Can I get a printed book?</span>
+              <svg class="w-6 h-6 text-slate-600 flex-shrink-0 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-0" class="accordion-content">
+              <div class="px-8 pb-6 pt-4 border-t border-slate-100">
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                  We don't offer printing directly. Here's why:
+                </p>
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                  Most families never look at printed books after the first week. But they listen to voice recordings constantly—while driving, cooking, before bed.
+                </p>
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                  We optimize for what people actually use: voice in their pocket.
+                </p>
+                <p class="text-lg text-slate-700 leading-relaxed">
+                  That said, you can export a beautiful PDF anytime and print it yourself via Blurb ($30-50). Many families do both: digital for daily listening, print for the shelf.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <button
+              class="w-full text-left px-8 py-6 flex items-center justify-between min-h-[56px] hover:bg-slate-50 transition-colors"
+              onclick="toggleAccordion(1)"
+              aria-expanded="false"
+              aria-controls="faq-content-1"
+            >
+              <span class="text-xl font-semibold text-slate-900 pr-4">Is this just for tech-savvy seniors?</span>
+              <svg class="w-6 h-6 text-slate-600 flex-shrink-0 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-1" class="accordion-content">
+              <div class="px-8 pb-6 pt-4 border-t border-slate-100">
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                  Nope. If your parent can use a smartphone, they can use HeritageWhisper. One tap to record. That's it.
+                </p>
+                <p class="text-lg text-slate-700 leading-relaxed">
+                  No passwords to remember (we use Face ID/fingerprint). No complicated menus.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <button
+              class="w-full text-left px-8 py-6 flex items-center justify-between min-h-[56px] hover:bg-slate-50 transition-colors"
+              onclick="toggleAccordion(2)"
+              aria-expanded="false"
+              aria-controls="faq-content-2"
+            >
+              <span class="text-xl font-semibold text-slate-900 pr-4">What happens to my stories if HeritageWhisper shuts down?</span>
+              <svg class="w-6 h-6 text-slate-600 flex-shrink-0 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-2" class="accordion-content">
+              <div class="px-8 pb-6 pt-4 border-t border-slate-100">
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                  You can export all your data (stories, audio, photos) anytime as a ZIP file. You own your content, forever.
+                </p>
+                <p class="text-lg text-slate-700 leading-relaxed">
+                  We also back up to multiple cloud providers.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <button
+              class="w-full text-left px-8 py-6 flex items-center justify-between min-h-[56px] hover:bg-slate-50 transition-colors"
+              onclick="toggleAccordion(3)"
+              aria-expanded="false"
+              aria-controls="faq-content-3"
+            >
+              <span class="text-xl font-semibold text-slate-900 pr-4">How long does recording take?</span>
+              <svg class="w-6 h-6 text-slate-600 flex-shrink-0 chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-3" class="accordion-content">
+              <div class="px-8 pb-6 pt-4 border-t border-slate-100">
+                <p class="text-lg text-slate-700 leading-relaxed mb-4">
+                  2-5 minutes per story. We recommend short recordings because they're easier to listen to—and easier to finish.
+                </p>
+                <p class="text-lg text-slate-700 leading-relaxed">
+                  Long sessions are overwhelming. Quick stories are powerful.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-white py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid md:grid-cols-2 gap-12 md:gap-24 mb-8">
+
+        <!-- Left Column -->
+        <div>
+          <div class="text-2xl font-bold mb-4">HeritageWhisper</div>
+          <p class="text-lg text-slate-400 leading-relaxed">
+            Stories in their voice, not books on a shelf.
+          </p>
+        </div>
+
+        <!-- Right Column -->
+        <div class="flex flex-col md:items-end space-y-4">
+          <nav class="flex flex-wrap gap-6 text-lg">
+            <a href="#" class="text-slate-400 hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" class="text-slate-400 hover:text-white transition-colors">Terms</a>
+            <a href="#" class="text-slate-400 hover:text-white transition-colors">Contact</a>
+          </nav>
+        </div>
+
+      </div>
+
+      <div class="border-t border-slate-800 pt-8 text-center">
+        <p class="text-slate-500 text-base">
+          © 2025 HeritageWhisper. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Sticky CTA Bar (Mobile) -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-slate-200 px-6 py-4 shadow-2xl md:hidden sticky-cta z-50">
+    <button class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg active:scale-95 transition-all duration-200 min-h-[60px] flex items-center justify-center" aria-label="Start recording your first three stories free">
+      Start Recording Free
+    </button>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Accordion functionality
+    function toggleAccordion(index) {
+      const content = document.getElementById(`faq-content-${index}`);
+      const button = content.previousElementSibling;
+      const chevron = button.querySelector('.chevron');
+      const isOpen = content.classList.contains('open');
+
+      // Close all accordions
+      document.querySelectorAll('.accordion-content').forEach(item => {
+        item.classList.remove('open');
+      });
+      document.querySelectorAll('.chevron').forEach(item => {
+        item.classList.remove('open');
+      });
+      document.querySelectorAll('[aria-expanded]').forEach(item => {
+        item.setAttribute('aria-expanded', 'false');
+      });
+
+      // If this one wasn't open, open it
+      if (!isOpen) {
+        content.classList.add('open');
+        chevron.classList.add('open');
+        button.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    // Audio player interaction
+    const audioBtn = document.getElementById('audioPlayerBtn');
+    let isPlaying = false;
+
+    audioBtn.addEventListener('click', function() {
+      if (!isPlaying) {
+        // Play state
+        isPlaying = true;
+        this.innerHTML = `
+          <svg class="w-8 h-8 text-blue-600 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+        `;
+        this.setAttribute('aria-label', 'Pause audio sample');
+
+        // Auto-stop after 5 seconds
+        setTimeout(() => {
+          if (isPlaying) {
+            isPlaying = false;
+            this.innerHTML = `
+              <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+              </svg>
+            `;
+            this.setAttribute('aria-label', 'Play audio sample');
+          }
+        }, 5000);
+      } else {
+        // Pause state
+        isPlaying = false;
+        this.innerHTML = `
+          <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+          </svg>
+        `;
+        this.setAttribute('aria-label', 'Play audio sample');
+      }
+    });
+
+    // Sticky CTA bar show/hide on scroll (mobile only)
+    let lastScrollY = window.scrollY;
+    const stickyCta = document.querySelector('.sticky-cta');
+
+    window.addEventListener('scroll', () => {
+      const currentScrollY = window.scrollY;
+
+      // Show sticky CTA after scrolling down 300px
+      if (currentScrollY > 300) {
+        stickyCta.classList.add('visible');
+      } else {
+        stickyCta.classList.remove('visible');
+      }
+
+      lastScrollY = currentScrollY;
+    });
+
+    // Handle all CTA button clicks
+    document.querySelectorAll('button, a[href="#pricing"]').forEach(element => {
+      if (element.textContent.includes('Start Recording Free') || element.textContent.includes('Start Free')) {
+        element.addEventListener('click', (e) => {
+          e.preventDefault();
+          // Placeholder: Would redirect to signup flow
+          console.log('CTA clicked - Redirect to signup flow');
+          alert('This would redirect to the signup flow. (Demo mode)');
+        });
+      }
+    });
+
+    // Keyboard navigation support
+    document.addEventListener('keydown', (e) => {
+      // Allow Enter and Space to trigger accordion buttons
+      if (e.key === 'Enter' || e.key === ' ') {
+        if (e.target.hasAttribute('onclick')) {
+          e.preventDefault();
+          e.target.click();
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

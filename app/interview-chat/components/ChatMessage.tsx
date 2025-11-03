@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Play, Pause } from "lucide-react";
 import { Message } from "../page";
+import { ChatWaveform } from "./ChatWaveform";
 
 interface ChatMessageProps {
   message: Message;
@@ -105,17 +106,19 @@ export function ChatMessage({ message }: ChatMessageProps) {
     return (
       <div className="flex justify-start">
         <div className="max-w-[78%]">
-          {/* Sender label */}
-          <div className="mb-1 px-3 text-[13px] font-medium text-slate-600">
-            Pearl
+          {/* Sender label with gradient */}
+          <div className="mb-1 px-3 text-[13px] font-semibold">
+            <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
+              Pearl
+            </span>
           </div>
           {/* Bubble */}
           <div
-            className="rounded-2xl px-4 py-2 shadow-sm ring-1 bg-[#E8D5F2] text-[#2C2C2C] ring-[#8B5CF6]/30"
+            className="rounded-2xl px-4 py-1.5 shadow-sm ring-1 bg-[#E8D5F2] text-[#2C2C2C] ring-[#8B5CF6]/30"
             role="text"
             aria-label={`Pearl says ${message.content}`}
           >
-            <p className="text-[18px] leading-relaxed">
+            <p className="text-[18px] leading-snug">
               {message.content}
             </p>
           </div>
@@ -139,12 +142,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
           </div>
           {/* Bubble */}
           <div
-            className="rounded-2xl px-4 py-2 shadow-sm ring-1 bg-white text-[#2C2C2C] ring-black/5"
+            className="rounded-2xl px-4 py-1.5 shadow-sm ring-1 bg-white text-[#2C2C2C] ring-black/5"
             role="text"
             aria-label={`You said ${message.content}`}
           >
             {/* Only show transcription, no audio player */}
-            <p className="text-[18px] leading-relaxed">
+            <p className="text-[18px] leading-snug">
               {message.content}
             </p>
           </div>
@@ -168,13 +171,39 @@ export function ChatMessage({ message }: ChatMessageProps) {
           </div>
           {/* Bubble */}
           <div
-            className="rounded-2xl px-4 py-2 shadow-sm ring-1 bg-white text-[#2C2C2C] ring-black/5"
+            className="rounded-2xl px-4 py-1.5 shadow-sm ring-1 bg-white text-[#2C2C2C] ring-black/5"
             role="text"
             aria-label={`You said ${message.content}`}
           >
-            <p className="text-[18px] leading-relaxed">
+            <p className="text-[18px] leading-snug">
               {message.content}
             </p>
+          </div>
+          {/* Timestamp */}
+          <div className="mt-1 px-3 text-[12px] text-[#6B7280] text-right">
+            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Waveform bubble (User speaking - right side)
+  if (message.type === 'waveform') {
+    return (
+      <div className="flex justify-end">
+        <div className="max-w-[78%]">
+          {/* Sender label */}
+          <div className="mb-1 px-3 text-[13px] font-medium text-slate-600 text-right">
+            You
+          </div>
+          {/* Bubble with waveform */}
+          <div
+            className="rounded-2xl shadow-sm ring-1 bg-white text-[#2C2C2C] ring-black/5"
+            role="status"
+            aria-label="You are speaking"
+          >
+            <ChatWaveform isActive={true} isPearl={false} />
           </div>
           {/* Timestamp */}
           <div className="mt-1 px-3 text-[12px] text-[#6B7280] text-right">

@@ -102,7 +102,8 @@ export function useRealtimeInterview() {
     onTranscriptFinal: (text: string) => void,
     onError?: (error: Error) => void,
     config?: RealtimeConfig,
-    onAssistantResponse?: (text: string) => void
+    onAssistantResponse?: (text: string) => void,
+    onUserSpeechStart?: () => void  // Callback when user starts speaking
   ) => {
     try {
       setStatus('connecting');
@@ -146,7 +147,7 @@ export function useRealtimeInterview() {
               // Create and configure audio element
               const audio = document.createElement('audio');
               audio.autoplay = true;
-              audio.muted = false;
+              audio.muted = false; // Audio plays immediately as Pearl speaks
               audio.volume = 1.0;
               audio.srcObject = stream;
 
@@ -284,6 +285,14 @@ export function useRealtimeInterview() {
           }, 100);
         },
 
+        // Assistant response started (first text delta) - show typing indicator
+        onAssistantResponseStarted: () => {
+          console.log('[RealtimeInterview] Pearl response started - showing typing indicator');
+          if (onAssistantResponse) {
+            onAssistantResponse('__COMPOSING__');
+          }
+        },
+
         // Assistant text streaming (for response trimming)
         onAssistantTextDelta: (text) => {
           assistantResponseRef.current += text;
@@ -344,6 +353,11 @@ export function useRealtimeInterview() {
           }
 
           console.log('[RealtimeInterview] User speech detected - but barge-in is disabled, Pearl will continue speaking');
+
+          // Notify page to show waveform
+          if (onUserSpeechStart) {
+            onUserSpeechStart();
+          }
 
           // BARGE-IN DISABLED: The following code would pause Pearl's audio when user speaks
           // Left commented for future reference if this behavior needs to be re-enabled

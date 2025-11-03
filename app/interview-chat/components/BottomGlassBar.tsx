@@ -26,10 +26,10 @@ export function BottomGlassBar({ onEnd, onPauseResume, onCancel, isPaused }: Bot
         aria-label={label}
         title={titleHint || label}
       >
-        <div className="h-5 w-5" aria-hidden="true">
+        <div className="h-5 w-5 mx-auto flex items-center justify-center" aria-hidden="true">
           {icon}
         </div>
-        <span className="text-[12px] font-medium tracking-tight">{label}</span>
+        <span className="text-[12px] font-medium tracking-tight whitespace-nowrap">{label}</span>
       </button>
     );
   };

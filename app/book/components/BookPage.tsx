@@ -517,7 +517,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 }}
                 aria-label="Scroll down to continue reading"
               >
-                <StoryContent story={story as Story} position={position} pageNum={pageNum} />
+                <StoryContent story={story as Story} position={position} pageNum={pageNum} fontSize={fontSize} />
               </div>
               
               {/* Scroll indicators - stay visible until user scrolls */}
@@ -550,7 +550,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
 BookPage.displayName = "BookPage";
 
 // Story Content Component
-function StoryContent({ story, position, pageNum }: { story: Story; position: "left" | "right"; pageNum: number }) {
+function StoryContent({ story, position, pageNum, fontSize = 17 }: { story: Story; position: "left" | "right"; pageNum: number; fontSize?: number }) {
   const router = useRouter();
   
   // Audio state
@@ -847,62 +847,20 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
       </div>
 
       {story.wisdomClipText && (
-        <div 
-          className="mt-6 mb-4 p-6 clear-both relative"
-          style={{
-            background: 'linear-gradient(135deg, #fef9e7 0%, #faf3dd 100%)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
-            transform: 'rotate(-0.5deg)',
-            borderRadius: '2px',
-            border: '1px solid rgba(139, 107, 122, 0.2)',
-          }}
-        >
-          {/* Paper texture overlay */}
-          <div 
-            className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        <div className="relative my-8 -mx-2 p-6 bg-white shadow-sm rotate-[0.5deg] clear-both">
+          <div
+            className="absolute inset-0 opacity-10"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E")`,
+              backgroundImage: `repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 27px,
+                #cbd5e1 27px,
+                #cbd5e1 28px
+              )`
             }}
-          ></div>
-          
-          {/* Tape at top corners */}
-          <div 
-            className="absolute -top-2 left-6 w-12 h-5 opacity-40"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255,255,240,0.7) 0%, rgba(255,250,230,0.8) 100%)',
-              transform: 'rotate(-2deg)',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            }}
-          ></div>
-          <div 
-            className="absolute -top-2 right-6 w-12 h-5 opacity-40"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255,255,240,0.7) 0%, rgba(255,250,230,0.8) 100%)',
-              transform: 'rotate(2deg)',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            }}
-          ></div>
-
-          <p 
-            className="text-sm mb-2"
-            style={{
-              fontFamily: '"Caveat", cursive',
-              fontSize: '20px',
-              color: '#8b6b7a',
-              fontWeight: 600,
-            }}
-          >
-            Lesson Learned
-          </p>
-          <p 
-            className="leading-7"
-            style={{
-              fontFamily: '"Caveat", cursive',
-              fontSize: '24px',
-              color: '#4a4a4a',
-              lineHeight: '1.8',
-            }}
-          >
+          />
+          <p className="relative text-slate-700 text-lg leading-relaxed" style={{ fontFamily: '"Caveat", cursive' }}>
             {story.wisdomClipText}
           </p>
         </div>

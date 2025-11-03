@@ -71,7 +71,7 @@ export default function BookV4Page() {
   const flowRightRef = useRef<HTMLDivElement>(null);
 
   // Fetch stories - same as main book
-  const { data, isLoading } = useQuery<{ stories: Story[] }>({
+  const { data, isLoading, isFetching } = useQuery<{ stories: Story[] }>({
     queryKey: ["/api/stories"],
     enabled: !!user,
   });
@@ -84,10 +84,13 @@ export default function BookV4Page() {
   );
 
   // Sort by year
-  const sortedStories = useMemo(() => 
+  const sortedStories = useMemo(() =>
     [...bookStories].sort((a, b) => a.storyYear - b.storyYear),
     [bookStories]
   );
+
+  // Debug logging
+  console.log('[Book] Loading states:', { isLoading, isFetching, hasData: !!data, storiesCount: stories.length, bookStoriesCount: bookStories.length, sortedStoriesCount: sortedStories.length });
 
   // Group stories by decade
   const decadeGroups = useMemo(() => {
@@ -368,8 +371,8 @@ export default function BookV4Page() {
     }
   }, [sortedStories, spreads, hasNavigatedToStory]);
 
-  // Loading state
-  if (isLoading) {
+  // Loading state - show spinner while fetching data OR waiting for user
+  if (isLoading || isFetching || !data) {
     return (
       <div className="min-h-screen bg-[#0b0d12] flex items-center justify-center">
         <div className="text-center">
@@ -380,8 +383,8 @@ export default function BookV4Page() {
     );
   }
 
-  // No stories state
-  if (sortedStories.length === 0) {
+  // No stories state (only show if we have data and it's truly empty)
+  if (data && sortedStories.length === 0) {
     return (
       <div className="min-h-screen bg-[#0b0d12] flex items-center justify-center">
         <div className="text-center max-w-md px-4">

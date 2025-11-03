@@ -28,6 +28,7 @@ export type RealtimeCallbacks = {
   onAssistantAudio: (stream: MediaStream) => void;
   onAssistantTextDelta?: (text: string) => void;
   onAssistantTextDone?: () => void;
+  onAssistantResponseStarted?: () => void;  // When first text delta arrives
   onSpeechStarted?: () => void;  // For barge-in
   onSpeechStopped?: () => void;
   onError: (error: Error) => void;
@@ -66,6 +67,9 @@ export async function startRealtime(
 
   // 4. Data channel for events (transcripts, text, etc.)
   const dataChannel = pc.createDataChannel('oai-events');
+
+  // Track if we've seen the first text delta for this response
+  let hasSeenFirstDelta = false;
 
   dataChannel.onmessage = (event) => {
     try {
@@ -115,6 +119,14 @@ export async function startRealtime(
         const delta = msg.delta || msg.text || '';
         if (delta) {
           console.log('[Realtime] Assistant text delta:', delta);
+
+          // On first delta, notify that response has started (show typing indicator)
+          if (!hasSeenFirstDelta) {
+            console.log('[Realtime] First text delta - response started');
+            hasSeenFirstDelta = true;
+            callbacks.onAssistantResponseStarted?.();
+          }
+
           callbacks.onAssistantTextDelta?.(delta);
         }
       }
@@ -122,6 +134,7 @@ export async function startRealtime(
           msg.type === 'response.output_text.done' ||
           msg.type === 'response.audio_transcript.done') {
         console.log('[Realtime] Assistant text done');
+        hasSeenFirstDelta = false; // Reset for next response
         callbacks.onAssistantTextDone?.();
       }
 

@@ -22,7 +22,8 @@ export type MessageType =
   | 'question'
   | 'audio-response'
   | 'text-response'
-  | 'typing';
+  | 'typing'
+  | 'waveform'; // User speaking with waveform animation
 
 export type Message = {
   id: string;
@@ -263,7 +264,16 @@ After they answer, continue the conversation naturally with follow-up questions 
             sender: 'user',
           };
 
-          setMessages(prev => [...prev, userMessage]);
+          // Replace waveform message with transcript (or just add if no waveform)
+          setMessages(prev => {
+            const lastMessage = prev[prev.length - 1];
+            if (lastMessage && lastMessage.type === 'waveform') {
+              // Replace waveform with transcript
+              return [...prev.slice(0, -1), userMessage];
+            }
+            // No waveform found, just add transcript
+            return [...prev, userMessage];
+          });
         },
         (error) => {
           console.error('[InterviewChat] Realtime error:', error);
@@ -307,6 +317,18 @@ After they answer, continue the conversation naturally with follow-up questions 
               return [...withoutTyping, pearlMessage];
             });
           }
+        },
+        () => {
+          // Handle user speech start - show waveform
+          console.log('[InterviewChat] User started speaking - showing waveform');
+          const waveformMessage: Message = {
+            id: 'user-waveform',
+            type: 'waveform',
+            content: '',
+            timestamp: new Date(),
+            sender: 'user',
+          };
+          setMessages(prev => [...prev, waveformMessage]);
         }
       );
 
