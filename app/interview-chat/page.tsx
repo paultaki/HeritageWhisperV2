@@ -3,10 +3,12 @@
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useAuth } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
-import { WelcomeModal } from "../interview-chat/components/WelcomeModal";
-import { ChatMessage } from "../interview-chat/components/ChatMessage";
-import { TypingIndicator } from "../interview-chat/components/TypingIndicator";
+import { WelcomeModal } from "./components/WelcomeModal";
+import { ChatMessage } from "./components/ChatMessage";
+import { TypingIndicator } from "./components/TypingIndicator";
+import { StatusBar } from "./components/StatusBar";
+import { DayPillBar } from "./components/DayPillBar";
+import { BottomGlassBar } from "./components/BottomGlassBar";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import {
   completeConversationAndRedirect,
@@ -14,7 +16,6 @@ import {
 } from "@/lib/conversationModeIntegration";
 import { useRecordingState } from "@/contexts/RecordingContext";
 import { useRealtimeInterview, PEARL_WITNESS_INSTRUCTIONS } from "@/hooks/use-realtime-interview";
-import { Mic, Square, Volume2, VolumeX, MessageSquare, Play, Pause, RotateCcw } from "lucide-react";
 
 export type MessageType =
   | 'system'
@@ -33,20 +34,19 @@ export type Message = {
   sender: 'hw' | 'user' | 'system';
 };
 
-function InterviewChatV2Content() {
+function InterviewChatContent() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { startRecording: startRecordingState, stopRecording: stopRecordingState } = useRecordingState();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [showWelcome, setShowWelcome] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isMicMuted, setIsMicMuted] = useState(false);
-  const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
-  const [textInput, setTextInput] = useState('');
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -54,12 +54,21 @@ function InterviewChatV2Content() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const pausedTimeAccumulatedRef = useRef<number>(0);
+  const pauseStartTimeRef = useRef<number>(0);
 
   // Check for prompt question in URL params
   const promptQuestion = searchParams.get('prompt');
 
-  // Pause start time tracker
-  const pauseStartTimeRef = useRef<number>(0);
+  // Reduced motion preference
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => setReduceMotion(mq.matches);
+    onChange();
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
 
   // Handler for pause/continue
   const handlePauseContinue = () => {
@@ -124,30 +133,6 @@ function InterviewChatV2Content() {
     }
   };
 
-  // Handler for sending text messages
-  const handleSendTextMessage = () => {
-    if (!textInput.trim()) return;
-
-    console.log('[InterviewChatV2] Sending text message:', textInput);
-
-    const messageText = textInput;
-
-    // Add user message to chat immediately
-    const userMessage: Message = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type: 'text-response',
-      content: messageText,
-      timestamp: new Date(),
-      sender: 'user',
-    };
-    setMessages(prev => [...prev, userMessage]);
-
-    setTextInput(''); // Clear input immediately
-
-    // Send text to Realtime API immediately (no artificial delay)
-    sendTextMessage(messageText);
-  };
-
   // Realtime API integration
   const {
     status: realtimeStatus,
@@ -176,6 +161,14 @@ function InterviewChatV2Content() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Auto-scroll to latest when typing indicators change
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [messages.length]);
+
   // Clean up recording state on unmount
   useEffect(() => {
     return () => {
@@ -183,6 +176,37 @@ function InterviewChatV2Content() {
       stopSession();
     };
   }, [stopRecordingState, stopSession]);
+
+  // Dynamic page title for quick glance
+  useEffect(() => {
+    const formatTime = (sec: number) => {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    };
+    document.title = `${isRecording ? (isPaused ? "Paused" : "Listening") : "Interview"} — ${formatTime(recordingDuration)}`;
+  }, [isRecording, isPaused, recordingDuration]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
+
+      if (e.code === "Space" && isRecording) {
+        e.preventDefault();
+        handlePauseContinue();
+      } else if ((e.key === "e" || e.key === "E") && (e.metaKey || e.ctrlKey) && isRecording) {
+        e.preventDefault();
+        handleCompleteInterview();
+      } else if (e.key === "Escape" && isRecording) {
+        e.preventDefault();
+        setShowCancelConfirm(true);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isRecording, isPaused]);
 
   // Initialize conversation after welcome dismissed
   const handleWelcomeDismiss = async () => {
@@ -229,7 +253,7 @@ After they answer, continue the conversation naturally with follow-up questions 
       await startSession(
         (finalText) => {
           // Handle final user transcript
-          console.log('[InterviewChatV2] User transcript:', finalText);
+          console.log('[InterviewChat] User transcript:', finalText);
 
           const userMessage: Message = {
             id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -242,7 +266,7 @@ After they answer, continue the conversation naturally with follow-up questions 
           setMessages(prev => [...prev, userMessage]);
         },
         (error) => {
-          console.error('[InterviewChatV2] Realtime error:', error);
+          console.error('[InterviewChat] Realtime error:', error);
           setErrorMessage(`Realtime API error: ${error.message}`);
           setShowErrorModal(true);
         },
@@ -251,15 +275,15 @@ After they answer, continue the conversation naturally with follow-up questions 
           instructions: sessionInstructions,
           modalities: ['text', 'audio'],
           voice: 'alloy',
-          temperature: 0.6, // Minimum allowed by Realtime API (was 0.5 but API requires ≥ 0.6)
+          temperature: 0.6, // Minimum allowed by Realtime API
         },
         (assistantText) => {
           // Handle Pearl's response
-          console.log('[InterviewChatV2] Pearl said:', assistantText);
+          console.log('[InterviewChat] Pearl said:', assistantText);
 
           // Check if this is the "composing" signal
           if (assistantText === '__COMPOSING__') {
-            console.log('[InterviewChatV2] Pearl is composing...');
+            console.log('[InterviewChat] Pearl is composing...');
             // Add typing indicator
             const typingMessage: Message = {
               id: 'typing-indicator',
@@ -287,12 +311,12 @@ After they answer, continue the conversation naturally with follow-up questions 
       );
 
       // After session successfully starts, trigger Pearl to speak first
-      console.log('[InterviewChatV2] Session started, triggering Pearl to speak first...');
+      console.log('[InterviewChat] Session started, triggering Pearl to speak first...');
       setTimeout(() => {
         triggerPearlResponse();
       }, 1500); // Delay to ensure WebRTC data channel is fully open
     } catch (error) {
-      console.error('[InterviewChatV2] Failed to start session:', error);
+      console.error('[InterviewChat] Failed to start session:', error);
       setErrorMessage('Failed to start voice session. Please try again.');
       setShowErrorModal(true);
       setIsRecording(false);
@@ -314,7 +338,7 @@ After they answer, continue the conversation naturally with follow-up questions 
     const mixedBlob = getMixedAudioBlob();
     stopSession();
 
-    console.log('[InterviewChatV2] Conversation ended. Mixed audio:', mixedBlob?.size || 0, 'bytes');
+    console.log('[InterviewChat] Conversation ended. Mixed audio:', mixedBlob?.size || 0, 'bytes');
   };
 
   // Complete interview
@@ -342,7 +366,7 @@ After they answer, continue the conversation naturally with follow-up questions 
     const mixedBlob = getMixedAudioBlob(); // User + Pearl (for debugging)
     const userOnlyBlob = getUserOnlyAudioBlob(); // User voice only (for final story)
 
-    console.log('[InterviewChatV2] Audio blobs:', {
+    console.log('[InterviewChat] Audio blobs:', {
       mixed: mixedBlob?.size || 0,
       userOnly: userOnlyBlob?.size || 0
     });
@@ -367,17 +391,10 @@ After they answer, continue the conversation naturally with follow-up questions 
     stopRecordingState();
   };
 
-  // Format recording time
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-page)' }}>
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F5F0]">
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-4 animate-pulse" />
           <p className="text-gray-600">Loading...</p>
@@ -389,7 +406,7 @@ After they answer, continue the conversation naturally with follow-up questions 
   if (!user) return null;
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-page)' }}>
+    <div className="min-h-screen bg-[#F5F5F0]">
       {/* Welcome Modal */}
       {showWelcome && (
         <WelcomeModal
@@ -437,180 +454,60 @@ After they answer, continue the conversation naturally with follow-up questions 
         variant="primary"
       />
 
-      {/* Chat Container */}
-      <div className="max-w-3xl mx-auto flex flex-col h-screen">
-        {/* Header - Compact */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-2">
-          <div className="flex flex-col items-center gap-1">
-            <Image
-              src="/Logo hw.svg"
-              alt="Heritage Whisper"
-              width={300}
-              height={75}
-              className="h-10 w-auto"
-              priority
+      {/* Layout container */}
+      <div className="min-h-screen flex justify-center">
+        <div className="w-full max-w-md flex flex-col">
+          {/* Top status bar */}
+          {isRecording && (
+            <StatusBar
+              listening={!isPaused}
+              seconds={recordingDuration}
+              onToggle={handlePauseContinue}
+              reduceMotion={reduceMotion}
             />
+          )}
 
-            {/* Status and Timer */}
-            {isRecording && (
-              <div className="flex items-center gap-2 text-xs">
-                <div className={`w-2 h-2 rounded-full ${isPaused ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`}></div>
-                <span className="font-medium text-gray-700">
-                  {isPaused ? 'Paused' : 'Active'}
-                </span>
-                <span className="text-gray-500">•</span>
-                <span className="tabular-nums text-gray-600">{formatTime(recordingDuration)}</span>
-              </div>
-            )}
+          {/* Scrollable content area */}
+          <div
+            ref={scrollRef}
+            className="flex-1 overflow-y-auto relative"
+            style={{
+              paddingBottom: "120px",
+            }}
+          >
+            {isRecording && <DayPillBar />}
 
-            {/* Action Buttons */}
-            {isRecording && (
-              <div className="flex gap-2">
-                <button
-                  onClick={handleCompleteInterview}
-                  className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-medium px-3 py-1 rounded-full text-xs transition-all shadow-md"
-                >
-                  Complete Interview
-                </button>
-                {isPaused && (
-                  <button
-                    onClick={handleRestartConversation}
-                    className="bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium px-3 py-1 rounded-full text-xs transition-all flex items-center gap-1"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    Restart
-                  </button>
-                )}
-                <button
-                  onClick={() => setShowCancelConfirm(true)}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-3 py-1 rounded-full text-xs transition-all"
-                >
-                  Cancel
-                </button>
+            <div className="w-full">
+              <div className="max-w-md mx-auto px-4">
+                <div className="flex flex-col gap-4 py-2" role="log" aria-live="polite" aria-relevant="additions">
+                  {messages.map((message) => (
+                    <div key={message.id}>
+                      {message.type === 'typing' ? (
+                        <TypingIndicator reduceMotion={reduceMotion} />
+                      ) : (
+                        <ChatMessage message={message} />
+                      )}
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
               </div>
+            </div>
+
+            {/* Soft bottom fade to separate content from action bar */}
+            {isRecording && (
+              <div className="pointer-events-none sticky bottom-0 h-14 bg-gradient-to-t from-[#F5F5F0] via-[#F5F5F0]/60 to-transparent -mb-2"></div>
             )}
           </div>
-        </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-6 space-y-4 pb-80 md:pb-96"> {/* Added large padding for footer and text input */}
-          {messages.map((message) => (
-            <div key={message.id}>
-              {message.type === 'typing' ? (
-                <TypingIndicator />
-              ) : (
-                <ChatMessage message={message} />
-              )}
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Voice Controls - Minimal Footer Above Nav */}
-        <div className="fixed bottom-16 md:bottom-24 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-3 py-1.5 z-30 shadow-sm">
-          {/* Provisional Transcript Display - Smaller */}
-          {isRecording && provisionalTranscript && (
-            <div className="mb-1 px-2 py-0.5 rounded bg-gray-50 border border-gray-100">
-              <p className="text-xs text-gray-600 italic truncate">{provisionalTranscript}</p>
-            </div>
-          )}
-
-          {/* Compact Control Bar */}
+          {/* Bottom glass actions */}
           {isRecording && (
-            <div className="flex items-center justify-center gap-3">
-              {/* Pause/Continue Toggle */}
-              <button
-                onClick={handlePauseContinue}
-                className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  isPaused
-                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                }`}
-                title={isPaused ? 'Continue conversation' : 'Pause conversation'}
-              >
-                {isPaused ? (
-                  <Play className="w-4 h-4" />
-                ) : (
-                  <Pause className="w-4 h-4" />
-                )}
-                <span className="ml-1.5">{isPaused ? 'Continue' : 'Pause'}</span>
-              </button>
-
-              {/* Pearl Voice Toggle */}
-              <button
-                onClick={toggleVoice}
-                className={`flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  voiceEnabled
-                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-                title={voiceEnabled ? 'Mute Pearl' : 'Unmute Pearl'}
-              >
-                {voiceEnabled ? (
-                  <Volume2 className="w-4 h-4" />
-                ) : (
-                  <VolumeX className="w-4 h-4" />
-                )}
-                <span className="ml-1.5">{voiceEnabled ? 'Mute Pearl' : 'Unmute Pearl'}</span>
-              </button>
-
-              {/* Mode Toggle */}
-              <div className="flex bg-gray-100 rounded-full p-0.5">
-                <button
-                  onClick={() => setInputMode('voice')}
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-medium transition-all ${
-                    inputMode === 'voice'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Voice
-                </button>
-                <button
-                  onClick={() => setInputMode('text')}
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-medium transition-all ${
-                    inputMode === 'text'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Type
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Text Input */}
-          {inputMode === 'text' && isRecording && (
-            <div className="flex flex-col gap-2 mt-2">
-              <textarea
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && textInput.trim()) {
-                    e.preventDefault();
-                    handleSendTextMessage();
-                  }
-                }}
-                placeholder="Type your response..."
-                rows={4}
-                className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-base resize-none"
-              />
-              <button
-                onClick={handleSendTextMessage}
-                disabled={!textInput.trim()}
-                className="w-full py-3 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-lg text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-600 hover:to-rose-600 transition-all shadow-md"
-              >
-                Send
-              </button>
-            </div>
-          )}
-
-          {/* Error Display */}
-          {realtimeError && (
-            <div className="mt-1 px-2 py-1 rounded bg-red-50 border border-red-100">
-              <p className="text-xs text-red-600">{realtimeError}</p>
-            </div>
+            <BottomGlassBar
+              onEnd={handleCompleteInterview}
+              onPauseResume={handlePauseContinue}
+              onCancel={() => setShowCancelConfirm(true)}
+              isPaused={isPaused}
+            />
           )}
         </div>
       </div>
@@ -618,17 +515,17 @@ After they answer, continue the conversation naturally with follow-up questions 
   );
 }
 
-export default function InterviewChatV2Page() {
+export default function InterviewChatPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-page)' }}>
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F5F0]">
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-4 animate-pulse" />
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     }>
-      <InterviewChatV2Content />
+      <InterviewChatContent />
     </Suspense>
   );
 }

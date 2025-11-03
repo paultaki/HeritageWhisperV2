@@ -11,6 +11,7 @@ interface ChatMessageProps {
 export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.sender === 'user';
   const isSystem = message.sender === 'system';
+  const isPearl = message.sender === 'hw';
 
   // System messages (centered)
   if (isSystem) {
@@ -99,69 +100,31 @@ export function ChatMessage({ message }: ChatMessageProps) {
     );
   }
 
-  // Question bubbles (HW - left side)
+  // Question bubbles (Pearl - left side)
   if (message.type === 'question') {
     return (
-      <>
-        <div className="flex justify-start">
-          <div className="max-w-[75%]">
-            {/* Sender label */}
-            <div className="mb-1 px-3 text-xs font-medium">
-              <span className="shimmer-text">Pearl</span>
-            </div>
-            {/* Bubble */}
-            <div
-              className="px-5 py-3 rounded-3xl rounded-tl-sm bg-white shadow-md"
-              style={{
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              }}
-            >
-              <p
-                className="text-base leading-relaxed"
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  color: '#1f0f08',
-                  fontSize: '18px',
-                }}
-              >
-                {message.content}
-              </p>
-            </div>
-            {/* Timestamp */}
-            <div className="mt-1 px-3 text-xs text-gray-400">
-              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </div>
+      <div className="flex justify-start">
+        <div className="max-w-[78%]">
+          {/* Sender label */}
+          <div className="mb-1 px-3 text-[13px] font-medium text-slate-600">
+            Pearl
+          </div>
+          {/* Bubble */}
+          <div
+            className="rounded-2xl px-4 py-3 shadow-sm ring-1 bg-[#E8D5F2] text-[#2C2C2C] ring-[#8B5CF6]/30"
+            role="text"
+            aria-label={`Pearl says ${message.content}`}
+          >
+            <p className="text-[16px] leading-relaxed">
+              {message.content}
+            </p>
+          </div>
+          {/* Timestamp */}
+          <div className="mt-1 px-3 text-[12px] text-[#6B7280]">
+            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
         </div>
-
-        <style jsx>{`
-          .shimmer-text {
-            background: linear-gradient(
-              90deg,
-              #D97706 0%,
-              #F59E0B 25%,
-              #FBBF24 50%,
-              #F59E0B 75%,
-              #D97706 100%
-            );
-            background-size: 200% auto;
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shimmer 3s linear infinite;
-            font-weight: 600;
-          }
-
-          @keyframes shimmer {
-            0% {
-              background-position: 200% center;
-            }
-            100% {
-              background-position: -200% center;
-            }
-          }
-        `}</style>
-      </>
+      </div>
     );
   }
 
@@ -169,31 +132,29 @@ export function ChatMessage({ message }: ChatMessageProps) {
   if (message.type === 'audio-response') {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[75%]">
+        <div className="max-w-[78%]">
           {/* Sender label */}
-          <div className="mb-1 px-3 text-xs text-gray-500 font-medium text-right">
+          <div className="mb-1 px-3 text-[13px] font-medium text-slate-600 text-right">
             You
           </div>
           {/* Bubble */}
           <div
-            className="px-4 py-3 rounded-3xl rounded-tr-sm text-white"
-            style={{
-              background: 'linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)',
-              boxShadow: '0 2px 8px rgba(245,158,11,0.3)',
-            }}
+            className="rounded-2xl px-4 py-3 shadow-sm ring-1 bg-white text-[#2C2C2C] ring-black/5"
+            role="text"
+            aria-label={`You said ${message.content}`}
           >
             <AudioPlayer
               audioBlob={message.audioBlob}
               duration={message.audioDuration || 0}
             />
             {message.content && (
-              <p className="text-base mt-2 opacity-90" style={{ fontSize: '15px' }}>
+              <p className="text-[16px] leading-relaxed mt-2">
                 {message.content}
               </p>
             )}
           </div>
           {/* Timestamp */}
-          <div className="mt-1 px-3 text-xs text-gray-400 text-right">
+          <div className="mt-1 px-3 text-[12px] text-[#6B7280] text-right">
             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
         </div>
@@ -205,25 +166,23 @@ export function ChatMessage({ message }: ChatMessageProps) {
   if (message.type === 'text-response') {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[75%]">
+        <div className="max-w-[78%]">
           {/* Sender label */}
-          <div className="mb-1 px-3 text-xs text-gray-500 font-medium text-right">
+          <div className="mb-1 px-3 text-[13px] font-medium text-slate-600 text-right">
             You
           </div>
           {/* Bubble */}
           <div
-            className="px-5 py-3 rounded-3xl rounded-tr-sm text-white"
-            style={{
-              background: 'linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)',
-              boxShadow: '0 2px 8px rgba(245,158,11,0.3)',
-            }}
+            className="rounded-2xl px-4 py-3 shadow-sm ring-1 bg-white text-[#2C2C2C] ring-black/5"
+            role="text"
+            aria-label={`You said ${message.content}`}
           >
-            <p className="text-base leading-relaxed" style={{ fontSize: '17px' }}>
+            <p className="text-[16px] leading-relaxed">
               {message.content}
             </p>
           </div>
           {/* Timestamp */}
-          <div className="mt-1 px-3 text-xs text-gray-400 text-right">
+          <div className="mt-1 px-3 text-[12px] text-[#6B7280] text-right">
             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
         </div>
@@ -295,73 +254,43 @@ function AudioPlayer({ audioBlob, duration }: AudioPlayerProps) {
   const bars = [0.3, 0.7, 0.5, 0.9, 0.6, 0.4, 0.8, 0.5, 0.7, 0.3, 0.6, 0.8, 0.5, 0.4, 0.7];
 
   return (
-    <>
-      <div className="flex items-center gap-3">
-        {/* Play/Pause Button */}
-        <button
-          onClick={togglePlay}
-          className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors flex-shrink-0"
-          aria-label={isPlaying ? 'Pause' : 'Play'}
-        >
-          {isPlaying ? (
-            <Pause className="w-4 h-4 text-white fill-white" />
-          ) : (
-            <Play className="w-4 h-4 text-white fill-white ml-0.5" />
-          )}
-        </button>
-
-        {/* Waveform Visualization */}
-        <div className="flex items-center gap-0.5 flex-1 h-8">
-          {bars.map((height, i) => (
-            <div
-              key={i}
-              className="w-1 bg-white/70 rounded-full transition-all"
-              style={{
-                height: `${height * 100}%`,
-                opacity: isPlaying ? 1 : 0.7,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Duration */}
-        <div className="text-sm font-medium tabular-nums flex-shrink-0">
-          {formatTime(isPlaying ? currentTime : duration)}
-        </div>
-
-        {/* Hidden Audio Element */}
-        {audioUrl && (
-          <audio ref={audioRef} src={audioUrl} preload="metadata" />
+    <div className="flex items-center gap-3">
+      {/* Play/Pause Button */}
+      <button
+        onClick={togglePlay}
+        className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors flex-shrink-0"
+        aria-label={isPlaying ? 'Pause' : 'Play'}
+      >
+        {isPlaying ? (
+          <Pause className="w-4 h-4 text-slate-700 fill-slate-700" />
+        ) : (
+          <Play className="w-4 h-4 text-slate-700 fill-slate-700 ml-0.5" />
         )}
+      </button>
+
+      {/* Waveform Visualization */}
+      <div className="flex items-center gap-0.5 flex-1 h-8">
+        {bars.map((height, i) => (
+          <div
+            key={i}
+            className="w-1 bg-slate-300 rounded-full transition-all"
+            style={{
+              height: `${height * 100}%`,
+              opacity: isPlaying ? 1 : 0.7,
+            }}
+          />
+        ))}
       </div>
 
-      <style jsx>{`
-        .shimmer-text {
-          background: linear-gradient(
-            90deg,
-            #D97706 0%,
-            #F59E0B 25%,
-            #FBBF24 50%,
-            #F59E0B 75%,
-            #D97706 100%
-          );
-          background-size: 200% auto;
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: shimmer 3s linear infinite;
-          font-weight: 600;
-        }
+      {/* Duration */}
+      <div className="text-sm font-medium tabular-nums flex-shrink-0 text-slate-600">
+        {formatTime(isPlaying ? currentTime : duration)}
+      </div>
 
-        @keyframes shimmer {
-          0% {
-            background-position: 200% center;
-          }
-          100% {
-            background-position: -200% center;
-          }
-        }
-      `}</style>
-    </>
+      {/* Hidden Audio Element */}
+      {audioUrl && (
+        <audio ref={audioRef} src={audioUrl} preload="metadata" />
+      )}
+    </div>
   );
 }

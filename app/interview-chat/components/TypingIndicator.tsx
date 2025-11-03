@@ -1,61 +1,54 @@
 "use client";
 
-export function TypingIndicator() {
+import { useEffect, useState } from "react";
+
+interface TypingIndicatorProps {
+  reduceMotion?: boolean;
+}
+
+export function TypingIndicator({ reduceMotion = false }: TypingIndicatorProps) {
+  // Hook to detect prefers-reduced-motion if not provided
+  const [prefersReduced, setPrefersReduced] = useState(false);
+
+  useEffect(() => {
+    if (reduceMotion === undefined) {
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const onChange = () => setPrefersReduced(mq.matches);
+      onChange();
+      mq.addEventListener?.("change", onChange);
+      return () => mq.removeEventListener?.("change", onChange);
+    }
+  }, [reduceMotion]);
+
+  const shouldReduceMotion = reduceMotion ?? prefersReduced;
+
   return (
     <div className="flex justify-start">
-      <div className="max-w-[75%]">
+      <div className="max-w-[78%]">
         {/* Sender label */}
-        <div className="mb-1 px-3 text-xs text-gray-500 font-medium">
+        <div className="mb-1 px-3 text-[13px] font-medium text-slate-600">
           Pearl
         </div>
-        {/* Bubble */}
+        {/* Bubble with typing dots */}
         <div
-          className="px-5 py-4 rounded-3xl rounded-tl-sm bg-white shadow-md inline-flex items-center gap-1"
-          style={{
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-          }}
+          className="rounded-2xl px-4 py-3 shadow-sm ring-1 bg-[#E8D5F2] text-[#2C2C2C] ring-[#8B5CF6]/30"
+          role="status"
+          aria-label="Pearl is typing"
         >
-          {/* Animated dots */}
-          <div className="flex items-center gap-1">
-            <div
-              className="w-2 h-2 rounded-full bg-gray-400"
-              style={{
-                animation: 'typing-dot 1.4s infinite',
-                animationDelay: '0s',
-              }}
+          <div className="flex items-center gap-1 text-[#6B7280]">
+            <span
+              className={`h-1.5 w-1.5 rounded-full bg-current opacity-70 ${!shouldReduceMotion ? 'animate-pulse' : ''}`}
+              style={{ animationDelay: "0ms" }}
             />
-            <div
-              className="w-2 h-2 rounded-full bg-gray-400"
-              style={{
-                animation: 'typing-dot 1.4s infinite',
-                animationDelay: '0.2s',
-              }}
+            <span
+              className={`h-1.5 w-1.5 rounded-full bg-current opacity-70 ${!shouldReduceMotion ? 'animate-pulse' : ''}`}
+              style={{ animationDelay: "150ms" }}
             />
-            <div
-              className="w-2 h-2 rounded-full bg-gray-400"
-              style={{
-                animation: 'typing-dot 1.4s infinite',
-                animationDelay: '0.4s',
-              }}
+            <span
+              className={`h-1.5 w-1.5 rounded-full bg-current opacity-70 ${!shouldReduceMotion ? 'animate-pulse' : ''}`}
+              style={{ animationDelay: "300ms" }}
             />
           </div>
-
-          <style jsx>{`
-            @keyframes typing-dot {
-              0%, 60%, 100% {
-                transform: translateY(0);
-                opacity: 0.7;
-              }
-              30% {
-                transform: translateY(-8px);
-                opacity: 1;
-              }
-            }
-          `}</style>
-        </div>
-        {/* Helper text */}
-        <div className="mt-1 px-3 text-xs text-gray-400 italic">
-          Thinking...
         </div>
       </div>
     </div>
