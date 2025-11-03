@@ -1461,8 +1461,6 @@ function MobilePage({
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
-  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
-  const [allowContentScroll, setAllowContentScroll] = useState(true);
   
   // Check if content is scrollable and track user scroll
   useEffect(() => {
@@ -1584,7 +1582,8 @@ function MobilePage({
       maxWidth: "calc(100vw + 20px)",
       maxHeight: "calc(100dvh - 100px)",
       aspectRatio: "5.5 / 8.5",
-      objectFit: "contain"
+      objectFit: "contain",
+      pointerEvents: 'none'
     }}>
       {/* Outer book cover/border */}
       <div 
@@ -1618,38 +1617,13 @@ function MobilePage({
         ></div>
 
         <div className="relative h-full w-full p-2">
-          <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden">
+          <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden relative">
             <div 
               ref={scrollRef}
-              className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-3 overflow-y-auto"
+              className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-3 overflow-y-auto relative z-0"
               style={{ 
                 overscrollBehavior: 'contain',
-                pointerEvents: allowContentScroll ? 'auto' : 'none'
-              }}
-              onTouchStart={(e) => {
-                const touch = e.touches[0];
-                touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
-              }}
-              onTouchMove={(e) => {
-                if (!touchStartRef.current) return;
-                
-                const touch = e.touches[0];
-                const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
-                const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
-                
-                // On first significant movement, decide direction
-                if (deltaX > 5 || deltaY > 5) {
-                  if (deltaX > deltaY * 1.3) {
-                    // Horizontal swipe - disable content to let parent handle it
-                    setAllowContentScroll(false);
-                  }
-                  touchStartRef.current = null; // Only check once
-                }
-              }}
-              onTouchEnd={() => {
-                touchStartRef.current = null;
-                // Re-enable content scroll for next gesture
-                setTimeout(() => setAllowContentScroll(true), 50);
+                pointerEvents: 'auto'
               }}
               onScroll={() => {
                 if (scrollRef.current && scrollRef.current.scrollTop > 50) {
