@@ -88,10 +88,10 @@ export default function BookPageCard({ story, isActive }: BookPageCardProps) {
         {/* Vertical scroller */}
         <div
           ref={scrollerRef}
-          className="relative h-full overflow-y-auto overscroll-contain"
+          className="relative h-full overflow-y-auto overscroll-contain pt-[76px]"
         >
           {/* Header image */}
-          <div className="px-3 pt-[23px]">
+          <div className="px-3 pt-5">
             <div
               className="relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-stone-200"
               style={{ aspectRatio: "16/10" }}

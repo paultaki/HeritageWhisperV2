@@ -173,7 +173,7 @@ export default function BookAudioPlayer({
       {/* Play/Pause button */}
       <button
         onClick={togglePlay}
-        className="relative grid h-12 w-12 place-items-center rounded-full bg-stone-900 text-white shadow-md ring-1 ring-stone-800 transition active:scale-95"
+        className="relative grid h-12 w-12 flex-shrink-0 place-items-center rounded-full bg-stone-900 text-white shadow-md ring-1 ring-stone-800 transition active:scale-95"
         aria-label={isPlaying ? "Pause" : "Play"}
       >
         {isPlaying ? (
@@ -184,7 +184,7 @@ export default function BookAudioPlayer({
       </button>
 
       {/* Progress bar and time */}
-      <div className="flex-1">
+      <div className="flex flex-1 flex-col justify-center">
         {/* Scrub bar */}
         <div
           ref={scrubBarRef}

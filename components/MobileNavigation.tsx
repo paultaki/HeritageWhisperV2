@@ -33,7 +33,7 @@ const NavItem: React.FC<NavItemProps> = ({
   return (
     <button
       onClick={handleClick}
-      className={`flex flex-col items-center gap-1 py-3 transition ${
+      className={`flex flex-col items-center gap-1 py-2 transition ${
         isActive ? "text-white" : "text-white/70 hover:text-white"
       }`}
     >
@@ -61,8 +61,8 @@ export default function MobileNavigation() {
     <nav
       className="md:hidden fixed bottom-0 inset-x-0 z-[9999] px-4"
       style={{
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 6px)",
-        paddingTop: "8px",
+        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4px)",
+        paddingTop: "4px",
       }}
     >
       <div className="mx-auto max-w-md rounded-2xl bg-black/40 text-white backdrop-blur-md ring-1 ring-white/10">

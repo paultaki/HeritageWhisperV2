@@ -14,7 +14,7 @@ export default function NavigationArrows({
       {/* Previous button */}
       <button
         onClick={onPrevious}
-        className={`pointer-events-auto ml-3 grid h-11 w-11 place-items-center rounded-full bg-black/40 text-white shadow-lg backdrop-blur-md ring-1 ring-white/10 transition active:scale-95 ${
+        className={`pointer-events-auto ml-3 grid h-11 w-11 place-items-center rounded-full bg-black/5 text-stone-500 shadow-sm backdrop-blur-sm ring-1 ring-black/5 transition active:scale-95 ${
           canGoPrevious ? "opacity-100" : "opacity-0"
         }`}
         aria-label="Previous"
@@ -27,7 +27,7 @@ export default function NavigationArrows({
       {/* Next button */}
       <button
         onClick={onNext}
-        className={`pointer-events-auto mr-3 grid h-11 w-11 place-items-center rounded-full bg-black/40 text-white shadow-lg backdrop-blur-md ring-1 ring-white/10 transition active:scale-95 ${
+        className={`pointer-events-auto mr-3 grid h-11 w-11 place-items-center rounded-full bg-black/5 text-stone-500 shadow-sm backdrop-blur-sm ring-1 ring-black/5 transition active:scale-95 ${
           canGoNext ? "opacity-100" : "opacity-0"
         }`}
         aria-label="Next"

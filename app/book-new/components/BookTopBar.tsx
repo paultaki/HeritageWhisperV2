@@ -11,7 +11,7 @@ export default function BookTopBar({
   onTocClick,
 }: BookTopBarProps) {
   return (
-    <header className="absolute inset-x-0 top-0 z-40 flex h-[56px] items-center justify-between gap-3 px-4 pt-[env(safe-area-inset-top)]">
+    <header className="fixed inset-x-0 top-0 z-40 flex h-[56px] items-center justify-between gap-3 px-4 pt-[env(safe-area-inset-top)]">
       {/* Left side: Avatar and title */}
       <div className="flex min-w-0 items-center gap-3">
         {/* User avatar */}
