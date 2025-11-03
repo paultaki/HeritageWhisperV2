@@ -335,53 +335,50 @@ export function useRealtimeInterview() {
           cancelSentRef.current = false; // Reset cancel flag for next response
         },
 
-        // Barge-in: Pause audio when user speaks (only if mic is enabled)
-        // Uses 400ms delay to prevent false positives from ambient noise
+        // Barge-in: DISABLED - Pearl will not be interrupted while speaking
+        // User speech is still transcribed and processed after Pearl finishes
         onSpeechStarted: () => {
           if (!micEnabledRef.current) {
-            console.log('[RealtimeInterview] User speech detected but mic is muted - ignoring barge-in');
+            console.log('[RealtimeInterview] User speech detected but mic is muted - ignoring');
             return;
           }
 
-          console.log('[RealtimeInterview] User speech detected - starting barge-in delay...');
+          console.log('[RealtimeInterview] User speech detected - but barge-in is disabled, Pearl will continue speaking');
 
-          // Clear any existing timeout
-          if (bargeInTimeoutRef.current) {
-            clearTimeout(bargeInTimeoutRef.current);
-          }
+          // BARGE-IN DISABLED: The following code would pause Pearl's audio when user speaks
+          // Left commented for future reference if this behavior needs to be re-enabled
 
-          // Wait 400ms before pausing (filters out brief noise spikes)
-          bargeInTimeoutRef.current = setTimeout(() => {
-            console.log('[RealtimeInterview] Barge-in delay complete - pausing Pearl');
-            if (audioElementRef.current && !audioElementRef.current.paused) {
-              audioElementRef.current.pause();
-              console.log('[RealtimeInterview] Audio paused for barge-in');
-            }
-            bargeInTimeoutRef.current = null;
-          }, 400); // 400ms delay filters ambient noise
+          // // Clear any existing timeout
+          // if (bargeInTimeoutRef.current) {
+          //   clearTimeout(bargeInTimeoutRef.current);
+          // }
+
+          // // Wait 400ms before pausing (filters out brief noise spikes)
+          // bargeInTimeoutRef.current = setTimeout(() => {
+          //   console.log('[RealtimeInterview] Barge-in delay complete - pausing Pearl');
+          //   if (audioElementRef.current && !audioElementRef.current.paused) {
+          //     audioElementRef.current.pause();
+          //     console.log('[RealtimeInterview] Audio paused for barge-in');
+          //   }
+          //   bargeInTimeoutRef.current = null;
+          // }, 400);
         },
 
         // User stopped speaking - set buffering flag for message ordering
         onSpeechStopped: () => {
           console.log('[RealtimeInterview] User stopped speaking - expecting transcript soon');
 
-          // Cancel barge-in timeout if speech was too short (false positive)
+          // Cancel barge-in timeout if it exists (though it shouldn't be set anymore)
           if (bargeInTimeoutRef.current) {
             clearTimeout(bargeInTimeoutRef.current);
             bargeInTimeoutRef.current = null;
-            console.log('[RealtimeInterview] Cancelled barge-in (speech too brief)');
+            console.log('[RealtimeInterview] Cancelled barge-in timeout');
           }
 
           waitingForUserTranscriptRef.current = true;
 
-          // Resume audio playback after user stops speaking
-          if (audioElementRef.current && audioElementRef.current.paused && voiceEnabled) {
-            audioElementRef.current.play().then(() => {
-              console.log('[RealtimeInterview] 🔊 Audio resumed after user stopped speaking');
-            }).catch(err => {
-              console.error('[RealtimeInterview] Failed to resume audio:', err);
-            });
-          }
+          // NO NEED TO RESUME AUDIO: Since barge-in is disabled, audio was never paused
+          // The user's speech will be transcribed and processed after Pearl finishes speaking
         },
 
         // Connection established

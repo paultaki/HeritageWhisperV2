@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { usePathname } from "next/navigation";
 import MobileNavigation from "./MobileNavigation";
 import HamburgerMenu from "./HamburgerMenu";
 import { useModeSelection } from "@/hooks/use-mode-selection";
@@ -9,14 +10,18 @@ import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 
 export default function NavigationWrapper() {
   const modeSelection = useModeSelection();
+  const pathname = usePathname();
+
+  // Hide all navigation on interview-chat page (has its own custom nav)
+  const isInterviewChat = pathname === '/interview-chat';
 
   return (
     <>
-      {/* Mobile Navigation (bottom bar) - shows on all pages */}
-      <MobileNavigation />
+      {/* Mobile Navigation (bottom bar) - shows on all pages except interview-chat */}
+      {!isInterviewChat && <MobileNavigation />}
 
-      {/* Hamburger Menu (top right) - hidden on book page per component logic */}
-      <HamburgerMenu />
+      {/* Hamburger Menu (top right) - hidden on book page and interview-chat */}
+      {!isInterviewChat && <HamburgerMenu />}
 
       {/* Mode Selection Modal */}
       <ModeSelectionModal

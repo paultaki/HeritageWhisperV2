@@ -121,6 +121,14 @@ export async function GET(request: NextRequest) {
       return data?.signedUrl || null;
     };
 
+    // Debug: Check what photo URLs we have
+    console.log('[Stories API] Processing', stories?.length, 'stories');
+    const storiesWithPhotos = stories?.filter(s => s.photo_url) || [];
+    console.log('[Stories API]', storiesWithPhotos.length, 'stories have photo_url field');
+    if (storiesWithPhotos.length > 0) {
+      console.log('[Stories API] Sample photo_url:', storiesWithPhotos[0].photo_url);
+    }
+
     // Transform to match frontend expectations
     const transformedStories = await Promise.all(
       (stories || []).map(async (story) => {
@@ -136,6 +144,16 @@ export async function GET(request: NextRequest) {
         }
 
         const photoUrl = await getPhotoUrl(story.photo_url);
+
+        // Debug photo URL generation
+        if (story.photo_url) {
+          logger.debug(`[Stories API] Photo URL transform:`, {
+            storyId: story.id,
+            storyTitle: story.title,
+            rawPhotoUrl: story.photo_url,
+            generatedPhotoUrl: photoUrl,
+          });
+        }
 
         return {
           id: story.id,

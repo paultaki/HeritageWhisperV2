@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAccountContext } from "@/hooks/use-account-context";
+import { supabase } from "@/lib/supabase";
 import { Story } from "@/shared/schema";
 import { BookStory, MobileBookViewV2Props } from "./types";
 import BookPageCard from "./BookPageCard";
@@ -26,14 +27,37 @@ export default function MobileBookViewV2({
   const [isTocOpen, setIsTocOpen] = useState(false);
 
   // Fetch stories
+  const storytellerId = activeContext?.storytellerId;
   const { data, isLoading } = useQuery<{ stories: Story[] }>({
-    queryKey: [
-      "/api/stories",
-      activeContext?.storytellerId
-        ? `?storyteller_id=${activeContext.storytellerId}`
-        : "",
-    ],
-    enabled: !!activeContext?.storytellerId,
+    queryKey: ["/api/stories", storytellerId],
+    queryFn: async () => {
+      // Get auth session
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const url = storytellerId
+        ? `/api/stories?storyteller_id=${storytellerId}`
+        : "/api/stories";
+
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      // Add auth token if available
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`;
+      }
+
+      const response = await fetch(url, {
+        headers,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch stories");
+      }
+      return response.json();
+    },
+    enabled: !!storytellerId,
   });
 
   console.log('[MobileBookViewV2] isLoading:', isLoading, 'stories:', data?.stories?.length);

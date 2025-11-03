@@ -28,6 +28,20 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   const [showContinueHint, setShowContinueHint] = useState(false);
   const [showFade, setShowFade] = useState(false);
 
+  // Get the hero photo or first photo (same logic as SimpleMobileBookView)
+  const heroPhoto = story.photos?.find((p) => p.isHero) || story.photos?.[0];
+  const photoUrl = heroPhoto?.url || story.photoUrl;
+  const photoTransform = heroPhoto?.transform || story.photoTransform;
+
+  // Debug: Log photo information
+  console.log('[BookPageCard]', story.title, {
+    hasPhotos: !!story.photos?.length,
+    hasHeroPhoto: !!heroPhoto,
+    hasPhotoUrl: !!story.photoUrl,
+    finalPhotoUrl: photoUrl,
+    hasTransform: !!photoTransform,
+  });
+
   // Check if content overflows and update hint visibility
   const checkOverflow = useCallback(() => {
     if (!scrollerRef.current) return;
@@ -97,22 +111,22 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
               className="relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-stone-200"
               style={{ aspectRatio: "16/10" }}
             >
-              {story.photoUrl ? (
-                story.photoTransform ? (
+              {photoUrl ? (
+                photoTransform ? (
                   // Use <img> tag for images with transform (crop/zoom)
                   <img
-                    src={story.photoUrl}
+                    src={photoUrl}
                     alt={story.title}
                     className="h-full w-full object-cover"
                     style={{
-                      transform: `scale(${story.photoTransform.zoom || 1})`,
-                      transformOrigin: `${story.photoTransform.position?.x || 50}% ${story.photoTransform.position?.y || 50}%`,
+                      transform: `scale(${photoTransform.zoom || 1})`,
+                      transformOrigin: `${photoTransform.position?.x || 50}% ${photoTransform.position?.y || 50}%`,
                     }}
                   />
                 ) : (
                   // Use Next.js Image for untransformed images
                   <Image
-                    src={story.photoUrl}
+                    src={photoUrl}
                     alt={story.title}
                     fill
                     className="object-cover"
