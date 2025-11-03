@@ -10,32 +10,38 @@ export default function NavigationArrows({
   onNext,
 }: NavigationArrowsProps) {
   return (
-    <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-20 flex items-center justify-between">
+    <>
       {/* Previous button */}
       <button
         onClick={onPrevious}
-        className={`pointer-events-auto ml-3 grid h-11 w-11 place-items-center rounded-full bg-black/5 text-stone-500 shadow-sm backdrop-blur-sm ring-1 ring-black/5 transition active:scale-95 ${
+        className={`pointer-events-auto fixed top-1/2 -translate-y-1/2 z-20 text-stone-400 transition active:scale-95 ${
           canGoPrevious ? "opacity-100" : "opacity-0"
         }`}
         aria-label="Previous"
         disabled={!canGoPrevious}
-        style={{ visibility: canGoPrevious ? "visible" : "hidden" }}
+        style={{
+          visibility: canGoPrevious ? "visible" : "hidden",
+          left: '3px'
+        }}
       >
-        <ChevronLeft className="h-5 w-5" />
+        <ChevronLeft className="h-6 w-6" />
       </button>
 
       {/* Next button */}
       <button
         onClick={onNext}
-        className={`pointer-events-auto mr-3 grid h-11 w-11 place-items-center rounded-full bg-black/5 text-stone-500 shadow-sm backdrop-blur-sm ring-1 ring-black/5 transition active:scale-95 ${
+        className={`pointer-events-auto fixed top-1/2 -translate-y-1/2 z-20 text-stone-400 transition active:scale-95 ${
           canGoNext ? "opacity-100" : "opacity-0"
         }`}
         aria-label="Next"
         disabled={!canGoNext}
-        style={{ visibility: canGoNext ? "visible" : "hidden" }}
+        style={{
+          visibility: canGoNext ? "visible" : "hidden",
+          right: '3px'
+        }}
       >
-        <ChevronRight className="h-5 w-5" />
+        <ChevronRight className="h-6 w-6" />
       </button>
-    </div>
+    </>
   );
 }

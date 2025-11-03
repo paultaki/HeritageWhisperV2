@@ -23,7 +23,7 @@ function formatDate(dateString: string | undefined): string {
   }
 }
 
-export default function BookPageCard({ story, isActive }: BookPageCardProps) {
+export default function BookPageCard({ story, isActive, caveatFont }: BookPageCardProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [showContinueHint, setShowContinueHint] = useState(false);
   const [showFade, setShowFade] = useState(false);
@@ -40,13 +40,14 @@ export default function BookPageCard({ story, isActive }: BookPageCardProps) {
     setShowFade(hasOverflow);
   }, []);
 
-  // Handle scroll to hide continue hint
+  // Handle scroll to hide continue hint and gradient
   const handleScroll = useCallback(() => {
     if (!scrollerRef.current) return;
     const isAtTop = scrollerRef.current.scrollTop < 8;
 
     if (!isAtTop) {
       setShowContinueHint(false);
+      setShowFade(false);
     } else {
       checkOverflow();
     }
@@ -167,7 +168,7 @@ export default function BookPageCard({ story, isActive }: BookPageCardProps) {
                   <span className="text-lg">💡</span>
                   <span>Lesson Learned</span>
                 </div>
-                <p className="text-[15px] leading-7 text-amber-900/80">
+                <p className={`text-[40px] leading-[1.6] text-amber-900/80 ${caveatFont || ''}`}>
                   {story.wisdomClipText}
                 </p>
               </div>
@@ -183,11 +184,11 @@ export default function BookPageCard({ story, isActive }: BookPageCardProps) {
 
           {/* Continue reading hint */}
           <div
-            className={`absolute bottom-[88px] left-0 right-0 flex justify-center transition-opacity duration-300 ${
+            className={`absolute bottom-[63px] left-0 right-0 flex justify-center transition-opacity duration-300 ${
               showContinueHint ? "opacity-100" : "opacity-0"
             }`}
           >
-            <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-stone-900 shadow ring-1 ring-stone-200">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-stone-900 shadow-lg backdrop-blur-md ring-1 ring-white/40">
               <span className="text-sm font-medium">Continue reading</span>
               <ChevronDown className="h-4 w-4" />
             </div>

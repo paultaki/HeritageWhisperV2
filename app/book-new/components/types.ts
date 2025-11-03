@@ -41,6 +41,7 @@ export interface PageNavigationState {
  */
 export interface MobileBookViewV2Props {
   initialStoryId?: string; // Optional story ID to jump to on load
+  caveatFont?: string; // Handwritten font class name
 }
 
 /**
@@ -49,6 +50,7 @@ export interface MobileBookViewV2Props {
 export interface BookPageCardProps {
   story: BookStory;
   isActive: boolean;
+  caveatFont?: string; // Handwritten font class name
 }
 
 /**

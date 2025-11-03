@@ -65,12 +65,6 @@ export function TimelineMobileV2() {
     router.push("/subscribe");
   }, [router]);
 
-
-  // CHANGE 5: Handle Add Memory button click
-  const handleAddMemory = useCallback(() => {
-    router.push("/review/book-style?new=true");
-  }, [router]);
-
   // Auth redirect
   useEffect(() => {
     if (!isLoading && !user) {
@@ -221,34 +215,6 @@ export function TimelineMobileV2() {
         </div>
       </main>
 
-      {/* CHANGE 5: Add Memory button - bottom right corner on mobile */}
-      <button
-        onClick={handleAddMemory}
-        className="particle-button-mobile-corner text-white font-medium rounded-full transition-all relative overflow-hidden md:hidden"
-        style={{
-          position: 'fixed',
-          right: '16px',
-          bottom: '48px',
-          zIndex: 40,
-        }}
-      >
-        <div className="points-wrapper-mobile">
-          <i className="point-mobile"></i>
-          <i className="point-mobile"></i>
-          <i className="point-mobile"></i>
-          <i className="point-mobile"></i>
-          <i className="point-mobile"></i>
-          <i className="point-mobile"></i>
-          <i className="point-mobile"></i>
-          <i className="point-mobile"></i>
-          <i className="point-mobile"></i>
-          <i className="point-mobile"></i>
-        </div>
-
-        <span className="button-inner-mobile">
-          + Add Memory
-        </span>
-      </button>
 
       <style jsx global>{`
         /* Override DecadeNav to work in header */

@@ -2,6 +2,12 @@
 
 import { useAuth } from "@/lib/auth";
 import MobileBookViewV2 from "./components/MobileBookViewV2";
+import { Caveat } from "next/font/google";
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function BookNewPage() {
   const { user, isLoading } = useAuth();
@@ -37,7 +43,7 @@ export default function BookNewPage() {
   console.log('[BookNewPage] Rendering MobileBookViewV2');
   return (
     <div className="relative h-[100dvh] w-screen overflow-hidden bg-neutral-950">
-      <MobileBookViewV2 />
+      <MobileBookViewV2 caveatFont={caveat.className} />
     </div>
   );
 }

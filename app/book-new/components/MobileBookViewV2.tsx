@@ -13,6 +13,7 @@ import BookTableOfContents from "./BookTableOfContents";
 
 export default function MobileBookViewV2({
   initialStoryId,
+  caveatFont,
 }: MobileBookViewV2Props) {
   const router = useRouter();
   const { activeContext } = useAccountContext();
@@ -207,6 +208,7 @@ export default function MobileBookViewV2({
             key={story.id}
             story={story}
             isActive={index === currentIndex}
+            caveatFont={caveatFont}
           />
         ))}
       </div>

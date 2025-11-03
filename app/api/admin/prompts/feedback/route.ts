@@ -45,9 +45,21 @@ export async function POST(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
+    logger.info("[Admin Prompts] User check:", {
+      userId: user.id,
+      userEmail: user.email,
+      userData,
+      userError: userError?.message,
+    });
+
     if (userError || userData?.role !== "admin") {
+      logger.warn("[Admin Prompts] Admin access denied:", {
+        userId: user.id,
+        role: userData?.role,
+        error: userError?.message,
+      });
       return NextResponse.json(
-        { error: "Admin access required" },
+        { error: "Admin access required", details: { role: userData?.role, hasError: !!userError } },
         { status: 403 }
       );
     }

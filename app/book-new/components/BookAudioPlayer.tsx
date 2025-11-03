@@ -184,7 +184,7 @@ export default function BookAudioPlayer({
       </button>
 
       {/* Progress bar and time */}
-      <div className="flex flex-1 flex-col justify-center">
+      <div className="flex flex-1 flex-col" style={{ marginTop: '-10px' }}>
         {/* Scrub bar */}
         <div
           ref={scrubBarRef}

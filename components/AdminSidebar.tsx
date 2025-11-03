@@ -21,6 +21,7 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
+  Target,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -62,6 +63,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: "Monitoring",
     items: [
       { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+      { label: "Market Assessment", href: "/admin/market-assessment", icon: Target },
       { label: "North Star", href: "file:///Users/paul/Development/HW_Files/index.html", icon: Compass },
       { label: "AI Prompts Inspector", href: "/admin/ai-prompts", icon: Code },
     ],
@@ -81,6 +83,17 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    title: "Competitors",
+    items: [
+      { label: "StoryWorth", href: "https://www.storyworth.com", icon: Target },
+      { label: "Remento", href: "https://www.remento.co", icon: Target },
+      { label: "Tell Mel", href: "https://www.tellmel.com", icon: Target },
+      { label: "Autobiographer", href: "https://www.autobiographer.com", icon: Target },
+      { label: "Life Story AI", href: "https://www.lifestory.ai", icon: Target },
+      { label: "StoryCorps", href: "https://storycorps.org", icon: Target },
+    ],
+  },
+  {
     title: "External Services",
     items: [
       { label: "Vercel", href: "https://vercel.com/pauls-projects-667765b0/heritage-whisper-v2", icon: Cloud },
@@ -97,6 +110,7 @@ export default function AdminSidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
   const [externalServicesOpen, setExternalServicesOpen] = useState(false);
+  const [competitorsOpen, setCompetitorsOpen] = useState(false);
 
   const isActive = (href: string) => {
     if (href === "/admin") {
@@ -134,16 +148,24 @@ export default function AdminSidebar() {
       <nav className="flex-1 p-4 space-y-6">
         {NAV_SECTIONS.map((section) => {
           const isExternalServices = section.title === "External Services";
+          const isCompetitors = section.title === "Competitors";
+          const isCollapsible = isExternalServices || isCompetitors;
 
           return (
             <div key={section.title}>
-              {isExternalServices ? (
+              {isCollapsible ? (
                 <button
-                  onClick={() => setExternalServicesOpen(!externalServicesOpen)}
+                  onClick={() => {
+                    if (isExternalServices) {
+                      setExternalServicesOpen(!externalServicesOpen);
+                    } else if (isCompetitors) {
+                      setCompetitorsOpen(!competitorsOpen);
+                    }
+                  }}
                   className="w-full flex items-center justify-between px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700 transition-colors"
                 >
                   <span>{section.title}</span>
-                  {externalServicesOpen ? (
+                  {(isExternalServices && externalServicesOpen) || (isCompetitors && competitorsOpen) ? (
                     <ChevronDown className="w-4 h-4" />
                   ) : (
                     <ChevronRight className="w-4 h-4" />
@@ -155,7 +177,9 @@ export default function AdminSidebar() {
                 </h3>
               )}
 
-              {(!isExternalServices || externalServicesOpen) && (
+              {((!isExternalServices && !isCompetitors) ||
+                (isExternalServices && externalServicesOpen) ||
+                (isCompetitors && competitorsOpen)) && (
                 <div className="space-y-1">
                   {section.items.map((item) => {
                     const Icon = item.icon;

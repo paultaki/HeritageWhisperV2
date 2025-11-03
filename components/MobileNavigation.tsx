@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Clock3, BookOpen, User, Lightbulb } from "lucide-react";
+import { Clock3, BookOpen, User, Lightbulb, Mic } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 interface NavItemProps {
@@ -66,7 +66,7 @@ export default function MobileNavigation() {
       }}
     >
       <div className="mx-auto max-w-md rounded-2xl bg-black/40 text-white backdrop-blur-md ring-1 ring-white/10">
-        <div className="grid grid-cols-4 text-center text-[11px] leading-tight">
+        <div className="grid grid-cols-5 text-center text-[11px] leading-tight">
           <NavItem
             icon={Clock3}
             label="Timeline"
@@ -78,6 +78,12 @@ export default function MobileNavigation() {
             label="Book"
             href="/book"
             isActive={pathname.startsWith("/book")}
+          />
+          <NavItem
+            icon={Mic}
+            label="+ Memory"
+            href="/review/book-style?new=true"
+            isActive={false}
           />
           <NavItem
             icon={Lightbulb}
