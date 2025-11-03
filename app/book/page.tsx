@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { Volume2, Pause, Loader2, Clock3, Pencil } from "lucide-react";
+import { Volume2, Pause, Loader2, Clock3, Pencil, Type } from "lucide-react";
 import { BookPage } from "./components/BookPage";
 import DarkBookProgressBar from "./components/DarkBookProgressBar";
 import { BookPage as BookPageType } from "@/lib/bookPagination";
@@ -65,6 +65,7 @@ export default function BookV4Page() {
   const [showToc, setShowToc] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [hasNavigatedToStory, setHasNavigatedToStory] = useState(false);
+  const [fontSize, setFontSize] = useState(17); // Default text size in pixels
   
   const flowLeftRef = useRef<HTMLDivElement>(null);
   const flowRightRef = useRef<HTMLDivElement>(null);
@@ -499,9 +500,11 @@ export default function BookV4Page() {
   return (
     <>
       {/* Mobile & Tablet: Full-screen mobile view */}
-      <MobileBookViewV2
-        caveatFont={caveat.className}
-      />
+      <div className="lg:hidden">
+        <MobileBookViewV2
+          caveatFont={caveat.className}
+        />
+      </div>
 
       {/* Desktop: Book view with dual-page spread */}
       <div className={`hidden lg:block h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
@@ -532,8 +535,30 @@ export default function BookV4Page() {
                 {user?.name ? `${user.name.split(' ')[0]}'s Story` : "Your Story"}
               </h1>
             </div>
-            <div className="flex items-center gap-2 mr-10">
-              {/* Mobile: Show icons only, Desktop: Show full button */}
+            <div className="flex items-center gap-3 mr-10">
+              {/* Font size controls - Desktop only */}
+              <div className="hidden md:flex items-center gap-1 rounded-md bg-white/5 p-1">
+                <button
+                  onClick={() => setFontSize(Math.max(14, fontSize - 1))}
+                  disabled={fontSize <= 14}
+                  className="flex items-center justify-center w-8 h-8 rounded text-slate-300 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  aria-label="Decrease font size"
+                  title="Decrease font size"
+                >
+                  <Type className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setFontSize(Math.min(24, fontSize + 1))}
+                  disabled={fontSize >= 24}
+                  className="flex items-center justify-center w-8 h-8 rounded text-slate-300 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  aria-label="Increase font size"
+                  title="Increase font size"
+                >
+                  <Type className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Mobile: Show icons only */}
               <button
                 onClick={() => router.push("/timeline")}
                 className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
@@ -547,13 +572,6 @@ export default function BookV4Page() {
                 aria-label="Edit"
               >
                 <Pencil className="w-5 h-5" />
-              </button>
-              {/* Desktop: Original button */}
-              <button
-                onClick={() => router.push("/timeline")}
-                className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium"
-              >
-                ← Timeline
               </button>
             </div>
           </div>
@@ -632,23 +650,25 @@ export default function BookV4Page() {
             ></div>
     
             {/* Right page - RENDERED FIRST so it's on top in case of overlap */}
-            <BookPage 
-              story={currentSpread.right} 
-              pageNum={currentSpreadIndex * 2 + 2} 
-              onScroll={() => {}} 
+            <BookPage
+              story={currentSpread.right}
+              pageNum={currentSpreadIndex * 2 + 2}
+              onScroll={() => {}}
               ref={flowRightRef}
               position="right"
               allStories={sortedStories}
               onNavigateToStory={handleNavigateToStory}
+              fontSize={fontSize}
             />
-            
+
             {/* Left page */}
-            <BookPage 
-              story={currentSpread.left} 
-              pageNum={currentSpreadIndex * 2 + 1} 
-              onScroll={() => {}} 
+            <BookPage
+              story={currentSpread.left}
+              pageNum={currentSpreadIndex * 2 + 1}
+              onScroll={() => {}}
               ref={flowLeftRef}
               position="left"
+              fontSize={fontSize}
               allStories={sortedStories}
               onNavigateToStory={handleNavigateToStory}
             />
@@ -715,26 +735,26 @@ export default function BookV4Page() {
           <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[580px] max-w-[calc(100vw-3rem)]">
             <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-6 py-4 text-black shadow-2xl">
               <div className="mb-4 flex items-center justify-center relative">
-                <button 
+                <button
                   onClick={() => {
                     // Navigate to TOC page
                     // Mobile: Navigate to page 1 (intro is 0, TOC is 1)
                     setCurrentMobilePage(1);
-                    
+
                     // Desktop: Find the spread containing TOC
                     // TOC is typically on spread index 1 (after intro on spread 0)
-                    const tocSpreadIndex = spreads.findIndex(spread => 
+                    const tocSpreadIndex = spreads.findIndex(spread =>
                       spread.left === 'toc-left' || spread.right === 'toc-right' ||
                       spread.left === 'toc-right' || spread.right === 'toc-left'
                     );
-                    
+
                     if (tocSpreadIndex !== -1) {
                       setCurrentSpreadIndex(tocSpreadIndex);
                     }
-                    
+
                     setShowToc(false);
                   }}
-                  className="font-semibold tracking-tight text-2xl whitespace-nowrap hover:text-indigo-600 transition-colors cursor-pointer"
+                  className="font-semibold tracking-tight text-3xl whitespace-nowrap hover:text-indigo-600 transition-colors cursor-pointer"
                 >
                   Table of Contents
                 </button>
@@ -992,11 +1012,20 @@ function StoryContent({ story }: { story: Story }) {
       </div>
 
       {story.wisdomClipText && (
-        <div className="mt-6 p-4 bg-amber-50/80 rounded-lg border-l-4 border-amber-400">
-          <p className="text-sm font-semibold text-amber-900 mb-1">
-            Lesson Learned
-          </p>
-          <p className="text-[14px] text-neutral-700 italic leading-6">
+        <div className="relative my-8 -mx-2 p-6 bg-white shadow-sm rotate-[0.5deg]">
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: `repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 27px,
+                #cbd5e1 27px,
+                #cbd5e1 28px
+              )`
+            }}
+          />
+          <p className={`relative text-slate-700 text-lg leading-relaxed ${caveat.className}`}>
             {story.wisdomClipText}
           </p>
         </div>
@@ -1228,16 +1257,16 @@ function ClosedBookCover({
 
           {/* Content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
-            <h1 
+            <h1
               className="text-4xl md:text-5xl lg:text-6xl font-serif mb-6 tracking-tight"
-              style={{ 
+              style={{
                 fontFamily: "Crimson Text, serif",
                 color: "#d4af87",
                 textShadow: "0 3px 6px rgba(0,0,0,0.9), 0 -1px 2px rgba(255,255,255,0.1)",
                 fontWeight: 600,
               }}
             >
-              {userName}&apos;s Story
+              {userName}&apos;s<br />Story
             </h1>
             
             <div className="w-32 h-0.5 mb-6" style={{ background: "linear-gradient(90deg, transparent, #d4af87, transparent)" }}></div>
@@ -1670,36 +1699,20 @@ function MobilePage({
 
               {/* Lesson learned */}
               {story.wisdomClipText && (
-                <div 
-                  className="mt-6 mb-3 p-5 clear-both relative"
-                  style={{
-                    background: 'linear-gradient(135deg, #fef9e7 0%, #faf3dd 100%)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
-                    transform: 'rotate(-0.5deg)',
-                    borderRadius: '2px',
-                    border: '1px solid rgba(139, 107, 122, 0.2)',
-                  }}
-                >
-                  <p 
-                    className="text-sm mb-2"
+                <div className="relative my-8 -mx-2 p-6 bg-white shadow-sm rotate-[0.5deg] clear-both">
+                  <div
+                    className="absolute inset-0 opacity-10"
                     style={{
-                      fontFamily: '"Caveat", cursive',
-                      fontSize: '18px',
-                      color: '#8b6b7a',
-                      fontWeight: 600,
+                      backgroundImage: `repeating-linear-gradient(
+                        0deg,
+                        transparent,
+                        transparent 27px,
+                        #cbd5e1 27px,
+                        #cbd5e1 28px
+                      )`
                     }}
-                  >
-                    Lesson Learned
-                  </p>
-                  <p 
-                    className="leading-7"
-                    style={{
-                      fontFamily: '"Caveat", cursive',
-                      fontSize: '22px',
-                      color: '#4a4a4a',
-                      lineHeight: '1.8',
-                    }}
-                  >
+                  />
+                  <p className={`relative text-slate-700 text-lg leading-relaxed ${caveat.className}`}>
                     {story.wisdomClipText}
                   </p>
                 </div>

@@ -36,10 +36,11 @@ interface BookPageProps {
   position: "left" | "right";
   allStories?: Story[]; // For TOC
   onNavigateToStory?: (storyIndex: number) => void; // For TOC navigation
+  fontSize?: number; // Font size for story text
 }
 
 export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
-  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory }, ref) => {
+  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory, fontSize = 17 }, ref) => {
     const pageRef = React.useRef<HTMLDivElement>(null);
     const [scrollState, setScrollState] = React.useState<{ 
       hasScroll: boolean; 
@@ -833,7 +834,13 @@ function StoryContent({ story, position, pageNum }: { story: Story; position: "l
       )}
 
       {/* Story text */}
-      <div className="text-[15.5px] leading-7 text-neutral-800/95 space-y-3">
+      <div
+        className="text-neutral-800/95 space-y-3"
+        style={{
+          fontSize: `${fontSize}px`,
+          lineHeight: fontSize <= 16 ? '1.6' : fontSize >= 20 ? '1.8' : '1.7'
+        }}
+      >
         {story.transcription?.split("\n\n").map((paragraph, i) => (
           <p key={i}>{paragraph}</p>
         ))}

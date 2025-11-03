@@ -168,12 +168,20 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
 
             {/* Lesson learned / Wisdom clip */}
             {story.wisdomClipText && (
-              <div className="mt-6 rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200">
-                <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-900">
-                  <span className="text-lg">💡</span>
-                  <span>Lesson Learned</span>
-                </div>
-                <p className={`text-[34px] leading-[1.3] text-amber-900/80 ${caveatFont || ''}`}>
+              <div className="relative my-8 -mx-2 p-6 bg-white shadow-sm rotate-[0.5deg]">
+                <div
+                  className="absolute inset-0 opacity-10"
+                  style={{
+                    backgroundImage: `repeating-linear-gradient(
+                      0deg,
+                      transparent,
+                      transparent 27px,
+                      #cbd5e1 27px,
+                      #cbd5e1 28px
+                    )`
+                  }}
+                />
+                <p className={`relative text-slate-700 text-lg leading-relaxed ${caveatFont || ''}`}>
                   {story.wisdomClipText}
                 </p>
               </div>
