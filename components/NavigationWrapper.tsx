@@ -14,6 +14,7 @@ export default function NavigationWrapper() {
 
   // Hide all navigation on interview-chat page (has its own custom nav)
   const isInterviewChat = pathname === '/interview-chat';
+  const isBookPage = pathname === '/book' || pathname.startsWith('/book/');
 
   return (
     <>
@@ -21,7 +22,7 @@ export default function NavigationWrapper() {
       {!isInterviewChat && <MobileNavigation />}
 
       {/* Hamburger Menu (top right) - hidden on book page and interview-chat */}
-      {!isInterviewChat && <HamburgerMenu />}
+      {!isInterviewChat && !isBookPage && <HamburgerMenu />}
 
       {/* Mode Selection Modal */}
       <ModeSelectionModal

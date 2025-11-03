@@ -10,7 +10,7 @@ import DarkBookProgressBar from "./components/DarkBookProgressBar";
 import { BookPage as BookPageType } from "@/lib/bookPagination";
 import { ScrollIndicator } from "@/components/ScrollIndicators";
 import { CompactNav } from "./components/CompactNav";
-import SimpleMobileBookView from "./components/SimpleMobileBookView";
+import MobileBookViewV2 from "../book-new/components/MobileBookViewV2";
 import "./book.css";
 
 // Import handwriting font
@@ -499,12 +499,8 @@ export default function BookV4Page() {
   return (
     <>
       {/* Mobile & Tablet: Full-screen mobile view */}
-      <SimpleMobileBookView
-        stories={sortedStories}
-        bookTitle={user?.name ? `${user.name.split(' ')[0]}'s Story` : "Your Story"}
-        userInitials={user?.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : "YS"}
-        onTimelineClick={() => router.push("/timeline")}
-        onEditClick={() => router.push("/timeline")}
+      <MobileBookViewV2
+        caveatFont={caveat.className}
       />
 
       {/* Desktop: Book view with dual-page spread */}

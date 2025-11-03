@@ -33,15 +33,6 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   const photoUrl = heroPhoto?.url || story.photoUrl;
   const photoTransform = heroPhoto?.transform || story.photoTransform;
 
-  // Debug: Log photo information
-  console.log('[BookPageCard]', story.title, {
-    hasPhotos: !!story.photos?.length,
-    hasHeroPhoto: !!heroPhoto,
-    hasPhotoUrl: !!story.photoUrl,
-    finalPhotoUrl: photoUrl,
-    hasTransform: !!photoTransform,
-  });
-
   // Check if content overflows and update hint visibility
   const checkOverflow = useCallback(() => {
     if (!scrollerRef.current) return;
@@ -103,10 +94,10 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
         {/* Vertical scroller */}
         <div
           ref={scrollerRef}
-          className="relative h-full overflow-y-auto overscroll-contain pt-[76px]"
+          className="relative h-full overflow-y-auto overscroll-contain pt-[56px]"
         >
           {/* Header image */}
-          <div className="px-3 pt-5">
+          <div className="px-3 pt-0">
             <div
               className="relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-stone-200"
               style={{ aspectRatio: "16/10" }}
@@ -182,7 +173,7 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
                   <span className="text-lg">💡</span>
                   <span>Lesson Learned</span>
                 </div>
-                <p className={`text-[40px] leading-[1.6] text-amber-900/80 ${caveatFont || ''}`}>
+                <p className={`text-[34px] leading-[1.3] text-amber-900/80 ${caveatFont || ''}`}>
                   {story.wisdomClipText}
                 </p>
               </div>

@@ -60,8 +60,6 @@ export default function MobileBookViewV2({
     enabled: !!storytellerId,
   });
 
-  console.log('[MobileBookViewV2] isLoading:', isLoading, 'stories:', data?.stories?.length);
-
   // Filter and sort stories for book view
   const bookStories = useMemo<BookStory[]>(() => {
     if (!data?.stories) return [];
