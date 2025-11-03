@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeritageWhisper - Your Parents' Stories, Actually in Their Voice</title>
+  <meta name="description" content="AI-powered family storytelling platform that preserves seniors' life stories through voice recordings, not printed books.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts - Serif for warmth -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* Mid-century modern color palette - warm, familiar tones */
+    :root {
+      --cream: #FAF7F2;
+      --warm-brown: #8B6F47;
+      --sage-green: #98A886;
+      --burnt-orange: #C85A3F;
+      --soft-teal: #5B8A8A;
+      --charcoal: #3E3E3E;
+      --warm-white: #FFFEF9;
+      --gold-accent: #D4A574;
+    }
+
+    body {
+      font-family: 'Crimson Text', Georgia, serif;
+      background: var(--cream);
+      color: var(--charcoal);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Lora', Georgia, serif;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    /* Waveform animation */
+    @keyframes waveform {
+      0%, 100% { transform: scaleY(0.5); }
+      50% { transform: scaleY(1); }
+    }
+
+    .waveform-bar {
+      animation: waveform 1s ease-in-out infinite;
+    }
+
+    .waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+    .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+    .waveform-bar:nth-child(4) { animation-delay: 0.3s; }
+    .waveform-bar:nth-child(5) { animation-delay: 0.4s; }
+
+    /* Smooth scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html {
+        scroll-behavior: auto;
+      }
+    }
+
+    *:focus-visible {
+      outline: 3px solid var(--burnt-orange);
+      outline-offset: 2px;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--burnt-orange);
+      color: white;
+      padding: 8px;
+      text-decoration: none;
+      z-index: 100;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    .sticky-cta {
+      transform: translateY(100%);
+      transition: transform 0.3s ease-out;
+    }
+
+    .sticky-cta.visible {
+      transform: translateY(0);
+    }
+
+    .chevron {
+      transition: transform 0.3s ease;
+    }
+
+    .chevron.open {
+      transform: rotate(180deg);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .accordion-content.open {
+      max-height: 1000px;
+    }
+
+    /* Mid-century texture effects */
+    .textured-bg {
+      background-image:
+        linear-gradient(45deg, rgba(0,0,0,0.02) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(0,0,0,0.02) 25%, transparent 25%);
+      background-size: 40px 40px;
+    }
+
+    .vintage-border {
+      border: 3px solid var(--warm-brown);
+      border-radius: 2px;
+    }
+
+    /* Rounded corners - classic mid-century */
+    .mid-century-card {
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Skip to content link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header -->
+  <header style="background: var(--warm-white); border-bottom: 3px solid var(--warm-brown);" class="py-5 px-6">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-3xl font-bold">HeritageWhisper</div>
+      <nav class="hidden md:flex space-x-8">
+        <a href="#how-it-works" style="color: var(--charcoal);" class="hover:opacity-70 transition-opacity text-xl">How It Works</a>
+        <a href="#pricing" style="color: var(--charcoal);" class="hover:opacity-70 transition-opacity text-xl">Pricing</a>
+        <a href="#faq" style="color: var(--charcoal);" class="hover:opacity-70 transition-opacity text-xl">FAQ</a>
+      </nav>
+      <a href="#pricing" style="background: var(--burnt-orange); color: var(--warm-white);" class="font-semibold px-8 py-4 mid-century-card hover:opacity-90 transition-opacity text-lg md:text-xl min-h-[44px] flex items-center shadow-md">
+        Get Started
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="main-content">
+
+    <!-- Hero Section -->
+    <section style="background: var(--warm-white);" class="py-20 md:py-28 px-6">
+      <div class="max-w-6xl mx-auto">
+
+        <!-- Headline -->
+        <h1 style="font-family: 'Lora', serif; color: var(--charcoal);" class="text-5xl md:text-7xl font-bold text-center leading-tight mb-6">
+          Your Parents' Stories,<br>
+          <span style="color: var(--burnt-orange);">Actually in Their Voice</span>
+        </h1>
+
+        <!-- Subheadline -->
+        <p style="color: var(--charcoal);" class="text-2xl md:text-4xl text-center mt-8 leading-relaxed max-w-4xl mx-auto font-normal">
+          Books collect dust. Their voice stays with you forever.
+        </p>
+
+        <!-- CTA -->
+        <div class="mt-16 flex flex-col items-center space-y-6">
+          <button style="background: var(--burnt-orange); color: var(--warm-white);" class="w-full md:w-auto text-2xl font-semibold px-16 py-6 mid-century-card shadow-lg hover:opacity-90 transition-opacity active:scale-98 min-h-[80px] md:min-h-[72px] flex items-center justify-center" aria-label="Start recording your first three stories free">
+            Start Recording Free
+          </button>
+          <p style="color: var(--charcoal);" class="text-xl text-center leading-relaxed opacity-75">
+            First 3 stories free • No credit card • 2-5 minutes per story
+          </p>
+        </div>
+
+        <!-- Visual: Warm vintage-style phone mockup -->
+        <div class="mt-20 flex justify-center">
+          <div class="relative max-w-sm w-full">
+            <!-- Phone mockup with warm tones -->
+            <div style="background: var(--warm-brown);" class="vintage-border shadow-2xl p-5 aspect-[9/19] flex flex-col items-center justify-center">
+              <div style="background: var(--warm-white);" class="mid-century-card w-full h-full p-6 overflow-hidden flex flex-col">
+                <!-- Mock timeline view -->
+                <div style="color: var(--warm-brown);" class="text-base font-bold mb-5">Your Stories</div>
+
+                <!-- Story card 1 -->
+                <div style="background: var(--cream); border-color: var(--warm-brown);" class="mid-century-card p-5 mb-4 border-2">
+                  <div style="color: var(--charcoal);" class="text-sm mb-1 opacity-60">Yesterday</div>
+                  <div style="color: var(--charcoal);" class="text-base font-semibold mb-3">The Day I Met Your Dad</div>
+                  <div class="flex items-center space-x-2">
+                    <div style="background: var(--burnt-orange);" class="w-7 h-7 rounded-full flex items-center justify-center">
+                      <svg class="w-4 h-4" style="color: var(--warm-white);" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                      </svg>
+                    </div>
+                    <!-- Waveform -->
+                    <div class="flex items-center space-x-1 flex-1">
+                      <div class="w-1 rounded-full waveform-bar" style="background: var(--sage-green); height: 14px;"></div>
+                      <div class="w-1 rounded-full waveform-bar" style="background: var(--sage-green); height: 22px;"></div>
+                      <div class="w-1 rounded-full waveform-bar" style="background: var(--sage-green); height: 18px;"></div>
+                      <div class="w-1 rounded-full waveform-bar" style="background: var(--sage-green); height: 26px;"></div>
+                      <div class="w-1 rounded-full waveform-bar" style="background: var(--sage-green); height: 16px;"></div>
+                    </div>
+                    <div style="color: var(--charcoal);" class="text-sm opacity-60">3:42</div>
+                  </div>
+                </div>
+
+                <!-- Story card 2 -->
+                <div style="background: var(--cream); border-color: var(--warm-brown);" class="mid-century-card p-5 mb-4 border-2">
+                  <div style="color: var(--charcoal);" class="text-sm mb-1 opacity-60">3 days ago</div>
+                  <div style="color: var(--charcoal);" class="text-base font-semibold mb-3">My First Job</div>
+                  <div class="flex items-center space-x-2">
+                    <div style="background: var(--charcoal); opacity: 0.3;" class="w-7 h-7 rounded-full flex items-center justify-center">
+                      <svg class="w-4 h-4" style="color: var(--warm-white);" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                      </svg>
+                    </div>
+                    <div style="background: var(--charcoal); opacity: 0.2;" class="h-1 rounded-full flex-1"></div>
+                    <div style="color: var(--charcoal);" class="text-sm opacity-60">2:18</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Audio player button -->
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
+              <button
+                id="audioPlayerBtn"
+                style="background: var(--burnt-orange);"
+                class="rounded-full shadow-2xl p-5 hover:opacity-90 transition-opacity cursor-pointer min-w-[60px] min-h-[60px] flex items-center justify-center"
+                aria-label="Play audio sample"
+              >
+                <svg class="w-9 h-9" style="color: var(--warm-white);" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Problem/Differentiator Section -->
+    <section style="background: var(--cream);" class="textured-bg py-20 md:py-28 px-6">
+      <div class="max-w-6xl mx-auto">
+
+        <h2 style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-4xl md:text-6xl font-bold text-center mb-20">
+          Why Families Switch from StoryWorth
+        </h2>
+
+        <!-- Comparison Grid -->
+        <div class="grid md:grid-cols-2 gap-10 md:gap-16 mb-20">
+
+          <!-- StoryWorth Column -->
+          <div style="background: var(--warm-white); border-color: var(--charcoal);" class="mid-century-card p-10 shadow-md border opacity-60">
+            <div style="color: var(--charcoal);" class="text-3xl font-bold mb-10 line-through opacity-50">StoryWorth</div>
+            <div class="space-y-7">
+              <div class="flex items-start space-x-5">
+                <span class="text-3xl">❌</span>
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed">Typed words (audio discarded)</p>
+              </div>
+              <div class="flex items-start space-x-5">
+                <span class="text-3xl">❌</span>
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed">Annual book project (ends after 52 weeks)</p>
+              </div>
+              <div class="flex items-start space-x-5">
+                <span class="text-3xl">❌</span>
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed">Generic weekly prompts</p>
+              </div>
+              <div class="flex items-start space-x-5">
+                <span class="text-3xl">❌</span>
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed">Family waits a year to read</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- HeritageWhisper Column -->
+          <div style="background: var(--warm-white); border-color: var(--burnt-orange);" class="mid-century-card p-10 shadow-lg border-l-8">
+            <div style="color: var(--burnt-orange);" class="text-3xl font-bold mb-10">HeritageWhisper</div>
+            <div class="space-y-7">
+              <div class="flex items-start space-x-5">
+                <span class="text-3xl">✅</span>
+                <p style="color: var(--charcoal);" class="text-xl font-semibold leading-relaxed">Voice, text, photos together</p>
+              </div>
+              <div class="flex items-start space-x-5">
+                <span class="text-3xl">✅</span>
+                <p style="color: var(--charcoal);" class="text-xl font-semibold leading-relaxed">Timeline grows forever</p>
+              </div>
+              <div class="flex items-start space-x-5">
+                <span class="text-3xl">✅</span>
+                <p style="color: var(--charcoal);" class="text-xl font-semibold leading-relaxed">AI asks personalized questions</p>
+              </div>
+              <div class="flex items-start space-x-5">
+                <span class="text-3xl">✅</span>
+                <p style="color: var(--charcoal);" class="text-xl font-semibold leading-relaxed">Family notified in real-time</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Testimonial -->
+        <div style="background: var(--warm-white); border-color: var(--gold-accent);" class="mid-century-card p-10 md:p-14 shadow-lg max-w-4xl mx-auto border-l-8">
+          <div style="color: var(--charcoal);" class="text-2xl md:text-3xl italic leading-relaxed mb-8 font-normal">
+            "We tried StoryWorth. Mom answered 3 questions in 6 months. With HeritageWhisper she's recorded 40 stories in 2 months."
+          </div>
+          <div style="color: var(--warm-brown);" class="text-xl font-semibold">
+            — Sarah K., San Diego
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" style="background: var(--warm-white);" class="py-20 md:py-28 px-6">
+      <div class="max-w-6xl mx-auto">
+
+        <h2 style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-4xl md:text-6xl font-bold text-center mb-20">
+          How It Actually Works
+        </h2>
+
+        <!-- Steps Grid -->
+        <div class="grid md:grid-cols-2 gap-16 md:gap-20 mb-20">
+
+          <!-- Step 1 -->
+          <div class="flex flex-col items-center text-center space-y-8">
+            <div style="background: var(--sage-green); opacity: 0.2;" class="w-24 h-24 mid-century-card flex items-center justify-center">
+              <svg class="w-12 h-12" style="color: var(--charcoal);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-3xl md:text-4xl font-bold mb-5">Step 1: Press Record</div>
+              <div style="color: var(--charcoal);" class="text-2xl leading-relaxed mb-5 opacity-70">(2-5 minutes)</div>
+              <div style="color: var(--charcoal);" class="text-xl italic">"I met your dad at a dance..."</div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="flex flex-col items-center text-center space-y-8">
+            <div style="background: var(--soft-teal); opacity: 0.2;" class="w-24 h-24 mid-century-card flex items-center justify-center">
+              <svg class="w-12 h-12" style="color: var(--charcoal);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-3xl md:text-4xl font-bold mb-5">Step 2: AI Asks Follow-Ups</div>
+              <div style="color: var(--charcoal);" class="text-2xl leading-relaxed mb-5 opacity-70">While You Talk</div>
+              <div class="space-y-3 text-xl" style="color: var(--charcoal);">
+                <div class="flex items-center justify-center space-x-3">
+                  <span style="color: var(--burnt-orange);">→</span>
+                  <span>"What song was playing?"</span>
+                </div>
+                <div class="flex items-center justify-center space-x-3">
+                  <span style="color: var(--burnt-orange);">→</span>
+                  <span>"What did you notice first?"</span>
+                </div>
+                <div class="flex items-center justify-center space-x-3">
+                  <span style="color: var(--burnt-orange);">→</span>
+                  <span>"What made you laugh?"</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="flex flex-col items-center text-center space-y-8">
+            <div style="background: var(--burnt-orange); opacity: 0.2;" class="w-24 h-24 mid-century-card flex items-center justify-center relative">
+              <svg class="w-12 h-12" style="color: var(--charcoal);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <span style="background: var(--burnt-orange); color: var(--warm-white);" class="absolute -top-2 -right-2 w-8 h-8 rounded-full text-sm flex items-center justify-center font-bold shadow-md">3</span>
+            </div>
+            <div>
+              <div style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-3xl md:text-4xl font-bold mb-5">Step 3: Story Joins Timeline</div>
+              <div style="color: var(--charcoal);" class="text-2xl leading-relaxed mb-5 opacity-70">Instantly</div>
+              <div style="color: var(--charcoal);" class="text-xl leading-relaxed">
+                Your kids get notified. They listen that night.<br>
+                <span class="font-semibold">Voice + transcript + photos, all in one place.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="flex flex-col items-center text-center space-y-8">
+            <div style="background: var(--gold-accent); opacity: 0.2;" class="w-24 h-24 mid-century-card flex items-center justify-center">
+              <svg class="w-12 h-12" style="color: var(--charcoal);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-3xl md:text-4xl font-bold mb-5">Step 4: AI Asks Next Question</div>
+              <div style="color: var(--charcoal);" class="text-xl italic leading-relaxed mb-5">
+                "You mentioned that dance—did you ever go back to that place?"
+              </div>
+              <div style="color: var(--charcoal);" class="text-xl leading-relaxed opacity-75">
+                This repeats forever. Your legacy grows with every recording.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Feature Deep Dive Section -->
+    <section style="background: var(--cream);" class="textured-bg py-20 md:py-28 px-6">
+      <div class="max-w-6xl mx-auto">
+
+        <h2 style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-4xl md:text-6xl font-bold text-center mb-20">
+          Built Different From Day One
+        </h2>
+
+        <!-- Feature Cards -->
+        <div class="grid md:grid-cols-3 gap-10">
+
+          <!-- Card 1 -->
+          <div style="background: var(--warm-white);" class="mid-century-card p-10 shadow-md hover:shadow-xl transition-shadow">
+            <div style="background: var(--sage-green); opacity: 0.15;" class="w-20 h-20 mid-century-card flex items-center justify-center mb-8">
+              <svg class="w-10 h-10" style="color: var(--charcoal);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <h3 style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-2xl md:text-3xl font-bold mb-6">Interview Mode Without Scheduling</h3>
+            <div class="space-y-5 text-xl" style="color: var(--charcoal);">
+              <p>Tell Mel makes you schedule calls. We let you record anytime.</p>
+              <p>3am memory? Capture it. Sunday reflection? Record it.</p>
+              <p class="font-semibold">The best stories happen spontaneously.</p>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div style="background: var(--warm-white);" class="mid-century-card p-10 shadow-md hover:shadow-xl transition-shadow">
+            <div style="background: var(--soft-teal); opacity: 0.15;" class="w-20 h-20 mid-century-card flex items-center justify-center mb-8">
+              <svg class="w-10 h-10" style="color: var(--charcoal);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h3 style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-2xl md:text-3xl font-bold mb-6">Personalized Questions, Not Generic Prompts</h3>
+            <div class="space-y-5 text-xl" style="color: var(--charcoal);">
+              <p>After you say "I had a teacher who changed everything"</p>
+              <p style="color: var(--burnt-orange);" class="font-medium">→ AI asks: "What did they say that you still remember?"</p>
+              <p>StoryWorth sends everyone the same 52 questions.</p>
+              <p class="font-semibold">We ask questions nobody else can—because they're yours.</p>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div style="background: var(--warm-white);" class="mid-century-card p-10 shadow-md hover:shadow-xl transition-shadow">
+            <div style="background: var(--burnt-orange); opacity: 0.15;" class="w-20 h-20 mid-century-card flex items-center justify-center mb-8">
+              <svg class="w-10 h-10" style="color: var(--charcoal);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+            <h3 style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-2xl md:text-3xl font-bold mb-6">Real-Time Family Engagement</h3>
+            <div class="space-y-5 text-xl" style="color: var(--charcoal);">
+              <p><span class="font-semibold">StoryWorth:</span> Family waits a year for the book</p>
+              <p><span class="font-semibold" style="color: var(--burnt-orange);">HeritageWhisper:</span> Family notified the moment you record</p>
+              <p class="font-semibold">Your daughter listens during lunch. Your grandson asks a question. You answer that weekend.</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" style="background: var(--warm-white);" class="py-20 md:py-28 px-6">
+      <div class="max-w-6xl mx-auto">
+
+        <h2 style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-4xl md:text-6xl font-bold text-center mb-10">
+          $149/year — Unlimited Stories, Forever
+        </h2>
+
+        <p style="color: var(--charcoal);" class="text-2xl md:text-3xl text-center mb-20 leading-relaxed max-w-3xl mx-auto opacity-75">
+          No per-story fees. No surprise charges. Just unlimited recording and sharing.
+        </p>
+
+        <!-- Pricing Card -->
+        <div style="background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%); border-color: var(--gold-accent);" class="mid-century-card p-10 md:p-14 shadow-xl max-w-3xl mx-auto border-4">
+
+          <!-- Features Checklist -->
+          <div class="space-y-8 mb-16">
+            <div class="flex items-start space-x-5">
+              <div style="background: var(--sage-green);" class="w-10 h-10 mid-century-card flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-6 h-6" style="color: var(--warm-white);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p style="color: var(--charcoal);" class="text-2xl leading-relaxed font-medium">First 3 stories free (no credit card)</p>
+            </div>
+
+            <div class="flex items-start space-x-5">
+              <div style="background: var(--sage-green);" class="w-10 h-10 mid-century-card flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-6 h-6" style="color: var(--warm-white);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p style="color: var(--charcoal);" class="text-2xl leading-relaxed font-medium">Unlimited recording after that</p>
+            </div>
+
+            <div class="flex items-start space-x-5">
+              <div style="background: var(--sage-green);" class="w-10 h-10 mid-century-card flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-6 h-6" style="color: var(--warm-white);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p style="color: var(--charcoal);" class="text-2xl leading-relaxed font-medium">AI interview mode (no scheduling)</p>
+            </div>
+
+            <div class="flex items-start space-x-5">
+              <div style="background: var(--sage-green);" class="w-10 h-10 mid-century-card flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-6 h-6" style="color: var(--warm-white);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p style="color: var(--charcoal);" class="text-2xl leading-relaxed font-medium">Family sharing & notifications</p>
+            </div>
+
+            <div class="flex items-start space-x-5">
+              <div style="background: var(--sage-green);" class="w-10 h-10 mid-century-card flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-6 h-6" style="color: var(--warm-white);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p style="color: var(--charcoal);" class="text-2xl leading-relaxed font-medium">Timeline + Book views</p>
+            </div>
+
+            <div class="flex items-start space-x-5">
+              <div style="background: var(--sage-green);" class="w-10 h-10 mid-century-card flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-6 h-6" style="color: var(--warm-white);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p style="color: var(--charcoal);" class="text-2xl leading-relaxed font-medium">Export PDF anytime</p>
+            </div>
+
+            <div class="flex items-start space-x-5">
+              <div style="background: var(--sage-green);" class="w-10 h-10 mid-century-card flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-6 h-6" style="color: var(--warm-white);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p style="color: var(--charcoal);" class="text-2xl leading-relaxed font-medium">30-day money-back guarantee</p>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <button style="background: var(--burnt-orange); color: var(--warm-white);" class="w-full text-2xl font-semibold px-12 py-7 mid-century-card shadow-lg hover:opacity-90 transition-opacity active:scale-98 min-h-[80px] flex items-center justify-center" aria-label="Start recording your first three stories free">
+            Start Recording Free
+          </button>
+
+          <p style="color: var(--charcoal);" class="text-xl text-center mt-8 leading-relaxed opacity-70">
+            No credit card required for your first 3 stories
+          </p>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" style="background: var(--cream);" class="textured-bg py-20 md:py-28 px-6">
+      <div class="max-w-4xl mx-auto">
+
+        <h2 style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-4xl md:text-6xl font-bold text-center mb-20">
+          Questions?
+        </h2>
+
+        <!-- Accordion Items -->
+        <div class="space-y-5">
+
+          <!-- FAQ 1 -->
+          <div style="background: var(--warm-white);" class="mid-century-card shadow-md overflow-hidden">
+            <button
+              class="w-full text-left px-10 py-8 flex items-center justify-between min-h-[56px] hover:opacity-80 transition-opacity"
+              onclick="toggleAccordion(0)"
+              aria-expanded="false"
+              aria-controls="faq-content-0"
+            >
+              <span style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-2xl font-semibold pr-6">Can I get a printed book?</span>
+              <svg class="w-7 h-7 flex-shrink-0 chevron" style="color: var(--charcoal);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-0" class="accordion-content" style="border-top: 2px solid var(--cream);">
+              <div class="px-10 pb-8 pt-6">
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed mb-5">
+                  We don't offer printing directly. Here's why:
+                </p>
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed mb-5">
+                  Most families never look at printed books after the first week. But they listen to voice recordings constantly—while driving, cooking, before bed.
+                </p>
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed mb-5">
+                  We optimize for what people actually use: voice in their pocket.
+                </p>
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed">
+                  That said, you can export a beautiful PDF anytime and print it yourself via Blurb ($30-50). Many families do both: digital for daily listening, print for the shelf.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div style="background: var(--warm-white);" class="mid-century-card shadow-md overflow-hidden">
+            <button
+              class="w-full text-left px-10 py-8 flex items-center justify-between min-h-[56px] hover:opacity-80 transition-opacity"
+              onclick="toggleAccordion(1)"
+              aria-expanded="false"
+              aria-controls="faq-content-1"
+            >
+              <span style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-2xl font-semibold pr-6">Is this just for tech-savvy seniors?</span>
+              <svg class="w-7 h-7 flex-shrink-0 chevron" style="color: var(--charcoal);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-1" class="accordion-content" style="border-top: 2px solid var(--cream);">
+              <div class="px-10 pb-8 pt-6">
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed mb-5">
+                  Nope. If your parent can use a smartphone, they can use HeritageWhisper. One tap to record. That's it.
+                </p>
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed">
+                  No passwords to remember (we use Face ID/fingerprint). No complicated menus.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div style="background: var(--warm-white);" class="mid-century-card shadow-md overflow-hidden">
+            <button
+              class="w-full text-left px-10 py-8 flex items-center justify-between min-h-[56px] hover:opacity-80 transition-opacity"
+              onclick="toggleAccordion(2)"
+              aria-expanded="false"
+              aria-controls="faq-content-2"
+            >
+              <span style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-2xl font-semibold pr-6">What happens to my stories if HeritageWhisper shuts down?</span>
+              <svg class="w-7 h-7 flex-shrink-0 chevron" style="color: var(--charcoal);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-2" class="accordion-content" style="border-top: 2px solid var(--cream);">
+              <div class="px-10 pb-8 pt-6">
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed mb-5">
+                  You can export all your data (stories, audio, photos) anytime as a ZIP file. You own your content, forever.
+                </p>
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed">
+                  We also back up to multiple cloud providers.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div style="background: var(--warm-white);" class="mid-century-card shadow-md overflow-hidden">
+            <button
+              class="w-full text-left px-10 py-8 flex items-center justify-between min-h-[56px] hover:opacity-80 transition-opacity"
+              onclick="toggleAccordion(3)"
+              aria-expanded="false"
+              aria-controls="faq-content-3"
+            >
+              <span style="font-family: 'Lora', serif; color: var(--warm-brown);" class="text-2xl font-semibold pr-6">How long does recording take?</span>
+              <svg class="w-7 h-7 flex-shrink-0 chevron" style="color: var(--charcoal);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-3" class="accordion-content" style="border-top: 2px solid var(--cream);">
+              <div class="px-10 pb-8 pt-6">
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed mb-5">
+                  2-5 minutes per story. We recommend short recordings because they're easier to listen to—and easier to finish.
+                </p>
+                <p style="color: var(--charcoal);" class="text-xl leading-relaxed">
+                  Long sessions are overwhelming. Quick stories are powerful.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer style="background: var(--charcoal); color: var(--warm-white);" class="py-14 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid md:grid-cols-2 gap-12 md:gap-24 mb-10">
+
+        <!-- Left Column -->
+        <div>
+          <div style="font-family: 'Lora', serif;" class="text-3xl font-bold mb-5">HeritageWhisper</div>
+          <p class="text-xl leading-relaxed opacity-75">
+            Stories in their voice, not books on a shelf.
+          </p>
+        </div>
+
+        <!-- Right Column -->
+        <div class="flex flex-col md:items-end space-y-5">
+          <nav class="flex flex-wrap gap-8 text-xl">
+            <a href="#" class="opacity-75 hover:opacity-100 transition-opacity">Privacy Policy</a>
+            <a href="#" class="opacity-75 hover:opacity-100 transition-opacity">Terms</a>
+            <a href="#" class="opacity-75 hover:opacity-100 transition-opacity">Contact</a>
+          </nav>
+        </div>
+
+      </div>
+
+      <div style="border-top: 2px solid rgba(255, 255, 255, 0.2);" class="pt-10 text-center">
+        <p class="opacity-60 text-lg">
+          © 2025 HeritageWhisper. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Sticky CTA Bar (Mobile) -->
+  <div style="background: var(--warm-white); border-top: 3px solid var(--warm-brown);" class="fixed bottom-0 left-0 right-0 px-6 py-5 shadow-2xl md:hidden sticky-cta z-50">
+    <button style="background: var(--burnt-orange); color: var(--warm-white);" class="w-full text-xl font-semibold px-8 py-5 mid-century-card shadow-lg active:scale-98 transition-all min-h-[60px] flex items-center justify-center" aria-label="Start recording your first three stories free">
+      Start Recording Free
+    </button>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Accordion functionality
+    function toggleAccordion(index) {
+      const content = document.getElementById(`faq-content-${index}`);
+      const button = content.previousElementSibling;
+      const chevron = button.querySelector('.chevron');
+      const isOpen = content.classList.contains('open');
+
+      // Close all accordions
+      document.querySelectorAll('.accordion-content').forEach(item => {
+        item.classList.remove('open');
+      });
+      document.querySelectorAll('.chevron').forEach(item => {
+        item.classList.remove('open');
+      });
+      document.querySelectorAll('[aria-expanded]').forEach(item => {
+        item.setAttribute('aria-expanded', 'false');
+      });
+
+      // If this one wasn't open, open it
+      if (!isOpen) {
+        content.classList.add('open');
+        chevron.classList.add('open');
+        button.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    // Audio player interaction
+    const audioBtn = document.getElementById('audioPlayerBtn');
+    let isPlaying = false;
+
+    audioBtn.addEventListener('click', function() {
+      const warmWhite = getComputedStyle(document.documentElement).getPropertyValue('--warm-white');
+      const burntOrange = getComputedStyle(document.documentElement).getPropertyValue('--burnt-orange');
+
+      if (!isPlaying) {
+        isPlaying = true;
+        this.innerHTML = `
+          <svg class="w-9 h-9 animate-pulse" style="color: ${warmWhite};" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+        `;
+        this.setAttribute('aria-label', 'Pause audio sample');
+
+        setTimeout(() => {
+          if (isPlaying) {
+            isPlaying = false;
+            this.innerHTML = `
+              <svg class="w-9 h-9" style="color: ${warmWhite};" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+              </svg>
+            `;
+            this.setAttribute('aria-label', 'Play audio sample');
+          }
+        }, 5000);
+      } else {
+        isPlaying = false;
+        this.innerHTML = `
+          <svg class="w-9 h-9" style="color: ${warmWhite};" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+          </svg>
+        `;
+        this.setAttribute('aria-label', 'Play audio sample');
+      }
+    });
+
+    // Sticky CTA bar
+    const stickyCta = document.querySelector('.sticky-cta');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        stickyCta.classList.add('visible');
+      } else {
+        stickyCta.classList.remove('visible');
+      }
+    });
+
+    // CTA button clicks
+    document.querySelectorAll('button, a[href="#pricing"]').forEach(element => {
+      if (element.textContent.includes('Start Recording Free') || element.textContent.includes('Get Started')) {
+        element.addEventListener('click', (e) => {
+          e.preventDefault();
+          console.log('CTA clicked - Redirect to signup flow');
+          alert('This would redirect to the signup flow. (Demo mode)');
+        });
+      }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        if (e.target.hasAttribute('onclick')) {
+          e.preventDefault();
+          e.target.click();
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

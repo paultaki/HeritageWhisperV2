@@ -266,12 +266,19 @@ After they answer, continue the conversation naturally with follow-up questions 
 
           // Replace waveform message with transcript (or just add if no waveform)
           setMessages(prev => {
-            const lastMessage = prev[prev.length - 1];
-            if (lastMessage && lastMessage.type === 'waveform') {
+            // Find the most recent waveform message
+            const waveformIndex = prev.findIndex(m => m.type === 'waveform');
+
+            if (waveformIndex !== -1) {
               // Replace waveform with transcript
-              return [...prev.slice(0, -1), userMessage];
+              console.log('[InterviewChat] Replacing waveform with transcript at index', waveformIndex);
+              const newMessages = [...prev];
+              newMessages[waveformIndex] = userMessage;
+              return newMessages;
             }
+
             // No waveform found, just add transcript
+            console.log('[InterviewChat] No waveform found, adding transcript as new message');
             return [...prev, userMessage];
           });
         },
@@ -322,7 +329,7 @@ After they answer, continue the conversation naturally with follow-up questions 
           // Handle user speech start - show waveform
           console.log('[InterviewChat] User started speaking - showing waveform');
           const waveformMessage: Message = {
-            id: 'user-waveform',
+            id: `waveform-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             type: 'waveform',
             content: '',
             timestamp: new Date(),
