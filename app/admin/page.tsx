@@ -20,7 +20,8 @@ import {
   Zap,
   Settings,
   MessageSquare,
-  Code
+  Code,
+  Target
 } from "lucide-react";
 
 interface AdminTool {
@@ -40,6 +41,14 @@ const ADMIN_TOOLS: AdminTool[] = [
     icon: <BarChart3 className="w-6 h-6" />,
     category: "monitoring",
     color: "text-green-600 bg-green-50",
+  },
+  {
+    title: "Market Assessment",
+    description: "Comprehensive competitive analysis, market opportunity, and strategic recommendations",
+    href: "/admin/market-assessment",
+    icon: <Target className="w-6 h-6" />,
+    category: "monitoring",
+    color: "text-blue-600 bg-blue-50",
   },
   {
     title: "North Star Dashboard",

@@ -10,6 +10,7 @@ import DarkBookProgressBar from "./components/DarkBookProgressBar";
 import { BookPage as BookPageType } from "@/lib/bookPagination";
 import { ScrollIndicator } from "@/components/ScrollIndicators";
 import { CompactNav } from "./components/CompactNav";
+import SimpleMobileBookView from "./components/SimpleMobileBookView";
 import "./book.css";
 
 // Import handwriting font
@@ -496,7 +497,18 @@ export default function BookV4Page() {
   }
 
   return (
-    <div className={`h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
+    <>
+      {/* Mobile & Tablet: Full-screen mobile view */}
+      <SimpleMobileBookView
+        stories={sortedStories}
+        bookTitle={user?.name ? `${user.name.split(' ')[0]}'s Story` : "Your Story"}
+        userInitials={user?.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : "YS"}
+        onTimelineClick={() => router.push("/timeline")}
+        onEditClick={() => router.push("/timeline")}
+      />
+
+      {/* Desktop: Book view with dual-page spread */}
+      <div className={`hidden lg:block h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
       {/* Dark Book Progress Bar - hidden on mobile */}
       <div className="hidden md:block">
         <DarkBookProgressBar
@@ -700,13 +712,7 @@ export default function BookV4Page() {
           </div>
         </div>
     
-        {/* Mobile & Tablet: Single page with horizontal swipe */}
-        <MobileView 
-          allPages={mobilePages}
-          currentPage={currentMobilePage}
-          onPageChange={setCurrentMobilePage}
-          sortedStories={sortedStories}
-        />
+        {/* Mobile view is rendered at root level below */}
     
         {/* TOC Drawer - Above Bottom Nav */}
         {showToc && (
@@ -793,9 +799,10 @@ export default function BookV4Page() {
         </div>
       </div>
 
-      {/* Desktop Navigation Bar */}
-      <CompactNav />
-    </div>
+        {/* Desktop Navigation Bar */}
+        <CompactNav />
+      </div>
+    </>
   );
 }
 
@@ -1070,26 +1077,22 @@ function MobileView({
     <div className="lg:hidden w-full" style={{ marginTop: '-10px' }}>
       <div className="relative w-full flex items-center justify-center" style={{ height: 'calc(100dvh - 80px)', minHeight: 'calc(100vh - 80px)' }}>
         {/* Mobile prev/next controls */}
+        {/* Left edge clickable zone */}
         <button 
           onClick={handlePrev}
           disabled={currentPage === 0}
-          className="absolute left-2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
-          style={{ top: 'calc(50% + 12px)' }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="m15 18-6-6 6-6"></path>
-          </svg>
-        </button>
+          className="absolute left-0 top-0 bottom-0 z-20 disabled:cursor-not-allowed"
+          style={{ width: '20px' }}
+          aria-label="Previous page"
+        />
+        {/* Right edge clickable zone */}
         <button 
           onClick={handleNext}
           disabled={currentPage === allPages.length - 1}
-          className="absolute right-2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:bg-white/20 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed"
-          style={{ top: 'calc(50% + 12px)' }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="m9 18 6-6-6-6"></path>
-          </svg>
-        </button>
+          className="absolute right-0 top-0 bottom-0 z-20 disabled:cursor-not-allowed"
+          style={{ width: '20px' }}
+          aria-label="Next page"
+        />
 
         <div 
           ref={scrollerRef}

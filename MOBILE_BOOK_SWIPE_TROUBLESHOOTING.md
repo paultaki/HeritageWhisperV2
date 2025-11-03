@@ -278,11 +278,61 @@ After 7 hours of debugging, discovered the root cause by comparing intro/TOC pag
 2. Content div: `pointerEvents: 'auto'` → Re-enables interaction for vertical scrolling
 3. Decorative elements: Keep `pointer-events-none` (they're just visual)
 
-**Result**: ✅ Should now work everywhere on the page
+**Result**: ❌ Still not working - same issue persists
 
 ---
 
-## Final Solution: Inconsistent Pointer Events ✅
+## Decision: Enhanced Navigation Buttons Instead
+
+After 7+ hours of debugging attempts, decided to improve the existing navigation buttons rather than continue fighting the touch gesture system.
+
+**What We Did**:
+Enhanced the left/right navigation buttons to be more prominent and easier to use:
+
+```tsx
+// Previous buttons (barely visible)
+className="... h-12 w-12 ... bg-white/10 ring-1 ring-white/15 ..."
+
+// New buttons (much more visible)
+className="... h-16 w-16 ... bg-white/90 ring-2 ring-white shadow-xl hover:scale-110 ..."
+```
+
+**Initial Approach**: Made buttons too visible (64px solid white circles)
+**Feedback**: Too prominent, overlapping content
+
+**Final Approach**: Invisible clickable edge zones
+- Removed visible buttons entirely
+- Created 20px wide invisible hit areas on left and right edges
+- Full height (top to bottom)
+- No visual interference with content
+- Natural tap zones that don't obstruct reading
+
+**Implementation**:
+```tsx
+// Left edge - 20px wide, full height
+<button
+  onClick={handlePrev}
+  className="absolute left-0 top-0 bottom-0 z-20"
+  style={{ width: '20px' }}
+  aria-label="Previous page"
+/>
+
+// Right edge - 20px wide, full height
+<button
+  onClick={handleNext}
+  className="absolute right-0 top-0 bottom-0 z-20"
+  style={{ width: '20px' }}
+  aria-label="Next page"
+/>
+```
+
+**Location**: `app/book/page.tsx` lines ~1072-1089
+
+**Result**: Invisible but easily tappable edge zones for navigation
+
+---
+
+## Final Solution: Enhanced Navigation Buttons ✅
 
 ### The Breakthrough
 
