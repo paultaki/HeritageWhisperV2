@@ -24,7 +24,7 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
     <nav
       className={cn(
         // positioning
-        "fixed left-1/2 -translate-x-1/2 bottom-5 z-50",
+        "fixed left-1/2 -translate-x-1/2 bottom-5 z-[100]",
         // layout
         "flex items-center gap-7 px-6 py-3",
         // shape

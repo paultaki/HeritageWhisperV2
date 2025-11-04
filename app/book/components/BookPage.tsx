@@ -40,7 +40,7 @@ interface BookPageProps {
 }
 
 export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
-  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory, fontSize = 17 }, ref) => {
+  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory, fontSize = 18 }, ref) => {
     const pageRef = React.useRef<HTMLDivElement>(null);
     const [scrollState, setScrollState] = React.useState<{ 
       hasScroll: boolean; 
@@ -550,7 +550,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
 BookPage.displayName = "BookPage";
 
 // Story Content Component
-function StoryContent({ story, position, pageNum, fontSize = 17 }: { story: Story; position: "left" | "right"; pageNum: number; fontSize?: number }) {
+function StoryContent({ story, position, pageNum, fontSize = 18 }: { story: Story; position: "left" | "right"; pageNum: number; fontSize?: number }) {
   const router = useRouter();
   
   // Audio state

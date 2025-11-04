@@ -65,7 +65,7 @@ export default function BookV4Page() {
   const [showToc, setShowToc] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [hasNavigatedToStory, setHasNavigatedToStory] = useState(false);
-  const [fontSize, setFontSize] = useState(17); // Default text size in pixels
+  const [fontSize, setFontSize] = useState(18); // Default text size in pixels (senior-first)
 
   const flowLeftRef = useRef<HTMLDivElement>(null);
   const flowRightRef = useRef<HTMLDivElement>(null);
@@ -579,8 +579,8 @@ export default function BookV4Page() {
               {/* Font size controls - Desktop only */}
               <div className="hidden md:flex items-center gap-1 rounded-md bg-white/5 p-1">
                 <button
-                  onClick={() => setFontSize(Math.max(14, fontSize - 1))}
-                  disabled={fontSize <= 14}
+                  onClick={() => setFontSize(Math.max(16, fontSize - 1))}
+                  disabled={fontSize <= 16}
                   className="flex items-center justify-center w-8 h-8 rounded text-slate-300 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   aria-label="Decrease font size"
                   title="Decrease font size"
