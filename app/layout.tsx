@@ -4,6 +4,7 @@ import "./globals.css";
 import "./styles/memory-overlay.css";
 import { Providers } from "./providers";
 import NavigationWrapper from "@/components/NavigationWrapper";
+import GlassNavWrapper from "@/components/GlassNavWrapper";
 import AgreementGuard from "@/components/AgreementGuard";
 import LayoutContent from "@/components/LayoutContent";
 import DarkModeCleanup from "@/components/DarkModeCleanup";
@@ -62,6 +63,7 @@ export default function RootLayout({
           <AgreementGuard>
             <DarkModeCleanup />
             <NavigationWrapper />
+            <GlassNavWrapper />
             <LayoutContent>{children}</LayoutContent>
           </AgreementGuard>
         </Providers>

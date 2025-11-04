@@ -9,6 +9,17 @@ export default {
     "./hooks/**/*.{js,ts,jsx,tsx}",
     "./utils/**/*.{js,ts,jsx,tsx}",
   ],
+  safelist: [
+    'blur-[6px]',
+    'scale-[1.02]',
+    'translate-x-[1.5px]',
+    'translate-y-[1.5px]',
+    'backdrop-blur-[18px]',
+    'saturate-[1.25]',
+    'contrast-[1.08]',
+    'brightness-[1.06]',
+    'rounded-[22px]',
+  ],
   theme: {
     extend: {
       borderRadius: {
