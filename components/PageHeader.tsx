@@ -65,9 +65,9 @@ export function DesktopPageHeader({
         <div className="flex items-center justify-between gap-4 h-full">
           {/* Left section - Branding and page identity */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* Logo - Increased size */}
+            {/* Logo - Final chat bubble design */}
             <Image
-              src="/logo black.svg"
+              src="/final logo/chat-bubble-hw-logo.svg"
               alt="Heritage Whisper Logo"
               width={145}
               height={145}
@@ -146,9 +146,9 @@ export function MobilePageHeader({
 
           {/* Center section - Compact branding and page identity */}
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            {/* Logo - Increased size for mobile */}
+            {/* Logo - Final chat bubble design for mobile */}
             <Image
-              src="/logo black.svg"
+              src="/final logo/chat-bubble-hw-logo.svg"
               alt="Heritage Whisper Logo"
               width={80}
               height={80}
