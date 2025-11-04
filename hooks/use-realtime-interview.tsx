@@ -298,7 +298,10 @@ export function useRealtimeInterview() {
           assistantResponseRef.current += text;
           console.log('[RealtimeInterview] Assistant delta:', text, '(total:', assistantResponseRef.current.length, 'chars)');
 
-          // Check if we should cancel due to exceeding trim threshold (only send cancel once)
+          // DISABLED: Response trimmer was causing Pearl to be cut off mid-question
+          // The shouldCancelResponse logic was too aggressive, canceling valid multi-sentence responses
+          // Now relying on max_response_output_tokens (1200) to limit response length instead
+          /*
           if (!cancelSentRef.current && shouldCancelResponse(assistantResponseRef.current)) {
             console.log('[RealtimeInterview] ⚠️ Response exceeded trim threshold, sending cancel...');
             if (realtimeHandlesRef.current?.dataChannel) {
@@ -308,6 +311,7 @@ export function useRealtimeInterview() {
               cancelSentRef.current = true;
             }
           }
+          */
         },
 
         onAssistantTextDone: () => {

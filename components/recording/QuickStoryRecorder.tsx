@@ -375,7 +375,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
         {/* Logo - 3x larger */}
         <div className="flex justify-center" style={{ marginTop: '-50px', marginBottom: '-110px' }}>
           <Image
-            src="/Logo hw.svg"
+            src="/logo black.svg"
             alt="Heritage Whisper"
             width={960}
             height={240}

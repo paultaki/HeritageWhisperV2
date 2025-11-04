@@ -195,16 +195,16 @@ interface FamilyPrompt {
   };
 }
 
-// Category data with icons and colors
+// Category data with icons and colors (using premium brand palette)
 const CATEGORIES = [
-  { id: 'childhood', label: 'Childhood', icon: Baby, color: 'from-blue-400 to-blue-500' },
-  { id: 'school', label: 'School Days', icon: GraduationCap, color: 'from-green-400 to-green-500' },
-  { id: 'work', label: 'Work & Career', icon: Briefcase, color: 'from-purple-400 to-purple-500' },
-  { id: 'family', label: 'Family Life', icon: Home, color: 'from-pink-400 to-pink-500' },
-  { id: 'places', label: 'Places & Travel', icon: MapPin, color: 'from-orange-400 to-orange-500' },
-  { id: 'hobbies', label: 'Hobbies & Interests', icon: Music, color: 'from-indigo-400 to-indigo-500' },
-  { id: 'food', label: 'Food & Traditions', icon: Utensils, color: 'from-red-400 to-red-500' },
-  { id: 'milestones', label: 'Life Milestones', icon: Star, color: 'from-yellow-400 to-yellow-500' },
+  { id: 'childhood', label: 'Childhood', icon: Baby, color: 'from-[#2C5282] to-[#4A90E2]' },
+  { id: 'school', label: 'School Days', icon: GraduationCap, color: 'from-[#4A90E2] to-[#2C5282]' },
+  { id: 'work', label: 'Work & Career', icon: Briefcase, color: 'from-[#ED8936] to-[#F6AD55]' },
+  { id: 'family', label: 'Family Life', icon: Home, color: 'from-[#F6AD55] to-[#ED8936]' },
+  { id: 'places', label: 'Places & Travel', icon: MapPin, color: 'from-[#2C5282] to-[#ED8936]' },
+  { id: 'hobbies', label: 'Hobbies & Interests', icon: Music, color: 'from-[#ED8936] to-[#2C5282]' },
+  { id: 'food', label: 'Food & Traditions', icon: Utensils, color: 'from-[#4A90E2] to-[#ED8936]' },
+  { id: 'milestones', label: 'Life Milestones', icon: Star, color: 'from-[#F6AD55] to-[#4A90E2]' },
 ];
 
 // Featured prompt card component
@@ -213,27 +213,28 @@ function FeaturedPromptCard({ prompt, onRecord }: { prompt: any; onRecord: (id: 
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 p-8 md:p-12"
+      className="relative overflow-hidden rounded-3xl p-8 md:p-12"
+      style={{ background: 'linear-gradient(135deg, #EBF4FF 0%, #FFFDF7 50%, #FFF4E6 100%)' }}
     >
       {/* Decorative elements */}
-      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-orange-200 to-rose-200 opacity-20 blur-3xl" />
-      <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-gradient-to-br from-amber-200 to-orange-200 opacity-20 blur-3xl" />
+      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-15 blur-3xl" style={{ background: 'linear-gradient(135deg, #2C5282 0%, #4A90E2 100%)' }} />
+      <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full opacity-15 blur-3xl" style={{ background: 'linear-gradient(135deg, #ED8936 0%, #F6AD55 100%)' }} />
 
       <div className="relative">
         {/* Badge */}
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 backdrop-blur">
-          <Sparkles className="h-5 w-5 text-orange-500" />
-          <span className="text-base font-medium text-gray-700">Today's Featured Question</span>
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 backdrop-blur border-2" style={{ backgroundColor: 'rgba(255, 253, 247, 0.9)', borderColor: '#ED8936' }}>
+          <Sparkles className="h-5 w-5" style={{ color: '#ED8936' }} />
+          <span className="text-base font-semibold" style={{ color: '#2C5282' }}>Today's Featured Question</span>
         </div>
 
         {/* Question */}
-        <h2 className="mb-4 text-3xl md:text-4xl font-semibold text-gray-900 leading-relaxed">
+        <h2 className="mb-4 text-3xl md:text-4xl font-semibold leading-relaxed" style={{ color: '#1A202C' }}>
           {prompt.prompt_text}
         </h2>
 
         {/* Context if available */}
         {prompt.context_note && (
-          <p className="mb-8 text-xl text-gray-600">
+          <p className="mb-8 text-xl" style={{ color: '#4A5568' }}>
             {prompt.context_note}
           </p>
         )}
@@ -242,10 +243,10 @@ function FeaturedPromptCard({ prompt, onRecord }: { prompt: any; onRecord: (id: 
         <Button
           onClick={() => onRecord(prompt.id, prompt.prompt_text, prompt.source)}
           size="lg"
-          className="text-white shadow-lg hover:shadow-xl transition-all duration-200 text-base md:text-lg px-6 md:px-8 py-4 md:py-6 rounded-2xl h-auto"
-          style={{ background: 'linear-gradient(to right, #7C6569, #9C7280)' }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #9C7280, #BFA9AB)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #7C6569, #9C7280)'}
+          className="text-white shadow-lg hover:shadow-xl transition-all duration-200 text-base md:text-lg px-6 md:px-8 py-4 md:py-6 rounded-2xl h-auto border-0"
+          style={{ background: '#2C5282' }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#3D68A0'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#2C5282'}
         >
           <Mic className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6 flex-shrink-0" />
           <span>Record Your Answer</span>
@@ -302,19 +303,19 @@ function SimplePromptCard({
             size="lg"
             variant="outline"
             className={`flex-shrink-0 w-12 h-12 p-0 flex items-center justify-center ${isSaved ? 'border-2' : ''}`}
-            style={isSaved ? { backgroundColor: '#F9E5E8', borderColor: '#BFA9AB' } : {}}
+            style={isSaved ? { backgroundColor: '#FFF4E6', borderColor: '#ED8936' } : { borderColor: '#E2E8F0' }}
           >
-            <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-current' : ''}`} style={isSaved ? { color: '#7C6569' } : {}} />
+            <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-current' : ''}`} style={isSaved ? { color: '#ED8936' } : { color: '#718096' }} />
           </Button>
         )}
 
         <Button
           onClick={() => onRecord(prompt.id, prompt.prompt_text, prompt.source || 'catalog')}
           size="lg"
-          className="flex-1 text-white text-lg md:text-xl py-4 md:py-5 px-6 md:px-8 h-auto font-medium rounded-full"
-          style={{ background: 'linear-gradient(to right, #7C6569, #9C7280)' }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #9C7280, #BFA9AB)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #7C6569, #9C7280)'}
+          className="flex-1 text-white text-lg md:text-xl py-4 md:py-5 px-6 md:px-8 h-auto font-medium rounded-full border-0"
+          style={{ background: '#2C5282' }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#3D68A0'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#2C5282'}
         >
           <Mic className="mr-2 md:mr-2.5 h-5 md:h-6 w-5 md:w-6 flex-shrink-0" />
           <span className="whitespace-nowrap">Record</span>
@@ -339,7 +340,8 @@ function FamilyPromptCard({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ y: -4 }}
-      className="group relative rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 p-6 border-2 border-blue-200"
+      className="group relative rounded-2xl p-6 border-2 shadow-md"
+      style={{ background: 'linear-gradient(135deg, #EBF4FF 0%, #FFFDF7 100%)', borderColor: '#2C5282' }}
     >
       {/* Dismiss button */}
       <button
@@ -348,7 +350,16 @@ function FamilyPromptCard({
           e.stopPropagation();
           onDismiss(prompt.id);
         }}
-        className="absolute top-3 right-3 p-1.5 rounded-full bg-white/80 hover:bg-white text-gray-600 hover:text-gray-900 transition-all shadow-sm hover:shadow-md"
+        className="absolute top-3 right-3 p-1.5 rounded-full transition-all shadow-sm hover:shadow-md"
+        style={{ backgroundColor: 'rgba(255, 253, 247, 0.9)', color: '#718096' }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#FFFDF7';
+          e.currentTarget.style.color = '#1A202C';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(255, 253, 247, 0.9)';
+          e.currentTarget.style.color = '#718096';
+        }}
         aria-label="Dismiss question"
         type="button"
       >
@@ -358,8 +369,8 @@ function FamilyPromptCard({
       {/* From badge */}
       <div className="mb-4 flex items-center justify-between pr-8">
         <div className="flex items-center gap-2">
-          <Heart className="h-5 w-5 text-blue-600 fill-blue-600" />
-          <span className="text-base font-semibold text-blue-700">
+          <Heart className="h-5 w-5 fill-current" style={{ color: '#ED8936' }} />
+          <span className="text-base font-semibold" style={{ color: '#2C5282' }}>
             From {prompt.submittedBy.name}
             {prompt.submittedBy.relationship && ` • ${prompt.submittedBy.relationship}`}
           </span>
@@ -367,7 +378,7 @@ function FamilyPromptCard({
       </div>
 
       {/* Question */}
-      <p className="mb-6 text-xl font-medium text-gray-900 leading-relaxed">
+      <p className="mb-6 text-xl font-medium leading-relaxed" style={{ color: '#1A202C' }}>
         {prompt.prompt_text}
       </p>
 
@@ -375,10 +386,10 @@ function FamilyPromptCard({
       <Button
         onClick={() => onRecord(prompt.id, prompt.prompt_text, 'family')}
         size="lg"
-        className="w-full text-white text-base py-3 md:py-4 px-4 md:px-6 h-auto"
-        style={{ background: 'linear-gradient(to right, #7C6569, #9C7280)' }}
-        onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #9C7280, #BFA9AB)'}
-        onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #7C6569, #9C7280)'}
+        className="w-full text-white text-base py-3 md:py-4 px-4 md:px-6 h-auto border-0"
+        style={{ background: '#ED8936' }}
+        onMouseEnter={(e) => e.currentTarget.style.background = '#F6AD55'}
+        onMouseLeave={(e) => e.currentTarget.style.background = '#ED8936'}
       >
         <MessageCircle className="mr-1.5 md:mr-2 h-4 md:h-5 w-4 md:w-5 flex-shrink-0" />
         <span>Answer {prompt.submittedBy.name.split(' ')[0]}'s Question</span>
@@ -597,7 +608,7 @@ export default function PromptsV2Page() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50">
+    <div className="min-h-screen" style={{ background: '#FFFDF7' }}>
       {/* Desktop Header */}
       <DesktopPageHeader
         icon={Lightbulb}
@@ -609,10 +620,10 @@ export default function PromptsV2Page() {
               variant="default"
               size="sm"
               onClick={() => setShowSubmitQuestionDialog(true)}
-              className="text-white flex-shrink-0"
-              style={{ backgroundColor: '#7C6569' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+              className="text-white flex-shrink-0 border-0"
+              style={{ backgroundColor: '#2C5282' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3D68A0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2C5282'}
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Submit Question
@@ -631,10 +642,10 @@ export default function PromptsV2Page() {
               variant="default"
               size="sm"
               onClick={() => setShowSubmitQuestionDialog(true)}
-              className="text-white text-xs px-2 py-1"
-              style={{ backgroundColor: '#7C6569' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+              className="text-white text-xs px-2 py-1 border-0"
+              style={{ backgroundColor: '#2C5282' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3D68A0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2C5282'}
             >
               <MessageCircle className="h-3 w-3 mr-1" />
               Submit
@@ -657,14 +668,15 @@ export default function PromptsV2Page() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-blue-50 border-b border-blue-200 px-6 py-4"
+              className="border-b px-6 py-4"
+              style={{ backgroundColor: '#EBF4FF', borderColor: '#2C5282' }}
             >
               <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-                <h3 className="font-semibold text-blue-900 mb-2 text-lg">How to use this page:</h3>
-                <ul className="text-blue-800 space-y-1 text-base">
+                <h3 className="font-semibold mb-2 text-lg" style={{ color: '#2C5282' }}>How to use this page:</h3>
+                <ul className="space-y-1 text-base" style={{ color: '#4A5568' }}>
                   <li>• Click "Record" on any question to start recording your story</li>
                   <li>• Click the bookmark icon to save a question for later</li>
-                  <li>• Questions from family members appear in blue</li>
+                  <li>• Questions from family members appear with special styling</li>
                   <li>• Browse categories at the bottom to find more topics</li>
                 </ul>
               </div>
@@ -683,8 +695,8 @@ export default function PromptsV2Page() {
           {familyPrompts.length > 0 && (
             <section className="mb-12">
               <div className="mb-6 flex items-center gap-3">
-                <Heart className="h-7 w-7 text-blue-600 fill-blue-600" />
-                <h2 className="text-3xl font-bold text-gray-900">
+                <Heart className="h-7 w-7 fill-current" style={{ color: '#ED8936' }} />
+                <h2 className="text-3xl font-bold" style={{ color: '#1A202C' }}>
                   Your Family Wants to Know
                 </h2>
               </div>
@@ -706,10 +718,10 @@ export default function PromptsV2Page() {
           {quickStartPrompts.length > 0 && (
             <section className="mb-12">
               <div className="mb-6">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                <h2 className="text-3xl font-bold mb-2" style={{ color: '#1A202C' }}>
                   Quick Start
                 </h2>
-                <p className="text-lg text-gray-600">
+                <p className="text-lg" style={{ color: '#4A5568' }}>
                   Easy questions to get you started
                 </p>
               </div>
@@ -732,13 +744,13 @@ export default function PromptsV2Page() {
           {queuedPrompts.length > 0 && (
             <section className="mb-12">
               <div className="mb-6 flex items-center gap-3">
-                <Bookmark className="h-7 w-7 text-orange-600 fill-orange-600" />
-                <h2 className="text-3xl font-bold text-gray-900">
+                <Bookmark className="h-7 w-7 fill-current" style={{ color: '#ED8936' }} />
+                <h2 className="text-3xl font-bold" style={{ color: '#1A202C' }}>
                   Saved for Later
                 </h2>
               </div>
 
-              <div className="rounded-2xl bg-orange-50/50 p-6 border border-orange-200">
+              <div className="rounded-2xl p-6 border-2" style={{ backgroundColor: '#FFF4E6', borderColor: '#ED8936' }}>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {queuedPrompts.map((prompt) => (
                     <SimplePromptCard
@@ -757,10 +769,10 @@ export default function PromptsV2Page() {
           {/* Browse by Category */}
           <section>
             <div className="mb-6">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-3xl font-bold mb-2" style={{ color: '#1A202C' }}>
                 Browse Topics
               </h2>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg" style={{ color: '#4A5568' }}>
                 Explore questions by category
               </p>
             </div>
@@ -913,9 +925,10 @@ export default function PromptsV2Page() {
                   });
                 }}
                 disabled={submitQuestionMutation.isPending}
-                style={{ backgroundColor: '#7C6569', color: 'white' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+                className="border-0"
+                style={{ backgroundColor: '#2C5282', color: 'white' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3D68A0'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2C5282'}
               >
                 {submitQuestionMutation.isPending ? "Submitting..." : "Submit Question"}
               </Button>

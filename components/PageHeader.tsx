@@ -56,44 +56,36 @@ export function DesktopPageHeader({
   const { isOwnAccount } = useAccountContext();
   
   return (
-    <header 
+    <header
       className="hidden md:block sticky top-0 z-40 bg-white border-b"
       role="banner"
       style={{ height: '62px' }}
     >
-      <div className="max-w-7xl mx-auto px-6" style={{ paddingTop: '2px', paddingBottom: '2px' }}>
-        <div className="flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-6 h-full">
+        <div className="flex items-center justify-between gap-4 h-full">
           {/* Left section - Branding and page identity */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* Logo */}
+            {/* Logo - Increased size */}
             <Image
-              src="/circle logo hw.svg"
+              src="/logo black.svg"
               alt="Heritage Whisper Logo"
-              width={65}
-              height={65}
-              className="w-[65px] h-[65px] flex-shrink-0 relative"
-              style={{ top: '-10px' }}
+              width={145}
+              height={145}
+              className="w-[145px] h-[145px] flex-shrink-0 relative"
+              style={{ top: '6px' }}
               priority
             />
-            
+
             {/* Page Icon */}
             <Icon
-              className="w-7 h-7 text-gray-700 flex-shrink-0 relative"
-              style={{ top: '-10px' }}
+              className="w-7 h-7 text-gray-700 flex-shrink-0"
               aria-hidden="true"
             />
 
-            {/* Page Title and Subtitle */}
-            <div className="min-w-0 flex flex-col justify-center relative" style={{ top: '-10px' }}>
-              <h1 className="text-2xl font-bold text-gray-900 truncate leading-tight">
-                {title}
-              </h1>
-              {subtitle && (
-                <p className="text-sm text-gray-600 truncate mt-0.5 leading-tight">
-                  {subtitle}
-                </p>
-              )}
-            </div>
+            {/* Page Title - Centered, no subtitle */}
+            <h1 className="text-2xl font-bold text-gray-900 truncate leading-tight">
+              {title}
+            </h1>
           </div>
 
           {/* Right section - Actions and account switcher */}
@@ -143,8 +135,8 @@ export function MobilePageHeader({
       role="banner"
       style={{ height: '52px' }}
     >
-      <div className="px-4" style={{ paddingTop: '2px', paddingBottom: '2px' }}>
-        <div className="flex items-center justify-between gap-2">
+      <div className="px-4 h-full">
+        <div className="flex items-center justify-between gap-2 h-full">
           {/* Left section with hamburger menu */}
           {leftContent && (
             <div className="flex-shrink-0">
@@ -154,35 +146,27 @@ export function MobilePageHeader({
 
           {/* Center section - Compact branding and page identity */}
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            {/* Logo - Smaller for mobile */}
+            {/* Logo - Increased size for mobile */}
             <Image
-              src="/circle logo hw.svg"
+              src="/logo black.svg"
               alt="Heritage Whisper Logo"
-              width={48}
-              height={48}
-              className="w-[48px] h-[48px] flex-shrink-0 relative"
-              style={{ top: '-6px' }}
+              width={80}
+              height={80}
+              className="w-[80px] h-[80px] flex-shrink-0 relative"
+              style={{ top: '6px' }}
               priority
             />
 
             {/* Page Icon */}
             <Icon
-              className="w-6 h-6 text-gray-700 flex-shrink-0 relative"
-              style={{ top: '-6px' }}
+              className="w-6 h-6 text-gray-700 flex-shrink-0"
               aria-hidden="true"
             />
 
-            {/* Page Title and Subtitle */}
-            <div className="min-w-0 flex flex-col justify-center relative" style={{ top: '-6px' }}>
-              <h1 className="text-lg font-bold text-gray-900 truncate leading-tight">
-                {title}
-              </h1>
-              {subtitle && (
-                <p className="text-xs text-gray-600 truncate mt-0.5 leading-tight">
-                  {subtitle}
-                </p>
-              )}
-            </div>
+            {/* Page Title - Centered, no subtitle */}
+            <h1 className="text-lg font-bold text-gray-900 truncate leading-tight">
+              {title}
+            </h1>
           </div>
 
           {/* Right section - Custom actions only */}

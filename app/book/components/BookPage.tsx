@@ -176,9 +176,9 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             {/* HW watermark logo in center */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="opacity-[0.08]">
-                <img 
-                  src="/circle logo hw.svg" 
-                  alt="Heritage Whisper" 
+                <img
+                  src="/logo black.svg"
+                  alt="Heritage Whisper"
                   className="w-32 h-32"
                   style={{ filter: 'grayscale(100%)' }}
                 />

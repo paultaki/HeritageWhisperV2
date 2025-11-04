@@ -43,19 +43,19 @@ export function BottomGlassBar({ onEnd, onPauseResume, onCancel, isPaused }: Bot
         <div className="rounded-3xl border border-[#E5E5E5] bg-white shadow-sm">
           <div className="flex items-stretch justify-between px-2">
             <ActionItem
-              icon={<StopCircle strokeWidth={1.5} />}
+              icon={<StopCircle size={20} strokeWidth={1.5} />}
               label="End interview"
               onClick={onEnd}
               titleHint="End interview (Cmd/Ctrl + E)"
             />
             <ActionItem
-              icon={isPaused ? <Play strokeWidth={1.5} /> : <Pause strokeWidth={1.5} />}
+              icon={isPaused ? <Play size={20} strokeWidth={1.5} /> : <Pause size={20} strokeWidth={1.5} />}
               label={isPaused ? "Resume" : "Pause"}
               onClick={onPauseResume}
               titleHint="Pause / Resume (Space)"
             />
             <ActionItem
-              icon={<XCircle strokeWidth={1.5} />}
+              icon={<XCircle size={20} strokeWidth={1.5} />}
               label="Cancel"
               onClick={onCancel}
               titleHint="Cancel (Esc)"

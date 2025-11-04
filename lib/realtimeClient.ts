@@ -282,13 +282,13 @@ export async function startRealtime(
         input_audio_transcription: {
           model: 'whisper-1',
         },
-        // Server VAD with longer silence threshold for storytelling
+        // Server VAD for detecting when user finishes speaking
         // Docs: https://platform.openai.com/docs/guides/realtime-webrtc#vad
         turn_detection: {
           type: 'server_vad',
-          threshold: 0.7,  // Higher threshold = less sensitive to ambient noise (was 0.5)
+          threshold: 0.7,  // Higher threshold = less sensitive to ambient noise
           prefix_padding_ms: 300,  // Include 300ms before speech starts
-          silence_duration_ms: 2000, // Wait 2 seconds of silence before ending turn (increased for natural pauses)
+          silence_duration_ms: 1000, // 1 second of silence to end turn (default is usually 500-700ms)
         },
         // Allow longer responses for natural conversation flow (1200 tokens ≈ 15-18 sentences)
         max_response_output_tokens: 1200,
