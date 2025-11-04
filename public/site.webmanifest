@@ -1,6 +1,6 @@
 {
-  "name": "Heritage Whisper",
-  "short_name": "Heritage Whisper",
+  "name": "HeritageWhisper",
+  "short_name": "HW",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -13,7 +13,7 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#2563EB",
+  "theme_color": "#8B4513",
   "background_color": "#ffffff",
   "display": "standalone"
 }
