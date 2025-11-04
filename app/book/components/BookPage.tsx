@@ -750,14 +750,14 @@ function StoryContent({ story, position, pageNum, fontSize = 17 }: { story: Stor
 
       {/* Audio Player - Senior-friendly 48px controls */}
       {story.audioUrl && (
-        <div className="audio mb-2">
+        <div className="mb-3 flex items-center gap-3">
           {/* Play button - 48px minimum touch target */}
           <button
             onClick={toggleAudio}
-            className="audio-button play"
+            className="relative flex-shrink-0 w-12 h-12 rounded-full border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
             aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
           >
-            <svg className="w-12 h-12 -rotate-90 absolute inset-0">
+            <svg className="absolute inset-0 w-12 h-12 -rotate-90">
               {/* Background ring */}
               <circle
                 cx="24"
@@ -784,7 +784,7 @@ function StoryContent({ story, position, pageNum, fontSize = 17 }: { story: Stor
               )}
             </svg>
             {/* Icon in center */}
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
               ) : isPlaying ? (
@@ -796,30 +796,32 @@ function StoryContent({ story, position, pageNum, fontSize = 17 }: { story: Stor
           </button>
 
           {/* Linear progress bar - 8px tall, easy to click */}
-          <div
-            className="track cursor-pointer"
-            onClick={(e) => {
-              if (!audioRef.current || !duration) return;
-
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const percentage = x / rect.width;
-              const newTime = percentage * duration;
-
-              audioRef.current.currentTime = newTime;
-              setCurrentTime(newTime);
-            }}
-          >
+          <div className="flex-1">
             <div
-              className="h-full bg-neutral-400 transition-all duration-100 rounded-full"
-              style={{ width: `${progress}%` }}
-            />
+              className="h-2 bg-neutral-200 rounded-full overflow-hidden cursor-pointer hover:h-2.5 transition-all"
+              onClick={(e) => {
+                if (!audioRef.current || !duration) return;
+
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percentage = x / rect.width;
+                const newTime = percentage * duration;
+
+                audioRef.current.currentTime = newTime;
+                setCurrentTime(newTime);
+              }}
+            >
+              <div
+                className="h-full bg-neutral-400 transition-all duration-100"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
 
-          {/* Timestamps - tabular nums for alignment */}
-          <span className="time">
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
+          {/* Timestamps - tabular nums, fixed width to prevent wrapping */}
+          <div className="text-xs text-neutral-500 font-mono tabular-nums whitespace-nowrap min-w-[70px] text-right">
+            {formatTime(currentTime)}<span className="text-neutral-400"> / </span>{formatTime(duration)}
+          </div>
         </div>
       )}
 
