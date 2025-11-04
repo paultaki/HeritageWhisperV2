@@ -22,19 +22,22 @@ type GlassNavProps = {
 export default function GlassNav({ items, activeKey, className, onMenuClick }: GlassNavProps) {
   return (
     <nav
+      data-sep="auto"
       className={cn(
         // width and shape
-        "w-[92vw] max-w-[720px] rounded-[24px] overflow-hidden",
-        // layout
-        "flex items-center justify-between gap-7 px-6 py-3",
-        // glass core - enhanced for visibility
-        "backdrop-blur-[18px] saturate-[1.25] contrast-[1.15] brightness-[0.96]",
+        "w-[92vw] max-w-[720px] rounded-[22px] overflow-hidden",
+        // layout - compact with even spacing
+        "flex items-center justify-around gap-1 px-4 py-2.5",
+        // glass core - brand-aligned
+        "backdrop-blur-[18px] saturate-[1.22] contrast-[1.12] brightness-[0.97]",
         "border border-white/35",
         "shadow-[0_20px_40px_-20px_rgba(0,0,0,0.45)]",
-        // darker neutral tint for better contrast
+        // taupe tint based on brand color #866C7A
         "bg-[linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04))]",
-        "bg-[rgba(92,92,92,0.12)]",
+        "bg-[rgba(134,108,122,0.12)]",
         "relative",
+        // subtle edge shadow for lift
+        "after:content-[''] after:absolute after:inset-x-4 after:-bottom-3 after:h-4 after:rounded-[20px] after:blur-[14px] after:bg-black/10 after:pointer-events-none",
         className
       )}
       style={{
@@ -45,26 +48,36 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
         zIndex: 100,
       }}
     >
-      {/* refraction layer – subtle */}
+      {/* refraction layer – more subtle */}
       <span
         aria-hidden="true"
         className="
-          pointer-events-none absolute inset-[-8%] opacity-20
+          pointer-events-none absolute inset-[-6%] opacity-15
           bg-inherit
           [background-attachment:fixed]
-          blur-[5px]
+          blur-[4px]
         "
         style={{
-          transform: "translate(1px,1px) scale(1.015)",
+          transform: "translate(0.8px,0.8px) scale(1.012)",
         }}
       />
 
-      {/* top lip + bottom fade for separation on light cards */}
+      {/* top lip highlight (always on) */}
       <span
         aria-hidden="true"
         className="
           pointer-events-none absolute inset-0
-          [background:linear-gradient(180deg,rgba(255,255,255,0.28),transparent_40%),linear-gradient(0deg,rgba(0,0,0,0.10),transparent_40%)]
+          [background:linear-gradient(180deg,rgba(255,255,255,0.28),transparent_42%)]
+        "
+      />
+
+      {/* bottom fade (conditional - only when data-sep="strong") */}
+      <span
+        aria-hidden="true"
+        className="
+          pointer-events-none absolute inset-0 hidden
+          [background:linear-gradient(0deg,rgba(0,0,0,0.10),transparent_40%)]
+          data-[sep='strong']:block
         "
       />
 
@@ -84,7 +97,7 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
             key={key}
             {...componentProps}
             className={cn(
-              "flex flex-col items-center gap-1 px-2 py-1 rounded-xl transition-transform",
+              "flex flex-col items-center px-2 py-1 rounded-[14px] transition-transform",
               "hover:-translate-y-0.5"
             )}
           >
@@ -92,7 +105,7 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
               className={cn(
                 "grid place-items-center w-7 h-7 rounded-full",
                 active
-                  ? "bg-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+                  ? "bg-black/6 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
                   : "bg-transparent"
               )}
             >
@@ -108,7 +121,7 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
             </span>
             <span
               className={cn(
-                "text-[13px] tracking-wide",
+                "text-[12px] font-medium leading-none tracking-wide mt-[2px]",
                 "text-black/85",
                 "drop-shadow-[0_1px_0_rgba(255,255,255,0.55)]",
                 active && "text-black"
