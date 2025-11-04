@@ -66,9 +66,30 @@ export default function BookV4Page() {
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [hasNavigatedToStory, setHasNavigatedToStory] = useState(false);
   const [fontSize, setFontSize] = useState(17); // Default text size in pixels
-  
+
   const flowLeftRef = useRef<HTMLDivElement>(null);
   const flowRightRef = useRef<HTMLDivElement>(null);
+  const liveRegionRef = useRef<HTMLDivElement>(null);
+
+  // Announce page changes to screen readers
+  const announcePageChange = (spreadIndex: number) => {
+    if (liveRegionRef.current && spreadIndex >= 0) {
+      const pageNum = spreadIndex * 2 + 1; // Convert to page number
+      liveRegionRef.current.textContent = `Page ${pageNum}`;
+
+      // Focus on the heading of the current page for keyboard users
+      setTimeout(() => {
+        const leftHeading = document.querySelector(`#page-${spreadIndex}-left h2`) as HTMLElement;
+        const rightHeading = document.querySelector(`#page-${spreadIndex}-right h2`) as HTMLElement;
+        const heading = leftHeading || rightHeading;
+
+        if (heading) {
+          heading.setAttribute('tabindex', '-1');
+          heading.focus();
+        }
+      }, 100);
+    }
+  };
 
   // Fetch stories - same as main book
   const { data, isLoading, isFetching } = useQuery<{ stories: Story[] }>({
@@ -303,15 +324,22 @@ export default function BookV4Page() {
     });
   }, [currentSpreadIndex]);
 
-  // Keyboard navigation
+  // Keyboard navigation (Arrow keys + Space)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input field
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
       if (e.key === "ArrowLeft") {
         e.preventDefault();
         goToPrevSpread();
-      } else if (e.key === "ArrowRight") {
+        announcePageChange(currentSpreadIndex - 1);
+      } else if (e.key === "ArrowRight" || e.key === " ") {
         e.preventDefault();
         goToNextSpread();
+        announcePageChange(currentSpreadIndex + 1);
       }
     };
 
@@ -511,6 +539,15 @@ export default function BookV4Page() {
 
       {/* Desktop: Book view with dual-page spread */}
       <div className={`hidden lg:block h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
+      {/* ARIA live region for page announcements */}
+      <div
+        id="sr-live"
+        ref={liveRegionRef}
+        className="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      ></div>
+
       {/* Dark Book Progress Bar - hidden on mobile */}
       <div className="hidden md:block">
         <DarkBookProgressBar

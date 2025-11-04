@@ -326,24 +326,15 @@ function DesktopProgressBar({
   return (
     <div className="book-progress-bar fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 shadow-lg">
       <div className="relative px-6 py-3 max-w-7xl mx-auto flex items-center gap-4">
-        {/* Previous button - Classic physical button style for seniors */}
+        {/* Previous button - 60px senior-friendly navigation arrow */}
         <button
           onClick={handlePrevious}
           disabled={!hasPrevious}
-          className={`flex-shrink-0 flex flex-col items-center justify-center gap-0.5 px-4 py-2.5 min-w-[80px] rounded transition-all font-semibold text-xs uppercase tracking-wide ${
-            hasPrevious
-              ? "bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 hover:from-gray-100 hover:via-gray-150 hover:to-gray-250 text-gray-800 border-t-2 border-l-2 border-r border-b border-t-gray-300 border-l-gray-300 border-r-gray-500 border-b-gray-600 active:border-t-gray-500 active:border-l-gray-500 active:border-r-gray-300 active:border-b-gray-300"
-              : "bg-gradient-to-b from-gray-200 to-gray-300 text-gray-500 cursor-not-allowed border border-gray-400"
-          }`}
-          style={hasPrevious ? {
-            boxShadow: "0 3px 0 rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5)",
-          } : {
-            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.2)",
-          }}
-          aria-label="Previous page"
+          className="nav-arrow flex items-center justify-center"
+          aria-label="Previous page (Left Arrow key)"
+          title="Previous page (Left Arrow key)"
         >
-          <ChevronLeft className="w-5 h-5 -mb-1" />
-          <span className="text-[10px]">PREV</span>
+          <ChevronLeft className="w-6 h-6 text-gray-700" />
         </button>
 
         {/* Progress bar */}
@@ -401,24 +392,15 @@ function DesktopProgressBar({
           )}
         </div>
 
-        {/* Next button - Classic physical button style for seniors */}
+        {/* Next button - 60px senior-friendly navigation arrow */}
         <button
           onClick={handleNextPage}
           disabled={!hasNext}
-          className={`flex-shrink-0 flex flex-col items-center justify-center gap-0.5 px-4 py-2.5 min-w-[80px] rounded transition-all font-semibold text-xs uppercase tracking-wide ${
-            hasNext
-              ? "bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 hover:from-gray-100 hover:via-gray-150 hover:to-gray-250 text-gray-800 border-t-2 border-l-2 border-r border-b border-t-gray-300 border-l-gray-300 border-r-gray-500 border-b-gray-600 active:border-t-gray-500 active:border-l-gray-500 active:border-r-gray-300 active:border-b-gray-300"
-              : "bg-gradient-to-b from-gray-200 to-gray-300 text-gray-500 cursor-not-allowed border border-gray-400"
-          }`}
-          style={hasNext ? {
-            boxShadow: "0 3px 0 rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5)",
-          } : {
-            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.2)",
-          }}
-          aria-label="Next page"
+          className="nav-arrow flex items-center justify-center"
+          aria-label="Next page (Right Arrow key or Space)"
+          title="Next page (Right Arrow key or Space)"
         >
-          <ChevronRight className="w-5 h-5 -mb-1" />
-          <span className="text-[10px]">NEXT</span>
+          <ChevronRight className="w-6 h-6 text-gray-700" />
         </button>
       </div>
     </div>

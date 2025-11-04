@@ -1,4 +1,25 @@
-/* Book V4 Styles */
+/* Book V4 Styles - Senior-First Premium v1.0 */
+
+/* ============================================================================
+   CSS Custom Properties - Senior-First Premium Color System
+   ============================================================================ */
+:root {
+  /* Core Colors */
+  --text: #111827;
+  --muted: #6B7280;
+  --blue: #2563EB;
+  --blue-700: #1D4ED8;
+  --border: #E5E7EB;
+  --paper: #FFFFFF;
+  --paper-2: #F9FAFB;
+
+  /* Border Radius */
+  --radius: 16px;
+  --radius-img: 12px;
+
+  /* Shadows - Soft elevation */
+  --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+}
 
 /* Smooth scrolling with visible styled scrollbars */
 .js-flow {
@@ -155,6 +176,196 @@ body {
   .animate-pulse-subtle,
   .animate-bounce-gentle {
     animation: none !important;
+  }
+}
+
+/* ============================================================================
+   Senior-First Premium Book Styles
+   ============================================================================ */
+
+/* Page Cards - Premium styling with soft elevation */
+.page-card {
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.page-card .prose {
+  max-width: 65ch;
+  color: var(--text);
+}
+
+.page-card h2 {
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: .005em;
+  line-height: 1.25;
+}
+
+.page-card .sub {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.page-card img {
+  aspect-ratio: 4/3;
+  width: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  border-radius: var(--radius-img);
+}
+
+/* Left and Right Page Spacing */
+.page-left {
+  padding-right: 32px;
+}
+
+.page-right {
+  padding-left: 32px;
+}
+
+/* Page Numbers */
+.page-number {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Chips and Buttons - 48px minimum touch target */
+.chip, .btn {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: #fff;
+  font-size: 14px;
+  transition: all .2s;
+}
+
+.chip:hover, .btn:hover {
+  background: var(--paper-2);
+  border-color: var(--blue);
+}
+
+.chip:active, .btn:active {
+  transform: scale(0.98);
+}
+
+/* Continue/More Button */
+.more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  transition: all .2s;
+}
+
+.more:hover {
+  background: var(--paper-2);
+  border-color: var(--blue);
+}
+
+.more:active {
+  transform: scale(0.98);
+}
+
+/* Navigation Arrows - 60px senior-friendly */
+.nav-arrow {
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  min-height: 60px;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  box-shadow: var(--shadow);
+  transition: all .2s;
+}
+
+.nav-arrow:hover {
+  background: var(--paper-2);
+  border-color: var(--blue);
+}
+
+.nav-arrow:active {
+  transform: scale(0.98);
+}
+
+/* Focus States - High-visibility for keyboard navigation */
+.chip:focus,
+.btn:focus,
+.more:focus,
+.nav-arrow:focus,
+.audio-button:focus,
+.toc-item:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, .9);
+}
+
+/* Audio Controls - Senior-friendly sizing (48px minimum) */
+.audio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+}
+
+.audio .play {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  transition: all .2s;
+}
+
+.audio .play:hover {
+  background: var(--paper-2);
+  border-color: var(--blue);
+}
+
+.audio .play:active {
+  transform: scale(0.98);
+}
+
+.audio .track {
+  flex: 1;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--border);
+}
+
+.audio .time {
+  width: 56px;
+  text-align: right;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Reduced Motion - Page transitions become cross-fades */
+@media (prefers-reduced-motion: reduce) {
+  .page-flip {
+    animation: none;
+    transition: opacity .2s ease;
+  }
+
+  .nav-arrow,
+  .chip,
+  .btn,
+  .more,
+  .audio .play {
+    transition: opacity .2s ease;
   }
 }
 

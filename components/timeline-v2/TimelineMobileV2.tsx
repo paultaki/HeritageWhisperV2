@@ -217,25 +217,6 @@ export function TimelineMobileV2() {
 
 
       <style jsx global>{`
-        /* PREMIUM V2 COLOR OVERRIDES - Must be inline to override base CSS */
-        .timeline-v2-premium .hw-year {
-          background: linear-gradient(135deg, #2C5282 0%, #3D6BA8 100%) !important;
-          color: #ffffff !important;
-          border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        }
-
-        .timeline-v2-premium .hw-card::before {
-          background: linear-gradient(to right, #2C5282, #3D6BA8) !important;
-        }
-
-        .timeline-v2-premium .hw-card:hover::before {
-          background: linear-gradient(to right, #ED8936, #F6AD55) !important;
-        }
-
-        .timeline-v2-premium .hw-spine::before {
-          background: linear-gradient(to bottom, #2C5282 0%, #3D6BA8 50%, #2C5282 100%) !important;
-        }
-
         /* Override DecadeNav to work in header */
         .decade-selector-header .hw-decade-nav {
           display: none !important; /* Hide desktop sidebar version */

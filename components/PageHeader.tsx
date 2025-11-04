@@ -146,13 +146,13 @@ export function MobilePageHeader({
 
           {/* Center section - Compact branding and page identity */}
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            {/* Logo - Final chat bubble design for mobile */}
+            {/* Logo - HW logo for mobile */}
             <Image
-              src="/final logo/chat-bubble-hw-logo.svg"
+              src="/final logo/logo hw.png"
               alt="Heritage Whisper Logo"
-              width={80}
-              height={80}
-              className="w-[80px] h-[80px] flex-shrink-0 relative"
+              width={51}
+              height={51}
+              className="w-[51px] h-[51px] flex-shrink-0 relative"
               style={{ top: '1px', left: '-10px' }}
               priority
             />
