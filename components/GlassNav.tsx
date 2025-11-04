@@ -16,9 +16,10 @@ type GlassNavProps = {
   items: NavItem[];
   activeKey?: string;
   className?: string;
+  onMenuClick?: () => void;
 };
 
-export default function GlassNav({ items, activeKey, className }: GlassNavProps) {
+export default function GlassNav({ items, activeKey, className, onMenuClick }: GlassNavProps) {
   return (
     <nav
       className={cn(
@@ -65,10 +66,18 @@ export default function GlassNav({ items, activeKey, className }: GlassNavProps)
       {/* items */}
       {items.map(({ key, label, href, Icon }) => {
         const active = key === activeKey;
+        const isMenu = key === 'menu';
+
+        // For menu item, use button instead of Link
+        const Component = isMenu ? 'button' : Link;
+        const componentProps = isMenu
+          ? { onClick: onMenuClick, type: 'button' as const }
+          : { href };
+
         return (
-          <Link
+          <Component
             key={key}
-            href={href}
+            {...componentProps}
             className={cn(
               "flex flex-col items-center gap-1 px-2 py-1 rounded-xl transition-transform",
               "hover:-translate-y-0.5"
@@ -99,7 +108,7 @@ export default function GlassNav({ items, activeKey, className }: GlassNavProps)
             >
               {label}
             </span>
-          </Link>
+          </Component>
         );
       })}
     </nav>

@@ -18,11 +18,11 @@ export default function NavigationWrapper() {
 
   return (
     <>
-      {/* Mobile Navigation (bottom bar) - shows on all pages except interview-chat */}
-      {!isInterviewChat && <MobileNavigation />}
+      {/* Mobile Navigation (bottom bar) - DISABLED - now using GlassNav */}
+      {/* {!isInterviewChat && <MobileNavigation />} */}
 
-      {/* Hamburger Menu (top right) - hidden on book page and interview-chat */}
-      {!isInterviewChat && !isBookPage && <HamburgerMenu />}
+      {/* Hamburger Menu (top right) - DISABLED - now using GlassMenuDropdown in GlassNav */}
+      {/* {!isInterviewChat && !isBookPage && <HamburgerMenu />} */}
 
       {/* Mode Selection Modal */}
       <ModeSelectionModal

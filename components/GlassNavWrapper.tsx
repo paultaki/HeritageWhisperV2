@@ -1,12 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Clock, BookOpen, Mic, Lightbulb, User } from "lucide-react";
+import { Clock, BookOpen, Mic, Lightbulb, Menu } from "lucide-react";
 import GlassNav from "./GlassNav";
+import GlassMenuDropdown from "./GlassMenuDropdown";
 
 export default function GlassNavWrapper() {
   const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Hide navigation on specific pages
   const isInterviewChat = pathname === '/interview-chat';
@@ -23,7 +25,6 @@ export default function GlassNavWrapper() {
     if (pathname.startsWith('/book')) return 'book';
     if (pathname.startsWith('/memory-box')) return 'memory';
     if (pathname.startsWith('/prompts')) return 'ideas';
-    if (pathname.startsWith('/profile')) return 'profile';
     return '';
   };
 
@@ -53,18 +54,22 @@ export default function GlassNavWrapper() {
       Icon: Lightbulb,
     },
     {
-      key: 'profile',
-      label: 'Profile',
-      href: '/profile',
-      Icon: User,
+      key: 'menu',
+      label: 'Menu',
+      href: '#',
+      Icon: Menu,
     },
   ];
 
   return (
-    <GlassNav
-      items={navItems}
-      activeKey={getActiveKey()}
-      className="pb-[calc(env(safe-area-inset-bottom)+12px)]"
-    />
+    <>
+      <GlassNav
+        items={navItems}
+        activeKey={getActiveKey()}
+        className="pb-[calc(env(safe-area-inset-bottom)+12px)]"
+        onMenuClick={() => setIsMenuOpen(!isMenuOpen)}
+      />
+      <GlassMenuDropdown isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+    </>
   );
 }
