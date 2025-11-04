@@ -102,7 +102,7 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-sm rounded-2xl shadow-2xl overflow-hidden bg-white/95 backdrop-blur-xl border border-white/30"
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[110] w-[90%] max-w-sm rounded-2xl shadow-2xl overflow-hidden bg-white/95 backdrop-blur-xl border border-white/30"
         >
           {/* User Info */}
           {user && (
