@@ -135,9 +135,9 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   </p>
                 </div>
               </div>
-              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
-                {position === "left" && <span className="tracking-tight">{pageNum}</span>}
-                {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
+              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-base text-neutral-600 pointer-events-none z-20">
+                {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
+                {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
               </div>
             </div>
           </div>
@@ -294,9 +294,9 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 />
               )}
               
-              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
-                {position === "left" && <span className="tracking-tight">{pageNum}</span>}
-                {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
+              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-base text-neutral-600 pointer-events-none z-20">
+                {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
+                {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
               </div>
             </div>
           </div>
@@ -395,9 +395,9 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 />
               )}
               
-              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
-                {position === "left" && <span className="tracking-tight">{pageNum}</span>}
-                {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
+              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-base text-neutral-600 pointer-events-none z-20">
+                {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
+                {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
               </div>
             </div>
           </div>

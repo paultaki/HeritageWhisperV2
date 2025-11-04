@@ -229,8 +229,9 @@ body {
 
 /* Page Numbers */
 .page-number {
-  font-size: 14px;
-  color: var(--muted);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
 }
 
 /* Chips and Buttons - 48px minimum touch target */

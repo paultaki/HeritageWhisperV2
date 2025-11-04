@@ -281,7 +281,7 @@ export default function DarkBookProgressBar({
           {/* TOC button - white outline style matching progress bar aesthetic */}
           <button
             onClick={onTocClick}
-            className="flex items-center gap-2 px-4 h-9 rounded-full border-2 border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white font-medium"
+            className="flex items-center gap-2 px-5 h-11 rounded-full border-2 border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white font-medium"
             aria-label="Table of Contents"
             title="Table of Contents"
           >
@@ -297,7 +297,7 @@ export default function DarkBookProgressBar({
               <path d="M4 12h16"></path>
               <path d="M4 18h16"></path>
             </svg>
-            <span className="text-sm">Contents</span>
+            <span className="text-base">Contents</span>
           </button>
         </div>
       </div>
