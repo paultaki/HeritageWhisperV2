@@ -748,88 +748,78 @@ function StoryContent({ story, position, pageNum, fontSize = 17 }: { story: Stor
         </div>
       </div>
 
-      {/* Audio Player */}
+      {/* Audio Player - Senior-friendly 48px controls */}
       {story.audioUrl && (
-        <div className="mb-2 relative" style={{ zIndex: 9999 }}>
-          <div className="flex items-center gap-3">
-            {/* Circular play button with progress ring */}
-            <button
-              onClick={toggleAudio}
-              className="relative flex-shrink-0 hover:scale-105 transition-transform cursor-pointer"
-              aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-              style={{ 
-                pointerEvents: 'auto',
-                zIndex: 9999,
-                position: 'relative'
-              }}
-            >
-              <svg className="w-10 h-10 -rotate-90">
-                {/* Background ring - very subtle */}
+        <div className="audio mb-2">
+          {/* Play button - 48px minimum touch target */}
+          <button
+            onClick={toggleAudio}
+            className="audio-button play"
+            aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+          >
+            <svg className="w-12 h-12 -rotate-90 absolute inset-0">
+              {/* Background ring */}
+              <circle
+                cx="24"
+                cy="24"
+                r="20"
+                fill="none"
+                stroke="rgba(139,107,122,0.15)"
+                strokeWidth="2"
+              />
+              {/* Progress ring */}
+              {isPlaying && (
                 <circle
-                  cx="20"
-                  cy="20"
-                  r="16"
+                  cx="24"
+                  cy="24"
+                  r="20"
                   fill="none"
-                  stroke="rgba(139,107,122,0.15)"
+                  stroke="rgba(139,107,122,0.5)"
                   strokeWidth="2"
+                  strokeDasharray={`${2 * Math.PI * 20}`}
+                  strokeDashoffset={`${2 * Math.PI * 20 * (1 - progress / 100)}`}
+                  strokeLinecap="round"
+                  className="transition-all duration-300"
                 />
-                {/* Progress ring - sepia tone */}
-                {isPlaying && (
-                  <circle
-                    cx="20"
-                    cy="20"
-                    r="16"
-                    fill="none"
-                    stroke="rgba(139,107,122,0.5)"
-                    strokeWidth="2"
-                    strokeDasharray={`${2 * Math.PI * 16}`}
-                    strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
-                    strokeLinecap="round"
-                    className="transition-all duration-300"
-                  />
-                )}
-              </svg>
-              {/* Icon in center */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
-                ) : isPlaying ? (
-                  <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
-                ) : (
-                  <Volume2 className="w-4 h-4 text-neutral-600" />
-                )}
-              </div>
-            </button>
-
-            {/* Linear progress bar - subtle, book-style */}
-            <div className="flex-1">
-              <div 
-                className="h-1.5 bg-neutral-200 rounded-full overflow-hidden cursor-pointer hover:h-2 transition-all"
-                onClick={(e) => {
-                  if (!audioRef.current || !duration) return;
-                  
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const percentage = x / rect.width;
-                  const newTime = percentage * duration;
-                  
-                  audioRef.current.currentTime = newTime;
-                  setCurrentTime(newTime);
-                }}
-                style={{ pointerEvents: 'auto', zIndex: 9999 }}
-              >
-                <div 
-                  className="h-full bg-neutral-400 transition-all duration-100 pointer-events-none" 
-                  style={{ width: `${progress}%` }} 
-                />
-              </div>
+              )}
+            </svg>
+            {/* Icon in center */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
+              ) : isPlaying ? (
+                <Pause className="w-5 h-5 text-neutral-600 fill-neutral-600" />
+              ) : (
+                <Volume2 className="w-5 h-5 text-neutral-600" />
+              )}
             </div>
+          </button>
 
-            {/* Timestamps - small, subtle */}
-            <span className="text-xs text-neutral-500 whitespace-nowrap tabular-nums">
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </span>
+          {/* Linear progress bar - 8px tall, easy to click */}
+          <div
+            className="track cursor-pointer"
+            onClick={(e) => {
+              if (!audioRef.current || !duration) return;
+
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const percentage = x / rect.width;
+              const newTime = percentage * duration;
+
+              audioRef.current.currentTime = newTime;
+              setCurrentTime(newTime);
+            }}
+          >
+            <div
+              className="h-full bg-neutral-400 transition-all duration-100 rounded-full"
+              style={{ width: `${progress}%` }}
+            />
           </div>
+
+          {/* Timestamps - tabular nums for alignment */}
+          <span className="time">
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </span>
         </div>
       )}
 
