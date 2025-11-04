@@ -23,8 +23,6 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
   return (
     <nav
       className={cn(
-        // positioning
-        "fixed left-1/2 -translate-x-1/2 bottom-5 z-[100]",
         // layout
         "flex items-center gap-7 px-6 py-3",
         // shape
@@ -38,6 +36,13 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
         "relative",
         className
       )}
+      style={{
+        position: 'fixed',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 100,
+      }}
     >
       {/* fake refraction layer */}
       <span
