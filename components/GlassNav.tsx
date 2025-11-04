@@ -27,7 +27,7 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
         // width and shape
         "w-[92vw] max-w-[720px] rounded-[22px] overflow-hidden",
         // layout - compact with even spacing
-        "flex items-center justify-around gap-1 px-4 py-2.5",
+        "flex items-center justify-evenly px-4 py-1",
         // glass core - brand-aligned
         "backdrop-blur-[18px] saturate-[1.22] contrast-[1.12] brightness-[0.97]",
         "border border-white/35",
