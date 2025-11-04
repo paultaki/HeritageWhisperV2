@@ -205,7 +205,12 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
   const currentPhoto = photos[currentPhotoIndex];
 
   return (
-    <Card className="relative overflow-hidden transition-all hover:shadow-lg border-0 md:border">
+    <Card className="hw-card relative overflow-hidden transition-all hover:shadow-lg border-0 md:border" style={{ "--title-offset": "180px" } as React.CSSProperties}>
+      {/* Year badge */}
+      <span className="hw-year">
+        {normalizeYear(story.storyYear)}
+      </span>
+
       {/* Photo section with carousel */}
       {photos.length > 0 && (
         <div 
