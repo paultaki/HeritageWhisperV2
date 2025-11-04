@@ -150,9 +150,9 @@ export function MobilePageHeader({
             <Image
               src="/final logo/logo hw.png"
               alt="Heritage Whisper Logo"
-              width={64}
-              height={64}
-              className="w-[64px] h-[64px] flex-shrink-0 relative"
+              width={51}
+              height={51}
+              className="w-[51px] h-[51px] flex-shrink-0 relative"
               style={{ top: '1px', left: '-10px' }}
               priority
             />
