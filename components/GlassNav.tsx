@@ -89,7 +89,11 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
         // For menu item, use button instead of Link
         const Component = isMenu ? 'button' : Link;
         const componentProps = isMenu
-          ? { onClick: onMenuClick, type: 'button' as const }
+          ? {
+              onClick: onMenuClick,
+              type: 'button' as const,
+              'data-menu-button': 'true'
+            }
           : { href };
 
         return (

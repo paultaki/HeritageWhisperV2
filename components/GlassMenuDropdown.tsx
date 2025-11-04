@@ -31,6 +31,8 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
   const { user, logout } = useAuth();
   const modeSelection = useModeSelection();
 
+  console.log('[GlassMenuDropdown] Render with isOpen:', isOpen);
+
   // Fetch profile data for profile photo
   const { data: profileData } = useQuery({
     queryKey: ["/api/user/profile"],
@@ -41,23 +43,45 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as HTMLElement;
+
+      // Check if click is on the menu button itself (ignore it)
+      const isMenuButton = target.closest('[data-menu-button]');
+
+      if (isMenuButton) {
+        return; // Don't close if clicking the menu button
+      }
+
+      if (menuRef.current && !menuRef.current.contains(target)) {
+        console.log('[GlassMenuDropdown] Closing menu - clicked outside');
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+      // Use a small delay to ensure the opening click has completed
+      const timeoutId = setTimeout(() => {
+        console.log('[GlassMenuDropdown] Attaching click-outside listener');
+        document.addEventListener("mousedown", handleClickOutside);
+      }, 100);
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+      return () => {
+        console.log('[GlassMenuDropdown] Removing click-outside listener');
+        clearTimeout(timeoutId);
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
   }, [isOpen, onClose]);
 
   // Close menu on route change
+  const pathnameRef = useRef(pathname);
   useEffect(() => {
-    onClose();
+    // Only close if pathname actually changed (not on initial mount)
+    if (pathnameRef.current !== pathname) {
+      console.log('[GlassMenuDropdown] Pathname changed from', pathnameRef.current, 'to:', pathname, '- closing menu');
+      pathnameRef.current = pathname;
+      onClose();
+    }
   }, [pathname, onClose]);
 
   const profileUser = (profileData as any)?.user;
