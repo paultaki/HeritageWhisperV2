@@ -146,9 +146,9 @@ export function MobilePageHeader({
 
           {/* Center section - Compact branding and page identity */}
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            {/* Logo - Final chat bubble design for mobile */}
+            {/* Logo - HW logo for mobile */}
             <Image
-              src="/final logo/chat-bubble-hw-logo.svg"
+              src="/final logo/logo hw.png"
               alt="Heritage Whisper Logo"
               width={80}
               height={80}
