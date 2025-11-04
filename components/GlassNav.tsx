@@ -23,16 +23,17 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
   return (
     <nav
       className={cn(
+        // width and shape
+        "w-[92vw] max-w-[720px] rounded-[24px] overflow-hidden",
         // layout
-        "flex items-center gap-7 px-6 py-3",
-        // shape
-        "rounded-[22px] overflow-hidden",
-        // iOS-ish glass look
-        "backdrop-blur-[18px] saturate-[1.25] contrast-[1.08] brightness-[1.06]",
-        "border border-white/30",
-        "shadow-[0_20px_40px_-20px_rgba(0,0,0,0.35)]",
-        // tint + vertical sheen
-        "bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] bg-white/5",
+        "flex items-center justify-between gap-7 px-6 py-3",
+        // glass core - enhanced for visibility
+        "backdrop-blur-[18px] saturate-[1.25] contrast-[1.15] brightness-[0.96]",
+        "border border-white/35",
+        "shadow-[0_20px_40px_-20px_rgba(0,0,0,0.45)]",
+        // darker neutral tint for better contrast
+        "bg-[linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04))]",
+        "bg-[rgba(92,92,92,0.12)]",
         "relative",
         className
       )}
@@ -44,27 +45,26 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
         zIndex: 100,
       }}
     >
-      {/* fake refraction layer */}
+      {/* refraction layer – subtle */}
       <span
         aria-hidden="true"
         className="
-          pointer-events-none absolute inset-[-8%] opacity-40
+          pointer-events-none absolute inset-[-8%] opacity-20
           bg-inherit
           [background-attachment:fixed]
-          blur-[6px] scale-[1.02] translate-x-[1.5px] translate-y-[1.5px]
+          blur-[5px]
         "
         style={{
-          // needed so Tailwind doesn't strip our transforms
-          transform: "translate(1.5px,1.5px) scale(1.02)",
+          transform: "translate(1px,1px) scale(1.015)",
         }}
       />
 
-      {/* top lip highlight */}
+      {/* top lip + bottom fade for separation on light cards */}
       <span
         aria-hidden="true"
         className="
           pointer-events-none absolute inset-0
-          [background:linear-gradient(180deg,rgba(255,255,255,0.35),transparent_45%)]
+          [background:linear-gradient(180deg,rgba(255,255,255,0.28),transparent_40%),linear-gradient(0deg,rgba(0,0,0,0.10),transparent_40%)]
         "
       />
 
@@ -100,7 +100,8 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
                 <Icon
                   className={cn(
                     "w-[18px] h-[18px]",
-                    active ? "text-white" : "text-white/80"
+                    active ? "text-black" : "text-black/85",
+                    "drop-shadow-[0_1px_0_rgba(255,255,255,0.55)]"
                   )}
                 />
               ) : null}
@@ -108,7 +109,9 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
             <span
               className={cn(
                 "text-[13px] tracking-wide",
-                active ? "text-white" : "text-white/80"
+                "text-black/85",
+                "drop-shadow-[0_1px_0_rgba(255,255,255,0.55)]",
+                active && "text-black"
               )}
             >
               {label}

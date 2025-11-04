@@ -10,15 +10,23 @@ export default {
     "./utils/**/*.{js,ts,jsx,tsx}",
   ],
   safelist: [
+    // Glass navigation effects
+    'blur-[5px]',
     'blur-[6px]',
     'scale-[1.02]',
+    'scale-[1.015]',
     'translate-x-[1.5px]',
     'translate-y-[1.5px]',
     'backdrop-blur-[18px]',
     'saturate-[1.25]',
     'contrast-[1.08]',
+    'contrast-[1.15]',
+    'brightness-[0.96]',
     'brightness-[1.06]',
     'rounded-[22px]',
+    'rounded-[24px]',
+    'drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]',
+    'drop-shadow-[0_1px_0_rgba(255,255,255,0.55)]',
   ],
   theme: {
     extend: {
