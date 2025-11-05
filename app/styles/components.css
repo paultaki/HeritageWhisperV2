@@ -73,8 +73,8 @@ body {
   top: 0;
   bottom: 0;
   width: 4px;
-  /* Darker mauve gradient (#845c71) */
-  background: linear-gradient(180deg, rgba(132, 92, 113, 0.6), rgba(132, 92, 113, 0.8));
+  /* Lighter mauve to match desktop (#C4A7B7) */
+  background: rgba(196, 167, 183, 0.35);
   box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12);
 }
 
@@ -87,16 +87,16 @@ body {
 /* decade band - sticky chapter divider */
 .hw-decade-band {
   position: sticky;
-  top: calc(env(safe-area-inset-top, 0px) + 52px); /* Mobile: reduced by 19px to close gap with header */
+  top: calc(env(safe-area-inset-top, 0px) + 47px); /* Mobile: 5px higher to tuck under header */
   z-index: 5; /* Above cards */
-  /* Enhanced glassmorphism effect - very transparent to see spine through */
-  background: rgba(250, 248, 245, 0.40);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  /* Glass effect - matching nav bar styling */
+  backdrop-filter: blur(18px) saturate(1.22) contrast(1.12) brightness(0.97);
+  -webkit-backdrop-filter: blur(18px) saturate(1.22) contrast(1.12) brightness(0.97);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04)), rgba(134, 108, 122, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.45);
   padding: 5px 16px 6px 16px;
-  border-bottom: 1px solid rgba(234, 234, 234, 0.5);
-  border-top: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: var(--shadow-card);
   transition: opacity 0.3s ease-in-out;
   opacity: 1;
   /* Break out of parent container's 24px padding + .hw-spine base padding-left (48px) = 72px total */
@@ -104,9 +104,9 @@ body {
   margin-right: calc(-24px - env(safe-area-inset-right, 0px));
   padding-left: calc(24px + env(safe-area-inset-left, 0px));
   padding-right: calc(24px + env(safe-area-inset-right, 0px));
-  /* Spacing: Extra margin above banner to create visual separation from previous card */
-  margin-top: 8px;
-  margin-bottom: 0px;
+  /* Spacing: Zero margins to prevent sticky positioning bugs (spacing handled by .hw-grid margins) */
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .hw-decade-band.fading-out {
@@ -127,8 +127,6 @@ body {
     margin-right: calc(-24px - env(safe-area-inset-right, 0px));
     padding-left: calc(12px + env(safe-area-inset-left, 0px));
     padding-right: calc(16px + env(safe-area-inset-right, 0px));
-    /* Desktop: Larger margin above banner */
-    margin-top: 10px;
   }
 }
 .hw-decade-band {
@@ -148,16 +146,10 @@ body {
   color: var(--color-text-muted);
 }
 
-/* spacing before first card - extra margin after decade banner */
+/* spacing before first card - handled by decade-band margin-bottom */
 .hw-decade-start {
   margin-top: 0;
-  margin-bottom: 8px; /* Additional 8px to make total 32px (24px + 8px) on mobile */
-}
-
-@media (min-width: 768px) {
-  .hw-decade-start {
-    margin-bottom: 10px; /* Additional 10px to make total 42px (32px + 10px) on desktop */
-  }
+  margin-bottom: 0;
 }
 
 /* story card */
@@ -185,12 +177,12 @@ body {
 .hw-card::before {
   content: "";
   position: absolute;
-  left: -27px; /* reaches toward spine inside gutter */
+  left: -29px; /* reaches toward spine inside gutter (moved 2px left) */
   top: calc(var(--title-offset, 22px)); /* aligns to title baseline */
   width: 24px;
   height: 4px;
-  /* Match timeline spine color and weight */
-  background: rgba(132, 92, 113, 0.7);
+  /* Gradient from solid at spine to faded at card */
+  background: linear-gradient(to right, rgba(196, 167, 183, 0.45), rgba(196, 167, 183, 0.15));
   border-radius: 1px;
   opacity: 1;
   pointer-events: none;
@@ -205,7 +197,7 @@ body {
 .hw-card:hover::before,
 .hw-card:focus-visible::before {
   width: 30px;
-  background: rgba(132, 92, 113, 0.9);
+  background: rgba(196, 167, 183, 0.6);
   opacity: 1;
 }
 
@@ -376,11 +368,16 @@ body {
 /* layout helpers */
 .hw-grid {
   display: grid;
-  gap: 24px; /* Equal spacing between cards */
+  gap: 24px; /* Mobile: 24px spacing between cards */
+  margin-top: 12px; /* Extra space after decade banner (total 36px) */
+  margin-bottom: 12px; /* Extra space before next decade banner (total 36px) */
 }
 @media (min-width: 1024px) {
   .hw-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 32px; /* Desktop: 32px spacing between cards */
+    margin-top: 16px; /* Extra space after decade banner (total 48px) */
+    margin-bottom: 16px; /* Extra space before next decade banner (total 48px) */
   }
   /* Hide year badge on right column cards (even-numbered cards in 2-column grid) */
   .hw-grid > .hw-card:nth-child(even) .hw-year {
@@ -493,12 +490,12 @@ body {
   .hw-card::before {
     content: "";
     position: absolute;
-    left: -23px;
+    left: -24px; /* moved 1px left */
     top: calc(var(--title-offset, 22px));
     width: 21px;
     height: 4px;
-    /* Match timeline spine color and weight */
-    background: rgba(132, 92, 113, 0.7);
+    /* Gradient from solid at spine to faded at card */
+    background: linear-gradient(to right, rgba(196, 167, 183, 0.45), rgba(196, 167, 183, 0.15));
     border-radius: 1px;
     opacity: 1;
     pointer-events: none;
@@ -507,7 +504,7 @@ body {
   .hw-card:hover::before,
   .hw-card:focus-visible::before {
     width: 39px;
-    background: rgba(132, 92, 113, 0.9);
+    background: rgba(196, 167, 183, 0.6);
   }
 
   /* timeline nodes align with tighter gutter */

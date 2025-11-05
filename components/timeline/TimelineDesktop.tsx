@@ -46,6 +46,8 @@ import { useAccountContext } from "@/hooks/use-account-context";
 import { AccountSwitcher } from "@/components/AccountSwitcher";
 import { DesktopPageHeader } from "@/components/PageHeader";
 import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormatting";
+import { TimelineEnd } from "@/components/timeline/TimelineEnd";
+import { TimelineNearEndNudge } from "@/components/timeline/TimelineNearEndNudge";
 
 const logoUrl = "/Logo Icon hw.svg";
 
@@ -1137,8 +1139,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
               backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(196, 167, 183, 0.35)',
               transform: 'translateX(calc(-50% - 225px))',
               top: '0',
-              bottom: '0',
-              height: '100%',
+              bottom: '250px',
               opacity: 0.8,
               boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
             }}
@@ -1226,9 +1227,27 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                 </Button>
               </div>
             )}
+
+            {/* Timeline End - Terminal node + CTA */}
+            {sortedStories.length > 0 && (
+              <TimelineEnd
+                isDark={isDark}
+                hasCurrentYearContent={sortedStories.some(
+                  (s) => new Date(s.createdAt).getFullYear() === new Date().getFullYear()
+                )}
+                onAddMemory={() => router.push("/review/book-style?new=true")}
+              />
+            )}
           </div>
         </div>
       </main>
+
+      {/* Near-end nudge */}
+      {sortedStories.length > 0 && (
+        <TimelineNearEndNudge
+          onAddMemory={() => router.push("/review/book-style?new=true")}
+        />
+      )}
 
       {/* Mode Selection Modal */}
       <ModeSelectionModal

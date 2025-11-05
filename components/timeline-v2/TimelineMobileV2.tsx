@@ -31,6 +31,8 @@ import { useTimelineUI } from "@/hooks/use-timeline-ui";
 import { TimelineHeader } from "@/components/timeline/TimelineHeader";
 import { TimelineDecadeSection } from "@/components/timeline/TimelineDecadeSection";
 import { PaywallModal } from "@/components/timeline/PaywallModal";
+import { TimelineEnd } from "@/components/timeline/TimelineEnd";
+import { TimelineNearEndNudge } from "@/components/timeline/TimelineNearEndNudge";
 
 export function TimelineMobileV2() {
   const { user, session, isLoading } = useAuth();
@@ -212,9 +214,22 @@ export function TimelineMobileV2() {
               />
             ))}
           </div>
+
+          {/* Timeline End - Terminal node + CTA */}
+          <TimelineEnd
+            isDark={ui.isDark}
+            hasCurrentYearContent={timelineData.stories.some(
+              (s) => new Date(s.createdAt).getFullYear() === new Date().getFullYear()
+            )}
+            onAddMemory={() => router.push("/review/book-style?new=true")}
+          />
         </div>
       </main>
 
+      {/* Near-end nudge */}
+      <TimelineNearEndNudge
+        onAddMemory={() => router.push("/review/book-style?new=true")}
+      />
 
       <style jsx global>{`
         /* Override DecadeNav to work in header */
