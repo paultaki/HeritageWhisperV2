@@ -116,12 +116,14 @@ export function useTimelineData({
     [user],
   );
   const normalizedBirthYear = useMemo(
-    () => (user ? normalizeYear(user.birthYear) : 0),
+    () => (user ? normalizeYear(user.birthYear) : null),
     [user],
   );
+  const hasValidBirthYear = normalizedBirthYear !== null;
 
   // Filter birth year stories
   const birthYearStories = useMemo(() => {
+    if (!hasValidBirthYear) return [];
     return stories.filter((s: any) => {
       const normalizedStoryYear = normalizeYear(s.storyYear);
       return (
@@ -130,10 +132,11 @@ export function useTimelineData({
         normalizedStoryYear === normalizedBirthYear
       );
     });
-  }, [stories, normalizedBirthYear]);
+  }, [stories, normalizedBirthYear, hasValidBirthYear]);
 
   // Filter pre-birth stories for "TOP" marker
   const prebirthStories = useMemo(() => {
+    if (!hasValidBirthYear) return [];
     return stories.filter((s: any) => {
       const normalizedStoryYear = normalizeYear(s.storyYear);
       return (
@@ -142,7 +145,7 @@ export function useTimelineData({
         normalizedStoryYear < normalizedBirthYear
       );
     });
-  }, [stories, normalizedBirthYear]);
+  }, [stories, normalizedBirthYear, hasValidBirthYear]);
 
   // Generate timeline items and decade entries
   const { allTimelineItems, decadeEntries } = useMemo(() => {
@@ -171,26 +174,32 @@ export function useTimelineData({
       });
     }
 
-    // Birth year section (always show)
-    items.push({
-      type: "decade",
-      id: "birth-year",
-      year: normalizedBirthYear || user.birthYear,
-      title: "The Year I was Born",
-      subtitle: `${normalizedBirthYear || user.birthYear} • The Beginning`,
-      stories: birthYearStories,
-    });
+    // Birth year section (show only when we have a valid birth year)
+    if (hasValidBirthYear) {
+      items.push({
+        type: "decade",
+        id: "birth-year",
+        year: normalizedBirthYear,
+        title: "The Year I was Born",
+        subtitle: `${normalizedBirthYear} • The Beginning`,
+        stories: birthYearStories,
+      });
+    }
 
     // Add decade groups in chronological order (filtering out pre-birth stories)
     decadeGroups.forEach((group) => {
       // Filter out pre-birth stories from this decade - they're in "Before I Was Born"
       const storiesAfterOrDuringBirth = group.stories.filter((s: any) => {
         const storyYear = normalizeYear(s.storyYear);
-        return (
-          storyYear !== null &&
-          normalizedBirthYear !== null &&
-          storyYear >= normalizedBirthYear
-        );
+        if (storyYear === null) {
+          return false;
+        }
+
+        if (!hasValidBirthYear) {
+          return true;
+        }
+
+        return storyYear >= normalizedBirthYear;
       });
 
       // Only show this decade if it has stories after/during birth
@@ -199,11 +208,12 @@ export function useTimelineData({
         const isCurrentDecade = groupDecadeNum === currentDecade;
 
         // If this decade contains the birth year, sort it AFTER the birth year section
-        const birthDecade =
-          Math.floor((normalizedBirthYear || user.birthYear) / 10) * 10;
+        const birthDecade = hasValidBirthYear
+          ? Math.floor(normalizedBirthYear / 10) * 10
+          : null;
         let sortYear = groupDecadeNum; // Default to decade start
 
-        if (groupDecadeNum === birthDecade) {
+        if (birthDecade !== null && groupDecadeNum === birthDecade) {
           // This decade contains the birth year, filter to only stories AFTER birth year
           const storiesAfterBirth = storiesAfterOrDuringBirth.filter(
             (s: any) => {
@@ -226,7 +236,7 @@ export function useTimelineData({
             sortYear = earliestAfterBirth;
           } else {
             // No stories after birth in this decade - sort right after birth year
-            sortYear = (normalizedBirthYear ?? 0) + 1;
+            sortYear = (normalizedBirthYear ?? groupDecadeNum) + 1;
           }
         }
 

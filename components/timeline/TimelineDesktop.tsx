@@ -1139,21 +1139,11 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
               backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(196, 167, 183, 0.35)',
               transform: 'translateX(calc(-50% - 225px))',
               top: '0',
-              bottom: '250px',
+              bottom: '500px',
               opacity: 0.8,
               boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
             }}
-          >
-            <div
-              ref={progressLineRef}
-              className="w-full rounded-full transition-all duration-300 ease-out"
-              style={{
-                height: "0%",
-                background: isDark ? 'rgba(176, 179, 184, 0.4)' : 'rgba(196, 167, 183, 0.55)',
-                boxShadow: 'none',
-              }}
-            />
-          </div>
+          />
 
           {/* Timeline Steps */}
           <div className="flex flex-col gap-2 md:gap-0">

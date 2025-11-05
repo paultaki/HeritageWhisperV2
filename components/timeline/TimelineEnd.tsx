@@ -195,7 +195,7 @@ export function TimelineEnd({
         @media (min-width: 768px) {
           .gradient-line {
             left: 465px;
-            top: 143px;
+            top: 239px;
             height: 96px;
           }
 

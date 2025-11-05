@@ -4,7 +4,6 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { useRouter } from "next/navigation";
 import { TimelineDesktop } from "@/components/timeline/TimelineDesktop";
 import { TimelineMobileV2 } from "@/components/timeline-v2/TimelineMobileV2";
-import FloatingAddButton from "@/components/timeline-v2/FloatingAddButton";
 import { useEffect, useState } from "react";
 import { LeftSidebar } from "@/components/LeftSidebar";
 
@@ -41,9 +40,6 @@ export default function TimelinePage() {
       <main className="flex-1 min-w-0 lg:ml-56">
         <TimelineDesktop useV2Features={true} />
       </main>
-
-      {/* Floating Add Memory button for desktop */}
-      <FloatingAddButton onClick={() => router.push("/review/book-style?new=true")} />
     </div>
   );
 }
