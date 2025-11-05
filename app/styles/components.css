@@ -64,7 +64,7 @@ body {
 /* timeline spine - gutter hosts spine and horizontal connectors */
 .hw-spine {
   position: relative;
-  padding-left: 56px;
+  padding-left: 48px; /* 24px spine width + 24px gap = 48px total */
 }
 .hw-spine::before {
   content: "";
@@ -99,13 +99,13 @@ body {
   box-shadow: var(--shadow-card);
   transition: opacity 0.3s ease-in-out;
   opacity: 1;
-  /* Break out of parent container's px-3 (12px) + .hw-spine base padding-left (56px) = 68px total */
-  margin-left: calc(-68px - env(safe-area-inset-left, 0px));
-  margin-right: calc(-12px - env(safe-area-inset-right, 0px));
-  padding-left: calc(12px + env(safe-area-inset-left, 0px));
-  padding-right: calc(16px + env(safe-area-inset-right, 0px));
-  /* Spacing between cards - zero margins for seamless sticky header transitions on mobile */
-  margin-top: 0px;
+  /* Break out of parent container's 24px padding + .hw-spine base padding-left (48px) = 72px total */
+  margin-left: calc(-72px - env(safe-area-inset-left, 0px));
+  margin-right: calc(-24px - env(safe-area-inset-right, 0px));
+  padding-left: calc(24px + env(safe-area-inset-left, 0px));
+  padding-right: calc(24px + env(safe-area-inset-right, 0px));
+  /* Spacing: Extra margin above banner to create visual separation from previous card */
+  margin-top: 8px;
   margin-bottom: 0px;
 }
 
@@ -127,6 +127,8 @@ body {
     margin-right: calc(-24px - env(safe-area-inset-right, 0px));
     padding-left: calc(12px + env(safe-area-inset-left, 0px));
     padding-right: calc(16px + env(safe-area-inset-right, 0px));
+    /* Desktop: Larger margin above banner */
+    margin-top: 10px;
   }
 }
 .hw-decade-band {
@@ -146,9 +148,16 @@ body {
   color: var(--color-text-muted);
 }
 
-/* spacing before first card - removed, handled by decade-band margin-bottom */
+/* spacing before first card - extra margin after decade banner */
 .hw-decade-start {
   margin-top: 0;
+  margin-bottom: 8px; /* Additional 8px to make total 32px (24px + 8px) on mobile */
+}
+
+@media (min-width: 768px) {
+  .hw-decade-start {
+    margin-bottom: 10px; /* Additional 10px to make total 42px (32px + 10px) on desktop */
+  }
 }
 
 /* story card */
@@ -367,7 +376,7 @@ body {
 /* layout helpers */
 .hw-grid {
   display: grid;
-  gap: var(--space-6);
+  gap: 24px; /* Equal spacing between cards */
 }
 @media (min-width: 1024px) {
   .hw-grid {
@@ -1155,8 +1164,27 @@ body {
     padding: 1.25rem 1.5rem;
     margin: 0.75rem 1rem 1.5rem;
   }
-  
+
   .timeline-prompt-text {
     font-size: 1rem;
+  }
+}
+
+/* ============================================
+   TIMELINE CONTAINER - Equal Spacing
+   ============================================ */
+
+/* Timeline container with consistent spacing */
+.timeline-container {
+  /* Mobile: 24px spacing with safe-area support */
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+
+@media (min-width: 768px) {
+  .timeline-container {
+    /* Desktop: 32px spacing with safe-area support */
+    padding-left: max(32px, env(safe-area-inset-left, 0px));
+    padding-right: max(32px, env(safe-area-inset-right, 0px));
   }
 }

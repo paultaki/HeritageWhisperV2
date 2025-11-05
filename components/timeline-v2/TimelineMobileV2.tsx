@@ -153,7 +153,7 @@ export function TimelineMobileV2() {
       />
 
       {/* Timeline Content */}
-      <main className="max-w-6xl mx-auto px-3 py-6 pb-24 md:p-6 md:pb-6 md:pr-20">
+      <main className="max-w-6xl mx-auto py-6 pb-24 md:pb-6 timeline-container">
         {/* Paywall Prompt */}
         {user?.freeStoriesUsed === 3 &&
           user?.subscriptionStatus !== "active" && (
@@ -226,7 +226,7 @@ export function TimelineMobileV2() {
           position: relative !important;
           display: flex !important;
           bottom: auto !important;
-          right: 50px !important;
+          right: 16px !important;
         }
 
         .decade-selector-header .hw-decade-pill {
