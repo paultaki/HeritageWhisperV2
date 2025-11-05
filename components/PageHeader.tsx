@@ -148,7 +148,7 @@ export function MobilePageHeader({
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {/* Logo - HW logo for mobile */}
             <Image
-              src="/final logo/logo-chat-hw.svg"
+              src="/final logo/chat-bubble-hw-logo.svg"
               alt="Heritage Whisper Logo"
               width={48}
               height={48}

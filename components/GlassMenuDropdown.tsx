@@ -31,8 +31,6 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
   const { user, logout } = useAuth();
   const modeSelection = useModeSelection();
 
-  console.log('[GlassMenuDropdown] Render with isOpen:', isOpen);
-
   // Fetch profile data for profile photo
   const { data: profileData } = useQuery({
     queryKey: ["/api/user/profile"],
@@ -53,7 +51,6 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
       }
 
       if (menuRef.current && !menuRef.current.contains(target)) {
-        console.log('[GlassMenuDropdown] Closing menu - clicked outside');
         onClose();
       }
     };
@@ -61,12 +58,10 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
     if (isOpen) {
       // Use a small delay to ensure the opening click has completed
       const timeoutId = setTimeout(() => {
-        console.log('[GlassMenuDropdown] Attaching click-outside listener');
         document.addEventListener("mousedown", handleClickOutside);
       }, 100);
 
       return () => {
-        console.log('[GlassMenuDropdown] Removing click-outside listener');
         clearTimeout(timeoutId);
         document.removeEventListener("mousedown", handleClickOutside);
       };
@@ -78,7 +73,6 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
   useEffect(() => {
     // Only close if pathname actually changed (not on initial mount)
     if (pathnameRef.current !== pathname) {
-      console.log('[GlassMenuDropdown] Pathname changed from', pathnameRef.current, 'to:', pathname, '- closing menu');
       pathnameRef.current = pathname;
       onClose();
     }

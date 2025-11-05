@@ -26,8 +26,8 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
       className={cn(
         // width and shape
         "w-[92vw] max-w-[720px] rounded-[22px] overflow-hidden",
-        // layout - compact with even spacing
-        "flex items-center justify-evenly px-4 py-1",
+        // layout - evenly distributed spacing
+        "flex items-center justify-around px-3 py-1",
         // glass core - brand-aligned
         "backdrop-blur-[18px] saturate-[1.22] contrast-[1.12] brightness-[0.97]",
         "border border-white/35",
@@ -101,7 +101,7 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
             key={key}
             {...componentProps}
             className={cn(
-              "flex flex-col items-center px-2 py-1 rounded-[14px] transition-transform",
+              "flex flex-col items-center px-1 py-1 rounded-[14px] transition-transform flex-1",
               "hover:-translate-y-0.5"
             )}
           >
