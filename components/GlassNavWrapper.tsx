@@ -66,7 +66,7 @@ export default function GlassNavWrapper() {
       <GlassNav
         items={navItems}
         activeKey={getActiveKey()}
-        className="pb-[calc(env(safe-area-inset-bottom)+12px)]"
+        className="pb-[calc(env(safe-area-inset-bottom)+6px)]"
         onMenuClick={() => setIsMenuOpen(!isMenuOpen)}
       />
       <GlassMenuDropdown isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />

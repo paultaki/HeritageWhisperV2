@@ -27,7 +27,7 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
         // width and shape
         "w-[92vw] max-w-[720px] rounded-[22px] overflow-hidden",
         // layout - evenly distributed spacing
-        "flex items-center justify-around px-3 py-1",
+        "flex items-center justify-around px-3 py-[6px]",
         // glass core - brand-aligned
         "backdrop-blur-[18px] saturate-[1.22] contrast-[1.12] brightness-[0.97]",
         "border border-white/35",
@@ -37,12 +37,12 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
         "bg-[rgba(134,108,122,0.12)]",
         "relative",
         // subtle edge shadow for lift
-        "after:content-[''] after:absolute after:inset-x-4 after:-bottom-3 after:h-4 after:rounded-[20px] after:blur-[14px] after:bg-black/10 after:pointer-events-none",
+        "after:content-[''] after:absolute after:inset-x-4 after:-bottom-2 after:h-3 after:rounded-[20px] after:blur-[14px] after:bg-black/10 after:pointer-events-none",
         className
       )}
       style={{
         position: 'fixed',
-        bottom: '20px',
+        bottom: '10px',
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 100,
@@ -101,37 +101,26 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
             key={key}
             {...componentProps}
             className={cn(
-              "flex flex-col items-center px-1 py-1 rounded-[14px] transition-transform flex-1",
-              "hover:-translate-y-0.5"
+              "group flex flex-col items-center justify-center px-1 py-[2px] rounded-[10px] transition-transform flex-1",
+              active && "bg-black/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] -translate-y-0.5"
             )}
           >
-            <span
+            <Icon
               className={cn(
-                "grid place-items-center w-7 h-7 rounded-full",
-                active
-                  ? "bg-black/6 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
-                  : "bg-transparent"
+                "w-[18px] h-[18px]",
+                active ? "text-black" : "text-black/75"
               )}
-            >
-              {Icon ? (
-                <Icon
-                  className={cn(
-                    "w-[18px] h-[18px]",
-                    active ? "text-black" : "text-black/85",
-                    "drop-shadow-[0_1px_0_rgba(255,255,255,0.55)]"
-                  )}
-                />
-              ) : null}
-            </span>
+            />
             <span
               className={cn(
-                "text-[12px] font-medium leading-none tracking-wide mt-[2px]",
-                "text-black/85",
-                "drop-shadow-[0_1px_0_rgba(255,255,255,0.55)]",
-                active && "text-black"
+                "relative mt-[1px] text-[12px] leading-none font-medium",
+                active ? "text-black" : "text-black/75"
               )}
             >
               {label}
+              {active && (
+                <i className="absolute left-1/2 -translate-x-1/2 -bottom-[2px] block w-5 h-[2px] rounded-full bg-black/70" />
+              )}
             </span>
           </Component>
         );
