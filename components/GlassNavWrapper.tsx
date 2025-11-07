@@ -13,9 +13,10 @@ export default function GlassNavWrapper() {
   // Hide navigation on specific pages
   const isInterviewChat = pathname === '/interview-chat';
   const isAuthPage = pathname.startsWith('/auth');
+  const isRecordingPhotoFirst = pathname === '/recording-photo-first';
 
   // Don't show glass nav on these pages
-  if (isInterviewChat || isAuthPage) {
+  if (isInterviewChat || isAuthPage || isRecordingPhotoFirst) {
     return null;
   }
 

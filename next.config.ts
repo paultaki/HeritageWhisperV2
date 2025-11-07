@@ -89,7 +89,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(self), geolocation=(), interest-cohort=()', // Restrict browser features
+            value: 'camera=(self), microphone=(self), geolocation=(), interest-cohort=()', // Restrict browser features
           },
         ],
       },
