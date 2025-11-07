@@ -5,7 +5,7 @@ import { Palette } from "lucide-react";
 
 export default function DesignGuidelinesPage() {
   return (
-    <div className="min-h-screen bg-[#FFF8F3] py-8 px-4">
+    <div className="min-h-screen bg-[#FFF8F3] py-8 px-4 pt-20 lg:pt-8">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">

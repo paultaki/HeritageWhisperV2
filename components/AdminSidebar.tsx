@@ -23,6 +23,8 @@ import {
   ChevronRight,
   Target,
   Palette,
+  Menu,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -112,6 +114,7 @@ export default function AdminSidebar() {
   const { user } = useAuth();
   const [externalServicesOpen, setExternalServicesOpen] = useState(false);
   const [competitorsOpen, setCompetitorsOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (href: string) => {
     if (href === "/admin") {
@@ -126,7 +129,35 @@ export default function AdminSidebar() {
   };
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col overflow-y-auto">
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border border-gray-200"
+        aria-label="Toggle menu"
+      >
+        {mobileMenuOpen ? (
+          <X className="w-6 h-6 text-gray-700" />
+        ) : (
+          <Menu className="w-6 h-6 text-gray-700" />
+        )}
+      </button>
+
+      {/* Mobile Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col overflow-y-auto z-40
+        transition-transform duration-300 ease-in-out
+        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:flex
+      `}>
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center gap-3 mb-2">
@@ -216,6 +247,7 @@ export default function AdminSidebar() {
                         key={item.href}
                         href={item.href}
                         className={linkClasses}
+                        onClick={() => setMobileMenuOpen(false)}
                       >
                         <Icon className="w-5 h-5 shrink-0" />
                         <span className="truncate">{item.label}</span>
@@ -234,6 +266,7 @@ export default function AdminSidebar() {
         <Link
           href="/"
           className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          onClick={() => setMobileMenuOpen(false)}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -242,5 +275,6 @@ export default function AdminSidebar() {
         </Link>
       </div>
     </div>
+    </>
   );
 }
