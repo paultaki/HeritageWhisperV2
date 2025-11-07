@@ -65,7 +65,7 @@ export default function PreRecordHints() {
           <span className="text-lg leading-6 flex-shrink-0" aria-hidden="true">
             {TIPS[idx].icon}
           </span>
-          <p className="text-[16px] leading-6 text-neutral-700 dark:text-neutral-200">
+          <p className="text-[19px] leading-7 text-neutral-700 dark:text-neutral-200">
             {TIPS[idx].text}
           </p>
         </div>
@@ -78,23 +78,11 @@ export default function PreRecordHints() {
           <svg aria-hidden="true" className="h-4 w-4 flex-shrink-0 text-neutral-500 dark:text-neutral-400" viewBox="0 0 24 24" fill="currentColor">
             <path d="M17 8V7a5 5 0 0 0-10 0v1H5a1 1 0 0 0-1 1v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V9a1 1 0 0 0-1-1h-2Zm-8 0V7a3 3 0 0 1 6 0v1H9Z"/>
           </svg>
-          <p className="text-[15px] leading-5 text-neutral-600 dark:text-neutral-300">
+          <p className="text-[18px] leading-6 text-neutral-600 dark:text-neutral-300">
             Private by default. You choose what to share.
           </p>
         </div>
 
-        {/* Hairline divider */}
-        <div className="my-2 h-px w-full bg-neutral-200/70 dark:bg-neutral-700/50" />
-
-        {/* Row 3: Edit or delete */}
-        <div className="flex items-center gap-2.5">
-          <svg aria-hidden="true" className="h-4 w-4 flex-shrink-0 text-neutral-500 dark:text-neutral-400" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-          </svg>
-          <p className="text-[15px] leading-5 text-neutral-600 dark:text-neutral-300">
-            Edit or delete anytime
-          </p>
-        </div>
       </div>
     </div>
   );

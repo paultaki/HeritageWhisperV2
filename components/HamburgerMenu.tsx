@@ -14,6 +14,8 @@ import {
   Plus,
   FileText,
   Shield,
+  Lightbulb,
+  Box,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
@@ -80,6 +82,8 @@ export default function HamburgerMenu() {
 
   const menuItems = [
     { icon: Home, label: "Home", href: "/" },
+    { icon: Box, label: "Memory Box", href: "/memory-box-v2" },
+    { icon: Lightbulb, label: "Story Ideas", href: "/prompts" },
     { icon: Users, label: "Family", href: "/family" },
     { icon: Settings, label: "Settings", href: "/profile" },
     { icon: HelpCircle, label: "Help", href: "/help" },
