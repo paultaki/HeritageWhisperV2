@@ -707,6 +707,7 @@ function CenteredMemoryCardV2({
         className="z-10 flex-shrink-0 timeline-dot transition-all duration-500"
         style={{
           transform: position === "left" ? "translateX(-12px)" : "translateX(12px)",
+          marginBottom: '-40px',
         }}
       >
         <div
@@ -722,6 +723,8 @@ function CenteredMemoryCardV2({
             boxShadow: '0 2px 6px -2px rgba(0, 0, 0, 0.1), 0 1px 3px -1px rgba(0, 0, 0, 0.08)',
             borderRadius: '8px',
             backdropFilter: 'blur(8px)',
+            position: 'relative',
+            top: '2px',
           }}
         >
           <span style={{ position: 'relative', top: '-1px' }}>
@@ -860,7 +863,7 @@ export function TimelineDesktopV2() {
     if (!storiesData) return;
 
     const handleBubbleScroll = () => {
-      const stickyTop = 62;
+      const stickyTop = 70; // Header height 62px + 8px clearance
       const collisionThreshold = 10 as number;
 
       const bubbles = Array.from(document.querySelectorAll('.timeline-dot'));
@@ -890,8 +893,8 @@ export function TimelineDesktopV2() {
           if (proximityToNext > 0) {
             bubble.style.opacity = '1';
             bubble.style.transform = `${translateX} scale(1)`;
-          } else if (proximityToNext > -65) {
-            const overlapProgress = Math.abs(proximityToNext) / 65;
+          } else if (proximityToNext > -38) {
+            const overlapProgress = Math.abs(proximityToNext) / 38;
             bubble.style.opacity = `${Math.max(0, 1 - overlapProgress)}`;
             bubble.style.transform = `${translateX} scale(${Math.max(0.9, 1 - (overlapProgress * 0.1))})`;
           } else {
@@ -1006,7 +1009,7 @@ export function TimelineDesktopV2() {
                       return (
                         <div
                           key={story.id}
-                          className={isVeryFirstStory ? "md:mt-0" : "md:-mt-[147px]"}
+                          className={isVeryFirstStory ? "md:mt-0" : "md:-mt-[146px]"}
                           data-memory-id={story.id}
                           style={{
                             transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',
@@ -1112,7 +1115,7 @@ export function TimelineDesktopV2() {
 
           .timeline-dot {
             position: sticky;
-            top: 62px;
+            top: 70px;
             z-index: 30;
           }
 

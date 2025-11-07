@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Clock, BookOpen, Mic, Lightbulb, Menu } from "lucide-react";
+import { Clock, BookOpen, Mic, Menu } from "lucide-react";
 import GlassNav from "./GlassNav";
 import GlassMenuDropdown from "./GlassMenuDropdown";
 
@@ -47,12 +47,6 @@ export default function GlassNavWrapper() {
       label: 'Memory',
       href: '/recording-photo-first',
       Icon: Mic,
-    },
-    {
-      key: 'ideas',
-      label: 'Ideas',
-      href: '/prompts',
-      Icon: Lightbulb,
     },
     {
       key: 'menu',
