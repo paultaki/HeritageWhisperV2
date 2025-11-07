@@ -436,7 +436,7 @@ export default function MemoryBoxV2Page() {
                                 AudioManager.getInstance().play(story.id, story.audioUrl);
                               }
                             }}
-                            onEdit={() => handleOpenOverlay(story)}
+                            onEdit={() => router.push(`/review/book-style?id=${story.id}&returnPath=${encodeURIComponent('/memory-box-v2')}`)}
                             onDelete={() => {
                               setStoryToDelete(story.id);
                               setShowDeleteConfirm(true);
@@ -450,6 +450,12 @@ export default function MemoryBoxV2Page() {
                             onToggleBook={() =>
                               updateStory.mutate({ id: story.id, updates: { includeInBook: !story.includeInBook } })
                             }
+                            onDuplicate={() => {
+                              toast({
+                                title: "Duplicate feature coming soon",
+                                description: "Memory duplication will be available in a future update.",
+                              });
+                            }}
                           />
                         );
                       })}

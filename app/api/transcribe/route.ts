@@ -252,6 +252,68 @@ ${sanitizedTranscription}
   }
 }
 
+// Helper function to generate a story title
+async function generateTitle(transcription: string): Promise<string> {
+  // Sanitize input to prevent prompt injection
+  const sanitizedTranscription = sanitizeUserInput(transcription);
+
+  if (!validateSanitizedInput(sanitizedTranscription)) {
+    logger.warn("Potential prompt injection detected in title generation");
+    return "My Memory";
+  }
+
+  try {
+    const completion = await openaiGateway.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "You are a skilled editor creating concise, evocative titles for personal stories. Generate titles that capture the essence of the memory in 3-7 words.",
+        },
+        {
+          role: "user",
+          content: `Based on this story, suggest a short, memorable title (3-7 words maximum). The title should capture the heart of the story without being too literal.
+
+<story>
+${sanitizedTranscription}
+</story>
+
+Return ONLY the title, nothing else.`,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 30,
+    });
+
+    const suggestedTitle = completion.choices[0]?.message?.content?.trim();
+
+    if (suggestedTitle && suggestedTitle.length > 0 && suggestedTitle.length <= 100) {
+      // Remove quotes if AI wrapped the title
+      return suggestedTitle.replace(/^["']|["']$/g, '');
+    }
+
+    // Fallback: use first sentence (max 60 chars)
+    const firstSentence = sanitizedTranscription.match(/[^.!?]*[.!?]/)?.[0]?.trim();
+    if (firstSentence && firstSentence.length > 0) {
+      return firstSentence.length > 60
+        ? firstSentence.slice(0, 57) + '…'
+        : firstSentence;
+    }
+
+    return "My Memory";
+  } catch (error) {
+    logger.error("Title generation error:", error);
+    // Fallback: use first sentence
+    const firstSentence = transcription.match(/[^.!?]*[.!?]/)?.[0]?.trim();
+    if (firstSentence && firstSentence.length > 0) {
+      return firstSentence.length > 60
+        ? firstSentence.slice(0, 57) + '…'
+        : firstSentence;
+    }
+    return "My Memory";
+  }
+}
+
 export async function POST(request: NextRequest) {
   logger.debug("[Transcribe] POST request received");
   // REMOVED: Sensitive data logging - console.log('[Transcribe] Headers:', Object.fromEntries(request.headers.entries()));
@@ -416,8 +478,8 @@ export async function POST(request: NextRequest) {
         (fileSizeInBytes / (1024 * 1024)) * 60,
       );
 
-      // Run formatting and lesson extraction IN PARALLEL for speed
-      const [formattedText, lessonOptions] = await Promise.all([
+      // Run formatting, lesson extraction, and title generation IN PARALLEL for speed
+      const [formattedText, lessonOptions, suggestedTitle] = await Promise.all([
         formatTranscription(transcription.text).catch((error) => {
           logger.warn("Failed to format transcription, using raw text:", error);
           return transcription.text;
@@ -426,6 +488,10 @@ export async function POST(request: NextRequest) {
           logger.warn("Failed to generate lesson options:", error);
           return null;
         }),
+        generateTitle(transcription.text).catch((error) => {
+          logger.warn("Failed to generate title:", error);
+          return "My Memory";
+        }),
       ]);
 
       // Clean up temp file
@@ -433,12 +499,13 @@ export async function POST(request: NextRequest) {
         fs.unlinkSync(tempFilePath);
       }
 
-      // Return the transcription and lesson options
+      // Return the transcription, lesson options, and suggested title
       // Include both 'transcription' and 'text' for backwards compatibility
       return NextResponse.json({
         transcription: formattedText,
         text: formattedText, // Add for backwards compatibility
         duration: estimatedDuration,
+        title: suggestedTitle,
         lessonOptions: lessonOptions || {
           practical:
             "Every experience teaches something if you're willing to learn from it",

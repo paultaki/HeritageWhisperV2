@@ -20,12 +20,20 @@ export default function PhotoFirstRecordingPage() {
 
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [photoDataURL, setPhotoDataURL] = useState<string | null>(null);
+  const [photoTransform, setPhotoTransform] = useState<{ zoom: number; position: { x: number; y: number } } | undefined>();
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioDuration, setAudioDuration] = useState(0);
   const [transcription, setTranscription] = useState('');
+  const [suggestedTitle, setSuggestedTitle] = useState('');
+  const [lessonOptions, setLessonOptions] = useState<{
+    practical: string;
+    emotional: string;
+    character: string;
+  } | undefined>();
 
-  const handlePhotoCapture = (dataURL: string) => {
+  const handlePhotoCapture = (dataURL: string, transform?: { zoom: number; position: { x: number; y: number } }) => {
     setPhotoDataURL(dataURL);
+    setPhotoTransform(transform);
     setCurrentScreen('recording');
   };
 
@@ -33,11 +41,70 @@ export default function PhotoFirstRecordingPage() {
     setCurrentScreen('home');
   };
 
-  const handleRecordingComplete = (blob: Blob, duration: number, transcript?: string) => {
-    setAudioBlob(blob);
-    setAudioDuration(duration);
-    setTranscription(transcript || '');
-    setCurrentScreen('review');
+  const handleRecordingComplete = async (blob: Blob, duration: number, data?: {
+    transcription: string;
+    title: string;
+    lessonOptions: {
+      practical: string;
+      emotional: string;
+      character: string;
+    };
+  }) => {
+    // Skip the PhotoFirstReview screen and go directly to book-style review
+    if (data) {
+      // Convert audio blob to base64 for NavCache
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        const base64Audio = reader.result as string;
+        const audioType = blob.type;
+
+        // Prepare NavCache data for book-style review
+        const navId = `photo-first-${Date.now()}`;
+
+        // Prepare photo data with transform if available
+        const photoData = photoDataURL ? [{
+          id: `photo-${Date.now()}`,
+          url: photoDataURL,
+          transform: photoTransform, // Include zoom/pan transform
+          isHero: true // Mark as hero image
+        }] : [];
+
+        const cacheData = {
+          mode: 'edit',
+          title: data.title,
+          transcription: data.transcription,
+          lessonLearned: data.lessonOptions.practical, // Default to practical lesson
+          mainAudioBase64: base64Audio.split(',')[1], // Remove data:audio/webm;base64, prefix
+          mainAudioType: audioType,
+          audioDuration: duration,
+          audioBlob: blob,
+          duration: duration,
+          photos: photoData, // Include photo array with transform
+          timestamp: new Date().toISOString(),
+          returnPath: '/timeline',
+        };
+
+        // Store in NavCache
+        navCache.set(navId, cacheData);
+
+        // Navigate directly to book-style review
+        router.push(`/review/book-style?nav=${navId}&mode=edit`);
+      };
+
+      reader.onerror = () => {
+        toast({
+          title: "Error",
+          description: "Failed to process audio. Please try again.",
+          variant: "destructive",
+        });
+      };
+    } else {
+      // Fallback if no data - shouldn't happen but just in case
+      setAudioBlob(blob);
+      setAudioDuration(duration);
+      setCurrentScreen('review');
+    }
   };
 
   const handleCancelRecording = () => {
@@ -123,8 +190,8 @@ export default function PhotoFirstRecordingPage() {
 
   return (
     <div className="mx-auto max-w-md min-h-screen relative flex flex-col bg-white">
-      {/* Top Bar - Hidden during recording and review */}
-      {currentScreen !== 'recording' && currentScreen !== 'review' && (
+      {/* Top Bar - Hidden during capture, recording and review */}
+      {currentScreen !== 'capture' && currentScreen !== 'recording' && currentScreen !== 'review' && (
         <header className="relative bg-white border-b border-gray-200">
           <div className="px-4 py-4 flex items-center justify-between">
             <Image
@@ -138,7 +205,7 @@ export default function PhotoFirstRecordingPage() {
             <Button
               variant="outline"
               size="sm"
-              className="text-base font-medium pl-3 pr-5 py-2 h-10"
+              className="text-base font-medium px-3 py-2 h-10 min-w-[80px]"
               onClick={() => router.push('/timeline')}
             >
               Cancel
@@ -152,20 +219,20 @@ export default function PhotoFirstRecordingPage() {
         {currentScreen === 'home' && (
           <section className="flex-1 flex flex-col justify-center px-6 py-12">
             <div className="text-center mb-8">
-              <h1 className="text-[32px] leading-[1.2] tracking-tight font-semibold mb-6">
+              <h1 className="text-[36px] leading-[1.2] tracking-tight font-semibold mb-6">
                 Every memory matters. Start with your voice.
               </h1>
-              <p className="text-[18px] text-gray-600 leading-relaxed mb-3">
+              <p className="text-[20px] text-gray-600 leading-relaxed mb-3">
                 Capture a photo and speak your memory—under two minutes.
               </p>
             </div>
 
             <PreRecordHints />
 
-            <div className="space-y-6 mt-8 mb-12">
+            <div className="mx-auto w-full max-w-sm px-4 space-y-6 mt-4 mb-12">
               <Button
                 onClick={() => setCurrentScreen('capture')}
-                className="w-full h-[64px] bg-blue-600 text-white rounded-xl text-[18px] font-medium tracking-tight flex items-center justify-center gap-3 shadow-sm hover:bg-blue-700 active:bg-blue-800"
+                className="w-full h-[64px] bg-blue-600 text-white rounded-xl text-[19px] font-medium tracking-tight flex items-center justify-center gap-3 shadow-sm hover:bg-blue-700 active:bg-blue-800"
               >
                 <Camera className="w-6 h-6" />
                 Add a Photo
@@ -175,12 +242,12 @@ export default function PhotoFirstRecordingPage() {
                 <Button
                   onClick={() => setCurrentScreen('recording')}
                   variant="outline"
-                  className="w-full h-[64px] rounded-xl text-[18px] font-medium tracking-tight flex items-center justify-center gap-3 border-2"
+                  className="w-full h-[64px] rounded-xl text-[19px] font-medium tracking-tight flex items-center justify-center gap-3 border-2"
                 >
                   <Mic className="w-6 h-6" />
                   Record Story Now
                 </Button>
-                <p className="text-[16px] text-gray-500 text-center mt-3">
+                <p className="text-[17px] text-gray-500 text-center mt-3">
                   Add photo later
                 </p>
               </div>
@@ -212,6 +279,8 @@ export default function PhotoFirstRecordingPage() {
             audioBlob={audioBlob}
             audioDuration={audioDuration}
             transcription={transcription}
+            suggestedTitle={suggestedTitle}
+            lessonOptions={lessonOptions}
             onSave={handleSave}
             onReRecord={handleReRecord}
             onChangePhoto={handleChangePhoto}

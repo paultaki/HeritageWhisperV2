@@ -11,6 +11,12 @@ type PhotoFirstReviewProps = {
   audioBlob: Blob;
   audioDuration: number;
   transcription?: string;
+  suggestedTitle?: string;
+  lessonOptions?: {
+    practical: string;
+    emotional: string;
+    character: string;
+  };
   onSave: (data: {
     title: string;
     year: string;
@@ -31,6 +37,8 @@ export function PhotoFirstReview({
   audioBlob,
   audioDuration,
   transcription = '',
+  suggestedTitle = '',
+  lessonOptions,
   onSave,
   onReRecord,
   onChangePhoto
@@ -39,14 +47,14 @@ export function PhotoFirstReview({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(suggestedTitle);
   const [decade, setDecade] = useState('');
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [transcriptionText, setTranscriptionText] = useState(transcription);
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const [lessonLearned, setLessonLearned] = useState('');
+  const [lessonLearned, setLessonLearned] = useState(lessonOptions?.practical || '');
 
   useEffect(() => {
     // Create audio URL from blob
@@ -61,54 +69,15 @@ export function PhotoFirstReview({
   }, [audioBlob]);
 
   useEffect(() => {
-    // Trigger transcription if not already provided
-    if (!transcription && audioBlob && !isTranscribing) {
-      handleTranscription();
-    }
-  }, [audioBlob]);
-
-  useEffect(() => {
+    // Update state when props change
     setTranscriptionText(transcription);
-
-    // Auto-generate title from transcription
-    if (transcription) {
-      const firstSentence = transcription.match(/[^.!?]*[.!?]/)?.[0]?.trim();
-      if (firstSentence && firstSentence.length > 0) {
-        const smartTitle = firstSentence.length > 60
-          ? firstSentence.slice(0, 57) + '…'
-          : firstSentence;
-        setTitle(smartTitle);
-      }
+    if (suggestedTitle) {
+      setTitle(suggestedTitle);
     }
-
-    // Default title if no transcription
-    if (!title && !transcription) {
-      const now = new Date();
-      setTitle(`A memory from ${now.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}`);
+    if (lessonOptions?.practical) {
+      setLessonLearned(lessonOptions.practical);
     }
-  }, [transcription]);
-
-  const handleTranscription = async () => {
-    setIsTranscribing(true);
-    try {
-      const formData = new FormData();
-      formData.append('audio', audioBlob);
-
-      const response = await fetch('/api/transcribe', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setTranscriptionText(data.transcription || '');
-      }
-    } catch (error) {
-      console.error('Transcription error:', error);
-    } finally {
-      setIsTranscribing(false);
-    }
-  };
+  }, [transcription, suggestedTitle, lessonOptions]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -316,42 +285,53 @@ export function PhotoFirstReview({
           </select>
         </div>
 
-        <details className="group">
+        <details className="group" open={!!transcriptionText}>
           <summary className="text-sm text-gray-600 font-medium cursor-pointer flex items-center gap-2 select-none py-2">
             <AlignLeft className="w-4 h-4 text-gray-500 group-open:rotate-90 transition" />
-            View transcription (optional)
-            {isTranscribing && (
-              <span className="text-xs text-blue-600 ml-2">Transcribing...</span>
-            )}
+            View & edit transcription (optional)
           </summary>
-          {isTranscribing ? (
-            <div className="w-full mt-2 p-6 border border-gray-200 rounded-lg h-32 flex items-center justify-center">
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-gray-600">Transcribing your audio...</span>
-              </div>
-            </div>
-          ) : (
-            <Textarea
-              value={transcriptionText}
-              onChange={(e) => setTranscriptionText(e.target.value)}
-              className="w-full mt-2 p-3 border border-gray-200 rounded-lg h-32 text-sm text-gray-700"
-              placeholder="Transcription will appear here if available"
-            />
-          )}
+          <Textarea
+            value={transcriptionText}
+            onChange={(e) => setTranscriptionText(e.target.value)}
+            className="w-full mt-2 p-3 border border-gray-200 rounded-lg h-32 text-sm text-gray-700"
+            placeholder="Transcription will appear here if available"
+          />
         </details>
 
-        <details className="group">
+        <details className="group" open={!!lessonOptions}>
           <summary className="text-sm text-gray-600 font-medium cursor-pointer flex items-center gap-2 select-none py-2">
             <AlignLeft className="w-4 h-4 text-gray-500 group-open:rotate-90 transition" />
             Lesson learned (optional)
           </summary>
-          <Textarea
-            value={lessonLearned}
-            onChange={(e) => setLessonLearned(e.target.value)}
-            className="w-full mt-2 p-3 border border-gray-200 rounded-lg h-24 text-sm text-gray-700"
-            placeholder="What did you learn from this experience?"
-          />
+          <div className="mt-2 space-y-2">
+            {lessonOptions && (
+              <div className="space-y-2 mb-3">
+                <p className="text-xs text-gray-500">Choose a suggested lesson or write your own:</p>
+                {Object.entries(lessonOptions).map(([type, text]) => (
+                  <button
+                    key={type}
+                    onClick={() => setLessonLearned(text)}
+                    className={`w-full text-left p-2.5 border rounded-lg text-sm transition ${
+                      lessonLearned === text
+                        ? 'border-blue-500 bg-blue-50 text-blue-900'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className="text-xs font-medium text-gray-500 uppercase block mb-0.5">
+                      {type}
+                    </span>
+                    {text}
+                  </button>
+                ))}
+              </div>
+            )}
+            <Textarea
+              value={lessonLearned}
+              onChange={(e) => setLessonLearned(e.target.value)}
+              className="w-full p-3 border border-gray-200 rounded-lg h-24 text-sm text-gray-700"
+              placeholder="Or write your own lesson..."
+            />
+          </div>
         </details>
       </div>
 

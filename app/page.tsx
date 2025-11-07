@@ -91,16 +91,18 @@ export default function HomePage() {
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           {/* Header with Logo */}
-          <div className="flex flex-col justify-center items-center -mb-8 md:-mb-12">
-            <Image
-              src="/logo black.svg"
-              alt="Heritage Whisper"
-              width={1440}
-              height={360}
-              className="h-64 md:h-80 w-auto"
-              style={{ filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))" }}
-              priority
-            />
+          <div className="flex flex-col justify-center items-center -mb-8 md:-mb-12 px-4" style={{ marginTop: "20px" }}>
+            <div className="flex justify-center w-full">
+              <Image
+                src="/final logo/chat-bubble-logo.svg"
+                alt="Heritage Whisper"
+                width={300}
+                height={300}
+                className="h-64 md:h-80 w-auto mx-auto"
+                style={{ filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))" }}
+                priority
+              />
+            </div>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-4 lg:gap-6 items-center">
@@ -149,7 +151,7 @@ export default function HomePage() {
             </div>
 
             {/* Right: Hero Image */}
-            <div className="relative" data-animate>
+            <div className="relative pb-12" data-animate>
               <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                 <Image
                   src="/1a.png"
@@ -161,10 +163,10 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
               </div>
               {/* Floating badge */}
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4 border-2 border-[#d4a574]">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#c9a78a] to-[#b88b94] flex items-center justify-center shadow-lg">
-                    <Mic className="w-6 h-6 text-white" />
+              <div className="absolute bottom-0 left-2 bg-white rounded-xl shadow-xl p-3 border-2 border-[#d4a574]">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#c9a78a] to-[#b88b94] flex items-center justify-center shadow-lg">
+                    <Mic className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-[#2d2520]">Just Press Record</p>
@@ -1023,12 +1025,12 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
             <div>
               <Image
-                src="/logo black.svg"
+                src="/final logo/chat-bubble-logo.svg"
                 alt="Heritage Whisper"
-                width={480}
-                height={120}
+                width={180}
+                height={180}
                 className="h-32 w-auto"
-                style={{ filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))" }}
+                style={{ filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) brightness(0) invert(1)" }}
               />
             </div>
             <div className="flex gap-8 text-base">

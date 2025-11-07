@@ -1,31 +1,98 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+const TIPS = [
+  {
+    icon: "📅",
+    text: "Start with when and where—it anchors your memory"
+  },
+  {
+    icon: "👤",
+    text: "Name the people—their names matter to your family"
+  },
+  {
+    icon: "❤️",
+    text: "Share how you felt—that's what they'll remember"
+  },
+  {
+    icon: "🎯",
+    text: "One story, one moment—don't try to tell everything"
+  }
+];
+
 export default function PreRecordHints() {
+  const [idx, setIdx] = useState(0);
+  const [reduced, setReduced] = useState(false);
+  const fadeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const m = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    setReduced(!!m?.matches);
+    const handler = () => setReduced(!!m?.matches);
+    m?.addEventListener?.("change", handler);
+    return () => m?.removeEventListener?.("change", handler);
+  }, []);
+
+  useEffect(() => {
+    if (reduced) return;
+    const id = setInterval(() => {
+      if (fadeRef.current) {
+        fadeRef.current.style.opacity = "0";
+        setTimeout(() => {
+          setIdx((i) => (i + 1) % TIPS.length);
+          if (fadeRef.current) fadeRef.current.style.opacity = "1";
+        }, 300);
+      }
+    }, 5000);
+    return () => clearInterval(id);
+  }, [reduced]);
+
   return (
-    <div className="mx-auto w-full max-w-md px-6">
+    <div className="mx-auto w-full max-w-sm px-4">
       <div
-        className="mx-auto w-full max-w-sm rounded-xl border border-neutral-200/70 bg-neutral-50/60 p-4 shadow-[0_1px_0_rgba(0,0,0,0.03)] dark:border-neutral-700/50 dark:bg-neutral-800/50"
+        className="mt-3 rounded-lg border border-neutral-200/70 bg-white/70 p-3 shadow-[0_1px_0_rgba(0,0,0,0.03)] backdrop-blur-[2px] dark:border-neutral-700/50 dark:bg-neutral-900/50"
         role="region"
         aria-label="Recording tips and privacy"
       >
-        {/* Micro-tip */}
-        <div className="flex items-start gap-2.5">
-          <svg aria-hidden="true" className="mt-0.5 h-4 w-4 text-neutral-500 dark:text-neutral-400" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M9 21h6v-2H9v2Zm3-20a7 7 0 0 0-7 7c0 2.38 1.18 4.48 3 5.74V16a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A6.99 6.99 0 0 0 20 8a7 7 0 0 0-7-7Z"/>
-          </svg>
-          <p className="text-[15px] leading-6 text-neutral-700 dark:text-neutral-200">
-            Start with the date and place.
+        {/* Row 1: Micro-tip */}
+        <div
+          ref={fadeRef}
+          className="flex items-center gap-2.5 transition-opacity duration-300"
+          role="status"
+          aria-live="polite"
+        >
+          <span className="text-lg leading-6 flex-shrink-0" aria-hidden="true">
+            {TIPS[idx].icon}
+          </span>
+          <p className="text-[16px] leading-6 text-neutral-700 dark:text-neutral-200">
+            {TIPS[idx].text}
           </p>
         </div>
 
-        {/* Divider */}
-        <div className="my-3 h-px w-full bg-neutral-200/70 dark:bg-neutral-700/50" />
+        {/* Hairline divider */}
+        <div className="my-2 h-px w-full bg-neutral-200/70 dark:bg-neutral-700/50" />
 
-        {/* Privacy */}
-        <div className="flex items-start gap-2.5">
-          <svg aria-hidden="true" className="mt-0.5 h-4 w-4 text-neutral-500 dark:text-neutral-400" viewBox="0 0 24 24" fill="currentColor">
+        {/* Row 2: Privacy */}
+        <div className="flex items-center gap-2.5">
+          <svg aria-hidden="true" className="h-4 w-4 flex-shrink-0 text-neutral-500 dark:text-neutral-400" viewBox="0 0 24 24" fill="currentColor">
             <path d="M17 8V7a5 5 0 0 0-10 0v1H5a1 1 0 0 0-1 1v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V9a1 1 0 0 0-1-1h-2Zm-8 0V7a3 3 0 0 1 6 0v1H9Z"/>
           </svg>
-          <p className="text-[13px] leading-5 text-neutral-600 dark:text-neutral-300">
+          <p className="text-[15px] leading-5 text-neutral-600 dark:text-neutral-300">
             Private by default. You choose what to share.
+          </p>
+        </div>
+
+        {/* Hairline divider */}
+        <div className="my-2 h-px w-full bg-neutral-200/70 dark:bg-neutral-700/50" />
+
+        {/* Row 3: Edit or delete */}
+        <div className="flex items-center gap-2.5">
+          <svg aria-hidden="true" className="h-4 w-4 flex-shrink-0 text-neutral-500 dark:text-neutral-400" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+          </svg>
+          <p className="text-[15px] leading-5 text-neutral-600 dark:text-neutral-300">
+            Edit or delete anytime
           </p>
         </div>
       </div>
