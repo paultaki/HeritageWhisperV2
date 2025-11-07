@@ -352,6 +352,13 @@ export default function MemoryBoxPage() {
     });
   };
 
+  const handleDuplicate = (id: string) => {
+    toast({
+      title: "Duplicate feature coming soon",
+      description: "Memory duplication will be available in a future update.",
+    });
+  };
+
   return (
     <div
       className="min-h-screen"
@@ -401,6 +408,7 @@ export default function MemoryBoxPage() {
                 deleteStory.mutate(id);
               }
             }}
+            onDuplicate={handleDuplicate}
           />
         </main>
       </div>

@@ -20,7 +20,7 @@ import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { MemoryBoxTabs } from "@/components/memory-box/MemoryBoxTabs";
 import { QuickStatsBar } from "@/components/memory-box/QuickStatsBar";
-import { StoryFilters, StoryFilterType } from "@/components/memory-box/StoryFilters";
+import { StoryFilters, type StoryFilterType } from "@/components/memory-box/StoryFilters";
 import { StoryCard } from "@/components/memory-box/StoryCard";
 import { TreasureGrid } from "@/components/memory-box/TreasureGrid";
 
@@ -383,9 +383,9 @@ export default function MemoryBoxV2Page() {
                 {/* Stories Grid */}
                 <div className="mt-6">
                   {isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {[...Array(6)].map((_, i) => (
-                        <div key={i} className="bg-gray-200 animate-pulse rounded-xl" style={{ height: "400px" }} />
+                        <div key={i} className="bg-gray-200 animate-pulse rounded-xl" style={{ height: "300px" }} />
                       ))}
                     </div>
                   ) : processedStories.length === 0 ? (
@@ -409,7 +409,7 @@ export default function MemoryBoxV2Page() {
                       )}
                     </Card>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {processedStories.map((story) => {
                         const heroPhoto = story.photos?.find((p) => p.isHero) || story.photos?.[0];
                         const imageUrl = heroPhoto?.url || story.photoUrl || "/images/placeholder.jpg";
@@ -421,7 +421,7 @@ export default function MemoryBoxV2Page() {
                             key={story.id}
                             id={story.id}
                             title={story.title}
-                            preview={getPreviewText(story.transcription)}
+                            preview=""
                             imageUrl={imageUrl}
                             photoTransform={photoTransform}
                             year={story.storyYear}

@@ -29,6 +29,7 @@ type Props = {
   onEdit?: (id: string) => void;
   onFavorite?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onDuplicate?: (id: string) => void;
 };
 
 /**
@@ -67,6 +68,7 @@ export default function MemoryList({
   onToggleBook,
   onListen,
   onEdit,
+  onDuplicate,
   onFavorite,
   onDelete,
 }: Props) {
@@ -224,6 +226,7 @@ export default function MemoryList({
               onEdit={onEdit}
               onFavorite={onFavorite}
               onDelete={onDelete}
+              onDuplicate={onDuplicate}
             />
           ))
         )}

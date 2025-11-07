@@ -70,10 +70,10 @@ export function StoryCard({
 
   return (
     <article className="bg-white rounded-xl border-2 border-gray-200 hover:shadow-xl transition-all duration-200 overflow-hidden">
-      {/* Large Thumbnail */}
+      {/* Compact Thumbnail */}
       <div
         className="relative overflow-hidden cursor-pointer"
-        style={{ height: "200px" }}
+        style={{ height: "140px" }}
         onClick={onEdit}
       >
         <img
@@ -139,9 +139,9 @@ export function StoryCard({
 
       {/* Card Content */}
       <div className="p-4">
-        {/* Title and Year */}
-        <div className="mb-2">
-          <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1 line-clamp-2" style={{ minHeight: "2.5rem" }}>
+        {/* Title and Year - Compact */}
+        <div className="mb-3">
+          <h3 className="text-base font-bold text-gray-900 mb-1 line-clamp-2">
             {title}
           </h3>
           <div className="text-sm text-gray-600 font-medium">
@@ -152,16 +152,11 @@ export function StoryCard({
               </>
             ) : (
               <span className="text-gray-400 flex items-center gap-1">
-                ☁️ Timeless memory
+                ☁️ Timeless
               </span>
             )}
           </div>
         </div>
-
-        {/* Preview Text */}
-        <p className="text-base text-gray-700 mb-4 line-clamp-3" style={{ minHeight: "4.5rem" }}>
-          {preview}
-        </p>
 
         {/* Action Buttons - All Visible */}
         <div className="grid grid-cols-4 gap-2">

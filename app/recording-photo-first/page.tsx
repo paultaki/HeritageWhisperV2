@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Camera, X, CheckCircle } from "lucide-react";
+import { Camera, X, CheckCircle, Mic } from "lucide-react";
 import { CameraCapture } from "@/components/recording/CameraCapture";
 import { AudioRecordingWithPhoto } from "@/components/recording/AudioRecordingWithPhoto";
 import { PhotoFirstReview } from "@/components/recording/PhotoFirstReview";
+import PreRecordHints from "@/components/recording/PreRecordHints";
 import { navCache } from "@/lib/navCache";
 import { useToast } from "@/hooks/use-toast";
 
@@ -123,43 +125,47 @@ export default function PhotoFirstRecordingPage() {
     <div className="mx-auto max-w-md min-h-screen relative flex flex-col bg-white">
       {/* Top Bar - Hidden during recording and review */}
       {currentScreen !== 'recording' && currentScreen !== 'review' && (
-        <header className="sticky top-0 z-30 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b border-gray-200">
-          <div className="px-5 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-9 w-9 rounded-md bg-gray-900 text-white flex items-center justify-center text-[13px] font-semibold tracking-tight">
-                HW
-              </div>
-              <div className="text-[18px] font-medium tracking-tight">HeritageWhisper</div>
-            </div>
+        <header className="relative bg-white border-b border-gray-200">
+          <div className="px-4 py-4 flex items-center justify-between">
+            <Image
+              src="/final logo/chat-bubble-hw-logo.svg"
+              alt="Heritage Whisper"
+              width={168}
+              height={68}
+              className="h-[68px]"
+              priority
+            />
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="text-[15px] -mr-2"
+              className="text-base font-medium pl-3 pr-5 py-2 h-10"
               onClick={() => router.push('/timeline')}
             >
-              <X className="w-6 h-6" />
+              Cancel
             </Button>
           </div>
         </header>
       )}
 
-      <main className="flex-1">
+      <main className="flex-1 flex flex-col">
         {/* Screen 1: Home */}
         {currentScreen === 'home' && (
-          <section className="px-5 pt-10 pb-24">
-            <div className="text-center">
-              <h1 className="text-[28px] leading-9 tracking-tight font-semibold">
+          <section className="flex-1 flex flex-col justify-center px-6 py-12">
+            <div className="text-center mb-8">
+              <h1 className="text-[32px] leading-[1.2] tracking-tight font-semibold mb-6">
                 Every memory matters. Start with your voice.
               </h1>
-              <p className="text-[18px] text-gray-600 mt-4 leading-relaxed">
+              <p className="text-[18px] text-gray-600 leading-relaxed mb-3">
                 Capture a photo and speak your memory—under two minutes.
               </p>
             </div>
 
-            <div className="mt-10 space-y-4">
+            <PreRecordHints />
+
+            <div className="space-y-6 mt-8 mb-12">
               <Button
                 onClick={() => setCurrentScreen('capture')}
-                className="w-full h-[60px] bg-blue-600 text-white rounded-xl text-[18px] font-medium tracking-tight flex items-center justify-center gap-3 shadow-sm hover:bg-blue-700 active:bg-blue-800"
+                className="w-full h-[64px] bg-blue-600 text-white rounded-xl text-[18px] font-medium tracking-tight flex items-center justify-center gap-3 shadow-sm hover:bg-blue-700 active:bg-blue-800"
               >
                 <Camera className="w-6 h-6" />
                 Add a Photo
@@ -169,12 +175,13 @@ export default function PhotoFirstRecordingPage() {
                 <Button
                   onClick={() => setCurrentScreen('recording')}
                   variant="outline"
-                  className="w-full h-[60px] rounded-xl text-[18px] font-medium tracking-tight flex items-center justify-center gap-3"
+                  className="w-full h-[64px] rounded-xl text-[18px] font-medium tracking-tight flex items-center justify-center gap-3 border-2"
                 >
+                  <Mic className="w-6 h-6" />
                   Record Story Now
                 </Button>
-                <p className="text-[15px] text-gray-500 mt-3 text-center">
-                  Add photo anytime
+                <p className="text-[16px] text-gray-500 text-center mt-3">
+                  Add photo later
                 </p>
               </div>
             </div>
