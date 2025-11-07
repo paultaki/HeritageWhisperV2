@@ -6,7 +6,6 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
 import Image from "next/image";
-import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Card,
@@ -509,26 +508,8 @@ export default function FamilyPage() {
         />
       </div>
 
-      {/* Left Sidebar - Desktop Only */}
-      {isDesktop && (
-        <aside
-          className="hidden lg:flex lg:w-56 flex-col gap-1.5 p-2"
-          style={{
-            position: "fixed",
-            top: 72,
-            left: 0,
-            height: "calc(100vh - 72px)",
-            backgroundColor: "transparent",
-            borderRight: "none",
-            color: isDark ? "#b0b3b8" : undefined,
-          }}
-        >
-          <LeftSidebar />
-        </aside>
-      )}
-
-      {/* Main content - with header and sidebar spacing */}
-      <main className="flex-1 min-w-0 pb-20 md:pb-0 lg:ml-56" style={{ marginTop: 55 }}>
+      {/* Main content - with header spacing, centered */}
+      <main className="w-full pb-20 md:pb-0 px-4 md:px-6" style={{ marginTop: 55 }}>
         <div className="max-w-6xl mx-auto p-4 md:p-6">
           {/* Page Header with Invite Button */}
           <div className="flex items-center justify-between mb-6 md:mb-8">

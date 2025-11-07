@@ -111,7 +111,7 @@ export default function AdminAnalyticsPage() {
             <CardTitle>Authentication Required</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">Please sign in to access analytics</p>
+            <p className="text-base text-gray-600">Please sign in to access analytics</p>
           </CardContent>
         </Card>
       </div>
@@ -123,7 +123,7 @@ export default function AdminAnalyticsPage() {
       <div className="min-h-screen flex items-center justify-center p-4 bg-[#FFF8F3]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-heritage-brown mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading analytics...</p>
+          <p className="text-base text-gray-600">Loading analytics...</p>
         </div>
       </div>
     );
@@ -137,7 +137,7 @@ export default function AdminAnalyticsPage() {
             <CardTitle className="text-red-600">Error</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">{error || 'Failed to load analytics'}</p>
+            <p className="text-base text-gray-600">{error || 'Failed to load analytics'}</p>
           </CardContent>
         </Card>
       </div>
@@ -152,16 +152,16 @@ export default function AdminAnalyticsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-serif font-bold text-heritage-brown">
+            <h1 className="text-4xl font-serif font-bold text-gray-900">
               Analytics Dashboard
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-lg text-gray-600 mt-2">
               Executive overview and key performance metrics
             </p>
           </div>
           <Link
             href="/admin"
-            className="text-heritage-brown hover:underline flex items-center gap-2"
+            className="text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-2 text-base"
           >
             ← Back to Admin
           </Link>
@@ -215,18 +215,18 @@ export default function AdminAnalyticsPage() {
               {lifecycleBreakdown.map((stage, index) => (
                 <div key={index} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-900">{stage.stage}</span>
-                    <span className="text-sm text-gray-600">
+                    <span className="font-medium text-base text-gray-900">{stage.stage}</span>
+                    <span className="text-base text-gray-600">
                       {stage.count} users ({stage.percentage}%)
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2.5">
                     <div
-                      className="bg-heritage-brown h-2.5 rounded-full transition-all"
+                      className="bg-blue-600 h-2.5 rounded-full transition-all"
                       style={{ width: `${stage.percentage}%` }}
                     ></div>
                   </div>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm text-gray-500">
                     Avg {stage.avgDaysSinceSignup} days since signup
                   </p>
                 </div>
@@ -251,14 +251,14 @@ export default function AdminAnalyticsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200 text-left">
-                    <th className="pb-3 pr-4 font-semibold text-gray-900">Rank</th>
-                    <th className="pb-3 pr-4 font-semibold text-gray-900">User</th>
-                    <th className="pb-3 pr-4 font-semibold text-gray-900 text-right">Stories</th>
-                    <th className="pb-3 pr-4 font-semibold text-gray-900 text-right">Stories/Week</th>
-                    <th className="pb-3 pr-4 font-semibold text-gray-900 text-right">Days Active</th>
-                    <th className="pb-3 pr-4 font-semibold text-gray-900">Last Active</th>
-                    <th className="pb-3 pr-4 font-semibold text-gray-900 text-center">Family</th>
-                    <th className="pb-3 font-semibold text-gray-900 text-center">Paid</th>
+                    <th className="pb-3 pr-4 font-semibold text-base text-gray-900">Rank</th>
+                    <th className="pb-3 pr-4 font-semibold text-base text-gray-900">User</th>
+                    <th className="pb-3 pr-4 font-semibold text-base text-gray-900 text-right">Stories</th>
+                    <th className="pb-3 pr-4 font-semibold text-base text-gray-900 text-right">Stories/Week</th>
+                    <th className="pb-3 pr-4 font-semibold text-base text-gray-900 text-right">Days Active</th>
+                    <th className="pb-3 pr-4 font-semibold text-base text-gray-900">Last Active</th>
+                    <th className="pb-3 pr-4 font-semibold text-base text-gray-900 text-center">Family</th>
+                    <th className="pb-3 font-semibold text-base text-gray-900 text-center">Paid</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -277,26 +277,26 @@ export default function AdminAnalyticsPage() {
                       </td>
                       <td className="py-3 pr-4">
                         <div>
-                          <div className="font-medium text-gray-900">{user.name}</div>
+                          <div className="font-medium text-base text-gray-900">{user.name}</div>
                           <div className="text-sm text-gray-500">{maskEmail(user.email)}</div>
                         </div>
                       </td>
                       <td className="py-3 pr-4 text-right">
-                        <span className="font-semibold text-heritage-brown">
+                        <span className="font-semibold text-base text-blue-600">
                           {user.storyCount}
                         </span>
                       </td>
                       <td className="py-3 pr-4 text-right">
-                        <span className="text-gray-900">{user.avgStoriesPerWeek}</span>
+                        <span className="text-base text-gray-900">{user.avgStoriesPerWeek}</span>
                       </td>
                       <td className="py-3 pr-4 text-right">
-                        <span className="text-gray-600">{user.daysSinceSignup}</span>
+                        <span className="text-base text-gray-600">{user.daysSinceSignup}</span>
                       </td>
                       <td className="py-3 pr-4">
-                        <span className="text-sm text-gray-600">{user.lastActive}</span>
+                        <span className="text-base text-gray-600">{user.lastActive}</span>
                       </td>
                       <td className="py-3 pr-4 text-center">
-                        <span className="text-gray-900">{user.familyCount}</span>
+                        <span className="text-base text-gray-900">{user.familyCount}</span>
                       </td>
                       <td className="py-3 text-center">
                         {user.isPaid ? (
@@ -379,7 +379,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Footer */}
-        <div className="text-center text-sm text-gray-500">
+        <div className="text-center text-base text-gray-500">
           Last updated: {new Date(data.generatedAt).toLocaleString()}
         </div>
       </div>
@@ -412,9 +412,9 @@ function MetricCard({
             <div className="text-2xl font-bold text-gray-900">
               {value.toLocaleString()}
             </div>
-            <div className="text-sm text-gray-600">{title}</div>
+            <div className="text-base text-gray-600">{title}</div>
             {subtitle && (
-              <div className="text-xs text-gray-500 mt-1">{subtitle}</div>
+              <div className="text-sm text-gray-500 mt-1">{subtitle}</div>
             )}
           </div>
         </div>
@@ -436,9 +436,9 @@ function MetricRow({
     <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
       <div className="flex items-center gap-2">
         {icon}
-        <span className="text-gray-700">{label}</span>
+        <span className="text-base text-gray-700">{label}</span>
       </div>
-      <span className="font-semibold text-gray-900">{value}</span>
+      <span className="font-semibold text-base text-gray-900">{value}</span>
     </div>
   );
 }

@@ -25,7 +25,6 @@ import MemoryToolbarV2 from "@/components/ui/MemoryToolbarV2";
 import MemoryCardCompact from "@/components/ui/MemoryCardCompact";
 import { MemoryList } from "@/components/ui/MemoryList";
 import { Story as SchemaStory } from "@/shared/schema";
-import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { apiRequest } from "@/lib/queryClient";
 import { MemoryOverlay } from "@/components/MemoryOverlay";
@@ -576,15 +575,12 @@ export default function MemoryBoxPage() {
         subtitle="Manage your memories"
       />
 
-      {/* Content Area with Sidebar */}
-      <div className="flex">
-        {/* Left Sidebar */}
-        {isDesktop && <LeftSidebar />}
-
+      {/* Content Area */}
+      <div className="flex justify-center">
         {/* Main content */}
-        <main className={`flex-1 min-w-0 pb-20 md:pb-0 ${viewMode === "list" ? "hw-list" : ""}`}>
-          {/* Toolbar with Stats and Controls - Contained width */}
-          <section className="px-3 pt-6" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+        <main className={`w-full pb-20 md:pb-0 px-4 md:px-6 ${viewMode === "list" ? "hw-list" : ""}`}>
+          {/* Toolbar with Stats and Controls - Centered */}
+          <section className="pt-6 max-w-7xl mx-auto">
             <div className="bg-white border rounded-xl p-6 mb-6">
               <MemoryToolbarV2
                 stats={toolbarStats}
@@ -601,7 +597,7 @@ export default function MemoryBoxPage() {
           </section>
 
           {/* Stories Content */}
-          <section className="px-3" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+          <section className="max-w-7xl mx-auto">
         {isLoading ? (
           <div className="hw-grid-mem">
             {[...Array(8)].map((_, i) => (

@@ -83,7 +83,7 @@ export default function MemoryToolbarV2(p: Props) {
       </div>
 
       {/* Controls Row - Search, Sort, View Toggle */}
-      <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+      <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center" suppressHydrationWarning>
         {/* Search Input - Larger for seniors */}
         <input
           type="search"
@@ -92,6 +92,7 @@ export default function MemoryToolbarV2(p: Props) {
           value={p.filter}
           onChange={(e) => p.setFilter(e.target.value)}
           style={{ minHeight: '48px' }} // WCAG AAA touch target
+          suppressHydrationWarning
         />
 
         {/* Sort Dropdown - Larger for seniors */}
@@ -100,6 +101,7 @@ export default function MemoryToolbarV2(p: Props) {
           value={p.sort}
           onChange={(e) => p.setSort(e.target.value)}
           style={{ minHeight: '48px' }}
+          suppressHydrationWarning
         >
           <option value="year-newest">Newest → Oldest</option>
           <option value="year-oldest">Oldest → Newest</option>
@@ -110,19 +112,20 @@ export default function MemoryToolbarV2(p: Props) {
         </select>
 
         {/* View Toggle - Larger buttons for seniors */}
-        <div className="flex rounded-lg border-2 border-gray-300 bg-white overflow-hidden">
+        <div className="flex rounded-lg border-2 border-gray-300 bg-white overflow-hidden" suppressHydrationWarning>
           <button
             onClick={() => p.setView("list")}
             className={`
               px-6 py-3 text-base font-medium transition-colors
-              ${p.view === "list" 
-                ? 'bg-blue-500 text-white' 
+              ${p.view === "list"
+                ? 'bg-blue-500 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-50'
               }
             `}
             style={{ minHeight: '48px', minWidth: '80px' }}
             aria-label="List view"
             aria-pressed={p.view === "list"}
+            suppressHydrationWarning
           >
             List
           </button>
@@ -130,14 +133,15 @@ export default function MemoryToolbarV2(p: Props) {
             onClick={() => p.setView("grid")}
             className={`
               px-6 py-3 text-base font-medium transition-colors border-l-2 border-gray-300
-              ${p.view === "grid" 
-                ? 'bg-blue-500 text-white' 
+              ${p.view === "grid"
+                ? 'bg-blue-500 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-50'
               }
             `}
             style={{ minHeight: '48px', minWidth: '80px' }}
             aria-label="Grid view"
             aria-pressed={p.view === "grid"}
+            suppressHydrationWarning
           >
             Grid
           </button>

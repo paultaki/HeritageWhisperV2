@@ -22,6 +22,7 @@ import {
   ChevronDown,
   ChevronRight,
   Target,
+  Palette,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -50,6 +51,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: "Dashboard",
     items: [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+      { label: "Design Guidelines", href: "/admin/design-guidelines", icon: Palette },
     ],
   },
   {
@@ -64,7 +66,6 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
       { label: "Market Assessment", href: "/admin/market-assessment", icon: Target },
-      { label: "North Star", href: "file:///Users/paul/Development/HW_Files/index.html", icon: Compass },
       { label: "AI Prompts Inspector", href: "/admin/ai-prompts", icon: Code },
     ],
   },

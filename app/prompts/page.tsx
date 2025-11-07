@@ -36,7 +36,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
 import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
-import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { AccountSwitcher } from "@/components/AccountSwitcher";
@@ -654,12 +653,9 @@ export default function PromptsV2Page() {
         }
       />
 
-      <div className="flex flex-col md:flex-row">
-        {/* Left Sidebar - Desktop only */}
-        {isDesktop && <LeftSidebar />}
-
+      <div className="flex justify-center">
         {/* Main content */}
-        <main className="flex-1 min-w-0 pb-24 md:pb-0">
+        <main className="w-full pb-24 md:pb-0 px-4 md:px-6">
 
         {/* Help overlay */}
         <AnimatePresence>
@@ -685,7 +681,7 @@ export default function PromptsV2Page() {
         </AnimatePresence>
 
         {/* Content */}
-        <div className="px-6 py-8" style={{ maxWidth: "1200px", margin: "0 auto" }}>
+        <div className="py-8 max-w-7xl mx-auto">
           {/* Featured Prompt */}
           <section className="mb-12">
             <FeaturedPromptCard prompt={featuredPrompt} onRecord={handleRecord} />
