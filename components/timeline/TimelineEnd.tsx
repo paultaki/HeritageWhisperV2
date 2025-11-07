@@ -154,13 +154,17 @@ export function TimelineEnd({
 
       <style jsx>{`
         .gradient-line {
-          left: 14px;
+          left: 0px;
           top: -12px;
           height: 72px;
         }
 
         .today-node {
           padding-top: 52px;
+        }
+
+        .today-node > div {
+          margin-left: -4px !important; /* Moved 14px left total */
         }
 
         .end-cta-button {

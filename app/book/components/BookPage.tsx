@@ -852,7 +852,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18 }: { story: Stor
               )`
             }}
           />
-          <p className="relative text-slate-700 text-lg leading-relaxed" style={{ fontFamily: '"Caveat", cursive' }}>
+          <p className="relative text-slate-700 text-xl leading-relaxed" style={{ fontFamily: '"Caveat", cursive' }}>
             {story.wisdomClipText}
           </p>
         </div>

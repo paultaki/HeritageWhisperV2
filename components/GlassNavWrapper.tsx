@@ -24,7 +24,7 @@ export default function GlassNavWrapper() {
   const getActiveKey = () => {
     if (pathname === '/timeline' || pathname === '/') return 'timeline';
     if (pathname.startsWith('/book')) return 'book';
-    if (pathname.startsWith('/memory-box')) return 'memory';
+    if (pathname.startsWith('/memory-box') || pathname.startsWith('/recording-photo-first')) return 'memory';
     if (pathname.startsWith('/prompts')) return 'ideas';
     return '';
   };
@@ -45,7 +45,7 @@ export default function GlassNavWrapper() {
     {
       key: 'memory',
       label: 'Memory',
-      href: '/memory-box',
+      href: '/recording-photo-first',
       Icon: Mic,
     },
     {

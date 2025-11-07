@@ -134,10 +134,10 @@ export default function PhotoFirstRecordingPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-[15px]"
+              className="text-[15px] -mr-2"
               onClick={() => router.push('/timeline')}
             >
-              <X className="w-5 h-5" />
+              <X className="w-6 h-6" />
             </Button>
           </div>
         </header>

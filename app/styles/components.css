@@ -467,22 +467,27 @@ body {
 
 /* mobile layout tighten - reclaim width for cards */
 @media (max-width: 767px) {
-  /* narrower gutter, spine nearer edge */
+  /* narrower gutter, spine nearer edge - moved 12px left total, cards stay put with 24px gap */
   .hw-spine {
-    padding-left: calc(40px + env(safe-area-inset-left));
+    padding-left: calc(26px + env(safe-area-inset-left)); /* Reduced by 2px to move spine left */
   }
   .hw-spine::before {
-    left: calc(14px + env(safe-area-inset-left));
+    left: calc(0px + env(safe-area-inset-left)); /* Moved 2px further left */
     box-shadow: 0 3px 8px -2px rgba(0, 0, 0, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Year badges adjusted to maintain position relative to spine */
+  .hw-year {
+    left: -50px; /* moved 3px left per user request */
   }
 
   /* Decade band starts from spine on mobile instead of edge-to-edge */
   .hw-decade-band {
-    margin-left: calc(-22px - env(safe-area-inset-left, 0px)); /* Start from spine position (~30px from edge) */
+    margin-left: calc(-26px - env(safe-area-inset-left, 0px)); /* Extended to reach new spine position */
     box-shadow: 0 3px 8px -2px rgba(0, 0, 0, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
-  /* connectors more visible and longer */
+  /* connectors more visible and longer - extended to reach new spine position */
   .hw-card {
     position: relative;
     border: 1.5px solid #B89B8D;
@@ -490,9 +495,9 @@ body {
   .hw-card::before {
     content: "";
     position: absolute;
-    left: -24px; /* moved 1px left */
+    left: -25px; /* moved 1px right per user request */
     top: calc(var(--title-offset, 22px));
-    width: 21px;
+    width: 24px; /* exactly 24px gap from spine to card */
     height: 4px;
     /* Gradient from solid at spine to faded at card */
     background: linear-gradient(to right, rgba(196, 167, 183, 0.45), rgba(196, 167, 183, 0.15));
@@ -503,7 +508,7 @@ body {
   }
   .hw-card:hover::before,
   .hw-card:focus-visible::before {
-    width: 39px;
+    width: 42px; /* extended proportionally */
     background: rgba(196, 167, 183, 0.6);
   }
 

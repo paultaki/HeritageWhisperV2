@@ -2,35 +2,19 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  FileText,
-  Box,
-  Download,
-  Printer,
-  Archive,
-  Volume2,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Box } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { useAccountContext } from "@/hooks/use-account-context";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
 import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
-import MemoryToolbarV2 from "@/components/ui/MemoryToolbarV2";
-import MemoryCardCompact from "@/components/ui/MemoryCardCompact";
-import { MemoryList } from "@/components/ui/MemoryList";
-import { Story as SchemaStory } from "@/shared/schema";
+import MemoryList from "@/components/memory-box/MemoryList";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { apiRequest } from "@/lib/queryClient";
 import { MemoryOverlay } from "@/components/MemoryOverlay";
 import { Story as SupabaseStory } from "@/lib/supabase";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
-import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface Story {
   id: string;
@@ -54,21 +38,6 @@ interface Story {
     lessonsLearned?: string;
   };
 }
-
-type ViewMode =
-  | "all"
-  | "timeline"
-  | "book"
-  | "private"
-  | "favorites"
-  | "undated";
-type SortBy =
-  | "year-newest"
-  | "year-oldest"
-  | "added-newest"
-  | "added-oldest"
-  | "title"
-  | "duration";
 
 // Audio Manager for single playback
 class AudioManager {
@@ -136,21 +105,10 @@ export default function MemoryBoxPage() {
   const router = useRouter();
   const { user, session } = useAuth();
   const modeSelection = useModeSelection();
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  const [searchQuery, setSearchQuery] = useState("");
-  // Desktop default: list view, Mobile default: grid view
-  const [viewMode, setViewMode] = useState<"grid" | "list">(isDesktop ? "list" : "grid");
-  const [filterMode, setFilterMode] = useState<ViewMode>("all");
-  const [sortBy, setSortBy] = useState<SortBy>("added-newest");
-  const [selectedStories, setSelectedStories] = useState<Set<string>>(
-    new Set(),
-  );
-  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [overlayOpen, setOverlayOpen] = useState(false);
 
@@ -283,97 +241,29 @@ export default function MemoryBoxPage() {
     },
   });
 
-  const processedStories = useMemo(() => {
-    let filtered = [...stories];
+  // Map Story to Memory format for MemoryList component
+  const memories = useMemo(() => {
+    return stories.map((story) => {
+      const heroPhoto = story.photos?.find((p) => p.isHero) || story.photos?.[0];
+      const thumbUrl = heroPhoto?.url || story.photoUrl || "/images/placeholder.jpg";
+      const age = story.storyYear && user?.birthYear
+        ? story.storyYear - user.birthYear
+        : undefined;
 
-    switch (filterMode) {
-      case "timeline":
-        filtered = filtered.filter((s) => s.includeInTimeline);
-        break;
-      case "book":
-        filtered = filtered.filter((s) => s.includeInBook);
-        break;
-      case "private":
-        filtered = filtered.filter(
-          (s) => !s.includeInTimeline && !s.includeInBook,
-        );
-        break;
-      case "favorites":
-        filtered = filtered.filter((s) => s.isFavorite);
-        break;
-      case "undated":
-        filtered = filtered.filter((s) => !s.storyYear);
-        break;
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (story) =>
-          story.title.toLowerCase().includes(query) ||
-          story.transcription?.toLowerCase().includes(query),
-      );
-    }
-
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "year-newest":
-          return (b.storyYear || 0) - (a.storyYear || 0);
-        case "year-oldest":
-          return (a.storyYear || 0) - (b.storyYear || 0);
-        case "added-newest":
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        case "added-oldest":
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        case "title":
-          return a.title.localeCompare(b.title);
-        case "duration":
-          return (b.durationSeconds || 0) - (a.durationSeconds || 0);
-        default:
-          return 0;
-      }
+      return {
+        id: story.id,
+        title: story.title,
+        year: story.storyYear || 0,
+        age: age && age >= 0 ? age : undefined,
+        durationSec: story.durationSeconds,
+        hasAudio: !!story.audioUrl,
+        onTimeline: story.includeInTimeline,
+        inBook: story.includeInBook,
+        favorited: story.isFavorite,
+        thumbUrl,
+      };
     });
-
-    return filtered;
-  }, [stories, filterMode, searchQuery, sortBy]);
-
-  const stats = useMemo(() => {
-    const totalDuration = stories.reduce(
-      (sum, s) => sum + (s.durationSeconds || 0),
-      0,
-    );
-    const timelineCount = stories.filter((s) => s.includeInTimeline).length;
-    const bookCount = stories.filter((s) => s.includeInBook).length;
-    const privateCount = stories.filter(
-      (s) => !s.includeInTimeline && !s.includeInBook,
-    ).length;
-    const favoritesCount = stories.filter((s) => s.isFavorite).length;
-    const undatedCount = stories.filter((s) => !s.storyYear).length;
-
-    return {
-      total: stories.length,
-      timeline: timelineCount,
-      book: bookCount,
-      private: privateCount,
-      favorites: favoritesCount,
-      undated: undatedCount,
-      duration: totalDuration,
-      words: stories.reduce(
-        (sum, s) => sum + (s.transcription?.split(" ").length || 0),
-        0,
-      ),
-    };
-  }, [stories]);
-
-  const formatDuration = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-  };
+  }, [stories, user?.birthYear]);
 
   const handleToggleTimeline = (id: string) => {
     const story = stories.find((s) => s.id === id);
@@ -402,120 +292,11 @@ export default function MemoryBoxPage() {
     }
   };
 
-  const handleSelectStory = (id: string) => {
-    const newSelection = new Set(selectedStories);
-    if (newSelection.has(id)) {
-      newSelection.delete(id);
-    } else {
-      newSelection.add(id);
-    }
-    setSelectedStories(newSelection);
-  };
-
-  const handleSelectAll = () => {
-    if (selectedStories.size === processedStories.length) {
-      setSelectedStories(new Set());
-    } else {
-      setSelectedStories(new Set(processedStories.map((s) => s.id)));
-    }
-  };
-
-  const handleBulkAction = (
-    action: "timeline" | "book" | "private" | "delete",
-  ) => {
-    const selectedIds = Array.from(selectedStories);
-
-    if (action === "delete") {
-      if (
-        confirm(`Delete ${selectedIds.length} memories? This cannot be undone.`)
-      ) {
-        selectedIds.forEach((id) => deleteStory.mutate(id));
-        setSelectedStories(new Set());
-      }
-    } else {
-      const updates: Partial<Story> = {};
-      if (action === "timeline") {
-        updates.includeInTimeline = true;
-        updates.includeInBook = false;
-      } else if (action === "book") {
-        updates.includeInBook = true;
-        updates.includeInTimeline = false;
-      } else if (action === "private") {
-        updates.includeInTimeline = false;
-        updates.includeInBook = false;
-      }
-
-      selectedIds.forEach((id) => updateStory.mutate({ id, updates }));
-      setSelectedStories(new Set());
-    }
-  };
-
-  // All 6 stats for senior-friendly toolbar
-  const toolbarStats = {
-    total: stats.total,
-    timeline: stats.timeline,
-    book: stats.book,
-    private: stats.private,
-    undated: stats.undated,
-    favorites: stats.favorites,
-  };
-
-  const formatDurationShort = (seconds?: number) => {
-    if (!seconds) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
   const calculateAge = (storyYear?: number | null) => {
     if (!storyYear || !user?.birthYear) return undefined;
     const age = storyYear - user.birthYear;
     if (age < 0) return undefined;
     return age.toString();
-  };
-
-  const handleDownloadPdf = async () => {
-    if (isExportingPdf) return;
-    setIsExportingPdf(true);
-    try {
-      toast({
-        title: "Generating PDF",
-        description: "This may take up to a minute...",
-      });
-
-      const response = await apiRequest("POST", "/api/export/trim", {
-        bookId: null,
-      });
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `heritage-book-trim-${new Date()
-        .toISOString()
-        .split("T")[0]}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      toast({
-        title: "PDF ready",
-        description: "Your book has been downloaded successfully.",
-      });
-    } catch (error) {
-      console.error("PDF export error:", error);
-      toast({
-        title: "Export failed",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Could not generate PDF. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExportingPdf(false);
-    }
   };
 
   const handleOpenOverlay = (story: Story) => {
@@ -549,10 +330,26 @@ export default function MemoryBoxPage() {
   };
 
   const handleNavigateStory = (storyId: string) => {
-    const story = processedStories.find((s) => s.id === storyId);
+    const story = stories.find((s) => s.id === storyId);
     if (story) {
       setSelectedStory(story);
     }
+  };
+
+  // Bulk action handlers
+  const handleBulkDelete = (ids: string[]) => {
+    if (confirm(`Delete ${ids.length} memories? This cannot be undone.`)) {
+      ids.forEach((id) => deleteStory.mutate(id));
+    }
+  };
+
+  const handleBulkFavorite = (ids: string[]) => {
+    ids.forEach((id) => {
+      const story = stories.find((s) => s.id === id);
+      if (story && !story.isFavorite) {
+        updateStory.mutate({ id, updates: { isFavorite: true } });
+      }
+    });
   };
 
   return (
@@ -575,172 +372,36 @@ export default function MemoryBoxPage() {
         subtitle="Manage your memories"
       />
 
-      {/* Content Area */}
+      {/* Content Area - Compact Memory List */}
       <div className="flex justify-center">
-        {/* Main content */}
-        <main className={`w-full pb-20 md:pb-0 px-4 md:px-6 ${viewMode === "list" ? "hw-list" : ""}`}>
-          {/* Toolbar with Stats and Controls - Centered */}
-          <section className="pt-6 max-w-7xl mx-auto">
-            <div className="bg-white border rounded-xl p-6 mb-6">
-              <MemoryToolbarV2
-                stats={toolbarStats}
-                view={viewMode}
-                setView={setViewMode}
-                filter={searchQuery}
-                setFilter={setSearchQuery}
-                sort={sortBy}
-                setSort={(s) => setSortBy(s as SortBy)}
-                filterMode={filterMode}
-                setFilterMode={(mode) => setFilterMode(mode as ViewMode)}
-              />
-            </div>
-          </section>
-
-          {/* Stories Content */}
-          <section className="max-w-7xl mx-auto">
-        {isLoading ? (
-          <div className="hw-grid-mem">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="hw-skel" />
-            ))}
-          </div>
-        ) : processedStories.length === 0 ? (
-          <Card className="text-center py-16">
-            <Box className="w-20 h-20 mx-auto text-gray-300 mb-4" />
-            <h3 className="text-2xl font-semibold mb-2">
-              {filterMode === "all" && !searchQuery
-                ? "Your Memory Box is empty"
-                : "No memories found"}
-            </h3>
-            <p className="text-lg text-gray-600 mb-6">
-              {filterMode === "all" && !searchQuery
-                ? "Start adding memories to build your collection"
-                : "Try adjusting your filters or search terms"}
-            </p>
-            {filterMode === "all" && !searchQuery && (
-              <Button
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => modeSelection.openModal()}
-                className="bg-heritage-coral hover:bg-heritage-coral/90 text-white text-lg px-6 py-3"
-              >
-                Add Your First Memory
-              </Button>
-            )}
-          </Card>
-        ) : viewMode === "list" ? (
+        <main className="w-full max-w-7xl">
           <MemoryList
-            stories={processedStories.map((story) => {
-              const heroPhoto =
-                story.photos?.find((p) => p.isHero) || story.photos?.[0];
-              const photoUrl =
-                heroPhoto?.url || story.photoUrl || "/images/placeholder.jpg";
-
-              return {
-                id: story.id,
-                title: story.title,
-                content: story.transcription || "",
-                year_of_event: story.storyYear || null,
-                user_birth_year: user?.birthYear || null,
-                audio_duration: story.durationSeconds || null,
-                audio_url: story.audioUrl || null,
-                cover_photo_url: photoUrl,
-                show_in_timeline: story.includeInTimeline,
-                include_in_book: story.includeInBook,
-                is_favorite: story.isFavorite,
-              } as unknown as SchemaStory;
-            })}
-            onPlay={(id) => {
-              const story = processedStories.find((s) => s.id === id);
+            items={memories}
+            onBulkDelete={handleBulkDelete}
+            onBulkFavorite={handleBulkFavorite}
+            onOpen={(id) => {
+              const story = stories.find((s) => s.id === id);
+              if (story) handleOpenOverlay(story);
+            }}
+            onToggleTimeline={handleToggleTimeline}
+            onToggleBook={handleToggleBook}
+            onListen={(id) => {
+              const story = stories.find((s) => s.id === id);
               if (story?.audioUrl) {
                 AudioManager.getInstance().play(id, story.audioUrl);
               }
             }}
-            onOpen={(id) => {
-              const returnPath = "/memory-box";
-              router.push(`/review/book-style?edit=${id}&returnPath=${encodeURIComponent(returnPath)}`);
+            onEdit={(id) => {
+              const story = stories.find((s) => s.id === id);
+              if (story) handleOpenOverlay(story);
             }}
-            onToggleFavorite={handleToggleFavorite}
-            onToggleTimeline={handleToggleTimeline}
-            onToggleBook={handleToggleBook}
+            onFavorite={handleToggleFavorite}
             onDelete={(id) => {
-              setStoryToDelete(id);
-              setShowDeleteConfirm(true);
+              if (confirm("Delete this memory? This cannot be undone.")) {
+                deleteStory.mutate(id);
+              }
             }}
-            density="comfortable"
           />
-        ) : (
-          <div className={`hw-grid-mem ${!isDesktop ? 'mobile-grid-2col' : ''}`}>
-            {processedStories.map((story) => {
-              const heroPhoto =
-                story.photos?.find((p) => p.isHero) || story.photos?.[0];
-              const photoUrl =
-                heroPhoto?.url || story.photoUrl || "/images/placeholder.jpg";
-              const photoTransform = heroPhoto?.transform;
-              const isPrivate =
-                !story.includeInTimeline && !story.includeInBook;
-
-              return (
-                <MemoryCardCompact
-                  key={story.id}
-                  id={story.id}
-                  imageUrl={photoUrl}
-                  photoTransform={photoTransform}
-                  title={story.title}
-                  year={story.storyYear || "—"}
-                  age={calculateAge(story.storyYear)}
-                  duration={formatDurationShort(story.durationSeconds)}
-                  isPrivate={isPrivate}
-                  isFavorite={story.isFavorite}
-                  inTimeline={story.includeInTimeline}
-                  inBook={story.includeInBook}
-                  onPlay={() => {
-                    if (story.audioUrl) {
-                      AudioManager.getInstance().play(story.id, story.audioUrl);
-                    }
-                  }}
-                  onEdit={() => handleOpenOverlay(story)}
-                  onToggleFavorite={() => handleToggleFavorite(story.id)}
-                  onDelete={() => {
-                    setStoryToDelete(story.id);
-                    setShowDeleteConfirm(true);
-                  }}
-                  onToggleTimeline={() => handleToggleTimeline(story.id)}
-                  onToggleBook={() => handleToggleBook(story.id)}
-                />
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-          {/* Export Section - Hidden until feature is ready */}
-          {/* <section className="px-3 pb-8" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
-            <Card className="p-6 bg-gradient-to-r from-gray-50 to-gray-100">
-              <h3 className="text-xl font-bold mb-4">Export Your Memories</h3>
-              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <Button
-                  variant="outline"
-                  className="h-20 flex-col"
-                  onClick={handleDownloadPdf}
-                  disabled={isExportingPdf}
-                >
-                  <Download className="w-6 h-6 mb-2" />
-                  <span>{isExportingPdf ? "Preparing PDF..." : "Download PDF"}</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col">
-                  <Printer className="w-6 h-6 mb-2" />
-                  <span>Print Stories</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col">
-                  <Archive className="w-6 h-6 mb-2" />
-                  <span>Backup All</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col">
-                  <Volume2 className="w-6 h-6 mb-2" />
-                  <span>Audio Collection</span>
-                </Button>
-              </div>
-            </Card>
-          </section> */}
         </main>
       </div>
 
@@ -779,7 +440,7 @@ export default function MemoryBoxPage() {
             updatedAt: undefined,
             wisdomClipAudio: undefined,
           }}
-          stories={processedStories.map((s) => ({
+          stories={stories.map((s) => ({
             id: s.id,
             title: s.title,
             transcription: s.transcription,
@@ -805,26 +466,6 @@ export default function MemoryBoxPage() {
         />
       )}
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showDeleteConfirm}
-        title="Delete Memory?"
-        message="Are you sure you want to delete this memory? This action cannot be undone."
-        confirmText="Yes, Delete"
-        cancelText="Keep Memory"
-        onConfirm={() => {
-          if (storyToDelete) {
-            deleteStory.mutate(storyToDelete);
-          }
-          setShowDeleteConfirm(false);
-          setStoryToDelete(null);
-        }}
-        onCancel={() => {
-          setShowDeleteConfirm(false);
-          setStoryToDelete(null);
-        }}
-        variant="danger"
-      />
     </div>
   );
 }
