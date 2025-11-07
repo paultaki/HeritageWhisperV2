@@ -1,49 +1,41 @@
 "use client";
 
+/**
+ * TimelineDesktopV2 - Premium Desktop Timeline Experience
+ *
+ * V2 Improvements:
+ * - Cleaner card design (no borders, softer shadows)
+ * - Better performance (optimized sticky positioning)
+ * - Smoother animations (reduced complexity)
+ * - Enhanced visual hierarchy
+ * - Better decade markers
+ * - Improved date badge positioning
+ */
+
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
-import { groupStoriesByDecade, type Story } from "@/lib/supabase";
+import { type Story } from "@/lib/supabase";
 import { getApiUrl } from "@/lib/config";
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
 import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
-import {
-  generateGhostPrompts,
-  mergeGhostPromptsWithStories,
-  type GhostPrompt,
-} from "@/lib/ghostPrompts";
-import {
-  generateNewUserGhostPrompts,
-  shouldShowNewUserGhosts,
-} from "@/lib/newUserGhostPrompts";
-import { GhostPromptCard } from "@/components/GhostPromptCard";
-import { NextStoryCard } from "@/components/NextStoryCard";
-import { PaywallPromptCard } from "@/components/PaywallPromptCard";
 import { MemoryOverlay } from "@/components/MemoryOverlay";
 import {
   Play,
   Plus,
-  Square,
   Calendar,
   Loader2,
-  AlertCircle,
   Pause,
-  X,
-  BookOpen,
-  Clock,
   Volume2,
 } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
 import { normalizeYear, formatYear } from "@/lib/utils";
-import StoryTraits from "@/components/StoryTraits";
-import { getTopTraits } from "@/utils/getTopTraits";
 import { useAccountContext } from "@/hooks/use-account-context";
-import { AccountSwitcher } from "@/components/AccountSwitcher";
 import { DesktopPageHeader } from "@/components/PageHeader";
 import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormatting";
 import { TimelineEnd } from "@/components/timeline/TimelineEnd";
@@ -51,19 +43,7 @@ import { TimelineNearEndNudge } from "@/components/timeline/TimelineNearEndNudge
 
 const logoUrl = "/Logo Icon hw.svg";
 
-// Timeline item helper type
-type TimelineItem = {
-  id: string;
-  type?: string;
-  year?: number;
-  title?: string;
-  subtitle?: string;
-  stories?: Array<any>;
-  storyCount?: number;
-  traits?: Array<{ name: string }>;
-};
-
-// V3: Subtle Decade Label Component - Museum Style
+// V2: Simplified Decade Label Component
 interface DecadeLabelProps {
   decade: string;
   isDark?: boolean;
@@ -73,40 +53,39 @@ function DecadeLabel({ decade, isDark = false }: DecadeLabelProps) {
   const decadeNum = decade.replace("s", "");
 
   return (
-    <div 
-      className="relative flex items-center justify-center md:-mt-[50px]"
+    <div
+      className="relative flex items-center justify-center -mt-[40px]"
       style={{
-        height: '60px',
-        marginBottom: '20px',
+        height: '80px',
+        marginBottom: '32px',
       }}
     >
-      {/* Subtle decade label positioned to the right of the timeline */}
       <div
         className="absolute z-0"
         style={{
           left: '50%',
-          transform: 'translateX(62px)', // Position to right of timeline line
-          opacity: isDark ? 0.4 : 0.45,
+          transform: 'translateX(calc(-50% - 163px))',
+          opacity: isDark ? 0.5 : 0.6,
         }}
       >
         <span
           style={{
-            fontSize: '12px',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontSize: '18px',
+            fontFamily: 'var(--font-serif)',
             fontWeight: 500,
-            letterSpacing: '0.5px',
-            color: isDark ? '#b0b3b8' : '#6b7280',
+            letterSpacing: '1px',
+            color: isDark ? '#b0b3b8' : '#1f0f08',
             textTransform: 'uppercase',
           }}
         >
-          {decadeNum}
+          {decadeNum}s
         </span>
       </div>
     </div>
   );
 }
 
-// Global audio manager to ensure only one audio plays at a time
+// Global audio manager
 class AudioManager {
   private static instance: AudioManager;
   private currentAudio: HTMLAudioElement | null = null;
@@ -177,22 +156,25 @@ class AudioManager {
 
 const audioManager = AudioManager.getInstance();
 
-interface CenteredMemoryCardProps {
+interface CenteredMemoryCardV2Props {
   story: Story;
   position: "left" | "right";
   index: number;
   isDark?: boolean;
-  showDecadeMarker?: boolean;
-  decadeLabel?: string;
   birthYear: number;
   onOpenOverlay?: (story: Story) => void;
-  useV2Features?: boolean;
 }
 
-function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear, onOpenOverlay, useV2Features = false }: CenteredMemoryCardProps) {
+function CenteredMemoryCardV2({
+  story,
+  position,
+  index,
+  isDark = false,
+  birthYear,
+  onOpenOverlay,
+}: CenteredMemoryCardV2Props) {
   const router = useRouter();
 
-  // Narrow story type for traits access
   const s = story as Story & { traits?: Array<{ name: string }> };
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -225,7 +207,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   const displayPhoto = getDisplayPhoto();
   const photoCount = story.photos?.length || (story.photoUrl ? 1 : 0);
 
-  // Derive a safe display age to avoid bad or missing metadata
   const normalizedStoryYear = normalizeYear(story.storyYear);
   const computedAge =
     typeof normalizedStoryYear === "number" && typeof birthYear === "number"
@@ -233,7 +214,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       : null;
   const displayLifeAge = (() => {
     if (typeof story.lifeAge === "number") {
-      // If metadata says pre-birth but the year is on/after birth year, trust computed
       if (computedAge !== null && story.lifeAge < 0 && normalizedStoryYear !== null && normalizedStoryYear >= birthYear) {
         return computedAge;
       }
@@ -242,7 +222,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
     return computedAge;
   })();
 
-  // Check for prefers-reduced-motion preference
+  // Check for prefers-reduced-motion
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setPrefersReducedMotion(mediaQuery.matches);
@@ -255,10 +235,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-  // Intersection Observer for scroll animation (respects reduced motion)
-  // Images load immediately (eager), but we only reveal them with animation when scrolling
+  // Intersection Observer for scroll animation
   useEffect(() => {
-    // Skip animations if user prefers reduced motion
     if (prefersReducedMotion) {
       setIsVisible(true);
       return;
@@ -273,8 +251,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         });
       },
       {
-        threshold: 0.05, // Trigger very early
-        rootMargin: "200px 0px 200px 0px", // Start revealing 200px before viewport (faster)
+        threshold: 0.05,
+        rootMargin: "200px 0px 200px 0px",
       }
     );
 
@@ -434,16 +412,14 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   }, [currentAudio]);
 
   const handleCardClick = () => {
-    // If overlay handler is provided, use it instead of navigation
     if (onOpenOverlay) {
       onOpenOverlay(story);
     } else {
-      // Fallback to original navigation behavior
       const navigationContext = {
         memoryId: story.id,
         scrollPosition: window.scrollY,
         timestamp: Date.now(),
-        returnPath: "/timeline",
+        returnPath: "/timeline-v2",
       };
       sessionStorage.setItem(
         "timeline-navigation-context",
@@ -461,9 +437,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
     }
   };
 
-  // Render function for card content - mobile style with white card below photo
+  // V2: Cleaner card rendering
   const renderCardContent = () => {
-    // If there's a photo, render with white card below (mobile style)
     if (displayPhoto?.url) {
       return (
         <div
@@ -472,17 +447,16 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           }`}
           onClick={handleCardClick}
           style={{
-            boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
-            border: '1.5px solid #B89B8D',
+            boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.06)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = '0 8px 20px -3px rgba(0, 0, 0, 0.2), 0 4px 9px -1px rgba(0, 0, 0, 0.15)';
+            e.currentTarget.style.boxShadow = '0 4px 12px -3px rgba(0, 0, 0, 0.12), 0 2px 5px -1px rgba(0, 0, 0, 0.08)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)';
+            e.currentTarget.style.boxShadow = '0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.06)';
           }}
         >
-          {/* Photo Section - 16:10 aspect ratio to match mobile, rounded top corners only */}
+          {/* Photo Section - 16:10 aspect ratio */}
           <div className="relative w-full aspect-[16/10] overflow-hidden">
             {displayPhoto.transform ? (
               <img
@@ -518,8 +492,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </div>
             )}
 
-            {/* Book-style audio button overlaid on photo (hidden in V2) */}
-            {story.audioUrl && !useV2Features && (
+            {/* V2: Audio button overlaid on photo */}
+            {story.audioUrl && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -530,7 +504,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 className="absolute right-4 bottom-4 hover:scale-105 transition-transform z-10"
               >
                 <svg className="w-11 h-11 -rotate-90">
-                  {/* Background ring */}
                   <circle
                     cx="22"
                     cy="22"
@@ -546,7 +519,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                     stroke="rgba(139,107,122,0.15)"
                     strokeWidth="2"
                   />
-                  {/* Progress ring */}
                   {isPlaying && (
                     <circle
                       cx="22"
@@ -562,7 +534,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                     />
                   )}
                 </svg>
-                {/* Icon in center */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   {isLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
@@ -576,14 +547,12 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             )}
           </div>
 
-          {/* White Card Section Below Photo */}
+          {/* White Card Section */}
           <div className="p-4 bg-white relative">
-            {/* Title */}
             <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
               {story.title}
             </h3>
 
-            {/* Metadata */}
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span>
                 {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
@@ -599,58 +568,12 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 </>
               )}
             </div>
-
-            {/* V2: Book-style circular audio button */}
-            {useV2Features && story.audioUrl && (
-              <button
-                onClick={handlePlayAudio}
-                className="absolute bottom-4 right-4 hover:scale-105 transition-transform"
-                aria-label={isPlaying ? "Pause audio" : "Play audio"}
-              >
-                <svg className="w-10 h-10 -rotate-90">
-                  {/* Background ring */}
-                  <circle
-                    cx="20"
-                    cy="20"
-                    r="16"
-                    fill="none"
-                    stroke="rgba(139,107,122,0.15)"
-                    strokeWidth="2"
-                  />
-                  {/* Progress ring */}
-                  {isPlaying && (
-                    <circle
-                      cx="20"
-                      cy="20"
-                      r="16"
-                      fill="none"
-                      stroke="rgba(139,107,122,0.5)"
-                      strokeWidth="2"
-                      strokeDasharray={`${2 * Math.PI * 16}`}
-                      strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
-                      strokeLinecap="round"
-                      className="transition-all duration-300"
-                    />
-                  )}
-                </svg>
-                {/* Icon in center */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
-                  ) : isPlaying ? (
-                    <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
-                  ) : (
-                    <Volume2 className="w-4 h-4 text-neutral-600" />
-                  )}
-                </div>
-              </button>
-            )}
           </div>
         </div>
       );
     }
-    
-    // No photo - render card with placeholder matching photo cards
+
+    // No photo - render placeholder
     return (
       <div
         className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer ${
@@ -658,17 +581,15 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         }`}
         onClick={handleCardClick}
         style={{
-          boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
-          border: '1.5px solid #B89B8D',
+          boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.06)',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = '0 16px 40px -6px rgba(0, 0, 0, 0.4), 0 8px 18px -3px rgba(0, 0, 0, 0.3)';
+          e.currentTarget.style.boxShadow = '0 4px 12px -3px rgba(0, 0, 0, 0.12), 0 2px 5px -1px rgba(0, 0, 0, 0.08)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)';
+          e.currentTarget.style.boxShadow = '0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.06)';
         }}
       >
-        {/* Placeholder Section - 16:10 aspect ratio to match mobile */}
         <div className="relative w-full aspect-[16/10] overflow-hidden">
           <div
             className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 flex items-center justify-center"
@@ -682,8 +603,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             </div>
           </div>
 
-          {/* Book-style audio button overlaid on placeholder (hidden in V2) */}
-          {story.audioUrl && !useV2Features && (
+          {story.audioUrl && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -694,7 +614,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               className="absolute right-4 bottom-4 hover:scale-105 transition-transform z-10"
             >
               <svg className="w-11 h-11 -rotate-90">
-                {/* Background ring */}
                 <circle
                   cx="22"
                   cy="22"
@@ -710,7 +629,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   stroke="rgba(139,107,122,0.15)"
                   strokeWidth="2"
                 />
-                {/* Progress ring */}
                 {isPlaying && (
                   <circle
                     cx="22"
@@ -726,7 +644,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   />
                 )}
               </svg>
-              {/* Icon in center */}
               <div className="absolute inset-0 flex items-center justify-center">
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
@@ -740,14 +657,11 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           )}
         </div>
 
-        {/* White Card Section Below Placeholder */}
         <div className="p-4 bg-white relative">
-          {/* Title */}
           <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
             {story.title}
           </h3>
 
-          {/* Metadata */}
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>
               {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
@@ -763,52 +677,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </>
             )}
           </div>
-
-          {/* V2: Book-style circular audio button */}
-          {useV2Features && story.audioUrl && (
-            <button
-              onClick={handlePlayAudio}
-              className="absolute bottom-4 right-4 hover:scale-105 transition-transform"
-              aria-label={isPlaying ? "Pause audio" : "Play audio"}
-            >
-              <svg className="w-10 h-10 -rotate-90">
-                {/* Background ring */}
-                <circle
-                  cx="20"
-                  cy="20"
-                  r="16"
-                  fill="none"
-                  stroke="rgba(139,107,122,0.15)"
-                  strokeWidth="2"
-                />
-                {/* Progress ring */}
-                {isPlaying && (
-                  <circle
-                    cx="20"
-                    cy="20"
-                    r="16"
-                    fill="none"
-                    stroke="rgba(139,107,122,0.5)"
-                    strokeWidth="2"
-                    strokeDasharray={`${2 * Math.PI * 16}`}
-                    strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
-                    strokeLinecap="round"
-                    className="transition-all duration-300"
-                  />
-                )}
-              </svg>
-              {/* Icon in center */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
-                ) : isPlaying ? (
-                  <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
-                ) : (
-                  <Volume2 className="w-4 h-4 text-neutral-600" />
-                )}
-              </div>
-            </button>
-          )}
         </div>
       </div>
     );
@@ -825,7 +693,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         pointerEvents: 'none',
       }}
     >
-      {/* Left side content (for left-positioned cards) - Desktop only */}
+      {/* Left side content */}
       <div className={`flex-1 flex ${position === "left" ? "justify-end lg:pr-6" : ""} hidden lg:flex`} style={{ pointerEvents: 'none' }}>
         {position === "left" && (
           <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
@@ -834,7 +702,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         )}
       </div>
 
-      {/* V3: Year marker - more visible now as primary date indicator */}
+      {/* V2: Improved year marker */}
       <div
         className="z-10 flex-shrink-0 timeline-dot transition-all duration-500"
         style={{
@@ -842,29 +710,27 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         }}
       >
         <div
-          className="py-0.5 px-2.5 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
+          className="py-1 px-3 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
           style={{
             backgroundColor: '#F9E5E8',
             border: `1px solid rgba(139, 107, 122, 0.2)`,
             color: '#6A4D58',
-            fontSize: '16px',
+            fontSize: '17px',
             fontWeight: 500,
             letterSpacing: '0.3px',
             opacity: 0.95,
-            boxShadow: '0 4px 10px -2px rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.09)',
-            borderRadius: '6px',
-            backdropFilter: 'blur(10px)',
-            position: 'relative',
-            top: '-22px',
+            boxShadow: '0 2px 6px -2px rgba(0, 0, 0, 0.1), 0 1px 3px -1px rgba(0, 0, 0, 0.08)',
+            borderRadius: '8px',
+            backdropFilter: 'blur(8px)',
           }}
         >
-          <span style={{ position: 'relative', top: '-2px' }}>
+          <span style={{ position: 'relative', top: '-1px' }}>
             {formatStoryDate(story.storyDate, story.storyYear, "year-only")}
           </span>
         </div>
       </div>
 
-      {/* Right side content (for right-positioned cards) - Desktop only */}
+      {/* Right side content */}
       <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`} style={{ pointerEvents: 'none' }}>
         {position === "right" && (
           <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
@@ -873,7 +739,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         )}
       </div>
 
-      {/* Mobile Card (shown on all small screens) */}
+      {/* Mobile Card */}
       <div className="lg:hidden w-full" style={{ pointerEvents: 'auto' }}>
         {renderCardContent()}
       </div>
@@ -881,7 +747,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   );
 }
 
-export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boolean } = {}) {
+export function TimelineDesktopV2() {
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
   const { toast } = useToast();
@@ -894,7 +760,6 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [overlayOpen, setOverlayOpen] = useState(false);
 
-  // V3: Get active storyteller context for family sharing
   const { activeContext } = useAccountContext();
   const storytellerId = activeContext?.storytellerId || user?.id;
 
@@ -903,7 +768,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     isLoading: isStoriesLoading,
     error: storiesError,
   } = useQuery({
-    queryKey: ["stories", storytellerId], // Include storytellerId in query key
+    queryKey: ["stories", storytellerId],
     queryFn: async () => {
       const url = storytellerId
         ? `${getApiUrl("/api/stories")}?storyteller_id=${storytellerId}`
@@ -912,32 +777,28 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
       return res.json();
     },
     enabled: !!user && !!storytellerId,
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
-    gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes even when unmounted
-    placeholderData: keepPreviousData, // Keep showing old data while refetching to prevent flash
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    placeholderData: keepPreviousData,
   });
 
-  // Restore scroll position when returning from book view
+  // Restore scroll position
   useEffect(() => {
-    // Check for return navigation context from BookView
     const contextStr = sessionStorage.getItem("timeline-navigation-context");
     if (contextStr) {
       try {
         const context = JSON.parse(contextStr);
-        const isExpired = Date.now() - context.timestamp > 5 * 60 * 1000; // 5 minutes expiry
+        const isExpired = Date.now() - context.timestamp > 5 * 60 * 1000;
 
         if (!isExpired && (context.returnPath === "/timeline-v2" || context.returnPath === "/timeline")) {
-          // Set the return highlight
           setReturnHighlightId(context.memoryId);
 
-          // Restore scroll position after a brief delay to ensure DOM is ready
           setTimeout(() => {
             window.scrollTo({
               top: context.scrollPosition,
               behavior: "instant",
             });
 
-            // Then apply smooth scroll to the specific card for visual feedback
             const memoryCard = document.querySelector(
               `[data-memory-id="${context.memoryId}"]`,
             );
@@ -949,15 +810,12 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             }
           }, 100);
 
-          // Clear the context after using it
           sessionStorage.removeItem("timeline-navigation-context");
 
-          // Remove highlight after animation
           setTimeout(() => {
             setReturnHighlightId(null);
           }, 3000);
         } else if (isExpired) {
-          // Clear expired context
           sessionStorage.removeItem("timeline-navigation-context");
         }
       } catch (e) {
@@ -982,10 +840,6 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
       const containerHeight = containerRect.height;
       const windowHeight = window.innerHeight;
 
-      // Calculate how far the viewport bottom has scrolled into the timeline
-      // When containerTop is positive (timeline below viewport), progress should be minimal
-      // When containerTop is negative (timeline scrolled up), progress grows
-      // When bottom of viewport reaches bottom of timeline, progress should be 100%
       const distanceIntoTimeline = windowHeight - containerTop;
       const scrollProgress = Math.max(
         0,
@@ -996,29 +850,27 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     };
 
     window.addEventListener("scroll", handleScroll);
-    handleScroll(); // Initial calculation
+    handleScroll();
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [storiesData]);
 
-  // Date bubble collision animation on scroll
+  // Date bubble collision animation
   useEffect(() => {
     if (!storiesData) return;
 
     const handleBubbleScroll = () => {
-      const stickyTop = 82; // Sticky position from top (aligned with header bottom edge, adjusted for badge offset)
-      const collisionThreshold = 10 as number; // Very small threshold - stay visible longer
+      const stickyTop = 62;
+      const collisionThreshold = 10 as number;
 
-      // Query all timeline-dot elements
       const bubbles = Array.from(document.querySelectorAll('.timeline-dot'));
-      
+
       bubbles.forEach((bubble, index) => {
         if (!(bubble instanceof HTMLElement)) return;
 
         const rect = bubble.getBoundingClientRect();
         const distanceFromTop = rect.top;
-        
-        // Check if there's a bubble below this one
+
         const nextBubble = bubbles[index + 1];
         let nextBubbleDistance = Infinity;
         if (nextBubble instanceof HTMLElement) {
@@ -1026,35 +878,27 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           nextBubbleDistance = nextRect.top;
         }
 
-        // Get the base translateX from inline styles (left cards: -12px, right cards: +12px)
         const baseTransform = bubble.style.transform || '';
         const translateXMatch = baseTransform.match(/translateX\(([^)]+)\)/);
         const translateX = translateXMatch ? translateXMatch[0] : '';
 
-        // This bubble is at or above sticky position
         if (distanceFromTop <= stickyTop) {
           bubble.classList.add('is-sticky');
-          
-          // Check if next bubble is approaching
+
           const proximityToNext = nextBubbleDistance - stickyTop;
 
-          // Fade logic - stay visible until next bubble is very close
           if (proximityToNext > 0) {
-            // Stay FULLY visible until next bubble touches sticky position
             bubble.style.opacity = '1';
             bubble.style.transform = `${translateX} scale(1)`;
-          } else if (proximityToNext > -23) {
-            // Fade out over the last 23px of overlap (holds until badges nearly touch)
-            const overlapProgress = Math.abs(proximityToNext) / 23;
+          } else if (proximityToNext > -65) {
+            const overlapProgress = Math.abs(proximityToNext) / 65;
             bubble.style.opacity = `${Math.max(0, 1 - overlapProgress)}`;
             bubble.style.transform = `${translateX} scale(${Math.max(0.9, 1 - (overlapProgress * 0.1))})`;
           } else {
-            // Fully faded when deep overlap
             bubble.style.opacity = '0';
             bubble.style.transform = `${translateX} scale(0.9)`;
           }
         } else {
-          // Bubble is below sticky position - normal state
           bubble.classList.remove('is-sticky');
           bubble.style.opacity = '1';
           bubble.style.transform = `${translateX} scale(1)`;
@@ -1063,21 +907,19 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     };
 
     window.addEventListener("scroll", handleBubbleScroll, { passive: true });
-    handleBubbleScroll(); // Initial calculation
+    handleBubbleScroll();
 
     return () => window.removeEventListener("scroll", handleBubbleScroll);
   }, [storiesData]);
 
-  // Single unified loading state - centered with timeline spine
   if (isLoading || !user || (isStoriesLoading && !storiesData)) {
-    // Redirect if no user
     if (!isLoading && !user) {
       router.push("/auth/login");
       return null;
     }
 
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3', transform: 'translateX(-337px)' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderBottomColor: isDark ? '#b0b3b8' : '#F59E0B' }}></div>
         <p className="text-lg" style={{ color: isDark ? '#b0b3b8' : '#6B4E42' }}>Loading your timeline...</p>
       </div>
@@ -1087,14 +929,12 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   const allStories = (storiesData as any)?.stories || [];
   const stories = allStories.filter((s: any) => s.includeInTimeline === true);
 
-  // Sort stories chronologically
   const sortedStories = [...stories].sort((a: any, b: any) => {
     const yearA = normalizeYear(a.storyYear);
     const yearB = normalizeYear(b.storyYear);
     return (yearA ?? 0) - (yearB ?? 0);
   });
 
-  // Group stories by decade for dividers
   const storiesByDecade = new Map<string, Story[]>();
   sortedStories.forEach((story: Story) => {
     const year = normalizeYear(story.storyYear);
@@ -1112,16 +952,15 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
       <div className="fixed top-0 left-0 right-0 z-50">
         <DesktopPageHeader
           icon={Calendar}
-          title="Timeline"
-          subtitle="A timeline of memories, moments, and milestones"
+          title="Timeline V2"
+          subtitle="Enhanced timeline experience"
           showAccountSwitcher={true}
         />
       </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-[114px] pb-12 md:pt-[114px] md:pb-20">
-        {/* Title Section */}
-        <div className="text-center mb-[114px]">
+        <div className="text-center mb-[114px]" style={{ transform: 'translateX(-225px)' }}>
           <h2 className="text-5xl md:text-7xl font-light tracking-tight mb-6" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>
             {activeContext?.storytellerName ? `${activeContext.storytellerName}'s Journey` : "Life's Journey"}
           </h2>
@@ -1130,22 +969,20 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           </p>
         </div>
 
-        {/* Timeline Container */}
         <div ref={timelineContainerRef} className="relative">
-          {/* V3: Subtle vertical timeline ruler - soft mauve for premium feel */}
+          {/* V2: Cleaner timeline spine */}
           <div
-            className="absolute left-1/2 md:w-[3.5px] w-[4px] rounded-full overflow-hidden pointer-events-none"
+            className="absolute left-1/2 md:w-[3px] w-[3px] rounded-full overflow-hidden pointer-events-none"
             style={{
-              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(196, 167, 183, 0.35)',
-              transform: 'translateX(-50%)',
+              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.3)' : 'rgba(196, 167, 183, 0.4)',
+              transform: 'translateX(calc(-50% - 225px))',
               top: '0',
               bottom: '500px',
-              opacity: 0.8,
-              boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
+              opacity: 0.85,
+              boxShadow: '0 2px 6px -2px rgba(0, 0, 0, 0.1), 0 1px 3px -1px rgba(0, 0, 0, 0.08)',
             }}
           />
 
-          {/* Timeline Steps */}
           <div className="flex flex-col gap-2 md:gap-0">
             {Array.from(storiesByDecade.entries())
               .sort(([decadeA], [decadeB]) => {
@@ -1154,32 +991,22 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                 return yearA - yearB;
               })
               .map(([decade, decadeStories], decadeIndex) => {
-                // Check if the first story falls on the decade year
                 const decadeYear = parseInt(decade.replace('s', ''));
                 const firstStoryYear = decadeStories[0] ? normalizeYear(decadeStories[0].storyYear) : null;
                 const firstStoryIsOnDecade = firstStoryYear === decadeYear;
                 const decadeLabel = decade.replace('s', '') + 's';
-                // Skip decade banner entirely for the first decade
                 const isFirstDecade = decadeIndex === 0;
-                
+
                 return (
                   <div key={decade}>
-                    {/* V3: Decade labels removed per user request */}
-                    
-                    {/* Stories in this decade */}
                     {decadeStories.map((story: Story, storyIndex: number) => {
-                      // Calculate global index for alternating left/right positioning
                       const globalIndex = sortedStories.findIndex(s => s.id === story.id);
-                      // V3: No decade markers on cards anymore
-                      const showDecadeMarker = false;
-                      
-                      // Only the very first story (first decade, first story) gets no negative margin
                       const isVeryFirstStory = decadeIndex === 0 && storyIndex === 0;
 
                       return (
                         <div
                           key={story.id}
-                          className={isVeryFirstStory ? "md:mt-0" : "md:-mt-[167px]"}
+                          className={isVeryFirstStory ? "md:mt-0" : "md:-mt-[147px]"}
                           data-memory-id={story.id}
                           style={{
                             transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',
@@ -1188,15 +1015,12 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                             padding: returnHighlightId === story.id ? '1rem' : '0',
                           }}
                         >
-                          <CenteredMemoryCard
+                          <CenteredMemoryCardV2
                             story={story}
                             position={globalIndex % 2 === 0 ? "left" : "right"}
                             index={globalIndex}
                             isDark={isDark}
-                            showDecadeMarker={showDecadeMarker}
-                            decadeLabel={showDecadeMarker ? decadeLabel : undefined}
                             birthYear={user?.birthYear || normalizeYear(user?.birthYear as any) || 0}
-                            useV2Features={useV2Features}
                           />
                         </div>
                       );
@@ -1218,7 +1042,6 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
               </div>
             )}
 
-            {/* Timeline End - Terminal node + CTA */}
             {sortedStories.length > 0 && (
               <TimelineEnd
                 isDark={isDark}
@@ -1232,33 +1055,29 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
         </div>
       </main>
 
-      {/* Near-end nudge */}
       {sortedStories.length > 0 && (
         <TimelineNearEndNudge
           onAddMemory={() => router.push("/review/book-style?new=true")}
         />
       )}
 
-      {/* Mode Selection Modal */}
       <ModeSelectionModal
         isOpen={modeSelection.isOpen}
         onClose={modeSelection.closeModal}
         onSelectQuickStory={modeSelection.openQuickRecorder}
       />
 
-      {/* Quick Story Recorder */}
       <QuickStoryRecorder
         isOpen={modeSelection.quickRecorderOpen}
         onClose={modeSelection.closeQuickRecorder}
       />
 
-      {/* Memory Overlay */}
       {selectedStory && (
         <MemoryOverlay
           story={selectedStory}
           stories={sortedStories}
           isOpen={overlayOpen}
-          originPath="/timeline"
+          originPath="/timeline-v2"
           onClose={() => {
             setOverlayOpen(false);
             setSelectedStory(null);
@@ -1272,35 +1091,31 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
         />
       )}
 
-      {/* Custom Styles */}
+      {/* V2: Cleaner connector line styles */}
       <style jsx global>{`
-        /* Connector lines from cards to timeline center */
         .timeline-step {
           position: relative;
         }
 
-        /* Connector line - horizontal stub from card to center timeline */
         @media (min-width: 768px) {
-          /* Shift timeline cards and decade banners 225px left on desktop/tablet */
           .timeline-step.translate-y-0 {
-            transform: translateY(0);
+            transform: translateX(-225px) translateY(0);
           }
 
           .timeline-step.translate-y-8 {
-            transform: translateY(2rem);
+            transform: translateX(-225px) translateY(2rem);
           }
 
           .decade-banner {
-            transform: none;
+            transform: translateX(-225px);
           }
-          /* Sticky date bubbles */
+
           .timeline-dot {
             position: sticky;
-            top: 82px;
+            top: 62px;
             z-index: 30;
-            /* No transitions - scroll handler provides smooth updates */
           }
-        
+
           .timeline-card-container {
             position: relative;
           }
@@ -1310,8 +1125,8 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 20px;
-            height: 3.5px;
+            width: 18px;
+            height: 3px;
             background: linear-gradient(
               to right,
               rgba(196, 167, 183, 0.3),
@@ -1320,14 +1135,13 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             border-radius: 1px;
             opacity: 1;
             pointer-events: none;
-            transition: all 150ms ease-out;
+            transition: all 120ms ease-out;
             z-index: 1;
-            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.06);
           }
 
-          /* Left-positioned cards - connector goes to the right */
           .timeline-step .justify-end .timeline-card-container::after {
-            right: -26px;
+            right: -24px;
             background: linear-gradient(
               to right,
               rgba(196, 167, 183, 0.5),
@@ -1335,9 +1149,8 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             );
           }
 
-          /* Right-positioned cards - connector goes to the left */
           .timeline-step .justify-start .timeline-card-container::after {
-            left: -26px;
+            left: -24px;
             background: linear-gradient(
               to left,
               rgba(196, 167, 183, 0.5),
@@ -1345,33 +1158,32 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             );
           }
 
-          /* Hover effect - extend and brighten */
           .timeline-step:hover .timeline-card-container::after {
-            width: 26px;
+            width: 24px;
             background: linear-gradient(
               to right,
-              rgba(196, 167, 183, 0.7),
-              rgba(196, 167, 183, 0.5)
+              rgba(196, 167, 183, 0.6),
+              rgba(196, 167, 183, 0.4)
             );
           }
 
           .timeline-step:hover .justify-end .timeline-card-container::after {
             background: linear-gradient(
               to right,
-              rgba(196, 167, 183, 0.7),
-              rgba(196, 167, 183, 0.5)
+              rgba(196, 167, 183, 0.6),
+              rgba(196, 167, 183, 0.4)
             );
           }
 
           .timeline-step:hover .justify-start .timeline-card-container::after {
             background: linear-gradient(
               to left,
-              rgba(196, 167, 183, 0.7),
-              rgba(196, 167, 183, 0.5)
+              rgba(196, 167, 183, 0.6),
+              rgba(196, 167, 183, 0.4)
             );
           }
         }
-        
+
         @media (max-width: 767px) {
           .timeline-step {
             opacity: 1 !important;
@@ -1385,14 +1197,13 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             opacity: 1 !important;
           }
         }
-        
+
         @media (prefers-reduced-motion: reduce) {
           .timeline-card-container::after {
             transition: none !important;
           }
         }
 
-        /* Dark theme connector line overrides - keep subtle gray for dark mode */
         .dark-theme .timeline-card-container::after {
           background: linear-gradient(
             to right,

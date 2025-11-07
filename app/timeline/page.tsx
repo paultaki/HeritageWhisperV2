@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { TimelineDesktop } from "@/components/timeline/TimelineDesktop";
 import { TimelineMobileV2 } from "@/components/timeline-v2/TimelineMobileV2";
 import { useEffect, useState } from "react";
-import { LeftSidebar } from "@/components/LeftSidebar";
 
 export default function TimelinePage() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -31,13 +30,11 @@ export default function TimelinePage() {
 
   return (
     <div
-      className="min-h-screen flex"
+      className="min-h-screen"
       style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}
     >
-      <LeftSidebar topOffsetClass="lg:top-[102px]" />
-
       {/* Main timeline content */}
-      <main className="flex-1 min-w-0 lg:ml-56">
+      <main className="flex-1 min-w-0">
         <TimelineDesktop useV2Features={true} />
       </main>
     </div>

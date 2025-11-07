@@ -546,11 +546,16 @@ Configured in `~/.mcp.json`:
 - **File:** `/app/styles/components.css` lines ~107-109 (`.hw-decade-band` margins)
 
 **Desktop Timeline - Year Badges:**
-- **Symptom:** Year badges along spine "unstick" too early with ~30px gap, cards flicker during transition
-- **Root Cause:** Insufficient negative margin on timeline cards - next badge doesn't get close enough before current releases
-- **Solution:** Increase negative margin from `-mt-[108px]` to `-mt-[147px]` on timeline card wrappers
-- **Additional fixes:** Update `stickyTop` to `62px`, remove forced `position: fixed` override, adjust fade timing
-- **File:** `/components/timeline/TimelineDesktop.tsx` line ~1117 (card wrapper className)
+- **Symptom:** Year badges along spine "unstick" too early with visible gap before next badge collides
+- **Root Cause:** Fade distance too large - badge starts fading before next badge gets close enough
+- **Solution:** Adjust fade distance in collision detection logic
+  - To make badges hold longer: DECREASE the fade distance number (e.g., -65px → -44px holds 21px longer)
+  - To make badges release earlier: INCREASE the fade distance number
+- **Key variables to adjust:**
+  - `stickyTop`: Currently 82px (updated from 62px when badges moved up 20px)
+  - Fade distance: Currently -44px in `proximityToNext > -44` check (line ~1046)
+  - CSS sticky position: `.timeline-dot { top: 82px }` must match `stickyTop` value
+- **File:** `/components/timeline/TimelineDesktop.tsx` lines ~1009 (stickyTop), ~1046 (fade distance), ~1299 (CSS)
 
 ## 🎯 Known Issues & Workarounds
 

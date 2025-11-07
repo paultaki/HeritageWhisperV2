@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Clock3, Pencil, Menu, ChevronLeft, ChevronRight, BookOpen, X, Play, Pause, ChevronDown } from "lucide-react";
+import { Pencil, Menu, ChevronLeft, ChevronRight, BookOpen, X, Play, Pause, ChevronDown } from "lucide-react";
 
 // Story interface matching your API structure
 interface Story {
@@ -175,14 +175,6 @@ export default function SimpleMobileBookView({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={onTimelineClick}
-            className="pointer-events-auto rounded-full bg-white/6 text-white p-2 backdrop-blur-sm ring-1 ring-white/10 active:scale-[0.98] transition flex items-center justify-center"
-            aria-label="Open timeline"
-            style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
-          >
-            <Clock3 className="w-5 h-5" />
-          </button>
           <button
             onClick={onEditClick}
             className="pointer-events-auto rounded-full bg-white/6 text-white p-2 backdrop-blur-sm ring-1 ring-white/10 active:scale-[0.98] transition flex items-center justify-center"

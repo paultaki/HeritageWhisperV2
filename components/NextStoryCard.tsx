@@ -117,16 +117,16 @@ export function NextStoryCard({ onRecordClick }: NextStoryCardProps) {
         setIsDismissed(true);
         return;
       }
-      
+
       // Mark as shown
       markPromptShown(prompt.id);
-      
+
       // Show sparkle animation if first prompt today
       const isFirst = isFirstPromptToday();
       setShowSparkle(isFirst);
-      
-      // Gentle slide-down animation
-      setTimeout(() => setIsVisible(true), 100);
+
+      // Show immediately - animation happens via CSS
+      setIsVisible(true);
     }
   }, [prompt?.id]);
 
@@ -189,19 +189,15 @@ export function NextStoryCard({ onRecordClick }: NextStoryCardProps) {
     }
   };
 
-  // Don't show if loading, no prompt, error, or dismissed
-  if (isLoading || !prompt || error || isDismissed) {
+  // Don't show if loading, no prompt, error, dismissed, OR not visible yet
+  if (isLoading || !prompt || error || isDismissed || !isVisible) {
     return null;
   }
 
   const greeting = getTimeAwareGreeting();
 
   return (
-    <div
-      className={`transition-all duration-400 ease-out ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"
-      }`}
-    >
+    <div className="transition-all duration-300 ease-out animate-in fade-in slide-in-from-top-2">
       <Card className="relative bg-gradient-to-br from-[#FFFBF0] to-[#FFF5E6] border border-[#E8D5C4] shadow-xl overflow-hidden">
         {/* Sparkle animation for first prompt of the day */}
         {showSparkle && (

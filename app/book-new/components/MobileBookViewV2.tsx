@@ -93,10 +93,11 @@ export default function MobileBookViewV2({
     return name.substring(0, 2).toUpperCase();
   }, [activeContext?.storytellerName]);
 
-  // Book title
+  // Book title (first name only)
   const bookTitle = useMemo(() => {
-    const name = activeContext?.storytellerName || "Your";
-    return `${name}'s Story`;
+    const fullName = activeContext?.storytellerName || "Your";
+    const firstName = fullName.split(" ")[0];
+    return `${firstName}'s Story`;
   }, [activeContext?.storytellerName]);
 
   // Scroll to specific page index

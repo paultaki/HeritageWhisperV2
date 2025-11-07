@@ -155,37 +155,33 @@ export function TimelineMobileV2() {
       />
 
       {/* Timeline Content */}
-      <main className="max-w-6xl mx-auto py-6 pb-24 md:pb-6 timeline-container">
+      <main className="max-w-6xl mx-auto pt-0 pb-24 md:pb-6 timeline-container">
         {/* Paywall Prompt */}
         {user?.freeStoriesUsed === 3 &&
           user?.subscriptionStatus !== "active" && (
-            <div className="mb-8">
-              <PaywallPromptCard
-                onSubscribe={() => {
-                  toast({
-                    title: "Coming soon!",
-                    description: "Stripe integration will be added soon.",
-                  });
-                }}
-                onDismiss={() => {}}
-              />
-            </div>
+            <PaywallPromptCard
+              onSubscribe={() => {
+                toast({
+                  title: "Coming soon!",
+                  description: "Stripe integration will be added soon.",
+                });
+              }}
+              onDismiss={() => {}}
+            />
           )}
 
         {/* Next Story Prompt */}
         {!(
           user?.freeStoriesUsed === 3 && user?.subscriptionStatus !== "active"
         ) && (
-          <div className="mb-8">
-            <NextStoryCard
-              onRecordClick={(promptId) => {
-                router.push("/review/book-style?new=true");
-                if (promptId) {
-                  sessionStorage.setItem("activePromptId", promptId);
-                }
-              }}
-            />
-          </div>
+          <NextStoryCard
+            onRecordClick={(promptId) => {
+              router.push("/review/book-style?new=true");
+              if (promptId) {
+                sessionStorage.setItem("activePromptId", promptId);
+              }
+            }}
+          />
         )}
 
         <div className="hw-layout">

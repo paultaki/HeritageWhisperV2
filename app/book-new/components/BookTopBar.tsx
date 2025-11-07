@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock3, Pencil, Menu } from "lucide-react";
+import { Pencil, Menu } from "lucide-react";
 import { BookTopBarProps } from "./types";
 
 export default function BookTopBar({
@@ -29,15 +29,6 @@ export default function BookTopBar({
 
       {/* Right side: Action buttons */}
       <div className="flex items-center gap-2">
-        {/* Timeline button */}
-        <button
-          onClick={onTimelineClick}
-          className="pointer-events-auto grid h-9 w-9 place-items-center rounded-full bg-white/6 text-white backdrop-blur-sm ring-1 ring-white/10 transition active:scale-[0.98]"
-          aria-label="Open timeline"
-        >
-          <Clock3 className="h-5 w-5" style={{ marginLeft: '1px' }} />
-        </button>
-
         {/* Edit button */}
         <button
           onClick={onEditClick}

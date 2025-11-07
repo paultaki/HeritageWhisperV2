@@ -131,7 +131,7 @@ export function MobilePageHeader({
 }: Omit<PageHeaderProps, 'showAccountSwitcher'>): ReactElement {
   return (
     <header
-      className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b"
+      className="md:hidden static bg-white border-b"
       role="banner"
       style={{ height: '52px' }}
     >
