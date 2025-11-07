@@ -737,6 +737,7 @@ export function MultiPhotoUploader({
                   variant="outline"
                   onClick={() => setSelectedPhotoIndex(null)}
                   disabled={disabled || loading}
+                  className="flex-1"
                   style={{ minHeight: '48px' }}
                   data-testid="button-cancel-transform"
                 >

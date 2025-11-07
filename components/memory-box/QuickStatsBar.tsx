@@ -25,35 +25,35 @@ export function QuickStatsBar({ storiesCount, totalHours, treasuresCount }: Prop
   };
 
   return (
-    <div className="bg-gradient-to-r from-heritage-brown/10 to-heritage-coral/10 rounded-xl p-4 mb-6">
-      <div className="flex items-center justify-center gap-8 flex-wrap">
+    <div className="bg-gradient-to-r from-heritage-brown/10 to-heritage-coral/10 rounded-xl p-3 md:p-4 mb-6">
+      <div className="flex items-center justify-center gap-3 md:gap-8">
         <div className="text-center">
-          <div className="text-3xl md:text-4xl font-bold text-heritage-brown">
+          <div className="text-2xl md:text-4xl font-bold text-heritage-brown">
             {storiesCount}
           </div>
-          <div className="text-sm md:text-base text-gray-700 font-medium">
+          <div className="text-xs md:text-base text-gray-700 font-medium">
             {storiesCount === 1 ? "Story" : "Stories"}
           </div>
         </div>
 
-        <div className="text-2xl text-gray-300">•</div>
+        <div className="text-xl md:text-2xl text-gray-300">•</div>
 
         <div className="text-center">
-          <div className="text-3xl md:text-4xl font-bold text-heritage-coral">
+          <div className="text-2xl md:text-4xl font-bold text-heritage-coral">
             {formatHours(totalHours)}
           </div>
-          <div className="text-sm md:text-base text-gray-700 font-medium">
+          <div className="text-xs md:text-base text-gray-700 font-medium">
             Recorded
           </div>
         </div>
 
-        <div className="text-2xl text-gray-300">•</div>
+        <div className="text-xl md:text-2xl text-gray-300">•</div>
 
         <div className="text-center">
-          <div className="text-3xl md:text-4xl font-bold text-heritage-brown">
+          <div className="text-2xl md:text-4xl font-bold text-heritage-brown">
             {treasuresCount}
           </div>
-          <div className="text-sm md:text-base text-gray-700 font-medium">
+          <div className="text-xs md:text-base text-gray-700 font-medium">
             {treasuresCount === 1 ? "Treasure" : "Treasures"}
           </div>
         </div>
