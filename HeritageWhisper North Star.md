@@ -81,34 +81,38 @@ Not for features. For peace of mind that stories won't die with them.
 
 Product Decisions Framework
 Every decision passes three gates:
-Does it reduce friction?
-Can grandma do this without help?
-Does it work in 2 minutes or less?
-Does it preserve what matters?
-Photo + Voice + Date
-Nothing else is required
-Will grandchildren care?
-In 2060, will this matter?
-Can they access it easily?
+1. Does it reduce friction?
+    Can grandma do this without help?
+    Does it work in 2 minutes or less?
+2. Does it preserve what matters?
+    Photo + Voice + Date
+    Nothing else is required
+3. Will grandchildren care?
+    In 2060, will this matter?
+    Can they access it easily?
+
 The Opportunity
 By the numbers:
-75 million Baby Boomers with photo albums
-Average family has 10-20 albums
-200-500 photos per album
-5,000 photos × 75M families = 375 billion stories at risk
+    75 million Baby Boomers with photo albums
+    Average family has 10-20 albums
+    200-500 photos per album
+    5,000 photos × 75M families = 375 billion stories at risk
 The urgency:
-10,000 Boomers turn 65 daily
-Average life expectancy: 78 years
-Window closing: 10-15 years
+    10,000 Boomers turn 65 daily
+    Average life expectancy: 78 years
+    Window closing: 10-15 years
+
 Our Advantages
-First mover in photo-triggered audio memories
-Simplicity over features (2-minute capture)
-Voice preservation (not just text)
-Timeline visualization (see your family history)
-No competition (others chase book printing)
+1 First mover in photo-triggered audio memories
+2 Simplicity over features (2-minute capture)
+3 Voice preservation (not just text)
+4 Timeline visualization (see your family history)
+5 No competition (others chase book printing)
+
 What Success Looks Like
 Year 1: 1,000 families preserve 50,000 photo stories Year 3: 50,000 families preserve 2.5M photo stories Year 5: 500,000 families preserve 25M photo stories
 Ultimate Success: A grandchild in 2060 hears their grandmother's voice explaining who's in a photo from 1955.
+
 The Daily Question
 "Does this help someone save a photo's story before it's too late?"
 If yes, build it fast. If no, ignore it completely.
