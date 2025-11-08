@@ -117,7 +117,14 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
                 active ? "text-black" : "text-black/75"
               )}
             >
-              {label}
+              {label.startsWith('+') ? (
+                <>
+                  <span className="text-[16px] font-bold">{label.charAt(0)}</span>
+                  {label.slice(1)}
+                </>
+              ) : (
+                label
+              )}
               {active && (
                 <i className="absolute left-1/2 -translate-x-1/2 -bottom-[2px] block w-5 h-[2px] rounded-full bg-black/70" />
               )}

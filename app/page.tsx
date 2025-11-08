@@ -110,9 +110,9 @@ export default function HomePage() {
             <div className="text-center lg:text-left space-y-8">
               <div className="space-y-4">
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#2d2520] leading-tight">
-                  Your Family&apos;s Story,{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8b6b7a] via-[#9d6b7c] to-[#b88b94]">
-                    Alive and Ever-Growing
+                  Welcome to{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-white/90 to-rose-300">
+                    Heritage Whisper
                   </span>
                 </h1>
               </div>

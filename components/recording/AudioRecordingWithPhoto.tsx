@@ -6,6 +6,7 @@ import { Pause, Play } from "lucide-react";
 
 type AudioRecordingWithPhotoProps = {
   photoDataURL: string | null;
+  photoTransform?: { zoom: number; position: { x: number; y: number } };
   onComplete: (audioBlob: Blob, duration: number, data?: {
     transcription: string;
     title: string;
@@ -20,6 +21,7 @@ type AudioRecordingWithPhotoProps = {
 
 export function AudioRecordingWithPhoto({
   photoDataURL,
+  photoTransform,
   onComplete,
   onCancel
 }: AudioRecordingWithPhotoProps) {
@@ -49,8 +51,24 @@ export function AudioRecordingWithPhoto({
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('[AudioRecording] Requesting microphone with echo cancellation...');
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        }
+      });
       streamRef.current = stream;
+
+      // Log audio settings
+      const audioTrack = stream.getAudioTracks()[0];
+      const settings = audioTrack.getSettings();
+      console.log('[AudioRecording] Audio track settings:', {
+        echoCancellation: settings.echoCancellation,
+        noiseSuppression: settings.noiseSuppression,
+        autoGainControl: settings.autoGainControl,
+      });
 
       // Setup MediaRecorder
       const mediaRecorder = new MediaRecorder(stream);
@@ -77,13 +95,28 @@ export function AudioRecordingWithPhoto({
           const formData = new FormData();
           formData.append('audio', audioBlob);
 
+          console.log('[AudioRecording] Sending audio to transcribe API, blob size:', audioBlob.size);
+
           const response = await fetch('/api/transcribe', {
             method: 'POST',
             body: formData,
           });
 
+          console.log('[AudioRecording] Transcribe API response status:', response.status);
+
           if (response.ok) {
             const data = await response.json();
+            console.log('[AudioRecording] ========== TRANSCRIBE API SUCCESS ==========');
+            console.log('[AudioRecording] Response data:', {
+              hasTranscription: !!data.transcription,
+              transcriptionLength: data.transcription?.length,
+              transcriptionPreview: data.transcription?.substring(0, 100),
+              title: data.title,
+              hasLessonOptions: !!data.lessonOptions,
+              lessonOptions: data.lessonOptions,
+            });
+            console.log('[AudioRecording] Full API response:', data);
+
             // Pass all AI-generated data to parent
             onComplete(audioBlob, duration, {
               transcription: data.transcription || '',
@@ -96,7 +129,8 @@ export function AudioRecordingWithPhoto({
             });
           } else {
             // Fallback if transcription fails
-            console.error('Transcription failed:', response.statusText);
+            const errorText = await response.text();
+            console.error('Transcription failed:', response.statusText, errorText);
             onComplete(audioBlob, duration);
           }
         } catch (error) {
@@ -278,30 +312,47 @@ export function AudioRecordingWithPhoto({
 
   return (
     <section className="h-screen bg-black flex flex-col">
-      {/* Top 40% Photo */}
-      <div className="h-[40%] relative">
-        {photoDataURL ? (
-          <img
-            src={photoDataURL}
-            className="w-full h-full object-contain bg-black"
-            alt="Selected Photo"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-            <p className="text-white/50">No photo selected</p>
-          </div>
-        )}
-      </div>
-
-      {/* Bottom 60% Recording UI or Processing Spinner */}
-      {isProcessing ? (
-        <div className="h-[60%] bg-white rounded-t-3xl flex flex-col items-center justify-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
-          <p className="text-lg text-gray-900 font-medium">Processing your memory...</p>
-          <p className="text-sm text-gray-600 mt-2">Creating transcription and suggestions</p>
+        {/* Top 40% Photo */}
+        <div className="h-[40%] relative overflow-hidden">
+          {photoDataURL ? (
+            <div className="w-full h-full relative bg-black">
+              <img
+                src={photoDataURL}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={photoTransform ? {
+                  transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x}%, ${photoTransform.position.y}%)`,
+                  transformOrigin: 'center center',
+                } : undefined}
+                alt="Selected Photo"
+              />
+            </div>
+          ) : (
+            <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+              <p className="text-white/50">No photo selected</p>
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="h-[60%] bg-white rounded-t-3xl p-6 pt-5 flex flex-col">
+
+        {/* Bottom 60% Recording UI or Processing Spinner */}
+        {isProcessing ? (
+          <div className="h-[60%] bg-white rounded-t-3xl flex flex-col items-center justify-center">
+            <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-[36px] text-gray-900 font-medium">Processing your memory...</p>
+            <p className="text-[28px] text-gray-600 mt-2">Creating transcription and suggestions</p>
+          </div>
+        ) : (
+          <div className="h-[60%] bg-white rounded-t-3xl p-6 pt-5 flex flex-col relative">
+          {/* Cancel button - top right */}
+          <button
+            onClick={onCancel}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Cancel"
+          >
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
           {/* Timer and state */}
           <div className="text-center">
             <div className={`text-6xl font-light tabular-nums leading-none ${isVeryNearEnd ? 'text-red-600' : ''}`}>
@@ -337,7 +388,7 @@ export function AudioRecordingWithPhoto({
         <div className="mt-6 flex items-center justify-center">
           <button
             onClick={handlePauseResume}
-            className="h-28 w-28 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:bg-red-600 active:scale-95 transition outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            className="h-28 w-28 min-h-[7rem] min-w-[7rem] rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:bg-red-600 active:scale-95 transition outline-none focus-visible:ring-2 focus-visible:ring-red-500 touch-none"
             aria-label={isPaused ? 'Resume' : 'Pause'}
           >
             {isPaused ? <Play className="w-14 h-14" /> : <Pause className="w-14 h-14" />}
@@ -358,8 +409,8 @@ export function AudioRecordingWithPhoto({
               Stop & Save
             </Button>
           </div>
-        </div>
-      )}
-    </section>
+          </div>
+        )}
+      </section>
   );
 }

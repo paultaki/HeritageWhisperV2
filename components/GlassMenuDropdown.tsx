@@ -99,7 +99,7 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
 
   const menuItems = [
     { icon: Home, label: "Home", href: "/" },
-    { icon: Box, label: "Memory Box", href: "/memory-box-v2" },
+    { icon: Box, label: "Memory Box", href: "/memory-box" },
     { icon: Lightbulb, label: "Story Ideas", href: "/prompts" },
     { icon: Users, label: "Family", href: "/family" },
     { icon: Settings, label: "Settings", href: "/profile" },

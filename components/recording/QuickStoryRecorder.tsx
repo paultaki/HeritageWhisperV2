@@ -2,6 +2,7 @@
 
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { AmbientSpotlight } from "@/components/ui/ambient-spotlight";
 import { Mic, Pause, Play, Square, RotateCcw, X, Loader2, PenTool, Upload, Check } from "lucide-react";
 import { useQuickRecorder } from "@/hooks/use-quick-recorder";
 import { motion, AnimatePresence } from "framer-motion";
@@ -593,19 +594,26 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
 
             {/* Recording & Paused State */}
             {(state === "recording" || state === "paused") && (
-              <motion.div
-                key="recording"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="px-6"
+              <AmbientSpotlight
+                size={500}
+                intensity={0.35}
+                color="rgba(124, 101, 105, 0.12)"
+                animationSpeed={12000}
+                className="rounded-2xl"
               >
-                {/* Whisper Capture title centered below logo */}
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-semibold text-[#322B27]">
-                    Whisper Capture
-                  </h3>
-                </div>
+                <motion.div
+                  key="recording"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="px-6"
+                >
+                  {/* Whisper Capture title centered below logo */}
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-semibold text-[#322B27]">
+                      Whisper Capture
+                    </h3>
+                  </div>
 
                 {/* Timer and status badges */}
                 <div className="mb-6 flex items-center justify-center gap-3">
@@ -713,7 +721,8 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 <p className="mt-3 text-xs text-center text-[#99898C]">
                   Tip: For best results, speak clearly and minimize background noise
                 </p>
-              </motion.div>
+                </motion.div>
+              </AmbientSpotlight>
             )}
 
             {/* Audio Review Screen */}

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { AmbientSpotlight } from "@/components/ui/ambient-spotlight";
 import { AudioRecorder, AudioRecorderHandle } from "@/components/AudioRecorder";
 import { VoiceRecordingButton } from "@/components/VoiceRecordingButton";
 import { Sparkles, Square, Play, Pause, Mic, Settings } from "lucide-react";
@@ -92,13 +93,20 @@ export function RecordingScreen(props: RecordingScreenProps) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
+    <AmbientSpotlight
+      size={500}
+      intensity={0.4}
+      color="rgba(251, 146, 60, 0.12)"
+      animationSpeed={10000}
+      className="rounded-2xl"
     >
-      {/* Prompt at top - or Follow-up Questions */}
       <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        {/* Prompt at top - or Follow-up Questions */}
+        <motion.div
         key={props.followUpQuestions.length > 0 ? `followup-${props.currentFollowUpIndex}` : 'original-prompt'}
         initial={{ backgroundColor: 'rgba(251, 146, 60, 0.1)' }}
         animate={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
@@ -333,6 +341,7 @@ export function RecordingScreen(props: RecordingScreenProps) {
           </ul>
         </div>
       )}
-    </motion.div>
+      </motion.div>
+    </AmbientSpotlight>
   );
 }

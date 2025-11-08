@@ -182,7 +182,7 @@ export function useRecordingWizard({
         year: data.year,
         transcription: data.useEnhanced ? data.enhancedTranscript : data.originalTranscript,
         audioUrl,
-        durationSeconds: data.recording.duration || 30, // Changed from 'duration' to 'durationSeconds' with fallback
+        durationSeconds: data.recording.duration || 1, // Minimum 1 second (database constraint requires 1-120)
         wisdomClipText: data.lessonLearned?.trim() || "",
         photos: photoUploads,
         metadata: {

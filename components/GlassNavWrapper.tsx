@@ -44,7 +44,7 @@ export default function GlassNavWrapper() {
     },
     {
       key: 'memory',
-      label: 'Memory',
+      label: '+Memory',
       href: '/recording-photo-first',
       Icon: Mic,
     },

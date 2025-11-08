@@ -339,13 +339,22 @@ function StoryPage({
             )}
 
             {/* Story Content */}
-            <div className="mt-5 space-y-4 text-[17px] leading-8 text-stone-800">
+            <div className="mt-5 space-y-4 text-[19px] leading-8 text-stone-800">
               {story.formattedContent?.formattedText ? (
                 <div dangerouslySetInnerHTML={{ __html: story.formattedContent.formattedText }} />
               ) : story.transcription ? (
                 story.transcription.split("\n").map((para, idx) => para.trim() && <p key={idx}>{para}</p>)
               ) : null}
             </div>
+
+            {/* Lesson Learned */}
+            {story.wisdomClipText && (
+              <div className="mt-6 border-l-4 border-[#D4A574] pl-4 py-2">
+                <p className="text-[18px] leading-7 text-stone-700 italic">
+                  {story.wisdomClipText}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Fade and Continue hint */}

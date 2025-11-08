@@ -50,6 +50,15 @@ export default function PhotoFirstRecordingPage() {
       character: string;
     };
   }) => {
+    console.log('[PhotoFirst] Recording complete, received data:', {
+      hasData: !!data,
+      transcription: data?.transcription?.substring(0, 50),
+      title: data?.title,
+      hasLessonOptions: !!data?.lessonOptions,
+      duration,
+      blobSize: blob.size
+    });
+
     // Skip the PhotoFirstReview screen and go directly to book-style review
     if (data) {
       // Convert audio blob to base64 for NavCache
@@ -85,11 +94,34 @@ export default function PhotoFirstRecordingPage() {
           returnPath: '/timeline',
         };
 
+        console.log('[PhotoFirst] ========== STORING IN NAVCACHE ==========');
+        console.log('[PhotoFirst] NavCache data:', {
+          navId,
+          title: cacheData.title,
+          transcriptionLength: cacheData.transcription?.length,
+          transcriptionPreview: cacheData.transcription?.substring(0, 100),
+          hasPhotos: !!cacheData.photos,
+          photoCount: cacheData.photos?.length,
+          hasLessonLearned: !!cacheData.lessonLearned,
+          lessonPreview: cacheData.lessonLearned?.substring(0, 50),
+        });
+
         // Store in NavCache
         navCache.set(navId, cacheData);
 
-        // Navigate directly to book-style review
-        router.push(`/review/book-style?nav=${navId}&mode=edit`);
+        // Verify it was stored
+        const verify = navCache.get(navId);
+        console.log('[PhotoFirst] Verification - data retrieved:', {
+          found: !!verify,
+          hasTranscription: !!verify?.transcription,
+          hasTitle: !!verify?.title,
+        });
+
+        // Small delay to ensure cache is written, then navigate
+        setTimeout(() => {
+          console.log('[PhotoFirst] Navigating to book-style review...');
+          router.push(`/review/book-style?nav=${navId}&mode=edit`);
+        }, 50);
       };
 
       reader.onerror = () => {
@@ -267,6 +299,7 @@ export default function PhotoFirstRecordingPage() {
         {currentScreen === 'recording' && (
           <AudioRecordingWithPhoto
             photoDataURL={photoDataURL}
+            photoTransform={photoTransform}
             onComplete={handleRecordingComplete}
             onCancel={handleCancelRecording}
           />

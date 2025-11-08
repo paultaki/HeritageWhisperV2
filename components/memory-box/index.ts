@@ -9,3 +9,5 @@ export { MemoryBoxTabs } from "./MemoryBoxTabs";
 export { StoryFilters } from "./StoryFilters";
 export { StoryCard } from "./StoryCard";
 export { TreasureGrid } from "./TreasureGrid";
+export { TreasureCard } from "./TreasureCard";
+export { AddTreasureModal } from "./AddTreasureModal";

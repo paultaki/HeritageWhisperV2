@@ -210,6 +210,26 @@ export const stories = pgTable("stories", {
   createdAt: timestamp("created_at").default(sql`NOW()`),
 });
 
+// Treasures table for visual keepsakes without stories
+export const treasures = pgTable("treasures", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  category: text("category").notNull(), // 'photos', 'documents', 'heirlooms', 'places', 'recipes', 'memorabilia'
+  year: integer("year"),
+  imageUrl: text("image_url").notNull(),
+  thumbnailUrl: text("thumbnail_url"),
+  isFavorite: boolean("is_favorite").default(false).notNull(),
+  linkedStoryId: uuid("linked_story_id").references(() => stories.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").default(sql`NOW()`),
+  updatedAt: timestamp("updated_at").default(sql`NOW()`),
+});
+
 export const followUps = pgTable("follow_ups", {
   id: uuid("id")
     .primaryKey()
@@ -437,6 +457,12 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export const insertStorySchema = createInsertSchema(stories).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertTreasureSchema = createInsertSchema(treasures).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertFollowUpSchema = createInsertSchema(followUps).omit({
@@ -771,6 +797,8 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStory = z.infer<typeof insertStorySchema>;
 export type Story = typeof stories.$inferSelect;
+export type InsertTreasure = z.infer<typeof insertTreasureSchema>;
+export type Treasure = typeof treasures.$inferSelect;
 export type InsertFollowUp = z.infer<typeof insertFollowUpSchema>;
 export type FollowUp = typeof followUps.$inferSelect;
 export type InsertGhostPrompt = z.infer<typeof insertGhostPromptSchema>;

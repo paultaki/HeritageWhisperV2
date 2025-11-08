@@ -101,7 +101,7 @@ export function StoryCard({
 
   return (
     <>
-      <article className="bg-white rounded-xl border-2 border-gray-200 hover:shadow-xl transition-all duration-200 overflow-hidden">
+      <article className="bg-white rounded-xl border-2 border-gray-200 hover:shadow-xl transition-all duration-200 overflow-hidden flex flex-col">
         {/* Compact Thumbnail with StatusIcons */}
         <div
           className="relative overflow-hidden cursor-pointer"
@@ -144,9 +144,9 @@ export function StoryCard({
         </div>
 
         {/* Card Content */}
-        <div className="p-4">
+        <div className="p-4 flex flex-col flex-1">
           {/* Title and Year - Compact */}
-          <div className="mb-3">
+          <div className="mb-3 flex-1">
             <h3 className="text-base font-bold text-gray-900 mb-1 line-clamp-2">
               {title}
             </h3>
@@ -165,7 +165,7 @@ export function StoryCard({
           </div>
 
           {/* Quick Actions + Dropdown - All Visible */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-auto">
             {/* Listen button - Quick action */}
             {onPlay && durationSeconds > 0 && (
               <button

@@ -36,6 +36,12 @@ type NavPayloadExtended = {
   rawTranscript?: string;
   qaPairs?: any;
   enhancedTranscript?: string;
+  photos?: StoryPhoto[];
+  lessonOptions?: {
+    practical?: string;
+    emotional?: string;
+    character?: string;
+  };
   [k: string]: unknown;
 };
 
@@ -211,11 +217,13 @@ function BookStyleReviewContent() {
 
           // For edit mode coming from transcription selection, use the selected transcript
           if (mode === "edit") {
-            const selectedTranscript = cachedData.useEnhanced 
-              ? (cachedData.enhancedTranscript || cachedData.originalTranscript || "")
-              : (cachedData.originalTranscript || "");
-            
+            const selectedTranscript = cachedData.useEnhanced
+              ? (cachedData.enhancedTranscript || cachedData.originalTranscript || cachedData.transcription || "")
+              : (cachedData.originalTranscript || cachedData.transcription || "");
+
             console.log("[Review] Edit mode - using", cachedData.useEnhanced ? "enhanced" : "original", "transcript");
+            console.log("[Review] Selected transcript length:", selectedTranscript?.length);
+            console.log("[Review] Selected transcript preview:", selectedTranscript?.substring(0, 100));
             setTranscription(selectedTranscript);
 
             // Load audio blob if available
@@ -234,13 +242,35 @@ function BookStyleReviewContent() {
               console.log("[Review] Audio duration from cache:", cachedData.duration, "seconds");
             }
 
+            // Load photos if available
+            if (cachedData.photos && Array.isArray(cachedData.photos)) {
+              console.log("[Review] Loading photos from cache:", cachedData.photos);
+              setPhotos(cachedData.photos);
+            }
+
             // Load lesson options if available
-            if (cachedData.lessonOptions?.practical) {
+            if (cachedData.lessonLearned) {
+              console.log("[Review] Loading lessonLearned from cache:", cachedData.lessonLearned);
+              setWisdomText(cachedData.lessonLearned);
+            } else if (cachedData.lessonOptions?.practical) {
+              console.log("[Review] Loading lessonOptions.practical from cache:", cachedData.lessonOptions.practical);
               setWisdomText(cachedData.lessonOptions.practical);
+            } else if (cachedData.wisdomClipText) {
+              console.log("[Review] Loading wisdomClipText from cache:", cachedData.wisdomClipText);
+              setWisdomText(cachedData.wisdomClipText);
+            }
+
+            // Load title if available
+            if (cachedData.title) {
+              console.log("[Review] Loading title from cache:", cachedData.title);
+              setTitle(cachedData.title);
             }
 
             // Consume the cache now that we've loaded it
             navCache.consume(navId);
+
+            // Skip further audio/wisdom processing since we handled it above
+            return;
           } else if (cachedData.transcription) {
             // Legacy support for old flow
             setTranscription(cachedData.transcription);
@@ -408,6 +438,39 @@ function BookStyleReviewContent() {
         );
         console.log("Has audio blob:", !!hasNewAudio);
 
+        // Calculate actual audio duration from blob if needed
+        let actualDuration = audioDuration;
+        if (hasNewAudio && mainAudioBlob && (!actualDuration || actualDuration < 1)) {
+          console.log("Calculating audio duration from blob...");
+          try {
+            const audioBlobUrl = URL.createObjectURL(mainAudioBlob);
+            const audio = new Audio(audioBlobUrl);
+
+            // Wait for metadata to load to get duration
+            await new Promise((resolve, reject) => {
+              audio.addEventListener('loadedmetadata', () => {
+                actualDuration = Math.round(audio.duration);
+                console.log("Calculated audio duration:", actualDuration, "seconds");
+                URL.revokeObjectURL(audioBlobUrl);
+                resolve(actualDuration);
+              });
+              audio.addEventListener('error', (e) => {
+                console.error("Failed to load audio metadata:", e);
+                URL.revokeObjectURL(audioBlobUrl);
+                reject(e);
+              });
+              // Timeout after 5 seconds
+              setTimeout(() => {
+                URL.revokeObjectURL(audioBlobUrl);
+                reject(new Error("Audio metadata loading timeout"));
+              }, 5000);
+            });
+          } catch (err) {
+            console.error("Error calculating audio duration:", err);
+            // Keep the original audioDuration value or default to 0
+          }
+        }
+
         // Construct storyDate if we have year, month, and day
         let storyDate: string | undefined = undefined;
         if (storyYear && storyMonth && storyDay) {
@@ -429,7 +492,7 @@ function BookStyleReviewContent() {
           isFavorite: false,
           audioUrl: null, // Will be set after upload
           wisdomClipText: wisdomText || "", // Ensure it's always a string
-          durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 30,
+          durationSeconds: actualDuration && actualDuration >= 1 ? Math.round(actualDuration) : 1, // Minimum 1 second (database constraint)
           sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
         };
         
@@ -855,7 +918,7 @@ function BookStyleReviewContent() {
         photos: finalPhotos,
         audioUrl: finalAudioUrl,
         wisdomClipText: wisdomText || "", // Ensure it's always a string
-        durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 30,
+        durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 1, // Minimum 1 second (database constraint)
         sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
       };
       

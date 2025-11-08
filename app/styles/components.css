@@ -69,12 +69,12 @@ body {
 .hw-spine::before {
   content: "";
   position: absolute;
-  left: 20px;
+  left: 18px;
   top: 0;
   bottom: 0;
   width: 4px;
   /* Lighter mauve to match desktop (#C4A7B7) */
-  background: rgba(196, 167, 183, 0.35);
+  background: rgba(196, 167, 183, 0.45);
   box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12);
 }
 
@@ -446,7 +446,7 @@ body {
 @media (max-width: 1023px) {
   .hw-year {
     left: -50px; /* Tablet and mobile: single-column timeline */
-    top: calc(var(--title-offset, 22px) - 40px);
+    top: calc(var(--title-offset, 22px) - 14px);
     font-size: 16px;
     line-height: 1;
     padding: 2px 5px 8px 5px;
@@ -472,7 +472,7 @@ body {
     padding-left: calc(26px + env(safe-area-inset-left)); /* Reduced by 2px to move spine left */
   }
   .hw-spine::before {
-    left: calc(0px + env(safe-area-inset-left)); /* Moved 2px further left */
+    left: calc(-3px + env(safe-area-inset-left)); /* Moved 3px further left */
     box-shadow: 0 3px 8px -2px rgba(0, 0, 0, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 

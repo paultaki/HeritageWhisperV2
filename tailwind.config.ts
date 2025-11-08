@@ -97,6 +97,7 @@ export default {
         heritage: {
           orange: "#FF9B47",
           coral: "#FF6B8A",
+          brown: "#8B4513",
           "warm-bg": "#FFF8F3",
           "warm-bg-light": "#FFFBF7",
         },

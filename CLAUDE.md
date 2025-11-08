@@ -538,24 +538,19 @@ Configured in `~/.mcp.json`:
 
 ### Sticky Header Gap Issues (Timeline)
 
+**Note:** For detailed troubleshooting of desktop timeline sticky badges, see **[@TIMELINE_STICKY_BADGES.md](TIMELINE_STICKY_BADGES.md)**
+
+**Quick Summary:**
+- **Desktop badges going under header:** Adjust `stickyTop` value in both TimelineDesktop files (currently 80px)
+- **Gap between badges:** Use negative `marginBottom` (currently -40px) to pull badges closer
+- **Badges fading too early:** Adjust fade distance threshold (currently -38px)
+
 **Mobile Timeline - Decade Headers:**
 - **Symptom:** Decade headers "unstick" too early, leaving visible gap before next header takes over
 - **Root Cause:** `margin-top` and `margin-bottom` on `.hw-decade-band` cause premature release
 - **Solution:** Remove margins on sticky elements - set both to `0px` in `/app/styles/components.css`
 - **Why it happens:** Sticky positioning calculates release point based on margin edges, not element edges
 - **File:** `/app/styles/components.css` lines ~107-109 (`.hw-decade-band` margins)
-
-**Desktop Timeline - Year Badges:**
-- **Symptom:** Year badges along spine "unstick" too early with visible gap before next badge collides
-- **Root Cause:** Fade distance too large - badge starts fading before next badge gets close enough
-- **Solution:** Adjust fade distance in collision detection logic
-  - To make badges hold longer: DECREASE the fade distance number (e.g., -65px → -44px holds 21px longer)
-  - To make badges release earlier: INCREASE the fade distance number
-- **Key variables to adjust:**
-  - `stickyTop`: Currently 82px (updated from 62px when badges moved up 20px)
-  - Fade distance: Currently -44px in `proximityToNext > -44` check (line ~1046)
-  - CSS sticky position: `.timeline-dot { top: 82px }` must match `stickyTop` value
-- **File:** `/components/timeline/TimelineDesktop.tsx` lines ~1009 (stickyTop), ~1046 (fade distance), ~1299 (CSS)
 
 ## 🎯 Known Issues & Workarounds
 

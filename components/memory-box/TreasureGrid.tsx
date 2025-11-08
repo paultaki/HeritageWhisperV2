@@ -1,69 +1,83 @@
 "use client";
 import React from "react";
-import { Camera, FileText, Gem, Home, UtensilsCrossed } from "lucide-react";
+import { Camera, FileText, Gem, Home, ChefHat, Award, Plus } from "lucide-react";
+import { TreasureCard } from "./TreasureCard";
 
-export type TreasureType = "photo" | "document" | "heirloom" | "place" | "recipe";
+export type TreasureCategory = "photos" | "documents" | "heirlooms" | "keepsakes" | "recipes" | "memorabilia";
 
 type Treasure = {
   id: string;
-  type: TreasureType;
   title: string;
-  imageUrl: string;
   description?: string;
-  date?: string;
+  imageUrl: string;
+  category: TreasureCategory;
+  year?: number;
+  isFavorite: boolean;
+  linkedStoryId?: string;
 };
 
 type Props = {
   treasures: Treasure[];
-  onTreasureClick?: (treasure: Treasure) => void;
+  onAddTreasure?: () => void;
+  onToggleFavorite?: (id: string) => void;
+  onLinkToStory?: (id: string) => void;
+  onCreateStory?: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onDownload?: (id: string) => void;
+  onDelete?: (id: string) => void;
 };
 
 /**
- * Treasure Grid for Photos, Heirlooms, Documents
+ * Treasure Grid - Masonry Layout for Visual Keepsakes
  *
  * Categories:
  * - Family Photos 📷
  * - Documents 📄
- * - Heirlooms 💍
- * - Places 🏠
- * - Recipes 🍳
- *
- * This is a placeholder component for future treasure management.
- * Currently shows a beautiful empty state encouraging users to add treasures.
+ * - Heirlooms 💎
+ * - Keepsakes 🏠
+ * - Recipes 👨‍🍳
+ * - Memorabilia 🏆
  */
-export function TreasureGrid({ treasures, onTreasureClick }: Props) {
-  const treasureIcons: Record<TreasureType, { icon: React.ReactNode; label: string; color: string }> = {
-    photo: { icon: <Camera className="w-6 h-6" />, label: "Family Photos", color: "#3B82F6" },
-    document: { icon: <FileText className="w-6 h-6" />, label: "Documents", color: "#8B5CF6" },
-    heirloom: { icon: <Gem className="w-6 h-6" />, label: "Heirlooms", color: "#EC4899" },
-    place: { icon: <Home className="w-6 h-6" />, label: "Places", color: "#10B981" },
-    recipe: { icon: <UtensilsCrossed className="w-6 h-6" />, label: "Recipes", color: "#F59E0B" },
+export function TreasureGrid({
+  treasures,
+  onAddTreasure,
+  onToggleFavorite,
+  onLinkToStory,
+  onCreateStory,
+  onEdit,
+  onDownload,
+  onDelete,
+}: Props) {
+  const treasureCategories = {
+    photos: { icon: Camera, label: "Family Photos", color: "#3B82F6" },
+    documents: { icon: FileText, label: "Documents", color: "#6B7280" },
+    heirlooms: { icon: Gem, label: "Heirlooms", color: "#A855F7" },
+    keepsakes: { icon: Home, label: "Keepsakes", color: "#10B981" },
+    recipes: { icon: ChefHat, label: "Recipes", color: "#F97316" },
+    memorabilia: { icon: Award, label: "Memorabilia", color: "#EAB308" },
   };
 
-  // Empty state - Coming Soon
+  // Empty state
   if (treasures.length === 0) {
     return (
-      <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
+      <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-8 md:p-12 text-center">
         <div className="max-w-2xl mx-auto">
-          <div className="text-6xl mb-4">💎</div>
+          <Gem className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-gray-900 mb-3">
             Your Treasure Chest
           </h3>
           <p className="text-lg text-gray-600 mb-6">
             A special place for photos, documents, and heirlooms that aren't tied to specific stories yet.
-            Perfect for organizing family recipes, old letters, or precious keepsakes.
           </p>
 
           {/* Category Preview */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-            {Object.entries(treasureIcons).map(([type, { icon, label, color }]) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+            {Object.entries(treasureCategories).map(([category, { icon: Icon, label, color }]) => (
               <div
-                key={type}
+                key={category}
                 className="flex flex-col items-center p-4 rounded-lg bg-gray-50 border border-gray-200"
               >
-                <div className="mb-2" style={{ color }}>
-                  {icon}
-                </div>
+                <Icon className="w-6 h-6 mb-2" style={{ color }} />
                 <div className="text-sm font-medium text-gray-700 text-center">
                   {label}
                 </div>
@@ -71,65 +85,79 @@ export function TreasureGrid({ treasures, onTreasureClick }: Props) {
             ))}
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
-            <div className="text-sm font-semibold text-blue-900 mb-2">✨ Coming Soon</div>
-            <p className="text-sm text-blue-800">
-              We're building a beautiful way for you to organize and cherish your precious keepsakes.
-              For now, you can attach photos to your stories in the Stories section.
-            </p>
-          </div>
+          {onAddTreasure && (
+            <button
+              onClick={onAddTreasure}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-heritage-coral text-white rounded-lg font-medium hover:bg-heritage-coral/90 transition-colors"
+              style={{ minHeight: "44px" }}
+            >
+              <Plus className="w-5 h-5" />
+              Add Your First Treasure
+            </button>
+          )}
         </div>
       </div>
     );
   }
 
-  // Grid view for treasures (when feature is implemented)
+  // Masonry Grid Layout
+  // Using CSS columns for masonry effect (simpler than complex JS solutions)
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-      {treasures.map((treasure) => {
-        const { icon, label, color } = treasureIcons[treasure.type];
+    <div
+      className="treasure-masonry-grid"
+      style={{
+        columnCount: 2,
+        columnGap: "16px",
+      }}
+    >
+      <style jsx>{`
+        .treasure-masonry-grid {
+          column-count: 2;
+        }
 
-        return (
-          <button
-            key={treasure.id}
-            onClick={() => onTreasureClick?.(treasure)}
-            className="bg-white rounded-xl border-2 border-gray-200 hover:shadow-lg transition-all duration-200 overflow-hidden text-left"
-          >
-            {/* Image */}
-            <div className="relative overflow-hidden" style={{ height: "160px" }}>
-              <img
-                src={treasure.imageUrl}
-                alt={treasure.title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
+        @media (min-width: 768px) {
+          .treasure-masonry-grid {
+            column-count: 3;
+          }
+        }
 
-              {/* Type Badge */}
-              <div
-                className="absolute top-2 right-2 w-10 h-10 rounded-full flex items-center justify-center text-white shadow-lg"
-                style={{ backgroundColor: color }}
-              >
-                {icon}
-              </div>
-            </div>
+        @media (min-width: 1024px) {
+          .treasure-masonry-grid {
+            column-count: 4;
+          }
+        }
 
-            {/* Content */}
-            <div className="p-3">
-              <div className="text-xs font-semibold mb-1" style={{ color }}>
-                {label}
-              </div>
-              <div className="text-sm font-bold text-gray-900 line-clamp-2">
-                {treasure.title}
-              </div>
-              {treasure.date && (
-                <div className="text-xs text-gray-500 mt-1">
-                  {treasure.date}
-                </div>
-              )}
-            </div>
-          </button>
-        );
-      })}
+        @media (min-width: 1536px) {
+          .treasure-masonry-grid {
+            column-count: 5;
+          }
+        }
+
+        .treasure-masonry-grid > * {
+          break-inside: avoid;
+          margin-bottom: 16px;
+        }
+      `}</style>
+
+      {treasures.map((treasure) => (
+        <TreasureCard
+          key={treasure.id}
+          id={treasure.id}
+          title={treasure.title}
+          description={treasure.description}
+          imageUrl={treasure.imageUrl}
+          category={treasure.category}
+          year={treasure.year}
+          isFavorite={treasure.isFavorite}
+          linkedStoryId={treasure.linkedStoryId}
+          onToggleFavorite={() => onToggleFavorite?.(treasure.id)}
+          onLinkToStory={() => onLinkToStory?.(treasure.id)}
+          onCreateStory={() => onCreateStory?.(treasure.id)}
+          onEdit={() => onEdit?.(treasure.id)}
+          onDownload={() => onDownload?.(treasure.id)}
+          onDelete={() => onDelete?.(treasure.id)}
+        />
+      ))}
     </div>
   );
 }

@@ -119,6 +119,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
     reader.onload = (event) => {
       const dataURL = event.target?.result as string;
       setCapturedImage(dataURL);
+      setIsEditing(true); // Go to edit mode after file selection
     };
     reader.readAsDataURL(file);
   };

@@ -4,17 +4,26 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Box } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { useAccountContext } from "@/hooks/use-account-context";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
 import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
-import MemoryList from "@/components/memory-box/MemoryList";
+import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { MemoryOverlay } from "@/components/MemoryOverlay";
 import { Story as SupabaseStory } from "@/lib/supabase";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { MemoryBoxTabs } from "@/components/memory-box/MemoryBoxTabs";
+import { QuickStatsBar } from "@/components/memory-box/QuickStatsBar";
+import { StoryFilters, type StoryFilterType } from "@/components/memory-box/StoryFilters";
+import { StoryCard } from "@/components/memory-box/StoryCard";
+import { TreasureGrid } from "@/components/memory-box/TreasureGrid";
+import { AddTreasureModal } from "@/components/memory-box/AddTreasureModal";
 
 interface Story {
   id: string;
@@ -38,6 +47,23 @@ interface Story {
     lessonsLearned?: string;
   };
 }
+
+interface Treasure {
+  id: string;
+  userId: string;
+  title: string;
+  description?: string;
+  category: "photos" | "documents" | "heirlooms" | "keepsakes" | "recipes" | "memorabilia";
+  year?: number;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  isFavorite: boolean;
+  linkedStoryId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+type TabType = "stories" | "treasures";
 
 // Audio Manager for single playback
 class AudioManager {
@@ -101,25 +127,33 @@ class AudioManager {
   }
 }
 
-export default function MemoryBoxPage() {
+export default function MemoryBoxV2Page() {
   const router = useRouter();
   const { user, session } = useAuth();
   const modeSelection = useModeSelection();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
+  const [activeTab, setActiveTab] = useState<TabType>("stories");
+  const [storyFilter, setStoryFilter] = useState<StoryFilterType>("all");
+  const [selectedDecade, setSelectedDecade] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [overlayOpen, setOverlayOpen] = useState(false);
+  const [addTreasureModalOpen, setAddTreasureModalOpen] = useState(false);
+  const [treasureToDelete, setTreasureToDelete] = useState<string | null>(null);
 
-  // Make AudioManager globally accessible for MemoryCard components
+  // Make AudioManager globally accessible
   useEffect(() => {
     if (typeof window !== 'undefined') {
       (window as any).AudioManager = AudioManager;
     }
   }, []);
 
-  // V3: Get active storyteller context for family sharing
+  // Get active storyteller context for family sharing
   const { activeContext } = useAccountContext();
   const storytellerId = activeContext?.storytellerId || user?.id;
 
@@ -170,50 +204,13 @@ export default function MemoryBoxPage() {
       }
       return response.json();
     },
-    onMutate: async ({ id, updates }) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({
-        queryKey: ["/api/stories", storytellerId, session?.access_token],
-      });
-
-      // Snapshot the previous value
-      const previousStories = queryClient.getQueryData<Story[]>([
-        "/api/stories",
-        storytellerId,
-        session?.access_token,
-      ]);
-
-      // Optimistically update to the new value
-      queryClient.setQueryData<Story[]>(
-        ["/api/stories", storytellerId, session?.access_token],
-        (old) => {
-          if (!old) return old;
-          return old.map((story) =>
-            story.id === id ? { ...story, ...updates } : story,
-          );
-        },
-      );
-
-      // Return context with the snapshotted value
-      return { previousStories };
-    },
-    onSuccess: (data) => {
-      // Invalidate all story queries to refresh timeline, memory box, etc.
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["/api/stories", storytellerId, session?.access_token],
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
-      queryClient.invalidateQueries({ queryKey: ["stories"] });
       toast({ title: "Memory updated successfully" });
     },
-    onError: (error: Error, variables, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousStories) {
-        queryClient.setQueryData(
-          ["/api/stories", storytellerId, session?.access_token],
-          context.previousStories,
-        );
-      }
+    onError: (error: Error) => {
       toast({
         title: "Failed to update memory",
         description: error.message,
@@ -231,66 +228,180 @@ export default function MemoryBoxPage() {
       if (!response.ok) throw new Error("Failed to delete story");
     },
     onSuccess: () => {
-      // Invalidate all story queries to refresh timeline, memory box, etc.
       queryClient.invalidateQueries({
         queryKey: ["/api/stories", storytellerId, session?.access_token],
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
-      queryClient.invalidateQueries({ queryKey: ["stories"] });
       toast({ title: "Memory deleted successfully" });
     },
   });
 
-  // Map Story to Memory format for MemoryList component
-  const memories = useMemo(() => {
-    return stories.map((story) => {
-      const heroPhoto = story.photos?.find((p) => p.isHero) || story.photos?.[0];
-      const thumbUrl = heroPhoto?.url || story.photoUrl || "/images/placeholder.jpg";
-      const age = story.storyYear && user?.birthYear
-        ? story.storyYear - user.birthYear
-        : undefined;
+  // Fetch treasures
+  const {
+    data: treasures = [],
+    isLoading: treasuresLoading,
+  } = useQuery<Treasure[]>({
+    queryKey: ["/api/treasures", storytellerId, session?.access_token],
+    queryFn: async () => {
+      const token = session?.access_token;
+      if (!token) throw new Error("No authentication token");
 
-      return {
-        id: story.id,
-        title: story.title,
-        year: story.storyYear || 0,
-        age: age && age >= 0 ? age : undefined,
-        durationSec: story.durationSeconds,
-        hasAudio: !!story.audioUrl,
-        onTimeline: story.includeInTimeline,
-        inBook: story.includeInBook,
-        favorited: story.isFavorite,
-        thumbUrl,
-      };
+      const url = storytellerId
+        ? `/api/treasures?storyteller_id=${storytellerId}`
+        : "/api/treasures";
+
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch treasures");
+      const data = await response.json();
+      return data.treasures || [];
+    },
+    enabled: !!session?.access_token && !!user && !!storytellerId,
+  });
+
+  // Treasure mutations
+  const toggleTreasureFavorite = useMutation({
+    mutationFn: async ({ id, isFavorite }: { id: string; isFavorite: boolean }) => {
+      const response = await fetch(`/api/treasures/${id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isFavorite: !isFavorite }),
+      });
+      if (!response.ok) throw new Error("Failed to update treasure");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["/api/treasures", storytellerId, session?.access_token],
+      });
+    },
+  });
+
+  const deleteTreasure = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/treasures/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (!response.ok) throw new Error("Failed to delete treasure");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["/api/treasures", storytellerId, session?.access_token],
+      });
+      toast({ title: "Treasure deleted successfully" });
+    },
+  });
+
+  const handleSaveTreasure = async (treasureData: {
+    title: string;
+    description?: string;
+    category: string;
+    year?: number;
+    imageFile: File;
+  }) => {
+    const formData = new FormData();
+    formData.append("image", treasureData.imageFile);
+    formData.append("title", treasureData.title);
+    formData.append("category", treasureData.category);
+    if (treasureData.description) {
+      formData.append("description", treasureData.description);
+    }
+    if (treasureData.year) {
+      formData.append("year", treasureData.year.toString());
+    }
+
+    const response = await fetch("/api/treasures", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session?.access_token}`,
+      },
+      body: formData,
     });
-  }, [stories, user?.birthYear]);
 
-  const handleToggleTimeline = (id: string) => {
-    const story = stories.find((s) => s.id === id);
-    if (story && story.storyYear) {
-      updateStory.mutate({
-        id,
-        updates: { includeInTimeline: !story.includeInTimeline },
-      });
-    }
+    if (!response.ok) throw new Error("Failed to create treasure");
+
+    queryClient.invalidateQueries({
+      queryKey: ["/api/treasures", storytellerId, session?.access_token],
+    });
+    toast({ title: "Treasure added successfully!" });
   };
 
-  const handleToggleBook = (id: string) => {
-    const story = stories.find((s) => s.id === id);
-    if (story) {
-      updateStory.mutate({
-        id,
-        updates: { includeInBook: !story.includeInBook },
-      });
-    }
-  };
+  // Calculate decades from stories
+  const availableDecades = useMemo(() => {
+    const decades = new Set<string>();
+    stories.forEach((story) => {
+      if (story.storyYear) {
+        const decade = Math.floor(story.storyYear / 10) * 10;
+        decades.add(`${decade}s`);
+      }
+    });
+    return Array.from(decades).sort();
+  }, [stories]);
 
-  const handleToggleFavorite = (id: string) => {
-    const story = stories.find((s) => s.id === id);
-    if (story) {
-      updateStory.mutate({ id, updates: { isFavorite: !story.isFavorite } });
+  // Process stories based on filters
+  const processedStories = useMemo(() => {
+    let filtered = [...stories];
+
+    // Apply story filter
+    switch (storyFilter) {
+      case "favorites":
+        filtered = filtered.filter((s) => s.isFavorite);
+        break;
+      case "decades":
+        if (selectedDecade) {
+          const decadeStart = parseInt(selectedDecade);
+          filtered = filtered.filter(
+            (s) => s.storyYear && s.storyYear >= decadeStart && s.storyYear < decadeStart + 10
+          );
+        }
+        break;
+      case "timeless":
+        filtered = filtered.filter((s) => !s.storyYear);
+        break;
+      case "shared":
+        filtered = filtered.filter((s) => s.includeInTimeline || s.includeInBook);
+        break;
+      case "private":
+        filtered = filtered.filter((s) => !s.includeInTimeline && !s.includeInBook);
+        break;
     }
-  };
+
+    // Apply search
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (story) =>
+          story.title.toLowerCase().includes(query) ||
+          story.transcription?.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort by date added (newest first)
+    filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return filtered;
+  }, [stories, storyFilter, selectedDecade, searchQuery]);
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const totalDuration = stories.reduce((sum, s) => sum + (s.durationSeconds || 0), 0);
+    const totalHours = totalDuration / 3600;
+
+    return {
+      all: stories.length,
+      favorites: stories.filter((s) => s.isFavorite).length,
+      decades: stories.filter((s) => s.storyYear).length,
+      timeless: stories.filter((s) => !s.storyYear).length,
+      shared: stories.filter((s) => s.includeInTimeline || s.includeInBook).length,
+      private: stories.filter((s) => !s.includeInTimeline && !s.includeInBook).length,
+      totalHours,
+      treasuresCount: treasures.length,
+    };
+  }, [stories, treasures]);
 
   const calculateAge = (storyYear?: number | null) => {
     if (!storyYear || !user?.birthYear) return undefined;
@@ -299,27 +410,12 @@ export default function MemoryBoxPage() {
     return age.toString();
   };
 
+  const getPreviewText = (transcription: string) => {
+    const words = transcription.split(" ");
+    return words.slice(0, 50).join(" ") + (words.length > 50 ? "..." : "");
+  };
+
   const handleOpenOverlay = (story: Story) => {
-    // Convert local Story type to SupabaseStory type for MemoryOverlay
-    const supabaseStory: SupabaseStory = {
-      id: story.id,
-      title: story.title,
-      transcription: story.transcription,
-      audioUrl: story.audioUrl || "",
-      photoUrl: story.photoUrl || undefined,
-      photos: story.photos || undefined,
-      storyYear: story.storyYear ?? undefined,
-      createdAt: story.createdAt,
-      includeInBook: story.includeInBook,
-      includeInTimeline: story.includeInTimeline,
-      isFavorite: story.isFavorite,
-      wisdomClipText: story.metadata?.lessonsLearned || undefined,
-      lifeAge: story.storyYear ? parseInt(calculateAge(story.storyYear) || "0") : undefined,
-      userId: user?.id || "",
-      photoTransform: undefined,
-      updatedAt: undefined,
-      wisdomClipAudio: undefined,
-    };
     setSelectedStory(story);
     setOverlayOpen(true);
   };
@@ -330,86 +426,201 @@ export default function MemoryBoxPage() {
   };
 
   const handleNavigateStory = (storyId: string) => {
-    const story = stories.find((s) => s.id === storyId);
+    const story = processedStories.find((s) => s.id === storyId);
     if (story) {
       setSelectedStory(story);
     }
   };
 
-  // Bulk action handlers
-  const handleBulkDelete = (ids: string[]) => {
-    if (confirm(`Delete ${ids.length} memories? This cannot be undone.`)) {
-      ids.forEach((id) => deleteStory.mutate(id));
-    }
-  };
-
-  const handleBulkFavorite = (ids: string[]) => {
-    ids.forEach((id) => {
-      const story = stories.find((s) => s.id === id);
-      if (story && !story.isFavorite) {
-        updateStory.mutate({ id, updates: { isFavorite: true } });
-      }
-    });
-  };
-
-  const handleDuplicate = (id: string) => {
-    toast({
-      title: "Duplicate feature coming soon",
-      description: "Memory duplication will be available in a future update.",
-    });
-  };
-
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: "#FFF8F3" }}
-    >
+    <div className="min-h-screen" style={{ backgroundColor: "#FFF8F3" }}>
       {/* Desktop Header */}
       <DesktopPageHeader
         icon={Box}
         title="Memory Box"
-        subtitle="Manage your memories, add or remove them from the book or timeline"
+        subtitle="Your digital hope chest • Organize stories and treasures your way"
         showAccountSwitcher={true}
       />
-      
-      {/* Mobile Header */}
-      <MobilePageHeader
-        icon={Box}
-        title="Memory Box"
-        subtitle="Manage your memories"
-      />
 
-      {/* Content Area - Compact Memory List */}
-      <div className="flex justify-center">
-        <main className="w-full max-w-7xl">
-          <MemoryList
-            items={memories}
-            onBulkDelete={handleBulkDelete}
-            onBulkFavorite={handleBulkFavorite}
-            onOpen={(id) => {
-              const story = stories.find((s) => s.id === id);
-              if (story) handleOpenOverlay(story);
-            }}
-            onToggleTimeline={handleToggleTimeline}
-            onToggleBook={handleToggleBook}
-            onListen={(id) => {
-              const story = stories.find((s) => s.id === id);
-              if (story?.audioUrl) {
-                AudioManager.getInstance().play(id, story.audioUrl);
-              }
-            }}
-            onEdit={(id) => {
-              const story = stories.find((s) => s.id === id);
-              if (story) handleOpenOverlay(story);
-            }}
-            onFavorite={handleToggleFavorite}
-            onDelete={(id) => {
-              if (confirm("Delete this memory? This cannot be undone.")) {
-                deleteStory.mutate(id);
-              }
-            }}
-            onDuplicate={handleDuplicate}
-          />
+      {/* Mobile Header */}
+      <MobilePageHeader icon={Box} title="Memory Box" subtitle="Organize your memories" />
+
+      {/* Content Area with Sidebar */}
+      <div className="flex">
+        {/* Left Sidebar */}
+        {isDesktop && <LeftSidebar />}
+
+        {/* Main content */}
+        <main className="flex-1 min-w-0 pb-20 md:pb-0">
+          <section className="px-3 pt-6" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+            {/* Quick Stats Bar */}
+            <QuickStatsBar
+              storiesCount={stats.all}
+              totalHours={stats.totalHours}
+              treasuresCount={stats.treasuresCount}
+            />
+
+            {/* Tab Selector */}
+            <MemoryBoxTabs
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              storiesCount={stats.all}
+              treasuresCount={stats.treasuresCount}
+            />
+
+            {/* Stories Tab */}
+            {activeTab === "stories" && (
+              <>
+                {/* Search Box */}
+                <div className="mb-6">
+                  <input
+                    type="search"
+                    className="w-full px-5 py-4 text-lg border-2 border-gray-300 rounded-xl focus:border-heritage-brown focus:ring-2 focus:ring-heritage-brown/20 outline-none"
+                    placeholder="Search by name, person, or place..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ minHeight: "56px" }}
+                  />
+                </div>
+
+                {/* Story Filters */}
+                <StoryFilters
+                  activeFilter={storyFilter}
+                  onFilterChange={setStoryFilter}
+                  counts={stats}
+                  selectedDecade={selectedDecade}
+                  availableDecades={availableDecades}
+                  onDecadeChange={setSelectedDecade}
+                />
+
+                {/* Stories Grid */}
+                <div className="mt-6">
+                  {isLoading ? (
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {[...Array(6)].map((_, i) => (
+                        <div key={i} className="bg-gray-200 animate-pulse rounded-xl" style={{ height: "300px" }} />
+                      ))}
+                    </div>
+                  ) : processedStories.length === 0 ? (
+                    <Card className="text-center py-16">
+                      <Box className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+                      <h3 className="text-2xl font-semibold mb-2">
+                        {storyFilter === "all" && !searchQuery ? "Your Memory Box is empty" : "No memories found"}
+                      </h3>
+                      <p className="text-lg text-gray-600 mb-6">
+                        {storyFilter === "all" && !searchQuery
+                          ? "Start adding memories to build your collection"
+                          : "Try adjusting your filters or search terms"}
+                      </p>
+                      {storyFilter === "all" && !searchQuery && (
+                        <Button
+                          onClick={() => router.push('/recording-photo-first')}
+                          className="bg-heritage-coral hover:bg-heritage-coral/90 text-white text-lg px-6 py-3"
+                        >
+                          Add Your First Memory
+                        </Button>
+                      )}
+                    </Card>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {processedStories.map((story) => {
+                        const heroPhoto = story.photos?.find((p) => p.isHero) || story.photos?.[0];
+                        const imageUrl = heroPhoto?.url || story.photoUrl || "/images/placeholder.jpg";
+                        const photoTransform = heroPhoto?.transform;
+                        const isPrivate = !story.includeInTimeline && !story.includeInBook;
+
+                        return (
+                          <StoryCard
+                            key={story.id}
+                            id={story.id}
+                            title={story.title}
+                            preview=""
+                            imageUrl={imageUrl}
+                            photoTransform={photoTransform}
+                            year={story.storyYear}
+                            age={calculateAge(story.storyYear)}
+                            durationSeconds={story.durationSeconds}
+                            isFavorite={story.isFavorite}
+                            inTimeline={story.includeInTimeline}
+                            inBook={story.includeInBook}
+                            isPrivate={isPrivate}
+                            onPlay={() => {
+                              if (story.audioUrl) {
+                                AudioManager.getInstance().play(story.id, story.audioUrl);
+                              }
+                            }}
+                            onEdit={() => router.push(`/review/book-style?id=${story.id}&returnPath=${encodeURIComponent('/memory-box')}`)}
+                            onDelete={() => {
+                              setStoryToDelete(story.id);
+                              setShowDeleteConfirm(true);
+                            }}
+                            onToggleFavorite={() =>
+                              updateStory.mutate({ id: story.id, updates: { isFavorite: !story.isFavorite } })
+                            }
+                            onToggleTimeline={() =>
+                              updateStory.mutate({ id: story.id, updates: { includeInTimeline: !story.includeInTimeline } })
+                            }
+                            onToggleBook={() =>
+                              updateStory.mutate({ id: story.id, updates: { includeInBook: !story.includeInBook } })
+                            }
+                            onDuplicate={() => {
+                              toast({
+                                title: "Duplicate feature coming soon",
+                                description: "Memory duplication will be available in a future update.",
+                              });
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Treasures Tab */}
+            {activeTab === "treasures" && (
+              <div className="mt-6">
+                <TreasureGrid
+                  treasures={treasures}
+                  onAddTreasure={() => setAddTreasureModalOpen(true)}
+                  onToggleFavorite={(id) => {
+                    const treasure = treasures.find((t) => t.id === id);
+                    if (treasure) {
+                      toggleTreasureFavorite.mutate({ id, isFavorite: treasure.isFavorite });
+                    }
+                  }}
+                  onLinkToStory={(id) => {
+                    toast({
+                      title: "Coming Soon",
+                      description: "Link to Story feature will be available in a future update.",
+                    });
+                  }}
+                  onCreateStory={(id) => {
+                    toast({
+                      title: "Coming Soon",
+                      description: "Create Story About This feature will be available in a future update.",
+                    });
+                  }}
+                  onEdit={(id) => {
+                    toast({
+                      title: "Coming Soon",
+                      description: "Edit treasure details will be available in a future update.",
+                    });
+                  }}
+                  onDownload={(id) => {
+                    const treasure = treasures.find((t) => t.id === id);
+                    if (treasure?.imageUrl) {
+                      window.open(treasure.imageUrl, "_blank");
+                    }
+                  }}
+                  onDelete={(id) => {
+                    setTreasureToDelete(id);
+                  }}
+                />
+              </div>
+            )}
+          </section>
         </main>
       </div>
 
@@ -421,10 +632,7 @@ export default function MemoryBoxPage() {
       />
 
       {/* Quick Story Recorder */}
-      <QuickStoryRecorder
-        isOpen={modeSelection.quickRecorderOpen}
-        onClose={modeSelection.closeQuickRecorder}
-      />
+      <QuickStoryRecorder isOpen={modeSelection.quickRecorderOpen} onClose={modeSelection.closeQuickRecorder} />
 
       {/* Memory Overlay */}
       {selectedStory && (
@@ -448,7 +656,7 @@ export default function MemoryBoxPage() {
             updatedAt: undefined,
             wisdomClipAudio: undefined,
           }}
-          stories={stories.map((s) => ({
+          stories={processedStories.map((s) => ({
             id: s.id,
             title: s.title,
             transcription: s.transcription,
@@ -474,6 +682,52 @@ export default function MemoryBoxPage() {
         />
       )}
 
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete Memory?"
+        message="Are you sure you want to delete this memory? This action cannot be undone."
+        confirmText="Yes, Delete"
+        cancelText="Keep Memory"
+        onConfirm={() => {
+          if (storyToDelete) {
+            deleteStory.mutate(storyToDelete);
+          }
+          setShowDeleteConfirm(false);
+          setStoryToDelete(null);
+        }}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setStoryToDelete(null);
+        }}
+        variant="danger"
+      />
+
+      {/* Add Treasure Modal */}
+      <AddTreasureModal
+        isOpen={addTreasureModalOpen}
+        onClose={() => setAddTreasureModalOpen(false)}
+        onSave={handleSaveTreasure}
+      />
+
+      {/* Delete Treasure Confirmation */}
+      <ConfirmModal
+        isOpen={!!treasureToDelete}
+        title="Delete Treasure?"
+        message="Are you sure you want to delete this treasure? This action cannot be undone."
+        confirmText="Yes, Delete"
+        cancelText="Keep Treasure"
+        onConfirm={() => {
+          if (treasureToDelete) {
+            deleteTreasure.mutate(treasureToDelete);
+          }
+          setTreasureToDelete(null);
+        }}
+        onCancel={() => {
+          setTreasureToDelete(null);
+        }}
+        variant="danger"
+      />
     </div>
   );
 }

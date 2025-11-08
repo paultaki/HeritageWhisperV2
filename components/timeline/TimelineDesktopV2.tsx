@@ -711,12 +711,12 @@ function CenteredMemoryCardV2({
         }}
       >
         <div
-          className="py-1 px-3 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
+          className="py-0.5 px-1 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
           style={{
             backgroundColor: '#F9E5E8',
             border: `1px solid rgba(139, 107, 122, 0.2)`,
             color: '#6A4D58',
-            fontSize: '17px',
+            fontSize: '15px',
             fontWeight: 500,
             letterSpacing: '0.3px',
             opacity: 0.95,
@@ -863,7 +863,7 @@ export function TimelineDesktopV2() {
     if (!storiesData) return;
 
     const handleBubbleScroll = () => {
-      const stickyTop = 70; // Header height 62px + 8px clearance
+      const stickyTop = 81; // Header height 62px + 19px clearance
       const collisionThreshold = 10 as number;
 
       const bubbles = Array.from(document.querySelectorAll('.timeline-dot'));
@@ -893,8 +893,8 @@ export function TimelineDesktopV2() {
           if (proximityToNext > 0) {
             bubble.style.opacity = '1';
             bubble.style.transform = `${translateX} scale(1)`;
-          } else if (proximityToNext > -38) {
-            const overlapProgress = Math.abs(proximityToNext) / 38;
+          } else if (proximityToNext > -34) {
+            const overlapProgress = Math.abs(proximityToNext) / 34;
             bubble.style.opacity = `${Math.max(0, 1 - overlapProgress)}`;
             bubble.style.transform = `${translateX} scale(${Math.max(0.9, 1 - (overlapProgress * 0.1))})`;
           } else {
@@ -977,7 +977,7 @@ export function TimelineDesktopV2() {
           <div
             className="absolute left-1/2 md:w-[3px] w-[3px] rounded-full overflow-hidden pointer-events-none"
             style={{
-              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.3)' : 'rgba(196, 167, 183, 0.4)',
+              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.3)' : 'rgba(196, 167, 183, 0.5)',
               transform: 'translateX(calc(-50% - 225px))',
               top: '0',
               bottom: '500px',
@@ -1115,7 +1115,7 @@ export function TimelineDesktopV2() {
 
           .timeline-dot {
             position: sticky;
-            top: 70px;
+            top: 81px;
             z-index: 30;
           }
 
@@ -1128,11 +1128,11 @@ export function TimelineDesktopV2() {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 18px;
+            width: 24px;
             height: 3px;
             background: linear-gradient(
               to right,
-              rgba(196, 167, 183, 0.3),
+              rgba(196, 167, 183, 0),
               rgba(196, 167, 183, 0.5)
             );
             border-radius: 1px;
@@ -1148,7 +1148,7 @@ export function TimelineDesktopV2() {
             background: linear-gradient(
               to right,
               rgba(196, 167, 183, 0.5),
-              rgba(196, 167, 183, 0.3)
+              rgba(196, 167, 183, 0)
             );
           }
 
@@ -1157,7 +1157,7 @@ export function TimelineDesktopV2() {
             background: linear-gradient(
               to left,
               rgba(196, 167, 183, 0.5),
-              rgba(196, 167, 183, 0.3)
+              rgba(196, 167, 183, 0)
             );
           }
 
@@ -1165,24 +1165,24 @@ export function TimelineDesktopV2() {
             width: 24px;
             background: linear-gradient(
               to right,
-              rgba(196, 167, 183, 0.6),
-              rgba(196, 167, 183, 0.4)
+              rgba(196, 167, 183, 0),
+              rgba(196, 167, 183, 0.7)
             );
           }
 
           .timeline-step:hover .justify-end .timeline-card-container::after {
             background: linear-gradient(
               to right,
-              rgba(196, 167, 183, 0.6),
-              rgba(196, 167, 183, 0.4)
+              rgba(196, 167, 183, 0.7),
+              rgba(196, 167, 183, 0)
             );
           }
 
           .timeline-step:hover .justify-start .timeline-card-container::after {
             background: linear-gradient(
               to left,
-              rgba(196, 167, 183, 0.6),
-              rgba(196, 167, 183, 0.4)
+              rgba(196, 167, 183, 0.7),
+              rgba(196, 167, 183, 0)
             );
           }
         }
