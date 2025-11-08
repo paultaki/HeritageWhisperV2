@@ -166,7 +166,7 @@ export default function Home() {
               </div>
 
               {/* Feature Preview Cards */}
-              <div className="w-full max-w-[960px] lg:w-[960px] pt-2 sm:pt-4 pb-6 sm:pb-8 md:pb-10 px-2 sm:px-4 md:px-6 lg:px-11 flex flex-col justify-center items-center gap-2 relative z-5 my-8 sm:my-12 md:my-16 lg:my-16 mb-0 lg:pb-0">
+              <div id="features" className="w-full max-w-[960px] lg:w-[960px] pt-2 sm:pt-4 pb-6 sm:pb-8 md:pb-10 px-2 sm:px-4 md:px-6 lg:px-11 flex flex-col justify-center items-center gap-2 relative z-5 my-8 sm:my-12 md:my-16 lg:my-16 mb-0 lg:pb-0">
                 <div className="w-full max-w-[960px] lg:w-[960px] h-[200px] sm:h-[280px] md:h-[450px] lg:h-[695.55px] bg-white shadow-[0px_0px_0px_0.9056603908538818px_rgba(0,0,0,0.08)] overflow-hidden rounded-[6px] sm:rounded-[8px] lg:rounded-[9.06px] flex flex-col justify-start items-start">
                   {/* Dashboard Content - Rotating Images */}
                   <div className="self-stretch flex-1 flex justify-start items-start">
@@ -209,13 +209,19 @@ export default function Home() {
                                 />
                               </div>
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#faf8f5] to-white p-8">
+                              <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-[#faf8f5] to-white ${
+                                card.title === "AI Transcribes Everything" ? "p-2 sm:p-4 md:p-8" : "p-8"
+                              }`}>
                                 <Image
                                   src={card.image}
                                   alt={card.title}
                                   width={800}
                                   height={600}
-                                  className="w-auto h-auto max-w-full max-h-full object-contain"
+                                  className={
+                                    card.title === "AI Transcribes Everything"
+                                      ? "w-full h-auto object-cover sm:w-auto sm:h-auto sm:max-w-full sm:max-h-full sm:object-contain"
+                                      : "w-auto h-auto max-w-full max-h-full object-contain"
+                                  }
                                 />
                               </div>
                             )}
@@ -288,13 +294,19 @@ export default function Home() {
               </div>
 
               {/* Testimonials Section */}
-              <TestimonialsSection />
+              <div id="testimonials">
+                <TestimonialsSection />
+              </div>
 
               {/* Pricing Section */}
-              <PricingSection />
+              <div id="pricing">
+                <PricingSection />
+              </div>
 
               {/* FAQ Section */}
-              <FAQSection />
+              <div id="faq">
+                <FAQSection />
+              </div>
 
               {/* CTA Section */}
               <CTASection />
