@@ -667,11 +667,11 @@ export default function FamilyPage() {
             {/* Family Stats */}
             <div className="grid grid-cols-3 gap-3 md:gap-4">
               <Card className="bg-white border border-gray-200 rounded-xl">
-                <CardContent className="py-4 px-3 md:px-4">
+                <CardContent className="pt-3 pb-2 px-3 md:px-4">
                   <div className="text-center">
                     <Users className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
                     <p className="text-xl md:text-3xl font-bold text-gray-900">{totalMembers}</p>
-                    <p className="text-xs md:text-base text-gray-500 mt-1">
+                    <p className="text-xs md:text-base text-gray-500">
                       Members
                     </p>
                   </div>
@@ -679,11 +679,11 @@ export default function FamilyPage() {
               </Card>
 
               <Card className="bg-white border border-gray-200 rounded-xl">
-                <CardContent className="py-4 px-3 md:px-4">
+                <CardContent className="pt-3 pb-2 px-3 md:px-4">
                   <div className="text-center">
                     <Share2 className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
                     <p className="text-xl md:text-3xl font-bold text-gray-900">{sharedStories}</p>
-                    <p className="text-xs md:text-base text-gray-500 mt-1">
+                    <p className="text-xs md:text-base text-gray-500">
                       Stories
                     </p>
                   </div>
@@ -691,11 +691,11 @@ export default function FamilyPage() {
               </Card>
 
               <Card className="bg-white border border-gray-200 rounded-xl">
-                <CardContent className="py-4 px-3 md:px-4">
+                <CardContent className="pt-3 pb-2 px-3 md:px-4">
                   <div className="text-center">
                     <Eye className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
                     <p className="text-xl md:text-3xl font-bold text-gray-900">{totalViews}</p>
-                    <p className="text-xs md:text-base text-gray-500 mt-1">Views</p>
+                    <p className="text-xs md:text-base text-gray-500">Views</p>
                   </div>
                 </CardContent>
               </Card>
@@ -703,12 +703,12 @@ export default function FamilyPage() {
 
             {/* Active Family Members */}
             <Card className="bg-white border border-gray-200 rounded-xl">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg md:text-xl font-semibold text-gray-900">
                   <Users className="w-5 h-5 text-blue-600" />
                   Family Members ({activeMembers.length})
                 </CardTitle>
-                <CardDescription className="text-sm md:text-base text-gray-500 mt-1">
+                <CardDescription className="text-sm md:text-base text-gray-500">
                   People who can view your stories
                 </CardDescription>
               </CardHeader>
@@ -724,7 +724,7 @@ export default function FamilyPage() {
                       className="min-h-[60px] px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
                     >
                       <UserPlus className="w-5 h-5 mr-2" />
-                      Invite Your First Family Member
+                      Invite Family Member
                     </Button>
                   </div>
                 ) : (
@@ -824,12 +824,12 @@ export default function FamilyPage() {
             {/* Pending Invitations */}
             {pendingMembers.length > 0 && (
               <Card className="bg-white border border-gray-200 rounded-xl">
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-lg md:text-xl font-semibold text-gray-900">
                     <Clock className="w-5 h-5 text-blue-600" />
                     Pending Invitations ({pendingMembers.length})
                   </CardTitle>
-                  <CardDescription className="text-sm md:text-base text-gray-500 mt-1">Waiting for acceptance</CardDescription>
+                  <CardDescription className="text-sm md:text-base text-gray-500">Waiting for acceptance</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -917,12 +917,12 @@ export default function FamilyPage() {
           {/* Sidebar - Recent Activity */}
           <div className="space-y-6">
             <Card className="bg-white border border-gray-200 rounded-xl">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg md:text-xl font-semibold text-gray-900">
                   <Activity className="w-5 h-5 text-blue-600" />
                   Recent Activity
                 </CardTitle>
-                <CardDescription className="text-sm md:text-base text-gray-500 mt-1">
+                <CardDescription className="text-sm md:text-base text-gray-500">
                   What your family has been viewing
                 </CardDescription>
               </CardHeader>
