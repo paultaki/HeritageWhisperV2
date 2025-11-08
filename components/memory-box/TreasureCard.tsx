@@ -126,13 +126,13 @@ export function TreasureCard({
         {/* Favorite Button - Top Right */}
         <button
           onClick={handleFavoriteClick}
-          className="absolute top-3 right-3 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-all"
+          className="absolute top-2 right-2 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-all"
           style={{ minWidth: "44px", minHeight: "44px" }}
           aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
           <Heart
             className={cn(
-              "w-5 h-5 transition-all",
+              "w-4 h-4 transition-all",
               isFavorite ? "fill-red-500 text-red-500" : "text-gray-600",
               isFavoriting && "animate-bounce"
             )}
@@ -141,9 +141,9 @@ export function TreasureCard({
 
         {/* Linked Story Indicator */}
         {linkedStoryId && (
-          <div className="absolute bottom-3 left-3 z-10">
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/75 backdrop-blur-sm text-white text-xs font-medium">
-              <Link2 className="w-3.5 h-3.5" />
+          <div className="absolute bottom-2 left-2 z-10">
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-black/75 backdrop-blur-sm text-white text-xs font-medium">
+              <Link2 className="w-3 h-3" />
               <span>Linked to Story</span>
             </div>
           </div>
@@ -151,13 +151,13 @@ export function TreasureCard({
       </div>
 
       {/* Card Info - 25% */}
-      <div className="p-3">
+      <div className="p-2.5">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-bold text-gray-900 mb-1 line-clamp-2">
+            <h3 className="text-sm font-bold text-gray-900 mb-0.5 line-clamp-2">
               {title}
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs text-gray-600">
               {categoryConfig.label}
               {year && <span className="text-gray-400"> • {year}</span>}
             </p>
@@ -167,12 +167,12 @@ export function TreasureCard({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-700 transition-colors"
+                className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-700 transition-colors"
                 style={{ minHeight: "44px", minWidth: "44px" }}
                 aria-label="More actions"
                 onClick={(e) => e.stopPropagation()}
               >
-                <MoreVertical className="w-5 h-5" />
+                <MoreVertical className="w-4 h-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
