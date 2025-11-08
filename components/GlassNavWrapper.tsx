@@ -13,10 +13,10 @@ export default function GlassNavWrapper() {
   // Hide navigation on specific pages
   const isInterviewChat = pathname === '/interview-chat';
   const isAuthPage = pathname.startsWith('/auth');
-  const isRecordingPhotoFirst = pathname === '/recording-photo-first';
+  const isRecording = pathname === '/recording';
 
   // Don't show glass nav on these pages
-  if (isInterviewChat || isAuthPage || isRecordingPhotoFirst) {
+  if (isInterviewChat || isAuthPage || isRecording) {
     return null;
   }
 
@@ -24,7 +24,7 @@ export default function GlassNavWrapper() {
   const getActiveKey = () => {
     if (pathname === '/timeline' || pathname === '/') return 'timeline';
     if (pathname.startsWith('/book')) return 'book';
-    if (pathname.startsWith('/memory-box') || pathname.startsWith('/recording-photo-first')) return 'memory';
+    if (pathname.startsWith('/memory-box') || pathname.startsWith('/recording')) return 'memory';
     if (pathname.startsWith('/prompts')) return 'ideas';
     return '';
   };
@@ -45,7 +45,7 @@ export default function GlassNavWrapper() {
     {
       key: 'memory',
       label: '+Memory',
-      href: '/recording-photo-first',
+      href: '/recording',
       Icon: Mic,
     },
     {

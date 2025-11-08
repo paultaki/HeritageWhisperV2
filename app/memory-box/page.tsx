@@ -514,7 +514,7 @@ export default function MemoryBoxV2Page() {
                       </p>
                       {storyFilter === "all" && !searchQuery && (
                         <Button
-                          onClick={() => router.push('/recording-photo-first')}
+                          onClick={() => router.push('/recording')}
                           className="bg-heritage-coral hover:bg-heritage-coral/90 text-white text-lg px-6 py-3"
                         >
                           Add Your First Memory

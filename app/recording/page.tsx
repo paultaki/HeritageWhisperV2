@@ -222,46 +222,19 @@ export default function PhotoFirstRecordingPage() {
 
   return (
     <div className="mx-auto max-w-md min-h-screen relative flex flex-col bg-white">
-      {/* Top Bar - Hidden during capture, recording and review */}
-      {currentScreen !== 'capture' && currentScreen !== 'recording' && currentScreen !== 'review' && (
-        <header className="relative bg-white border-b border-gray-200">
-          <div className="px-4 py-4 flex items-center justify-between">
-            <Image
-              src="/final logo/chat-bubble-hw-logo.svg"
-              alt="Heritage Whisper"
-              width={168}
-              height={68}
-              className="h-[68px]"
-              priority
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-base font-medium px-3 py-2 h-10 min-w-[80px]"
-              onClick={() => router.push('/timeline')}
-            >
-              Cancel
-            </Button>
-          </div>
-        </header>
-      )}
-
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col pb-24">
         {/* Screen 1: Home */}
         {currentScreen === 'home' && (
-          <section className="flex-1 flex flex-col justify-center px-6 py-12">
+          <section className="flex-1 flex flex-col px-6 pt-8">
             <div className="text-center mb-8">
               <h1 className="text-[36px] leading-[1.2] tracking-tight font-semibold mb-6">
                 Every memory matters. Start with your voice.
               </h1>
-              <p className="text-[20px] text-gray-600 leading-relaxed mb-3">
-                Capture a photo and speak your memory—under two minutes.
-              </p>
             </div>
 
             <PreRecordHints />
 
-            <div className="mx-auto w-full max-w-sm px-4 space-y-6 mt-4 mb-12">
+            <div className="mx-auto w-full max-w-sm px-4 space-y-6 mt-4">
               <Button
                 onClick={() => setCurrentScreen('capture')}
                 className="w-full h-[64px] bg-blue-600 text-white rounded-xl text-[19px] font-medium tracking-tight flex items-center justify-center gap-3 shadow-sm hover:bg-blue-700 active:bg-blue-800"
@@ -335,6 +308,19 @@ export default function PhotoFirstRecordingPage() {
           </div>
         )}
       </main>
+
+      {/* Fixed Cancel Button at Bottom - Only on home screen */}
+      {currentScreen === 'home' && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 max-w-md mx-auto">
+          <Button
+            variant="outline"
+            className="w-full h-[56px] text-[18px] font-medium"
+            onClick={() => router.push('/timeline')}
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

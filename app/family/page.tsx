@@ -512,9 +512,9 @@ export default function FamilyPage() {
       <main className="w-full pb-20 md:pb-0 px-4 md:px-6 overflow-x-hidden" style={{ marginTop: 55 }}>
         <div className="max-w-6xl mx-auto py-4 md:py-6">
           {/* Page Header with Invite Button */}
-          <div className="flex items-center justify-between mb-6 gap-4">
-            <div className="flex-1 min-w-0">
-              <p className="text-base md:text-lg text-gray-500">
+          <div className="flex items-start sm:items-center justify-between mb-6 gap-4">
+            <div className="flex-1 min-w-0 pt-3 sm:pt-0">
+              <p className="text-base text-gray-500">
                 Share your stories with loved ones
               </p>
             </div>
@@ -522,7 +522,7 @@ export default function FamilyPage() {
             <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
             <DialogTrigger asChild>
               <Button
-                className="min-h-[60px] px-6 md:px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200 shrink-0"
+                className="shrink-0 min-h-[60px] px-6 md:px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
               >
                 <UserPlus className="w-5 h-5 mr-2" />
                 <span className="hidden sm:inline">Invite Family</span>
@@ -674,11 +674,11 @@ export default function FamilyPage() {
             {/* Family Stats */}
             <div className="grid grid-cols-3 gap-3 md:gap-4">
               <Card className="bg-white border border-gray-200 rounded-xl">
-                <CardContent className="pt-5 pb-5 px-3 md:px-4">
+                <CardContent className="py-4 px-3 md:px-4">
                   <div className="text-center">
-                    <Users className="w-7 h-7 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
-                    <p className="text-2xl md:text-3xl font-bold text-gray-900">{totalMembers}</p>
-                    <p className="text-sm md:text-base text-gray-500 mt-1">
+                    <Users className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
+                    <p className="text-xl md:text-3xl font-bold text-gray-900">{totalMembers}</p>
+                    <p className="text-xs md:text-base text-gray-500 mt-1">
                       Members
                     </p>
                   </div>
@@ -686,11 +686,11 @@ export default function FamilyPage() {
               </Card>
 
               <Card className="bg-white border border-gray-200 rounded-xl">
-                <CardContent className="pt-5 pb-5 px-3 md:px-4">
+                <CardContent className="py-4 px-3 md:px-4">
                   <div className="text-center">
-                    <Share2 className="w-7 h-7 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
-                    <p className="text-2xl md:text-3xl font-bold text-gray-900">{sharedStories}</p>
-                    <p className="text-sm md:text-base text-gray-500 mt-1">
+                    <Share2 className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
+                    <p className="text-xl md:text-3xl font-bold text-gray-900">{sharedStories}</p>
+                    <p className="text-xs md:text-base text-gray-500 mt-1">
                       Stories
                     </p>
                   </div>
@@ -698,11 +698,11 @@ export default function FamilyPage() {
               </Card>
 
               <Card className="bg-white border border-gray-200 rounded-xl">
-                <CardContent className="pt-5 pb-5 px-3 md:px-4">
+                <CardContent className="py-4 px-3 md:px-4">
                   <div className="text-center">
-                    <Eye className="w-7 h-7 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
-                    <p className="text-2xl md:text-3xl font-bold text-gray-900">{totalViews}</p>
-                    <p className="text-sm md:text-base text-gray-500 mt-1">Views</p>
+                    <Eye className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
+                    <p className="text-xl md:text-3xl font-bold text-gray-900">{totalViews}</p>
+                    <p className="text-xs md:text-base text-gray-500 mt-1">Views</p>
                   </div>
                 </CardContent>
               </Card>
@@ -710,12 +710,12 @@ export default function FamilyPage() {
 
             {/* Active Family Members */}
             <Card className="bg-white border border-gray-200 rounded-xl">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-xl md:text-2xl font-semibold text-gray-900">
-                  <Users className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg md:text-xl font-semibold text-gray-900">
+                  <Users className="w-5 h-5 text-blue-600" />
                   Family Members ({activeMembers.length})
                 </CardTitle>
-                <CardDescription className="text-base text-gray-500">
+                <CardDescription className="text-sm md:text-base text-gray-500 mt-1">
                   People who can view your stories
                 </CardDescription>
               </CardHeader>
@@ -735,20 +735,20 @@ export default function FamilyPage() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {activeMembers.map((member) => (
                       <div
                         key={member.id}
-                        className="flex flex-col gap-4 p-4 md:p-5 rounded-xl border border-gray-200 bg-white hover:shadow-sm transition-shadow overflow-hidden"
+                        className="flex flex-col gap-3 p-4 rounded-xl border border-gray-200 bg-white hover:shadow-sm transition-shadow overflow-hidden"
                       >
-                        <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
                           <Avatar className="w-12 h-12 shrink-0">
                             <AvatarFallback className="bg-blue-100 text-blue-600 text-lg font-medium">
                               {(member.name || member.email)[0].toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <p className="font-semibold text-base md:text-lg text-gray-900 truncate">
                                 {member.name || member.email}
                               </p>
@@ -758,33 +758,23 @@ export default function FamilyPage() {
                                 </Badge>
                               )}
                             </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                              <span className="text-sm md:text-base text-gray-500 break-all">{member.email}</span>
-                              {member.last_accessed_at && (
-                                <span className="flex items-center gap-1 text-sm text-gray-500">
-                                  <Clock className="w-4 h-4" />
-                                  {getRelativeTime(member.last_accessed_at)}
-                                </span>
-                              )}
-                            </div>
-                            <div className="mt-2">
-                              <Badge
-                                variant={member.permissionLevel === 'contributor' ? 'default' : 'outline'}
-                                className={`text-sm ${member.permissionLevel === 'contributor' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border-gray-300 text-gray-700'}`}
-                              >
-                                {member.permissionLevel === 'contributor' ? '✏️ Contributor' : '👁 Viewer'}
-                              </Badge>
-                            </div>
+                            <p className="text-sm md:text-base text-gray-500 break-all mt-1">{member.email}</p>
+                            {member.last_accessed_at && (
+                              <p className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                                <Clock className="w-4 h-4" />
+                                Last viewed {getRelativeTime(member.last_accessed_at)}
+                              </p>
+                            )}
                           </div>
                         </div>
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2 w-full sm:w-auto">
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
                           <Select
                             value={member.permissionLevel || 'viewer'}
                             onValueChange={(value: 'viewer' | 'contributor') =>
                               updatePermissionMutation.mutate({ memberId: member.id, permissionLevel: value })
                             }
                           >
-                            <SelectTrigger className="min-h-[48px] w-full sm:w-[140px] px-3 text-base border-gray-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0">
+                            <SelectTrigger className="flex-1 sm:flex-none min-h-[48px] sm:w-[160px] px-3 text-base border-gray-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -801,10 +791,9 @@ export default function FamilyPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="min-h-[48px] w-full sm:w-auto sm:min-w-[48px] text-red-600 hover:text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
+                                className="shrink-0 min-h-[48px] min-w-[48px] text-red-600 hover:text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 rounded-xl"
                               >
                                 <Trash2 className="w-5 h-5" />
-                                <span className="sm:hidden ml-2">Remove</span>
                               </Button>
                             </AlertDialogTrigger>
                           <AlertDialogContent>
@@ -842,49 +831,51 @@ export default function FamilyPage() {
             {/* Pending Invitations */}
             {pendingMembers.length > 0 && (
               <Card className="bg-white border border-gray-200 rounded-xl">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-xl md:text-2xl font-semibold text-gray-900">
-                    <Clock className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg md:text-xl font-semibold text-gray-900">
+                    <Clock className="w-5 h-5 text-blue-600" />
                     Pending Invitations ({pendingMembers.length})
                   </CardTitle>
-                  <CardDescription className="text-base text-gray-500">Waiting for acceptance</CardDescription>
+                  <CardDescription className="text-sm md:text-base text-gray-500 mt-1">Waiting for acceptance</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {pendingMembers.map((member) => (
                       <div
                         key={member.id}
-                        className="flex flex-col gap-4 p-4 md:p-5 rounded-xl border border-gray-200 bg-gray-50 overflow-hidden"
+                        className="flex flex-col gap-3 p-4 rounded-xl border border-gray-200 bg-gray-50 overflow-hidden"
                       >
-                        <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
                           <Avatar className="w-12 h-12 shrink-0">
                             <AvatarFallback className="bg-gray-200 text-gray-600 text-lg font-medium">
                               {member.email[0].toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <p className="font-semibold text-base md:text-lg text-gray-900 break-all">{member.email}</p>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap mt-1">
                               {member.relationship && (
                                 <Badge variant="outline" className="text-sm border-gray-300 text-gray-700">
                                   {member.relationship}
                                 </Badge>
                               )}
                               {member.inviteExpired && (
-                                <Badge variant="destructive" className="text-sm bg-red-600 text-white">Expired</Badge>
+                                <Badge className="text-sm bg-red-600 text-white border-0">Expired</Badge>
                               )}
                             </div>
-                            <p className="text-sm md:text-base text-gray-500">
+                            <p className="text-sm text-gray-500 mt-1">
                               Invited {getRelativeTime(member.invited_at)}
                             </p>
                           </div>
                         </div>
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
                           <Button
                             variant="ghost"
                             onClick={() => resendMutation.mutate(member.id)}
                             disabled={resendMutation.isPending}
-                            className="min-h-[48px] px-4 text-base text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 whitespace-nowrap"
+                            className="flex-1 sm:flex-none min-h-[48px] px-4 text-base text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 rounded-xl"
                           >
                             {resendMutation.isPending ? "Sending..." : "Resend"}
                           </Button>
@@ -892,7 +883,7 @@ export default function FamilyPage() {
                             <AlertDialogTrigger asChild>
                               <Button
                                 variant="ghost"
-                                className="min-h-[48px] px-4 text-base text-red-600 hover:text-red-700 hover:bg-red-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 whitespace-nowrap"
+                                className="flex-1 sm:flex-none min-h-[48px] px-4 text-base text-red-600 hover:text-red-700 hover:bg-red-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 rounded-xl"
                               >
                                 Revoke
                               </Button>
@@ -933,25 +924,25 @@ export default function FamilyPage() {
           {/* Sidebar - Recent Activity */}
           <div className="space-y-6">
             <Card className="bg-white border border-gray-200 rounded-xl">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-xl md:text-2xl font-semibold text-gray-900">
-                  <Activity className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg md:text-xl font-semibold text-gray-900">
+                  <Activity className="w-5 h-5 text-blue-600" />
                   Recent Activity
                 </CardTitle>
-                <CardDescription className="text-base text-gray-500">
+                <CardDescription className="text-sm md:text-base text-gray-500 mt-1">
                   What your family has been viewing
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {familyActivity.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Activity className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 text-gray-400" />
-                    <p className="text-base md:text-lg text-gray-500">
+                  <div className="text-center py-8">
+                    <Activity className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                    <p className="text-base text-gray-500">
                       No activity yet
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-5">
+                  <div className="space-y-4">
                     {familyActivity.slice(0, 10).map((activity) => {
                       const ActivityIcon = getActivityIcon(
                         activity.activityType,
@@ -959,12 +950,12 @@ export default function FamilyPage() {
                       return (
                         <div key={activity.id} className="flex gap-3">
                           <div className="flex-shrink-0">
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-100">
-                              <ActivityIcon className="w-5 h-5 text-blue-600" />
+                            <div className="w-9 h-9 rounded-full flex items-center justify-center bg-blue-100">
+                              <ActivityIcon className="w-4 h-4 text-blue-600" />
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-base text-gray-900 leading-relaxed">
+                            <p className="text-sm md:text-base text-gray-900 leading-snug">
                               <span className="font-semibold">
                                 {activity.familyMember.name ||
                                   activity.familyMember.email}
@@ -976,7 +967,7 @@ export default function FamilyPage() {
                                 "{activity.storyTitle}"
                               </span>
                             </p>
-                            <p className="text-sm text-gray-500 mt-1">
+                            <p className="text-xs md:text-sm text-gray-500 mt-0.5">
                               {getRelativeTime(activity.createdAt)}
                             </p>
                           </div>
