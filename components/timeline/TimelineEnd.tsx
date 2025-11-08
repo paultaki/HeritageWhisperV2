@@ -109,6 +109,8 @@ export function TimelineEnd({
         className="absolute gradient-line"
         style={{
           width: "4px",
+          left: "calc(50% + 225px)",
+          transform: "translateX(-50%)",
           background: isDark
             ? "linear-gradient(to bottom, rgba(176, 179, 184, 0.35) 0%, rgba(176, 179, 184, 0.2) 40%, transparent 100%)"
             : "linear-gradient(to bottom, rgba(196, 167, 183, 0.35) 0%, rgba(196, 167, 183, 0.2) 40%, transparent 100%)",
@@ -118,20 +120,21 @@ export function TimelineEnd({
       {/* Terminal node - "Today" */}
       <div className="relative flex items-center mb-12 today-node">
         {/* Terminal dot aligned with spine */}
-        <div
-          className="w-3 h-3 rounded-full border-2 flex-shrink-0"
-          style={{
-            marginLeft: "10px",
-            backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3",
-            borderColor: isDark ? "#b0b3b8" : "#B49D8D",
-          }}
-        />
-        <span
-          className="ml-3 text-sm font-medium"
-          style={{ color: isDark ? "#8a8d92" : "#9CA3AF" }}
-        >
-          Today
-        </span>
+        <div className="flex items-center" style={{ marginLeft: "calc(50% + 225px - 6px)" }}>
+          <div
+            className="w-3 h-3 rounded-full border-2 flex-shrink-0"
+            style={{
+              backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3",
+              borderColor: isDark ? "#b0b3b8" : "#B49D8D",
+            }}
+          />
+          <span
+            className="ml-3 text-sm font-medium"
+            style={{ color: isDark ? "#8a8d92" : "#9CA3AF" }}
+          >
+            Today
+          </span>
+        </div>
       </div>
 
       {/* CTA Button */}
@@ -140,6 +143,7 @@ export function TimelineEnd({
         onClick={handleClick}
         aria-label="Add a new memory"
         className="end-cta-button"
+        style={{ marginLeft: "225px", marginRight: "auto" }}
       >
         + {getButtonConfig().text}
       </button>
@@ -154,7 +158,6 @@ export function TimelineEnd({
 
       <style jsx>{`
         .gradient-line {
-          left: 0px;
           top: -12px;
           height: 72px;
         }
@@ -163,12 +166,7 @@ export function TimelineEnd({
           padding-top: 52px;
         }
 
-        .today-node > div {
-          margin-left: -4px !important; /* Moved 14px left total */
-        }
-
         .end-cta-button {
-          margin: 0 auto;
           display: block;
           width: min(640px, 92%);
           min-height: 60px;
@@ -198,19 +196,16 @@ export function TimelineEnd({
 
         @media (min-width: 768px) {
           .gradient-line {
-            left: 465px;
             top: 239px;
             height: 96px;
           }
 
           .today-node {
             padding-top: 355px;
-            padding-left: 450px;
           }
 
           .end-cta-button {
             margin-top: 190px;
-            margin-left: 225px; /* Offset the parent's -225px to center on window */
           }
         }
       `}</style>

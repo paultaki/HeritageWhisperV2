@@ -26,7 +26,11 @@ type Props = {
   id: string;
   title: string;
   description?: string;
-  imageUrl: string;
+  // NEW: Dual WebP URLs
+  masterUrl?: string;
+  displayUrl?: string;
+  // DEPRECATED (backward compatibility):
+  imageUrl?: string;
   category: TreasureCategory;
   year?: number;
   isFavorite: boolean;
@@ -52,6 +56,8 @@ export function TreasureCard({
   id,
   title,
   description,
+  masterUrl,
+  displayUrl,
   imageUrl,
   category,
   year,
@@ -91,7 +97,7 @@ export function TreasureCard({
       <div className="relative overflow-hidden" style={{ minHeight: "200px" }}>
         {!imageError ? (
           <img
-            src={imageUrl}
+            src={displayUrl || imageUrl}
             alt={title}
             className={cn(
               "w-full h-full object-cover transition-opacity duration-300",

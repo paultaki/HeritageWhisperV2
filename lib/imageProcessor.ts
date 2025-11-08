@@ -150,3 +150,97 @@ export async function getImageInfo(buffer: Buffer) {
     throw new Error("Failed to read image metadata");
   }
 }
+
+/**
+ * Process image to dual WebP versions (Master + Display)
+ * - Master: 2400px wide @ 85% quality (for future printing - 8" at 300 DPI)
+ * - Display: 550px wide @ 80% quality (for timeline/book/treasure views)
+ * - Strips ALL EXIF metadata for privacy (GPS, camera info, timestamps)
+ * - Uses Sharp's clone() for parallel processing
+ */
+export async function processImageToWebP(
+  buffer: Buffer,
+): Promise<{
+  master: { buffer: Buffer; width: number; height: number };
+  display: { buffer: Buffer; width: number; height: number };
+}> {
+  try {
+    // Create base pipeline with auto-rotation
+    const pipeline = sharp(buffer).rotate(); // Auto-rotate based on EXIF orientation
+
+    // Get original dimensions for validation
+    const metadata = await pipeline.metadata();
+
+    if (!metadata.width || !metadata.height) {
+      throw new Error("Invalid image: missing dimensions");
+    }
+
+    // Validate dimensions (min 10px, max 20000px)
+    if (
+      metadata.width < 10 ||
+      metadata.height < 10 ||
+      metadata.width > 20000 ||
+      metadata.height > 20000
+    ) {
+      throw new Error(
+        `Invalid image dimensions: ${metadata.width}x${metadata.height}`,
+      );
+    }
+
+    // Clone pipeline for parallel processing
+    const masterPipeline = pipeline.clone();
+    const displayPipeline = pipeline.clone();
+
+    // Master WebP: 2400px wide, 85% quality, effort 6 (best compression)
+    const masterBuffer = await masterPipeline
+      .resize(2400, null, {
+        fit: "inside", // Maintain aspect ratio
+        withoutEnlargement: true, // Don't upscale smaller images
+      })
+      .webp({
+        quality: 85,
+        effort: 6, // Maximum compression effort (0-6, higher = smaller file)
+      })
+      .withMetadata({
+        // Strip ALL metadata for privacy
+        exif: {},
+        icc: undefined,
+      })
+      .toBuffer({ resolveWithObject: true });
+
+    // Display WebP: 550px wide, 80% quality, effort 4 (balanced)
+    const displayBuffer = await displayPipeline
+      .resize(550, null, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({
+        quality: 80,
+        effort: 4, // Balanced compression (faster than master)
+      })
+      .withMetadata({
+        // Strip ALL metadata for privacy
+        exif: {},
+        icc: undefined,
+      })
+      .toBuffer({ resolveWithObject: true });
+
+    return {
+      master: {
+        buffer: masterBuffer.data,
+        width: masterBuffer.info.width,
+        height: masterBuffer.info.height,
+      },
+      display: {
+        buffer: displayBuffer.data,
+        width: displayBuffer.info.width,
+        height: displayBuffer.info.height,
+      },
+    };
+  } catch (error) {
+    console.error("WebP processing error:", error);
+    throw new Error(
+      `Failed to process image to WebP: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+}

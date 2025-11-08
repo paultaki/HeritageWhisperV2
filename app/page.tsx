@@ -54,7 +54,7 @@ export default function Home() {
     {
       title: "Just Press Record",
       description: "No typing, no complexity. Your own voice, your own pace—transcribed beautifully.",
-      image: "/microphone.webp",
+      image: "/microphone 2.webp",
     },
     {
       title: "Beautiful Timeline",

@@ -24,8 +24,14 @@ import {
 
 export interface StoryPhoto {
   id: string;
-  url: string;
-  filePath?: string; // Storage path (without signed URL)
+  // NEW: Dual WebP paths and URLs
+  masterPath?: string; // Path to master WebP (2400px @ 85% quality)
+  displayPath?: string; // Path to display WebP (550px @ 80% quality)
+  masterUrl?: string; // Signed URL for master (generated on-demand)
+  displayUrl?: string; // Signed URL for display (generated on-demand)
+  // DEPRECATED (backward compatibility):
+  url?: string; // Old: file path or signed URL (fallback to displayUrl)
+  filePath?: string; // Old: storage path (fallback to displayPath)
   transform?: { zoom: number; position: { x: number; y: number } };
   caption?: string;
   isHero?: boolean;
@@ -46,15 +52,20 @@ interface MultiPhotoUploaderProps {
   loading?: boolean;
 }
 
-// Normalize photo URL to handle local blob URLs
-const normalizePhotoUrl = (url: string) => {
-  if (!url) return url;
+// Get the display URL for a photo (handles dual WebP + backward compatibility)
+const getPhotoDisplayUrl = (photo: StoryPhoto): string => {
+  // Prefer displayUrl (new dual WebP system)
+  if (photo.displayUrl) return photo.displayUrl;
 
-  // Handle blob URLs (for temporary local previews) - keep as-is
-  if (url.startsWith("blob:")) return url;
+  // Fall back to url for backward compatibility (old single-path system)
+  if (photo.url) {
+    // Handle blob URLs (for temporary local previews) - keep as-is
+    if (photo.url.startsWith("blob:")) return photo.url;
+    // All other URLs (including signed URLs from server) are used as-is
+    return photo.url;
+  }
 
-  // All other URLs (including signed URLs from server) are used as-is
-  return url;
+  return "";
 };
 
 // Migration helper: Convert legacy pixel-based transforms to percentage-based
@@ -484,7 +495,7 @@ export function MultiPhotoUploader({
                     {/* Image container with consistent aspect ratio */}
                     <div className="absolute inset-0 overflow-hidden">
                       <img
-                        src={normalizePhotoUrl(photo.url)}
+                        src={getPhotoDisplayUrl(photo)}
                         alt={`Photo ${index + 1}`}
                         className="absolute inset-0 w-full h-full"
                         style={{
@@ -651,7 +662,7 @@ export function MultiPhotoUploader({
                   >
                     <img
                       ref={imageRef}
-                      src={normalizePhotoUrl(selectedPhoto.url)}
+                      src={getPhotoDisplayUrl(selectedPhoto)}
                       alt="Edit photo"
                       className="absolute inset-0 w-full h-full transition-transform cursor-move"
                       style={{

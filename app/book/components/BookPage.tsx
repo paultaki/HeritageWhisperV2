@@ -15,7 +15,11 @@ interface Story {
   audioUrl?: string;
   photos?: Array<{
     id: string;
-    url: string;
+    // NEW: Dual WebP URLs
+    masterUrl?: string;
+    displayUrl?: string;
+    // DEPRECATED (backward compatibility):
+    url?: string;
     caption?: string;
     isHero?: boolean;
   }>;
@@ -719,11 +723,13 @@ function StoryContent({ story, position, pageNum, fontSize = 18 }: { story: Stor
       {story.photos && story.photos.length > 0 && (() => {
         // Find the hero photo, or use the first photo as fallback
         const heroPhoto = story.photos.find(p => p.isHero) || story.photos[0];
+        // Get display URL (prefer displayUrl, fall back to url for backward compatibility)
+        const photoUrl = heroPhoto.displayUrl || heroPhoto.url;
         return (
           <div className="mb-2">
             <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
               <img
-                src={heroPhoto.url}
+                src={photoUrl}
                 alt={story.title}
                 className="w-full h-full object-cover"
               />

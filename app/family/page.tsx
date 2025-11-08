@@ -667,37 +667,37 @@ export default function FamilyPage() {
             {/* Family Stats */}
             <div className="grid grid-cols-3 gap-3 md:gap-4">
               <Card className="bg-white border border-gray-200 rounded-xl">
-                <CardContent className="pt-3 pb-2 px-3 md:px-4">
+                <div className="py-2.5 px-3 md:px-4">
                   <div className="text-center">
-                    <Users className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
-                    <p className="text-xl md:text-3xl font-bold text-gray-900">{totalMembers}</p>
-                    <p className="text-xs md:text-base text-gray-500">
+                    <Users className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-1 text-blue-600" />
+                    <p className="text-xl md:text-3xl font-bold text-gray-900 leading-none mb-0.5">{totalMembers}</p>
+                    <p className="text-xs md:text-base text-gray-500 leading-none mt-1">
                       Members
                     </p>
                   </div>
-                </CardContent>
+                </div>
               </Card>
 
               <Card className="bg-white border border-gray-200 rounded-xl">
-                <CardContent className="pt-3 pb-2 px-3 md:px-4">
+                <div className="py-2.5 px-3 md:px-4">
                   <div className="text-center">
-                    <Share2 className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
-                    <p className="text-xl md:text-3xl font-bold text-gray-900">{sharedStories}</p>
-                    <p className="text-xs md:text-base text-gray-500">
+                    <Share2 className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-1 text-blue-600" />
+                    <p className="text-xl md:text-3xl font-bold text-gray-900 leading-none mb-0.5">{sharedStories}</p>
+                    <p className="text-xs md:text-base text-gray-500 leading-none mt-1">
                       Stories
                     </p>
                   </div>
-                </CardContent>
+                </div>
               </Card>
 
               <Card className="bg-white border border-gray-200 rounded-xl">
-                <CardContent className="pt-3 pb-2 px-3 md:px-4">
+                <div className="py-2.5 px-3 md:px-4">
                   <div className="text-center">
-                    <Eye className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
-                    <p className="text-xl md:text-3xl font-bold text-gray-900">{totalViews}</p>
-                    <p className="text-xs md:text-base text-gray-500">Views</p>
+                    <Eye className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-1 text-blue-600" />
+                    <p className="text-xl md:text-3xl font-bold text-gray-900 leading-none mb-0.5">{totalViews}</p>
+                    <p className="text-xs md:text-base text-gray-500 leading-none mt-1">Views</p>
                   </div>
-                </CardContent>
+                </div>
               </Card>
             </div>
 

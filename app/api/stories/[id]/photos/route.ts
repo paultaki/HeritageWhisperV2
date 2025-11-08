@@ -64,28 +64,41 @@ export async function GET(
     const photos = story.metadata?.photos || [];
     const photosWithSignedUrls = await Promise.all(
       photos.map(async (photo: any) => {
-        if (!photo.url) return photo;
+        let masterUrl = photo.masterUrl;
+        let displayUrl = photo.displayUrl;
 
-        // If already a full URL, use as-is
-        if (
-          photo.url.startsWith("http://") ||
-          photo.url.startsWith("https://")
-        ) {
-          return photo;
+        // Generate signed URLs for new dual-path photos
+        if (photo.masterPath && !photo.masterPath.startsWith("http")) {
+          const { data: masterSignedData } = await supabaseAdmin.storage
+            .from("heritage-whisper-files")
+            .createSignedUrl(photo.masterPath, 3600); // 1 hour expiry
+          masterUrl = masterSignedData?.signedUrl || photo.masterPath;
         }
 
-        // Generate signed URL for storage path
-        // Photos are stored with 'photo/' prefix in heritage-whisper-files bucket
-        const photoPath = photo.url.startsWith("photo/")
-          ? photo.url
-          : `photo/${photo.url}`;
-        const { data: signedUrlData } = await supabaseAdmin.storage
-          .from("heritage-whisper-files")
-          .createSignedUrl(photoPath, 3600); // 1 hour expiry
+        if (photo.displayPath && !photo.displayPath.startsWith("http")) {
+          const { data: displaySignedData } = await supabaseAdmin.storage
+            .from("heritage-whisper-files")
+            .createSignedUrl(photo.displayPath, 3600);
+          displayUrl = displaySignedData?.signedUrl || photo.displayPath;
+        }
+
+        // Fallback to old single-path for backward compatibility
+        if (!displayUrl && photo.url && !photo.url.startsWith("http")) {
+          const photoPath = photo.url.startsWith("photo/")
+            ? photo.url
+            : `photo/${photo.url}`;
+          const { data: signedUrlData } = await supabaseAdmin.storage
+            .from("heritage-whisper-files")
+            .createSignedUrl(photoPath, 3600);
+          displayUrl = signedUrlData?.signedUrl || photo.url;
+        }
 
         return {
           ...photo,
-          url: signedUrlData?.signedUrl || photo.url,
+          masterUrl,
+          displayUrl,
+          // DEPRECATED (backward compatibility):
+          url: displayUrl || photo.url,
         };
       }),
     );
@@ -133,13 +146,14 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { filePath, isHero, transform } = body;
+    const { masterPath, displayPath, filePath, isHero, transform } = body;
 
     // REMOVED: Sensitive data logging - console.log('[POST /api/stories/[id]/photos] Request body:', body);
 
-    if (!filePath) {
+    // Require at least display path (or filePath for backward compatibility)
+    if (!displayPath && !filePath) {
       return NextResponse.json(
-        { error: "File path is required" },
+        { error: "Display path or file path is required" },
         { status: 400 },
       );
     }
@@ -168,11 +182,14 @@ export async function POST(
       story.metadata,
     );
 
-    // Create new photo object - store the PATH, not the signed URL
+    // Create new photo object - store the PATHS, not signed URLs
     const newPhoto = {
       id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      url: filePath, // Store the path, not a signed URL
-      filePath: filePath, // Also store as filePath for clarity
+      masterPath: masterPath || undefined,
+      displayPath: displayPath || undefined,
+      // DEPRECATED (backward compatibility):
+      url: displayPath || filePath,
+      filePath: displayPath || filePath,
       transform: transform || { zoom: 1, position: { x: 0, y: 0 } },
       isHero: isHero || false,
       caption: "",
@@ -231,19 +248,41 @@ export async function POST(
       updatedStory.metadata,
     );
 
-    // Generate a signed URL for the photo so it can be displayed immediately
-    // Photos are stored with 'photo/' prefix in heritage-whisper-files bucket
-    const photoPath = filePath.startsWith("photo/")
-      ? filePath
-      : `photo/${filePath}`;
-    const { data: signedUrlData } = await supabaseAdmin.storage
-      .from("heritage-whisper-files")
-      .createSignedUrl(photoPath, 604800); // 1 week expiry
+    // Generate signed URLs for both master and display versions
+    let masterUrl, displayUrl;
+
+    if (masterPath) {
+      const { data: masterSignedData } = await supabaseAdmin.storage
+        .from("heritage-whisper-files")
+        .createSignedUrl(masterPath, 604800); // 1 week expiry
+      masterUrl = masterSignedData?.signedUrl || masterPath;
+    }
+
+    if (displayPath) {
+      const { data: displaySignedData } = await supabaseAdmin.storage
+        .from("heritage-whisper-files")
+        .createSignedUrl(displayPath, 604800);
+      displayUrl = displaySignedData?.signedUrl || displayPath;
+    }
+
+    // Fallback for backward compatibility
+    if (!displayUrl && filePath) {
+      const photoPath = filePath.startsWith("photo/")
+        ? filePath
+        : `photo/${filePath}`;
+      const { data: signedUrlData } = await supabaseAdmin.storage
+        .from("heritage-whisper-files")
+        .createSignedUrl(photoPath, 604800);
+      displayUrl = signedUrlData?.signedUrl || filePath;
+    }
 
     const photoWithSignedUrl = {
       ...newPhoto,
-      url: signedUrlData?.signedUrl || filePath, // Return signed URL for display
-      filePath: filePath, // Always include the storage path
+      masterUrl,
+      displayUrl,
+      // DEPRECATED (backward compatibility):
+      url: displayUrl,
+      filePath: displayPath || filePath,
     };
 
     return NextResponse.json({ photo: photoWithSignedUrl });

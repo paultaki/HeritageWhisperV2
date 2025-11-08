@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Star } from "lucide-react"
+import Image from "next/image"
 
 export default function TestimonialsSection() {
   const [activeTestimonial, setActiveTestimonial] = useState(0)
@@ -15,7 +16,7 @@ export default function TestimonialsSection() {
       location: "Austin, TX",
       relation: "Daughter",
       stories: "47 stories saved",
-      avatar: "S",
+      image: "/sarah.webp",
     },
     {
       quote:
@@ -24,7 +25,7 @@ export default function TestimonialsSection() {
       location: "Seattle, WA",
       relation: "Son",
       stories: "62 stories saved",
-      avatar: "D",
+      image: "/david.webp",
     },
     {
       quote:
@@ -33,7 +34,7 @@ export default function TestimonialsSection() {
       location: "Miami, FL",
       relation: "Daughter",
       stories: "50 stories saved",
-      avatar: "J",
+      image: "/jennifer.webp",
     },
   ]
 
@@ -86,8 +87,14 @@ export default function TestimonialsSection() {
                 transform: isTransitioning ? "scale(0.95)" : "scale(1)",
               }}
             >
-              <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-[#8b6b7a] to-[#b88b94] flex items-center justify-center text-white text-5xl md:text-7xl font-bold shadow-xl">
-                {testimonials[activeTestimonial].avatar}
+              <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden shadow-xl">
+                <Image
+                  src={testimonials[activeTestimonial].image}
+                  alt={testimonials[activeTestimonial].name}
+                  width={192}
+                  height={192}
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
 

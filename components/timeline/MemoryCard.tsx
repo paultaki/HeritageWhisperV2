@@ -179,14 +179,27 @@ export const MemoryCard = React.memo(
     // Get top trait for display
     const top = getTopTraits(story, 1, 0.6);
 
+    // Helper: Get display URL from photo (handles dual WebP + backward compatibility)
+    const getPhotoDisplayUrl = (photo: any): string | undefined => {
+      // Prefer displayUrl (new dual WebP system)
+      if (photo.displayUrl) return photo.displayUrl;
+      // Fall back to url for backward compatibility
+      if (photo.url) return photo.url;
+      return undefined;
+    };
+
     // Get the display photo - hero photo if exists, otherwise first photo, otherwise legacy photoUrl
     const getDisplayPhoto = () => {
       if (story.photos && story.photos.length > 0) {
-        const heroPhoto = story.photos.find((p) => p.isHero && p.url);
-        if (heroPhoto) return heroPhoto;
-        // Find first photo with valid URL
-        const firstValidPhoto = story.photos.find((p) => p.url);
-        if (firstValidPhoto) return firstValidPhoto;
+        // Check for hero photo with valid display URL
+        const heroPhoto = story.photos.find(
+          (p) => p.isHero && getPhotoDisplayUrl(p)
+        );
+        if (heroPhoto) return { ...heroPhoto, url: getPhotoDisplayUrl(heroPhoto) };
+
+        // Find first photo with valid display URL
+        const firstValidPhoto = story.photos.find((p) => getPhotoDisplayUrl(p));
+        if (firstValidPhoto) return { ...firstValidPhoto, url: getPhotoDisplayUrl(firstValidPhoto) };
       }
       if (story.photoUrl) {
         return { url: story.photoUrl, transform: story.photoTransform };

@@ -69,9 +69,9 @@ export function DesktopPageHeader({
             <Image
               src="/final logo/chat-bubble-logo.svg"
               alt="Heritage Whisper Logo"
-              width={128}
-              height={128}
-              className="w-[128px] h-[128px] flex-shrink-0 relative"
+              width={102}
+              height={102}
+              className="w-[102px] h-[102px] flex-shrink-0 relative"
               style={{ top: '6px' }}
               priority
             />
@@ -150,9 +150,9 @@ export function MobilePageHeader({
             <Image
               src="/final logo/chat-bubble-hw-logo.svg"
               alt="Heritage Whisper Logo"
-              width={53}
-              height={53}
-              className="w-[53px] h-[53px] flex-shrink-0 relative"
+              width={42}
+              height={42}
+              className="w-[42px] h-[42px] flex-shrink-0 relative"
               style={{ top: '1px', left: '-10px' }}
               priority
             />

@@ -152,7 +152,14 @@ export const stories = pgTable("stories", {
   photos: jsonb("photos").$type<
     Array<{
       id: string;
-      url: string;
+      // NEW: Dual WebP paths (suffix naming: photo-{id}-master.webp, photo-{id}-display.webp)
+      masterPath?: string; // Path to master WebP (2400px @ 85% quality)
+      displayPath?: string; // Path to display WebP (550px @ 80% quality)
+      masterUrl?: string; // Optional: signed URL for master (generated on-demand)
+      displayUrl?: string; // Optional: signed URL for display (generated on-demand)
+      // DEPRECATED (kept for backward compatibility during migration):
+      url?: string; // Old: file path or signed URL
+      filePath?: string; // Old: duplicate for clarity
       transform?: { zoom: number; position: { x: number; y: number } };
       caption?: string;
       isHero?: boolean;
@@ -222,8 +229,12 @@ export const treasures = pgTable("treasures", {
   description: text("description"),
   category: text("category").notNull(), // 'photos', 'documents', 'heirlooms', 'places', 'recipes', 'memorabilia'
   year: integer("year"),
-  imageUrl: text("image_url").notNull(),
-  thumbnailUrl: text("thumbnail_url"),
+  // NEW: Dual WebP paths (suffix naming: treasure-{id}-master.webp, treasure-{id}-display.webp)
+  masterPath: text("master_path"), // Path to master WebP (2400px @ 85% quality)
+  displayPath: text("display_path"), // Path to display WebP (550px @ 80% quality)
+  // DEPRECATED (kept for backward compatibility during migration):
+  imageUrl: text("image_url"), // Old: public URL
+  thumbnailUrl: text("thumbnail_url"), // Old: replaced by displayPath
   isFavorite: boolean("is_favorite").default(false).notNull(),
   linkedStoryId: uuid("linked_story_id").references(() => stories.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").default(sql`NOW()`),
@@ -339,7 +350,14 @@ export const demoStories = pgTable("demo_stories", {
   photos: jsonb("photos").$type<
     Array<{
       id: string;
-      url: string;
+      // NEW: Dual WebP paths (suffix naming: photo-{id}-master.webp, photo-{id}-display.webp)
+      masterPath?: string; // Path to master WebP (2400px @ 85% quality)
+      displayPath?: string; // Path to display WebP (550px @ 80% quality)
+      masterUrl?: string; // Optional: signed URL for master (generated on-demand)
+      displayUrl?: string; // Optional: signed URL for display (generated on-demand)
+      // DEPRECATED (kept for backward compatibility during migration):
+      url?: string; // Old: file path or signed URL
+      filePath?: string; // Old: duplicate for clarity
       transform?: { zoom: number; position: { x: number; y: number } };
       caption?: string;
       isHero?: boolean;

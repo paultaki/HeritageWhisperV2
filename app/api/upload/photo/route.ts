@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
 
     // Validate that it's actually an image
-    const { validateImage, processImage } = await import(
+    const { validateImage, processImageToWebP } = await import(
       "@/lib/imageProcessor"
     );
     const isValidImage = await validateImage(buffer);
@@ -82,49 +82,75 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Process image: strip EXIF data, optimize, and convert to standard format
-    const { buffer: processedBuffer, contentType } = await processImage(
-      buffer,
-      {
-        maxWidth: 2400,
-        maxHeight: 2400,
-        quality: 85,
-        format: "jpeg", // Convert all photos to JPEG for consistency
-      },
-    );
+    // Process image to dual WebP versions (Master + Display)
+    const { master, display } = await processImageToWebP(buffer);
 
-    // Generate unique filename with photo/ prefix for heritage-whisper-files bucket
+    // Generate unique filenames with suffix naming
     const timestamp = Date.now();
-    const filename = `photo/${user.id}/${storyId || "temp"}/${timestamp}.jpg`;
+    const baseFilename = `photo/${user.id}/${storyId || "temp"}/${timestamp}`;
+    const masterFilename = `${baseFilename}-master.webp`;
+    const displayFilename = `${baseFilename}-display.webp`;
 
-    // Upload processed image to Supabase Storage using admin client
-    const { data, error } = await supabaseAdmin.storage
+    // Upload Master WebP (2400px @ 85% quality)
+    const { error: masterError } = await supabaseAdmin.storage
       .from("heritage-whisper-files")
-      .upload(filename, processedBuffer, {
-        contentType, // Use the content type from processed image
+      .upload(masterFilename, master.buffer, {
+        contentType: "image/webp",
         upsert: false,
       });
 
-    if (error) {
-      logger.error("Supabase upload error:", error);
+    if (masterError) {
+      logger.error("Master WebP upload error:", masterError);
       return NextResponse.json(
         {
-          error: "Failed to upload photo",
-          details: error.message,
+          error: "Failed to upload master photo",
+          details: masterError.message,
         },
         { status: 500 },
       );
     }
 
-    // Generate a signed URL for immediate display
-    const { data: signedUrlData } = await supabaseAdmin.storage
+    // Upload Display WebP (550px @ 80% quality)
+    const { error: displayError } = await supabaseAdmin.storage
       .from("heritage-whisper-files")
-      .createSignedUrl(filename, 604800); // 1 week expiry
+      .upload(displayFilename, display.buffer, {
+        contentType: "image/webp",
+        upsert: false,
+      });
+
+    if (displayError) {
+      logger.error("Display WebP upload error:", displayError);
+      // Clean up master file if display upload fails
+      await supabaseAdmin.storage
+        .from("heritage-whisper-files")
+        .remove([masterFilename]);
+      return NextResponse.json(
+        {
+          error: "Failed to upload display photo",
+          details: displayError.message,
+        },
+        { status: 500 },
+      );
+    }
+
+    // Generate signed URLs for immediate display (1 week expiry)
+    const { data: masterSignedUrl } = await supabaseAdmin.storage
+      .from("heritage-whisper-files")
+      .createSignedUrl(masterFilename, 604800);
+
+    const { data: displaySignedUrl } = await supabaseAdmin.storage
+      .from("heritage-whisper-files")
+      .createSignedUrl(displayFilename, 604800);
 
     return NextResponse.json({
-      url: signedUrlData?.signedUrl || filename,
-      path: filename,
-      filePath: filename,
+      masterPath: masterFilename,
+      displayPath: displayFilename,
+      masterUrl: masterSignedUrl?.signedUrl || masterFilename,
+      displayUrl: displaySignedUrl?.signedUrl || displayFilename,
+      // DEPRECATED (for backward compatibility):
+      url: displaySignedUrl?.signedUrl || displayFilename,
+      path: displayFilename,
+      filePath: displayFilename,
     });
   } catch (error) {
     logger.error("Photo upload error:", error);
