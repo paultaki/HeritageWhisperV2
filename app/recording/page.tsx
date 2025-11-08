@@ -222,10 +222,10 @@ export default function PhotoFirstRecordingPage() {
 
   return (
     <div className="mx-auto max-w-md min-h-screen relative flex flex-col bg-white">
-      <main className="flex-1 flex flex-col pb-24">
+      <main className="flex-1 flex flex-col pb-20">
         {/* Screen 1: Home */}
         {currentScreen === 'home' && (
-          <section className="flex-1 flex flex-col px-6 pt-8">
+          <section className="flex-1 flex flex-col px-6 pt-4">
             <div className="text-center mb-8">
               <h1 className="text-[36px] leading-[1.2] tracking-tight font-semibold mb-6">
                 Every memory matters. Start with your voice.
