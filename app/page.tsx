@@ -209,6 +209,11 @@ export default function Home() {
                                       ? "w-full h-auto object-cover sm:w-auto sm:h-auto sm:max-w-full sm:max-h-full sm:object-contain"
                                       : "w-auto h-auto max-w-full max-h-full object-contain"
                                   }
+                                  style={
+                                    card.title === "Just Press Record"
+                                      ? { filter: "drop-shadow(0 10px 25px rgba(0, 0, 0, 0.15)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.1))" }
+                                      : undefined
+                                  }
                                 />
                               </div>
                             )}
