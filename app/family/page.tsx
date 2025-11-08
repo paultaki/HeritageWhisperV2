@@ -492,7 +492,7 @@ export default function FamilyPage() {
   ];
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}>
+    <div className="min-h-screen flex overflow-x-hidden" style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}>
       {/* Header */}
       {/* Desktop Header */}
       <div className="fixed top-0 left-0 right-0 z-50">
@@ -509,7 +509,7 @@ export default function FamilyPage() {
       </div>
 
       {/* Main content - with header spacing, centered */}
-      <main className="w-full pb-20 md:pb-0 px-4 md:px-6" style={{ marginTop: 55 }}>
+      <main className="w-full pb-20 md:pb-0 px-4 md:px-6 overflow-x-hidden" style={{ marginTop: 55 }}>
         <div className="max-w-6xl mx-auto py-4 md:py-6">
           {/* Page Header with Invite Button */}
           <div className="flex items-center justify-between mb-6 gap-4">
@@ -668,7 +668,7 @@ export default function FamilyPage() {
           </Dialog>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Family Stats */}
@@ -739,7 +739,7 @@ export default function FamilyPage() {
                     {activeMembers.map((member) => (
                       <div
                         key={member.id}
-                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 md:p-5 rounded-xl border border-gray-200 bg-white hover:shadow-sm transition-shadow"
+                        className="flex flex-col gap-4 p-4 md:p-5 rounded-xl border border-gray-200 bg-white hover:shadow-sm transition-shadow overflow-hidden"
                       >
                         <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
                           <Avatar className="w-12 h-12 shrink-0">
@@ -759,7 +759,7 @@ export default function FamilyPage() {
                               )}
                             </div>
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                              <span className="text-sm md:text-base text-gray-500 truncate">{member.email}</span>
+                              <span className="text-sm md:text-base text-gray-500 break-all">{member.email}</span>
                               {member.last_accessed_at && (
                                 <span className="flex items-center gap-1 text-sm text-gray-500">
                                   <Clock className="w-4 h-4" />
@@ -777,7 +777,7 @@ export default function FamilyPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 sm:gap-2 shrink-0">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2 w-full sm:w-auto">
                           <Select
                             value={member.permissionLevel || 'viewer'}
                             onValueChange={(value: 'viewer' | 'contributor') =>
@@ -801,9 +801,10 @@ export default function FamilyPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="min-h-[48px] min-w-[48px] text-red-600 hover:text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
+                                className="min-h-[48px] w-full sm:w-auto sm:min-w-[48px] text-red-600 hover:text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
                               >
                                 <Trash2 className="w-5 h-5" />
+                                <span className="sm:hidden ml-2">Remove</span>
                               </Button>
                             </AlertDialogTrigger>
                           <AlertDialogContent>
@@ -853,7 +854,7 @@ export default function FamilyPage() {
                     {pendingMembers.map((member) => (
                       <div
                         key={member.id}
-                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 md:p-5 rounded-xl border border-gray-200 bg-gray-50"
+                        className="flex flex-col gap-4 p-4 md:p-5 rounded-xl border border-gray-200 bg-gray-50 overflow-hidden"
                       >
                         <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
                           <Avatar className="w-12 h-12 shrink-0">
@@ -863,7 +864,7 @@ export default function FamilyPage() {
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <p className="font-semibold text-base md:text-lg text-gray-900 truncate">{member.email}</p>
+                              <p className="font-semibold text-base md:text-lg text-gray-900 break-all">{member.email}</p>
                               {member.relationship && (
                                 <Badge variant="outline" className="text-sm border-gray-300 text-gray-700">
                                   {member.relationship}
@@ -878,12 +879,12 @@ export default function FamilyPage() {
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                           <Button
                             variant="ghost"
                             onClick={() => resendMutation.mutate(member.id)}
                             disabled={resendMutation.isPending}
-                            className="min-h-[48px] px-4 text-base text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
+                            className="min-h-[48px] px-4 text-base text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 whitespace-nowrap"
                           >
                             {resendMutation.isPending ? "Sending..." : "Resend"}
                           </Button>
@@ -891,7 +892,7 @@ export default function FamilyPage() {
                             <AlertDialogTrigger asChild>
                               <Button
                                 variant="ghost"
-                                className="min-h-[48px] px-4 text-base text-red-600 hover:text-red-700 hover:bg-red-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
+                                className="min-h-[48px] px-4 text-base text-red-600 hover:text-red-700 hover:bg-red-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 whitespace-nowrap"
                               >
                                 Revoke
                               </Button>
