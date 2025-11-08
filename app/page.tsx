@@ -107,9 +107,9 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => router.push("/auth/login")}
-                  className="px-3 sm:px-4 md:px-[14px] py-2 sm:py-2 bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] rounded-full flex justify-center items-center hover:bg-gray-50 transition-colors flex-shrink-0"
+                  className="px-3 py-1.5 bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] rounded-full flex justify-center items-center hover:bg-gray-50 transition-colors flex-shrink-0"
                 >
-                  <div className="text-[#37322F] text-xs sm:text-sm md:text-[14px] font-medium">
+                  <div className="text-[#37322F] text-xs sm:text-sm font-medium">
                     Log in
                   </div>
                 </button>
