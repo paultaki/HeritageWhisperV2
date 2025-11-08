@@ -119,7 +119,7 @@ export default function Home() {
               <div className="w-full max-w-[937px] lg:w-[937px] flex flex-col justify-center items-center gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                 <div className="self-stretch rounded-[3px] flex flex-col justify-center items-center gap-4 sm:gap-5 md:gap-6 lg:gap-8">
                   {/* Headline */}
-                  <h1 className="w-full max-w-[748.71px] lg:w-[748.71px] text-center text-[#37322F] text-[32px] xs:text-[36px] sm:text-[44px] md:text-[64px] lg:text-[96px] font-normal leading-[1.1] sm:leading-[1.15] md:leading-[1.2] font-serif px-2 sm:px-4 md:px-0">
+                  <h1 className="w-full max-w-[748.71px] lg:w-[748.71px] text-center text-[#37322F] text-[32px] xs:text-[36px] sm:text-[44px] md:text-[56px] lg:text-[72px] font-normal leading-[1.1] sm:leading-[1.15] md:leading-[1.2] font-serif px-2 sm:px-4 md:px-0">
                     Your Family&apos;s Living Legacy—
                     <br />
                     Told in Their Own Voice
