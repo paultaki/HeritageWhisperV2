@@ -107,9 +107,9 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => router.push("/auth/login")}
-                  className="px-3 py-1.5 bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] rounded-full flex justify-center items-center hover:bg-gray-50 transition-colors flex-shrink-0"
+                  className="px-2 sm:px-2.5 py-1.5 bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] rounded-full flex justify-center items-center hover:bg-gray-50 transition-colors flex-shrink-0"
                 >
-                  <div className="text-[#37322F] text-xs sm:text-sm font-medium">
+                  <div className="text-[#37322F] text-xs sm:text-sm font-medium whitespace-nowrap">
                     Log in
                   </div>
                 </button>
@@ -162,8 +162,8 @@ export default function Home() {
                         {featureCards.map((card, index) => (
                           <div
                             key={index}
-                            className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                              activeCard === index ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+                            className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+                              activeCard === index ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-98 blur-md"
                             }`}
                           >
                             {/* Special scrolling animation for timeline */}
