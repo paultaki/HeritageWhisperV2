@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS public.family_sessions (
   user_agent TEXT,
   ip_address TEXT,
   expires_at TIMESTAMPTZ NOT NULL,
+  absolute_expires_at TIMESTAMPTZ NOT NULL,
   last_active_at TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

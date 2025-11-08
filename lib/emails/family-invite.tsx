@@ -110,9 +110,14 @@ export function FamilyInviteEmail({
               <p style="margin: 0; font-size: 13px; color: #9CA3AF; line-height: 1.5;">
                 You're receiving this email because ${storytellerName} invited you to view their stories on Heritage Whisper. Your access is view-only and will remain active for 30 days after your first visit.
               </p>
-              
+
+              <p style="margin: 16px 0; font-size: 12px; color: #9CA3AF; text-align: center; line-height: 1.5;">
+                Not interested? You can safely ignore this invitation or <a href="mailto:support@heritagewhisper.com?subject=Unsubscribe" style="color: #6B7280; text-decoration: underline;">unsubscribe from future emails</a>.
+              </p>
+
               <p style="margin: 16px 0 0; font-size: 13px; color: #9CA3AF; text-align: center;">
-                © ${new Date().getFullYear()} Heritage Whisper. All rights reserved.
+                © ${new Date().getFullYear()} Heritage Whisper. All rights reserved.<br>
+                <span style="font-size: 11px;">HeritageWhisper, 522 W Riverside Ave Ste N, Spokane, WA 99201</span>
               </p>
             </td>
           </tr>
@@ -148,7 +153,10 @@ Heritage Whisper is a platform that helps people preserve and share their life s
 
 You're receiving this email because ${storytellerName} invited you to view their stories. Your access is view-only and will remain active for 30 days after your first visit.
 
+Not interested? You can safely ignore this invitation or email support@heritagewhisper.com to unsubscribe from future emails.
+
 © ${new Date().getFullYear()} Heritage Whisper. All rights reserved.
+HeritageWhisper, 522 W Riverside Ave Ste N, Spokane, WA 99201
     `,
   };
 }
