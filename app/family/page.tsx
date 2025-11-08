@@ -510,11 +510,11 @@ export default function FamilyPage() {
 
       {/* Main content - with header spacing, centered */}
       <main className="w-full pb-20 md:pb-0 px-4 md:px-6" style={{ marginTop: 55 }}>
-        <div className="max-w-6xl mx-auto p-4 md:p-6">
+        <div className="max-w-6xl mx-auto py-4 md:py-6">
           {/* Page Header with Invite Button */}
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <div>
-              <p className="text-sm md:text-base text-muted-foreground">
+          <div className="flex items-center justify-between mb-6 gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-base md:text-lg text-gray-500">
                 Share your stories with loved ones
               </p>
             </div>
@@ -522,27 +522,25 @@ export default function FamilyPage() {
             <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
             <DialogTrigger asChild>
               <Button
-                className="h-12 px-4 md:px-6"
-                style={{ backgroundColor: '#7C6569', color: 'white' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+                className="min-h-[60px] px-6 md:px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200 shrink-0"
               >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Invite Family
+                <UserPlus className="w-5 h-5 mr-2" />
+                <span className="hidden sm:inline">Invite Family</span>
+                <span className="sm:hidden">Invite</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle className="text-xl">
+                <DialogTitle className="text-2xl font-semibold">
                   Invite Family Member
                 </DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="text-base text-gray-500">
                   Send an invitation to share your life stories
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleInvite} className="space-y-4 py-4">
+              <form onSubmit={handleInvite} className="space-y-6 py-4">
                 <div>
-                  <Label htmlFor="email" className="text-base">
+                  <Label htmlFor="email" className="text-base font-medium text-gray-900">
                     Email Address
                   </Label>
                   <Input
@@ -550,26 +548,26 @@ export default function FamilyPage() {
                     type="email"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="mt-2 h-12 text-base"
+                    className="mt-2 h-14 w-full px-4 py-3 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0"
                     placeholder="family@example.com"
                     required
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="relationship" className="text-base">
+                  <Label htmlFor="relationship" className="text-base font-medium text-gray-900">
                     Relationship
                   </Label>
                   <Select
                     value={inviteRelationship}
                     onValueChange={setInviteRelationship}
                   >
-                    <SelectTrigger className="mt-2 h-12 text-base">
+                    <SelectTrigger className="mt-2 h-14 w-full px-4 py-3 text-base bg-white border border-gray-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0">
                       <SelectValue placeholder="Select relationship" />
                     </SelectTrigger>
                     <SelectContent>
                       {relationshipOptions.map((rel) => (
-                        <SelectItem key={rel} value={rel}>
+                        <SelectItem key={rel} value={rel} className="text-base">
                           {rel}
                         </SelectItem>
                       ))}
@@ -578,41 +576,41 @@ export default function FamilyPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="permission" className="text-base">
+                  <Label htmlFor="permission" className="text-base font-medium text-gray-900">
                     Permission Level
                   </Label>
                   <Select
                     value={invitePermission}
                     onValueChange={(value) => setInvitePermission(value as 'viewer' | 'contributor')}
                   >
-                    <SelectTrigger className="mt-2 h-12 text-base">
+                    <SelectTrigger className="mt-2 h-14 w-full px-4 py-3 text-base bg-white border border-gray-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="viewer">
+                      <SelectItem value="viewer" className="text-base">
                         👁 Viewer - View stories only
                       </SelectItem>
-                      <SelectItem value="contributor">
+                      <SelectItem value="contributor" className="text-base">
                         ✏️ Contributor - Can submit questions
                       </SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    {invitePermission === 'viewer' 
+                  <p className="text-sm text-gray-500 mt-2">
+                    {invitePermission === 'viewer'
                       ? 'Read stories, listen to audio, view photos'
                       : 'Can also submit questions they want answered'}
                   </p>
                 </div>
 
                 <div>
-                  <Label htmlFor="message" className="text-base">
+                  <Label htmlFor="message" className="text-base font-medium text-gray-900">
                     Personal Message (Optional)
                   </Label>
                   <Textarea
                     id="message"
                     value={inviteMessage}
                     onChange={(e) => setInviteMessage(e.target.value)}
-                    className="mt-2 text-base"
+                    className="mt-2 min-h-[96px] w-full px-4 py-3 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0"
                     placeholder="Add a personal message to your invitation..."
                     rows={3}
                   />
@@ -620,36 +618,36 @@ export default function FamilyPage() {
 
                 <Separator />
 
-                <div className="space-y-2">
-                  <Label className="text-sm text-muted-foreground">
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-500">
                     Or share invite link:
                   </Label>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleCopyInviteLink}
-                    className="w-full h-12 justify-start"
+                    className="w-full min-h-[48px] px-6 py-3 bg-white text-gray-900 text-base font-medium border border-gray-200 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200 justify-start"
                   >
                     {copiedLink ? (
                       <>
-                        <Check className="w-4 h-4 mr-2 text-green-600" />
+                        <Check className="w-5 h-5 mr-2 text-green-700" />
                         Link Copied!
                       </>
                     ) : (
                       <>
-                        <Copy className="w-4 h-4 mr-2" />
+                        <Copy className="w-5 h-5 mr-2" />
                         Copy Invite Link
                       </>
                     )}
                   </Button>
                 </div>
 
-                <DialogFooter className="gap-2">
+                <DialogFooter className="gap-4 flex-col sm:flex-row">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setInviteDialogOpen(false)}
-                    className="h-12"
+                    className="w-full min-h-[48px] px-6 py-3 bg-white text-gray-900 text-base font-medium border border-gray-200 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
                   >
                     Cancel
                   </Button>
@@ -657,12 +655,9 @@ export default function FamilyPage() {
                     ref={sendButtonRef}
                     type="submit"
                     disabled={inviteMutation.isPending}
-                    className="h-12"
-                    style={{ backgroundColor: '#7C6569', color: 'white' }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+                    className="w-full min-h-[60px] px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-xl shadow-sm hover:shadow-md hover:bg-blue-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
                   >
-                    <Mail className="w-4 h-4 mr-2" />
+                    <Mail className="w-5 h-5 mr-2" />
                     {inviteMutation.isPending
                       ? "Sending..."
                       : "Send Invitation"}
@@ -677,128 +672,126 @@ export default function FamilyPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Family Stats */}
-            <div className="grid grid-cols-3 gap-4">
-              <Card>
-                <CardContent className="pt-6">
+            <div className="grid grid-cols-3 gap-3 md:gap-4">
+              <Card className="bg-white border border-gray-200 rounded-xl">
+                <CardContent className="pt-5 pb-5 px-3 md:px-4">
                   <div className="text-center">
-                    <Users className="w-8 h-8 mx-auto mb-2" style={{ color: '#7C6569' }} />
-                    <p className="text-3xl font-bold">{totalMembers}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Family Members
+                    <Users className="w-7 h-7 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
+                    <p className="text-2xl md:text-3xl font-bold text-gray-900">{totalMembers}</p>
+                    <p className="text-sm md:text-base text-gray-500 mt-1">
+                      Members
                     </p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardContent className="pt-6">
+              <Card className="bg-white border border-gray-200 rounded-xl">
+                <CardContent className="pt-5 pb-5 px-3 md:px-4">
                   <div className="text-center">
-                    <Share2 className="w-8 h-8 mx-auto mb-2" style={{ color: '#7C6569' }} />
-                    <p className="text-3xl font-bold">{sharedStories}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Shared Stories
+                    <Share2 className="w-7 h-7 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
+                    <p className="text-2xl md:text-3xl font-bold text-gray-900">{sharedStories}</p>
+                    <p className="text-sm md:text-base text-gray-500 mt-1">
+                      Stories
                     </p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardContent className="pt-6">
+              <Card className="bg-white border border-gray-200 rounded-xl">
+                <CardContent className="pt-5 pb-5 px-3 md:px-4">
                   <div className="text-center">
-                    <Eye className="w-8 h-8 mx-auto mb-2" style={{ color: '#7C6569' }} />
-                    <p className="text-3xl font-bold">{totalViews}</p>
-                    <p className="text-sm text-muted-foreground">Total Views</p>
+                    <Eye className="w-7 h-7 md:w-8 md:h-8 mx-auto mb-2 text-blue-600" />
+                    <p className="text-2xl md:text-3xl font-bold text-gray-900">{totalViews}</p>
+                    <p className="text-sm md:text-base text-gray-500 mt-1">Views</p>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Active Family Members */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
+            <Card className="bg-white border border-gray-200 rounded-xl">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-xl md:text-2xl font-semibold text-gray-900">
+                  <Users className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
                   Family Members ({activeMembers.length})
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-base text-gray-500">
                   People who can view your stories
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {activeMembers.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Users className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-                    <p className="text-muted-foreground mb-4">
+                  <div className="text-center py-12">
+                    <Users className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 text-gray-400" />
+                    <p className="text-base md:text-lg text-gray-500 mb-6">
                       No family members yet
                     </p>
                     <Button
                       onClick={() => setInviteDialogOpen(true)}
-                      style={{ backgroundColor: '#7C6569', color: 'white' }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+                      className="min-h-[60px] px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
                     >
-                      <UserPlus className="w-4 h-4 mr-2" />
+                      <UserPlus className="w-5 h-5 mr-2" />
                       Invite Your First Family Member
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {activeMembers.map((member) => (
                       <div
                         key={member.id}
-                        className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 md:p-5 rounded-xl border border-gray-200 bg-white hover:shadow-sm transition-shadow"
                       >
-                        <div className="flex items-center gap-3 flex-1">
-                          <Avatar className="w-12 h-12">
-                            <AvatarFallback style={{ backgroundColor: '#F9E5E8', color: '#7C6569' }}>
+                        <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                          <Avatar className="w-12 h-12 shrink-0">
+                            <AvatarFallback className="bg-blue-100 text-blue-600 text-lg font-medium">
                               {(member.name || member.email)[0].toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-medium">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <p className="font-semibold text-base md:text-lg text-gray-900 truncate">
                                 {member.name || member.email}
                               </p>
                               {member.relationship && (
-                                <Badge variant="secondary">
+                                <Badge variant="secondary" className="text-sm bg-gray-100 text-gray-700 border-0">
                                   {member.relationship}
                                 </Badge>
                               )}
-                              <Badge
-                                variant={member.permissionLevel === 'contributor' ? 'default' : 'outline'}
-                                className="text-xs"
-                                style={member.permissionLevel === 'contributor' ? { backgroundColor: '#7C6569', color: 'white' } : {}}
-                              >
-                                {member.permissionLevel === 'contributor' ? '✏️ Contributor' : '👁 Viewer'}
-                              </Badge>
                             </div>
-                            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                              <span>{member.email}</span>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                              <span className="text-sm md:text-base text-gray-500 truncate">{member.email}</span>
                               {member.last_accessed_at && (
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  Last viewed{" "}
+                                <span className="flex items-center gap-1 text-sm text-gray-500">
+                                  <Clock className="w-4 h-4" />
                                   {getRelativeTime(member.last_accessed_at)}
                                 </span>
                               )}
                             </div>
+                            <div className="mt-2">
+                              <Badge
+                                variant={member.permissionLevel === 'contributor' ? 'default' : 'outline'}
+                                className={`text-sm ${member.permissionLevel === 'contributor' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border-gray-300 text-gray-700'}`}
+                              >
+                                {member.permissionLevel === 'contributor' ? '✏️ Contributor' : '👁 Viewer'}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3 sm:gap-2 shrink-0">
                           <Select
                             value={member.permissionLevel || 'viewer'}
-                            onValueChange={(value: 'viewer' | 'contributor') => 
+                            onValueChange={(value: 'viewer' | 'contributor') =>
                               updatePermissionMutation.mutate({ memberId: member.id, permissionLevel: value })
                             }
                           >
-                            <SelectTrigger className="h-9 w-[140px]">
+                            <SelectTrigger className="min-h-[48px] w-full sm:w-[140px] px-3 text-base border-gray-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="viewer">
+                              <SelectItem value="viewer" className="text-base">
                                 👁 Viewer
                               </SelectItem>
-                              <SelectItem value="contributor">
+                              <SelectItem value="contributor" className="text-base">
                                 ✏️ Contributor
                               </SelectItem>
                             </SelectContent>
@@ -808,29 +801,29 @@ export default function FamilyPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="text-destructive hover:text-destructive"
+                                className="min-h-[48px] min-w-[48px] text-red-600 hover:text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-5 h-5" />
                               </Button>
                             </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>
+                              <AlertDialogTitle className="text-2xl font-semibold text-gray-900">
                                 Remove family member?
                               </AlertDialogTitle>
-                              <AlertDialogDescription>
+                              <AlertDialogDescription className="text-base text-gray-500">
                                 {member.name || member.email} will no longer be
                                 able to view your stories. This action can be
                                 undone by inviting them again.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel className="h-12">
+                            <AlertDialogFooter className="gap-3 flex-col sm:flex-row">
+                              <AlertDialogCancel className="w-full min-h-[48px] px-6 py-3 bg-white text-gray-900 text-base font-medium border border-gray-200 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200">
                                 Cancel
                               </AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleRemoveMember(member.id)}
-                                className="h-12 bg-destructive hover:bg-destructive/90"
+                                className="w-full min-h-[48px] px-6 py-3 bg-red-600 text-white text-base font-medium rounded-xl hover:bg-red-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-all duration-200"
                               >
                                 Remove
                               </AlertDialogAction>
@@ -847,50 +840,50 @@ export default function FamilyPage() {
 
             {/* Pending Invitations */}
             {pendingMembers.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
+              <Card className="bg-white border border-gray-200 rounded-xl">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-xl md:text-2xl font-semibold text-gray-900">
+                    <Clock className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
                     Pending Invitations ({pendingMembers.length})
                   </CardTitle>
-                  <CardDescription>Waiting for acceptance</CardDescription>
+                  <CardDescription className="text-base text-gray-500">Waiting for acceptance</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {pendingMembers.map((member) => (
                       <div
                         key={member.id}
-                        className="flex items-center justify-between p-4 rounded-lg border bg-muted/30"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 md:p-5 rounded-xl border border-gray-200 bg-gray-50"
                       >
-                        <div className="flex items-center gap-3">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback className="bg-muted">
+                        <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                          <Avatar className="w-12 h-12 shrink-0">
+                            <AvatarFallback className="bg-gray-200 text-gray-600 text-lg font-medium">
                               {member.email[0].toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium">{member.email}</p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <p className="font-semibold text-base md:text-lg text-gray-900 truncate">{member.email}</p>
                               {member.relationship && (
-                                <Badge variant="outline">
+                                <Badge variant="outline" className="text-sm border-gray-300 text-gray-700">
                                   {member.relationship}
                                 </Badge>
                               )}
                               {member.inviteExpired && (
-                                <Badge variant="destructive">Expired</Badge>
+                                <Badge variant="destructive" className="text-sm bg-red-600 text-white">Expired</Badge>
                               )}
                             </div>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm md:text-base text-gray-500">
                               Invited {getRelativeTime(member.invited_at)}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3 shrink-0">
                           <Button
                             variant="ghost"
-                            size="sm"
                             onClick={() => resendMutation.mutate(member.id)}
                             disabled={resendMutation.isPending}
+                            className="min-h-[48px] px-4 text-base text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
                           >
                             {resendMutation.isPending ? "Sending..." : "Resend"}
                           </Button>
@@ -898,30 +891,29 @@ export default function FamilyPage() {
                             <AlertDialogTrigger asChild>
                               <Button
                                 variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive"
+                                className="min-h-[48px] px-4 text-base text-red-600 hover:text-red-700 hover:bg-red-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
                               >
                                 Revoke
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>
+                                <AlertDialogTitle className="text-2xl font-semibold text-gray-900">
                                   Revoke invitation?
                                 </AlertDialogTitle>
-                                <AlertDialogDescription>
+                                <AlertDialogDescription className="text-base text-gray-500">
                                   This will cancel the invitation to{" "}
                                   {member.email}. They won't be able to use the
                                   invite link.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="h-12">
+                              <AlertDialogFooter className="gap-3 flex-col sm:flex-row">
+                                <AlertDialogCancel className="w-full min-h-[48px] px-6 py-3 bg-white text-gray-900 text-base font-medium border border-gray-200 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200">
                                   Cancel
                                 </AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleRemoveMember(member.id, true)}
-                                  className="h-12 bg-destructive hover:bg-destructive/90"
+                                  className="w-full min-h-[48px] px-6 py-3 bg-red-600 text-white text-base font-medium rounded-xl hover:bg-red-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-all duration-200"
                                 >
                                   Revoke
                                 </AlertDialogAction>
@@ -939,26 +931,26 @@ export default function FamilyPage() {
 
           {/* Sidebar - Recent Activity */}
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="w-5 h-5" />
+            <Card className="bg-white border border-gray-200 rounded-xl">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-xl md:text-2xl font-semibold text-gray-900">
+                  <Activity className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
                   Recent Activity
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-base text-gray-500">
                   What your family has been viewing
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {familyActivity.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Activity className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground">
+                  <div className="text-center py-12">
+                    <Activity className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 text-gray-400" />
+                    <p className="text-base md:text-lg text-gray-500">
                       No activity yet
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {familyActivity.slice(0, 10).map((activity) => {
                       const ActivityIcon = getActivityIcon(
                         activity.activityType,
@@ -966,24 +958,24 @@ export default function FamilyPage() {
                       return (
                         <div key={activity.id} className="flex gap-3">
                           <div className="flex-shrink-0">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F9E5E8' }}>
-                              <ActivityIcon className="w-4 h-4" style={{ color: '#7C6569' }} />
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-100">
+                              <ActivityIcon className="w-5 h-5 text-blue-600" />
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm">
-                              <span className="font-medium">
+                            <p className="text-base text-gray-900 leading-relaxed">
+                              <span className="font-semibold">
                                 {activity.familyMember.name ||
                                   activity.familyMember.email}
                               </span>{" "}
-                              <span className="text-muted-foreground">
+                              <span className="text-gray-500">
                                 {getActivityText(activity)}
                               </span>{" "}
                               <span className="font-medium">
                                 "{activity.storyTitle}"
                               </span>
                             </p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
+                            <p className="text-sm text-gray-500 mt-1">
                               {getRelativeTime(activity.createdAt)}
                             </p>
                           </div>
