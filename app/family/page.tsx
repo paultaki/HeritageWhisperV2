@@ -512,21 +512,14 @@ export default function FamilyPage() {
       <main className="w-full pb-20 md:pb-0 px-4 md:px-6 overflow-x-hidden" style={{ marginTop: 55 }}>
         <div className="max-w-6xl mx-auto py-4 md:py-6">
           {/* Page Header with Invite Button */}
-          <div className="flex items-start sm:items-center justify-between mb-6 gap-4">
-            <div className="flex-1 min-w-0 pt-3 sm:pt-0">
-              <p className="text-base text-gray-500">
-                Share your stories with loved ones
-              </p>
-            </div>
-
+          <div className="flex items-center justify-end mb-6">
             <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
             <DialogTrigger asChild>
               <Button
-                className="shrink-0 min-h-[60px] px-6 md:px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+                className="w-full sm:w-auto min-h-[60px] px-6 md:px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
               >
                 <UserPlus className="w-5 h-5 mr-2" />
-                <span className="hidden sm:inline">Invite Family</span>
-                <span className="sm:hidden">Invite</span>
+                Invite Family
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">

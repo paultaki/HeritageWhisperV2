@@ -51,7 +51,7 @@ export default function PreRecordHints() {
   return (
     <div className="mx-auto w-full max-w-sm px-4">
       <div
-        className="mt-3 rounded-lg border border-neutral-200/70 bg-white/70 p-4 shadow-[0_1px_0_rgba(0,0,0,0.03)] backdrop-blur-[2px] dark:border-neutral-700/50 dark:bg-neutral-900/50"
+        className="mt-3 rounded-2xl border border-[#e8ddd5] bg-white/80 p-4 shadow-sm backdrop-blur-sm"
         role="region"
         aria-label="Recording tips and privacy"
       >
@@ -65,20 +65,20 @@ export default function PreRecordHints() {
           <span className="text-2xl leading-6 flex-shrink-0" aria-hidden="true">
             {TIPS[idx].icon}
           </span>
-          <p className="text-[22px] leading-7 text-neutral-700 dark:text-neutral-200">
+          <p className="text-[22px] leading-7 text-[#2d2520]">
             {TIPS[idx].text}
           </p>
         </div>
 
         {/* Hairline divider */}
-        <div className="my-3 h-px w-full bg-neutral-200/70 dark:bg-neutral-700/50" />
+        <div className="my-3 h-px w-full bg-[#e8ddd5]" />
 
         {/* Row 2: Privacy */}
         <div className="flex items-center gap-3">
-          <svg aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-neutral-500 dark:text-neutral-400" viewBox="0 0 24 24" fill="currentColor">
+          <svg aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-[#6b7280]" viewBox="0 0 24 24" fill="currentColor">
             <path d="M17 8V7a5 5 0 0 0-10 0v1H5a1 1 0 0 0-1 1v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V9a1 1 0 0 0-1-1h-2Zm-8 0V7a3 3 0 0 1 6 0v1H9Z"/>
           </svg>
-          <p className="text-[21px] leading-7 text-neutral-600 dark:text-neutral-300">
+          <p className="text-[21px] leading-7 text-[#5a4a3a]">
             Private by default. You choose what to share.
           </p>
         </div>

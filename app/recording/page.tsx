@@ -41,15 +41,20 @@ export default function PhotoFirstRecordingPage() {
     setCurrentScreen('home');
   };
 
-  const handleRecordingComplete = async (blob: Blob, duration: number, data?: {
-    transcription: string;
-    title: string;
-    lessonOptions: {
-      practical: string;
-      emotional: string;
-      character: string;
-    };
-  }) => {
+  const handleRecordingComplete = async (
+    blob: Blob,
+    duration: number,
+    updatedPhotoTransform: { zoom: number; position: { x: number; y: number } },
+    data?: {
+      transcription: string;
+      title: string;
+      lessonOptions: {
+        practical: string;
+        emotional: string;
+        character: string;
+      };
+    }
+  ) => {
     console.log('[PhotoFirst] Recording complete, received data:', {
       hasData: !!data,
       transcription: data?.transcription?.substring(0, 50),
@@ -71,11 +76,11 @@ export default function PhotoFirstRecordingPage() {
         // Prepare NavCache data for book-style review
         const navId = `photo-first-${Date.now()}`;
 
-        // Prepare photo data with transform if available
+        // Prepare photo data with updated transform from recording
         const photoData = photoDataURL ? [{
           id: `photo-${Date.now()}`,
           url: photoDataURL,
-          transform: photoTransform, // Include zoom/pan transform
+          transform: updatedPhotoTransform, // Use updated zoom/pan transform
           isHero: true // Mark as hero image
         }] : [];
 
@@ -221,38 +226,78 @@ export default function PhotoFirstRecordingPage() {
   };
 
   return (
-    <div className="mx-auto max-w-md min-h-screen relative flex flex-col bg-white">
-      <main className="flex-1 flex flex-col pb-20">
+    <div className="mx-auto max-w-md md:max-w-3xl min-h-screen relative flex flex-col bg-gradient-to-b from-[#faf8f5] via-[#f5f0eb] to-[#f0ebe6]">
+      <main className="flex-1 flex flex-col pb-20 md:pb-24">
         {/* Screen 1: Home */}
         {currentScreen === 'home' && (
-          <section className="flex-1 flex flex-col px-6 pt-4">
-            <div className="text-center mb-8">
-              <h1 className="text-[36px] leading-[1.2] tracking-tight font-semibold mb-6">
+          <section className="flex-1 flex flex-col px-6 md:px-12 pt-4 md:pt-12">
+            <div className="text-center mb-8 md:mb-12">
+              <h1 className="text-4xl md:text-5xl leading-tight font-bold text-[#2d2520] mb-6">
                 Every memory matters. Start with your voice.
               </h1>
             </div>
 
             <PreRecordHints />
 
-            <div className="mx-auto w-full max-w-sm px-4 space-y-6 mt-4">
-              <Button
-                onClick={() => setCurrentScreen('capture')}
-                className="w-full h-[64px] bg-blue-600 text-white rounded-xl text-[19px] font-medium tracking-tight flex items-center justify-center gap-3 shadow-sm hover:bg-blue-700 active:bg-blue-800"
-              >
-                <Camera className="w-6 h-6" />
-                Add a Photo
-              </Button>
+            <div className="mx-auto w-full max-w-sm md:max-w-lg px-4 space-y-6 md:space-y-8 mt-4">
+              {/* Mobile: Single "Add a Photo" button */}
+              <div className="md:hidden">
+                <Button
+                  onClick={() => setCurrentScreen('capture')}
+                  className="w-full h-[64px] bg-gradient-to-r from-[#8b6b7a] to-[#9d6b7c] text-white rounded-2xl text-lg font-bold tracking-tight flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300"
+                >
+                  <Camera className="w-6 h-6" />
+                  Add a Photo
+                </Button>
+              </div>
+
+              {/* Desktop: Two photo options side-by-side */}
+              <div className="hidden md:grid md:grid-cols-2 gap-4">
+                <Button
+                  onClick={() => {
+                    // Trigger file input
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          handlePhotoCapture(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    };
+                    input.click();
+                  }}
+                  className="w-full h-[72px] bg-gradient-to-r from-[#8b6b7a] to-[#9d6b7c] text-white rounded-2xl text-lg font-bold tracking-tight flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl hover:scale-105 hover:-translate-y-0.5 active:scale-95 transition-all duration-300"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Choose from Files
+                </Button>
+                <Button
+                  onClick={() => setCurrentScreen('capture')}
+                  variant="outline"
+                  className="w-full h-[72px] rounded-2xl text-lg font-bold tracking-tight flex items-center justify-center gap-3 border-2 border-[#e8ddd5] text-[#2d2520] hover:border-[#c9a78a] hover:bg-white hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300"
+                >
+                  <Camera className="w-6 h-6" />
+                  Use Camera
+                </Button>
+              </div>
 
               <div>
                 <Button
                   onClick={() => setCurrentScreen('recording')}
                   variant="outline"
-                  className="w-full h-[64px] rounded-xl text-[19px] font-medium tracking-tight flex items-center justify-center gap-3 border-2"
+                  className="w-full h-[64px] md:h-[72px] rounded-2xl text-lg font-bold tracking-tight flex items-center justify-center gap-3 border-2 border-[#e8ddd5] text-[#2d2520] hover:border-[#c9a78a] hover:bg-white hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300"
                 >
                   <Mic className="w-6 h-6" />
                   Record Story Now
                 </Button>
-                <p className="text-[17px] text-gray-500 text-center mt-3">
+                <p className="text-base text-[#6b7280] text-center mt-3">
                   Add photo later
                 </p>
               </div>
@@ -311,10 +356,10 @@ export default function PhotoFirstRecordingPage() {
 
       {/* Fixed Cancel Button at Bottom - Only on home screen */}
       {currentScreen === 'home' && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 max-w-md mx-auto">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-[#e8ddd5] p-4 max-w-md md:max-w-3xl mx-auto shadow-lg">
           <Button
             variant="outline"
-            className="w-full h-[56px] text-[18px] font-medium"
+            className="w-full h-[56px] text-lg font-semibold border-2 border-[#e8ddd5] text-[#5a4a3a] hover:border-[#c9a78a] hover:bg-white transition-all duration-200"
             onClick={() => router.push('/timeline')}
           >
             Cancel
