@@ -88,27 +88,42 @@ export async function GET(
       return data?.signedUrl || null;
     };
 
-    // Process photos array from metadata
+    // Process photos array from top-level photos column
     let photos = [];
-    if (story.metadata?.photos) {
+    if (story.photos) {
       logger.debug(
         "[GET /api/stories/[id]] Raw photos from DB:",
-        story.metadata.photos,
+        story.photos,
       );
       photos = await Promise.all(
-        (story.metadata.photos || []).map(async (photo: any) => {
-          const photoPath = photo.url || photo.filePath;
-          const signedUrl = await getPhotoUrl(photoPath);
+        (story.photos || []).map(async (photo: any) => {
+          // Generate signed URLs for dual WebP versions
+          const displayUrl = photo.displayPath
+            ? await getPhotoUrl(photo.displayPath) // 550px WebP for web display
+            : null;
+
+          const masterUrl = photo.masterPath
+            ? await getPhotoUrl(photo.masterPath) // 2400px WebP for printing
+            : null;
+
+          // Fallback to original file if not yet migrated to WebP
+          const legacyUrl = !displayUrl && (photo.url || photo.filePath)
+            ? await getPhotoUrl(photo.url || photo.filePath)
+            : null;
+
           logger.debug(
-            "[GET /api/stories/[id]] Photo path:",
-            photoPath,
-            "-> Signed URL:",
-            signedUrl,
+            "[GET /api/stories/[id]] Photo paths:",
+            { display: photo.displayPath, master: photo.masterPath, legacy: photo.url || photo.filePath },
+            "-> Signed URLs:",
+            { displayUrl, masterUrl, legacyUrl },
           );
+
           return {
             ...photo,
-            url: signedUrl,
-            filePath: photoPath, // Preserve the storage path
+            displayUrl,
+            masterUrl,
+            url: displayUrl || legacyUrl, // Primary display uses 550px WebP
+            filePath: photo.displayPath || photo.url || photo.filePath,
           };
         }),
       );
@@ -362,7 +377,8 @@ export async function PUT(
       metadata.is_favorite = body.isFavorite;
     }
     if (processedPhotos !== undefined) {
-      metadata.photos = processedPhotos;
+      // Store photos in top-level photos column (not metadata.photos)
+      storyData.photos = processedPhotos;
     }
     if (body.pivotalCategory !== undefined) {
       metadata.pivotal_category = body.pivotalCategory;

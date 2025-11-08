@@ -24,6 +24,7 @@ type Props = {
   inTimeline: boolean;
   inBook: boolean;
   isPrivate: boolean;
+  onView?: () => void; // NEW: Opens overlay
   onPlay?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -64,6 +65,7 @@ export function StoryCard({
   inTimeline,
   inBook,
   isPrivate,
+  onView, // NEW: Opens overlay
   onPlay,
   onEdit,
   onDelete,
@@ -106,7 +108,7 @@ export function StoryCard({
         <div
           className="relative overflow-hidden cursor-pointer"
           style={{ height: "140px" }}
-          onClick={onEdit}
+          onClick={onView}
         >
           <img
             className="w-full h-full object-cover"
@@ -147,7 +149,10 @@ export function StoryCard({
         <div className="p-4 flex flex-col flex-1">
           {/* Title and Year - Compact */}
           <div className="mb-3 flex-1">
-            <h3 className="text-base font-bold text-gray-900 mb-1 line-clamp-2">
+            <h3
+              className="text-base font-bold text-gray-900 mb-1 line-clamp-2 cursor-pointer hover:text-heritage-coral transition-colors"
+              onClick={onView}
+            >
               {title}
             </h3>
             <div className="text-sm text-gray-600 font-medium">

@@ -197,8 +197,8 @@ export async function POST(
 
     logger.debug("[POST /api/stories/[id]/photos] New photo object:", newPhoto);
 
-    // Get current photos from metadata
-    const currentPhotos = story.metadata?.photos || [];
+    // Get current photos from top-level photos column
+    const currentPhotos = story.photos || [];
     logger.debug(
       "[POST /api/stories/[id]/photos] Current photos count:",
       currentPhotos.length,
@@ -218,14 +218,11 @@ export async function POST(
       updatedPhotos,
     );
 
-    // Update story metadata with new photos array in Supabase database
+    // Update story with new photos array in top-level photos column
     const { data: updatedStory, error: updateError } = await supabaseAdmin
       .from("stories")
       .update({
-        metadata: {
-          ...story.metadata,
-          photos: updatedPhotos,
-        },
+        photos: updatedPhotos, // Store in top-level column
       })
       .eq("id", id)
       .eq("user_id", user.id)

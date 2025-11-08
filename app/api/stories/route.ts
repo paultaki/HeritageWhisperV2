@@ -124,14 +124,32 @@ export async function GET(request: NextRequest) {
     // Transform to match frontend expectations
     const transformedStories = await Promise.all(
       (stories || []).map(async (story) => {
-        // Handle photos if stored as JSON
+        // Handle photos from top-level photos column (migrated from metadata.photos)
         let photos = [];
-        if (story.metadata?.photos) {
+        if (story.photos) {
           photos = await Promise.all(
-            (story.metadata.photos || []).map(async (photo: any) => ({
-              ...photo,
-              url: await getPhotoUrl(photo.url || photo.filePath),
-            })),
+            (story.photos || []).map(async (photo: any) => {
+              // Generate signed URLs for dual WebP versions
+              const displayUrl = photo.displayPath
+                ? await getPhotoUrl(photo.displayPath) // 550px WebP for web display
+                : null;
+
+              const masterUrl = photo.masterPath
+                ? await getPhotoUrl(photo.masterPath) // 2400px WebP for printing
+                : null;
+
+              // Fallback to original file if not yet migrated to WebP
+              const legacyUrl = !displayUrl && (photo.url || photo.filePath)
+                ? await getPhotoUrl(photo.url || photo.filePath)
+                : null;
+
+              return {
+                ...photo,
+                displayUrl,
+                masterUrl,
+                url: displayUrl || legacyUrl, // Primary display uses 550px WebP
+              };
+            }),
           );
         }
 

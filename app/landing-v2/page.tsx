@@ -180,8 +180,10 @@ export default function LandingV2() {
                               <div className="w-full h-full overflow-hidden bg-gradient-to-br from-[#faf8f5] to-white relative">
                                 <style dangerouslySetInnerHTML={{__html: `
                                   @keyframes timelineScroll {
-                                    0%, 10% { transform: translateY(0); }
-                                    90%, 100% { transform: translateY(-40%); }
+                                    0% { transform: translateY(0); opacity: 0; }
+                                    5%, 10% { transform: translateY(0); opacity: 1; }
+                                    85% { transform: translateY(-40%); opacity: 1; }
+                                    95%, 100% { transform: translateY(-40%); opacity: 0; }
                                   }
                                   .timeline-animate {
                                     animation: timelineScroll 15s ease-in-out infinite;

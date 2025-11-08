@@ -451,7 +451,7 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                         alt="Record"
                         width={32}
                         height={32}
-                        className="z-10"
+                        className="z-10 drop-shadow-lg"
                       />
                     </button>
                   </div>

@@ -11,7 +11,7 @@ const faqData: FAQItem[] = [
   {
     question: "What if my parent isn't tech-savvy?",
     answer:
-      "If they can use FaceTime, they can use HeritageWhisper. Just press the big red button and talk. We handle everything else. Plus, you get a free onboarding call with our team to walk them through it.",
+      "If they can use FaceTime, they can use HeritageWhisper. Just press record and talk. We handle everything else. Plus, you get a free onboarding call with our team to walk them through it.",
   },
   {
     question: "How is this different from recording on my phone?",
@@ -41,12 +41,12 @@ const faqData: FAQItem[] = [
   {
     question: "What if I want a printed book?",
     answer:
-      "You can order a premium printed book anytime with all your stories, photos, and timeline. Your first book is included in your annual plan. Additional copies available at cost.",
+      "We don't offer printed books at this time. We're focused on your living digital legacy—the ability to continue updating your digital book and timeline. Your stories stay alive and grow with your family.",
   },
   {
     question: "Is there a free trial?",
     answer:
-      "We offer a 30-day money-back guarantee, which is even better than a trial. Start building your legacy, and if you're not completely satisfied, get a full refund—no questions asked.",
+      "Yes! You can experience the full platform for your first 3 stories added—completely free. No credit card required. Plus, we offer a 30-day money-back guarantee after that.",
   },
 ]
 

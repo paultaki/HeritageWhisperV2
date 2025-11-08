@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
         });
 
         const { data: emailData, error: emailError } = await resend.emails.send({
-          from: 'Heritage Whisper <no-reply@updates.heritagewhisper.com>',
+          from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
           to: email,
           subject: emailContent.subject,
           html: emailContent.html,

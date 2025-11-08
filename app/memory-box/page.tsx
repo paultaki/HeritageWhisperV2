@@ -55,6 +55,10 @@ interface Treasure {
   description?: string;
   category: "photos" | "documents" | "heirlooms" | "keepsakes" | "recipes" | "memorabilia";
   year?: number;
+  // NEW: Dual WebP URLs
+  masterUrl?: string;
+  displayUrl?: string;
+  // DEPRECATED (backward compatibility):
   imageUrl: string;
   thumbnailUrl?: string;
   isFavorite: boolean;
@@ -544,6 +548,10 @@ export default function MemoryBoxV2Page() {
                             inTimeline={story.includeInTimeline}
                             inBook={story.includeInBook}
                             isPrivate={isPrivate}
+                            onView={() => {
+                              setSelectedStory(story);
+                              setOverlayOpen(true);
+                            }}
                             onPlay={() => {
                               if (story.audioUrl) {
                                 AudioManager.getInstance().play(story.id, story.audioUrl);

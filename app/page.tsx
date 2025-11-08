@@ -57,14 +57,14 @@ export default function Home() {
       image: "/microphone 2.webp",
     },
     {
+      title: "AI Transcribes Everything",
+      description: "Smart technology captures every word and organizes stories automatically.",
+      image: "/book full.webp",
+    },
+    {
       title: "Beautiful Timeline",
       description: "Stories organized by decade with photos, audio, and extracted wisdom.",
       image: "/timeline.webp",
-    },
-    {
-      title: "AI Transcribes Everything",
-      description: "Smart technology captures every word and organizes stories automatically.",
-      image: "/book full.png",
     },
   ]
 
@@ -165,12 +165,14 @@ export default function Home() {
                             }`}
                           >
                             {/* Special scrolling animation for timeline */}
-                            {card.title === "Beautiful Timeline" ? (
+                            {card.image === "/timeline.webp" ? (
                               <div className="w-full h-full overflow-hidden bg-gradient-to-br from-[#faf8f5] to-white relative">
                                 <style dangerouslySetInnerHTML={{__html: `
                                   @keyframes timelineScroll {
-                                    0%, 10% { transform: translateY(0); }
-                                    90%, 100% { transform: translateY(-40%); }
+                                    0% { transform: translateY(0); opacity: 0; }
+                                    5%, 10% { transform: translateY(0); opacity: 1; }
+                                    85% { transform: translateY(-40%); opacity: 1; }
+                                    95%, 100% { transform: translateY(-40%); opacity: 0; }
                                   }
                                   .timeline-animate {
                                     animation: timelineScroll 15s ease-in-out infinite;
@@ -193,20 +195,24 @@ export default function Home() {
                                   style={{ minHeight: '150%' }}
                                 />
                               </div>
+                            ) : card.image === "/book full.webp" ? (
+                              <div className="w-full h-full bg-gradient-to-br from-[#faf8f5] to-white">
+                                <Image
+                                  src={card.image}
+                                  alt={card.title}
+                                  width={960}
+                                  height={695}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
                             ) : (
-                              <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-[#faf8f5] to-white ${
-                                card.title === "AI Transcribes Everything" ? "p-2 sm:p-4 md:p-8" : "p-8"
-                              }`}>
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#faf8f5] to-white p-8">
                                 <Image
                                   src={card.image}
                                   alt={card.title}
                                   width={800}
                                   height={600}
-                                  className={
-                                    card.title === "AI Transcribes Everything"
-                                      ? "w-full h-auto object-cover sm:w-auto sm:h-auto sm:max-w-full sm:max-h-full sm:object-contain"
-                                      : "w-auto h-auto max-w-full max-h-full object-contain"
-                                  }
+                                  className="w-auto h-auto max-w-full max-h-full object-contain"
                                   style={
                                     card.title === "Just Press Record"
                                       ? { filter: "drop-shadow(0 10px 25px rgba(0, 0, 0, 0.15)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.1))" }
