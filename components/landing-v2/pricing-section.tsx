@@ -116,24 +116,24 @@ export default function PricingSection() {
         <div className="bg-gradient-to-r from-[#8b6b7a] to-[#9d6b7c] rounded-3xl p-8 md:p-10 text-white text-center shadow-2xl">
           <h3 className="text-3xl font-bold mb-6 font-serif">Try HeritageWhisper Risk-Free</h3>
           <div className="grid md:grid-cols-2 gap-4 mb-6">
-            <div className="flex items-center gap-3 justify-center md:justify-start">
+            <div className="flex items-center gap-3 justify-center">
               <CheckCircle className="w-6 h-6 flex-shrink-0" />
               <span className="text-lg font-sans">30-Day Money-Back Guarantee</span>
             </div>
-            <div className="flex items-center gap-3 justify-center md:justify-start">
+            <div className="flex items-center gap-3 justify-center">
               <CheckCircle className="w-6 h-6 flex-shrink-0" />
               <span className="text-lg font-sans">Cancel anytime, keep your stories</span>
             </div>
-            <div className="flex items-center gap-3 justify-center md:justify-start">
+            <div className="flex items-center gap-3 justify-center">
               <CheckCircle className="w-6 h-6 flex-shrink-0" />
               <span className="text-lg font-sans">Free onboarding support call</span>
             </div>
-            <div className="flex items-center gap-3 justify-center md:justify-start">
+            <div className="flex items-center gap-3 justify-center">
               <CheckCircle className="w-6 h-6 flex-shrink-0" />
               <span className="text-lg font-sans">No credit card required for trial</span>
             </div>
           </div>
-          <p className="text-2xl font-bold italic font-serif">&quot;If you don&apos;t love it, you don&apos;t pay. Period.&quot;</p>
+          <p className="text-2xl font-bold italic font-serif text-center">&quot;If you don&apos;t love it, you don&apos;t pay. Period.&quot;</p>
         </div>
       </div>
     </div>

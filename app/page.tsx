@@ -54,7 +54,7 @@ export default function Home() {
     {
       title: "Just Press Record",
       description: "No typing, no complexity. Your own voice, your own pace—transcribed beautifully.",
-      image: "/silver_mic_sm.png",
+      image: "/microphone.webp",
     },
     {
       title: "Beautiful Timeline",
@@ -84,48 +84,35 @@ export default function Home() {
             <div className="w-full h-12 sm:h-14 md:h-16 lg:h-[84px] absolute left-0 top-0 flex justify-center items-center z-20 px-6 sm:px-8 md:px-12 lg:px-0">
               <div className="w-full h-0 absolute left-0 top-6 sm:top-7 md:top-8 lg:top-[42px] border-t border-[rgba(55,50,47,0.12)] shadow-[0px_1px_0px_white]"></div>
 
-              <div className="w-full max-w-[calc(100%-32px)] sm:max-w-[calc(100%-48px)] md:max-w-[calc(100%-64px)] lg:max-w-[700px] lg:w-[700px] h-10 sm:h-11 md:h-12 py-1.5 sm:py-2 px-3 sm:px-4 md:px-4 pr-2 sm:pr-3 bg-[#faf8f5] backdrop-blur-sm shadow-[0px_0px_0px_2px_white] overflow-hidden rounded-[50px] flex justify-between items-center relative z-30">
-                <div className="flex justify-center items-center gap-4">
-                  <div className="flex justify-start items-center">
-                    <Image
-                      src="/final logo/chat-bubble-logo.svg"
-                      alt="Heritage Whisper"
-                      width={32}
-                      height={32}
-                      className="h-6 w-auto"
-                    />
-                  </div>
-                  <div className="hidden sm:flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-4">
-                    <button
-                      onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                      className="text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium hover:text-[#2563EB] transition-colors"
-                    >
-                      Features
-                    </button>
-                    <button
-                      onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-                      className="text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium hover:text-[#2563EB] transition-colors"
-                    >
-                      Pricing
-                    </button>
-                    <button
-                      onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })}
-                      className="text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium hover:text-[#2563EB] transition-colors"
-                    >
-                      FAQ
-                    </button>
-                  </div>
-                </div>
-                <div className="h-6 sm:h-7 md:h-8 flex justify-start items-start gap-2 sm:gap-3">
+              <div className="w-full max-w-[calc(100%-32px)] sm:max-w-[calc(100%-48px)] md:max-w-[calc(100%-64px)] lg:max-w-[700px] lg:w-[700px] min-h-[48px] py-2 sm:py-2 px-4 sm:px-4 md:px-4 pr-3 sm:pr-3 bg-[#faf8f5] backdrop-blur-sm shadow-[0px_0px_0px_2px_white] rounded-[50px] flex justify-between items-center relative z-30 gap-2">
+                <div className="flex flex-row items-center gap-3 sm:gap-4 md:gap-5">
                   <button
-                    onClick={() => router.push("/auth/login")}
-                    className="px-2 sm:px-3 md:px-[14px] py-1 sm:py-[6px] bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] overflow-hidden rounded-full flex justify-center items-center hover:bg-gray-50 transition-colors"
+                    onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-[rgba(49,45,43,0.80)] text-xs sm:text-sm md:text-[14px] font-medium hover:text-[#2563EB] transition-colors whitespace-nowrap"
                   >
-                    <div className="text-[#37322F] text-xs md:text-[13px] font-medium">
-                      Log in
-                    </div>
+                    Features
+                  </button>
+                  <button
+                    onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-[rgba(49,45,43,0.80)] text-xs sm:text-sm md:text-[14px] font-medium hover:text-[#2563EB] transition-colors whitespace-nowrap"
+                  >
+                    Pricing
+                  </button>
+                  <button
+                    onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-[rgba(49,45,43,0.80)] text-xs sm:text-sm md:text-[14px] font-medium hover:text-[#2563EB] transition-colors whitespace-nowrap"
+                  >
+                    FAQ
                   </button>
                 </div>
+                <button
+                  onClick={() => router.push("/auth/login")}
+                  className="px-3 sm:px-4 md:px-[14px] py-2 sm:py-2 bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] rounded-full flex justify-center items-center hover:bg-gray-50 transition-colors flex-shrink-0"
+                >
+                  <div className="text-[#37322F] text-xs sm:text-sm md:text-[14px] font-medium">
+                    Log in
+                  </div>
+                </button>
               </div>
             </div>
 
