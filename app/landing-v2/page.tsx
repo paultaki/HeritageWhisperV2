@@ -177,16 +177,32 @@ export default function LandingV2() {
                           >
                             {/* Special scrolling animation for timeline */}
                             {card.title === "Beautiful Timeline" ? (
-                              <div className="w-full h-full overflow-hidden bg-gradient-to-br from-[#faf8f5] to-white">
-                                <div className="timeline-scroll-container h-full">
-                                  <Image
-                                    src={card.image}
-                                    alt={card.title}
-                                    width={1200}
-                                    height={2400}
-                                    className="w-full h-auto object-cover timeline-scroll"
-                                  />
-                                </div>
+                              <div className="w-full h-full overflow-hidden bg-gradient-to-br from-[#faf8f5] to-white relative">
+                                <style dangerouslySetInnerHTML={{__html: `
+                                  @keyframes timelineScroll {
+                                    0%, 10% { transform: translateY(0); }
+                                    90%, 100% { transform: translateY(-40%); }
+                                  }
+                                  .timeline-animate {
+                                    animation: timelineScroll 15s ease-in-out infinite;
+                                  }
+                                  .timeline-animate:hover {
+                                    animation-play-state: paused;
+                                  }
+                                  @media (prefers-reduced-motion: reduce) {
+                                    .timeline-animate {
+                                      animation: none;
+                                    }
+                                  }
+                                `}} />
+                                <Image
+                                  src={card.image}
+                                  alt={card.title}
+                                  width={1200}
+                                  height={2400}
+                                  className="w-full h-auto timeline-animate"
+                                  style={{ minHeight: '150%' }}
+                                />
                               </div>
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#faf8f5] to-white p-8">
@@ -206,38 +222,6 @@ export default function LandingV2() {
                   </div>
                 </div>
               </div>
-
-              {/* Timeline Scroll Animation */}
-              <style jsx>{`
-                @keyframes timelineScroll {
-                  0% {
-                    transform: translateY(0);
-                  }
-                  100% {
-                    transform: translateY(-50%);
-                  }
-                }
-
-                .timeline-scroll {
-                  animation: timelineScroll 20s linear infinite;
-                }
-
-                .timeline-scroll-container {
-                  overflow: hidden;
-                }
-
-                /* Pause animation on hover */
-                .timeline-scroll-container:hover .timeline-scroll {
-                  animation-play-state: paused;
-                }
-
-                @media (prefers-reduced-motion: reduce) {
-                  .timeline-scroll {
-                    animation: none;
-                    transform: translateY(-25%);
-                  }
-                }
-              `}</style>
 
               {/* Feature Cards */}
               <div className="self-stretch border-t border-[#E0DEDB] border-b border-[#E0DEDB] flex justify-center items-start">
