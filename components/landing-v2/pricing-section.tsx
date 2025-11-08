@@ -57,10 +57,10 @@ export default function PricingSection() {
       </div>
 
       {/* Pricing Card Section */}
-      <div className="self-stretch border-b border-t border-[rgba(55,50,47,0.12)] flex justify-center items-center py-12">
+      <div className="self-stretch border-b border-t border-[rgba(55,50,47,0.12)] flex justify-center items-center py-16">
         <div className="flex justify-center items-center w-full max-w-[600px] px-4">
           {/* Single Featured Plan */}
-          <div className="w-full bg-gradient-to-br from-[#faf8f5] to-white rounded-2xl p-10 md:p-12 border-4 border-[#8b6b7a] shadow-2xl relative overflow-hidden">
+          <div className="w-full bg-gradient-to-br from-[#faf8f5] to-white rounded-2xl p-10 md:p-12 border-4 border-[#8b6b7a] shadow-2xl relative">
             {/* "Most Popular" Badge */}
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
               <div className="px-6 py-2 bg-gradient-to-r from-[#8b6b7a] to-[#9d6b7c] text-white text-sm font-bold rounded-full shadow-lg">

@@ -54,22 +54,22 @@ export default function LandingV2() {
     {
       title: "Just Press Record",
       description: "No typing, no complexity. Your own voice, your own pace—transcribed beautifully.",
-      image: "/silver_mic_sm.png", // Placeholder - replace with actual screenshot
+      image: "/silver_mic_sm.png",
     },
     {
       title: "AI Transcribes Everything",
       description: "Smart technology captures every word and organizes stories automatically.",
-      image: "/book full.png", // Placeholder - replace with actual screenshot
+      image: "/book full.png",
     },
     {
       title: "Beautiful Timeline",
       description: "Stories organized by decade with photos, audio, and extracted wisdom.",
-      image: "/book full.png", // Placeholder - replace with actual screenshot
+      image: "/timeline.webp",
     },
     {
       title: "Family Stays Connected",
       description: "Real-time notifications when new memories are shared. Everyone stays engaged.",
-      image: "/1a.png", // Placeholder - replace with actual screenshot
+      image: "/1a.png",
     },
   ]
 
@@ -175,15 +175,30 @@ export default function LandingV2() {
                               activeCard === index ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
                             }`}
                           >
-                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#faf8f5] to-white p-8">
-                              <Image
-                                src={card.image}
-                                alt={card.title}
-                                width={800}
-                                height={600}
-                                className="w-auto h-auto max-w-full max-h-full object-contain"
-                              />
-                            </div>
+                            {/* Special scrolling animation for timeline */}
+                            {card.title === "Beautiful Timeline" ? (
+                              <div className="w-full h-full overflow-hidden bg-gradient-to-br from-[#faf8f5] to-white">
+                                <div className="timeline-scroll-container h-full">
+                                  <Image
+                                    src={card.image}
+                                    alt={card.title}
+                                    width={1200}
+                                    height={2400}
+                                    className="w-full h-auto object-cover timeline-scroll"
+                                  />
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#faf8f5] to-white p-8">
+                                <Image
+                                  src={card.image}
+                                  alt={card.title}
+                                  width={800}
+                                  height={600}
+                                  className="w-auto h-auto max-w-full max-h-full object-contain"
+                                />
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -191,6 +206,38 @@ export default function LandingV2() {
                   </div>
                 </div>
               </div>
+
+              {/* Timeline Scroll Animation */}
+              <style jsx>{`
+                @keyframes timelineScroll {
+                  0% {
+                    transform: translateY(0);
+                  }
+                  100% {
+                    transform: translateY(-50%);
+                  }
+                }
+
+                .timeline-scroll {
+                  animation: timelineScroll 20s linear infinite;
+                }
+
+                .timeline-scroll-container {
+                  overflow: hidden;
+                }
+
+                /* Pause animation on hover */
+                .timeline-scroll-container:hover .timeline-scroll {
+                  animation-play-state: paused;
+                }
+
+                @media (prefers-reduced-motion: reduce) {
+                  .timeline-scroll {
+                    animation: none;
+                    transform: translateY(-25%);
+                  }
+                }
+              `}</style>
 
               {/* Feature Cards */}
               <div className="self-stretch border-t border-[#E0DEDB] border-b border-[#E0DEDB] flex justify-center items-start">
