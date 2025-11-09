@@ -1348,9 +1348,8 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             );
           }
 
-          /* Hover effect - extend and brighten */
+          /* Hover effect - brighten */
           .timeline-step:hover .timeline-card-container::after {
-            width: 26px;
             background: linear-gradient(
               to right,
               rgba(196, 167, 183, 0),

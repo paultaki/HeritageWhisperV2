@@ -31,7 +31,7 @@ import { normalizeYear, formatYear } from "@/lib/utils";
 import { getTopTraits } from "@/utils/getTopTraits";
 import { audioManager } from "@/lib/audioManager";
 import type { MemoryCardProps } from "@/types/timeline";
-import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormatting";
+import { formatStoryDate, formatStoryDateForMetadata, formatV2TimelineDate } from "@/lib/dateFormatting";
 
 /**
  * MemoryCard - Story card component with audio playback
@@ -357,6 +357,46 @@ export const MemoryCard = React.memo(
     };
 
     // ==================================================================================
+    // V2: Photo Carousel Handlers
+    // ==================================================================================
+
+    const handlePrevPhoto = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setCurrentPhotoIndex((prev) => (prev === 0 ? photoCount - 1 : prev - 1));
+    };
+
+    const handleNextPhoto = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setCurrentPhotoIndex((prev) => (prev === photoCount - 1 ? 0 : prev + 1));
+    };
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+      setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+      setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+      if (!touchStart || !touchEnd) return;
+
+      const distance = touchStart - touchEnd;
+      const isLeftSwipe = distance > 50;
+      const isRightSwipe = distance < -50;
+
+      if (isLeftSwipe && currentPhotoIndex < photoCount - 1) {
+        handleNextPhoto(e as any);
+      }
+      if (isRightSwipe && currentPhotoIndex > 0) {
+        handlePrevPhoto(e as any);
+      }
+
+      setTouchStart(0);
+      setTouchEnd(0);
+    };
+
+    // ==================================================================================
     // Render: Cards WITHOUT Photos
     // ==================================================================================
 
@@ -474,40 +514,99 @@ export const MemoryCard = React.memo(
                   {story.title}
                 </h3>
                 <div className="hw-meta">
-                  <span>
-                    {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
-                  </span>
-                  <span className="divider"></span>
-                  <span>
-                    {story.lifeAge !== null &&
-                      story.lifeAge !== undefined &&
-                      story.lifeAge > 0 &&
-                      `Age ${story.lifeAge}`}
-                    {story.lifeAge !== null &&
-                      story.lifeAge !== undefined &&
-                      story.lifeAge === 0 &&
-                      `Birth`}
-                    {story.lifeAge !== null &&
-                      story.lifeAge !== undefined &&
-                      story.lifeAge < 0 &&
-                      `Before birth`}
-                  </span>
+                  {useV2Features ? (
+                    // V2: "Age 7 • Summer 1962" format
+                    <span className="text-sm font-medium text-gray-700">
+                      {formatV2TimelineDate(story.storyDate, story.storyYear, birthYear)}
+                    </span>
+                  ) : (
+                    // Original format
+                    <>
+                      <span>
+                        {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
+                      </span>
+                      <span className="divider"></span>
+                      <span>
+                        {story.lifeAge !== null &&
+                          story.lifeAge !== undefined &&
+                          story.lifeAge > 0 &&
+                          `Age ${story.lifeAge}`}
+                        {story.lifeAge !== null &&
+                          story.lifeAge !== undefined &&
+                          story.lifeAge === 0 &&
+                          `Birth`}
+                        {story.lifeAge !== null &&
+                          story.lifeAge !== undefined &&
+                          story.lifeAge < 0 &&
+                          `Before birth`}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* V2: Small audio icon in bottom right corner */}
+            {/* V2: Enhanced audio indicator (no photo cards) */}
             {useV2Features && story.audioUrl && (
-              <button
-                onClick={handlePlayAudio}
-                className="absolute bottom-4 right-4 flex flex-col items-center gap-0.5 group"
-                aria-label={isPlaying ? "Pause audio" : "Play audio"}
-              >
-                <Volume2 className="w-5 h-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
-                <span className="text-xs text-gray-600 font-medium">
-                  {formatDuration(duration)}
-                </span>
-              </button>
+              <div className="mt-3 px-4 pb-4">
+                <button
+                  onClick={handlePlayAudio}
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity w-full"
+                  aria-label={isPlaying ? "Pause audio" : "Play audio"}
+                >
+                  {/* Circular progress ring */}
+                  <div className="relative flex-shrink-0">
+                    <svg className="w-10 h-10 -rotate-90">
+                      {/* Background ring */}
+                      <circle
+                        cx="20"
+                        cy="20"
+                        r="16"
+                        fill="none"
+                        stroke="rgba(139,107,122,0.15)"
+                        strokeWidth="2"
+                      />
+                      {/* Progress ring */}
+                      {isPlaying && (
+                        <circle
+                          cx="20"
+                          cy="20"
+                          r="16"
+                          fill="none"
+                          stroke="rgba(212,165,116,0.8)"
+                          strokeWidth="2"
+                          strokeDasharray={`${2 * Math.PI * 16}`}
+                          strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
+                          strokeLinecap="round"
+                          className="transition-all duration-300"
+                        />
+                      )}
+                    </svg>
+                    {/* Icon in center */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      {isLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-amber-700" />
+                      ) : isPlaying ? (
+                        <Pause className="w-4 h-4 text-amber-700 fill-amber-700" />
+                      ) : (
+                        <Play className="w-4 h-4 text-amber-700 fill-amber-700 ml-0.5" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Audio label and time */}
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-semibold text-amber-800">
+                      {isPlaying ? "Playing..." : `Listen • ${formatDuration(duration)}`}
+                    </span>
+                    {isPlaying && (
+                      <span className="text-xs text-gray-600 tabular-nums">
+                        {formatDuration(currentTime)} / {formatDuration(duration)}
+                      </span>
+                    )}
+                  </div>
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -552,24 +651,85 @@ export const MemoryCard = React.memo(
         </span>
 
         {/* Image container with audio overlay */}
-        <div style={{ position: "relative", overflow: "hidden" }}>
-          <img
-            src={displayPhoto.url}
-            alt={story.title}
-            className="hw-card-media"
-            style={
-              displayPhoto.transform
-                ? {
-                    transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x}%, ${displayPhoto.transform.position.y}%)`,
-                    transformOrigin: "center center",
-                    objectFit: "cover",
-                  }
-                : undefined
-            }
-          />
+        <div
+          style={{ position: "relative", overflow: "hidden" }}
+          onTouchStart={useV2Features && photoCount > 1 ? handleTouchStart : undefined}
+          onTouchMove={useV2Features && photoCount > 1 ? handleTouchMove : undefined}
+          onTouchEnd={useV2Features && photoCount > 1 ? handleTouchEnd : undefined}
+        >
+          {/* Get current photo for V2 carousel or fallback to displayPhoto */}
+          {(() => {
+            const currentPhoto = useV2Features && story.photos && story.photos.length > 0
+              ? story.photos[currentPhotoIndex]
+              : null;
 
-          {/* Photo count badge */}
-          {photoCount > 1 && (
+            const photoUrl = currentPhoto
+              ? getPhotoDisplayUrl(currentPhoto)
+              : displayPhoto.url;
+
+            const photoTransform = currentPhoto?.transform || displayPhoto.transform;
+
+            return (
+              <img
+                src={photoUrl}
+                alt={story.title}
+                className="hw-card-media"
+                style={
+                  photoTransform
+                    ? {
+                        transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x}%, ${photoTransform.position.y}%)`,
+                        transformOrigin: "center center",
+                        objectFit: "cover",
+                      }
+                    : undefined
+                }
+              />
+            );
+          })()}
+
+          {/* V2: Photo carousel navigation */}
+          {useV2Features && photoCount > 1 && (
+            <>
+              {/* Photo counter badge */}
+              <div className="absolute top-3 right-3 bg-black/70 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
+                {currentPhotoIndex + 1} of {photoCount}
+              </div>
+
+              {/* Navigation arrows */}
+              <button
+                onClick={handlePrevPhoto}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                aria-label="Previous photo"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+
+              <button
+                onClick={handleNextPhoto}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                aria-label="Next photo"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+
+              {/* Dot indicators */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {Array.from({ length: photoCount }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${
+                      idx === currentPhotoIndex
+                        ? "bg-white w-4"
+                        : "bg-white/50"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Original photo count badge (non-V2) */}
+          {!useV2Features && photoCount > 1 && (
             <div className="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
               {photoCount} photos
             </div>
@@ -646,89 +806,116 @@ export const MemoryCard = React.memo(
 
           {/* Metadata */}
           <div className="hw-meta">
-            <span>
-              {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
-            </span>
-            <span className="divider"></span>
-            <span>
-              {(() => {
-                const y = normalizeYear(story.storyYear);
-                const by = normalizeYear(birthYear);
-                const computed =
-                  typeof y === "number" && typeof by === "number"
-                    ? y - by
-                    : null;
-                const age =
-                  typeof story.lifeAge === "number"
-                    ? story.lifeAge < 0 &&
-                      computed !== null &&
-                      y !== null &&
-                      by !== null &&
-                      y >= by
-                      ? computed
-                      : story.lifeAge
-                    : computed;
-                return age !== null && age !== undefined
-                  ? age > 0
-                    ? `Age ${age}`
-                    : age === 0
-                      ? "Birthday"
-                      : "Before birth"
-                  : "";
-              })()}
-            </span>
-            {(top?.length ?? 0) > 0 && (
+            {useV2Features ? (
+              // V2: "Age 7 • Summer 1962" format
+              <span className="text-sm font-medium text-gray-700">
+                {formatV2TimelineDate(story.storyDate, story.storyYear, birthYear)}
+              </span>
+            ) : (
+              // Original: "Jun 1985 • Age 7" format
               <>
+                <span>
+                  {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
+                </span>
                 <span className="divider"></span>
-                <span>{(top?.[0] as any)?.name}</span>
+                <span>
+                  {(() => {
+                    const y = normalizeYear(story.storyYear);
+                    const by = normalizeYear(birthYear);
+                    const computed =
+                      typeof y === "number" && typeof by === "number"
+                        ? y - by
+                        : null;
+                    const age =
+                      typeof story.lifeAge === "number"
+                        ? story.lifeAge < 0 &&
+                          computed !== null &&
+                          y !== null &&
+                          by !== null &&
+                          y >= by
+                          ? computed
+                          : story.lifeAge
+                        : computed;
+                    return age !== null && age !== undefined
+                      ? age > 0
+                        ? `Age ${age}`
+                        : age === 0
+                          ? "Birthday"
+                          : "Before birth"
+                      : "";
+                  })()}
+                </span>
+                {(top?.length ?? 0) > 0 && (
+                  <>
+                    <span className="divider"></span>
+                    <span>{(top?.[0] as any)?.name}</span>
+                  </>
+                )}
               </>
             )}
           </div>
 
-          {/* V2: Book-style circular audio button */}
+          {/* V2: Enhanced audio indicator with time display */}
           {useV2Features && story.audioUrl && (
-            <button
-              onClick={handlePlayAudio}
-              className="absolute bottom-4 right-4 hover:scale-105 transition-transform"
-              aria-label={isPlaying ? "Pause audio" : "Play audio"}
-            >
-              <svg className="w-10 h-10 -rotate-90">
-                {/* Background ring */}
-                <circle
-                  cx="20"
-                  cy="20"
-                  r="16"
-                  fill="none"
-                  stroke="rgba(139,107,122,0.15)"
-                  strokeWidth="2"
-                />
-                {/* Progress ring */}
-                {isPlaying && (
-                  <circle
-                    cx="20"
-                    cy="20"
-                    r="16"
-                    fill="none"
-                    stroke="rgba(139,107,122,0.5)"
-                    strokeWidth="2"
-                    strokeDasharray={`${2 * Math.PI * 16}`}
-                    strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
-                    strokeLinecap="round"
-                    className="transition-all duration-300"
-                  />
-                )}
-              </svg>
-              {/* Icon in center */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
-                ) : isPlaying ? (
-                  <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
-                ) : (
-                  <Volume2 className="w-4 h-4 text-neutral-600" />
-                )}
-              </div>
-            </button>
+            <div className="mt-3 flex items-center justify-between">
+              <button
+                onClick={handlePlayAudio}
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                aria-label={isPlaying ? "Pause audio" : "Play audio"}
+              >
+                {/* Circular progress ring */}
+                <div className="relative">
+                  <svg className="w-12 h-12 -rotate-90">
+                    {/* Background ring */}
+                    <circle
+                      cx="24"
+                      cy="24"
+                      r="20"
+                      fill="none"
+                      stroke="rgba(139,107,122,0.15)"
+                      strokeWidth="2.5"
+                    />
+                    {/* Progress ring */}
+                    {isPlaying && (
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        fill="none"
+                        stroke="rgba(212,165,116,0.8)"
+                        strokeWidth="2.5"
+                        strokeDasharray={`${2 * Math.PI * 20}`}
+                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - progress / 100)}`}
+                        strokeLinecap="round"
+                        className="transition-all duration-300"
+                      />
+                    )}
+                  </svg>
+                  {/* Icon in center */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {isLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-amber-700" />
+                    ) : isPlaying ? (
+                      <Pause className="w-5 h-5 text-amber-700 fill-amber-700" />
+                    ) : (
+                      <Play className="w-5 h-5 text-amber-700 fill-amber-700 ml-0.5" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Audio label and time */}
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-semibold text-amber-800">
+                    {isPlaying ? "Playing..." : `Listen • ${formatDuration(duration)}`}
+                  </span>
+                  {isPlaying && (
+                    <span className="text-xs text-gray-600 tabular-nums">
+                      {formatDuration(currentTime)} / {formatDuration(duration)}
+                    </span>
+                  )}
+                </div>
+              </button>
+            </div>
           )}
         </div>
       </div>

@@ -39,7 +39,7 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
 
   return (
     <aside
-      className={`hidden lg:flex lg:w-56 flex-col gap-1.5 p-2 lg:sticky ${topOffsetClass} lg:self-start`}
+      className={`hidden lg:flex lg:w-28 flex-col gap-1.5 p-2 lg:sticky ${topOffsetClass} lg:self-start`}
       style={{
         backgroundColor: "transparent",
         borderRight: "none",
@@ -52,7 +52,7 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
         {user && (
           <Link
             href="/profile"
-            className="flex items-center gap-3 px-2 py-2 rounded-md hover:opacity-90 mb-4"
+            className="flex items-center gap-3 px-2 py-2 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800 mb-4"
             style={{ color: isDark ? "#b0b3b8" : "#111827" }}
           >
             <Avatar className="w-8 h-8 flex-shrink-0">
@@ -75,7 +75,7 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
 
         <Link
           href="/timeline"
-          className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
+          className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
           style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
         >
           <Clock3 className="w-7 h-7" />
@@ -83,7 +83,7 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
         </Link>
         <Link
           href="/book"
-          className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
+          className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
           style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
         >
           <BookOpen className="w-7 h-7" />
@@ -91,7 +91,7 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
         </Link>
         <Link
           href="/memory-box"
-          className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:opacity-90"
+          className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
           style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
         >
           <Box className="w-7 h-7" />

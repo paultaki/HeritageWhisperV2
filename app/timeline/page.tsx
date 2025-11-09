@@ -3,7 +3,7 @@
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useRouter } from "next/navigation";
 import { TimelineDesktop } from "@/components/timeline/TimelineDesktop";
-import { TimelineMobileV2 } from "@/components/timeline-v2/TimelineMobileV2";
+import { TimelineMobileV2 } from "@/components/timeline/TimelineMobileV2";
 import { useEffect, useState } from "react";
 
 export default function TimelinePage() {

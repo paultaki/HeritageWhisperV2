@@ -330,33 +330,33 @@ export default function FamilyPage() {
     },
   });
 
-  // Update permission mutation
-  const updatePermissionMutation = useMutation({
-    mutationFn: async ({ memberId, permissionLevel }: { memberId: string; permissionLevel: 'viewer' | 'contributor' }) => {
-      const response = await apiRequest(
-        "PATCH",
-        `/api/family/${memberId}/permissions`,
-        { permissionLevel }
-      );
-      return response.json();
-    },
-    onSuccess: async (data, variables) => {
-      await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
-      await refetchMembers();
-      const newLevel = variables.permissionLevel === 'contributor' ? 'Contributor' : 'Viewer';
-      toast({
-        title: "Permissions updated",
-        description: `Changed to ${newLevel} - they can ${variables.permissionLevel === 'contributor' ? 'now submit questions' : 'only view stories'}.`,
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Update failed",
-        description: error.message || "Could not update permissions.",
-        variant: "destructive",
-      });
-    },
-  });
+  // Permission changes disabled - permissions are set once at invitation and cannot be changed
+  // const updatePermissionMutation = useMutation({
+  //   mutationFn: async ({ memberId, permissionLevel }: { memberId: string; permissionLevel: 'viewer' | 'contributor' }) => {
+  //     const response = await apiRequest(
+  //       "PATCH",
+  //       `/api/family/${memberId}/permissions`,
+  //       { permissionLevel }
+  //     );
+  //     return response.json();
+  //   },
+  //   onSuccess: async (data, variables) => {
+  //     await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
+  //     await refetchMembers();
+  //     const newLevel = variables.permissionLevel === 'contributor' ? 'Contributor' : 'Viewer';
+  //     toast({
+  //       title: "Permissions updated",
+  //       description: `Changed to ${newLevel} - they can ${variables.permissionLevel === 'contributor' ? 'now submit questions' : 'only view stories'}.`,
+  //     });
+  //   },
+  //   onError: (error: any) => {
+  //     toast({
+  //       title: "Update failed",
+  //       description: error.message || "Could not update permissions.",
+  //       variant: "destructive",
+  //     });
+  //   },
+  // });
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -780,24 +780,10 @@ export default function FamilyPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 w-full sm:w-auto">
-                          <Select
-                            value={member.permissionLevel || 'viewer'}
-                            onValueChange={(value: 'viewer' | 'contributor') =>
-                              updatePermissionMutation.mutate({ memberId: member.id, permissionLevel: value })
-                            }
-                          >
-                            <SelectTrigger className="flex-1 sm:flex-none min-h-[48px] sm:w-[160px] px-3 text-base border-gray-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="viewer" className="text-base">
-                                👁 Viewer
-                              </SelectItem>
-                              <SelectItem value="contributor" className="text-base">
-                                ✏️ Contributor
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                          {/* Permission level badge - set at invitation, cannot be changed */}
+                          <div className="flex-1 sm:flex-none px-4 py-2 min-h-[48px] flex items-center justify-center bg-gray-100 border border-gray-300 rounded-xl text-base text-gray-700">
+                            {member.permissionLevel === 'contributor' ? '✏️ Contributor' : '👁 Viewer'}
+                          </div>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button

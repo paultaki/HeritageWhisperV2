@@ -436,7 +436,7 @@ Configured in `~/.mcp.json`:
 
 ### Table Categories
 - **Core User (3)**: users, profiles, passkeys
-- **Content (3)**: stories, photos, active_prompts
+- **Content (4)**: stories, photos, treasures, active_prompts
 - **AI Prompts (5)**: ai_prompts, user_prompts, family_prompts, prompt_feedback, prompt_entities
 - **Family Sharing (5)**: family_members, family_invites, family_collaborations, family_sessions, family_access_tokens
 - **Admin/Monitoring (3)**: admin_audit_log, ai_usage_log, stripe_customers
@@ -447,6 +447,7 @@ Configured in `~/.mcp.json`:
 - **AI Transcription**: AssemblyAI "universal" batch (~3.7s, 58% cheaper, 93.4% accuracy)
 - **Pearl AI Interviewer**: Conversational AI via OpenAI Realtime API with WebRTC (see @AI_PROMPTING.md)
 - **AI Prompt System**: Multi-tier reflection prompts (Tier 1: entity-based, Tier 3: milestone analysis)
+- **My Treasures**: Photo upload with zoom/pan editing (16:10 aspect ratio), stores transform as JSONB in `treasures.transform`
 - **Photo Management**: Multi-upload with cropping & hero images (EXIF data stripped for privacy)
 - **Timeline View**: Chronological story organization by decade
 - **Book View**: Dual-page layout with natural pagination
@@ -667,7 +668,7 @@ Aim to keep the file under 700 lines (~5,000 tokens).
 
 ---
 
-_Last updated: November 2, 2025_
+_Last updated: January 8, 2025_
 
 **Other Documentation:**
 - [@CLAUDE_HISTORY.md](CLAUDE_HISTORY.md) - Historical fixes, feature archives, and migration notes

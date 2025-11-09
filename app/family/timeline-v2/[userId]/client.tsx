@@ -11,9 +11,9 @@ import { Loader2, Plus } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { groupStoriesByDecade } from '@/lib/supabase';
 import { normalizeYear } from '@/lib/utils';
-import TimelineCardV2 from '@/components/timeline-v2/TimelineCardV2';
-import YearScrubber from '@/components/timeline-v2/YearScrubber';
-import FloatingAddButton from '@/components/timeline-v2/FloatingAddButton';
+import TimelineCardV2 from '@/components/timeline/TimelineCardV2';
+import YearScrubber from '@/components/timeline/YearScrubber';
+import FloatingAddButton from '@/components/timeline/FloatingAddButton';
 
 // Audio Manager (same as original timeline)
 class AudioManager {
