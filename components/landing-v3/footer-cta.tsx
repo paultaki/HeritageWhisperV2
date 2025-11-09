@@ -25,12 +25,6 @@ export default function FooterCTA() {
             Begin Your Timeline
           </button>
         </div>
-
-        <div className="pt-8 border-t border-blue-400/30">
-          <p className="text-blue-100 text-lg">
-            Already recording <span className="font-bold text-white">10,000+ stories</span> and growing every day
-          </p>
-        </div>
       </div>
     </section>
   )

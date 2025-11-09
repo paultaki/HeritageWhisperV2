@@ -12,7 +12,7 @@ export default function FAQSection() {
     },
     {
       question: 'Do I need to be tech-savvy?',
-      answer: 'If you can talk to your phone for 2 minutes, you\'re tech-savvy enough. No typing. No apps. Just talking.'
+      answer: 'If you can FaceTime your grandkids, you can use HeritageWhisper. No typing. No apps to download. Just talking.'
     },
     {
       question: 'What about a physical book?',

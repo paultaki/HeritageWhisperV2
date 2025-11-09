@@ -1,12 +1,23 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 export default function HeroSection() {
   const router = useRouter()
 
   return (
-    <section className="relative pt-16 pb-12 md:pt-24 md:pb-20 px-6 md:px-12">
+    <section className="relative pt-24 pb-12 md:pt-24 md:pb-20 px-6 md:px-12">
+      {/* Login Button - Upper Right */}
+      <div className="absolute top-4 right-4 md:top-6 md:right-6 z-50">
+        <button
+          onClick={() => router.push('/auth/login')}
+          className="px-4 py-1.5 md:px-6 md:py-2 bg-white text-blue-600 text-sm md:text-base font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-all duration-200 shadow-md hover:shadow-lg"
+        >
+          Login
+        </button>
+      </div>
+
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left: Copy */}
@@ -68,13 +79,13 @@ export default function HeroSection() {
 
           {/* Right: Visual */}
           <div className="relative">
-            <div className="aspect-[4/3] bg-gradient-to-br from-stone-200 to-stone-300 rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center border border-stone-300">
-              <div className="text-center px-8">
-                <p className="text-gray-600 text-lg font-medium">
-                  Photo: Grandparent with smartphone,<br />
-                  mid-story, natural lighting
-                </p>
-              </div>
+            <div className="aspect-[4/3] relative rounded-2xl shadow-2xl overflow-hidden border border-stone-300">
+              <Image
+                src="/grandparent.webp"
+                alt="Grandparent with smartphone, mid-story, natural lighting"
+                fill
+                className="object-cover"
+              />
             </div>
 
             {/* Decorative accent */}
