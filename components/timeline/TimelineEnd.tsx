@@ -111,7 +111,7 @@ export function TimelineEnd({
           width: "4px",
           left: "50%",
           top: "-12px",
-          transform: "translateX(-50%) translateY(238px)",
+          transform: "translateX(-50%) translateY(197px)",
           background: isDark
             ? "linear-gradient(to bottom, rgba(176, 179, 184, 0.35) 0%, rgba(176, 179, 184, 0.2) 40%, transparent 100%)"
             : "linear-gradient(to bottom, rgba(196, 167, 183, 0.35) 0%, rgba(196, 167, 183, 0.2) 40%, transparent 100%)",
@@ -119,14 +119,14 @@ export function TimelineEnd({
       />
 
       {/* Terminal node - "Today" */}
-      <div className="relative flex items-center mb-12 today-node">
+      <div className="relative flex items-center mb-12 today-node" style={{ marginTop: "-40px" }}>
         {/* Terminal dot aligned with spine */}
         <div
           className="flex items-center"
           style={{
-            position: "fixed",
+            position: "absolute",
             left: "50%",
-            transform: "translate(calc(-50% + 27px), -32px)",
+            transform: "translateX(calc(-50% + 27px))",
           }}
         >
           <div
