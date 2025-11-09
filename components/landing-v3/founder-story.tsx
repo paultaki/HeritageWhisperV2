@@ -29,15 +29,15 @@ export default function FounderStory() {
             </p>
 
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-              With four siblings scattered across the USA and 23 grandkids in our immediate family,
+              With four siblings scattered across the country and 23 grandkids in our immediate family,
               it's impossible to share a physical book. But now we all have the same access to our
               parents' stories the moment they're recorded. Our kids treasure hearing these memories
               in their grandparents' own voices as much as we do.
             </p>
 
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-              The majority of seniors are on smartphones—it's how we all consume everything these days.
-              We can even submit questions directly to them, capturing those precious memories while we still can.
+              The majority of seniors are on smartphones, it's how we all consume everything these days.
+              We can even submit questions directly to them, capturing those precious memories before it's too late.
             </p>
 
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">

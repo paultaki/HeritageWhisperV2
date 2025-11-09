@@ -826,7 +826,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       }}
     >
       {/* Left side content (for left-positioned cards) - Desktop only */}
-      <div className={`flex-1 flex ${position === "left" ? "justify-end lg:pr-6" : ""} hidden lg:flex`} style={{ pointerEvents: 'none' }}>
+      <div className={`flex-1 flex ${position === "left" ? "justify-end" : ""} hidden lg:flex`} style={{ pointerEvents: 'none', paddingRight: position === "left" ? "109px" : "0" }}>
         {position === "left" && (
           <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
             {renderCardContent()}
@@ -838,7 +838,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       <div
         className="z-10 flex-shrink-0 timeline-dot transition-all duration-500"
         style={{
-          transform: position === "left" ? "translateX(-12px)" : "translateX(12px)",
+          transform: position === "left" ? "translateX(-54px)" : "translateX(54px)",
           marginBottom: '-40px',
         }}
       >
@@ -848,7 +848,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             backgroundColor: '#F9E5E8',
             border: `1px solid rgba(139, 107, 122, 0.2)`,
             color: '#6A4D58',
-            fontSize: '15px',
+            fontSize: '18px',
             fontWeight: 500,
             letterSpacing: '0.3px',
             opacity: 0.95,
@@ -866,7 +866,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       </div>
 
       {/* Right side content (for right-positioned cards) - Desktop only */}
-      <div className={`flex-1 flex ${position === "right" ? "justify-start lg:pl-6" : ""} hidden lg:flex`} style={{ pointerEvents: 'none' }}>
+      <div className={`flex-1 flex ${position === "right" ? "justify-start" : ""} hidden lg:flex`} style={{ pointerEvents: 'none', paddingLeft: position === "right" ? "109px" : "0" }}>
         {position === "right" && (
           <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
             {renderCardContent()}
@@ -1187,7 +1187,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                       return (
                         <div
                           key={story.id}
-                          className={isVeryFirstStory ? "md:mt-0" : "md:-mt-[146px]"}
+                          className={isVeryFirstStory ? "md:mt-0" : "md:-mt-[121px]"}
                           data-memory-id={story.id}
                           style={{
                             transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',
@@ -1342,7 +1342,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 26px;
+            width: 92px;
             height: 3.5px;
             background: linear-gradient(
               to right,
@@ -1357,23 +1357,25 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1);
           }
 
-          /* Left-positioned cards - connector goes to the right */
+          /* Left-positioned cards - connector goes to the right (dark at card, light at spine) */
           .timeline-step .justify-end .timeline-card-container::after {
-            right: -26px;
+            right: -92px;
             background: linear-gradient(
               to right,
-              rgba(196, 167, 183, 0.5),
-              rgba(196, 167, 183, 0)
+              rgba(196, 167, 183, 0.2) 0%,
+              rgba(196, 167, 183, 0.4) 70%,
+              rgba(196, 167, 183, 0.5) 100%
             );
           }
 
-          /* Right-positioned cards - connector goes to the left */
+          /* Right-positioned cards - connector goes to the left (dark at card, light at spine) */
           .timeline-step .justify-start .timeline-card-container::after {
-            left: -26px;
+            left: -92px;
             background: linear-gradient(
-              to left,
-              rgba(196, 167, 183, 0.5),
-              rgba(196, 167, 183, 0)
+              to right,
+              rgba(196, 167, 183, 0.5) 0%,
+              rgba(196, 167, 183, 0.4) 30%,
+              rgba(196, 167, 183, 0.2) 100%
             );
           }
 

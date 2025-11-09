@@ -235,8 +235,8 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
 
           {/* CHANGE 3: Photo count indicator */}
           {hasMultiplePhotos && (
-            <div className="absolute top-3 left-3 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium">
-              {currentPhotoIndex + 1} of {photos.length} photos
+            <div className="absolute top-3 right-3 bg-black/70 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
+              {currentPhotoIndex + 1} of {photos.length}
             </div>
           )}
 
@@ -278,36 +278,47 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
 
       {/* Card content */}
       <div className="p-5">
-        {/* CHANGE 1: Audio indicator with Listen • duration */}
-        {story.audioUrl && (
-          <div className="mb-4">
+        {/* Title */}
+        <h3 className="text-xl font-serif font-semibold text-gray-800 mb-2">
+          {story.title}
+        </h3>
+
+        {/* Metadata and Audio Button - Horizontal Layout */}
+        <div className="flex items-center justify-between gap-3">
+          {/* Metadata (left side) */}
+          <p className="text-sm text-gray-600">
+            {formatMetadata()}
+          </p>
+
+          {/* Audio indicator (right side, inline) */}
+          {story.audioUrl && (
             <button
               onClick={handlePlayAudio}
-              className="flex items-center gap-3 w-full p-3 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors group"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0"
             >
-              {/* CHANGE 1: Circular progress ring */}
-              <div className="relative w-12 h-12 flex-shrink-0">
-                <svg className="w-12 h-12 -rotate-90">
+              {/* Circular progress ring */}
+              <div className="relative w-10 h-10">
+                <svg className="w-10 h-10 -rotate-90">
                   {/* Background circle */}
                   <circle
-                    cx="24"
-                    cy="24"
-                    r="20"
+                    cx="20"
+                    cy="20"
+                    r="16"
                     fill="none"
                     stroke="#FDE68A"
-                    strokeWidth="3"
+                    strokeWidth="2.5"
                   />
                   {/* Progress circle */}
                   {isPlaying && (
                     <circle
-                      cx="24"
-                      cy="24"
-                      r="20"
+                      cx="20"
+                      cy="20"
+                      r="16"
                       fill="none"
                       stroke="#F59E0B"
-                      strokeWidth="3"
-                      strokeDasharray={`${2 * Math.PI * 20}`}
-                      strokeDashoffset={`${2 * Math.PI * 20 * (1 - progress / 100)}`}
+                      strokeWidth="2.5"
+                      strokeDasharray={`${2 * Math.PI * 16}`}
+                      strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
                       strokeLinecap="round"
                       className="transition-all duration-300"
                     />
@@ -316,39 +327,29 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
                 {/* Icon in center */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   {isLoading ? (
-                    <Loader2 className="w-6 h-6 animate-spin text-amber-600" />
+                    <Loader2 className="w-5 h-5 animate-spin text-amber-600" />
                   ) : isPlaying ? (
-                    <Pause className="w-6 h-6 text-amber-600 fill-amber-600" />
+                    <Pause className="w-5 h-5 text-amber-600 fill-amber-600" />
                   ) : (
-                    <Volume2 className="w-6 h-6 text-amber-600" />
+                    <Volume2 className="w-5 h-5 text-amber-600" />
                   )}
                 </div>
               </div>
 
-              {/* CHANGE 1: Text label with duration */}
-              <div className="flex-1 text-left">
-                <div className="font-medium text-gray-900">
-                  {isPlaying ? 'Playing...' : `Listen • ${formatDuration(duration)}`}
-                </div>
+              {/* Text label - Hidden on mobile for compactness */}
+              <div className="hidden sm:flex flex-col items-start">
+                <span className="text-sm font-semibold text-amber-800">
+                  {isPlaying ? 'Playing...' : `${formatDuration(duration)}`}
+                </span>
                 {isPlaying && (
-                  <div className="text-sm text-gray-600 mt-1">
+                  <span className="text-xs text-gray-600">
                     {formatDuration(currentTime)} / {formatDuration(duration)}
-                  </div>
+                  </span>
                 )}
               </div>
             </button>
-          </div>
-        )}
-
-        {/* Title */}
-        <h3 className="text-xl font-serif font-semibold text-gray-800 mb-2">
-          {story.title}
-        </h3>
-
-        {/* CHANGE 4: Metadata with improved format */}
-        <p className="text-sm text-gray-600">
-          {formatMetadata()}
-        </p>
+          )}
+        </div>
       </div>
 
       {/* Hover provenance */}

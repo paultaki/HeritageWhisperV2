@@ -92,7 +92,8 @@ export function TreasureCard({
 
   return (
     <article
-      className="treasure-card group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+      className="treasure-card group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer w-full"
+      style={{ maxWidth: "480px" }}
       onClick={onEdit}
     >
       {/* Image Container - 75% of card height */}

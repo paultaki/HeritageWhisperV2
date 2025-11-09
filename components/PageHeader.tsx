@@ -2,6 +2,7 @@
 
 import React, { type ReactElement } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { type LucideIcon } from "lucide-react";
 import { AccountSwitcher } from "./AccountSwitcher";
 import { useAccountContext } from "@/hooks/use-account-context";
@@ -66,15 +67,17 @@ export function DesktopPageHeader({
           {/* Left section - Branding and page identity */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Logo - Full chat bubble for desktop */}
-            <Image
-              src="/final logo/chat-bubble-logo.svg"
-              alt="Heritage Whisper Logo"
-              width={102}
-              height={102}
-              className="w-[102px] h-[102px] flex-shrink-0 relative"
-              style={{ top: '6px' }}
-              priority
-            />
+            <Link href="/" className="flex-shrink-0">
+              <Image
+                src="/final logo/chat-bubble-logo.svg"
+                alt="Heritage Whisper Logo"
+                width={102}
+                height={102}
+                className="w-[102px] h-[102px] flex-shrink-0 relative cursor-pointer hover:opacity-90 transition-opacity"
+                style={{ top: '6px' }}
+                priority
+              />
+            </Link>
 
             {/* Page Icon */}
             <Icon
@@ -147,15 +150,17 @@ export function MobilePageHeader({
           {/* Center section - Compact branding and page identity */}
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {/* Logo - HW logo for mobile */}
-            <Image
-              src="/final logo/chat-bubble-hw-logo.svg"
-              alt="Heritage Whisper Logo"
-              width={42}
-              height={42}
-              className="w-[42px] h-[42px] flex-shrink-0 relative"
-              style={{ top: '1px', left: '-10px' }}
-              priority
-            />
+            <Link href="/" className="flex-shrink-0">
+              <Image
+                src="/final logo/chat-bubble-hw-logo.svg"
+                alt="Heritage Whisper Logo"
+                width={42}
+                height={42}
+                className="w-[42px] h-[42px] flex-shrink-0 relative cursor-pointer active:opacity-70 transition-opacity"
+                style={{ top: '1px', left: '-10px' }}
+                priority
+              />
+            </Link>
 
             {/* Page Icon */}
             <Icon

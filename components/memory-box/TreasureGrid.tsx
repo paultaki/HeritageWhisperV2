@@ -110,13 +110,13 @@ export function TreasureGrid({
       <div
         className="treasure-masonry-grid"
         style={{
-          columnCount: 1,
           columnGap: "24px",
         }}
       >
         <style jsx>{`
           .treasure-masonry-grid {
             column-count: 1;
+            column-gap: 24px;
           }
 
           @media (min-width: 768px) {
@@ -127,19 +127,27 @@ export function TreasureGrid({
 
           @media (min-width: 1024px) {
             .treasure-masonry-grid {
+              column-count: 2;
+            }
+          }
+
+          @media (min-width: 1280px) {
+            .treasure-masonry-grid {
               column-count: 3;
             }
           }
 
           @media (min-width: 1536px) {
             .treasure-masonry-grid {
-              column-count: 4;
+              column-count: 3;
             }
           }
 
           .treasure-masonry-grid > * {
             break-inside: avoid;
             margin-bottom: 24px;
+            display: inline-block;
+            width: 100%;
           }
         `}</style>
 
