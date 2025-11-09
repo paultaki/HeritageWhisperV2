@@ -18,6 +18,9 @@
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useMemo, useEffect } from "react";
 import { groupStoriesByDecade, type Story } from "@/lib/supabase";
+import { apiRequest } from "@/lib/queryClient";
+import { getApiUrl } from "@/lib/config";
+import { useAccountContext } from "@/hooks/use-account-context";
 import {
   generateGhostPrompts,
   mergeGhostPromptsWithStories,
@@ -49,6 +52,13 @@ export function useTimelineData({
   session,
 }: UseTimelineDataOptions): UseTimelineDataReturn {
   // ==================================================================================
+  // Family Sharing Support - Get active storyteller context
+  // ==================================================================================
+
+  const { activeContext } = useAccountContext();
+  const storytellerId = activeContext?.storytellerId || user?.id;
+
+  // ==================================================================================
   // Data Fetching (TanStack Query)
   // ==================================================================================
 
@@ -57,8 +67,15 @@ export function useTimelineData({
     refetch: refetchStories,
     isLoading: isLoadingStories,
   } = useQuery({
-    queryKey: ["/api/stories"],
-    enabled: !!user && !!session,
+    queryKey: ["stories", storytellerId], // Include storytellerId in query key for family sharing
+    queryFn: async () => {
+      const url = storytellerId
+        ? `${getApiUrl("/api/stories")}?storyteller_id=${storytellerId}`
+        : getApiUrl("/api/stories");
+      const res = await apiRequest("GET", url);
+      return res.json();
+    },
+    enabled: !!user && !!storytellerId,
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
     gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes even when unmounted
     refetchOnWindowFocus: true, // Refetch when window regains focus

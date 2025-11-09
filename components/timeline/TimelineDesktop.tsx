@@ -1210,14 +1210,38 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
 
             {sortedStories.length === 0 && (
               <div className="text-center py-20">
-                <p className="text-gray-500 text-lg mb-6">No memories yet. Start recording your first story!</p>
-                <Button
-                  onClick={() => modeSelection.openModal()}
-                  className="bg-orange-500 hover:bg-orange-600"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Create First Memory
-                </Button>
+                {activeContext?.type === 'own' ? (
+                  // Viewing own account - show create button
+                  <>
+                    <p className="text-gray-500 text-lg mb-6">No memories yet. Start recording your first story!</p>
+                    <Button
+                      onClick={() => modeSelection.openModal()}
+                      className="bg-orange-500 hover:bg-orange-600"
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Create First Memory
+                    </Button>
+                  </>
+                ) : activeContext?.permissionLevel === 'contributor' ? (
+                  // Viewing family member as contributor - can create stories
+                  <>
+                    <p className="text-gray-500 text-lg mb-6">
+                      No stories yet. You can record stories for {activeContext.storytellerName}.
+                    </p>
+                    <Button
+                      onClick={() => modeSelection.openModal()}
+                      className="bg-orange-500 hover:bg-orange-600"
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Record Story
+                    </Button>
+                  </>
+                ) : (
+                  // Viewing family member as viewer - read-only
+                  <p className="text-gray-500 text-lg">
+                    No stories have been shared yet.
+                  </p>
+                )}
               </div>
             )}
 
