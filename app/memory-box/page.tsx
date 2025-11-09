@@ -12,7 +12,6 @@ import { useModeSelection } from "@/hooks/use-mode-selection";
 import { useAccountContext } from "@/hooks/use-account-context";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
 import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
-import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { MemoryOverlay } from "@/components/MemoryOverlay";
 import { Story as SupabaseStory } from "@/lib/supabase";
@@ -24,6 +23,7 @@ import { StoryFilters, type StoryFilterType } from "@/components/memory-box/Stor
 import { StoryCard } from "@/components/memory-box/StoryCard";
 import { TreasureGrid } from "@/components/memory-box/TreasureGrid";
 import { AddTreasureModal } from "@/components/memory-box/AddTreasureModal";
+import { EditTreasureModal } from "@/components/memory-box/EditTreasureModal";
 import { EditMemoryModal } from "@/components/memory-box/EditMemoryModal";
 
 interface Story {
@@ -151,6 +151,7 @@ export default function MemoryBoxV2Page() {
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [addTreasureModalOpen, setAddTreasureModalOpen] = useState(false);
   const [treasureToDelete, setTreasureToDelete] = useState<string | null>(null);
+  const [treasureToEdit, setTreasureToEdit] = useState<Treasure | null>(null);
   const [storyToEdit, setStoryToEdit] = useState<Story | null>(null);
 
   // Make AudioManager globally accessible
@@ -341,6 +342,38 @@ export default function MemoryBoxV2Page() {
     toast({ title: "Treasure added successfully!" });
   };
 
+  const handleUpdateTreasure = async (updates: {
+    id: string;
+    title: string;
+    description?: string;
+    category: "photos" | "documents" | "heirlooms" | "keepsakes" | "recipes" | "memorabilia";
+    year?: number;
+    transform?: { zoom: number; position: { x: number; y: number } };
+  }) => {
+    const response = await fetch(`/api/treasures/${updates.id}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${session?.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: updates.title,
+        description: updates.description,
+        category: updates.category,
+        year: updates.year,
+        transform: updates.transform,
+      }),
+    });
+
+    if (!response.ok) throw new Error("Failed to update treasure");
+
+    queryClient.invalidateQueries({
+      queryKey: ["/api/treasures", storytellerId, session?.access_token],
+    });
+    toast({ title: "Treasure updated successfully!" });
+    setTreasureToEdit(null);
+  };
+
   // Calculate decades from stories
   const availableDecades = useMemo(() => {
     const decades = new Set<string>();
@@ -456,14 +489,11 @@ export default function MemoryBoxV2Page() {
       {/* Mobile Header */}
       <MobilePageHeader icon={Box} title="Memory Box" subtitle="Organize your memories" />
 
-      {/* Content Area with Sidebar */}
-      <div className="flex">
-        {/* Left Sidebar */}
-        {isDesktop && <LeftSidebar />}
-
+      {/* Content Area */}
+      <div>
         {/* Main content */}
-        <main className="flex-1 min-w-0 pb-20 md:pb-0">
-          <section className="px-3 pt-6" style={{ maxWidth: "1400px", marginLeft: 0, marginRight: "auto" }}>
+        <main className="pb-20 md:pb-0">
+          <section className="max-w-7xl mx-auto px-6 pt-6">
             {/* Quick Stats Bar */}
             <QuickStatsBar
               storiesCount={stats.all}
@@ -618,10 +648,10 @@ export default function MemoryBoxV2Page() {
                     });
                   }}
                   onEdit={(id) => {
-                    toast({
-                      title: "Coming Soon",
-                      description: "Edit treasure details will be available in a future update.",
-                    });
+                    const treasure = treasures.find((t) => t.id === id);
+                    if (treasure) {
+                      setTreasureToEdit(treasure);
+                    }
                   }}
                   onDownload={(id) => {
                     const treasure = treasures.find((t) => t.id === id);
@@ -724,6 +754,24 @@ export default function MemoryBoxV2Page() {
         onClose={() => setAddTreasureModalOpen(false)}
         onSave={handleSaveTreasure}
       />
+
+      {/* Edit Treasure Modal */}
+      {treasureToEdit && (
+        <EditTreasureModal
+          isOpen={true}
+          onClose={() => setTreasureToEdit(null)}
+          treasure={{
+            id: treasureToEdit.id,
+            title: treasureToEdit.title,
+            description: treasureToEdit.description,
+            imageUrl: treasureToEdit.displayUrl || treasureToEdit.imageUrl,
+            category: treasureToEdit.category,
+            year: treasureToEdit.year,
+            transform: treasureToEdit.transform,
+          }}
+          onSave={handleUpdateTreasure}
+        />
+      )}
 
       {/* Delete Treasure Confirmation */}
       <ConfirmModal

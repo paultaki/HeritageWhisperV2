@@ -111,7 +111,7 @@ export function TreasureGrid({
         className="treasure-masonry-grid"
         style={{
           columnCount: 2,
-          columnGap: "16px",
+          columnGap: "24px",
         }}
       >
         <style jsx>{`
@@ -139,7 +139,7 @@ export function TreasureGrid({
 
           .treasure-masonry-grid > * {
             break-inside: avoid;
-            margin-bottom: 16px;
+            margin-bottom: 24px;
           }
         `}</style>
 

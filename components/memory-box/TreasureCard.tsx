@@ -143,7 +143,7 @@ export function TreasureCard({
         {/* Category Badge - Top Left */}
         <div className="absolute top-2 left-2 z-10">
           <div className={cn(
-            "flex items-center gap-1 px-2 py-1 rounded-full text-white text-xs font-medium backdrop-blur-sm shadow-lg",
+            "flex items-center gap-1 px-2 py-1 rounded-full text-white text-sm font-medium backdrop-blur-sm shadow-lg",
             categoryConfig.color
           )}>
             <CategoryIcon className="w-3 h-3" />
@@ -179,13 +179,13 @@ export function TreasureCard({
       </div>
 
       {/* Card Info - 25% */}
-      <div className="p-2.5">
+      <div className="p-5.5">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-bold text-gray-900 mb-0.5 line-clamp-2">
+            <h3 className="text-lg font-bold text-gray-900 mb-0.5 line-clamp-2">
               {title}
             </h3>
-            <p className="text-xs text-gray-600">
+            <p className="text-base text-gray-600">
               {categoryConfig.label}
               {year && <span className="text-gray-400"> • {year}</span>}
             </p>

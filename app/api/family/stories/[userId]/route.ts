@@ -132,6 +132,17 @@ export async function GET(
       })
       .eq('id', session.family_member_id);
 
+    // Fetch storyteller's user data for birth year calculations
+    const { data: storytellerUser, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('id, first_name, last_name, birth_year')
+      .eq('id', familyMember.user_id)
+      .single();
+
+    if (userError) {
+      console.warn('[Family Stories API] Failed to fetch storyteller:', userError);
+    }
+
     // Transform stories to match frontend expectations (camelCase)
     const transformedStories = stories.map((story: any) => ({
       id: story.id,
@@ -144,10 +155,21 @@ export async function GET(
       photos: story.metadata?.photos || [],
       wisdomText: story.wisdom_clip_text,
       createdAt: story.created_at,
+      includeInTimeline: story.metadata?.include_in_timeline ?? true,
+      includeInBook: story.metadata?.include_in_book ?? true,
     }));
+
+    // Map storyteller data to camelCase
+    const storytellerData = storytellerUser ? {
+      id: storytellerUser.id,
+      firstName: storytellerUser.first_name,
+      lastName: storytellerUser.last_name,
+      birthYear: storytellerUser.birth_year,
+    } : null;
 
     return NextResponse.json({
       stories: transformedStories,
+      storyteller: storytellerData, // Include storyteller metadata
       total: transformedStories.length,
     });
   } catch (error) {
