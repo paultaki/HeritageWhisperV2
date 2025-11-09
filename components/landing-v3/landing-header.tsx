@@ -59,9 +59,9 @@ export default function LandingHeader() {
                 <Image
                   src="/final logo/logo-heritage-whisper.svg"
                   alt="HeritageWhisper"
-                  width={180}
-                  height={40}
-                  className="h-8 md:h-10 w-auto"
+                  width={240}
+                  height={56}
+                  className="h-10 md:h-14 w-auto"
                   priority
                 />
               </button>
@@ -99,7 +99,7 @@ export default function LandingHeader() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-gray-700 hover:text-blue-600 transition-colors"
+              className="lg:hidden p-2 text-gray-700 hover:text-blue-600 transition-colors ml-auto"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? (
