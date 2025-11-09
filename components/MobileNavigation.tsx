@@ -33,12 +33,12 @@ const NavItem: React.FC<NavItemProps> = ({
   return (
     <button
       onClick={handleClick}
-      className={`flex flex-col items-center gap-1 py-2 transition ${
+      className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 transition min-h-[64px] ${
         isActive ? "text-white" : "text-white/70 hover:text-white"
       }`}
     >
-      <Icon className="h-5 w-5" />
-      <span className={`text-[11px] leading-tight ${isActive ? "font-medium" : ""}`}>
+      <Icon className="h-6 w-6" />
+      <span className={`text-xs font-medium leading-tight whitespace-nowrap ${isActive ? "font-semibold" : ""}`}>
         {label}
       </span>
     </button>
@@ -65,8 +65,8 @@ export default function MobileNavigation() {
         paddingTop: "4px",
       }}
     >
-      <div className="mx-auto max-w-md rounded-2xl bg-black/40 text-white backdrop-blur-md ring-1 ring-white/10">
-        <div className="grid grid-cols-4 text-center text-[11px] leading-tight">
+      <div className="mx-auto max-w-md rounded-2xl bg-black/40 text-white backdrop-blur-md ring-1 ring-white/10 px-2 py-2">
+        <div className="grid grid-cols-4 gap-2">
           <NavItem
             icon={Clock3}
             label="Timeline"

@@ -98,7 +98,7 @@ export function TimelineEnd({
   return (
     <div
       id="timeline-end"
-      className="relative md:-ml-[225px]"
+      className="relative"
       style={{
         paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))",
         marginTop: "0",
@@ -109,8 +109,9 @@ export function TimelineEnd({
         className="absolute gradient-line"
         style={{
           width: "4px",
-          left: "calc(50% + 225px)",
-          transform: "translateX(-50%)",
+          left: "50%",
+          top: "-12px",
+          transform: "translateX(-50%) translateY(238px)",
           background: isDark
             ? "linear-gradient(to bottom, rgba(176, 179, 184, 0.35) 0%, rgba(176, 179, 184, 0.2) 40%, transparent 100%)"
             : "linear-gradient(to bottom, rgba(196, 167, 183, 0.35) 0%, rgba(196, 167, 183, 0.2) 40%, transparent 100%)",
@@ -120,7 +121,14 @@ export function TimelineEnd({
       {/* Terminal node - "Today" */}
       <div className="relative flex items-center mb-12 today-node">
         {/* Terminal dot aligned with spine */}
-        <div className="flex items-center" style={{ marginLeft: "calc(50% + 225px - 6px)" }}>
+        <div
+          className="flex items-center"
+          style={{
+            position: "fixed",
+            left: "50%",
+            transform: "translate(calc(-50% + 27px), -32px)",
+          }}
+        >
           <div
             className="w-3 h-3 rounded-full border-2 flex-shrink-0"
             style={{
@@ -143,7 +151,7 @@ export function TimelineEnd({
         onClick={handleClick}
         aria-label="Add a new memory"
         className="end-cta-button"
-        style={{ marginLeft: "225px", marginRight: "auto" }}
+        style={{ marginLeft: "auto", marginRight: "auto" }}
       >
         + {getButtonConfig().text}
       </button>
@@ -158,7 +166,7 @@ export function TimelineEnd({
 
       <style jsx>{`
         .gradient-line {
-          top: -12px;
+          top: -7px;
           height: 72px;
         }
 

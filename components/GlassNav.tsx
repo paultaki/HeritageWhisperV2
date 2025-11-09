@@ -24,10 +24,10 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
     <nav
       data-sep="auto"
       className={cn(
-        // width and shape - REDUCED FROM 92vw to 46vw (half width)
-        "w-[46vw] max-w-[360px] rounded-[22px] overflow-hidden",
-        // layout - evenly distributed spacing
-        "flex items-center justify-around px-2 py-[4px]",
+        // width and shape - increased for better spacing
+        "w-[90vw] max-w-[420px] rounded-[22px] overflow-hidden",
+        // layout - evenly distributed spacing with more padding
+        "flex items-center justify-around px-4 py-2",
         // glass core - brand-aligned
         "backdrop-blur-[18px] saturate-[1.22] contrast-[1.12] brightness-[0.97]",
         "border border-white/35",
@@ -101,20 +101,20 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
             key={key}
             {...componentProps}
             className={cn(
-              "group flex flex-col items-center justify-center px-1 py-[2px] rounded-[10px] transition-all duration-200 flex-1",
+              "group flex flex-col items-center justify-center px-2 py-2 rounded-[10px] transition-all duration-200 flex-1 gap-1",
               "hover:bg-black/[0.04] hover:scale-105",
               active && "bg-black/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] -translate-y-0.5"
             )}
           >
             <Icon
               className={cn(
-                "w-[18px] h-[18px]",
+                "w-[22px] h-[22px]",
                 active ? "text-black" : "text-black/75"
               )}
             />
             <span
               className={cn(
-                "relative mt-[1px] text-[12px] leading-none font-medium",
+                "relative text-[13px] leading-tight font-medium",
                 active ? "text-black" : "text-black/75"
               )}
             >

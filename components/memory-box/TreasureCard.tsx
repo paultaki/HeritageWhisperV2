@@ -179,7 +179,7 @@ export function TreasureCard({
       </div>
 
       {/* Card Info - 25% */}
-      <div className="p-4">
+      <div className="px-4 pt-4 pb-3">
         <div className="flex items-start justify-between gap-3">
           {/* Title and metadata */}
           <div className="flex-1 min-w-0">

@@ -49,7 +49,7 @@ export default function LandingHeader() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="flex items-center justify-between h-18 md:h-20">
+          <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
             <div className="flex items-center">
               <button
@@ -67,39 +67,40 @@ export default function LandingHeader() {
               </button>
             </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-8">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-                >
-                  {item.label}
-                </button>
-              ))}
-            </nav>
+            {/* Desktop Navigation and Actions */}
+            <div className="hidden lg:flex items-center gap-8">
+              <nav className="flex items-center gap-8">
+                {navItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
 
-            {/* Desktop Action Buttons */}
-            <div className="hidden lg:flex items-center gap-4">
-              <button
-                onClick={() => router.push('/auth/login')}
-                className="px-5 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-colors"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => router.push('/auth/register')}
-                className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
-              >
-                Start Free
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => router.push('/auth/login')}
+                  className="px-5 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-colors"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => router.push('/auth/register')}
+                  className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  Start Free
+                </button>
+              </div>
             </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-gray-700 hover:text-blue-600 transition-colors ml-auto"
+              className="lg:hidden p-2 text-gray-700 hover:text-blue-600 transition-colors"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? (
@@ -154,7 +155,7 @@ export default function LandingHeader() {
       </header>
 
       {/* Spacer to prevent content from going under fixed header */}
-      <div className="h-18 md:h-20" />
+      <div className="h-16 md:h-20" />
     </>
   )
 }
