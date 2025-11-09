@@ -9,12 +9,12 @@ export default function HowItWorks() {
     {
       number: 2,
       title: 'Talk for 2-5 Minutes',
-      description: 'Answer a prompt or tell any story. AI transcribes perfectly.',
+      description: 'Answer a prompt or tell any story. Automatically transcribed perfectly.',
       icon: '🎙️'
     },
     {
       number: 3,
-      title: 'AI Finds the Wisdom',
+      title: 'We Find the Wisdom',
       description: '"What I learned was..." Every story automatically reveals the lesson within.',
       icon: '✨'
     },

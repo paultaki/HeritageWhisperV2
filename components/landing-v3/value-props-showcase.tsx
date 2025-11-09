@@ -7,7 +7,7 @@ export default function ValuePropsShowcase() {
     {
       badge: 'Timeline View',
       title: 'Your Life in Beautiful Cards',
-      description: 'Every story becomes a moment on your timeline. Photos, voice, and wisdom extracted by AI. Scroll through decades in seconds.',
+      description: 'Every story becomes a moment on your timeline. Photos, voice, and wisdom extracted by our Storyteller. Scroll through decades in seconds.',
       image: '/timeline full.webp',
       imageAlt: 'Timeline view showing story cards',
       isScrolling: true,

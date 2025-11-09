@@ -8,7 +8,7 @@ export default function PricingSection() {
   const features = [
     'Unlimited stories forever',
     'Share with entire family',
-    'AI wisdom extraction',
+    'Wisdom extraction',
     'Beautiful timeline & book views',
     'Family can submit questions',
     'Memory box for treasures',

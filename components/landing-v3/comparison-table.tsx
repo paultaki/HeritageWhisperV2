@@ -3,7 +3,7 @@ export default function ComparisonTable() {
     { name: 'Stories Limit', heritage: 'Unlimited ✓', remento: '52 🚫', storyworth: '52 🚫' },
     { name: 'Keeps Growing', heritage: 'Forever ✓', remento: '1 year 🚫', storyworth: '1 year 🚫' },
     { name: 'Family Alerts', heritage: 'Yes ✓', remento: 'No 🚫', storyworth: 'No 🚫' },
-    { name: 'AI Wisdom Extract', heritage: 'Yes ✓', remento: 'No 🚫', storyworth: 'No 🚫' },
+    { name: 'Wisdom Extract', heritage: 'Yes ✓', remento: 'No 🚫', storyworth: 'No 🚫' },
     { name: 'Beautiful Timeline', heritage: 'Yes ✓', remento: 'No 🚫', storyworth: 'No 🚫' },
     { name: 'Memory Treasures', heritage: 'Yes ✓', remento: 'No 🚫', storyworth: 'No 🚫' },
     { name: 'Price', heritage: '$79/year', remento: '$99+book', storyworth: '$99+book' }

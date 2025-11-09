@@ -20,7 +20,7 @@ export default function FAQSection() {
     },
     {
       question: 'What if I run out of stories?',
-      answer: 'You won\'t. Every day brings memories. Plus, family can submit questions. AI suggests prompts based on your past stories. The well never runs dry.'
+      answer: 'You won\'t. Every day brings memories. Plus, family can submit questions. We suggest prompts based on your past stories. The well never runs dry.'
     }
   ]
 
