@@ -35,14 +35,15 @@ type Props = {
 };
 
 /**
- * StoryCard V4 - Management-First Compact Design
+ * StoryCard V5 - Management-First with Enhanced Typography
  *
  * Key changes:
  * - Replaced Timeline/Book badges with subtle top-right StatusIcons
  * - Added visible Listen and Edit quick action buttons at bottom
  * - Redesigned dropdown: Toggle Favorite, Manage Visibility, Duplicate, Delete
  * - Integrated VisibilityModal for Timeline/Book management
- * - Kept compact 140px image and no preview text
+ * - 16:10 aspect ratio for consistent image sizing
+ * - Larger fonts: title (18px), metadata (16px), buttons (16px)
  *
  * Design principles:
  * - Management interface (not display showcase)
@@ -104,10 +105,9 @@ export function StoryCard({
   return (
     <>
       <article className="bg-white rounded-xl border-2 border-gray-200 hover:shadow-xl transition-all duration-200 overflow-hidden flex flex-col">
-        {/* Compact Thumbnail with StatusIcons */}
+        {/* Thumbnail with 16:10 Aspect Ratio */}
         <div
-          className="relative overflow-hidden cursor-pointer"
-          style={{ height: "140px" }}
+          className="relative overflow-hidden cursor-pointer aspect-[16/10] w-full"
           onClick={onView}
         >
           <img
@@ -150,12 +150,12 @@ export function StoryCard({
           {/* Title and Year - Compact */}
           <div className="mb-3 flex-1">
             <h3
-              className="text-base font-bold text-gray-900 mb-1 line-clamp-2 cursor-pointer hover:text-heritage-coral transition-colors"
+              className="text-lg font-bold text-gray-900 mb-1 line-clamp-2 cursor-pointer hover:text-heritage-coral transition-colors"
               onClick={onView}
             >
               {title}
             </h3>
-            <div className="text-sm text-gray-600 font-medium">
+            <div className="text-base text-gray-600 font-medium">
               {year ? (
                 <>
                   {year}
@@ -175,7 +175,7 @@ export function StoryCard({
             {onPlay && durationSeconds > 0 && (
               <button
                 onClick={handlePlayClick}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors font-medium text-sm"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors font-medium text-base"
                 style={{ minHeight: "44px" }}
                 aria-label="Listen to story"
               >
@@ -191,7 +191,7 @@ export function StoryCard({
                   e.stopPropagation();
                   onEdit();
                 }}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors font-medium text-sm"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors font-medium text-base"
                 style={{ minHeight: "44px" }}
                 aria-label="Edit story"
               >

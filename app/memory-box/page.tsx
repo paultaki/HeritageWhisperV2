@@ -24,6 +24,7 @@ import { StoryFilters, type StoryFilterType } from "@/components/memory-box/Stor
 import { StoryCard } from "@/components/memory-box/StoryCard";
 import { TreasureGrid } from "@/components/memory-box/TreasureGrid";
 import { AddTreasureModal } from "@/components/memory-box/AddTreasureModal";
+import { EditMemoryModal } from "@/components/memory-box/EditMemoryModal";
 
 interface Story {
   id: string;
@@ -150,6 +151,7 @@ export default function MemoryBoxV2Page() {
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [addTreasureModalOpen, setAddTreasureModalOpen] = useState(false);
   const [treasureToDelete, setTreasureToDelete] = useState<string | null>(null);
+  const [storyToEdit, setStoryToEdit] = useState<Story | null>(null);
 
   // Make AudioManager globally accessible
   useEffect(() => {
@@ -562,7 +564,7 @@ export default function MemoryBoxV2Page() {
                                 AudioManager.getInstance().play(story.id, story.audioUrl);
                               }
                             }}
-                            onEdit={() => router.push(`/review/book-style?id=${story.id}&returnPath=${encodeURIComponent('/memory-box')}`)}
+                            onEdit={() => setStoryToEdit(story)}
                             onDelete={() => {
                               setStoryToDelete(story.id);
                               setShowDeleteConfirm(true);
@@ -741,6 +743,46 @@ export default function MemoryBoxV2Page() {
         }}
         variant="danger"
       />
+
+      {/* Edit Memory Modal */}
+      {storyToEdit && (
+        <EditMemoryModal
+          isOpen={!!storyToEdit}
+          onClose={() => setStoryToEdit(null)}
+          story={{
+            id: storyToEdit.id,
+            title: storyToEdit.title,
+            storyYear: storyToEdit.storyYear,
+            transcription: storyToEdit.transcription,
+            photoUrl: storyToEdit.photoUrl,
+            photoTransform: storyToEdit.photos?.find(p => p.isHero)?.transform,
+            metadata: storyToEdit.metadata,
+          }}
+          onSave={async (updates) => {
+            await updateStory.mutateAsync({
+              id: updates.id,
+              updates: {
+                title: updates.title,
+                storyYear: updates.storyYear,
+                transcription: updates.transcription,
+                metadata: updates.metadata,
+                photos: updates.photoTransform && storyToEdit.photos
+                  ? storyToEdit.photos.map(p =>
+                      p.isHero
+                        ? { ...p, transform: updates.photoTransform }
+                        : p
+                    )
+                  : storyToEdit.photos,
+              },
+            });
+            setStoryToEdit(null);
+            toast({
+              title: "Changes saved",
+              description: "Your memory has been updated successfully.",
+            });
+          }}
+        />
+      )}
     </div>
   );
 }
