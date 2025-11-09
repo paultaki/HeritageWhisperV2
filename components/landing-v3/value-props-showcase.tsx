@@ -26,8 +26,9 @@ export default function ValuePropsShowcase() {
       badge: 'Memory Box',
       title: 'More Than Stories',
       description: 'Store recipes, heirlooms, keepsakes. One place for everything you want to pass down. Not just stories – treasures.',
-      image: null,
-      placeholder: 'Screenshot of Memory Box interface showing recipes, photos, and keepsakes',
+      image: '/treasurebox.webp',
+      imageAlt: 'Memory Box interface showing recipes, photos, and keepsakes',
+      isScrolling: false,
       imagePosition: 'left'
     }
   ]

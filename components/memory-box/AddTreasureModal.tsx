@@ -293,6 +293,7 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
                 placeholder="e.g., Dad's War Medals"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                autoComplete="off"
                 className="w-full px-4 py-3 text-lg font-medium border-2 border-gray-200 rounded-lg focus:border-heritage-coral focus:outline-none transition-colors"
                 required
               />
@@ -338,6 +339,7 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
                 onChange={(e) => setYear(e.target.value)}
                 min="1800"
                 max={currentYear}
+                autoComplete="off"
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-heritage-coral focus:outline-none transition-colors"
               />
             </div>
@@ -353,6 +355,7 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
+                autoComplete="off"
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-heritage-coral focus:outline-none transition-colors resize-none"
               />
             </div>

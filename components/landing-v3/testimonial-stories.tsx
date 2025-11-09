@@ -1,17 +1,22 @@
+import Image from 'next/image'
+
 export default function TestimonialStories() {
   const stories = [
     {
-      photoPlaceholder: 'Photo: Elderly man with phone',
+      image: '/Frank.webp',
+      imageAlt: 'Elderly man with phone',
       headline: 'Frank, 78, has recorded 67 stories',
       story: 'Started with his war stories. Now shares memories as they come. His grandkids in California listen on their commute.'
     },
     {
-      photoPlaceholder: 'Photo: Three generations at dinner table',
+      image: '/Johnsons.webp',
+      imageAlt: 'Three generations at dinner table',
       headline: 'The Johnsons: 3 generations, 5 states',
       story: 'Grandma records in Florida. Kids listen in New York, Texas, Seattle. More connected than when they lived next door.'
     },
     {
-      photoPlaceholder: 'Photo: Woman looking at phone, smiling',
+      image: '/Sarah.webp',
+      imageAlt: 'Woman looking at phone, smiling',
       headline: 'Sarah discovered her mom\'s humor',
       story: '"I never knew mom was funny until I heard her stories. The book would have missed her laugh, her timing, everything."'
     }
@@ -37,11 +42,14 @@ export default function TestimonialStories() {
               key={index}
               className="bg-gradient-to-br from-white to-orange-50 rounded-2xl shadow-lg border border-stone-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
-              {/* Photo placeholder */}
-              <div className="aspect-[4/3] bg-gradient-to-br from-stone-200 to-stone-300 flex items-center justify-center border-b border-stone-300">
-                <p className="text-gray-600 text-sm font-medium text-center px-6">
-                  {story.photoPlaceholder}
-                </p>
+              {/* Photo */}
+              <div className="aspect-[4/3] relative overflow-hidden border-b border-stone-300">
+                <Image
+                  src={story.image}
+                  alt={story.imageAlt}
+                  fill
+                  className="object-cover"
+                />
               </div>
 
               {/* Content */}

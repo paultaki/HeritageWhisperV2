@@ -269,21 +269,27 @@ export async function POST(request: NextRequest) {
       .createSignedUrl(displayFilename, 604800);
 
     // Create treasure record with new dual-path fields
+    const insertData: any = {
+      user_id: user.id,
+      title,
+      description,
+      category,
+      year,
+      master_path: masterFilename,
+      display_path: displayFilename,
+      // DEPRECATED (backward compatibility):
+      image_url: displaySignedUrl?.signedUrl || displayFilename,
+      is_favorite: false,
+    };
+
+    // Only add transform if it exists (for backward compatibility)
+    if (transform) {
+      insertData.transform = transform;
+    }
+
     const { data: treasure, error: dbError } = await supabaseAdmin
       .from("treasures")
-      .insert({
-        user_id: user.id,
-        title,
-        description,
-        category,
-        year,
-        master_path: masterFilename,
-        display_path: displayFilename,
-        transform: transform,
-        // DEPRECATED (backward compatibility):
-        image_url: displaySignedUrl?.signedUrl || displayFilename,
-        is_favorite: false,
-      })
+      .insert(insertData)
       .select()
       .single();
 

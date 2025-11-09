@@ -1,18 +1,20 @@
+import Image from 'next/image'
+
 export default function SocialProofSnapshot() {
   return (
     <section className="py-16 md:py-20 px-6 md:px-12 bg-white">
       <div className="max-w-5xl mx-auto">
         <div className="bg-gradient-to-br from-blue-50 to-orange-50 rounded-3xl p-8 md:p-12 shadow-xl border border-stone-200">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-            {/* Photo placeholder */}
+            {/* Photo */}
             <div className="md:col-span-1">
-              <div className="aspect-square bg-gradient-to-br from-stone-200 to-stone-300 rounded-2xl shadow-lg overflow-hidden flex items-center justify-center border border-stone-300">
-                <div className="text-center px-4">
-                  <p className="text-gray-600 text-sm font-medium">
-                    Photo: Elderly woman<br />
-                    with phone, smiling
-                  </p>
-                </div>
+              <div className="aspect-square relative rounded-2xl shadow-lg overflow-hidden border border-stone-300">
+                <Image
+                  src="/Margaret.webp"
+                  alt="Elderly woman with phone, smiling"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
 
