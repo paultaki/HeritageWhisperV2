@@ -7,25 +7,15 @@ export default function HeroSection() {
   const router = useRouter()
 
   return (
-    <section className="relative pt-24 pb-12 md:pt-24 md:pb-20 px-6 md:px-12">
-      {/* Login Button - Upper Right */}
-      <div className="absolute top-4 right-4 md:top-6 md:right-6 z-50">
-        <button
-          onClick={() => router.push('/auth/login')}
-          className="px-4 py-1.5 md:px-6 md:py-2 bg-white text-blue-600 text-sm md:text-base font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-all duration-200 shadow-md hover:shadow-lg"
-        >
-          Login
-        </button>
-      </div>
-
+    <section className="relative pt-24 pb-12 md:pt-32 md:pb-20 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left: Copy */}
           <div className="space-y-8">
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-gray-900">
-                Your grandkids will still be hearing{' '}
-                <span className="text-blue-600">new stories</span> from you next Christmas
+                Every photo in Mom's albums has a{' '}
+                <span className="text-blue-600">story only she knows</span>
               </h1>
 
               <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl">
@@ -41,14 +31,14 @@ export default function HeroSection() {
                 onClick={() => router.push('/auth/register')}
                 className="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
-                Start Your Timeline Free
+                Start Recording Free
               </button>
 
               <button
                 onClick={() => router.push('/auth/register')}
                 className="px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
-                Give This Gift - $79
+                Give This Gift - $79/year
               </button>
             </div>
 
@@ -58,21 +48,21 @@ export default function HeroSection() {
                 <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>First 3 stories free</span>
+                <span>Record unlimited stories free</span>
               </div>
 
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>No credit card</span>
+                <span>No apps to download</span>
               </div>
 
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>Takes 2 minutes</span>
+                <span>Works on any smartphone</span>
               </div>
             </div>
           </div>

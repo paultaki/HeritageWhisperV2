@@ -21,6 +21,30 @@ export default function FAQSection() {
     {
       question: 'What if I run out of stories?',
       answer: 'You won\'t. Every day brings memories. Plus, family can submit questions. We suggest prompts based on your past stories. The well never runs dry.'
+    },
+    {
+      question: 'Is my data secure?',
+      answer: 'Yes. Your stories are encrypted in transit and at rest. We use enterprise-grade infrastructure (Vercel + Supabase SOC 2 certified). We never sell or share your data. Ever.'
+    },
+    {
+      question: 'Can I export all my stories?',
+      answer: 'Absolutely. Download everything anytime in multiple formats. Your data, your control. No lock-in, no hassle.'
+    },
+    {
+      question: 'What happens if I want to cancel?',
+      answer: 'Cancel anytime, no questions asked. Your stories stay accessible (read-only). Reactivate whenever you want to add more or share with family again.'
+    },
+    {
+      question: 'Do family members need accounts to listen?',
+      answer: 'No. You can share via private link or they can create free accounts to get notifications when you add new stories. Their choice.'
+    },
+    {
+      question: 'Can I edit stories after recording?',
+      answer: 'Yes. Edit transcripts, add photos, update dates, or re-record entirely. Your memories evolve, so should your stories.'
+    },
+    {
+      question: 'How many family members can I share with?',
+      answer: 'Unlimited. Share with your entire family tree. Everyone gets instant access to new stories, no matter where they are.'
     }
   ]
 

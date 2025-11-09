@@ -14,7 +14,7 @@ export default function FooterCTA() {
 
         <p className="text-xl md:text-2xl text-blue-100 leading-relaxed">
           Start your living timeline today.<br />
-          First 3 stories free. No credit card.
+          Record unlimited. Share for $79/year.
         </p>
 
         <div className="pt-4">

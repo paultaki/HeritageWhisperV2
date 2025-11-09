@@ -1,7 +1,16 @@
+'use client'
+
+import { useScrollFadeIn, fadeInClasses } from '@/lib/scroll-animations'
+
 export default function ProblemStatement() {
+  const { ref, isVisible } = useScrollFadeIn()
+
   return (
     <section className="py-16 md:py-20 px-6 md:px-12 bg-white">
-      <div className="max-w-4xl mx-auto text-center space-y-6">
+      <div
+        ref={ref}
+        className={`max-w-4xl mx-auto text-center space-y-6 ${fadeInClasses.initial} ${isVisible ? fadeInClasses.animate : ''}`}
+      >
         <div className="space-y-2 text-xl md:text-2xl text-gray-600">
           <p className="line-through decoration-red-500 decoration-2">StoryWorth ends at 52 stories.</p>
           <p className="line-through decoration-red-500 decoration-2">Remento ends when the book is done.</p>

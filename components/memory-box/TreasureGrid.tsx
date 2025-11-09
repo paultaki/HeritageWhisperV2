@@ -144,9 +144,9 @@ export function TreasureGrid({
         `}</style>
 
         {treasures.map((treasure) => (
-          <TreasureCard
-            key={treasure.id}
-            id={treasure.id}
+          <div key={treasure.id} className="mb-6">
+            <TreasureCard
+              id={treasure.id}
             title={treasure.title}
             description={treasure.description}
             displayUrl={treasure.displayUrl}
@@ -163,7 +163,8 @@ export function TreasureGrid({
             onEdit={() => onEdit?.(treasure.id)}
             onDownload={() => onDownload?.(treasure.id)}
             onDelete={() => onDelete?.(treasure.id)}
-          />
+            />
+          </div>
         ))}
       </div>
 

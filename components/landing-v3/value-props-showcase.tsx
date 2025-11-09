@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useScrollFadeIn, fadeInClasses } from '@/lib/scroll-animations'
 
 export default function ValuePropsShowcase() {
   const features = [
@@ -47,12 +48,17 @@ export default function ValuePropsShowcase() {
         </div>
 
         {/* Features */}
-        {features.map((feature, index) => (
+        {features.map((feature, index) => {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          const { ref, isVisible } = useScrollFadeIn(0.2, index * 100)
+
+          return (
           <div
             key={index}
+            ref={ref}
             className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${
               feature.imagePosition === 'right' ? 'lg:flex-row-reverse' : ''
-            }`}
+            } ${fadeInClasses.initial} ${isVisible ? fadeInClasses.animate : ''}`}
           >
             {/* Image */}
             <div className={`${feature.imagePosition === 'right' ? 'lg:order-2' : ''}`}>
@@ -90,7 +96,7 @@ export default function ValuePropsShowcase() {
               </p>
             </div>
           </div>
-        ))}
+        )})}
       </div>
 
       <style jsx>{`

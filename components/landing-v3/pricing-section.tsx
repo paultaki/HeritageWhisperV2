@@ -24,15 +24,18 @@ export default function PricingSection() {
             <span className="text-sm font-semibold text-gray-700">Simple Pricing</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            One Simple Price
+            Record Unlimited. Share for $79/year
           </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Capture all your stories free. Only pay when you're ready to share with family.
+          </p>
         </div>
 
         {/* Pricing card */}
         <div className="bg-gradient-to-br from-white to-blue-50 rounded-3xl shadow-2xl border-2 border-blue-200 overflow-hidden">
           {/* Badge */}
           <div className="bg-blue-600 text-white text-center py-3 px-6">
-            <p className="font-semibold">Best Value for Your Family's Legacy</p>
+            <p className="font-semibold">Record Free Forever • Share with Family: $79/year</p>
           </div>
 
           <div className="p-8 md:p-12">

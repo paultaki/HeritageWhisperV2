@@ -1,4 +1,10 @@
+'use client'
+
+import { useScrollFadeIn, fadeInClasses } from '@/lib/scroll-animations'
+
 export default function ThreePillars() {
+  const { ref, isVisible } = useScrollFadeIn()
+
   const pillars = [
     {
       icon: '📱',
@@ -21,7 +27,10 @@ export default function ThreePillars() {
     <section className="py-16 md:py-24 px-6 md:px-12 bg-[#faf8f5]">
       <div className="max-w-7xl mx-auto">
         {/* Section header */}
-        <div className="text-center mb-12">
+        <div
+          ref={ref}
+          className={`text-center mb-12 ${fadeInClasses.initial} ${isVisible ? fadeInClasses.animate : ''}`}
+        >
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-stone-200 shadow-sm mb-4">
             <span className="text-sm font-semibold text-gray-700">Three Core Features</span>
           </div>
