@@ -43,9 +43,13 @@ export function TimelineMobileV2() {
 
   // V3: Get active storyteller context for family sharing
   const { activeContext } = useAccountContext();
+  const isViewingOwnAccount = activeContext?.type === 'own';
 
   // Data fetching and processing
   const timelineData = useTimelineData({ user, session });
+
+  // Use storyteller's birth year, fallback to user's birth year
+  const birthYear = timelineData.storyteller?.birthYear || user?.birthYear || 0;
 
   // Navigation and scroll tracking
   const navigation = useTimelineNavigation({
@@ -153,32 +157,37 @@ export function TimelineMobileV2() {
 
       {/* Timeline Content */}
       <main className="max-w-6xl mx-auto pt-0 pb-24 md:pb-6 timeline-container">
-        {/* Paywall Prompt */}
-        {user?.freeStoriesUsed === 3 &&
-          user?.subscriptionStatus !== "active" && (
-            <PaywallPromptCard
-              onSubscribe={() => {
-                toast({
-                  title: "Coming soon!",
-                  description: "Stripe integration will be added soon.",
-                });
-              }}
-              onDismiss={() => {}}
-            />
-          )}
+        {/* V3: Only show personal prompts and paywalls when viewing own account */}
+        {isViewingOwnAccount && (
+          <>
+            {/* Paywall Prompt */}
+            {user?.freeStoriesUsed === 3 &&
+              user?.subscriptionStatus !== "active" && (
+                <PaywallPromptCard
+                  onSubscribe={() => {
+                    toast({
+                      title: "Coming soon!",
+                      description: "Stripe integration will be added soon.",
+                    });
+                  }}
+                  onDismiss={() => {}}
+                />
+              )}
 
-        {/* Next Story Prompt */}
-        {!(
-          user?.freeStoriesUsed === 3 && user?.subscriptionStatus !== "active"
-        ) && (
-          <NextStoryCard
-            onRecordClick={(promptId) => {
-              router.push("/review/book-style?new=true");
-              if (promptId) {
-                sessionStorage.setItem("activePromptId", promptId);
-              }
-            }}
-          />
+            {/* Next Story Prompt */}
+            {!(
+              user?.freeStoriesUsed === 3 && user?.subscriptionStatus !== "active"
+            ) && (
+              <NextStoryCard
+                onRecordClick={(promptId) => {
+                  router.push("/review/book-style?new=true");
+                  if (promptId) {
+                    sessionStorage.setItem("activePromptId", promptId);
+                  }
+                }}
+              />
+            )}
+          </>
         )}
 
         <div className="hw-layout">
@@ -236,7 +245,7 @@ export function TimelineMobileV2() {
                     isActive={navigation.activeDecade === item.id}
                     isDarkTheme={ui.isDark}
                     colorScheme={ui.currentColorScheme}
-                    birthYear={user.birthYear}
+                    birthYear={birthYear}
                     onRegisterRef={navigation.registerDecadeRef}
                     onGhostPromptClick={handleGhostPromptClick}
                     highlightedStoryId={navigation.highlightedStoryId}

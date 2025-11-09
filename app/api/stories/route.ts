@@ -185,7 +185,30 @@ export async function GET(request: NextRequest) {
       }),
     );
 
-    return NextResponse.json({ stories: transformedStories });
+    // V3: Fetch storyteller's user data for family sharing
+    // (needed for birth year calculations and display name)
+    const { data: storytellerUser, error: userError } = await supabaseAdmin
+      .from("users")
+      .select("id, first_name, last_name, birth_year")
+      .eq("id", targetUserId)
+      .single();
+
+    if (userError) {
+      logger.warn(`[Stories API] Failed to fetch storyteller user data:`, userError);
+    }
+
+    // Map to camelCase for frontend
+    const storytellerData = storytellerUser ? {
+      id: storytellerUser.id,
+      firstName: storytellerUser.first_name,
+      lastName: storytellerUser.last_name,
+      birthYear: storytellerUser.birth_year,
+    } : null;
+
+    return NextResponse.json({
+      stories: transformedStories,
+      storyteller: storytellerData, // Include storyteller metadata
+    });
   } catch (error) {
     logger.error("Stories fetch error:", error);
     return NextResponse.json(

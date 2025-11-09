@@ -98,6 +98,11 @@ export function useTimelineData({
     return (storiesData as any)?.stories || [];
   }, [storiesData]);
 
+  // Extract storyteller metadata from API response (for family sharing)
+  const storytellerData = useMemo(() => {
+    return (storiesData as any)?.storyteller || null;
+  }, [storiesData]);
+
   // Filter to only show stories marked for timeline
   const stories = useMemo(() => {
     return allStories.filter((s: any) => s.includeInTimeline === true);
@@ -317,5 +322,8 @@ export function useTimelineData({
     // Timeline items
     allTimelineItems,
     decadeEntries,
+
+    // V3: Storyteller metadata for family sharing (id, firstName, lastName, birthYear)
+    storyteller: storytellerData,
   };
 }

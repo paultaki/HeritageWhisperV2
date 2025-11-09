@@ -898,6 +898,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   // V3: Get active storyteller context for family sharing
   const { activeContext } = useAccountContext();
   const storytellerId = activeContext?.storytellerId || user?.id;
+  const isViewingOwnAccount = activeContext?.type === 'own';
 
   const {
     data: storiesData,
@@ -1090,6 +1091,10 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   const allStories = (storiesData as any)?.stories || [];
   const stories = allStories.filter((s: any) => s.includeInTimeline === true);
 
+  // V3: Extract storyteller metadata for family sharing (birth year for age calculations)
+  const storytellerData = (storiesData as any)?.storyteller || null;
+  const birthYear = storytellerData?.birthYear || user?.birthYear || 0;
+
   // Sort stories chronologically
   const sortedStories = [...stories].sort((a: any, b: any) => {
     const yearA = normalizeYear(a.storyYear);
@@ -1198,7 +1203,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                             isDark={isDark}
                             showDecadeMarker={showDecadeMarker}
                             decadeLabel={showDecadeMarker ? decadeLabel : undefined}
-                            birthYear={user?.birthYear || normalizeYear(user?.birthYear as any) || 0}
+                            birthYear={birthYear}
                             useV2Features={useV2Features}
                           />
                         </div>
