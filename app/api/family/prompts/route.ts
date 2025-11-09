@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { promptSubmitRatelimit } from '@/lib/ratelimit';
+import { sendQuestionReceivedNotification } from '@/lib/notifications/send-question-received';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -79,13 +81,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if family member has contributor permission
-    if (familyMember.permission_level !== 'contributor') {
+    // Rate limiting: 5 prompt submissions per minute per family member
+    const { success, limit, reset, remaining } = await promptSubmitRatelimit.limit(familyMember.id);
+    if (!success) {
+      console.warn('[FamilyPrompts] Rate limit exceeded for family member:', familyMember.id);
       return NextResponse.json(
-        { error: 'You need contributor permission to submit prompts' },
-        { status: 403 }
+        {
+          error: 'Too many questions submitted',
+          details: 'Please wait before submitting another question',
+          retryAfter: Math.ceil((reset - Date.now()) / 1000),
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': limit.toString(),
+            'X-RateLimit-Remaining': remaining.toString(),
+            'X-RateLimit-Reset': reset.toString(),
+            'Retry-After': Math.ceil((reset - Date.now()) / 1000).toString(),
+          },
+        }
       );
     }
+
+    // All family members (viewer or contributor) can submit question suggestions
+    // This allows view-only family to engage without giving them write access to stories
 
     // Validate prompt text
     if (!promptText || promptText.trim().length < 10) {
@@ -122,6 +141,17 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Send email notification to storyteller (async, non-blocking)
+    sendQuestionReceivedNotification({
+      storytellerUserId: storytellerUserId,
+      submitterFamilyMemberId: familyMember.id,
+      promptText: promptText.trim(),
+      context: context?.trim(),
+    }).catch((error) => {
+      // Log error but don't fail the request
+      console.error('[FamilyPrompts] Failed to send notification email:', error);
+    });
 
     return NextResponse.json({
       success: true,

@@ -10,6 +10,9 @@ type Treasure = {
   title: string;
   description?: string;
   imageUrl: string;
+  displayUrl?: string;
+  masterUrl?: string;
+  transform?: { zoom: number; position: { x: number; y: number } };
   category: TreasureCategory;
   year?: number;
   isFavorite: boolean;
@@ -103,61 +106,81 @@ export function TreasureGrid({
   // Masonry Grid Layout
   // Using CSS columns for masonry effect (simpler than complex JS solutions)
   return (
-    <div
-      className="treasure-masonry-grid"
-      style={{
-        columnCount: 2,
-        columnGap: "16px",
-      }}
-    >
-      <style jsx>{`
-        .treasure-masonry-grid {
-          column-count: 2;
-        }
-
-        @media (min-width: 768px) {
+    <>
+      <div
+        className="treasure-masonry-grid"
+        style={{
+          columnCount: 2,
+          columnGap: "16px",
+        }}
+      >
+        <style jsx>{`
           .treasure-masonry-grid {
-            column-count: 3;
+            column-count: 2;
           }
-        }
 
-        @media (min-width: 1024px) {
-          .treasure-masonry-grid {
-            column-count: 4;
+          @media (min-width: 768px) {
+            .treasure-masonry-grid {
+              column-count: 3;
+            }
           }
-        }
 
-        @media (min-width: 1536px) {
-          .treasure-masonry-grid {
-            column-count: 5;
+          @media (min-width: 1024px) {
+            .treasure-masonry-grid {
+              column-count: 4;
+            }
           }
-        }
 
-        .treasure-masonry-grid > * {
-          break-inside: avoid;
-          margin-bottom: 16px;
-        }
-      `}</style>
+          @media (min-width: 1536px) {
+            .treasure-masonry-grid {
+              column-count: 5;
+            }
+          }
 
-      {treasures.map((treasure) => (
-        <TreasureCard
-          key={treasure.id}
-          id={treasure.id}
-          title={treasure.title}
-          description={treasure.description}
-          imageUrl={treasure.imageUrl}
-          category={treasure.category}
-          year={treasure.year}
-          isFavorite={treasure.isFavorite}
-          linkedStoryId={treasure.linkedStoryId}
-          onToggleFavorite={() => onToggleFavorite?.(treasure.id)}
-          onLinkToStory={() => onLinkToStory?.(treasure.id)}
-          onCreateStory={() => onCreateStory?.(treasure.id)}
-          onEdit={() => onEdit?.(treasure.id)}
-          onDownload={() => onDownload?.(treasure.id)}
-          onDelete={() => onDelete?.(treasure.id)}
-        />
-      ))}
-    </div>
+          .treasure-masonry-grid > * {
+            break-inside: avoid;
+            margin-bottom: 16px;
+          }
+        `}</style>
+
+        {treasures.map((treasure) => (
+          <TreasureCard
+            key={treasure.id}
+            id={treasure.id}
+            title={treasure.title}
+            description={treasure.description}
+            displayUrl={treasure.displayUrl}
+            masterUrl={treasure.masterUrl}
+            imageUrl={treasure.imageUrl}
+            transform={treasure.transform}
+            category={treasure.category}
+            year={treasure.year}
+            isFavorite={treasure.isFavorite}
+            linkedStoryId={treasure.linkedStoryId}
+            onToggleFavorite={() => onToggleFavorite?.(treasure.id)}
+            onLinkToStory={() => onLinkToStory?.(treasure.id)}
+            onCreateStory={() => onCreateStory?.(treasure.id)}
+            onEdit={() => onEdit?.(treasure.id)}
+            onDownload={() => onDownload?.(treasure.id)}
+            onDelete={() => onDelete?.(treasure.id)}
+          />
+        ))}
+      </div>
+
+      {/* Floating Add Button */}
+      {onAddTreasure && (
+        <div className="fixed bottom-24 right-6 z-40">
+          <button
+            onClick={onAddTreasure}
+            className="flex items-center justify-center gap-2 px-6 py-4 bg-heritage-coral text-white rounded-full font-semibold shadow-2xl hover:bg-heritage-coral/90 transition-all hover:scale-105 active:scale-95"
+            style={{ minHeight: "56px", minWidth: "56px" }}
+            aria-label="Add treasure"
+          >
+            <Plus className="w-6 h-6" />
+            <span className="hidden sm:inline">Add Treasure</span>
+          </button>
+        </div>
+      )}
+    </>
   );
 }

@@ -30,7 +30,6 @@ import { useTimelineUI } from "@/hooks/use-timeline-ui";
 // V2 Components
 import { TimelineHeader } from "@/components/timeline/TimelineHeader";
 import { TimelineDecadeSection } from "@/components/timeline/TimelineDecadeSection";
-import { PaywallModal } from "@/components/timeline/PaywallModal";
 import { TimelineEnd } from "@/components/timeline/TimelineEnd";
 import { TimelineNearEndNudge } from "@/components/timeline/TimelineNearEndNudge";
 
@@ -54,18 +53,10 @@ export function TimelineMobileV2() {
   // Event Handlers
   const handleGhostPromptClick = useCallback(
     (_prompt: GhostPrompt) => {
-      if (user && !user.isPaid && user.storyCount >= 3) {
-        ui.setShowPaywall(true);
-      } else {
-        router.push("/review/book-style?new=true");
-      }
+      router.push("/review/book-style?new=true");
     },
-    [user, router, ui],
+    [router],
   );
-
-  const handleSubscribe = useCallback(() => {
-    router.push("/subscribe");
-  }, [router]);
 
   // Auth redirect
   useEffect(() => {
@@ -495,13 +486,6 @@ export function TimelineMobileV2() {
           white-space: nowrap;
         }
       `}</style>
-
-      {/* Paywall Modal */}
-      <PaywallModal
-        isOpen={ui.showPaywall}
-        onClose={() => ui.setShowPaywall(false)}
-        onSubscribe={handleSubscribe}
-      />
     </div>
   );
 }

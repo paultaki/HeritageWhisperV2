@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { FamilyGuard } from '@/components/FamilyGuard';
 import { FamilyBanner } from '@/components/FamilyBanner';
-import { SubmitQuestionDialog } from '@/components/SubmitQuestionDialog';
+import { SubmitPromptButton } from '@/components/family/SubmitPromptButton';
 import { useFamilyAuth } from '@/hooks/use-family-auth';
 import { Card } from '@/components/ui/card';
 import { Loader2, Calendar, Play, Pause, AlertCircle } from 'lucide-react';
@@ -119,15 +119,16 @@ export default function FamilyTimelineClient({ userId }: { userId: string }) {
                   {stories.length} {stories.length === 1 ? 'story' : 'stories'} shared with you
                 </p>
               </div>
-              {session?.permissionLevel === 'contributor' && (
-                <SubmitQuestionDialog
-                  storytellerId={userId}
-                  sessionToken={session.sessionToken}
-                  storytellerName={session.storytellerName}
-                />
-              )}
             </div>
           </div>
+
+          {/* Floating prompt submission button - available to all family members */}
+          {session && (
+            <SubmitPromptButton
+              storytellerUserId={userId}
+              storytellerName={session.storytellerName}
+            />
+          )}
 
           {isLoading && (
             <div className="flex items-center justify-center py-12">

@@ -1,0 +1,174 @@
+import { createClient } from '@supabase/supabase-js';
+import { Resend } from 'resend';
+import { NewStoryNotificationEmail } from '@/lib/emails/new-story-notification';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
+
+export interface SendStoryNotificationsParams {
+  storytellerUserId: string;
+  storyId: string;
+  storyTitle: string;
+  storyYear?: number;
+  heroPhotoPath?: string; // File path in Supabase Storage
+  transcript: string;
+}
+
+/**
+ * Extract the first sentence from a transcript.
+ * Returns up to 150 characters to avoid overly long previews.
+ */
+function extractFirstSentence(text: string): string {
+  if (!text) return '';
+
+  // Clean up the text
+  const cleaned = text.trim();
+
+  // Find first sentence ending with . ! or ?
+  const match = cleaned.match(/^[^.!?]+[.!?]/);
+  if (match) {
+    const sentence = match[0].trim();
+    // Truncate if too long
+    return sentence.length > 150 ? sentence.substring(0, 147) + '...' : sentence;
+  }
+
+  // No sentence ending found, take first 150 chars
+  return cleaned.substring(0, 147) + (cleaned.length > 147 ? '...' : '');
+}
+
+/**
+ * Generate a signed URL for a photo with 1-week expiry.
+ * Returns null if no path provided or if generation fails.
+ */
+async function generateSignedPhotoUrl(photoPath: string | null | undefined): Promise<string | null> {
+  if (!photoPath) return null;
+
+  try {
+    const { data, error } = await supabaseAdmin.storage
+      .from('heritage-whisper-files')
+      .createSignedUrl(photoPath, 604800); // 7 days in seconds
+
+    if (error || !data) {
+      console.error('[StoryNotification] Failed to generate signed URL:', error);
+      return null;
+    }
+
+    return data.signedUrl;
+  } catch (error) {
+    console.error('[StoryNotification] Error generating signed URL:', error);
+    return null;
+  }
+}
+
+/**
+ * Send email notifications to all family members when storyteller adds a new story.
+ * This runs asynchronously after story creation - failures are logged but don't block the request.
+ */
+export async function sendNewStoryNotifications({
+  storytellerUserId,
+  storyId,
+  storyTitle,
+  storyYear,
+  heroPhotoPath,
+  transcript,
+}: SendStoryNotificationsParams): Promise<void> {
+  try {
+    // Skip if Resend API key not configured
+    if (!process.env.RESEND_API_KEY) {
+      console.log('[StoryNotification] Skipping story emails - no Resend API key configured');
+      return;
+    }
+
+    // Fetch storyteller's name
+    const { data: storyteller, error: storytellerError } = await supabaseAdmin
+      .from('users')
+      .select('firstName, lastName')
+      .eq('id', storytellerUserId)
+      .single();
+
+    if (storytellerError || !storyteller) {
+      console.error('[StoryNotification] Failed to fetch storyteller:', storytellerError);
+      return;
+    }
+
+    const storytellerName = storyteller.firstName
+      ? `${storyteller.firstName} ${storyteller.lastName || ''}`.trim()
+      : 'Your family member';
+
+    // Fetch all family members with access to this storyteller
+    // This includes both magic-link-based (V2) and account-based (V3) family sharing
+    const { data: familyMembers, error: familyError } = await supabaseAdmin
+      .from('family_members')
+      .select('id, name, email, auth_user_id')
+      .eq('user_id', storytellerUserId)
+      .eq('status', 'active');
+
+    if (familyError || !familyMembers || familyMembers.length === 0) {
+      console.log('[StoryNotification] No active family members to notify');
+      return;
+    }
+
+    // Generate signed URL for hero photo (if exists)
+    const heroPhotoUrl = await generateSignedPhotoUrl(heroPhotoPath);
+
+    // Extract first sentence from transcript
+    const firstSentence = extractFirstSentence(transcript);
+
+    // Prepare email content
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002';
+    const viewStoryLink = `${appUrl}/timeline`; // Link to timeline where they can see the new story
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    // Send email to each family member
+    let successCount = 0;
+    let failureCount = 0;
+
+    for (const member of familyMembers) {
+      try {
+        const familyMemberName = member.name || member.email.split('@')[0];
+
+        const emailContent = NewStoryNotificationEmail({
+          storytellerName,
+          familyMemberName,
+          storyTitle,
+          storyYear,
+          heroPhotoUrl: heroPhotoUrl || undefined,
+          firstSentence,
+          viewStoryLink,
+        });
+
+        const { data: emailData, error: emailError } = await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL || 'HeritageWhisper <no-reply@updates.heritagewhisper.com>',
+          to: member.email,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          text: emailContent.text,
+        });
+
+        if (emailError) {
+          console.error(`[StoryNotification] Failed to send to ${member.email}:`, emailError);
+          failureCount++;
+        } else {
+          console.log(`[StoryNotification] ✅ Email sent to ${member.email}:`, emailData?.id);
+          successCount++;
+        }
+      } catch (error) {
+        console.error(`[StoryNotification] Error sending to ${member.email}:`, error);
+        failureCount++;
+      }
+    }
+
+    console.log(`[StoryNotification] Story notifications complete: ${successCount} sent, ${failureCount} failed`);
+  } catch (error) {
+    // Catch-all for unexpected errors - log but don't throw
+    console.error('[StoryNotification] Unexpected error sending story notifications:', error);
+  }
+}

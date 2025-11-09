@@ -9,6 +9,7 @@ import { tier3Ratelimit, aiIpRatelimit, aiGlobalRatelimit, getClientIp } from "@
 import { CreateStorySchema, safeValidateRequestBody } from "@/lib/validationSchemas";
 import { ZodError } from "zod";
 import { hasAIConsent } from "@/lib/aiConsent";
+import { sendNewStoryNotifications } from "@/lib/notifications/send-new-story-notifications";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -317,6 +318,21 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       );
     }
+
+    // ============================================================================
+    // FAMILY NOTIFICATIONS: Notify family members about new story (async, non-blocking)
+    // ============================================================================
+    sendNewStoryNotifications({
+      storytellerUserId: user.id,
+      storyId: newStory.id,
+      storyTitle: newStory.title,
+      storyYear: newStory.year || undefined,
+      heroPhotoPath: newStory.photo_url || undefined,
+      transcript: newStory.transcript || '',
+    }).catch((error) => {
+      // Log error but don't fail the request
+      logger.error('[Stories API] Failed to send story notification emails:', error);
+    });
 
     // ============================================================================
     // PROMPT TRACKING: Mark source prompt as "used" if applicable

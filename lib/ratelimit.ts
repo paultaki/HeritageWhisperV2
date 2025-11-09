@@ -54,8 +54,9 @@ let _apiRatelimit: Ratelimit | null = null;
 let _tier3Ratelimit: Ratelimit | null = null;
 let _aiIpRatelimit: Ratelimit | null = null;
 let _aiGlobalRatelimit: Ratelimit | null = null;
+let _promptSubmitRatelimit: Ratelimit | null = null;
 
-function getRateLimiter(type: "auth" | "upload" | "api" | "tier3" | "ai-ip" | "ai-global"): Ratelimit | null {
+function getRateLimiter(type: "auth" | "upload" | "api" | "tier3" | "ai-ip" | "ai-global" | "prompt-submit"): Ratelimit | null {
   const redis = getRedis();
 
   // CRITICAL CHANGE: Fail in production if Redis not available
@@ -127,6 +128,16 @@ function getRateLimiter(type: "auth" | "upload" | "api" | "tier3" | "ai-ip" | "a
     });
   }
 
+  if (type === "prompt-submit" && !_promptSubmitRatelimit) {
+    // Prompt Submit: Prevent spam - 5 submissions per minute per user
+    _promptSubmitRatelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "60 s"), // 5 submissions per minute
+      analytics: true,
+      prefix: "@hw/prompt-submit",
+    });
+  }
+
   return type === "auth"
     ? _authRatelimit
     : type === "upload"
@@ -137,7 +148,9 @@ function getRateLimiter(type: "auth" | "upload" | "api" | "tier3" | "ai-ip" | "a
           ? _aiIpRatelimit
           : type === "ai-global"
             ? _aiGlobalRatelimit
-            : _apiRatelimit;
+            : type === "prompt-submit"
+              ? _promptSubmitRatelimit
+              : _apiRatelimit;
 }
 
 // Export getters instead of direct instances
@@ -336,6 +349,39 @@ export const aiGlobalRatelimit = {
         success: true,
         limit: 999,
         reset: Date.now() + 3600000,
+        remaining: 999,
+      };
+    }
+  },
+};
+
+export const promptSubmitRatelimit = {
+  limit: async (identifier: string) => {
+    try {
+      const limiter = getRateLimiter("prompt-submit");
+      if (!limiter) {
+        return {
+          success: true,
+          limit: 999,
+          reset: Date.now() + 60000,
+          remaining: 999,
+        };
+      }
+      return limiter.limit(identifier);
+    } catch (error) {
+      console.error('[Rate Limit] Prompt submit rate limit check failed:', error);
+      if (process.env.NODE_ENV === 'production') {
+        return {
+          success: false,
+          limit: 0,
+          reset: Date.now() + 60000,
+          remaining: 0,
+        };
+      }
+      return {
+        success: true,
+        limit: 999,
+        reset: Date.now() + 60000,
         remaining: 999,
       };
     }

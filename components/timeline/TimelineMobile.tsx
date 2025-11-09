@@ -6,7 +6,7 @@
  *
  * Architecture (Research-Informed):
  * - Hooks: use-timeline-data, use-timeline-navigation, use-timeline-ui
- * - Components: TimelineHeader, TimelineDecadeSection, MemoryCard, PaywallModal
+ * - Components: TimelineHeader, TimelineDecadeSection, MemoryCard
  * - Principle: <200 lines per file, granular state, logic extraction
  *
  * Research Sources:
@@ -39,7 +39,6 @@ import { useTimelineUI } from "@/hooks/use-timeline-ui";
 // Components
 import { TimelineHeader } from "./TimelineHeader";
 import { TimelineDecadeSection } from "./TimelineDecadeSection";
-import { PaywallModal } from "./PaywallModal";
 
 /**
  * Color scheme configuration
@@ -135,20 +134,11 @@ export function TimelineMobile() {
 
   const handleGhostPromptClick = useCallback(
     (prompt: GhostPrompt) => {
-      // Check if user has reached story limit
-      if (user && !user.isPaid && user.storyCount >= 3) {
-        ui.setShowPaywall(true);
-      } else {
-        // Open mode selection modal
-        modeSelection.openModal();
-      }
+      // Open mode selection modal
+      modeSelection.openModal();
     },
-    [user, modeSelection, ui],
+    [modeSelection],
   );
-
-  const handleSubscribe = useCallback(() => {
-    router.push("/subscribe");
-  }, [router]);
 
   const handleOpenOverlay = useCallback(
     (story: Story) => {
@@ -338,13 +328,6 @@ export function TimelineMobile() {
           </div>
         </div>
       </main>
-
-      {/* Paywall Modal */}
-      <PaywallModal
-        isOpen={ui.showPaywall}
-        onClose={() => ui.setShowPaywall(false)}
-        onSubscribe={handleSubscribe}
-      />
 
       {/* Mode Selection Modal */}
       <ModeSelectionModal

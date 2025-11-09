@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { promptSubmitRatelimit } from '@/lib/ratelimit';
+import { sendQuestionReceivedNotification } from '@/lib/notifications/send-question-received';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -43,6 +45,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Authentication failed' },
         { status: 401 }
+      );
+    }
+
+    // Rate limiting: 5 prompt submissions per minute per user
+    const { success, limit, reset, remaining } = await promptSubmitRatelimit.limit(user.id);
+    if (!success) {
+      console.warn('[FamilySubmit] Rate limit exceeded for user:', user.id);
+      return NextResponse.json(
+        {
+          error: 'Too many questions submitted',
+          details: 'Please wait before submitting another question',
+          retryAfter: Math.ceil((reset - Date.now()) / 1000),
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': limit.toString(),
+            'X-RateLimit-Remaining': remaining.toString(),
+            'X-RateLimit-Reset': reset.toString(),
+            'Retry-After': Math.ceil((reset - Date.now()) / 1000).toString(),
+          },
+        }
       );
     }
 
@@ -120,6 +144,17 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[FamilySubmit] ✅ Question submitted successfully:', prompt.id);
+
+    // Send email notification to storyteller (async, non-blocking)
+    sendQuestionReceivedNotification({
+      storytellerUserId: storyteller_id,
+      submitterFamilyMemberId: familyMember.id,
+      promptText: prompt_text.trim(),
+      context: context?.trim(),
+    }).catch((error) => {
+      // Log error but don't fail the request
+      console.error('[FamilySubmit] Failed to send notification email:', error);
+    });
 
     return NextResponse.json({
       success: true,

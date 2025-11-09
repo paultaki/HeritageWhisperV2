@@ -77,6 +77,7 @@ export function FamilyInviteEmail({
                   <li>Read their stories with photos and context</li>
                   <li>Listen to audio recordings in their own voice</li>
                   <li>Browse their memory book organized by decade</li>
+                  <li><strong>Suggest questions</strong> you'd like them to answer</li>
                 </ul>
               </div>
 
@@ -108,7 +109,7 @@ export function FamilyInviteEmail({
               </p>
               
               <p style="margin: 0; font-size: 13px; color: #9CA3AF; line-height: 1.5;">
-                You're receiving this email because ${storytellerName} invited you to view their stories on Heritage Whisper. Your access is view-only and will remain active for 30 days after your first visit.
+                You're receiving this email because ${storytellerName} invited you to view their stories on Heritage Whisper. Your access is view-only and will remain active for up to 90 days with regular activity.
               </p>
 
               <p style="margin: 16px 0; font-size: 12px; color: #9CA3AF; text-align: center; line-height: 1.5;">
@@ -140,6 +141,7 @@ What you can explore:
 • Read their stories with photos and context
 • Listen to audio recordings in their own voice
 • Browse their memory book organized by decade
+• Suggest questions you'd like them to answer
 
 Click here to view their stories:
 ${magicLink}
@@ -151,7 +153,7 @@ This link will expire on ${expiryDate}.
 What is Heritage Whisper?
 Heritage Whisper is a platform that helps people preserve and share their life stories with family members. It's a beautiful way to keep family history alive for generations to come.
 
-You're receiving this email because ${storytellerName} invited you to view their stories. Your access is view-only and will remain active for 30 days after your first visit.
+You're receiving this email because ${storytellerName} invited you to view their stories. Your access is view-only and will remain active for up to 90 days with regular activity.
 
 Not interested? You can safely ignore this invitation or email support@heritagewhisper.com to unsubscribe from future emails.
 

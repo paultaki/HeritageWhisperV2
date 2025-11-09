@@ -29,6 +29,7 @@ type Props = {
   // NEW: Dual WebP URLs
   masterUrl?: string;
   displayUrl?: string;
+  transform?: { zoom: number; position: { x: number; y: number } };
   // DEPRECATED (backward compatibility):
   imageUrl?: string;
   category: TreasureCategory;
@@ -58,6 +59,7 @@ export function TreasureCard({
   description,
   masterUrl,
   displayUrl,
+  transform,
   imageUrl,
   category,
   year,
@@ -94,19 +96,39 @@ export function TreasureCard({
       onClick={onEdit}
     >
       {/* Image Container - 75% of card height */}
-      <div className="relative overflow-hidden" style={{ minHeight: "200px" }}>
+      <div className="relative overflow-hidden" style={{ minHeight: "200px", aspectRatio: "16/10" }}>
         {!imageError ? (
-          <img
-            src={displayUrl || imageUrl}
-            alt={title}
-            className={cn(
-              "w-full h-full object-cover transition-opacity duration-300",
-              imageLoaded ? "opacity-100" : "opacity-0"
-            )}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
-            loading="lazy"
-          />
+          transform ? (
+            // Use regular img with transform when zoom/pan is set
+            <img
+              src={displayUrl || imageUrl}
+              alt={title}
+              className={cn(
+                "w-full h-full object-cover transition-opacity duration-300",
+                imageLoaded ? "opacity-100" : "opacity-0"
+              )}
+              style={{
+                transform: `scale(${transform.zoom}) translate(${transform.position.x}%, ${transform.position.y}%)`,
+                transformOrigin: 'center center',
+              }}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+              loading="lazy"
+            />
+          ) : (
+            // Use regular img without transform
+            <img
+              src={displayUrl || imageUrl}
+              alt={title}
+              className={cn(
+                "w-full h-full object-cover transition-opacity duration-300",
+                imageLoaded ? "opacity-100" : "opacity-0"
+              )}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+              loading="lazy"
+            />
+          )
         ) : (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
             <CategoryIcon className="w-16 h-16 text-gray-300" />

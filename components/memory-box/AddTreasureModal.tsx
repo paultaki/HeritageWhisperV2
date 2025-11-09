@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Upload, X, Camera, FileText, Gem, Home, ChefHat, Award } from "lucide-react";
+import { Upload, X, Camera, FileText, Gem, Home, ChefHat, Award, ZoomIn, ZoomOut } from "lucide-react";
+import * as Slider from "@radix-ui/react-slider";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ type Props = {
     category: TreasureCategory;
     year?: number;
     imageFile: File;
+    transform?: { zoom: number; position: { x: number; y: number } };
   }) => Promise<void>;
 };
 
@@ -56,6 +58,13 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Zoom/Pan state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTransform, setEditTransform] = useState({ zoom: 1, position: { x: 0, y: 0 } });
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const imageRef = useRef<HTMLDivElement>(null);
+
   const currentYear = new Date().getFullYear();
 
   const handleFileChange = (file: File) => {
@@ -68,8 +77,84 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
+      setIsEditing(true); // Enter editing mode after file selection
     };
     reader.readAsDataURL(file);
+  };
+
+  // Zoom/Pan handlers
+  const handleZoomChange = (value: number[]) => {
+    setEditTransform(prev => ({ ...prev, zoom: value[0] }));
+  };
+
+  // Mouse drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDraggingImage(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingImage || !imageRef.current) return;
+
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+
+    const rect = imageRef.current.getBoundingClientRect();
+    const percentX = (deltaX / rect.width) * 100;
+    const percentY = (deltaY / rect.height) * 100;
+
+    // Calculate max offset based on zoom
+    const maxPercent = (editTransform.zoom - 1) * 50;
+
+    setEditTransform(prev => ({
+      ...prev,
+      position: {
+        x: Math.max(-maxPercent, Math.min(maxPercent, prev.position.x + percentX)),
+        y: Math.max(-maxPercent, Math.min(maxPercent, prev.position.y + percentY))
+      }
+    }));
+
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDraggingImage(false);
+  };
+
+  // Touch drag handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setIsDraggingImage(true);
+    setDragStart({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingImage || !imageRef.current) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - dragStart.x;
+    const deltaY = touch.clientY - dragStart.y;
+
+    const rect = imageRef.current.getBoundingClientRect();
+    const percentX = (deltaX / rect.width) * 100;
+    const percentY = (deltaY / rect.height) * 100;
+
+    // Calculate max offset based on zoom
+    const maxPercent = (editTransform.zoom - 1) * 50;
+
+    setEditTransform(prev => ({
+      ...prev,
+      position: {
+        x: Math.max(-maxPercent, Math.min(maxPercent, prev.position.x + percentX)),
+        y: Math.max(-maxPercent, Math.min(maxPercent, prev.position.y + percentY))
+      }
+    }));
+
+    setDragStart({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchEnd = () => {
+    setIsDraggingImage(false);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -113,6 +198,7 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
         category: category as TreasureCategory,
         year: year ? parseInt(year) : undefined,
         imageFile,
+        transform: editTransform,
       });
 
       // Reset form
@@ -122,6 +208,8 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
       setCategory("");
       setYear("");
       setDescription("");
+      setIsEditing(false);
+      setEditTransform({ zoom: 1, position: { x: 0, y: 0 } });
       onClose();
     } catch (error) {
       console.error("Failed to save treasure:", error);
@@ -141,6 +229,8 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
     setCategory("");
     setYear("");
     setDescription("");
+    setIsEditing(false);
+    setEditTransform({ zoom: 1, position: { x: 0, y: 0 } });
     onClose();
   };
 
@@ -151,58 +241,40 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
           <DialogTitle className="text-2xl font-bold">Add to Treasure Chest</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Photo Upload Area */}
-          {!imagePreview ? (
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={cn(
-                "border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-colors",
-                isDragging
-                  ? "border-heritage-coral bg-heritage-coral/5"
-                  : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
-              )}
-            >
-              <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-lg font-medium text-gray-700 mb-2">
-                Drop photos or click to browse
-              </p>
-              <p className="text-sm text-gray-500">
-                Supports JPG, PNG, WebP (max 5MB)
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileInputChange}
-                className="hidden"
-              />
-            </div>
-          ) : (
-            <div className="relative rounded-xl overflow-hidden border-2 border-gray-200">
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="w-full h-auto max-h-96 object-contain bg-gray-100"
-              />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setImageFile(null);
-                  setImagePreview("");
-                }}
-                className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-colors"
-                aria-label="Remove image"
+        {!isEditing ? (
+          <div className="space-y-6">
+            {/* Photo Upload Area */}
+            {!imagePreview ? (
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={cn(
+                  "border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-colors",
+                  isDragging
+                    ? "border-heritage-coral bg-heritage-coral/5"
+                    : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                )}
               >
-                <X className="w-5 h-5 text-gray-700" />
-              </button>
-            </div>
-          )}
+                <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-lg font-medium text-gray-700 mb-2">
+                  Drop photos or click to browse
+                </p>
+                <p className="text-sm text-gray-500">
+                  Supports JPG, PNG, WebP (max 5MB)
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileInputChange}
+                  className="hidden"
+                />
+              </div>
+            ) : null}
 
-          {/* Quick Details Form */}
+            {/* Quick Details Form */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -285,26 +357,116 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
               />
             </div>
           </form>
-        </div>
+          </div>
+        ) : (
+          /* Photo editing screen with zoom/pan */
+          <div className="space-y-6">
+            {/* Header with instructions */}
+            <div className="text-center">
+              <p className="text-gray-700 text-base">
+                Drag to reposition • Zoom slider to adjust size
+              </p>
+            </div>
 
-        <DialogFooter className="gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleClose}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!imageFile || !title || !category || isSubmitting}
-            className="bg-heritage-coral hover:bg-heritage-coral/90"
-          >
-            {isSubmitting ? "Saving..." : "Save Treasure"}
-          </Button>
-        </DialogFooter>
+            {/* 16:10 aspect ratio editing frame */}
+            <div
+              className="relative w-full bg-black rounded-lg overflow-hidden border-2 border-gray-300"
+              style={{ aspectRatio: '16/10' }}
+            >
+              <div
+                ref={imageRef}
+                className="absolute inset-0 touch-none select-none"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                style={{
+                  cursor: isDraggingImage ? 'grabbing' : 'grab',
+                  overflow: 'hidden'
+                }}
+              >
+                <img
+                  src={imagePreview}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{
+                    transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x}%, ${editTransform.position.y}%)`,
+                    transformOrigin: 'center center',
+                  }}
+                  alt="Editing"
+                  draggable={false}
+                />
+              </div>
+            </div>
+
+            {/* Zoom slider */}
+            <div className="flex items-center gap-4">
+              <ZoomOut className="w-5 h-5 text-gray-600 flex-shrink-0" />
+              <Slider.Root
+                className="relative flex items-center select-none touch-none flex-1 h-5"
+                value={[editTransform.zoom]}
+                onValueChange={handleZoomChange}
+                min={1}
+                max={3}
+                step={0.1}
+              >
+                <Slider.Track className="bg-gray-200 relative grow rounded-full h-[3px]">
+                  <Slider.Range className="absolute bg-heritage-coral rounded-full h-full" />
+                </Slider.Track>
+                <Slider.Thumb
+                  className="block w-6 h-6 bg-heritage-coral rounded-full hover:bg-heritage-coral/90 focus:outline-none focus:ring-2 focus:ring-heritage-coral shadow-md"
+                  aria-label="Zoom"
+                />
+              </Slider.Root>
+              <ZoomIn className="w-5 h-5 text-gray-600 flex-shrink-0" />
+            </div>
+
+            {/* Action buttons */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setImageFile(null);
+                  setImagePreview("");
+                  setIsEditing(false);
+                  setEditTransform({ zoom: 1, position: { x: 0, y: 0 } });
+                }}
+                className="h-[50px] rounded-xl"
+              >
+                Choose Different Photo
+              </Button>
+              <Button
+                onClick={() => setIsEditing(false)}
+                className="h-[50px] rounded-xl bg-heritage-coral hover:bg-heritage-coral/90"
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {!isEditing && (
+          <DialogFooter className="gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!imageFile || !title || !category || isSubmitting}
+              className="bg-heritage-coral hover:bg-heritage-coral/90"
+            >
+              {isSubmitting ? "Saving..." : "Save Treasure"}
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

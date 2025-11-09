@@ -237,6 +237,7 @@ export const treasures = pgTable("treasures", {
   thumbnailUrl: text("thumbnail_url"), // Old: replaced by displayPath
   isFavorite: boolean("is_favorite").default(false).notNull(),
   linkedStoryId: uuid("linked_story_id").references(() => stories.id, { onDelete: "set null" }),
+  transform: jsonb("transform"), // Image zoom/pan transform: {zoom: number, position: {x: number, y: number}}
   createdAt: timestamp("created_at").default(sql`NOW()`),
   updatedAt: timestamp("updated_at").default(sql`NOW()`),
 });

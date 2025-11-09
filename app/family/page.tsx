@@ -67,6 +67,8 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
+import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
+import { useSubscription } from "@/hooks/use-subscription";
 
 interface FamilyMember {
   id: string;
@@ -112,6 +114,10 @@ export default function FamilyPage() {
     window.addEventListener("hw-theme-change", handler);
     return () => window.removeEventListener("hw-theme-change", handler);
   }, []);
+
+  // Subscription state
+  const { isPaid, canInviteFamily } = useSubscription();
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   // Invite form state
   const [inviteEmail, setInviteEmail] = useState("");
@@ -513,15 +519,28 @@ export default function FamilyPage() {
         <div className="max-w-6xl mx-auto py-4 md:py-6">
           {/* Page Header with Invite Button */}
           <div className="flex items-center justify-end mb-6">
+            {/* Invite Button - checks subscription status */}
+            <Button
+              onClick={() => {
+                if (canInviteFamily) {
+                  setInviteDialogOpen(true);
+                } else {
+                  setUpgradeModalOpen(true);
+                }
+              }}
+              className="w-full sm:w-auto min-h-[60px] px-6 md:px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+            >
+              <UserPlus className="w-5 h-5 mr-2" />
+              Invite Family
+              {!canInviteFamily && (
+                <span className="ml-2 rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold">
+                  Premium
+                </span>
+              )}
+            </Button>
+
+            {/* Invite Dialog - only for premium users */}
             <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                className="w-full sm:w-auto min-h-[60px] px-6 md:px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
-              >
-                <UserPlus className="w-5 h-5 mr-2" />
-                Invite Family
-              </Button>
-            </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-semibold">
@@ -976,6 +995,13 @@ export default function FamilyPage() {
         </div>
       </div>
       </main>
+
+      {/* Upgrade Modal for free users */}
+      <UpgradeModal
+        open={upgradeModalOpen}
+        onOpenChange={setUpgradeModalOpen}
+        trigger="family_invite"
+      />
     </div>
   );
 }

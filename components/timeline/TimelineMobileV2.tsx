@@ -32,7 +32,6 @@ import { useTimelineUI } from "@/hooks/use-timeline-ui";
 
 // Components
 import { TimelineHeader } from "./TimelineHeader";
-import { PaywallModal } from "./PaywallModal";
 
 /**
  * V2 Color schemes with improved contrast and accessibility
@@ -122,18 +121,10 @@ export function TimelineMobileV2() {
 
   const handleGhostPromptClick = useCallback(
     (prompt: GhostPrompt) => {
-      if (user && !user.isPaid && user.storyCount >= 3) {
-        ui.setShowPaywall(true);
-      } else {
-        modeSelection.openModal();
-      }
+      modeSelection.openModal();
     },
-    [user, modeSelection, ui],
+    [modeSelection],
   );
-
-  const handleSubscribe = useCallback(() => {
-    router.push("/subscribe");
-  }, [router]);
 
   const handleOpenOverlay = useCallback(
     (story: Story) => {
@@ -399,12 +390,6 @@ export function TimelineMobileV2() {
       </main>
 
       {/* Modals */}
-      <PaywallModal
-        isOpen={ui.showPaywall}
-        onClose={() => ui.setShowPaywall(false)}
-        onSubscribe={handleSubscribe}
-      />
-
       <ModeSelectionModal
         isOpen={modeSelection.isOpen}
         onClose={modeSelection.closeModal}

@@ -113,6 +113,7 @@ export async function GET(request: NextRequest) {
           displayPath: treasure.display_path,
           masterUrl,
           displayUrl,
+          transform: treasure.transform,
           // DEPRECATED (backward compatibility):
           imageUrl: displayUrl || treasure.image_url,
           thumbnailUrl: displayUrl || treasure.thumbnail_url,
@@ -175,6 +176,8 @@ export async function POST(request: NextRequest) {
     const category = formData.get("category") as string;
     const year = formData.get("year") ? parseInt(formData.get("year") as string) : null;
     const description = formData.get("description") as string | null;
+    const transformStr = formData.get("transform") as string | null;
+    const transform = transformStr ? JSON.parse(transformStr) : null;
 
     if (!imageFile || !title || !category) {
       return NextResponse.json(
@@ -276,6 +279,7 @@ export async function POST(request: NextRequest) {
         year,
         master_path: masterFilename,
         display_path: displayFilename,
+        transform: transform,
         // DEPRECATED (backward compatibility):
         image_url: displaySignedUrl?.signedUrl || displayFilename,
         is_favorite: false,
@@ -304,6 +308,7 @@ export async function POST(request: NextRequest) {
       displayPath: treasure.display_path,
       masterUrl: masterSignedUrl?.signedUrl || masterFilename,
       displayUrl: displaySignedUrl?.signedUrl || displayFilename,
+      transform: treasure.transform,
       // DEPRECATED (backward compatibility):
       imageUrl: displaySignedUrl?.signedUrl || displayFilename,
       thumbnailUrl: displaySignedUrl?.signedUrl || displayFilename,

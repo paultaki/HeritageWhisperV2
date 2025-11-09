@@ -58,6 +58,7 @@ interface Treasure {
   // NEW: Dual WebP URLs
   masterUrl?: string;
   displayUrl?: string;
+  transform?: { zoom: number; position: { x: number; y: number } };
   // DEPRECATED (backward compatibility):
   imageUrl: string;
   thumbnailUrl?: string;
@@ -306,6 +307,7 @@ export default function MemoryBoxV2Page() {
     category: string;
     year?: number;
     imageFile: File;
+    transform?: { zoom: number; position: { x: number; y: number } };
   }) => {
     const formData = new FormData();
     formData.append("image", treasureData.imageFile);
@@ -316,6 +318,9 @@ export default function MemoryBoxV2Page() {
     }
     if (treasureData.year) {
       formData.append("year", treasureData.year.toString());
+    }
+    if (treasureData.transform) {
+      formData.append("transform", JSON.stringify(treasureData.transform));
     }
 
     const response = await fetch("/api/treasures", {

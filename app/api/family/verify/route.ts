@@ -114,14 +114,14 @@ export async function GET(req: NextRequest) {
       .delete()
       .eq('family_member_id', familyMember.id);
 
-    // Create a new family session (7 days, reduced from 30 for better security)
+    // Create a new family session (30 days renewable, can be extended up to 90-day absolute limit)
     const sessionToken = generateSecureToken();
     const sessionExpiresAt = new Date();
-    sessionExpiresAt.setDate(sessionExpiresAt.getDate() + 7);
+    sessionExpiresAt.setDate(sessionExpiresAt.getDate() + 30);
 
-    // Absolute expiry is the maximum session lifetime (30 days, cannot be extended)
+    // Absolute expiry is the maximum session lifetime (90 days, cannot be extended)
     const absoluteExpiresAt = new Date();
-    absoluteExpiresAt.setDate(absoluteExpiresAt.getDate() + 30);
+    absoluteExpiresAt.setDate(absoluteExpiresAt.getDate() + 90);
 
     const { error: sessionError } = await supabaseAdmin
       .from('family_sessions')

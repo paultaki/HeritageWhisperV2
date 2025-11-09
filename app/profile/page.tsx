@@ -62,11 +62,14 @@ import { ManagePasskeys } from "@/components/auth/ManagePasskeys";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
+import { useSubscription } from "@/hooks/use-subscription";
+import { Badge } from "@/components/ui/badge";
 
 export default function Profile() {
   const router = useRouter();
   const { user, logout, session, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
+  const { isPaid, planType } = useSubscription();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [showHelp, setShowHelp] = useState(false);
 
@@ -714,19 +717,31 @@ export default function Profile() {
 
           {/* Subscription & Storage */}
           {user.isPaid !== undefined && (
-            <Card>
+            <Card className={isPaid ? "border-2 border-amber-200" : ""}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5" />
-                  {user.isPaid ? "Premium Plan" : "Free Plan"}
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    Membership Status
+                  </CardTitle>
+                  <Badge
+                    className={
+                      isPaid
+                        ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white"
+                        : "bg-gray-100 text-gray-600"
+                    }
+                  >
+                    {isPaid ? "Premium" : "Free"}
+                  </Badge>
+                </div>
                 <CardDescription>
-                  {user.isPaid
-                    ? "Thank you for being a premium member!"
-                    : "Upgrade to unlock more storage and features"}
+                  {isPaid
+                    ? "Thank you for being a premium member! Enjoy unlimited family sharing."
+                    : "Upgrade to Premium to unlock family sharing features"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Storage Usage */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -742,22 +757,70 @@ export default function Profile() {
                       className="rounded-full h-2 transition-all"
                       style={{
                         width: `${storagePercent}%`,
-                        backgroundColor: '#7C6569'
+                        backgroundColor: isPaid ? '#D97706' : '#7C6569'
                       }}
                     />
                   </div>
                 </div>
 
-                {!user.isPaid && (
+                {/* Feature List for Free Users */}
+                {!isPaid && (
+                  <div className="rounded-lg bg-gray-50 p-4 space-y-2">
+                    <p className="text-sm font-semibold text-gray-700 mb-3">Unlock with Premium:</p>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <span className="text-red-500">✕</span>
+                        <span>Share stories with family members</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <span className="text-red-500">✕</span>
+                        <span>Family can submit questions</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <span className="text-red-500">✕</span>
+                        <span>Track family engagement</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                {!isPaid ? (
                   <Button
-                    className="w-full h-12"
-                    variant="default"
-                    style={{ backgroundColor: '#7C6569', color: 'white' }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+                    onClick={() => router.push('/upgrade?reason=profile')}
+                    className="w-full h-12 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
                   >
                     <ArrowUpCircle className="w-4 h-4 mr-2" />
-                    Upgrade to Premium
+                    Upgrade to Premium - $79/year
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/stripe/customer-portal', {
+                          method: 'POST',
+                        });
+
+                        if (!response.ok) {
+                          throw new Error('Failed to create portal session');
+                        }
+
+                        const { url } = await response.json();
+                        window.location.href = url;
+                      } catch (error) {
+                        console.error('Error opening customer portal:', error);
+                        toast({
+                          title: 'Error',
+                          description: 'Failed to open subscription management. Please try again.',
+                          variant: 'destructive',
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    className="w-full h-12"
+                  >
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Manage Subscription
                   </Button>
                 )}
               </CardContent>
