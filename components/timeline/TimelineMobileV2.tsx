@@ -15,12 +15,15 @@
 import { useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { useAccountContext } from "@/hooks/use-account-context";
 import { NextStoryCard } from "@/components/NextStoryCard";
 import { PaywallPromptCard } from "@/components/PaywallPromptCard";
 import DecadeNav from "@/components/ui/DecadeNav";
 import { useToast } from "@/hooks/use-toast";
 import { type Story } from "@/lib/supabase";
 import { type GhostPrompt } from "@/lib/ghostPrompts";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 // Hooks
 import { useTimelineData } from "@/hooks/use-timeline-data";
@@ -37,6 +40,9 @@ export function TimelineMobileV2() {
   const { user, session, isLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+
+  // V3: Get active storyteller context for family sharing
+  const { activeContext } = useAccountContext();
 
   // Data fetching and processing
   const timelineData = useTimelineData({ user, session });
@@ -176,40 +182,80 @@ export function TimelineMobileV2() {
         )}
 
         <div className="hw-layout">
-          <div
-            className="hw-spine"
-            style={
-              ui.isDark ? { backgroundColor: "#ffffff", opacity: 1 } : undefined
-            }
-          >
-            {timelineData.allTimelineItems.map((item, index) => (
-              <TimelineDecadeSection
-                key={item.id ?? String(index)}
-                decadeId={item.id}
-                title={item.title}
-                subtitle={item.subtitle}
-                stories={item.stories}
-                isActive={navigation.activeDecade === item.id}
-                isDarkTheme={ui.isDark}
-                colorScheme={ui.currentColorScheme}
-                birthYear={user.birthYear}
-                onRegisterRef={navigation.registerDecadeRef}
-                onGhostPromptClick={handleGhostPromptClick}
-                highlightedStoryId={navigation.highlightedStoryId}
-                returnHighlightId={navigation.returnHighlightId}
-                useV2Features={true}
-              />
-            ))}
-          </div>
+          {/* Empty State - Context-aware based on account type */}
+          {timelineData.stories.length === 0 ? (
+            <div className="text-center py-20 px-4">
+              {activeContext?.type === 'own' ? (
+                // Viewing own account - show create button
+                <>
+                  <p className="text-gray-500 text-lg mb-6">No memories yet. Start recording your first story!</p>
+                  <Button
+                    onClick={() => router.push("/review/book-style?new=true")}
+                    className="bg-orange-500 hover:bg-orange-600"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Create First Memory
+                  </Button>
+                </>
+              ) : activeContext?.permissionLevel === 'contributor' ? (
+                // Viewing family member as contributor - can create stories
+                <>
+                  <p className="text-gray-500 text-lg mb-6">
+                    No stories yet. You can record stories for {activeContext.storytellerName}.
+                  </p>
+                  <Button
+                    onClick={() => router.push("/review/book-style?new=true")}
+                    className="bg-orange-500 hover:bg-orange-600"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Record Story
+                  </Button>
+                </>
+              ) : (
+                // Viewing family member as viewer - read-only
+                <p className="text-gray-500 text-lg">
+                  No stories have been shared yet.
+                </p>
+              )}
+            </div>
+          ) : (
+            <>
+              <div
+                className="hw-spine"
+                style={
+                  ui.isDark ? { backgroundColor: "#ffffff", opacity: 1 } : undefined
+                }
+              >
+                {timelineData.allTimelineItems.map((item, index) => (
+                  <TimelineDecadeSection
+                    key={item.id ?? String(index)}
+                    decadeId={item.id}
+                    title={item.title}
+                    subtitle={item.subtitle}
+                    stories={item.stories}
+                    isActive={navigation.activeDecade === item.id}
+                    isDarkTheme={ui.isDark}
+                    colorScheme={ui.currentColorScheme}
+                    birthYear={user.birthYear}
+                    onRegisterRef={navigation.registerDecadeRef}
+                    onGhostPromptClick={handleGhostPromptClick}
+                    highlightedStoryId={navigation.highlightedStoryId}
+                    returnHighlightId={navigation.returnHighlightId}
+                    useV2Features={true}
+                  />
+                ))}
+              </div>
 
-          {/* Timeline End - Terminal node + CTA */}
-          <TimelineEnd
-            isDark={ui.isDark}
-            hasCurrentYearContent={timelineData.stories.some(
-              (s) => new Date(s.createdAt).getFullYear() === new Date().getFullYear()
-            )}
-            onAddMemory={() => router.push("/review/book-style?new=true")}
-          />
+              {/* Timeline End - Terminal node + CTA */}
+              <TimelineEnd
+                isDark={ui.isDark}
+                hasCurrentYearContent={timelineData.stories.some(
+                  (s) => new Date(s.createdAt).getFullYear() === new Date().getFullYear()
+                )}
+                onAddMemory={() => router.push("/review/book-style?new=true")}
+              />
+            </>
+          )}
         </div>
       </main>
 
