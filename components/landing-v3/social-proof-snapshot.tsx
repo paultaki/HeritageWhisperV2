@@ -10,7 +10,7 @@ export default function SocialProofSnapshot() {
             <div className="md:col-span-1">
               <div className="aspect-square relative rounded-2xl shadow-lg overflow-hidden border border-stone-300">
                 <Image
-                  src="/Margaret.webp"
+                  src="/margaret.webp"
                   alt="Elderly woman with phone, smiling"
                   fill
                   className="object-cover"

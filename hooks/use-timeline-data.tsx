@@ -55,7 +55,9 @@ export function useTimelineData({
   // Family Sharing Support - Get active storyteller context
   // ==================================================================================
 
-  const { activeContext } = useAccountContext();
+  const { activeContext, isLoading: isContextLoading } = useAccountContext();
+
+  // Always default to user.id if no active context (prevents query from being disabled)
   const storytellerId = activeContext?.storytellerId || user?.id;
 
   // ==================================================================================
@@ -75,7 +77,7 @@ export function useTimelineData({
       const res = await apiRequest("GET", url);
       return res.json();
     },
-    enabled: !!user && !!storytellerId,
+    enabled: !!user && !!user.id, // Always enabled when user exists (storytellerId defaults to user.id)
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
     gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes even when unmounted
     refetchOnWindowFocus: true, // Refetch when window regains focus

@@ -3,13 +3,13 @@ import Image from 'next/image'
 export default function TestimonialStories() {
   const stories = [
     {
-      image: '/Frank.webp',
+      image: '/frank.webp',
       imageAlt: 'Elderly man with phone',
       headline: 'Frank, 78, has recorded 67 stories',
       story: 'Started with his war stories. Now shares memories as they come. His grandkids in California listen on their commute.'
     },
     {
-      image: '/Johnsons.webp',
+      image: '/johnsons.webp',
       imageAlt: 'Three generations at dinner table',
       headline: 'The Johnsons: 3 generations, 5 states',
       story: 'Grandma records in Florida. Kids listen in New York, Texas, Seattle. More connected than when they lived next door.'
