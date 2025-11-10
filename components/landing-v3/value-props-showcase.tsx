@@ -27,7 +27,7 @@ export default function ValuePropsShowcase() {
       badge: 'Memory Box',
       title: 'More Than Stories',
       description: 'Store recipes, heirlooms, keepsakes. One place for everything you want to pass down. Not just stories – treasures.',
-      image: '/treasurebox.webp',
+      image: '/treasurebox.webp?v=2',
       imageAlt: 'Memory Box interface showing recipes, photos, and keepsakes',
       isScrolling: false,
       imagePosition: 'left'
@@ -69,6 +69,7 @@ export default function ValuePropsShowcase() {
                     alt={feature.imageAlt || ''}
                     width={600}
                     height={feature.isScrolling ? 800 : 600}
+                    quality={100}
                     className={`w-full ${feature.isScrolling ? 'animate-scroll-slow' : 'h-auto'}`}
                   />
                 </div>

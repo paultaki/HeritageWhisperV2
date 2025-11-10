@@ -30,11 +30,21 @@ export default function TimelinePage() {
 
   return (
     <div
-      className="min-h-screen"
-      style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}
+      className="min-h-screen relative"
+      style={{ backgroundColor: isDark ? "#1c1c1d" : "#faf8f5" }}
     >
+      {/* Spine glow - subtle radial gradient down the center */}
+      {!isDark && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse 800px 100% at 50% 50%, rgba(166,131,104,0.03), transparent)',
+          }}
+        />
+      )}
+
       {/* Main timeline content */}
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 relative z-10">
         <TimelineDesktop useV2Features={true} />
       </main>
     </div>

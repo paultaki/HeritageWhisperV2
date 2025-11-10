@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Clock3, BookOpen, Lightbulb, Box } from "lucide-react";
+import { Clock3, BookOpen, Lightbulb, Archive, Mic } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -90,12 +90,20 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
           <span>Book</span>
         </Link>
         <Link
+          href="/review/book-style?new=true"
+          className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
+          style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
+        >
+          <Mic className="w-7 h-7" />
+          <span>Record</span>
+        </Link>
+        <Link
           href="/memory-box"
           className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
           style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
         >
-          <Box className="w-7 h-7" />
-          <span>Memory Box</span>
+          <Archive className="w-7 h-7" />
+          <span>Keepsakes</span>
         </Link>
       </nav>
     </aside>

@@ -850,7 +850,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           className="py-0 px-1 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
           style={{
             backgroundColor: '#F9E5E8',
-            border: `1px solid rgba(139, 107, 122, 0.2)`,
+            border: `1px solid #B8B0A8`, // 40% darker warm taupe for active chip
             color: '#6A4D58',
             fontSize: '18px',
             fontWeight: 500,
@@ -1144,11 +1144,11 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
 
         {/* Timeline Container */}
         <div ref={timelineContainerRef} className="relative">
-          {/* V3: Subtle vertical timeline ruler - soft mauve for premium feel */}
+          {/* V3: Subtle vertical timeline ruler - warm gray for definition */}
           <div
             className="absolute left-1/2 md:w-[3.5px] w-[4px] rounded-full overflow-hidden pointer-events-none"
             style={{
-              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'rgba(196, 167, 183, 0.45)',
+              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : '#DCDAD8', // 12% darker for visibility
               transform: 'translateX(-50%)',
               top: '0',
               bottom: '500px',
@@ -1350,8 +1350,8 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             height: 3.5px;
             background: linear-gradient(
               to right,
-              rgba(196, 167, 183, 0),
-              rgba(196, 167, 183, 0.5)
+              rgba(220, 218, 216, 0.3),
+              rgba(220, 218, 216, 0.8)
             );
             border-radius: 1px;
             opacity: 1;
@@ -1366,9 +1366,9 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             right: -92px;
             background: linear-gradient(
               to right,
-              rgba(196, 167, 183, 0.2) 0%,
-              rgba(196, 167, 183, 0.4) 70%,
-              rgba(196, 167, 183, 0.5) 100%
+              rgba(220, 218, 216, 0.4) 0%,
+              rgba(220, 218, 216, 0.6) 70%,
+              rgba(220, 218, 216, 0.8) 100%
             );
           }
 
@@ -1377,9 +1377,9 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             left: -92px;
             background: linear-gradient(
               to right,
-              rgba(196, 167, 183, 0.5) 0%,
-              rgba(196, 167, 183, 0.4) 30%,
-              rgba(196, 167, 183, 0.2) 100%
+              rgba(220, 218, 216, 0.8) 0%,
+              rgba(220, 218, 216, 0.6) 30%,
+              rgba(220, 218, 216, 0.4) 100%
             );
           }
 
@@ -1387,24 +1387,24 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           .timeline-step:hover .timeline-card-container::after {
             background: linear-gradient(
               to right,
-              rgba(196, 167, 183, 0),
-              rgba(196, 167, 183, 0.7)
+              rgba(220, 218, 216, 0.5),
+              rgba(220, 218, 216, 0.9)
             );
           }
 
           .timeline-step:hover .justify-end .timeline-card-container::after {
             background: linear-gradient(
               to right,
-              rgba(196, 167, 183, 0.7),
-              rgba(196, 167, 183, 0)
+              rgba(220, 218, 216, 0.9),
+              rgba(220, 218, 216, 0.5)
             );
           }
 
           .timeline-step:hover .justify-start .timeline-card-container::after {
             background: linear-gradient(
               to left,
-              rgba(196, 167, 183, 0.7),
-              rgba(196, 167, 183, 0)
+              rgba(220, 218, 216, 0.9),
+              rgba(220, 218, 216, 0.5)
             );
           }
         }

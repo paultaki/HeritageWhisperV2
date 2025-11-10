@@ -449,113 +449,94 @@ export const MemoryCard = React.memo(
           </div>
 
           <div className="hw-card-body relative">
-            <div className="flex items-center gap-3">
-              {/* Book-style circular audio button with progress ring */}
-              {story.audioUrl && !useV2Features && (
-                <button
-                  onClick={handlePlayAudio}
-                  className="relative flex-shrink-0 hover:scale-105 transition-transform"
-                  data-testid={`button-play-${story.id}`}
-                  aria-label={
-                    isPlaying
-                      ? "Pause audio"
-                      : hasError
-                        ? "Retry playing audio"
-                        : "Play audio"
-                  }
-                >
-                  <svg className="w-10 h-10 -rotate-90">
-                    {/* Background ring */}
-                    <circle
-                      cx="20"
-                      cy="20"
-                      r="16"
-                      fill="none"
-                      stroke="rgba(139,107,122,0.15)"
-                      strokeWidth="2"
-                    />
-                    {/* Progress ring */}
-                    {isPlaying && (
-                      <circle
-                        cx="20"
-                        cy="20"
-                        r="16"
-                        fill="none"
-                        stroke="rgba(139,107,122,0.5)"
-                        strokeWidth="2"
-                        strokeDasharray={`${2 * Math.PI * 16}`}
-                        strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
-                        strokeLinecap="round"
-                        className="transition-all duration-300"
-                      />
-                    )}
-                  </svg>
-                  {/* Icon in center */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {isLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
-                    ) : hasError ? (
-                      <AlertCircle className="w-4 h-4 text-red-500" />
-                    ) : isPlaying ? (
-                      <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
-                    ) : (
-                      <Volume2 className="w-4 h-4 text-neutral-600" />
-                    )}
-                  </div>
-                </button>
-              )}
-
-              {/* Title and metadata */}
-              <div className="flex-1 min-w-0">
-                <h3
-                  className="hw-card-title line-clamp-1"
-                  data-testid={`story-title-${story.id}`}
-                >
-                  {story.title}
-                </h3>
-                <div className="hw-meta">
-                  {useV2Features ? (
-                    // V2: "Age 7 • Summer 1962" format
+            {useV2Features && story.audioUrl ? (
+              // V2: Horizontal layout with title+metadata on left, audio button on right
+              <div className="flex gap-6 items-start">
+                {/* Left column: Text content */}
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className="hw-card-title line-clamp-1"
+                    data-testid={`story-title-${story.id}`}
+                  >
+                    {story.title}
+                  </h3>
+                  <div className="hw-meta">
                     <span className="text-sm font-medium text-gray-700">
                       {formatV2TimelineDate(story.storyDate, story.storyYear, birthYear)}
                     </span>
-                  ) : (
-                    // Original format
-                    <>
-                      <span>
-                        {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
-                      </span>
-                      <span className="divider"></span>
-                      <span>
-                        {story.lifeAge !== null &&
-                          story.lifeAge !== undefined &&
-                          story.lifeAge > 0 &&
-                          `Age ${story.lifeAge}`}
-                        {story.lifeAge !== null &&
-                          story.lifeAge !== undefined &&
-                          story.lifeAge === 0 &&
-                          `Birth`}
-                        {story.lifeAge !== null &&
-                          story.lifeAge !== undefined &&
-                          story.lifeAge < 0 &&
-                          `Before birth`}
-                      </span>
-                    </>
-                  )}
+                  </div>
+                </div>
+
+                {/* Right column: Audio button with duration */}
+                <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                  <button
+                    onClick={handlePlayAudio}
+                    className="hover:opacity-80 transition-opacity"
+                    aria-label={isPlaying ? "Pause audio" : "Play audio"}
+                  >
+                    {/* Circular progress ring - 40px */}
+                    <div className="relative">
+                      <svg className="w-10 h-10 -rotate-90">
+                        {/* Background ring */}
+                        <circle
+                          cx="20"
+                          cy="20"
+                          r="18"
+                          fill="none"
+                          stroke="rgba(139,107,122,0.15)"
+                          strokeWidth="2.25"
+                        />
+                        {/* Progress ring */}
+                        {isPlaying && (
+                          <circle
+                            cx="20"
+                            cy="20"
+                            r="18"
+                            fill="none"
+                            stroke="rgba(212,165,116,0.8)"
+                            strokeWidth="2.25"
+                            strokeDasharray={`${2 * Math.PI * 18}`}
+                            strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
+                            strokeLinecap="round"
+                            className="transition-all duration-300"
+                          />
+                        )}
+                      </svg>
+                      {/* Icon in center */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        {isLoading ? (
+                          <Loader2 className="w-5 h-5 animate-spin text-amber-700" />
+                        ) : isPlaying ? (
+                          <Pause className="w-5 h-5 text-amber-700 fill-amber-700" />
+                        ) : (
+                          <Play className="w-5 h-5 text-amber-700 fill-amber-700 ml-0.5" />
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                  {/* Duration label */}
+                  <span className="text-xs text-gray-600 font-medium">
+                    {formatDuration(duration)}
+                  </span>
                 </div>
               </div>
-            </div>
-
-            {/* V2: Enhanced audio indicator (no photo cards) */}
-            {useV2Features && story.audioUrl && (
-              <div className="mt-3 px-4 pb-4">
-                <button
-                  onClick={handlePlayAudio}
-                  className="flex items-center gap-2 hover:opacity-80 transition-opacity w-full"
-                  aria-label={isPlaying ? "Pause audio" : "Play audio"}
-                >
-                  {/* Circular progress ring */}
-                  <div className="relative flex-shrink-0">
+            ) : (
+              // Original layout for non-V2
+              <div className="flex items-center gap-3">
+                {/* Book-style circular audio button with progress ring */}
+                {story.audioUrl && (
+                  <button
+                    onClick={handlePlayAudio}
+                    className="relative flex-shrink-0 hover:scale-105 transition-transform"
+                    data-testid={`button-play-${story.id}`}
+                    aria-label={
+                      isPlaying
+                        ? "Pause audio"
+                        : hasError
+                          ? "Retry playing audio"
+                          : "Play audio"
+                    }
+                  >
                     <svg className="w-10 h-10 -rotate-90">
                       {/* Background ring */}
                       <circle
@@ -573,7 +554,7 @@ export const MemoryCard = React.memo(
                           cy="20"
                           r="16"
                           fill="none"
-                          stroke="rgba(212,165,116,0.8)"
+                          stroke="rgba(139,107,122,0.5)"
                           strokeWidth="2"
                           strokeDasharray={`${2 * Math.PI * 16}`}
                           strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
@@ -585,27 +566,57 @@ export const MemoryCard = React.memo(
                     {/* Icon in center */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       {isLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-amber-700" />
+                        <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
+                      ) : hasError ? (
+                        <AlertCircle className="w-4 h-4 text-red-500" />
                       ) : isPlaying ? (
-                        <Pause className="w-4 h-4 text-amber-700 fill-amber-700" />
+                        <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
                       ) : (
-                        <Play className="w-4 h-4 text-amber-700 fill-amber-700 ml-0.5" />
+                        <Volume2 className="w-4 h-4 text-neutral-600" />
                       )}
                     </div>
-                  </div>
+                  </button>
+                )}
 
-                  {/* Audio label and time */}
-                  <div className="flex flex-col items-start">
-                    <span className="text-sm font-semibold text-amber-800">
-                      {isPlaying ? "Playing..." : `Listen • ${formatDuration(duration)}`}
-                    </span>
-                    {isPlaying && (
-                      <span className="text-xs text-gray-600 tabular-nums">
-                        {formatDuration(currentTime)} / {formatDuration(duration)}
+                {/* Title and metadata */}
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className="hw-card-title line-clamp-1"
+                    data-testid={`story-title-${story.id}`}
+                  >
+                    {story.title}
+                  </h3>
+                  <div className="hw-meta">
+                    {useV2Features ? (
+                      // V2: "Age 7 • Summer 1962" format
+                      <span className="text-sm font-medium text-gray-700">
+                        {formatV2TimelineDate(story.storyDate, story.storyYear, birthYear)}
                       </span>
+                    ) : (
+                      // Original format
+                      <>
+                        <span>
+                          {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
+                        </span>
+                        <span className="divider"></span>
+                        <span>
+                          {story.lifeAge !== null &&
+                            story.lifeAge !== undefined &&
+                            story.lifeAge > 0 &&
+                            `Age ${story.lifeAge}`}
+                          {story.lifeAge !== null &&
+                            story.lifeAge !== undefined &&
+                            story.lifeAge === 0 &&
+                            `Birth`}
+                          {story.lifeAge !== null &&
+                            story.lifeAge !== undefined &&
+                            story.lifeAge < 0 &&
+                            `Before birth`}
+                        </span>
+                      </>
                     )}
                   </div>
-                </button>
+                </div>
               </div>
             )}
           </div>
@@ -698,7 +709,7 @@ export const MemoryCard = React.memo(
               {/* Navigation arrows */}
               <button
                 onClick={handlePrevPhoto}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all z-10"
                 aria-label="Previous photo"
               >
                 <ChevronLeft className="w-6 h-6" />
@@ -706,7 +717,7 @@ export const MemoryCard = React.memo(
 
               <button
                 onClick={handleNextPhoto}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all z-10"
                 aria-label="Next photo"
               >
                 <ChevronRight className="w-6 h-6" />
@@ -799,123 +810,131 @@ export const MemoryCard = React.memo(
         </div>
 
         <div className="hw-card-body relative">
-          {/* Title */}
-          <h3 className="hw-card-title" data-testid={`story-title-${story.id}`}>
-            {story.title}
-          </h3>
+          {useV2Features && story.audioUrl ? (
+            // V2: Horizontal layout with title+metadata on left, audio button on right
+            <div className="flex gap-6 items-start">
+              {/* Left column: Text content */}
+              <div className="flex-1 min-w-0">
+                <h3 className="hw-card-title" data-testid={`story-title-${story.id}`}>
+                  {story.title}
+                </h3>
+                <div className="hw-meta">
+                  <span className="text-sm font-medium text-gray-700">
+                    {formatV2TimelineDate(story.storyDate, story.storyYear, birthYear)}
+                  </span>
+                </div>
+              </div>
 
-          {/* Metadata */}
-          <div className="hw-meta">
-            {useV2Features ? (
-              // V2: "Age 7 • Summer 1962" format
-              <span className="text-sm font-medium text-gray-700">
-                {formatV2TimelineDate(story.storyDate, story.storyYear, birthYear)}
-              </span>
-            ) : (
-              // Original: "Jun 1985 • Age 7" format
-              <>
-                <span>
-                  {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
+              {/* Right column: Audio button with duration */}
+              <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                <button
+                  onClick={handlePlayAudio}
+                  className="hover:opacity-80 transition-opacity"
+                  aria-label={isPlaying ? "Pause audio" : "Play audio"}
+                >
+                  {/* Circular progress ring - 40px */}
+                  <div className="relative">
+                    <svg className="w-10 h-10 -rotate-90">
+                      {/* Background ring */}
+                      <circle
+                        cx="20"
+                        cy="20"
+                        r="18"
+                        fill="none"
+                        stroke="rgba(139,107,122,0.15)"
+                        strokeWidth="2.25"
+                      />
+                      {/* Progress ring */}
+                      {isPlaying && (
+                        <circle
+                          cx="20"
+                          cy="20"
+                          r="18"
+                          fill="none"
+                          stroke="rgba(212,165,116,0.8)"
+                          strokeWidth="2.25"
+                          strokeDasharray={`${2 * Math.PI * 18}`}
+                          strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
+                          strokeLinecap="round"
+                          className="transition-all duration-300"
+                        />
+                      )}
+                    </svg>
+                    {/* Icon in center */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      {isLoading ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-amber-700" />
+                      ) : isPlaying ? (
+                        <Pause className="w-5 h-5 text-amber-700 fill-amber-700" />
+                      ) : (
+                        <Play className="w-5 h-5 text-amber-700 fill-amber-700 ml-0.5" />
+                      )}
+                    </div>
+                  </div>
+                </button>
+                {/* Duration label */}
+                <span className="text-xs text-gray-600 font-medium">
+                  {formatDuration(duration)}
                 </span>
-                <span className="divider"></span>
-                <span>
-                  {(() => {
-                    const y = normalizeYear(story.storyYear);
-                    const by = normalizeYear(birthYear);
-                    const computed =
-                      typeof y === "number" && typeof by === "number"
-                        ? y - by
-                        : null;
-                    const age =
-                      typeof story.lifeAge === "number"
-                        ? story.lifeAge < 0 &&
-                          computed !== null &&
-                          y !== null &&
-                          by !== null &&
-                          y >= by
-                          ? computed
-                          : story.lifeAge
-                        : computed;
-                    return age !== null && age !== undefined
-                      ? age > 0
-                        ? `Age ${age}`
-                        : age === 0
-                          ? "Birthday"
-                          : "Before birth"
-                      : "";
-                  })()}
-                </span>
-                {(top?.length ?? 0) > 0 && (
+              </div>
+            </div>
+          ) : (
+            // Original layout for non-V2 or cards without audio
+            <>
+              <h3 className="hw-card-title" data-testid={`story-title-${story.id}`}>
+                {story.title}
+              </h3>
+
+              <div className="hw-meta">
+                {useV2Features ? (
+                  // V2: "Age 7 • Summer 1962" format
+                  <span className="text-sm font-medium text-gray-700">
+                    {formatV2TimelineDate(story.storyDate, story.storyYear, birthYear)}
+                  </span>
+                ) : (
+                  // Original: "Jun 1985 • Age 7" format
                   <>
+                    <span>
+                      {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
+                    </span>
                     <span className="divider"></span>
-                    <span>{(top?.[0] as any)?.name}</span>
+                    <span>
+                      {(() => {
+                        const y = normalizeYear(story.storyYear);
+                        const by = normalizeYear(birthYear);
+                        const computed =
+                          typeof y === "number" && typeof by === "number"
+                            ? y - by
+                            : null;
+                        const age =
+                          typeof story.lifeAge === "number"
+                            ? story.lifeAge < 0 &&
+                              computed !== null &&
+                              y !== null &&
+                              by !== null &&
+                              y >= by
+                              ? computed
+                              : story.lifeAge
+                            : computed;
+                        return age !== null && age !== undefined
+                          ? age > 0
+                            ? `Age ${age}`
+                            : age === 0
+                              ? "Birthday"
+                              : "Before birth"
+                          : "";
+                      })()}
+                    </span>
+                    {(top?.length ?? 0) > 0 && (
+                      <>
+                        <span className="divider"></span>
+                        <span>{(top?.[0] as any)?.name}</span>
+                      </>
+                    )}
                   </>
                 )}
-              </>
-            )}
-          </div>
-
-          {/* V2: Enhanced audio indicator with time display */}
-          {useV2Features && story.audioUrl && (
-            <div className="mt-3 flex items-center justify-between">
-              <button
-                onClick={handlePlayAudio}
-                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                aria-label={isPlaying ? "Pause audio" : "Play audio"}
-              >
-                {/* Circular progress ring */}
-                <div className="relative">
-                  <svg className="w-12 h-12 -rotate-90">
-                    {/* Background ring */}
-                    <circle
-                      cx="24"
-                      cy="24"
-                      r="20"
-                      fill="none"
-                      stroke="rgba(139,107,122,0.15)"
-                      strokeWidth="2.5"
-                    />
-                    {/* Progress ring */}
-                    {isPlaying && (
-                      <circle
-                        cx="24"
-                        cy="24"
-                        r="20"
-                        fill="none"
-                        stroke="rgba(212,165,116,0.8)"
-                        strokeWidth="2.5"
-                        strokeDasharray={`${2 * Math.PI * 20}`}
-                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - progress / 100)}`}
-                        strokeLinecap="round"
-                        className="transition-all duration-300"
-                      />
-                    )}
-                  </svg>
-                  {/* Icon in center */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {isLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-amber-700" />
-                    ) : isPlaying ? (
-                      <Pause className="w-5 h-5 text-amber-700 fill-amber-700" />
-                    ) : (
-                      <Play className="w-5 h-5 text-amber-700 fill-amber-700 ml-0.5" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Audio label and time */}
-                <div className="flex flex-col items-start">
-                  <span className="text-sm font-semibold text-amber-800">
-                    {isPlaying ? "Playing..." : `Listen • ${formatDuration(duration)}`}
-                  </span>
-                  {isPlaying && (
-                    <span className="text-xs text-gray-600 tabular-nums">
-                      {formatDuration(currentTime)} / {formatDuration(duration)}
-                    </span>
-                  )}
-                </div>
-              </button>
-            </div>
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -86,18 +86,18 @@ export function TreasureCard({
     setIsFavoriting(true);
     onToggleFavorite?.();
 
-    // Reset after animation
-    setTimeout(() => setIsFavoriting(false), 600);
+    // Reset after animation (120ms for micro-interaction)
+    setTimeout(() => setIsFavoriting(false), 120);
   };
 
   return (
     <article
-      className="treasure-card group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer w-full"
+      className="treasure-card group bg-white rounded-2xl overflow-hidden border border-black/8 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer w-full"
       style={{ maxWidth: "480px" }}
       onClick={onEdit}
     >
       {/* Image Container - 75% of card height */}
-      <div className="relative overflow-hidden" style={{ minHeight: "200px", aspectRatio: "16/10" }}>
+      <div className="relative overflow-hidden ring-1 ring-inset ring-black/10" style={{ minHeight: "200px", aspectRatio: "16/10" }}>
         {!imageError ? (
           transform ? (
             // Use regular img with transform when zoom/pan is set
@@ -143,10 +143,7 @@ export function TreasureCard({
 
         {/* Category Badge - Top Left */}
         <div className="absolute top-2 left-2 z-10">
-          <div className={cn(
-            "flex items-center gap-1 px-2 py-1 rounded-full text-white text-sm font-medium backdrop-blur-sm shadow-lg",
-            categoryConfig.color
-          )}>
+          <div className="flex items-center gap-1 py-1 px-2.5 rounded-full bg-gray-100 text-gray-700 text-xs font-medium backdrop-blur-sm shadow-lg">
             <CategoryIcon className="w-3 h-3" />
             <span className="hidden sm:inline">{categoryConfig.label}</span>
           </div>
@@ -158,12 +155,13 @@ export function TreasureCard({
           className="absolute top-2 right-2 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-all"
           style={{ minWidth: "44px", minHeight: "44px" }}
           aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+          title={isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
           <Heart
             className={cn(
-              "w-4 h-4 transition-all",
+              "w-4 h-4 transition-all duration-75",
               isFavorite ? "fill-red-500 text-red-500" : "text-gray-600",
-              isFavoriting && "animate-bounce"
+              isFavoriting && "scale-125"
             )}
           />
         </button>
@@ -180,16 +178,15 @@ export function TreasureCard({
       </div>
 
       {/* Card Info - 25% */}
-      <div className="px-4 pt-4 pb-3">
+      <div className="px-4 pt-2.5 pb-2">
         <div className="flex items-start justify-between gap-3">
           {/* Title and metadata */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-2">
+            <h3 className="text-xl font-semibold text-gray-900 mb-0.5 line-clamp-2">
               {title}
             </h3>
-            <p className="text-base text-gray-600">
-              {categoryConfig.label}
-              {year && <span className="text-gray-400"> • {year}</span>}
+            <p className="text-lg text-gray-600 leading-tight">
+              {year || "\u00A0"}
             </p>
           </div>
 

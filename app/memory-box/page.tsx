@@ -628,6 +628,7 @@ export default function MemoryBoxV2Page() {
               <div className="mt-6">
                 <TreasureGrid
                   treasures={treasures}
+                  isLoading={treasuresLoading}
                   onAddTreasure={() => setAddTreasureModalOpen(true)}
                   onToggleFavorite={(id) => {
                     const treasure = treasures.find((t) => t.id === id);

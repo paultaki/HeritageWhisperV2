@@ -14,7 +14,8 @@ import {
   Compass,
   MessageSquare,
   Code,
-  Target
+  Target,
+  Users
 } from "lucide-react";
 
 interface AdminTool {

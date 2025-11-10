@@ -25,9 +25,9 @@ export function QuickStatsBar({ storiesCount, totalHours, treasuresCount }: Prop
   };
 
   return (
-    <div className="bg-gradient-to-r from-heritage-brown/10 to-heritage-coral/10 rounded-xl p-3 md:p-4 mb-6">
-      <div className="flex items-center justify-center gap-3 md:gap-8">
-        <div className="text-center">
+    <div className="bg-white border border-gray-200 rounded-xl p-2 md:p-3 mb-6">
+      <div className="flex items-center justify-center divide-x divide-gray-200">
+        <div className="text-center px-4 md:px-6">
           <div className="text-2xl md:text-4xl font-bold text-heritage-brown">
             {storiesCount}
           </div>
@@ -36,9 +36,7 @@ export function QuickStatsBar({ storiesCount, totalHours, treasuresCount }: Prop
           </div>
         </div>
 
-        <div className="text-xl md:text-2xl text-gray-300">•</div>
-
-        <div className="text-center">
+        <div className="text-center px-4 md:px-6">
           <div className="text-2xl md:text-4xl font-bold text-heritage-coral">
             {formatHours(totalHours)}
           </div>
@@ -47,9 +45,7 @@ export function QuickStatsBar({ storiesCount, totalHours, treasuresCount }: Prop
           </div>
         </div>
 
-        <div className="text-xl md:text-2xl text-gray-300">•</div>
-
-        <div className="text-center">
+        <div className="text-center px-4 md:px-6">
           <div className="text-2xl md:text-4xl font-bold text-heritage-brown">
             {treasuresCount}
           </div>

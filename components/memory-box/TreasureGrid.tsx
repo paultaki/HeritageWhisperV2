@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import { Camera, FileText, Gem, Home, ChefHat, Award, Plus } from "lucide-react";
 import { TreasureCard } from "./TreasureCard";
 
@@ -21,6 +21,7 @@ type Treasure = {
 
 type Props = {
   treasures: Treasure[];
+  isLoading?: boolean;
   onAddTreasure?: () => void;
   onToggleFavorite?: (id: string) => void;
   onLinkToStory?: (id: string) => void;
@@ -43,6 +44,7 @@ type Props = {
  */
 export function TreasureGrid({
   treasures,
+  isLoading = false,
   onAddTreasure,
   onToggleFavorite,
   onLinkToStory,
@@ -59,6 +61,40 @@ export function TreasureGrid({
     recipes: { icon: ChefHat, label: "Recipes", color: "#F97316" },
     memorabilia: { icon: Award, label: "Memorabilia", color: "#EAB308" },
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="treasure-grid">
+        <style jsx>{`
+          .treasure-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+          }
+
+          @media (min-width: 768px) {
+            .treasure-grid {
+              grid-template-columns: repeat(2, 1fr);
+            }
+          }
+
+          @media (min-width: 1280px) {
+            .treasure-grid {
+              grid-template-columns: repeat(3, 1fr);
+            }
+          }
+        `}</style>
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={i}
+            className="bg-gray-200 animate-pulse rounded-2xl border border-gray-200"
+            style={{ height: "320px", maxWidth: "480px" }}
+          />
+        ))}
+      </div>
+    );
+  }
 
   // Empty state
   if (treasures.length === 0) {
@@ -103,56 +139,65 @@ export function TreasureGrid({
     );
   }
 
-  // Masonry Grid Layout
-  // Using CSS columns for masonry effect (simpler than complex JS solutions)
+  // Sort treasures: favorites first, then maintain original order
+  const sortedTreasures = useMemo(() => {
+    return [...treasures].sort((a, b) => {
+      // Favorites always come first
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      // Within same favorite status, maintain original order
+      return 0;
+    });
+  }, [treasures]);
+
+  // Calculate favorites count for section headers
+  const favoriteCount = sortedTreasures.filter(t => t.isFavorite).length;
+
+  // Grid Layout - preserves array order while allowing variable heights
   return (
     <>
-      <div
-        className="treasure-masonry-grid"
-        style={{
-          columnGap: "24px",
-        }}
-      >
+      <div className="treasure-grid">
         <style jsx>{`
-          .treasure-masonry-grid {
-            column-count: 1;
-            column-gap: 24px;
+          .treasure-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
           }
 
           @media (min-width: 768px) {
-            .treasure-masonry-grid {
-              column-count: 2;
-            }
-          }
-
-          @media (min-width: 1024px) {
-            .treasure-masonry-grid {
-              column-count: 2;
+            .treasure-grid {
+              grid-template-columns: repeat(2, 1fr);
             }
           }
 
           @media (min-width: 1280px) {
-            .treasure-masonry-grid {
-              column-count: 3;
+            .treasure-grid {
+              grid-template-columns: repeat(3, 1fr);
             }
-          }
-
-          @media (min-width: 1536px) {
-            .treasure-masonry-grid {
-              column-count: 3;
-            }
-          }
-
-          .treasure-masonry-grid > * {
-            break-inside: avoid;
-            margin-bottom: 24px;
-            display: inline-block;
-            width: 100%;
           }
         `}</style>
 
-        {treasures.map((treasure) => (
-          <div key={treasure.id} className="mb-6">
+        {sortedTreasures.map((treasure, index) => (
+          <React.Fragment key={treasure.id}>
+            {/* Favorites Section Header */}
+            {index === 0 && favoriteCount > 0 && (
+              <div className="col-span-full mb-2 mt-2">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                  Favorites (auto-pinned) · {favoriteCount}
+                </h3>
+              </div>
+            )}
+
+            {/* All Treasures Section Header */}
+            {index === favoriteCount && favoriteCount < sortedTreasures.length && (
+              <div className="col-span-full mb-2 mt-6">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                  All Treasures · {sortedTreasures.length - favoriteCount}
+                </h3>
+              </div>
+            )}
+
+            <div>
             <TreasureCard
               id={treasure.id}
             title={treasure.title}
@@ -173,6 +218,7 @@ export function TreasureGrid({
             onDelete={() => onDelete?.(treasure.id)}
             />
           </div>
+          </React.Fragment>
         ))}
       </div>
 
