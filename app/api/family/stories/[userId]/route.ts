@@ -135,7 +135,7 @@ export async function GET(
     // Fetch storyteller's user data for birth year calculations
     const { data: storytellerUser, error: userError } = await supabaseAdmin
       .from('users')
-      .select('id, first_name, last_name, birth_year')
+      .select('id, name, birth_year')
       .eq('id', familyMember.user_id)
       .single();
 
@@ -143,27 +143,92 @@ export async function GET(
       console.warn('[Family Stories API] Failed to fetch storyteller:', userError);
     }
 
+    // Helper function to generate signed URLs for photos
+    const getPhotoUrl = async (photoUrl: string) => {
+      if (!photoUrl) return null;
+
+      // Skip blob URLs
+      if (photoUrl.startsWith("blob:")) {
+        return null;
+      }
+
+      // If already a full URL, use as-is
+      if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) {
+        return photoUrl;
+      }
+
+      // Generate signed URL for storage path
+      const { data, error } = await supabaseAdmin.storage
+        .from("heritage-whisper-files")
+        .createSignedUrl(
+          photoUrl.startsWith("photo/") ? photoUrl : `photo/${photoUrl}`,
+          604800, // 1 week
+        );
+
+      if (error) {
+        console.error("Error creating signed URL for photo:", photoUrl, error);
+        return null;
+      }
+
+      return data?.signedUrl || null;
+    };
+
     // Transform stories to match frontend expectations (camelCase)
-    const transformedStories = stories.map((story: any) => ({
-      id: story.id,
-      title: story.title,
-      transcript: story.transcription || story.transcript,
-      audioUrl: story.audio_url,
-      storyYear: story.year,
-      ageAtStory: story.metadata?.life_age,
-      heroPhotoUrl: story.photo_url,
-      photos: story.metadata?.photos || [],
-      wisdomText: story.wisdom_clip_text,
-      createdAt: story.created_at,
-      includeInTimeline: story.metadata?.include_in_timeline ?? true,
-      includeInBook: story.metadata?.include_in_book ?? true,
-    }));
+    const transformedStories = await Promise.all(
+      stories.map(async (story: any) => {
+        // Handle photos from top-level photos column
+        let photos = [];
+        if (story.photos) {
+          photos = await Promise.all(
+            (story.photos || []).map(async (photo: any) => {
+              // Generate signed URLs for dual WebP versions
+              const displayUrl = photo.displayPath
+                ? await getPhotoUrl(photo.displayPath) // 550px WebP for web display
+                : null;
+
+              const masterUrl = photo.masterPath
+                ? await getPhotoUrl(photo.masterPath) // 2400px WebP for printing
+                : null;
+
+              // Fallback to original file if not yet migrated to WebP
+              const legacyUrl = !displayUrl && (photo.url || photo.filePath)
+                ? await getPhotoUrl(photo.url || photo.filePath)
+                : null;
+
+              return {
+                ...photo,
+                displayUrl,
+                masterUrl,
+                url: displayUrl || legacyUrl, // Primary display uses 550px WebP
+              };
+            }),
+          );
+        }
+
+        const photoUrl = await getPhotoUrl(story.photo_url);
+
+        return {
+          id: story.id,
+          title: story.title,
+          transcript: story.transcription || story.transcript,
+          audioUrl: story.audio_url,
+          storyYear: story.year,
+          ageAtStory: story.metadata?.life_age,
+          heroPhotoUrl: photoUrl,
+          photos: photos,
+          photoUrl: photoUrl,
+          wisdomText: story.wisdom_clip_text,
+          createdAt: story.created_at,
+          includeInTimeline: story.metadata?.include_in_timeline ?? true,
+          includeInBook: story.metadata?.include_in_book ?? true,
+        };
+      })
+    );
 
     // Map storyteller data to camelCase
     const storytellerData = storytellerUser ? {
       id: storytellerUser.id,
-      firstName: storytellerUser.first_name,
-      lastName: storytellerUser.last_name,
+      name: storytellerUser.name,
       birthYear: storytellerUser.birth_year,
     } : null;
 

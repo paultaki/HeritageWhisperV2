@@ -86,7 +86,7 @@ export function DesktopPageHeader({
             />
 
             {/* Page Title - Centered, no subtitle */}
-            <h1 className="text-2xl font-bold text-gray-900 truncate leading-tight">
+            <h1 className="text-3xl font-bold text-gray-900 truncate leading-tight">
               {title}
             </h1>
           </div>

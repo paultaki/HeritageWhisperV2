@@ -189,7 +189,7 @@ export async function GET(request: NextRequest) {
     // (needed for birth year calculations and display name)
     const { data: storytellerUser, error: userError } = await supabaseAdmin
       .from("users")
-      .select("id, first_name, last_name, birth_year")
+      .select("id, name, birth_year")
       .eq("id", targetUserId)
       .single();
 
@@ -200,8 +200,7 @@ export async function GET(request: NextRequest) {
     // Map to camelCase for frontend
     const storytellerData = storytellerUser ? {
       id: storytellerUser.id,
-      firstName: storytellerUser.first_name,
-      lastName: storytellerUser.last_name,
+      name: storytellerUser.name,
       birthYear: storytellerUser.birth_year,
     } : null;
 

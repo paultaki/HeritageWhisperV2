@@ -19,27 +19,26 @@ export default function FounderStory() {
           {/* Text - 60% */}
           <div className="lg:col-span-3 space-y-6">
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-              I noticed our parents photo albums had something missing. The photos had dates, but no context.
+              I noticed our parents' photo albums had something missing. The photos had dates, but no context.
               We could name most of the faces, but not the place, not the moment, not why it mattered.
               I built HeritageWhisper to capture the stories behind every photo while we still can.
             </p>
 
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-              Books capture stories in a single moment, then sit on a shelf collecting dust. But there
-              are always more stories to be told. I wanted something that could grow forever, alert me
-              the moment a new story was added, and let me listen instantly no matter where I was in the world.
+              Books capture stories in a single moment, then sit on a shelf collecting dust. I wanted something
+              that could grow forever, alert me the moment a new story was added, and let me listen instantly anywhere.
             </p>
 
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
               With four siblings scattered across the country and 16 grandkids in our immediate family,
               it's impossible to share a physical book. But now we all have the same access to our
               parents' stories the moment they're recorded. Our kids treasure hearing these memories
-              in their grandparents' own voices as much as we do.
+              in their grandparents' own voices.
             </p>
 
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-              The majority of seniors are on smartphones, it's how we all consume everything these days.
-              We can even submit questions directly to them, capturing those precious memories before it's too late.
+              Most seniors are on smartphones. We can submit questions directly to them, capturing those
+              precious memories before it's too late.
             </p>
 
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">

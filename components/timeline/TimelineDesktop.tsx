@@ -49,7 +49,7 @@ import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormattin
 import { TimelineEnd } from "@/components/timeline/TimelineEnd";
 import { TimelineNearEndNudge } from "@/components/timeline/TimelineNearEndNudge";
 
-const logoUrl = "/Logo Icon hw.svg";
+const logoUrl = "/circle logo hw.svg";
 
 // Timeline item helper type
 type TimelineItem = {
@@ -1127,6 +1127,19 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           title="Timeline"
           subtitle="A timeline of memories, moments, and milestones"
           showAccountSwitcher={true}
+          rightContent={
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/book')}
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+              >
+                <BookOpen className="w-5 h-5" />
+                <span className="font-medium">Book</span>
+              </Button>
+            </div>
+          }
         />
       </div>
 
