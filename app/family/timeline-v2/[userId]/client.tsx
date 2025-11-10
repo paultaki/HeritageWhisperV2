@@ -100,14 +100,16 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
       const firstValidPhoto = story.photos.find((p: any) => p.url);
       if (firstValidPhoto) return firstValidPhoto;
     }
-    if (story.photoUrl) {
-      return { url: story.photoUrl, transform: (story as any).photoTransform };
+    // Check both photoUrl and heroPhotoUrl (API uses heroPhotoUrl)
+    const photoUrl = (story as any).photoUrl || (story as any).heroPhotoUrl;
+    if (photoUrl) {
+      return { url: photoUrl, transform: (story as any).photoTransform };
     }
     return null;
   };
 
   const displayPhoto = getDisplayPhoto();
-  const photoCount = story.photos?.length || (story.photoUrl ? 1 : 0);
+  const photoCount = story.photos?.length || ((story as any).photoUrl || (story as any).heroPhotoUrl ? 1 : 0);
 
   // Calculate display age
   const normalizedStoryYear = normalizeYear(story.storyYear);
@@ -718,13 +720,14 @@ export default function FamilyTimelineV2Client({ userId }: FamilyTimelineV2Clien
                   <Clock className="w-4 h-4" />
                   <span className="hidden sm:inline">Timeline</span>
                 </button>
-                <button
+                {/* Book view - Coming soon */}
+                {/* <button
                   onClick={() => router.push(`/family/book/${userId}`)}
                   className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <BookOpen className="w-4 h-4" />
                   <span className="hidden sm:inline">Book</span>
-                </button>
+                </button> */}
                 {session?.permissionLevel === 'contributor' && (
                   <SubmitQuestionDialog
                     storytellerId={userId}

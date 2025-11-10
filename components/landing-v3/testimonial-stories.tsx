@@ -43,12 +43,13 @@ export default function TestimonialStories() {
               className="bg-gradient-to-br from-white to-orange-50 rounded-2xl shadow-lg border border-stone-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               {/* Photo */}
-              <div className="aspect-[4/3] relative overflow-hidden border-b border-stone-300">
+              <div className="aspect-[4/3] relative overflow-hidden border-b border-stone-300 bg-gradient-to-br from-stone-100 to-stone-200">
                 <Image
                   src={story.image}
-                  alt={story.imageAlt}
+                  alt=""
                   fill
                   className="object-cover"
+                  priority={index === 0}
                 />
               </div>
 

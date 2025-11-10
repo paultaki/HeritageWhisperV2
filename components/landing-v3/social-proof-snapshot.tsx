@@ -8,12 +8,13 @@ export default function SocialProofSnapshot() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             {/* Photo */}
             <div className="md:col-span-1">
-              <div className="aspect-square relative rounded-2xl shadow-lg overflow-hidden border border-stone-300">
+              <div className="aspect-square relative rounded-2xl shadow-lg overflow-hidden border border-stone-300 bg-gradient-to-br from-stone-100 to-stone-200">
                 <Image
                   src="/margaret.webp"
-                  alt="Elderly woman with phone, smiling"
+                  alt=""
                   fill
                   className="object-cover"
+                  priority
                 />
               </div>
             </div>
