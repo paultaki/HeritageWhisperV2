@@ -22,9 +22,9 @@ function generateSecureToken(): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, name, relationship, permissionLevel } = body;
+    const { email, name, relationship } = body;
 
-    console.log('Family invite request:', { email, name, relationship, permissionLevel: permissionLevel || 'viewer' });
+    console.log('Family invite request:', { email, name, relationship });
 
     // Validate input
     if (!email || !email.includes('@')) {
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
         email: email.toLowerCase(),
         name: name || null,
         relationship: relationship || null,
-        permission_level: permissionLevel || 'viewer',
+        permission_level: 'viewer', // All family members are viewers (read-only)
         status: 'pending',
       })
       .select()

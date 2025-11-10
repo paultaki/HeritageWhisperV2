@@ -120,9 +120,9 @@ export default function FamilyPage() {
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   // Invite form state
+  const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRelationship, setInviteRelationship] = useState("");
-  const [invitePermission, setInvitePermission] = useState<'viewer' | 'contributor'>('viewer');
   const [inviteMessage, setInviteMessage] = useState("");
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -204,9 +204,8 @@ export default function FamilyPage() {
   const inviteMutation = useMutation({
     mutationFn: async (data: {
       email: string;
-      name: string;
-      relationship: string;
-      permissionLevel?: 'viewer' | 'contributor';
+      name?: string;
+      relationship?: string;
     }) => {
       const response = await apiRequest("POST", "/api/family/invite", data);
       return response.json();
@@ -230,6 +229,7 @@ export default function FamilyPage() {
 
       // Close dialog
       setInviteDialogOpen(false);
+      setInviteName("");
       setInviteEmail("");
       setInviteRelationship("");
       setInviteMessage("");
@@ -368,23 +368,19 @@ export default function FamilyPage() {
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!inviteEmail || !inviteRelationship) {
+    if (!inviteEmail) {
       toast({
         title: "Missing information",
-        description: "Please provide email and relationship.",
+        description: "Please provide an email address.",
         variant: "destructive",
       });
       return;
     }
 
-    // Extract name from email if not provided separately
-    const name = inviteEmail.split('@')[0];
-    
     await inviteMutation.mutateAsync({
       email: inviteEmail,
-      name: name,
-      relationship: inviteRelationship,
-      permissionLevel: invitePermission,
+      ...(inviteName && { name: inviteName }),
+      ...(inviteRelationship && { relationship: inviteRelationship }),
     });
   };
 
@@ -559,6 +555,20 @@ export default function FamilyPage() {
               </DialogHeader>
               <form onSubmit={handleInvite} className="space-y-6 py-4">
                 <div>
+                  <Label htmlFor="name" className="text-base font-medium text-gray-900">
+                    Name <span className="text-gray-400 font-normal">(Optional)</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={inviteName}
+                    onChange={(e) => setInviteName(e.target.value)}
+                    className="mt-2 h-14 w-full px-4 py-3 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0"
+                    placeholder="John Smith"
+                  />
+                </div>
+
+                <div>
                   <Label htmlFor="email" className="text-base font-medium text-gray-900">
                     Email Address
                   </Label>
@@ -575,7 +585,7 @@ export default function FamilyPage() {
 
                 <div>
                   <Label htmlFor="relationship" className="text-base font-medium text-gray-900">
-                    Relationship
+                    Relationship <span className="text-gray-400 font-normal">(Optional)</span>
                   </Label>
                   <Select
                     value={inviteRelationship}
@@ -592,33 +602,6 @@ export default function FamilyPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="permission" className="text-base font-medium text-gray-900">
-                    Permission Level
-                  </Label>
-                  <Select
-                    value={invitePermission}
-                    onValueChange={(value) => setInvitePermission(value as 'viewer' | 'contributor')}
-                  >
-                    <SelectTrigger className="mt-2 h-14 w-full px-4 py-3 text-base bg-white border border-gray-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="viewer" className="text-base">
-                        👁 Viewer - View stories only
-                      </SelectItem>
-                      <SelectItem value="contributor" className="text-base">
-                        ✏️ Contributor - Can submit questions
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {invitePermission === 'viewer'
-                      ? 'Read stories, listen to audio, view photos'
-                      : 'Can also submit questions they want answered'}
-                  </p>
                 </div>
 
                 <div>
@@ -760,46 +743,33 @@ export default function FamilyPage() {
                         key={member.id}
                         className="flex flex-col gap-3 p-4 rounded-xl border border-gray-200 bg-white hover:shadow-sm transition-shadow overflow-hidden"
                       >
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
-                          <Avatar className="w-12 h-12 shrink-0">
-                            <AvatarFallback className="bg-blue-100 text-blue-600 text-lg font-medium">
-                              {(member.name || member.email)[0].toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-semibold text-base md:text-lg text-gray-900 truncate">
-                                {member.name || member.email}
-                              </p>
-                              {member.relationship && (
-                                <Badge variant="secondary" className="text-sm bg-gray-100 text-gray-700 border-0">
-                                  {member.relationship}
-                                </Badge>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <Avatar className="w-12 h-12 shrink-0">
+                              <AvatarFallback className="bg-blue-100 text-blue-600 text-lg font-medium">
+                                {(member.name || member.email)[0].toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="font-semibold text-base md:text-lg text-gray-900 truncate">
+                                  {member.name || member.email.split('@')[0]}
+                                </p>
+                                {member.relationship && (
+                                  <Badge variant="secondary" className="text-sm bg-gray-100 text-gray-700 border-0">
+                                    {member.relationship}
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm md:text-base text-gray-500 break-all mt-1">{member.email}</p>
+                              {member.last_accessed_at && (
+                                <p className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                                  <Clock className="w-4 h-4" />
+                                  Last viewed {getRelativeTime(member.last_accessed_at)}
+                                </p>
                               )}
                             </div>
-                            <p className="text-sm md:text-base text-gray-500 break-all mt-1">{member.email}</p>
-                            {member.last_accessed_at && (
-                              <p className="flex items-center gap-1 text-sm text-gray-500 mt-1">
-                                <Clock className="w-4 h-4" />
-                                Last viewed {getRelativeTime(member.last_accessed_at)}
-                              </p>
-                            )}
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                          {/* Permission level badge - set at invitation, cannot be changed */}
-                          <div className="flex-1 sm:flex-none px-4 py-2 min-h-[48px] flex items-center justify-center bg-gray-100 border border-gray-300 rounded-xl text-base text-gray-700">
-                            {member.permissionLevel === 'contributor' ? '✏️ Contributor' : '👁 Viewer'}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            onClick={() => resendMutation.mutate(member.id)}
-                            disabled={resendMutation.isPending}
-                            className="shrink-0 min-h-[48px] px-4 text-base text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 rounded-xl whitespace-nowrap"
-                          >
-                            <LinkIcon className="w-4 h-4 mr-2" />
-                            {resendMutation.isPending ? "Sending..." : "Send Login Link"}
-                          </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button
@@ -810,30 +780,41 @@ export default function FamilyPage() {
                                 <Trash2 className="w-5 h-5" />
                               </Button>
                             </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle className="text-2xl font-semibold text-gray-900">
-                                Remove family member?
-                              </AlertDialogTitle>
-                              <AlertDialogDescription className="text-base text-gray-500">
-                                {member.name || member.email} will no longer be
-                                able to view your stories. This action can be
-                                undone by inviting them again.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter className="gap-3 flex-col sm:flex-row">
-                              <AlertDialogCancel className="w-full min-h-[48px] px-6 py-3 bg-white text-gray-900 text-base font-medium border border-gray-200 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200">
-                                Cancel
-                              </AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleRemoveMember(member.id)}
-                                className="w-full min-h-[48px] px-6 py-3 bg-red-600 text-white text-base font-medium rounded-xl hover:bg-red-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-all duration-200"
-                              >
-                                Remove
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="text-2xl font-semibold text-gray-900">
+                                  Remove family member?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="text-base text-gray-500">
+                                  {member.name || member.email} will no longer be
+                                  able to view your stories. This action can be
+                                  undone by inviting them again.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter className="gap-3 flex-col sm:flex-row">
+                                <AlertDialogCancel className="w-full min-h-[48px] px-6 py-3 bg-white text-gray-900 text-base font-medium border border-gray-200 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200">
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleRemoveMember(member.id)}
+                                  className="w-full min-h-[48px] px-6 py-3 bg-red-600 text-white text-base font-medium rounded-xl hover:bg-red-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-all duration-200"
+                                >
+                                  Remove
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            onClick={() => resendMutation.mutate(member.id)}
+                            disabled={resendMutation.isPending}
+                            className="flex-1 min-h-[48px] px-4 text-base text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 rounded-xl whitespace-nowrap"
+                          >
+                            <LinkIcon className="w-4 h-4 mr-2" />
+                            {resendMutation.isPending ? "Sending..." : "Send Login Link"}
+                          </Button>
                         </div>
                       </div>
                     ))}
