@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useScrollFadeIn, fadeInClasses } from '@/lib/scroll-animations'
 
 export default function ThreePillars() {
@@ -7,19 +8,19 @@ export default function ThreePillars() {
 
   const pillars = [
     {
-      icon: '📱',
-      title: 'Record in 2 Minutes',
-      lines: ['Talk to your phone.', 'No typing. No homework.', 'Just your voice, preserved.']
+      icon: '/mic photo.svg',
+      title: 'Photos Come Alive',
+      lines: ['"Who\'s that in the uniform?"', 'Every photo has a story only they can tell. Capture them in 90 seconds.', 'No typing. Just talking.']
     },
     {
-      icon: '🔔',
-      title: 'Family Gets Alerts',
-      lines: ['"Grandma just shared a story"', 'Instant connection across', 'any distance.']
+      icon: '/bell.svg',
+      title: 'Instant Family Alerts',
+      lines: ['"Mom just recorded the story behind the wedding photo"', 'Instant alerts when new memories are added. Listen immediately, wherever you are.']
     },
     {
-      icon: '♾️',
-      title: 'Never "Complete"',
-      lines: ['Add stories forever.', 'Your timeline grows.', 'Life doesn\'t stop at 52.']
+      icon: '/phone album.svg',
+      title: 'Living Timeline',
+      lines: ['Those boxes in the attic? Now accessible on every phone.', 'Transform physical photos into a living, growing family timeline that never ends.']
     }
   ]
 
@@ -43,7 +44,15 @@ export default function ThreePillars() {
               key={index}
               className="bg-white rounded-2xl p-8 shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="text-5xl mb-6">{pillar.icon}</div>
+              <div className="mb-6 w-24 h-24 relative">
+                <Image
+                  src={pillar.icon}
+                  alt={pillar.title}
+                  width={96}
+                  height={96}
+                  className="w-full h-full object-contain"
+                />
+              </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">{pillar.title}</h3>
               <div className="space-y-1 text-gray-600 leading-relaxed">
                 {pillar.lines.map((line, lineIndex) => (

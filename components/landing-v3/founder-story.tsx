@@ -61,16 +61,12 @@ export default function FounderStory() {
             <div className="aspect-square relative rounded-2xl overflow-hidden shadow-2xl border border-stone-200 bg-gradient-to-br from-blue-50 to-orange-50">
               {/* Placeholder for founder photo */}
               <div className="absolute inset-0 flex items-center justify-center p-8">
-                <div className="text-center space-y-4">
+                <div className="text-center">
                   <div className="w-24 h-24 mx-auto rounded-full bg-blue-100 flex items-center justify-center">
                     <svg className="w-12 h-12 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <p className="text-gray-500 text-sm font-medium">
-                    Founder Photo<br />
-                    Coming Soon
-                  </p>
                 </div>
               </div>
             </div>

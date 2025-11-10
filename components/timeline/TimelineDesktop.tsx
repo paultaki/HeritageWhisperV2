@@ -576,75 +576,77 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             )}
           </div>
 
-          {/* White Card Section Below Photo */}
-          <div className="p-4 bg-white relative">
-            {/* Title */}
-            <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-              {story.title}
-            </h3>
-
-            {/* Metadata */}
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>
-                {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
-              </span>
-              {displayLifeAge !== null && displayLifeAge !== undefined && (
-                <>
-                  <span className="text-gray-300">•</span>
+          {/* White Card Section Below Photo - Compact horizontal layout */}
+          <div className="px-4 py-3 bg-white relative">
+            <div className="flex items-center justify-between gap-4">
+              {/* Left: Title and metadata stacked */}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold text-gray-900 mb-0.5 truncate">
+                  {story.title}
+                </h3>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
                   <span>
-                    {displayLifeAge > 0 && `Age ${displayLifeAge}`}
-                    {displayLifeAge === 0 && `Birthday`}
-                    {displayLifeAge < 0 && `Before birth`}
+                    {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
                   </span>
-                </>
-              )}
-            </div>
+                  {displayLifeAge !== null && displayLifeAge !== undefined && (
+                    <>
+                      <span className="text-gray-300">•</span>
+                      <span>
+                        {displayLifeAge > 0 && `Age ${displayLifeAge}`}
+                        {displayLifeAge === 0 && `Birthday`}
+                        {displayLifeAge < 0 && `Before birth`}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
 
-            {/* V2: Book-style circular audio button */}
-            {useV2Features && story.audioUrl && (
-              <button
-                onClick={handlePlayAudio}
-                className="absolute bottom-4 right-4 hover:scale-105 transition-transform"
-                aria-label={isPlaying ? "Pause audio" : "Play audio"}
-              >
-                <svg className="w-10 h-10 -rotate-90">
-                  {/* Background ring */}
-                  <circle
-                    cx="20"
-                    cy="20"
-                    r="16"
-                    fill="none"
-                    stroke="rgba(139,107,122,0.15)"
-                    strokeWidth="2"
-                  />
-                  {/* Progress ring */}
-                  {isPlaying && (
+              {/* Right: V2 audio button */}
+              {useV2Features && story.audioUrl && (
+                <button
+                  onClick={handlePlayAudio}
+                  className="flex-shrink-0 hover:scale-105 transition-transform"
+                  aria-label={isPlaying ? "Pause audio" : "Play audio"}
+                >
+                  <svg className="w-10 h-10 -rotate-90">
+                    {/* Background ring */}
                     <circle
                       cx="20"
                       cy="20"
                       r="16"
                       fill="none"
-                      stroke="rgba(139,107,122,0.5)"
+                      stroke="rgba(139,107,122,0.15)"
                       strokeWidth="2"
-                      strokeDasharray={`${2 * Math.PI * 16}`}
-                      strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
-                      strokeLinecap="round"
-                      className="transition-all duration-300"
                     />
-                  )}
-                </svg>
-                {/* Icon in center */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
-                  ) : isPlaying ? (
-                    <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
-                  ) : (
-                    <Volume2 className="w-4 h-4 text-neutral-600" />
-                  )}
-                </div>
-              </button>
-            )}
+                    {/* Progress ring */}
+                    {isPlaying && (
+                      <circle
+                        cx="20"
+                        cy="20"
+                        r="16"
+                        fill="none"
+                        stroke="rgba(139,107,122,0.5)"
+                        strokeWidth="2"
+                        strokeDasharray={`${2 * Math.PI * 16}`}
+                        strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
+                        strokeLinecap="round"
+                        className="transition-all duration-300"
+                      />
+                    )}
+                  </svg>
+                  {/* Icon in center */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
+                    ) : isPlaying ? (
+                      <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
+                    ) : (
+                      <Volume2 className="w-4 h-4 text-neutral-600" />
+                    )}
+                  </div>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       );
@@ -740,75 +742,77 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           )}
         </div>
 
-        {/* White Card Section Below Placeholder */}
-        <div className="p-4 bg-white relative">
-          {/* Title */}
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-            {story.title}
-          </h3>
-
-          {/* Metadata */}
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>
-              {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
-            </span>
-            {displayLifeAge !== null && displayLifeAge !== undefined && (
-              <>
-                <span className="text-gray-300">•</span>
+        {/* White Card Section Below Placeholder - Compact horizontal layout */}
+        <div className="px-4 py-3 bg-white relative">
+          <div className="flex items-center justify-between gap-4">
+            {/* Left: Title and metadata stacked */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-0.5 truncate">
+                {story.title}
+              </h3>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>
-                  {displayLifeAge > 0 && `Age ${displayLifeAge}`}
-                  {displayLifeAge === 0 && `Birthday`}
-                  {displayLifeAge < 0 && `Before birth`}
+                  {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
                 </span>
-              </>
-            )}
-          </div>
+                {displayLifeAge !== null && displayLifeAge !== undefined && (
+                  <>
+                    <span className="text-gray-300">•</span>
+                    <span>
+                      {displayLifeAge > 0 && `Age ${displayLifeAge}`}
+                      {displayLifeAge === 0 && `Birthday`}
+                      {displayLifeAge < 0 && `Before birth`}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
 
-          {/* V2: Book-style circular audio button */}
-          {useV2Features && story.audioUrl && (
-            <button
-              onClick={handlePlayAudio}
-              className="absolute bottom-4 right-4 hover:scale-105 transition-transform"
-              aria-label={isPlaying ? "Pause audio" : "Play audio"}
-            >
-              <svg className="w-10 h-10 -rotate-90">
-                {/* Background ring */}
-                <circle
-                  cx="20"
-                  cy="20"
-                  r="16"
-                  fill="none"
-                  stroke="rgba(139,107,122,0.15)"
-                  strokeWidth="2"
-                />
-                {/* Progress ring */}
-                {isPlaying && (
+            {/* Right: V2 audio button */}
+            {useV2Features && story.audioUrl && (
+              <button
+                onClick={handlePlayAudio}
+                className="flex-shrink-0 hover:scale-105 transition-transform"
+                aria-label={isPlaying ? "Pause audio" : "Play audio"}
+              >
+                <svg className="w-10 h-10 -rotate-90">
+                  {/* Background ring */}
                   <circle
                     cx="20"
                     cy="20"
                     r="16"
                     fill="none"
-                    stroke="rgba(139,107,122,0.5)"
+                    stroke="rgba(139,107,122,0.15)"
                     strokeWidth="2"
-                    strokeDasharray={`${2 * Math.PI * 16}`}
-                    strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
-                    strokeLinecap="round"
-                    className="transition-all duration-300"
                   />
-                )}
-              </svg>
-              {/* Icon in center */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
-                ) : isPlaying ? (
-                  <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
-                ) : (
-                  <Volume2 className="w-4 h-4 text-neutral-600" />
-                )}
-              </div>
-            </button>
-          )}
+                  {/* Progress ring */}
+                  {isPlaying && (
+                    <circle
+                      cx="20"
+                      cy="20"
+                      r="16"
+                      fill="none"
+                      stroke="rgba(139,107,122,0.5)"
+                      strokeWidth="2"
+                      strokeDasharray={`${2 * Math.PI * 16}`}
+                      strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
+                      strokeLinecap="round"
+                      className="transition-all duration-300"
+                    />
+                  )}
+                </svg>
+                {/* Icon in center */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
+                  ) : isPlaying ? (
+                    <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
+                  ) : (
+                    <Volume2 className="w-4 h-4 text-neutral-600" />
+                  )}
+                </div>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );

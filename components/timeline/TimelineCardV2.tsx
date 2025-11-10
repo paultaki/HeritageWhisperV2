@@ -276,25 +276,25 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
         </div>
       )}
 
-      {/* Card content */}
-      <div className="p-5">
-        {/* Title */}
-        <h3 className="text-xl font-serif font-semibold text-gray-800 mb-2">
-          {story.title}
-        </h3>
+      {/* Card content - Compact horizontal layout */}
+      <div className="px-4 py-3">
+        <div className="flex items-center justify-between gap-4">
+          {/* Left: Title and metadata stacked */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-serif font-semibold text-gray-800 mb-0.5 truncate">
+              {story.title}
+            </h3>
+            <p className="text-sm text-gray-600">
+              {formatMetadata()}
+            </p>
+          </div>
 
-        {/* Metadata and Audio Button - Horizontal Layout */}
-        <div className="flex items-center justify-between gap-3">
-          {/* Metadata (left side) */}
-          <p className="text-sm text-gray-600">
-            {formatMetadata()}
-          </p>
-
-          {/* Audio indicator (right side, inline) */}
+          {/* Right: Audio player */}
           {story.audioUrl && (
             <button
               onClick={handlePlayAudio}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0"
+              aria-label={isPlaying ? "Pause audio" : "Play audio"}
             >
               {/* Circular progress ring */}
               <div className="relative w-10 h-10">

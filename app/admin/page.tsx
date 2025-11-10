@@ -51,6 +51,14 @@ const ADMIN_TOOLS: AdminTool[] = [
     color: "text-blue-600 bg-blue-50",
   },
   {
+    title: "Photo Album Market",
+    description: "Physical photo album digitization market analysis with TAM/SAM/SOM breakdown",
+    href: "/admin/photo-album-market",
+    icon: <Target className="w-6 h-6" />,
+    category: "monitoring",
+    color: "text-emerald-600 bg-emerald-50",
+  },
+  {
     title: "Prompt Quality Dashboard",
     description: "View all prompts with quality scores, validation details, and rejection reasons",
     href: "/admin/prompts",
