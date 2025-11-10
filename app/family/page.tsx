@@ -313,12 +313,19 @@ export default function FamilyPage() {
       );
       return response.json();
     },
-    onSuccess: async () => {
+    onSuccess: async (data, memberId) => {
       await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
       await refetchMembers();
+
+      // Check if it was a pending or active member
+      const member = familyMembers.find(m => m.id === memberId);
+      const isActive = member?.status === 'active';
+
       toast({
-        title: "Invitation resent! 📧",
-        description: "A new invitation email has been sent.",
+        title: isActive ? "Login link sent! 📧" : "Invitation resent! 📧",
+        description: isActive
+          ? "A new magic link has been sent to their email."
+          : "A new invitation email has been sent.",
       });
     },
     onError: (error: any) => {
@@ -784,6 +791,15 @@ export default function FamilyPage() {
                           <div className="flex-1 sm:flex-none px-4 py-2 min-h-[48px] flex items-center justify-center bg-gray-100 border border-gray-300 rounded-xl text-base text-gray-700">
                             {member.permissionLevel === 'contributor' ? '✏️ Contributor' : '👁 Viewer'}
                           </div>
+                          <Button
+                            variant="ghost"
+                            onClick={() => resendMutation.mutate(member.id)}
+                            disabled={resendMutation.isPending}
+                            className="shrink-0 min-h-[48px] px-4 text-base text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 rounded-xl whitespace-nowrap"
+                          >
+                            <LinkIcon className="w-4 h-4 mr-2" />
+                            {resendMutation.isPending ? "Sending..." : "Send Login Link"}
+                          </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button
