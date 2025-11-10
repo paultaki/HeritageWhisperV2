@@ -8,7 +8,7 @@ export default function ThreePillars() {
 
   const pillars = [
     {
-      icon: '/mic photo.svg',
+      icon: '/passkey.svg',
       title: 'Photos Come Alive',
       lines: ['"Who\'s that in the uniform?"', 'Every photo has a story only they can tell. Capture them in 90 seconds.', 'No typing. Just talking.']
     },
