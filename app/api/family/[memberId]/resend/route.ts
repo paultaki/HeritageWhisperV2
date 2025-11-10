@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { Resend } from 'resend';
+import { FamilyInviteEmail } from '@/lib/emails/family-invite';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -109,15 +111,68 @@ export async function POST(
       ? `${userProfile.firstName || ''} ${userProfile.lastName || ''}`.trim()
       : 'A family member';
 
-    // TODO: Send email via Resend
+    // Send email with Resend
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/family/access?token=${inviteToken}`;
-    
-    console.log('=== RESEND FAMILY INVITE ===');
-    console.log('To:', member.email);
-    console.log('From:', senderName);
-    console.log('Link:', inviteUrl);
-    console.log('Expires:', expiresAt.toISOString());
-    console.log('============================');
+
+    try {
+      // Only initialize Resend if API key is available
+      if (process.env.RESEND_API_KEY) {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+
+        const emailContent = FamilyInviteEmail({
+          storytellerName: senderName,
+          familyMemberName: member.name,
+          relationship: member.relationship,
+          magicLink: inviteUrl,
+          expiresAt: expiresAt.toISOString(),
+        });
+
+        const { data: emailData, error: emailError } = await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+          to: member.email,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          text: emailContent.text,
+        });
+
+        if (emailError) {
+          console.error('Error sending email:', emailError);
+          // Still log to console as fallback
+          console.log('=== RESEND FAMILY INVITE (Email failed, console backup) ===');
+          console.log('To:', member.email);
+          console.log('From:', senderName);
+          console.log('Link:', inviteUrl);
+          console.log('Expires:', expiresAt.toISOString());
+          console.log('=============================================================');
+        } else {
+          console.log('✅ Family invite email resent:', emailData?.id);
+          // Also log in development
+          if (process.env.NODE_ENV === 'development') {
+            console.log('=== RESEND FAMILY INVITE (Email sent) ===');
+            console.log('To:', member.email);
+            console.log('Link:', inviteUrl);
+            console.log('==========================================');
+          }
+        }
+      } else {
+        // No Resend API key - log to console only
+        console.log('=== RESEND FAMILY INVITE (No Resend API key, console only) ===');
+        console.log('To:', member.email);
+        console.log('From:', senderName);
+        console.log('Link:', inviteUrl);
+        console.log('Expires:', expiresAt.toISOString());
+        console.log('===============================================================');
+      }
+    } catch (emailError) {
+      console.error('Exception sending email:', emailError);
+      // Fallback to console
+      console.log('=== RESEND FAMILY INVITE (Exception, console backup) ===');
+      console.log('To:', member.email);
+      console.log('From:', senderName);
+      console.log('Link:', inviteUrl);
+      console.log('Expires:', expiresAt.toISOString());
+      console.log('=========================================================');
+    }
 
     return NextResponse.json({
       success: true,

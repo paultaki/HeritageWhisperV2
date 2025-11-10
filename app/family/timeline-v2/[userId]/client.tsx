@@ -14,7 +14,7 @@ import { MemoryOverlay } from '@/components/MemoryOverlay';
 import Image from 'next/image';
 import { formatStoryDate, formatStoryDateForMetadata } from '@/lib/dateFormatting';
 
-const logoUrl = "/Logo Icon hw.svg";
+const logoUrl = "/circle logo hw.svg";
 
 // Audio Manager for coordinating playback across cards
 class AudioManager {
