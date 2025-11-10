@@ -1,28 +1,30 @@
+import Image from 'next/image'
+
 export default function HowItWorks() {
   const steps = [
     {
       number: 1,
       title: 'Open on Your Phone',
       description: 'No app download. Works instantly. Use your fingerprint to login.',
-      icon: '📱'
+      icon: '/passkey.svg'
     },
     {
       number: 2,
       title: 'Talk for 2-5 Minutes',
       description: 'Answer a prompt or tell any story. Automatically transcribed perfectly.',
-      icon: '🎙️'
+      icon: '/mic clock.svg'
     },
     {
       number: 3,
       title: 'We Find the Wisdom',
       description: '"What I learned was..." Every story automatically reveals the lesson within.',
-      icon: '✨'
+      icon: '/book spark.svg'
     },
     {
       number: 4,
       title: 'Family Gets Notified',
       description: '"Dad just shared: The day he met mom" They listen instantly, anywhere.',
-      icon: '🔔'
+      icon: '/bell.svg'
     }
   ]
 
@@ -56,7 +58,15 @@ export default function HowItWorks() {
                 </div>
 
                 {/* Icon */}
-                <div className="text-5xl mb-4 mt-2">{step.icon}</div>
+                <div className="mb-6 mt-2 w-16 h-16 relative">
+                  <Image
+                    src={step.icon}
+                    alt={step.title}
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
 
                 {/* Title */}
                 <h3 className="text-xl font-bold text-gray-900 mb-3">

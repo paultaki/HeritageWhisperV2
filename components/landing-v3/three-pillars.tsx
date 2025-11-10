@@ -8,7 +8,7 @@ export default function ThreePillars() {
 
   const pillars = [
     {
-      icon: '/passkey.svg',
+      icon: '/phone album.svg',
       title: 'Photos Come Alive',
       lines: ['"Who\'s that in the uniform?"', 'Every photo has a story only they can tell. Capture them in 90 seconds.', 'No typing. Just talking.']
     },
@@ -18,7 +18,7 @@ export default function ThreePillars() {
       lines: ['"Mom just recorded the story behind the wedding photo"', 'Instant alerts when new memories are added. Listen immediately, wherever you are.']
     },
     {
-      icon: '/phone album.svg',
+      icon: '/timelineico.svg',
       title: 'Living Timeline',
       lines: ['Those boxes in the attic? Now accessible on every phone.', 'Transform physical photos into a living, growing family timeline that never ends.']
     }

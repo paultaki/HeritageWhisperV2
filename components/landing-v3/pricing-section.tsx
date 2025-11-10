@@ -6,7 +6,7 @@ export default function PricingSection() {
   const router = useRouter()
 
   const features = [
-    'Unlimited stories forever',
+    'Unlimited stories',
     'Share with entire family',
     'Wisdom extraction',
     'Beautiful timeline & book views',
