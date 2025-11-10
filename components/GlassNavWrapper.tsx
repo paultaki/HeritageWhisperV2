@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Clock, BookOpen, Mic, Menu } from "lucide-react";
+import { Clock, BookOpen, Mic, Menu, Archive } from "lucide-react";
 import GlassNav from "./GlassNav";
 import GlassMenuDropdown from "./GlassMenuDropdown";
 
@@ -25,7 +25,8 @@ export default function GlassNavWrapper() {
   const getActiveKey = () => {
     if (pathname === '/timeline' || pathname === '/') return 'timeline';
     if (pathname.startsWith('/book')) return 'book';
-    if (pathname.startsWith('/memory-box') || pathname.startsWith('/recording')) return 'memory';
+    if (pathname.startsWith('/recording')) return 'record';
+    if (pathname.startsWith('/memory-box')) return 'keepsakes';
     if (pathname.startsWith('/prompts')) return 'ideas';
     return '';
   };
@@ -44,10 +45,16 @@ export default function GlassNavWrapper() {
       Icon: BookOpen,
     },
     {
-      key: 'memory',
-      label: '+Memory',
+      key: 'record',
+      label: 'Record',
       href: '/recording',
       Icon: Mic,
+    },
+    {
+      key: 'keepsakes',
+      label: 'Keepsakes',
+      href: '/memory-box',
+      Icon: Archive,
     },
     {
       key: 'menu',

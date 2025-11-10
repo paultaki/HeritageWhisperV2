@@ -842,8 +842,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       <div
         className="z-10 flex-shrink-0 timeline-dot transition-all duration-500"
         style={{
-          transform: position === "left" ? "translateX(-54px)" : "translateX(54px)",
-          marginBottom: '-40px',
+          transform: position === "left" ? "translateX(-54px) translateY(-21px)" : "translateX(54px) translateY(-21px)",
+          marginBottom: '-82px',  // Increased to eliminate gap during sticky transition
         }}
       >
         <div
@@ -860,7 +860,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             borderRadius: '6px',
             backdropFilter: 'blur(10px)',
             position: 'relative',
-            top: '-19px',
+            top: '-19px',  // Original value restored
           }}
         >
           <span style={{ position: 'relative', top: '-2px' }}>
@@ -1346,7 +1346,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 92px;
+            width: 78px;
             height: 3.5px;
             background: linear-gradient(
               to right,
@@ -1363,7 +1363,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
 
           /* Left-positioned cards - connector goes to the right (dark at card, light at spine) */
           .timeline-step .justify-end .timeline-card-container::after {
-            right: -92px;
+            right: -78px;
             background: linear-gradient(
               to right,
               rgba(220, 218, 216, 0.4) 0%,
@@ -1374,7 +1374,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
 
           /* Right-positioned cards - connector goes to the left (dark at card, light at spine) */
           .timeline-step .justify-start .timeline-card-container::after {
-            left: -92px;
+            left: -78px;
             background: linear-gradient(
               to right,
               rgba(220, 218, 216, 0.8) 0%,

@@ -3,19 +3,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { FamilyGuard } from '@/components/FamilyGuard';
-import { FamilyBanner } from '@/components/FamilyBanner';
 import { SubmitQuestionDialog } from '@/components/SubmitQuestionDialog';
 import { useFamilyAuth } from '@/hooks/use-family-auth';
 import { Card } from '@/components/ui/card';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Home, BookOpen, HelpCircle, Pause, Volume2, Clock } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
-import { groupStoriesByDecade } from '@/lib/supabase';
-import { normalizeYear } from '@/lib/utils';
-import TimelineCardV2 from '@/components/timeline/TimelineCardV2';
-import YearScrubber from '@/components/timeline/YearScrubber';
-import FloatingAddButton from '@/components/timeline/FloatingAddButton';
+import { groupStoriesByDecade, type Story } from '@/lib/supabase';
+import { normalizeYear, formatYear } from '@/lib/utils';
+import { MemoryOverlay } from '@/components/MemoryOverlay';
+import Image from 'next/image';
+import { formatStoryDate, formatStoryDateForMetadata } from '@/lib/dateFormatting';
 
-// Audio Manager (same as original timeline)
+const logoUrl = "/Logo Icon hw.svg";
+
+// Audio Manager for coordinating playback across cards
 class AudioManager {
   private static instance: AudioManager;
   private currentAudio: HTMLAudioElement | null = null;
@@ -42,51 +43,585 @@ class AudioManager {
     this.listeners.delete(cardId);
   }
 
-  play(cardId: string, audio: HTMLAudioElement) {
-    if (this.currentAudio && this.currentCardId !== cardId) {
-      this.currentAudio.pause();
-      this.currentAudio.currentTime = 0;
-      const oldCallback = this.listeners.get(this.currentCardId!);
+  requestPlay(cardId: string) {
+    if (this.currentCardId && this.currentCardId !== cardId) {
+      const oldCallback = this.listeners.get(this.currentCardId);
       if (oldCallback) {
-        oldCallback(false, this.currentAudio);
+        oldCallback(false, null);
       }
     }
+    this.currentCardId = cardId;
+  }
+
+  confirmPlaying(cardId: string, audio: HTMLAudioElement) {
     this.currentAudio = audio;
     this.currentCardId = cardId;
   }
 
-  pause(cardId: string) {
+  stop(cardId: string) {
     if (this.currentCardId === cardId) {
       this.currentAudio = null;
       this.currentCardId = null;
     }
   }
-
-  getCurrentCardId() {
-    return this.currentCardId;
-  }
 }
 
 const audioManager = AudioManager.getInstance();
 
-export default function FamilyTimelineV2Client({ userId }: { userId: string }) {
-  const router = useRouter();
-  const { session, updateFirstAccess } = useFamilyAuth();
-  const decadeRefs = useRef<{ [key: string]: HTMLElement | null }>({});
-  const [isMobile, setIsMobile] = useState(false);
+// Timeline Card Component (matching TimelineDesktop style)
+interface TimelineCardProps {
+  story: Story;
+  position: "left" | "right";
+  index: number;
+  birthYear: number;
+  userId: string;
+  onOpenOverlay?: (story: Story) => void;
+}
 
-  // Detect mobile viewport
+function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay }: TimelineCardProps) {
+  const router = useRouter();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(story.durationSeconds || 0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Get display photo
+  const getDisplayPhoto = () => {
+    if (story.photos && story.photos.length > 0) {
+      const heroPhoto = story.photos.find((p: any) => p.isHero && p.url);
+      if (heroPhoto) return heroPhoto;
+      const firstValidPhoto = story.photos.find((p: any) => p.url);
+      if (firstValidPhoto) return firstValidPhoto;
+    }
+    if (story.photoUrl) {
+      return { url: story.photoUrl, transform: (story as any).photoTransform };
+    }
+    return null;
+  };
+
+  const displayPhoto = getDisplayPhoto();
+  const photoCount = story.photos?.length || (story.photoUrl ? 1 : 0);
+
+  // Calculate display age
+  const normalizedStoryYear = normalizeYear(story.storyYear);
+  const computedAge =
+    typeof normalizedStoryYear === "number" && typeof birthYear === "number"
+      ? normalizedStoryYear - birthYear
+      : null;
+  const displayLifeAge = (() => {
+    if (typeof (story as any).lifeAge === "number") {
+      if (computedAge !== null && (story as any).lifeAge < 0 && normalizedStoryYear !== null && normalizedStoryYear >= birthYear) {
+        return computedAge;
+      }
+      return (story as any).lifeAge;
+    }
+    return computedAge;
+  })();
+
+  // Check for prefers-reduced-motion
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
     };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
+  // Intersection Observer for scroll animation
   useEffect(() => {
-    // Mark first access as complete
+    if (prefersReducedMotion) {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+          }
+        });
+      },
+      {
+        threshold: 0.05,
+        rootMargin: "200px 0px 200px 0px",
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, [prefersReducedMotion]);
+
+  const handlePlayAudio = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (hasError) {
+      setHasError(false);
+      setIsLoading(true);
+    }
+
+    if (isPlaying && currentAudio) {
+      currentAudio.pause();
+      setIsPlaying(false);
+      setCurrentAudio(null);
+      audioRef.current = null;
+      setProgress(0);
+      setCurrentTime(0);
+      audioManager.stop(story.id);
+    } else if (story.audioUrl && story.audioUrl.trim() !== "") {
+      setIsLoading(true);
+      setHasError(false);
+
+      const audio = new Audio(story.audioUrl);
+      audio.crossOrigin = "anonymous";
+
+      audioManager.requestPlay(story.id);
+
+      setCurrentAudio(audio);
+      audioRef.current = audio;
+
+      audio.addEventListener("loadstart", () => {
+        setIsLoading(true);
+      });
+
+      audio.addEventListener("canplay", () => {
+        setIsLoading(false);
+        setDuration(audio.duration);
+      });
+
+      audio.addEventListener("timeupdate", () => {
+        const progressPercent = (audio.currentTime / audio.duration) * 100;
+        setProgress(progressPercent);
+        setCurrentTime(audio.currentTime);
+      });
+
+      audio.addEventListener("ended", () => {
+        setIsPlaying(false);
+        setCurrentAudio(null);
+        audioRef.current = null;
+        setProgress(0);
+        setCurrentTime(0);
+        audioManager.stop(story.id);
+      });
+
+      audio.addEventListener("error", (error) => {
+        console.error("Audio playback error:", error);
+        setIsPlaying(false);
+        setIsLoading(false);
+        setHasError(true);
+        setCurrentAudio(null);
+        audioRef.current = null;
+        setProgress(0);
+        setCurrentTime(0);
+        audioManager.stop(story.id);
+      });
+
+      setTimeout(() => {
+        if (audioRef.current === audio) {
+          audio
+            .play()
+            .then(() => {
+              audioManager.confirmPlaying(story.id, audio);
+              setIsPlaying(true);
+              setIsLoading(false);
+            })
+            .catch((error) => {
+              console.error("Error playing audio:", error);
+              setIsPlaying(false);
+              setIsLoading(false);
+              setHasError(true);
+              setCurrentAudio(null);
+              audioRef.current = null;
+              setProgress(0);
+              audioManager.stop(story.id);
+            });
+        }
+      }, 50);
+    }
+  };
+
+  useEffect(() => {
+    const handleAudioStateChange = (
+      playing: boolean,
+      audioElement?: HTMLAudioElement | null,
+    ) => {
+      if (!playing) {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          audioRef.current = null;
+        }
+        setIsPlaying(false);
+        setProgress(0);
+        setCurrentTime(0);
+        setCurrentAudio(null);
+        setIsLoading(false);
+      }
+    };
+
+    audioManager.register(story.id, handleAudioStateChange);
+
+    return () => {
+      audioManager.unregister(story.id);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
+    };
+  }, [story.id]);
+
+  useEffect(() => {
+    audioRef.current = currentAudio;
+  }, [currentAudio]);
+
+  const handleCardClick = () => {
+    if (onOpenOverlay) {
+      onOpenOverlay(story);
+    } else {
+      // Navigate to family book view
+      router.push(`/family/book/${userId}?storyId=${story.id}`);
+    }
+  };
+
+  // Render card content (matching TimelineDesktop mobile style)
+  const renderCardContent = () => {
+    if (displayPhoto?.url) {
+      return (
+        <div
+          className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer ${
+            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}
+          onClick={handleCardClick}
+          style={{
+            boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
+            border: '1.5px solid #B89B8D',
+          }}
+        >
+          {/* Photo Section */}
+          <div className="relative w-full aspect-[16/10] overflow-hidden">
+            {(displayPhoto as any).transform ? (
+              <img
+                src={displayPhoto.url}
+                alt={story.title}
+                className="w-full h-full object-cover"
+                style={{
+                  transform: `scale(${(displayPhoto as any).transform.zoom}) translate(${(displayPhoto as any).transform.position.x}%, ${(displayPhoto as any).transform.position.y}%)`,
+                  transformOrigin: "center center",
+                }}
+                onError={(e) => console.error("[Timeline] Image failed to load:", displayPhoto.url)}
+              />
+            ) : (
+              <Image
+                src={displayPhoto.url}
+                alt={story.title}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
+                className={`object-cover ${isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''}`}
+                loading="eager"
+                priority={index < 8}
+                quality={85}
+                placeholder="blur"
+                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
+                onError={(e) => console.error("[Timeline] Image failed to load:", displayPhoto.url)}
+              />
+            )}
+
+            {/* Photo count badge */}
+            {photoCount > 1 && (
+              <div className="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
+                {photoCount} photos
+              </div>
+            )}
+
+            {/* Audio button */}
+            {story.audioUrl && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePlayAudio(e);
+                }}
+                aria-pressed={isPlaying}
+                aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+                className="absolute right-4 bottom-4 hover:scale-105 transition-transform z-10"
+              >
+                <svg className="w-11 h-11 -rotate-90">
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    fill="white"
+                    fillOpacity="0.9"
+                  />
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    fill="none"
+                    stroke="rgba(139,107,122,0.15)"
+                    strokeWidth="2"
+                  />
+                  {isPlaying && (
+                    <circle
+                      cx="22"
+                      cy="22"
+                      r="18"
+                      fill="none"
+                      stroke="rgba(139,107,122,0.5)"
+                      strokeWidth="2"
+                      strokeDasharray={`${2 * Math.PI * 18}`}
+                      strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
+                      strokeLinecap="round"
+                      className="transition-all duration-300"
+                    />
+                  )}
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
+                  ) : isPlaying ? (
+                    <Pause className="w-5 h-5 text-neutral-600 fill-neutral-600" />
+                  ) : (
+                    <Volume2 className="w-5 h-5 text-neutral-600" />
+                  )}
+                </div>
+              </button>
+            )}
+          </div>
+
+          {/* Title and metadata */}
+          <div className="px-4 py-3 bg-white relative">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold text-gray-900 mb-0.5 truncate">
+                  {story.title}
+                </h3>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span>
+                    {formatStoryDateForMetadata((story as any).storyDate, story.storyYear)}
+                  </span>
+                  {displayLifeAge !== null && displayLifeAge !== undefined && (
+                    <>
+                      <span className="text-gray-300">•</span>
+                      <span>
+                        {displayLifeAge > 0 && `Age ${displayLifeAge}`}
+                        {displayLifeAge === 0 && `Birthday`}
+                        {displayLifeAge < 0 && `Before birth`}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // No photo - render placeholder
+    return (
+      <div
+        className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer ${
+          isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        }`}
+        onClick={handleCardClick}
+        style={{
+          boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
+          border: '1.5px solid #B89B8D',
+        }}
+      >
+        {/* Placeholder */}
+        <div className="relative w-full aspect-[16/10] overflow-hidden">
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 flex items-center justify-center"
+          >
+            <div className="text-center p-6">
+              <div className="text-5xl opacity-10">📝</div>
+            </div>
+          </div>
+
+          {/* Audio button */}
+          {story.audioUrl && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePlayAudio(e);
+              }}
+              aria-pressed={isPlaying}
+              aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+              className="absolute right-4 bottom-4 hover:scale-105 transition-transform z-10"
+            >
+              <svg className="w-11 h-11 -rotate-90">
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="18"
+                  fill="white"
+                  fillOpacity="0.9"
+                />
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="18"
+                  fill="none"
+                  stroke="rgba(139,107,122,0.15)"
+                  strokeWidth="2"
+                />
+                {isPlaying && (
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    fill="none"
+                    stroke="rgba(139,107,122,0.5)"
+                    strokeWidth="2"
+                    strokeDasharray={`${2 * Math.PI * 18}`}
+                    strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
+                    strokeLinecap="round"
+                    className="transition-all duration-300"
+                  />
+                )}
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
+                ) : isPlaying ? (
+                  <Pause className="w-5 h-5 text-neutral-600 fill-neutral-600" />
+                ) : (
+                  <Volume2 className="w-5 h-5 text-neutral-600" />
+                )}
+              </div>
+            </button>
+          )}
+        </div>
+
+        {/* Title and metadata */}
+        <div className="px-4 py-3 bg-white relative">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-0.5 truncate">
+                {story.title}
+              </h3>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>
+                  {formatStoryDateForMetadata((story as any).storyDate, story.storyYear)}
+                </span>
+                {displayLifeAge !== null && displayLifeAge !== undefined && (
+                  <>
+                    <span className="text-gray-300">•</span>
+                    <span>
+                      {displayLifeAge > 0 && `Age ${displayLifeAge}`}
+                      {displayLifeAge === 0 && `Birthday`}
+                      {displayLifeAge < 0 && `Before birth`}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      className={`timeline-step flex flex-col lg:flex-row items-center gap-6 lg:gap-0 transition-all duration-500 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+      style={{
+        transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+        pointerEvents: 'none',
+      }}
+    >
+      {/* Left side content (desktop) */}
+      <div className={`flex-1 flex ${position === "left" ? "justify-end" : ""} hidden lg:flex`} style={{ pointerEvents: 'none', paddingRight: position === "left" ? "109px" : "0" }}>
+        {position === "left" && (
+          <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
+            {renderCardContent()}
+          </div>
+        )}
+      </div>
+
+      {/* Year marker */}
+      <div
+        className="z-10 flex-shrink-0 timeline-dot transition-all duration-500"
+        style={{
+          transform: position === "left" ? "translateX(-54px)" : "translateX(54px)",
+          marginBottom: '-40px',
+        }}
+      >
+        <div
+          className="py-0 px-1 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
+          style={{
+            backgroundColor: '#F9E5E8',
+            border: `1px solid #B8B0A8`,
+            color: '#6A4D58',
+            fontSize: '18px',
+            fontWeight: 500,
+            letterSpacing: '0.3px',
+            opacity: 0.95,
+            boxShadow: '0 4px 10px -2px rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.09)',
+            borderRadius: '6px',
+            backdropFilter: 'blur(10px)',
+            position: 'relative',
+            top: '-19px',
+          }}
+        >
+          <span style={{ position: 'relative', top: '-2px' }}>
+            {formatStoryDate((story as any).storyDate, story.storyYear, "year-only")}
+          </span>
+        </div>
+      </div>
+
+      {/* Right side content (desktop) */}
+      <div className={`flex-1 flex ${position === "right" ? "justify-start" : ""} hidden lg:flex`} style={{ pointerEvents: 'none', paddingLeft: position === "right" ? "109px" : "0" }}>
+        {position === "right" && (
+          <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
+            {renderCardContent()}
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Card */}
+      <div className="lg:hidden w-full" style={{ pointerEvents: 'auto' }}>
+        {renderCardContent()}
+      </div>
+    </div>
+  );
+}
+
+interface FamilyTimelineV2ClientProps {
+  userId: string;
+}
+
+export default function FamilyTimelineV2Client({ userId }: FamilyTimelineV2ClientProps) {
+  const router = useRouter();
+  const { session, updateFirstAccess } = useFamilyAuth();
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [overlayOpen, setOverlayOpen] = useState(false);
+  const progressLineRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
     if (session?.firstAccess) {
       updateFirstAccess();
     }
@@ -118,62 +653,92 @@ export default function FamilyTimelineV2Client({ userId }: { userId: string }) {
   const allStories = storiesData?.stories || [];
   const stories = allStories.filter((s: any) => s.includeInTimeline === true);
   const storytellerBirthYear = storiesData?.storyteller?.birthYear || 1950;
+  const storytellerFirstName = storiesData?.storyteller?.firstName || 'Family Member';
 
   // Group stories by decade
   const storiesByDecade = groupStoriesByDecade(stories, storytellerBirthYear);
+  const sortedStories = [...stories].sort((a: any, b: any) => {
+    return (normalizeYear(a.storyYear) ?? 0) - (normalizeYear(b.storyYear) ?? 0);
+  });
 
-  // Scroll to decade
-  const scrollToDecade = (decadeId: string) => {
-    const element = decadeRefs.current[decadeId];
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  // Calculate progress line height based on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!progressLineRef.current) return;
+
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY;
+      const clientHeight = window.innerHeight;
+
+      const scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
+      progressLineRef.current.style.height = `${scrollPercent}%`;
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial calculation
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleOpenOverlay = (story: Story) => {
+    setSelectedStory(story);
+    setOverlayOpen(true);
   };
-
-  // Handle add memory click
-  const handleAddMemory = () => {
-    // For family members, they can't add memories - show a message or redirect
-    alert('Family members can view but not add memories. Contact the storyteller to add more memories.');
-  };
-
-  // CHANGE 6: Find empty years (years with no stories)
-  const allYears = stories.map((s: any) => normalizeYear(s.storyYear)).filter(Boolean).sort((a: number, b: number) => a - b);
-  const minYear = allYears[0] || new Date().getFullYear() - 70;
-  const maxYear = allYears[allYears.length - 1] || new Date().getFullYear();
-  const emptyYears: number[] = [];
-  
-  for (let year = minYear; year <= maxYear; year++) {
-    if (!allYears.includes(year)) {
-      emptyYears.push(year);
-    }
-  }
 
   return (
     <FamilyGuard userId={userId}>
-      <div className="min-h-screen pb-20 md:pb-0" style={{ background: 'var(--color-page)' }}>
-        <FamilyBanner storytellerName={session?.storytellerName || 'Family Member'} />
-
-        <div className="max-w-4xl mx-auto p-4 md:p-6">
-          <div className="mb-8">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-serif font-bold text-gray-800 mb-2">
-                  Timeline
-                </h1>
-                <p className="text-gray-600">
-                  {stories.length} {stories.length === 1 ? 'story' : 'stories'} shared with you
-                </p>
-              </div>
-              {session?.permissionLevel === 'contributor' && (
-                <SubmitQuestionDialog
-                  storytellerId={userId}
-                  sessionToken={session.sessionToken}
-                  storytellerName={session.storytellerName}
+      <div className="min-h-screen" style={{ background: 'var(--color-page)' }}>
+        {/* Guest Navigation Bar */}
+        <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              {/* Left: Logo and name */}
+              <div className="flex items-center gap-3">
+                <Image
+                  src={logoUrl}
+                  alt="Heritage Whisper"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8"
                 />
-              )}
+                <div>
+                  <h1 className="text-sm font-semibold text-gray-900">
+                    {storytellerFirstName}'s Stories
+                  </h1>
+                  <p className="text-xs text-gray-500">View-only access</p>
+                </div>
+              </div>
+
+              {/* Right: Navigation */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => router.push(`/family/timeline-v2/${userId}`)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <Clock className="w-4 h-4" />
+                  <span className="hidden sm:inline">Timeline</span>
+                </button>
+                <button
+                  onClick={() => router.push(`/family/book/${userId}`)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span className="hidden sm:inline">Book</span>
+                </button>
+                {session?.permissionLevel === 'contributor' && (
+                  <SubmitQuestionDialog
+                    storytellerId={userId}
+                    sessionToken={session.sessionToken}
+                    storytellerName={session.storytellerName}
+                  />
+                )}
+              </div>
             </div>
           </div>
+        </div>
 
+        {/* Timeline Content */}
+        <div className="max-w-7xl mx-auto px-4 py-8">
           {isLoading && (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
@@ -186,93 +751,61 @@ export default function FamilyTimelineV2Client({ userId }: { userId: string }) {
             </Card>
           )}
 
-          {/* Timeline with stories grouped by decade */}
           {!isLoading && stories.length > 0 && (
             <div className="relative">
               {/* Vertical timeline spine */}
-              <div className="absolute left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-200 to-amber-400 md:block hidden" />
+              <div
+                className="absolute left-1/2 top-0 bottom-0 w-1 -ml-0.5 hidden lg:block"
+                style={{
+                  background: 'linear-gradient(to bottom, #B89B8D 0%, #8B6B7A 50%, #B89B8D 100%)',
+                  opacity: 0.3,
+                }}
+              />
 
-              {/* Decade sections */}
-              {Object.entries(storiesByDecade).map(([decade, decadeStories]: [string, any[]]) => (
-                <div 
-                  key={decade} 
-                  ref={(el) => { decadeRefs.current[decade] = el; }}
-                  data-decade={decade}
-                  className="mb-12"
-                >
-                  {/* Decade header - CHANGE 4: Desktop removes duplicate year markers from spine */}
-                  <div className="mb-6 md:ml-0">
-                    <h2 className="text-2xl font-serif font-semibold text-gray-800">
-                      {decade}
-                    </h2>
-                  </div>
+              {/* Progress line */}
+              <div
+                ref={progressLineRef}
+                className="absolute left-1/2 top-0 w-1 -ml-0.5 transition-all duration-200 hidden lg:block"
+                style={{
+                  background: 'linear-gradient(to bottom, #B89B8D 0%, #8B6B7A 50%, #B89B8D 100%)',
+                  opacity: 0.8,
+                  height: '0%',
+                }}
+              />
 
-                  {/* Stories in this decade */}
-                  <div className="space-y-6">
-                    {decadeStories.map((story: any) => (
-                      <TimelineCardV2
-                        key={story.id}
-                        story={story}
-                        birthYear={storytellerBirthYear}
-                        audioManager={audioManager}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              {/* CHANGE 6: Empty state for years with no memories */}
-              {emptyYears.length > 0 && (
-                <Card className="p-8 text-center mt-12 bg-amber-50 border-amber-200">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-3">
-                    Some years are waiting for memories
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    There are {emptyYears.length} years without stories between {minYear} and {maxYear}
-                  </p>
-                  {emptyYears.slice(0, 5).map((year) => (
-                    <div key={year} className="text-sm text-gray-500 mb-2">
-                      No memories yet for {year}
-                    </div>
-                  ))}
-                  {emptyYears.length > 5 && (
-                    <p className="text-sm text-gray-400 mt-2">
-                      and {emptyYears.length - 5} more years...
-                    </p>
-                  )}
-                </Card>
-              )}
+              {/* Timeline cards */}
+              <div className="space-y-8">
+                {sortedStories.map((story: any, index: number) => (
+                  <TimelineCard
+                    key={story.id}
+                    story={story}
+                    position={index % 2 === 0 ? "left" : "right"}
+                    index={index}
+                    birthYear={storytellerBirthYear}
+                    userId={userId}
+                    onOpenOverlay={handleOpenOverlay}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-        {/* CHANGE 2: Mobile year scrubber - only show on mobile with stories */}
-        {isMobile && stories.length > 0 && (
-          <YearScrubber 
-            decades={Object.keys(storiesByDecade)}
-            onSelectDecade={scrollToDecade}
+        {/* Memory Overlay */}
+        {selectedStory && (
+          <MemoryOverlay
+            open={overlayOpen}
+            onClose={() => {
+              setOverlayOpen(false);
+              setSelectedStory(null);
+            }}
+            story={selectedStory}
+            allStories={sortedStories}
+            onStoryChange={(newStory: Story) => setSelectedStory(newStory)}
+            isReadOnly={true}
           />
-        )}
-
-        {/* CHANGE 5: Floating Add Memory button - Desktop only */}
-        {!isMobile && (
-          <FloatingAddButton onClick={handleAddMemory} />
-        )}
-
-        {/* CHANGE 5: Mobile bottom nav with Add Memory */}
-        {isMobile && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-center gap-4">
-            <button
-              onClick={handleAddMemory}
-              className="flex items-center gap-2 bg-amber-600 text-white px-6 py-3 rounded-full font-medium hover:bg-amber-700 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Add Memory</span>
-            </button>
-          </div>
         )}
       </div>
     </FamilyGuard>
   );
 }
-
