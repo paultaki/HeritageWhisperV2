@@ -842,7 +842,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       <div
         className="z-10 flex-shrink-0 timeline-dot transition-all duration-500"
         style={{
-          transform: position === "left" ? "translateX(-54px) translateY(-21px)" : "translateX(54px) translateY(-21px)",
+          transform: position === "left" ? "translateX(-54px)" : "translateX(54px)",
           marginBottom: '-82px',  // Increased to eliminate gap during sticky transition
         }}
       >
@@ -860,7 +860,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             borderRadius: '6px',
             backdropFilter: 'blur(10px)',
             position: 'relative',
-            top: '-19px',  // Original value restored
+            top: '-40px',  // Moved up 21px to align with connectors
           }}
         >
           <span style={{ position: 'relative', top: '-2px' }}>
