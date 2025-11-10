@@ -17,9 +17,9 @@ export default function FounderStory() {
           {/* Text - 60% */}
           <div className="lg:col-span-3 space-y-6">
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-              I realized my parents had boxes of photos no one else could identify. When they're gone,
-              those become meaningless snapshots. I built HeritageWhisper to capture the stories behind
-              every photo while we still can.
+              I noticed our parents photo albums had something missing. The photos had dates, but no context.
+              We could name most of the faces, but not the place, not the moment, not why it mattered.
+              I built HeritageWhisper to capture the stories behind every photo while we still can.
             </p>
 
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
@@ -29,7 +29,7 @@ export default function FounderStory() {
             </p>
 
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-              With four siblings scattered across the country and 23 grandkids in our immediate family,
+              With four siblings scattered across the country and 16 grandkids in our immediate family,
               it's impossible to share a physical book. But now we all have the same access to our
               parents' stories the moment they're recorded. Our kids treasure hearing these memories
               in their grandparents' own voices as much as we do.

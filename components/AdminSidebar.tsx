@@ -68,6 +68,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
       { label: "Market Assessment", href: "/admin/market-assessment", icon: Target },
+      { label: "Photo Album Market", href: "/admin/photo-album-market", icon: Target },
       { label: "AI Prompts Inspector", href: "/admin/ai-prompts", icon: Code },
     ],
   },
@@ -99,11 +100,14 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: "External Services",
     items: [
+      { label: "Supabase", href: "https://supabase.com/dashboard/project/tjycibrhoammxohemyhq", icon: Database },
       { label: "Vercel", href: "https://vercel.com/pauls-projects-667765b0/heritage-whisper-v2", icon: Cloud },
       { label: "AI Gateway", href: "https://vercel.com/pauls-projects-667765b0/heritage-whisper-v2/observability/ai", icon: Zap },
       { label: "PDFShift", href: "https://app.pdfshift.io/env/", icon: FileText },
       { label: "Resend", href: "https://resend.com/emails", icon: Mail },
-      { label: "Supabase", href: "https://supabase.com/dashboard/project/tjycibrhoammxohemyhq", icon: Database },
+      { label: "AssemblyAI", href: "https://www.assemblyai.com/app", icon: BarChart3 },
+      { label: "OpenAI", href: "https://platform.openai.com/usage", icon: Zap },
+      { label: "Upstash Redis", href: "https://console.upstash.com/", icon: Settings },
       { label: "Stripe", href: "https://dashboard.stripe.com/test/dashboard", icon: Settings },
     ],
   },
