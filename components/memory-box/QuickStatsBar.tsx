@@ -5,6 +5,7 @@ type Props = {
   storiesCount: number;
   totalHours: number;
   treasuresCount: number;
+  isOwnAccount?: boolean; // For family sharing - hide stories/time for viewers
 };
 
 /**
@@ -12,8 +13,11 @@ type Props = {
  *
  * Shows at-a-glance summary of their collection
  * Large, readable numbers with clear labels
+ *
+ * For family viewers (isOwnAccount=false): Shows only treasures count
+ * For account owners (isOwnAccount=true): Shows all stats
  */
-export function QuickStatsBar({ storiesCount, totalHours, treasuresCount }: Props) {
+export function QuickStatsBar({ storiesCount, totalHours, treasuresCount, isOwnAccount = true }: Props) {
   const formatHours = (hours: number) => {
     if (hours < 1) {
       const minutes = Math.round(hours * 60);
