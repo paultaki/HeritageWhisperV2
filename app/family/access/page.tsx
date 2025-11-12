@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,6 +40,19 @@ function FamilyAccessContent() {
     verifyToken(token);
   }, [searchParams]);
 
+  // Memoized redirect handler to prevent stale closures
+  const handleContinue = useCallback(() => {
+    if (sessionData) {
+      console.log('[Family Access] Redirecting to /timeline with session:', {
+        storytellerId: sessionData.storytellerId,
+        storytellerName: sessionData.storytellerName,
+        permissionLevel: sessionData.permissionLevel,
+        expiresAt: sessionData.expiresAt
+      });
+      router.push('/timeline');
+    }
+  }, [sessionData, router]);
+
   // Countdown timer effect
   useEffect(() => {
     if (showWelcome && countdown > 0) {
@@ -50,7 +63,7 @@ function FamilyAccessContent() {
     } else if (showWelcome && countdown === 0) {
       handleContinue();
     }
-  }, [showWelcome, countdown]);
+  }, [showWelcome, countdown, handleContinue]);
 
   async function verifyToken(token: string) {
     try {
@@ -81,18 +94,6 @@ function FamilyAccessContent() {
       console.error('Token verification error:', err);
       setStatus('error');
       setError(err.message || 'Failed to verify invitation');
-    }
-  }
-
-  function handleContinue() {
-    if (sessionData) {
-      console.log('[Family Access] Redirecting to /timeline with session:', {
-        storytellerId: sessionData.storytellerId,
-        storytellerName: sessionData.storytellerName,
-        permissionLevel: sessionData.permissionLevel,
-        expiresAt: sessionData.expiresAt
-      });
-      router.push('/timeline');
     }
   }
 
