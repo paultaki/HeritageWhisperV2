@@ -41,10 +41,11 @@ interface BookPageProps {
   allStories?: Story[]; // For TOC
   onNavigateToStory?: (storyIndex: number) => void; // For TOC navigation
   fontSize?: number; // Font size for story text
+  isOwnAccount?: boolean; // Whether user owns this account (for edit permissions)
 }
 
 export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
-  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory, fontSize = 18 }, ref) => {
+  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory, fontSize = 18, isOwnAccount = true }, ref) => {
     const pageRef = React.useRef<HTMLDivElement>(null);
     const [scrollState, setScrollState] = React.useState<{ 
       hasScroll: boolean; 
@@ -181,7 +182,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="opacity-[0.08]">
                 <img
-                  src="/logo black.svg"
+                  src="/final logo/logo-new.svg"
                   alt="Heritage Whisper"
                   className="w-32 h-32"
                   style={{ filter: 'grayscale(100%)' }}
@@ -521,7 +522,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 }}
                 aria-label="Scroll down to continue reading"
               >
-                <StoryContent story={story as Story} position={position} pageNum={pageNum} fontSize={fontSize} />
+                <StoryContent story={story as Story} position={position} pageNum={pageNum} fontSize={fontSize} isOwnAccount={isOwnAccount} />
               </div>
               
               {/* Scroll indicators - stay visible until user scrolls */}
@@ -554,7 +555,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
 BookPage.displayName = "BookPage";
 
 // Story Content Component
-function StoryContent({ story, position, pageNum, fontSize = 18 }: { story: Story; position: "left" | "right"; pageNum: number; fontSize?: number }) {
+function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = true }: { story: Story; position: "left" | "right"; pageNum: number; fontSize?: number; isOwnAccount?: boolean }) {
   const router = useRouter();
   
   // Audio state
@@ -683,8 +684,8 @@ function StoryContent({ story, position, pageNum, fontSize = 18 }: { story: Stor
 
   return (
     <>
-      {/* Edit and Timeline buttons - only show for actual stories, not intro/toc/decade pages */}
-      {typeof story === 'object' && 'id' in story && (
+      {/* Edit and Timeline buttons - only show for account owners with actual stories */}
+      {isOwnAccount && typeof story === 'object' && 'id' in story && (
         <div className={`flex gap-2 mb-1.5 -mt-5 ${position === "right" ? "justify-end" : ""}`}>
           <button
             onClick={() =>
@@ -727,7 +728,10 @@ function StoryContent({ story, position, pageNum, fontSize = 18 }: { story: Stor
         const photoUrl = heroPhoto.displayUrl || heroPhoto.url;
         return (
           <div className="mb-2">
-            <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
+            <div
+              data-nav-ink="light"
+              className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5"
+            >
               <img
                 src={photoUrl}
                 alt={story.title}
@@ -834,15 +838,17 @@ function StoryContent({ story, position, pageNum, fontSize = 18 }: { story: Stor
       )}
 
       {/* Story text */}
-      <div
-        className="text-neutral-800/95 space-y-3"
-        style={{
-          fontSize: `${fontSize}px`,
-          lineHeight: fontSize <= 16 ? '1.6' : fontSize >= 20 ? '1.8' : '1.7'
-        }}
-      >
+      <div className="text-neutral-800/95 space-y-3">
         {story.transcription?.split("\n\n").map((paragraph, i) => (
-          <p key={i}>{paragraph}</p>
+          <p
+            key={i}
+            style={{
+              fontSize: `${fontSize}px`,
+              lineHeight: fontSize <= 16 ? '1.6' : fontSize >= 20 ? '1.8' : '1.7'
+            }}
+          >
+            {paragraph}
+          </p>
         ))}
       </div>
 
@@ -860,7 +866,14 @@ function StoryContent({ story, position, pageNum, fontSize = 18 }: { story: Stor
               )`
             }}
           />
-          <p className="relative text-slate-700 text-xl leading-relaxed" style={{ fontFamily: '"Caveat", cursive' }}>
+          <p
+            className="relative text-slate-700 leading-relaxed"
+            style={{
+              fontFamily: '"Caveat", cursive',
+              fontSize: `${fontSize + 3}px`,
+              lineHeight: fontSize <= 16 ? '1.7' : fontSize >= 20 ? '1.9' : '1.8'
+            }}
+          >
             {story.wisdomClipText}
           </p>
         </div>

@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
+import { useAccountContext } from "@/hooks/use-account-context";
 
 type GlassMenuDropdownProps = {
   isOpen: boolean;
@@ -32,6 +33,10 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const modeSelection = useModeSelection();
+  const { activeContext } = useAccountContext();
+  const isOwnAccount = activeContext?.type === 'own' ?? false;
+
+  console.log('[GlassMenuDropdown] activeContext:', activeContext, 'isOwnAccount:', isOwnAccount);
 
   // Fetch profile data for profile photo
   const { data: profileData } = useQuery({
@@ -97,23 +102,29 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
     onClose();
   };
 
-  const menuItems = [
+  const allMenuItems = [
     { icon: Home, label: "Home", href: "/" },
-    { icon: Box, label: "Memory Box", href: "/memory-box" },
-    { icon: Lightbulb, label: "Story Ideas", href: "/prompts" },
-    { icon: Users, label: "Family", href: "/family" },
-    { icon: Settings, label: "Settings", href: "/profile" },
+    { icon: Lightbulb, label: "Story Ideas", href: "/prompts", ownerOnly: true },
+    { icon: Users, label: "Family", href: "/family", ownerOnly: true },
+    { icon: Settings, label: "Settings", href: "/profile", ownerOnly: true },
     { icon: HelpCircle, label: "Help", href: "/help" },
   ];
 
-  const actionItems = [
+  // Filter menu items based on permissions
+  const menuItems = allMenuItems.filter(item => !item.ownerOnly || isOwnAccount);
+
+  const allActionItems = [
     {
       icon: Plus,
       label: "New Memory",
       onClick: handleNewMemory,
       color: "text-heritage-coral hover:bg-heritage-coral/10",
+      ownerOnly: true,
     },
   ];
+
+  // Filter action items based on permissions
+  const actionItems = allActionItems.filter(item => !item.ownerOnly || isOwnAccount);
 
   return (
     <AnimatePresence>
@@ -152,22 +163,24 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
             </div>
           )}
 
-          {/* Action Items */}
-          <div className="py-1 border-b border-gray-100">
-            {actionItems.map((item, index) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={index}
-                  onClick={item.onClick}
-                  className={`w-full flex items-center px-4 py-2.5 text-sm transition-colors ${item.color}`}
-                >
-                  <Icon className="w-4 h-4 mr-3" />
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
+          {/* Action Items - only show if there are any */}
+          {actionItems.length > 0 && (
+            <div className="py-1 border-b border-gray-100">
+              {actionItems.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={index}
+                    onClick={item.onClick}
+                    className={`w-full flex items-center px-4 py-2.5 text-sm transition-colors ${item.color}`}
+                  >
+                    <Icon className="w-4 h-4 mr-3" />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Menu Items */}
           <div className="py-1">

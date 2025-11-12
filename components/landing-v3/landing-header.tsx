@@ -57,7 +57,7 @@ export default function LandingHeader() {
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
                 <Image
-                  src="/final logo/logo-heritage-whisper.svg"
+                  src="/final logo/logo-new.svg"
                   alt="HeritageWhisper"
                   width={240}
                   height={56}

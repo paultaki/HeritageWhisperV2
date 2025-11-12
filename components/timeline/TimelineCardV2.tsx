@@ -213,7 +213,8 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
 
       {/* Photo section with carousel */}
       {photos.length > 0 && (
-        <div 
+        <div
+          data-nav-ink="light"
           className="relative w-full aspect-[16/10] bg-gray-100"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}

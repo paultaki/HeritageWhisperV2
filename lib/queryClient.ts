@@ -95,9 +95,37 @@ export async function apiRequest(
   if (session?.access_token) {
     headers["Authorization"] = `Bearer ${session.access_token}`;
   } else {
-    // Don't proceed with auth-required requests
-    if (!url.includes("/api/share/") && !url.includes("/api/auth/")) {
-      throw new Error("Authentication required. Please sign in again.");
+    // Check for family_session (unauthenticated viewers)
+    const familySessionStr = typeof window !== 'undefined'
+      ? localStorage.getItem('family_session')
+      : null;
+
+    if (familySessionStr) {
+      try {
+        const familySession = JSON.parse(familySessionStr);
+        // Check if session expired
+        if (new Date(familySession.expiresAt) > new Date()) {
+          headers["Authorization"] = `Bearer ${familySession.sessionToken}`;
+        } else {
+          // Session expired - clear it
+          localStorage.removeItem('family_session');
+          throw new Error("Your viewing session has expired. Please request a new link.");
+        }
+      } catch (e) {
+        // Failed to parse or expired
+        if (e instanceof Error && e.message.includes('expired')) {
+          throw e;
+        }
+        // Otherwise, authentication required
+        if (!url.includes("/api/share/") && !url.includes("/api/auth/")) {
+          throw new Error("Authentication required. Please sign in again.");
+        }
+      }
+    } else {
+      // Don't proceed with auth-required requests
+      if (!url.includes("/api/share/") && !url.includes("/api/auth/")) {
+        throw new Error("Authentication required. Please sign in again.");
+      }
     }
   }
 
@@ -182,6 +210,34 @@ export const getQueryFn: <T>(options: {
 
     if (session?.access_token) {
       headers["Authorization"] = `Bearer ${session.access_token}`;
+    } else {
+      // Check for family_session (unauthenticated viewers)
+      const familySessionStr = typeof window !== 'undefined'
+        ? localStorage.getItem('family_session')
+        : null;
+
+      if (familySessionStr) {
+        try {
+          const familySession = JSON.parse(familySessionStr);
+          // Check if session expired
+          if (new Date(familySession.expiresAt) > new Date()) {
+            headers["Authorization"] = `Bearer ${familySession.sessionToken}`;
+          } else {
+            // Session expired - clear it
+            localStorage.removeItem('family_session');
+            if (unauthorizedBehavior === "returnNull") {
+              return null;
+            }
+            throw new Error("Your viewing session has expired. Please request a new link.");
+          }
+        } catch (e) {
+          // Failed to parse or expired
+          if (e instanceof Error && e.message.includes('expired')) {
+            throw e;
+          }
+          // For other parse errors, continue without auth (will fail at API if needed)
+        }
+      }
     }
 
     const res = await fetch(getApiUrl(queryKey.join("/") as string), {

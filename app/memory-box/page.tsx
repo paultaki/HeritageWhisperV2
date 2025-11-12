@@ -143,13 +143,26 @@ export default function MemoryBoxV2Page() {
   const queryClient = useQueryClient();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  const [activeTab, setActiveTab] = useState<TabType>("stories");
+  // Get active storyteller context for family sharing (must be before defaultTab)
+  const { activeContext } = useAccountContext();
+  const storytellerId = activeContext?.storytellerId || user?.id;
+  const isOwnAccount = activeContext?.type === 'own' ?? false;
+
+  // Force viewers to Treasures tab, owners can use either
+  const defaultTab: TabType = isOwnAccount ? "stories" : "treasures";
+  const [activeTab, setActiveTab] = useState<TabType>(defaultTab);
   const [storyFilter, setStoryFilter] = useState<StoryFilterType>("all");
   const [selectedDecade, setSelectedDecade] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [addTreasureModalOpen, setAddTreasureModalOpen] = useState(false);
+
+  // Handler that prevents viewers from switching to Stories tab
+  const handleTabChange = (tab: TabType) => {
+    if (!isOwnAccount && tab === "stories") return; // Block viewers from stories tab
+    setActiveTab(tab);
+  };
   const [treasureToDelete, setTreasureToDelete] = useState<string | null>(null);
   const [treasureToEdit, setTreasureToEdit] = useState<Treasure | null>(null);
   const [storyToEdit, setStoryToEdit] = useState<Story | null>(null);
@@ -160,10 +173,6 @@ export default function MemoryBoxV2Page() {
       (window as any).AudioManager = AudioManager;
     }
   }, []);
-
-  // Get active storyteller context for family sharing
-  const { activeContext } = useAccountContext();
-  const storytellerId = activeContext?.storytellerId || user?.id;
 
   const {
     data: stories = [],
@@ -504,9 +513,10 @@ export default function MemoryBoxV2Page() {
             {/* Tab Selector */}
             <MemoryBoxTabs
               activeTab={activeTab}
-              onTabChange={setActiveTab}
-              storiesCount={stats.all}
+              onTabChange={handleTabChange}
+              storiesCount={isOwnAccount ? stats.all : 0}
               treasuresCount={stats.treasuresCount}
+              showStoriesTab={isOwnAccount}
             />
 
             {/* Stories Tab */}
@@ -629,7 +639,8 @@ export default function MemoryBoxV2Page() {
                 <TreasureGrid
                   treasures={treasures}
                   isLoading={treasuresLoading}
-                  onAddTreasure={() => setAddTreasureModalOpen(true)}
+                  readOnly={!isOwnAccount}
+                  onAddTreasure={isOwnAccount ? () => setAddTreasureModalOpen(true) : undefined}
                   onToggleFavorite={(id) => {
                     const treasure = treasures.find((t) => t.id === id);
                     if (treasure) {

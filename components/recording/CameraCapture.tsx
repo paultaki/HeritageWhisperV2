@@ -19,6 +19,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState(false);
+  const [showCamera, setShowCamera] = useState(false); // NEW: Control camera visibility
 
   // Photo editing state
   const [isEditing, setIsEditing] = useState(false);
@@ -27,12 +28,15 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageRef = useRef<HTMLImageElement>(null);
 
+  // Only start camera when user explicitly requests it
   useEffect(() => {
-    startCamera();
+    if (showCamera) {
+      startCamera();
+    }
     return () => {
       stopCamera();
     };
-  }, [facingMode]);
+  }, [facingMode, showCamera]);
 
   const startCamera = async () => {
     try {
@@ -128,6 +132,8 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
     setCapturedImage(null);
     setIsEditing(false);
     setEditTransform({ zoom: 1, position: { x: 0, y: 0 } });
+    setShowCamera(false); // Return to picker screen
+    stopCamera(); // Clean up camera stream
   };
 
   const handleUsePhoto = () => {
@@ -214,56 +220,23 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
 
   return (
     <section className="relative w-full h-screen bg-black overflow-hidden flex items-center justify-center">
-      {/* Video preview or gallery preview */}
+      {/* Photo picker or editing view */}
       {!capturedImage ? (
-        <>
-          {/* 16:10 aspect ratio preview frame */}
-          <div className="relative w-full max-w-4xl mx-auto" style={{ aspectRatio: '16/10' }}>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className={`absolute inset-0 w-full h-full object-cover rounded-lg ${cameraError ? 'hidden' : ''}`}
-            />
-            {/* Frame border to show capture area */}
-            <div className="absolute inset-0 border-2 border-white/30 rounded-lg pointer-events-none" />
-          </div>
-          <canvas ref={canvasRef} className="hidden" />
-
-          {cameraError && (
-            <div className="absolute inset-0 flex items-center justify-center p-6">
-              <div className="text-center text-white">
-                <Camera className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg mb-4">Camera not available</p>
-                <p className="text-sm text-white/70 mb-4">
-                  Please use the gallery button below to select a photo
-                </p>
-              </div>
+        !showCamera ? (
+          /* Initial picker screen - Choose photo source */
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
+            <div className="text-center text-white max-w-md mb-8">
+              <Camera className="w-20 h-20 mx-auto mb-6 opacity-90" />
+              <h2 className="text-2xl font-semibold mb-3">Add a Photo</h2>
+              <p className="text-lg text-white/80">
+                Choose from your library or take a new photo
+              </p>
             </div>
-          )}
 
-          {/* Helper text */}
-          <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-            <div className="bg-black/60 text-white text-[16px] px-3 py-2 rounded-md max-w-[70%]">
-              Capture a picture from your physical album, or choose from your gallery
-            </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={onCancel}
-              className="bg-white/90 hover:bg-white text-base px-4"
-            >
-              Cancel
-            </Button>
-          </div>
-
-          {/* Controls */}
-          <div className="absolute bottom-0 left-0 right-0 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-8 px-5 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-            <div className="relative flex items-center justify-center">
-              {/* Gallery picker - Absolute left */}
-              <label className="absolute left-8 text-white flex items-center justify-center h-[68px] w-[68px] rounded-full bg-white/10 border border-white/20 hover:bg-white/20 active:scale-95 transition cursor-pointer">
-                <ImageIcon className="w-8 h-8" />
+            {/* Photo source options */}
+            <div className="w-full max-w-sm space-y-4">
+              {/* Choose from Photos - Primary option */}
+              <label className="block">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -271,29 +244,128 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
+                <div className="w-full py-6 px-6 bg-white hover:bg-gray-50 rounded-2xl cursor-pointer active:scale-95 transition-all shadow-lg">
+                  <div className="flex items-center gap-4">
+                    <ImageIcon className="w-8 h-8 text-purple-700 flex-shrink-0" />
+                    <div className="flex-1 text-left">
+                      <div className="text-xl font-semibold text-gray-900">
+                        Choose from Photos
+                      </div>
+                      <div className="text-base text-gray-600">
+                        Select from your gallery or files
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </label>
 
-              {/* Capture button - Center with camera icon */}
+              {/* Take Photo - Secondary option */}
               <button
-                onClick={handleCapture}
-                disabled={cameraError}
-                className="h-20 w-20 rounded-full bg-white border-4 border-white/40 shadow-lg active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                aria-label="Capture"
+                onClick={() => setShowCamera(true)}
+                className="w-full py-6 px-6 bg-white/10 border-2 border-white/30 hover:bg-white/20 rounded-2xl active:scale-95 transition-all"
               >
-                <Camera className="w-8 h-8 text-gray-800" />
-              </button>
-
-              {/* Flip camera - Absolute right */}
-              <button
-                onClick={handleFlipCamera}
-                disabled={cameraError}
-                className="absolute right-8 text-white flex items-center justify-center h-[68px] w-[68px] rounded-full bg-white/10 border border-white/20 hover:bg-white/20 active:scale-95 transition disabled:opacity-50"
-              >
-                <RefreshCw className="w-8 h-8" />
+                <div className="flex items-center gap-4">
+                  <Camera className="w-8 h-8 text-white flex-shrink-0" />
+                  <div className="flex-1 text-left">
+                    <div className="text-xl font-semibold text-white">
+                      Take Photo
+                    </div>
+                    <div className="text-base text-white/80">
+                      Use your camera
+                    </div>
+                  </div>
+                </div>
               </button>
             </div>
+
+            {/* Cancel button */}
+            <Button
+              variant="ghost"
+              onClick={onCancel}
+              className="mt-8 text-white hover:bg-white/10 text-lg px-6 py-3"
+            >
+              Cancel
+            </Button>
           </div>
-        </>
+        ) : (
+          /* Camera view - only shown when user clicks "Take Photo" */
+          <>
+            {/* 16:10 aspect ratio preview frame */}
+            <div className="relative w-full max-w-4xl mx-auto" style={{ aspectRatio: '16/10' }}>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className={`absolute inset-0 w-full h-full object-cover rounded-lg ${cameraError ? 'hidden' : ''}`}
+              />
+              {/* Frame border to show capture area */}
+              <div className="absolute inset-0 border-2 border-white/30 rounded-lg pointer-events-none" />
+            </div>
+            <canvas ref={canvasRef} className="hidden" />
+
+            {cameraError && (
+              <div className="absolute inset-0 flex items-center justify-center p-6">
+                <div className="text-center text-white">
+                  <Camera className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg mb-4">Camera not available</p>
+                  <p className="text-sm text-white/70 mb-4">
+                    Please go back and choose a photo from your gallery
+                  </p>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setShowCamera(false)}
+                    className="bg-white/90 hover:bg-white text-base px-6"
+                  >
+                    Back to Photo Picker
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Helper text */}
+            <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+              <div className="bg-black/60 text-white text-[16px] px-3 py-2 rounded-md max-w-[70%]">
+                Frame your photo and tap the capture button
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  stopCamera();
+                  setShowCamera(false);
+                }}
+                className="bg-white/90 hover:bg-white text-base px-4"
+              >
+                Back
+              </Button>
+            </div>
+
+            {/* Controls */}
+            <div className="absolute bottom-0 left-0 right-0 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-8 px-5 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+              <div className="relative flex items-center justify-center">
+                {/* Capture button - Center with camera icon */}
+                <button
+                  onClick={handleCapture}
+                  disabled={cameraError}
+                  className="h-20 w-20 rounded-full bg-white border-4 border-white/40 shadow-lg active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  aria-label="Capture"
+                >
+                  <Camera className="w-8 h-8 text-gray-800" />
+                </button>
+
+                {/* Flip camera - Absolute right */}
+                <button
+                  onClick={handleFlipCamera}
+                  disabled={cameraError}
+                  className="absolute right-8 text-white flex items-center justify-center h-[68px] w-[68px] rounded-full bg-white/10 border border-white/20 hover:bg-white/20 active:scale-95 transition disabled:opacity-50"
+                >
+                  <RefreshCw className="w-8 h-8" />
+                </button>
+              </div>
+            </div>
+          </>
+        )
       ) : isEditing ? (
         /* Photo editing screen with zoom/pan */
         <div className="absolute inset-0 bg-black flex flex-col">

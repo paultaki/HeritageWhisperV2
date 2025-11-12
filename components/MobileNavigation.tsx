@@ -2,8 +2,9 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Clock3, BookOpen, User, Mic, Archive } from "lucide-react";
+import { Clock3, BookOpen, User, Mic, Archive, MessageSquarePlus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useAccountContext } from "@/hooks/use-account-context";
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -48,10 +49,15 @@ const NavItem: React.FC<NavItemProps> = ({
 export default function MobileNavigation() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { activeContext } = useAccountContext();
+  const isOwnAccount = activeContext?.type === 'own' ?? false;
+
+  console.log('[MobileNavigation] activeContext:', activeContext, 'isOwnAccount:', isOwnAccount, 'user:', !!user);
 
   // Don't show navigation on auth pages or home page
+  // Show for authenticated users OR family viewers with activeContext
   const shouldShow =
-    user && !["/auth/login", "/auth/register", "/"].includes(pathname);
+    (user || activeContext) && !["/auth/login", "/auth/register", "/"].includes(pathname);
 
   if (!shouldShow) {
     return null;
@@ -66,7 +72,7 @@ export default function MobileNavigation() {
       }}
     >
       <div className="mx-auto max-w-md rounded-2xl bg-black/40 text-white backdrop-blur-md ring-1 ring-white/10 px-2 py-2">
-        <div className="grid grid-cols-5 gap-1">
+        <div className={`grid ${isOwnAccount ? 'grid-cols-5' : 'grid-cols-4'} gap-1`}>
           <NavItem
             icon={Clock3}
             label="Timeline"
@@ -79,24 +85,40 @@ export default function MobileNavigation() {
             href="/book"
             isActive={pathname.startsWith("/book")}
           />
-          <NavItem
-            icon={Mic}
-            label="Record"
-            href="/review/book-style?new=true"
-            isActive={false}
-          />
+
+          {/* Only show Record button for account owners */}
+          {isOwnAccount && (
+            <NavItem
+              icon={Mic}
+              label="Record"
+              href="/review/book-style?new=true"
+              isActive={false}
+            />
+          )}
+
           <NavItem
             icon={Archive}
             label="Keepsakes"
             href="/memory-box"
             isActive={pathname === "/memory-box"}
           />
-          <NavItem
-            icon={User}
-            label="Profile"
-            href="/profile"
-            isActive={pathname === "/profile"}
-          />
+
+          {/* Show Profile for owners, Submit Question for viewers */}
+          {isOwnAccount ? (
+            <NavItem
+              icon={User}
+              label="Profile"
+              href="/profile"
+              isActive={pathname === "/profile"}
+            />
+          ) : (
+            <NavItem
+              icon={MessageSquarePlus}
+              label="Ask Question"
+              href="/family/submit-question"
+              isActive={false}
+            />
+          )}
         </div>
       </div>
     </nav>

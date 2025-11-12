@@ -66,15 +66,14 @@ export function DesktopPageHeader({
         <div className="flex items-center justify-between gap-4 h-full">
           {/* Left section - Branding and page identity */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* Logo - Full chat bubble for desktop */}
+            {/* Logo - Full logo for desktop */}
             <Link href="/" className="flex-shrink-0">
               <Image
-                src="/final logo/chat-bubble-logo.svg"
+                src="/final logo/logo-new.svg"
                 alt="Heritage Whisper Logo"
-                width={102}
-                height={102}
-                className="w-[102px] h-[102px] flex-shrink-0 relative cursor-pointer hover:opacity-90 transition-opacity"
-                style={{ top: '6px' }}
+                width={160}
+                height={48}
+                className="h-12 w-auto flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
                 priority
               />
             </Link>
@@ -149,15 +148,14 @@ export function MobilePageHeader({
 
           {/* Center section - Compact branding and page identity */}
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            {/* Logo - HW logo for mobile */}
+            {/* Logo - Compact logo for mobile */}
             <Link href="/" className="flex-shrink-0">
               <Image
-                src="/final logo/chat-bubble-hw-logo.svg"
+                src="/final logo/logo-new.svg"
                 alt="Heritage Whisper Logo"
-                width={42}
-                height={42}
-                className="w-[42px] h-[42px] flex-shrink-0 relative cursor-pointer active:opacity-70 transition-opacity"
-                style={{ top: '1px', left: '-10px' }}
+                width={120}
+                height={36}
+                className="h-9 w-auto flex-shrink-0 cursor-pointer active:opacity-70 transition-opacity"
                 priority
               />
             </Link>

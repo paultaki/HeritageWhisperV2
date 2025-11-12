@@ -18,6 +18,7 @@ import {
   Box,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useAccountContext } from "@/hooks/use-account-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
@@ -31,7 +32,11 @@ export default function HamburgerMenu() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { activeContext } = useAccountContext();
+  const isOwnAccount = activeContext?.type === 'own' ?? false;
   const modeSelection = useModeSelection();
+
+  console.log('[HamburgerMenu] activeContext:', activeContext, 'isOwnAccount:', isOwnAccount, 'user:', !!user);
 
   // Fetch profile data for profile photo
   const { data: profileData } = useQuery({
@@ -85,18 +90,20 @@ export default function HamburgerMenu() {
     { icon: Box, label: "Memory Box", href: "/memory-box" },
     { icon: Lightbulb, label: "Story Ideas", href: "/prompts" },
     { icon: Users, label: "Family", href: "/family" },
-    { icon: Settings, label: "Settings", href: "/profile" },
+    // Only show Settings for account owners
+    ...(isOwnAccount ? [{ icon: Settings, label: "Settings", href: "/profile" }] : []),
     { icon: HelpCircle, label: "Help", href: "/help" },
   ];
 
-  const actionItems = [
+  // Only show action items for account owners
+  const actionItems = isOwnAccount ? [
     {
       icon: Plus,
       label: "New Memory",
       onClick: handleNewMemory,
       color: "text-heritage-coral hover:bg-heritage-coral/10",
     },
-  ];
+  ] : [];
 
   // Don't show on auth pages, home page, or book-new page
   const shouldShow = !["/auth/login", "/auth/register", "/", "/book-new"].includes(pathname) && !pathname.startsWith("/book-new/");

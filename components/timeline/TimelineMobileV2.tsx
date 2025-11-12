@@ -42,14 +42,24 @@ export function TimelineMobileV2() {
   const { toast } = useToast();
 
   // V3: Get active storyteller context for family sharing
-  const { activeContext } = useAccountContext();
+  const { activeContext, isLoading: isAccountContextLoading } = useAccountContext();
   const isViewingOwnAccount = activeContext?.type === 'own';
+
+  console.log('[TimelineMobileV2] Auth state:', { user: !!user, activeContext: !!activeContext, isLoading, isAccountContextLoading });
 
   // Data fetching and processing
   const timelineData = useTimelineData({ user, session });
 
   // Use storyteller's birth year, fallback to user's birth year
   const birthYear = timelineData.storyteller?.birthYear || user?.birthYear || 0;
+
+  console.log('[TimelineMobileV2] Timeline data:', {
+    storiesCount: timelineData.stories.length,
+    allTimelineItemsCount: timelineData.allTimelineItems.length,
+    isLoading: timelineData.isLoading,
+    storyteller: !!timelineData.storyteller,
+    birthYear
+  });
 
   // Navigation and scroll tracking
   const navigation = useTimelineNavigation({
@@ -68,15 +78,16 @@ export function TimelineMobileV2() {
     [router],
   );
 
-  // Auth redirect
+  // Auth redirect - allow family viewers (activeContext without user)
   useEffect(() => {
-    if (!isLoading && !user) {
+    // Wait for both auth and account context to load before redirecting
+    if (!isLoading && !isAccountContextLoading && !user && !activeContext) {
       router.push("/auth/login");
     }
-  }, [isLoading, user, router]);
+  }, [isLoading, isAccountContextLoading, user, activeContext, router]);
 
-  // Loading states
-  if (isLoading) {
+  // Loading states - wait for both auth and account context
+  if (isLoading || isAccountContextLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -84,7 +95,8 @@ export function TimelineMobileV2() {
     );
   }
 
-  if (!user) {
+  // Allow family viewers (activeContext without user)
+  if (!user && !activeContext) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>

@@ -39,7 +39,7 @@ Keep sections in this order (most frequently needed first):
 - Be concise: One clear sentence is better than a paragraph
 - Be actionable: Include commands, file paths, concrete examples
 - Be current: Remove outdated information immediately
-- Cross-reference: Use @filename syntax to link to detailed docs
+- Cross-reference: Link to detailed docs when needed
 
 ## 🚀 Common Commands
 
@@ -155,15 +155,15 @@ AI-powered storytelling platform for seniors to capture and share life memories.
   ```
 
 ### API Routes
-See detailed patterns in [@app/api/CLAUDE.md](app/api/CLAUDE.md)
+See detailed patterns in [app/api/CLAUDE.md](app/api/CLAUDE.md)
 - Always validate user session first
 - Map snake_case DB fields to camelCase for frontend responses
 - Return proper HTTP status codes (200, 201, 400, 401, 403, 404, 429, 500)
-- Use `@lib/logger` not `console.log`
+- Use `lib/logger.ts` not `console.log`
 
 ### Database
 - Store file paths in DB, generate signed URLs on-demand (1-week expiry)
-- Full schema reference: [@DATA_MODEL.md](DATA_MODEL.md)
+- Full schema reference: [DATA_MODEL.md](DATA_MODEL.md)
 
 ### Mobile-First
 - Test all changes on mobile viewport (responsive design critical)
@@ -173,14 +173,14 @@ See detailed patterns in [@app/api/CLAUDE.md](app/api/CLAUDE.md)
 ## 🤖 Development Workflows
 
 ### When Creating New Features
-1. Check @DATA_MODEL.md for existing tables/fields first
+1. Check [DATA_MODEL.md](DATA_MODEL.md) for existing tables/fields first
 2. Verify RLS policies before adding database queries
-3. Use TypeScript types from @shared/schema
+3. Use TypeScript types from `shared/schema.ts`
 4. Test family sharing access controls if multi-tenant feature
 5. Update appropriate documentation file
 
 ### When Fixing Bugs
-1. Check @CLAUDE_HISTORY.md for similar past issues
+1. Check [CLAUDE_HISTORY.md](CLAUDE_HISTORY.md) for similar past issues
 2. Test in both own account and family member views (account switcher)
 3. Verify RLS policies aren't blocking legitimate access
 4. Check browser console for errors
@@ -217,219 +217,44 @@ HeritageWhisperV2/
 ```
 
 ### Key Files & Documentation
-- `@shared/schema.ts` - All database types (use these for type safety!)
-- `@lib/queryClient.ts` - API wrapper with custom 429 handling
-- `@lib/supabase.ts` - Supabase client configuration
-- `@hooks/use-recording-state.tsx` - Recording orchestration
-- `@app/api/CLAUDE.md` - API route patterns and boilerplate
-- `@DATA_MODEL.md` - Complete database schema reference
-- `@AI_PROMPTING.md` - Pearl & prompt engineering docs
-- `@SECURITY.md` - Security implementation status
-- `@FAMILY_SHARING_README.md` - Multi-tenant system documentation
+- `shared/schema.ts` - All database types (use these for type safety!)
+- `lib/queryClient.ts` - API wrapper with custom 429 handling
+- `lib/supabase.ts` - Supabase client configuration
+- `hooks/use-recording-state.tsx` - Recording orchestration
+- [app/api/CLAUDE.md](app/api/CLAUDE.md) - API route patterns and boilerplate
+- [DATA_MODEL.md](DATA_MODEL.md) - Complete database schema reference
+- [AI_PROMPTING.md](AI_PROMPTING.md) - Pearl & prompt engineering docs
+- [SECURITY.md](SECURITY.md) - Security implementation status
+- [FAMILY_SHARING_README.md](FAMILY_SHARING_README.md) - Multi-tenant system documentation
 
-## 🔍 JIT Search Commands (Quick Navigation)
+## 🔍 Finding Code
 
-Use these ripgrep commands to quickly find code patterns:
+Ask Claude to find code patterns, or see [SEARCH_PATTERNS.md](SEARCH_PATTERNS.md) for ripgrep commands.
 
-### Find Components
-```bash
-# Find component definition
-rg -n "^export (function|const) .*[A-Z]" components/
+**Common searches:**
+- "Find where BookView component is defined"
+- "Show me all API routes that query the stories table"
+- "Where do we use the has_collaboration_access function?"
+- "Find all components that import useRecording"
 
-# Find component usage
-rg -n "<ComponentName" app/ components/
-
-# Find props interface/type
-rg -n "type.*Props.*=|interface.*Props" components/
-```
-
-### Find API Routes
-```bash
-# Find all API route handlers
-rg -n "export async function (GET|POST|PUT|DELETE)" app/api/
-
-# Find API routes using specific table
-rg -n "from\(\"table_name\"\)" app/api/
-
-# Find routes with RLS checks
-rg -n "has_collaboration_access" app/api/
-```
-
-### Find Hooks
-```bash
-# Find custom hook definitions
-rg -n "export (function|const) use[A-Z]" hooks/
-
-# Find hook usage
-rg -n "use[A-Z][a-zA-Z]+\(" app/ components/
-
-# Find TanStack Query hooks
-rg -n "useQuery|useMutation" --type tsx
-```
-
-### Find Database Queries
-```bash
-# Find queries on specific table
-rg -n "\.from\(\"stories\"\)" app/api/ lib/
-
-# Find INSERT operations
-rg -n "\.insert\(" app/api/
-
-# Find UPDATE operations
-rg -n "\.update\(" app/api/
-
-# Find DELETE operations
-rg -n "\.delete\(" app/api/
-```
-
-### Find Types & Schemas
-```bash
-# Find type definition
-rg -n "^export (type|interface) YourType" shared/ types/
-
-# Find Zod schemas
-rg -n "z\.(object|string|number)" lib/ shared/
-
-# Find type imports
-rg -n "import.*type.*from.*schema" app/ components/
-```
-
-### Find Styling
-```bash
-# Find Tailwind classes with specific color
-rg -n "className=.*bg-primary" app/ components/
-
-# Find inline styles (anti-pattern)
-rg -n "style=" app/ components/
-
-# Find responsive breakpoints
-rg -n "md:|lg:|xl:" app/ components/
-```
-
-### Security Scans
-```bash
-# Find potential secret leaks
-rg -n "console\.log.*token|password|email" app/ lib/
-
-# Find service role key usage
-rg -n "SUPABASE_SERVICE_ROLE_KEY" app/api/
-
-# Find RLS bypass attempts
-rg -n "\.rpc\(\"bypass" app/api/
-```
-
-### Find by Feature
-```bash
-# Family sharing features
-rg -n "storyteller_id|has_collaboration_access" app/
-
-# Authentication code
-rg -n "auth\.getUser|auth\.getSession" app/api/
-
-# File uploads
-rg -n "supabaseStorage|\.upload\(" app/api/
-
-# Rate limiting
-rg -n "rateLimit\.check" app/api/
-```
-
-## 🔌 MCP Server Usage Guide
-
-### Available MCP Servers
+## 🔌 MCP Servers
 
 Configured in `~/.mcp.json`:
 
-#### **Supabase MCP** - Database Operations
-**When to use:**
-- "Show me the schema for stories table"
-- "Check if RLS policy exists for family_prompts"
-- "Query the database for users with email X"
-- "Inspect the has_collaboration_access RPC function"
+- **Supabase MCP** - Database schema inspection, RLS policy checks
+- **GitHub MCP** - Create issues/PRs, check workflow status
+- **Vercel MCP** - Deployment status, environment variables, build logs
+- **Stripe MCP** - Subscription status, payment tracking
+- **Resend MCP** - Email delivery status, bounce tracking
 
-**Common commands:**
-```typescript
-// Via Claude: "Use Supabase MCP to show me the stories table schema"
-// Via Claude: "Check RLS policies on active_prompts table"
-```
-
-#### **GitHub MCP** - Repository Management
-**When to use:**
-- "Create a GitHub issue for this bug"
-- "Show me recent PRs on this repo"
-- "Create a PR with these changes"
-- "Check CI/CD workflow status"
-
-**Common commands:**
-```bash
-# Via Claude: "Create an issue titled 'Fix prompt dismiss bug'"
-# Via Claude: "Show me the last 5 pull requests"
-```
-
-#### **Vercel MCP** - Deployment Management
-**When to use:**
-- "Check latest deployment status"
-- "Show me environment variables on Vercel"
-- "Check deployment logs for errors"
-- "View build output for latest deployment"
-
-**Common commands:**
-```bash
-# Via Claude: "Check if the latest deployment succeeded"
-# Via Claude: "Show me the build logs from 2 hours ago"
-```
-
-#### **Stripe MCP** - Payment Operations
-**When to use:**
-- "Check if user X has an active subscription"
-- "Show me recent payment failures"
-- "List all active subscriptions"
-- "Get customer details for user Y"
-
-**Common commands:**
-```bash
-# Via Claude: "Check subscription status for customer cus_ABC123"
-# Via Claude: "Show me failed payments from last week"
-```
-
-#### **Resend MCP** - Email Operations
-**When to use:**
-- "Check if email to user X was delivered"
-- "Show me recent email bounces"
-- "Test email sending for new feature"
-- "Check email delivery logs"
-
-**Common commands:**
-```bash
-# Via Claude: "Check delivery status for email to test@example.com"
-# Via Claude: "Show me emails sent in the last hour"
-```
-
-### MCP Best Practices
-
-**✅ DO:**
-- Use MCP for read operations (checking status, viewing logs)
-- Use MCP to inspect database schema and RLS policies
-- Use MCP to create issues/PRs for tracking work
-- Use MCP to verify deployment success
-
-**❌ DON'T:**
-- Use MCP for destructive operations without confirmation
-- Bypass MCP when direct file access is more efficient
-- Use MCP for sensitive data without verifying permissions
-
-### When NOT to Use MCP
-
-- **File operations**: Use Read/Edit/Create tools instead
-- **Local development**: Use Execute for npm commands
-- **Code refactoring**: Use Edit tools, not MCP
-- **Quick reads**: MCP has overhead - use Read for simple file access
+**Usage:** Just ask Claude to use these services (e.g., "Check RLS policies on stories table" or "Show recent deployment logs")
 
 ## 📊 Database & Data Model
 
-**Complete documentation:** See @DATA_MODEL.md
+**Complete documentation:** See [DATA_MODEL.md](DATA_MODEL.md)
 
 ### Quick Reference
-- **21 Tables** with TypeScript types via Drizzle ORM (`@shared/schema.ts`)
+- **21 Tables** with TypeScript types via Drizzle ORM (`shared/schema.ts`)
 - **Row Level Security (RLS)** enabled on all tables
 - **50+ Performance Indexes** for optimized queries
 - **Multi-tenant RPC:** `has_collaboration_access(user_uuid, storyteller_uuid)`
@@ -445,7 +270,7 @@ Configured in `~/.mcp.json`:
 
 - **Audio Recording**: One-session flow with 3-2-1 countdown, 5-minute max, auto-transcription
 - **AI Transcription**: AssemblyAI "universal" batch (~3.7s, 58% cheaper, 93.4% accuracy)
-- **Pearl AI Interviewer**: Conversational AI via OpenAI Realtime API with WebRTC (see @AI_PROMPTING.md)
+- **Pearl AI Interviewer**: Conversational AI via OpenAI Realtime API with WebRTC (see [AI_PROMPTING.md](AI_PROMPTING.md))
 - **AI Prompt System**: Multi-tier reflection prompts (Tier 1: entity-based, Tier 3: milestone analysis)
 - **My Treasures**: Photo upload with zoom/pan editing (16:10 aspect ratio), stores transform as JSONB in `treasures.transform`
 - **Photo Management**: Multi-upload with cropping & hero images (EXIF data stripped for privacy)
@@ -537,34 +362,14 @@ Configured in `~/.mcp.json`:
 - **Without transforms:** Use Next.js `<Image>` component
 - **Signed URLs:** Regenerate with 1-week expiry if expired
 
-### Sticky Header Gap Issues (Timeline)
+### Sticky Header Issues (Timeline)
 
-**Note:** For detailed troubleshooting of desktop timeline sticky badges, see **[@TIMELINE_STICKY_BADGES.md](TIMELINE_STICKY_BADGES.md)**
+Desktop and mobile timeline sticky positioning issues are detailed in [TIMELINE_STICKY_BADGES.md](TIMELINE_STICKY_BADGES.md). Common fixes involve adjusting `stickyTop` values and negative margins.
 
-**Quick Summary:**
-- **Desktop badges going under header:** Adjust `stickyTop` value in both TimelineDesktop files (currently 80px)
-- **Gap between badges:** Use negative `marginBottom` (currently -40px) to pull badges closer
-- **Badges fading too early:** Adjust fade distance threshold (currently -38px)
+## 🎯 Known Issues
 
-**Mobile Timeline - Decade Headers:**
-- **Symptom:** Decade headers "unstick" too early, leaving visible gap before next header takes over
-- **Root Cause:** `margin-top` and `margin-bottom` on `.hw-decade-band` cause premature release
-- **Solution:** Remove margins on sticky elements - set both to `0px` in `/app/styles/components.css`
-- **Why it happens:** Sticky positioning calculates release point based on margin edges, not element edges
-- **File:** `/app/styles/components.css` lines ~107-109 (`.hw-decade-band` margins)
-
-## 🎯 Known Issues & Workarounds
-
-### Book View Cursor Issue
-- **Issue:** Directional cursor arrows (w-resize/e-resize) flicker despite forced styles
-- **Workaround:** Navigation still works by clicking page margins - ignore visual glitch
-- **Status:** Low priority cosmetic issue
-
-### Pearl Personalization Disabled
-- **Issue:** Pearl AI temporarily doesn't reference user's past stories
-- **Why:** Needs story fetching implementation before re-enabling
-- **Workaround:** Pearl works great for standalone conversations
-- **Status:** Planned for future release
+- **Book View Cursor:** Directional arrows flicker (cosmetic only, navigation works)
+- **Pearl Personalization:** Temporarily disabled pending story fetching implementation
 
 ## 🔧 Environment Variables
 
@@ -603,18 +408,6 @@ UPSTASH_REDIS_REST_TOKEN=your_token
 - Copy `env.example` to `.env.local`
 - Never commit `.env.local` to git
 - Ask team for production keys (don't use dev keys in prod)
-
-## 🔌 MCP Servers
-
-Configured in `/Users/paul/Documents/DevProjects/.mcp.json`:
-
-- ✅ GitHub MCP - Repository management
-- ✅ Supabase MCP - Database queries (read-only)
-- ✅ Vercel MCP - Deployment management
-- ✅ Stripe MCP - Payment APIs
-- ✅ Resend MCP - Email sending
-
-**See detailed usage guide in the "MCP Server Usage Guide" section above.**
 
 ## ⚙️ Claude Code Automation
 
@@ -668,11 +461,15 @@ Aim to keep the file under 700 lines (~5,000 tokens).
 
 ---
 
-_Last updated: January 8, 2025_
+_Last updated: January 11, 2025_
 
-**Other Documentation:**
-- [@CLAUDE_HISTORY.md](CLAUDE_HISTORY.md) - Historical fixes, feature archives, and migration notes
-- [@AI_PROMPTING.md](AI_PROMPTING.md) - Pearl AI prompting & system instructions
-- [@DATA_MODEL.md](DATA_MODEL.md) - Complete database schema reference
-- [@SECURITY.md](SECURITY.md) - Security implementation status
-- [@FAMILY_SHARING_README.md](FAMILY_SHARING_README.md) - Multi-tenant system docs
+## 📚 Additional Documentation
+
+Read these as needed for specific tasks:
+
+- [CLAUDE_HISTORY.md](CLAUDE_HISTORY.md) - Historical fixes, feature archives, and migration notes
+- [AI_PROMPTING.md](AI_PROMPTING.md) - Pearl AI prompting & system instructions
+- [DATA_MODEL.md](DATA_MODEL.md) - Complete database schema reference
+- [SECURITY.md](SECURITY.md) - Security implementation status
+- [FAMILY_SHARING_README.md](FAMILY_SHARING_README.md) - Multi-tenant system docs
+- [TIMELINE_STICKY_BADGES.md](TIMELINE_STICKY_BADGES.md) - Timeline sticky positioning troubleshooting

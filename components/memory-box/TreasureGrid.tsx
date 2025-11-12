@@ -22,6 +22,7 @@ type Treasure = {
 type Props = {
   treasures: Treasure[];
   isLoading?: boolean;
+  readOnly?: boolean;
   onAddTreasure?: () => void;
   onToggleFavorite?: (id: string) => void;
   onLinkToStory?: (id: string) => void;
@@ -45,6 +46,7 @@ type Props = {
 export function TreasureGrid({
   treasures,
   isLoading = false,
+  readOnly = false,
   onAddTreasure,
   onToggleFavorite,
   onLinkToStory,
@@ -210,6 +212,7 @@ export function TreasureGrid({
             year={treasure.year}
             isFavorite={treasure.isFavorite}
             linkedStoryId={treasure.linkedStoryId}
+            readOnly={readOnly}
             onToggleFavorite={() => onToggleFavorite?.(treasure.id)}
             onLinkToStory={() => onLinkToStory?.(treasure.id)}
             onCreateStory={() => onCreateStory?.(treasure.id)}

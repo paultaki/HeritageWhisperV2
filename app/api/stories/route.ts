@@ -35,45 +35,85 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Verify the JWT token with Supabase
+    let targetUserId: string;
+    let isViewerMode = false;
+
+    // Try JWT authentication first (owners with Supabase Auth)
     const {
       data: { user },
-      error,
+      error: jwtError,
     } = await supabaseAdmin.auth.getUser(token);
 
-    if (error || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 },
-      );
-    }
+    if (user && !jwtError) {
+      // JWT authentication successful (authenticated owner)
+      // V3: Support storyteller_id query parameter for family sharing
+      const { searchParams } = new URL(request.url);
+      const storytellerId = searchParams.get('storyteller_id');
+      targetUserId = user.id; // Default to own stories
 
-    // V3: Support storyteller_id query parameter for family sharing
-    const { searchParams } = new URL(request.url);
-    const storytellerId = searchParams.get('storyteller_id');
-    let targetUserId = user.id; // Default to own stories
+      // If requesting another storyteller's stories, verify access permission
+      if (storytellerId && storytellerId !== user.id) {
+        // Use RPC function to verify access
+        const { data: hasAccess, error: accessError } = await supabaseAdmin.rpc(
+          'has_collaboration_access',
+          {
+            p_user_id: user.id,
+            p_storyteller_id: storytellerId,
+          }
+        );
 
-    // If requesting another storyteller's stories, verify access permission
-    if (storytellerId && storytellerId !== user.id) {
-      // Use RPC function to verify access
-      const { data: hasAccess, error: accessError } = await supabaseAdmin.rpc(
-        'has_collaboration_access',
-        {
-          p_user_id: user.id,
-          p_storyteller_id: storytellerId,
+        if (accessError || !hasAccess) {
+          logger.warn(`[Stories API] User ${user.id} denied access to ${storytellerId}'s stories`);
+          return NextResponse.json(
+            { error: "You don't have permission to view these stories" },
+            { status: 403 },
+          );
         }
-      );
 
-      if (accessError || !hasAccess) {
-        logger.warn(`[Stories API] User ${user.id} denied access to ${storytellerId}'s stories`);
+        targetUserId = storytellerId;
+        logger.debug(`[Stories API] User ${user.id} viewing ${storytellerId}'s stories`);
+      }
+    } else {
+      // JWT failed - try sessionToken authentication (unauthenticated family viewers)
+      const { data: familySession, error: sessionError } = await supabaseAdmin
+        .from('family_sessions')
+        .select(`
+          id,
+          family_member_id,
+          expires_at,
+          family_members!inner (
+            id,
+            user_id,
+            email,
+            name,
+            relationship,
+            permission_level
+          )
+        `)
+        .eq('token', token)
+        .single();
+
+      if (sessionError || !familySession) {
+        logger.warn('[Stories API] Invalid authentication - neither JWT nor sessionToken valid');
         return NextResponse.json(
-          { error: "You don't have permission to view these stories" },
-          { status: 403 },
+          { error: "Invalid authentication" },
+          { status: 401 },
         );
       }
 
-      targetUserId = storytellerId;
-      logger.debug(`[Stories API] User ${user.id} viewing ${storytellerId}'s stories`);
+      // Check if session expired
+      if (new Date(familySession.expires_at) < new Date()) {
+        logger.warn('[Stories API] Family session expired');
+        return NextResponse.json(
+          { error: "Session expired" },
+          { status: 401 },
+        );
+      }
+
+      // Extract storyteller ID from family_members.user_id
+      targetUserId = (familySession as any).family_members.user_id;
+      isViewerMode = true;
+      logger.debug(`[Stories API] Family viewer accessing ${targetUserId}'s stories via sessionToken`);
     }
 
     // Fetch stories from Supabase database

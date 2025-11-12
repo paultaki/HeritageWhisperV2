@@ -32,7 +32,6 @@ import {
   AlertCircle,
   Pause,
   X,
-  BookOpen,
   Clock,
   Volume2,
 } from "lucide-react";
@@ -49,7 +48,7 @@ import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormattin
 import { TimelineEnd } from "@/components/timeline/TimelineEnd";
 import { TimelineNearEndNudge } from "@/components/timeline/TimelineNearEndNudge";
 
-const logoUrl = "/circle logo hw.svg";
+const logoUrl = "/final logo/logo-new.svg";
 
 // Timeline item helper type
 type TimelineItem = {
@@ -900,7 +899,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   const [overlayOpen, setOverlayOpen] = useState(false);
 
   // V3: Get active storyteller context for family sharing
-  const { activeContext } = useAccountContext();
+  const { activeContext, isLoading: isAccountContextLoading } = useAccountContext();
   const storytellerId = activeContext?.storytellerId || user?.id;
   const isViewingOwnAccount = activeContext?.type === 'own';
 
@@ -1074,15 +1073,17 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     return () => window.removeEventListener("scroll", handleBubbleScroll);
   }, [storiesData]);
 
-  // Redirect if no user (useEffect to avoid setState during render)
+  // Redirect if no user (useEffect to avoid setState during render) - allow family viewers
   useEffect(() => {
-    if (!isLoading && !user) {
+    // Wait for both auth and account context to load before redirecting
+    if (!isLoading && !isAccountContextLoading && !user && !activeContext) {
       router.push("/auth/login");
     }
-  }, [isLoading, user, router]);
+  }, [isLoading, isAccountContextLoading, user, activeContext, router]);
 
   // Single unified loading state - centered with timeline spine
-  if (isLoading || !user || (isStoriesLoading && !storiesData)) {
+  // Wait for account context to load, then check for user or activeContext
+  if (isLoading || isAccountContextLoading || (!user && !activeContext) || (isStoriesLoading && !storiesData)) {
 
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
@@ -1127,19 +1128,6 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           title="Timeline"
           subtitle="A timeline of memories, moments, and milestones"
           showAccountSwitcher={true}
-          rightContent={
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/book')}
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-              >
-                <BookOpen className="w-5 h-5" />
-                <span className="font-medium">Book</span>
-              </Button>
-            </div>
-          }
         />
       </div>
 

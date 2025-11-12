@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Clock3, BookOpen, Lightbulb, Archive, Mic } from "lucide-react";
+import { Clock3, BookOpen, Lightbulb, Archive, Mic, MessageSquarePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useAccountContext } from "@/hooks/use-account-context";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
+import { SubmitPromptButton } from "@/components/family/SubmitPromptButton";
 
 interface LeftSidebarProps {
   topOffsetClass?: string;
@@ -14,6 +16,10 @@ interface LeftSidebarProps {
 export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
   const [isDark, setIsDark] = useState(false);
   const { user } = useAuth();
+  const { activeContext } = useAccountContext();
+  const isOwnAccount = activeContext?.type === 'own' ?? false;
+
+  console.log('[LeftSidebar] activeContext:', activeContext, 'isOwnAccount:', isOwnAccount, 'user:', !!user);
 
   // Fetch profile data for profile photo
   const { data: profileData } = useQuery({
@@ -48,8 +54,8 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
       }}
     >
       <nav className="mt-8 space-y-[7px]">
-        {/* Profile Section */}
-        {user && (
+        {/* Profile Section - Only show for account owners */}
+        {user && isOwnAccount && (
           <Link
             href="/profile"
             className="flex items-center gap-3 px-2 py-2 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800 mb-4"
@@ -89,14 +95,26 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
           <BookOpen className="w-7 h-7" />
           <span>Book</span>
         </Link>
-        <Link
-          href="/review/book-style?new=true"
-          className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
-          style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
-        >
-          <Mic className="w-7 h-7" />
-          <span>Record</span>
-        </Link>
+
+        {/* Show Record button for owners, Submit Question for viewers */}
+        {isOwnAccount ? (
+          <Link
+            href="/review/book-style?new=true"
+            className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
+          >
+            <Mic className="w-7 h-7" />
+            <span>Record</span>
+          </Link>
+        ) : (
+          <div className="px-2 py-1.5">
+            <SubmitPromptButton
+              storytellerUserId={activeContext?.storytellerId || ""}
+              storytellerName={activeContext?.storytellerName || ""}
+            />
+          </div>
+        )}
+
         <Link
           href="/memory-box"
           className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800"

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { useAccountContext } from "@/hooks/use-account-context";
 import { Volume2, Pause, Loader2, Clock3, Pencil, Type } from "lucide-react";
 import { BookPage } from "./components/BookPage";
 import DarkBookProgressBar from "./components/DarkBookProgressBar";
@@ -57,13 +58,14 @@ interface Story {
 
 export default function BookV4Page() {
   const { user } = useAuth();
+  const { activeContext } = useAccountContext();
+  const isOwnAccount = activeContext?.type === 'own' ?? false;
   const router = useRouter();
   
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
   const [showToc, setShowToc] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1.0);
   const [hasNavigatedToStory, setHasNavigatedToStory] = useState(false);
   const [fontSize, setFontSize] = useState(18); // Default text size in pixels (senior-first)
 
@@ -94,7 +96,7 @@ export default function BookV4Page() {
   // Fetch stories - same as main book
   const { data, isLoading, isFetching } = useQuery<{ stories: Story[] }>({
     queryKey: ["/api/stories"],
-    enabled: !!user,
+    enabled: (!!user && !!user.id) || !!activeContext,
   });
 
   const stories = data?.stories || [];
@@ -475,11 +477,11 @@ export default function BookV4Page() {
           <div className="mx-auto max-w-[1800px] px-6">
             <div className="relative h-16 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 flex items-center justify-center">
-                  <img 
-                    src="/circle logo white.svg" 
-                    alt="Heritage Whisper" 
-                    className="h-9 w-9"
+                <div className="flex items-center justify-center">
+                  <img
+                    src="/final logo/logo-new.svg"
+                    alt="Heritage Whisper"
+                    className="h-8 w-auto"
                   />
                 </div>
                 <div>
@@ -497,13 +499,16 @@ export default function BookV4Page() {
                 >
                   <Clock3 className="w-5 h-5" />
                 </button>
-                <button
-                  onClick={() => router.push("/timeline")}
-                  className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
-                  aria-label="Edit"
-                >
-                  <Pencil className="w-5 h-5" />
-                </button>
+                {/* Mobile Edit Icon - Only show for account owners */}
+                {isOwnAccount && (
+                  <button
+                    onClick={() => router.push("/timeline")}
+                    className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                    aria-label="Edit"
+                  >
+                    <Pencil className="w-5 h-5" />
+                  </button>
+                )}
                 {/* Desktop: Original button */}
                 <button
                   onClick={() => router.push("/timeline")}
@@ -564,11 +569,11 @@ export default function BookV4Page() {
         <div className="mx-auto max-w-[1600px] mb-6 mt-[10px] md:mt-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 flex items-center justify-center">
-                <img 
-                  src="/circle logo white.svg" 
-                  alt="Heritage Whisper" 
-                  className="h-9 w-9"
+              <div className="flex items-center justify-center">
+                <img
+                  src="/final logo/logo-new.svg"
+                  alt="Heritage Whisper"
+                  className="h-8 w-auto"
                 />
               </div>
               <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
@@ -606,13 +611,16 @@ export default function BookV4Page() {
               >
                 <Clock3 className="w-5 h-5" />
               </button>
-              <button
-                onClick={() => router.push("/timeline")}
-                className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
-                aria-label="Edit"
-              >
-                <Pencil className="w-5 h-5" />
-              </button>
+              {/* Mobile Edit Icon - Only show for account owners */}
+              {isOwnAccount && (
+                <button
+                  onClick={() => router.push("/timeline")}
+                  className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                  aria-label="Edit"
+                >
+                  <Pencil className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
     
@@ -699,6 +707,7 @@ export default function BookV4Page() {
               allStories={sortedStories}
               onNavigateToStory={handleNavigateToStory}
               fontSize={fontSize}
+              isOwnAccount={isOwnAccount}
             />
 
             {/* Left page */}
@@ -711,6 +720,7 @@ export default function BookV4Page() {
               fontSize={fontSize}
               allStories={sortedStories}
               onNavigateToStory={handleNavigateToStory}
+              isOwnAccount={isOwnAccount}
             />
     
             {/* Refined spine */}
@@ -828,31 +838,6 @@ export default function BookV4Page() {
           </div>
         )}
 
-      </div>
-
-      {/* Floating Zoom Controls - Bottom right corner (desktop only) */}
-      <div className="hidden lg:block fixed bottom-6 right-6 z-30 no-print">
-        <div className="flex flex-col gap-2 rounded-lg border-2 border-white/30 overflow-hidden backdrop-blur-sm bg-white/5 p-1">
-          <button
-            onClick={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))}
-            className="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-colors text-white font-bold text-xl rounded"
-            aria-label="Zoom in"
-            title="Zoom in"
-          >
-            +
-          </button>
-          <div className="w-10 text-center text-xs text-white font-medium py-1">
-            {Math.round(zoomLevel * 100)}%
-          </div>
-          <button
-            onClick={() => setZoomLevel(prev => Math.max(0.6, prev - 0.1))}
-            className="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-colors text-white font-bold text-xl rounded"
-            aria-label="Zoom out"
-            title="Zoom out"
-          >
-            −
-          </button>
-        </div>
       </div>
 
         {/* Desktop Navigation Bar */}

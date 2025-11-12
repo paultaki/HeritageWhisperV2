@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext, type ReactNode } from 'react';
 import { useAuth } from '@/lib/auth';
 import { apiRequest } from '@/lib/queryClient';
 import { useQueryClient } from '@tanstack/react-query';
@@ -21,17 +21,84 @@ export interface AvailableStoryteller {
 
 const STORAGE_KEY = 'hw_active_storyteller_context';
 
-export function useAccountContext() {
+// Create Context for sharing state across all components
+interface AccountContextValue {
+  activeContext: AccountContext | null;
+  availableStorytellers: AvailableStoryteller[];
+  isLoading: boolean;
+  error: string | null;
+  switchToStoryteller: (storytellerId: string) => Promise<void>;
+  resetToOwnAccount: () => void;
+  refreshStorytellers: () => Promise<void>;
+  isOwnAccount: boolean;
+  canInvite: boolean;
+}
+
+const AccountContextContext = createContext<AccountContextValue | null>(null);
+
+// Internal hook that contains the actual logic
+function useAccountContextInternal() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const queryClient = useQueryClient();
   const [activeContext, setActiveContext] = useState<AccountContext | null>(null);
   const [availableStorytellers, setAvailableStorytellers] = useState<AvailableStoryteller[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [authCheckComplete, setAuthCheckComplete] = useState(false);
+
+  // Fallback: If auth is taking too long, check for family session anyway
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!user && !activeContext) {
+        setAuthCheckComplete(true);
+      }
+    }, 1000); // Wait 1 second max for auth
+
+    return () => clearTimeout(timeout);
+  }, [user, activeContext]);
 
   // Load active context from localStorage or check for initial family member context
   useEffect(() => {
+    // Don't run if auth is still loading - wait for it to finish OR timeout
+    if (isAuthLoading && !authCheckComplete) {
+      return;
+    }
+
     if (!user) {
+      // Check for family_session (unauthenticated viewer)
+      const familySessionStr = localStorage.getItem('family_session');
+
+      if (familySessionStr) {
+        try {
+          const familySession = JSON.parse(familySessionStr);
+
+          // Check if session expired
+          if (new Date(familySession.expiresAt) < new Date()) {
+            localStorage.removeItem('family_session');
+            setError('Your viewing session has expired. Please request a new link.');
+            setActiveContext(null);
+            setIsLoading(false);
+            return;
+          }
+
+          // Set viewer context
+          const viewerContext = {
+            storytellerId: familySession.storytellerId,
+            storytellerName: familySession.storytellerName,
+            type: 'viewing' as const,
+            permissionLevel: (familySession.permissionLevel || 'viewer') as 'viewer' | 'contributor' | 'owner',
+            relationship: familySession.relationship || null,
+          };
+
+          setActiveContext(viewerContext);
+          setIsLoading(false);
+          return;
+        } catch (e) {
+          console.error('[useAccountContext] Failed to parse family_session:', e);
+          localStorage.removeItem('family_session');
+        }
+      }
+
       setActiveContext(null);
       setIsLoading(false);
       return;
@@ -73,7 +140,7 @@ export function useAccountContext() {
       relationship: null,
     });
     setIsLoading(false);
-  }, [user]);
+  }, [user, isAuthLoading, authCheckComplete]); // Run when user changes OR when auth loading completes OR timeout
 
   // Fetch available storytellers the user can switch to
   const fetchAvailableStorytellers = useCallback(async () => {
@@ -211,7 +278,8 @@ export function useAccountContext() {
   return {
     activeContext,
     availableStorytellers,
-    isLoading: isLoading || isAuthLoading,
+    // For family viewers (activeContext without user), ignore isAuthLoading since we're not waiting for auth
+    isLoading: activeContext && !user ? isLoading : (isLoading || isAuthLoading),
     error,
     switchToStoryteller,
     resetToOwnAccount,
@@ -219,4 +287,24 @@ export function useAccountContext() {
     isOwnAccount,
     canInvite,
   };
+}
+
+// Provider component that wraps the app
+export function AccountContextProvider({ children }: { children: ReactNode }) {
+  const value = useAccountContextInternal();
+
+  return (
+    <AccountContextContext.Provider value={value}>
+      {children}
+    </AccountContextContext.Provider>
+  );
+}
+
+// Public hook that components use
+export function useAccountContext() {
+  const context = useContext(AccountContextContext);
+  if (!context) {
+    throw new Error('useAccountContext must be used within AccountContextProvider');
+  }
+  return context;
 }

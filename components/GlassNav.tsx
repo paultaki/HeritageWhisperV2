@@ -10,6 +10,7 @@ type NavItem = {
   label: string;
   href: string;
   Icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  onClick?: () => void;
 };
 
 type GlassNavProps = {
@@ -17,19 +18,34 @@ type GlassNavProps = {
   activeKey?: string;
   className?: string;
   onMenuClick?: () => void;
+  id?: string;
+  dataInk?: "dark" | "light";
+  isAssertive?: boolean;
 };
 
-export default function GlassNav({ items, activeKey, className, onMenuClick }: GlassNavProps) {
+export default function GlassNav({
+  items,
+  activeKey,
+  className,
+  onMenuClick,
+  id,
+  dataInk = "dark",
+  isAssertive = false,
+}: GlassNavProps) {
   return (
     <nav
+      id={id}
       data-sep="auto"
+      data-ink={dataInk}
       className={cn(
         // width and shape - 20% smaller
         "w-[72vw] max-w-[336px] rounded-[22px] overflow-hidden",
         // layout - evenly distributed spacing
         "flex items-center justify-around px-3 py-1.5",
-        // glass core - brand-aligned
-        "backdrop-blur-[18px] saturate-[1.22] contrast-[1.12] brightness-[0.97]",
+        // glass core - brand-aligned (conditional on assertive mode)
+        isAssertive
+          ? "backdrop-blur-[22px] saturate-[1.15] contrast-[1.25] brightness-[0.92]" // Assertive: stronger separation for photos
+          : "backdrop-blur-[18px] saturate-[1.22] contrast-[1.12] brightness-[0.97]", // Normal: balanced glass effect
         "border border-white/35",
         "shadow-[0_20px_40px_-20px_rgba(0,0,0,0.45)]",
         // taupe tint based on brand color #866C7A
@@ -62,6 +78,17 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
         }}
       />
 
+      {/* Luminance-aware scrim - auto darken/lighten background */}
+      <span
+        aria-hidden="true"
+        className="
+          pointer-events-none absolute inset-0 z-0
+          mix-blend-multiply opacity-60
+          bg-[radial-gradient(120%_200%_at_50%_-80%,rgba(134,108,122,0.20),transparent_55%),
+              linear-gradient(0deg,rgba(134,108,122,0.15),transparent_40%)]
+        "
+      />
+
       {/* top lip highlight (always on) */}
       <span
         aria-hidden="true"
@@ -82,17 +109,18 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
       />
 
       {/* items */}
-      {items.map(({ key, label, href, Icon }) => {
+      {items.map(({ key, label, href, Icon, onClick }) => {
         const active = key === activeKey;
         const isMenu = key === 'menu';
+        const hasOnClick = !!onClick || isMenu;
 
-        // For menu item, use button instead of Link
-        const Component = isMenu ? 'button' : Link;
-        const componentProps = isMenu
+        // For items with onClick (menu, question, etc.), use button instead of Link
+        const Component = hasOnClick ? 'button' : Link;
+        const componentProps = hasOnClick
           ? {
-              onClick: onMenuClick,
+              onClick: isMenu ? onMenuClick : onClick,
               type: 'button' as const,
-              'data-menu-button': 'true'
+              'data-nav-button': key,
             }
           : { href };
 
@@ -102,20 +130,39 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
             {...componentProps}
             className={cn(
               "group flex flex-col items-center justify-center px-1.5 py-1.5 rounded-[10px] transition-all duration-200 flex-1 gap-0.5",
-              "hover:bg-black/[0.04] hover:scale-105",
-              active && "bg-black/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] -translate-y-0.5"
+              // Hover states - conditional on ink color
+              dataInk === "light"
+                ? "hover:bg-white/8 hover:scale-105"
+                : "hover:bg-black/6 hover:scale-105",
+              // Active states - conditional on ink color
+              active && dataInk === "light" && "bg-white/15 shadow-[inset_0_1px_0_rgba(0,0,0,0.15)] -translate-y-0.5",
+              active && dataInk === "dark" && "bg-black/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] -translate-y-0.5"
             )}
           >
             <Icon
               className={cn(
-                "w-[18px] h-[18px]",
-                active ? "text-black" : "text-black/75"
+                "w-[18px] h-[18px] transition-colors duration-200",
+                // Icon colors - conditional on ink and active state
+                dataInk === "light"
+                  ? active
+                    ? "text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
+                    : "text-white/92 drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
+                  : active
+                  ? "text-black"
+                  : "text-black/85" // Boosted from /75 for better visibility
               )}
             />
             <span
               className={cn(
-                "relative text-[11px] leading-tight font-medium",
-                active ? "text-black" : "text-black/75"
+                "relative text-[11px] leading-tight font-medium transition-colors duration-200",
+                // Label colors - conditional on ink and active state
+                dataInk === "light"
+                  ? active
+                    ? "text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
+                    : "text-white/92 drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
+                  : active
+                  ? "text-black"
+                  : "text-black/85" // Boosted from /75 for better visibility
               )}
             >
               {label.startsWith('+') ? (
@@ -127,7 +174,12 @@ export default function GlassNav({ items, activeKey, className, onMenuClick }: G
                 label
               )}
               {active && (
-                <i className="absolute left-1/2 -translate-x-1/2 -bottom-[2px] block w-5 h-[2px] rounded-full bg-black/70" />
+                <i
+                  className={cn(
+                    "absolute left-1/2 -translate-x-1/2 -bottom-[2px] block w-5 h-[2px] rounded-full",
+                    dataInk === "light" ? "bg-white/90" : "bg-black/70"
+                  )}
+                />
               )}
             </span>
           </Component>

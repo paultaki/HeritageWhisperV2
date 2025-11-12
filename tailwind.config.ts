@@ -21,11 +21,15 @@ export default {
     'translate-x-[1.5px]',
     'translate-y-[1.5px]',
     'backdrop-blur-[18px]',
+    'backdrop-blur-[22px]', // Assertive mode
+    'saturate-[1.15]', // Assertive mode
     'saturate-[1.22]',
     'saturate-[1.25]',
     'contrast-[1.08]',
     'contrast-[1.12]',
     'contrast-[1.15]',
+    'contrast-[1.25]', // Assertive mode
+    'brightness-[0.92]', // Assertive mode
     'brightness-[0.96]',
     'brightness-[0.97]',
     'brightness-[1.06]',
@@ -35,6 +39,7 @@ export default {
     'rounded-[24px]',
     'drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]',
     'drop-shadow-[0_1px_0_rgba(255,255,255,0.55)]',
+    'drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]', // Light ink drop shadow
   ],
   theme: {
     extend: {

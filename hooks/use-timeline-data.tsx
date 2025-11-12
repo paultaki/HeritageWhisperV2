@@ -60,6 +60,8 @@ export function useTimelineData({
   // Always default to user.id if no active context (prevents query from being disabled)
   const storytellerId = activeContext?.storytellerId || user?.id;
 
+  const queryEnabled = !isContextLoading && ((!!user && !!user.id) || !!activeContext);
+
   // ==================================================================================
   // Data Fetching (TanStack Query)
   // ==================================================================================
@@ -77,7 +79,7 @@ export function useTimelineData({
       const res = await apiRequest("GET", url);
       return res.json();
     },
-    enabled: !!user && !!user.id, // Always enabled when user exists (storytellerId defaults to user.id)
+    enabled: queryEnabled, // Wait for context to load, then enable for users OR viewers
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
     gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes even when unmounted
     refetchOnWindowFocus: true, // Refetch when window regains focus
@@ -130,19 +132,21 @@ export function useTimelineData({
 
   // Group all items (stories + ghost prompts) by decade
   const decadeGroups = useMemo(() => {
-    if (!user) return [];
-    return groupStoriesByDecade(storiesWithGhostPrompts, user.birthYear);
-  }, [storiesWithGhostPrompts, user]);
+    const birthYear = storytellerData?.birthYear || user?.birthYear;
+    if (!birthYear) return [];
+    return groupStoriesByDecade(storiesWithGhostPrompts, birthYear);
+  }, [storiesWithGhostPrompts, user, storytellerData]);
 
   // Calculate birth year values
-  const cleanBirthYear = useMemo(
-    () => (user ? formatYear(user.birthYear) : ""),
-    [user],
-  );
-  const normalizedBirthYear = useMemo(
-    () => (user ? normalizeYear(user.birthYear) : null),
-    [user],
-  );
+  const cleanBirthYear = useMemo(() => {
+    const birthYear = storytellerData?.birthYear || user?.birthYear;
+    return birthYear ? formatYear(birthYear) : "";
+  }, [user, storytellerData]);
+
+  const normalizedBirthYear = useMemo(() => {
+    const birthYear = storytellerData?.birthYear || user?.birthYear;
+    return birthYear ? normalizeYear(birthYear) : null;
+  }, [user, storytellerData]);
   const hasValidBirthYear = normalizedBirthYear !== null;
 
   // Filter birth year stories
@@ -173,7 +177,8 @@ export function useTimelineData({
 
   // Generate timeline items and decade entries
   const { allTimelineItems, decadeEntries } = useMemo(() => {
-    if (!user) return { allTimelineItems: [], decadeEntries: [] };
+    const birthYear = storytellerData?.birthYear || user?.birthYear;
+    if (!birthYear) return { allTimelineItems: [], decadeEntries: [] };
 
     const items: TimelineItem[] = [];
     const currentYear = new Date().getFullYear();
@@ -286,7 +291,7 @@ export function useTimelineData({
         item.id === "before-birth"
           ? "TOP"
           : item.id === "birth-year"
-            ? formatYear(user.birthYear)
+            ? formatYear(birthYear)
             : item.id.replace("decade-", "").replace("s", ""),
       count: item.stories?.length || 0,
     }));
@@ -299,6 +304,7 @@ export function useTimelineData({
     birthYearStories,
     normalizedBirthYear,
     user,
+    storytellerData,
   ]);
 
   // ==================================================================================

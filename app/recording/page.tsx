@@ -30,6 +30,7 @@ export default function PhotoFirstRecordingPage() {
     emotional: string;
     character: string;
   } | undefined>();
+  const [isStarting, setIsStarting] = useState(false);
 
   const handlePhotoCapture = (dataURL: string, transform?: { zoom: number; position: { x: number; y: number } }) => {
     setPhotoDataURL(dataURL);
@@ -239,68 +240,129 @@ export default function PhotoFirstRecordingPage() {
 
             <PreRecordHints />
 
-            <div className="mx-auto w-full max-w-sm md:max-w-lg px-4 space-y-6 md:space-y-8 mt-4">
-              {/* Mobile: Single "Add a Photo" button */}
-              <div className="md:hidden">
-                <Button
-                  onClick={() => setCurrentScreen('capture')}
-                  className="w-full h-[64px] bg-gradient-to-r from-[#8b6b7a] to-[#9d6b7c] text-white rounded-2xl text-lg font-bold tracking-tight flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300"
-                >
-                  <Camera className="w-6 h-6" />
-                  Add a Photo
-                </Button>
-              </div>
-
-              {/* Desktop: Two photo options side-by-side */}
-              <div className="hidden md:grid md:grid-cols-2 gap-4">
-                <Button
-                  onClick={() => {
-                    // Trigger file input
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = 'image/*';
-                    input.onchange = (e) => {
-                      const file = (e.target as HTMLInputElement).files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          handlePhotoCapture(reader.result as string);
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    };
-                    input.click();
+            {/* Button Section - Premium Senior-Optimized Design */}
+            <div
+              className="space-y-5 px-6 pb-6 md:max-w-2xl md:mx-auto"
+              style={{
+                paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)'
+              }}
+            >
+              {/* Primary CTA - Start Recording (Most Common Path) */}
+              <div className="space-y-2">
+                <button
+                  onClick={async () => {
+                    if (isStarting) return;
+                    setIsStarting(true);
+                    // Haptic feedback on supported devices
+                    if ('vibrate' in navigator) {
+                      navigator.vibrate(10);
+                    }
+                    // Brief delay for visual feedback
+                    await new Promise(r => setTimeout(r, 100));
+                    setCurrentScreen('recording');
+                    setIsStarting(false);
                   }}
-                  className="w-full h-[72px] bg-gradient-to-r from-[#8b6b7a] to-[#9d6b7c] text-white rounded-2xl text-lg font-bold tracking-tight flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl hover:scale-105 hover:-translate-y-0.5 active:scale-95 transition-all duration-300"
+                  disabled={isStarting}
+                  className="w-full py-5 px-6 bg-purple-700 hover:bg-purple-800
+                             active:bg-purple-900 text-white rounded-2xl
+                             flex items-center justify-center gap-4
+                             text-xl font-semibold shadow-lg hover:shadow-xl
+                             transition-all duration-200 min-h-[64px]
+                             focus-visible:ring-4 focus-visible:ring-purple-300
+                             focus-visible:ring-offset-2
+                             active:scale-[0.98] group
+                             disabled:opacity-50 disabled:cursor-not-allowed
+                             md:py-6 md:text-2xl md:max-w-xl md:mx-auto md:min-h-[72px]
+                             motion-reduce:transition-none motion-reduce:hover:scale-100"
+                  aria-label="Start recording your story now"
+                  data-analytics="recording-start-no-photo"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  Choose from Files
-                </Button>
-                <Button
-                  onClick={() => setCurrentScreen('capture')}
-                  variant="outline"
-                  className="w-full h-[72px] rounded-2xl text-lg font-bold tracking-tight flex items-center justify-center gap-3 border-2 border-[#e8ddd5] text-[#2d2520] hover:border-[#c9a78a] hover:bg-white hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300"
-                >
-                  <Camera className="w-6 h-6" />
-                  Use Camera
-                </Button>
-              </div>
-
-              <div>
-                <Button
-                  onClick={() => setCurrentScreen('recording')}
-                  variant="outline"
-                  className="w-full h-[64px] md:h-[72px] rounded-2xl text-lg font-bold tracking-tight flex items-center justify-center gap-3 border-2 border-[#e8ddd5] text-[#2d2520] hover:border-[#c9a78a] hover:bg-white hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300"
-                >
-                  <Mic className="w-6 h-6" />
-                  Record Story Now
-                </Button>
-                <p className="text-base text-[#6b7280] text-center mt-3">
-                  Add photo later
+                  <Mic className="w-7 h-7 group-hover:scale-110 transition-transform motion-reduce:group-hover:scale-100" />
+                  <span>Start Recording</span>
+                </button>
+                <p className="text-center text-gray-600 text-base px-2">
+                  Record your story now, add photos anytime later
                 </p>
               </div>
+
+              {/* Divider with "OR" */}
+              <div className="relative flex items-center py-2">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="flex-shrink mx-4 text-gray-500 font-medium text-sm tracking-wide">
+                  FOR RICHER MEMORIES
+                </span>
+                <div className="flex-grow border-t border-gray-300"></div>
+              </div>
+
+              {/* Secondary Option - Add Photo First */}
+              <div className="space-y-2">
+                <button
+                  onClick={async () => {
+                    if (isStarting) return;
+                    setIsStarting(true);
+                    // Haptic feedback on supported devices
+                    if ('vibrate' in navigator) {
+                      navigator.vibrate(10);
+                    }
+                    // Brief delay for visual feedback
+                    await new Promise(r => setTimeout(r, 100));
+                    setCurrentScreen('capture');
+                    setIsStarting(false);
+                  }}
+                  disabled={isStarting}
+                  className="w-full py-5 px-6 bg-white border-3 border-amber-400
+                             hover:border-amber-500 hover:bg-amber-50
+                             rounded-2xl transition-all duration-200 min-h-[64px]
+                             shadow-md hover:shadow-lg
+                             focus-visible:ring-4 focus-visible:ring-amber-300
+                             focus-visible:ring-offset-2
+                             active:scale-[0.98] group
+                             disabled:opacity-50 disabled:cursor-not-allowed
+                             md:py-6 md:max-w-xl md:mx-auto md:min-h-[72px]
+                             motion-reduce:transition-none motion-reduce:hover:scale-100"
+                  aria-label="Add a photo before recording to see it while you speak"
+                  data-analytics="recording-start-with-photo"
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Icon */}
+                    <div className="flex-shrink-0">
+                      <Camera className="w-7 h-7 text-amber-600 group-hover:scale-110 transition-transform motion-reduce:group-hover:scale-100" />
+                    </div>
+
+                    {/* Text Content */}
+                    <div className="flex-1 text-left min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-gray-900 text-lg">
+                          Record with Photo
+                        </span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full
+                                       text-xs font-medium bg-amber-100 text-amber-800
+                                       whitespace-nowrap">
+                          Recommended
+                        </span>
+                      </div>
+                      <span className="block text-base text-gray-600 mt-0.5">
+                        Seeing a photo sparks details
+                      </span>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Trust-Building Micro-Copy */}
+                <p className="text-center text-sm text-gray-500 px-2">
+                  <span className="inline-flex items-center gap-1 justify-center">
+                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                    </svg>
+                    Photos stay private on your device until you share
+                  </span>
+                </p>
+              </div>
+
+              {/* Keyboard Navigation Hint - Desktop Only */}
+              <p className="hidden md:block text-center text-sm text-gray-400 mt-4">
+                Press <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Tab</kbd> to navigate
+              </p>
             </div>
           </section>
         )}

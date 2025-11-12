@@ -6,6 +6,7 @@ import { AuthProvider } from "@/lib/auth";
 import { getQueryFn } from "@/lib/queryClient";
 import { RecordingProvider } from "@/contexts/RecordingContext";
 import { Toaster } from "@/components/ui/toaster";
+import { AccountContextProvider } from "@/hooks/use-account-context";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -24,10 +25,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RecordingProvider>
-          {children}
-          <Toaster />
-        </RecordingProvider>
+        <AccountContextProvider>
+          <RecordingProvider>
+            {children}
+            <Toaster />
+          </RecordingProvider>
+        </AccountContextProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

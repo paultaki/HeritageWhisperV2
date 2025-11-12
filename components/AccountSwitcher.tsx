@@ -27,11 +27,22 @@ export function AccountSwitcher() {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  if (isLoading || !activeContext || !user) {
+  // Show loading only if context is loading OR if we don't have either user or activeContext
+  if (isLoading || !activeContext) {
     return (
       <Button variant="ghost" size="sm" disabled className="gap-2">
         <User className="h-4 w-4" />
         <span className="text-sm">Loading...</span>
+      </Button>
+    );
+  }
+
+  // For family viewers (!user), show simple view - they can't switch accounts
+  if (!user) {
+    return (
+      <Button variant="ghost" size="sm" className="gap-2 bg-blue-50 border-2 border-blue-300 text-blue-900">
+        <Users className="h-5 w-5 text-blue-600" />
+        <span className="text-base font-semibold">{activeContext.storytellerName}</span>
       </Button>
     );
   }

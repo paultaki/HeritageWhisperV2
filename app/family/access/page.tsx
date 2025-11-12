@@ -86,7 +86,13 @@ function FamilyAccessContent() {
 
   function handleContinue() {
     if (sessionData) {
-      router.push(`/family/timeline/${sessionData.storytellerId}`);
+      console.log('[Family Access] Redirecting to /timeline with session:', {
+        storytellerId: sessionData.storytellerId,
+        storytellerName: sessionData.storytellerName,
+        permissionLevel: sessionData.permissionLevel,
+        expiresAt: sessionData.expiresAt
+      });
+      router.push('/timeline');
     }
   }
 

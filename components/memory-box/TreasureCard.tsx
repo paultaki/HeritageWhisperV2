@@ -36,6 +36,7 @@ type Props = {
   year?: number;
   isFavorite: boolean;
   linkedStoryId?: string;
+  readOnly?: boolean;
   onToggleFavorite?: () => void;
   onLinkToStory?: () => void;
   onCreateStory?: () => void;
@@ -65,6 +66,7 @@ export function TreasureCard({
   year,
   isFavorite,
   linkedStoryId,
+  readOnly = false,
   onToggleFavorite,
   onLinkToStory,
   onCreateStory,
@@ -97,7 +99,11 @@ export function TreasureCard({
       onClick={onEdit}
     >
       {/* Image Container - 75% of card height */}
-      <div className="relative overflow-hidden ring-1 ring-inset ring-black/10" style={{ minHeight: "200px", aspectRatio: "16/10" }}>
+      <div
+        data-nav-ink="light"
+        className="relative overflow-hidden ring-1 ring-inset ring-black/10"
+        style={{ minHeight: "200px", aspectRatio: "16/10" }}
+      >
         {!imageError ? (
           transform ? (
             // Use regular img with transform when zoom/pan is set
@@ -149,22 +155,24 @@ export function TreasureCard({
           </div>
         </div>
 
-        {/* Favorite Button - Top Right */}
-        <button
-          onClick={handleFavoriteClick}
-          className="absolute top-2 right-2 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-all"
-          style={{ minWidth: "44px", minHeight: "44px" }}
-          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-          title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-        >
-          <Heart
-            className={cn(
-              "w-4 h-4 transition-all duration-75",
-              isFavorite ? "fill-red-500 text-red-500" : "text-gray-600",
-              isFavoriting && "scale-125"
-            )}
-          />
-        </button>
+        {/* Favorite Button - Top Right (hidden for viewers) */}
+        {!readOnly && (
+          <button
+            onClick={handleFavoriteClick}
+            className="absolute top-2 right-2 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-all"
+            style={{ minWidth: "44px", minHeight: "44px" }}
+            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Heart
+              className={cn(
+                "w-4 h-4 transition-all duration-75",
+                isFavorite ? "fill-red-500 text-red-500" : "text-gray-600",
+                isFavoriting && "scale-125"
+              )}
+            />
+          </button>
+        )}
 
         {/* Linked Story Indicator */}
         {linkedStoryId && (
@@ -190,110 +198,112 @@ export function TreasureCard({
             </p>
           </div>
 
-          {/* Three-dot menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-700 transition-colors"
-                style={{ minHeight: "44px", minWidth: "44px" }}
-                aria-label="More actions"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreVertical className="w-4 h-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {/* Toggle Favorite */}
-              {onToggleFavorite && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleFavorite();
-                  }}
-                  className="cursor-pointer"
+          {/* Three-dot menu (hidden for viewers) */}
+          {!readOnly && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-700 transition-colors"
+                  style={{ minHeight: "44px", minWidth: "44px" }}
+                  aria-label="More actions"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <Heart
-                    size={16}
-                    className="mr-2"
-                    fill={isFavorite ? "currentColor" : "none"}
-                  />
-                  {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-                </DropdownMenuItem>
-              )}
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {/* Toggle Favorite */}
+                {onToggleFavorite && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleFavorite();
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <Heart
+                      size={16}
+                      className="mr-2"
+                      fill={isFavorite ? "currentColor" : "none"}
+                    />
+                    {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+                  </DropdownMenuItem>
+                )}
 
-              {/* Link to Story */}
-              {onLinkToStory && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onLinkToStory();
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Link2 size={16} className="mr-2" />
-                  {linkedStoryId ? "Change Linked Story" : "Link to Story"}
-                </DropdownMenuItem>
-              )}
+                {/* Link to Story */}
+                {onLinkToStory && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onLinkToStory();
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <Link2 size={16} className="mr-2" />
+                    {linkedStoryId ? "Change Linked Story" : "Link to Story"}
+                  </DropdownMenuItem>
+                )}
 
-              {/* Create Story About This */}
-              {onCreateStory && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onCreateStory();
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Mic size={16} className="mr-2" />
-                  Create Story About This
-                </DropdownMenuItem>
-              )}
+                {/* Create Story About This */}
+                {onCreateStory && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCreateStory();
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <Mic size={16} className="mr-2" />
+                    Create Story About This
+                  </DropdownMenuItem>
+                )}
 
-              {/* Edit Details */}
-              {onEdit && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit();
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Edit3 size={16} className="mr-2" />
-                  Edit Details
-                </DropdownMenuItem>
-              )}
+                {/* Edit Details */}
+                {onEdit && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit();
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <Edit3 size={16} className="mr-2" />
+                    Edit Details
+                  </DropdownMenuItem>
+                )}
 
-              {/* Download Photo */}
-              {onDownload && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDownload();
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Download size={16} className="mr-2" />
-                  Download Photo
-                </DropdownMenuItem>
-              )}
+                {/* Download Photo */}
+                {onDownload && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDownload();
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <Download size={16} className="mr-2" />
+                    Download Photo
+                  </DropdownMenuItem>
+                )}
 
-              <DropdownMenuSeparator />
+                <DropdownMenuSeparator />
 
-              {/* Delete */}
-              {onDelete && (
-                <DropdownMenuItem
-                  className="text-red-600 focus:text-red-600 cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                >
-                  <Trash2 size={16} className="mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                {/* Delete */}
+                {onDelete && (
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete();
+                    }}
+                  >
+                    <Trash2 size={16} className="mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
     </article>
