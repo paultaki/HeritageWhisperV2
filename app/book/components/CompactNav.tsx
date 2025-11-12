@@ -5,7 +5,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { Clock3, BookOpen, User, Lightbulb } from "lucide-react";
 import { motion } from "framer-motion";
 
-export function CompactNav() {
+type CompactNavProps = {
+  currentStoryId?: string;
+};
+
+export function CompactNav({ currentStoryId }: CompactNavProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -24,7 +28,19 @@ export function CompactNav() {
       {/* Navigation Items - Icons only, evenly spaced */}
       <div className="flex items-center justify-center gap-12">
         <button
-          onClick={() => router.push("/timeline")}
+          onClick={() => {
+            // If we have a current story ID, store navigation context for timeline to scroll to it
+            if (currentStoryId) {
+              const context = {
+                memoryId: currentStoryId,
+                scrollPosition: 0, // Start at top, will scroll to card
+                timestamp: Date.now(),
+                returnPath: '/timeline', // Required by timeline navigation logic
+              };
+              sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
+            }
+            router.push("/timeline");
+          }}
           className="flex items-center justify-center p-2 rounded-lg transition-all hover:bg-white/10 relative"
           style={{
             color: pathname === "/timeline" ? "#ffffff" : "rgba(255, 255, 255, 0.6)",

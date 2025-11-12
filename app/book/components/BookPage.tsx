@@ -684,7 +684,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
 
   return (
     <>
-      {/* Edit and Timeline buttons - only show for account owners with actual stories */}
+      {/* Edit button - only show for account owners with actual stories */}
       {isOwnAccount && typeof story === 'object' && 'id' in story && (
         <div className={`flex gap-2 mb-1.5 -mt-5 ${position === "right" ? "justify-end" : ""}`}>
           <button
@@ -697,25 +697,6 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
           >
             <Pencil className="w-4 h-4" />
             <span>Edit</span>
-          </button>
-          <button
-            onClick={() => {
-              // Store navigation context for timeline to pick up
-              const context = {
-                memoryId: story.id,
-                scrollPosition: 0, // Start at top, will scroll to card
-                timestamp: Date.now(),
-                returnPath: '/timeline', // Required by timeline navigation logic
-              };
-              sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
-
-              // Navigate to timeline
-              router.push('/timeline');
-            }}
-            className="hidden md:flex items-center gap-1.5 px-2.5 py-0 min-h-[34px] rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-base font-medium text-gray-700"
-          >
-            <Clock className="w-4 h-4" />
-            <span className="hidden lg:inline">Timeline</span>
           </button>
         </div>
       )}

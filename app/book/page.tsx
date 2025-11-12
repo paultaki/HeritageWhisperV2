@@ -296,6 +296,22 @@ export default function BookV4Page() {
     }
   }, [currentSpreadIndex, spreads.length]);
 
+  // Get current story ID for smart navigation
+  const getCurrentStoryId = useCallback(() => {
+    const spread = spreads[currentSpreadIndex];
+    if (!spread) return undefined;
+
+    // Check left page first
+    if (spread.left && typeof spread.left === 'object' && 'id' in spread.left) {
+      return spread.left.id;
+    }
+    // Check right page
+    if (spread.right && typeof spread.right === 'object' && 'id' in spread.right) {
+      return spread.right.id;
+    }
+    return undefined;
+  }, [spreads, currentSpreadIndex]);
+
   // Prevent page scrolling
   useEffect(() => {
     // Lock body scroll
@@ -502,7 +518,12 @@ export default function BookV4Page() {
                 {/* Mobile Edit Icon - Only show for account owners */}
                 {isOwnAccount && (
                   <button
-                    onClick={() => router.push("/timeline")}
+                    onClick={() => {
+                      const storyId = getCurrentStoryId();
+                      if (storyId) {
+                        router.push(`/review/book-style?edit=${storyId}&returnPath=${encodeURIComponent('/book')}`);
+                      }
+                    }}
                     className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
                     aria-label="Edit"
                   >
@@ -841,7 +862,7 @@ export default function BookV4Page() {
       </div>
 
         {/* Desktop Navigation Bar */}
-        <CompactNav />
+        <CompactNav currentStoryId={getCurrentStoryId()} />
       </div>
     </>
   );

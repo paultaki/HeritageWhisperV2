@@ -143,18 +143,27 @@ export default function MobileBookViewV2({
     [bookStories, scrollToIndex]
   );
 
-  // Navigate to timeline
+  // Navigate to timeline with smart routing
   const handleTimelineClick = useCallback(() => {
+    // If we have a current story, store navigation context for timeline to scroll to it
+    if (bookStories[currentIndex]) {
+      const context = {
+        memoryId: bookStories[currentIndex].id,
+        scrollPosition: 0, // Start at top, will scroll to card
+        timestamp: Date.now(),
+        returnPath: '/timeline', // Required by timeline navigation logic
+      };
+      sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
+    }
     router.push("/timeline");
-  }, [router]);
+  }, [bookStories, currentIndex, router]);
 
-  // Navigate to edit (placeholder for now)
+  // Navigate to edit
   const handleEditClick = useCallback(() => {
     if (bookStories[currentIndex]) {
-      // TODO: Navigate to edit view for current story
-      console.log("Edit story:", bookStories[currentIndex].id);
+      router.push(`/review/book-style?edit=${bookStories[currentIndex].id}&returnPath=${encodeURIComponent('/book')}`);
     }
-  }, [bookStories, currentIndex]);
+  }, [bookStories, currentIndex, router]);
 
   // Jump to initial story if provided
   useEffect(() => {

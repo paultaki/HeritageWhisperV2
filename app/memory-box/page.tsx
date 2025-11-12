@@ -7,6 +7,7 @@ import { Box } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
+import { useFamilyAuth } from "@/hooks/use-family-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { useAccountContext } from "@/hooks/use-account-context";
@@ -136,6 +137,7 @@ class AudioManager {
 export default function MemoryBoxV2Page() {
   const router = useRouter();
   const { user, session } = useAuth();
+  const { session: familySession } = useFamilyAuth();
   const modeSelection = useModeSelection();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
@@ -147,6 +149,14 @@ export default function MemoryBoxV2Page() {
   const { activeContext } = useAccountContext();
   const storytellerId = activeContext?.storytellerId || user?.id;
   const isOwnAccount = activeContext?.type === 'own' ?? false;
+
+  // Dual authentication: Use JWT for owners, sessionToken for viewers
+  const authToken = session?.access_token || familySession?.sessionToken;
+  const authHeaders = session?.access_token
+    ? { Authorization: `Bearer ${session.access_token}` }
+    : familySession?.sessionToken
+      ? { Authorization: `Bearer ${familySession.sessionToken}` }
+      : {};
 
   // Force viewers to Treasures tab, owners can use either
   const defaultTab: TabType = isOwnAccount ? "stories" : "treasures";
@@ -179,24 +189,23 @@ export default function MemoryBoxV2Page() {
     isLoading,
     refetch,
   } = useQuery<Story[]>({
-    queryKey: ["/api/stories", storytellerId, session?.access_token],
+    queryKey: ["/api/stories", storytellerId, authToken],
     queryFn: async () => {
-      const token = session?.access_token;
-      if (!token) throw new Error("No authentication token");
+      if (!authToken) throw new Error("No authentication token");
 
       const url = storytellerId
         ? `/api/stories?storyteller_id=${storytellerId}`
         : "/api/stories";
 
       const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: authHeaders,
       });
 
       if (!response.ok) throw new Error("Failed to fetch stories");
       const data = await response.json();
       return data.stories || [];
     },
-    enabled: !!session?.access_token && !!user && !!storytellerId,
+    enabled: !!authToken && !!storytellerId,
   });
 
   const updateStory = useMutation({
@@ -210,7 +219,7 @@ export default function MemoryBoxV2Page() {
       const response = await fetch(`/api/stories/${id}`, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${session?.access_token}`,
+          ...authHeaders,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(updates),
@@ -223,7 +232,7 @@ export default function MemoryBoxV2Page() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/stories", storytellerId, session?.access_token],
+        queryKey: ["/api/stories", storytellerId, authToken],
       });
       toast({ title: "Memory updated successfully" });
     },
@@ -240,13 +249,13 @@ export default function MemoryBoxV2Page() {
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/stories/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+        headers: authHeaders,
       });
       if (!response.ok) throw new Error("Failed to delete story");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/stories", storytellerId, session?.access_token],
+        queryKey: ["/api/stories", storytellerId, authToken],
       });
       toast({ title: "Memory deleted successfully" });
     },
@@ -257,24 +266,23 @@ export default function MemoryBoxV2Page() {
     data: treasures = [],
     isLoading: treasuresLoading,
   } = useQuery<Treasure[]>({
-    queryKey: ["/api/treasures", storytellerId, session?.access_token],
+    queryKey: ["/api/treasures", storytellerId, authToken],
     queryFn: async () => {
-      const token = session?.access_token;
-      if (!token) throw new Error("No authentication token");
+      if (!authToken) throw new Error("No authentication token");
 
       const url = storytellerId
         ? `/api/treasures?storyteller_id=${storytellerId}`
         : "/api/treasures";
 
       const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: authHeaders,
       });
 
       if (!response.ok) throw new Error("Failed to fetch treasures");
       const data = await response.json();
       return data.treasures || [];
     },
-    enabled: !!session?.access_token && !!user && !!storytellerId,
+    enabled: !!authToken && !!storytellerId,
   });
 
   // Treasure mutations
@@ -283,7 +291,7 @@ export default function MemoryBoxV2Page() {
       const response = await fetch(`/api/treasures/${id}`, {
         method: "PATCH",
         headers: {
-          Authorization: `Bearer ${session?.access_token}`,
+          ...authHeaders,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ isFavorite: !isFavorite }),
@@ -292,7 +300,7 @@ export default function MemoryBoxV2Page() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/treasures", storytellerId, session?.access_token],
+        queryKey: ["/api/treasures", storytellerId, authToken],
       });
     },
   });
@@ -301,13 +309,13 @@ export default function MemoryBoxV2Page() {
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/treasures/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+        headers: authHeaders,
       });
       if (!response.ok) throw new Error("Failed to delete treasure");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/treasures", storytellerId, session?.access_token],
+        queryKey: ["/api/treasures", storytellerId, authToken],
       });
       toast({ title: "Treasure deleted successfully" });
     },
@@ -337,16 +345,14 @@ export default function MemoryBoxV2Page() {
 
     const response = await fetch("/api/treasures", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${session?.access_token}`,
-      },
+      headers: authHeaders,
       body: formData,
     });
 
     if (!response.ok) throw new Error("Failed to create treasure");
 
     queryClient.invalidateQueries({
-      queryKey: ["/api/treasures", storytellerId, session?.access_token],
+      queryKey: ["/api/treasures", storytellerId, authToken],
     });
     toast({ title: "Treasure added successfully!" });
   };
@@ -362,7 +368,7 @@ export default function MemoryBoxV2Page() {
     const response = await fetch(`/api/treasures/${updates.id}`, {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${session?.access_token}`,
+        ...authHeaders,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -377,7 +383,7 @@ export default function MemoryBoxV2Page() {
     if (!response.ok) throw new Error("Failed to update treasure");
 
     queryClient.invalidateQueries({
-      queryKey: ["/api/treasures", storytellerId, session?.access_token],
+      queryKey: ["/api/treasures", storytellerId, authToken],
     });
     toast({ title: "Treasure updated successfully!" });
     setTreasureToEdit(null);
