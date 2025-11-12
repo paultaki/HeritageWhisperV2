@@ -72,22 +72,42 @@ export async function GET(request: NextRequest) {
       }
     } else {
       // JWT failed - try family session token
-      const { data: familySession } = await supabaseAdmin
+      const { data: familySession, error: sessionError } = await supabaseAdmin
         .from("family_sessions")
-        .select("*")
-        .eq("session_token", token)
-        .gt("expires_at", new Date().toISOString())
+        .select(`
+          id,
+          family_member_id,
+          expires_at,
+          family_members!inner (
+            id,
+            user_id,
+            email,
+            name,
+            relationship,
+            permission_level
+          )
+        `)
+        .eq("token", token)
         .single();
 
-      if (!familySession) {
+      if (sessionError || !familySession) {
         return NextResponse.json(
           { error: "Invalid authentication" },
           { status: 401 }
         );
       }
 
+      // Check if session expired
+      if (new Date(familySession.expires_at) < new Date()) {
+        return NextResponse.json(
+          { error: "Session expired" },
+          { status: 401 }
+        );
+      }
+
       // Family session authentication successful
-      storytellerId = familySession.storyteller_user_id;
+      // Extract storyteller ID from family_members.user_id
+      storytellerId = (familySession as any).family_members.user_id;
       isAuthenticated = true;
     }
 

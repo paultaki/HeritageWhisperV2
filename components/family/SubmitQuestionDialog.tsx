@@ -87,15 +87,6 @@ export function SubmitQuestionDialog({
   const charCount = promptText.length;
   const contextCharCount = context.length;
 
-  // Debug: Check state values
-  console.log('[SubmitQuestionDialog] State:', {
-    isOpen,
-    promptTextLength: promptText.length,
-    trimmedLength: promptText.trim().length,
-    isSubmitting,
-    hasSession: !!session,
-  });
-
   if (!isOpen) return null;
 
   return (
@@ -154,10 +145,7 @@ export function SubmitQuestionDialog({
               <textarea
                 id="promptText"
                 value={promptText}
-                onChange={(e) => {
-                  console.log('[SubmitQuestionDialog] Prompt changed:', e.target.value.length, 'chars');
-                  setPromptText(e.target.value);
-                }}
+                onChange={(e) => setPromptText(e.target.value)}
                 placeholder={`What question would you like ${storytellerName} to answer?`}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 rows={4}
@@ -215,7 +203,6 @@ export function SubmitQuestionDialog({
               <button
                 type="submit"
                 disabled={isSubmitting || promptText.trim().length < 10}
-                onClick={() => console.log('[SubmitQuestionDialog] Submit button clicked, disabled:', isSubmitting || promptText.trim().length < 10)}
                 className="flex-1 px-4 py-3 bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 text-white rounded-lg hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (

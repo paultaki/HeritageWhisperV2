@@ -514,6 +514,7 @@ export default function MemoryBoxV2Page() {
               storiesCount={stats.all}
               totalHours={stats.totalHours}
               treasuresCount={stats.treasuresCount}
+              isOwnAccount={isOwnAccount}
             />
 
             {/* Tab Selector */}

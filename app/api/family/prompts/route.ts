@@ -121,14 +121,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create the prompt
+    // Create the prompt (note: family_prompts table doesn't have context column)
     const { data: prompt, error: promptError } = await supabaseAdmin
       .from('family_prompts')
       .insert({
         storyteller_user_id: storytellerUserId,
         submitted_by_family_member_id: familyMember.id,
         prompt_text: promptText.trim(),
-        context: context?.trim() || null,
         status: 'pending',
       })
       .select()
@@ -147,7 +146,7 @@ export async function POST(req: NextRequest) {
       storytellerUserId: storytellerUserId,
       submitterFamilyMemberId: familyMember.id,
       promptText: promptText.trim(),
-      context: context?.trim(),
+      context: context?.trim(), // Context still sent to email even though not stored
     }).catch((error) => {
       // Log error but don't fail the request
       console.error('[FamilyPrompts] Failed to send notification email:', error);
@@ -158,7 +157,6 @@ export async function POST(req: NextRequest) {
       prompt: {
         id: prompt.id,
         promptText: prompt.prompt_text,
-        context: prompt.context,
         status: prompt.status,
         createdAt: prompt.created_at,
         submittedBy: {

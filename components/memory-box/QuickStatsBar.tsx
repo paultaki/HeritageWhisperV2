@@ -28,6 +28,25 @@ export function QuickStatsBar({ storiesCount, totalHours, treasuresCount, isOwnA
     return minutes > 0 ? `${wholeHours}h ${minutes}m` : `${wholeHours} hours`;
   };
 
+  // For family viewers, show only treasures count (centered)
+  if (!isOwnAccount) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl p-2 md:p-3 mb-6">
+        <div className="flex items-center justify-center">
+          <div className="text-center px-4 md:px-6">
+            <div className="text-2xl md:text-4xl font-bold text-heritage-brown">
+              {treasuresCount}
+            </div>
+            <div className="text-xs md:text-base text-gray-700 font-medium">
+              {treasuresCount === 1 ? "Treasure" : "Treasures"}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // For account owners, show all stats
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-2 md:p-3 mb-6">
       <div className="flex items-center justify-center divide-x divide-gray-200">
