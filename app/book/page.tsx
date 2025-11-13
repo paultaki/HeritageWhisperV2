@@ -312,6 +312,18 @@ export default function BookV4Page() {
     return undefined;
   }, [spreads, currentSpreadIndex]);
 
+  // Update sessionStorage whenever current story changes (for GlassNav smart routing)
+  useEffect(() => {
+    const storyId = getCurrentStoryId();
+    if (storyId) {
+      sessionStorage.setItem('current-book-story-id', storyId);
+      console.log('[Book] Updated current story ID in storage:', storyId);
+    } else {
+      sessionStorage.removeItem('current-book-story-id');
+      console.log('[Book] Cleared current story ID (on intro/TOC/decade page)');
+    }
+  }, [getCurrentStoryId]);
+
   // Prevent page scrolling
   useEffect(() => {
     // Lock body scroll

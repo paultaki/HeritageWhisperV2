@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Clock, BookOpen, Mic, Menu, Archive, MessageSquarePlus } from "lucide-react";
 import GlassNav from "./GlassNav";
 import GlassMenuDropdown from "./GlassMenuDropdown";
@@ -11,6 +11,8 @@ import { useAccountContext } from "@/hooks/use-account-context";
 
 export default function GlassNavWrapper() {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isQuestionDialogOpen, setIsQuestionDialogOpen] = useState(false);
   const { activeContext } = useAccountContext();
@@ -55,6 +57,35 @@ export default function GlassNavWrapper() {
     return '';
   };
 
+  // Handle Timeline navigation with smart routing from book view
+  const handleTimelineClick = () => {
+    console.log('[GlassNav] Timeline clicked from:', pathname);
+
+    // Check if we're on a book page
+    if (pathname.startsWith('/book')) {
+      // Try to get current story ID from a global storage key
+      // (Book views set this when changing pages)
+      const currentBookStoryId = sessionStorage.getItem('current-book-story-id');
+
+      console.log('[GlassNav] Current book story ID from storage:', currentBookStoryId);
+
+      if (currentBookStoryId) {
+        const context = {
+          memoryId: currentBookStoryId,
+          scrollPosition: 0,
+          timestamp: Date.now(),
+          returnPath: '/timeline',
+        };
+        console.log('[GlassNav] Setting timeline navigation context:', context);
+        sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
+      } else {
+        console.log('[GlassNav] No current story ID found - timeline will go to top');
+      }
+    }
+
+    router.push('/timeline');
+  };
+
   // Build nav items based on permission level
   const allNavItems = [
     {
@@ -62,6 +93,7 @@ export default function GlassNavWrapper() {
       label: 'Timeline',
       href: '/timeline',
       Icon: Clock,
+      onClick: handleTimelineClick,
     },
     {
       key: 'book',

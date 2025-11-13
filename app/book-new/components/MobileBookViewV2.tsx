@@ -143,6 +143,18 @@ export default function MobileBookViewV2({
     [bookStories, scrollToIndex]
   );
 
+  // Update sessionStorage whenever current story changes (for GlassNav smart routing)
+  useEffect(() => {
+    if (bookStories[currentIndex]) {
+      const storyId = bookStories[currentIndex].id;
+      sessionStorage.setItem('current-book-story-id', storyId);
+      console.log('[MobileBookView] Updated current story ID in storage:', storyId);
+    } else {
+      sessionStorage.removeItem('current-book-story-id');
+      console.log('[MobileBookView] Cleared current story ID (no story at current index)');
+    }
+  }, [bookStories, currentIndex]);
+
   // Navigate to timeline with smart routing
   const handleTimelineClick = useCallback(() => {
     console.log('[MobileBookView] Timeline clicked. currentIndex:', currentIndex);
