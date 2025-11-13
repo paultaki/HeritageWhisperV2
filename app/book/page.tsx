@@ -102,9 +102,27 @@ export default function BookV4Page() {
   const stories = data?.stories || [];
 
   // Filter stories that should be included in book (must be explicitly true)
-  const bookStories = stories.filter(
-    (s) => s.includeInBook === true && s.storyYear && s.transcription
-  );
+  const bookStories = stories.filter((s) => {
+    // Must be explicitly marked for book inclusion
+    if (s.includeInBook !== true) {
+      console.warn(`[Book] Story "${s.title}" excluded: includeInBook is ${s.includeInBook}`);
+      return false;
+    }
+    
+    // Must have a year (can't sort without it)
+    if (!s.storyYear) {
+      console.warn(`[Book] Story "${s.title}" excluded: missing storyYear`);
+      return false;
+    }
+    
+    // Must have transcription (nothing to display without it)
+    if (!s.transcription) {
+      console.warn(`[Book] Story "${s.title}" excluded: missing transcription`);
+      return false;
+    }
+    
+    return true;
+  });
 
   // Sort by year
   const sortedStories = useMemo(() =>
@@ -114,6 +132,18 @@ export default function BookV4Page() {
 
   // Debug logging
   console.log('[Book] Loading states:', { isLoading, isFetching, hasData: !!data, storiesCount: stories.length, bookStoriesCount: bookStories.length, sortedStoriesCount: sortedStories.length });
+  
+  // Debug logging for excluded stories
+  if (stories.length !== bookStories.length) {
+    const excludedStories = stories.filter(s => !bookStories.includes(s));
+    console.log('[Book] Summary of excluded stories:', excludedStories.map(s => ({
+      id: s.id,
+      title: s.title,
+      includeInBook: s.includeInBook,
+      hasYear: !!s.storyYear,
+      hasTranscription: !!s.transcription,
+    })));
+  }
 
   // Group stories by decade
   const decadeGroups = useMemo(() => {
@@ -311,6 +341,27 @@ export default function BookV4Page() {
     }
     return undefined;
   }, [spreads, currentSpreadIndex]);
+
+  // Handle Timeline navigation with smart routing
+  const handleTimelineClick = useCallback(() => {
+    console.log('[Book] Timeline clicked. currentStoryId:', getCurrentStoryId());
+    
+    const currentStoryId = getCurrentStoryId();
+    if (currentStoryId) {
+      const context = {
+        memoryId: currentStoryId,
+        scrollPosition: 0,
+        timestamp: Date.now(),
+        returnPath: '/timeline',
+      };
+      console.log('[Book] Setting timeline navigation context:', context);
+      sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
+    } else {
+      console.log('[Book] No current story ID - timeline will go to top');
+    }
+    
+    router.push('/timeline');
+  }, [getCurrentStoryId, router]);
 
   // Update sessionStorage whenever current story changes (for GlassNav smart routing)
   useEffect(() => {
@@ -521,7 +572,7 @@ export default function BookV4Page() {
               <div className="flex items-center gap-2 mr-10">
                 {/* Mobile: Show icons only, Desktop: Show full buttons */}
                 <button
-                  onClick={() => router.push("/timeline")}
+                  onClick={handleTimelineClick}
                   className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
                   aria-label="Timeline"
                 >
@@ -544,7 +595,7 @@ export default function BookV4Page() {
                 )}
                 {/* Desktop: Original button */}
                 <button
-                  onClick={() => router.push("/timeline")}
+                  onClick={handleTimelineClick}
                   className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium mr-[70px]"
                 >
                   ← Timeline
@@ -638,7 +689,7 @@ export default function BookV4Page() {
 
               {/* Mobile: Show icons only */}
               <button
-                onClick={() => router.push("/timeline")}
+                onClick={handleTimelineClick}
                 className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
                 aria-label="Timeline"
               >
@@ -647,7 +698,12 @@ export default function BookV4Page() {
               {/* Mobile Edit Icon - Only show for account owners */}
               {isOwnAccount && (
                 <button
-                  onClick={() => router.push("/timeline")}
+                  onClick={() => {
+                    const storyId = getCurrentStoryId();
+                    if (storyId) {
+                      router.push(`/review/book-style?edit=${storyId}&returnPath=${encodeURIComponent('/book')}`);
+                    }
+                  }}
                   className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
                   aria-label="Edit"
                 >

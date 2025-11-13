@@ -450,14 +450,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         JSON.stringify(navigationContext),
       );
 
-      const isBirthYearStory =
-        story.title?.toLowerCase().includes("born") ||
-        story.title?.toLowerCase().includes("birth");
-      if (isBirthYearStory) {
-        router.push(`/review?edit=${story.id}`);
-      } else {
-        router.push(`/book?storyId=${story.id}`);
-      }
+      // Always navigate to book view - user can edit from there if needed
+      router.push(`/book?storyId=${story.id}`);
     }
   };
 
