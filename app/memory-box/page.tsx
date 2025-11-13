@@ -25,6 +25,7 @@ import { StoryCard } from "@/components/memory-box/StoryCard";
 import { TreasureGrid } from "@/components/memory-box/TreasureGrid";
 import { AddTreasureModal } from "@/components/memory-box/AddTreasureModal";
 import { EditTreasureModal } from "@/components/memory-box/EditTreasureModal";
+import { TreasureViewModal } from "@/components/memory-box/TreasureViewModal";
 import { EditMemoryModal } from "@/components/memory-box/EditMemoryModal";
 
 interface Story {
@@ -774,22 +775,40 @@ export default function MemoryBoxV2Page() {
         onSave={handleSaveTreasure}
       />
 
-      {/* Edit Treasure Modal */}
+      {/* Edit/View Treasure Modal - Conditional based on user role */}
       {treasureToEdit && (
-        <EditTreasureModal
-          isOpen={true}
-          onClose={() => setTreasureToEdit(null)}
-          treasure={{
-            id: treasureToEdit.id,
-            title: treasureToEdit.title,
-            description: treasureToEdit.description,
-            imageUrl: treasureToEdit.displayUrl || treasureToEdit.imageUrl,
-            category: treasureToEdit.category,
-            year: treasureToEdit.year,
-            transform: treasureToEdit.transform,
-          }}
-          onSave={handleUpdateTreasure}
-        />
+        <>
+          {isOwnAccount ? (
+            <EditTreasureModal
+              isOpen={true}
+              onClose={() => setTreasureToEdit(null)}
+              treasure={{
+                id: treasureToEdit.id,
+                title: treasureToEdit.title,
+                description: treasureToEdit.description,
+                imageUrl: treasureToEdit.displayUrl || treasureToEdit.imageUrl,
+                category: treasureToEdit.category,
+                year: treasureToEdit.year,
+                transform: treasureToEdit.transform,
+              }}
+              onSave={handleUpdateTreasure}
+            />
+          ) : (
+            <TreasureViewModal
+              isOpen={true}
+              onClose={() => setTreasureToEdit(null)}
+              treasure={{
+                id: treasureToEdit.id,
+                title: treasureToEdit.title,
+                description: treasureToEdit.description,
+                imageUrl: treasureToEdit.displayUrl || treasureToEdit.imageUrl,
+                category: treasureToEdit.category,
+                year: treasureToEdit.year,
+                transform: treasureToEdit.transform,
+              }}
+            />
+          )}
+        </>
       )}
 
       {/* Delete Treasure Confirmation */}

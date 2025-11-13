@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tansta
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
+import { useFamilyAuth } from "@/hooks/use-family-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { groupStoriesByDecade, type Story } from "@/lib/supabase";
 import { getApiUrl } from "@/lib/config";
@@ -887,7 +888,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
 
 export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boolean } = {}) {
   const router = useRouter();
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading, logout, session } = useAuth();
+  const { session: familySession } = useFamilyAuth();
   const { toast } = useToast();
   const modeSelection = useModeSelection();
   const queryClient = useQueryClient();
@@ -903,20 +905,35 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   const storytellerId = activeContext?.storytellerId || user?.id;
   const isViewingOwnAccount = activeContext?.type === 'own';
 
+  // Dual authentication: Use JWT for owners, sessionToken for viewers
+  const authToken = session?.access_token || familySession?.sessionToken;
+  const authHeaders = session?.access_token
+    ? { Authorization: `Bearer ${session.access_token}` }
+    : familySession?.sessionToken
+      ? { Authorization: `Bearer ${familySession.sessionToken}` }
+      : {};
+
   const {
     data: storiesData,
     isLoading: isStoriesLoading,
     error: storiesError,
   } = useQuery({
-    queryKey: ["stories", storytellerId], // Include storytellerId in query key
+    queryKey: ["stories", storytellerId, authToken], // Include auth token in query key
     queryFn: async () => {
       const url = storytellerId
         ? `${getApiUrl("/api/stories")}?storyteller_id=${storytellerId}`
         : getApiUrl("/api/stories");
-      const res = await apiRequest("GET", url);
+      const res = await fetch(url, {
+        headers: authHeaders,
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch stories: ${res.status}`);
+      }
+
       return res.json();
     },
-    enabled: !!user && !!storytellerId,
+    enabled: !!authToken && !!storytellerId,
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
     gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes even when unmounted
     placeholderData: keepPreviousData, // Keep showing old data while refetching to prevent flash

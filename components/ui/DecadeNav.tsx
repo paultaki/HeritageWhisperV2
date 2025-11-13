@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { useDecadeSync } from "./useDecadeSync";
 import "@/app/styles/decade-nav.css";
 
@@ -43,8 +44,15 @@ export default function DecadeNav({ entries }: { entries: DecadeEntry[] }) {
           className="hw-decade-pill"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
+          aria-label={`Jump to decade: ${entries.find((e) => e.id === activeId)?.label ?? entries[0]?.label}`}
         >
-          {entries.find((e) => e.id === activeId)?.label ?? entries[0]?.label}
+          <Image
+            src="/timeline-icon.svg"
+            alt="Timeline"
+            width={20}
+            height={20}
+            className="timeline-icon"
+          />
           <span className="caret" />
         </button>
         {open && (
