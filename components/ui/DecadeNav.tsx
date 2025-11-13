@@ -49,11 +49,12 @@ export default function DecadeNav({ entries }: { entries: DecadeEntry[] }) {
           <Image
             src="/timeline-icon.svg"
             alt="Timeline"
-            width={20}
-            height={20}
+            width={48}
+            height={48}
             className="timeline-icon"
+            style={{ marginRight: '8px' }}
           />
-          <span className="caret" />
+          <span className="caret" style={{ marginLeft: 'auto' }} />
         </button>
         {open && (
           <div className="hw-decade-sheet" role="menu">

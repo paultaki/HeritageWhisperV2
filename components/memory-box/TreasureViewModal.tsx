@@ -1,25 +1,22 @@
 "use client";
 
 import React from "react";
-import { Camera, FileText, Gem, Home, ChefHat, Award, X } from "lucide-react";
+import { Camera, FileText, Gem, Home, ChefHat, Award } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 type TreasureCategory = "photos" | "documents" | "heirlooms" | "keepsakes" | "recipes" | "memorabilia";
 
 const TREASURE_CATEGORIES = {
-  photos: { icon: Camera, label: "Family Photos", color: "text-blue-500 bg-blue-50" },
-  documents: { icon: FileText, label: "Documents", color: "text-gray-500 bg-gray-50" },
-  heirlooms: { icon: Gem, label: "Heirlooms", color: "text-purple-500 bg-purple-50" },
-  keepsakes: { icon: Home, label: "Keepsakes", color: "text-green-500 bg-green-50" },
-  recipes: { icon: ChefHat, label: "Recipes", color: "text-orange-500 bg-orange-50" },
-  memorabilia: { icon: Award, label: "Memorabilia", color: "text-yellow-500 bg-yellow-50" },
+  photos: { icon: Camera, label: "Family Photos" },
+  documents: { icon: FileText, label: "Documents" },
+  heirlooms: { icon: Gem, label: "Heirlooms" },
+  keepsakes: { icon: Home, label: "Keepsakes" },
+  recipes: { icon: ChefHat, label: "Recipes" },
+  memorabilia: { icon: Award, label: "Memorabilia" },
 };
 
 type TreasureViewModalProps = {
@@ -47,14 +44,12 @@ type TreasureViewModalProps = {
  */
 export function TreasureViewModal({ isOpen, onClose, treasure }: TreasureViewModalProps) {
   const categoryInfo = TREASURE_CATEGORIES[treasure.category];
-  const CategoryIcon = categoryInfo.icon;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{treasure.title}</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" hideCloseButton>
+        {/* Title */}
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">{treasure.title}</h2>
 
         <div className="space-y-6">
           {/* Photo Display - Full size with transform */}
@@ -72,49 +67,36 @@ export function TreasureViewModal({ isOpen, onClose, treasure }: TreasureViewMod
             />
           </div>
 
-          {/* Metadata Display */}
+          {/* Metadata Display - Clean inline format */}
           <div className="space-y-4">
-            {/* Category */}
-            <div className="flex items-center gap-3">
-              <div className={cn("p-2 rounded-lg", categoryInfo.color)}>
-                <CategoryIcon className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Category</p>
-                <p className="font-medium text-gray-900">{categoryInfo.label}</p>
-              </div>
+            <div className="text-lg text-gray-800">
+              <span className="font-medium">Category:</span> {categoryInfo.label}
+              {treasure.year && (
+                <>
+                  <span className="mx-3 text-gray-400">•</span>
+                  <span className="font-medium">Year:</span> {treasure.year}
+                </>
+              )}
             </div>
-
-            {/* Year */}
-            {treasure.year && (
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Year</p>
-                <p className="font-medium text-gray-900">{treasure.year}</p>
-              </div>
-            )}
 
             {/* Description */}
             {treasure.description && (
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Description</p>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+              <div className="pt-2">
+                <p className="text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {treasure.description}
                 </p>
               </div>
             )}
-
-            {/* View-only notice */}
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <p className="text-sm text-amber-800">
-                You're viewing this treasure in read-only mode.
-              </p>
-            </div>
           </div>
         </div>
 
         {/* Close Button */}
-        <div className="flex justify-end pt-4">
-          <Button onClick={onClose} className="w-full sm:w-auto">
+        <div className="flex justify-center pt-6">
+          <Button
+            onClick={onClose}
+            size="lg"
+            className="w-full sm:w-auto min-w-[200px]"
+          >
             Close
           </Button>
         </div>

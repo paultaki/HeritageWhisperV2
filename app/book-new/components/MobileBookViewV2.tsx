@@ -145,6 +145,10 @@ export default function MobileBookViewV2({
 
   // Navigate to timeline with smart routing
   const handleTimelineClick = useCallback(() => {
+    console.log('[MobileBookView] Timeline clicked. currentIndex:', currentIndex);
+    console.log('[MobileBookView] bookStories length:', bookStories.length);
+    console.log('[MobileBookView] Current story:', bookStories[currentIndex]);
+
     // If we have a current story, store navigation context for timeline to scroll to it
     if (bookStories[currentIndex]) {
       const context = {
@@ -153,8 +157,13 @@ export default function MobileBookViewV2({
         timestamp: Date.now(),
         returnPath: '/timeline', // Required by timeline navigation logic
       };
+      console.log('[MobileBookView] Setting sessionStorage context:', context);
       sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
+      console.log('[MobileBookView] SessionStorage set. Verifying:', sessionStorage.getItem('timeline-navigation-context'));
+    } else {
+      console.log('[MobileBookView] No current story - skipping sessionStorage');
     }
+
     router.push("/timeline");
   }, [bookStories, currentIndex, router]);
 

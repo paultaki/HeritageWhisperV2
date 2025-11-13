@@ -29,6 +29,8 @@ export function CompactNav({ currentStoryId }: CompactNavProps) {
       <div className="flex items-center justify-center gap-12">
         <button
           onClick={() => {
+            console.log('[CompactNav] Timeline clicked. currentStoryId:', currentStoryId);
+
             // If we have a current story ID, store navigation context for timeline to scroll to it
             if (currentStoryId) {
               const context = {
@@ -37,8 +39,13 @@ export function CompactNav({ currentStoryId }: CompactNavProps) {
                 timestamp: Date.now(),
                 returnPath: '/timeline', // Required by timeline navigation logic
               };
+              console.log('[CompactNav] Setting sessionStorage context:', context);
               sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
+              console.log('[CompactNav] SessionStorage set. Verifying:', sessionStorage.getItem('timeline-navigation-context'));
+            } else {
+              console.log('[CompactNav] No currentStoryId - skipping sessionStorage');
             }
+
             router.push("/timeline");
           }}
           className="flex items-center justify-center p-2 rounded-lg transition-all hover:bg-white/10 relative"

@@ -941,19 +941,41 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
 
   // Restore scroll position when returning from book view
   useEffect(() => {
+    const stories = (storiesData as any)?.stories || [];
+
+    console.log('[Timeline Navigation Debug] Effect triggered', {
+      hasStoriesData: !!storiesData,
+      storiesCount: stories.length
+    });
+
+    // Only process if we have stories loaded
+    if (!storiesData || stories.length === 0) {
+      console.log('[Timeline Navigation Debug] Skipping - no stories loaded yet');
+      return;
+    }
+
     // Check for return navigation context from BookView
     const contextStr = sessionStorage.getItem("timeline-navigation-context");
+    console.log('[Timeline Navigation Debug] SessionStorage context:', contextStr);
+
     if (contextStr) {
       try {
         const context = JSON.parse(contextStr);
+        console.log('[Timeline Navigation Debug] Parsed context:', context);
+
         const isExpired = Date.now() - context.timestamp > 5 * 60 * 1000; // 5 minutes expiry
+        console.log('[Timeline Navigation Debug] Is expired?', isExpired);
 
         if (!isExpired && (context.returnPath === "/timeline-v2" || context.returnPath === "/timeline")) {
+          console.log('[Timeline Navigation Debug] Context valid, setting up scroll to:', context.memoryId);
+
           // Set the return highlight
           setReturnHighlightId(context.memoryId);
 
           // Restore scroll position after a brief delay to ensure DOM is ready
           setTimeout(() => {
+            console.log('[Timeline Navigation Debug] Executing scroll after timeout');
+
             window.scrollTo({
               top: context.scrollPosition,
               behavior: "instant",
@@ -963,22 +985,34 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             const memoryCard = document.querySelector(
               `[data-memory-id="${context.memoryId}"]`,
             );
+            console.log('[Timeline Navigation Debug] Found memory card?', !!memoryCard, memoryCard);
+
             if (memoryCard) {
+              console.log('[Timeline Navigation Debug] Scrolling to card');
               memoryCard.scrollIntoView({
                 behavior: "smooth",
                 block: "center",
               });
+              // Only clear sessionStorage if we successfully found and scrolled to the card
+              sessionStorage.removeItem("timeline-navigation-context");
+              console.log('[Timeline Navigation Debug] SessionStorage cleared after successful scroll');
+            } else {
+              console.log('[Timeline Navigation Debug] Story card not found yet, will retry on next render');
+              // Check if any cards with data-memory-id exist
+              const allCards = document.querySelectorAll('[data-memory-id]');
+              console.log('[Timeline Navigation Debug] Total cards with data-memory-id:', allCards.length);
+              if (allCards.length > 0) {
+                console.log('[Timeline Navigation Debug] Sample IDs:', Array.from(allCards).slice(0, 3).map(c => c.getAttribute('data-memory-id')));
+              }
             }
-          }, 100);
-
-          // Clear the context after using it
-          sessionStorage.removeItem("timeline-navigation-context");
+          }, 300); // Increased timeout to give DOM more time to render
 
           // Remove highlight after animation
           setTimeout(() => {
             setReturnHighlightId(null);
           }, 3000);
         } else if (isExpired) {
+          console.log('[Timeline Navigation Debug] Context expired, clearing');
           // Clear expired context
           sessionStorage.removeItem("timeline-navigation-context");
         }
@@ -986,6 +1020,8 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
         console.error("Failed to parse navigation context:", e);
         sessionStorage.removeItem("timeline-navigation-context");
       }
+    } else {
+      console.log('[Timeline Navigation Debug] No sessionStorage context found');
     }
   }, [storiesData]);
 

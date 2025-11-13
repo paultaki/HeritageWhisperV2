@@ -124,14 +124,6 @@ export function SubmitQuestionDialog({
                 <h2 className="text-2xl font-bold">Suggest a Question</h2>
                 <p className="text-amber-50 mt-1">for {storytellerName}</p>
               </div>
-              <button
-                onClick={handleClose}
-                className="text-white/80 hover:text-white transition-colors"
-                disabled={isSubmitting}
-                aria-label="Close dialog"
-              >
-                <X className="w-6 h-6" />
-              </button>
             </div>
           </div>
 

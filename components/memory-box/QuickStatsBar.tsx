@@ -38,7 +38,7 @@ export function QuickStatsBar({ storiesCount, totalHours, treasuresCount, isOwnA
               {treasuresCount}
             </div>
             <div className="text-xs md:text-base text-gray-700 font-medium">
-              {treasuresCount === 1 ? "Treasure" : "Treasures"}
+              {treasuresCount === 1 ? "Timeless Treasure" : "Timeless Treasures"}
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@ export function QuickStatsBar({ storiesCount, totalHours, treasuresCount, isOwnA
             {treasuresCount}
           </div>
           <div className="text-xs md:text-base text-gray-700 font-medium">
-            {treasuresCount === 1 ? "Treasure" : "Treasures"}
+            {treasuresCount === 1 ? "Timeless Treasure" : "Timeless Treasures"}
           </div>
         </div>
       </div>

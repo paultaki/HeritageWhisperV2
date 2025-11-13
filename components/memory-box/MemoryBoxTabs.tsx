@@ -65,7 +65,7 @@ export function MemoryBoxTabs({ activeTab, onTabChange, storiesCount, treasuresC
         <div className="flex items-center justify-center gap-2">
           <span className="text-2xl">💎</span>
           <div className="text-left">
-            <div className="text-lg md:text-xl font-semibold">My Treasures</div>
+            <div className="text-lg md:text-xl font-semibold">Timeless Treasures</div>
             <div className={`text-sm ${activeTab === "treasures" ? "text-white/80" : "text-gray-500"}`}>
               {treasuresCount} {treasuresCount === 1 ? "item" : "items"}
             </div>
