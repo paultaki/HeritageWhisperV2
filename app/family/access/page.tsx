@@ -42,16 +42,37 @@ function FamilyAccessContent() {
 
   // Memoized redirect handler to prevent stale closures
   const handleContinue = useCallback(() => {
-    if (sessionData) {
-      console.log('[Family Access] Redirecting to /timeline with session:', {
-        storytellerId: sessionData.storytellerId,
-        storytellerName: sessionData.storytellerName,
-        permissionLevel: sessionData.permissionLevel,
-        expiresAt: sessionData.expiresAt
-      });
-      router.push('/timeline');
+    if (!sessionData) return;
+
+    console.log('[Family Access] Preparing redirect to /timeline with session:', {
+      storytellerId: sessionData.storytellerId,
+      storytellerName: sessionData.storytellerName,
+      permissionLevel: sessionData.permissionLevel,
+      expiresAt: sessionData.expiresAt
+    });
+
+    // Force a synchronous write to localStorage and verify it succeeded
+    localStorage.setItem('family_session', JSON.stringify(sessionData));
+
+    // Verify the write succeeded immediately
+    const verification = localStorage.getItem('family_session');
+    if (!verification) {
+      console.error('[Family Access] localStorage write failed!');
+    } else {
+      console.log('[Family Access] localStorage write confirmed');
     }
-  }, [sessionData, router]);
+
+    // Use requestAnimationFrame to ensure localStorage write is flushed to disk
+    // before we navigate (gives browser a chance to complete I/O)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        console.log('[Family Access] Redirecting to timeline...');
+        // Use window.location instead of router to force a full page load
+        // This ensures timeline reads fresh localStorage state
+        window.location.href = '/timeline';
+      });
+    });
+  }, [sessionData]);
 
   // Countdown timer effect
   useEffect(() => {
