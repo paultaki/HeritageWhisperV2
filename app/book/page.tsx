@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useAccountContext } from "@/hooks/use-account-context";
 import { Volume2, Pause, Loader2, Clock3, Pencil, Type } from "lucide-react";
@@ -61,6 +61,10 @@ export default function BookV4Page() {
   const { activeContext } = useAccountContext();
   const isOwnAccount = activeContext?.type === 'own' ?? false;
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Extract storyId from URL for deep linking (e.g., from timeline)
+  const initialStoryId = searchParams?.get('storyId') || undefined;
   
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
@@ -622,6 +626,7 @@ export default function BookV4Page() {
       {/* Mobile & Tablet: Full-screen mobile view */}
       <div className="lg:hidden">
         <MobileBookViewV2
+          initialStoryId={initialStoryId}
           caveatFont={caveat.className}
         />
       </div>
