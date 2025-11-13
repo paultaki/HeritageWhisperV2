@@ -247,54 +247,7 @@ export default function PhotoFirstRecordingPage() {
                 paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)'
               }}
             >
-              {/* Primary CTA - Start Recording (Most Common Path) */}
-              <div className="space-y-2">
-                <button
-                  onClick={async () => {
-                    if (isStarting) return;
-                    setIsStarting(true);
-                    // Haptic feedback on supported devices
-                    if ('vibrate' in navigator) {
-                      navigator.vibrate(10);
-                    }
-                    // Brief delay for visual feedback
-                    await new Promise(r => setTimeout(r, 100));
-                    setCurrentScreen('recording');
-                    setIsStarting(false);
-                  }}
-                  disabled={isStarting}
-                  className="w-full py-5 px-6 bg-purple-700 hover:bg-purple-800
-                             active:bg-purple-900 text-white rounded-2xl
-                             flex items-center justify-center gap-4
-                             text-xl font-semibold shadow-lg hover:shadow-xl
-                             transition-all duration-200 min-h-[64px]
-                             focus-visible:ring-4 focus-visible:ring-purple-300
-                             focus-visible:ring-offset-2
-                             active:scale-[0.98] group
-                             disabled:opacity-50 disabled:cursor-not-allowed
-                             md:py-6 md:text-2xl md:max-w-xl md:mx-auto md:min-h-[72px]
-                             motion-reduce:transition-none motion-reduce:hover:scale-100"
-                  aria-label="Start recording your story now"
-                  data-analytics="recording-start-no-photo"
-                >
-                  <Mic className="w-7 h-7 group-hover:scale-110 transition-transform motion-reduce:group-hover:scale-100" />
-                  <span>Start Recording</span>
-                </button>
-                <p className="text-center text-gray-600 text-base px-2">
-                  Record your story now, add photos anytime later
-                </p>
-              </div>
-
-              {/* Divider with "OR" */}
-              <div className="relative flex items-center py-2">
-                <div className="flex-grow border-t border-gray-300"></div>
-                <span className="flex-shrink mx-4 text-gray-500 font-medium text-sm tracking-wide">
-                  FOR RICHER MEMORIES
-                </span>
-                <div className="flex-grow border-t border-gray-300"></div>
-              </div>
-
-              {/* Secondary Option - Add Photo First */}
+              {/* Primary CTA - Record with Photo (Recommended Path) */}
               <div className="space-y-2">
                 <button
                   onClick={async () => {
@@ -310,52 +263,75 @@ export default function PhotoFirstRecordingPage() {
                     setIsStarting(false);
                   }}
                   disabled={isStarting}
-                  className="w-full py-5 px-6 bg-white border-3 border-amber-400
-                             hover:border-amber-500 hover:bg-amber-50
+                  className="w-full py-5 px-6 bg-purple-700 hover:bg-purple-800
+                             active:bg-purple-900 text-white rounded-2xl
+                             flex items-center justify-center gap-4
+                             text-xl font-semibold shadow-lg hover:shadow-xl
+                             transition-all duration-200 min-h-[64px]
+                             focus-visible:ring-4 focus-visible:ring-purple-300
+                             focus-visible:ring-offset-2
+                             active:scale-[0.98] group
+                             disabled:opacity-50 disabled:cursor-not-allowed
+                             md:py-6 md:text-2xl md:max-w-xl md:mx-auto md:min-h-[72px]
+                             motion-reduce:transition-none motion-reduce:hover:scale-100"
+                  aria-label="Add a photo before recording to see it while you speak"
+                  data-analytics="recording-start-with-photo"
+                >
+                  <Camera className="w-7 h-7 group-hover:scale-110 transition-transform motion-reduce:group-hover:scale-100" />
+                  <span>Record with Photo</span>
+                </button>
+                <p className="text-center text-gray-600 text-base px-2">
+                  One extra step helps you remember more details
+                </p>
+              </div>
+
+              {/* Divider with "OR" */}
+              <div className="relative flex items-center py-2">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="flex-shrink mx-4 text-gray-500 font-medium text-sm tracking-wide">
+                  OR SKIP THE PHOTO
+                </span>
+                <div className="flex-grow border-t border-gray-300"></div>
+              </div>
+
+              {/* Secondary Option - Audio Only */}
+              <div className="space-y-2">
+                <button
+                  onClick={async () => {
+                    if (isStarting) return;
+                    setIsStarting(true);
+                    // Haptic feedback on supported devices
+                    if ('vibrate' in navigator) {
+                      navigator.vibrate(10);
+                    }
+                    // Brief delay for visual feedback
+                    await new Promise(r => setTimeout(r, 100));
+                    setCurrentScreen('recording');
+                    setIsStarting(false);
+                  }}
+                  disabled={isStarting}
+                  className="w-full py-5 px-6 bg-white border-2 border-gray-300
+                             hover:border-gray-400 hover:bg-gray-50
                              rounded-2xl transition-all duration-200 min-h-[64px]
-                             shadow-md hover:shadow-lg
-                             focus-visible:ring-4 focus-visible:ring-amber-300
+                             shadow-sm hover:shadow-md
+                             focus-visible:ring-4 focus-visible:ring-gray-300
                              focus-visible:ring-offset-2
                              active:scale-[0.98] group
                              disabled:opacity-50 disabled:cursor-not-allowed
                              md:py-6 md:max-w-xl md:mx-auto md:min-h-[72px]
                              motion-reduce:transition-none motion-reduce:hover:scale-100"
-                  aria-label="Add a photo before recording to see it while you speak"
-                  data-analytics="recording-start-with-photo"
+                  aria-label="Start recording your story now without a photo"
+                  data-analytics="recording-start-no-photo"
                 >
-                  <div className="flex items-center gap-4">
-                    {/* Icon */}
-                    <div className="flex-shrink-0">
-                      <Camera className="w-7 h-7 text-amber-600 group-hover:scale-110 transition-transform motion-reduce:group-hover:scale-100" />
-                    </div>
-
-                    {/* Text Content */}
-                    <div className="flex-1 text-left min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-gray-900 text-lg">
-                          Record with Photo
-                        </span>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full
-                                       text-xs font-medium bg-amber-100 text-amber-800
-                                       whitespace-nowrap">
-                          Recommended
-                        </span>
-                      </div>
-                      <span className="block text-base text-gray-600 mt-0.5">
-                        Seeing a photo sparks details
-                      </span>
-                    </div>
+                  <div className="flex items-center justify-center gap-3">
+                    <Mic className="w-6 h-6 text-gray-600 group-hover:scale-110 transition-transform motion-reduce:group-hover:scale-100" />
+                    <span className="font-semibold text-gray-900 text-lg">
+                      Start Recording (no photo)
+                    </span>
                   </div>
                 </button>
-
-                {/* Trust-Building Micro-Copy */}
                 <p className="text-center text-sm text-gray-500 px-2">
-                  <span className="inline-flex items-center gap-1 justify-center">
-                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                    </svg>
-                    Photos stay private on your device until you share
-                  </span>
+                  Record now, add photos anytime later
                 </p>
               </div>
 
@@ -416,7 +392,7 @@ export default function PhotoFirstRecordingPage() {
         )}
       </main>
 
-      {/* Fixed Cancel Button at Bottom - Only on home screen */}
+      {/* Fixed Back Button at Bottom - Only on home screen */}
       {currentScreen === 'home' && (
         <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-[#e8ddd5] p-4 max-w-md md:max-w-3xl mx-auto shadow-lg">
           <Button
@@ -424,7 +400,7 @@ export default function PhotoFirstRecordingPage() {
             className="w-full h-[56px] text-lg font-semibold border-2 border-[#e8ddd5] text-[#5a4a3a] hover:border-[#c9a78a] hover:bg-white transition-all duration-200"
             onClick={() => router.push('/timeline')}
           >
-            Cancel
+            Back
           </Button>
         </div>
       )}

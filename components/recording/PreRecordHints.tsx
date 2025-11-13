@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 const TIPS = [
   {
     icon: "📅",
-    text: "Start with when and where—it anchors your memory"
+    text: "Start with when and where. It helps anchor your memory"
   },
   {
     icon: "👤",
@@ -79,7 +79,7 @@ export default function PreRecordHints() {
             <path d="M17 8V7a5 5 0 0 0-10 0v1H5a1 1 0 0 0-1 1v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V9a1 1 0 0 0-1-1h-2Zm-8 0V7a3 3 0 0 1 6 0v1H9Z"/>
           </svg>
           <p className="text-[21px] leading-7 text-[#5a4a3a]">
-            Private by default. You choose what to share.
+            Private by default. You decide what your family sees.
           </p>
         </div>
 
