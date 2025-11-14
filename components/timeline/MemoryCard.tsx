@@ -467,57 +467,22 @@ export const MemoryCard = React.memo(
                   </div>
                 </div>
 
-                {/* Right column: Audio button with duration */}
-                <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                {/* Right column: Audio button - Book view style */}
+                <div className="flex-shrink-0">
                   <button
                     onClick={handlePlayAudio}
-                    className="hover:opacity-80 transition-opacity"
+                    className="relative grid place-items-center h-12 w-12 flex-shrink-0 rounded-full bg-stone-900 text-white ring-1 ring-stone-800 shadow-md active:scale-95 transition"
                     aria-label={isPlaying ? "Pause audio" : "Play audio"}
+                    style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
                   >
-                    {/* Circular progress ring - 40px */}
-                    <div className="relative">
-                      <svg className="w-10 h-10 -rotate-90">
-                        {/* Background ring */}
-                        <circle
-                          cx="20"
-                          cy="20"
-                          r="18"
-                          fill="none"
-                          stroke="rgba(139,107,122,0.15)"
-                          strokeWidth="2.25"
-                        />
-                        {/* Progress ring */}
-                        {isPlaying && (
-                          <circle
-                            cx="20"
-                            cy="20"
-                            r="18"
-                            fill="none"
-                            stroke="rgba(212,165,116,0.8)"
-                            strokeWidth="2.25"
-                            strokeDasharray={`${2 * Math.PI * 18}`}
-                            strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
-                            strokeLinecap="round"
-                            className="transition-all duration-300"
-                          />
-                        )}
-                      </svg>
-                      {/* Icon in center */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        {isLoading ? (
-                          <Loader2 className="w-5 h-5 animate-spin text-amber-700" />
-                        ) : isPlaying ? (
-                          <Pause className="w-5 h-5 text-amber-700 fill-amber-700" />
-                        ) : (
-                          <Play className="w-5 h-5 text-amber-700 fill-amber-700 ml-0.5" />
-                        )}
-                      </div>
-                    </div>
+                    {isLoading ? (
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    ) : isPlaying ? (
+                      <Pause className="w-6 h-6" />
+                    ) : (
+                      <Play className="w-6 h-6 relative left-[0.5px]" />
+                    )}
                   </button>
-                  {/* Duration label */}
-                  <span className="text-xs text-gray-600 font-medium">
-                    {formatDuration(duration)}
-                  </span>
                 </div>
               </div>
             ) : (
@@ -825,57 +790,22 @@ export const MemoryCard = React.memo(
                 </div>
               </div>
 
-              {/* Right column: Audio button with duration */}
-              <div className="flex flex-col items-center gap-1 flex-shrink-0">
+              {/* Right column: Audio button - Book view style */}
+              <div className="flex-shrink-0">
                 <button
                   onClick={handlePlayAudio}
-                  className="hover:opacity-80 transition-opacity"
+                  className="relative grid place-items-center h-12 w-12 flex-shrink-0 rounded-full bg-stone-900 text-white ring-1 ring-stone-800 shadow-md active:scale-95 transition"
                   aria-label={isPlaying ? "Pause audio" : "Play audio"}
+                  style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
                 >
-                  {/* Circular progress ring - 40px */}
-                  <div className="relative">
-                    <svg className="w-10 h-10 -rotate-90">
-                      {/* Background ring */}
-                      <circle
-                        cx="20"
-                        cy="20"
-                        r="18"
-                        fill="none"
-                        stroke="rgba(139,107,122,0.15)"
-                        strokeWidth="2.25"
-                      />
-                      {/* Progress ring */}
-                      {isPlaying && (
-                        <circle
-                          cx="20"
-                          cy="20"
-                          r="18"
-                          fill="none"
-                          stroke="rgba(212,165,116,0.8)"
-                          strokeWidth="2.25"
-                          strokeDasharray={`${2 * Math.PI * 18}`}
-                          strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
-                          strokeLinecap="round"
-                          className="transition-all duration-300"
-                        />
-                      )}
-                    </svg>
-                    {/* Icon in center */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin text-amber-700" />
-                      ) : isPlaying ? (
-                        <Pause className="w-5 h-5 text-amber-700 fill-amber-700" />
-                      ) : (
-                        <Play className="w-5 h-5 text-amber-700 fill-amber-700 ml-0.5" />
-                      )}
-                    </div>
-                  </div>
+                  {isLoading ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : isPlaying ? (
+                    <Pause className="w-6 h-6" />
+                  ) : (
+                    <Play className="w-6 h-6 relative left-[0.5px]" />
+                  )}
                 </button>
-                {/* Duration label */}
-                <span className="text-xs text-gray-600 font-medium">
-                  {formatDuration(duration)}
-                </span>
               </div>
             </div>
           ) : (

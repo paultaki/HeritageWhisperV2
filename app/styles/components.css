@@ -26,8 +26,8 @@ body {
 /* meta row under titles */
 .hw-meta {
   font-family: var(--font-sans);
-  font-size: var(--meta);
-  color: var(--color-text-muted);
+  font-size: 15px; /* Book view metadata size */
+  color: #78716c; /* stone-500 */
   display: flex;
   gap: var(--space-3);
   align-items: center;
@@ -87,7 +87,7 @@ body {
 /* decade band - sticky chapter divider */
 .hw-decade-band {
   position: sticky;
-  top: calc(env(safe-area-inset-top, 0px) + 0px); /* Sticky to top of page when header scrolls out */
+  top: calc(env(safe-area-inset-top, 0px) + 52px); /* Mobile: Sticky below 52px header bar */
   z-index: 5; /* Above cards */
   /* Glass effect - matching nav bar styling */
   backdrop-filter: blur(18px) saturate(1.22) contrast(1.12) brightness(0.97);
@@ -217,7 +217,10 @@ body {
 }
 .hw-card-title {
   font-family: var(--font-sans);
-  color: #1f0f08;
+  color: #1c1917; /* stone-900 */
+  font-size: 19px; /* Book view title size */
+  font-weight: 600; /* semibold */
+  letter-spacing: -0.025em; /* tracking-tight */
   margin: 0 0 var(--space-2) 0;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -575,16 +575,16 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             <div className="flex items-center justify-between gap-4">
               {/* Left: Title and metadata stacked */}
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-gray-900 mb-0.5 truncate">
+                <h3 className="text-[19px] tracking-tight font-semibold text-stone-900 mb-0.5 truncate">
                   {story.title}
                 </h3>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-[15px] text-stone-500">
                   <span>
                     {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
                   </span>
                   {displayLifeAge !== null && displayLifeAge !== undefined && (
                     <>
-                      <span className="text-gray-300">•</span>
+                      <span className="text-stone-300">•</span>
                       <span>
                         {displayLifeAge > 0 && `Age ${displayLifeAge}`}
                         {displayLifeAge === 0 && `Birthday`}
@@ -595,49 +595,21 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 </div>
               </div>
 
-              {/* Right: V2 audio button */}
+              {/* Right: V2 audio button - Book view style */}
               {useV2Features && story.audioUrl && (
                 <button
                   onClick={handlePlayAudio}
-                  className="flex-shrink-0 hover:scale-105 transition-transform"
+                  className="relative grid place-items-center h-12 w-12 flex-shrink-0 rounded-full bg-stone-900 text-white ring-1 ring-stone-800 shadow-md active:scale-95 transition"
                   aria-label={isPlaying ? "Pause audio" : "Play audio"}
+                  style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
                 >
-                  <svg className="w-10 h-10 -rotate-90">
-                    {/* Background ring */}
-                    <circle
-                      cx="20"
-                      cy="20"
-                      r="16"
-                      fill="none"
-                      stroke="rgba(139,107,122,0.15)"
-                      strokeWidth="2"
-                    />
-                    {/* Progress ring */}
-                    {isPlaying && (
-                      <circle
-                        cx="20"
-                        cy="20"
-                        r="16"
-                        fill="none"
-                        stroke="rgba(139,107,122,0.5)"
-                        strokeWidth="2"
-                        strokeDasharray={`${2 * Math.PI * 16}`}
-                        strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
-                        strokeLinecap="round"
-                        className="transition-all duration-300"
-                      />
-                    )}
-                  </svg>
-                  {/* Icon in center */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {isLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
-                    ) : isPlaying ? (
-                      <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
-                    ) : (
-                      <Volume2 className="w-4 h-4 text-neutral-600" />
-                    )}
-                  </div>
+                  {isLoading ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : isPlaying ? (
+                    <Pause className="w-6 h-6" />
+                  ) : (
+                    <Play className="w-6 h-6 relative left-[0.5px]" />
+                  )}
                 </button>
               )}
             </div>
@@ -741,16 +713,16 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           <div className="flex items-center justify-between gap-4">
             {/* Left: Title and metadata stacked */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-0.5 truncate">
+              <h3 className="text-[19px] tracking-tight font-semibold text-stone-900 mb-0.5 truncate">
                 {story.title}
               </h3>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-[15px] text-stone-500">
                 <span>
                   {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
                 </span>
                 {displayLifeAge !== null && displayLifeAge !== undefined && (
                   <>
-                    <span className="text-gray-300">•</span>
+                    <span className="text-stone-300">•</span>
                     <span>
                       {displayLifeAge > 0 && `Age ${displayLifeAge}`}
                       {displayLifeAge === 0 && `Birthday`}
@@ -761,49 +733,21 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </div>
             </div>
 
-            {/* Right: V2 audio button */}
+            {/* Right: V2 audio button - Book view style */}
             {useV2Features && story.audioUrl && (
               <button
                 onClick={handlePlayAudio}
-                className="flex-shrink-0 hover:scale-105 transition-transform"
+                className="relative grid place-items-center h-12 w-12 flex-shrink-0 rounded-full bg-stone-900 text-white ring-1 ring-stone-800 shadow-md active:scale-95 transition"
                 aria-label={isPlaying ? "Pause audio" : "Play audio"}
+                style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
               >
-                <svg className="w-10 h-10 -rotate-90">
-                  {/* Background ring */}
-                  <circle
-                    cx="20"
-                    cy="20"
-                    r="16"
-                    fill="none"
-                    stroke="rgba(139,107,122,0.15)"
-                    strokeWidth="2"
-                  />
-                  {/* Progress ring */}
-                  {isPlaying && (
-                    <circle
-                      cx="20"
-                      cy="20"
-                      r="16"
-                      fill="none"
-                      stroke="rgba(139,107,122,0.5)"
-                      strokeWidth="2"
-                      strokeDasharray={`${2 * Math.PI * 16}`}
-                      strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
-                      strokeLinecap="round"
-                      className="transition-all duration-300"
-                    />
-                  )}
-                </svg>
-                {/* Icon in center */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
-                  ) : isPlaying ? (
-                    <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
-                  ) : (
-                    <Volume2 className="w-4 h-4 text-neutral-600" />
-                  )}
-                </div>
+                {isLoading ? (
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                ) : isPlaying ? (
+                  <Pause className="w-6 h-6" />
+                ) : (
+                  <Play className="w-6 h-6 relative left-[0.5px]" />
+                )}
               </button>
             )}
           </div>
@@ -1133,7 +1077,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   if (isLoading || isAccountContextLoading || (!user && !activeContext) || (isStoriesLoading && !storiesData)) {
 
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#fafaf9' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderBottomColor: isDark ? '#b0b3b8' : '#F59E0B' }}></div>
         <p className="text-lg" style={{ color: isDark ? '#b0b3b8' : '#6B4E42' }}>Loading your timeline...</p>
       </div>
@@ -1167,7 +1111,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   });
 
   return (
-    <div className={`min-h-screen ${isDark ? 'dark-theme' : ''}`} style={{ backgroundColor: isDark ? '#1c1c1d' : '#FFF8F3' }}>
+    <div className={`min-h-screen ${isDark ? 'dark-theme' : ''}`} style={{ backgroundColor: isDark ? '#1c1c1d' : '#fafaf9' }}>
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <DesktopPageHeader

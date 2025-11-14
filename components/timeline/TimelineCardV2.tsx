@@ -282,72 +282,29 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
         <div className="flex items-center justify-between gap-4">
           {/* Left: Title and metadata stacked */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-serif font-semibold text-gray-800 mb-0.5 truncate">
+            <h3 className="text-[19px] tracking-tight font-semibold text-stone-900 mb-0.5 truncate">
               {story.title}
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-[15px] text-stone-500">
               {formatMetadata()}
             </p>
           </div>
 
-          {/* Right: Audio player */}
+          {/* Right: Audio player - Book view style */}
           {story.audioUrl && (
             <button
               onClick={handlePlayAudio}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0"
+              className="relative grid place-items-center h-12 w-12 flex-shrink-0 rounded-full bg-stone-900 text-white ring-1 ring-stone-800 shadow-md active:scale-95 transition"
               aria-label={isPlaying ? "Pause audio" : "Play audio"}
+              style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
             >
-              {/* Circular progress ring */}
-              <div className="relative w-10 h-10">
-                <svg className="w-10 h-10 -rotate-90">
-                  {/* Background circle */}
-                  <circle
-                    cx="20"
-                    cy="20"
-                    r="16"
-                    fill="none"
-                    stroke="#FDE68A"
-                    strokeWidth="2.5"
-                  />
-                  {/* Progress circle */}
-                  {isPlaying && (
-                    <circle
-                      cx="20"
-                      cy="20"
-                      r="16"
-                      fill="none"
-                      stroke="#F59E0B"
-                      strokeWidth="2.5"
-                      strokeDasharray={`${2 * Math.PI * 16}`}
-                      strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
-                      strokeLinecap="round"
-                      className="transition-all duration-300"
-                    />
-                  )}
-                </svg>
-                {/* Icon in center */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-amber-600" />
-                  ) : isPlaying ? (
-                    <Pause className="w-5 h-5 text-amber-600 fill-amber-600" />
-                  ) : (
-                    <Volume2 className="w-5 h-5 text-amber-600" />
-                  )}
-                </div>
-              </div>
-
-              {/* Text label - Hidden on mobile for compactness */}
-              <div className="hidden sm:flex flex-col items-start">
-                <span className="text-sm font-semibold text-amber-800">
-                  {isPlaying ? 'Playing...' : `${formatDuration(duration)}`}
-                </span>
-                {isPlaying && (
-                  <span className="text-xs text-gray-600">
-                    {formatDuration(currentTime)} / {formatDuration(duration)}
-                  </span>
-                )}
-              </div>
+              {isLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : isPlaying ? (
+                <Pause className="w-6 h-6" />
+              ) : (
+                <Play className="w-6 h-6 relative left-[0.5px]" />
+              )}
             </button>
           )}
         </div>

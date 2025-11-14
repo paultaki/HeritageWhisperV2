@@ -108,7 +108,7 @@ export function TimelineMobileV2() {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center gap-4"
-        style={{ backgroundColor: ui.isDark ? "#1c1c1d" : "#FFF8F3" }}
+        style={{ backgroundColor: ui.isDark ? "#1c1c1d" : "#fafaf9" }}
       >
         <div
           className="animate-spin rounded-full h-12 w-12 border-b-2"
@@ -132,7 +132,7 @@ export function TimelineMobileV2() {
     : {
         backgroundColor:
           ui.currentColorScheme === "original"
-            ? "#FFF8F3"
+            ? "#fafaf9"
             : ui.currentColorScheme === "white"
               ? "#FFFFFF"
               : ui.currentColorScheme === "inverted"
@@ -145,7 +145,7 @@ export function TimelineMobileV2() {
                       ? "#0F0F0F"
                       : ui.currentColorScheme === "retro"
                         ? "#F5E6D3"
-                        : "#FFF8F3",
+                        : "#fafaf9",
         color:
           ui.currentColorScheme === "dark"
             ? "#E5E5E5"
