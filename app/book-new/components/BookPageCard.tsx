@@ -1,11 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useLayoutEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { BookPageCardProps } from "./types";
 import BookAudioPlayer from "./BookAudioPlayer";
-import { useSafeViewport } from "@/hooks/use-safe-viewport";
 
 /**
  * Format a date string or ISO date to readable format
@@ -29,12 +28,9 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   const [showContinueHint, setShowContinueHint] = useState(false);
   const [showFade, setShowFade] = useState(false);
   
-  // Detect viewport changes for URL bar handling
-  const { urlBarHeight } = useSafeViewport();
-  
-  // Calculate dynamic padding to prevent image cutoff when URL bar is visible
-  // Base padding is 56px for the top bar, add URL bar height when it's visible at the top
-  const dynamicPadding = 56 + (urlBarHeight || 0);
+  // Fixed padding for top bar (56px)
+  // Note: Dynamic viewport detection not needed since book page has overflow:hidden on body
+  const fixedPadding = 56;
 
   // Get the hero photo or first photo (same logic as SimpleMobileBookView)
   const heroPhoto = story.photos?.find((p) => p.isHero) || story.photos?.[0];
@@ -66,7 +62,14 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
     }
   }, [checkOverflow]);
 
-  // Reset scroll when this card becomes active (fixes scroll carryover)
+  // Reset scroll BEFORE paint when story changes (fixes Chrome scroll carryover)
+  useLayoutEffect(() => {
+    if (scrollerRef.current) {
+      scrollerRef.current.scrollTop = 0;
+    }
+  }, [story.id]);
+
+  // Also reset when this card becomes active (defensive)
   useEffect(() => {
     if (isActive && scrollerRef.current) {
       scrollerRef.current.scrollTop = 0;
@@ -111,8 +114,7 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
           ref={scrollerRef}
           className="relative h-full overflow-y-auto overscroll-contain"
           style={{
-            paddingTop: `${dynamicPadding}px`,
-            transition: 'padding-top 0.2s ease-out'
+            paddingTop: `${fixedPadding}px`
           }}
         >
           {/* Header image */}
