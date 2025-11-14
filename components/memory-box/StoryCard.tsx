@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 import { Volume2, Edit3, MoreVertical, Star, Copy, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
@@ -8,7 +9,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { StatusIcons } from "./StatusIcons";
 import { VisibilityModal } from "./VisibilityModal";
 
 type Props = {
@@ -134,14 +134,51 @@ export function StoryCard({
             </div>
           )}
 
-          {/* Status Icons - Top right */}
-          <div className="absolute top-3 right-3">
-            <StatusIcons
-              onTimeline={inTimeline}
-              inBook={inBook}
-              isFavorite={isFavorite}
-              isPrivate={isPrivate}
-            />
+          {/* Timeline/Book Toggle Badges - Top right */}
+          <div className="absolute top-2 right-2 flex flex-col gap-2">
+            {/* Timeline Badge */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleTimeline?.();
+              }}
+              className={`w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${
+                inTimeline ? "bg-black/75" : "bg-black/50"
+              }`}
+              aria-pressed={inTimeline}
+              aria-label={inTimeline ? "Remove from timeline" : "Add to timeline"}
+              type="button"
+            >
+              <Image
+                src={inTimeline ? "/timeline-open.svg" : "/timeline-closed.svg"}
+                width={24}
+                height={24}
+                alt=""
+                className="pointer-events-none"
+              />
+            </button>
+
+            {/* Book Badge */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleBook?.();
+              }}
+              className={`w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${
+                inBook ? "bg-black/75" : "bg-black/50"
+              }`}
+              aria-pressed={inBook}
+              aria-label={inBook ? "Remove from book view" : "Add to book view"}
+              type="button"
+            >
+              <Image
+                src={inBook ? "/book-open.svg" : "/book-closed.svg"}
+                width={24}
+                height={24}
+                alt=""
+                className="pointer-events-none"
+              />
+            </button>
           </div>
         </div>
 
