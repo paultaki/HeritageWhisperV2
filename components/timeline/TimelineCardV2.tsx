@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Loader2, ChevronLeft, ChevronRight, Volume2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { normalizeYear } from '@/lib/utils';
+import { apiRequest } from '@/lib/queryClient';
 
 interface Photo {
   url: string;
@@ -38,6 +39,9 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
   const [duration, setDuration] = useState(story.durationSeconds || 0);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Activity tracking state - only log once per playback session
+  const hasLoggedListeningRef = useRef(false);
 
   // CHANGE 3: Photo carousel state
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -142,6 +146,43 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
       }
     };
   }, [story.id, audioManager]);
+
+  // Activity tracking: Log story_listened event when threshold is met
+  useEffect(() => {
+    // Skip if already logged for this playback session
+    if (hasLoggedListeningRef.current) return;
+
+    // Skip if no duration or current time yet
+    if (!duration || !currentTime) return;
+
+    // Check if threshold is met: 10 seconds OR 50% of duration
+    const hasReachedTimeThreshold = currentTime >= 10;
+    const hasReachedPercentageThreshold = (currentTime / duration) >= 0.5;
+
+    if (hasReachedTimeThreshold || hasReachedPercentageThreshold) {
+      // Mark as logged to prevent duplicate events
+      hasLoggedListeningRef.current = true;
+
+      // Log the activity event (async, non-blocking)
+      apiRequest("POST", "/api/activity", {
+        eventType: "story_listened",
+        storyId: story.id,
+        metadata: {
+          listenedDuration: Math.floor(currentTime),
+          totalDuration: Math.floor(duration),
+          percentageListened: Math.floor((currentTime / duration) * 100),
+          source: "timeline",
+        },
+      }).catch((error) => {
+        console.error("[TimelineCard] Failed to log story_listened activity:", error);
+      });
+    }
+  }, [currentTime, duration, story.id]);
+
+  // Reset activity tracking when story changes
+  useEffect(() => {
+    hasLoggedListeningRef.current = false;
+  }, [story.id]);
 
   // CHANGE 3: Photo carousel handlers
   const handlePrevPhoto = (e: React.MouseEvent) => {

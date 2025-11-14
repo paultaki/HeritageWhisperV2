@@ -545,6 +545,24 @@ export const familyActivity = pgTable("family_activity", {
   createdAt: timestamp("created_at").default(sql`NOW()`),
 });
 
+// Activity events - tracks key user and family interactions
+export const activityEvents = pgTable("activity_events", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(), // Owner of the family circle (storyteller)
+  actorId: uuid("actor_id").references(() => users.id), // Who performed the action
+  familyMemberId: uuid("family_member_id").references(() => familyMembers.id), // Related family member
+  storyId: uuid("story_id").references(() => stories.id), // Related story
+  eventType: text("event_type").notNull(), // story_listened, story_recorded, family_member_joined, invite_sent, invite_resent
+  metadata: jsonb("metadata").$type<Record<string, any>>(), // Additional structured data
+  occurredAt: timestamp("occurred_at")
+    .notNull()
+    .default(sql`NOW()`),
+});
+
 export const insertProfileSchema = createInsertSchema(profiles).omit({
   id: true,
   createdAt: true,
@@ -563,6 +581,13 @@ export const insertFamilyActivitySchema = createInsertSchema(
 ).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertActivityEventSchema = createInsertSchema(
+  activityEvents,
+).omit({
+  id: true,
+  occurredAt: true,
 });
 
 // Shared access table for timeline/book sharing with permissions
@@ -837,6 +862,8 @@ export type InsertFamilyMember = z.infer<typeof insertFamilyMemberSchema>;
 export type FamilyMember = typeof familyMembers.$inferSelect;
 export type InsertFamilyActivity = z.infer<typeof insertFamilyActivitySchema>;
 export type FamilyActivity = typeof familyActivity.$inferSelect;
+export type InsertActivityEvent = z.infer<typeof insertActivityEventSchema>;
+export type ActivityEvent = typeof activityEvents.$inferSelect;
 export type InsertSharedAccess = z.infer<typeof insertSharedAccessSchema>;
 export type SharedAccess = typeof sharedAccess.$inferSelect;
 export type InsertUserAgreement = z.infer<typeof insertUserAgreementSchema>;

@@ -15,7 +15,7 @@ export default function GlassNavWrapper() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isQuestionDialogOpen, setIsQuestionDialogOpen] = useState(false);
   const { activeContext } = useAccountContext();
-  const isOwnAccount = activeContext?.type === 'own' ?? false;
+  const isOwnAccount = activeContext?.type === 'own';
 
   // Determine default ink based on page context
   // Book, story, and record pages have darker backgrounds (or photos) → use light ink

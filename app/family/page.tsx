@@ -54,6 +54,12 @@ import { FamilySummaryTile } from "@/components/family/FamilySummaryTile";
 import { FamilyMemberCard } from "@/components/family/FamilyMemberCard";
 import { PendingInviteCard } from "@/components/family/PendingInviteCard";
 import { PrivacyInfoCard } from "@/components/family/PrivacyInfoCard";
+import {
+  useRecentActivity,
+  formatActivityEvent,
+  getActivitySummary,
+  getRelativeTime,
+} from "@/hooks/useRecentActivity";
 
 interface FamilyMember {
   id: string;
@@ -69,15 +75,6 @@ interface FamilyMember {
   created_at: string;
   inviteExpired?: boolean;
   permissionLevel?: "viewer" | "contributor";
-}
-
-interface FamilyActivityItem {
-  id: string;
-  familyMember: FamilyMember;
-  storyTitle: string;
-  activityType: "viewed" | "commented" | "favorited" | "shared";
-  details?: string;
-  createdAt: string;
 }
 
 export default function FamilyPage() {
@@ -139,11 +136,10 @@ export default function FamilyPage() {
 
   const familyMembers = familyMembersData?.members || [];
 
-  // Fetch family activity
-  const { data: familyActivity = [], isLoading: loadingActivity } = useQuery<
-    FamilyActivityItem[]
-  >({
-    queryKey: ["/api/family/activity"],
+  // Fetch recent activity
+  const { data: activityEvents = [], isLoading: loadingActivity } = useRecentActivity({
+    limit: 8,
+    days: 30,
     enabled: !!user,
   });
 
@@ -400,45 +396,8 @@ export default function FamilyPage() {
   // Calculate stats
   const totalMembers = activeMembers.length;
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "viewed":
-        return Eye;
-      case "commented":
-        return Users;
-      case "favorited":
-        return Users;
-      default:
-        return Activity;
-    }
-  };
-
-  const getActivityText = (activity: FamilyActivityItem) => {
-    switch (activity.activityType) {
-      case "viewed":
-        return "viewed";
-      case "commented":
-        return "commented on";
-      case "favorited":
-        return "favorited";
-      default:
-        return "interacted with";
-    }
-  };
-
-  const getRelativeTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
+  // Calculate activity summary for the Recent Activity card
+  const activitySummary = getActivitySummary(activityEvents);
 
   const relationshipOptions = [
     "Son",
@@ -519,7 +478,7 @@ export default function FamilyPage() {
               {/* Privacy Card */}
               <PrivacyInfoCard />
 
-              {/* Recent Activity Card - Desktop */}
+              {/* Recent Activity Card */}
               <Card className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2.5 text-lg md:text-xl font-semibold text-gray-900 leading-tight">
@@ -528,12 +487,21 @@ export default function FamilyPage() {
                     </div>
                     Recent Activity
                   </CardTitle>
-                  <CardDescription className="text-xs md:text-sm text-gray-600 leading-snug">
-                    What your family has been viewing
-                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {familyActivity.length === 0 ? (
+                  {loadingActivity ? (
+                    <div className="space-y-3">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="flex gap-2.5 animate-pulse">
+                          <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
+                          <div className="flex-1 space-y-2">
+                            <div className="h-4 bg-gray-200 rounded w-3/4" />
+                            <div className="h-3 bg-gray-200 rounded w-1/2" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : activityEvents.length === 0 ? (
                     <div className="text-center py-6">
                       <div className="w-14 h-14 mx-auto mb-3.5 rounded-full bg-gray-100 flex items-center justify-center">
                         <Activity className="w-7 h-7 text-gray-400" />
@@ -547,37 +515,47 @@ export default function FamilyPage() {
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-3.5">
-                      {familyActivity.slice(0, 6).map((activity) => {
-                        const ActivityIcon = getActivityIcon(activity.activityType);
-                        return (
-                          <div key={activity.id} className="flex gap-2.5">
-                            <div className="flex-shrink-0">
-                              <div className="w-9 h-9 rounded-full flex items-center justify-center bg-blue-100">
-                                <ActivityIcon className="w-4.5 h-4.5 text-blue-600" />
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs md:text-sm text-gray-900 leading-snug">
-                                <span className="font-semibold">
-                                  {activity.familyMember.name ||
-                                    activity.familyMember.email}
-                                </span>{" "}
-                                <span className="text-gray-600">
-                                  {getActivityText(activity)}
-                                </span>{" "}
-                                <span className="font-medium">
-                                  "{activity.storyTitle}"
-                                </span>
+                    <>
+                      {/* Summary line */}
+                      {activitySummary.storiesListened > 0 && (
+                        <div className="mb-4 pb-3 border-b border-gray-200">
+                          <p className="text-xs md:text-sm text-gray-700 font-medium">
+                            This month:{" "}
+                            {activitySummary.uniqueListeners > 0 && (
+                              <>
+                                {activitySummary.uniqueListeners} family{" "}
+                                {activitySummary.uniqueListeners === 1 ? "member" : "members"}{" "}
+                                listened to{" "}
+                              </>
+                            )}
+                            {activitySummary.storiesListened}{" "}
+                            {activitySummary.storiesListened === 1 ? "story" : "stories"}
+                            {activitySummary.storiesRecorded > 0 && (
+                              <>
+                                {" "}• {activitySummary.storiesRecorded} new{" "}
+                                {activitySummary.storiesRecorded === 1 ? "story" : "stories"} recorded
+                              </>
+                            )}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Activity list */}
+                      <div className="space-y-3">
+                        {activityEvents.slice(0, 8).map((event) => (
+                          <div key={event.id} className="flex flex-col gap-0.5">
+                            <p className="text-sm md:text-base font-medium text-gray-900 leading-snug">
+                              {formatActivityEvent(event)}
+                            </p>
+                            {event.storyTitle && event.eventType === "story_listened" && (
+                              <p className="text-xs md:text-sm text-gray-600">
+                                "{event.storyTitle}"
                               </p>
-                              <p className="text-xs text-gray-500 mt-0.5">
-                                {getRelativeTime(activity.createdAt)}
-                              </p>
-                            </div>
+                            )}
                           </div>
-                        );
-                      })}
-                    </div>
+                        ))}
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>

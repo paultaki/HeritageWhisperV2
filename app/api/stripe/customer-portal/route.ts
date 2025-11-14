@@ -73,6 +73,8 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .single();
 
+    let stripeCustomerId: string;
+
     if (!stripeCustomer?.stripe_customer_id) {
       // Fallback: search for customer by email
       const customers = await stripe.customers.list({
@@ -97,12 +99,14 @@ export async function POST(request: NextRequest) {
           onConflict: 'user_id',
         });
 
-      stripeCustomer.stripe_customer_id = customers.data[0].id;
+      stripeCustomerId = customers.data[0].id;
+    } else {
+      stripeCustomerId = stripeCustomer.stripe_customer_id;
     }
 
     // 4. Create Customer Portal session
     const portalSession = await stripe.billingPortal.sessions.create({
-      customer: stripeCustomer.stripe_customer_id,
+      customer: stripeCustomerId,
       return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/profile`,
     });
 

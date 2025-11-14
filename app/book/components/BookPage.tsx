@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Pencil, Clock, Volume2, Pause, Loader2 } from "lucide-react";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
 import { ScrollIndicator } from "@/components/ScrollIndicators";
+import { apiRequest } from "@/lib/queryClient";
 
 interface Story {
   id: string;
@@ -564,6 +565,9 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Activity tracking state - only log once per playback session
+  const hasLoggedListeningRef = useRef(false);
   
   // Calculate progress percentage
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -648,6 +652,42 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
     // Only re-run when story.id changes, not when other story properties change.
     // This prevents recreating the audio element unnecessarily which would cause playback issues.
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [story.id]);
+
+  // Activity tracking: Log story_listened event when threshold is met
+  useEffect(() => {
+    // Skip if already logged for this playback session
+    if (hasLoggedListeningRef.current) return;
+
+    // Skip if no duration or current time yet
+    if (!duration || !currentTime) return;
+
+    // Check if threshold is met: 10 seconds OR 50% of duration
+    const hasReachedTimeThreshold = currentTime >= 10;
+    const hasReachedPercentageThreshold = (currentTime / duration) >= 0.5;
+
+    if (hasReachedTimeThreshold || hasReachedPercentageThreshold) {
+      // Mark as logged to prevent duplicate events
+      hasLoggedListeningRef.current = true;
+
+      // Log the activity event (async, non-blocking)
+      apiRequest("POST", "/api/activity", {
+        eventType: "story_listened",
+        storyId: story.id,
+        metadata: {
+          listenedDuration: Math.floor(currentTime),
+          totalDuration: Math.floor(duration),
+          percentageListened: Math.floor((currentTime / duration) * 100),
+        },
+      }).catch((error) => {
+        console.error("[BookPage] Failed to log story_listened activity:", error);
+      });
+    }
+  }, [currentTime, duration, story.id]);
+
+  // Reset activity tracking when story changes
+  useEffect(() => {
+    hasLoggedListeningRef.current = false;
   }, [story.id]);
 
   // Toggle audio playback

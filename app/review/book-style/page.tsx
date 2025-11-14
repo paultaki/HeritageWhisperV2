@@ -217,9 +217,9 @@ function BookStyleReviewContent() {
 
           // For edit mode coming from transcription selection, use the selected transcript
           if (mode === "edit") {
-            const selectedTranscript = cachedData.useEnhanced
+            const selectedTranscript = (cachedData.useEnhanced
               ? (cachedData.enhancedTranscript || cachedData.originalTranscript || cachedData.transcription || "")
-              : (cachedData.originalTranscript || cachedData.transcription || "");
+              : (cachedData.originalTranscript || cachedData.transcription || "")) as string;
 
             console.log("[Review] Edit mode - using", cachedData.useEnhanced ? "enhanced" : "original", "transcript");
             console.log("[Review] Selected transcript length:", selectedTranscript?.length);
@@ -273,9 +273,9 @@ function BookStyleReviewContent() {
             return;
           } else if (cachedData.transcription) {
             // Legacy support for old flow
-            setTranscription(cachedData.transcription);
+            setTranscription(cachedData.transcription as string);
           } else if (cachedData.originalTranscript) {
-            setTranscription(cachedData.originalTranscript);
+            setTranscription(cachedData.originalTranscript as string);
           }
 
           if (cachedData.title) {
@@ -427,14 +427,14 @@ function BookStyleReviewContent() {
 
       // For NEW stories with blob photos or audio, we need to create the story first, then upload media
       const hasNewPhotos =
-        !isEditing && photos.some((p) => p.url.startsWith("blob:"));
+        !isEditing && photos.some((p) => p.url?.startsWith("blob:"));
       const hasNewAudio = mainAudioBlob && audioUrl?.startsWith("blob:");
 
       if (!isEditing && (hasNewPhotos || hasNewAudio)) {
         console.log("=== NEW STORY WITH MEDIA ===");
         console.log(
           "Photos with blob URLs:",
-          photos.filter((p) => p.url.startsWith("blob:")).length,
+          photos.filter((p) => p.url?.startsWith("blob:")).length,
         );
         console.log("Has audio blob:", !!hasNewAudio);
 
@@ -591,7 +591,7 @@ function BookStyleReviewContent() {
             pendingFileName: pendingFile?.name,
           });
 
-          if (pendingFile && photo.url.startsWith("blob:")) {
+          if (pendingFile && photo.url?.startsWith("blob:")) {
             try {
               console.log(`✅ Uploading photo ${i} to permanent storage...`);
               const fileExtension = pendingFile.name.split(".").pop() || "jpg";
@@ -675,7 +675,7 @@ function BookStyleReviewContent() {
               }
 
               // Clean up
-              URL.revokeObjectURL(photo.url);
+              if (photo.url) URL.revokeObjectURL(photo.url);
               delete (window as any)[`__pendingPhotoFile_${i}`];
             } catch (error) {
               console.error(`Photo ${i} upload failed:`, error);
@@ -824,7 +824,7 @@ function BookStyleReviewContent() {
         });
 
         // If it's a blob URL, upload it first
-        if (photo.url.startsWith("blob:") && pendingFile) {
+        if (photo.url?.startsWith("blob:") && pendingFile) {
           try {
             console.log(`Uploading blob photo ${i} to storage...`);
             const fileExtension = pendingFile.name.split(".").pop() || "jpg";
@@ -884,12 +884,12 @@ function BookStyleReviewContent() {
             }
 
             // Clean up
-            URL.revokeObjectURL(photo.url);
+            if (photo.url) URL.revokeObjectURL(photo.url);
             delete (window as any)[`__pendingPhotoFile_${i}`];
           } catch (error) {
             console.error(`Failed to upload photo ${i}:`, error);
           }
-        } else if (!photo.url.startsWith("blob:")) {
+        } else if (photo.url && !photo.url.startsWith("blob:")) {
           // Keep existing photos that are not blob URLs
           // Remove the file property if it exists (shouldn't be in DB)
           const { file, ...photoWithoutFile } = photo;
@@ -1162,12 +1162,12 @@ function BookStyleReviewContent() {
       console.log("[Transcription Select] User selected:", useEnhanced ? "enhanced" : "original");
 
       // Get the actual transcription text (it should be in originalTranscript or rawTranscript)
-      const transcriptionText = cachedData.originalTranscript || cachedData.rawTranscript || "";
+      const transcriptionText = (cachedData.originalTranscript || cachedData.rawTranscript || "") as string;
       
       console.log("[Transcription Select] Available transcription:", {
-        originalTranscript: cachedData.originalTranscript?.substring(0, 50),
-        rawTranscript: cachedData.rawTranscript?.substring(0, 50),
-        enhancedTranscript: cachedData.enhancedTranscript?.substring(0, 50),
+        originalTranscript: (cachedData.originalTranscript as string)?.substring(0, 50),
+        rawTranscript: (cachedData.rawTranscript as string)?.substring(0, 50),
+        enhancedTranscript: (cachedData.enhancedTranscript as string)?.substring(0, 50),
       });
 
       // Update cached data with selection and ensure transcription is set
@@ -1201,8 +1201,8 @@ function BookStyleReviewContent() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
         <TranscriptionSelectionScreen
-          originalTranscript={cachedData.originalTranscript || cachedData.rawTranscript || ""}
-          enhancedTranscript={cachedData.enhancedTranscript || cachedData.originalTranscript || cachedData.rawTranscript || ""}
+          originalTranscript={(cachedData.originalTranscript || cachedData.rawTranscript || "") as string}
+          enhancedTranscript={(cachedData.enhancedTranscript || cachedData.originalTranscript || cachedData.rawTranscript || "") as string}
           isLoading={false}
           onSelect={handleTranscriptionSelect}
           onCancel={handleCancel}

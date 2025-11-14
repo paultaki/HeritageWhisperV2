@@ -62,7 +62,7 @@ interface Story {
 function BookV4PageContent() {
   const { user } = useAuth();
   const { activeContext } = useAccountContext();
-  const isOwnAccount = activeContext?.type === 'own' ?? false;
+  const isOwnAccount = activeContext?.type === 'own';
   const router = useRouter();
   const searchParams = useSearchParams();
   

@@ -33,7 +33,7 @@ export default function HamburgerMenu() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { activeContext } = useAccountContext();
-  const isOwnAccount = activeContext?.type === 'own' ?? false;
+  const isOwnAccount = activeContext?.type === 'own';
   const modeSelection = useModeSelection();
 
   console.log('[HamburgerMenu] activeContext:', activeContext, 'isOwnAccount:', isOwnAccount, 'user:', !!user);

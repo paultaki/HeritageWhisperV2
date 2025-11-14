@@ -10,6 +10,7 @@ import { CreateStorySchema, safeValidateRequestBody } from "@/lib/validationSche
 import { ZodError } from "zod";
 import { hasAIConsent } from "@/lib/aiConsent";
 import { sendNewStoryNotifications } from "@/lib/notifications/send-new-story-notifications";
+import { logActivityEvent } from "@/lib/activity";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -394,6 +395,25 @@ export async function POST(request: NextRequest) {
     }).catch((error) => {
       // Log error but don't fail the request
       logger.error('[Stories API] Failed to send story notification emails:', error);
+    });
+
+    // ============================================================================
+    // ACTIVITY TRACKING: Log story_recorded event (async, non-blocking)
+    // ============================================================================
+    logActivityEvent({
+      userId: user.id,
+      actorId: user.id,
+      storyId: newStory.id,
+      eventType: "story_recorded",
+      metadata: {
+        storyTitle: newStory.title,
+        year: newStory.year,
+        hasAudio: !!newStory.audio_url,
+        hasPhoto: !!newStory.photo_url,
+      },
+    }).catch((error) => {
+      // Log error but don't fail the request
+      logger.error('[Stories API] Failed to log story_recorded activity:', error);
     });
 
     // ============================================================================

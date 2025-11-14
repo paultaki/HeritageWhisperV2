@@ -34,7 +34,7 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
   const { user, logout } = useAuth();
   const modeSelection = useModeSelection();
   const { activeContext } = useAccountContext();
-  const isOwnAccount = activeContext?.type === 'own' ?? false;
+  const isOwnAccount = activeContext?.type === 'own';
 
   console.log('[GlassMenuDropdown] activeContext:', activeContext, 'isOwnAccount:', isOwnAccount);
 

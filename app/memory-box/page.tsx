@@ -149,7 +149,7 @@ export default function MemoryBoxV2Page() {
   // Get active storyteller context for family sharing (must be before defaultTab)
   const { activeContext } = useAccountContext();
   const storytellerId = activeContext?.storytellerId || user?.id;
-  const isOwnAccount = activeContext?.type === 'own' ?? false;
+  const isOwnAccount = activeContext?.type === 'own';
 
   // Dual authentication: Use JWT for owners, sessionToken for viewers
   const authToken = session?.access_token || familySession?.sessionToken;
@@ -715,7 +715,7 @@ export default function MemoryBoxV2Page() {
             includeInTimeline: selectedStory.includeInTimeline,
             isFavorite: selectedStory.isFavorite,
             wisdomClipText: selectedStory.metadata?.lessonsLearned || undefined,
-            lifeAge: selectedStory.storyYear ? parseInt(calculateAge(selectedStory.storyYear) || "0") : undefined,
+            lifeAge: selectedStory.storyYear ? parseInt(calculateAge(selectedStory.storyYear) || "0") : 0,
             userId: user?.id || "",
             photoTransform: undefined,
             updatedAt: undefined,
@@ -734,7 +734,7 @@ export default function MemoryBoxV2Page() {
             includeInTimeline: s.includeInTimeline,
             isFavorite: s.isFavorite,
             wisdomClipText: s.metadata?.lessonsLearned || undefined,
-            lifeAge: s.storyYear ? parseInt(calculateAge(s.storyYear) || "0") : undefined,
+            lifeAge: s.storyYear ? parseInt(calculateAge(s.storyYear) || "0") : 0,
             userId: user?.id || "",
             photoTransform: undefined,
             updatedAt: undefined,

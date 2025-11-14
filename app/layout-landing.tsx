@@ -1,4 +1,4 @@
-import { Providers } from "../providers";
+import { Providers } from "./providers";
 
 export default function LandingV3Layout({
   children,

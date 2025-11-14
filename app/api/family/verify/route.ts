@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { logActivityEvent } from '@/lib/activity';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -96,6 +97,21 @@ export async function GET(req: NextRequest) {
           access_count: 1,
         })
         .eq('id', familyMember.id);
+
+      // Log family_member_joined activity event (async, non-blocking)
+      logActivityEvent({
+        userId: familyMember.user_id, // Storyteller
+        actorId: null, // No specific actor yet (family member hasn't created account)
+        familyMemberId: familyMember.id,
+        eventType: 'family_member_joined',
+        metadata: {
+          email: familyMember.email,
+          name: familyMember.name,
+          relationship: familyMember.relationship,
+        },
+      }).catch((error) => {
+        console.error('[Family Verify] Failed to log family_member_joined activity:', error);
+      });
     } else {
       // Update last accessed time and increment count
       await supabaseAdmin

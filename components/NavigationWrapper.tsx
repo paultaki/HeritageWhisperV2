@@ -2,7 +2,6 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import MobileNavigation from "./MobileNavigation";
 import HamburgerMenu from "./HamburgerMenu";
 import { useModeSelection } from "@/hooks/use-mode-selection";
 import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
@@ -18,9 +17,6 @@ export default function NavigationWrapper() {
 
   return (
     <>
-      {/* Mobile Navigation (bottom bar) - DISABLED - now using GlassNav */}
-      {/* {!isInterviewChat && <MobileNavigation />} */}
-
       {/* Hamburger Menu (top right) - DISABLED - now using GlassMenuDropdown in GlassNav */}
       {/* {!isInterviewChat && !isBookPage && <HamburgerMenu />} */}
 

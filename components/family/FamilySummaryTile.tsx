@@ -23,33 +23,36 @@ export function FamilySummaryTile({
     <Card
       onClick={onClick}
       className={`
-        bg-white border border-gray-200 rounded-xl overflow-hidden
+        rounded-2xl shadow-sm
         ${isClickable ? "cursor-pointer hover:shadow-md transition-all duration-200 active:scale-[0.98]" : ""}
-        ${isPrimary ? "bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200" : ""}
+        ${isPrimary ? "bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200" : "bg-white border border-gray-200"}
       `}
     >
-      <div className="px-3.5 py-3 md:px-4 md:py-3.5">
-        <div className="flex items-center gap-3">
-          <div
+      <div className="flex flex-col items-center justify-center gap-2 py-4 md:py-5">
+        {/* Row 1: Icon + Label */}
+        <div className="flex items-center gap-2">
+          <span
             className={`
-              inline-flex w-8 h-8 rounded-full items-center justify-center shrink-0
-              ${isPrimary ? "bg-blue-600" : "bg-blue-100"}
+              inline-flex h-8 w-8 items-center justify-center rounded-full shrink-0
+              ${isPrimary ? "bg-blue-600" : "bg-slate-100"}
             `}
           >
-            <Icon className={`w-4 h-4 ${isPrimary ? "text-white" : "text-blue-600"}`} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-gray-600 leading-tight">{label}</p>
-            <p
-              className={`
-                text-xl md:text-2xl font-bold leading-none mt-0.5
-                ${isPrimary ? "text-blue-700" : "text-gray-900"}
-              `}
-            >
-              {value}
-            </p>
-          </div>
+            <Icon className={`h-4 w-4 ${isPrimary ? "text-white" : "text-slate-700"}`} />
+          </span>
+          <span className="text-sm md:text-base font-medium text-slate-700">
+            {label}
+          </span>
         </div>
+
+        {/* Row 2: Value */}
+        <span
+          className={`
+            text-xl md:text-2xl font-semibold
+            ${isPrimary ? "text-blue-600" : "text-slate-900"}
+          `}
+        >
+          {value}
+        </span>
       </div>
     </Card>
   );
