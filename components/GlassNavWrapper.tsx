@@ -39,10 +39,9 @@ export default function GlassNavWrapper() {
   const isLandingPage = pathname === '/';
   const isInterviewChat = pathname === '/interview-chat';
   const isAuthPage = pathname.startsWith('/auth');
-  const isRecording = pathname === '/recording';
 
   // Don't show glass nav on these pages
-  if (isLandingPage || isInterviewChat || isAuthPage || isRecording) {
+  if (isLandingPage || isInterviewChat || isAuthPage) {
     return null;
   }
 
@@ -145,7 +144,7 @@ export default function GlassNavWrapper() {
         id="glass-nav"
         items={navItems}
         activeKey={getActiveKey()}
-        className="pb-[calc(env(safe-area-inset-bottom)+6px)]"
+        className=""
         dataInk={ink}
         isAssertive={isAssertive}
         onMenuClick={() => setIsMenuOpen(!isMenuOpen)}

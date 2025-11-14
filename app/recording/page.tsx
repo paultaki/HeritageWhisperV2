@@ -8,7 +8,6 @@ import { Camera, X, CheckCircle, Mic } from "lucide-react";
 import { CameraCapture } from "@/components/recording/CameraCapture";
 import { AudioRecordingWithPhoto } from "@/components/recording/AudioRecordingWithPhoto";
 import { PhotoFirstReview } from "@/components/recording/PhotoFirstReview";
-import PreRecordHints from "@/components/recording/PreRecordHints";
 import { navCache } from "@/lib/navCache";
 import { useToast } from "@/hooks/use-toast";
 
@@ -238,13 +237,11 @@ export default function PhotoFirstRecordingPage() {
               </h1>
             </div>
 
-            <PreRecordHints />
-
             {/* Button Section - Premium Senior-Optimized Design */}
             <div
               className="space-y-5 px-6 pb-6 md:max-w-2xl md:mx-auto"
               style={{
-                paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)'
+                paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))'
               }}
             >
               {/* Primary CTA - Record with Photo (Recommended Path) */}
@@ -391,19 +388,6 @@ export default function PhotoFirstRecordingPage() {
           </div>
         )}
       </main>
-
-      {/* Fixed Back Button at Bottom - Only on home screen */}
-      {currentScreen === 'home' && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-[#e8ddd5] p-4 max-w-md md:max-w-3xl mx-auto shadow-lg">
-          <Button
-            variant="outline"
-            className="w-full h-[56px] text-lg font-semibold border-2 border-[#e8ddd5] text-[#5a4a3a] hover:border-[#c9a78a] hover:bg-white transition-all duration-200"
-            onClick={() => router.push('/timeline')}
-          >
-            Back
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
