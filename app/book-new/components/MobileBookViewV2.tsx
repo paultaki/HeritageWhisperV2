@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAccountContext } from "@/hooks/use-account-context";
@@ -186,9 +186,9 @@ export default function MobileBookViewV2({
     }
   }, [bookStories, currentIndex, router]);
 
-  // Reset scroll position on mount (fixes Chrome mobile scroll carryover)
-  useEffect(() => {
-    // Force scroll to top immediately
+  // Reset scroll position BEFORE paint (fixes Chrome mobile scroll carryover)
+  useLayoutEffect(() => {
+    // Force scroll to top immediately - BEFORE browser paints
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
@@ -207,6 +207,20 @@ export default function MobileBookViewV2({
         history.scrollRestoration = previousRestoration;
       };
     }
+  }, []);
+
+  // Lock body scroll to prevent any background scrolling
+  useEffect(() => {
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+    };
   }, []);
 
   // Jump to initial story if provided

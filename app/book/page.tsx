@@ -3,7 +3,7 @@
 // Prevent static generation for this user-specific page
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
@@ -382,9 +382,9 @@ function BookV4PageContent() {
     }
   }, [getCurrentStoryId]);
 
-  // Reset scroll position on mount (fixes Chrome mobile scroll carryover)
-  useEffect(() => {
-    // Force scroll to top immediately
+  // Reset scroll position BEFORE paint (fixes Chrome mobile scroll carryover)
+  useLayoutEffect(() => {
+    // Force scroll to top immediately - BEFORE browser paints
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
