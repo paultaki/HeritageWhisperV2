@@ -98,10 +98,10 @@ export function MemoryOverlay({
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "";
+      document.body.style.removeProperty('overflow');
     }
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.removeProperty('overflow');
     };
   }, [isOpen]);
 

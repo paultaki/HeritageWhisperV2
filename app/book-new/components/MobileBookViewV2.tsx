@@ -186,6 +186,15 @@ export default function MobileBookViewV2({
     }
   }, [bookStories, currentIndex, router]);
 
+  // Force cleanup any stuck overflow state on mount (Chrome iOS fix)
+  useLayoutEffect(() => {
+    // CRITICAL: Force remove any stuck body/html overflow from other components
+    // (MultiPhotoUploader, MemoryOverlay, etc. may have left body overflow stuck)
+    // This is especially important for Chrome iOS which caches these values aggressively
+    document.body.style.removeProperty('overflow');
+    document.documentElement.style.removeProperty('overflow');
+  }, []);
+
   // Reset scroll position BEFORE paint to prevent scroll carryover from previous pages
   useLayoutEffect(() => {
     // Force window scroll to top immediately - BEFORE browser paints

@@ -4,12 +4,20 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { useRouter } from "next/navigation";
 import { TimelineDesktop } from "@/components/timeline/TimelineDesktop";
 import { TimelineMobileV2 } from "@/components/timeline/TimelineMobileV2";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect } from "react";
 
 export default function TimelinePage() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const router = useRouter();
   const [isDark, setIsDark] = useState(false);
+
+  // Force cleanup any stuck overflow state on mount (Chrome iOS fix)
+  useLayoutEffect(() => {
+    // Remove any stuck body/html overflow from other pages (book view, modals, etc.)
+    // Chrome iOS caches these values aggressively and doesn't clean them up
+    document.body.style.removeProperty('overflow');
+    document.documentElement.style.removeProperty('overflow');
+  }, []);
 
   useEffect(() => {
     const updateFromDom = () => {

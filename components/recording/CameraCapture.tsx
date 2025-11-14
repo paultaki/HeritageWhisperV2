@@ -74,37 +74,15 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
-    // Calculate 16:10 aspect ratio crop
-    const videoAspect = video.videoWidth / video.videoHeight;
-    const targetAspect = 16 / 10;
+    // Save full video frame without pre-cropping
+    // User can crop/zoom in the edit screen
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
-    let sourceWidth = video.videoWidth;
-    let sourceHeight = video.videoHeight;
-    let sourceX = 0;
-    let sourceY = 0;
-
-    if (videoAspect > targetAspect) {
-      // Video is wider than 16:10, crop sides
-      sourceWidth = video.videoHeight * targetAspect;
-      sourceX = (video.videoWidth - sourceWidth) / 2;
-    } else {
-      // Video is taller than 16:10, crop top/bottom
-      sourceHeight = video.videoWidth / targetAspect;
-      sourceY = (video.videoHeight - sourceHeight) / 2;
-    }
-
-    // Set canvas to 16:10 aspect ratio
-    canvas.width = sourceWidth;
-    canvas.height = sourceHeight;
-
-    // Draw cropped video frame to canvas
+    // Draw full video frame to canvas
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      ctx.drawImage(
-        video,
-        sourceX, sourceY, sourceWidth, sourceHeight,
-        0, 0, canvas.width, canvas.height
-      );
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const dataURL = canvas.toDataURL('image/jpeg', 0.95);
       setCapturedImage(dataURL);
       setIsEditing(true); // Go to edit mode after capture
@@ -399,7 +377,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
               >
                 <img
                   src={capturedImage}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain"
                   style={{
                     transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x}%, ${editTransform.position.y}%)`,
                     transformOrigin: 'center center',

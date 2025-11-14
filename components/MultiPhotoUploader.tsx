@@ -134,13 +134,13 @@ export function MultiPhotoUploader({
       document.body.style.overflow = "hidden";
     } else {
       setEditingTransform(null);
-      // Re-enable body scroll when modal closes
-      document.body.style.overflow = "";
+      // Re-enable body scroll when modal closes (use removeProperty for Chrome iOS)
+      document.body.style.removeProperty('overflow');
     }
 
     // Cleanup on unmount
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.removeProperty('overflow');
     };
   }, [selectedPhoto]);
 

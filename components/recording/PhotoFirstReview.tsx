@@ -164,15 +164,13 @@ export function PhotoFirstReview({
         {photoDataURL ? (
           <img
             src={photoDataURL}
-            className="w-full h-full object-cover opacity-90"
+            className="w-full h-full object-contain opacity-90"
             alt="Photo"
             style={
               photoTransform
                 ? {
                     transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x}%, ${photoTransform.position.y}%)`,
                     transformOrigin: "center center",
-                    objectFit: "cover",
-                    objectPosition: "center center",
                   }
                 : undefined
             }

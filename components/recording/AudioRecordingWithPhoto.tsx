@@ -424,7 +424,7 @@ export function AudioRecordingWithPhoto({
               >
                 <img
                   src={photoDataURL}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain"
                   style={{
                     transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x}%, ${photoTransform.position.y}%)`,
                     transformOrigin: 'center center',
@@ -478,7 +478,7 @@ export function AudioRecordingWithPhoto({
           <div className="relative w-full h-full md:h-auto md:w-full md:max-w-4xl md:mx-auto overflow-hidden" style={{ aspectRatio: '16/10' }}>
             <img
               src={photoDataURL}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-contain"
               style={{
                 transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x}%, ${photoTransform.position.y}%)`,
                 transformOrigin: 'center center',
