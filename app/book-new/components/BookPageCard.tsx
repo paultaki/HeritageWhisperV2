@@ -66,6 +66,13 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
     }
   }, [checkOverflow]);
 
+  // Reset scroll when this card becomes active (fixes scroll carryover)
+  useEffect(() => {
+    if (isActive && scrollerRef.current) {
+      scrollerRef.current.scrollTop = 0;
+    }
+  }, [isActive]);
+
   // Set up resize observer and scroll listener
   useEffect(() => {
     if (!scrollerRef.current) return;
