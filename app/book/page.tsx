@@ -382,36 +382,7 @@ function BookV4PageContent() {
     }
   }, [getCurrentStoryId]);
 
-  // Reset scroll position BEFORE paint (fixes Chrome mobile scroll carryover)
-  useLayoutEffect(() => {
-    // Force scroll to top immediately - BEFORE browser paints
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    
-    // Disable scroll restoration for this page
-    if ('scrollRestoration' in history) {
-      const previousRestoration = history.scrollRestoration;
-      history.scrollRestoration = 'manual';
-      
-      return () => {
-        history.scrollRestoration = previousRestoration;
-      };
-    }
-  }, []);
-
-  // Prevent page scrolling
-  useEffect(() => {
-    // Lock body scroll
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    
-    return () => {
-      // Restore scroll on unmount
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-    };
-  }, []);
+  // Note: Scroll locking and reset is now handled by app/book/layout.tsx
 
   // Reset scroll position and stop audio when spread changes
   useEffect(() => {
