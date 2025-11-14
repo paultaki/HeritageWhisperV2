@@ -198,13 +198,6 @@ export default function MobileBookViewV2({
       pagerRef.current.scrollLeft = 0;
     }
     
-    // Lock body/html scroll to prevent background scrolling
-    const originalBodyOverflow = document.body.style.overflow;
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    
     // Disable browser's scroll restoration feature
     let originalScrollRestoration: ScrollRestoration | undefined;
     if ('scrollRestoration' in history) {
@@ -212,22 +205,14 @@ export default function MobileBookViewV2({
       history.scrollRestoration = 'manual';
     }
     
-    // Cleanup: restore original overflow styles and scroll restoration
+    // Cleanup: restore scroll restoration ONLY
+    // NOTE: We do NOT touch body.style.overflow at all!
+    // The container classes handle overflow isolation:
+    // - Root div: overflow-hidden
+    // - Pager div: overflow-x-auto overflow-y-hidden
+    // - Individual cards: overflow-y-auto
+    // This prevents body overflow from getting stuck across page navigations.
     return () => {
-      // Remove inline styles to restore default behavior
-      if (originalBodyOverflow) {
-        document.body.style.overflow = originalBodyOverflow;
-      } else {
-        document.body.style.removeProperty('overflow');
-      }
-      
-      if (originalHtmlOverflow) {
-        document.documentElement.style.overflow = originalHtmlOverflow;
-      } else {
-        document.documentElement.style.removeProperty('overflow');
-      }
-      
-      // Restore scroll restoration setting
       if (originalScrollRestoration && 'scrollRestoration' in history) {
         history.scrollRestoration = originalScrollRestoration;
       }
