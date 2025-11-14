@@ -1,5 +1,8 @@
 "use client";
 
+// Prevent static generation for this page
+export const dynamic = 'force-dynamic';
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { useAccountContext } from "@/hooks/use-account-context";

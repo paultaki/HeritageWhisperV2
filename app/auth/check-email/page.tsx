@@ -14,6 +14,9 @@ import { Mail, ArrowLeft, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
+// Prevent static generation for this auth page
+export const dynamic = 'force-dynamic';
+
 function CheckEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();

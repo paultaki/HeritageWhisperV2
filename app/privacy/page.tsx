@@ -7,6 +7,9 @@ import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 
+// Prevent static generation for this page
+export const dynamic = 'force-dynamic';
+
 export default function PrivacyPolicy() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [isDark, setIsDark] = useState(false);

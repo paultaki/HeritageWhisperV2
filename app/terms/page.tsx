@@ -6,6 +6,9 @@ import { FileText } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 
+// Prevent static generation for this page
+export const dynamic = 'force-dynamic';
+
 export default function TermsOfService() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [isDark, setIsDark] = useState(false);

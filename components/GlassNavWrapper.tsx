@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Clock, BookOpen, Mic, Menu, Archive, MessageSquarePlus } from "lucide-react";
 import GlassNav from "./GlassNav";
 import GlassMenuDropdown from "./GlassMenuDropdown";
@@ -12,7 +12,6 @@ import { useAccountContext } from "@/hooks/use-account-context";
 export default function GlassNavWrapper() {
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isQuestionDialogOpen, setIsQuestionDialogOpen] = useState(false);
   const { activeContext } = useAccountContext();

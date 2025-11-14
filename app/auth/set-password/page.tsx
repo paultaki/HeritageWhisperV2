@@ -23,6 +23,9 @@ import {
   EyeOff,
 } from "lucide-react";
 
+// Prevent static generation for this auth page
+export const dynamic = 'force-dynamic';
+
 export default function SetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

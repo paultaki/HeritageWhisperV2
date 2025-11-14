@@ -32,6 +32,9 @@ interface FAQCategory {
   items: FAQItem[];
 }
 
+// Prevent static generation for this page
+export const dynamic = 'force-dynamic';
+
 export default function HelpPage() {
   const router = useRouter();
   const isDesktop = useMediaQuery("(min-width: 1024px)");

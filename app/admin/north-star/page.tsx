@@ -4,6 +4,9 @@ import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Prevent static generation for this admin page
+export const dynamic = 'force-dynamic';
+
 export default function NorthStarPage() {
   const { user } = useAuth();
   const navLinksRef = useRef<HTMLAnchorElement[]>([]);

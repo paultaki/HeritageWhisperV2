@@ -14,6 +14,9 @@ import { Eye, EyeOff, Mail, Lock, User, Calendar, Shield, UserPlus } from "lucid
 
 const logoUrl = "/HW_text-compress.png";
 
+// Prevent static generation for this auth page
+export const dynamic = 'force-dynamic';
+
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

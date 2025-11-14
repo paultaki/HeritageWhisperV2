@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/card";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 
+// Prevent static generation for this auth page
+export const dynamic = 'force-dynamic';
+
 export default function AuthVerified() {
   const router = useRouter();
   const [status, setStatus] = useState<"loading" | "success" | "error">(

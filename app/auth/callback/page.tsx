@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useQueryClient } from "@tanstack/react-query";
 
+// Prevent static generation for this auth callback page
+export const dynamic = 'force-dynamic';
+
 export default function AuthCallback() {
   const router = useRouter();
   const queryClient = useQueryClient();

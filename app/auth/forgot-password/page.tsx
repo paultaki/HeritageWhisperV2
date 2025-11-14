@@ -17,6 +17,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Mail, Send } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
+// Prevent static generation for this auth page
+export const dynamic = 'force-dynamic';
+
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);

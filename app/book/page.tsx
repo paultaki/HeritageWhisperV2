@@ -1,6 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+// Prevent static generation for this user-specific page
+export const dynamic = 'force-dynamic';
+
+import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
@@ -56,7 +59,7 @@ interface Story {
   createdAt: string;
 }
 
-export default function BookV4Page() {
+function BookV4PageContent() {
   const { user } = useAuth();
   const { activeContext } = useAccountContext();
   const isOwnAccount = activeContext?.type === 'own' ?? false;
@@ -1854,5 +1857,21 @@ function MobilePage({
         </div>
       </div>
     </div>
+  );
+}
+
+// Wrapper component with Suspense boundary
+export default function BookV4Page() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0b0d12] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+          <p className="text-slate-300">Loading your stories...</p>
+        </div>
+      </div>
+    }>
+      <BookV4PageContent />
+    </Suspense>
   );
 }
