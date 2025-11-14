@@ -15,7 +15,7 @@ export default function TestimonialStories() {
       story: 'Grandma records in Florida. Kids listen in New York, Texas, Seattle. More connected than when they lived next door.'
     },
     {
-      image: '/Sarah.webp',
+      image: '/sarah-testimonial.webp',
       imageAlt: 'Woman looking at phone, smiling',
       headline: 'Sarah discovered her mom\'s humor',
       story: '"I never knew mom was funny until I heard her stories. The book would have missed her laugh, her timing, everything."'
