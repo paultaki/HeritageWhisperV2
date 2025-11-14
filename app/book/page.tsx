@@ -382,7 +382,8 @@ function BookV4PageContent() {
     }
   }, [getCurrentStoryId]);
 
-  // Note: Scroll locking and reset is now handled by app/book/layout.tsx
+  // Note: Scroll locking is handled by MobileBookViewV2 component for mobile
+  // Desktop book view uses h-screen overflow-hidden on the container
 
   // Reset scroll position and stop audio when spread changes
   useEffect(() => {

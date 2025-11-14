@@ -186,12 +186,52 @@ export default function MobileBookViewV2({
     }
   }, [bookStories, currentIndex, router]);
 
-  // Reset horizontal pager scroll when component mounts
-  // Note: Window-level scroll reset and body locking is handled by app/book/layout.tsx
+  // Reset scroll position BEFORE paint to prevent scroll carryover from previous pages
   useLayoutEffect(() => {
+    // Force window scroll to top immediately - BEFORE browser paints
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Reset horizontal pager scroll
     if (pagerRef.current) {
       pagerRef.current.scrollLeft = 0;
     }
+    
+    // Lock body/html scroll to prevent background scrolling
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    // Disable browser's scroll restoration feature
+    let originalScrollRestoration: ScrollRestoration | undefined;
+    if ('scrollRestoration' in history) {
+      originalScrollRestoration = history.scrollRestoration;
+      history.scrollRestoration = 'manual';
+    }
+    
+    // Cleanup: restore original overflow styles and scroll restoration
+    return () => {
+      // Remove inline styles to restore default behavior
+      if (originalBodyOverflow) {
+        document.body.style.overflow = originalBodyOverflow;
+      } else {
+        document.body.style.removeProperty('overflow');
+      }
+      
+      if (originalHtmlOverflow) {
+        document.documentElement.style.overflow = originalHtmlOverflow;
+      } else {
+        document.documentElement.style.removeProperty('overflow');
+      }
+      
+      // Restore scroll restoration setting
+      if (originalScrollRestoration && 'scrollRestoration' in history) {
+        history.scrollRestoration = originalScrollRestoration;
+      }
+    };
   }, []);
 
   // Jump to initial story if provided
