@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { BookPageCardProps } from "./types";
 import BookAudioPlayer from "./BookAudioPlayer";
+import { useSafeViewport } from "@/hooks/use-safe-viewport";
 
 /**
  * Format a date string or ISO date to readable format
@@ -27,6 +28,13 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [showContinueHint, setShowContinueHint] = useState(false);
   const [showFade, setShowFade] = useState(false);
+  
+  // Detect viewport changes for URL bar handling
+  const { urlBarHeight } = useSafeViewport();
+  
+  // Calculate dynamic padding to prevent image cutoff when URL bar is visible
+  // Base padding is 56px for the top bar, add URL bar height when it's visible at the top
+  const dynamicPadding = 56 + (urlBarHeight || 0);
 
   // Get the hero photo or first photo (same logic as SimpleMobileBookView)
   const heroPhoto = story.photos?.find((p) => p.isHero) || story.photos?.[0];
@@ -94,7 +102,11 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
         {/* Vertical scroller */}
         <div
           ref={scrollerRef}
-          className="relative h-full overflow-y-auto overscroll-contain pt-[56px]"
+          className="relative h-full overflow-y-auto overscroll-contain"
+          style={{
+            paddingTop: `${dynamicPadding}px`,
+            transition: 'padding-top 0.2s ease-out'
+          }}
         >
           {/* Header image */}
           <div className="px-3 pt-0">
