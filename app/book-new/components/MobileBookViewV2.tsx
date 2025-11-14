@@ -186,6 +186,29 @@ export default function MobileBookViewV2({
     }
   }, [bookStories, currentIndex, router]);
 
+  // Reset scroll position on mount (fixes Chrome mobile scroll carryover)
+  useEffect(() => {
+    // Force scroll to top immediately
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Reset horizontal pager scroll
+    if (pagerRef.current) {
+      pagerRef.current.scrollLeft = 0;
+    }
+    
+    // Disable scroll restoration for this page
+    if ('scrollRestoration' in history) {
+      const previousRestoration = history.scrollRestoration;
+      history.scrollRestoration = 'manual';
+      
+      return () => {
+        history.scrollRestoration = previousRestoration;
+      };
+    }
+  }, []);
+
   // Jump to initial story if provided
   useEffect(() => {
     if (initialStoryId && bookStories.length > 0) {

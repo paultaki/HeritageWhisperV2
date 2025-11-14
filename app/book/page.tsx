@@ -382,6 +382,24 @@ function BookV4PageContent() {
     }
   }, [getCurrentStoryId]);
 
+  // Reset scroll position on mount (fixes Chrome mobile scroll carryover)
+  useEffect(() => {
+    // Force scroll to top immediately
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Disable scroll restoration for this page
+    if ('scrollRestoration' in history) {
+      const previousRestoration = history.scrollRestoration;
+      history.scrollRestoration = 'manual';
+      
+      return () => {
+        history.scrollRestoration = previousRestoration;
+      };
+    }
+  }, []);
+
   // Prevent page scrolling
   useEffect(() => {
     // Lock body scroll
