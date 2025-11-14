@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useLayoutEffect, type ReactNode } from "react";
 
 function UseLockedBodyForBook() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof window === "undefined" || typeof document === "undefined") {
       return;
     }
 
     // 1. Make sure the book is fully in view BEFORE locking
+    // useLayoutEffect runs synchronously BEFORE paint, preventing scroll carryover
     window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
 
     // 2. Lock body/html while we are on the Book route
     const previousBodyOverflow = document.body.style.overflow;

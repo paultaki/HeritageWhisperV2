@@ -186,41 +186,12 @@ export default function MobileBookViewV2({
     }
   }, [bookStories, currentIndex, router]);
 
-  // Reset scroll position BEFORE paint (fixes Chrome mobile scroll carryover)
+  // Reset horizontal pager scroll when component mounts
+  // Note: Window-level scroll reset and body locking is handled by app/book/layout.tsx
   useLayoutEffect(() => {
-    // Force scroll to top immediately - BEFORE browser paints
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    
-    // Reset horizontal pager scroll
     if (pagerRef.current) {
       pagerRef.current.scrollLeft = 0;
     }
-    
-    // Disable scroll restoration for this page
-    if ('scrollRestoration' in history) {
-      const previousRestoration = history.scrollRestoration;
-      history.scrollRestoration = 'manual';
-      
-      return () => {
-        history.scrollRestoration = previousRestoration;
-      };
-    }
-  }, []);
-
-  // Lock body scroll to prevent any background scrolling
-  useEffect(() => {
-    const originalBodyOverflow = document.body.style.overflow;
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    
-    return () => {
-      document.body.style.overflow = originalBodyOverflow;
-      document.documentElement.style.overflow = originalHtmlOverflow;
-    };
   }, []);
 
   // Jump to initial story if provided
