@@ -16,6 +16,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Lock, CheckCircle, Eye, EyeOff } from "lucide-react";
 
+// Force dynamic rendering for password reset page (accessed via email link)
+export const dynamic = 'force-dynamic';
+
 export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
