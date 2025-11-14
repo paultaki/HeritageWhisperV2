@@ -8,6 +8,7 @@ import { Play, Pause, Mic, ImagePlus, AlignLeft } from "lucide-react";
 
 type PhotoFirstReviewProps = {
   photoDataURL: string | null;
+  photoTransform?: { zoom: number; position: { x: number; y: number } };
   audioBlob: Blob;
   audioDuration: number;
   transcription?: string;
@@ -34,6 +35,7 @@ type PhotoFirstReviewProps = {
 
 export function PhotoFirstReview({
   photoDataURL,
+  photoTransform,
   audioBlob,
   audioDuration,
   transcription = '',
@@ -164,6 +166,16 @@ export function PhotoFirstReview({
             src={photoDataURL}
             className="w-full h-full object-cover opacity-90"
             alt="Photo"
+            style={
+              photoTransform
+                ? {
+                    transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x}%, ${photoTransform.position.y}%)`,
+                    transformOrigin: "center center",
+                    objectFit: "cover",
+                    objectPosition: "center center",
+                  }
+                : undefined
+            }
           />
         ) : (
           <div className="w-full h-full bg-gray-900 flex items-center justify-center">

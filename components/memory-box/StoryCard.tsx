@@ -119,8 +119,10 @@ export function StoryCard({
             style={
               photoTransform
                 ? {
-                    transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x / photoTransform.zoom}px, ${photoTransform.position.y / photoTransform.zoom}px)`,
+                    transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x}%, ${photoTransform.position.y}%)`,
                     transformOrigin: "center center",
+                    objectFit: "cover",
+                    objectPosition: "center center",
                   }
                 : undefined
             }

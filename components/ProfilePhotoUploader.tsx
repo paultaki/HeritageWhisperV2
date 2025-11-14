@@ -305,9 +305,10 @@ export function ProfilePhotoUploader({
                           alt="Preview"
                           className="absolute inset-0 w-full h-full transition-transform"
                           style={{
-                            transform: `scale(${transform.zoom}) translate(${transform.position.x / transform.zoom}px, ${transform.position.y / transform.zoom}px)`,
+                            transform: `scale(${transform.zoom}) translate(${transform.position.x}%, ${transform.position.y}%)`,
                             transformOrigin: "center center",
                             objectFit: "cover",
+                            objectPosition: "center center",
                           }}
                           draggable={false}
                         />

@@ -226,8 +226,10 @@ export function EditMemoryModal({ isOpen, onClose, story, onSave }: EditMemoryMo
                     alt={title}
                     className="w-full h-full object-cover"
                     style={{
-                      transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x / editTransform.zoom}px, ${editTransform.position.y / editTransform.zoom}px)`,
+                      transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x}%, ${editTransform.position.y}%)`,
                       transformOrigin: "center center",
+                      objectFit: "cover",
+                      objectPosition: "center center",
                     }}
                   />
                   {/* Overlay hint */}
@@ -323,8 +325,10 @@ export function EditMemoryModal({ isOpen, onClose, story, onSave }: EditMemoryMo
                   alt={title}
                   className="w-full h-full object-cover select-none pointer-events-none"
                   style={{
-                    transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x / editTransform.zoom}px, ${editTransform.position.y / editTransform.zoom}px)`,
+                    transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x}%, ${editTransform.position.y}%)`,
                     transformOrigin: "center center",
+                    objectFit: "cover",
+                    objectPosition: "center center",
                   }}
                   draggable={false}
                 />
