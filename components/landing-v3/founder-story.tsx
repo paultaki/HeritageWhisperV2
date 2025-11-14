@@ -61,7 +61,7 @@ export default function FounderStory() {
           <div className="lg:col-span-2">
             <div className="aspect-square relative rounded-2xl overflow-hidden shadow-2xl border border-stone-200">
               <Image
-                src="/paul.webp"
+                src="/Paul.webp"
                 alt="Paul, Founder & CEO of HeritageWhisper"
                 fill
                 className="object-cover"

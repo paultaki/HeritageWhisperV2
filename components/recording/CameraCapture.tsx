@@ -28,15 +28,6 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Detect if desktop and auto-trigger file picker
-  useEffect(() => {
-    const isDesktop = window.matchMedia('(min-width: 768px)').matches;
-    if (isDesktop && fileInputRef.current) {
-      // On desktop, skip picker screen and go straight to file dialog
-      fileInputRef.current.click();
-    }
-  }, []);
-
   // Only start camera when user explicitly requests it
   useEffect(() => {
     if (showCamera) {
