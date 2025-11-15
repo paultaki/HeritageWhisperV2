@@ -504,27 +504,28 @@ export const MemoryCard = React.memo(
                         cy="20"
                         r="16"
                         fill="none"
-                        stroke="rgba(139,107,122,0.15)"
-                        strokeWidth="2"
+                        stroke="rgba(139,107,122,0.2)"
+                        strokeWidth="3"
                       />
-                      {/* Progress ring */}
-                      {isPlaying && (
-                        <circle
-                          cx="20"
-                          cy="20"
-                          r="16"
-                          fill="none"
-                          stroke="rgba(139,107,122,0.5)"
-                          strokeWidth="2"
-                          strokeDasharray={`${2 * Math.PI * 16}`}
-                          strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
-                          strokeLinecap="round"
-                          className="transition-all duration-300"
-                        />
-                      )}
+                      {/* Progress ring - Always render, but only visible when playing */}
+                      <circle
+                        cx="20"
+                        cy="20"
+                        r="16"
+                        fill="none"
+                        stroke="#8b6b7a"
+                        strokeWidth="3"
+                        strokeDasharray={`${2 * Math.PI * 16}`}
+                        strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
+                        strokeLinecap="round"
+                        style={{
+                          opacity: isPlaying ? 1 : 0,
+                          transition: 'stroke-dashoffset 0.3s ease, opacity 0.2s ease'
+                        }}
+                      />
                     </svg>
                     {/* Icon in center */}
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       {isLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
                       ) : hasError ? (
@@ -734,27 +735,28 @@ export const MemoryCard = React.memo(
                   cy="22"
                   r="18"
                   fill="none"
-                  stroke="rgba(139,107,122,0.15)"
-                  strokeWidth="2"
+                  stroke="rgba(139,107,122,0.2)"
+                  strokeWidth="3"
                 />
-                {/* Progress ring */}
-                {isPlaying && (
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r="18"
-                    fill="none"
-                    stroke="rgba(139,107,122,0.5)"
-                    strokeWidth="2"
-                    strokeDasharray={`${2 * Math.PI * 18}`}
-                    strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
-                    strokeLinecap="round"
-                    className="transition-all duration-300"
-                  />
-                )}
+                {/* Progress ring - Always render, but only visible when playing */}
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="18"
+                  fill="none"
+                  stroke="#8b6b7a"
+                  strokeWidth="3"
+                  strokeDasharray={`${2 * Math.PI * 18}`}
+                  strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
+                  strokeLinecap="round"
+                  style={{
+                    opacity: isPlaying ? 1 : 0,
+                    transition: 'stroke-dashoffset 0.3s ease, opacity 0.2s ease'
+                  }}
+                />
               </svg>
               {/* Icon in center */}
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
                 ) : hasError ? (

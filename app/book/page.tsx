@@ -548,68 +548,17 @@ function BookV4PageContent() {
   if (!isBookOpen) {
     return (
       <div className={`hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
-        {/* Header */}
-        <div className="fixed top-0 left-0 right-0 z-50 no-print -mt-[5px] md:-mt-[15px]">
-          <div className="mx-auto max-w-[1800px] px-6">
-            <div className="relative h-16 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center">
-                  <img
-                    src="/final logo/logo-new.svg"
-                    alt="Heritage Whisper"
-                    className="h-8 w-auto"
-                  />
-                </div>
-                <div>
-                  <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
-                    {user?.name ? `${user.name.split(' ')[0]}'s Story` : "Your Story"}
-                  </h1>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 mr-10">
-                {/* Mobile: Show icons only, Desktop: Show full buttons */}
-                <button
-                  onClick={handleTimelineClick}
-                  className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
-                  aria-label="Timeline"
-                >
-                  <Clock3 className="w-5 h-5" />
-                </button>
-                {/* Mobile Edit Icon - Only show for account owners */}
-                {isOwnAccount && (
-                  <button
-                    onClick={() => {
-                      const storyId = getCurrentStoryId();
-                      if (storyId) {
-                        router.push(`/review/book-style?edit=${storyId}&returnPath=${encodeURIComponent('/book')}`);
-                      }
-                    }}
-                    className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
-                    aria-label="Edit"
-                  >
-                    <Pencil className="w-5 h-5" />
-                  </button>
-                )}
-                {/* Desktop: Original button */}
-                <button
-                  onClick={handleTimelineClick}
-                  className="hidden md:flex items-center gap-2 text-base text-slate-300 hover:text-white transition-colors font-medium mr-[70px]"
-                >
-                  ← Timeline
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Closed book cover - centered */}
-        <div className="flex items-start md:items-center justify-center pt-[109px] md:pt-[64px]" style={{ height: "calc(100dvh - 64px)" }}>
+        <div className="flex items-center justify-center" style={{ height: "100dvh" }}>
           <ClosedBookCover
             userName={user?.name || "Your"}
             storyCount={sortedStories.length}
             onOpen={() => setIsBookOpen(true)}
           />
         </div>
+
+        {/* Desktop Navigation Bar */}
+        <CompactNav currentStoryId={getCurrentStoryId()} />
       </div>
     );
   }
@@ -647,71 +596,6 @@ function BookV4PageContent() {
       </div>
     
       <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6 mt-0 md:mt-[51px]" style={{ paddingTop: '0px' }}>
-        {/* Compact Header */}
-        <div className="mx-auto max-w-[1600px] mb-6 mt-[10px] md:mt-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center">
-                <img
-                  src="/final logo/logo-new.svg"
-                  alt="Heritage Whisper"
-                  className="h-8 w-auto"
-                />
-              </div>
-              <h1 className="text-xl md:text-2xl tracking-tight font-semibold text-white leading-tight">
-                {user?.name ? `${user.name.split(' ')[0]}'s Story` : "Your Story"}
-              </h1>
-            </div>
-            <div className="flex items-center gap-3 mr-10">
-              {/* Font size controls - Desktop only */}
-              <div className="hidden md:flex items-center gap-1 rounded-md bg-white/5 p-1">
-                <button
-                  onClick={() => setFontSize(Math.max(16, fontSize - 1))}
-                  disabled={fontSize <= 16}
-                  className="flex items-center justify-center w-8 h-8 rounded text-slate-300 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                  aria-label="Decrease font size"
-                  title="Decrease font size"
-                >
-                  <Type className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => setFontSize(Math.min(24, fontSize + 1))}
-                  disabled={fontSize >= 24}
-                  className="flex items-center justify-center w-8 h-8 rounded text-slate-300 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                  aria-label="Increase font size"
-                  title="Increase font size"
-                >
-                  <Type className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Mobile: Show icons only */}
-              <button
-                onClick={handleTimelineClick}
-                className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
-                aria-label="Timeline"
-              >
-                <Clock3 className="w-5 h-5" />
-              </button>
-              {/* Mobile Edit Icon - Only show for account owners */}
-              {isOwnAccount && (
-                <button
-                  onClick={() => {
-                    const storyId = getCurrentStoryId();
-                    if (storyId) {
-                      router.push(`/review/book-style?edit=${storyId}&returnPath=${encodeURIComponent('/book')}`);
-                    }
-                  }}
-                  className="flex md:hidden items-center justify-center w-9 h-9 text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
-                  aria-label="Edit"
-                >
-                  <Pencil className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-          </div>
-    
-        </div>
     
         {/* Desktop: Dual-page spread */}
         <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100dvh - 180px)" }}>
