@@ -25,7 +25,15 @@ export default function TimelinePage() {
   }, []);
 
   if (!isDesktop) {
-    return <TimelineMobileV2 />;
+    return (
+      <div className="relative">
+        <TimelineMobileV2 />
+        {/* Build version indicator */}
+        <div className="fixed bottom-2 right-2 text-xs opacity-30 pointer-events-none z-50">
+          Build: 2025-11-14 7:58pm (Paul)
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -47,6 +55,11 @@ export default function TimelinePage() {
       <main className="flex-1 min-w-0 relative z-10">
         <TimelineDesktop useV2Features={true} />
       </main>
+      
+      {/* Build version indicator */}
+      <div className="fixed bottom-2 right-2 text-xs opacity-30 pointer-events-none z-50">
+        Build: 2025-11-14 7:58pm (Paul)
+      </div>
     </div>
   );
 }
