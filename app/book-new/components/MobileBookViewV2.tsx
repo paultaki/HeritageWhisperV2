@@ -186,6 +186,35 @@ export default function MobileBookViewV2({
     }
   }, [bookStories, currentIndex, router]);
 
+  // Fix for Chrome iOS URL bar at TOP position - force viewport recalculation
+  useEffect(() => {
+    // Detect if we're on Chrome iOS with URL bar at top
+    const isChromeiOS = /CriOS/.test(navigator.userAgent);
+    
+    if (isChromeiOS) {
+      // Force viewport recalculation by triggering a reflow
+      // This fixes the visualViewport.offsetTop not resetting to 0
+      const forceReflow = () => {
+        // Read visualViewport to force Chrome to recalculate
+        const vh = window.visualViewport?.height || window.innerHeight;
+        const offsetTop = window.visualViewport?.offsetTop || 0;
+        
+        // If offsetTop is not 0, we need to compensate
+        if (offsetTop !== 0) {
+          console.log('[BookView] Chrome iOS viewport offset detected:', offsetTop);
+          // Scroll window to force reset
+          window.scrollTo(0, 0);
+        }
+      };
+      
+      // Run immediately and after layout settles
+      forceReflow();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(forceReflow);
+      });
+    }
+  }, []);
+
   // Jump to initial story if provided
   useEffect(() => {
     if (initialStoryId && bookStories.length > 0) {
