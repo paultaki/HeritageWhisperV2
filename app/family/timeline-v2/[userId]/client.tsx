@@ -13,6 +13,7 @@ import { normalizeYear, formatYear } from '@/lib/utils';
 import { MemoryOverlay } from '@/components/MemoryOverlay';
 import Image from 'next/image';
 import { formatStoryDate, formatStoryDateForMetadata } from '@/lib/dateFormatting';
+import { apiRequest } from '@/lib/queryClient';
 
 const logoUrl = "/final logo/logo-new.svg";
 
@@ -91,6 +92,29 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const listenTrackedRef = useRef<boolean>(false);
+  const listenTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Log story listened activity after 5 seconds of playback
+  const logStoryListened = async () => {
+    if (listenTrackedRef.current) return; // Already logged this session
+    
+    listenTrackedRef.current = true;
+    
+    try {
+      await apiRequest('POST', '/api/activity', {
+        eventType: 'story_listened',
+        storytellerId: userId,
+        storyId: story.id,
+        metadata: {
+          duration_seconds: duration,
+          title: story.title,
+        },
+      });
+    } catch (error) {
+      console.error('[Timeline] Failed to log story_listened activity:', error);
+    }
+  };
 
   // Get display photo
   const getDisplayPhoto = () => {
@@ -244,6 +268,14 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
               audioManager.confirmPlaying(story.id, audio);
               setIsPlaying(true);
               setIsLoading(false);
+              
+              // Start timer to log activity after 5 seconds of playback
+              if (listenTimerRef.current) {
+                clearTimeout(listenTimerRef.current);
+              }
+              listenTimerRef.current = setTimeout(() => {
+                logStoryListened();
+              }, 5000);
             })
             .catch((error) => {
               console.error("Error playing audio:", error);
@@ -266,6 +298,12 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
       audioElement?: HTMLAudioElement | null,
     ) => {
       if (!playing) {
+        // Clear listen tracking timer when audio stops
+        if (listenTimerRef.current) {
+          clearTimeout(listenTimerRef.current);
+          listenTimerRef.current = null;
+        }
+        
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
@@ -282,6 +320,12 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
     audioManager.register(story.id, handleAudioStateChange);
 
     return () => {
+      // Clear timer on unmount
+      if (listenTimerRef.current) {
+        clearTimeout(listenTimerRef.current);
+        listenTimerRef.current = null;
+      }
+      
       audioManager.unregister(story.id);
       if (audioRef.current) {
         audioRef.current.pause();
@@ -294,6 +338,15 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
   useEffect(() => {
     audioRef.current = currentAudio;
   }, [currentAudio]);
+
+  // Reset listen tracking when story changes
+  useEffect(() => {
+    listenTrackedRef.current = false;
+    if (listenTimerRef.current) {
+      clearTimeout(listenTimerRef.current);
+      listenTimerRef.current = null;
+    }
+  }, [story.id]);
 
   const handleCardClick = () => {
     if (onOpenOverlay) {

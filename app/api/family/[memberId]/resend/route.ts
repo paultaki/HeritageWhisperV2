@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { Resend } from 'resend';
 import { FamilyInviteEmail } from '@/lib/emails/family-invite';
+import { logActivityEvent } from '@/lib/activity';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -173,6 +174,22 @@ export async function POST(
       console.log('Expires:', expiresAt.toISOString());
       console.log('=========================================================');
     }
+
+    // Log invite_resent activity event (async, non-blocking)
+    logActivityEvent({
+      userId: user.id,
+      actorId: user.id,
+      familyMemberId: member.id,
+      eventType: 'invite_resent',
+      metadata: {
+        email: member.email,
+        name: member.name,
+        relationship: member.relationship,
+        status: member.status,
+      },
+    }).catch((error) => {
+      console.error('[Family Resend] Failed to log invite_resent activity:', error);
+    });
 
     return NextResponse.json({
       success: true,
