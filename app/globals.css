@@ -3588,3 +3588,8 @@ body .fixed.bottom-0[class*="safe-area"] {
   }
 }
 
+
+/* Scroll root for centralized scroll management */
+.hw-scroll-root {
+  -webkit-overflow-scrolling: touch;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAccountContext } from "@/hooks/use-account-context";
@@ -185,48 +185,6 @@ export default function MobileBookViewV2({
       router.push(`/review/book-style?edit=${bookStories[currentIndex].id}&returnPath=${encodeURIComponent('/book')}`);
     }
   }, [bookStories, currentIndex, router]);
-
-  // Force cleanup any stuck overflow state on mount (Chrome iOS fix)
-  useLayoutEffect(() => {
-    // CRITICAL: Force remove any stuck body/html overflow from other components
-    // (MultiPhotoUploader, MemoryOverlay, etc. may have left body overflow stuck)
-    // This is especially important for Chrome iOS which caches these values aggressively
-    document.body.style.removeProperty('overflow');
-    document.documentElement.style.removeProperty('overflow');
-  }, []);
-
-  // Reset scroll position BEFORE paint to prevent scroll carryover from previous pages
-  useLayoutEffect(() => {
-    // Force window scroll to top immediately - BEFORE browser paints
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    
-    // Reset horizontal pager scroll
-    if (pagerRef.current) {
-      pagerRef.current.scrollLeft = 0;
-    }
-    
-    // Disable browser's scroll restoration feature
-    let originalScrollRestoration: ScrollRestoration | undefined;
-    if ('scrollRestoration' in history) {
-      originalScrollRestoration = history.scrollRestoration;
-      history.scrollRestoration = 'manual';
-    }
-    
-    // Cleanup: restore scroll restoration ONLY
-    // NOTE: We do NOT touch body.style.overflow at all!
-    // The container classes handle overflow isolation:
-    // - Root div: overflow-hidden
-    // - Pager div: overflow-x-auto overflow-y-hidden
-    // - Individual cards: overflow-y-auto
-    // This prevents body overflow from getting stuck across page navigations.
-    return () => {
-      if (originalScrollRestoration && 'scrollRestoration' in history) {
-        history.scrollRestoration = originalScrollRestoration;
-      }
-    };
-  }, []);
 
   // Jump to initial story if provided
   useEffect(() => {
