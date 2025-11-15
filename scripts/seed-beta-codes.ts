@@ -9,6 +9,12 @@
  *   npx tsx scripts/seed-beta-codes.ts --count=50 --expires=2025-12-31
  */
 
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load environment variables from .env.local
+config({ path: resolve(__dirname, '../.env.local') });
+
 import { createGenericBetaCodes } from '../lib/betaCodes';
 
 interface Args {

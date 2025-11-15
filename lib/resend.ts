@@ -58,7 +58,7 @@ export async function sendVerificationEmail(
 
     const resendClient = getResendClient();
     const { data, error } = await resendClient.emails.send({
-      from: "Heritage Whisper <noreply@heritagewhisper.com>",
+      from: process.env.RESEND_FROM_EMAIL || "Heritage Whisper <noreply@send.heritagewhisper.com>",
       to: email,
       subject: "Confirm your Heritage Whisper account",
       html: `
@@ -135,7 +135,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
 
     const resendClient = getResendClient();
     const { data, error } = await resendClient.emails.send({
-      from: "Heritage Whisper <noreply@heritagewhisper.com>",
+      from: process.env.RESEND_FROM_EMAIL || "Heritage Whisper <noreply@send.heritagewhisper.com>",
       to: email,
       subject: "Welcome to Heritage Whisper!",
       html: `
