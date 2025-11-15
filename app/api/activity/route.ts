@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
   console.log('[Activity API] POST request received');
   
   try {
-    // 1. Validate session
+    // 1. Validate session (either Supabase JWT or family session token)
     const authHeader = request.headers.get("authorization");
     const token = authHeader && authHeader.split(" ")[1];
     console.log('[Activity API] Auth token present:', !!token);
@@ -153,16 +153,65 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let user: any = null;
+    let actorUserId: string | null = null;
+
+    // Try Supabase JWT authentication first
     const {
-      data: { user },
+      data: { user: authUser },
       error: authError,
     } = await supabaseAdmin.auth.getUser(token);
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 }
-      );
+    if (authUser && !authError) {
+      // Authenticated as regular user
+      user = authUser;
+      actorUserId = user.id;
+      console.log('[Activity API] Authenticated as user:', user.id);
+    } else {
+      // JWT failed - try family session token (for family members viewing)
+      const { data: familySession, error: sessionError } = await supabaseAdmin
+        .from('family_sessions')
+        .select(`
+          id,
+          family_member_id,
+          expires_at,
+          family_members!inner (
+            id,
+            user_id,
+            email,
+            name,
+            auth_user_id
+          )
+        `)
+        .eq('token', token)
+        .single();
+
+      if (sessionError || !familySession) {
+        console.log('[Activity API] Invalid authentication - neither JWT nor family session valid');
+        return NextResponse.json(
+          { error: "Invalid authentication" },
+          { status: 401 }
+        );
+      }
+
+      // Check if session expired
+      if (new Date(familySession.expires_at) < new Date()) {
+        console.log('[Activity API] Family session expired');
+        return NextResponse.json(
+          { error: "Session expired" },
+          { status: 401 }
+        );
+      }
+
+      // Family member viewing - create a pseudo-user object
+      const familyMember = (familySession as any).family_members;
+      user = {
+        id: familyMember.auth_user_id || familyMember.id, // Use auth_user_id if exists, otherwise family_member.id
+        email: familyMember.email,
+        name: familyMember.name,
+      };
+      actorUserId = familyMember.auth_user_id || null; // May be null if family member hasn't created account
+      console.log('[Activity API] Authenticated as family member:', familyMember.id, 'for storyteller:', familyMember.user_id);
     }
 
     // 2. Parse request body
@@ -203,16 +252,18 @@ export async function POST(request: NextRequest) {
     const userId = storytellerId || user.id;
 
     // 5. Verify family sharing access if logging for different user
-    if (userId !== user.id) {
+    // Note: Skip verification for family members (actorUserId is null) as they already have session validation
+    if (actorUserId && userId !== actorUserId) {
       const { data: hasAccess } = await supabaseAdmin.rpc(
         "has_collaboration_access",
         {
-          p_user_id: user.id,
+          p_user_id: actorUserId,
           p_storyteller_id: userId,
         }
       );
 
       if (!hasAccess) {
+        console.log('[Activity API] Access denied for user:', actorUserId, 'to storyteller:', userId);
         return NextResponse.json(
           { error: "Access denied" },
           { status: 403 }
@@ -223,7 +274,7 @@ export async function POST(request: NextRequest) {
     // 6. Build payload
     const payload: ActivityEventPayload = {
       userId, // The storyteller (owner of the family circle)
-      actorId: user.id, // Current authenticated user
+      actorId: actorUserId || undefined, // Current authenticated user (may be null for family members without accounts)
       eventType,
       storyId: storyId || undefined,
       familyMemberId: familyMemberId || undefined,
@@ -233,7 +284,7 @@ export async function POST(request: NextRequest) {
     console.log('[Activity API] Logging event:', {
       eventType,
       userId,
-      actorId: user.id,
+      actorId: actorUserId,
       storyId,
     });
 
