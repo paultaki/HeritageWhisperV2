@@ -497,30 +497,30 @@ export const MemoryCard = React.memo(
                           : "Play audio"
                     }
                   >
-                    <svg className="w-10 h-10 -rotate-90" viewBox="0 0 40 40">
-                      {/* Background ring */}
+                    <svg className="w-10 h-10 -rotate-90" viewBox="0 0 40 40" style={{ display: 'block' }}>
+                      {/* Background ring - TESTING: Made very visible */}
                       <circle
                         cx="20"
                         cy="20"
                         r="16"
                         fill="none"
-                        stroke="rgba(139,107,122,0.2)"
+                        stroke="red"
                         strokeWidth="3"
                       />
-                      {/* Progress ring - Always render, but only visible when playing */}
+                      {/* Progress ring - TESTING: Always visible with solid color */}
                       <circle
                         cx="20"
                         cy="20"
                         r="16"
                         fill="none"
-                        stroke="#8b6b7a"
+                        stroke="blue"
                         strokeWidth="3"
                         strokeDasharray={`${2 * Math.PI * 16}`}
-                        strokeDashoffset={`${2 * Math.PI * 16 * (1 - progress / 100)}`}
+                        strokeDashoffset={isPlaying ? `${2 * Math.PI * 16 * (1 - progress / 100)}` : `${2 * Math.PI * 16}`}
                         strokeLinecap="round"
                         style={{
-                          opacity: isPlaying ? 1 : 0,
-                          transition: 'stroke-dashoffset 0.3s ease, opacity 0.2s ease'
+                          opacity: 1,
+                          transition: 'all 0.1s linear'
                         }}
                       />
                     </svg>
