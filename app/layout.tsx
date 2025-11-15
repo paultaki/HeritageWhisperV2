@@ -8,7 +8,6 @@ import GlassNavWrapper from "@/components/GlassNavWrapper";
 import AgreementGuard from "@/components/AgreementGuard";
 import LayoutContent from "@/components/LayoutContent";
 import DarkModeCleanup from "@/components/DarkModeCleanup";
-import { ScrollManager } from "@/app/components/ScrollManager";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -60,20 +59,14 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <ScrollManager />
-        <main
-          data-scroll-root
-          className="hw-scroll-root min-h-screen overflow-y-auto"
-        >
-          <Providers>
-            <AgreementGuard>
-              <DarkModeCleanup />
-              <NavigationWrapper />
-              <GlassNavWrapper />
-              <LayoutContent>{children}</LayoutContent>
-            </AgreementGuard>
-          </Providers>
-        </main>
+        <Providers>
+          <AgreementGuard>
+            <DarkModeCleanup />
+            <NavigationWrapper />
+            <GlassNavWrapper />
+            <LayoutContent>{children}</LayoutContent>
+          </AgreementGuard>
+        </Providers>
       </body>
     </html>
   );

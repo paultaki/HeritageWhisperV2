@@ -124,25 +124,38 @@ export function MultiPhotoUploader({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialTransform, setInitialTransform] = useState<{ x: number; y: number } | null>(null);
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   // Initialize editing transform when selecting a photo
+  // Use position fixed pattern for iOS WebKit compatibility
   useEffect(() => {
     if (selectedPhoto) {
       // Use normalizeTransform to convert legacy pixel-based transforms to percentages
       setEditingTransform(normalizeTransform(selectedPhoto.transform));
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = "hidden";
+      
+      // iOS WebKit scroll lock pattern: position fixed + save scroll position
+      const scrollY = window.scrollY;
+      setScrollPosition(scrollY);
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
     } else {
       setEditingTransform(null);
-      // Re-enable body scroll when modal closes (use removeProperty for Chrome iOS)
-      document.body.style.removeProperty('overflow');
+      
+      // Restore scroll position
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollPosition);
     }
 
     // Cleanup on unmount
     return () => {
-      document.body.style.removeProperty('overflow');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
     };
-  }, [selectedPhoto]);
+  }, [selectedPhoto, scrollPosition]);
 
   const validateFile = (file: File): string | null => {
     const maxSize = 5 * 1024 * 1024; // 5MB

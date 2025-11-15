@@ -93,15 +93,34 @@ export function MemoryOverlay({
     return () => document.removeEventListener("keydown", handleTab);
   }, [isOpen]);
 
-  // Body scroll lock
+  // Body scroll lock using position fixed pattern for iOS WebKit compatibility
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      // Save scroll position and lock with position fixed
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      
+      // Store scroll position for restoration
+      document.body.dataset.scrollY = String(scrollY);
     } else {
-      document.body.style.removeProperty('overflow');
+      // Restore scroll position
+      const scrollY = document.body.dataset.scrollY;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY));
+        delete document.body.dataset.scrollY;
+      }
     }
     return () => {
-      document.body.style.removeProperty('overflow');
+      // Cleanup on unmount
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      delete document.body.dataset.scrollY;
     };
   }, [isOpen]);
 

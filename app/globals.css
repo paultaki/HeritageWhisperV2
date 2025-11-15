@@ -3589,7 +3589,9 @@ body .fixed.bottom-0[class*="safe-area"] {
 }
 
 
-/* Scroll root for centralized scroll management */
-.hw-scroll-root {
+
+/* iOS WebKit scroll fixes - let body be the natural scroll container */
+body {
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
 }
