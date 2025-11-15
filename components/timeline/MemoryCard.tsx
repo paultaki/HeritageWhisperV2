@@ -25,10 +25,11 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Play, Pause, Loader2, AlertCircle, ChevronLeft, ChevronRight, Volume2 } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Pause, Volume2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { normalizeYear, formatYear } from "@/lib/utils";
 import { getTopTraits } from "@/utils/getTopTraits";
+import PlayPauseButton from "@/components/ui/PlayPauseButton";
 import { audioManager } from "@/lib/audioManager";
 import type { MemoryCardProps } from "@/types/timeline";
 import { formatStoryDate, formatStoryDateForMetadata, formatV2TimelineDate } from "@/lib/dateFormatting";
@@ -467,22 +468,16 @@ export const MemoryCard = React.memo(
                   </div>
                 </div>
 
-                {/* Right column: Audio button - Book view style */}
+                {/* Right column: Audio button with progress indicator */}
                 <div className="flex-shrink-0">
-                  <button
+                  <PlayPauseButton
+                    isPlaying={isPlaying}
+                    isLoading={isLoading}
+                    progress={progress}
                     onClick={handlePlayAudio}
-                    className="relative grid place-items-center h-12 w-12 flex-shrink-0 rounded-full bg-stone-900 text-white ring-1 ring-stone-800 shadow-md active:scale-95 transition"
-                    aria-label={isPlaying ? "Pause audio" : "Play audio"}
-                    style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                    ) : isPlaying ? (
-                      <Pause className="w-6 h-6" />
-                    ) : (
-                      <Play className="w-6 h-6 relative left-[0.5px]" />
-                    )}
-                  </button>
+                    size={48}
+                    className="text-white shadow-md"
+                  />
                 </div>
               </div>
             ) : (
@@ -790,22 +785,16 @@ export const MemoryCard = React.memo(
                 </div>
               </div>
 
-              {/* Right column: Audio button - Book view style */}
+              {/* Right column: Audio button with progress indicator */}
               <div className="flex-shrink-0">
-                <button
+                <PlayPauseButton
+                  isPlaying={isPlaying}
+                  isLoading={isLoading}
+                  progress={progress}
                   onClick={handlePlayAudio}
-                  className="relative grid place-items-center h-12 w-12 flex-shrink-0 rounded-full bg-stone-900 text-white ring-1 ring-stone-800 shadow-md active:scale-95 transition"
-                  aria-label={isPlaying ? "Pause audio" : "Play audio"}
-                  style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : isPlaying ? (
-                    <Pause className="w-6 h-6" />
-                  ) : (
-                    <Play className="w-6 h-6 relative left-[0.5px]" />
-                  )}
-                </button>
+                  size={48}
+                  className="text-white shadow-md"
+                />
               </div>
             </div>
           ) : (

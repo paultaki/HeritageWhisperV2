@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Loader2, ChevronLeft, ChevronRight, Volume2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { normalizeYear } from '@/lib/utils';
 import { apiRequest } from '@/lib/queryClient';
+import PlayPauseButton from '@/components/ui/PlayPauseButton';
 
 interface Photo {
   url: string;
@@ -331,22 +332,16 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
             </p>
           </div>
 
-          {/* Right: Audio player - Book view style */}
+          {/* Right: Audio player with progress indicator */}
           {story.audioUrl && (
-            <button
+            <PlayPauseButton
+              isPlaying={isPlaying}
+              isLoading={isLoading}
+              progress={progress}
               onClick={handlePlayAudio}
-              className="relative grid place-items-center h-12 w-12 flex-shrink-0 rounded-full bg-stone-900 text-white ring-1 ring-stone-800 shadow-md active:scale-95 transition"
-              aria-label={isPlaying ? "Pause audio" : "Play audio"}
-              style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
-            >
-              {isLoading ? (
-                <Loader2 className="w-6 h-6 animate-spin" />
-              ) : isPlaying ? (
-                <Pause className="w-6 h-6" />
-              ) : (
-                <Play className="w-6 h-6 relative left-[0.5px]" />
-              )}
-            </button>
+              size={48}
+              className="text-white shadow-md"
+            />
           )}
         </div>
       </div>

@@ -48,6 +48,7 @@ import { DesktopPageHeader } from "@/components/PageHeader";
 import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormatting";
 import { TimelineEnd } from "@/components/timeline/TimelineEnd";
 import { TimelineNearEndNudge } from "@/components/timeline/TimelineNearEndNudge";
+import PlayPauseButton from "@/components/ui/PlayPauseButton";
 
 const logoUrl = "/final logo/logo-new.svg";
 
@@ -595,22 +596,16 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 </div>
               </div>
 
-              {/* Right: V2 audio button - Book view style */}
+              {/* Right: V2 audio button with progress indicator */}
               {useV2Features && story.audioUrl && (
-                <button
+                <PlayPauseButton
+                  isPlaying={isPlaying}
+                  isLoading={isLoading}
+                  progress={progress}
                   onClick={handlePlayAudio}
-                  className="relative grid place-items-center h-12 w-12 flex-shrink-0 rounded-full bg-stone-900 text-white ring-1 ring-stone-800 shadow-md active:scale-95 transition"
-                  aria-label={isPlaying ? "Pause audio" : "Play audio"}
-                  style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : isPlaying ? (
-                    <Pause className="w-6 h-6" />
-                  ) : (
-                    <Play className="w-6 h-6 relative left-[0.5px]" />
-                  )}
-                </button>
+                  size={48}
+                  className="text-white shadow-md"
+                />
               )}
             </div>
           </div>
@@ -733,22 +728,16 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </div>
             </div>
 
-            {/* Right: V2 audio button - Book view style */}
+            {/* Right: V2 audio button with progress indicator */}
             {useV2Features && story.audioUrl && (
-              <button
+              <PlayPauseButton
+                isPlaying={isPlaying}
+                isLoading={isLoading}
+                progress={progress}
                 onClick={handlePlayAudio}
-                className="relative grid place-items-center h-12 w-12 flex-shrink-0 rounded-full bg-stone-900 text-white ring-1 ring-stone-800 shadow-md active:scale-95 transition"
-                aria-label={isPlaying ? "Pause audio" : "Play audio"}
-                style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
-              >
-                {isLoading ? (
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                ) : isPlaying ? (
-                  <Pause className="w-6 h-6" />
-                ) : (
-                  <Play className="w-6 h-6 relative left-[0.5px]" />
-                )}
-              </button>
+                size={48}
+                className="text-white shadow-md"
+              />
             )}
           </div>
         </div>
