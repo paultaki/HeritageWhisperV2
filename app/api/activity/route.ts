@@ -138,10 +138,13 @@ export async function GET(request: NextRequest) {
  * }
  */
 export async function POST(request: NextRequest) {
+  console.log('[Activity API] POST request received');
+  
   try {
     // 1. Validate session
     const authHeader = request.headers.get("authorization");
     const token = authHeader && authHeader.split(" ")[1];
+    console.log('[Activity API] Auth token present:', !!token);
 
     if (!token) {
       return NextResponse.json(
@@ -227,8 +230,17 @@ export async function POST(request: NextRequest) {
       metadata: metadata || {},
     };
 
+    console.log('[Activity API] Logging event:', {
+      eventType,
+      userId,
+      actorId: user.id,
+      storyId,
+    });
+
     // 7. Log the event
     const { success, eventId, error } = await logActivityEvent(payload);
+    
+    console.log('[Activity API] Log result:', { success, eventId, error });
 
     if (!success || error) {
       logger.error("[Activity API] Failed to log event:", error);

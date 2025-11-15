@@ -211,6 +211,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Log invite_sent activity event (async, non-blocking)
+    console.log('[Family Invite] Logging invite_sent activity for:', familyMember.email);
     logActivityEvent({
       userId: user.id,
       actorId: user.id,
@@ -221,8 +222,10 @@ export async function POST(req: NextRequest) {
         name: familyMember.name,
         relationship: familyMember.relationship,
       },
+    }).then((result) => {
+      console.log('[Family Invite] ✅ Activity logged:', result);
     }).catch((error) => {
-      console.error('[Family Invite] Failed to log invite_sent activity:', error);
+      console.error('[Family Invite] ❌ Failed to log invite_sent activity:', error);
     });
 
     return NextResponse.json({

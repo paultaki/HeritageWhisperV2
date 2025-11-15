@@ -97,12 +97,21 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
 
   // Log story listened activity after 5 seconds of playback
   const logStoryListened = async () => {
-    if (listenTrackedRef.current) return; // Already logged this session
+    if (listenTrackedRef.current) {
+      console.log('[Timeline] Activity already tracked for this story session');
+      return; // Already logged this session
+    }
+    
+    console.log('[Timeline] Logging story_listened activity:', {
+      storytellerId: userId,
+      storyId: story.id,
+      title: story.title,
+    });
     
     listenTrackedRef.current = true;
     
     try {
-      await apiRequest('POST', '/api/activity', {
+      const response = await apiRequest('POST', '/api/activity', {
         eventType: 'story_listened',
         storytellerId: userId,
         storyId: story.id,
@@ -111,8 +120,10 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
           title: story.title,
         },
       });
+      console.log('[Timeline] ✅ Story listened activity logged successfully');
     } catch (error) {
-      console.error('[Timeline] Failed to log story_listened activity:', error);
+      console.error('[Timeline] ❌ Failed to log story_listened activity:', error);
+      listenTrackedRef.current = false; // Reset so it can retry
     }
   };
 

@@ -524,7 +524,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
                 className="absolute right-4 bottom-4 hover:scale-105 transition-transform z-10"
               >
-                <svg className="w-11 h-11 -rotate-90">
+                <svg className="w-11 h-11 -rotate-90" viewBox="0 0 44 44">
                   {/* Background ring */}
                   <circle
                     cx="22"
@@ -656,7 +656,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
               className="absolute right-4 bottom-4 hover:scale-105 transition-transform z-10"
             >
-              <svg className="w-11 h-11 -rotate-90">
+              <svg className="w-11 h-11 -rotate-90" viewBox="0 0 44 44">
                 {/* Background ring */}
                 <circle
                   cx="22"

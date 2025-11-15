@@ -497,7 +497,7 @@ export const MemoryCard = React.memo(
                           : "Play audio"
                     }
                   >
-                    <svg className="w-10 h-10 -rotate-90">
+                    <svg className="w-10 h-10 -rotate-90" viewBox="0 0 40 40">
                       {/* Background ring */}
                       <circle
                         cx="20"
@@ -720,7 +720,7 @@ export const MemoryCard = React.memo(
                     : "Play audio"
               }
             >
-              <svg className="w-11 h-11 -rotate-90">
+              <svg className="w-11 h-11 -rotate-90" viewBox="0 0 44 44">
                 {/* Background ring */}
                 <circle
                   cx="22"

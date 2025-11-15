@@ -176,6 +176,7 @@ export async function POST(
     }
 
     // Log invite_resent activity event (async, non-blocking)
+    console.log('[Family Resend] Logging invite_resent activity for:', member.email);
     logActivityEvent({
       userId: user.id,
       actorId: user.id,
@@ -187,8 +188,10 @@ export async function POST(
         relationship: member.relationship,
         status: member.status,
       },
+    }).then((result) => {
+      console.log('[Family Resend] ✅ Activity logged:', result);
     }).catch((error) => {
-      console.error('[Family Resend] Failed to log invite_resent activity:', error);
+      console.error('[Family Resend] ❌ Failed to log invite_resent activity:', error);
     });
 
     return NextResponse.json({

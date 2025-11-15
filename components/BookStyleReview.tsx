@@ -431,20 +431,10 @@ export function BookStyleReview({
 
       {/* Top Navigation */}
       <div className="sticky top-0 z-50 bg-[#faf8f5]/95 backdrop-blur-sm border-b border-[#8B6F47]/20">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
-          <h1 className="text-2xl md:text-3xl font-serif text-gray-800 flex-shrink-0">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <h1 className="text-2xl md:text-3xl font-serif text-gray-800">
             Review Memory
           </h1>
-          <div className="flex items-center gap-2 md:gap-3 ml-auto mr-[75px] md:mr-0">
-            <Button
-              type="button"
-              onClick={onSave}
-              disabled={isSaving}
-              className="bg-gradient-to-r from-[#8b6b7a] to-[#b88b94] hover:from-[#7a5a69] hover:to-[#a77a83] text-white rounded-full px-4 md:px-6 py-4 md:py-6 text-base md:text-lg"
-            >
-              {isSaving ? "Saving..." : "Save"}
-            </Button>
-          </div>
         </div>
       </div>
 
