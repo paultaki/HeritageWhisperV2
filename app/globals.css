@@ -3593,5 +3593,5 @@ body .fixed.bottom-0[class*="safe-area"] {
 /* iOS WebKit scroll fixes - let body be the natural scroll container */
 body {
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
+  /* Note: overscroll-behavior-y removed as it causes fixed nav jumping on iOS */
 }
