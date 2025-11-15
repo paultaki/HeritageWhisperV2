@@ -85,7 +85,7 @@ export function DesktopPageHeader({
             />
 
             {/* Page Title - Centered, no subtitle */}
-            <h1 className="text-3xl font-bold text-gray-900 truncate leading-tight">
+            <h1 className={`text-3xl font-bold truncate leading-tight ${title === 'Timeline' ? 'text-red-600' : 'text-gray-900'}`}>
               {title}
             </h1>
           </div>
