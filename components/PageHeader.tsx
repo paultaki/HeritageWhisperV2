@@ -85,7 +85,7 @@ export function DesktopPageHeader({
             />
 
             {/* Page Title - Centered, no subtitle */}
-            <h1 className={`text-3xl font-bold truncate leading-tight ${title === 'Timeline' ? 'text-red-600' : 'text-gray-900'}`}>
+            <h1 className="text-3xl font-bold text-gray-900 truncate leading-tight">
               {title}
             </h1>
           </div>
@@ -167,7 +167,7 @@ export function MobilePageHeader({
             />
 
             {/* Page Title - Centered, no subtitle */}
-            <h1 className={`text-lg font-bold truncate leading-tight ${title === 'Timeline' ? 'text-red-600' : 'text-gray-900'}`}>
+            <h1 className="text-lg font-bold text-gray-900 truncate leading-tight">
               {title}
             </h1>
           </div>
