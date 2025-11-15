@@ -6,77 +6,80 @@ type Props = {
   totalHours: number;
   treasuresCount: number;
   isOwnAccount?: boolean; // For family sharing - hide stories/time for viewers
+  storytellerName?: string; // Name for subtitle personalization
 };
 
 /**
- * Quick Stats Bar - Immediate Context for Seniors
+ * Quick Stats Bar - Minimal inline stats for Memory Box header
  *
- * Shows at-a-glance summary of their collection
- * Large, readable numbers with clear labels
+ * Shows summary as compact text: "41 stories • 21 min recorded • 11 treasures"
+ * Smart time formatting: minutes if <60, hours otherwise
  *
  * For family viewers (isOwnAccount=false): Shows only treasures count
  * For account owners (isOwnAccount=true): Shows all stats
  */
-export function QuickStatsBar({ storiesCount, totalHours, treasuresCount, isOwnAccount = true }: Props) {
-  const formatHours = (hours: number) => {
-    if (hours < 1) {
-      const minutes = Math.round(hours * 60);
-      return `${minutes} min`;
+export function QuickStatsBar({
+  storiesCount,
+  totalHours,
+  treasuresCount,
+  isOwnAccount = true,
+  storytellerName
+}: Props) {
+  // Smart time formatting: show minutes if <60 min, otherwise hours
+  const formatSmartTime = (hours: number) => {
+    const totalMinutes = Math.round(hours * 60);
+
+    if (totalMinutes < 60) {
+      return `${totalMinutes} min`;
     }
-    const wholeHours = Math.floor(hours);
-    const minutes = Math.round((hours - wholeHours) * 60);
-    return minutes > 0 ? `${wholeHours}h ${minutes}m` : `${wholeHours} hours`;
+
+    // Show hours with one decimal place
+    const formattedHours = (totalMinutes / 60).toFixed(1);
+    return `${formattedHours} hrs`;
   };
 
-  // For family viewers, show only treasures count (centered)
+  // Format individual stat strings
+  const formatStories = () => {
+    return `${storiesCount} ${storiesCount === 1 ? 'story' : 'stories'}`;
+  };
+
+  const formatTreasures = () => {
+    return `${treasuresCount} ${treasuresCount === 1 ? 'treasure' : 'treasures'}`;
+  };
+
+  const formatRecorded = () => {
+    return `${formatSmartTime(totalHours)} recorded`;
+  };
+
+  // Build subtitle based on account type
+  const buildSubtitle = () => {
+    const name = storytellerName || "their";
+    return `All of ${name}'s stories and keepsakes in one place`;
+  };
+
+  // For family viewers, show only treasures
   if (!isOwnAccount) {
     return (
-      <div className="bg-white border border-gray-200 rounded-xl p-2 md:p-3 mb-6">
-        <div className="flex items-center justify-center">
-          <div className="text-center px-4 md:px-6">
-            <div className="text-2xl md:text-4xl font-bold text-heritage-brown">
-              {treasuresCount}
-            </div>
-            <div className="text-xs md:text-base text-gray-700 font-medium">
-              {treasuresCount === 1 ? "Timeless Treasure" : "Timeless Treasures"}
-            </div>
-          </div>
-        </div>
+      <div className="mb-6">
+        <p className="text-sm md:text-base text-gray-600 mb-1">
+          {formatTreasures()}
+        </p>
+        <p className="text-xs md:text-sm text-gray-500">
+          {buildSubtitle()}
+        </p>
       </div>
     );
   }
 
-  // For account owners, show all stats
+  // For account owners, show all stats in one line
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-2 md:p-3 mb-6">
-      <div className="flex items-center justify-center divide-x divide-gray-200">
-        <div className="text-center px-4 md:px-6">
-          <div className="text-2xl md:text-4xl font-bold text-heritage-brown">
-            {storiesCount}
-          </div>
-          <div className="text-xs md:text-base text-gray-700 font-medium">
-            {storiesCount === 1 ? "Story" : "Stories"}
-          </div>
-        </div>
-
-        <div className="text-center px-4 md:px-6">
-          <div className="text-2xl md:text-4xl font-bold text-heritage-coral">
-            {formatHours(totalHours)}
-          </div>
-          <div className="text-xs md:text-base text-gray-700 font-medium">
-            Recorded
-          </div>
-        </div>
-
-        <div className="text-center px-4 md:px-6">
-          <div className="text-2xl md:text-4xl font-bold text-heritage-brown">
-            {treasuresCount}
-          </div>
-          <div className="text-xs md:text-base text-gray-700 font-medium">
-            {treasuresCount === 1 ? "Timeless Treasure" : "Timeless Treasures"}
-          </div>
-        </div>
-      </div>
+    <div className="mb-6">
+      <p className="text-sm md:text-base text-gray-600 mb-1">
+        {formatStories()} • {formatRecorded()} • {formatTreasures()}
+      </p>
+      <p className="text-xs md:text-sm text-gray-500">
+        {buildSubtitle()}
+      </p>
     </div>
   );
 }

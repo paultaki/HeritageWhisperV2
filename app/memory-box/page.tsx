@@ -18,9 +18,9 @@ import { MemoryOverlay } from "@/components/MemoryOverlay";
 import { Story as SupabaseStory } from "@/lib/supabase";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
-import { MemoryBoxTabs } from "@/components/memory-box/MemoryBoxTabs";
-import { QuickStatsBar } from "@/components/memory-box/QuickStatsBar";
-import { StoryFilters, type StoryFilterType } from "@/components/memory-box/StoryFilters";
+import { MemoryBoxHeader } from "@/components/memory-box/MemoryBoxHeader";
+import { type StoryFilterType } from "@/components/memory-box/StoryFilters";
+import { type TreasureFilterType } from "@/components/memory-box/TreasureFilters";
 import { StoryCard } from "@/components/memory-box/StoryCard";
 import { TreasureGrid } from "@/components/memory-box/TreasureGrid";
 import { AddTreasureModal } from "@/components/memory-box/AddTreasureModal";
@@ -163,6 +163,7 @@ export default function MemoryBoxV2Page() {
   const defaultTab: TabType = isOwnAccount ? "stories" : "treasures";
   const [activeTab, setActiveTab] = useState<TabType>(defaultTab);
   const [storyFilter, setStoryFilter] = useState<StoryFilterType>("all");
+  const [treasureFilter, setTreasureFilter] = useState<TreasureFilterType>("all");
   const [selectedDecade, setSelectedDecade] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
@@ -460,8 +461,53 @@ export default function MemoryBoxV2Page() {
       private: stories.filter((s) => !s.includeInTimeline && !s.includeInBook).length,
       totalHours,
       treasuresCount: treasures.length,
+      storiesCount: stories.length,
     };
   }, [stories, treasures]);
+
+  // Calculate treasure category counts
+  const treasureCounts = useMemo(() => {
+    return {
+      all: treasures.length,
+      photos: treasures.filter((t) => t.category === "photos").length,
+      documents: treasures.filter((t) => t.category === "documents").length,
+      heirlooms: treasures.filter((t) => t.category === "heirlooms").length,
+      keepsakes: treasures.filter((t) => t.category === "keepsakes").length,
+      recipes: treasures.filter((t) => t.category === "recipes").length,
+      memorabilia: treasures.filter((t) => t.category === "memorabilia").length,
+    };
+  }, [treasures]);
+
+  // Process treasures based on filters and search
+  const processedTreasures = useMemo(() => {
+    let filtered = [...treasures];
+
+    // Apply treasure filter by category
+    if (treasureFilter !== "all") {
+      filtered = filtered.filter((t) => t.category === treasureFilter);
+    }
+
+    // Apply search (search title and description)
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (treasure) =>
+          treasure.title.toLowerCase().includes(query) ||
+          treasure.description?.toLowerCase().includes(query)
+      );
+    }
+
+    // Favorites are automatically sorted to top (as user mentioned)
+    filtered.sort((a, b) => {
+      // First sort by favorite status
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      // Then by creation date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    return filtered;
+  }, [treasures, treasureFilter, searchQuery]);
 
   const calculateAge = (storyYear?: number | null) => {
     if (!storyYear || !user?.birthYear) return undefined;
@@ -510,47 +556,32 @@ export default function MemoryBoxV2Page() {
         {/* Main content */}
         <main className="pb-20 md:pb-0">
           <section className="max-w-7xl mx-auto px-6 pt-6">
-            {/* Quick Stats Bar */}
-            <QuickStatsBar
-              storiesCount={stats.all}
-              totalHours={stats.totalHours}
-              treasuresCount={stats.treasuresCount}
-              isOwnAccount={isOwnAccount}
-            />
-
-            {/* Tab Selector */}
-            <MemoryBoxTabs
+            {/* Memory Box Header - Consolidated title, stats, tabs, search, filters */}
+            <MemoryBoxHeader
               activeTab={activeTab}
               onTabChange={handleTabChange}
-              storiesCount={isOwnAccount ? stats.all : 0}
-              treasuresCount={stats.treasuresCount}
               showStoriesTab={isOwnAccount}
+              stats={{
+                ...stats,
+                storiesCount: stats.all,
+              }}
+              treasureCounts={treasureCounts}
+              isOwnAccount={isOwnAccount}
+              storytellerName={activeContext?.storytellerName || undefined}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              storyFilter={storyFilter}
+              onStoryFilterChange={setStoryFilter}
+              selectedDecade={selectedDecade}
+              availableDecades={availableDecades}
+              onDecadeChange={setSelectedDecade}
+              treasureFilter={treasureFilter}
+              onTreasureFilterChange={setTreasureFilter}
             />
 
             {/* Stories Tab */}
             {activeTab === "stories" && (
               <>
-                {/* Search Box */}
-                <div className="mb-6">
-                  <input
-                    type="search"
-                    className="w-full px-5 py-4 text-lg border-2 border-gray-300 rounded-xl focus:border-heritage-brown focus:ring-2 focus:ring-heritage-brown/20 outline-none"
-                    placeholder="Search by name, person, or place..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ minHeight: "56px" }}
-                  />
-                </div>
-
-                {/* Story Filters */}
-                <StoryFilters
-                  activeFilter={storyFilter}
-                  onFilterChange={setStoryFilter}
-                  counts={stats}
-                  selectedDecade={selectedDecade}
-                  availableDecades={availableDecades}
-                  onDecadeChange={setSelectedDecade}
-                />
 
                 {/* Stories Grid */}
                 <div className="mt-6">
@@ -645,12 +676,12 @@ export default function MemoryBoxV2Page() {
             {activeTab === "treasures" && (
               <div className="mt-6">
                 <TreasureGrid
-                  treasures={treasures}
+                  treasures={processedTreasures}
                   isLoading={treasuresLoading}
                   readOnly={!isOwnAccount}
                   onAddTreasure={isOwnAccount ? () => setAddTreasureModalOpen(true) : undefined}
                   onToggleFavorite={(id) => {
-                    const treasure = treasures.find((t) => t.id === id);
+                    const treasure = processedTreasures.find((t) => t.id === id);
                     if (treasure) {
                       toggleTreasureFavorite.mutate({ id, isFavorite: treasure.isFavorite });
                     }
@@ -668,13 +699,13 @@ export default function MemoryBoxV2Page() {
                     });
                   }}
                   onEdit={(id) => {
-                    const treasure = treasures.find((t) => t.id === id);
+                    const treasure = processedTreasures.find((t) => t.id === id);
                     if (treasure) {
                       setTreasureToEdit(treasure);
                     }
                   }}
                   onDownload={(id) => {
-                    const treasure = treasures.find((t) => t.id === id);
+                    const treasure = processedTreasures.find((t) => t.id === id);
                     if (treasure?.imageUrl) {
                       window.open(treasure.imageUrl, "_blank");
                     }

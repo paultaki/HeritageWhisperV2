@@ -171,7 +171,7 @@ export default function Login() {
 
   return (
     <div className="hw-page antialiased bg-gradient-to-b from-[#fff7f3] via-[#ffe9e0] to-[#fde5e3]" style={{ fontSize: '16px' }}>
-      {/* Background: animated blobs + grain */}
+      {/* Background: static gradient (animations disabled for performance) */}
       <div aria-hidden="true" className="fixed inset-0 overflow-hidden pointer-events-none">
         {/* soft radial glow center */}
         <div
@@ -179,21 +179,21 @@ export default function Login() {
           style={{ background: "radial-gradient(60% 60% at 65% 20%, rgba(255,183,77,.18) 0%, rgba(255,140,101,.12) 40%, rgba(255,255,255,0) 70%)" }}
         />
 
-        {/* animated blob 1 */}
+        {/* static blob 1 - animations disabled */}
         <div
-          className="absolute -top-24 -right-24 w-[36rem] h-[36rem] rounded-full blur-3xl animate-[floatBlob_14s_ease-in-out_infinite]"
+          className="absolute -top-24 -right-24 w-[36rem] h-[36rem] rounded-full blur-2xl"
           style={{ background: "radial-gradient(circle at 30% 30%, rgba(245,158,11,.55), rgba(244,114,182,.15))" }}
         />
 
-        {/* animated blob 2 */}
+        {/* static blob 2 - animations disabled */}
         <div
-          className="absolute -bottom-24 -left-16 w-[32rem] h-[32rem] rounded-full blur-3xl animate-[driftBlob_16s_ease-in-out_infinite]"
+          className="absolute -bottom-24 -left-16 w-[32rem] h-[32rem] rounded-full blur-2xl"
           style={{ background: "radial-gradient(circle at 70% 70%, rgba(251,113,133,.5), rgba(249,115,22,.18))" }}
         />
 
-        {/* subtle horizontal sheen */}
+        {/* static horizontal sheen - animation disabled */}
         <div
-          className="absolute inset-x-0 top-1/3 h-48 opacity-50 animate-[gentlePulse_12s_ease-in-out_infinite]"
+          className="absolute inset-x-0 top-1/3 h-48 opacity-50"
           style={{ background: "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(253,164,175,.25) 40%, rgba(254,215,170,.3) 60%, rgba(255,255,255,0) 100%)" }}
         />
       </div>

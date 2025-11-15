@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+
+  // Performance optimizations for development
+  reactStrictMode: false, // Disable double-rendering in dev (re-enable for debugging)
+
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
@@ -36,6 +40,11 @@ const nextConfig: NextConfig = {
     // Content Security Policy - Prevents XSS attacks
     // Note: Avoid "upgrade-insecure-requests" in development to prevent https upgrade on localhost
     const isProd = process.env.NODE_ENV === 'production';
+
+    // Skip security headers in development for faster reloads
+    if (!isProd) {
+      return [];
+    }
     const cspHeader = `
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.tailwindcss.com;
