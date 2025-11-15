@@ -49,7 +49,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-album-cream to-white flex items-center justify-center px-4">
+    <div className="hw-page bg-gradient-to-b from-album-cream to-white flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <Card className="border-heritage-gold/20">
           <CardHeader className="space-y-1">

@@ -202,17 +202,16 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
       {!capturedImage ? (
         !showCamera ? (
           /* Initial picker screen - Choose photo source */
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-            <div className="text-center text-white max-w-md mb-8">
-              <Camera className="w-20 h-20 mx-auto mb-6 opacity-90" />
-              <h2 className="text-2xl font-semibold mb-3">Add a Photo</h2>
-              <p className="text-lg text-white/80">
+          <div className="absolute inset-0 flex flex-col items-center justify-between p-6 py-12">
+            <div className="text-center text-white max-w-md">
+              <Camera className="w-20 h-20 mx-auto mb-8 opacity-90" />
+              <p className="text-xl text-white/90">
                 Choose from your library or take a new photo
               </p>
             </div>
 
             {/* Photo source options */}
-            <div className="w-full max-w-sm space-y-4">
+            <div className="w-full max-w-sm space-y-5">
               {/* Choose from Photos - Primary option */}
               <label className="block">
                 <input
@@ -260,7 +259,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
             <Button
               variant="ghost"
               onClick={onCancel}
-              className="mt-8 text-white hover:bg-white/10 text-lg px-6 py-3"
+              className="text-white hover:bg-white/10 text-base"
             >
               Cancel
             </Button>
@@ -420,7 +419,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
               onClick={handleRetake}
               className="h-[60px] rounded-xl bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
             >
-              Retake
+              Start Over
             </Button>
             <Button
               onClick={handleUsePhoto}

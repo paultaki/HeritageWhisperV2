@@ -70,7 +70,7 @@ export default function NorthStarPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FFF8F3]">
+      <div className="hw-page flex items-center justify-center p-4 bg-[#FFF8F3]">
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle>Authentication Required</CardTitle>

@@ -9,7 +9,7 @@ export default function FamilyUnauthorizedPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+    <div className="hw-page flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
       <Card className="max-w-md w-full border-red-200">
         <CardContent className="pt-12 pb-12 text-center">
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">

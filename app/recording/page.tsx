@@ -226,7 +226,7 @@ export default function PhotoFirstRecordingPage() {
   };
 
   return (
-    <div className="mx-auto max-w-md md:max-w-3xl min-h-screen relative flex flex-col bg-gradient-to-b from-[#faf8f5] via-[#f5f0eb] to-[#f0ebe6]">
+    <div className="mx-auto max-w-md md:max-w-3xl hw-page relative flex flex-col bg-gradient-to-b from-[#faf8f5] via-[#f5f0eb] to-[#f0ebe6]">
       <main className="flex-1 flex flex-col pb-20 md:pb-24">
         {/* Screen 1: Home */}
         {currentScreen === 'home' && (

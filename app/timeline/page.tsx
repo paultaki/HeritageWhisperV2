@@ -30,7 +30,7 @@ export default function TimelinePage() {
 
   return (
     <div
-      className="min-h-screen relative"
+      className="hw-page relative"
       style={{ backgroundColor: isDark ? "#1c1c1d" : "#faf8f5" }}
     >
       {/* Spine glow - subtle radial gradient down the center */}

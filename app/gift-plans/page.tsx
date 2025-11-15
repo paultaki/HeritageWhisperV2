@@ -146,7 +146,7 @@ export default function GiftPlansPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-rose-50 to-white overflow-x-hidden">
+    <div className="hw-page bg-gradient-to-br from-amber-50 via-rose-50 to-white overflow-x-hidden">
       {/* Header */}
       <div className="fixed top-4 right-4 z-50 flex gap-3">
         <button
@@ -166,7 +166,7 @@ export default function GiftPlansPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="min-h-screen relative flex items-center justify-center">
+      <section className="hw-page relative flex items-center justify-center">
         <div className="relative z-10 flex flex-col items-center justify-center px-6 py-20">
           <div className="text-7xl mb-8 animate-fade-in-up">🎁</div>
           <h1

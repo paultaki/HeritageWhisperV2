@@ -44,8 +44,8 @@ export function FamilyMemberCard({
       <div className="p-4 md:p-5">
         {/* Top section: Avatar + Info + Remove button */}
         <div className="flex items-start gap-3 mb-3">
-          <Avatar className="w-12 h-12 md:w-14 md:h-14 shrink-0">
-            <AvatarFallback className="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 text-lg md:text-xl font-semibold">
+          <Avatar className="w-14 h-14 md:w-16 md:h-16 shrink-0">
+            <AvatarFallback className="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 text-xl md:text-2xl font-semibold">
               {initial}
             </AvatarFallback>
           </Avatar>
@@ -53,7 +53,7 @@ export function FamilyMemberCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 mb-1.5">
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 truncate leading-tight">
+                <h3 className="text-xl md:text-2xl font-semibold text-gray-900 truncate leading-tight">
                   {displayName}
                 </h3>
               </div>
@@ -97,18 +97,18 @@ export function FamilyMemberCard({
             </div>
 
             {member.relationship && (
-              <Badge className="bg-blue-100 text-blue-700 border-0 text-xs md:text-sm px-2.5 py-0.5 font-medium rounded-full mb-1.5">
+              <Badge className="bg-blue-100 text-blue-700 border-0 text-sm md:text-base px-3 py-1 font-medium rounded-full mb-2">
                 {member.relationship}
               </Badge>
             )}
 
-            <p className="text-xs md:text-sm text-gray-600 break-all mb-1">
+            <p className="text-sm md:text-base text-gray-600 break-all mb-1">
               {member.email}
             </p>
 
             {member.last_accessed_at && (
-              <p className="flex items-center gap-1.5 text-xs md:text-sm text-gray-500">
-                <Clock className="w-3.5 h-3.5" />
+              <p className="flex items-center gap-1.5 text-sm md:text-base text-gray-500">
+                <Clock className="w-4 h-4" />
                 Last viewed {getRelativeTime(member.last_accessed_at)}
               </p>
             )}
@@ -121,12 +121,12 @@ export function FamilyMemberCard({
             <Button
               onClick={onSendLoginLink}
               disabled={isSendingLink}
-              className="w-full min-h-[48px] px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+              className="w-full min-h-[48px] px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-base md:text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
             >
-              <LinkIcon className="w-4 h-4 mr-2" />
+              <LinkIcon className="w-5 h-5 mr-2" />
               {isSendingLink ? "Sending..." : "Send Sign-In Link"}
             </Button>
-            <p className="hidden md:block text-xs text-gray-500 mt-1.5 ml-0.5 leading-snug">
+            <p className="hidden md:block text-sm text-gray-500 mt-1.5 ml-0.5 leading-snug">
               Sends them a one-click link to sign in
             </p>
           </div>

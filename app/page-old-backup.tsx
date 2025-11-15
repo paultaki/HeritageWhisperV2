@@ -72,7 +72,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#faf8f5] via-[#f5f0eb] to-[#f0ebe6]">
+    <div className="hw-page bg-gradient-to-b from-[#faf8f5] via-[#f5f0eb] to-[#f0ebe6]">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#faf8f5] via-[#f8f5f2] to-[#f5f1ed] pt-0 pb-2 md:pt-0 md:pb-4">
         {/* Decorative gradient orbs - softer, more premium */}

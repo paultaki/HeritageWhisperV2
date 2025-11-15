@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Clock, BookOpen, Mic, Menu, Archive, MessageSquarePlus } from "lucide-react";
+import { Clock, BookOpen, Mic, Menu, Users, MessageSquarePlus } from "lucide-react";
 import GlassNav from "./GlassNav";
 import GlassMenuDropdown from "./GlassMenuDropdown";
 import { SubmitQuestionDialog } from "@/components/family/SubmitQuestionDialog";
@@ -50,7 +50,7 @@ export default function GlassNavWrapper() {
     if (pathname === '/timeline' || pathname === '/') return 'timeline';
     if (pathname.startsWith('/book')) return 'book';
     if (pathname.startsWith('/recording')) return 'record';
-    if (pathname.startsWith('/memory-box')) return 'keepsakes';
+    if (pathname.startsWith('/family')) return 'family';
     if (pathname.startsWith('/prompts')) return 'ideas';
     return '';
   };
@@ -115,10 +115,11 @@ export default function GlassNavWrapper() {
       onClick: () => setIsQuestionDialogOpen(true),
     },
     {
-      key: 'keepsakes',
-      label: 'Keepsakes',
-      href: '/memory-box',
-      Icon: Archive,
+      key: 'family',
+      label: 'Family',
+      href: '/family',
+      Icon: Users,
+      ownerOnly: true, // Only show for account owners
     },
     {
       key: 'menu',

@@ -18,7 +18,7 @@ function ReviewEditRedirectContent() {
   }, [router, params]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="hw-page flex items-center justify-center">
       <div className="text-center">
         <div className="w-16 h-16 border-4 border-coral-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
         <p className="text-muted-foreground">Loading your memory...</p>
@@ -31,7 +31,7 @@ export default function ReviewEditRedirect() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="hw-page flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-coral-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading...</p>

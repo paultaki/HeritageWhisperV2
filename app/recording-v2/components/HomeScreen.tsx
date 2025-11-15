@@ -15,7 +15,7 @@ const DAILY_PROMPTS = [
 
 export function HomeScreen({ onStartRecording }: HomeScreenProps) {
   return (
-    <div className="relative min-h-screen">
+    <div className="relative hw-page">
       {/* Premium background glow */}
       <div
         className="pointer-events-none fixed inset-0 -z-10 opacity-60"

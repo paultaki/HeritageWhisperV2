@@ -476,7 +476,7 @@ export default function Profile() {
   // Show loading state while checking authentication
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen bg-background album-texture flex items-center justify-center">
+      <div className="hw-page bg-background album-texture flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
     );
@@ -502,7 +502,7 @@ export default function Profile() {
     "Friend";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 flex flex-col overflow-x-hidden">
+    <div className="hw-page bg-gradient-to-br from-orange-50 via-white to-rose-50 flex flex-col overflow-x-hidden">
       {/* Desktop Header */}
       <DesktopPageHeader
         icon={User}

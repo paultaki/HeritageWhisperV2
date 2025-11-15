@@ -105,7 +105,7 @@ function FamilyAccessContent() {
   // Loading State
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+      <div className="hw-page flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
         <Card className="max-w-md w-full">
           <CardContent className="pt-12 pb-12 text-center">
             <Loader2 className="w-16 h-16 mx-auto mb-6 text-amber-600 animate-spin" />
@@ -124,7 +124,7 @@ function FamilyAccessContent() {
   // Error State
   if (status === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+      <div className="hw-page flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
         <Card className="max-w-md w-full border-red-200">
           <CardContent className="pt-12 pb-12 text-center">
             <XCircle className="w-16 h-16 mx-auto mb-6 text-red-500" />
@@ -160,7 +160,7 @@ function FamilyAccessContent() {
   // Success State - Welcome Screen
   if (status === 'success' && showWelcome && sessionData) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+      <div className="hw-page flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
         <Card className="max-w-2xl w-full border-amber-200 shadow-xl">
           <CardContent className="pt-12 pb-12">
             <div className="text-center mb-8">
@@ -230,7 +230,7 @@ function FamilyAccessContent() {
 export default function FamilyAccessPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+      <div className="hw-page flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
         <Card className="max-w-md w-full">
           <CardContent className="pt-12 pb-12 text-center">
             <Loader2 className="w-16 h-16 mx-auto mb-6 text-amber-600 animate-spin" />

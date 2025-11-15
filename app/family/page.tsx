@@ -379,7 +379,7 @@ export default function FamilyPage() {
   // Show loading spinner while checking authentication
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="hw-page flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
     );
@@ -416,7 +416,7 @@ export default function FamilyPage() {
 
   return (
     <div
-      className="min-h-screen flex overflow-x-hidden"
+      className="hw-page flex overflow-x-hidden"
       style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}
     >
       {/* Header */}
@@ -441,10 +441,10 @@ export default function FamilyPage() {
         <div className="max-w-7xl mx-auto py-5 md:py-6">
           {/* Emotional Header */}
           <div className="text-center md:text-left mb-6 md:mb-8">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-2.5">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-3">
               Family Circle
             </h1>
-            <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-lg mx-auto md:mx-0 leading-relaxed">
+            <p className="text-lg md:text-xl lg:text-2xl text-gray-600 max-w-lg mx-auto md:mx-0 leading-relaxed">
               A private place to share your stories with the people who matter.
             </p>
           </div>
@@ -481,9 +481,9 @@ export default function FamilyPage() {
               {/* Recent Activity Card */}
               <Card className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2.5 text-lg md:text-xl font-semibold text-gray-900 leading-tight">
-                    <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
-                      <Activity className="w-5 h-5 text-blue-600" />
+                  <CardTitle className="flex items-center gap-2.5 text-xl md:text-2xl font-semibold text-gray-900 leading-tight">
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                      <Activity className="w-6 h-6 text-blue-600" />
                     </div>
                     Recent Activity
                   </CardTitle>
@@ -495,21 +495,21 @@ export default function FamilyPage() {
                         <div key={i} className="flex gap-2.5 animate-pulse">
                           <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
                           <div className="flex-1 space-y-2">
-                            <div className="h-4 bg-gray-200 rounded w-3/4" />
-                            <div className="h-3 bg-gray-200 rounded w-1/2" />
+                            <div className="h-5 bg-gray-200 rounded w-3/4" />
+                            <div className="h-4 bg-gray-200 rounded w-1/2" />
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : activityEvents.length === 0 ? (
                     <div className="text-center py-6">
-                      <div className="w-14 h-14 mx-auto mb-3.5 rounded-full bg-gray-100 flex items-center justify-center">
-                        <Activity className="w-7 h-7 text-gray-400" />
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Activity className="w-8 h-8 text-gray-400" />
                       </div>
-                      <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-1.5 leading-tight">
+                      <h4 className="text-lg md:text-xl font-semibold text-gray-900 mb-2 leading-tight">
                         No activity yet
                       </h4>
-                      <p className="text-xs md:text-sm text-gray-600 leading-snug max-w-xs mx-auto">
+                      <p className="text-base md:text-lg text-gray-600 leading-snug max-w-xs mx-auto">
                         When your family listens to a story or joins your circle,
                         you'll see it here.
                       </p>
@@ -519,7 +519,7 @@ export default function FamilyPage() {
                       {/* Summary line */}
                       {activitySummary.storiesListened > 0 && (
                         <div className="mb-4 pb-3 border-b border-gray-200">
-                          <p className="text-xs md:text-sm text-gray-700 font-medium">
+                          <p className="text-base md:text-lg text-gray-700 font-medium">
                             This month:{" "}
                             {activitySummary.uniqueListeners > 0 && (
                               <>
@@ -543,12 +543,12 @@ export default function FamilyPage() {
                       {/* Activity list */}
                       <div className="space-y-3">
                         {activityEvents.slice(0, 8).map((event) => (
-                          <div key={event.id} className="flex flex-col gap-0.5">
-                            <p className="text-sm md:text-base font-medium text-gray-900 leading-snug">
+                          <div key={event.id} className="flex flex-col gap-1">
+                            <p className="text-base md:text-lg font-medium text-gray-900 leading-snug">
                               {formatActivityEvent(event)}
                             </p>
                             {event.storyTitle && event.eventType === "story_listened" && (
-                              <p className="text-xs md:text-sm text-gray-600">
+                              <p className="text-sm md:text-base text-gray-600">
                                 "{event.storyTitle}"
                               </p>
                             )}
@@ -564,10 +564,10 @@ export default function FamilyPage() {
               {/* Active Family Members Section */}
               <section>
                 <div className="mb-4">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1.5 leading-tight">
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 leading-tight">
                     Family Members {activeMembers.length > 0 && `(${activeMembers.length})`}
                   </h2>
-                  <p className="text-sm md:text-base text-gray-600 leading-snug">
+                  <p className="text-base md:text-lg text-gray-600 leading-snug">
                     People who can view your stories
                   </p>
                 </div>
@@ -575,13 +575,13 @@ export default function FamilyPage() {
                 {activeMembers.length === 0 ? (
                   <Card className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
                     <div className="text-center py-12 md:py-14 px-6">
-                      <div className="w-16 h-16 md:w-18 md:h-18 mx-auto mb-5 rounded-full bg-blue-100 flex items-center justify-center">
-                        <Users className="w-8 h-8 md:w-9 md:h-9 text-blue-600" />
+                      <div className="w-18 h-18 md:w-20 md:h-20 mx-auto mb-5 rounded-full bg-blue-100 flex items-center justify-center">
+                        <Users className="w-9 h-9 md:w-10 md:h-10 text-blue-600" />
                       </div>
-                      <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2.5">
+                      <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-3">
                         No family members yet
                       </h3>
-                      <p className="text-sm md:text-base text-gray-600 mb-6 max-w-md mx-auto leading-relaxed">
+                      <p className="text-base md:text-lg text-gray-600 mb-6 max-w-md mx-auto leading-relaxed">
                         Invite your loved ones to start sharing your life stories
                       </p>
                       <Button
@@ -628,18 +628,18 @@ export default function FamilyPage() {
                     className="w-full mb-3 flex items-center justify-between group"
                   >
                     <div>
-                      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1.5 text-left leading-tight">
+                      <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 text-left leading-tight">
                         Pending Invitations ({pendingMembers.length})
                       </h2>
-                      <p className="text-sm md:text-base text-gray-600 text-left leading-snug">
+                      <p className="text-base md:text-lg text-gray-600 text-left leading-snug">
                         Waiting for acceptance
                       </p>
                     </div>
                     <div className="shrink-0 ml-3">
                       {pendingExpanded ? (
-                        <ChevronUp className="w-6 h-6 text-gray-500 group-hover:text-gray-700 transition-colors" />
+                        <ChevronUp className="w-7 h-7 text-gray-500 group-hover:text-gray-700 transition-colors" />
                       ) : (
-                        <ChevronDown className="w-6 h-6 text-gray-500 group-hover:text-gray-700 transition-colors" />
+                        <ChevronDown className="w-7 h-7 text-gray-500 group-hover:text-gray-700 transition-colors" />
                       )}
                     </div>
                   </button>

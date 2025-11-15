@@ -1077,7 +1077,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   if (isLoading || isAccountContextLoading || (!user && !activeContext) || (isStoriesLoading && !storiesData)) {
 
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#fafaf9' }}>
+      <div className="hw-page flex flex-col items-center justify-center gap-4" style={{ backgroundColor: isDark ? '#1c1c1d' : '#fafaf9' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderBottomColor: isDark ? '#b0b3b8' : '#F59E0B' }}></div>
         <p className="text-lg" style={{ color: isDark ? '#b0b3b8' : '#6B4E42' }}>Loading your timeline...</p>
       </div>
@@ -1111,7 +1111,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   });
 
   return (
-    <div className={`min-h-screen ${isDark ? 'dark-theme' : ''}`} style={{ backgroundColor: isDark ? '#1c1c1d' : '#fafaf9' }}>
+    <div className={`hw-page ${isDark ? 'dark-theme' : ''}`} style={{ backgroundColor: isDark ? '#1c1c1d' : '#fafaf9' }}>
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <DesktopPageHeader

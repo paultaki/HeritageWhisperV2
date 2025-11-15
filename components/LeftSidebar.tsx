@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Clock3, BookOpen, Lightbulb, Archive, Mic, MessageSquarePlus } from "lucide-react";
+import { Clock3, BookOpen, Lightbulb, Users, Mic, MessageSquarePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useAccountContext } from "@/hooks/use-account-context";
@@ -115,14 +115,17 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
           </div>
         )}
 
-        <Link
-          href="/memory-box"
-          className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
-          style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
-        >
-          <Archive className="w-7 h-7" />
-          <span>Keepsakes</span>
-        </Link>
+        {/* Show Family link for owners only */}
+        {isOwnAccount && (
+          <Link
+            href="/family"
+            className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
+            style={{ color: isDark ? "#b0b3b8" : "#111827", fontSize: '0.92rem', lineHeight: 1.1 }}
+          >
+            <Users className="w-7 h-7" />
+            <span>Family</span>
+          </Link>
+        )}
       </nav>
     </aside>
   );

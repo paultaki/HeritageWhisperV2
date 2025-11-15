@@ -60,7 +60,7 @@ function UpgradePageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-12">
+    <div className="hw-page bg-gradient-to-b from-amber-50 to-white py-12">
       <div className="container mx-auto max-w-4xl px-4">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -238,7 +238,7 @@ function UpgradePageContent() {
 
 export default function UpgradePage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="flex hw-page items-center justify-center">Loading...</div>}>
       <UpgradePageContent />
     </Suspense>
   );

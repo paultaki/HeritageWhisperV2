@@ -28,7 +28,7 @@ export default function PrivacyPolicy() {
   }, []);
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}>
+    <div className="hw-page flex" style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}>
       {/* Desktop Header */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <DesktopPageHeader

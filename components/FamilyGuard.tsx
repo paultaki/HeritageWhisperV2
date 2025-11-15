@@ -30,7 +30,7 @@ export function FamilyGuard({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+      <div className="hw-page flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
         <div className="text-center">
           <Loader2 className="w-12 h-12 mx-auto mb-4 text-amber-600 animate-spin" />
           <p className="text-gray-600">Loading...</p>

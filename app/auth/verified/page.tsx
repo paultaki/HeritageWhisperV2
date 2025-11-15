@@ -41,7 +41,7 @@ export default function AuthVerified() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center album-texture px-4">
+    <div className="hw-page flex items-center justify-center album-texture px-4">
       <Card className="max-w-md w-full">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">

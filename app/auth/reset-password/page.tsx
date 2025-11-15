@@ -97,7 +97,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 album-texture">
+    <div className="hw-page flex flex-col items-center justify-center p-4 album-texture">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">

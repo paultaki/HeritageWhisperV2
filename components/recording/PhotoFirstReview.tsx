@@ -158,7 +158,7 @@ export function PhotoFirstReview({
     : 0;
 
   return (
-    <section className="min-h-screen bg-gray-50 pb-32">
+    <section className="hw-page bg-gray-50 pb-32">
       {/* Photo Hero */}
       <div className="relative h-56 bg-black">
         {photoDataURL ? (

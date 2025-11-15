@@ -99,14 +99,14 @@ export default function PromptQualityDashboard() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FFF8F3]">
+      <div className="hw-page flex items-center justify-center p-4 bg-[#FFF8F3]">
         <p className="text-gray-600">Please sign in to access admin tools</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF8F3] py-8 px-4">
+    <div className="hw-page bg-[#FFF8F3] py-8 px-4">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

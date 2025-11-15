@@ -89,7 +89,7 @@ export function TimelineMobileV2() {
   // Loading states - wait for both auth and account context
   if (isLoading || isAccountContextLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="hw-page flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
     );
@@ -98,7 +98,7 @@ export function TimelineMobileV2() {
   // Allow family viewers (activeContext without user)
   if (!user && !activeContext) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="hw-page flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
     );
@@ -107,7 +107,7 @@ export function TimelineMobileV2() {
   if (timelineData.isLoading && timelineData.stories.length === 0) {
     return (
       <div
-        className="min-h-screen flex flex-col items-center justify-center gap-4"
+        className="hw-page flex flex-col items-center justify-center gap-4"
         style={{ backgroundColor: ui.isDark ? "#1c1c1d" : "#fafaf9" }}
       >
         <div
@@ -155,7 +155,7 @@ export function TimelineMobileV2() {
       };
 
   return (
-    <div className="timeline-page timeline-v2-premium min-h-screen" style={pageStyle}>
+    <div className="timeline-page timeline-v2-premium hw-page" style={pageStyle}>
       {/* Header Navigation */}
       <TimelineHeader
         isDark={ui.isDark}

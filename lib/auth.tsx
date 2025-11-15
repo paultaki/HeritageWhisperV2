@@ -19,6 +19,7 @@ interface AuthContextType {
     password: string,
     name: string,
     birthYear: number,
+    betaCode?: string,
   ) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
@@ -175,11 +176,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
       name,
       birthYear,
+      betaCode,
     }: {
       email: string;
       password: string;
       name: string;
       birthYear: number;
+      betaCode?: string;
     }) => {
       // Register with backend - it will return JWT tokens
       const res = await apiRequest("POST", "/api/auth/register", {
@@ -187,6 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
         name,
         birthYear,
+        betaCode,
       });
       const data = await res.json();
 
@@ -294,8 +298,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     name: string,
     birthYear: number,
+    betaCode?: string,
   ) => {
-    await registerMutation.mutateAsync({ email, password, name, birthYear });
+    await registerMutation.mutateAsync({ email, password, name, birthYear, betaCode });
   };
 
   const logout = async () => {

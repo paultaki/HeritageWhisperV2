@@ -20,6 +20,7 @@ export const dynamic = 'force-dynamic';
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [betaCode, setBetaCode] = useState("");
   const [name, setName] = useState("");
   const [birthYear, setBirthYear] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +28,9 @@ export default function Register() {
   const router = useRouter();
   const { register, user } = useAuth();
   const { toast } = useToast();
+  
+  // Check if beta code is required
+  const requireBetaCode = process.env.NEXT_PUBLIC_REQUIRE_BETA_CODE === "true";
 
   // Redirect if already logged in
   useEffect(() => {
@@ -47,7 +51,17 @@ export default function Register() {
         });
         return;
       }
-      await register(email, password, name, parseInt(birthYear));
+      
+      if (requireBetaCode && !betaCode) {
+        toast({
+          title: "Beta code required",
+          description: "Please enter a valid beta access code to continue",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      await register(email, password, name, parseInt(birthYear), betaCode);
     } catch (error: any) {
       toast({
         title: "Registration failed",
@@ -59,7 +73,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 album-texture">
+    <div className="hw-page flex items-center justify-center p-4 album-texture">
       <div className="w-full max-w-md">
         <div className="text-center mb-12">
           {/* Heritage Whisper Logo */}
@@ -154,6 +168,34 @@ export default function Register() {
                   </div>
                 </div>
               </div>
+
+              {requireBetaCode && (
+                <div>
+                  <Label htmlFor="betaCode" className="text-lg font-medium text-foreground">
+                    Beta Access Code
+                  </Label>
+                  <div className="relative mt-3">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                      <Shield className="h-5 w-5" />
+                    </div>
+                    <Input
+                      type="text"
+                      id="betaCode"
+                      value={betaCode}
+                      onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
+                      className="text-lg py-4 pl-10 font-mono"
+                      placeholder="Enter your beta code"
+                      required={requireBetaCode}
+                      autoComplete="off"
+                      data-testid="input-beta-code"
+                      maxLength={8}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Enter the beta access code you received
+                  </p>
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="name" className="text-lg font-medium text-foreground">

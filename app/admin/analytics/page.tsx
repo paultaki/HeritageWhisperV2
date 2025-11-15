@@ -120,7 +120,7 @@ export default function AdminAnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FFF8F3]">
+      <div className="hw-page flex items-center justify-center p-4 bg-[#FFF8F3]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-heritage-brown mx-auto mb-4"></div>
           <p className="text-base text-gray-600">Loading analytics...</p>
@@ -131,7 +131,7 @@ export default function AdminAnalyticsPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FFF8F3]">
+      <div className="hw-page flex items-center justify-center p-4 bg-[#FFF8F3]">
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle className="text-red-600">Error</CardTitle>
@@ -147,7 +147,7 @@ export default function AdminAnalyticsPage() {
   const { overallStats, lifecycleBreakdown, topUsers, engagementMetrics } = data;
 
   return (
-    <div className="min-h-screen bg-[#FFF8F3] py-8 px-4">
+    <div className="hw-page bg-[#FFF8F3] py-8 px-4">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">

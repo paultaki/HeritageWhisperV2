@@ -1104,7 +1104,7 @@ function BookStyleReviewContent() {
   // Show loading spinner while checking authentication
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+      <div className="hw-page bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -1116,7 +1116,7 @@ function BookStyleReviewContent() {
   // If story not found, show message and prevent interaction
   if (storyNotFound) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+      <div className="hw-page bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Story not found. Redirecting to timeline...</p>
@@ -1131,7 +1131,7 @@ function BookStyleReviewContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+      <div className="hw-page bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading memory...</p>
@@ -1149,7 +1149,7 @@ function BookStyleReviewContent() {
     if (!cachedData) {
       console.error("[Transcription Select Mode] No data found in NavCache");
       return (
-        <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+        <div className="hw-page bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
           <div className="text-center">
             <p className="text-red-600 mb-4">Recording data not found</p>
             <Button onClick={() => router.push("/timeline")}>Go to Timeline</Button>
@@ -1199,7 +1199,7 @@ function BookStyleReviewContent() {
     };
 
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      <div className="hw-page bg-gradient-to-b from-amber-50 to-white">
         <TranscriptionSelectionScreen
           originalTranscript={(cachedData.originalTranscript || cachedData.rawTranscript || "") as string}
           enhancedTranscript={(cachedData.enhancedTranscript || cachedData.originalTranscript || cachedData.rawTranscript || "") as string}
@@ -1269,7 +1269,7 @@ function BookStyleReviewContent() {
     };
 
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      <div className="hw-page bg-gradient-to-b from-amber-50 to-white">
         <PostRecordingWizard initialData={initialData} onComplete={handleWizardComplete} />
       </div>
     );
@@ -1322,7 +1322,7 @@ export default function BookStyleReviewPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+        <div className="hw-page bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600">Loading book view...</p>

@@ -7,6 +7,7 @@ import { sendVerificationEmail } from "@/lib/resend";
 import { authRatelimit, getClientIp, checkRateLimit } from "@/lib/ratelimit";
 import { logger } from "@/lib/logger";
 import { RegisterUserSchema, safeValidateRequestBody } from "@/lib/validationSchemas";
+import { validateBetaCode, markBetaCodeUsed, createInviteCodesForUser } from "@/lib/betaCodes";
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -58,6 +59,30 @@ export async function POST(request: NextRequest) {
 
     // Use validated data
     const { email, password, name, birthYear } = validationResult.data;
+    const betaCode = rawBody.betaCode as string | undefined;
+
+    // Check if beta code is required
+    const requireBetaCode = process.env.NEXT_PUBLIC_REQUIRE_BETA_CODE === "true";
+    let validatedBetaCode: any = null;
+
+    if (requireBetaCode) {
+      if (!betaCode) {
+        return NextResponse.json(
+          { error: "Beta access code is required" },
+          { status: 400 }
+        );
+      }
+
+      try {
+        validatedBetaCode = await validateBetaCode(betaCode);
+      } catch (error) {
+        logger.warn("[Registration] Beta code validation failed:", error instanceof Error ? error.message : 'Unknown error');
+        return NextResponse.json(
+          { error: error instanceof Error ? error.message : "Invalid beta code" },
+          { status: 400 }
+        );
+      }
+    }
 
     // Require email confirmation for all new users
     const requireEmailConfirmation = true;
@@ -159,6 +184,33 @@ export async function POST(request: NextRequest) {
         logger.debug(
           `[Registration] Created user record and recorded agreement acceptance for user ${data.user.id}`,
         );
+      }
+
+      // Mark beta code as used if one was validated
+      if (validatedBetaCode) {
+        try {
+          await markBetaCodeUsed(validatedBetaCode.id, data.user.id);
+          logger.debug(`[Registration] Marked beta code as used for user ${data.user.id}`);
+        } catch (betaCodeError) {
+          logger.error(
+            "[Registration] Failed to mark beta code as used:",
+            betaCodeError instanceof Error ? betaCodeError.message : 'Unknown error',
+          );
+        }
+      }
+
+      // Create invite codes for the new user
+      try {
+        const inviteCodes = await createInviteCodesForUser(data.user.id, 5);
+        logger.debug(
+          `[Registration] Created ${inviteCodes.length} invite codes for user ${data.user.id}`,
+        );
+      } catch (inviteError) {
+        logger.error(
+          "[Registration] Failed to create invite codes:",
+          inviteError instanceof Error ? inviteError.message : 'Unknown error',
+        );
+        // Don't fail registration if invite code creation fails
       }
     } catch (agreementError) {
       logger.error(

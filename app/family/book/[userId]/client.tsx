@@ -54,7 +54,7 @@ export default function FamilyBookClient({ userId }: { userId: string }) {
 
   return (
     <FamilyGuard userId={userId}>
-      <div className="min-h-screen pb-20 md:pb-0" style={{ background: 'var(--color-page)' }}>
+      <div className="hw-page pb-20 md:pb-0" style={{ background: 'var(--color-page)' }}>
         <FamilyBanner storytellerName={session?.storytellerName || 'Family Member'} />
 
         <div className="max-w-4xl mx-auto p-4 md:p-6">

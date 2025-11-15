@@ -69,7 +69,7 @@ export default function AIPromptsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center hw-page">
         <p className="text-muted-foreground">Loading AI prompts...</p>
       </div>
     );

@@ -42,7 +42,7 @@ export default function RecordingV2Page() {
   // Show loading while checking auth
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FFFDF7]">
+      <div className="hw-page flex items-center justify-center bg-[#FFFDF7]">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-[#2C5282] border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -199,7 +199,7 @@ export default function RecordingV2Page() {
 
   // Render appropriate screen based on state
   return (
-    <div className="min-h-screen bg-[#FFFDF7]">
+    <div className="hw-page bg-[#FFFDF7]">
       {state.screen === "home" && (
         <HomeScreen onStartRecording={handleStartRecording} />
       )}

@@ -26,7 +26,7 @@ export default function MarketAssessmentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFF8F3] py-8 px-4">
+    <div className="hw-page bg-[#FFF8F3] py-8 px-4">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-4">

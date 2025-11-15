@@ -116,7 +116,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 album-texture">
+    <div className="hw-page flex items-center justify-center p-4 album-texture">
       <div className="w-full max-w-lg text-center">
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">

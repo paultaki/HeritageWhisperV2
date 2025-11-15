@@ -511,7 +511,7 @@ export default function HelpPage() {
 
   return (
     <div
-      className="min-h-screen flex"
+      className="hw-page flex"
       style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}
     >
       {/* Header */}

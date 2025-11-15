@@ -33,13 +33,13 @@ export function FamilySummaryTile({
         <div className="flex items-center gap-2">
           <span
             className={`
-              inline-flex h-8 w-8 items-center justify-center rounded-full shrink-0
+              inline-flex h-9 w-9 items-center justify-center rounded-full shrink-0
               ${isPrimary ? "bg-blue-600" : "bg-slate-100"}
             `}
           >
-            <Icon className={`h-4 w-4 ${isPrimary ? "text-white" : "text-slate-700"}`} />
+            <Icon className={`h-5 w-5 ${isPrimary ? "text-white" : "text-slate-700"}`} />
           </span>
-          <span className="text-sm md:text-base font-medium text-slate-700">
+          <span className="text-base md:text-lg font-medium text-slate-700">
             {label}
           </span>
         </div>
@@ -47,7 +47,7 @@ export function FamilySummaryTile({
         {/* Row 2: Value */}
         <span
           className={`
-            text-xl md:text-2xl font-semibold
+            text-2xl md:text-3xl font-semibold
             ${isPrimary ? "text-blue-600" : "text-slate-900"}
           `}
         >

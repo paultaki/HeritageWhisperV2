@@ -15,7 +15,7 @@ export default function PhotoAlbumMarketPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFCF9]">
+    <div className="hw-page bg-[#FCFCF9]">
       {/* Back Link */}
       <div className="bg-white border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4">

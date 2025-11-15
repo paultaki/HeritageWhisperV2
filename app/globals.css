@@ -168,7 +168,7 @@ html::-webkit-scrollbar-thumb:hover {
       hsl(30, 57%, 98%) 0%,
       hsl(30, 47%, 96%) 100%
     );
-    min-height: 100vh;
+    min-height: 100dvh;
     /* Minimum font size for senior readability */
     font-size: 18px;
     line-height: 1.6;
@@ -1529,7 +1529,7 @@ textarea:focus-visible {
   /* Book view wrapper */
   .book-view {
     background: linear-gradient(135deg, #1a1410 0%, #2c2416 50%, #1a1410 100%);
-    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   /* Book header */
@@ -2918,7 +2918,7 @@ textarea:focus-visible {
 /* Book background */
 .book-background {
   background: linear-gradient(to bottom, #f5f0e8 0%, #e8dfd0 100%);
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Book container - the main wrapper */
@@ -3489,7 +3489,7 @@ body .book-page .page-content {
 /* Book view container - allows natural scrolling */
 .book-view {
   position: relative;
-  min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden; /* Prevent horizontal scroll */
   overflow-y: auto; /* Allow vertical scroll */
 }
@@ -3498,7 +3498,7 @@ body .book-page .page-content {
 .book-container-wrapper {
   padding-top: 80px; /* Space for header */
   padding-bottom: 80px; /* Space for bottom navigation */
-  min-height: 100vh;
+  min-height: 100dvh;
   background-color: #F5F2ED;
 }
 
@@ -3594,4 +3594,13 @@ body .fixed.bottom-0[class*="safe-area"] {
 body {
   -webkit-overflow-scrolling: touch;
   /* Note: overscroll-behavior-y removed as it causes fixed nav jumping on iOS */
+}
+
+/* iOS-friendly page wrappers - use dvh for dynamic viewport */
+.hw-page {
+  min-height: 100dvh;
+}
+
+.hw-page-full {
+  height: 100dvh;
 }

@@ -480,7 +480,7 @@ function BookV4PageContent() {
   // Loading state - show spinner while fetching data OR waiting for user
   if (isLoading || isFetching || !data) {
     return (
-      <div className="min-h-screen bg-[#0b0d12] flex items-center justify-center">
+      <div className="hw-page bg-[#0b0d12] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
           <p className="text-slate-300">Loading your stories...</p>
@@ -492,7 +492,7 @@ function BookV4PageContent() {
   // No stories state (only show if we have data and it's truly empty)
   if (data && sortedStories.length === 0) {
     return (
-      <div className="min-h-screen bg-[#0b0d12] flex items-center justify-center">
+      <div className="hw-page bg-[#0b0d12] flex items-center justify-center">
         <div className="text-center max-w-md px-4">
           <h2 className="text-2xl font-semibold text-white mb-4">
             Your Book is Empty
@@ -547,7 +547,7 @@ function BookV4PageContent() {
   // Render closed book cover state
   if (!isBookOpen) {
     return (
-      <div className={`h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
+      <div className={`hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
         {/* Header */}
         <div className="fixed top-0 left-0 right-0 z-50 no-print -mt-[5px] md:-mt-[15px]">
           <div className="mx-auto max-w-[1800px] px-6">
@@ -603,7 +603,7 @@ function BookV4PageContent() {
         </div>
 
         {/* Closed book cover - centered */}
-        <div className="flex items-start md:items-center justify-center pt-[109px] md:pt-[64px]" style={{ height: "calc(100vh - 64px)" }}>
+        <div className="flex items-start md:items-center justify-center pt-[109px] md:pt-[64px]" style={{ height: "calc(100dvh - 64px)" }}>
           <ClosedBookCover
             userName={user?.name || "Your"}
             storyCount={sortedStories.length}
@@ -625,7 +625,7 @@ function BookV4PageContent() {
       </div>
 
       {/* Desktop: Book view with dual-page spread */}
-      <div className={`hidden lg:block h-screen overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
+      <div className={`hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
       {/* ARIA live region for page announcements */}
       <div
         id="sr-live"
@@ -714,14 +714,14 @@ function BookV4PageContent() {
         </div>
     
         {/* Desktop: Dual-page spread */}
-        <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100vh - 180px)" }}>
+        <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100dvh - 180px)" }}>
           {/* Clickable Navigation Zones - Left margin for previous */}
           <button
             onClick={goToPrevSpread}
             disabled={currentSpreadIndex === 0}
             className="absolute left-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
             style={{ 
-              width: "calc((100vw - min(95vw, calc((100vh - 180px) * 1.294))) / 2 + 11px)",
+              width: "calc((100vw - min(95vw, calc((100dvh - 180px) * 1.294))) / 2 + 11px)",
               background: "transparent"
             }}
             aria-label="Previous page"
@@ -742,7 +742,7 @@ function BookV4PageContent() {
             disabled={currentSpreadIndex >= spreads.length - 1}
             className="absolute right-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
             style={{ 
-              width: "calc((100vw - min(95vw, calc((100vh - 180px) * 1.294))) / 2 + 11px)",
+              width: "calc((100vw - min(95vw, calc((100dvh - 180px) * 1.294))) / 2 + 11px)",
               background: "transparent"
             }}
             aria-label="Next page"
@@ -761,7 +761,7 @@ function BookV4PageContent() {
           <div 
             className="relative [perspective:2000px]" 
             style={{ 
-              width: "min(95vw, calc((100vh - 180px) * 1.294))",
+              width: "min(95vw, calc((100dvh - 180px) * 1.294))",
               aspectRatio: "11 / 8.5",
               maxWidth: "1600px"
             }}
@@ -1212,7 +1212,7 @@ function MobileView({
 
   return (
     <div className="lg:hidden w-full" style={{ marginTop: '-10px' }}>
-      <div className="relative w-full flex items-center justify-center" style={{ height: 'calc(100dvh - 80px)', minHeight: 'calc(100vh - 80px)' }}>
+      <div className="relative w-full flex items-center justify-center" style={{ height: 'calc(100dvh - 80px)', minHeight: 'calc(100dvh - 80px)' }}>
         {/* Mobile prev/next controls */}
         {/* Left edge clickable zone */}
         <button 
@@ -1279,7 +1279,7 @@ function ClosedBookCover({
 }) {
   return (
     <div className="relative mx-auto" style={{ 
-      width: "min(95vw, calc((100vh - 180px) * 0.647))",
+      width: "min(95vw, calc((100dvh - 180px) * 0.647))",
       aspectRatio: "5.5 / 8.5",
       maxWidth: "800px"
     }}>
@@ -1854,7 +1854,7 @@ function MobilePage({
 export default function BookV4Page() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0b0d12] flex items-center justify-center">
+      <div className="hw-page bg-[#0b0d12] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
           <p className="text-slate-300">Loading your stories...</p>

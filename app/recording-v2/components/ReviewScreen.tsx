@@ -130,7 +130,7 @@ export function ReviewScreen({
   );
 
   return (
-    <div className="max-w-md mx-auto min-h-screen flex flex-col">
+    <div className="max-w-md mx-auto hw-page flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-200">
         <div className="max-w-md mx-auto px-5 py-4 flex items-center justify-between">

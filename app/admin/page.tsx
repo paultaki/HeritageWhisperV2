@@ -122,7 +122,7 @@ export default function AdminHomePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FFF8F3]">
+      <div className="hw-page flex items-center justify-center p-4 bg-[#FFF8F3]">
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle>Authentication Required</CardTitle>
@@ -136,7 +136,7 @@ export default function AdminHomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF8F3] py-8 px-4 pt-20 lg:pt-8">
+    <div className="hw-page bg-[#FFF8F3] py-8 px-4 pt-20 lg:pt-8">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">

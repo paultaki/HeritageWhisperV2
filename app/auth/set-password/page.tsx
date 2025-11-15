@@ -54,7 +54,7 @@ export default function SetPassword() {
   // Show loading while checking auth
   if (checkingAuth || authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center album-texture">
+      <div className="hw-page flex items-center justify-center album-texture">
         <div className="text-center">
           <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
           <p className="text-muted-foreground">Checking authentication...</p>
@@ -127,7 +127,7 @@ export default function SetPassword() {
   };
 
   return (
-    <div className="min-h-screen album-texture">
+    <div className="hw-page album-texture">
       <div className="container mx-auto p-4">
         <Button
           variant="ghost"

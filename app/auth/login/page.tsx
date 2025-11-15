@@ -170,7 +170,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen antialiased bg-gradient-to-b from-[#fff7f3] via-[#ffe9e0] to-[#fde5e3]" style={{ fontSize: '16px' }}>
+    <div className="hw-page antialiased bg-gradient-to-b from-[#fff7f3] via-[#ffe9e0] to-[#fde5e3]" style={{ fontSize: '16px' }}>
       {/* Background: animated blobs + grain */}
       <div aria-hidden="true" className="fixed inset-0 overflow-hidden pointer-events-none">
         {/* soft radial glow center */}
@@ -198,7 +198,7 @@ export default function Login() {
         />
       </div>
 
-      <main className="relative z-10 flex min-h-screen items-center">
+      <main className="relative z-10 flex hw-page items-center">
         <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
 

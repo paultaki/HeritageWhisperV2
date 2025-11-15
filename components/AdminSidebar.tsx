@@ -25,6 +25,7 @@ import {
   Palette,
   Menu,
   X,
+  UserPlus,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -53,6 +54,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: "Dashboard",
     items: [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+      { label: "Beta Codes", href: "/admin/beta", icon: UserPlus },
       { label: "Design Guidelines", href: "/admin/design-guidelines", icon: Palette },
     ],
   },

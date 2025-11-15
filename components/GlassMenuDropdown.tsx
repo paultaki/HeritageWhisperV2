@@ -14,6 +14,7 @@ import {
   Shield,
   Box,
   Lightbulb,
+  Archive,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
@@ -105,7 +106,7 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
   const allMenuItems = [
     { icon: Home, label: "Home", href: "/" },
     { icon: Lightbulb, label: "Story Ideas", href: "/prompts", ownerOnly: true },
-    { icon: Users, label: "Family", href: "/family", ownerOnly: true },
+    { icon: Archive, label: "Keepsakes", href: "/memory-box" },
     { icon: Settings, label: "Settings", href: "/profile", ownerOnly: true },
     { icon: HelpCircle, label: "Help", href: "/help" },
   ];

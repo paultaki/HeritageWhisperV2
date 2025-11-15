@@ -542,7 +542,7 @@ export default function InterviewChatPage() {
   // Show loading state while checking auth
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-page)' }}>
+      <div className="hw-page flex items-center justify-center" style={{ background: 'var(--color-page)' }}>
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-4 animate-pulse" />
           <p className="text-gray-600">Loading...</p>
@@ -557,7 +557,7 @@ export default function InterviewChatPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-page)' }}>
+    <div className="hw-page" style={{ background: 'var(--color-page)' }}>
       {/* Welcome Modal */}
       {showWelcome && (
         <WelcomeModal

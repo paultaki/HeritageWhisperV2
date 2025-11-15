@@ -41,31 +41,31 @@ export function PendingInviteCard({
     <Card className="bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200 rounded-2xl overflow-hidden">
       <div className="p-4 md:p-5">
         <div className="flex items-start gap-3 mb-3">
-          <Avatar className="w-12 h-12 md:w-14 md:h-14 shrink-0">
-            <AvatarFallback className="bg-gray-300 text-gray-600 text-lg md:text-xl font-semibold">
+          <Avatar className="w-14 h-14 md:w-16 md:h-16 shrink-0">
+            <AvatarFallback className="bg-gray-300 text-gray-600 text-xl md:text-2xl font-semibold">
               {initial}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex-1 min-w-0">
-            <p className="text-base md:text-lg font-semibold text-gray-900 break-all mb-1.5 leading-tight">
+            <p className="text-lg md:text-xl font-semibold text-gray-900 break-all mb-2 leading-tight">
               {member.email}
             </p>
 
             <div className="flex flex-wrap items-center gap-1.5 mb-1">
               {member.relationship && (
-                <Badge className="bg-white text-gray-700 border border-gray-300 text-xs px-2.5 py-0.5 font-medium rounded-full">
+                <Badge className="bg-white text-gray-700 border border-gray-300 text-sm px-3 py-1 font-medium rounded-full">
                   {member.relationship}
                 </Badge>
               )}
               {member.inviteExpired && (
-                <Badge className="bg-red-600 text-white border-0 text-xs px-2.5 py-0.5 font-medium rounded-full">
+                <Badge className="bg-red-600 text-white border-0 text-sm px-3 py-1 font-medium rounded-full">
                   Expired
                 </Badge>
               )}
             </div>
 
-            <p className="text-xs md:text-sm text-gray-600">
+            <p className="text-sm md:text-base text-gray-600">
               Invited {getRelativeTime(member.invited_at)}
             </p>
           </div>
@@ -76,7 +76,7 @@ export function PendingInviteCard({
           <Button
             onClick={onResend}
             disabled={isResending}
-            className="flex-1 min-h-[48px] px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+            className="flex-1 min-h-[48px] px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-base md:text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
           >
             {isResending ? "Sending..." : "Resend Invitation"}
           </Button>
@@ -85,7 +85,7 @@ export function PendingInviteCard({
             <AlertDialogTrigger asChild>
               <Button
                 variant="outline"
-                className="flex-1 sm:flex-none min-h-[48px] px-5 py-2.5 text-gray-700 hover:text-gray-900 hover:bg-gray-100 border-gray-300 text-sm md:text-base font-medium rounded-xl active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+                className="flex-1 sm:flex-none min-h-[48px] px-5 py-2.5 text-gray-700 hover:text-gray-900 hover:bg-gray-100 border-gray-300 text-base md:text-lg font-medium rounded-xl active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
               >
                 Cancel
               </Button>

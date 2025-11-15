@@ -493,7 +493,7 @@ export default function MemoryBoxV2Page() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#FFF8F3" }}>
+    <div className="hw-page" style={{ backgroundColor: "#FFF8F3" }}>
       {/* Desktop Header */}
       <DesktopPageHeader
         icon={Box}

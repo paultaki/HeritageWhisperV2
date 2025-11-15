@@ -78,7 +78,7 @@ function CheckEmailContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center album-texture px-4">
+    <div className="hw-page flex items-center justify-center album-texture px-4">
       <Card className="max-w-md w-full">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -160,7 +160,7 @@ export default function CheckEmail() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center album-texture">
+        <div className="hw-page flex items-center justify-center album-texture">
           <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
         </div>
       }

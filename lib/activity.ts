@@ -130,27 +130,11 @@ export async function getRecentActivity(
     dateThreshold.setDate(dateThreshold.getDate() - days);
 
     // Fetch events with related data
-    const { data, error } = await supabaseAdmin
+    // Note: We need to fetch events first, then manually join related data
+    // because actor_id references auth.users which PostgREST can't join directly
+    const { data: events, error } = await supabaseAdmin
       .from("activity_events")
-      .select(
-        `
-        id,
-        event_type,
-        occurred_at,
-        metadata,
-        actor:actor_id (
-          email,
-          profiles (full_name)
-        ),
-        story:story_id (
-          title
-        ),
-        family_member:family_member_id (
-          email,
-          relationship
-        )
-      `
-      )
+      .select("*")
       .eq("user_id", userId)
       .gte("occurred_at", dateThreshold.toISOString())
       .order("occurred_at", { ascending: false })
@@ -161,18 +145,76 @@ export async function getRecentActivity(
       return { success: false, error: error.message };
     }
 
-    // Transform to DTO format
-    const events = data.map((event: any) => ({
-      id: event.id,
-      eventType: event.event_type,
-      occurredAt: event.occurred_at,
-      actorName: event.actor?.profiles?.full_name || event.actor?.email || undefined,
-      storyTitle: event.story?.title || undefined,
-      familyMemberName: event.family_member?.email || undefined,
-      metadata: event.metadata || {},
-    }));
+    if (!events || events.length === 0) {
+      return { success: true, events: [] };
+    }
 
-    return { success: true, events };
+    // Collect unique IDs for batch fetching
+    const actorIds = new Set<string>();
+    const storyIds = new Set<string>();
+    const familyMemberIds = new Set<string>();
+
+    events.forEach((event: any) => {
+      if (event.actor_id) actorIds.add(event.actor_id);
+      if (event.story_id) storyIds.add(event.story_id);
+      if (event.family_member_id) familyMemberIds.add(event.family_member_id);
+    });
+
+    // Fetch related data in parallel
+    const [actorsData, storiesData, familyMembersData] = await Promise.all([
+      // Fetch actors (users) with their profiles
+      actorIds.size > 0
+        ? supabaseAdmin
+            .from("users")
+            .select("id, email, name")
+            .in("id", Array.from(actorIds))
+            .then((res) => res.data || [])
+        : Promise.resolve([]),
+
+      // Fetch stories
+      storyIds.size > 0
+        ? supabaseAdmin
+            .from("stories")
+            .select("id, title")
+            .in("id", Array.from(storyIds))
+            .then((res) => res.data || [])
+        : Promise.resolve([]),
+
+      // Fetch family members
+      familyMemberIds.size > 0
+        ? supabaseAdmin
+            .from("family_members")
+            .select("id, email, name")
+            .in("id", Array.from(familyMemberIds))
+            .then((res) => res.data || [])
+        : Promise.resolve([]),
+    ]);
+
+    // Create lookup maps
+    const actorMap = new Map(actorsData.map((a: any) => [a.id, a]));
+    const storyMap = new Map(storiesData.map((s: any) => [s.id, s]));
+    const familyMemberMap = new Map(familyMembersData.map((f: any) => [f.id, f]));
+
+    // Transform to DTO format with denormalized names
+    const transformedEvents = events.map((event: any) => {
+      const actor = event.actor_id ? actorMap.get(event.actor_id) : null;
+      const story = event.story_id ? storyMap.get(event.story_id) : null;
+      const familyMember = event.family_member_id
+        ? familyMemberMap.get(event.family_member_id)
+        : null;
+
+      return {
+        id: event.id,
+        eventType: event.event_type,
+        occurredAt: event.occurred_at,
+        actorName: actor?.name || actor?.email || undefined,
+        storyTitle: story?.title || undefined,
+        familyMemberName: familyMember?.name || familyMember?.email || undefined,
+        metadata: event.metadata || {},
+      };
+    });
+
+    return { success: true, events: transformedEvents };
   } catch (error) {
     logger.error("[Activity] Exception fetching events:", error);
     return { success: false, error: "Internal error fetching activity" };
