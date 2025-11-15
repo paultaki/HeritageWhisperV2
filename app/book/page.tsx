@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useAccountContext } from "@/hooks/use-account-context";
+import { apiRequest } from "@/lib/queryClient";
+import { getApiUrl } from "@/lib/config";
 import { Volume2, Pause, Loader2, Clock3, Pencil, Type } from "lucide-react";
 import { BookPage } from "./components/BookPage";
 import DarkBookProgressBar from "./components/DarkBookProgressBar";
@@ -61,11 +63,11 @@ interface Story {
 
 function BookV4PageContent() {
   const { user } = useAuth();
-  const { activeContext } = useAccountContext();
+  const { activeContext, isLoading: isContextLoading } = useAccountContext();
   const isOwnAccount = activeContext?.type === 'own';
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Extract storyId from URL for deep linking (e.g., from timeline)
   const initialStoryId = searchParams?.get('storyId') || undefined;
   
@@ -100,10 +102,42 @@ function BookV4PageContent() {
     }
   };
 
-  // Fetch stories - same as main book
+  // Fetch stories - with storyteller_id support for family sharing
+  // Always default to user.id if no active context (prevents query from being disabled)
+  const storytellerId = activeContext?.storytellerId || user?.id;
+  const queryEnabled = !isContextLoading && ((!!user && !!user.id) || !!activeContext);
+
+  // Debug logging
+  console.log('[Book] Query setup:', {
+    user: user?.id,
+    activeContext,
+    storytellerId,
+    isContextLoading,
+    queryEnabled
+  });
+
   const { data, isLoading, isFetching } = useQuery<{ stories: Story[] }>({
-    queryKey: ["/api/stories"],
-    enabled: (!!user && !!user.id) || !!activeContext,
+    queryKey: ["/api/stories", storytellerId],
+    queryFn: async () => {
+      console.log('[Book] Fetching stories for storytellerId:', storytellerId);
+
+      // Build URL with storyteller_id if viewing someone else's stories
+      const url = storytellerId
+        ? `${getApiUrl("/api/stories")}?storyteller_id=${storytellerId}`
+        : getApiUrl("/api/stories");
+
+      console.log('[Book] Fetch URL:', url);
+
+      // Use apiRequest which handles authentication (JWT or family session token)
+      const res = await apiRequest("GET", url);
+      const result = await res.json();
+
+      console.log('[Book] Fetched stories:', result?.stories?.length || 0);
+      return result;
+    },
+    enabled: queryEnabled, // Wait for context to load, then enable for users OR viewers
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   const stories = data?.stories || [];
@@ -595,17 +629,17 @@ function BookV4PageContent() {
         />
       </div>
     
-      <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6 mt-0 md:mt-[51px]" style={{ paddingTop: '0px' }}>
+      <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6" style={{ paddingTop: '80px' }}>
     
         {/* Desktop: Dual-page spread */}
-        <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100dvh - 180px)" }}>
+        <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100dvh - 240px)" }}>
           {/* Clickable Navigation Zones - Left margin for previous */}
           <button
             onClick={goToPrevSpread}
             disabled={currentSpreadIndex === 0}
             className="absolute left-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
             style={{ 
-              width: "calc((100vw - min(95vw, calc((100dvh - 180px) * 1.294))) / 2 + 11px)",
+              width: "calc((100vw - min(95vw, calc((100dvh - 240px) * 1.294))) / 2 + 11px)",
               background: "transparent"
             }}
             aria-label="Previous page"
@@ -626,7 +660,7 @@ function BookV4PageContent() {
             disabled={currentSpreadIndex >= spreads.length - 1}
             className="absolute right-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
             style={{ 
-              width: "calc((100vw - min(95vw, calc((100dvh - 180px) * 1.294))) / 2 + 11px)",
+              width: "calc((100vw - min(95vw, calc((100dvh - 240px) * 1.294))) / 2 + 11px)",
               background: "transparent"
             }}
             aria-label="Next page"
@@ -645,7 +679,7 @@ function BookV4PageContent() {
           <div 
             className="relative [perspective:2000px]" 
             style={{ 
-              width: "min(95vw, calc((100dvh - 180px) * 1.294))",
+              width: "min(95vw, calc((100dvh - 240px) * 1.294))",
               aspectRatio: "11 / 8.5",
               maxWidth: "1600px"
             }}
