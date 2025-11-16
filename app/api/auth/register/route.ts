@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { userAgreements, users } from "@/shared/schema";
 import { eq } from "drizzle-orm";
-import { sendVerificationEmail } from "@/lib/resend";
 import { authRatelimit, getClientIp, checkRateLimit } from "@/lib/ratelimit";
 import { logger } from "@/lib/logger";
 import { RegisterUserSchema, safeValidateRequestBody } from "@/lib/validationSchemas";
@@ -262,11 +261,13 @@ export async function POST(request: NextRequest) {
       isPaid: false,
     };
 
-    // If email confirmation is required, send verification email via Resend
+    // If email confirmation is required, Supabase will send the verification email
+    // (configured in supabase.auth.signUp with emailRedirectTo option above)
     if (requireEmailConfirmation && !session) {
-      const confirmationUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/auth/verified?email=${encodeURIComponent(email)}`;
-
-      await sendVerificationEmail(email, name, confirmationUrl);
+      // NOTE: We're NOT sending a custom Resend email here because Supabase
+      // already sent its native confirmation email to /auth/callback
+      // The custom Resend email was causing conflicts - it went to /auth/verified
+      // which doesn't actually confirm the email in Supabase's system
 
       return NextResponse.json({
         user: userData,
