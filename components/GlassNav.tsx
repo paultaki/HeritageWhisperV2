@@ -144,9 +144,7 @@ export default function GlassNav({
                 "w-[18px] h-[18px] transition-colors duration-200",
                 // Icon colors - conditional on ink and active state
                 dataInk === "light"
-                  ? active
-                    ? "text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
-                    : "text-white/92 drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
+                  ? "text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
                   : active
                   ? "text-black"
                   : "text-black/85" // Boosted from /75 for better visibility
@@ -157,9 +155,7 @@ export default function GlassNav({
                 "relative text-[11px] leading-tight font-medium transition-colors duration-200",
                 // Label colors - conditional on ink and active state
                 dataInk === "light"
-                  ? active
-                    ? "text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
-                    : "text-white/92 drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
+                  ? "text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
                   : active
                   ? "text-black"
                   : "text-black/85" // Boosted from /75 for better visibility
