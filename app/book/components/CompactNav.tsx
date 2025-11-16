@@ -50,7 +50,7 @@ export function CompactNav({ currentStoryId }: CompactNavProps) {
           }}
           className="flex items-center justify-center p-2 rounded-lg transition-all hover:bg-white/10 relative"
           style={{
-            color: pathname === "/timeline" ? "#ffffff" : "rgba(255, 255, 255, 0.6)",
+            color: "#ffffff",
           }}
         >
           {pathname === "/timeline" && (
@@ -70,7 +70,7 @@ export function CompactNav({ currentStoryId }: CompactNavProps) {
           onClick={() => router.push("/book")}
           className="flex items-center justify-center p-2 rounded-lg transition-all hover:bg-white/10 relative"
           style={{
-            color: pathname.startsWith("/book") ? "#ffffff" : "rgba(255, 255, 255, 0.6)",
+            color: "#ffffff",
           }}
         >
           {pathname.startsWith("/book") && (
@@ -90,7 +90,7 @@ export function CompactNav({ currentStoryId }: CompactNavProps) {
           onClick={() => router.push("/prompts")}
           className="flex items-center justify-center p-2 rounded-lg transition-all hover:bg-white/10 relative"
           style={{
-            color: pathname === "/prompts" ? "#ffffff" : "rgba(255, 255, 255, 0.6)",
+            color: "#ffffff",
           }}
         >
           {pathname === "/prompts" && (
@@ -110,7 +110,7 @@ export function CompactNav({ currentStoryId }: CompactNavProps) {
           onClick={() => router.push("/profile")}
           className="flex items-center justify-center p-2 rounded-lg transition-all hover:bg-white/10 relative"
           style={{
-            color: pathname === "/profile" ? "#ffffff" : "rgba(255, 255, 255, 0.6)",
+            color: "#ffffff",
           }}
         >
           {pathname === "/profile" && (

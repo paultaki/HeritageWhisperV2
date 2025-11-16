@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,23 @@ export default function PhotoFirstRecordingPage() {
     character: string;
   } | undefined>();
   const [isStarting, setIsStarting] = useState(false);
+  const [templateTitle, setTemplateTitle] = useState<string | null>(null);
+
+  // Read starter template from sessionStorage on mount
+  useEffect(() => {
+    const stored = sessionStorage.getItem('starterTemplate');
+    if (stored) {
+      try {
+        const template = JSON.parse(stored);
+        setTemplateTitle(template.title);
+        console.log('[Recording] Loaded starter template:', template);
+        // Clear after reading so it doesn't persist
+        sessionStorage.removeItem('starterTemplate');
+      } catch (e) {
+        console.error('Failed to parse starter template:', e);
+      }
+    }
+  }, []);
 
   const handlePhotoCapture = (dataURL: string, transform?: { zoom: number; position: { x: number; y: number } }) => {
     setPhotoDataURL(dataURL);
@@ -86,7 +103,7 @@ export default function PhotoFirstRecordingPage() {
 
         const cacheData = {
           mode: 'edit',
-          title: data.title,
+          title: templateTitle || data.title, // Use template title if available, otherwise AI-generated
           transcription: data.transcription,
           lessonLearned: data.lessonOptions.practical, // Default to practical lesson
           mainAudioBase64: base64Audio.split(',')[1], // Remove data:audio/webm;base64, prefix
@@ -183,7 +200,7 @@ export default function PhotoFirstRecordingPage() {
         // Prepare NavCache data
         const cacheData = {
           mode: 'quick',
-          title: data.title,
+          title: templateTitle || data.title, // Use template title if available
           storyYear: data.year || data.decade,
           transcription: data.transcription,
           mainAudioBase64: base64Audio.split(',')[1], // Remove data:audio/webm;base64, prefix

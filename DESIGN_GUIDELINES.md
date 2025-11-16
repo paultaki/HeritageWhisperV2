@@ -1,200 +1,607 @@
-Summary
+HeritageWhisper Design Guidelines
 
-Raise base text to 18 px, lock contrast, enlarge and separate targets, keep labels visible, and add a “Simple Mode” preset. Ship bottom tabs with icon + label, inputs at 56 px, skeletons everywhere, and proxy/caregiver patterns. The rest is editing, not inventing.
+North star:
+Calm, book like, trustworthy.
+Middle aged adults and seniors should be able to browse for hours with zero strain.
 
-High-impact fixes to apply now
+Warm paper backgrounds, not clinical white
 
-Base type: make body 18 px default. Keep 16 px only for captions/labels.
+Deep slate blue as the spine color
 
-Contrast: change brand buttons to blue-600 with white text, not blue-500.
+Muted green as support
 
-Status colors: switch success/error to darker tones so white text passes AA.
+Gold accent used sparingly
 
-Grays: never use gray-400 on white for content. Reserve it for disabled only.
+One clean sans serif for almost everything
 
-Targets & spacing: primary actions 60 px tall, all controls ≥48 px, 16–24 px spacing between tappables.
+Big, readable type and large hit targets
 
-Line length: cap reading width to 60–75 characters (max-w-[65ch]).
+1. Brand palette
+1.1 Color tokens
 
-Nav: 4 tabs max, icon + label always visible, label ≥14 px.
+Use these as the single source of truth in code and design.
 
-Inputs: 56 px field height, inline validation, right keyboard per field.
+:root {
+  /* Brand core */
+  --hw-page-bg: #F7F2EC;   /* warm paper background */
+  --hw-section-bg: #EFE6DA;
+  --hw-surface: #FFFFFF;
 
-Scaling: support 200% text scale and iOS AX sizes; no caps. Ensure scroll containers prevent cut-offs.
+  --hw-primary: #203954;         /* deep slate blue */
+  --hw-primary-hover: #1B3047;
+  --hw-primary-soft: #E0E5ED;    /* very light tint for badges etc */
 
-Simple Mode: larger type and fewer choices per screen; user-toggle in Settings.
+  --hw-secondary: #3E6A5A;       /* muted green */
+  --hw-secondary-hover: #355C4E;
+  --hw-secondary-soft: #DDE7E1;
 
-Token tweaks (drop-in replacements)
-
-Use these so all CTA text is AA at any size.
-
-:root{
-  /* Brand */
-  --primary: #2563EB;     /* blue-600 (AA with white) */
-  --primary-hover: #1D4ED8;/* blue-700 */
+  --hw-accent-gold: #CBA46A;     /* premium accent, use sparingly */
+  --hw-accent-gold-soft: #F4E6CC;
 
   /* Text */
-  --text-primary: #111827; /* gray-900 */
-  --text-secondary: #6B7280;/* gray-500 (OK ≥16 px) */
-  --text-tertiary: #9CA3AF; /* disabled/meta only, not body */
+  --hw-text-primary: #1F1F1F;    /* near black */
+  --hw-text-secondary: #4A4A4A;  /* long captions, helper text */
+  --hw-text-muted: #8A8378;      /* meta, not for main copy */
+  --hw-text-on-dark: #FFFFFF;
 
-  /* Backgrounds */
-  --bg-primary: #FFFFFF;
-  --bg-secondary: #F9FAFB;
-  --border: #E5E7EB;
+  /* Borders and dividers */
+  --hw-border-subtle: #D2C9BD;
+  --hw-border-strong: #B8AA9C;
 
-  /* Status (AA with white) */
-  --success: #15803D;    /* green-700 */
-  --error: #DC2626;      /* red-600 */
-  --warning-bg: #FFFBEB; /* amber-50 */
-  --warning-accent: #B45309; /* amber-700 if on dark */
+  /* Status */
+  --hw-success: #166534;         /* works with white text */
+  --hw-error: #B91C1C;
+  --hw-warning-bg: #FFFBEB;
+  --hw-warning-accent: #B45309;
+  --hw-info: #1D4ED8;
 
-  /* Sizing */
-  --body: 18px;          /* default body */
-  --line: 1.5;
-  --hit-min: 48px;
-  --hit-pref: 60px;
-  --gap: 16px;           /* inter-control spacing minimum */
+  /* Typography base */
+  --hw-font-body-size: 18px;
+  --hw-font-line-height: 1.6;
+
+  /* Hit targets and spacing */
+  --hw-hit-min: 48px;
+  --hw-hit-primary: 60px;
+  --hw-gap-sm: 8px;
+  --hw-gap-md: 16px;
+  --hw-gap-lg: 24px;
 }
-html{ font-size: var(--body); }
+html {
+  font-size: var(--hw-font-body-size);
+}
 
-Tailwind class upgrades (exact swaps)
+1.2 Palette usage
 
-Primary Button
-Replace your button classes with:
+Backgrounds
 
-w-full min-h-[60px] px-8 py-4
-bg-blue-600 text-white text-lg font-medium
-rounded-xl shadow-sm hover:shadow-md hover:bg-blue-700
-active:scale-[0.98] focus:outline-none
-focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 focus:ring-offset-white
-transition-all duration-200
+Page background: --hw-page-bg
+
+Alternate bands: --hw-section-bg
+
+Cards and modal surfaces: --hw-surface
+
+Primary color (blue)
+
+Main CTAs and primary links
+
+Logo and key navigation
+
+Important icons
+
+Secondary color (green)
+
+Secondary buttons
+
+Filters, chips, tags, timeline markers
+
+Non destructive confirmation states
+
+Accent gold
+
+Small icons, separators, chapter markers
+
+Underline for current nav item
+
+Highlight for “Wisdom” or “Gold insight” labels
+
+Never use as a full button background with body text
+
+Status
+
+Do not theme status onto brand colors. Use --hw-success, --hw-error, --hw-info and keep them separate from primary/secondary.
+
+Do not
+
+Introduce extra brand colors without a very specific job
+
+Put long body text directly on saturated colors
+
+Use low contrast gray text on colored backgrounds
+
+2. Typography
+2.1 Font family
+
+Use a single, clean, humanist sans.
+
+Recommended primary font
+
+font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+  "Segoe UI", sans-serif;
 
 
-Secondary Button
+Alternative options if needed:
 
-w-full min-h-[48px] px-6 py-3
-bg-white text-gray-900 text-base font-medium
-border border-gray-200 rounded-xl
-hover:bg-gray-50 active:scale-[0.98]
-focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600
-transition-all duration-200
+Source Sans 3
+
+Lato
+
+Use this family for:
+
+Body copy
+
+Navigation
+
+Buttons
+
+Labels
+
+Most headings
+
+If you later add a serif, reserve it for large hero headings only.
+
+2.2 Type scale
+
+Base body size is set by --hw-font-body-size.
+
+Recommended scale:
+
+H1: 32 to 36 px, line height 1.3
+
+H2: 24 to 28 px, line height 1.35
+
+H3: 20 to 22 px, line height 1.4
+
+Body: 18 px, line height 1.6 (default)
+
+Small helper text and captions: 16 px, line height 1.5 minimum
+
+Line length for paragraphs:
+
+Max width: 60 to 75 characters
+In Tailwind: max-w-[65ch]
+
+2.3 Weights
+
+Body text: Regular (400)
+
+Navigation, buttons, labels: Medium (500)
+
+Section headings: Semibold (600)
+
+Do not use Light or Thin weights for anything that must be read clearly.
+
+2.4 Case and styling
+
+Sentence case for almost everything
+
+All caps restricted to short labels and HERITAGE in the logo
+
+No long strings of all caps in body text
+
+3. Layout and spacing
+3.1 Spacing system
+
+Use multiples of 8 for vertical rhythm:
+
+8 px small
+
+16 px default gap between controls
+
+24 px or 32 px between grouped sections
+
+Between tappable elements:
+
+Minimum gap: 16 px
+
+Preferred gap: 24 px
+
+3.2 Hit targets
+
+All tappable targets at least 48 px tall and wide
+
+Primary actions and major CTAs at least 60 px tall
+
+This applies to: buttons, list items, tabs, pills, icons with actions.
+
+3.3 Grids and content width
+
+Desktop:
+
+Core content width: 960 to 1140 px
+
+Long reading sections wrapped in max-w-[65ch] containers
+
+Generous left and right margins so the experience feels like a book, not a dashboard
+
+Mobile:
+
+Maintain side padding of 16 to 24 px
+
+Avoid edge to edge text except for short labels
+
+4. Navigation
+4.1 Global nav
+
+Background: tinted bar, not fully transparent glass
+
+On normal content: rgba(247, 242, 236, 0.9) over the page
+
+On photo hero: rgba(32, 57, 84, 0.9) with white text
+
+Nav text:
+
+Font: Inter medium
+
+Size: 16 px minimum on desktop, 14 to 16 px on mobile
+
+Color on light nav: --hw-primary
+
+Color on dark nav: --hw-text-on-dark
+
+Active item:
+
+Text color: --hw-primary
+
+Bottom underline or pill indicator in --hw-accent-gold
+
+Limit top level nav items to 4 to 6.
+
+4.2 Bottom tabs (app style)
+
+Icon plus label, label always visible
+
+Max 4 tabs
+
+Label size at least 14 px
+
+Tailwind example:
+
+<button
+  class="
+    flex flex-col items-center justify-center
+    min-w-[72px] h-16 text-sm
+    text-hw-text-secondary
+    aria-[current=true]:text-hw-primary
+  "
+>
+  ...
+</button>
+
+5. Components
+5.1 Primary button
+
+Usage:
+
+Main call to action on a page or card
+
+Save, Continue, Start recording, Invite family
+
+Visual:
+
+Background: --hw-primary
+
+Text: white
+
+Height: 60 px
+
+Tailwind example:
+
+<button
+  class="
+    w-full min-h-[60px] px-8 py-4
+    bg-[var(--hw-primary)] text-white text-lg font-medium
+    rounded-xl shadow-sm
+    hover:bg-[var(--hw-primary-hover)] hover:shadow-md
+    active:scale-[0.98]
+    focus:outline-none focus:ring-2
+    focus:ring-offset-2 focus:ring-[var(--hw-primary)]
+    focus:ring-offset-[var(--hw-page-bg)]
+    transition-all duration-200
+  "
+>
+  Save this story
+</button>
+
+5.2 Secondary button
+
+Usage:
+
+Secondary actions such as Preview, Cancel, Learn more
+
+Visual:
+
+Outline or soft fill
+
+Text in --hw-text-primary
+
+Example:
+
+<button
+  class="
+    w-full min-h-[48px] px-6 py-3
+    bg-[var(--hw-surface)] text-[var(--hw-text-primary)]
+    text-base font-medium
+    border border-[var(--hw-border-subtle)] rounded-xl
+    hover:bg-[var(--hw-section-bg)]
+    active:scale-[0.98]
+    focus:outline-none focus:ring-2
+    focus:ring-offset-2 focus:ring-[var(--hw-primary)]
+    focus:ring-offset-[var(--hw-page-bg)]
+    transition-all duration-200
+  "
+>
+  Preview sample book
+</button>
+
+5.3 Ghost / tertiary button
+
+Link like actions (View details, Edit title) can be simple text buttons:
+
+Text color: --hw-primary
+
+Underline on hover
+
+No filled background
+
+5.4 Inputs
+
+Height: 56 px
+
+Full width by default
+
+Label always visible above the field
+
+Example:
+
+<label class="block space-y-1">
+  <span class="text-sm font-medium text-[var(--hw-text-primary)]">
+    Story title
+  </span>
+  <input
+    class="
+      h-14 w-full px-4 py-3 text-base
+      bg-[var(--hw-surface)]
+      border border-[var(--hw-border-subtle)] rounded-xl
+      text-[var(--hw-text-primary)]
+      placeholder:text-[var(--hw-text-muted)]
+      focus:border-[var(--hw-primary)]
+      focus:ring-2 focus:ring-[var(--hw-primary)] focus:ring-offset-0
+      aria-[invalid=true]:border-[var(--hw-error)]
+    "
+    placeholder="Grandpa’s first job"
+  />
+</label>
 
 
-Input / Select / Textarea
+Validation and helper text in 16 px, --hw-text-secondary.
 
-h-14 w-full px-4 py-3 text-base
-bg-white border border-gray-300 rounded-xl
-placeholder:text-gray-400
-focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0
-aria-[invalid=true]:border-red-600
+5.5 Cards
 
+Use one of these patterns per page, not both.
 
-Card (pick one per page)
+Bordered card:
 
-/* Border */
-bg-white border border-gray-200 rounded-xl p-6
-
-/* OR Shadow */
-bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6
-
-
-Bottom Tab Item
-
-flex flex-col items-center justify-center
-min-w-[72px] h-16
-text-sm
-aria-[current=true]:text-blue-600
+<div
+  class="
+    bg-[var(--hw-surface)]
+    border border-[var(--hw-border-subtle)]
+    rounded-xl p-6
+  "
+>
+  ...
+</div>
 
 
-Always show icon + label. No icon-only tabs.
+Soft shadow card:
 
-Content & layout guardrails
+<div
+  class="
+    bg-[var(--hw-surface)]
+    rounded-xl shadow-sm hover:shadow-md
+    transition-shadow p-6
+  "
+>
+  ...
+</div>
 
-Headings: text-2xl to text-4xl, 1.5 line height.
 
-Body: text-base → md:text-lg.
+Timeline and memory cards should use --hw-section-bg behind groups to create “chapters”.
 
-Readable width: wrap long text in max-w-[65ch].
+5.6 Chips and tags
 
-White space: use only 8-point steps; between tappables use gap-4 or gap-6.
+Height at least 32 px
 
-Copy: verb-first CTAs, 6–8 words max. No jargon.
+Rounded full or large radius
 
-Recording screen (tight spec)
+Background:
 
-Timer text-5xl font-semibold, near-black on white.
+Default: --hw-primary-soft or --hw-secondary-soft
 
-One primary button: Record (blue-600).
+Text: --hw-primary or --hw-secondary
 
-Tap to pause/resume. No long-press.
+6. Content and copy
+6.1 Voice
 
-Subtle single pulse: animate-pulse opacity-30 under the mic icon only.
+Calm, clear, reassuring
 
-Helper text: “Take your time. You can edit later.”
+Direct language, no jargon
 
-Timeline
+CTAs:
 
-Grid/list cards with consistent gap-6.
+Verb first, 6 to 8 words max
 
-Year markers prominent, text-xl font-semibold.
+Examples:
 
-Wisdom/Lessons use amber-50 background with black text and left border amber-400.
+Save this story
 
-Card actions as 60 px buttons with labels: Play, Share, Print.
+Invite your family to listen
 
-Story Ideas / Prompts
+Print a keepsake book
 
-Each prompt has a Record button.
+6.2 Layout of content
 
-Categories as labeled chips, 32+ px tall.
+For long form text:
 
-If you keep a purple-blue gradient, limit to the hero and ensure text 4.5:1.
+H2 heading
 
-Progressive disclosure: collapsed by default, expand for details.
+Short intro paragraph
 
-Accessibility specifics to add
+Break into sections with subheadings and lists
 
-Respect Bold Text, Reduce Motion, Increase Contrast.
+Avoid walls of text longer than about 5 to 6 lines at desktop width
 
-VoiceOver/TalkBack: every control has role, name, state.
+Use the warmer backgrounds to break the page into “chapters”:
 
-Text scaling: test iOS AX3–AX5 and Android at 200%; no clipped controls; scroll instead.
+Hero section: --hw-page-bg
 
-Focus styles: always visible (focus:ring-2 focus:ring-blue-600 focus:ring-offset-2).
+Benefits band: --hw-section-bg
 
-Never rely on color alone; pair with icons and text.
+Testimonial band: slightly darker --hw-section-bg plus gold accents
 
-Proxy & Simple Mode (add these to the system)
+7. Accessibility and older adults
 
-Proxy/Caregiver: invite by link → role selection (view, assist) → audit trail.
+High impact rules:
 
-Simple Mode: larger type preset, fewer tabs, fewer actions per screen. Toggle in Settings, remember per user.
+Body text at least 18 px
 
-QA checklist (ship gate)
+Captions no smaller than 16 px
 
-Body text ≥18 px; captions only may be 16 px.
+Never use text lighter than #777777 on anything except disabled controls
 
-All tappables ≥48 px; primaries ≥60 px; 16–24 px between tappables.
+All interactive elements 48 px minimum size, primary 60 px
 
-Blue buttons are blue-600+; success/error use the darker tokens above.
+Contrast ratios:
 
-Contrast AA passes in light and dark.
+Normal text at least 4.5:1
 
-Icon + label on tabs; ≤4 items.
+Large text 3:1 or more
 
-Inputs are 56 px tall with inline validation.
+Aim above this rather than just meeting the minimum
 
-Skeletons replace spinners for content lists.
+Behavior:
 
-Full flows usable at 200%/AX5 with screen readers on.
+Respect system settings for Bold Text, Reduce Motion, Increase Contrast
 
-Why these edits matter
+Support at least 200 percent text scaling without clipping; allow scroll rather than truncation
 
-Blue-600 fixes contrast so your white CTA text is readable at any size.
+Focus outlines:
 
-Darker success/error colors prevent failure states that look “fine” to us but unreadable to seniors.
+Always visible, ring around the element in --hw-primary with offset
 
-18 px base body + 56/60 px controls materially reduce mis-taps and rereads.
+Semantics:
 
-Max line length and visible labels speed comprehension and cut errors.
+Every control has role, name, and state for screen readers
+
+Do not rely on color alone for meaning; pair with icons and labels
+
+8. Simple Mode and caregiver patterns
+8.1 Simple Mode
+
+A view preset aimed at seniors who want very low cognitive load.
+
+Characteristics:
+
+Larger base font (20 px)
+
+Fewer visible choices per screen
+
+Reduced color variation (mostly background + primary blue)
+
+Bigger buttons, one primary action per panel
+
+Implementation:
+
+Toggle in Settings that remembers per user
+
+Optional quick toggle if a caregiver is assisting
+
+8.2 Proxy and caregiver access
+
+Pattern:
+
+Invite link sent by email or message
+
+Role selection:
+
+View only
+
+Assist (can set up prompts, organize, but not delete stories)
+
+Activity log viewable by the account owner
+
+9. Recording and timeline specifics
+9.1 Recording screen
+
+Large timer at top, 32 px or larger, near black on white
+
+One big primary button in blue with clear label:
+
+Start recording / Pause recording / Resume recording
+
+Subtle pulse animation only under the mic icon
+
+Helper text in 16 px:
+
+Take your time. You can edit later.
+
+No long press actions.
+
+9.2 Timeline and memories
+
+Cards grouped by decade or year, each group on --hw-section-bg
+
+Year labels in 20 to 24 px, medium weight
+
+Wisdom or Lessons callouts:
+
+Background --hw-accent-gold-soft
+
+Left border --hw-accent-gold
+
+Text in --hw-text-primary
+
+Action buttons on cards:
+
+Play, Share, Print
+
+Each as a 60 px tall button or clearly tappable control with icon plus label
+
+Skeleton loaders instead of spinners while content loads.
+
+10. QA checklist before shipping
+
+Use this as a gate for any new feature or page.
+
+ Body text is 18 px or larger
+
+ Captions are 16 px or larger
+
+ All interactive elements are at least 48 px, primary actions 60 px
+
+ Spacing between tappable elements is at least 16 px
+
+ No gray text under #777 on colored backgrounds
+
+ All CTAs use --hw-primary for fill and white text
+
+ Success and error messages use the status tokens, not random reds or greens
+
+ Long paragraphs are constrained with max-w-[65ch]
+
+ Logo uses updated deep blue and sits cleanly on --hw-page-bg and dark overlays
+
+ Nav is readable at a glance over photos and backgrounds
+
+ Text scaling at 200 percent still works without clipping; scroll works everywhere
+
+ Screen reader users can navigate every flow

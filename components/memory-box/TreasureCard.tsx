@@ -100,7 +100,6 @@ export function TreasureCard({
     >
       {/* Image Container - 75% of card height */}
       <div
-        data-nav-ink="light"
         className="relative overflow-hidden ring-1 ring-inset ring-black/10"
         style={{ minHeight: "200px", aspectRatio: "16/10" }}
       >

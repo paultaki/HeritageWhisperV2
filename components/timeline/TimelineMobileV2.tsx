@@ -35,6 +35,8 @@ import { TimelineHeader } from "@/components/timeline/TimelineHeader";
 import { TimelineDecadeSection } from "@/components/timeline/TimelineDecadeSection";
 import { TimelineEnd } from "@/components/timeline/TimelineEnd";
 import { TimelineNearEndNudge } from "@/components/timeline/TimelineNearEndNudge";
+import { STARTER_TEMPLATES, type StarterMemoryTemplate } from "@/lib/starterTemplates";
+import { StarterMemoryCard } from "@/components/timeline/StarterMemoryCard";
 
 export function TimelineMobileV2() {
   const { user, session, isLoading } = useAuth();
@@ -205,36 +207,57 @@ export function TimelineMobileV2() {
         <div className="hw-layout">
           {/* Empty State - Context-aware based on account type */}
           {timelineData.stories.length === 0 ? (
-            <div className="text-center py-20 px-4">
-              {activeContext?.type === 'own' ? (
-                // Viewing own account - show create button
+            <div className="py-12 space-y-8 px-4">
+              {activeContext?.type === 'own' || activeContext?.permissionLevel === 'contributor' ? (
+                // Viewing own account or contributor - show premium starter cards
                 <>
-                  <p className="text-gray-500 text-lg mb-6">No memories yet. Start recording your first story!</p>
-                  <Button
-                    onClick={() => router.push("/review/book-style?new=true")}
-                    className="bg-orange-500 hover:bg-orange-600"
-                  >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Create First Memory
-                  </Button>
-                </>
-              ) : activeContext?.permissionLevel === 'contributor' ? (
-                // Viewing family member as contributor - can create stories
-                <>
-                  <p className="text-gray-500 text-lg mb-6">
-                    No stories yet. You can record stories for {activeContext.storytellerName}.
+                  {/* Intro text */}
+                  <p className="text-center text-lg text-stone-600 max-w-2xl mx-auto">
+                    {activeContext?.type === 'own'
+                      ? "Let's start your story. Choose a moment below or tap Create First Memory."
+                      : `Let's start ${activeContext.storytellerName}'s story. Choose a moment below or tap Record Story.`
+                    }
                   </p>
-                  <Button
-                    onClick={() => router.push("/review/book-style?new=true")}
-                    className="bg-orange-500 hover:bg-orange-600"
-                  >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Record Story
-                  </Button>
+
+                  {/* Starter Cards - Responsive Grid (stacked on mobile) */}
+                  <div className="grid grid-cols-1 gap-6 max-w-md mx-auto">
+                    {STARTER_TEMPLATES.map((template) => (
+                      <StarterMemoryCard
+                        key={template.id}
+                        template={template}
+                        onStart={(template) => {
+                          // Store template in sessionStorage for /recording page to read
+                          sessionStorage.setItem('starterTemplate', JSON.stringify({
+                            id: template.id,
+                            title: template.title,
+                          }));
+
+                          // Navigate to recording page (same as nav bar "Record" button)
+                          router.push('/recording');
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Helper text */}
+                  <p className="text-center text-sm text-stone-400 max-w-xl mx-auto">
+                    These are just suggestions. Once you save your first memory, your real timeline will appear here.
+                  </p>
+
+                  {/* Original "Create First Memory" button - kept as fallback */}
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={() => router.push('/recording')}
+                      variant="outline"
+                      className="border-orange-500 text-orange-600 hover:bg-orange-50">
+                      <Plus className="w-5 h-5 mr-2" />
+                      {activeContext?.type === 'own' ? 'Create First Memory' : 'Record Story'}
+                    </Button>
+                  </div>
                 </>
               ) : (
                 // Viewing family member as viewer - read-only
-                <p className="text-gray-500 text-lg">
+                <p className="text-gray-500 text-lg text-center">
                   No stories have been shared yet.
                 </p>
               )}
