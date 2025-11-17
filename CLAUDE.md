@@ -227,6 +227,40 @@ HeritageWhisperV2/
 - [SECURITY.md](SECURITY.md) - Security implementation status
 - [FAMILY_SHARING_README.md](FAMILY_SHARING_README.md) - Multi-tenant system documentation
 
+### Alternative Routes & Experimental Features
+
+The following routes exist but are **not linked in main navigation**. Each has comprehensive documentation:
+
+**Active Alternative Implementations:**
+- **`/app/book-new/`** - ✅ Mobile-first book view (used internally by `/book` for mobile displays)
+  - See [/app/book-new/README.md](app/book-new/README.md) for details
+  - Status: Active in production, accessible at `/book-new` for testing
+
+- **`/app/interview-chat-v2/`** - ✅ Conversational AI with Pearl's voice (premium feature)
+  - See [/app/interview-chat-v2/README.md](app/interview-chat-v2/README.md) for details
+  - Status: Production ready, ~$3-5 per interview vs $1.13 for standard
+  - Consider: Premium tier, feature flag, or optional upgrade
+
+**Experimental Routes:**
+- **`/app/recording-v2/`** - 🧪 State machine recording flow (kept for future testing)
+  - See [/app/recording-v2/README.md](app/recording-v2/README.md) for details
+  - Status: Experimental, cleaner architecture with distinct screens
+  - Use: Testing alternative state machine approach
+
+**Family Routes:**
+- **`/app/family/timeline-v2/[userId]/`** - ✅ Enhanced family timeline with V2 features
+  - Status: Active for family member viewing
+  - Features: Age display, circular audio progress, photo carousel
+
+### Archived Components (November 17, 2025)
+
+Orphaned components moved to `/archive/orphaned-components-2025-11-17/`:
+- `components/landing-v2/` (4 files) - Old landing page components (replaced by landing-v3)
+- `components/ui/MemoryToolbar.tsx` - Unused memory filter toolbar
+- `components/ui/MemoryToolbarV2.tsx` - Unused senior-friendly toolbar variant
+
+See [/archive/orphaned-components-2025-11-17/README.md](archive/orphaned-components-2025-11-17/README.md) for restoration instructions.
+
 ## 🔍 Finding Code
 
 Ask Claude to find code patterns, or see [SEARCH_PATTERNS.md](SEARCH_PATTERNS.md) for ripgrep commands.
@@ -461,7 +495,7 @@ Aim to keep the file under 700 lines (~5,000 tokens).
 
 ---
 
-_Last updated: January 11, 2025_
+_Last updated: November 17, 2025_
 
 ## 📚 Additional Documentation
 

@@ -622,6 +622,8 @@ function BookV4PageContent() {
           totalPages={bookPages.length}
           onNavigateToPage={handleNavigateToPage}
           onTocClick={() => setShowToc(!showToc)}
+          fontSize={fontSize}
+          onFontSizeChange={setFontSize}
         />
       </div>
     

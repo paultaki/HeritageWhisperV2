@@ -20,6 +20,8 @@ interface DarkBookProgressBarProps {
   totalPages: number;
   onNavigateToPage: (pageNumber: number) => void;
   onTocClick: () => void;
+  fontSize: number;
+  onFontSizeChange: (size: number) => void;
 }
 
 /**
@@ -60,6 +62,8 @@ export default function DarkBookProgressBar({
   totalPages,
   onNavigateToPage,
   onTocClick,
+  fontSize,
+  onFontSizeChange,
 }: DarkBookProgressBarProps) {
   const [isHovering, setIsHovering] = useState(false);
   const [hoverPosition, setHoverPosition] = useState(0);
@@ -276,12 +280,12 @@ export default function DarkBookProgressBar({
           </div>
         </div>
 
-        {/* Right: Table of Contents button */}
+        {/* Right: Controls - TOC and Text Size */}
         <div className="hidden md:flex items-center justify-end gap-2 flex-shrink-0">
-          {/* TOC button - white outline style matching progress bar aesthetic */}
+          {/* TOC button - Book icon */}
           <button
             onClick={onTocClick}
-            className="flex items-center gap-2 px-5 h-11 rounded-full border-2 border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white font-medium"
+            className="flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white"
             aria-label="Table of Contents"
             title="Table of Contents"
           >
@@ -292,12 +296,34 @@ export default function DarkBookProgressBar({
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <path d="M4 6h16"></path>
-              <path d="M4 12h16"></path>
-              <path d="M4 18h16"></path>
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
             </svg>
-            <span className="text-base">Contents</span>
+          </button>
+
+          {/* Decrease text size - Small A */}
+          <button
+            onClick={() => onFontSizeChange(Math.max(14, fontSize - 2))}
+            className="flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white font-semibold"
+            aria-label="Decrease text size"
+            title="Smaller text"
+            disabled={fontSize <= 14}
+          >
+            <span style={{ fontSize: '14px' }}>A</span>
+          </button>
+
+          {/* Increase text size - Large A */}
+          <button
+            onClick={() => onFontSizeChange(Math.min(26, fontSize + 2))}
+            className="flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white font-semibold"
+            aria-label="Increase text size"
+            title="Larger text"
+            disabled={fontSize >= 26}
+          >
+            <span style={{ fontSize: '20px' }}>A</span>
           </button>
         </div>
       </div>

@@ -2,6 +2,22 @@
 
 A modern, touch-friendly mobile book reading experience with horizontal page swiping, audio playback, and decade-grouped table of contents.
 
+## 📌 Current Status & Usage
+
+**Status:** ✅ **ACTIVE IN PRODUCTION** (as of November 2025)
+
+**How it's used:**
+- The `MobileBookViewV2` component is **imported and used by `/app/book/page.tsx`** (line 18)
+- Renders for **mobile and tablet devices** (`lg:hidden` breakpoint)
+- Desktop users see a different dual-page book layout
+- This route (`/book-new`) exists as a **standalone testing route** but is NOT linked in navigation
+
+**Navigation:**
+- Primary route: `/book` (uses MobileBookViewV2 internally for mobile)
+- Testing route: `/book-new` (direct access to mobile view)
+
+**Recommendation:** Use `/book` as the primary route. The `/book-new` route can be kept for testing mobile-specific features without desktop interference.
+
 ## 📁 File Structure
 
 ```
