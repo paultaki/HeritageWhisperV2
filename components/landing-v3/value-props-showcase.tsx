@@ -35,14 +35,14 @@ export default function ValuePropsShowcase() {
   ]
 
   return (
-    <section className="py-16 md:py-24 px-6 md:px-12 bg-[#faf8f5]">
+    <section className="py-16 md:py-24 px-6 md:px-12 bg-heritage-warm-paper">
       <div className="max-w-7xl mx-auto space-y-24">
         {/* Section header */}
         <div className="text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-stone-200 shadow-sm mb-6">
-            <span className="text-sm font-semibold text-gray-700">What Makes HeritageWhisper Different</span>
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/80 backdrop-blur-sm rounded-full border border-heritage-deep-slate/10 shadow-sm mb-6">
+            <span className="text-sm font-semibold text-heritage-deep-slate tracking-wide">Premium Experience</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
+          <h2 className="text-4xl md:text-5xl font-bold text-heritage-text-primary leading-tight">
             Three Ways to Experience Your Legacy
           </h2>
         </div>
@@ -63,14 +63,14 @@ export default function ValuePropsShowcase() {
             {/* Image */}
             <div className={`${feature.imagePosition === 'right' ? 'lg:order-2' : ''}`}>
               {feature.image ? (
-                <div className={`relative rounded-2xl overflow-hidden shadow-2xl border border-stone-200 bg-white ${feature.isScrolling ? 'h-[500px]' : ''}`}>
+                <div className={`relative rounded-2xl overflow-hidden shadow-lg border border-heritage-deep-slate/10 bg-white transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] group ${feature.isScrolling ? 'h-[500px]' : ''}`}>
                   <Image
                     src={feature.image}
                     alt={feature.imageAlt || ''}
                     width={600}
                     height={feature.isScrolling ? 800 : 600}
                     quality={100}
-                    className={`w-full ${feature.isScrolling ? 'animate-scroll-slow' : 'h-auto'}`}
+                    className={`w-full ${feature.isScrolling ? 'animate-scroll-slow' : 'h-auto transition-transform duration-500 group-hover:scale-105'}`}
                   />
                 </div>
               ) : (
@@ -84,15 +84,15 @@ export default function ValuePropsShowcase() {
 
             {/* Copy */}
             <div className={`space-y-6 ${feature.imagePosition === 'right' ? 'lg:order-1' : ''}`}>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full border border-blue-200">
-                <span className="text-sm font-semibold text-blue-700">{feature.badge}</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-heritage-deep-slate/5 rounded-full border border-heritage-deep-slate/20 transition-all duration-300 hover:bg-heritage-deep-slate/10">
+                <span className="text-sm font-semibold text-heritage-deep-slate tracking-wide">{feature.badge}</span>
               </div>
 
-              <h3 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+              <h3 className="text-3xl md:text-4xl font-bold text-heritage-text-primary leading-tight">
                 {feature.title}
               </h3>
 
-              <p className="text-xl text-gray-600 leading-relaxed">
+              <p className="text-lg md:text-xl text-heritage-text-primary/70 leading-relaxed">
                 {feature.description}
               </p>
             </div>

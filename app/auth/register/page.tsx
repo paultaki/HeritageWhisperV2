@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,8 +12,6 @@ import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithGoogle } from "@/lib/supabase";
 import { Eye, EyeOff, Mail, Lock, User, Calendar, Shield, UserPlus } from "lucide-react";
-
-const logoUrl = "/HW_text-compress.png";
 
 // Prevent static generation for this auth page
 export const dynamic = 'force-dynamic';
@@ -73,47 +72,50 @@ export default function Register() {
   };
 
   return (
-    <div className="hw-page flex items-center justify-center p-4 album-texture">
+    <div className="hw-page flex items-center justify-center p-4" style={{ backgroundColor: 'var(--hw-page-bg, #F7F2EC)' }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-12">
           {/* Heritage Whisper Logo */}
           <div
-            className="w-40 h-40 mx-auto mb-8 cursor-pointer hover:opacity-80 transition-opacity"
+            className="mx-auto mb-8 cursor-pointer hover:opacity-80 transition-opacity flex items-center justify-center"
             onClick={() => router.push("/")}
           >
-            <img
-              src={logoUrl}
-              alt="HeritageWhisper Logo"
-              className="w-full h-full object-contain"
+            <Image
+              src="/final logo/logo-new.svg"
+              alt="HeritageWhisper"
+              width={240}
+              height={56}
+              className="h-14 w-auto"
+              priority
             />
           </div>
-          <p className="text-2xl text-muted-foreground font-medium text-center">
+          <p className="font-medium text-center" style={{ fontSize: '24px', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
             Your voice. Their treasure. Forever.
           </p>
         </div>
 
-        <Card className="shadow-lg border">
+        <Card className="shadow-lg" style={{ backgroundColor: 'var(--hw-surface, #FFFFFF)', border: '1px solid var(--hw-border-subtle, #D2C9BD)', boxShadow: '0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(32,57,84,0.08)' }}>
           <CardContent className="pt-8 pb-8 px-8">
-            <h2 className="text-2xl font-semibold text-center mb-3">
+            <h2 className="font-semibold text-center mb-3" style={{ fontSize: '28px', color: 'var(--hw-text-primary, #1F1F1F)' }}>
               Create Your Story
             </h2>
-            
+
             {/* Protected Session Badge */}
             <div className="flex justify-center mb-8">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
-                <Shield className="h-3.5 w-3.5 text-green-600" />
-                <span className="text-xs font-medium text-green-700">Protected Session</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ backgroundColor: 'var(--hw-secondary-soft, #DDE7E1)', border: '1px solid var(--hw-secondary, #3E6A5A)' }}>
+                <Shield className="h-3.5 w-3.5" style={{ color: 'var(--hw-secondary, #3E6A5A)' }} />
+                <span className="font-medium" style={{ fontSize: '12px', color: 'var(--hw-secondary, #3E6A5A)' }}>Protected Session</span>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
               <div>
-                <Label htmlFor="email" className="text-lg font-medium text-foreground">
+                <Label htmlFor="email" className="font-medium" style={{ fontSize: '16px', color: 'var(--hw-text-primary, #1F1F1F)' }}>
                   Email
                 </Label>
                 <div className="relative mt-3">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-                    <Mail className="h-5 w-5" />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5" style={{ color: 'var(--hw-text-muted, #8A8378)' }} />
                   </div>
                   <Input
                     type="email"
@@ -121,6 +123,11 @@ export default function Register() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="text-lg py-4 pl-10"
+                    style={{
+                      backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                      border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                      color: 'var(--hw-text-primary, #1F1F1F)'
+                    }}
                     placeholder="your@email.com"
                     required
                     autoComplete="email"
@@ -130,13 +137,13 @@ export default function Register() {
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-lg font-medium text-foreground">
+                <Label htmlFor="password" className="font-medium" style={{ fontSize: '16px', color: 'var(--hw-text-primary, #1F1F1F)' }}>
                   Password
                 </Label>
                 <div className="mt-3 flex items-center gap-2">
                   <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-                      <Lock className="h-5 w-5" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5" style={{ color: 'var(--hw-text-muted, #8A8378)' }} />
                     </div>
                     <Input
                       type={showPassword ? "text" : "password"}
@@ -144,6 +151,11 @@ export default function Register() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="text-lg py-4 pl-10 pr-12 w-full"
+                      style={{
+                        backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                        border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                        color: 'var(--hw-text-primary, #1F1F1F)'
+                      }}
                       placeholder="••••••••"
                       required
                       autoComplete="new-password"
@@ -153,7 +165,8 @@ export default function Register() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 transition-colors"
+                        className="focus:outline-none transition-colors"
+                        style={{ color: 'var(--hw-text-muted, #8A8378)' }}
                         aria-label={
                           showPassword ? "Hide password" : "Show password"
                         }
@@ -171,12 +184,12 @@ export default function Register() {
 
               {requireBetaCode && (
                 <div>
-                  <Label htmlFor="betaCode" className="text-lg font-medium text-foreground">
+                  <Label htmlFor="betaCode" className="font-medium" style={{ fontSize: '16px', color: 'var(--hw-text-primary, #1F1F1F)' }}>
                     Beta Access Code
                   </Label>
                   <div className="relative mt-3">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-                      <Shield className="h-5 w-5" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Shield className="h-5 w-5" style={{ color: 'var(--hw-text-muted, #8A8378)' }} />
                     </div>
                     <Input
                       type="text"
@@ -184,6 +197,11 @@ export default function Register() {
                       value={betaCode}
                       onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
                       className="text-lg py-4 pl-10 font-mono"
+                      style={{
+                        backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                        border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                        color: 'var(--hw-text-primary, #1F1F1F)'
+                      }}
                       placeholder="Enter your beta code"
                       required={requireBetaCode}
                       autoComplete="off"
@@ -191,19 +209,19 @@ export default function Register() {
                       maxLength={8}
                     />
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="mt-2" style={{ fontSize: '14px', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
                     Enter the beta access code you received
                   </p>
                 </div>
               )}
 
               <div>
-                <Label htmlFor="name" className="text-lg font-medium text-foreground">
+                <Label htmlFor="name" className="font-medium" style={{ fontSize: '16px', color: 'var(--hw-text-primary, #1F1F1F)' }}>
                   Full Name
                 </Label>
                 <div className="relative mt-3">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-                    <User className="h-5 w-5" />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5" style={{ color: 'var(--hw-text-muted, #8A8378)' }} />
                   </div>
                   <Input
                     type="text"
@@ -211,24 +229,29 @@ export default function Register() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="text-lg py-4 pl-10"
+                    style={{
+                      backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                      border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                      color: 'var(--hw-text-primary, #1F1F1F)'
+                    }}
                     placeholder="Your full name"
                     required
                     autoComplete="name"
                     data-testid="input-name"
                   />
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="mt-2" style={{ fontSize: '14px', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
                   This will appear on your timeline
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="birthYear" className="text-lg font-medium text-foreground">
+                <Label htmlFor="birthYear" className="font-medium" style={{ fontSize: '16px', color: 'var(--hw-text-primary, #1F1F1F)' }}>
                   Birth Year
                 </Label>
                 <div className="relative mt-3">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-                    <Calendar className="h-5 w-5" />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Calendar className="h-5 w-5" style={{ color: 'var(--hw-text-muted, #8A8378)' }} />
                   </div>
                   <Input
                     type="number"
@@ -236,6 +259,11 @@ export default function Register() {
                     value={birthYear}
                     onChange={(e) => setBirthYear(e.target.value)}
                     className="text-lg py-4 pl-10"
+                    style={{
+                      backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                      border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                      color: 'var(--hw-text-primary, #1F1F1F)'
+                    }}
                     placeholder="1952"
                     min="1920"
                     max="2010"
@@ -244,7 +272,7 @@ export default function Register() {
                     data-testid="input-birth-year"
                   />
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="mt-2" style={{ fontSize: '14px', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
                   This helps us create your timeline
                 </p>
               </div>
@@ -255,17 +283,23 @@ export default function Register() {
                   id="terms"
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                  className="mt-1 h-4 w-4 rounded cursor-pointer"
+                  style={{
+                    border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                    accentColor: 'var(--hw-primary, #203954)'
+                  }}
                   data-testid="checkbox-terms"
                 />
                 <Label
                   htmlFor="terms"
-                  className="text-sm font-normal leading-relaxed cursor-pointer"
+                  className="font-normal leading-relaxed cursor-pointer"
+                  style={{ fontSize: '14px', color: 'var(--hw-text-primary, #1F1F1F)' }}
                 >
                   I agree to the{" "}
                   <Link
                     href="/terms"
-                    className="text-primary hover:underline font-medium"
+                    className="hover:underline font-medium"
+                    style={{ color: 'var(--hw-primary, #203954)' }}
                     target="_blank"
                   >
                     Terms of Service
@@ -273,7 +307,8 @@ export default function Register() {
                   and{" "}
                   <Link
                     href="/privacy"
-                    className="text-primary hover:underline font-medium"
+                    className="hover:underline font-medium"
+                    style={{ color: 'var(--hw-primary, #203954)' }}
                     target="_blank"
                   >
                     Privacy Policy
@@ -283,40 +318,33 @@ export default function Register() {
 
               <Button
                 type="submit"
-                className="relative w-full text-xl font-semibold py-4 transition-all duration-300 overflow-hidden flex items-center justify-center gap-2 group hover:shadow-[0_0_0_1px_rgba(245,158,11,0.35),0_20px_40px_rgba(245,158,11,0.18)]"
+                className="relative w-full font-semibold py-4 transition-all duration-300 overflow-hidden flex items-center justify-center gap-2 group rounded-xl shadow-lg active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2"
+                style={{
+                  fontSize: '18px',
+                  minHeight: '60px',
+                  backgroundColor: 'var(--hw-primary, #203954)',
+                  color: 'var(--hw-text-on-dark, #FFFFFF)',
+                  boxShadow: '0 4px 12px rgba(32,57,84,0.2)',
+                  '--tw-ring-color': 'var(--hw-primary, #203954)',
+                  '--tw-ring-offset-color': 'var(--hw-page-bg, #F7F2EC)'
+                } as React.CSSProperties}
                 disabled={!agreedToTerms}
                 data-testid="button-register"
               >
-                <UserPlus className="h-5 w-5 relative z-[1] group-hover:translate-x-1 transition-transform duration-300" />
-                <span className="relative z-[1] group-hover:translate-x-1 transition-transform duration-300">
+                <UserPlus className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                <span className="transition-transform duration-300 group-hover:translate-x-1">
                   Create My Timeline
                 </span>
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300"
-                  style={{
-                    background:
-                      "linear-gradient(45deg, rgba(245,158,11,0.8) 0%, rgba(251,146,60,0.8) 50%, rgba(251,113,133,0.8) 100%)",
-                  }}
-                />
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 rounded-md"
-                  style={{
-                    background:
-                      "radial-gradient(120% 80% at 50% -20%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0) 60%)",
-                  }}
-                />
               </Button>
             </form>
 
             {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-300" />
+                <span className="w-full border-t" style={{ borderColor: 'var(--hw-border-subtle, #D2C9BD)' }} />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-background px-3 text-gray-500">Or</span>
+              <div className="relative flex justify-center">
+                <span className="px-3" style={{ fontSize: '14px', backgroundColor: 'var(--hw-surface, #FFFFFF)', color: 'var(--hw-text-muted, #8A8378)' }}>Or</span>
               </div>
             </div>
 
@@ -325,7 +353,13 @@ export default function Register() {
               type="button"
               onClick={signInWithGoogle}
               variant="outline"
-              className="w-full text-lg font-medium py-4 flex items-center justify-center gap-3 transition-all duration-300 hover:bg-gray-50 hover:shadow-md"
+              className="w-full font-medium py-4 flex items-center justify-center gap-3 transition-all duration-300 hover:shadow-md rounded-xl"
+              style={{
+                fontSize: '16px',
+                border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                color: 'var(--hw-text-primary, #1F1F1F)'
+              }}
               data-testid="button-google-signin"
             >
               <svg className="h-6 w-6" viewBox="0 0 24 24">
@@ -353,20 +387,21 @@ export default function Register() {
             <div className="text-center mt-6">
               <Link
                 href="/auth/login"
-                className="text-primary hover:text-primary/80 text-lg font-medium hover:underline"
+                className="font-medium hover:underline"
+                style={{ fontSize: '18px', color: 'var(--hw-primary, #203954)' }}
               >
                 Already have an account? Sign In
               </Link>
             </div>
 
             {/* Trust Badges */}
-            <div className="flex items-center justify-center gap-6 mt-8 pt-6 border-t border-gray-200">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Lock className="h-4 w-4" />
+            <div className="flex items-center justify-center gap-6 mt-8 pt-6 border-t" style={{ borderColor: 'var(--hw-border-subtle, #D2C9BD)' }}>
+              <div className="flex items-center gap-2" style={{ fontSize: '14px', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
+                <Lock className="h-4 w-4" style={{ color: 'var(--hw-accent-gold, #CBA46A)' }} />
                 <span>256-bit SSL</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Shield className="h-4 w-4" />
+              <div className="flex items-center gap-2" style={{ fontSize: '14px', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
+                <Shield className="h-4 w-4" style={{ color: 'var(--hw-secondary, #3E6A5A)' }} />
                 <span>Bank-Level Security</span>
               </div>
             </div>

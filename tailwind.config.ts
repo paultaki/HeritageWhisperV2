@@ -105,6 +105,12 @@ export default {
           brown: "#8B4513",
           "warm-bg": "#FFF8F3",
           "warm-bg-light": "#FFFBF7",
+          // New Design Guidelines (v2025)
+          "deep-slate": "#203954", // Primary - Deep Slate Blue
+          "muted-green": "#3E6A5A", // Secondary - Muted Green
+          "gold": "#CBA46A", // Premium Accent - Gold
+          "warm-paper": "#F7F2EC", // Background - Warm Paper
+          "text-primary": "#1F1F1F", // Text - Near Black
         },
       },
       fontFamily: {

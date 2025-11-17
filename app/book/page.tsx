@@ -15,7 +15,6 @@ import { BookPage } from "./components/BookPage";
 import DarkBookProgressBar from "./components/DarkBookProgressBar";
 import { BookPage as BookPageType } from "@/lib/bookPagination";
 import { ScrollIndicator } from "@/components/ScrollIndicators";
-import { CompactNav } from "./components/CompactNav";
 import MobileBookViewV2 from "../book-new/components/MobileBookViewV2";
 import "./book.css";
 
@@ -590,9 +589,6 @@ function BookV4PageContent() {
             onOpen={() => setIsBookOpen(true)}
           />
         </div>
-
-        {/* Desktop Navigation Bar */}
-        <CompactNav currentStoryId={getCurrentStoryId()} />
       </div>
     );
   }
@@ -844,9 +840,6 @@ function BookV4PageContent() {
         )}
 
       </div>
-
-        {/* Desktop Navigation Bar */}
-        <CompactNav currentStoryId={getCurrentStoryId()} />
       </div>
     </>
   );

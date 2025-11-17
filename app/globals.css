@@ -34,29 +34,32 @@
 }
 
 :root {
-  /* Phase 5-7 Design System Colors */
-  --primary-coral: hsl(0, 77%, 64%); /* #E85D5D */
-  --bg-cream: hsl(30, 57%, 98%); /* #FDF6F0 */
+  /* Design Guidelines v2025 - Premium Color System */
+  --hw-deep-slate: #203954; /* Deep Slate Blue - Primary */
+  --hw-muted-green: #3E6A5A; /* Muted Green - Secondary */
+  --hw-gold: #CBA46A; /* Gold - Premium Accent */
+  --hw-warm-paper: #F7F2EC; /* Warm Paper - Background */
+  --hw-text-primary: #1F1F1F; /* Near Black - Primary Text */
 
-  --background: hsl(30, 57%, 98%); /* Cream background */
-  --foreground: hsl(210, 10%, 23%);
+  --background: #F7F2EC; /* Warm paper background */
+  --foreground: #1F1F1F; /* Near black text */
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(210, 10%, 23%);
+  --card-foreground: #1F1F1F;
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(210, 10%, 23%);
-  --primary: hsl(0, 77%, 64%); /* Coral for main CTAs */
+  --popover-foreground: #1F1F1F;
+  --primary: #203954; /* Deep Slate Blue for main CTAs */
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(34, 55%, 53%); /* Gold/Bronze accent */
-  --secondary-foreground: hsl(210, 10%, 23%);
+  --secondary: #3E6A5A; /* Muted Green for secondary actions */
+  --secondary-foreground: hsl(0, 0%, 100%);
   --muted: hsl(45, 15%, 85%);
   --muted-foreground: hsl(45, 5%, 55%);
-  --accent: hsl(0, 77%, 64%); /* Coral accent */
-  --accent-foreground: hsl(0, 0%, 100%);
+  --accent: #CBA46A; /* Gold accent */
+  --accent-foreground: #1F1F1F;
   --destructive: hsl(356, 90%, 54%);
   --destructive-foreground: hsl(0, 0%, 100%);
   --border: hsl(45, 20%, 82%);
   --input: hsl(45, 20%, 88%);
-  --ring: hsl(0, 77%, 64%); /* Coral for focus states */
+  --ring: #203954; /* Deep Slate Blue for focus states */
   --chart-1: hsl(210, 29%, 24%);
   --chart-2: hsl(34, 55%, 53%);
   --chart-3: hsl(0, 77%, 64%);

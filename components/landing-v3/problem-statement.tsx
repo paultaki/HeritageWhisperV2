@@ -11,17 +11,17 @@ export default function ProblemStatement() {
         ref={ref}
         className={`max-w-4xl mx-auto text-center space-y-6 ${fadeInClasses.initial} ${isVisible ? fadeInClasses.animate : ''}`}
       >
-        <div className="space-y-2 text-xl md:text-2xl text-gray-600">
+        <div className="space-y-2 text-xl md:text-2xl text-heritage-text-primary/70">
           <p className="line-through decoration-red-500 decoration-2">StoryWorth ends at 52 stories.</p>
           <p className="line-through decoration-red-500 decoration-2">Remento ends when the book is done.</p>
-          <p className="text-gray-900 font-semibold text-2xl md:text-3xl mt-4">Your stories shouldn't end.</p>
+          <p className="text-heritage-text-primary font-semibold text-2xl md:text-3xl mt-4">Your stories shouldn't end.</p>
         </div>
 
-        <div className="pt-6 border-t border-gray-200 mt-8">
-          <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-relaxed">
+        <div className="pt-6 border-t border-heritage-deep-slate/10 mt-8">
+          <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-heritage-text-primary leading-relaxed">
             HeritageWhisper is the only platform where your legacy{' '}
-            <span className="text-blue-600">grows forever</span> – and your family experiences it{' '}
-            <span className="text-orange-600">in real-time</span>.
+            <span className="text-heritage-deep-slate">grows forever</span> – and your family experiences it{' '}
+            <span className="text-heritage-gold">in real-time</span>.
           </p>
         </div>
       </div>

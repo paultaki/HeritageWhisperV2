@@ -29,6 +29,14 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+    // Image quality settings (required for Next.js 16+)
+    qualities: [75, 100], // Allow quality 75 (default) and 100 (high quality)
+    // Local patterns for images (required for Next.js 16+)
+    localPatterns: [
+      {
+        pathname: '/**', // Allow all local images from public folder
+      },
+    ],
     // Aggressive caching for better performance
     minimumCacheTTL: 31536000, // 1 year in seconds
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

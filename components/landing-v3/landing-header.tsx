@@ -62,6 +62,7 @@ export default function LandingHeader() {
                   width={240}
                   height={56}
                   className="h-10 md:h-14 w-auto"
+                  style={{ width: 'auto' }}
                   priority
                 />
               </button>
@@ -74,7 +75,7 @@ export default function LandingHeader() {
                   <button
                     key={item.id}
                     onClick={() => scrollToSection(item.id)}
-                    className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                    className="text-heritage-text-primary/70 hover:text-heritage-deep-slate font-medium transition-colors"
                   >
                     {item.label}
                   </button>
@@ -84,13 +85,13 @@ export default function LandingHeader() {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => router.push('/auth/login')}
-                  className="px-5 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-colors"
+                  className="px-5 py-2 text-heritage-text-primary/70 hover:text-heritage-deep-slate font-semibold transition-colors"
                 >
                   Login
                 </button>
                 <button
                   onClick={() => router.push('/auth/register')}
-                  className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                  className="px-6 py-2.5 bg-heritage-deep-slate text-white font-semibold rounded-xl hover:bg-heritage-deep-slate/90 transition-all duration-300 shadow-md hover:shadow-lg"
                 >
                   Start Free
                 </button>

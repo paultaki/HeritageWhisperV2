@@ -11,8 +11,6 @@ import { Eye, EyeOff, Mail, Lock, LogIn, Feather, Mic } from "lucide-react";
 import { PasskeyAuth } from "@/components/auth/PasskeyAuth";
 import { PasskeySetupPrompt } from "@/components/auth/PasskeySetupPrompt";
 
-const logoUrl = "/HW_text-compress.png";
-
 // Prevent static generation for this auth page
 export const dynamic = 'force-dynamic';
 
@@ -170,31 +168,31 @@ export default function Login() {
   };
 
   return (
-    <div className="hw-page antialiased bg-gradient-to-b from-[#fff7f3] via-[#ffe9e0] to-[#fde5e3]" style={{ fontSize: '16px' }}>
-      {/* Background: static gradient (animations disabled for performance) */}
+    <div className="hw-page antialiased" style={{ fontSize: '16px', backgroundColor: 'var(--hw-page-bg, #F7F2EC)' }}>
+      {/* Background: subtle warm paper texture with soft accents */}
       <div aria-hidden="true" className="fixed inset-0 overflow-hidden pointer-events-none">
-        {/* soft radial glow center */}
+        {/* soft radial glow center - using primary blue and gold */}
         <div
           className="absolute inset-0"
-          style={{ background: "radial-gradient(60% 60% at 65% 20%, rgba(255,183,77,.18) 0%, rgba(255,140,101,.12) 40%, rgba(255,255,255,0) 70%)" }}
+          style={{ background: "radial-gradient(60% 60% at 65% 20%, rgba(203,164,106,.08) 0%, rgba(32,57,84,.05) 40%, rgba(255,255,255,0) 70%)" }}
         />
 
-        {/* static blob 1 - animations disabled */}
+        {/* static blob 1 - muted gold and secondary green */}
         <div
           className="absolute -top-24 -right-24 w-[36rem] h-[36rem] rounded-full blur-2xl"
-          style={{ background: "radial-gradient(circle at 30% 30%, rgba(245,158,11,.55), rgba(244,114,182,.15))" }}
+          style={{ background: "radial-gradient(circle at 30% 30%, rgba(203,164,106,.18), rgba(62,106,90,.08))" }}
         />
 
-        {/* static blob 2 - animations disabled */}
+        {/* static blob 2 - soft primary and gold */}
         <div
           className="absolute -bottom-24 -left-16 w-[32rem] h-[32rem] rounded-full blur-2xl"
-          style={{ background: "radial-gradient(circle at 70% 70%, rgba(251,113,133,.5), rgba(249,115,22,.18))" }}
+          style={{ background: "radial-gradient(circle at 70% 70%, rgba(32,57,84,.12), rgba(203,164,106,.10))" }}
         />
 
-        {/* static horizontal sheen - animation disabled */}
+        {/* static horizontal sheen - subtle gold accent */}
         <div
-          className="absolute inset-x-0 top-1/3 h-48 opacity-50"
-          style={{ background: "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(253,164,175,.25) 40%, rgba(254,215,170,.3) 60%, rgba(255,255,255,0) 100%)" }}
+          className="absolute inset-x-0 top-1/3 h-48 opacity-40"
+          style={{ background: "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(203,164,106,.15) 40%, rgba(244,230,204,.18) 60%, rgba(255,255,255,0) 100%)" }}
         />
       </div>
 
@@ -206,47 +204,47 @@ export default function Login() {
             <section className="order-1 lg:order-1" style={{ paddingTop: '24px' }}>
               <div className="inline-flex items-center gap-3 mb-6">
                 <div
-                  className="relative grid place-items-center w-12 h-12 rounded-xl shadow-lg shadow-orange-200/40"
-                  style={{ background: "linear-gradient(135deg, rgba(245,158,11,.95), rgba(251,113,133,.95))", transform: 'translateY(-2px)' }}
+                  className="relative grid place-items-center w-12 h-12 rounded-xl shadow-lg"
+                  style={{ backgroundColor: 'var(--hw-primary, #203954)', boxShadow: '0 4px 12px rgba(32,57,84,0.2)', transform: 'translateY(-2px)' }}
                 >
-                  <Mic className="text-white w-6 h-6" />
+                  <Mic className="w-6 h-6" style={{ color: 'var(--hw-text-on-dark, #FFFFFF)' }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <p className="text-sm text-rose-600/80 font-medium" style={{ fontSize: '18px', margin: 0, lineHeight: '1.1', fontWeight: 'bold' }}>Welcome to</p>
-                  <p className="text-xl font-semibold tracking-tight text-slate-900" style={{ fontFamily: "serif", fontSize: '28px', margin: 0, marginTop: '-1px', lineHeight: '1.2' }}>
+                  <p className="font-medium" style={{ fontSize: '18px', margin: 0, lineHeight: '1.1', fontWeight: 'bold', color: 'var(--hw-secondary, #3E6A5A)' }}>Welcome to</p>
+                  <p className="font-semibold tracking-tight" style={{ fontFamily: "serif", fontSize: '28px', margin: 0, marginTop: '-1px', lineHeight: '1.2', color: 'var(--hw-text-primary, #1F1F1F)' }}>
                     Heritage Whisper
                   </p>
                 </div>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-slate-900" style={{ fontSize: '38px', lineHeight: '1.1' }}>
+              <h1 className="font-semibold tracking-tight" style={{ fontSize: '38px', lineHeight: '1.1', color: 'var(--hw-text-primary, #1F1F1F)' }}>
                 Sign in to{" "}
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500">
+                <span style={{ color: 'var(--hw-primary, #203954)' }}>
                   continue your story
                 </span>
               </h1>
-              <p className="mt-4 text-slate-600/80 max-w-xl" style={{ fontSize: '22px', lineHeight: '1.4' }}>
+              <p className="mt-4 max-w-xl" style={{ fontSize: '22px', lineHeight: '1.4', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
                 A quiet space where family memories become timeless keepsakes.
               </p>
 
               {/* Feature bullets */}
               <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 max-w-xl" style={{ marginTop: '20px', marginBottom: '12px', gap: '16px' }}>
                 <div className="flex items-start gap-3">
-                  <span className="inline-grid place-items-center w-9 h-9 rounded-lg bg-white/70 ring-1 ring-rose-100 backdrop-blur">
-                    <Feather className="w-5 h-5 text-rose-500" />
+                  <span className="inline-grid place-items-center w-9 h-9 rounded-lg backdrop-blur" style={{ backgroundColor: 'var(--hw-surface, #FFFFFF)', border: '1px solid var(--hw-border-subtle, #D2C9BD)' }}>
+                    <Feather className="w-5 h-5" style={{ color: 'var(--hw-secondary, #3E6A5A)' }} />
                   </span>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <p className="font-medium text-slate-900" style={{ fontSize: '20px', margin: 0, lineHeight: '1.2' }}>Capture voices</p>
-                    <p className="text-sm text-slate-600/80" style={{ fontSize: '17px', margin: 0, marginTop: '2px', lineHeight: '1.4' }}>Record and preserve in warm detail.</p>
+                    <p className="font-medium" style={{ fontSize: '20px', margin: 0, lineHeight: '1.2', color: 'var(--hw-text-primary, #1F1F1F)' }}>Capture voices</p>
+                    <p style={{ fontSize: '17px', margin: 0, marginTop: '2px', lineHeight: '1.4', color: 'var(--hw-text-secondary, #4A4A4A)' }}>Record and preserve in warm detail.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="inline-grid place-items-center w-9 h-9 rounded-lg bg-white/70 ring-1 ring-rose-100 backdrop-blur">
-                    <Lock className="w-5 h-5 text-amber-500" />
+                  <span className="inline-grid place-items-center w-9 h-9 rounded-lg backdrop-blur" style={{ backgroundColor: 'var(--hw-surface, #FFFFFF)', border: '1px solid var(--hw-border-subtle, #D2C9BD)' }}>
+                    <Lock className="w-5 h-5" style={{ color: 'var(--hw-accent-gold, #CBA46A)' }} />
                   </span>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <p className="font-medium text-slate-900" style={{ fontSize: '20px', margin: 0, lineHeight: '1.2' }}>Private by design</p>
-                    <p className="text-sm text-slate-600/80" style={{ fontSize: '17px', margin: 0, marginTop: '2px', lineHeight: '1.4' }}>Your memories stay in the family.</p>
+                    <p className="font-medium" style={{ fontSize: '20px', margin: 0, lineHeight: '1.2', color: 'var(--hw-text-primary, #1F1F1F)' }}>Private by design</p>
+                    <p style={{ fontSize: '17px', margin: 0, marginTop: '2px', lineHeight: '1.4', color: 'var(--hw-text-secondary, #4A4A4A)' }}>Your memories stay in the family.</p>
                   </div>
                 </div>
               </div>
@@ -255,22 +253,25 @@ export default function Login() {
             {/* Right: Form */}
             <section className="order-2 lg:order-2 mt-8 lg:mt-0" style={{ marginTop: '-8px' }}>
               <div className="mx-auto max-w-md">
-                {/* gradient border card */}
+                {/* Card with subtle border */}
                 <div
-                  className="p-[1px] rounded-2xl"
-                  style={{ background: "linear-gradient(145deg, rgba(245,158,11,.4), rgba(251,113,133,.4))" }}
+                  className="rounded-2xl shadow-xl"
+                  style={{
+                    backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                    border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(32,57,84,0.08)'
+                  }}
                 >
-                  <div className="rounded-2xl bg-white/80 backdrop-blur-xl shadow-xl ring-1 ring-white/30">
-                    <div className="p-6 sm:p-8">
-                      <header className="mb-6">
-                        <h2 className="text-2xl font-semibold tracking-tight text-slate-900" style={{ fontSize: '28px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>Login</h2>
-                        <p className="mt-1 text-lg text-slate-600/80" style={{ fontSize: '20px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>Enter your details to continue.</p>
-                      </header>
+                  <div className="p-6 sm:p-8">
+                    <header className="mb-6">
+                      <h2 className="font-semibold tracking-tight" style={{ fontSize: '28px', fontFamily: 'system-ui, -apple-system, sans-serif', color: 'var(--hw-text-primary, #1F1F1F)' }}>Login</h2>
+                      <p className="mt-1" style={{ fontSize: '20px', fontFamily: 'system-ui, -apple-system, sans-serif', color: 'var(--hw-text-secondary, #4A4A4A)' }}>Enter your details to continue.</p>
+                    </header>
 
-                      <form onSubmit={handleSubmit} className="space-y-5" suppressHydrationWarning>
+                    <form onSubmit={handleSubmit} className="space-y-5" suppressHydrationWarning>
                         {/* Email */}
                         <div>
-                          <label htmlFor="email" className="block text-base font-medium text-slate-700" style={{ fontSize: '16px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+                          <label htmlFor="email" className="block font-medium" style={{ fontSize: '16px', fontFamily: 'system-ui, -apple-system, sans-serif', color: 'var(--hw-text-primary, #1F1F1F)' }}>
                             Email address
                           </label>
                           <div className="mt-2 relative">
@@ -282,21 +283,30 @@ export default function Login() {
                               required
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
-                              className="w-full rounded-xl border border-rose-100/80 bg-white/70 px-4 py-3 text-slate-900 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-300/80 focus:border-rose-200"
-                              style={{ fontSize: '16px', paddingRight: '40px' }}
+                              className="w-full rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
+                              style={{
+                                fontSize: '16px',
+                                paddingRight: '40px',
+                                padding: '12px 40px 12px 16px',
+                                backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                                border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                                color: 'var(--hw-text-primary, #1F1F1F)',
+                                '--tw-ring-color': 'var(--hw-primary, #203954)',
+                                '--tw-ring-offset-color': 'var(--hw-page-bg, #F7F2EC)'
+                              } as React.CSSProperties}
                               placeholder="you@example.com"
                               data-testid="input-email"
                               suppressHydrationWarning
                             />
                             <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                              <Mail className="w-5 h-5 text-slate-400" />
+                              <Mail className="w-5 h-5" style={{ color: 'var(--hw-text-muted, #8A8378)' }} />
                             </div>
                           </div>
                         </div>
 
                         {/* Password */}
                         <div>
-                          <label htmlFor="password" className="block text-base font-medium text-slate-700" style={{ fontSize: '16px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+                          <label htmlFor="password" className="block font-medium" style={{ fontSize: '16px', fontFamily: 'system-ui, -apple-system, sans-serif', color: 'var(--hw-text-primary, #1F1F1F)' }}>
                             Password
                           </label>
                           <div className="mt-2 relative">
@@ -314,15 +324,25 @@ export default function Login() {
                                   handleSubmit(e as any);
                                 }
                               }}
-                              className="w-full rounded-xl border border-rose-100/80 bg-white/70 px-4 py-3 text-slate-900 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-300/80 focus:border-amber-200"
-                              style={{ fontSize: '16px', paddingRight: '40px' }}
+                              className="w-full rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
+                              style={{
+                                fontSize: '16px',
+                                paddingRight: '40px',
+                                padding: '12px 40px 12px 16px',
+                                backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                                border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                                color: 'var(--hw-text-primary, #1F1F1F)',
+                                '--tw-ring-color': 'var(--hw-primary, #203954)',
+                                '--tw-ring-offset-color': 'var(--hw-page-bg, #F7F2EC)'
+                              } as React.CSSProperties}
                               placeholder="••••••••"
                               data-testid="input-password"
                               suppressHydrationWarning
                             />
                             <div
                               onClick={() => setShowPassword(!showPassword)}
-                              className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                              className="absolute inset-y-0 right-3 flex items-center transition-colors cursor-pointer"
+                              style={{ color: 'var(--hw-text-muted, #8A8378)' }}
                               aria-label="Toggle password visibility"
                               role="button"
                               tabIndex={0}
@@ -361,14 +381,14 @@ export default function Login() {
                                 }
                               }}
                             />
-                            <span className="grid place-items-center w-5 h-5 rounded-md border border-rose-200 bg-white shadow-sm transition peer-checked:bg-gradient-to-br peer-checked:from-amber-400 peer-checked:to-rose-400 peer-checked:border-transparent">
-                              <svg className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <span className="grid place-items-center w-5 h-5 rounded-md shadow-sm transition peer-checked:border-transparent" style={{ border: '1px solid var(--hw-border-subtle, #D2C9BD)', backgroundColor: 'var(--hw-surface, #FFFFFF)' }}>
+                              <svg className="w-3.5 h-3.5 opacity-0 peer-checked:opacity-100 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--hw-primary, #203954)' }}>
                                 <path d="M20 6 9 17l-5-5"/>
                               </svg>
                             </span>
-                            <span className="text-base text-slate-700" style={{ fontSize: '16px', lineHeight: '1.5', fontFamily: 'system-ui, -apple-system, sans-serif' }}>Remember me</span>
+                            <span className="font-medium" style={{ fontSize: '16px', lineHeight: '1.5', fontFamily: 'system-ui, -apple-system, sans-serif', color: 'var(--hw-text-primary, #1F1F1F)' }}>Remember me</span>
                           </label>
-                          <Link href="/auth/forgot-password" className="text-base text-rose-600 hover:text-rose-700 font-medium" style={{ fontSize: '16px', lineHeight: '1.5', display: 'flex', alignItems: 'center', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+                          <Link href="/auth/forgot-password" className="font-medium hover:underline" style={{ fontSize: '16px', lineHeight: '1.5', display: 'flex', alignItems: 'center', fontFamily: 'system-ui, -apple-system, sans-serif', color: 'var(--hw-primary, #203954)' }}>
                             Forgot password?
                           </Link>
                         </div>
@@ -376,8 +396,17 @@ export default function Login() {
                         {/* Submit */}
                         <button
                           type="submit"
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white px-4 py-3 font-semibold shadow-lg shadow-rose-200/50 hover:brightness-110 transition"
-                          style={{ fontSize: '17px', fontFamily: 'system-ui, -apple-system, sans-serif' }}
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold shadow-lg transition active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2"
+                          style={{
+                            fontSize: '17px',
+                            fontFamily: 'system-ui, -apple-system, sans-serif',
+                            minHeight: '60px',
+                            backgroundColor: 'var(--hw-primary, #203954)',
+                            color: 'var(--hw-text-on-dark, #FFFFFF)',
+                            boxShadow: '0 4px 12px rgba(32,57,84,0.2)',
+                            '--tw-ring-color': 'var(--hw-primary, #203954)',
+                            '--tw-ring-offset-color': 'var(--hw-page-bg, #F7F2EC)'
+                          } as React.CSSProperties}
                           data-testid="button-login"
                           suppressHydrationWarning
                         >
@@ -388,10 +417,10 @@ export default function Login() {
                         {/* Divider */}
                         <div className="relative">
                           <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                            <div className="w-full border-t border-rose-100"></div>
+                            <div className="w-full border-t" style={{ borderColor: 'var(--hw-border-subtle, #D2C9BD)' }}></div>
                           </div>
                           <div className="relative flex justify-center">
-                            <span className="bg-white/80 backdrop-blur px-3 text-sm text-slate-500" style={{ fontSize: '14px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>or</span>
+                            <span className="backdrop-blur px-3" style={{ fontSize: '14px', fontFamily: 'system-ui, -apple-system, sans-serif', backgroundColor: 'var(--hw-surface, #FFFFFF)', color: 'var(--hw-text-muted, #8A8378)' }}>or</span>
                           </div>
                         </div>
 
@@ -399,8 +428,14 @@ export default function Login() {
                         <button
                           type="button"
                           onClick={signInWithGoogle}
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-rose-100 bg-white/70 px-4 py-2.5 text-slate-800 font-medium hover:bg-white transition"
-                          style={{ fontSize: '16px', fontFamily: 'system-ui, -apple-system, sans-serif' }}
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-medium transition hover:shadow-md"
+                          style={{
+                            fontSize: '16px',
+                            fontFamily: 'system-ui, -apple-system, sans-serif',
+                            border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                            backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                            color: 'var(--hw-text-primary, #1F1F1F)'
+                          }}
                           data-testid="button-google-signin"
                           suppressHydrationWarning
                         >
@@ -421,23 +456,22 @@ export default function Login() {
                             onError={handlePasskeyError}
                           />
                         )}
-                      </form>
+                    </form>
 
-                      <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '24px' }}>
-                        <p className="text-slate-600/90" style={{ fontSize: '18px', textAlign: 'center', margin: 0, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-                          New here?{" "}
-                          <Link href="/auth/register" className="font-medium text-rose-700 hover:text-rose-800">
-                            Create an account
-                          </Link>
-                        </p>
-                      </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '24px' }}>
+                      <p style={{ fontSize: '18px', textAlign: 'center', margin: 0, fontFamily: 'system-ui, -apple-system, sans-serif', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
+                        New here?{" "}
+                        <Link href="/auth/register" className="font-medium hover:underline" style={{ color: 'var(--hw-primary, #203954)' }}>
+                          Create an account
+                        </Link>
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Small reassurance */}
-                <p className="mt-4 text-sm text-slate-500 text-center" style={{ fontSize: '15px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-                  Protected with end‑to‑end encryption and secure sharing controls.
+                <p className="mt-4 text-center" style={{ fontSize: '15px', fontFamily: 'system-ui, -apple-system, sans-serif', color: 'var(--hw-text-muted, #8A8378)' }}>
+                  Protected with end-to-end encryption and secure sharing controls.
                 </p>
               </div>
             </section>

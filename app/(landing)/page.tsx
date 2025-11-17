@@ -18,19 +18,20 @@ export default function LandingV3() {
   return (
     <>
       <LandingHeader />
-      <main className="relative bg-[#faf8f5] overflow-hidden">
+      <main className="relative bg-heritage-warm-paper overflow-hidden">
         {/* Subtle vertical line accents */}
         <div className="hidden lg:block fixed left-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-stone-300/20 to-transparent" />
         <div className="hidden lg:block fixed right-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-stone-300/20 to-transparent" />
 
         <div className="relative">
           <HeroSection />
+          {/* Three Ways section moved up - key differentiator */}
+          <ValuePropsShowcase />
           <ProblemStatement />
           <div id="features">
             <ThreePillars />
           </div>
           <SocialProofSnapshot />
-          <ValuePropsShowcase />
           <div id="how-it-works">
             <HowItWorks />
           </div>

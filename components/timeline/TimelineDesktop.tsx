@@ -615,8 +615,11 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         </div>
       );
     }
-    
-    // No photo - render card with placeholder matching photo cards
+
+    // No photo - render compact pill-style card
+    const hasAudio = story.audioUrl && story.audioUrl.trim() !== "";
+    const hasText = story.transcription || story.storyText;
+
     return (
       <div
         className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer ${
@@ -628,100 +631,42 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           border: '1.5px solid #B89B8D',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = '0 16px 40px -6px rgba(0, 0, 0, 0.4), 0 8px 18px -3px rgba(0, 0, 0, 0.3)';
+          e.currentTarget.style.boxShadow = '0 8px 20px -3px rgba(0, 0, 0, 0.2), 0 4px 9px -1px rgba(0, 0, 0, 0.15)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)';
+          e.currentTarget.style.boxShadow = '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)';
         }}
       >
-        {/* Placeholder Section - 16:10 aspect ratio to match mobile */}
-        <div className="relative w-full aspect-[16/10] overflow-hidden">
-          <div
-            className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 flex items-center justify-center"
-            style={{
-              backgroundColor: isDark ? '#2a2a2a' : '#f9fafb',
-              backgroundImage: `linear-gradient(135deg, ${isDark ? '#2a2a2a' : '#f9fafb'} 0%, ${isDark ? '#1f1f1f' : '#f3f4f6'} 50%, ${isDark ? '#2a2a2a' : '#f9fafb'} 100%)`
-            }}
-          >
-            <div className="text-center p-6">
-              <div className="text-5xl opacity-10">📝</div>
-            </div>
-          </div>
-
-          {/* Book-style audio button overlaid on placeholder (hidden in V2) */}
-          {story.audioUrl && !useV2Features && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePlayAudio(e);
-              }}
-              aria-pressed={isPlaying}
-              aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-              className="absolute right-4 bottom-4 hover:scale-105 transition-transform z-10"
-            >
-              <svg className="w-11 h-11 -rotate-90" viewBox="0 0 44 44">
-                {/* Background ring */}
-                <circle
-                  cx="22"
-                  cy="22"
-                  r="18"
-                  fill="white"
-                  fillOpacity="0.9"
-                />
-                <circle
-                  cx="22"
-                  cy="22"
-                  r="18"
-                  fill="none"
-                  stroke="rgba(139,107,122,0.2)"
-                  strokeWidth="3"
-                />
-                {/* Progress ring - Always render, but only visible when playing */}
-                <circle
-                  cx="22"
-                  cy="22"
-                  r="18"
-                  fill="none"
-                  stroke="#8b6b7a"
-                  strokeWidth="3"
-                  strokeDasharray={`${2 * Math.PI * 18}`}
-                  strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
-                  strokeLinecap="round"
-                  style={{
-                    opacity: isPlaying ? 1 : 0,
-                    transition: 'stroke-dashoffset 0.3s ease, opacity 0.2s ease'
-                  }}
-                />
-              </svg>
-              {/* Icon in center */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
-                ) : isPlaying ? (
-                  <Pause className="w-5 h-5 text-neutral-600 fill-neutral-600" />
+        {/* Compact pill layout - no photo placeholder */}
+        <div className="px-5 py-5">
+          <div className="flex items-center gap-3">
+            {/* Left: Icon badge */}
+            <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
+              <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center">
+                {hasAudio ? (
+                  <Volume2 className="w-6 h-6 text-stone-600" />
                 ) : (
-                  <Volume2 className="w-5 h-5 text-neutral-600" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
                 )}
               </div>
-            </button>
-          )}
-        </div>
+              <span className="text-xs text-stone-500 font-medium">
+                {hasAudio ? "Voice" : "Written"}
+              </span>
+            </div>
 
-        {/* White Card Section Below Placeholder - Compact horizontal layout */}
-        <div className="px-4 py-3 bg-white relative">
-          <div className="flex items-center justify-between gap-4">
-            {/* Left: Title and metadata stacked */}
+            {/* Middle: Title + metadata + snippet */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-[19px] tracking-tight font-semibold text-stone-900 mb-0.5 truncate">
+              <h3 className="text-[19px] tracking-tight font-semibold text-stone-900 mb-1 truncate">
                 {story.title}
               </h3>
-              <div className="flex items-center gap-2 text-[15px] text-stone-500">
-                <span>
-                  {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
-                </span>
+
+              <div className="text-[15px] text-stone-500 mb-2">
+                <span>{formatStoryDateForMetadata(story.storyDate, story.storyYear)}</span>
                 {displayLifeAge !== null && displayLifeAge !== undefined && (
                   <>
-                    <span className="text-stone-300">•</span>
+                    <span className="mx-1.5">•</span>
                     <span>
                       {displayLifeAge > 0 && `Age ${displayLifeAge}`}
                       {displayLifeAge === 0 && `Birthday`}
@@ -730,20 +675,56 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   </>
                 )}
               </div>
+
+              {/* Snippet - first line of transcription or story text */}
+              {hasText && (
+                <p className="text-sm text-stone-600 truncate italic">
+                  {(story.transcription || story.storyText || "").substring(0, 100)}...
+                </p>
+              )}
             </div>
 
-            {/* Right: V2 audio button with progress indicator */}
-            {useV2Features && story.audioUrl && (
-              <PlayPauseButton
-                isPlaying={isPlaying}
-                isLoading={isLoading}
-                progress={progress}
-                onClick={handlePlayAudio}
-                size={48}
-                className="text-white shadow-md"
-              />
-            )}
+            {/* Right: Action button */}
+            <div className="flex-shrink-0">
+              {hasAudio ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePlayAudio(e);
+                  }}
+                  className="w-11 h-11 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md hover:shadow-lg transition-all hover:scale-105"
+                  aria-label={isPlaying ? "Pause audio" : hasError ? "Retry playing audio" : "Play audio"}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : hasError ? (
+                    <AlertCircle className="w-5 h-5" />
+                  ) : isPlaying ? (
+                    <Pause className="w-5 h-5 fill-current" />
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  )}
+                </button>
+              ) : (
+                <button
+                  className="px-4 py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold flex items-center gap-1.5 transition-colors"
+                  aria-label="Read story"
+                >
+                  <span>Read</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Helper text */}
+          <p className="text-xs text-stone-400 mt-3 text-center">
+            {hasAudio ? "Tap to listen to this story" : "Tap to read this story"}
+          </p>
         </div>
       </div>
     );
@@ -1169,14 +1150,33 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                       const globalIndex = sortedStories.findIndex(s => s.id === story.id);
                       // V3: No decade markers on cards anymore
                       const showDecadeMarker = false;
-                      
+
                       // Only the very first story (first decade, first story) gets no negative margin
                       const isVeryFirstStory = decadeIndex === 0 && storyIndex === 0;
+
+                      // Check if current story has a photo
+                      const hasPhoto = (story.photos && story.photos.length > 0 && story.photos.some((p: any) => p.url)) || story.photoUrl;
+
+                      // Check if previous story has a photo
+                      const prevStory = storyIndex > 0 ? decadeStories[storyIndex - 1] : null;
+                      const prevHasPhoto = prevStory
+                        ? (prevStory.photos && prevStory.photos.length > 0 && prevStory.photos.some((p: any) => p.url)) || prevStory.photoUrl
+                        : true; // Default to true for first card
+
+                      // Adjust negative margin based on current AND previous card type
+                      let negativeMargin = "md:-mt-[121px]"; // Default for photo after photo
+                      if (!hasPhoto) {
+                        // Current card is pill (no photo)
+                        negativeMargin = "md:-mt-[40px]";
+                      } else if (!prevHasPhoto) {
+                        // Current card is photo, but previous was pill - use less aggressive margin
+                        negativeMargin = "md:-mt-[40px]";
+                      }
 
                       return (
                         <div
                           key={story.id}
-                          className={isVeryFirstStory ? "md:mt-0" : "md:-mt-[121px]"}
+                          className={isVeryFirstStory ? "md:mt-0" : negativeMargin}
                           data-memory-id={story.id}
                           style={{
                             transition: returnHighlightId === story.id ? 'background-color 0.3s' : 'none',

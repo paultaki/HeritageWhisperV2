@@ -25,15 +25,15 @@ export default function ThreePillars() {
   ]
 
   return (
-    <section className="py-16 md:py-24 px-6 md:px-12 bg-[#faf8f5]">
+    <section className="py-16 md:py-24 px-6 md:px-12 bg-heritage-warm-paper">
       <div className="max-w-7xl mx-auto">
         {/* Section header */}
         <div
           ref={ref}
           className={`text-center mb-12 ${fadeInClasses.initial} ${isVisible ? fadeInClasses.animate : ''}`}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-stone-200 shadow-sm mb-4">
-            <span className="text-sm font-semibold text-gray-700">Three Core Features</span>
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/80 backdrop-blur-sm rounded-full border border-heritage-deep-slate/10 shadow-sm mb-4">
+            <span className="text-sm font-semibold text-heritage-deep-slate tracking-wide">Three Core Features</span>
           </div>
         </div>
 
@@ -42,7 +42,7 @@ export default function ThreePillars() {
           {pillars.map((pillar, index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl p-8 shadow-lg border border-stone-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              className="bg-white rounded-2xl p-8 shadow-lg border border-heritage-deep-slate/10 hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.02]"
             >
               <div className="mb-6 w-24 h-24 relative">
                 <Image
@@ -53,8 +53,8 @@ export default function ThreePillars() {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">{pillar.title}</h3>
-              <div className="space-y-1 text-gray-600 leading-relaxed">
+              <h3 className="text-2xl font-bold text-heritage-text-primary mb-4">{pillar.title}</h3>
+              <div className="space-y-1 text-heritage-text-primary/70 leading-relaxed">
                 {pillar.lines.map((line, lineIndex) => (
                   <p key={lineIndex}>{line}</p>
                 ))}

@@ -417,7 +417,7 @@ export default function FamilyPage() {
   return (
     <div
       className="hw-page flex overflow-x-hidden"
-      style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}
+      style={{ backgroundColor: isDark ? "#1c1c1d" : "#F7F2EC" }}
     >
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50">
@@ -441,10 +441,10 @@ export default function FamilyPage() {
         <div className="max-w-7xl mx-auto py-5 md:py-6">
           {/* Emotional Header */}
           <div className="text-center md:text-left mb-6 md:mb-8">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-3">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-heritage-text-primary mb-3">
               Family Circle
             </h1>
-            <p className="text-lg md:text-xl lg:text-2xl text-gray-600 max-w-lg mx-auto md:mx-0 leading-relaxed">
+            <p className="text-lg md:text-xl lg:text-2xl text-heritage-text-primary/70 max-w-lg mx-auto md:mx-0 leading-relaxed">
               A private place to share your stories with the people who matter.
             </p>
           </div>
@@ -479,11 +479,11 @@ export default function FamilyPage() {
               <PrivacyInfoCard />
 
               {/* Recent Activity Card */}
-              <Card className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+              <Card className="bg-white border border-heritage-deep-slate/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2.5 text-xl md:text-2xl font-semibold text-gray-900 leading-tight">
-                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
-                      <Activity className="w-6 h-6 text-blue-600" />
+                  <CardTitle className="flex items-center gap-2.5 text-xl md:text-2xl font-semibold text-heritage-text-primary leading-tight">
+                    <div className="w-10 h-10 rounded-xl bg-heritage-deep-slate/10 flex items-center justify-center shrink-0">
+                      <Activity className="w-6 h-6 text-heritage-deep-slate" />
                     </div>
                     Recent Activity
                   </CardTitle>
@@ -564,24 +564,24 @@ export default function FamilyPage() {
               {/* Active Family Members Section */}
               <section>
                 <div className="mb-4">
-                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 leading-tight">
+                  <h2 className="text-3xl md:text-4xl font-bold text-heritage-text-primary mb-2 leading-tight">
                     Family Members {activeMembers.length > 0 && `(${activeMembers.length})`}
                   </h2>
-                  <p className="text-base md:text-lg text-gray-600 leading-snug">
+                  <p className="text-base md:text-lg text-heritage-text-primary/70 leading-snug">
                     People who can view your stories
                   </p>
                 </div>
 
                 {activeMembers.length === 0 ? (
-                  <Card className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                  <Card className="bg-white border border-heritage-deep-slate/10 rounded-2xl overflow-hidden shadow-sm">
                     <div className="text-center py-12 md:py-14 px-6">
-                      <div className="w-18 h-18 md:w-20 md:h-20 mx-auto mb-5 rounded-full bg-blue-100 flex items-center justify-center">
-                        <Users className="w-9 h-9 md:w-10 md:h-10 text-blue-600" />
+                      <div className="w-18 h-18 md:w-20 md:h-20 mx-auto mb-5 rounded-full bg-heritage-deep-slate/10 flex items-center justify-center">
+                        <Users className="w-9 h-9 md:w-10 md:h-10 text-heritage-deep-slate" />
                       </div>
-                      <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-3">
+                      <h3 className="text-2xl md:text-3xl font-semibold text-heritage-text-primary mb-3">
                         No family members yet
                       </h3>
-                      <p className="text-base md:text-lg text-gray-600 mb-6 max-w-md mx-auto leading-relaxed">
+                      <p className="text-base md:text-lg text-heritage-text-primary/70 mb-6 max-w-md mx-auto leading-relaxed">
                         Invite your loved ones to start sharing your life stories
                       </p>
                       <Button
@@ -592,12 +592,12 @@ export default function FamilyPage() {
                             setUpgradeModalOpen(true);
                           }
                         }}
-                        className="min-h-[56px] px-7 py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-base md:text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+                        className="min-h-[56px] px-7 py-3.5 bg-heritage-deep-slate hover:bg-heritage-deep-slate/90 text-white text-base md:text-lg font-medium rounded-xl shadow-md hover:shadow-lg active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heritage-deep-slate transition-all duration-300"
                       >
                         <UserPlus className="w-5 h-5 mr-2" />
                         Invite Family Member
                         {!canInviteFamily && (
-                          <span className="ml-2 rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold">
+                          <span className="ml-2 rounded-full bg-heritage-gold px-2 py-0.5 text-xs font-semibold text-heritage-text-primary">
                             Premium
                           </span>
                         )}
@@ -628,10 +628,10 @@ export default function FamilyPage() {
                     className="w-full mb-3 flex items-center justify-between group"
                   >
                     <div>
-                      <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 text-left leading-tight">
+                      <h2 className="text-3xl md:text-4xl font-bold text-heritage-text-primary mb-2 text-left leading-tight">
                         Pending Invitations ({pendingMembers.length})
                       </h2>
-                      <p className="text-base md:text-lg text-gray-600 text-left leading-snug">
+                      <p className="text-base md:text-lg text-heritage-text-primary/70 text-left leading-snug">
                         Waiting for acceptance
                       </p>
                     </div>
@@ -658,7 +658,7 @@ export default function FamilyPage() {
                           />
                         ))}
                       </div>
-                      <p className="text-xs md:text-sm text-gray-600 pl-3.5 border-l-4 border-blue-200 py-1.5 leading-snug">
+                      <p className="text-xs md:text-sm text-heritage-text-primary/70 pl-3.5 border-l-4 border-heritage-deep-slate/20 py-1.5 leading-snug">
                         They'll appear as a member as soon as they accept the invitation.
                       </p>
                     </>
@@ -682,7 +682,7 @@ export default function FamilyPage() {
                   description: "Step-by-step guide will be available soon.",
                 });
               }}
-              className="min-h-[48px] px-6 py-2.5 text-sm md:text-base font-medium rounded-xl border-2 border-gray-300 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+              className="min-h-[48px] px-6 py-2.5 text-sm md:text-base font-medium rounded-xl border-2 border-gray-300 hover:border-heritage-deep-slate hover:bg-heritage-deep-slate/5 hover:text-heritage-deep-slate active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heritage-deep-slate transition-all duration-300"
             >
               View Step-by-Step Guide
             </Button>
@@ -715,7 +715,7 @@ export default function FamilyPage() {
                 type="text"
                 value={inviteName}
                 onChange={(e) => setInviteName(e.target.value)}
-                className="mt-2 h-12 w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0"
+                className="mt-2 h-12 w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-heritage-deep-slate focus:ring-2 focus:ring-heritage-deep-slate focus:ring-offset-0"
                 placeholder="John Smith"
               />
             </div>
@@ -732,7 +732,7 @@ export default function FamilyPage() {
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                className="mt-2 h-12 w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0"
+                className="mt-2 h-12 w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-heritage-deep-slate focus:ring-2 focus:ring-heritage-deep-slate focus:ring-offset-0"
                 placeholder="family@example.com"
                 required
               />
@@ -750,7 +750,7 @@ export default function FamilyPage() {
                 value={inviteRelationship}
                 onValueChange={setInviteRelationship}
               >
-                <SelectTrigger className="mt-2 h-12 w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0">
+                <SelectTrigger className="mt-2 h-12 w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl focus:border-heritage-deep-slate focus:ring-2 focus:ring-heritage-deep-slate focus:ring-offset-0">
                   <SelectValue placeholder="Select relationship" />
                 </SelectTrigger>
                 <SelectContent>
@@ -812,7 +812,7 @@ export default function FamilyPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setInviteDialogOpen(false)}
-                className="w-full min-h-[48px] px-5 py-2.5 bg-white text-gray-900 text-sm md:text-base font-medium border border-gray-300 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+                className="w-full min-h-[48px] px-5 py-2.5 bg-white text-gray-900 text-sm md:text-base font-medium border border-gray-300 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heritage-deep-slate transition-all duration-300"
               >
                 Cancel
               </Button>
@@ -820,7 +820,7 @@ export default function FamilyPage() {
                 ref={sendButtonRef}
                 type="submit"
                 disabled={inviteMutation.isPending}
-                className="w-full min-h-[56px] px-7 py-3.5 bg-blue-600 text-white text-base md:text-lg font-medium rounded-xl shadow-sm hover:shadow-md hover:bg-blue-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+                className="w-full min-h-[56px] px-7 py-3.5 bg-heritage-deep-slate text-white text-base md:text-lg font-medium rounded-xl shadow-md hover:shadow-lg hover:bg-heritage-deep-slate/90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heritage-deep-slate transition-all duration-300"
               >
                 <Mail className="w-5 h-5 mr-2" />
                 {inviteMutation.isPending ? "Sending..." : "Send Invitation"}

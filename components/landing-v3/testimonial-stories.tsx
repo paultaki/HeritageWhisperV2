@@ -48,6 +48,7 @@ export default function TestimonialStories() {
                   src={story.image}
                   alt=""
                   fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover"
                   priority={index === 0}
                 />

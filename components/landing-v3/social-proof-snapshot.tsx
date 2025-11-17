@@ -13,6 +13,7 @@ export default function SocialProofSnapshot() {
                   src="/margaret.webp"
                   alt=""
                   fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover"
                   priority
                 />
