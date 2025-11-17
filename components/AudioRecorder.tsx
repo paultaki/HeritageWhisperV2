@@ -157,9 +157,6 @@ export const AudioRecorder = forwardRef<
               // Silence detected
               if (!silenceStartRef.current) {
                 silenceStartRef.current = Date.now();
-                console.log(
-                  `[Silence Detection] Silence started at ${getRecordingDuration()}s`,
-                );
               } else {
                 const silenceDurationMs = Date.now() - silenceStartRef.current;
                 if (
@@ -168,9 +165,6 @@ export const AudioRecorder = forwardRef<
                 ) {
                   isSilentRef.current = true;
                   const recordingDuration = getRecordingDuration();
-                  console.log(
-                    `[Silence Detection] Triggering silence callback at ${recordingDuration}s (after ${silenceDurationMs}ms of silence)`,
-                  );
                   onSilenceDetected(recordingDuration);
                 }
               }
@@ -178,9 +172,6 @@ export const AudioRecorder = forwardRef<
               // Speech detected
               if (silenceStartRef.current) {
                 const silenceDurationMs = Date.now() - silenceStartRef.current;
-                console.log(
-                  `[Silence Detection] Speech resumed at ${getRecordingDuration()}s (after ${silenceDurationMs}ms of silence)`,
-                );
                 silenceStartRef.current = null;
                 if (isSilentRef.current) {
                   isSilentRef.current = false;
@@ -229,17 +220,11 @@ export const AudioRecorder = forwardRef<
     try {
       // Prevent starting if already recording or initializing
       if (isRecording || mediaRecorderRef.current) {
-        console.log(
-          "[AudioRecorder] Already recording or initializing, ignoring start request",
-        );
         return;
       }
 
       // Reset cancelled flag - this is a new recording
       cancelledRef.current = false;
-
-      console.log("[AudioRecorder] Starting recording...");
-      console.log("[AudioRecorder] Browser:", navigator.userAgent);
 
       // Check if getUserMedia is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -289,24 +274,9 @@ export const AudioRecorder = forwardRef<
         }
       }
 
-      console.log(
-        "[AudioRecorder] Got media stream:",
-        stream.getAudioTracks().length,
-        "audio tracks",
-      );
       const audioTracks = stream.getAudioTracks();
       if (audioTracks.length === 0) {
         throw new Error("No audio tracks available in MediaStream");
-      }
-      if (audioTracks.length > 0) {
-        console.log(
-          "[AudioRecorder] Audio track settings:",
-          audioTracks[0].getSettings(),
-        );
-        console.log(
-          "[AudioRecorder] Audio track state:",
-          audioTracks[0].readyState,
-        );
       }
 
       // Verify at least one track is live
@@ -331,21 +301,16 @@ export const AudioRecorder = forwardRef<
         "audio/mp4",
       ];
 
-      console.log("[AudioRecorder] Checking supported mime types...");
       for (const type of supportedTypes) {
         if (MediaRecorder.isTypeSupported(type)) {
           mimeType = type;
           mimeTypeRef.current = type;
-          console.log("[AudioRecorder] Using audio format:", type);
           break;
         }
       }
 
       // If no specific type is supported, let the browser choose
       if (!mimeType) {
-        console.log(
-          "[AudioRecorder] No specific mime type supported, using browser default",
-        );
         mimeTypeRef.current = "audio/webm"; // Default fallback for blob type
       }
 
@@ -353,59 +318,19 @@ export const AudioRecorder = forwardRef<
       const mediaRecorderOptions = mimeType ? { mimeType } : {};
       const mediaRecorder = new MediaRecorder(stream, mediaRecorderOptions);
 
-      console.log("[AudioRecorder] MediaRecorder created");
-      console.log("[AudioRecorder] MediaRecorder state:", mediaRecorder.state);
-      console.log(
-        "[AudioRecorder] MediaRecorder mimeType:",
-        mediaRecorder.mimeType,
-      );
-
       mediaRecorderRef.current = mediaRecorder;
-
-      // Track data collection
-      let dataCollectionCount = 0;
-      let totalDataSize = 0;
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
           chunksRef.current.push(event.data);
-          dataCollectionCount++;
-          totalDataSize += event.data.size;
-
-          // Only log every 10th chunk to reduce console spam
-          if (dataCollectionCount % 10 === 0 || dataCollectionCount === 1) {
-            console.log(
-              `[AudioRecorder] Chunk ${dataCollectionCount} collected, Total size: ${(totalDataSize / 1024).toFixed(1)} KB`,
-            );
-          }
         }
       };
 
       mediaRecorder.onstop = () => {
-        console.log("[AudioRecorder] MediaRecorder stopped");
-
         // Check if recording was cancelled - if so, skip processing
         if (cancelledRef.current) {
-          console.log(
-            "[AudioRecorder] Recording was cancelled, skipping onRecordingComplete",
-          );
           return;
         }
-
-        console.log(
-          "[AudioRecorder] Total chunks collected:",
-          chunksRef.current.length,
-        );
-
-        const totalSize = chunksRef.current.reduce(
-          (acc, chunk) => acc + chunk.size,
-          0,
-        );
-        console.log(
-          "[AudioRecorder] Total audio data size:",
-          totalSize,
-          "bytes",
-        );
 
         if (chunksRef.current.length === 0) {
           console.error("[AudioRecorder] ERROR: No audio chunks collected!");
@@ -427,23 +352,9 @@ export const AudioRecorder = forwardRef<
           mediaRecorderRef.current?.mimeType ||
           mimeTypeRef.current ||
           "audio/webm";
-        console.log("[AudioRecorder] Creating blob with type:", blobType);
 
         const audioBlob = new Blob(chunksRef.current, { type: blobType });
         const finalDuration = Math.floor(finalElapsedRef.current / 1000);
-
-        console.log(
-          "[AudioRecorder] Created audio blob - Type:",
-          audioBlob.type,
-          "Size:",
-          audioBlob.size,
-          "bytes",
-        );
-        console.log(
-          "[AudioRecorder] Recording duration:",
-          finalDuration,
-          "seconds",
-        );
 
         if (audioBlob.size === 0) {
           console.error("[AudioRecorder] ERROR: Audio blob is empty!");
@@ -452,11 +363,6 @@ export const AudioRecorder = forwardRef<
 
         // Clean up stream
         stream.getTracks().forEach((track) => {
-          console.log(
-            "[AudioRecorder] Stopping track:",
-            track.kind,
-            track.label,
-          );
           track.stop();
         });
         setMediaStream(undefined);
@@ -481,28 +387,21 @@ export const AudioRecorder = forwardRef<
         }
       };
 
-      // Add state change handlers for debugging
+      // Add state change handlers
       mediaRecorder.onstart = () => {
-        console.log("[AudioRecorder] MediaRecorder started successfully");
-        console.log(
-          "[AudioRecorder] State after start:",
-          mediaRecorderRef.current?.state,
-        );
-
         // Setup audio monitoring AFTER MediaRecorder starts to avoid conflicts
         setupSilenceDetection(stream);
       };
 
       mediaRecorder.onpause = () => {
-        console.log("[AudioRecorder] MediaRecorder paused");
+        // MediaRecorder paused
       };
 
       mediaRecorder.onresume = () => {
-        console.log("[AudioRecorder] MediaRecorder resumed");
+        // MediaRecorder resumed
       };
 
       // Start countdown before recording
-      console.log("[AudioRecorder] Starting 3-2-1 countdown...");
       setCountdown(3);
 
       await new Promise<void>((resolve) => {
@@ -525,16 +424,6 @@ export const AudioRecorder = forwardRef<
       startTimeRef.current = Date.now();
 
       // Start recording with larger timeslice to reduce chunks
-      console.log(
-        "[AudioRecorder] Starting MediaRecorder with 1000ms timeslice...",
-      );
-      console.log(
-        "[AudioRecorder] MediaRecorder config - mimeType:",
-        mediaRecorder.mimeType,
-        "state:",
-        mediaRecorder.state,
-      );
-
       try {
         mediaRecorder.start(1000); // Collect data every 1 second instead of 100ms
       } catch (startError: any) {
@@ -545,10 +434,6 @@ export const AudioRecorder = forwardRef<
         console.error("[AudioRecorder] Start error:", startError);
 
         // Try again without any mimeType (let browser choose)
-        console.log(
-          "[AudioRecorder] Attempting to recreate MediaRecorder without mimeType...",
-        );
-
         try {
           // Save event handlers before cleanup
           const handlers = {
@@ -568,10 +453,6 @@ export const AudioRecorder = forwardRef<
 
           // Create new MediaRecorder without any options
           const fallbackRecorder = new MediaRecorder(stream);
-          console.log(
-            "[AudioRecorder] Fallback MediaRecorder created with mimeType:",
-            fallbackRecorder.mimeType,
-          );
 
           // Re-attach saved event handlers
           fallbackRecorder.ondataavailable = handlers.ondataavailable;
@@ -585,13 +466,7 @@ export const AudioRecorder = forwardRef<
           mediaRecorderRef.current = fallbackRecorder;
 
           // Try to start the fallback recorder without timeslice
-          console.log(
-            "[AudioRecorder] Starting fallback MediaRecorder without timeslice...",
-          );
           fallbackRecorder.start();
-          console.log(
-            "[AudioRecorder] Fallback MediaRecorder started successfully",
-          );
         } catch (fallbackError: any) {
           console.error(
             "[AudioRecorder] Fallback MediaRecorder also failed:",
@@ -694,18 +569,10 @@ export const AudioRecorder = forwardRef<
   ]);
 
   const stopRecording = useCallback(() => {
-    console.log("[AudioRecorder] Stop button clicked");
-
     if (!mediaRecorderRef.current) {
       console.error("[AudioRecorder] No mediaRecorder found");
       return;
     }
-
-    console.log("[AudioRecorder] Stopping recording...");
-    console.log(
-      "[AudioRecorder] MediaRecorder state before stop:",
-      mediaRecorderRef.current.state,
-    );
 
     if (
       mediaRecorderRef.current.state === "recording" ||
@@ -717,24 +584,10 @@ export const AudioRecorder = forwardRef<
         ? pausedTimeRef.current
         : pausedTimeRef.current + (now - startTimeRef.current);
 
-      console.log("[AudioRecorder] Stop timing:", {
-        now,
-        startTime: startTimeRef.current,
-        pausedTime: pausedTimeRef.current,
-        elapsed: now - startTimeRef.current,
-        totalElapsed,
-        isPaused,
-      });
-
       // Cap the final elapsed time at maxDuration
       finalElapsedRef.current = Math.min(totalElapsed, maxDuration * 1000);
 
       const recordingDuration = Math.floor(finalElapsedRef.current / 1000);
-      console.log(
-        "[AudioRecorder] Recording duration on stop:",
-        recordingDuration,
-        "seconds",
-      );
 
       if (recordingDuration < 1) {
         console.warn(
@@ -747,14 +600,12 @@ export const AudioRecorder = forwardRef<
       }
 
       // Request any buffered data before stopping
-      console.log("[AudioRecorder] Requesting buffered data...");
       if (mediaRecorderRef.current.state === "recording") {
         mediaRecorderRef.current.requestData();
       }
 
       // Small delay to ensure data is flushed
       setTimeout(() => {
-        console.log("[AudioRecorder] Stopping MediaRecorder...");
         mediaRecorderRef.current!.stop();
         setIsRecording(false);
         setIsPaused(false);
@@ -854,12 +705,8 @@ export const AudioRecorder = forwardRef<
 
   const getCurrentRecording = useCallback(() => {
     if (mediaRecorderRef.current && chunksRef.current.length > 0) {
-      console.log("[AudioRecorder] Getting current recording...");
-      console.log("[AudioRecorder] Current chunks:", chunksRef.current.length);
-
       // Force MediaRecorder to flush any buffered data
       if (mediaRecorderRef.current.state === "recording") {
-        console.log("[AudioRecorder] Requesting data flush...");
         mediaRecorderRef.current.requestData();
       }
 
@@ -869,51 +716,28 @@ export const AudioRecorder = forwardRef<
         mimeTypeRef.current ||
         "audio/webm";
       const blob = new Blob(chunksRef.current, { type: blobType });
-      console.log(
-        "[AudioRecorder] Created blob from chunks - Size:",
-        blob.size,
-        "Type:",
-        blob.type,
-      );
       return blob;
     }
-    console.log("[AudioRecorder] No recording available");
     return null;
   }, []);
 
   const getCurrentPartialRecording = useCallback(() => {
-    console.log("[AudioRecorder] getCurrentPartialRecording called");
-    console.log("[AudioRecorder] MediaRecorder exists:", !!mediaRecorderRef.current);
-    console.log("[AudioRecorder] MediaRecorder state:", mediaRecorderRef.current?.state);
-    console.log("[AudioRecorder] Current chunks count:", chunksRef.current.length);
-    console.log("[AudioRecorder] Chunks sizes:", chunksRef.current.map(c => c.size));
-    
     if (!mediaRecorderRef.current) {
-      console.log("[AudioRecorder] No mediaRecorder available");
       return { blob: null, chunkCount: 0 };
     }
 
     // Request current data to flush buffered audio
-    if (mediaRecorderRef.current.state === "recording" || 
+    if (mediaRecorderRef.current.state === "recording" ||
         mediaRecorderRef.current.state === "paused") {
-      console.log("[AudioRecorder] State is", mediaRecorderRef.current.state, "- requesting data flush...");
       try {
         mediaRecorderRef.current.requestData();
-        console.log("[AudioRecorder] requestData() called successfully");
       } catch (error) {
         console.error("[AudioRecorder] Error calling requestData():", error);
       }
-    } else {
-      console.log("[AudioRecorder] Cannot request data, state is:", mediaRecorderRef.current.state);
     }
 
-    // Wait a bit for ondataavailable to fire
-    // In testing, requestData is sometimes async
-    console.log("[AudioRecorder] Checking chunks after requestData...");
-    
     // Even if no chunks yet, check if we have data
     if (chunksRef.current.length === 0) {
-      console.log("[AudioRecorder] Still no chunks available after requestData");
       return { blob: null, chunkCount: 0 };
     }
 
@@ -924,68 +748,41 @@ export const AudioRecorder = forwardRef<
       "audio/webm";
     const blob = new Blob(chunksRef.current, { type: blobType });
     const chunkCount = chunksRef.current.length;
-    
-    console.log(
-      "[AudioRecorder] Created partial blob - Size:",
-      blob.size,
-      "Type:",
-      blob.type,
-      "Chunk count:",
-      chunkCount
-    );
+
     return { blob, chunkCount };
   }, []);
 
   const getRemainingChunks = useCallback(() => {
-    console.log("[AudioRecorder] getRemainingChunks called");
-    console.log("[AudioRecorder] Total chunks:", chunksRef.current.length);
-    console.log("[AudioRecorder] Transcribed chunks count:", transcribedChunksCountRef.current);
-    console.log("[AudioRecorder] MediaRecorder exists:", !!mediaRecorderRef.current);
-    
     if (!mediaRecorderRef.current || chunksRef.current.length === 0) {
-      console.log("[AudioRecorder] No remaining chunks available - no mediaRecorder or no chunks");
       return null;
     }
-    
+
     const remaining = chunksRef.current.slice(transcribedChunksCountRef.current);
-    console.log("[AudioRecorder] Remaining chunks after slice:", remaining.length);
-    
+
     if (remaining.length === 0) {
-      console.log("[AudioRecorder] All chunks already transcribed");
       return null;
     }
-    
+
     const blobType =
       mediaRecorderRef.current.mimeType ||
       mimeTypeRef.current ||
       "audio/webm";
     const blob = new Blob(remaining, { type: blobType });
-    
-    console.log(
-      "[AudioRecorder] Created remaining chunks blob - Chunks:",
-      remaining.length,
-      "Size:",
-      blob.size,
-      "Type:",
-      blob.type
-    );
+
     return blob;
   }, []);
 
   const markChunksAsTranscribed = useCallback((count: number) => {
-    console.log("[AudioRecorder] Marking", count, "chunks as transcribed");
     transcribedChunksCountRef.current = count;
   }, []);
 
   // Comprehensive cleanup method
   const cleanup = useCallback(() => {
-    console.log("[AudioRecorder] Cleanup called");
     cancelledRef.current = true;
 
     // Stop and clean up MediaRecorder
     if (mediaRecorderRef.current) {
       const state = mediaRecorderRef.current.state;
-      console.log("[AudioRecorder] Cleaning up MediaRecorder, state:", state);
 
       // Remove event listeners to prevent callbacks
       mediaRecorderRef.current.ondataavailable = null;
@@ -1007,9 +804,7 @@ export const AudioRecorder = forwardRef<
 
     // Stop and clean up MediaStream
     if (mediaStream) {
-      console.log("[AudioRecorder] Stopping media stream tracks");
       mediaStream.getTracks().forEach((track) => {
-        console.log("[AudioRecorder] Stopping track:", track.kind, track.label);
         track.stop();
       });
       setMediaStream(undefined);
@@ -1035,8 +830,6 @@ export const AudioRecorder = forwardRef<
 
     // Clear chunks
     chunksRef.current = [];
-
-    console.log("[AudioRecorder] Cleanup complete");
   }, [mediaStream, cleanupSilenceDetection]);
 
   // Auto-start disabled due to React StrictMode conflicts
@@ -1045,15 +838,12 @@ export const AudioRecorder = forwardRef<
   // Cleanup on unmount only (not on every state change)
   useEffect(() => {
     return () => {
-      console.log("[AudioRecorder] Component unmounting, calling cleanup");
-
       // Inline cleanup to avoid dependency issues
       cancelledRef.current = true;
 
       // Stop and clean up MediaRecorder
       if (mediaRecorderRef.current) {
         const state = mediaRecorderRef.current.state;
-        console.log("[AudioRecorder] Cleaning up MediaRecorder, state:", state);
 
         // Remove event listeners to prevent callbacks
         mediaRecorderRef.current.ondataavailable = null;
@@ -1095,8 +885,6 @@ export const AudioRecorder = forwardRef<
         audioContextRef.current.close();
         audioContextRef.current = null;
       }
-
-      console.log("[AudioRecorder] Cleanup complete");
     };
   }, []); // No dependencies - only run on mount/unmount
 

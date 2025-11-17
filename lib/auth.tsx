@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // If "Remember Me" is disabled and this is a new browser session (sessionActive is missing)
       // then the user closed their browser and we should logout
       if (rememberMe === 'false' && !sessionActive) {
-        console.log('[Auth] Remember Me disabled - clearing session on browser reopen');
+        if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Auth] Remember Me disabled - clearing session on browser reopen');
         await supabase.auth.signOut();
         return;
       }
@@ -120,14 +120,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Backend now returns real Supabase session for all users
       if (data.session) {
-        console.log("[Auth] Backend returned Supabase session");
+        if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log("[Auth] Backend returned Supabase session");
       }
 
       return data;
     },
     onSuccess: async (data) => {
       if (data.session) {
-        console.log("[Auth] Successfully authenticated with Supabase");
+        if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log("[Auth] Successfully authenticated with Supabase");
         // Set the Supabase session - this works now because it's a real Supabase session
         await supabase.auth.setSession({
           access_token: data.session.access_token,
@@ -143,14 +143,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Poll for session availability before navigating
       // This ensures Supabase storage has been updated
-      console.log("[Auth] Waiting for session to be available in storage...");
+      if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log("[Auth] Waiting for session to be available in storage...");
       let sessionReady = false;
       for (let attempt = 0; attempt < 20; attempt++) {
         const {
           data: { session: checkSession },
         } = await supabase.auth.getSession();
         if (checkSession?.access_token) {
-          console.log(
+          if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log(
             `[Auth] Session confirmed available after ${attempt * 50}ms`,
           );
           sessionReady = true;
@@ -196,7 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Backend returns real Supabase session for new users
       if (data.session) {
-        console.log("[Auth] Backend returned Supabase session for new user");
+        if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log("[Auth] Backend returned Supabase session for new user");
       }
 
       return data;
@@ -204,7 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     onSuccess: async (data) => {
       // Check if email confirmation is required
       if (data.requiresEmailConfirmation) {
-        console.log("[Auth] Email confirmation required");
+        if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log("[Auth] Email confirmation required");
         // Store user data for later use
         queryClient.setQueryData(["/api/auth/pending-confirmation"], data);
         // Redirect to a page that shows "check your email" message with email param
@@ -214,7 +214,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data.session) {
-        console.log("[Auth] Successfully registered with Supabase");
+        if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log("[Auth] Successfully registered with Supabase");
         // Set the Supabase session - this works now because it's a real Supabase session
         await supabase.auth.setSession({
           access_token: data.session.access_token,
@@ -230,14 +230,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Poll for session availability before navigating
       // This ensures Supabase storage has been updated
-      console.log("[Auth] Waiting for session to be available in storage...");
+      if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log("[Auth] Waiting for session to be available in storage...");
       let sessionReady = false;
       for (let attempt = 0; attempt < 20; attempt++) {
         const {
           data: { session: checkSession },
         } = await supabase.auth.getSession();
         if (checkSession?.access_token) {
-          console.log(
+          if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log(
             `[Auth] Session confirmed available after ${attempt * 50}ms`,
           );
           sessionReady = true;
@@ -330,12 +330,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Memoize callbacks to prevent re-initialization of activity tracker
   const handleTimeout = useCallback(() => {
-    console.log('[Auth] Session timed out due to inactivity');
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Auth] Session timed out due to inactivity');
     logout();
   }, [logout]);
 
   const handleTimeoutLogout = useCallback(() => {
-    console.log('[Auth] User logged out from timeout warning');
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Auth] User logged out from timeout warning');
     logout();
   }, [logout]);
 
@@ -348,7 +348,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Handle continue session - use resetTimer directly to avoid recreating callback
   const handleContinueSession = useCallback(() => {
-    console.log('[Auth] User chose to continue session');
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Auth] User chose to continue session');
     activityTracker.resetTimer();
   }, [activityTracker.resetTimer]); // Only depend on the function, not the whole object
 

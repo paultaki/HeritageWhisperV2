@@ -218,8 +218,6 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
 
   // Background transcription
   const startBackgroundTranscription = useCallback(async (blob: Blob) => {
-    console.log("[useQuickRecorder] Starting background transcription");
-
     // Set status to processing
     setTranscriptionStatus('processing');
 
@@ -245,8 +243,6 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
       const data = await response.json();
       const transcription = data.transcription || "";
 
-      console.log("[useQuickRecorder] Background transcription complete:", transcription);
-
       // Set status to complete
       setTranscriptionStatus('complete');
 
@@ -269,7 +265,6 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
     } catch (error) {
       // Don't set error if request was aborted (user re-recorded)
       if (error instanceof Error && error.name === 'AbortError') {
-        console.log("[useQuickRecorder] Background transcription cancelled");
         setTranscriptionStatus('idle');
         return;
       }
@@ -288,7 +283,6 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
   // Handle recording completion - show audio review screen
   const handleRecordingComplete = useCallback(async () => {
     if (isRestarting) {
-      console.log("[useQuickRecorder] Restart in progress, skipping completion");
       return;
     }
 
@@ -303,17 +297,13 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
 
       // Use ref for current duration (more reliable than state closure)
       const currentDuration = durationRef.current;
-      console.log("[useQuickRecorder] Recording complete, showing review screen. Duration:", currentDuration, "seconds");
 
       // Show review screen (not processing yet)
       setState("review");
 
       // AUTO-START transcription if recording is >= 30 seconds
       if (currentDuration >= 30) {
-        console.log("[useQuickRecorder] ✅ Auto-starting background transcription (recording >= 30s)");
         startBackgroundTranscription(blob);
-      } else {
-        console.log("[useQuickRecorder] ⏭️ Recording < 30s, skipping auto-transcription");
       }
     } catch (error) {
       console.error("[useQuickRecorder] Error creating audio blob:", error);
@@ -329,8 +319,6 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
 
   // Handle continue from review - check if transcription is ready or still processing
   const continueFromReview = useCallback(async () => {
-    console.log("[useQuickRecorder] continueFromReview called - transcriptionStatus:", transcriptionStatus, "state:", state, "duration:", duration);
-
     if (!audioBlob) {
       console.error("[useQuickRecorder] No audio blob to process");
       return;
@@ -338,11 +326,9 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
 
     // Check if background transcription already completed
     const existingResult = sessionStorage.getItem('hw_transcription_result');
-    console.log("[useQuickRecorder] existingResult from sessionStorage:", existingResult ? "EXISTS" : "NULL");
 
     // PATH A: Transcription complete → Navigate with data
     if (existingResult && transcriptionStatus === 'complete') {
-      console.log("[useQuickRecorder] PATH A: Transcription complete! Navigating with data...");
 
       // Parse the result
       const { transcription, lessonOptions, formattedContent } = JSON.parse(existingResult);
@@ -363,14 +349,6 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
           useEnhanced: false, // Default to original
         });
 
-        console.log("[useQuickRecorder] NavCache populated with navId:", navId, {
-          hasTranscription: !!transcription,
-          transcriptionLength: transcription.length,
-          hasLessonOptions: !!lessonOptions,
-          hasDuration: !!duration,
-          hasAudioBlob: !!audioBlob,
-        });
-
         // Verify data was actually saved
         const verifyData = await navCache.get(navId);
         if (!verifyData) {
@@ -383,8 +361,6 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
           setState("review");
           return;
         }
-
-        console.log("[useQuickRecorder] NavCache verified successfully");
 
         // Cleanup sessionStorage
         sessionStorage.removeItem('hw_transcription_result');
@@ -413,13 +389,10 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
     }
 
     // PATH B: Transcription not complete → Show processing, don't navigate yet
-    console.log("[useQuickRecorder] PATH B: Transcription not ready, showing processing state");
-    console.log("[useQuickRecorder] Duration:", duration, "TranscriptionStatus:", transcriptionStatus);
     setState("processing");
 
     // For recordings < 30s, start transcription now
     if (duration < 30 && transcriptionStatus === 'idle') {
-      console.log("[useQuickRecorder] Starting transcription for short recording (<30s)...");
       setTranscriptionStatus('processing');
 
       // Start transcription API call (don't navigate, wait for completion)
@@ -440,8 +413,6 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
           const data = await response.json();
           const transcription = data.transcription || "";
 
-          console.log("[useQuickRecorder] Transcription complete:", transcription.substring(0, 100) + "...");
-
           // Set status to complete (this will trigger auto-navigation)
           setTranscriptionStatus('complete');
 
@@ -451,8 +422,6 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
             lessonOptions: data.lessonOptions,
             formattedContent: data.formattedContent,
           }));
-
-          console.log("[useQuickRecorder] Dispatching hw_transcription_complete event");
 
           // Dispatch event
           window.dispatchEvent(new CustomEvent('hw_transcription_complete', {
@@ -483,7 +452,6 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
 
     // For recordings >= 30s, transcription already running in background
     // Just wait for it to complete (status will change to 'complete')
-    console.log("[useQuickRecorder] Waiting for transcription to complete (will auto-navigate)...");
   }, [audioBlob, duration, transcriptionStatus, state, router, cleanup, options, toast]);
 
   // Cancel recording
@@ -522,7 +490,6 @@ export function useQuickRecorder(options: UseQuickRecorderOptions = {}) {
     if (transcriptionAbortControllerRef.current) {
       transcriptionAbortControllerRef.current.abort();
       transcriptionAbortControllerRef.current = null;
-      console.log("[useQuickRecorder] Cancelled in-flight transcription");
     }
 
     // Clear any cached transcription results

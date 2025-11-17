@@ -95,7 +95,6 @@ export default function InterviewChatPage() {
 
         // Auto-complete at 30 minutes (1800 seconds)
         if (elapsed >= 1800) {
-          console.log('[Session] 30-minute limit reached, auto-completing interview');
           handleCompleteInterview();
         }
       }, 1000);
@@ -193,7 +192,6 @@ export default function InterviewChatPage() {
     if (isRealtimeEnabled) {
       // In Realtime mode, transcripts are handled via handleTranscriptUpdate
       // This is just called to store the audio blob for archival
-      console.log('[InterviewChat] Realtime audio blob received:', audioBlob.size, 'bytes');
       return;
     }
 
@@ -214,12 +212,6 @@ export default function InterviewChatPage() {
     try {
       // Transcribe the COMPLETE audio blob (not sliced chunks)
       // Slicing WebM creates invalid audio files - we need the full blob with headers
-      console.log('[HandleAudioResponse] Transcribing complete audio:', {
-        size: audioBlob.size,
-        type: audioBlob.type,
-        duration
-      });
-
       const transcription = await transcribeChunk(audioBlob);
 
       // Update full transcript by appending this response
@@ -340,11 +332,6 @@ export default function InterviewChatPage() {
     // Use the blob directly with proper file extension
     formData.append('audio', audioBlob, `chunk.${extension}`);
 
-    console.log('[TranscribeChunk] Sending audio chunk:', {
-      size: audioBlob.size,
-      type: audioBlob.type,
-    });
-
     const response = await fetch('/api/interview-test/transcribe-chunk', {
       method: 'POST',
       body: formData,
@@ -361,9 +348,6 @@ export default function InterviewChatPage() {
     }
 
     const data = await response.json();
-    console.log('[TranscribeChunk] Success:', {
-      transcriptionLength: data.transcription?.length || 0,
-    });
     return data.transcription;
   };
 
@@ -466,15 +450,11 @@ export default function InterviewChatPage() {
 
   // Complete interview and redirect to post-recording flow prototype
   const handleCompleteInterview = async () => {
-    console.log('🎬 [Interview] handleCompleteInterview called');
-
     try {
       // Require at least one Q&A exchange
       const userResponses = messages.filter(m =>
         m.type === 'audio-response' || m.type === 'text-response'
       );
-
-      console.log('📊 [Interview] User responses:', userResponses.length);
 
       if (userResponses.length === 0) {
         alert('Please answer at least one question before completing the interview.');
@@ -487,28 +467,20 @@ export default function InterviewChatPage() {
         'You\'ll be taken to review and finalize your story.'
       );
 
-      console.log('✅ [Interview] User confirmed:', confirmComplete);
-
       if (!confirmComplete) return;
 
       // Extract Q&A pairs from messages
-      console.log('🔍 [Interview] Extracting Q&A pairs from', messages.length, 'messages');
       const qaPairs = extractQAPairs(messages);
-      console.log('📝 [Interview] Extracted Q&A pairs:', qaPairs.length);
 
       // Collect all audio blobs (if any)
       const audioBlobs = messages
         .filter(m => m.audioBlob)
         .map(m => m.audioBlob as Blob);
 
-      console.log('🎵 [Interview] Audio blobs found:', audioBlobs.length);
-
       // Combine audio blobs if multiple
       let combinedAudio: Blob | null = null;
       if (audioBlobs.length > 0) {
-        console.log('🔄 [Interview] Combining audio blobs...');
         combinedAudio = await combineAudioBlobs(audioBlobs);
-        console.log('✅ [Interview] Audio combined:', combinedAudio?.size, 'bytes');
       }
 
       // Calculate total duration
@@ -516,19 +488,13 @@ export default function InterviewChatPage() {
         .filter(m => m.audioDuration)
         .reduce((sum, m) => sum + (m.audioDuration || 0), 0);
 
-      console.log('⏱️  [Interview] Total duration:', totalDuration, 'seconds');
-      console.log('📄 [Interview] Full transcript length:', audioState.fullTranscript?.length || 0);
-
       // Complete conversation and redirect
-      console.log('🚀 [Interview] Calling completeConversationAndRedirect...');
       await completeConversationAndRedirect({
         qaPairs,
         audioBlob: combinedAudio,
         fullTranscript: audioState.fullTranscript,
         totalDuration,
       });
-
-      console.log('✅ [Interview] completeConversationAndRedirect finished');
 
       // Stop recording state when interview is completed
       stopRecording();

@@ -138,45 +138,16 @@ export async function POST(
 
         if (emailError) {
           console.error('Error sending email:', emailError);
-          // Still log to console as fallback
-          console.log('=== RESEND FAMILY INVITE (Email failed, console backup) ===');
-          console.log('To:', member.email);
-          console.log('From:', senderName);
-          console.log('Link:', inviteUrl);
-          console.log('Expires:', expiresAt.toISOString());
-          console.log('=============================================================');
-        } else {
-          console.log('✅ Family invite email resent:', emailData?.id);
-          // Also log in development
-          if (process.env.NODE_ENV === 'development') {
-            console.log('=== RESEND FAMILY INVITE (Email sent) ===');
-            console.log('To:', member.email);
-            console.log('Link:', inviteUrl);
-            console.log('==========================================');
-          }
         }
       } else {
-        // No Resend API key - log to console only
-        console.log('=== RESEND FAMILY INVITE (No Resend API key, console only) ===');
-        console.log('To:', member.email);
-        console.log('From:', senderName);
-        console.log('Link:', inviteUrl);
-        console.log('Expires:', expiresAt.toISOString());
-        console.log('===============================================================');
+        // No Resend API key configured - email will not be sent
+        console.error('Resend API key not configured - cannot send email');
       }
     } catch (emailError) {
       console.error('Exception sending email:', emailError);
-      // Fallback to console
-      console.log('=== RESEND FAMILY INVITE (Exception, console backup) ===');
-      console.log('To:', member.email);
-      console.log('From:', senderName);
-      console.log('Link:', inviteUrl);
-      console.log('Expires:', expiresAt.toISOString());
-      console.log('=========================================================');
     }
 
     // Log invite_resent activity event (async, non-blocking)
-    console.log('[Family Resend] Logging invite_resent activity for:', member.email);
     logActivityEvent({
       userId: user.id,
       actorId: user.id,
@@ -188,10 +159,8 @@ export async function POST(
         relationship: member.relationship,
         status: member.status,
       },
-    }).then((result) => {
-      console.log('[Family Resend] ✅ Activity logged:', result);
     }).catch((error) => {
-      console.error('[Family Resend] ❌ Failed to log invite_resent activity:', error);
+      console.error('[Family Resend] Failed to log invite_resent activity:', error);
     });
 
     return NextResponse.json({

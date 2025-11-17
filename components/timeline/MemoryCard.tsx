@@ -419,7 +419,9 @@ export const MemoryCard = React.memo(
           style={{
             "--title-offset": "22px",
             border: "1.5px solid #B89B8D",
-            background: "white"
+            background: "white",
+            maxWidth: "100%",
+            width: "100%"
           } as React.CSSProperties}
           onClick={handleCardClick}
           data-testid={`memory-card-${story.id}`}
@@ -441,8 +443,8 @@ export const MemoryCard = React.memo(
           </span>
 
           {/* Compact pill layout - no photo placeholder */}
-          <div className="px-4 py-4 md:px-5 md:py-5">
-            <div className="flex items-center gap-3">
+          <div className="px-3 py-4 md:px-5 md:py-5 max-w-full overflow-hidden">
+            <div className="flex items-center gap-2 md:gap-3 w-full min-w-0">
               {/* Left: Icon badge */}
               <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
                 <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center">
@@ -460,8 +462,8 @@ export const MemoryCard = React.memo(
               </div>
 
               {/* Middle: Title + metadata + snippet */}
-              <div className="flex-1 min-w-0">
-                <h3 className="text-[19px] tracking-tight font-semibold text-stone-900 mb-1 truncate">
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <h3 className="text-[19px] tracking-tight font-semibold text-stone-900 mb-1 truncate w-full">
                   {story.title}
                 </h3>
 
@@ -489,7 +491,7 @@ export const MemoryCard = React.memo(
 
                 {/* Snippet - first line of transcription or story text */}
                 {hasText && (
-                  <p className="text-sm text-stone-600 truncate italic">
+                  <p className="text-sm text-stone-600 truncate italic w-full">
                     {(story.transcription || story.storyText || "").substring(0, 100)}...
                   </p>
                 )}
@@ -517,11 +519,11 @@ export const MemoryCard = React.memo(
                   </button>
                 ) : (
                   <button
-                    className="px-4 py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold flex items-center gap-1.5 transition-colors"
+                    className="w-11 h-11 md:w-auto md:h-auto md:px-4 md:py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold flex items-center justify-center md:gap-1.5 transition-colors"
                     aria-label="Read story"
                   >
-                    <span>Read</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <span className="hidden md:inline">Read</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>

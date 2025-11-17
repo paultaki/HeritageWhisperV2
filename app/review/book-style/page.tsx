@@ -89,8 +89,6 @@ function BookStyleReviewContent() {
   const [storyNotFound, setStoryNotFound] = useState(false);
 
   const handleAudioChange = (url: string | null, blob?: Blob | null) => {
-    console.log("[handleAudioChange] Setting audio URL:", url);
-    console.log("[handleAudioChange] Setting audio blob:", !!blob);
     setAudioUrl(url);
     if (blob) {
       setMainAudioBlob(blob);
@@ -103,24 +101,18 @@ function BookStyleReviewContent() {
 
       // Don't fetch if auth is still loading or user is not available
       if (isAuthLoading || !user) {
-        console.log("[Edit Mode] Waiting for auth to load...");
         return;
       }
 
       setIsLoading(true);
       try {
-        console.log("[Edit Mode] Fetching story data for ID:", editId);
-        console.log("[Edit Mode] User authenticated:", user.id);
-
         // Set returnPath from URL if provided
         if (urlReturnPath) {
           setReturnPath(urlReturnPath);
-          console.log("[Edit Mode] Return path set to:", urlReturnPath);
         }
 
         const response = await apiRequest("GET", `/api/stories/${editId}`);
         const { story } = await response.json();
-        console.log("[Edit Mode] Received story data:", story);
 
         // Populate form with existing story data
         setTitle(story.title || "");
@@ -143,10 +135,8 @@ function BookStyleReviewContent() {
 
         // Handle photos
         if (story.photos && Array.isArray(story.photos)) {
-          console.log("[Edit Mode] Setting photos from API:", story.photos);
           setPhotos(story.photos);
         } else if (story.photoUrl) {
-          console.log("[Edit Mode] Setting legacy photo:", story.photoUrl);
           setPhotos([
             {
               id: "legacy",
@@ -154,8 +144,6 @@ function BookStyleReviewContent() {
               transform: story.photoTransform,
             },
           ]);
-        } else {
-          console.log("[Edit Mode] No photos found in story");
         }
       } catch (error) {
         console.error("Failed to fetch story:", error);
@@ -196,24 +184,10 @@ function BookStyleReviewContent() {
       // SKIP this if wizard mode OR transcription-select mode - they handle their own NavCache loading
       const navId = searchParams.get("nav");
       if (navId) {
-        console.log("[Review] Loading from NavCache with ID:", navId);
         const rawCached = navCache.get(navId); // Use get instead of consume for now
         const cachedData = rawCached as NavPayloadExtended;
 
         if (cachedData) {
-          console.log("[Review] NavCache data retrieved:", {
-            hasTranscription: !!cachedData.transcription,
-            hasOriginalTranscript: !!cachedData.originalTranscript,
-            hasEnhancedTranscript: !!cachedData.enhancedTranscript,
-            useEnhanced: cachedData.useEnhanced,
-            transcriptionLength: cachedData.transcription?.length,
-            hasMainAudioBase64: !!cachedData.mainAudioBase64,
-            base64Length: cachedData.mainAudioBase64?.length,
-            hasTitle: !!cachedData.title,
-            hasYear: !!cachedData.storyYear,
-            returnPath: cachedData.returnPath,
-            allKeys: Object.keys(cachedData),
-          });
 
           // For edit mode coming from transcription selection, use the selected transcript
           if (mode === "edit") {
@@ -221,9 +195,6 @@ function BookStyleReviewContent() {
               ? (cachedData.enhancedTranscript || cachedData.originalTranscript || cachedData.transcription || "")
               : (cachedData.originalTranscript || cachedData.transcription || "")) as string;
 
-            console.log("[Review] Edit mode - using", cachedData.useEnhanced ? "enhanced" : "original", "transcript");
-            console.log("[Review] Selected transcript length:", selectedTranscript?.length);
-            console.log("[Review] Selected transcript preview:", selectedTranscript?.substring(0, 100));
             setTranscription(selectedTranscript);
 
             // Load audio blob if available
@@ -231,38 +202,29 @@ function BookStyleReviewContent() {
               const url = URL.createObjectURL(cachedData.audioBlob);
               setMainAudioBlob(cachedData.audioBlob);
               setAudioUrl(url);
-              console.log("[Review] Audio blob loaded from cache, size:", cachedData.audioBlob.size);
-            } else {
-              console.log("[Review] No audio blob in cache");
             }
 
             // Set duration
             if (cachedData.duration) {
               setAudioDuration(cachedData.duration);
-              console.log("[Review] Audio duration from cache:", cachedData.duration, "seconds");
             }
 
             // Load photos if available
             if (cachedData.photos && Array.isArray(cachedData.photos)) {
-              console.log("[Review] Loading photos from cache:", cachedData.photos);
               setPhotos(cachedData.photos);
             }
 
             // Load lesson options if available
             if (cachedData.lessonLearned) {
-              console.log("[Review] Loading lessonLearned from cache:", cachedData.lessonLearned);
               setWisdomText(cachedData.lessonLearned);
             } else if (cachedData.lessonOptions?.practical) {
-              console.log("[Review] Loading lessonOptions.practical from cache:", cachedData.lessonOptions.practical);
               setWisdomText(cachedData.lessonOptions.practical);
             } else if (cachedData.wisdomClipText) {
-              console.log("[Review] Loading wisdomClipText from cache:", cachedData.wisdomClipText);
               setWisdomText(cachedData.wisdomClipText);
             }
 
             // Load title if available
             if (cachedData.title) {
-              console.log("[Review] Loading title from cache:", cachedData.title);
               setTitle(cachedData.title);
             }
 
@@ -287,10 +249,7 @@ function BookStyleReviewContent() {
           if (cachedData.wisdomClipText || cachedData.wisdomTranscription) {
             const wisdom =
               cachedData.wisdomClipText || cachedData.wisdomTranscription || "";
-            console.log("[Review] Setting wisdom text from NavCache:", wisdom);
             setWisdomText(wisdom);
-          } else {
-            console.log("[Review] No wisdom text found in NavCache");
           }
           if (cachedData.returnPath) {
             setReturnPath(cachedData.returnPath);
@@ -298,7 +257,6 @@ function BookStyleReviewContent() {
 
           // Handle audio - convert base64 back to blob if available
           if (cachedData.mainAudioBase64 && cachedData.mainAudioType) {
-            console.log("[Review] Converting base64 audio to blob");
             try {
               const binaryString = atob(cachedData.mainAudioBase64);
               const bytes = new Uint8Array(binaryString.length);
@@ -311,18 +269,16 @@ function BookStyleReviewContent() {
               const url = URL.createObjectURL(blob);
               setMainAudioBlob(blob);
               setAudioUrl(url);
-              console.log("[Review] Audio blob created, size:", blob.size);
             } catch (err) {
               console.error("[Review] Failed to convert base64 to blob:", err);
             }
           } else if (cachedData.audioUrl) {
             setAudioUrl(cachedData.audioUrl);
           }
-          
+
           // Set audio duration from cache if available
           if (cachedData.audioDuration) {
             setAudioDuration(cachedData.audioDuration);
-            console.log("[Review] Audio duration from cache:", cachedData.audioDuration, "seconds");
           }
 
           return; // Data loaded from cache, skip other sources
@@ -408,10 +364,6 @@ function BookStyleReviewContent() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      console.log("Starting save mutation...");
-      console.log("[SAVE DEBUG] User ID:", user?.id);
-      console.log("[SAVE DEBUG] Edit ID:", editId);
-      console.log("[SAVE DEBUG] Is Editing:", isEditing);
 
       // Calculate age at the time of the story
       const age =
@@ -421,9 +373,6 @@ function BookStyleReviewContent() {
 
       // Get source prompt ID if this story was triggered by a prompt
       const sourcePromptId = sessionStorage.getItem("activePromptId");
-      if (sourcePromptId) {
-        console.log("Story triggered by prompt:", sourcePromptId);
-      }
 
       // For NEW stories with blob photos or audio, we need to create the story first, then upload media
       const hasNewPhotos =
@@ -431,17 +380,9 @@ function BookStyleReviewContent() {
       const hasNewAudio = mainAudioBlob && audioUrl?.startsWith("blob:");
 
       if (!isEditing && (hasNewPhotos || hasNewAudio)) {
-        console.log("=== NEW STORY WITH MEDIA ===");
-        console.log(
-          "Photos with blob URLs:",
-          photos.filter((p) => p.url?.startsWith("blob:")).length,
-        );
-        console.log("Has audio blob:", !!hasNewAudio);
-
         // Calculate actual audio duration from blob if needed
         let actualDuration = audioDuration;
         if (hasNewAudio && mainAudioBlob && (!actualDuration || actualDuration < 1)) {
-          console.log("Calculating audio duration from blob...");
           try {
             const audioBlobUrl = URL.createObjectURL(mainAudioBlob);
             const audio = new Audio(audioBlobUrl);
@@ -450,7 +391,6 @@ function BookStyleReviewContent() {
             await new Promise((resolve, reject) => {
               audio.addEventListener('loadedmetadata', () => {
                 actualDuration = Math.round(audio.duration);
-                console.log("Calculated audio duration:", actualDuration, "seconds");
                 URL.revokeObjectURL(audioBlobUrl);
                 resolve(actualDuration);
               });
@@ -501,7 +441,6 @@ function BookStyleReviewContent() {
           tempStoryData.storyDate = storyDate;
         }
 
-        console.log("Creating story first...");
         const createResponse = await apiRequest(
           "POST",
           "/api/stories",
@@ -514,28 +453,13 @@ function BookStyleReviewContent() {
 
         const { story: createdStory } = await createResponse.json();
         const newStoryId = createdStory.id;
-        console.log("Story created with ID:", newStoryId);
 
         let finalAudioUrl = null;
 
         // Step 2: Upload audio if available
         if (hasNewAudio) {
-          console.log("Uploading audio...", {
-            isFile: mainAudioBlob instanceof File,
-            type: mainAudioBlob?.type,
-            size: mainAudioBlob?.size,
-          });
           try {
             const formData = new FormData();
-
-            // Debug logging
-            console.log("Creating FormData for audio upload:", {
-              isFile: mainAudioBlob instanceof File,
-              isBlob: mainAudioBlob instanceof Blob,
-              type: mainAudioBlob?.type,
-              size: mainAudioBlob?.size,
-              name: mainAudioBlob instanceof File ? mainAudioBlob.name : "N/A",
-            });
 
             // If it's a File object, it has its own name and type
             if (mainAudioBlob instanceof File) {
@@ -563,7 +487,6 @@ function BookStyleReviewContent() {
             if (uploadResponse.ok) {
               const { url } = await uploadResponse.json();
               finalAudioUrl = url;
-              console.log("✅ Audio uploaded successfully:", url);
             } else {
               console.error("Audio upload failed:", uploadResponse.status);
               const error = await uploadResponse.text();
@@ -575,25 +498,12 @@ function BookStyleReviewContent() {
         }
 
         // Step 3: Upload photos if available
-        console.log("=== PHOTO UPLOAD DEBUG ===");
-        console.log("Total photos in array:", photos.length);
-
         for (let i = 0; i < photos.length; i++) {
           const photo = photos[i];
           const pendingFile = photo.file || (window as any)[`__pendingPhotoFile_${i}`];
 
-          console.log(`Photo ${i}:`, {
-            hasPhoto: !!photo,
-            photoUrl: photo?.url,
-            hasPendingFile: !!pendingFile,
-            hasPhotoFile: !!photo.file,
-            isBlobUrl: photo?.url?.startsWith("blob:"),
-            pendingFileName: pendingFile?.name,
-          });
-
           if (pendingFile && photo.url?.startsWith("blob:")) {
             try {
-              console.log(`✅ Uploading photo ${i} to permanent storage...`);
               const fileExtension = pendingFile.name.split(".").pop() || "jpg";
 
               // Get upload URL
@@ -612,10 +522,6 @@ function BookStyleReviewContent() {
               }
 
               const { uploadURL, filePath } = await uploadUrlResponse.json();
-              console.log(`Got upload URL for photo ${i}:`, {
-                uploadURL,
-                filePath,
-              });
 
               // Upload file to storage
               const uploadResponse = await fetch(uploadURL, {
@@ -626,12 +532,6 @@ function BookStyleReviewContent() {
                     pendingFile.type || "application/octet-stream",
                 },
               });
-
-              console.log(
-                `Upload response for photo ${i}:`,
-                uploadResponse.status,
-                uploadResponse.statusText,
-              );
 
               if (!uploadResponse.ok) {
                 const errorText = await uploadResponse.text();
@@ -644,10 +544,6 @@ function BookStyleReviewContent() {
                 );
               }
 
-              console.log(
-                `Photo ${i} uploaded to storage successfully, now adding to story metadata...`,
-              );
-
               // Add photo to story using the API
               const addPhotoResponse = await apiRequest(
                 "POST",
@@ -659,13 +555,7 @@ function BookStyleReviewContent() {
                 },
               );
 
-              if (addPhotoResponse.ok) {
-                const photoResult = await addPhotoResponse.json();
-                console.log(
-                  `✅ Photo ${i} added successfully to story metadata:`,
-                  photoResult,
-                );
-              } else {
+              if (!addPhotoResponse.ok) {
                 const errorText = await addPhotoResponse.text();
                 console.error(
                   `Failed to add photo ${i} to story:`,
@@ -685,7 +575,6 @@ function BookStyleReviewContent() {
 
         // Step 4: Update story with audio URL if uploaded
         if (finalAudioUrl) {
-          console.log("Updating story with audio URL:", finalAudioUrl);
           // IMPORTANT: Only update the audioUrl field, don't overwrite entire metadata
           const updateResponse = await apiRequest(
             "GET",
@@ -693,10 +582,6 @@ function BookStyleReviewContent() {
           );
           if (updateResponse.ok) {
             const { story: currentStory } = await updateResponse.json();
-            console.log(
-              "[Audio Update] Current story before audio update:",
-              currentStory,
-            );
 
             // Use current story data and only update the audioUrl
             await apiRequest("PUT", `/api/stories/${newStoryId}`, {
@@ -712,9 +597,6 @@ function BookStyleReviewContent() {
               audioUrl: finalAudioUrl, // THIS is the only field we're updating
               photos: currentStory.photos || [],
             });
-            console.log(
-              "[Audio Update] Story updated with audio URL, photos preserved",
-            );
           }
         }
 
@@ -724,33 +606,14 @@ function BookStyleReviewContent() {
       // For EDITING or stories without new media, use standard save
       let finalAudioUrl = audioUrl;
       if (mainAudioBlob && audioUrl?.startsWith("blob:")) {
-        console.log("Uploading audio blob...", {
-          isFile: mainAudioBlob instanceof File,
-          type: mainAudioBlob.type,
-          size: mainAudioBlob.size,
-        });
         try {
           const formData = new FormData();
-
-          // Debug logging
-          console.log("Creating FormData for audio upload (edit mode):", {
-            isFile: mainAudioBlob instanceof File,
-            isBlob: mainAudioBlob instanceof Blob,
-            type: mainAudioBlob.type,
-            size: mainAudioBlob.size,
-            name: mainAudioBlob instanceof File ? mainAudioBlob.name : "N/A",
-          });
 
           // CRITICAL FIX: Ensure the blob has a proper MIME type
           let audioToUpload = mainAudioBlob;
 
           // If the blob doesn't have a type or it's text/plain, we need to fix it
           if (!mainAudioBlob.type || mainAudioBlob.type.startsWith("text/")) {
-            console.warn(
-              "Audio blob has invalid MIME type, attempting to fix:",
-              mainAudioBlob.type,
-            );
-
             // Try to determine the correct MIME type from the filename if it's a File
             let mimeType = "audio/webm"; // default fallback
             if (mainAudioBlob instanceof File) {
@@ -767,7 +630,6 @@ function BookStyleReviewContent() {
 
             // Create a new blob with the correct MIME type
             audioToUpload = new Blob([mainAudioBlob], { type: mimeType });
-            console.log("Fixed audio blob MIME type to:", mimeType);
           }
 
           // If it's a File object, it has its own name and type
@@ -796,7 +658,6 @@ function BookStyleReviewContent() {
           if (uploadResponse.ok) {
             const { url } = await uploadResponse.json();
             finalAudioUrl = url;
-            console.log("Audio uploaded successfully:", url);
           } else {
             console.error("Audio upload failed:", uploadResponse.status);
             const error = await uploadResponse.text();
@@ -808,25 +669,15 @@ function BookStyleReviewContent() {
       }
 
       // Upload blob photos before saving
-      console.log("=== EDIT MODE PHOTO UPLOAD ===");
       const finalPhotos = [];
 
       for (let i = 0; i < photos.length; i++) {
         const photo = photos[i];
         const pendingFile = photo.file || (window as any)[`__pendingPhotoFile_${i}`];
 
-        console.log(`Photo ${i}:`, {
-          hasPhoto: !!photo,
-          photoUrl: photo?.url,
-          isBlobUrl: photo?.url?.startsWith("blob:"),
-          hasPendingFile: !!pendingFile,
-          hasPhotoFile: !!photo.file,
-        });
-
         // If it's a blob URL, upload it first
         if (photo.url?.startsWith("blob:") && pendingFile) {
           try {
-            console.log(`Uploading blob photo ${i} to storage...`);
             const fileExtension = pendingFile.name.split(".").pop() || "jpg";
 
             // Get upload URL
@@ -861,8 +712,6 @@ function BookStyleReviewContent() {
               );
             }
 
-            console.log(`Photo ${i} uploaded successfully, adding to story...`);
-
             // Add photo to story using the API
             const photoResponse = await apiRequest(
               "POST",
@@ -880,7 +729,6 @@ function BookStyleReviewContent() {
             if (photoResponse.ok) {
               const { photo: savedPhoto } = await photoResponse.json();
               finalPhotos.push(savedPhoto);
-              console.log(`Photo ${i} saved to story metadata`);
             }
 
             // Clean up
@@ -927,17 +775,8 @@ function BookStyleReviewContent() {
         storyData.storyDate = storyDate;
       }
 
-      console.log("Saving story with data:", storyData);
-      console.log("[SAVE DEBUG] audioUrl state:", audioUrl);
-      console.log("[SAVE DEBUG] finalAudioUrl:", finalAudioUrl);
-      console.log("[SAVE DEBUG] mainAudioBlob:", !!mainAudioBlob);
-
       const url = isEditing ? `/api/stories/${editId}` : "/api/stories";
       const method = isEditing ? "PUT" : "POST";
-
-      console.log("[SAVE DEBUG] Request URL:", url);
-      console.log("[SAVE DEBUG] Request Method:", method);
-      console.log("[SAVE DEBUG] Story Data Keys:", Object.keys(storyData));
 
       const response = await apiRequest(method, url, storyData);
 
@@ -1017,13 +856,6 @@ function BookStyleReviewContent() {
   });
 
   const handleSave = async () => {
-    console.log("Save button clicked!");
-    console.log("Current data:", {
-      title,
-      storyYear,
-      transcription: transcription?.substring(0, 50),
-    });
-
     // Check for authentication first
     const { supabase } = await import("@/lib/supabase");
     const {
@@ -1049,7 +881,6 @@ function BookStyleReviewContent() {
       return;
     }
 
-    console.log("Calling saveMutation.mutate()");
     saveMutation.mutate();
   };
 
@@ -1142,7 +973,6 @@ function BookStyleReviewContent() {
 
   // Transcription Selection Mode: Choose original vs enhanced
   if (isTranscriptionSelectMode && navId) {
-    console.log("[Transcription Select Mode] Loading data from NavCache with ID:", navId);
     const rawCached = navCache.get(navId);
     const cachedData = rawCached as NavPayloadExtended;
 
@@ -1159,16 +989,8 @@ function BookStyleReviewContent() {
     }
 
     const handleTranscriptionSelect = async (useEnhanced: boolean) => {
-      console.log("[Transcription Select] User selected:", useEnhanced ? "enhanced" : "original");
-
       // Get the actual transcription text (it should be in originalTranscript or rawTranscript)
       const transcriptionText = (cachedData.originalTranscript || cachedData.rawTranscript || "") as string;
-      
-      console.log("[Transcription Select] Available transcription:", {
-        originalTranscript: (cachedData.originalTranscript as string)?.substring(0, 50),
-        rawTranscript: (cachedData.rawTranscript as string)?.substring(0, 50),
-        enhancedTranscript: (cachedData.enhancedTranscript as string)?.substring(0, 50),
-      });
 
       // Update cached data with selection and ensure transcription is set
       const updatedData = {
@@ -1178,12 +1000,6 @@ function BookStyleReviewContent() {
         enhancedTranscript: transcriptionText, // For now, both are the same
         selectedTranscript: transcriptionText,
       };
-
-      console.log("[Transcription Select] Saving to cache:", {
-        hasOriginalTranscript: !!updatedData.originalTranscript,
-        hasEnhancedTranscript: !!updatedData.enhancedTranscript,
-        textLength: transcriptionText.length,
-      });
 
       // Save back to cache
       await navCache.set(navId, updatedData);
@@ -1217,7 +1033,6 @@ function BookStyleReviewContent() {
 
   // Wizard Mode: New recording flow (DEPRECATED - keeping for backward compatibility)
   if (isWizardMode && navId) {
-    console.log("[Wizard Mode] Loading data from NavCache with ID:", navId);
     const rawCached = navCache.get(navId);
     const cachedData = rawCached as NavPayloadExtended;
 
@@ -1225,8 +1040,6 @@ function BookStyleReviewContent() {
       // Error handling moved to useEffect to avoid render-time state updates
       return null;
     }
-
-    console.log("[Wizard Mode] NavCache data retrieved:", cachedData);
 
     // Prepare RecordingSession from cached data
     const recording: RecordingSession = {
@@ -1244,7 +1057,6 @@ function BookStyleReviewContent() {
     // If we have Q&A pairs and no enhanced transcript yet, we'll enhance it on the fly
     // This happens asynchronously in the wizard component
     if (cachedData.mode === "conversation" && cachedData.qaPairs && !cachedData.enhancedTranscript) {
-      console.log("[Wizard Mode] Conversation mode detected, enhancement will be done in wizard");
       enhancedTranscript = cachedData.rawTranscript || ""; // Start with raw, will enhance in component
     }
 
@@ -1263,7 +1075,6 @@ function BookStyleReviewContent() {
     };
 
     const handleWizardComplete = () => {
-      console.log("[Wizard Mode] Story saved successfully");
       // NavCache will be consumed by the wizard's submitStory
       router.push("/timeline");
     };

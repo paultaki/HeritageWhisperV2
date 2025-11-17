@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('[AvailableAccounts] Fetching collaborations for user:', user.id);
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[AvailableAccounts] Fetching collaborations for user:', user.id);
 
     // Use the RPC function to get available storytellers
     const { data: storytellers, error: rpcError } = await supabaseAdmin.rpc(
@@ -59,8 +59,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('[AvailableAccounts] Found', storytellers?.length || 0, 'storytellers');
-    console.log('[AvailableAccounts] Raw storyteller data:', JSON.stringify(storytellers, null, 2));
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+      console.log('[AvailableAccounts] Found', storytellers?.length || 0, 'storytellers');
+    }
 
     // Map database snake_case to camelCase for frontend
     const mappedStorytellers = (storytellers || []).map((st: any) => ({

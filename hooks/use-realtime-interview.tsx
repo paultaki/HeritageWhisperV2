@@ -117,14 +117,11 @@ export function useRealtimeInterview() {
 
         // Final transcript (lock to black, trigger follow-up)
         onTranscriptFinal: (text) => {
-          console.log('[RealtimeInterview] Final transcript:', text);
           setProvisionalTranscript(''); // Clear provisional
           onTranscriptFinal(text);
 
           // After user transcript arrives, flush any buffered Pearl response immediately
           if (pendingAssistantResponseRef.current) {
-            console.log('[RealtimeInterview] Flushing buffered Pearl response:', pendingAssistantResponseRef.current);
-
             // Show response immediately (no artificial delay)
             if (onAssistantResponse) {
               onAssistantResponse(pendingAssistantResponseRef.current);
@@ -138,12 +135,8 @@ export function useRealtimeInterview() {
         onAssistantAudio: (stream) => {
           // Play audio if voice enabled
           if (voiceEnabled) {
-            console.log('[RealtimeInterview] Playing assistant audio, voice enabled:', voiceEnabled);
-
             // Only create audio element ONCE per session (not per response)
             if (!audioElementRef.current) {
-              console.log('[RealtimeInterview] Creating audio element for session');
-
               // Create and configure audio element
               const audio = document.createElement('audio');
               audio.autoplay = true;
@@ -155,81 +148,31 @@ export function useRealtimeInterview() {
               audio.style.display = 'none';
               audio.id = 'pearl-audio-element';
               document.body.appendChild(audio);
-              console.log('[RealtimeInterview] Audio element added to DOM');
 
               // Add event listeners for debugging
-              audio.addEventListener('playing', () => {
-                console.log('[RealtimeInterview] 🔊 Audio is PLAYING');
-              });
-              audio.addEventListener('pause', () => {
-                console.log('[RealtimeInterview] ⏸️ Audio PAUSED');
-              });
-              audio.addEventListener('ended', () => {
-                console.log('[RealtimeInterview] ⏹️ Audio ENDED');
-              });
               audio.addEventListener('error', (e) => {
                 console.error('[RealtimeInterview] ❌ Audio ERROR:', e);
               });
-              audio.addEventListener('loadedmetadata', () => {
-                console.log('[RealtimeInterview] 📊 Audio metadata loaded, duration:', audio.duration);
-              });
-              audio.addEventListener('canplay', () => {
-                console.log('[RealtimeInterview] ✅ Audio can play');
-              });
-
-              // Log stream details for debugging
-              console.log('[RealtimeInterview] Stream active:', stream.active);
-              console.log('[RealtimeInterview] Audio tracks:', stream.getAudioTracks().map(t => ({
-                id: t.id,
-                enabled: t.enabled,
-                muted: t.muted,
-                readyState: t.readyState
-              })));
 
               // Check if setSinkId is available (Chrome/Edge only)
               if ('setSinkId' in audio) {
-                console.log('[RealtimeInterview] Checking audio output devices...');
                 navigator.mediaDevices.enumerateDevices().then(devices => {
                   const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
-                  console.log('[RealtimeInterview] Available audio outputs:', audioOutputs.map(d => ({
-                    deviceId: d.deviceId,
-                    label: d.label,
-                    groupId: d.groupId
-                  })));
 
                   // Try to set default audio output
                   if (audioOutputs.length > 0) {
                     (audio as any).setSinkId('').then(() => {
-                      console.log('[RealtimeInterview] Audio output set to default device');
+                      // Audio output set to default device
                     }).catch((err: any) => {
                       console.error('[RealtimeInterview] Failed to set audio output:', err);
                     });
                   }
                 });
-              } else {
-                console.log('[RealtimeInterview] setSinkId not supported (Firefox/Safari)');
               }
 
               // Explicitly call play() - autoplay might be blocked by browser
               audio.play().then(() => {
-                console.log('[RealtimeInterview] ✅ Audio playback started successfully');
-                console.log('[RealtimeInterview] Audio element state:', {
-                  paused: audio.paused,
-                  muted: audio.muted,
-                  volume: audio.volume,
-                  readyState: audio.readyState
-                });
-
-                // Double-check stream tracks are enabled
-                const tracks = stream.getAudioTracks();
-                tracks.forEach((track, i) => {
-                  console.log(`[RealtimeInterview] Track ${i}:`, {
-                    enabled: track.enabled,
-                    muted: track.muted,
-                    readyState: track.readyState,
-                    settings: track.getSettings()
-                  });
-                });
+                // Audio playback started successfully
               }).catch(err => {
                 console.error('[RealtimeInterview] ❌ Audio play failed:', err);
                 console.error('[RealtimeInterview] This is usually due to browser autoplay policy');
@@ -238,17 +181,13 @@ export function useRealtimeInterview() {
               });
               audioElementRef.current = audio;
             } else {
-              console.log('[RealtimeInterview] Audio element already exists, reusing it');
               // Make sure it's not paused and stream is still connected
               if (audioElementRef.current.paused) {
-                console.log('[RealtimeInterview] Audio was paused, resuming...');
                 audioElementRef.current.play().catch(err => {
                   console.error('[RealtimeInterview] Failed to resume audio:', err);
                 });
               }
             }
-          } else {
-            console.log('[RealtimeInterview] Voice disabled, skipping audio playback');
           }
 
           // Start BOTH recorders if we have mic stream (use ref to access handles)
@@ -257,12 +196,10 @@ export function useRealtimeInterview() {
             if (micStream) {
               // Start mixed recorder (user + Pearl for debugging)
               if (!mixedRecorderRef.current) {
-                console.log('[RealtimeInterview] Starting mixed recorder...');
                 const mixedRecorder = startMixedRecorder({
                   micStream,
                   botStream: stream,
                   onStop: (blob) => {
-                    console.log('[RealtimeInterview] Mixed recording stopped:', blob.size, 'bytes');
                     mixedAudioBlobRef.current = blob;
                   },
                 });
@@ -271,11 +208,9 @@ export function useRealtimeInterview() {
 
               // Start user-only recorder (for final story audio)
               if (!userOnlyRecorderRef.current) {
-                console.log('[RealtimeInterview] Starting user-only recorder...');
                 const userOnlyRecorder = startUserOnlyRecorder({
                   micStream,
                   onStop: (blob) => {
-                    console.log('[RealtimeInterview] User-only recording stopped:', blob.size, 'bytes');
                     userOnlyAudioBlobRef.current = blob;
                   },
                 });
@@ -287,7 +222,6 @@ export function useRealtimeInterview() {
 
         // Assistant response started (first text delta) - show typing indicator
         onAssistantResponseStarted: () => {
-          console.log('[RealtimeInterview] Pearl response started - showing typing indicator');
           if (onAssistantResponse) {
             onAssistantResponse('__COMPOSING__');
           }
@@ -296,14 +230,12 @@ export function useRealtimeInterview() {
         // Assistant text streaming (for response trimming)
         onAssistantTextDelta: (text) => {
           assistantResponseRef.current += text;
-          console.log('[RealtimeInterview] Assistant delta:', text, '(total:', assistantResponseRef.current.length, 'chars)');
 
           // DISABLED: Response trimmer was causing Pearl to be cut off mid-question
           // The shouldCancelResponse logic was too aggressive, canceling valid multi-sentence responses
           // Now relying on max_response_output_tokens (1200) to limit response length instead
           /*
           if (!cancelSentRef.current && shouldCancelResponse(assistantResponseRef.current)) {
-            console.log('[RealtimeInterview] ⚠️ Response exceeded trim threshold, sending cancel...');
             if (realtimeHandlesRef.current?.dataChannel) {
               realtimeHandlesRef.current.dataChannel.send(JSON.stringify({
                 type: 'response.cancel'
@@ -316,7 +248,6 @@ export function useRealtimeInterview() {
 
         onAssistantTextDone: () => {
           const rawResponse = assistantResponseRef.current;
-          console.log('[RealtimeInterview] Assistant response complete (raw):', rawResponse);
 
           // DISABLED: Post-processing for Realtime API
           // Problem: Audio has already played to user by the time text arrives
@@ -333,7 +264,6 @@ export function useRealtimeInterview() {
 
           // Check if we're waiting for user transcript
           if (waitingForUserTranscriptRef.current) {
-            console.log('[RealtimeInterview] Buffering Pearl response until user transcript arrives');
             pendingAssistantResponseRef.current = finalResponse;
           } else {
             // Send complete response to caller immediately (for display in chat)
@@ -352,11 +282,8 @@ export function useRealtimeInterview() {
         // User speech is still transcribed and processed after Pearl finishes
         onSpeechStarted: () => {
           if (!micEnabledRef.current) {
-            console.log('[RealtimeInterview] User speech detected but mic is muted - ignoring');
             return;
           }
-
-          console.log('[RealtimeInterview] User speech detected - but barge-in is disabled, Pearl will continue speaking');
 
           // Notify page to show waveform
           if (onUserSpeechStart) {
@@ -373,10 +300,8 @@ export function useRealtimeInterview() {
 
           // // Wait 400ms before pausing (filters out brief noise spikes)
           // bargeInTimeoutRef.current = setTimeout(() => {
-          //   console.log('[RealtimeInterview] Barge-in delay complete - pausing Pearl');
           //   if (audioElementRef.current && !audioElementRef.current.paused) {
           //     audioElementRef.current.pause();
-          //     console.log('[RealtimeInterview] Audio paused for barge-in');
           //   }
           //   bargeInTimeoutRef.current = null;
           // }, 400);
@@ -384,13 +309,10 @@ export function useRealtimeInterview() {
 
         // User stopped speaking - set buffering flag for message ordering
         onSpeechStopped: () => {
-          console.log('[RealtimeInterview] User stopped speaking - expecting transcript soon');
-
           // Cancel barge-in timeout if it exists (though it shouldn't be set anymore)
           if (bargeInTimeoutRef.current) {
             clearTimeout(bargeInTimeoutRef.current);
             bargeInTimeoutRef.current = null;
-            console.log('[RealtimeInterview] Cancelled barge-in timeout');
           }
 
           waitingForUserTranscriptRef.current = true;
@@ -401,7 +323,6 @@ export function useRealtimeInterview() {
 
         // Connection established
         onConnected: () => {
-          console.log('[RealtimeInterview] Connected successfully');
           setStatus('connected');
         },
 
@@ -431,12 +352,10 @@ export function useRealtimeInterview() {
       return;
     }
 
-    console.log('[RealtimeInterview] Starting mixed recorder...');
     const recorder = startMixedRecorder({
       micStream,
       botStream: assistantStream,
       onStop: (blob) => {
-        console.log('[RealtimeInterview] Mixed recording stopped:', blob.size, 'bytes');
         mixedAudioBlobRef.current = blob;
       },
     });
@@ -446,8 +365,6 @@ export function useRealtimeInterview() {
 
   // Stop session and all recorders
   const stopSession = useCallback(() => {
-    console.log('[RealtimeInterview] Stopping session...');
-
     // Stop mixed recorder
     if (mixedRecorderRef.current) {
       mixedRecorderRef.current.stop();
@@ -490,7 +407,6 @@ export function useRealtimeInterview() {
       // Mute/unmute the audio element
       if (audioElementRef.current) {
         audioElementRef.current.muted = !newValue;
-        console.log('[RealtimeInterview] Pearl voice', newValue ? 'ENABLED' : 'MUTED');
       }
 
       return newValue;
@@ -545,7 +461,6 @@ export function useRealtimeInterview() {
   const toggleMic = useCallback((enabled: boolean) => {
     // Update ref to track mic state (used to prevent barge-in when muted)
     micEnabledRef.current = enabled;
-    console.log('[RealtimeInterview] Mic state updated:', enabled ? 'ENABLED' : 'DISABLED');
 
     if (realtimeHandlesRef.current) {
       realtimeHandlesRef.current.toggleMic(enabled);

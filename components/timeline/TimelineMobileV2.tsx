@@ -34,7 +34,6 @@ import { useTimelineUI } from "@/hooks/use-timeline-ui";
 import { TimelineHeader } from "@/components/timeline/TimelineHeader";
 import { TimelineDecadeSection } from "@/components/timeline/TimelineDecadeSection";
 import { TimelineEnd } from "@/components/timeline/TimelineEnd";
-import { TimelineNearEndNudge } from "@/components/timeline/TimelineNearEndNudge";
 import { STARTER_TEMPLATES, type StarterMemoryTemplate } from "@/lib/starterTemplates";
 import { StarterMemoryCard } from "@/components/timeline/StarterMemoryCard";
 
@@ -302,11 +301,6 @@ export function TimelineMobileV2() {
           )}
         </div>
       </main>
-
-      {/* Near-end nudge */}
-      <TimelineNearEndNudge
-        onAddMemory={() => router.push("/review/book-style?new=true")}
-      />
 
       <style jsx global>{`
         /* Override DecadeNav to work in header */

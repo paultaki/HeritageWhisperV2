@@ -56,8 +56,6 @@ export async function combineAudioBlobs(blobs: Blob[]): Promise<Blob> {
  */
 async function extractLessonFromTranscript(transcript: string): Promise<string> {
   try {
-    console.log('[Conversation] Extracting lesson from transcript...');
-
     const response = await fetch('/api/extract-lesson', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -70,7 +68,6 @@ async function extractLessonFromTranscript(transcript: string): Promise<string> 
     }
 
     const data = await response.json();
-    console.log('[Conversation] Lesson extracted:', data.lesson);
     return data.lesson || '';
   } catch (error) {
     console.error('[Conversation] Lesson extraction error:', error);
@@ -85,24 +82,10 @@ export async function completeConversationAndRedirect(
   conversationData: ConversationData
 ): Promise<void> {
   try {
-    console.log('📝 Completing conversation...', {
-      hasUserOnlyAudio: !!conversationData.userOnlyAudioBlob,
-      hasMixedAudio: !!conversationData.audioBlob,
-      transcriptLength: conversationData.fullTranscript?.length,
-      qaPairsCount: conversationData.qaPairs?.length,
-      duration: conversationData.totalDuration
-    });
-
     const { qaPairs, audioBlob, userOnlyAudioBlob, fullTranscript, totalDuration } = conversationData;
 
     // Prefer user-only audio (no Pearl voice) for final story
     const finalAudioBlob = userOnlyAudioBlob || audioBlob;
-
-    if (finalAudioBlob) {
-      const sizeInMB = finalAudioBlob.size / (1024 * 1024);
-      const audioType = userOnlyAudioBlob ? 'User-only' : 'Mixed';
-      console.log(`🎵 ${audioType} audio size: ${sizeInMB.toFixed(2)} MB`);
-    }
 
     // Extract lesson learned from transcript (async, non-blocking)
     const lessonLearned = await extractLessonFromTranscript(fullTranscript || '');
@@ -121,15 +104,6 @@ export async function completeConversationAndRedirect(
     // Generate unique ID and save to NavCache
     const navId = navCache.generateId();
     await navCache.set(navId, recordingData);
-
-    console.log('✓ Conversation data saved to NavCache with ID:', navId);
-    console.log('📊 Data:', {
-      mode: recordingData.mode,
-      qaPairs: recordingData.qaPairs.length,
-      duration: recordingData.duration,
-      hasAudio: !!recordingData.audioBlob,
-      transcriptLength: recordingData.rawTranscript.length
-    });
 
     // Redirect to wizard
     window.location.href = `/review/book-style?nav=${navId}&mode=wizard`;

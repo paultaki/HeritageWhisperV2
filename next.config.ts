@@ -7,14 +7,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: false, // Disable double-rendering in dev (re-enable for debugging)
 
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
+    // Enforce linting during builds - prevents deploying broken code
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has type errors.
-    ignoreBuildErrors: true,
+    // Enforce type checking during builds - prevents deploying broken code
+    ignoreBuildErrors: false,
   },
   images: {
     remotePatterns: [

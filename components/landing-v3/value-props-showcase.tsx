@@ -60,8 +60,23 @@ export default function ValuePropsShowcase() {
               feature.imagePosition === 'right' ? 'lg:flex-row-reverse' : ''
             } ${fadeInClasses.initial} ${isVisible ? fadeInClasses.animate : ''}`}
           >
+            {/* Copy */}
+            <div className={`space-y-6 ${feature.imagePosition === 'right' ? 'lg:order-2' : 'lg:order-1'}`}>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-heritage-deep-slate/5 rounded-full border border-heritage-deep-slate/20 transition-all duration-300 hover:bg-heritage-deep-slate/10">
+                <span className="text-sm font-semibold text-heritage-deep-slate tracking-wide">{feature.badge}</span>
+              </div>
+
+              <h3 className="text-3xl md:text-4xl font-bold text-heritage-text-primary leading-tight">
+                {feature.title}
+              </h3>
+
+              <p className="text-lg md:text-xl text-heritage-text-primary/70 leading-relaxed">
+                {feature.description}
+              </p>
+            </div>
+
             {/* Image */}
-            <div className={`${feature.imagePosition === 'right' ? 'lg:order-2' : ''}`}>
+            <div className={`${feature.imagePosition === 'right' ? 'lg:order-1' : 'lg:order-2'}`}>
               {feature.image ? (
                 <div className={`relative rounded-2xl overflow-hidden shadow-lg border border-heritage-deep-slate/10 bg-white transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] group ${feature.isScrolling ? 'h-[500px]' : ''}`}>
                   <Image
@@ -80,21 +95,6 @@ export default function ValuePropsShowcase() {
                   </p>
                 </div>
               )}
-            </div>
-
-            {/* Copy */}
-            <div className={`space-y-6 ${feature.imagePosition === 'right' ? 'lg:order-1' : ''}`}>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-heritage-deep-slate/5 rounded-full border border-heritage-deep-slate/20 transition-all duration-300 hover:bg-heritage-deep-slate/10">
-                <span className="text-sm font-semibold text-heritage-deep-slate tracking-wide">{feature.badge}</span>
-              </div>
-
-              <h3 className="text-3xl md:text-4xl font-bold text-heritage-text-primary leading-tight">
-                {feature.title}
-              </h3>
-
-              <p className="text-lg md:text-xl text-heritage-text-primary/70 leading-relaxed">
-                {feature.description}
-              </p>
             </div>
           </div>
         )})}

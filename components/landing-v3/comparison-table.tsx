@@ -26,9 +26,9 @@ export default function ComparisonTable() {
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-heritage-deep-slate/10 transition-all duration-500 hover:shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead>
+              <thead className="relative z-10">
                 <tr className="border-b border-heritage-deep-slate/10">
-                  <th className="sticky left-0 z-10 px-6 py-4 text-left text-sm font-semibold text-heritage-text-primary/70 bg-heritage-deep-slate/5 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">Feature</th>
+                  <th className="sticky left-0 z-50 isolate px-6 py-4 text-left text-sm font-semibold text-heritage-text-primary/70 bg-white shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">Feature</th>
                   <th className="px-6 py-4 text-center text-sm font-bold text-white bg-heritage-deep-slate">
                     HeritageWhisper
                   </th>

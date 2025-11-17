@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`Received webhook event: ${event.type}`);
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log(`Received webhook event: ${event.type}`);
 
     // 2. Handle different event types
     switch (event.type) {
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log(`Unhandled event type: ${event.type}`);
     }
 
     // 3. Return success
@@ -151,7 +151,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       subscription_id: session.subscription as string,
     });
 
-    console.log(`User ${userId} upgraded to Premium successfully`);
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log(`User ${userId} upgraded to Premium successfully`);
   } catch (error) {
     console.error('Error handling checkout completion:', error);
     throw error;
@@ -181,7 +181,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       })
       .eq('id', userId);
 
-    console.log(`User ${userId} subscription updated to ${status}`);
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log(`User ${userId} subscription updated to ${status}`);
   } catch (error) {
     console.error('Error handling subscription update:', error);
     throw error;
@@ -208,7 +208,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       })
       .eq('id', userId);
 
-    console.log(`User ${userId} subscription canceled`);
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log(`User ${userId} subscription canceled`);
   } catch (error) {
     console.error('Error handling subscription deletion:', error);
     throw error;
@@ -246,7 +246,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
       invoice_id: invoice.id,
     });
 
-    console.log(`User ${userId} payment failed, status set to past_due`);
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log(`User ${userId} payment failed, status set to past_due`);
   } catch (error) {
     console.error('Error handling payment failure:', error);
     throw error;

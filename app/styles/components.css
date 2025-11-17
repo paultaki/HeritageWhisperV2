@@ -159,6 +159,7 @@ body {
   border-radius: 16px;
   box-shadow: var(--shadow-card);
   position: relative;
+  max-width: 100%;
 }
 
 /* Lighter shadows on mobile and remove border */
@@ -166,6 +167,7 @@ body {
   .hw-card {
     box-shadow: 0 3px 8px -2px rgba(0, 0, 0, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     border: none;
+    overflow: visible; /* Allow year badges and connectors to show */
   }
 }
 .hw-card > div:first-of-type {
@@ -479,9 +481,9 @@ body {
     box-shadow: 0 3px 8px -2px rgba(0, 0, 0, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
-  /* Year badges adjusted to maintain position relative to spine */
+  /* Year badges adjusted to fit within spine padding */
   .hw-year {
-    left: -50px; /* moved 3px left per user request */
+    left: -48px; /* Moved 26px further left from -22px */
   }
 
   /* Decade band starts from spine on mobile instead of edge-to-edge */

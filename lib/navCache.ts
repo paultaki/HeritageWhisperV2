@@ -63,7 +63,6 @@ export const navCache = {
     try {
       // Store in memory for immediate access (with Blob)
       memoryCache.set(id, payload);
-      console.log("NavCache: Stored data in memory with ID", id);
 
       // For localStorage, we need to serialize Blobs
       const serializable = { ...payload };
@@ -85,15 +84,11 @@ export const navCache = {
       // Try to store in localStorage as backup (may fail if quota exceeded)
       try {
         localStorage.setItem(`nav:${id}`, JSON.stringify(serializable));
-        console.log("NavCache: Stored data in localStorage with ID", id);
       } catch (storageError: any) {
-        if (storageError.name === 'QuotaExceededError') {
-          console.warn("NavCache: localStorage quota exceeded, data stored in memory only", id);
-          console.warn("NavCache: Audio size:", payload.audioBlob?.size, "bytes");
-          // Memory cache still works, just skip localStorage backup
-        } else {
+        if (storageError.name !== 'QuotaExceededError') {
           throw storageError;
         }
+        // Memory cache still works, just skip localStorage backup
       }
     } catch (error) {
       console.error("NavCache: Error storing data", error);
@@ -109,7 +104,6 @@ export const navCache = {
       // Try memory cache first (fastest, has Blob intact)
       const memoryData = memoryCache.get(id);
       if (memoryData) {
-        console.log("NavCache: Retrieved from memory", id);
         return memoryData;
       }
 
@@ -138,11 +132,9 @@ export const navCache = {
 
         // Refresh memory cache
         memoryCache.set(id, parsed);
-        console.log("NavCache: Retrieved from localStorage", id);
         return parsed;
       }
 
-      console.log("NavCache: No data found for ID", id);
       return null;
     } catch (error) {
       console.error("NavCache: Error retrieving data", error);
@@ -167,7 +159,6 @@ export const navCache = {
     try {
       memoryCache.delete(id);
       localStorage.removeItem(`nav:${id}`);
-      console.log("NavCache: Removed data for ID", id);
     } catch (error) {
       console.error("NavCache: Error removing data", error);
     }
@@ -218,10 +209,6 @@ export const navCache = {
       keysToRemove.forEach(key => {
         localStorage.removeItem(key);
       });
-
-      if (keysToRemove.length > 0) {
-        console.log(`NavCache: Cleaned up ${keysToRemove.length} old entries`);
-      }
     } catch (error) {
       console.error("NavCache: Error cleaning up old entries", error);
     }

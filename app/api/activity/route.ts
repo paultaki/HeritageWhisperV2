@@ -138,13 +138,13 @@ export async function GET(request: NextRequest) {
  * }
  */
 export async function POST(request: NextRequest) {
-  console.log('[Activity API] POST request received');
-  
+  if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] POST request received');
+
   try {
     // 1. Validate session (either Supabase JWT or family session token)
     const authHeader = request.headers.get("authorization");
     const token = authHeader && authHeader.split(" ")[1];
-    console.log('[Activity API] Auth token present:', !!token);
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] Auth token present:', !!token);
 
     if (!token) {
       return NextResponse.json(
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
       // Authenticated as regular user
       user = authUser;
       actorUserId = user.id;
-      console.log('[Activity API] Authenticated as user:', user.id);
+      if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] Authenticated as user:', user.id);
     } else {
       // JWT failed - try family session token (for family members viewing)
       const { data: familySession, error: sessionError } = await supabaseAdmin
@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (sessionError || !familySession) {
-        console.log('[Activity API] Invalid authentication - neither JWT nor family session valid');
+        if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] Invalid authentication - neither JWT nor family session valid');
         return NextResponse.json(
           { error: "Invalid authentication" },
           { status: 401 }
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
 
       // Check if session expired
       if (new Date(familySession.expires_at) < new Date()) {
-        console.log('[Activity API] Family session expired');
+        if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] Family session expired');
         return NextResponse.json(
           { error: "Session expired" },
           { status: 401 }
@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
         name: familyMember.name,
       };
       actorUserId = familyMember.auth_user_id || null; // May be null if family member hasn't created account
-      console.log('[Activity API] Authenticated as family member:', familyMember.id, 'for storyteller:', familyMember.user_id);
+      if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] Authenticated as family member:', familyMember.id, 'for storyteller:', familyMember.user_id);
     }
 
     // 2. Parse request body
@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
       );
 
       if (!hasAccess) {
-        console.log('[Activity API] Access denied for user:', actorUserId, 'to storyteller:', userId);
+        if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] Access denied for user:', actorUserId, 'to storyteller:', userId);
         return NextResponse.json(
           { error: "Access denied" },
           { status: 403 }
@@ -281,17 +281,19 @@ export async function POST(request: NextRequest) {
       metadata: metadata || {},
     };
 
-    console.log('[Activity API] Logging event:', {
-      eventType,
-      userId,
-      actorId: actorUserId,
-      storyId,
-    });
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+      console.log('[Activity API] Logging event:', {
+        eventType,
+        userId,
+        actorId: actorUserId,
+        storyId,
+      });
+    }
 
     // 7. Log the event
     const { success, eventId, error } = await logActivityEvent(payload);
-    
-    console.log('[Activity API] Log result:', { success, eventId, error });
+
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] Log result:', { success, eventId, error });
 
     if (!success || error) {
       logger.error("[Activity API] Failed to log event:", error);

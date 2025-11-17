@@ -47,21 +47,13 @@ export async function startRealtime(
   apiKey: string,
   config?: RealtimeConfig
 ): Promise<RealtimeHandles> {
-  console.log('[Realtime] Starting session with direct API key...');
-
   // 2. Create WebRTC peer connection
   // Docs: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection
   const pc = new RTCPeerConnection();
 
   // 3. Assistant audio output (receive track)
   pc.ontrack = (event) => {
-    console.log('[Realtime] 🔊 Received assistant audio track');
     const stream = event.streams[0];
-    console.log('[Realtime] Audio stream tracks:', stream.getTracks().map(t => ({
-      kind: t.kind,
-      enabled: t.enabled,
-      readyState: t.readyState
-    })));
     callbacks.onAssistantAudio(stream);
   };
 
@@ -75,23 +67,11 @@ export async function startRealtime(
     try {
       const msg = JSON.parse(event.data);
 
-      // DEBUG: Log all event types to see what we're receiving
-      if (msg.type && !msg.type.includes('audio.delta')) {
-        console.log('[Realtime] Event:', msg.type, msg);
-      }
-
-      // DEBUG: Specifically log any conversation or input events
-      if (msg.type && (msg.type.includes('conversation') || msg.type.includes('input_audio'))) {
-        console.log('[Realtime] 🎤 User audio event:', msg.type, msg);
-      }
-
       // User speech transcript events (CANONICAL NAMES)
       if (msg.type === 'conversation.item.input_audio_transcription.delta') {
-        console.log('[Realtime] 📝 Transcript delta:', msg.delta);
         callbacks.onTranscriptDelta(msg.delta || '');
       }
       if (msg.type === 'conversation.item.input_audio_transcription.completed') {
-        console.log('[Realtime] ✅ Transcript completed:', msg.transcript);
         callbacks.onTranscriptFinal(msg.transcript || '');
       }
       if (msg.type === 'conversation.item.input_audio_transcription.failed') {
@@ -101,10 +81,9 @@ export async function startRealtime(
 
       // conversation.item.created - user audio committed
       if (msg.type === 'conversation.item.created') {
-        console.log('[Realtime] 🎤 Conversation item created:', msg.item);
         // Check if this is a user audio item that needs transcription
         if (msg.item?.type === 'message' && msg.item?.role === 'user') {
-          console.log('[Realtime] User message committed, waiting for transcription...');
+          // User message committed, waiting for transcription...
         }
       }
 
@@ -118,11 +97,8 @@ export async function startRealtime(
           msg.type === 'response.audio_transcript.delta') {
         const delta = msg.delta || msg.text || '';
         if (delta) {
-          console.log('[Realtime] Assistant text delta:', delta);
-
           // On first delta, notify that response has started (show typing indicator)
           if (!hasSeenFirstDelta) {
-            console.log('[Realtime] First text delta - response started');
             hasSeenFirstDelta = true;
             callbacks.onAssistantResponseStarted?.();
           }
@@ -133,19 +109,16 @@ export async function startRealtime(
       if (msg.type === 'response.text.done' ||
           msg.type === 'response.output_text.done' ||
           msg.type === 'response.audio_transcript.done') {
-        console.log('[Realtime] Assistant text done');
         hasSeenFirstDelta = false; // Reset for next response
         callbacks.onAssistantTextDone?.();
       }
 
       // Response output item completion (contains full text)
       if (msg.type === 'response.output_item.done') {
-        console.log('[Realtime] Output item done:', msg.item);
         // Extract text from completed item if available
         if (msg.item?.content) {
           for (const content of msg.item.content) {
             if (content.type === 'text' && content.text) {
-              console.log('[Realtime] ✅ Assistant said (full text):', content.text);
               // DON'T call onAssistantTextDelta here - we've already accumulated deltas
               // Just signal completion
               callbacks.onAssistantTextDone?.();
@@ -156,26 +129,19 @@ export async function startRealtime(
 
       // Speech detection events (for barge-in)
       if (msg.type === 'input_audio_buffer.speech_started') {
-        console.log('[Realtime] User started speaking');
         callbacks.onSpeechStarted?.();
       }
       if (msg.type === 'input_audio_buffer.speech_stopped') {
-        console.log('[Realtime] User stopped speaking');
         callbacks.onSpeechStopped?.();
       }
 
       // Session events
       if (msg.type === 'session.created') {
-        console.log('[Realtime] 📋 Session created:', msg.session);
-        console.log('[Realtime] 🔍 Initial transcription config:', msg.session?.input_audio_transcription);
+        // Session created
       }
 
       if (msg.type === 'session.updated') {
-        console.log('[Realtime] ✅ Session updated:', msg.session);
-        console.log('[Realtime] 🔍 Transcription config:', msg.session?.input_audio_transcription);
-        console.log('[Realtime] 🔍 Modalities:', msg.session?.modalities);
-        console.log('[Realtime] 🔍 Turn detection:', msg.session?.turn_detection);
-        console.log('[Realtime] 🔍 Temperature:', msg.session?.temperature);
+        // Session updated
       }
 
       // Error events
@@ -213,7 +179,6 @@ export async function startRealtime(
   // 7. Connect to OpenAI Realtime via WebRTC (Direct API Key approach)
   // Docs: https://platform.openai.com/docs/guides/realtime-webrtc
   // Using direct API key = 30-minute session TTL
-  console.log('[Realtime] Connecting to OpenAI WebRTC endpoint...');
   const sdpResponse = await fetch('https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17', {
     method: 'POST',
     headers: {
@@ -222,8 +187,6 @@ export async function startRealtime(
     },
     body: offer.sdp,
   });
-
-  console.log('[Realtime] SDP response status:', sdpResponse.status, sdpResponse.statusText);
 
   if (!sdpResponse.ok) {
     const errorText = await sdpResponse.text();
@@ -273,8 +236,6 @@ export async function startRealtime(
   // Docs: https://platform.openai.com/docs/guides/realtime-webrtc#session-configuration
   // Why VAD params: 300ms silence/prefix = snappy turns without cutting off speech
   dataChannel.onopen = () => {
-    console.log('[Realtime] DataChannel open, sending session.update');
-
     const sessionConfig: any = {
       type: 'session.update',
       session: {
@@ -299,19 +260,15 @@ export async function startRealtime(
     if (config) {
       if (config.instructions) {
         sessionConfig.session.instructions = config.instructions;
-        console.log('[Realtime] Setting instructions:', config.instructions.substring(0, 100) + '...');
       }
       if (config.modalities) {
         sessionConfig.session.modalities = config.modalities;
-        console.log('[Realtime] Setting modalities:', config.modalities);
       }
       if (config.voice) {
         sessionConfig.session.voice = config.voice;
-        console.log('[Realtime] Setting voice:', config.voice);
       }
       if (config.temperature !== undefined) {
         sessionConfig.session.temperature = config.temperature;
-        console.log('[Realtime] Setting temperature:', config.temperature);
       }
     }
 
@@ -321,15 +278,12 @@ export async function startRealtime(
 
   // 9. Reconnection logic (handle ICE failures)
   const reconnect = async (): Promise<RealtimeHandles> => {
-    console.log('[Realtime] Reconnecting...');
     pc.close();
     // Recursively call startRealtime to get new session (with same API key)
     return startRealtime(callbacks, apiKey);
   };
 
   pc.oniceconnectionstatechange = () => {
-    console.log('[Realtime] ICE state:', pc.iceConnectionState);
-
     if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
       console.error('[Realtime] WebRTC connection lost');
       callbacks.onError(new Error('WebRTC connection lost'));
@@ -343,7 +297,6 @@ export async function startRealtime(
 
   // 10. Cleanup function
   const stop = () => {
-    console.log('[Realtime] Stopping session');
     mic.getTracks().forEach(track => track.stop());
     dataChannel.close();
     pc.close();
@@ -352,9 +305,6 @@ export async function startRealtime(
   // 11. Update instructions dynamically (session.update)
   // Used for hint freshness and do-not-ask filtering
   const updateInstructions = (instructions: string) => {
-    console.log('[Realtime] Updating instructions via session.update...');
-    console.log('[Realtime] New instructions preview:', instructions.substring(0, 150) + '...');
-
     const updateMessage = {
       type: 'session.update',
       session: {
@@ -362,9 +312,7 @@ export async function startRealtime(
       },
     };
 
-    if (safeSend(updateMessage)) {
-      console.log('[Realtime] ✅ Instructions updated');
-    } else {
+    if (!safeSend(updateMessage)) {
       console.error('[Realtime] ❌ Failed to update instructions');
     }
   };
@@ -372,8 +320,6 @@ export async function startRealtime(
   // 12. Send text message to conversation
   // Docs: https://platform.openai.com/docs/guides/realtime-webrtc#conversation-item-create
   const sendTextMessage = (text: string) => {
-    console.log('[Realtime] Sending text message:', text);
-
     const textMessage = {
       type: 'conversation.item.create',
       item: {
@@ -389,15 +335,11 @@ export async function startRealtime(
     };
 
     if (safeSend(textMessage)) {
-      console.log('[Realtime] ✅ Text message sent');
-
       // Trigger response generation
       const responseCreate = {
         type: 'response.create',
       };
-      if (safeSend(responseCreate)) {
-        console.log('[Realtime] ✅ Response generation triggered');
-      }
+      safeSend(responseCreate);
     } else {
       console.error('[Realtime] ❌ Failed to send text message');
     }
@@ -405,22 +347,15 @@ export async function startRealtime(
 
   // 13. Trigger Pearl to speak first (no user message needed)
   const triggerPearlResponse = () => {
-    console.log('[Realtime] Triggering Pearl to speak first...');
-
     const responseCreate = {
       type: 'response.create',
     };
 
-    if (safeSend(responseCreate)) {
-      console.log('[Realtime] ✅ Pearl response triggered');
-    } else {
-      console.log('[Realtime] ⚠️ Pearl response trigger queued for retry');
-    }
+    safeSend(responseCreate);
   };
 
   // 14. Toggle microphone on/off
   const toggleMic = (enabled: boolean) => {
-    console.log('[Realtime] Toggling mic:', enabled ? 'ON' : 'OFF');
     mic.getAudioTracks().forEach(track => {
       track.enabled = enabled;
     });
