@@ -18,10 +18,11 @@ type Props = {
 export function StarterMemoryCard({ template, onStart }: Props) {
   return (
     <div
-      className="border-[1.5px] border-dashed border-[#B89B8D] opacity-80
+      className="border-[1.5px] border-dashed opacity-80
                  rounded-2xl bg-stone-50 hover:opacity-100 hover:shadow-lg
                  transition-all duration-200 cursor-pointer max-w-md w-full
                  hover:scale-[1.02] transform"
+      style={{ borderColor: 'var(--color-border-card)' }}
       onClick={() => onStart(template)}
       role="button"
       tabIndex={0}

@@ -8,7 +8,7 @@ body {
 /* decade header */
 .hw-decade {
   font-family: var(--font-serif);
-  color: #1f0f08;
+  color: var(--color-text-decade);
   margin: 0; /* Remove default margins - spacing handled by decade-band */
   letter-spacing: -0.01em;
 }
@@ -73,8 +73,8 @@ body {
   top: 0;
   bottom: 0;
   width: 4px;
-  /* Lighter mauve to match desktop (#C4A7B7) */
-  background: rgba(196, 167, 183, 0.45);
+  /* Lighter mauve to match desktop */
+  background: var(--color-spine);
   box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12);
 }
 
@@ -92,7 +92,7 @@ body {
   /* Glass effect - matching nav bar styling */
   backdrop-filter: blur(18px) saturate(1.22) contrast(1.12) brightness(0.97);
   -webkit-backdrop-filter: blur(18px) saturate(1.22) contrast(1.12) brightness(0.97);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04)), rgba(134, 108, 122, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04)), var(--color-decade-bg);
   border-top: 1px solid rgba(255, 255, 255, 0.35);
   border-bottom: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.45);
@@ -137,7 +137,7 @@ body {
   font-family: var(--font-serif);
   font-size: 18px; /* Reduced from 24px for "Before I was born" etc */
   letter-spacing: -0.01em;
-  color: #1f0f08;
+  color: var(--color-text-decade);
 }
 .hw-decade-band .meta {
   display: none; /* Hide age and subtitle on mobile */
@@ -155,7 +155,7 @@ body {
 /* story card */
 .hw-card {
   background: #fff;
-  border: 1.5px solid #B89B8D;
+  border: 1.5px solid var(--color-border-card);
   border-radius: 16px;
   box-shadow: var(--shadow-card);
   position: relative;
@@ -184,7 +184,7 @@ body {
   width: 24px;
   height: 4px;
   /* Gradient from solid at spine to faded at card */
-  background: linear-gradient(to right, rgba(196, 167, 183, 0.45), rgba(196, 167, 183, 0.15));
+  background: linear-gradient(to right, var(--color-spine), var(--color-connector-fade));
   border-radius: 1px;
   opacity: 1;
   pointer-events: none;
@@ -199,7 +199,7 @@ body {
 .hw-card:hover::before,
 .hw-card:focus-visible::before {
   width: 30px;
-  background: rgba(196, 167, 183, 0.6);
+  background: var(--color-connector-hover);
   opacity: 1;
 }
 
@@ -437,10 +437,10 @@ body {
   font-size: 18px;
   line-height: 1;
   /* Mauve text on soft rose background */
-  color: #6A4D58 !important;
-  background: #F9E5E8 !important;
+  color: var(--color-text-badge) !important;
+  background: var(--color-surface-badge) !important;
   padding: 6px 8px 8px 8px;
-  border: 1px solid rgba(139, 107, 122, 0.2) !important;
+  border: 1px solid var(--color-border-badge) !important;
   border-radius: 8px;
   opacity: 1;
   transform: translateY(0);
@@ -495,7 +495,7 @@ body {
   /* connectors more visible and longer - extended to reach new spine position */
   .hw-card {
     position: relative;
-    border: 1.5px solid #B89B8D;
+    border: 1.5px solid var(--color-border-card);
   }
   .hw-card::before {
     content: "";
@@ -505,7 +505,7 @@ body {
     width: 24px; /* exactly 24px gap from spine to card */
     height: 4px;
     /* Gradient from solid at spine to faded at card */
-    background: linear-gradient(to right, rgba(196, 167, 183, 0.45), rgba(196, 167, 183, 0.15));
+    background: linear-gradient(to right, var(--color-spine), var(--color-connector-fade));
     border-radius: 1px;
     opacity: 1;
     pointer-events: none;
@@ -514,7 +514,7 @@ body {
   .hw-card:hover::before,
   .hw-card:focus-visible::before {
     width: 42px; /* extended proportionally */
-    background: rgba(196, 167, 183, 0.6);
+    background: var(--color-connector-hover);
   }
 
   /* timeline nodes align with tighter gutter */
@@ -690,7 +690,7 @@ body {
 }
 .hw-kpi .n {
   font: 700 16px var(--font-sans);
-  color: #1f0f08;
+  color: var(--color-text-decade);
 }
 .hw-kpi .l {
   font: 500 11px var(--font-sans);
@@ -1028,7 +1028,7 @@ body {
 /* Content section typography */
 .memory-row .title {
   font-family: var(--font-sans);
-  color: #1f0f08;
+  color: var(--color-text-decade);
   line-height: 1.3;
   letter-spacing: -0.01em;
 }

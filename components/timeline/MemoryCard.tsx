@@ -418,7 +418,7 @@ export const MemoryCard = React.memo(
           } ${isVisible ? "hw-card-visible" : "hw-card-hidden"}`}
           style={{
             "--title-offset": "22px",
-            border: "1.5px solid #B89B8D",
+            border: "1.5px solid var(--color-border-card)",
             background: "white",
             maxWidth: "100%",
             width: "100%"
@@ -557,7 +557,7 @@ export const MemoryCard = React.memo(
               ? "return-highlight-animation"
               : ""
         } ${isVisible ? "hw-card-visible" : "hw-card-hidden"}`}
-        style={{ "--title-offset": titleOffset, border: "1.5px solid #B89B8D" } as React.CSSProperties}
+        style={{ "--title-offset": titleOffset, border: "1.5px solid var(--color-border-card)" } as React.CSSProperties}
         onClick={handleCardClick}
         data-testid={`memory-card-${story.id}`}
       >

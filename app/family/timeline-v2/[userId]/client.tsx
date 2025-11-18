@@ -379,7 +379,7 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
           onClick={handleCardClick}
           style={{
             boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
-            border: '1.5px solid #B89B8D',
+            border: '1.5px solid var(--color-border-card)',
           }}
         >
           {/* Photo Section */}
@@ -511,7 +511,7 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
         onClick={handleCardClick}
         style={{
           boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
-          border: '1.5px solid #B89B8D',
+          border: '1.5px solid var(--color-border-card)',
         }}
       >
         {/* Placeholder */}
@@ -639,9 +639,9 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
         <div
           className="py-0 px-1 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
           style={{
-            backgroundColor: '#F9E5E8',
-            border: `1px solid #B8B0A8`,
-            color: '#6A4D58',
+            backgroundColor: 'var(--color-surface-badge)',
+            border: `1px solid var(--color-border-badge)`,
+            color: 'var(--color-text-badge)',
             fontSize: '18px',
             fontWeight: 500,
             letterSpacing: '0.3px',
@@ -824,7 +824,7 @@ export default function FamilyTimelineV2Client({ userId }: FamilyTimelineV2Clien
               <div
                 className="absolute left-1/2 top-0 bottom-0 w-1 -ml-0.5 hidden lg:block"
                 style={{
-                  background: 'linear-gradient(to bottom, #B89B8D 0%, #8B6B7A 50%, #B89B8D 100%)',
+                  background: 'linear-gradient(to bottom, var(--color-border-card) 0%, var(--color-spine-mid) 50%, var(--color-border-card) 100%)',
                   opacity: 0.3,
                 }}
               />
@@ -834,7 +834,7 @@ export default function FamilyTimelineV2Client({ userId }: FamilyTimelineV2Clien
                 ref={progressLineRef}
                 className="absolute left-1/2 top-0 w-1 -ml-0.5 transition-all duration-200 hidden lg:block"
                 style={{
-                  background: 'linear-gradient(to bottom, #B89B8D 0%, #8B6B7A 50%, #B89B8D 100%)',
+                  background: 'linear-gradient(to bottom, var(--color-border-card) 0%, var(--color-spine-mid) 50%, var(--color-border-card) 100%)',
                   opacity: 0.8,
                   height: '0%',
                 }}
