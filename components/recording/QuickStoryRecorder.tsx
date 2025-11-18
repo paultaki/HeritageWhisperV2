@@ -595,10 +595,8 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
             {/* Recording & Paused State */}
             {(state === "recording" || state === "paused") && (
               <AmbientSpotlight
-                size={500}
                 intensity={0.35}
                 color="rgba(124, 101, 105, 0.12)"
-                animationSpeed={12000}
                 className="rounded-2xl"
               >
                 <motion.div

@@ -43,9 +43,16 @@ interface NavPayload {
   qaPairs?: QAPair[];
   enhancedTranscript?: string;
   lessonOptions?: any;
+  lessonLearned?: string;
   formattedContent?: any;
   useEnhanced?: boolean;
   selectedTranscript?: string;
+  photos?: Array<{
+    id?: string;
+    url: string;
+    isHero?: boolean;
+    transform?: { zoom: number; position: { x: number; y: number } };
+  }>;
 
   // Re-recording fields
   isReRecording?: boolean;

@@ -102,7 +102,7 @@ export default function PhotoFirstRecordingPage() {
         }] : [];
 
         const cacheData = {
-          mode: 'edit',
+          mode: 'quick',
           title: templateTitle || data.title, // Use template title if available, otherwise AI-generated
           transcription: data.transcription,
           lessonLearned: data.lessonOptions.practical, // Default to practical lesson

@@ -617,7 +617,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
 
     // No photo - render compact pill-style card
     const hasAudio = story.audioUrl && story.audioUrl.trim() !== "";
-    const hasText = story.transcription || story.storyText;
+    const hasText = story.transcription;
 
     return (
       <div
@@ -678,7 +678,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               {/* Snippet - first line of transcription or story text */}
               {hasText && (
                 <p className="text-sm text-stone-600 truncate italic">
-                  {(story.transcription || story.storyText || "").substring(0, 100)}...
+                  {(story.transcription || "").substring(0, 100)}...
                 </p>
               )}
             </div>

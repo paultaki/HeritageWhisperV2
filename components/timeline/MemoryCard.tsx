@@ -404,7 +404,7 @@ export const MemoryCard = React.memo(
     // Compact pill layout for memories without photos
     if (!displayPhoto || !displayPhoto.url) {
       const hasAudio = story.audioUrl && story.audioUrl.trim() !== "";
-      const hasText = story.transcription || story.storyText;
+      const hasText = story.transcription;
 
       return (
         <div
@@ -492,7 +492,7 @@ export const MemoryCard = React.memo(
                 {/* Snippet - first line of transcription or story text */}
                 {hasText && (
                   <p className="text-sm text-stone-600 truncate italic w-full">
-                    {(story.transcription || story.storyText || "").substring(0, 100)}...
+                    {(story.transcription || "").substring(0, 100)}...
                   </p>
                 )}
               </div>

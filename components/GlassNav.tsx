@@ -139,17 +139,19 @@ export default function GlassNav({
               active && dataInk === "dark" && "bg-black/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] -translate-y-0.5"
             )}
           >
-            <Icon
-              className={cn(
-                "w-[18px] h-[18px] transition-colors duration-200",
-                // Icon colors - conditional on ink and active state
-                dataInk === "light"
-                  ? "text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
-                  : active
-                  ? "text-black"
-                  : "text-black/85" // Boosted from /75 for better visibility
-              )}
-            />
+            {Icon && (
+              <Icon
+                className={cn(
+                  "w-[18px] h-[18px] transition-colors duration-200",
+                  // Icon colors - conditional on ink and active state
+                  dataInk === "light"
+                    ? "text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
+                    : active
+                    ? "text-black"
+                    : "text-black/85" // Boosted from /75 for better visibility
+                )}
+              />
+            )}
             <span
               className={cn(
                 "relative text-[11px] leading-tight font-medium transition-colors duration-200",

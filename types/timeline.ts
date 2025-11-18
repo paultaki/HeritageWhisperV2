@@ -81,6 +81,14 @@ export interface UseTimelineDataReturn {
   // Timeline items
   allTimelineItems: TimelineItem[];
   decadeEntries: DecadeEntry[];
+
+  // V3: Storyteller metadata for family sharing
+  storyteller: {
+    id?: string;
+    firstName?: string;
+    lastName?: string;
+    birthYear?: number;
+  } | null;
 }
 
 /** Return type for useTimelineNavigation hook */

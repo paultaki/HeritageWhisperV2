@@ -94,10 +94,8 @@ export function RecordingScreen(props: RecordingScreenProps) {
 
   return (
     <AmbientSpotlight
-      size={500}
       intensity={0.4}
       color="rgba(251, 146, 60, 0.12)"
-      animationSpeed={10000}
       className="rounded-2xl"
     >
       <motion.div

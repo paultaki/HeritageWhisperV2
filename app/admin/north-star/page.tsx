@@ -704,32 +704,32 @@ export default function NorthStarPage() {
             <div className="ns-nav-brand">HeritageWhisper</div>
             <ul className="ns-nav-links">
               <li>
-                <a href="#mission" className="ns-nav-link" ref={(el) => el && (navLinksRef.current[0] = el)}>
+                <a href="#mission" className="ns-nav-link" ref={(el) => { if (el) navLinksRef.current[0] = el; }}>
                   Mission &amp; Core
                 </a>
               </li>
               <li>
-                <a href="#position" className="ns-nav-link" ref={(el) => el && (navLinksRef.current[1] = el)}>
+                <a href="#position" className="ns-nav-link" ref={(el) => { if (el) navLinksRef.current[1] = el; }}>
                   Market Position
                 </a>
               </li>
               <li>
-                <a href="#messaging" className="ns-nav-link" ref={(el) => el && (navLinksRef.current[2] = el)}>
+                <a href="#messaging" className="ns-nav-link" ref={(el) => { if (el) navLinksRef.current[2] = el; }}>
                   Messaging Tiers
                 </a>
               </li>
               <li>
-                <a href="#competitive" className="ns-nav-link" ref={(el) => el && (navLinksRef.current[3] = el)}>
+                <a href="#competitive" className="ns-nav-link" ref={(el) => { if (el) navLinksRef.current[3] = el; }}>
                   Competitive Edge
                 </a>
               </li>
               <li>
-                <a href="#launch" className="ns-nav-link" ref={(el) => el && (navLinksRef.current[4] = el)}>
+                <a href="#launch" className="ns-nav-link" ref={(el) => { if (el) navLinksRef.current[4] = el; }}>
                   Launch Strategy
                 </a>
               </li>
               <li>
-                <a href="#roadmap" className="ns-nav-link" ref={(el) => el && (navLinksRef.current[5] = el)}>
+                <a href="#roadmap" className="ns-nav-link" ref={(el) => { if (el) navLinksRef.current[5] = el; }}>
                   Product Roadmap
                 </a>
               </li>

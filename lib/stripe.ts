@@ -13,10 +13,10 @@ if (!process.env.STRIPE_SECRET_KEY) {
 
 /**
  * Stripe client instance
- * Configured for API version 2024-11-20 (latest stable)
+ * Configured for API version 2025-09-30 (latest stable)
  */
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-11-20.acacia',
+  apiVersion: '2025-09-30.clover',
   typescript: true,
   appInfo: {
     name: 'HeritageWhisper',
