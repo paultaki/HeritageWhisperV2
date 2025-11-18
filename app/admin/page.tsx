@@ -15,7 +15,8 @@ import {
   MessageSquare,
   Code,
   Target,
-  Users
+  Users,
+  ClipboardCheck
 } from "lucide-react";
 
 interface AdminTool {
@@ -28,6 +29,14 @@ interface AdminTool {
 }
 
 const ADMIN_TOOLS: AdminTool[] = [
+  {
+    title: "Pre-Launch Audit Dashboard",
+    description: "Track implementation progress for 24 audit findings with prioritized blockers, time estimates, and ARR impact",
+    href: "/admin/audit-dashboard",
+    icon: <ClipboardCheck className="w-6 h-6" />,
+    category: "monitoring",
+    color: "text-orange-600 bg-orange-50",
+  },
   {
     title: "Analytics Dashboard",
     description: "Executive overview with user growth, engagement metrics, and top 10 power users leaderboard",

@@ -26,6 +26,7 @@ import {
   Menu,
   X,
   UserPlus,
+  ClipboardCheck,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -68,6 +69,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: "Monitoring",
     items: [
+      { label: "Pre-Launch Audit", href: "/admin/audit-dashboard", icon: ClipboardCheck },
       { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
       { label: "Market Assessment", href: "/admin/market-assessment", icon: Target },
       { label: "Photo Album Market", href: "/admin/photo-album-market", icon: Target },

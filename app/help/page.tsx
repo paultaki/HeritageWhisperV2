@@ -530,7 +530,7 @@ export default function HelpPage() {
       >
         <div className="flex items-center gap-3 w-full">
           <Image
-            src="/logo_hw.png"
+            src="/final logo/logo-new.svg"
             alt="Heritage Whisper"
             width={36}
             height={36}

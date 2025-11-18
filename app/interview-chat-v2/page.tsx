@@ -552,7 +552,7 @@ export default function InterviewChatPage() {
           {messages.some(m => m.type === 'audio-response' || m.type === 'text-response') ? (
             <div className="flex flex-col items-center gap-2">
               <Image
-                src="/HW_text-compress.png"
+                src="/final logo/logo-new.svg"
                 alt="Heritage Whisper"
                 width={200}
                 height={50}
@@ -572,7 +572,7 @@ export default function InterviewChatPage() {
             // Original layout when no complete button
             <div className="flex flex-col items-center gap-0.5 sm:gap-2">
               <Image
-                src="/HW_text-compress.png"
+                src="/final logo/logo-new.svg"
                 alt="Heritage Whisper"
                 width={200}
                 height={50}

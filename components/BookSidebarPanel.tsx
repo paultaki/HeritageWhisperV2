@@ -276,7 +276,7 @@ export default function BookSidebarPanel({
           {/* Logo */}
           <div className="mb-8 flex justify-center">
             <Image
-              src="/HW_text-compress.png"
+              src="/final logo/logo-new.svg"
               alt="HeritageWhisper"
               width={80}
               height={48}

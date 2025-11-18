@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Gift, Mail, Mic, Heart, ChevronDown } from "lucide-react";
 
-const logoUrl = "/HW_logo_mic_clean.png";
+const logoUrl = "/final logo/logo-new.svg";
 
 export default function GiftPlansPage() {
   const router = useRouter();
