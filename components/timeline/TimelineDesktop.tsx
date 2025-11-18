@@ -1113,7 +1113,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           <div
             className="absolute left-1/2 md:w-[3.5px] w-[4px] rounded-full overflow-hidden pointer-events-none"
             style={{
-              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : '#DCDAD8', // 12% darker for visibility
+              backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'var(--color-timeline-spine)',
               transform: 'translateX(-50%)',
               top: '0',
               bottom: '500px',

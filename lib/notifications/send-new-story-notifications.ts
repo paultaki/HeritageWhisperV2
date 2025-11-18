@@ -159,6 +159,17 @@ export async function sendNewStoryNotifications({
         } else {
           console.log(`[StoryNotification] ✅ Email sent to ${member.email}:`, emailData?.id);
           successCount++;
+
+          // Update timestamp to prevent duplicate notifications from daily digest
+          const { error: updateError } = await supabaseAdmin
+            .from('family_members')
+            .update({ last_story_notification_sent_at: new Date().toISOString() })
+            .eq('id', member.id);
+
+          if (updateError) {
+            console.error(`[StoryNotification] Failed to update timestamp for ${member.email}:`, updateError);
+            // Don't fail the entire operation, just log the error
+          }
         }
       } catch (error) {
         console.error(`[StoryNotification] Error sending to ${member.email}:`, error);
