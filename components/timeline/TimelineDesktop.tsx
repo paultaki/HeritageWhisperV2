@@ -469,7 +469,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           onClick={handleCardClick}
           style={{
             boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
-            border: '1.5px solid var(--color-border-card)',
+            border: '1.5px solid var(--color-timeline-card-border)',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.boxShadow = '0 8px 20px -3px rgba(0, 0, 0, 0.2), 0 4px 9px -1px rgba(0, 0, 0, 0.15)';
@@ -627,7 +627,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         onClick={handleCardClick}
         style={{
           boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
-          border: '1.5px solid var(--color-border-card)',
+          border: '1.5px solid var(--color-timeline-card-border)',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.boxShadow = '0 8px 20px -3px rgba(0, 0, 0, 0.2), 0 4px 9px -1px rgba(0, 0, 0, 0.15)';
@@ -760,9 +760,9 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         <div
           className="py-0 px-1 font-serif whitespace-nowrap transition-all duration-200 hover:opacity-100"
           style={{
-            backgroundColor: 'var(--color-surface-badge)',
-            border: `1px solid var(--color-border-badge)`,
-            color: 'var(--color-text-badge)',
+            backgroundColor: 'var(--color-timeline-badge-bg)',
+            border: `1px solid var(--color-timeline-border-badge)`,
+            color: 'var(--color-timeline-badge-text)',
             fontSize: '18px',
             fontWeight: 500,
             letterSpacing: '0.3px',

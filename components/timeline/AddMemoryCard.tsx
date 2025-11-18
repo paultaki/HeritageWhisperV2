@@ -75,7 +75,7 @@ export function AddMemoryCard({ onCreateMemory, isDark = false }: AddMemoryCardP
         ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
       `}
       style={{
-        border: "1.5px dashed var(--color-border-card)",
+        border: "1.5px dashed var(--color-timeline-card-border)",
         opacity: isHovered ? 1 : 0.85,
         boxShadow: isHovered
           ? "0 8px 20px rgba(0, 0, 0, 0.12)"

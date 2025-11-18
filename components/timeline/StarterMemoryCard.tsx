@@ -22,7 +22,7 @@ export function StarterMemoryCard({ template, onStart }: Props) {
                  rounded-2xl bg-stone-50 hover:opacity-100 hover:shadow-lg
                  transition-all duration-200 cursor-pointer max-w-md w-full
                  hover:scale-[1.02] transform"
-      style={{ borderColor: 'var(--color-border-card)' }}
+      style={{ borderColor: 'var(--color-timeline-card-border)' }}
       onClick={() => onStart(template)}
       role="button"
       tabIndex={0}
