@@ -1,14 +1,14 @@
 // Navigation cache for reliable data transfer between pages
 // Uses both memory cache (fast) and localStorage (persistent) as fallback
 
-interface QAPair {
+export interface QAPair {
   question: string;
   answer: string;
   timestamp?: string;
   duration?: number;
 }
 
-interface NavPayload {
+export interface NavPayload {
   transcription?: string;
   wisdomTranscription?: string;
   audioDuration?: number;

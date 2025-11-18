@@ -102,7 +102,7 @@ export default function PhotoFirstRecordingPage() {
         }] : [];
 
         const cacheData = {
-          mode: 'quick',
+          mode: 'quick' as const,
           title: templateTitle || data.title, // Use template title if available, otherwise AI-generated
           transcription: data.transcription,
           lessonLearned: data.lessonOptions.practical, // Default to practical lesson
@@ -199,7 +199,7 @@ export default function PhotoFirstRecordingPage() {
 
         // Prepare NavCache data
         const cacheData = {
-          mode: 'quick',
+          mode: 'quick' as const,
           title: templateTitle || data.title, // Use template title if available
           storyYear: data.year || data.decade,
           transcription: data.transcription,

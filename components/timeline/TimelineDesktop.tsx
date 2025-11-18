@@ -818,7 +818,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
 
   // Dual authentication: Use JWT for owners, sessionToken for viewers
   const authToken = session?.access_token || familySession?.sessionToken;
-  const authHeaders = session?.access_token
+  const authHeaders: Record<string, string> = session?.access_token
     ? { Authorization: `Bearer ${session.access_token}` }
     : familySession?.sessionToken
       ? { Authorization: `Bearer ${familySession.sessionToken}` }

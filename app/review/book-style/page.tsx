@@ -999,7 +999,7 @@ function BookStyleReviewContent() {
         originalTranscript: transcriptionText,
         enhancedTranscript: transcriptionText, // For now, both are the same
         selectedTranscript: transcriptionText,
-      };
+      } as import('@/lib/navCache').NavPayload;
 
       // Save back to cache
       await navCache.set(navId, updatedData);

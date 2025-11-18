@@ -114,31 +114,19 @@ export default function GlassNav({
         const isMenu = key === 'menu';
         const hasOnClick = !!onClick || isMenu;
 
-        // For items with onClick (menu, question, etc.), use button instead of Link
-        const Component = hasOnClick ? 'button' : Link;
-        const componentProps = hasOnClick
-          ? {
-              onClick: isMenu ? onMenuClick : onClick,
-              type: 'button' as const,
-              'data-nav-button': key,
-            }
-          : { href };
+        const sharedClassName = cn(
+          "group flex flex-col items-center justify-center px-1.5 py-1.5 rounded-[10px] transition-all duration-200 flex-1 gap-0.5",
+          // Hover states - conditional on ink color
+          dataInk === "light"
+            ? "hover:bg-white/8 hover:scale-105"
+            : "hover:bg-black/6 hover:scale-105",
+          // Active states - conditional on ink color
+          active && dataInk === "light" && "bg-white/15 shadow-[inset_0_1px_0_rgba(0,0,0,0.15)] -translate-y-0.5",
+          active && dataInk === "dark" && "bg-black/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] -translate-y-0.5"
+        );
 
-        return (
-          <Component
-            key={key}
-            {...componentProps}
-            className={cn(
-              "group flex flex-col items-center justify-center px-1.5 py-1.5 rounded-[10px] transition-all duration-200 flex-1 gap-0.5",
-              // Hover states - conditional on ink color
-              dataInk === "light"
-                ? "hover:bg-white/8 hover:scale-105"
-                : "hover:bg-black/6 hover:scale-105",
-              // Active states - conditional on ink color
-              active && dataInk === "light" && "bg-white/15 shadow-[inset_0_1px_0_rgba(0,0,0,0.15)] -translate-y-0.5",
-              active && dataInk === "dark" && "bg-black/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] -translate-y-0.5"
-            )}
-          >
+        const content = (
+          <>
             {Icon && (
               <Icon
                 className={cn(
@@ -180,7 +168,24 @@ export default function GlassNav({
                 />
               )}
             </span>
-          </Component>
+          </>
+        );
+
+        // Render either button or Link based on hasOnClick
+        return hasOnClick ? (
+          <button
+            key={key}
+            onClick={isMenu ? onMenuClick : onClick}
+            type="button"
+            data-nav-button={key}
+            className={sharedClassName}
+          >
+            {content}
+          </button>
+        ) : (
+          <Link key={key} href={href} className={sharedClassName}>
+            {content}
+          </Link>
         );
       })}
     </nav>

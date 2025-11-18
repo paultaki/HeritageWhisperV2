@@ -421,7 +421,7 @@ export default function PromptsV2Page() {
   const [promptToDismiss, setPromptToDismiss] = useState<FamilyPrompt | null>(null);
 
   // V3: Get active storyteller context for family sharing
-  const rawContext = useAccountContext() as AccountContextExtended;
+  const rawContext = useAccountContext() as unknown as AccountContextExtended;
   const { activeContext, isOwnAccount, canInvite, permissionLevel } = rawContext;
   const storytellerId = activeContext?.storytellerId || user?.id;
 
