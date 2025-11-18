@@ -33,6 +33,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!name || name.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Name is required' },
+        { status: 400 }
+      );
+    }
+
     // Get authenticated user
     const authHeader = req.headers.get('authorization');
     const token = authHeader && authHeader.split(' ')[1];
@@ -90,7 +97,7 @@ export async function POST(req: NextRequest) {
       .insert({
         user_id: user.id,
         email: email.toLowerCase(),
-        name: name || null,
+        name: name.trim(),
         relationship: relationship || null,
         permission_level: 'viewer', // All family members are viewers (read-only)
         status: 'pending',

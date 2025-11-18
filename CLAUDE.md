@@ -217,15 +217,27 @@ HeritageWhisperV2/
 ```
 
 ### Key Files & Documentation
+
+**Core Code:**
 - `shared/schema.ts` - All database types (use these for type safety!)
 - `lib/queryClient.ts` - API wrapper with custom 429 handling
 - `lib/supabase.ts` - Supabase client configuration
 - `hooks/use-recording-state.tsx` - Recording orchestration
 - [app/api/CLAUDE.md](app/api/CLAUDE.md) - API route patterns and boilerplate
-- [DATA_MODEL.md](DATA_MODEL.md) - Complete database schema reference
-- [AI_PROMPTING.md](AI_PROMPTING.md) - Pearl & prompt engineering docs
-- [SECURITY.md](SECURITY.md) - Security implementation status
-- [FAMILY_SHARING_README.md](FAMILY_SHARING_README.md) - Multi-tenant system documentation
+
+**Documentation Structure (as of Nov 18, 2025):**
+- **`/docs/architecture/`** - Data model, schema, RPC functions, patterns, anti-patterns
+- **`/docs/security/`** - Security implementation, CSRF, GDPR compliance
+- **`/docs/features/`** - Feature implementation guides, testing docs
+- **`/docs/troubleshooting/`** - Fix guides, debugging, optimization
+- **`/docs/deployment/`** - Deployment checklists, domain migration
+- **`/migrations/`** - Database migrations (0000-0027) + MIGRATIONS_HISTORY.md
+
+**Root Documentation (Quick Reference):**
+- [AI_PROMPTING.md](AI_PROMPTING.md) - Pearl & prompt engineering (production reference)
+- [DESIGN_GUIDELINES.md](DESIGN_GUIDELINES.md) - Design system and UI principles
+- [HeritageWhisper North Star.md](HeritageWhisper North Star.md) - Product vision
+- [FAMILY_SHARING_README.md](FAMILY_SHARING_README.md) - Multi-tenant system
 
 ### Alternative Routes & Experimental Features
 
@@ -252,18 +264,22 @@ The following routes exist but are **not linked in main navigation**. Each has c
   - Status: Active for family member viewing
   - Features: Age display, circular audio progress, photo carousel
 
-### Archived Components (November 17, 2025)
+### Archived Documentation & Components (November 2025)
 
-Orphaned components moved to `/archive/orphaned-components-2025-11-17/`:
-- `components/landing-v2/` (4 files) - Old landing page components (replaced by landing-v3)
-- `components/ui/MemoryToolbar.tsx` - Unused memory filter toolbar
-- `components/ui/MemoryToolbarV2.tsx` - Unused senior-friendly toolbar variant
+**Code Cleanup (Nov 18, 2025):**
+- **`/archive/planning-docs-2025/`** - Historical AI planning docs (AI_PROMPTING_SYSTEM.md, AI PRD)
+- **`/archive/mobile-fixes-2025-11/`** - Deprecated mobile fix iterations
+- **`/archive/completed-implementations-2025/`** - One-time implementation guides (7 files)
+- **`/migrations/archive-oct-2025/`** - Archived SQL migrations (13 duplicates, 3 utilities)
 
-See [/archive/orphaned-components-2025-11-17/README.md](archive/orphaned-components-2025-11-17/README.md) for restoration instructions.
+**Component Cleanup (Nov 17, 2025):**
+- **`/archive/orphaned-components-2025-11-17/`** - Unused components (landing-v2, MemoryToolbar variants)
+
+Each archive directory has a README with restoration instructions and context.
 
 ## 🔍 Finding Code
 
-Ask Claude to find code patterns, or see [SEARCH_PATTERNS.md](SEARCH_PATTERNS.md) for ripgrep commands.
+Ask Claude to find code patterns, or see [SEARCH_PATTERNS.md](SEARCH_PATTERNS.md) for ripgrep commands (if exists in root, or check /docs/).
 
 **Common searches:**
 - "Find where BookView component is defined"
@@ -285,7 +301,7 @@ Configured in `~/.mcp.json`:
 
 ## 📊 Database & Data Model
 
-**Complete documentation:** See [DATA_MODEL.md](DATA_MODEL.md)
+**Complete documentation:** See [/docs/architecture/DATA_MODEL.md](docs/architecture/DATA_MODEL.md)
 
 ### Quick Reference
 - **21 Tables** with TypeScript types via Drizzle ORM (`shared/schema.ts`)
@@ -495,15 +511,38 @@ Aim to keep the file under 700 lines (~5,000 tokens).
 
 ---
 
-_Last updated: November 17, 2025_
+_Last updated: November 18, 2025_
 
 ## 📚 Additional Documentation
 
-Read these as needed for specific tasks:
+**Organized Documentation (Nov 18, 2025 restructure):**
 
-- [CLAUDE_HISTORY.md](CLAUDE_HISTORY.md) - Historical fixes, feature archives, and migration notes
-- [AI_PROMPTING.md](AI_PROMPTING.md) - Pearl AI prompting & system instructions
-- [DATA_MODEL.md](DATA_MODEL.md) - Complete database schema reference
-- [SECURITY.md](SECURITY.md) - Security implementation status
-- [FAMILY_SHARING_README.md](FAMILY_SHARING_README.md) - Multi-tenant system docs
-- [TIMELINE_STICKY_BADGES.md](TIMELINE_STICKY_BADGES.md) - Timeline sticky positioning troubleshooting
+### Core Reference
+- [CLAUDE_HISTORY.md](CLAUDE_HISTORY.md) - Historical fixes and migration notes
+- [AI_PROMPTING.md](AI_PROMPTING.md) - Pearl AI prompting (production reference)
+- [FAMILY_SHARING_README.md](FAMILY_SHARING_README.md) - Multi-tenant system
+
+### Architecture & Database
+- [/docs/architecture/DATA_MODEL.md](docs/architecture/DATA_MODEL.md) - Schema overview & navigation hub
+- [/docs/architecture/SCHEMA_REFERENCE.md](docs/architecture/SCHEMA_REFERENCE.md) - Complete table documentation
+- [/docs/architecture/RPC_FUNCTIONS.md](docs/architecture/RPC_FUNCTIONS.md) - PostgreSQL functions & triggers
+- [/docs/architecture/DATA_FLOW_PATTERNS.md](docs/architecture/DATA_FLOW_PATTERNS.md) - Operation sequences
+- [/docs/architecture/ANTI_PATTERNS.md](docs/architecture/ANTI_PATTERNS.md) - Common mistakes & best practices
+- [/migrations/MIGRATIONS_HISTORY.md](migrations/MIGRATIONS_HISTORY.md) - Database migration milestones
+
+### Security & Compliance
+- [/docs/security/SECURITY.md](docs/security/SECURITY.md) - Security implementation status
+- [/docs/security/GDPR_DATA_INVENTORY.md](docs/security/GDPR_DATA_INVENTORY.md) - Data compliance
+- [/docs/security/CSRF_IMPLEMENTATION.md](docs/security/CSRF_IMPLEMENTATION.md) - CSRF protection
+
+### Troubleshooting
+- [/docs/troubleshooting/SCROLL_CARRYOVER_FIX_FINAL.md](docs/troubleshooting/SCROLL_CARRYOVER_FIX_FINAL.md) - Mobile scroll fix
+- [/docs/troubleshooting/VIEWPORT_FIX_SUMMARY.md](docs/troubleshooting/VIEWPORT_FIX_SUMMARY.md) - URL bar viewport fix
+- [/docs/troubleshooting/TIMELINE_STICKY_BADGES.md](docs/troubleshooting/TIMELINE_STICKY_BADGES.md) - Sticky positioning
+- [/docs/troubleshooting/CACHE_INVALIDATION_GUIDE.md](docs/troubleshooting/CACHE_INVALIDATION_GUIDE.md) - TanStack Query patterns
+
+### Archives
+- [/archive/planning-docs-2025/](archive/planning-docs-2025/) - Historical planning documents
+- [/archive/mobile-fixes-2025-11/](archive/mobile-fixes-2025-11/) - Deprecated fix iterations
+- [/archive/completed-implementations-2025/](archive/completed-implementations-2025/) - Implementation guides
+- [/migrations/archive-oct-2025/](migrations/archive-oct-2025/) - Archived SQL migrations

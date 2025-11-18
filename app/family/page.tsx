@@ -326,10 +326,10 @@ export default function FamilyPage() {
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!inviteEmail) {
+    if (!inviteEmail || !inviteName) {
       toast({
         title: "Missing information",
-        description: "Please provide an email address.",
+        description: "Please provide both name and email address.",
         variant: "destructive",
       });
       return;
@@ -337,7 +337,7 @@ export default function FamilyPage() {
 
     await inviteMutation.mutateAsync({
       email: inviteEmail,
-      ...(inviteName && { name: inviteName }),
+      name: inviteName,
       ...(inviteRelationship && { relationship: inviteRelationship }),
     });
   };
@@ -707,8 +707,7 @@ export default function FamilyPage() {
                 htmlFor="name"
                 className="text-base font-medium text-gray-900"
               >
-                Name{" "}
-                <span className="text-gray-500 font-normal">(Optional)</span>
+                Name
               </Label>
               <Input
                 id="name"
@@ -717,6 +716,7 @@ export default function FamilyPage() {
                 onChange={(e) => setInviteName(e.target.value)}
                 className="mt-2 h-12 w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-heritage-deep-slate focus:ring-2 focus:ring-heritage-deep-slate focus:ring-offset-0"
                 placeholder="John Smith"
+                required
               />
             </div>
 
