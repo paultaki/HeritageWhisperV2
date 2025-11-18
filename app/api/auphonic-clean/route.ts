@@ -119,7 +119,7 @@ async function createAuphonicProduction(
 
   // Upload the audio file to the production using native FormData
   const uploadFormData = new FormData();
-  const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
+  const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' });
   uploadFormData.append('input_file', audioBlob, 'audio.webm');
 
   const uploadResponse = await fetch(`https://auphonic.com/api/production/${productionUuid}/upload.json`, {

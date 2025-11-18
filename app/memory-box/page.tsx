@@ -42,6 +42,7 @@ interface Story {
   }>;
   storyYear?: number | null;
   createdAt: string;
+  userId: string;
   durationSeconds?: number;
   includeInBook: boolean;
   includeInTimeline: boolean;
@@ -733,44 +734,8 @@ export default function MemoryBoxV2Page() {
       {/* Memory Overlay */}
       {selectedStory && (
         <MemoryOverlay
-          story={{
-            id: selectedStory.id,
-            title: selectedStory.title,
-            transcription: selectedStory.transcription,
-            audioUrl: selectedStory.audioUrl || "",
-            photoUrl: selectedStory.photoUrl || undefined,
-            photos: selectedStory.photos || undefined,
-            storyYear: selectedStory.storyYear || undefined,
-            createdAt: selectedStory.createdAt,
-            includeInBook: selectedStory.includeInBook,
-            includeInTimeline: selectedStory.includeInTimeline,
-            isFavorite: selectedStory.isFavorite,
-            wisdomClipText: selectedStory.metadata?.lessonsLearned || undefined,
-            lifeAge: selectedStory.storyYear ? parseInt(calculateAge(selectedStory.storyYear) || "0") : 0,
-            userId: user?.id || "",
-            photoTransform: undefined,
-            updatedAt: undefined,
-            wisdomClipAudio: undefined,
-          }}
-          stories={processedStories.map((s) => ({
-            id: s.id,
-            title: s.title,
-            transcription: s.transcription,
-            audioUrl: s.audioUrl || "",
-            photoUrl: s.photoUrl || undefined,
-            photos: s.photos || undefined,
-            storyYear: s.storyYear || undefined,
-            createdAt: s.createdAt,
-            includeInBook: s.includeInBook,
-            includeInTimeline: s.includeInTimeline,
-            isFavorite: s.isFavorite,
-            wisdomClipText: s.metadata?.lessonsLearned || undefined,
-            lifeAge: s.storyYear ? parseInt(calculateAge(s.storyYear) || "0") : 0,
-            userId: user?.id || "",
-            photoTransform: undefined,
-            updatedAt: undefined,
-            wisdomClipAudio: undefined,
-          }))}
+          story={selectedStory as any}
+          stories={processedStories as any}
           isOpen={overlayOpen}
           onClose={handleCloseOverlay}
           onNavigate={handleNavigateStory}

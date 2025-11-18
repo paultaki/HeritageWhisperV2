@@ -17,7 +17,7 @@ export function LeftSidebar({ topOffsetClass = "lg:top-0" }: LeftSidebarProps) {
   const [isDark, setIsDark] = useState(false);
   const { user } = useAuth();
   const { activeContext } = useAccountContext();
-  const isOwnAccount = activeContext?.type === 'own' ?? false;
+  const isOwnAccount = activeContext?.type === 'own';
 
   console.log('[LeftSidebar] activeContext:', activeContext, 'isOwnAccount:', isOwnAccount, 'user:', !!user);
 

@@ -91,7 +91,7 @@ export default function ValuePropsShowcase() {
               ) : (
                 <div className="aspect-[4/3] bg-gradient-to-br from-stone-200 to-stone-300 rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center border border-stone-300 p-8">
                   <p className="text-gray-600 text-lg font-medium text-center">
-                    {feature.placeholder}
+                    {feature.description}
                   </p>
                 </div>
               )}

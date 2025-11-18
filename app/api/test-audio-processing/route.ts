@@ -37,7 +37,7 @@ async function pathA_AssemblyAI(audioBuffer: Buffer, token: string): Promise<Pat
     
     // Call transcribe endpoint (does AssemblyAI + GPT formatting + lessons)
     const formData = new FormData();
-    const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
+    const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' });
     formData.append('audio', audioBlob, 'test-audio.webm');
     
     const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/transcribe`, {
@@ -137,7 +137,7 @@ async function pathB_AuphonicCleaner(audioBuffer: Buffer, token: string): Promis
     
     // Clean audio with Auphonic (cleaner preset or mode)
     const auphonicFormData = new FormData();
-    const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
+    const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' });
     auphonicFormData.append('audio', audioBlob, 'test-audio.webm');
     
     // Use preset if available, otherwise use cleaner mode with built-in algorithms
@@ -218,7 +218,7 @@ async function pathC_AuphonicCutter(audioBuffer: Buffer, token: string): Promise
     
     // Step 1: Cut audio with Auphonic (cutter mode or preset)
     const auphonicFormData = new FormData();
-    const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
+    const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' });
     auphonicFormData.append('audio', audioBlob, 'test-audio.webm');
     
     // Use preset if available, otherwise use cutter mode

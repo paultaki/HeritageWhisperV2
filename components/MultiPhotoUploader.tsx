@@ -324,7 +324,7 @@ export function MultiPhotoUploader({
       await onPhotoRemove(photoId);
     } else {
       const photoToRemove = photos.find((p) => p.id === photoId);
-      if (photoToRemove?.url.startsWith("blob:")) {
+      if (photoToRemove?.url && photoToRemove.url.startsWith("blob:")) {
         URL.revokeObjectURL(photoToRemove.url);
       }
 

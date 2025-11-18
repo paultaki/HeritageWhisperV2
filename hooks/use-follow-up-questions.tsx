@@ -19,7 +19,7 @@ import { toast } from "@/hooks/use-toast";
  */
 
 export interface UseFollowUpQuestionsOptions {
-  audioRecorderRef: React.RefObject<AudioRecorderHandle>;
+  audioRecorderRef: React.RefObject<AudioRecorderHandle | null>;
   onComplete?: (questions: string[]) => void;
   onError?: (error: Error) => void;
 }

@@ -101,7 +101,7 @@ export async function GET(req: NextRequest) {
       // Log family_member_joined activity event (async, non-blocking)
       logActivityEvent({
         userId: familyMember.user_id, // Storyteller
-        actorId: null, // No specific actor yet (family member hasn't created account)
+        actorId: undefined, // No specific actor yet (family member hasn't created account)
         familyMemberId: familyMember.id,
         eventType: 'family_member_joined',
         metadata: {

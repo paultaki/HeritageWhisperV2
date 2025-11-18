@@ -52,8 +52,6 @@ export async function uploadAudioToSupabase(
     console.error("[SupabaseStorage] Upload error:", error);
     console.error("[SupabaseStorage] Error details:", {
       message: error.message,
-      status: error.status,
-      statusCode: error.statusCode,
     });
     throw new Error(`Failed to upload audio: ${error.message}`);
   }

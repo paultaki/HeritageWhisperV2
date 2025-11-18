@@ -861,15 +861,17 @@ export default function FamilyTimelineV2Client({ userId }: FamilyTimelineV2Clien
         {/* Memory Overlay */}
         {selectedStory && (
           <MemoryOverlay
-            open={overlayOpen}
+            isOpen={overlayOpen}
             onClose={() => {
               setOverlayOpen(false);
               setSelectedStory(null);
             }}
             story={selectedStory}
-            allStories={sortedStories}
-            onStoryChange={(newStory: Story) => setSelectedStory(newStory)}
-            isReadOnly={true}
+            stories={sortedStories}
+            onNavigate={(storyId: string) => {
+              const newStory = sortedStories.find(s => s.id === storyId);
+              if (newStory) setSelectedStory(newStory);
+            }}
           />
         )}
       </div>

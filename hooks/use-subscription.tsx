@@ -26,8 +26,8 @@ export function useSubscription(): SubscriptionInfo {
   const { user, isLoading } = useAuth();
 
   const isPaid = user?.isPaid || false;
-  const planType = (user?.planType as 'free' | 'premium' | 'gift') || 'free';
-  const subscriptionStatus = (user?.subscriptionStatus as 'none' | 'active' | 'cancelled' | 'expired') || 'none';
+  const planType = ((user as any)?.planType as 'free' | 'premium' | 'gift') || 'free';
+  const subscriptionStatus = ((user as any)?.subscriptionStatus as 'none' | 'active' | 'cancelled' | 'expired') || 'none';
   const canInviteFamily = isPaid;
 
   const canAccessFeature = (feature: 'family_sharing') => {

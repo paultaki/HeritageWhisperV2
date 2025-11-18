@@ -219,7 +219,9 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
  * Handle failed payments
  */
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  const subscription = invoice.subscription;
+  const subscription = typeof (invoice as any).subscription === 'string'
+    ? (invoice as any).subscription
+    : (invoice as any).subscription?.id;
 
   if (!subscription) {
     return;

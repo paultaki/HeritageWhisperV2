@@ -198,7 +198,7 @@ export async function POST(
     logger.debug("[POST /api/stories/[id]/photos] New photo object:", newPhoto);
 
     // Get current photos from top-level photos column
-    const currentPhotos = story.photos || [];
+    const currentPhotos = (story as any).photos || [];
     logger.debug(
       "[POST /api/stories/[id]/photos] Current photos count:",
       currentPhotos.length,
