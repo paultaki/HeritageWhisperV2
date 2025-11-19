@@ -34,12 +34,56 @@
 }
 
 :root {
-  /* Design Guidelines v2025 - Premium Color System */
+  /* Design Guidelines v2025 - Complete Design System */
+  /* Brand core */
+  --hw-page-bg: #F7F2EC;   /* warm paper background */
+  --hw-section-bg: #EFE6DA;
+  --hw-surface: #FFFFFF;
+
+  --hw-primary: #203954;         /* deep slate blue */
+  --hw-primary-hover: #1B3047;
+  --hw-primary-soft: #E0E5ED;    /* very light tint for badges etc */
+
+  --hw-secondary: #3E6A5A;       /* muted green */
+  --hw-secondary-hover: #355C4E;
+  --hw-secondary-soft: #DDE7E1;
+
+  --hw-accent-gold: #CBA46A;     /* premium accent, use sparingly */
+  --hw-accent-gold-soft: #F4E6CC;
+
+  /* Text */
+  --hw-text-primary: #1F1F1F;    /* near black */
+  --hw-text-secondary: #4A4A4A;  /* long captions, helper text */
+  --hw-text-muted: #8A8378;      /* meta, not for main copy */
+  --hw-text-on-dark: #FFFFFF;
+
+  /* Borders and dividers */
+  --hw-border-subtle: #D2C9BD;
+  --hw-border-strong: #B8AA9C;
+
+  /* Status */
+  --hw-success: #166534;         /* works with white text */
+  --hw-error: #B91C1C;
+  --hw-warning-bg: #FFFBEB;
+  --hw-warning-accent: #B45309;
+  --hw-info: #1D4ED8;
+
+  /* Typography base */
+  --hw-font-body-size: 18px;
+  --hw-font-line-height: 1.6;
+
+  /* Hit targets and spacing */
+  --hw-hit-min: 48px;
+  --hw-hit-primary: 60px;
+  --hw-gap-sm: 8px;
+  --hw-gap-md: 16px;
+  --hw-gap-lg: 24px;
+
+  /* Legacy aliases - keep for backwards compatibility */
   --hw-deep-slate: #203954; /* Deep Slate Blue - Primary */
   --hw-muted-green: #3E6A5A; /* Muted Green - Secondary */
   --hw-gold: #CBA46A; /* Gold - Premium Accent */
   --hw-warm-paper: #F7F2EC; /* Warm Paper - Background */
-  --hw-text-primary: #1F1F1F; /* Near Black - Primary Text */
 
   --background: #F7F2EC; /* Warm paper background */
   --foreground: #1F1F1F; /* Near black text */
@@ -130,8 +174,9 @@
   display: none; /* Chrome, Safari and Opera */
 }
 
-/* Global scrollbar styling - subtle but visible */
+/* Global styling with design system base font size */
 html {
+  font-size: var(--hw-font-body-size);
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }

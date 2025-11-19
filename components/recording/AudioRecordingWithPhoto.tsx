@@ -31,6 +31,7 @@ export function AudioRecordingWithPhoto({
   const [duration, setDuration] = useState(0);
   const [recordingState, setRecordingState] = useState<'preparing' | 'recording' | 'paused' | 'processing'>('preparing');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [totalPausedTime, setTotalPausedTime] = useState(0);
 
   // Photo editing state
   const [isEditingPhoto, setIsEditingPhoto] = useState(false);
@@ -48,7 +49,7 @@ export function AudioRecordingWithPhoto({
   const animationFrameRef = useRef<number | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
-  const pausedTimeRef = useRef<number>(0);
+  const pauseStartTimeRef = useRef<number>(0);
 
   useEffect(() => {
     startRecording();
@@ -168,12 +169,14 @@ export function AudioRecordingWithPhoto({
 
       // Start timer
       timerIntervalRef.current = setInterval(() => {
-        const elapsed = (Date.now() - startTimeRef.current - pausedTimeRef.current) / 1000;
-        setDuration(elapsed);
+        if (!isPaused) {
+          const elapsed = (Date.now() - startTimeRef.current - totalPausedTime) / 1000;
+          setDuration(elapsed);
 
-        // Auto-stop at 120 seconds (2 minutes)
-        if (elapsed >= 120) {
-          handleStopAndSave();
+          // Auto-stop at 120 seconds (2 minutes)
+          if (elapsed >= 120) {
+            handleStopAndSave();
+          }
         }
       }, 200);
 
@@ -214,11 +217,13 @@ export function AudioRecordingWithPhoto({
       ctx.scale(dpr, dpr);
 
       // Clear canvas with heritage background
-      ctx.fillStyle = '#faf8f5';
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--hw-page-bg').trim();
       ctx.fillRect(0, 0, rect.width, rect.height);
 
-      // Draw waveform (or flat line if paused) with heritage gradient colors
-      ctx.strokeStyle = isPaused ? '#9CA3AF' : '#8b6b7a';
+      // Draw waveform (or flat line if paused) with design system colors
+      ctx.strokeStyle = isPaused
+        ? getComputedStyle(document.documentElement).getPropertyValue('--hw-text-muted').trim()
+        : getComputedStyle(document.documentElement).getPropertyValue('--hw-primary').trim();
       ctx.lineWidth = 2;
       ctx.beginPath();
 
@@ -257,16 +262,20 @@ export function AudioRecordingWithPhoto({
     if (!mediaRecorderRef.current) return;
 
     if (mediaRecorderRef.current.state === 'recording') {
+      // Pausing
       mediaRecorderRef.current.pause();
       setIsPaused(true);
       setRecordingState('paused');
-      pausedTimeRef.current = Date.now() - startTimeRef.current;
+      pauseStartTimeRef.current = Date.now(); // Mark when we paused
       // Waveform continues animating but shows flat line
     } else if (mediaRecorderRef.current.state === 'paused') {
+      // Resuming
       mediaRecorderRef.current.resume();
       setIsPaused(false);
       setRecordingState('recording');
-      startTimeRef.current = Date.now() - pausedTimeRef.current;
+      // Add the time we were paused to total paused time
+      const pauseDuration = Date.now() - pauseStartTimeRef.current;
+      setTotalPausedTime(prev => prev + pauseDuration);
       // Waveform continues automatically, will show active waveform again
     }
   };
@@ -506,18 +515,23 @@ export function AudioRecordingWithPhoto({
 
       {/* Recording UI section */}
       {isProcessing ? (
-        <div className="flex-1 bg-white rounded-t-3xl backdrop-blur-[18px] md:bg-white/90 flex flex-col items-center justify-center transition-all duration-300 md:max-w-4xl md:mx-auto md:w-full">
-          <div className="w-16 h-16 md:w-20 md:h-20 border-4 border-t-transparent rounded-full animate-spin mb-4" style={{ borderColor: '#9d6b7c transparent #8b6b7a transparent' }} />
-          <p className="text-[36px] md:text-[42px] text-[#2d2520] font-medium">Processing your memory...</p>
-          <p className="text-[28px] md:text-[32px] text-[#6b7280] mt-2">Creating transcription and suggestions</p>
+        <div className="flex-1 bg-[var(--hw-surface)] rounded-t-3xl backdrop-blur-[18px] flex flex-col items-center justify-center transition-all duration-300 md:max-w-4xl md:mx-auto md:w-full px-6">
+          <div
+            className="w-16 h-16 md:w-20 md:h-20 border-4 border-t-transparent rounded-full animate-spin mb-6"
+            style={{
+              borderColor: `var(--hw-primary) transparent var(--hw-primary) transparent`
+            }}
+          />
+          <p className="text-3xl md:text-4xl text-[var(--hw-text-primary)] font-semibold text-center">Processing your memory...</p>
+          <p className="text-xl md:text-2xl text-[var(--hw-text-secondary)] mt-3 text-center">Creating transcription and suggestions</p>
         </div>
       ) : (
-          <div className="flex-1 bg-white rounded-t-3xl backdrop-blur-[18px] md:bg-white/90 p-6 md:p-12 pt-5 md:pt-8 flex flex-col relative transition-all duration-300 md:max-w-4xl md:mx-auto md:w-full">
+          <div className="flex-1 bg-[var(--hw-surface)] rounded-t-3xl backdrop-blur-[18px] p-6 md:p-12 pt-5 md:pt-8 flex flex-col relative transition-all duration-300 md:max-w-4xl md:mx-auto md:w-full">
           {/* Cancel button - top right */}
           <button
             onClick={onCancel}
-            className="absolute top-4 right-4 md:top-6 md:right-6 text-[#6b7280] hover:text-[#2d2520] transition-all duration-200 hover:scale-110"
-            aria-label="Cancel"
+            className="absolute top-4 right-4 md:top-6 md:right-6 text-[var(--hw-text-secondary)] hover:text-[var(--hw-text-primary)] transition-all duration-200 hover:scale-110 min-h-[48px] min-w-[48px] flex items-center justify-center"
+            aria-label="Cancel recording"
           >
             <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -526,59 +540,73 @@ export function AudioRecordingWithPhoto({
 
           {/* Timer and state */}
           <div className="text-center">
-            <div className={`text-6xl md:text-7xl font-light tabular-nums leading-none transition-colors ${isVeryNearEnd ? 'text-red-600' : 'text-[#2d2520]'}`}>
+            <div className={`text-6xl md:text-7xl font-light tabular-nums leading-none transition-colors ${isVeryNearEnd ? 'text-[var(--hw-error)]' : 'text-[var(--hw-text-primary)]'}`}>
               {formatTime(duration)}
             </div>
-            <div className="text-sm md:text-base text-[#6b7280] uppercase tracking-wider mt-2 md:mt-3">
+            <div className="text-base md:text-lg text-[var(--hw-text-secondary)] uppercase tracking-wider mt-2 md:mt-3 font-medium">
               {recordingState === 'preparing' && 'Preparing…'}
               {recordingState === 'recording' && 'Recording'}
               {recordingState === 'paused' && 'Paused'}
             </div>
             {isNearEnd && (
-              <div className="text-[14px] text-red-600 mt-1">
+              <div className="text-base text-[var(--hw-error)] mt-2 font-medium">
                 {Math.ceil(120 - duration)} seconds left
               </div>
             )}
           </div>
 
         {/* Progress (2 min max) */}
-        <div className="mt-5 md:mt-8 h-3 md:h-4 bg-[#e8ddd5] rounded-full overflow-hidden shadow-sm">
+        <div className="mt-5 md:mt-8 h-3 md:h-4 bg-[var(--hw-section-bg)] rounded-full overflow-hidden shadow-sm">
           <div
-            className="h-3 md:h-4 rounded-full transition-all duration-200 bg-gradient-to-r from-[#8b6b7a] to-[#9d6b7c]"
-            style={{ width: `${progressPercent}%` }}
+            className="h-3 md:h-4 rounded-full transition-all duration-200"
+            style={{
+              width: `${progressPercent}%`,
+              background: 'var(--hw-primary)'
+            }}
           />
         </div>
 
         {/* Waveform */}
         <canvas
           ref={waveformCanvasRef}
-          className="mt-4 md:mt-6 h-20 md:h-32 w-full rounded-xl bg-[#faf8f5] border border-[#e8ddd5] shadow-sm"
+          className="mt-4 md:mt-6 h-20 md:h-32 w-full rounded-xl bg-[var(--hw-page-bg)] border border-[var(--hw-border-subtle)] shadow-sm"
         />
 
         {/* Controls */}
-        <div className="mt-6 md:mt-8 flex items-center justify-center">
+        <div className="mt-6 md:mt-8 flex items-center justify-center gap-4">
           <button
             onClick={handlePauseResume}
-            className="h-28 w-28 md:h-32 md:w-32 min-h-[7rem] min-w-[7rem] md:min-h-[8rem] md:min-w-[8rem] rounded-full bg-red-500 text-white flex items-center justify-center shadow-xl hover:shadow-2xl hover:bg-red-600 hover:scale-105 active:scale-95 transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 touch-none"
-            aria-label={isPaused ? 'Resume' : 'Pause'}
+            className="min-h-[7rem] min-w-[7rem] md:min-h-[8rem] md:min-w-[8rem] rounded-full text-white flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 outline-none focus-visible:ring-4 focus-visible:ring-[var(--hw-primary)] focus-visible:ring-offset-2 touch-none"
+            style={{
+              background: isPaused ? 'var(--hw-secondary)' : 'var(--hw-primary)'
+            }}
+            aria-label={isPaused ? 'Resume recording' : 'Pause recording'}
           >
-            {isPaused ? <Play className="w-14 h-14 md:w-16 md:h-16" /> : <Pause className="w-14 h-14 md:w-16 md:h-16" />}
+            {isPaused ? (
+              <Play className="w-14 h-14 md:w-16 md:h-16" fill="white" />
+            ) : (
+              <Pause className="w-14 h-14 md:w-16 md:h-16" />
+            )}
           </button>
         </div>
 
         {/* Helper prompts */}
-        <div className="mt-5 md:mt-6 text-center text-[#2d2520] text-[20px] md:text-[22px] leading-relaxed">
+        <div className="mt-5 md:mt-6 text-center text-[var(--hw-text-primary)] text-lg md:text-xl leading-relaxed">
           <p>Who's in this photo? When was it? Why is it special?</p>
         </div>
 
-          {/* Stop & Save - Centered */}
-          <div className="mt-auto pt-4 md:pt-6 flex justify-center">
-            <Button
+          {/* Stop & Save - Centered with safe spacing */}
+          <div className="mt-auto pt-6 md:pt-8 flex justify-center pb-safe">
+            <button
               onClick={handleStopAndSave}
-              className="w-full max-w-sm h-[60px] md:h-[72px] bg-gradient-to-r from-[#8b6b7a] to-[#9d6b7c] text-white rounded-2xl text-[18px] md:text-[20px] font-bold tracking-tight hover:shadow-2xl hover:scale-105 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 shadow-xl"
+              className="w-full max-w-sm min-h-[60px] md:min-h-[72px] rounded-2xl text-lg md:text-xl font-semibold text-[var(--hw-text-on-dark)] hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-xl focus-visible:ring-4 focus-visible:ring-[var(--hw-primary)] focus-visible:ring-offset-2 px-8 py-4"
+              style={{
+                background: 'var(--hw-primary)'
+              }}
+              aria-label="Stop recording and save"
             >
               Stop & Save
-            </Button>
+            </button>
           </div>
           </div>
         )}

@@ -205,7 +205,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
           <div className="absolute inset-0 flex flex-col items-center justify-between p-6 py-12">
             <div className="text-center text-white max-w-md">
               <Camera className="w-20 h-20 mx-auto mb-8 opacity-90" />
-              <p className="text-xl text-white/90">
+              <p className="text-xl md:text-2xl text-white/90 font-medium">
                 Choose from your library or take a new photo
               </p>
             </div>
@@ -221,14 +221,17 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <div className="w-full py-6 px-6 bg-white hover:bg-gray-50 rounded-2xl cursor-pointer active:scale-95 transition-all shadow-lg">
+                <div
+                  className="w-full min-h-[72px] py-5 px-6 rounded-2xl cursor-pointer active:scale-[0.98] transition-all shadow-lg hover:shadow-xl"
+                  style={{ background: 'var(--hw-primary)' }}
+                >
                   <div className="flex items-center gap-4">
-                    <ImageIcon className="w-8 h-8 text-purple-700 flex-shrink-0" />
+                    <ImageIcon className="w-8 h-8 text-[var(--hw-text-on-dark)] flex-shrink-0" />
                     <div className="flex-1 text-left">
-                      <div className="text-xl font-semibold text-gray-900">
+                      <div className="text-xl font-semibold text-[var(--hw-text-on-dark)]">
                         Choose from Photos
                       </div>
-                      <div className="text-base text-gray-600">
+                      <div className="text-base text-[var(--hw-text-on-dark)]/80">
                         Select from your gallery or files
                       </div>
                     </div>
@@ -239,15 +242,15 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
               {/* Take Photo - Secondary option */}
               <button
                 onClick={() => setShowCamera(true)}
-                className="w-full py-6 px-6 bg-white/10 border-2 border-white/30 hover:bg-white/20 rounded-2xl active:scale-95 transition-all"
+                className="w-full min-h-[60px] py-5 px-6 bg-[var(--hw-surface)] border-2 border-[var(--hw-border-strong)] hover:bg-[var(--hw-section-bg)] rounded-2xl active:scale-[0.98] transition-all shadow-sm hover:shadow-md"
               >
                 <div className="flex items-center gap-4">
-                  <Camera className="w-8 h-8 text-white flex-shrink-0" />
+                  <Camera className="w-8 h-8 text-[var(--hw-text-primary)] flex-shrink-0" />
                   <div className="flex-1 text-left">
-                    <div className="text-xl font-semibold text-white">
+                    <div className="text-xl font-semibold text-[var(--hw-text-primary)]">
                       Take Photo
                     </div>
-                    <div className="text-base text-white/80">
+                    <div className="text-base text-[var(--hw-text-secondary)]">
                       Use your camera
                     </div>
                   </div>
@@ -256,13 +259,12 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
             </div>
 
             {/* Cancel button */}
-            <Button
-              variant="ghost"
+            <button
               onClick={onCancel}
-              className="text-white hover:bg-white/10 text-base"
+              className="text-white hover:bg-white/10 text-base min-h-[48px] px-6 py-3 rounded-xl transition-all"
             >
               Cancel
-            </Button>
+            </button>
           </div>
         ) : (
           /* Camera view - only shown when user clicks "Take Photo" */
@@ -285,57 +287,55 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
               <div className="absolute inset-0 flex items-center justify-center p-6">
                 <div className="text-center text-white">
                   <Camera className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg mb-4">Camera not available</p>
-                  <p className="text-sm text-white/70 mb-4">
+                  <p className="text-xl font-semibold mb-4">Camera not available</p>
+                  <p className="text-base text-white/80 mb-6">
                     Please go back and choose a photo from your gallery
                   </p>
-                  <Button
-                    variant="secondary"
+                  <button
                     onClick={() => setShowCamera(false)}
-                    className="bg-white/90 hover:bg-white text-base px-6"
+                    className="bg-[var(--hw-surface)]/90 hover:bg-[var(--hw-surface)] text-[var(--hw-text-primary)] text-base px-6 py-3 min-h-[60px] rounded-xl font-semibold transition-all shadow-lg"
                   >
                     Back to Photo Picker
-                  </Button>
+                  </button>
                 </div>
               </div>
             )}
 
             {/* Helper text */}
             <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-              <div className="bg-black/60 text-white text-[16px] px-3 py-2 rounded-md max-w-[70%]">
+              <div className="bg-black/60 text-white text-base px-4 py-2 rounded-lg max-w-[70%]">
                 Frame your photo and tap the capture button
               </div>
-              <Button
-                variant="secondary"
-                size="sm"
+              <button
                 onClick={() => {
                   stopCamera();
                   setShowCamera(false);
                 }}
-                className="bg-white/90 hover:bg-white text-base px-4"
+                className="bg-[var(--hw-surface)]/90 hover:bg-[var(--hw-surface)] text-[var(--hw-text-primary)] text-base px-4 py-2 rounded-lg min-h-[48px] font-medium transition-all shadow-sm"
               >
                 Back
-              </Button>
+              </button>
             </div>
 
             {/* Controls */}
             <div className="absolute bottom-0 left-0 right-0 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-8 px-5 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
               <div className="relative flex items-center justify-center">
-                {/* Capture button - Center with camera icon */}
+                {/* Capture button - Center with camera icon (Primary action: 72px+) */}
                 <button
                   onClick={handleCapture}
                   disabled={cameraError}
-                  className="h-20 w-20 rounded-full bg-white border-4 border-white/40 shadow-lg active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                  aria-label="Capture"
+                  className="min-h-[80px] min-w-[80px] rounded-full bg-[var(--hw-surface)] border-4 border-white/40 shadow-2xl active:scale-95 hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  aria-label="Capture photo"
                 >
-                  <Camera className="w-8 h-8 text-gray-800" />
+                  <Camera className="w-10 h-10 text-[var(--hw-primary)]" />
                 </button>
 
                 {/* Flip camera - Absolute right */}
                 <button
                   onClick={handleFlipCamera}
                   disabled={cameraError}
-                  className="absolute right-8 text-white flex items-center justify-center h-[68px] w-[68px] rounded-full bg-white/10 border border-white/20 hover:bg-white/20 active:scale-95 transition disabled:opacity-50"
+                  className="absolute right-8 text-white flex items-center justify-center min-h-[68px] min-w-[68px] rounded-full bg-white/10 border border-white/20 hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  aria-label="Switch camera"
                 >
                   <RefreshCw className="w-8 h-8" />
                 </button>
@@ -348,8 +348,8 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
         <div className="absolute inset-0 bg-black flex flex-col">
           {/* Header with instructions */}
           <div className="flex-shrink-0 px-6 py-4 bg-black/90">
-            <p className="text-white text-center text-base">
-              Pinch or drag to zoom and position your photo
+            <p className="text-white text-center text-base md:text-lg font-medium">
+              Drag to reposition, use slider to zoom
             </p>
           </div>
 
@@ -414,19 +414,19 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
 
           {/* Action buttons */}
           <div className="flex-shrink-0 px-6 pb-8 pt-4 grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
+            <button
               onClick={handleRetake}
-              className="h-[60px] rounded-xl bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
+              className="min-h-[60px] rounded-xl bg-[var(--hw-surface)] text-[var(--hw-text-primary)] border-2 border-[var(--hw-border-strong)] hover:bg-[var(--hw-section-bg)] text-base md:text-lg font-semibold transition-all active:scale-[0.98] focus-visible:ring-4 focus-visible:ring-[var(--hw-primary)] focus-visible:ring-offset-2"
             >
               Start Over
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={handleUsePhoto}
-              className="h-[60px] rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+              className="min-h-[60px] rounded-xl text-[var(--hw-text-on-dark)] text-base md:text-lg font-semibold hover:shadow-xl transition-all active:scale-[0.98] focus-visible:ring-4 focus-visible:ring-[var(--hw-primary)] focus-visible:ring-offset-2"
+              style={{ background: 'var(--hw-primary)' }}
             >
               Use This Photo
-            </Button>
+            </button>
           </div>
         </div>
       ) : null}
