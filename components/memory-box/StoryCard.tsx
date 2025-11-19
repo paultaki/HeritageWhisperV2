@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { VisibilityModal } from "./VisibilityModal";
+import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
 
 type Props = {
   id: string;
@@ -17,6 +18,8 @@ type Props = {
   preview: string; // Kept for backwards compatibility but not displayed
   imageUrl: string;
   photoTransform?: { zoom: number; position: { x: number; y: number } };
+  photoWidth?: number;
+  photoHeight?: number;
   year?: number | null;
   age?: string;
   durationSeconds?: number;
@@ -59,6 +62,8 @@ export function StoryCard({
   preview, // Not used but kept for compatibility
   imageUrl,
   photoTransform,
+  photoWidth,
+  photoHeight,
   year,
   age,
   durationSeconds = 0,
@@ -105,27 +110,19 @@ export function StoryCard({
   return (
     <>
       <article className="bg-white rounded-xl border-2 border-gray-200 hover:shadow-xl transition-all duration-200 overflow-hidden flex flex-col">
-        {/* Thumbnail with 16:10 Aspect Ratio */}
+        {/* Thumbnail with 16:10 Aspect Ratio - Now with blur-extend for portrait images */}
         <div
-          className="relative overflow-hidden cursor-pointer aspect-[16/10] w-full"
+          className="relative cursor-pointer"
           onClick={onView}
         >
-          <img
-            className="w-full h-full object-cover"
+          <StoryPhotoWithBlurExtend
             src={imageUrl}
             alt={title}
-            loading="lazy"
-            decoding="async"
-            style={
-              photoTransform
-                ? {
-                    transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x}%, ${photoTransform.position.y}%)`,
-                    transformOrigin: "center center",
-                    objectFit: "cover",
-                    objectPosition: "center center",
-                  }
-                : undefined
-            }
+            width={photoWidth}
+            height={photoHeight}
+            transform={photoTransform}
+            aspectRatio={16 / 10}
+            className="rounded-t-xl overflow-hidden"
           />
 
           {/* Duration Badge - Top left */}

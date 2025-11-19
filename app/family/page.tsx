@@ -692,7 +692,7 @@ export default function FamilyPage() {
 
       {/* Invite Dialog - only for premium users */}
       <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-        <DialogContent className="sm:max-w-[540px]">
+        <DialogContent className="sm:max-w-[540px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl md:text-3xl font-semibold">
               Invite Family Member

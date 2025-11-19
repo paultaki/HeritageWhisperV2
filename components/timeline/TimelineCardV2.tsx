@@ -6,11 +6,14 @@ import { Card } from '@/components/ui/card';
 import { normalizeYear } from '@/lib/utils';
 import { apiRequest } from '@/lib/queryClient';
 import PlayPauseButton from '@/components/ui/PlayPauseButton';
+import { StoryPhotoWithBlurExtend } from '@/components/StoryPhotoWithBlurExtend';
 
 interface Photo {
   url: string;
   isHero?: boolean;
   transform?: any;
+  width?: number;
+  height?: number;
 }
 
 interface Story {
@@ -253,26 +256,21 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
         {normalizeYear(story.storyYear)}
       </span>
 
-      {/* Photo section with carousel */}
+      {/* Photo section with carousel - Now with blur-extend for portrait images */}
       {photos.length > 0 && (
         <div
-          className="relative w-full aspect-[16/10] bg-gray-100"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          <img
+          <StoryPhotoWithBlurExtend
             src={currentPhoto.url}
             alt={story.title}
-            className="w-full h-full object-cover"
-            style={
-              currentPhoto.transform
-                ? {
-                    transform: `scale(${currentPhoto.transform.zoom}) translate(${currentPhoto.transform.position.x}%, ${currentPhoto.transform.position.y}%)`,
-                    transformOrigin: 'center center',
-                  }
-                : undefined
-            }
+            width={currentPhoto.width}
+            height={currentPhoto.height}
+            transform={currentPhoto.transform}
+            aspectRatio={16 / 10}
+            className="bg-gray-100"
           />
 
           {/* CHANGE 3: Photo count indicator */}

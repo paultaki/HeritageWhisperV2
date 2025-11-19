@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
 
 type TreasureCategory = "photos" | "documents" | "heirlooms" | "keepsakes" | "recipes" | "memorabilia";
 
@@ -32,6 +33,8 @@ type Props = {
   transform?: { zoom: number; position: { x: number; y: number } };
   // DEPRECATED (backward compatibility):
   imageUrl?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   category: TreasureCategory;
   year?: number;
   isFavorite: boolean;
@@ -62,6 +65,8 @@ export function TreasureCard({
   displayUrl,
   transform,
   imageUrl,
+  imageWidth,
+  imageHeight,
   category,
   year,
   isFavorite,
@@ -98,47 +103,40 @@ export function TreasureCard({
       style={{ maxWidth: "480px" }}
       onClick={onEdit}
     >
-      {/* Image Container - 75% of card height */}
-      <div
-        className="relative overflow-hidden ring-1 ring-inset ring-black/10"
-        style={{ minHeight: "200px", aspectRatio: "16/10" }}
-      >
-        {!imageError ? (
-          transform ? (
-            // Use regular img with transform when zoom/pan is set
-            <img
-              src={displayUrl || imageUrl}
-              alt={title}
-              className={cn(
-                "w-full h-full object-cover transition-opacity duration-300",
-                imageLoaded ? "opacity-100" : "opacity-0"
-              )}
-              style={{
-                transform: `scale(${transform.zoom}) translate(${transform.position.x}%, ${transform.position.y}%)`,
-                transformOrigin: 'center center',
-              }}
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageError(true)}
-              loading="lazy"
-            />
-          ) : (
-            // Use regular img without transform
-            <img
-              src={displayUrl || imageUrl}
-              alt={title}
-              className={cn(
-                "w-full h-full object-cover transition-opacity duration-300",
-                imageLoaded ? "opacity-100" : "opacity-0"
-              )}
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageError(true)}
-              loading="lazy"
-            />
-          )
+      {/* Image Container - 75% of card height - Now with blur-extend for portrait images */}
+      <div className="relative">
+        {!imageError && (displayUrl || imageUrl) ? (
+          <StoryPhotoWithBlurExtend
+            src={displayUrl || imageUrl!}
+            alt={title}
+            width={imageWidth}
+            height={imageHeight}
+            transform={transform}
+            aspectRatio={16 / 10}
+            className={cn(
+              "overflow-hidden ring-1 ring-inset ring-black/10 transition-opacity duration-300",
+              imageLoaded ? "opacity-100" : "opacity-0"
+            )}
+            imgClassName="transition-opacity duration-300"
+          />
         ) : (
-          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+          <div
+            className="w-full bg-gray-100 flex items-center justify-center overflow-hidden ring-1 ring-inset ring-black/10"
+            style={{ minHeight: "200px", aspectRatio: "16/10" }}
+          >
             <CategoryIcon className="w-16 h-16 text-gray-300" />
           </div>
+        )}
+        {/* Hidden img for loading/error detection */}
+        {(displayUrl || imageUrl) && (
+          <img
+            src={displayUrl || imageUrl!}
+            alt=""
+            className="hidden"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+            loading="lazy"
+          />
         )}
 
         {/* Skeleton loader */}

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { StatusIcons } from "./StatusIcons";
 import { VisibilityModal } from "./VisibilityModal";
+import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
 
 export type MemoryCardProps = {
   memory: {
@@ -24,6 +25,8 @@ export type MemoryCardProps = {
     inBook: boolean;
     favorited?: boolean;
     thumbUrl: string;
+    thumbWidth?: number;
+    thumbHeight?: number;
   };
   selected: boolean;
   onToggleSelect: (id: string) => void;
@@ -90,6 +93,8 @@ const MemoryCard = memo(
       inBook,
       favorited = false,
       thumbUrl,
+      thumbWidth,
+      thumbHeight,
     } = memory;
 
     const [visibilityModalOpen, setVisibilityModalOpen] = useState(false);
@@ -137,16 +142,16 @@ const MemoryCard = memo(
             />
           </div>
 
-          {/* Thumbnail - 16:9 aspect ratio for consistency */}
-          <div className="relative w-full overflow-hidden rounded-xl bg-slate-200">
-            <Image
+          {/* Thumbnail - 16:9 aspect ratio - Now with blur-extend for portrait images */}
+          <div className="relative w-full">
+            <StoryPhotoWithBlurExtend
               src={thumbUrl}
-              alt=""
-              width={640}
-              height={360}
-              className="aspect-video w-full object-cover"
+              alt={title || "Memory"}
+              width={thumbWidth || 640}
+              height={thumbHeight || 360}
+              aspectRatio={16 / 9}
               priority={false}
-              loading="lazy"
+              className="rounded-xl bg-slate-200"
             />
             {/* Audio duration badge - Top left (below selection if present) */}
             {hasAudio && durationSec && (

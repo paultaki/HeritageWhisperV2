@@ -6,6 +6,7 @@ import { Pencil, Clock, Volume2, Pause, Loader2 } from "lucide-react";
 import { DecadeIntroPage } from "@/components/BookDecadePages";
 import { ScrollIndicator } from "@/components/ScrollIndicators";
 import { apiRequest } from "@/lib/queryClient";
+import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
 
 interface Story {
   id: string;
@@ -23,6 +24,8 @@ interface Story {
     url?: string;
     caption?: string;
     isHero?: boolean;
+    width?: number;
+    height?: number;
   }>;
   wisdomClipText?: string;
 }
@@ -741,22 +744,26 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
         </div>
       )}
 
-      {/* Photo at top if available */}
+      {/* Photo at top if available - Now with blur-extend for portrait images */}
       {story.photos && story.photos.length > 0 && (() => {
         // Find the hero photo, or use the first photo as fallback
         const heroPhoto = story.photos.find(p => p.isHero) || story.photos[0];
         // Get display URL (prefer displayUrl, fall back to url for backward compatibility)
         const photoUrl = heroPhoto.displayUrl || heroPhoto.url;
+
+        // Only render if we have a valid photo URL
+        if (!photoUrl) return null;
+
         return (
           <div className="mb-2">
-            <div
-              data-nav-ink="light"
-              className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5"
-            >
-              <img
+            <div data-nav-ink="light">
+              <StoryPhotoWithBlurExtend
                 src={photoUrl}
                 alt={story.title}
-                className="w-full h-full object-cover"
+                width={heroPhoto.width}
+                height={heroPhoto.height}
+                aspectRatio={16 / 10}
+                className="rounded-md shadow ring-1 ring-black/5"
               />
             </div>
             {heroPhoto.caption && (
