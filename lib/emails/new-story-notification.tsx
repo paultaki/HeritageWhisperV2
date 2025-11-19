@@ -1,7 +1,10 @@
+import { generateUnsubscribeToken } from '@/app/api/family/unsubscribe/route';
+
 // Email template for when storyteller adds a new story
 export interface NewStoryNotificationEmailProps {
   storytellerName: string;
   familyMemberName?: string;
+  familyMemberId: string; // Required for unsubscribe link
   storyTitle: string;
   storyYear?: number;
   heroPhotoUrl?: string;
@@ -12,6 +15,7 @@ export interface NewStoryNotificationEmailProps {
 export function NewStoryNotificationEmail({
   storytellerName,
   familyMemberName,
+  familyMemberId,
   storyTitle,
   storyYear,
   heroPhotoUrl,
@@ -19,6 +23,11 @@ export function NewStoryNotificationEmail({
   viewStoryLink,
 }: NewStoryNotificationEmailProps) {
   const yearText = storyYear ? ` (${storyYear})` : '';
+
+  // Generate unsubscribe token and link
+  const unsubscribeToken = generateUnsubscribeToken(familyMemberId);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dev.heritagewhisper.com';
+  const unsubscribeLink = `${appUrl}/api/family/unsubscribe?token=${unsubscribeToken}`;
 
   return {
     subject: `${storytellerName} added a new story: "${storyTitle}"`,
@@ -109,11 +118,11 @@ export function NewStoryNotificationEmail({
               </p>
 
               <p style="margin: 0; font-size: 13px; color: #9CA3AF; line-height: 1.5;">
-                You're receiving this email because you have access to ${storytellerName}'s Heritage Whisper stories. You can manage your notification preferences in your profile settings.
+                You're receiving this email because you have access to ${storytellerName}'s Heritage Whisper stories.
               </p>
 
               <p style="margin: 16px 0; font-size: 12px; color: #9CA3AF; text-align: center; line-height: 1.5;">
-                Want to pause these updates? You can <a href="mailto:support@heritagewhisper.com?subject=Disable%20Story%20Notifications" style="color: #6B7280; text-decoration: underline;">disable story notifications</a>.
+                Want to pause these updates? <a href="${unsubscribeLink}" style="color: #6B7280; text-decoration: underline;">Unsubscribe from story notifications</a>.
               </p>
 
               <p style="margin: 16px 0 0; font-size: 13px; color: #9CA3AF; text-align: center;">
@@ -147,9 +156,10 @@ You can view all stories in the Timeline or Memory Book.
 About Story Notifications:
 When ${storytellerName} adds a new story to their Heritage Whisper collection, we'll send you a notification so you can stay connected to their memories. These stories are precious family history being preserved for generations.
 
-You're receiving this email because you have access to ${storytellerName}'s stories. You can manage your notification preferences in your profile settings.
+You're receiving this email because you have access to ${storytellerName}'s stories.
 
-Want to pause these updates? Email support@heritagewhisper.com to disable story notifications.
+Want to pause these updates? Unsubscribe here:
+${unsubscribeLink}
 
 © ${new Date().getFullYear()} Heritage Whisper. All rights reserved.
 HeritageWhisper, 522 W Riverside Ave Ste N, Spokane, WA 99201

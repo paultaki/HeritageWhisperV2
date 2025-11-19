@@ -99,17 +99,17 @@ export default function PricingSection() {
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-4 mb-6 min-h-[120px] sm:min-h-[56px]">
               <button
                 onClick={() => router.push('/auth/register')}
-                className="flex-1 px-8 py-4 bg-heritage-deep-slate text-white text-lg font-semibold rounded-xl hover:bg-heritage-deep-slate/90 transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02]"
+                className="flex-1 px-8 py-4 bg-heritage-deep-slate text-white text-lg font-semibold rounded-xl hover:bg-heritage-deep-slate/90 transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02] h-[56px]"
               >
                 Start Free — Unlimited Stories
               </button>
 
               <button
                 onClick={() => router.push('/auth/register')}
-                className="flex-1 px-8 py-4 bg-white text-heritage-gold text-lg font-semibold rounded-xl border-2 border-heritage-gold hover:bg-heritage-gold/5 transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02]"
+                className="flex-1 px-8 py-4 bg-white text-heritage-gold text-lg font-semibold rounded-xl border-2 border-heritage-gold hover:bg-heritage-gold/5 transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02] h-[56px]"
               >
                 Gift Family Sharing
               </button>

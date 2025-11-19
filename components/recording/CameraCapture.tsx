@@ -413,7 +413,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
           </div>
 
           {/* Action buttons */}
-          <div className="flex-shrink-0 px-6 pb-8 pt-4 grid grid-cols-2 gap-3">
+          <div className="flex-shrink-0 px-6 pb-8 pt-4 grid grid-cols-2 gap-3 relative z-[110]">
             <button
               onClick={handleRetake}
               className="min-h-[60px] rounded-xl bg-[var(--hw-surface)] text-[var(--hw-text-primary)] border-2 border-[var(--hw-border-strong)] hover:bg-[var(--hw-section-bg)] text-base md:text-lg font-semibold transition-all active:scale-[0.98] focus-visible:ring-4 focus-visible:ring-[var(--hw-primary)] focus-visible:ring-offset-2"

@@ -42,15 +42,15 @@ export default function GlassNav({
         "w-[86vw] max-w-[400px] rounded-[22px] overflow-hidden",
         // layout - evenly distributed spacing with more breathing room
         "flex items-center justify-around px-4 py-1.5",
-        // glass core - brand-aligned (conditional on assertive mode)
+        // glass core - brand-aligned (conditional on assertive mode) - ENHANCED for seniors
         isAssertive
-          ? "backdrop-blur-[22px] saturate-[1.15] contrast-[1.25] brightness-[0.92]" // Assertive: stronger separation for photos
-          : "backdrop-blur-[18px] saturate-[1.22] contrast-[1.12] brightness-[0.97]", // Normal: balanced glass effect
-        "border border-white/35",
+          ? "backdrop-blur-[28px] saturate-[1.15] contrast-[1.25] brightness-[0.88]" // Assertive: stronger separation for photos
+          : "backdrop-blur-[24px] saturate-[1.22] contrast-[1.12] brightness-[0.94]", // Normal: enhanced visibility
+        "border border-white/50", // Increased border opacity for better definition
         "shadow-[0_20px_40px_-20px_rgba(0,0,0,0.45)]",
-        // taupe tint based on brand color #866C7A
-        "bg-[linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04))]",
-        "bg-[rgba(134,108,122,0.12)]",
+        // taupe tint based on brand color #866C7A - STRONGER for visibility
+        "bg-[linear-gradient(180deg,rgba(255,255,255,0.15),rgba(255,255,255,0.08))]",
+        "bg-[rgba(134,108,122,0.18)]", // Increased from 0.12 to 0.18 for better visibility
         "relative",
         // subtle edge shadow for lift
         "after:content-[''] after:absolute after:inset-x-4 after:-bottom-2 after:h-3 after:rounded-[20px] after:blur-[14px] after:bg-black/10 after:pointer-events-none",

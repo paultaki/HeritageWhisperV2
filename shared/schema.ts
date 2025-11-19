@@ -518,6 +518,7 @@ export const familyMembers = pgTable("family_members", {
   lastAccessedAt: timestamp("last_accessed_at"),
   accessCount: integer("access_count").default(0),
   lastStoryNotificationSentAt: timestamp("last_story_notification_sent_at"), // For daily digest notifications
+  emailNotifications: boolean("email_notifications").notNull().default(true), // Opt-out via unsubscribe link
   customMessage: text("custom_message"),
   permissions: jsonb("permissions")
     .$type<{

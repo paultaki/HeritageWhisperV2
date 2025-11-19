@@ -356,7 +356,13 @@ export function useRealtimeInterview() {
           setStatus('error');
           onError?.(err);
         },
-      }, process.env.NEXT_PUBLIC_OPENAI_API_KEY || '', config);
+      },
+      // TODO: SECURITY - Implement server-side ephemeral token proxy before re-enabling
+      // Client-side API key exposure removed for beta launch
+      // See: /app/api/realtime-session/route.ts (needs implementation)
+      '' /* process.env.NEXT_PUBLIC_OPENAI_API_KEY || '' */,
+      config
+    );
 
       realtimeHandlesRef.current = handles;
 

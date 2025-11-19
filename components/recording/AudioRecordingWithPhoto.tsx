@@ -499,10 +499,10 @@ export function AudioRecordingWithPhoto({
             {!isProcessing && (
               <button
                 onClick={() => setIsEditingPhoto(true)}
-                className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105"
+                className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105 min-h-[48px]"
               >
-                <Edit2 className="w-4 h-4" />
-                <span className="text-sm font-medium">Edit Photo</span>
+                <Edit2 className="w-5 h-5" />
+                <span className="text-base font-medium">Edit Photo</span>
               </button>
             )}
           </div>
@@ -576,7 +576,7 @@ export function AudioRecordingWithPhoto({
         <div className="mt-6 md:mt-8 flex items-center justify-center gap-4">
           <button
             onClick={handlePauseResume}
-            className="min-h-[7rem] min-w-[7rem] md:min-h-[8rem] md:min-w-[8rem] rounded-full text-white flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 outline-none focus-visible:ring-4 focus-visible:ring-[var(--hw-primary)] focus-visible:ring-offset-2 touch-none"
+            className="h-28 w-28 md:h-32 md:w-32 flex-shrink-0 rounded-full text-white flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 outline-none focus-visible:ring-4 focus-visible:ring-[var(--hw-primary)] focus-visible:ring-offset-2 touch-none"
             style={{
               background: isPaused ? 'var(--hw-secondary)' : 'var(--hw-primary)'
             }}
@@ -596,7 +596,7 @@ export function AudioRecordingWithPhoto({
         </div>
 
           {/* Stop & Save - Centered with safe spacing */}
-          <div className="mt-auto pt-6 md:pt-8 flex justify-center pb-safe">
+          <div className="mt-auto pt-6 md:pt-8 pb-4 flex justify-center relative z-[110]">
             <button
               onClick={handleStopAndSave}
               className="w-full max-w-sm min-h-[60px] md:min-h-[72px] rounded-2xl text-lg md:text-xl font-semibold text-[var(--hw-text-on-dark)] hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-xl focus-visible:ring-4 focus-visible:ring-[var(--hw-primary)] focus-visible:ring-offset-2 px-8 py-4"

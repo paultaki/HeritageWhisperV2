@@ -59,6 +59,9 @@ export default function InterviewChatPage() {
   const [showTimeWarning, setShowTimeWarning] = useState(false);
   const sessionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Check if feature is enabled (for beta launch)
+  const isFeatureEnabled = process.env.NEXT_PUBLIC_FEATURE_REALTIME_INTERVIEW === 'true';
+
   // Check if Realtime API is enabled
   const isRealtimeEnabled = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true';
 
@@ -504,6 +507,34 @@ export default function InterviewChatPage() {
       alert('Failed to complete interview. Please try again.');
     }
   };
+
+  // Show "Coming Soon" if feature is disabled
+  if (!isFeatureEnabled) {
+    return (
+      <div className="hw-page flex items-center justify-center" style={{ background: 'var(--color-page)' }}>
+        <div className="text-center max-w-md px-6">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-6 flex items-center justify-center">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H10m9-7a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-3">Coming Soon</h1>
+          <p className="text-gray-600 mb-6">
+            Our AI-powered interview feature is currently being enhanced with improved security and performance.
+          </p>
+          <p className="text-sm text-gray-500 mb-8">
+            In the meantime, you can record your stories using our standard recording feature.
+          </p>
+          <button
+            onClick={() => router.push('/recording')}
+            className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-semibold px-6 py-3 rounded-full transition-all shadow-md"
+          >
+            Go to Recording
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state while checking auth
   if (isLoading) {

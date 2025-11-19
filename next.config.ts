@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
       },
     ],
     // Image quality settings (required for Next.js 16+)
-    qualities: [75, 100], // Allow quality 75 (default) and 100 (high quality)
+    qualities: [75, 90, 100], // Allow quality 75 (default), 90, and 100 (high quality)
     // Local patterns for images (required for Next.js 16+)
     localPatterns: [
       {

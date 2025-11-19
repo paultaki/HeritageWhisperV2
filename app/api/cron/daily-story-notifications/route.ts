@@ -82,9 +82,11 @@ export async function GET(request: NextRequest) {
       email,
       name,
       relationship,
-      last_story_notification_sent_at
+      last_story_notification_sent_at,
+      email_notifications
     `)
     .eq('status', 'active')
+    .eq('email_notifications', true) // Only notify users who haven't unsubscribed
     .or(`last_story_notification_sent_at.is.null,last_story_notification_sent_at.lt.${twentyFourHoursAgo}`);
 
   if (membersError) {
@@ -198,6 +200,7 @@ export async function GET(request: NextRequest) {
       const emailContent = NewStoryNotificationEmail({
         storytellerName: storyteller.name || 'Your family member',
         familyMemberName: member.name || undefined,
+        familyMemberId: member.id, // For unsubscribe link
         storyTitle: firstStory.title || 'Untitled Story',
         storyYear: firstStory.year || undefined,
         heroPhotoUrl,

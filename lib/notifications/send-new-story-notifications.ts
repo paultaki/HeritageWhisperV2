@@ -104,11 +104,13 @@ export async function sendNewStoryNotifications({
 
     // Fetch all family members with access to this storyteller
     // This includes both magic-link-based (V2) and account-based (V3) family sharing
+    // Only notify users who haven't unsubscribed
     const { data: familyMembers, error: familyError } = await supabaseAdmin
       .from('family_members')
-      .select('id, name, email, auth_user_id')
+      .select('id, name, email, auth_user_id, email_notifications')
       .eq('user_id', storytellerUserId)
-      .eq('status', 'active');
+      .eq('status', 'active')
+      .eq('email_notifications', true);
 
     if (familyError || !familyMembers || familyMembers.length === 0) {
       console.log('[StoryNotification] No active family members to notify');
@@ -138,6 +140,7 @@ export async function sendNewStoryNotifications({
         const emailContent = NewStoryNotificationEmail({
           storytellerName,
           familyMemberName,
+          familyMemberId: member.id, // Required for unsubscribe link
           storyTitle,
           storyYear,
           heroPhotoUrl: heroPhotoUrl || undefined,

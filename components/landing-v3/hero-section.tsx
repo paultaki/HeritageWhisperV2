@@ -28,17 +28,17 @@ export default function HeroSection() {
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 min-h-[120px] sm:min-h-[56px]">
               <button
                 onClick={() => router.push('/auth/register')}
-                className="px-8 py-4 bg-heritage-deep-slate text-white text-lg font-semibold rounded-xl hover:bg-heritage-deep-slate/90 transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02]"
+                className="px-8 py-4 bg-heritage-deep-slate text-white text-lg font-semibold rounded-xl hover:bg-heritage-deep-slate/90 transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02] h-[56px]"
               >
                 Start Free — Unlimited Stories
               </button>
 
               <button
                 onClick={() => router.push('/auth/register')}
-                className="px-8 py-4 bg-white text-heritage-gold text-lg font-semibold rounded-xl border-2 border-heritage-gold hover:bg-heritage-gold/5 transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02]"
+                className="px-8 py-4 bg-white text-heritage-gold text-lg font-semibold rounded-xl border-2 border-heritage-gold hover:bg-heritage-gold/5 transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02] h-[56px]"
               >
                 Gift Family Sharing — $79/year
               </button>
@@ -71,7 +71,7 @@ export default function HeroSection() {
 
           {/* Right: Visual */}
           <div className="relative">
-            <div className="aspect-[4/3] relative rounded-2xl shadow-xl overflow-hidden border border-heritage-deep-slate/10 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]">
+            <div className="aspect-[4/3] relative rounded-2xl shadow-xl overflow-hidden border border-heritage-deep-slate/10 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] bg-heritage-deep-slate/5">
               <Image
                 src="/grandparent.webp"
                 alt="Grandparent with smartphone, mid-story, natural lighting"
@@ -79,6 +79,9 @@ export default function HeroSection() {
                 priority
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
                 className="object-cover"
+                quality={90}
+                placeholder="blur"
+                blurDataURL="data:image/webp;base64,UklGRjQAAABXRUJQVlA4ICgAAAAwAQCdASoQAAwAAUAmJaQAA3AA/vuiAA=="
               />
             </div>
 
