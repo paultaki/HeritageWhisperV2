@@ -502,7 +502,7 @@ export default function Profile() {
     "Friend";
 
   return (
-    <div className="hw-page bg-gradient-to-br from-orange-50 via-white to-rose-50 flex flex-col overflow-x-hidden">
+    <div className="hw-page bg-[var(--hw-page-bg)] flex flex-col overflow-x-hidden">
       {/* Desktop Header */}
       <DesktopPageHeader
         icon={User}
@@ -513,10 +513,7 @@ export default function Profile() {
             variant="ghost"
             size="sm"
             onClick={() => setShowHelp((prev) => !prev)}
-            className="text-gray-600"
-            style={{ color: '#99898C' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#7C6569'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#99898C'}
+            className="text-[var(--hw-text-secondary)] hover:text-[var(--hw-text-primary)] min-h-[48px] min-w-[48px]"
           >
             <HelpCircle className="h-5 w-5" />
           </Button>
@@ -534,8 +531,7 @@ export default function Profile() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-600 md:hidden"
-                style={{ color: '#99898C' }}
+                className="text-[var(--hw-text-secondary)] hover:text-[var(--hw-text-primary)] md:hidden min-h-[48px] min-w-[48px]"
               >
                 <Menu className="h-5 w-5" />
               </Button>
@@ -550,10 +546,7 @@ export default function Profile() {
             variant="ghost"
             size="sm"
             onClick={() => setShowHelp((prev) => !prev)}
-            className="text-gray-600"
-            style={{ color: '#99898C' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#7C6569'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#99898C'}
+            className="text-[var(--hw-text-secondary)] hover:text-[var(--hw-text-primary)] min-h-[48px] min-w-[48px]"
           >
             <HelpCircle className="h-5 w-5" />
           </Button>
@@ -566,12 +559,11 @@ export default function Profile() {
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
-            className="border-b"
-            style={{ backgroundColor: '#F9E5E8', borderColor: '#E0D9D7' }}
+            className="border-b bg-[var(--hw-warning-bg)] border-[var(--hw-border-subtle)]"
           >
-            <div className="max-w-6xl mx-auto px-4 md:px-6 py-4" style={{ color: '#7C6569' }}>
+            <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 text-[var(--hw-text-primary)]">
               <h3 className="font-semibold text-lg mb-2">Need a hand?</h3>
-              <ul className="space-y-1 text-base">
+              <ul className="space-y-1 text-base leading-relaxed">
                 <li>• Update your photo, bio, and contact preferences here.</li>
                 <li>• Toggle AI features if you want manual-only storytelling.</li>
                 <li>• Export your entire archive or print-ready book PDFs.</li>
@@ -618,8 +610,8 @@ export default function Profile() {
                     disabled={updateProfileMutation.isPending}
                   />
                   <div className="flex-1 pt-4">
-                    <h4 className="font-medium mb-1">Profile Photo</h4>
-                    <p className="text-xs md:text-sm text-muted-foreground">
+                    <h4 className="font-medium text-base mb-1">Profile Photo</h4>
+                    <p className="text-base text-[var(--hw-text-secondary)]">
                       Click the camera icon to upload a new photo. You can zoom and reposition before saving.
                     </p>
                   </div>
@@ -629,7 +621,7 @@ export default function Profile() {
 
                 <div className="grid gap-4">
                   <div>
-                    <Label htmlFor="name" className="text-base">
+                    <Label htmlFor="name" className="text-base font-medium">
                       Full Name
                     </Label>
                     <Input
@@ -637,31 +629,31 @@ export default function Profile() {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="mt-2 h-12 text-base"
+                      className="mt-2 h-14 text-base"
                       placeholder="Your full name"
                       required
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="email" className="text-base">
+                    <Label htmlFor="email" className="text-base font-medium">
                       Email
                     </Label>
                     <Input
                       id="email"
                       type="email"
                       value={email}
-                      className="mt-2 h-12 text-base"
+                      className="mt-2 h-14 text-base"
                       disabled
                       placeholder="your@email.com"
                     />
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-base text-[var(--hw-text-secondary)] mt-1">
                       Email cannot be changed
                     </p>
                   </div>
 
                   <div>
-                    <Label htmlFor="birthYear" className="text-base">
+                    <Label htmlFor="birthYear" className="text-base font-medium">
                       Birth Year
                     </Label>
                     <Input
@@ -669,30 +661,30 @@ export default function Profile() {
                       type="number"
                       value={birthYear}
                       onChange={(e) => setBirthYear(e.target.value)}
-                      className="mt-2 h-12 text-base"
+                      className="mt-2 h-14 text-base"
                       placeholder="1952"
                       min="1920"
                       max="2010"
                       required
                     />
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-base text-[var(--hw-text-secondary)] mt-1">
                       Used to organize your timeline
                     </p>
                   </div>
 
                   <div>
-                    <Label htmlFor="bio" className="text-base">
+                    <Label htmlFor="bio" className="text-base font-medium">
                       About / Bio
                     </Label>
                     <Textarea
                       id="bio"
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      className="mt-2 min-h-[100px] text-base"
+                      className="mt-2 min-h-[100px] text-base leading-relaxed"
                       placeholder="Tell us a little about yourself..."
                       maxLength={500}
                     />
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-base text-[var(--hw-text-secondary)] mt-1">
                       {bio.length}/500 characters
                     </p>
                   </div>
@@ -700,13 +692,10 @@ export default function Profile() {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base"
-                  style={{ backgroundColor: '#7C6569', color: 'white' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+                  className="w-full min-h-[60px] text-lg font-medium bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white"
                   disabled={updateProfileMutation.isPending}
                 >
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save className="w-5 h-5 mr-2" />
                   {updateProfileMutation.isPending
                     ? "Saving..."
                     : "Save Changes"}
@@ -745,19 +734,19 @@ export default function Profile() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <HardDrive className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Storage Used</span>
+                      <HardDrive className="w-5 h-5 text-[var(--hw-text-secondary)]" />
+                      <span className="text-base font-medium">Storage Used</span>
                     </div>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-base text-[var(--hw-text-secondary)]">
                       {storageUsedGB} GB / {storageLimitGB} GB
                     </span>
                   </div>
-                  <div className="w-full bg-muted rounded-full h-2">
+                  <div className="w-full bg-[var(--hw-section-bg)] rounded-full h-2">
                     <div
                       className="rounded-full h-2 transition-all"
                       style={{
                         width: `${storagePercent}%`,
-                        backgroundColor: isPaid ? '#D97706' : '#7C6569'
+                        backgroundColor: isPaid ? 'var(--hw-accent-gold)' : 'var(--hw-primary)'
                       }}
                     />
                   </div>
@@ -765,19 +754,19 @@ export default function Profile() {
 
                 {/* Feature List for Free Users */}
                 {!isPaid && (
-                  <div className="rounded-lg bg-gray-50 p-4 space-y-2">
-                    <p className="text-sm font-semibold text-gray-700 mb-3">Unlock with Premium:</p>
+                  <div className="rounded-lg bg-[var(--hw-section-bg)] p-4 space-y-2">
+                    <p className="text-base font-semibold text-[var(--hw-text-primary)] mb-3">Unlock with Premium:</p>
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <span className="text-red-500">✕</span>
+                      <div className="flex items-center gap-2 text-base text-[var(--hw-text-secondary)]">
+                        <span className="text-[var(--hw-error)]">✕</span>
                         <span>Share stories with family members</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <span className="text-red-500">✕</span>
+                      <div className="flex items-center gap-2 text-base text-[var(--hw-text-secondary)]">
+                        <span className="text-[var(--hw-error)]">✕</span>
                         <span>Family can submit questions</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <span className="text-red-500">✕</span>
+                      <div className="flex items-center gap-2 text-base text-[var(--hw-text-secondary)]">
+                        <span className="text-[var(--hw-error)]">✕</span>
                         <span>Track family engagement</span>
                       </div>
                     </div>
@@ -788,9 +777,9 @@ export default function Profile() {
                 {!isPaid ? (
                   <Button
                     onClick={() => router.push('/upgrade?reason=profile')}
-                    className="w-full h-12 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
+                    className="w-full min-h-[60px] text-lg font-medium bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
                   >
-                    <ArrowUpCircle className="w-4 h-4 mr-2" />
+                    <ArrowUpCircle className="w-5 h-5 mr-2" />
                     Upgrade to Premium - $79/year
                   </Button>
                 ) : (
@@ -817,9 +806,9 @@ export default function Profile() {
                       }
                     }}
                     variant="outline"
-                    className="w-full h-12"
+                    className="w-full min-h-[48px] text-base font-medium"
                   >
-                    <CreditCard className="w-4 h-4 mr-2" />
+                    <CreditCard className="w-5 h-5 mr-2" />
                     Manage Subscription
                   </Button>
                 )}
@@ -839,7 +828,7 @@ export default function Profile() {
             <CardContent>
               <form onSubmit={handleChangePassword} className="space-y-4">
                 <div>
-                  <Label htmlFor="currentPassword" className="text-base">
+                  <Label htmlFor="currentPassword" className="text-base font-medium">
                     Current Password
                   </Label>
                   <Input
@@ -847,13 +836,13 @@ export default function Profile() {
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="mt-2 h-12 text-base"
+                    className="mt-2 h-14 text-base"
                     placeholder="Enter current password"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="newPassword" className="text-base">
+                  <Label htmlFor="newPassword" className="text-base font-medium">
                     New Password
                   </Label>
                   <Input
@@ -861,13 +850,13 @@ export default function Profile() {
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="mt-2 h-12 text-base"
+                    className="mt-2 h-14 text-base"
                     placeholder="Enter new password"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="confirmPassword" className="text-base">
+                  <Label htmlFor="confirmPassword" className="text-base font-medium">
                     Confirm New Password
                   </Label>
                   <Input
@@ -875,20 +864,17 @@ export default function Profile() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="mt-2 h-12 text-base"
+                    className="mt-2 h-14 text-base"
                     placeholder="Confirm new password"
                   />
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base"
-                  style={{ backgroundColor: '#7C6569', color: 'white' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+                  className="w-full min-h-[60px] text-lg font-medium bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white"
                   disabled={updatePasswordMutation.isPending}
                 >
-                  <Lock className="w-4 h-4 mr-2" />
+                  <Lock className="w-5 h-5 mr-2" />
                   {updatePasswordMutation.isPending
                     ? "Updating..."
                     : "Update Password"}
@@ -921,10 +907,10 @@ export default function Profile() {
               <Button
                 type="button"
                 onClick={() => setShowPasskeySetup(true)}
-                className="w-full h-12 text-base"
+                className="w-full min-h-[48px] text-base font-medium"
                 variant="outline"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-5 h-5 mr-2" />
                 Add New Passkey
               </Button>
 
@@ -939,7 +925,7 @@ export default function Profile() {
                   </AlertDialogHeader>
                   <div className="py-4 space-y-4">
                     <div>
-                      <Label htmlFor="passkey-password" className="text-base">
+                      <Label htmlFor="passkey-password" className="text-base font-medium">
                         Current Password
                       </Label>
                       <Input
@@ -947,7 +933,7 @@ export default function Profile() {
                         type="password"
                         value={passkeyPassword}
                         onChange={(e) => setPasskeyPassword(e.target.value)}
-                        className="mt-2 h-12 text-base"
+                        className="mt-2 h-14 text-base"
                         placeholder="Enter your password"
                       />
                     </div>
@@ -1169,13 +1155,13 @@ export default function Profile() {
               <div>
                 <Button
                   variant="outline"
-                  className="w-full h-12 text-base justify-start"
+                  className="w-full min-h-[48px] text-base font-medium justify-start"
                   onClick={handleExportData}
                 >
-                  <Download className="w-4 h-4 mr-2" />
+                  <Download className="w-5 h-5 mr-2" />
                   Export All Data (JSON)
                 </Button>
-                <p className="text-sm text-muted-foreground mt-2 px-1">
+                <p className="text-base text-[var(--hw-text-secondary)] mt-2 px-1">
                   Download a complete copy of your stories, photos, and profile data in JSON format
                 </p>
               </div>
@@ -1233,9 +1219,9 @@ export default function Profile() {
                 <AlertDialogTrigger asChild>
                   <Button
                     variant="destructive"
-                    className="w-full h-12 text-base justify-start"
+                    className="w-full min-h-[48px] text-base font-medium justify-start"
                   >
-                    <Trash2 className="w-4 h-4 mr-2" />
+                    <Trash2 className="w-5 h-5 mr-2" />
                     Delete Account
                   </Button>
                 </AlertDialogTrigger>
@@ -1258,7 +1244,7 @@ export default function Profile() {
                         <li>All family connections</li>
                       </ul>
                       <div className="pt-4">
-                        <Label htmlFor="delete-confirmation" className="text-sm font-medium">
+                        <Label htmlFor="delete-confirmation" className="text-base font-medium">
                           Type <span className="font-bold text-red-600">DELETE</span> to confirm:
                         </Label>
                         <Input
@@ -1267,15 +1253,15 @@ export default function Profile() {
                           value={deleteConfirmation}
                           onChange={(e) => setDeleteConfirmation(e.target.value)}
                           placeholder="Type DELETE"
-                          className="mt-2"
+                          className="mt-2 h-14"
                           autoComplete="off"
                         />
                       </div>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel 
-                      className="h-12"
+                    <AlertDialogCancel
+                      className="min-h-[48px] font-medium"
                       onClick={() => setDeleteConfirmation("")}
                     >
                       Cancel
@@ -1283,7 +1269,7 @@ export default function Profile() {
                     <AlertDialogAction
                       onClick={handleDeleteAccount}
                       disabled={deleteConfirmation !== "DELETE"}
-                      className="h-12 bg-destructive hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="min-h-[48px] font-medium bg-destructive hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Delete Account Permanently
                     </AlertDialogAction>
@@ -1298,7 +1284,7 @@ export default function Profile() {
             <Button
               variant="outline"
               onClick={handleLogout}
-              className="w-full h-12 text-base"
+              className="w-full min-h-[48px] text-base font-medium"
             >
               Sign Out
             </Button>
