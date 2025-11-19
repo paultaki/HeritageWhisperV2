@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import { Calendar } from "lucide-react";
 import { useDecadeSync } from "./useDecadeSync";
 import "@/app/styles/decade-nav.css";
 
@@ -46,11 +46,8 @@ export default function DecadeNav({ entries }: { entries: DecadeEntry[] }) {
           aria-expanded={open}
           aria-label={`Jump to decade: ${entries.find((e) => e.id === activeId)?.label ?? entries[0]?.label}`}
         >
-          <Image
-            src="/timeline-icon.svg"
-            alt="Timeline"
-            width={48}
-            height={48}
+          <Calendar
+            size={24}
             className="timeline-icon"
             style={{ marginRight: '8px' }}
           />

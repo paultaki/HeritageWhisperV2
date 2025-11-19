@@ -38,10 +38,10 @@ export default function GlassNav({
       data-sep="auto"
       data-ink={dataInk}
       className={cn(
-        // width and shape - 20% smaller
-        "w-[72vw] max-w-[336px] rounded-[22px] overflow-hidden",
-        // layout - evenly distributed spacing
-        "flex items-center justify-around px-3 py-1.5",
+        // width and shape - responsive with safe margins
+        "w-[86vw] max-w-[400px] rounded-[22px] overflow-hidden",
+        // layout - evenly distributed spacing with more breathing room
+        "flex items-center justify-around px-4 py-1.5",
         // glass core - brand-aligned (conditional on assertive mode)
         isAssertive
           ? "backdrop-blur-[22px] saturate-[1.15] contrast-[1.25] brightness-[0.92]" // Assertive: stronger separation for photos

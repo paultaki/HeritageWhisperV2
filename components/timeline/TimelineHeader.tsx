@@ -11,7 +11,6 @@
 "use client";
 
 import React from "react";
-import { Calendar } from "lucide-react";
 import type { TimelineHeaderProps } from "@/types/timeline";
 import { MobilePageHeader } from "@/components/PageHeader";
 
@@ -25,7 +24,6 @@ export function TimelineHeader({
 }: TimelineHeaderProps & { rightContent?: React.ReactNode }) {
   return (
     <MobilePageHeader
-      icon={Calendar}
       title="Timeline"
       subtitle="Your life's journey"
       rightContent={rightContent}

@@ -92,7 +92,11 @@ body {
   /* Glass effect - matching nav bar styling */
   backdrop-filter: blur(18px) saturate(1.22) contrast(1.12) brightness(0.97);
   -webkit-backdrop-filter: blur(18px) saturate(1.22) contrast(1.12) brightness(0.97);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04)), var(--color-timeline-decade-bg);
+  /* Enhanced glass background - much more visible */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)),
+    rgba(134, 108, 122, 0.45);
   border-top: 1px solid rgba(255, 255, 255, 0.35);
   border-bottom: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.45);
@@ -164,6 +168,9 @@ body {
   box-shadow: var(--shadow-card);
   position: relative;
   max-width: 100%;
+  width: 100%; /* Explicitly set to 100% of grid cell */
+  min-width: 0; /* Allow card to shrink below content size */
+  box-sizing: border-box;
 }
 
 /* Lighter shadows on mobile and remove border */
@@ -172,6 +179,12 @@ body {
     box-shadow: 0 3px 8px -2px rgba(0, 0, 0, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     border: none;
     overflow: visible; /* Allow year badges and connectors to show */
+  }
+
+  /* Ensure card content can shrink */
+  .hw-card > * {
+    min-width: 0;
+    max-width: 100%;
   }
 }
 .hw-card > div:first-of-type {
@@ -377,11 +390,14 @@ body {
 /* layout helpers */
 .hw-grid {
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* Mobile: Single column, force to container width */
   gap: 24px; /* Mobile: 24px spacing between cards */
   margin-top: 12px; /* Extra space after decade banner (total 36px) */
   margin-bottom: 12px; /* Extra space before next decade banner (total 36px) */
   max-width: 100%; /* Prevent grid from overflowing */
+  width: 100%; /* Explicitly set width to 100% of parent */
   box-sizing: border-box;
+  overflow: hidden; /* Prevent grid from expanding beyond container */
 }
 @media (min-width: 1024px) {
   .hw-grid {

@@ -13,7 +13,7 @@ import { useAccountContext } from "@/hooks/use-account-context";
  */
 interface PageHeaderProps {
   /** Lucide icon component to display next to title */
-  icon: LucideIcon;
+  icon?: LucideIcon;
   /** Main page title */
   title: string;
   /** Optional subtitle for additional context */
@@ -66,23 +66,25 @@ export function DesktopPageHeader({
         <div className="flex items-center justify-between gap-4 h-full">
           {/* Left section - Branding and page identity */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* Logo - Full logo for desktop */}
-            <Link href="/" className="flex-shrink-0">
+            {/* Logo - Full logo for desktop (15% smaller) */}
+            <Link href="/" className="flex-shrink-0" style={{ marginTop: '10px' }}>
               <Image
                 src="/final logo/logo-new.svg"
                 alt="Heritage Whisper Logo"
-                width={160}
-                height={48}
-                className="h-12 w-auto flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
+                width={136}
+                height={41}
+                className="h-[41px] w-auto flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
                 priority
               />
             </Link>
 
-            {/* Page Icon */}
-            <Icon
-              className="w-7 h-7 text-gray-700 flex-shrink-0"
-              aria-hidden="true"
-            />
+            {/* Page Icon - Only show if provided */}
+            {Icon && (
+              <Icon
+                className="w-7 h-7 text-gray-700 flex-shrink-0"
+                aria-hidden="true"
+              />
+            )}
 
             {/* Page Title - Centered, no subtitle */}
             <h1 className="text-3xl font-bold text-gray-900 truncate leading-tight">
@@ -148,23 +150,25 @@ export function MobilePageHeader({
 
           {/* Center section - Compact branding and page identity */}
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            {/* Logo - Compact logo for mobile */}
-            <Link href="/" className="flex-shrink-0">
+            {/* Logo - Compact logo for mobile (15% smaller) */}
+            <Link href="/" className="flex-shrink-0" style={{ marginTop: '10px' }}>
               <Image
                 src="/final logo/logo-new.svg"
                 alt="Heritage Whisper Logo"
-                width={120}
-                height={36}
-                className="h-9 w-auto flex-shrink-0 cursor-pointer active:opacity-70 transition-opacity"
+                width={102}
+                height={31}
+                className="h-[31px] w-auto flex-shrink-0 cursor-pointer active:opacity-70 transition-opacity"
                 priority
               />
             </Link>
 
-            {/* Page Icon */}
-            <Icon
-              className="w-6 h-6 text-gray-700 flex-shrink-0"
-              aria-hidden="true"
-            />
+            {/* Page Icon - Only show if provided */}
+            {Icon && (
+              <Icon
+                className="w-6 h-6 text-gray-700 flex-shrink-0"
+                aria-hidden="true"
+              />
+            )}
 
             {/* Page Title - Centered, no subtitle */}
             <h1 className="text-lg font-bold text-gray-900 truncate leading-tight">
