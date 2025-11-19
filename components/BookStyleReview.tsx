@@ -510,13 +510,13 @@ export function BookStyleReview({
                   <Calendar className="w-4 h-4" />
                   Story Date
                 </label>
-                <div className="flex gap-3 items-center">
+                <div className="flex gap-2 md:gap-3 items-center">
                   {/* Year Selector */}
                   <div className="border-2 border-gray-300 rounded-lg focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all">
                     <select
                       value={storyYear}
                       onChange={(e) => onYearChange(e.target.value)}
-                      className="px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg cursor-pointer"
+                      className="px-2 md:px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg cursor-pointer"
                     >
                       <option value="">Year</option>
                       {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => {
@@ -531,7 +531,7 @@ export function BookStyleReview({
                   </div>
 
                   {/* Month Input */}
-                  <div className="border-2 border-gray-300 rounded-lg focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all">
+                  <div className="border-2 border-gray-300 rounded-lg focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all flex-shrink-0">
                     <input
                       type="text"
                       placeholder="Month"
@@ -542,13 +542,13 @@ export function BookStyleReview({
                           onMonthChange?.(value);
                         }
                       }}
-                      className="w-24 px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg"
+                      className="w-16 md:w-24 px-2 md:px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg"
                       maxLength={2}
                     />
                   </div>
 
                   {/* Day Input */}
-                  <div className="border-2 border-gray-300 rounded-lg focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all">
+                  <div className="border-2 border-gray-300 rounded-lg focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all flex-shrink-0">
                     <input
                       type="text"
                       placeholder="Day"
@@ -559,7 +559,7 @@ export function BookStyleReview({
                           onDayChange?.(value);
                         }
                       }}
-                      className="w-20 px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg"
+                      className="w-14 md:w-20 px-2 md:px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg"
                       maxLength={2}
                     />
                   </div>

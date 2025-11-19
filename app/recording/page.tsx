@@ -294,16 +294,13 @@ export default function PhotoFirstRecordingPage() {
                   <Camera className="w-7 h-7 group-hover:scale-110 transition-transform motion-reduce:group-hover:scale-100" />
                   <span>Record with Photo</span>
                 </button>
-                <p className="text-center text-gray-600 text-base px-2">
-                  One extra step helps you remember more details
-                </p>
               </div>
 
               {/* Divider with "OR" */}
               <div className="relative flex items-center py-2">
                 <div className="flex-grow border-t border-gray-300"></div>
                 <span className="flex-shrink mx-4 text-gray-500 font-medium text-sm tracking-wide">
-                  OR SKIP THE PHOTO
+                  OR
                 </span>
                 <div className="flex-grow border-t border-gray-300"></div>
               </div>
@@ -347,6 +344,31 @@ export default function PhotoFirstRecordingPage() {
                 <p className="text-center text-sm text-gray-500 px-2">
                   Record now, add photos anytime later
                 </p>
+              </div>
+
+              {/* Type Your Story Link */}
+              <div className="text-center pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    // Create a minimal NavCache entry for typing mode
+                    const navId = `type-story-${Date.now()}`;
+                    const cacheData = {
+                      mode: 'quick' as const,
+                      title: templateTitle || '',
+                      transcription: '',
+                      timestamp: new Date().toISOString(),
+                      returnPath: '/timeline',
+                    };
+                    navCache.set(navId, cacheData);
+                    router.push(`/review/book-style?nav=${navId}&mode=edit`);
+                  }}
+                  className="text-purple-600 hover:text-purple-700 underline text-base font-medium
+                             transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-purple-300
+                             focus-visible:ring-offset-2 rounded px-2 py-1"
+                  aria-label="Skip recording and type your story directly"
+                >
+                  Type Your Story
+                </button>
               </div>
 
               {/* Keyboard Navigation Hint - Desktop Only */}

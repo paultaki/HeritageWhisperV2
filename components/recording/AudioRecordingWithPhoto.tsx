@@ -50,6 +50,7 @@ export function AudioRecordingWithPhoto({
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const pauseStartTimeRef = useRef<number>(0);
+  const isPausedRef = useRef(false); // Fix closure bug in timer/waveform
 
   useEffect(() => {
     startRecording();
@@ -169,7 +170,7 @@ export function AudioRecordingWithPhoto({
 
       // Start timer
       timerIntervalRef.current = setInterval(() => {
-        if (!isPaused) {
+        if (!isPausedRef.current) {  // Use ref to avoid closure bug
           const elapsed = (Date.now() - startTimeRef.current - totalPausedTime) / 1000;
           setDuration(elapsed);
 
@@ -221,13 +222,13 @@ export function AudioRecordingWithPhoto({
       ctx.fillRect(0, 0, rect.width, rect.height);
 
       // Draw waveform (or flat line if paused) with design system colors
-      ctx.strokeStyle = isPaused
+      ctx.strokeStyle = isPausedRef.current  // Use ref to avoid closure bug
         ? getComputedStyle(document.documentElement).getPropertyValue('--hw-text-muted').trim()
         : getComputedStyle(document.documentElement).getPropertyValue('--hw-primary').trim();
       ctx.lineWidth = 2;
       ctx.beginPath();
 
-      if (isPaused) {
+      if (isPausedRef.current) {  // Use ref to avoid closure bug
         // Draw flat line when paused
         ctx.moveTo(0, rect.height / 2);
         ctx.lineTo(rect.width, rect.height / 2);
@@ -265,6 +266,7 @@ export function AudioRecordingWithPhoto({
       // Pausing
       mediaRecorderRef.current.pause();
       setIsPaused(true);
+      isPausedRef.current = true;  // Keep ref in sync with state
       setRecordingState('paused');
       pauseStartTimeRef.current = Date.now(); // Mark when we paused
       // Waveform continues animating but shows flat line
@@ -272,6 +274,7 @@ export function AudioRecordingWithPhoto({
       // Resuming
       mediaRecorderRef.current.resume();
       setIsPaused(false);
+      isPausedRef.current = false;  // Keep ref in sync with state
       setRecordingState('recording');
       // Add the time we were paused to total paused time
       const pauseDuration = Date.now() - pauseStartTimeRef.current;
@@ -527,17 +530,6 @@ export function AudioRecordingWithPhoto({
         </div>
       ) : (
           <div className="flex-1 bg-[var(--hw-surface)] rounded-t-3xl backdrop-blur-[18px] p-6 md:p-12 pt-5 md:pt-8 flex flex-col relative transition-all duration-300 md:max-w-4xl md:mx-auto md:w-full">
-          {/* Cancel button - top right */}
-          <button
-            onClick={onCancel}
-            className="absolute top-4 right-4 md:top-6 md:right-6 text-[var(--hw-text-secondary)] hover:text-[var(--hw-text-primary)] transition-all duration-200 hover:scale-110 min-h-[48px] min-w-[48px] flex items-center justify-center"
-            aria-label="Cancel recording"
-          >
-            <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
           {/* Timer and state */}
           <div className="text-center">
             <div className={`text-6xl md:text-7xl font-light tabular-nums leading-none transition-colors ${isVeryNearEnd ? 'text-[var(--hw-error)]' : 'text-[var(--hw-text-primary)]'}`}>
@@ -573,10 +565,10 @@ export function AudioRecordingWithPhoto({
         />
 
         {/* Controls */}
-        <div className="mt-6 md:mt-8 flex items-center justify-center gap-4">
+        <div className="mt-6 md:mt-8 flex items-center justify-center gap-4 overflow-visible px-4">
           <button
             onClick={handlePauseResume}
-            className="h-28 w-28 md:h-32 md:w-32 flex-shrink-0 rounded-full text-white flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 outline-none focus-visible:ring-4 focus-visible:ring-[var(--hw-primary)] focus-visible:ring-offset-2 touch-none"
+            className="h-28 w-28 md:h-32 md:w-32 flex-shrink-0 rounded-full text-white flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 outline-none focus-visible:ring-4 focus-visible:ring-[var(--hw-primary)] focus-visible:ring-offset-2 touch-none overflow-visible"
             style={{
               background: isPaused ? 'var(--hw-secondary)' : 'var(--hw-primary)'
             }}

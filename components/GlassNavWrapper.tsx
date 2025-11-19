@@ -18,12 +18,11 @@ export default function GlassNavWrapper() {
   const isOwnAccount = activeContext?.type === 'own';
 
   // Determine default ink based on page context
-  // Book, story, and record pages have darker backgrounds (or photos) → use light ink
-  // Timeline, memory box, prompts have light backgrounds → use dark ink
+  // Book and story pages have darker backgrounds (or photos) → use light ink
+  // Timeline, recording, memory box, prompts have light backgrounds → use dark ink
   const defaultInk =
     pathname.startsWith('/book') ||
-    pathname.startsWith('/story') ||
-    pathname === '/recording'
+    pathname.startsWith('/story')
       ? 'light'
       : 'dark';
 
