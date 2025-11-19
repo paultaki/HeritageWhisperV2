@@ -49,6 +49,7 @@ import { TimelineEnd } from "@/components/timeline/TimelineEnd";
 import { STARTER_TEMPLATES, type StarterMemoryTemplate } from "@/lib/starterTemplates";
 import { StarterMemoryCard } from "@/components/timeline/StarterMemoryCard";
 import PlayPauseButton from "@/components/ui/PlayPauseButton";
+import DecadeNav, { type DecadeEntry } from "@/components/ui/DecadeNav";
 
 const logoUrl = "/final logo/logo-new.svg";
 
@@ -1082,6 +1083,19 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     storiesByDecade.get(decadeKey)?.push(story);
   });
 
+  // Generate decade entries for DecadeNav
+  const decadeEntries: DecadeEntry[] = Array.from(storiesByDecade.entries())
+    .sort(([decadeA], [decadeB]) => {
+      const yearA = parseInt(decadeA.replace('s', ''));
+      const yearB = parseInt(decadeB.replace('s', ''));
+      return yearA - yearB;
+    })
+    .map(([decade, stories]) => ({
+      id: `decade-${decade}`,
+      label: decade.replace('s', ''), // e.g., "1950"
+      count: stories.length,
+    }));
+
   return (
     <div className={`hw-page ${isDark ? 'dark-theme' : ''}`} style={{ backgroundColor: isDark ? '#1c1c1d' : '#fafaf9' }}>
       {/* Header */}
@@ -1090,6 +1104,11 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           title="Timeline"
           subtitle="A timeline of memories, moments, and milestones"
           showAccountSwitcher={true}
+          rightContent={
+            <div className="decade-selector-header">
+              <DecadeNav entries={decadeEntries} />
+            </div>
+          }
         />
       </div>
       {/* Main Content */}
