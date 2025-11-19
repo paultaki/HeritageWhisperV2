@@ -63,8 +63,9 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  gap: 6px;
   height: 48px;
-  min-width: 156px;
+  min-width: 110px;
   padding: 4px 16px 4px 20px;
   background: #fff;
   border: 2px solid #333;
@@ -80,8 +81,14 @@
 .hw-decade-pill:hover {
   opacity: 1;
 }
+.hw-decade-pill .decade-range-text {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #1f0f08;
+  white-space: nowrap;
+}
 .hw-decade-pill .caret {
-  margin-left: 8px;
   width: 10px;
   height: 10px;
   border-right: 2px solid var(--color-text-muted);

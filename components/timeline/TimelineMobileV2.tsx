@@ -316,7 +316,7 @@ export function TimelineMobileV2() {
         }
 
         .decade-selector-header .hw-decade-pill {
-          min-width: 80px;
+          min-width: 100px;
           height: 36px;
           min-height: 36px;
           font-size: 13px;
@@ -324,6 +324,10 @@ export function TimelineMobileV2() {
           border: 1px solid #ddd;
           position: relative;
           top: -2px;
+        }
+
+        .decade-selector-header .hw-decade-pill .decade-range-text {
+          font-size: 13px;
         }
 
         .decade-selector-header .hw-decade-sheet {

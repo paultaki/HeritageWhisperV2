@@ -28,7 +28,6 @@ import {
   Play,
   Plus,
   Square,
-  Calendar,
   Loader2,
   AlertCircle,
   Pause,
@@ -1088,13 +1087,11 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <DesktopPageHeader
-          icon={Calendar}
           title="Timeline"
           subtitle="A timeline of memories, moments, and milestones"
           showAccountSwitcher={true}
         />
       </div>
-
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-[114px] pb-12 md:pt-[114px] md:pb-20">
         {/* Title Section */}
