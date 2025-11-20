@@ -36,6 +36,8 @@ export interface StoryPhoto {
   caption?: string;
   isHero?: boolean;
   file?: File; // Pending file for upload (only for new uploads, not in DB)
+  width?: number; // Image width for portrait detection
+  height?: number; // Image height for portrait detection
 }
 
 interface MultiPhotoUploaderProps {
@@ -92,6 +94,19 @@ const normalizeTransform = (transform?: { zoom: number; position: { x: number; y
 
   // Already percentage-based (or zero)
   return transform;
+};
+
+// Helper: Measure image dimensions from a File
+const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      resolve({ width: img.width, height: img.height });
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
 };
 
 export function MultiPhotoUploader({
@@ -200,12 +215,18 @@ export function MultiPhotoUploader({
       } else {
         // Create a local preview for new stories (not yet saved)
         const url = URL.createObjectURL(file);
+
+        // Measure image dimensions for portrait detection
+        const dimensions = await getImageDimensions(file);
+
         const newPhoto: StoryPhoto = {
           id: `temp-${Date.now()}`,
           url,
           file, // Include the file for later upload
           isHero: photos.length === 0, // First photo becomes hero
           transform: { zoom: 1, position: { x: 0, y: 0 } },
+          width: dimensions.width,
+          height: dimensions.height,
         };
 
         const newPhotos = [...photos];
@@ -275,12 +296,18 @@ export function MultiPhotoUploader({
         await onPhotoUpload(file, slotIndex);
       } else {
         const url = URL.createObjectURL(file);
+
+        // Measure image dimensions for portrait detection
+        const dimensions = await getImageDimensions(file);
+
         const newPhoto: StoryPhoto = {
           id: `temp-${Date.now()}`,
           url,
           file, // Include the file for later upload
           isHero: photos.length === 0,
           transform: { zoom: 1, position: { x: 0, y: 0 } },
+          width: dimensions.width,
+          height: dimensions.height,
         };
 
         const newPhotos = [...photos];
@@ -525,7 +552,12 @@ export function MultiPhotoUploader({
                     {/* Hero Star Overlay - Shows when photo is marked as hero */}
                     {photo.isHero && (
                       <div className="absolute top-2 left-2 pointer-events-none">
-                        <Star className="w-5 h-5 fill-yellow-500 text-yellow-500 drop-shadow-md" />
+                        <Star
+                          className="w-5 h-5 fill-yellow-500 text-yellow-500"
+                          style={{
+                            filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.5)) drop-shadow(0px 0px 1px rgba(0,0,0,0.8))'
+                          }}
+                        />
                       </div>
                     )}
 
@@ -711,7 +743,7 @@ export function MultiPhotoUploader({
 
                 {/* Label outside the frame */}
                 <div className="absolute -top-2 left-4 bg-white px-2 py-1 rounded text-xs font-medium text-blue-600">
-                  Crop Frame - Content inside will be saved
+                  Preview Frame - Adjust zoom & position
                 </div>
               </div>
             </div>
@@ -738,8 +770,9 @@ export function MultiPhotoUploader({
                 <SliderPrimitive.Thumb className="block w-5 h-5 bg-background shadow-lg border-2 border-primary rounded-full hover:bg-accent focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
               </SliderPrimitive.Root>
               <p className="text-xs text-muted-foreground text-center">
-                Drag the photo to reposition • Use slider to zoom • Content
-                inside the frame will be saved
+                Drag the photo to reposition • Use slider to zoom
+                <br />
+                <span className="text-green-600 font-medium">Original photo preserved - portrait images display with blurred backgrounds</span>
               </p>
             </div>
 

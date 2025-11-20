@@ -573,18 +573,18 @@ export function BookStyleReview({
                 )}
               </div>
 
-              {/* 4. Audio Recording */}
+              {/* 4. Audio Recording - Compact Horizontal Layout */}
               <div>
-                <h3 className="text-lg font-medium text-gray-700 mb-3 flex items-center gap-2">
-                  <Mic className="w-5 h-5" />
-                  Audio Recording (Optional)
+                <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <Mic className="w-4 h-4" />
+                  Audio (Optional)
                 </h3>
                 {audioUrl ? (
-                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <CustomAudioPlayer 
-                      src={audioUrl} 
-                      knownDuration={audioDuration} 
-                      className="mb-3"
+                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <CustomAudioPlayer
+                      src={audioUrl}
+                      knownDuration={audioDuration}
+                      className="mb-2"
                     />
                     <div className="flex gap-2">
                       <Button
@@ -595,9 +595,9 @@ export function BookStyleReview({
                           setRemoveAudioAction('rerecord');
                           setShowRemoveAudioConfirm(true);
                         }}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-1.5"
                       >
-                        <RotateCcw className="w-4 h-4" />
+                        <RotateCcw className="w-3.5 h-3.5" />
                         Re-record
                       </Button>
                       <Button
@@ -610,162 +610,148 @@ export function BookStyleReview({
                         }}
                         className="text-red-600 hover:text-red-700"
                       >
-                        <X className="w-4 h-4 mr-1" />
-                        Remove Audio
+                        <X className="w-3.5 h-3.5" />
                       </Button>
                     </div>
                   </div>
                 ) : isProcessing ? (
-                  <div className="p-8 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="flex flex-col items-center gap-4">
-                      <Loader2 className="w-10 h-10 text-coral-500 animate-spin" />
-                      <div className="text-center">
-                        <p className="text-xl font-medium text-gray-900">
-                          Processing your recording...
-                        </p>
-                        <p className="text-lg text-gray-600 mt-1">
-                          Transcribing audio and generating wisdom
-                        </p>
-                      </div>
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <Loader2 className="w-6 h-6 text-coral-500 animate-spin flex-shrink-0" />
+                      <p className="text-sm text-gray-600">Processing audio...</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setIsInitialRecordingShow(false); // Manual recording
-                          setShowRecordingOverlay(true);
-                        }}
-                        className="flex items-center gap-2"
-                      >
-                        <Mic className="w-4 h-4" />
-                        REC Memory
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const input = document.createElement("input");
-                          input.type = "file";
-                          input.accept = "audio/*";
-                          input.onchange = async (e) => {
-                            const file = (e.target as HTMLInputElement)
-                              .files?.[0];
-                            if (file) {
-                              setIsProcessing(true);
+                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setIsInitialRecordingShow(false);
+                        setShowRecordingOverlay(true);
+                      }}
+                      className="flex items-center gap-1.5 h-9"
+                    >
+                      <Mic className="w-4 h-4" />
+                      Record
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const input = document.createElement("input");
+                        input.type = "file";
+                        input.accept = "audio/*";
+                        input.onchange = async (e) => {
+                          const file = (e.target as HTMLInputElement)
+                            .files?.[0];
+                          if (file) {
+                            setIsProcessing(true);
 
-                              const audioUrl = URL.createObjectURL(file);
-                              const hasExistingText = transcription && transcription.trim().length > 0;
+                            const audioUrl = URL.createObjectURL(file);
+                            const hasExistingText = transcription && transcription.trim().length > 0;
 
-                              // Transcribe the audio
-                              const formData = new FormData();
-                              formData.append("audio", file);
+                            // Transcribe the audio
+                            const formData = new FormData();
+                            formData.append("audio", file);
 
-                              try {
-                                const { supabase } = await import(
-                                  "@/lib/supabase"
-                                );
-                                const {
-                                  data: { session },
-                                } = await supabase.auth.getSession();
+                            try {
+                              const { supabase } = await import(
+                                "@/lib/supabase"
+                              );
+                              const {
+                                data: { session },
+                              } = await supabase.auth.getSession();
 
-                                // Get CSRF token
-                                const csrfResponse = await fetch("/api/csrf");
-                                const { token: csrfToken } = await csrfResponse.json();
+                              // Get CSRF token
+                              const csrfResponse = await fetch("/api/csrf");
+                              const { token: csrfToken } = await csrfResponse.json();
 
-                                const headers: HeadersInit = {
-                                  "x-csrf-token": csrfToken,
-                                };
-                                if (session?.access_token) {
-                                  headers["Authorization"] =
-                                    `Bearer ${session.access_token}`;
-                                }
+                              const headers: HeadersInit = {
+                                "x-csrf-token": csrfToken,
+                              };
+                              if (session?.access_token) {
+                                headers["Authorization"] =
+                                  `Bearer ${session.access_token}`;
+                              }
 
-                                const response = await fetch(
-                                  "/api/transcribe",
-                                  {
-                                    method: "POST",
-                                    headers,
-                                    body: formData,
-                                  },
-                                );
+                              const response = await fetch(
+                                "/api/transcribe",
+                                {
+                                  method: "POST",
+                                  headers,
+                                  body: formData,
+                                },
+                              );
 
-                                if (response.ok) {
-                                  const data = await response.json();
+                              if (response.ok) {
+                                const data = await response.json();
 
-                                  if (hasExistingText && data.transcription) {
-                                    // Store pending data and show confirmation
-                                    setPendingTranscription(data.transcription);
-                                    setPendingLessonOptions(data.lessonOptions || null);
-                                    setPendingAudioUrl(audioUrl);
-                                    setPendingAudioBlob(file);
-                                    setPendingAudioDuration(0); // Duration not available from upload
-                                    onAudioChange?.(audioUrl, file);
-                                    setShowTranscriptionReplaceConfirm(true);
-                                  } else {
-                                    // No existing text or no transcription, apply directly
-                                    onAudioChange?.(audioUrl, file);
-                                    
-                                    if (data.transcription) {
-                                      onTranscriptionChange(data.transcription);
-                                    }
-                                    // Use practical lesson as default (user can edit later)
-                                    if (data.lessonOptions?.practical) {
-                                      onWisdomChange(
-                                        data.lessonOptions.practical,
-                                      );
-                                    }
-                                  }
-                                } else {
-                                  toast({
-                                    title: "Transcription failed",
-                                    description: "Could not transcribe the audio. The audio file will still be saved.",
-                                    variant: "destructive",
-                                  });
-                                  // Still set the audio even if transcription failed
+                                if (hasExistingText && data.transcription) {
+                                  // Store pending data and show confirmation
+                                  setPendingTranscription(data.transcription);
+                                  setPendingLessonOptions(data.lessonOptions || null);
+                                  setPendingAudioUrl(audioUrl);
+                                  setPendingAudioBlob(file);
+                                  setPendingAudioDuration(0); // Duration not available from upload
                                   onAudioChange?.(audioUrl, file);
+                                  setShowTranscriptionReplaceConfirm(true);
+                                } else {
+                                  // No existing text or no transcription, apply directly
+                                  onAudioChange?.(audioUrl, file);
+
+                                  if (data.transcription) {
+                                    onTranscriptionChange(data.transcription);
+                                  }
+                                  // Use practical lesson as default (user can edit later)
+                                  if (data.lessonOptions?.practical) {
+                                    onWisdomChange(
+                                      data.lessonOptions.practical,
+                                    );
+                                  }
                                 }
-                              } catch {
+                              } else {
                                 toast({
-                                  title: "Error",
-                                  description: "An error occurred while processing the audio. The audio file will still be saved.",
+                                  title: "Transcription failed",
+                                  description: "Could not transcribe the audio. The audio file will still be saved.",
                                   variant: "destructive",
                                 });
-                                // Still set the audio even if error
+                                // Still set the audio even if transcription failed
                                 onAudioChange?.(audioUrl, file);
-                              } finally {
-                                setIsProcessing(false);
                               }
+                            } catch {
+                              toast({
+                                title: "Error",
+                                description: "An error occurred while processing the audio. The audio file will still be saved.",
+                                variant: "destructive",
+                              });
+                              // Still set the audio even if error
+                              onAudioChange?.(audioUrl, file);
+                            } finally {
+                              setIsProcessing(false);
                             }
-                          };
-                          
-                          // Append to DOM and trigger synchronously
-                          input.style.display = "none";
-                          document.body.appendChild(input);
-                          input.click();
-                          
-                          // Clean up after a delay
-                          setTimeout(() => {
-                            if (document.body.contains(input)) {
-                              document.body.removeChild(input);
-                            }
-                          }, 1000);
-                        }}
-                        className="flex items-center gap-2"
-                      >
-                        <Upload className="w-4 h-4" />
-                        Upload Audio
-                      </Button>
-                    </div>
-                    <p className="text-base text-gray-500 mt-2">
-                      Add an audio recording to preserve your voice with this
-                      memory
-                    </p>
+                          }
+                        };
+
+                        // Append to DOM and trigger synchronously
+                        input.style.display = "none";
+                        document.body.appendChild(input);
+                        input.click();
+
+                        // Clean up after a delay
+                        setTimeout(() => {
+                          if (document.body.contains(input)) {
+                            document.body.removeChild(input);
+                          }
+                        }, 1000);
+                      }}
+                      className="flex items-center gap-1.5 h-9"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload
+                    </Button>
                   </div>
                 )}
               </div>
@@ -870,7 +856,7 @@ export function BookStyleReview({
                   value={transcription}
                   onChange={(e) => onTranscriptionChange(e.target.value)}
                   className={cn(
-                    "w-full min-h-[300px] resize-none border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400",
+                    "w-full min-h-[300px] resize-none bg-white border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400",
                     (transcriptionStatus !== "complete" &&
                       transcriptionStatus !== "idle") &&
                       "opacity-60 cursor-not-allowed"
@@ -992,64 +978,49 @@ export function BookStyleReview({
                         setEditingWisdom(true);
                       }}
                       style={{
-                        background: 'linear-gradient(135deg, #fef9e7 0%, #faf3dd 100%)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
-                        transform: 'rotate(-0.5deg)',
-                        borderRadius: '2px',
-                        border: '1px solid rgba(139, 107, 122, 0.2)',
+                        background: '#FFFFFF',
+                        backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #E0E0E0 31px, #E0E0E0 32px)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        borderRadius: '4px',
+                        border: '1px solid #D0D0D0',
+                        paddingTop: '40px',
                       }}
                     >
-                      {/* Paper texture overlay */}
-                      <div 
-                        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+                      {/* Red vertical margin line (like notebook paper) */}
+                      <div
+                        className="absolute top-0 left-8 bottom-0 w-[2px] pointer-events-none"
                         style={{
-                          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E")`,
-                        }}
-                      ></div>
-                      
-                      {/* Tape at top corners */}
-                      <div 
-                        className="absolute -top-2 left-6 w-12 h-5 opacity-40 pointer-events-none"
-                        style={{
-                          background: 'linear-gradient(135deg, rgba(255,255,240,0.7) 0%, rgba(255,250,230,0.8) 100%)',
-                          transform: 'rotate(-2deg)',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                        }}
-                      ></div>
-                      <div 
-                        className="absolute -top-2 right-6 w-12 h-5 opacity-40 pointer-events-none"
-                        style={{
-                          background: 'linear-gradient(135deg, rgba(255,255,240,0.7) 0%, rgba(255,250,230,0.8) 100%)',
-                          transform: 'rotate(2deg)',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                          background: '#FF6B6B',
+                          opacity: 0.3,
                         }}
                       ></div>
 
-                      <p 
-                        className="text-sm mb-2 relative z-10"
+                      <p
+                        className="text-sm mb-2 relative z-10 pl-6"
                         style={{
                           fontFamily: '"Caveat", cursive',
-                          fontSize: '20px',
+                          fontSize: '18px',
                           color: '#8b6b7a',
                           fontWeight: 600,
+                          lineHeight: '32px',
                         }}
                       >
                         Lesson Learned
                       </p>
-                      <p 
-                        className="leading-7 relative z-10"
+                      <p
+                        className="relative z-10 pl-6"
                         style={{
                           fontFamily: '"Caveat", cursive',
-                          fontSize: '24px',
-                          color: '#4a4a4a',
-                          lineHeight: '1.8',
+                          fontSize: '22px',
+                          color: '#2c2c2c',
+                          lineHeight: '32px',
                         }}
                       >
                         {wisdomText ||
                           "Click to add a lesson or wisdom from this memory..."}
                       </p>
-                      <div className="flex items-center gap-2 mt-2 relative z-10">
-                        <Edit2 className="w-5 h-5 text-gray-400" />
+                      <div className="flex items-center gap-2 mt-4 relative z-10 pl-6">
+                        <Edit2 className="w-4 h-4 text-gray-400" />
                         {wisdomText && (
                           <button
                             onClick={(e) => {
@@ -1059,7 +1030,7 @@ export function BookStyleReview({
                             className="text-gray-400 hover:text-red-600 transition-colors"
                             title="Delete lesson"
                           >
-                            <Trash2 className="w-5 h-5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         )}
                       </div>
@@ -1128,40 +1099,46 @@ export function BookStyleReview({
 
       {/* Bottom Action Buttons */}
       <div className="max-w-3xl mx-auto px-4 pb-8">
-        <div className="flex gap-3">
-          <Button
-            type="button"
-            onClick={() => {
-              console.log(
-                "BookStyleReview: Bottom Save button clicked, calling onSave",
-              );
-              onSave();
-            }}
-            disabled={isSaving}
-            className="flex-1 bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full py-3 text-base font-medium"
-          >
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
-          <Button
-            type="button"
-            onClick={onCancel}
-            disabled={isSaving}
-            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded-full py-3 text-base font-medium"
-          >
-            Cancel
-          </Button>
+        <div className="flex items-center gap-3">
+          {/* Delete icon button - far left to prevent accidental clicks */}
           {isEditing && onDelete && (
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
+              size="icon"
               onClick={() => setShowDeleteConfirm(true)}
               disabled={isSaving}
-              className="flex-1 rounded-full py-3 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 min-w-[48px] min-h-[48px]"
+              title="Delete story"
             >
-              <Trash2 className="w-4 h-4 mr-1.5" />
-              Delete
+              <Trash2 className="w-5 h-5" />
             </Button>
           )}
+
+          {/* Spacer to push main buttons to the right */}
+          <div className="flex-1 flex gap-3">
+            <Button
+              type="button"
+              onClick={() => {
+                console.log(
+                  "BookStyleReview: Bottom Save button clicked, calling onSave",
+                );
+                onSave();
+              }}
+              disabled={isSaving}
+              className="flex-1 bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full py-3 text-base font-medium"
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+            <Button
+              type="button"
+              onClick={onCancel}
+              disabled={isSaving}
+              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded-full py-3 text-base font-medium"
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       </div>
 

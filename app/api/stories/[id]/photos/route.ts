@@ -48,7 +48,7 @@ export async function GET(
     // Get the story from Supabase database to verify ownership
     const { data: story, error: fetchError } = await supabaseAdmin
       .from("stories")
-      .select("metadata, user_id")
+      .select("photos, user_id")
       .eq("id", id)
       .eq("user_id", user.id)
       .single();
@@ -60,8 +60,8 @@ export async function GET(
       );
     }
 
-    // Get signed URLs for all photos from metadata
-    const photos = story.metadata?.photos || [];
+    // Get signed URLs for all photos from top-level photos column
+    const photos = (story as any).photos || [];
     const photosWithSignedUrls = await Promise.all(
       photos.map(async (photo: any) => {
         let masterUrl = photo.masterUrl;
@@ -146,7 +146,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { masterPath, displayPath, filePath, isHero, transform } = body;
+    const { masterPath, displayPath, filePath, isHero, transform, width, height } = body;
 
     // REMOVED: Sensitive data logging - console.log('[POST /api/stories/[id]/photos] Request body:', body);
 
@@ -193,6 +193,9 @@ export async function POST(
       transform: transform || { zoom: 1, position: { x: 0, y: 0 } },
       isHero: isHero || false,
       caption: "",
+      // Dimensions for portrait detection
+      width: width || undefined,
+      height: height || undefined,
     };
 
     logger.debug("[POST /api/stories/[id]/photos] New photo object:", newPhoto);

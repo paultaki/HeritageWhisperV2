@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { FileText } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 
@@ -31,12 +30,10 @@ export default function TermsOfService() {
       {/* Desktop Header */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <DesktopPageHeader
-          icon={FileText}
           title="Terms of Service"
           subtitle="Please read our terms and conditions"
         />
         <MobilePageHeader
-          icon={FileText}
           title="Terms of Service"
           subtitle="Terms and conditions"
         />

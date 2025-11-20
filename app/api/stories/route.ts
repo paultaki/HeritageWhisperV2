@@ -202,6 +202,8 @@ export async function GET(request: NextRequest) {
           title: story.title || "Untitled Story",
           content: story.transcript,
           transcription: story.transcript,
+          textBody: story.text_body,
+          recordingMode: story.recording_mode,
           createdAt: story.created_at,
           updatedAt: story.updated_at,
           age: story.metadata?.life_age || story.metadata?.age,
@@ -339,6 +341,8 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
       title: body.title || "Untitled Story",
       transcript: body.transcription || body.content,
+      text_body: body.textBody || undefined, // Text-only story content
+      recording_mode: body.recordingMode || (body.audioUrl ? 'audio' : body.textBody ? 'text' : 'audio'), // Track recording method
       year: body.year || body.storyYear,
       story_date: body.storyDate || null, // Store full date with month/day
       audio_url:
@@ -347,7 +351,7 @@ export async function POST(request: NextRequest) {
           : undefined,
       wisdom_text: body.wisdomClipText || body.wisdomTranscription,
       wisdom_clip_url: body.wisdomClipUrl,
-      duration_seconds: durationForDb, // Clamped to database constraint (1-120)
+      duration_seconds: body.textBody ? null : durationForDb, // No duration for text-only stories
       emotions: body.emotions,
       photo_url:
         body.photoUrl && !body.photoUrl.startsWith("blob:")
@@ -515,7 +519,7 @@ export async function POST(request: NextRequest) {
         includeInBook: newStory.metadata?.include_in_book,
         isFavorite: newStory.metadata?.is_favorite,
         photoUrl: newStory.photo_url,
-        photos: newStory.metadata?.photos || [],
+        photos: newStory.photos || [],
         audioUrl: newStory.audio_url,
         wisdomTranscription: newStory.wisdom_text,
         wisdomClipText: newStory.wisdom_text,
@@ -828,7 +832,7 @@ export async function POST(request: NextRequest) {
       includeInBook: newStory.metadata?.include_in_book,
       isFavorite: newStory.metadata?.is_favorite,
       photoUrl: newStory.photo_url,
-      photos: newStory.metadata?.photos || [],
+      photos: newStory.photos || [],
       audioUrl: newStory.audio_url,
       wisdomTranscription: newStory.wisdom_text,
       wisdomClipText: newStory.wisdom_text,

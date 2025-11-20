@@ -62,8 +62,29 @@ export function StoryPhotoWithBlurExtend({
    */
   const isPortrait = width && height ? height / width > 1.15 : false;
 
-  // Build transform style for foreground image (if provided)
-  const transformStyle = transform
+  // DEBUG: Log portrait detection
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[StoryPhotoWithBlurExtend] Portrait detection:', {
+      src: src.substring(0, 50) + '...',
+      width,
+      height,
+      ratio: width && height ? (height / width).toFixed(2) : 'N/A',
+      isPortrait,
+    });
+  }
+
+  /**
+   * Transform Logic:
+   * - For PORTRAIT images: IGNORE transforms (show original with blur-extend)
+   * - For LANDSCAPE images: APPLY transforms (zoom/pan as intended)
+   *
+   * Rationale: Portrait photos with zoom/pan transforms were "cropped" to fit
+   * landscape frames. Ignoring transforms lets blur-extend show the full portrait.
+   */
+  const shouldApplyTransform = !isPortrait && transform;
+
+  // Build transform style for foreground image (only for landscape)
+  const transformStyle = shouldApplyTransform
     ? {
         transform: `scale(${transform.zoom}) translate(${transform.position.x}%, ${transform.position.y}%)`,
         transformOrigin: "center center",
@@ -111,7 +132,7 @@ export function StoryPhotoWithBlurExtend({
               style={transformStyle}
               className={cn(
                 "h-full w-auto max-h-full max-w-full object-contain rounded-2xl shadow-md",
-                transform ? "will-change-transform" : "",
+                shouldApplyTransform ? "will-change-transform" : "",
                 imgClassName
               )}
             />
@@ -132,7 +153,7 @@ export function StoryPhotoWithBlurExtend({
           style={transformStyle}
           className={cn(
             "object-cover",
-            transform ? "will-change-transform" : "",
+            shouldApplyTransform ? "will-change-transform" : "",
             imgClassName
           )}
         />

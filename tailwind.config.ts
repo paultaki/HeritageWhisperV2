@@ -112,6 +112,26 @@ export default {
           "warm-paper": "#F7F2EC", // Background - Warm Paper
           "text-primary": "#1F1F1F", // Text - Near Black
         },
+        // Landing V2 Theme Colors
+        cream: {
+          100: "#FBF9F6",
+          200: "#F7F2EC",
+          300: "#EBE2D5",
+        },
+        navy: {
+          800: "#2C4259",
+          900: "#1D3147",
+        },
+        green: {
+          700: "#2D7A61",
+          800: "#1F5F4A",
+          900: "#164636",
+        },
+        gold: {
+          400: "#E5C095",
+          500: "#D4A574",
+          600: "#B58554",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

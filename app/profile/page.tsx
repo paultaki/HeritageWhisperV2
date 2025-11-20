@@ -8,7 +8,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ProfileInterests } from "@/components/ProfileInterests";
 import { ProfilePhotoUploader } from "@/components/ProfilePhotoUploader";
 import { Button } from "@/components/ui/button";
-import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Card,
@@ -60,8 +59,6 @@ import {
 import { PasskeyAuth } from "@/components/auth/PasskeyAuth";
 import { ManagePasskeys } from "@/components/auth/ManagePasskeys";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
 import { Badge } from "@/components/ui/badge";
 
@@ -505,7 +502,6 @@ export default function Profile() {
     <div className="hw-page bg-[var(--hw-page-bg)] flex flex-col overflow-x-hidden">
       {/* Desktop Header */}
       <DesktopPageHeader
-        icon={User}
         title={`Welcome back, ${firstName}`}
         subtitle="Manage your account, privacy, and preferences"
         rightContent={
@@ -522,25 +518,8 @@ export default function Profile() {
 
       {/* Mobile Header */}
       <MobilePageHeader
-        icon={User}
         title={`Welcome, ${firstName}`}
         subtitle="Manage your account"
-        leftContent={
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-[var(--hw-text-secondary)] hover:text-[var(--hw-text-primary)] md:hidden min-h-[48px] min-w-[48px]"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0">
-              <LeftSidebar />
-            </SheetContent>
-          </Sheet>
-        }
         rightContent={
           <Button
             variant="ghost"

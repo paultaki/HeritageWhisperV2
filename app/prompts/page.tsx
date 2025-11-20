@@ -30,7 +30,6 @@ import {
   Music,
   Utensils,
   X,
-  Lightbulb
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
@@ -619,7 +618,6 @@ export default function PromptsV2Page() {
     <div className="min-h-screen" style={{ background: '#F7F2EC' }}>
       {/* Desktop Header */}
       <DesktopPageHeader
-        icon={Lightbulb}
         title="Story Ideas"
         showAccountSwitcher={true}
         rightContent={
@@ -642,7 +640,6 @@ export default function PromptsV2Page() {
       
       {/* Mobile Header */}
       <MobilePageHeader
-        icon={Lightbulb}
         title="Story Ideas"
         rightContent={
           !isOwnAccount && permissionLevel === 'contributor' ? (

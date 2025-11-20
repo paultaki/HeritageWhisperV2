@@ -442,11 +442,11 @@ export async function PUT(
       return data?.signedUrl || null;
     };
 
-    // Process photos array from metadata
+    // Process photos array from top-level photos column
     let photos = [];
-    if (updatedStory.metadata?.photos) {
+    if (updatedStory.photos) {
       photos = await Promise.all(
-        (updatedStory.metadata.photos || []).map(async (photo: any) => ({
+        (updatedStory.photos || []).map(async (photo: any) => ({
           ...photo,
           url: await getPhotoUrl(photo.url || photo.filePath),
         })),

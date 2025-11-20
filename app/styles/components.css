@@ -200,8 +200,8 @@ body {
   top: calc(var(--title-offset, 22px)); /* aligns to title baseline */
   width: 24px;
   height: 4px;
-  /* Gradient from solid at spine to faded at card */
-  background: linear-gradient(to right, var(--color-timeline-spine), var(--color-timeline-connector-fade));
+  /* Gradient from solid at spine to faded at card - using explicit colors for visibility */
+  background: linear-gradient(to right, rgba(220, 218, 216, 0.8), rgba(220, 218, 216, 0.3));
   border-radius: 1px;
   opacity: 1;
   pointer-events: none;
@@ -216,7 +216,7 @@ body {
 .hw-card:hover::before,
 .hw-card:focus-visible::before {
   width: 30px;
-  background: var(--color-timeline-connector-hover);
+  background: rgba(220, 218, 216, 0.9);
   opacity: 1;
 }
 
@@ -397,7 +397,7 @@ body {
   max-width: 100%; /* Prevent grid from overflowing */
   width: 100%; /* Explicitly set width to 100% of parent */
   box-sizing: border-box;
-  overflow: hidden; /* Prevent grid from expanding beyond container */
+  overflow: visible; /* Allow year badges and connectors to show outside grid */
 }
 @media (min-width: 1024px) {
   .hw-grid {

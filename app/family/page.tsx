@@ -422,12 +422,10 @@ export default function FamilyPage() {
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <DesktopPageHeader
-          icon={Users}
           title="Family Circle"
           subtitle="Share your stories with loved ones"
         />
         <MobilePageHeader
-          icon={Users}
           title="Family Circle"
           subtitle="Share your stories"
         />

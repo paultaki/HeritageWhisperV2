@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { 
-  Shield, 
-  Heart, 
-  Users, 
-  Bot, 
-  DollarSign, 
+import {
+  Shield,
+  Heart,
+  Users,
+  Bot,
+  DollarSign,
   Scale,
   Lock,
   PhoneCall,
@@ -15,7 +15,6 @@ import {
   ChevronDown,
   ChevronUp
 } from "lucide-react";
-import { LeftSidebar } from "@/components/LeftSidebar";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 
@@ -52,37 +51,17 @@ export default function FamilyAgreement() {
       {/* Desktop Header */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <DesktopPageHeader
-          icon={Heart}
           title="Family Agreement"
           subtitle="Our promises to you and your family"
         />
         <MobilePageHeader
-          icon={Heart}
           title="Family Agreement"
           subtitle="Our promises to you"
         />
       </div>
 
-      {/* Left Sidebar - Desktop Only */}
-      {isDesktop && (
-        <aside
-          className="hidden lg:flex lg:w-56 flex-col gap-1.5 p-2"
-          style={{
-            position: "fixed",
-            top: 72,
-            left: 0,
-            height: "calc(100vh - 72px)",
-            backgroundColor: "transparent",
-            borderRight: "none",
-            color: isDark ? "#b0b3b8" : undefined,
-          }}
-        >
-          <LeftSidebar />
-        </aside>
-      )}
-
       {/* Main content */}
-      <main className="flex-1 min-w-0 pb-20 md:pb-0 lg:ml-56" style={{ marginTop: 55 }}>
+      <main className="flex-1 min-w-0 pb-20 md:pb-0" style={{ marginTop: 55 }}>
         <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           
           {/* Welcome Header */}

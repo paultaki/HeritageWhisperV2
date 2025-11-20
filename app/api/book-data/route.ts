@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       });
       logger.debug("[Book Data API] Sample photo data:", {
         photo_url: stories[0].photo_url,
-        metadata_photos: stories[0].metadata?.photos,
+        top_level_photos: stories[0].photos,
       });
     }
 
@@ -91,9 +91,9 @@ export async function GET(request: NextRequest) {
       storyDate: story.story_date,
       lifeAge: story.metadata?.life_age,
       photoUrl: getAbsolutePhotoUrl(story.photo_url),
-      // Photos are stored in metadata.photos JSONB column
+      // Photos are stored in top-level photos column
       photos:
-        story.metadata?.photos?.map((photo: any) => ({
+        story.photos?.map((photo: any) => ({
           ...photo,
           url:
             getAbsolutePhotoUrl(photo.url || photo.filePath) ||

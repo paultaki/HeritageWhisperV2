@@ -1,0 +1,80 @@
+{
+  "id": "d5e1d382-6f52-40c0-95ba-e1ef61bd73dd",
+  "user_id": "38ad3036-e423-4e41-a3f3-020664a1ee0e",
+  "created_at": "2025-10-04T00:18:57.680742+00:00",
+  "updated_at": "2025-11-08T22:05:10.949502+00:00",
+  "expires_at": null,
+  "transcript": "I can picture the moment vividly. The box was breathing on the floral couch. I lifted the lid and a golden face popped up. He climbed my shirt and licked my ear like he was notarizing me. Every name I'd practiced vanished. \"You're mine\" was all I had.\n\nMom slid over the contract. Before school walks, after school feeding, winter counts as weather. I signed. He ate the pen. He celebrated with a tiny sprinkle shaped like Ohio.\n\nWe tried names, Duke, Rocket, Mr. President. He chewed the list and answered to Chewy. Then he napped on my shoe, breathing like a small accordion and smelling like corn chips and hope. That's how I learned responsibility in kid language. Keep your shoe still so someone small can trust it. We snapped the couch photo. People see a boy and his dog. I see the day I got housebroken by love.",
+  "duration_seconds": 30,
+  "is_saved": true,
+  "is_enhanced": false,
+  "word_count": null,
+  "play_count": 0,
+  "share_count": 0,
+  "voice_notes": null,
+  "metadata": {
+    "life_age": 7,
+    "is_favorite": false,
+    "include_in_book": true,
+    "include_in_timeline": true
+  },
+  "title": "Taste of Responsibility",
+  "year": 1962,
+  "audio_url": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/public/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759537137957-recording.webm",
+  "wisdom_clip_url": null,
+  "wisdom_text": "In the unexpected moments of joy, like a puppy's unconditional affection, we learn the profound lessons of responsibility and love—keep your heart open and your foundation steady, so those who depend on you find trust and comfort.",
+  "photo_url": null,
+  "emotions": null,
+  "session_id": null,
+  "status": "recorded",
+  "audio_raw_path": null,
+  "audio_clean_path": null,
+  "transcript_fast": null,
+  "transcript_clean": null,
+  "followups_initial": null,
+  "metrics": null,
+  "enhancement_job_id": null,
+  "enhancement_error": null,
+  "lesson_learned": null,
+  "lesson_alternatives": [],
+  "source_prompt_id": null,
+  "life_phase": null,
+  "include_in_book": true,
+  "include_in_timeline": true,
+  "is_favorite": false,
+  "story_date": null,
+  "photos": [
+    {
+      "id": "photo-1760395051075-pjzgf2ess",
+      "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1760395050158-5g0qqgw2do5.png",
+      "isHero": false,
+      "caption": "",
+      "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1760395050158-5g0qqgw2do5.png",
+      "transform": {
+        "zoom": 1.2,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "masterPath": "photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639509365-q7u91b-master.webp",
+      "displayPath": "photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639509365-q7u91b-display.webp"
+    },
+    {
+      "id": "photo-1760395052255-opb8uvs15",
+      "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1760395051407-3sm8qf7csoh.png",
+      "isHero": true,
+      "caption": "",
+      "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1760395051407-3sm8qf7csoh.png",
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "masterPath": "photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639510481-zshno-master.webp",
+      "displayPath": "photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639510481-zshno-display.webp"
+    }
+  ]
+}

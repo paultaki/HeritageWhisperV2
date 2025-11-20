@@ -543,14 +543,13 @@ export default function MemoryBoxV2Page() {
     <div className="hw-page" style={{ backgroundColor: "#FFF8F3" }}>
       {/* Desktop Header */}
       <DesktopPageHeader
-        icon={Box}
         title="Memory Box"
         subtitle="Your digital hope chest • Organize stories and treasures your way"
         showAccountSwitcher={true}
       />
 
       {/* Mobile Header */}
-      <MobilePageHeader icon={Box} title="Memory Box" subtitle="Organize your memories" />
+      <MobilePageHeader title="Memory Box" subtitle="Organize your memories" />
 
       {/* Content Area */}
       <div>

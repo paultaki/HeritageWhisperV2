@@ -49,10 +49,18 @@ const PhotoSchema = z.object({
  * Validates all inputs for creating a new story
  */
 export const CreateStorySchema = z.object({
-  // Required fields
+  // Content fields - at least one is required (validated below)
   transcription: z.string()
-    .min(1, 'Transcription is required')
-    .max(50000, 'Transcription too long (max 50,000 characters)'),
+    .max(50000, 'Transcription too long (max 50,000 characters)')
+    .optional(),
+
+  textBody: z.string()
+    .max(50000, 'Text body too long (max 50,000 characters)')
+    .optional(),
+
+  // Recording mode (audio, text, photo_audio)
+  recordingMode: z.enum(['audio', 'text', 'photo_audio'])
+    .optional(),
 
   // Optional but validated fields
   title: z.string()
@@ -160,7 +168,16 @@ export const CreateStorySchema = z.object({
 
   // Legacy field compatibility
   content: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    // At least one content field must be present
+    return !!(data.transcription || data.textBody || data.content);
+  },
+  {
+    message: 'Story must have either transcription or text content',
+    path: ['transcription'],
+  }
+);
 
 /**
  * Story Update Schema (PUT /api/stories/[id])
@@ -173,8 +190,10 @@ export const UpdateStorySchema = z.object({
 
   // Core text fields (no defaults)
   transcription: z.string().max(50000).optional(),
+  textBody: z.string().max(50000).optional(),
   content: z.string().optional(),
   title: z.string().max(200).optional(),
+  recordingMode: z.enum(['audio', 'text', 'photo_audio']).optional(),
 
   // Dates/nums (no defaults)
   year: z.number().int().min(1900).max(new Date().getFullYear() + 10).nullable().optional(),

@@ -263,6 +263,14 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
+          {/* DEBUG: Log photo data */}
+          {process.env.NODE_ENV === 'development' && console.log('[TimelineCardV2] Current photo:', {
+            id: currentPhoto.id,
+            width: currentPhoto.width,
+            height: currentPhoto.height,
+            hasTransform: !!currentPhoto.transform,
+            url: currentPhoto.url?.substring(0, 50) + '...'
+          })}
           <StoryPhotoWithBlurExtend
             src={currentPhoto.url}
             alt={story.title}

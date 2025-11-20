@@ -22,6 +22,8 @@ type NavPayloadExtended = {
   lessonLearned?: string;
   timestamp?: string | number;
   transcription?: string;
+  textBody?: string; // Text-only story content
+  recordingMode?: "audio" | "text" | "photo_audio"; // How the story was created
   title?: string;
   storyYear?: string;
   wisdomClipText?: string;
@@ -116,7 +118,8 @@ function BookStyleReviewContent() {
 
         // Populate form with existing story data
         setTitle(story.title || "");
-        setTranscription(story.transcription || story.content || "");
+        // For text-only stories, use textBody; otherwise use transcription
+        setTranscription(story.textBody || story.transcription || story.content || "");
         setStoryYear(
           story.storyYear?.toString() || story.year?.toString() || "",
         );
@@ -238,6 +241,9 @@ function BookStyleReviewContent() {
             setTranscription(cachedData.transcription as string);
           } else if (cachedData.originalTranscript) {
             setTranscription(cachedData.originalTranscript as string);
+          } else if (cachedData.textBody) {
+            // Text-only mode: use textBody as the transcription
+            setTranscription(cachedData.textBody as string);
           }
 
           if (cachedData.title) {
@@ -552,6 +558,8 @@ function BookStyleReviewContent() {
                   filePath,
                   isHero: photo.isHero,
                   transform: photo.transform,
+                  width: photo.width,
+                  height: photo.height,
                 },
               );
 
@@ -723,6 +731,8 @@ function BookStyleReviewContent() {
                   zoom: 1,
                   position: { x: 0, y: 0 },
                 },
+                width: photo.width,
+                height: photo.height,
               },
             );
 
