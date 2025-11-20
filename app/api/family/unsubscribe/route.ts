@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
 import { logger } from '@/lib/logger';
+import { generateUnsubscribeToken, verifyUnsubscribeToken } from '@/lib/unsubscribe-token';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -13,49 +13,8 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
-/**
- * Generate an unsubscribe token for a family member
- * Format: {familyMemberId}.{hmacSignature}
- *
- * This is used by email templates to create unsubscribe links
- */
-export function generateUnsubscribeToken(familyMemberId: string): string {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || 'fallback-secret';
-  const hmac = crypto.createHmac('sha256', secret);
-  hmac.update(familyMemberId);
-  const signature = hmac.digest('hex');
-  return `${familyMemberId}.${signature}`;
-}
-
-/**
- * Verify an unsubscribe token and extract the family member ID
- * Returns the family member ID if valid, null otherwise
- */
-function verifyUnsubscribeToken(token: string): string | null {
-  try {
-    const [familyMemberId, providedSignature] = token.split('.');
-
-    if (!familyMemberId || !providedSignature) {
-      return null;
-    }
-
-    // Regenerate the signature
-    const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || 'fallback-secret';
-    const hmac = crypto.createHmac('sha256', secret);
-    hmac.update(familyMemberId);
-    const expectedSignature = hmac.digest('hex');
-
-    // Constant-time comparison to prevent timing attacks
-    if (crypto.timingSafeEqual(Buffer.from(providedSignature), Buffer.from(expectedSignature))) {
-      return familyMemberId;
-    }
-
-    return null;
-  } catch (error) {
-    logger.error('[Unsubscribe] Token verification error:', error);
-    return null;
-  }
-}
+// Re-export for backwards compatibility with any existing code
+export { generateUnsubscribeToken }
 
 /**
  * Unsubscribe Endpoint

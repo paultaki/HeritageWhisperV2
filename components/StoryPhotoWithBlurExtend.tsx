@@ -51,6 +51,7 @@ export function StoryPhotoWithBlurExtend({
   width,
   height,
   transform,
+  sizes = "(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw",
 }: StoryPhotoWithBlurExtendProps) {
   // Default aspect ratio is 16:10 (standard for story cards)
   const ratio = aspectRatio ?? 16 / 10;
@@ -115,6 +116,7 @@ export function StoryPhotoWithBlurExtend({
             src={src}
             alt=""
             fill
+            sizes={sizes}
             priority={priority}
             aria-hidden="true"
             className="object-cover scale-110 blur-xl opacity-70"
@@ -150,6 +152,7 @@ export function StoryPhotoWithBlurExtend({
           src={src}
           alt={alt}
           fill
+          sizes={sizes}
           priority={priority}
           style={transformStyle}
           className={cn(

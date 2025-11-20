@@ -122,6 +122,8 @@ export const stories = pgTable("stories", {
     .notNull(),
   title: text("title").notNull(),
   audioUrl: text("audio_url"),
+  textBody: text("text_body"), // Text content for text-only stories (alternative to audio)
+  recordingMode: text("recording_mode"), // How story was created: 'audio', 'text', 'photo_audio'
   transcription: text("transcription"),
   durationSeconds: integer("duration_seconds"),
   wisdomClipUrl: text("wisdom_clip_url"),
@@ -232,6 +234,8 @@ export const treasures = pgTable("treasures", {
   // NEW: Dual WebP paths (suffix naming: treasure-{id}-master.webp, treasure-{id}-display.webp)
   masterPath: text("master_path"), // Path to master WebP (2400px @ 85% quality)
   displayPath: text("display_path"), // Path to display WebP (550px @ 80% quality)
+  imageWidth: integer("image_width"), // Original image width in pixels (from master WebP)
+  imageHeight: integer("image_height"), // Original image height in pixels (from master WebP)
   // DEPRECATED (kept for backward compatibility during migration):
   imageUrl: text("image_url"), // Old: public URL
   thumbnailUrl: text("thumbnail_url"), // Old: replaced by displayPath

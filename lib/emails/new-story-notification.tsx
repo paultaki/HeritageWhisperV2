@@ -1,4 +1,4 @@
-import { generateUnsubscribeToken } from '@/app/api/family/unsubscribe/route';
+import { generateUnsubscribeToken } from '@/lib/unsubscribe-token';
 
 // Email template for when storyteller adds a new story
 export interface NewStoryNotificationEmailProps {

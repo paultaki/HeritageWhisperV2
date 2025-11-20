@@ -12,6 +12,8 @@ type Treasure = {
   imageUrl: string;
   displayUrl?: string;
   masterUrl?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   transform?: { zoom: number; position: { x: number; y: number } };
   category: TreasureCategory;
   year?: number;
@@ -207,6 +209,8 @@ export function TreasureGrid({
             displayUrl={treasure.displayUrl}
             masterUrl={treasure.masterUrl}
             imageUrl={treasure.imageUrl}
+            imageWidth={treasure.imageWidth}
+            imageHeight={treasure.imageHeight}
             transform={treasure.transform}
             category={treasure.category}
             year={treasure.year}

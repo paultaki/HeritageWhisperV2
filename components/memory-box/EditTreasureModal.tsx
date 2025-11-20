@@ -46,6 +46,7 @@ type EditTreasureModalProps = {
     category: TreasureCategory;
     year?: number;
     transform?: { zoom: number; position: { x: number; y: number } };
+    imageFile?: File;
   }) => Promise<void>;
 };
 
@@ -77,6 +78,11 @@ export function EditTreasureModal({ isOpen, onClose, treasure, onSave }: EditTre
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageRef = useRef<HTMLDivElement>(null);
 
+  // Photo replacement state
+  const [newPhotoFile, setNewPhotoFile] = useState<File | null>(null);
+  const [newPhotoPreview, setNewPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const currentYear = new Date().getFullYear();
 
   // Reset form when treasure changes
@@ -87,8 +93,48 @@ export function EditTreasureModal({ isOpen, onClose, treasure, onSave }: EditTre
       setYear(treasure.year?.toString() || "");
       setDescription(treasure.description || "");
       setEditTransform(treasure.transform || { zoom: 1, position: { x: 0, y: 0 } });
+      setNewPhotoFile(null);
+      setNewPhotoPreview(null);
     }
   }, [treasure]);
+
+  // Handle photo file selection
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Image must be smaller than 10MB");
+      return;
+    }
+
+    setNewPhotoFile(file);
+
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewPhotoPreview(reader.result as string);
+      // Reset transform when new photo is selected
+      setEditTransform({ zoom: 1, position: { x: 0, y: 0 } });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Remove new photo
+  const handleRemoveNewPhoto = () => {
+    setNewPhotoFile(null);
+    setNewPhotoPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   // Zoom handlers
   const handleZoomChange = (value: number[]) => {
@@ -197,6 +243,7 @@ export function EditTreasureModal({ isOpen, onClose, treasure, onSave }: EditTre
         category,
         year: year ? parseInt(year) : undefined,
         transform: editTransform,
+        imageFile: newPhotoFile || undefined,
       });
 
       onClose();
@@ -228,10 +275,10 @@ export function EditTreasureModal({ isOpen, onClose, treasure, onSave }: EditTre
               <Label>Photo</Label>
               <div
                 className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border-2 border-gray-300 cursor-pointer hover:border-heritage-coral transition-colors group"
-                onClick={() => setIsEditingPhoto(true)}
+                onClick={() => !newPhotoPreview && setIsEditingPhoto(true)}
               >
                 <img
-                  src={treasure.imageUrl}
+                  src={newPhotoPreview || treasure.imageUrl}
                   alt={title}
                   className="w-full h-full object-cover"
                   style={{
@@ -240,14 +287,59 @@ export function EditTreasureModal({ isOpen, onClose, treasure, onSave }: EditTre
                   }}
                 />
                 {/* Overlay hint */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
-                  <div className="bg-white/90 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                    <ImageIcon className="w-5 h-5" />
-                    <span className="font-medium">Click to adjust photo</span>
+                {!newPhotoPreview && (
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
+                    <div className="bg-white/90 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                      <ImageIcon className="w-5 h-5" />
+                      <span className="font-medium">Click to adjust photo</span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
-              <p className="text-sm text-gray-500">Click photo to zoom and reposition</p>
+
+              {/* Photo Actions */}
+              <div className="flex gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-1"
+                  size="sm"
+                >
+                  <ImageIcon className="w-4 h-4 mr-2" />
+                  {newPhotoFile ? "Change Photo" : "Replace Photo"}
+                </Button>
+                {newPhotoFile && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleRemoveNewPhoto}
+                    size="sm"
+                  >
+                    Cancel Replacement
+                  </Button>
+                )}
+                {!newPhotoFile && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditingPhoto(true)}
+                    size="sm"
+                  >
+                    Adjust Position
+                  </Button>
+                )}
+              </div>
+              <p className="text-sm text-gray-500">
+                {newPhotoFile ? "New photo selected - will replace current photo when saved" : "Replace photo or click to zoom and reposition"}
+              </p>
             </div>
 
             {/* Title */}
@@ -338,7 +430,7 @@ export function EditTreasureModal({ isOpen, onClose, treasure, onSave }: EditTre
               style={{ cursor: isDragging ? "grabbing" : "grab" }}
             >
               <img
-                src={treasure.imageUrl}
+                src={newPhotoPreview || treasure.imageUrl}
                 alt={title}
                 className="w-full h-full object-cover select-none pointer-events-none"
                 style={{

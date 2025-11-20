@@ -19,13 +19,15 @@ type RouteContext = {
 /**
  * PATCH /api/treasures/[id] - Update treasure
  *
- * Body:
+ * Body (JSON or FormData):
  * - isFavorite?: boolean
  * - title?: string
  * - description?: string
  * - category?: string
  * - year?: number
  * - linkedStoryId?: string | null
+ * - transform?: { zoom: number; position: { x: number; y: number } }
+ * - image?: File (FormData only - replaces existing photo)
  */
 export async function PATCH(
   request: NextRequest,
@@ -56,7 +58,111 @@ export async function PATCH(
     }
 
     const { id } = await context.params;
-    const body = await request.json();
+
+    // Check content type to determine how to parse body
+    const contentType = request.headers.get("content-type") || "";
+    const isFormData = contentType.includes("multipart/form-data");
+
+    let body: any = {};
+    let imageFile: File | null = null;
+
+    if (isFormData) {
+      const formData = await request.formData();
+
+      // Extract form fields
+      if (formData.has("title")) body.title = formData.get("title");
+      if (formData.has("description")) body.description = formData.get("description");
+      if (formData.has("category")) body.category = formData.get("category");
+      if (formData.has("year")) body.year = parseInt(formData.get("year") as string);
+      if (formData.has("transform")) body.transform = JSON.parse(formData.get("transform") as string);
+      if (formData.has("isFavorite")) body.isFavorite = formData.get("isFavorite") === "true";
+      if (formData.has("linkedStoryId")) body.linkedStoryId = formData.get("linkedStoryId");
+
+      // Extract image file if present
+      imageFile = formData.get("image") as File | null;
+    } else {
+      body = await request.json();
+    }
+
+    // Process image replacement if provided
+    if (imageFile) {
+      // Convert image to Buffer and process to dual WebP versions
+      const arrayBuffer = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Validate and process image
+      const { validateImage, processImageToWebP } = await import("@/lib/imageProcessor");
+      const isValidImage = await validateImage(buffer);
+
+      if (!isValidImage) {
+        return NextResponse.json(
+          { error: "Invalid image file" },
+          { status: 400 }
+        );
+      }
+
+      // Process image to dual WebP versions (Master + Display)
+      const { master, display } = await processImageToWebP(buffer);
+
+      // Generate unique filenames
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(7);
+      const baseFilename = `treasure/${user.id}/${timestamp}-${randomId}`;
+      const masterFilename = `${baseFilename}-master.webp`;
+      const displayFilename = `${baseFilename}-display.webp`;
+
+      // Upload Master WebP
+      const { error: masterError } = await supabaseAdmin.storage
+        .from("heritage-whisper-files")
+        .upload(masterFilename, master.buffer, {
+          contentType: "image/webp",
+          upsert: false,
+        });
+
+      if (masterError) {
+        console.error("Master WebP upload error:", masterError);
+        return NextResponse.json(
+          { error: "Failed to upload master image" },
+          { status: 500 }
+        );
+      }
+
+      // Upload Display WebP
+      const { error: displayError } = await supabaseAdmin.storage
+        .from("heritage-whisper-files")
+        .upload(displayFilename, display.buffer, {
+          contentType: "image/webp",
+          upsert: false,
+        });
+
+      if (displayError) {
+        console.error("Display WebP upload error:", displayError);
+        // Clean up master file
+        await supabaseAdmin.storage
+          .from("heritage-whisper-files")
+          .remove([masterFilename]);
+        return NextResponse.json(
+          { error: "Failed to upload display image" },
+          { status: 500 }
+        );
+      }
+
+      // Generate signed URLs
+      const { data: masterSignedUrl } = await supabaseAdmin.storage
+        .from("heritage-whisper-files")
+        .createSignedUrl(masterFilename, 604800);
+
+      const { data: displaySignedUrl } = await supabaseAdmin.storage
+        .from("heritage-whisper-files")
+        .createSignedUrl(displayFilename, 604800);
+
+      // Update image paths and dimensions
+      body.master_path = masterFilename;
+      body.display_path = displayFilename;
+      body.image_url = displaySignedUrl?.signedUrl || displayFilename;
+      body.image_width = master.width;
+      body.image_height = master.height;
+    }
 
     // Build update object
     const updates: Record<string, any> = {
@@ -80,6 +186,24 @@ export async function PATCH(
     }
     if (body.linkedStoryId !== undefined) {
       updates.linked_story_id = body.linkedStoryId;
+    }
+    if (body.transform !== undefined) {
+      updates.transform = body.transform;
+    }
+    if (body.master_path !== undefined) {
+      updates.master_path = body.master_path;
+    }
+    if (body.display_path !== undefined) {
+      updates.display_path = body.display_path;
+    }
+    if (body.image_url !== undefined) {
+      updates.image_url = body.image_url;
+    }
+    if (body.image_width !== undefined) {
+      updates.image_width = body.image_width;
+    }
+    if (body.image_height !== undefined) {
+      updates.image_height = body.image_height;
     }
 
     // Update treasure (RLS ensures user owns it)

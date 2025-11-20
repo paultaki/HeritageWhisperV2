@@ -62,6 +62,8 @@ interface Treasure {
   // NEW: Dual WebP URLs
   masterUrl?: string;
   displayUrl?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   transform?: { zoom: number; position: { x: number; y: number } };
   // DEPRECATED (backward compatibility):
   imageUrl: string;
@@ -367,21 +369,42 @@ export default function MemoryBoxV2Page() {
     category: "photos" | "documents" | "heirlooms" | "keepsakes" | "recipes" | "memorabilia";
     year?: number;
     transform?: { zoom: number; position: { x: number; y: number } };
+    imageFile?: File;
   }) => {
-    const response = await fetch(`/api/treasures/${updates.id}`, {
-      method: "PATCH",
-      headers: {
-        ...authHeaders,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: updates.title,
-        description: updates.description,
-        category: updates.category,
-        year: updates.year,
-        transform: updates.transform,
-      }),
-    });
+    let response;
+
+    if (updates.imageFile) {
+      // Use FormData when replacing photo
+      const formData = new FormData();
+      formData.append("image", updates.imageFile);
+      formData.append("title", updates.title);
+      formData.append("category", updates.category);
+      if (updates.description) formData.append("description", updates.description);
+      if (updates.year) formData.append("year", updates.year.toString());
+      if (updates.transform) formData.append("transform", JSON.stringify(updates.transform));
+
+      response = await fetch(`/api/treasures/${updates.id}`, {
+        method: "PATCH",
+        headers: authHeaders,
+        body: formData,
+      });
+    } else {
+      // Use JSON when only updating metadata
+      response = await fetch(`/api/treasures/${updates.id}`, {
+        method: "PATCH",
+        headers: {
+          ...authHeaders,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: updates.title,
+          description: updates.description,
+          category: updates.category,
+          year: updates.year,
+          transform: updates.transform,
+        }),
+      });
+    }
 
     if (!response.ok) throw new Error("Failed to update treasure");
 
