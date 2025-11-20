@@ -15,7 +15,7 @@ export function StartStoryScreen({ onSelectMode, onCancel }: StartStoryScreenPro
       <div className="flex items-start justify-between px-6 pt-6 pb-4">
         <div className="flex items-center gap-3">
           <img
-            src="/logo hw.svg"
+            src="/final logo/logo hw.svg"
             alt="HW"
             className="w-12 h-12"
           />
@@ -31,6 +31,7 @@ export function StartStoryScreen({ onSelectMode, onCancel }: StartStoryScreenPro
         <button
           onClick={onCancel}
           className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"
+          style={{ marginRight: "-20px" }}
           aria-label="Cancel"
         >
           <X className="w-5 h-5" style={{ color: "#2C3E50" }} />
@@ -60,12 +61,12 @@ export function StartStoryScreen({ onSelectMode, onCancel }: StartStoryScreenPro
           {/* Record with photo */}
           <button
             onClick={() => onSelectMode("photo_audio")}
-            className="w-full bg-white rounded-2xl py-3 px-4 flex items-center gap-4 active:scale-[0.98] transition-transform shadow-sm"
+            className="w-full bg-white rounded-2xl py-3 px-4 flex flex-col items-center gap-3 active:scale-[0.98] transition-transform shadow-sm"
           >
-            <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#E8E8E8" }}>
-              <Camera className="w-7 h-7" style={{ color: "#2C3E50" }} />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#E8E8E8" }}>
+              <Camera className="w-5 h-5" style={{ color: "#2C3E50" }} />
             </div>
-            <div className="flex-1 text-left">
+            <div className="text-center">
               <h3 className="font-semibold text-lg mb-1" style={{ color: "#2C3E50" }}>
                 Record with photo
               </h3>
@@ -78,12 +79,12 @@ export function StartStoryScreen({ onSelectMode, onCancel }: StartStoryScreenPro
           {/* Start recording (no photo) */}
           <button
             onClick={() => onSelectMode("audio")}
-            className="w-full bg-white rounded-2xl py-3 px-4 flex items-center gap-4 active:scale-[0.98] transition-transform shadow-sm"
+            className="w-full bg-white rounded-2xl py-3 px-4 flex flex-col items-center gap-3 active:scale-[0.98] transition-transform shadow-sm"
           >
-            <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#E8E8E8" }}>
-              <Mic className="w-7 h-7" style={{ color: "#2C3E50" }} />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#E8E8E8" }}>
+              <Mic className="w-5 h-5" style={{ color: "#2C3E50" }} />
             </div>
-            <div className="flex-1 text-left">
+            <div className="text-center">
               <h3 className="font-semibold text-lg mb-1" style={{ color: "#2C3E50" }}>
                 Start recording (no photo)
               </h3>
