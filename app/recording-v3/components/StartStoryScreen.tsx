@@ -6,108 +6,106 @@ import "../recording-v3.css";
 
 /**
  * StartStoryScreen - Entry point for recording flow V3
- * Offers 3 recording modes: Photo+Audio, Audio Only, or Text
- * Based on heritage-whisper-recorder reference implementation
+ * Matches heritage-whisper-recorder reference design exactly
  */
 export function StartStoryScreen({ onSelectMode, onCancel }: StartStoryScreenProps) {
   return (
-    <div className="hw-screen-wrapper">
+    <div className="hw-screen-wrapper" style={{ backgroundColor: "#F5F1ED" }}>
       {/* Header */}
-      <div className="hw-screen-header">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-hw-charcoal rounded-full flex items-center justify-center">
-            <span className="text-white font-serif text-sm font-semibold">HW</span>
+      <div className="flex items-center justify-between px-6 pt-6 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-hw-charcoal rounded-full flex items-center justify-center">
+            <span className="text-white font-serif text-base font-bold">HW</span>
           </div>
-          <h1 className="hw-heading-md">New Story</h1>
+          <div>
+            <h1 className="font-bold text-lg tracking-wide" style={{ color: "#2C3E50" }}>
+              HERITAGE WHISPER
+            </h1>
+            <p className="text-sm" style={{ color: "#6B7280" }}>
+              Record a new memory
+            </p>
+          </div>
         </div>
         <button
           onClick={onCancel}
-          className="hw-btn-icon hw-btn-ghost"
+          className="w-10 h-10 flex items-center justify-center"
           aria-label="Cancel"
         >
-          <X className="w-5 h-5" />
+          <X className="w-6 h-6" style={{ color: "#2C3E50" }} />
         </button>
       </div>
 
       {/* Content */}
-      <div className="hw-screen-content">
-        <div className="hw-stack-lg">
-          <div className="hw-text-center mb-4">
-            <h2 className="hw-heading-lg mb-2">Share Your Story</h2>
-            <p className="hw-body-base hw-text-muted">
-              Choose how you'd like to capture this memory
-            </p>
-          </div>
+      <div className="px-6 pt-8 pb-6">
+        {/* Main Heading */}
+        <h2
+          className="font-serif font-semibold mb-3"
+          style={{
+            fontSize: "32px",
+            lineHeight: "1.2",
+            color: "#2C3E50"
+          }}
+        >
+          Every memory matters.<br />Start with your voice.
+        </h2>
 
-          {/* Option 1: Photo + Audio (Primary) */}
+        <p className="text-base mb-8" style={{ color: "#6B7280" }}>
+          Capture a story in your own words. Add photos now or later.
+        </p>
+
+        {/* Primary Options */}
+        <div className="space-y-4 mb-8">
+          {/* Record with photo */}
           <button
             onClick={() => onSelectMode("photo_audio")}
-            className="hw-card hw-card-interactive"
+            className="w-full bg-white rounded-2xl p-5 flex items-center gap-4 active:scale-[0.98] transition-transform shadow-sm"
           >
-            <div className="flex items-start gap-4">
-              <div
-                className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: "var(--hw-charcoal)" }}
-              >
-                <Camera className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1 text-left">
-                <h3 className="hw-heading-md mb-1">Record with Photo</h3>
-                <p className="hw-body-sm">
-                  Add a photo and tell the story behind it
-                </p>
-              </div>
+            <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#E8E8E8" }}>
+              <Camera className="w-7 h-7" style={{ color: "#2C3E50" }} />
+            </div>
+            <div className="flex-1 text-left">
+              <h3 className="font-semibold text-lg mb-1" style={{ color: "#2C3E50" }}>
+                Record with photo
+              </h3>
+              <p className="text-sm" style={{ color: "#6B7280" }}>
+                Choose a photo, then tell the story behind it.
+              </p>
             </div>
           </button>
 
-          {/* Option 2: Audio Only */}
+          {/* Start recording (no photo) */}
           <button
             onClick={() => onSelectMode("audio")}
-            className="hw-card hw-card-interactive"
+            className="w-full bg-white rounded-2xl p-5 flex items-center gap-4 active:scale-[0.98] transition-transform shadow-sm"
           >
-            <div className="flex items-start gap-4">
-              <div
-                className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: "var(--hw-rose-gold)" }}
-              >
-                <Mic className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1 text-left">
-                <h3 className="hw-heading-md mb-1">Record without Photo</h3>
-                <p className="hw-body-sm">
-                  Jump right into recording your story
-                </p>
-              </div>
+            <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#E8E8E8" }}>
+              <Mic className="w-7 h-7" style={{ color: "#2C3E50" }} />
+            </div>
+            <div className="flex-1 text-left">
+              <h3 className="font-semibold text-lg mb-1" style={{ color: "#2C3E50" }}>
+                Start recording (no photo)
+              </h3>
+              <p className="text-sm" style={{ color: "#6B7280" }}>
+                Record now, add photos anytime later.
+              </p>
             </div>
           </button>
+        </div>
 
-          {/* Option 3: Text Mode */}
+        {/* Text Mode - De-emphasized */}
+        <div className="text-center">
           <button
             onClick={() => onSelectMode("text")}
-            className="hw-card hw-card-interactive"
+            className="inline-flex items-center gap-2 px-4 py-2"
           >
-            <div className="flex items-start gap-4">
-              <div
-                className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: "var(--hw-forest-green)" }}
-              >
-                <Keyboard className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1 text-left">
-                <h3 className="hw-heading-md mb-1">Write Your Story</h3>
-                <p className="hw-body-sm">
-                  Type your memory instead of recording
-                </p>
-              </div>
-            </div>
+            <Keyboard className="w-5 h-5" style={{ color: "#6B7280" }} />
+            <span className="text-base font-medium" style={{ color: "#2C3E50" }}>
+              Prefer to type this story instead?
+            </span>
           </button>
-
-          {/* Helper Text */}
-          <div className="mt-4 text-center">
-            <p className="hw-body-sm hw-text-muted">
-              You can pause and resume at any time
-            </p>
-          </div>
+          <p className="text-sm mt-1" style={{ color: "#9CA3AF" }}>
+            Audio is best, but you can always type if you prefer.
+          </p>
         </div>
       </div>
     </div>

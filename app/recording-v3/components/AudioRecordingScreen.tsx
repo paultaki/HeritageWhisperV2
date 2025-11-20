@@ -1,15 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Pause, Play, Square, Save, Type } from "lucide-react";
+import { ArrowLeft, Pause, Play, Square, Mic } from "lucide-react";
 import { type AudioRecordingScreenProps, type RecordingState } from "../types";
-import { WaveformVisualizer } from "./WaveformVisualizer";
 import "../recording-v3.css";
 
 /**
  * AudioRecordingScreen - Core recording experience
- * Full MediaRecorder integration with pause/resume, waveform, and controls
- * Based on heritage-whisper-recorder reference implementation
+ * Matches heritage-whisper-recorder reference design exactly
  */
 export function AudioRecordingScreen({
   draft,
@@ -30,11 +28,9 @@ export function AudioRecordingScreen({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  const MAX_DURATION_SECONDS = 300; // 5 minutes
+  const MAX_DURATION_SECONDS = 1800; // 30 minutes
 
-  // Initialize recording
   useEffect(() => {
-    startRecording();
     return cleanup;
   }, []);
 
@@ -42,10 +38,7 @@ export function AudioRecordingScreen({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // Set up MediaRecorder
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: "audio/webm",
-      });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (event) => {
@@ -54,7 +47,6 @@ export function AudioRecordingScreen({
         }
       };
 
-      // Start recording in chunks
       mediaRecorder.start(250);
       setRecordingState("recording");
       startTimer();
@@ -79,7 +71,6 @@ export function AudioRecordingScreen({
     timerIntervalRef.current = window.setInterval(() => {
       setElapsedSeconds((prev) => {
         const newTime = prev + 1;
-        // Auto-stop at max duration
         if (newTime >= MAX_DURATION_SECONDS) {
           handleStop();
         }
@@ -101,9 +92,8 @@ export function AudioRecordingScreen({
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
     analyserRef.current.getByteFrequencyData(dataArray);
 
-    // Calculate average volume
     const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-    setAudioLevel(average / 255); // Normalize to 0-1
+    setAudioLevel(average / 255);
 
     animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
   };
@@ -126,35 +116,70 @@ export function AudioRecordingScreen({
     setRecordingState("processing");
     stopTimer();
 
-    // Stop visualization
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
 
-    // Stop recording
     mediaRecorderRef.current.stop();
 
-    // Wait for final data
     await new Promise<void>((resolve) => {
       if (mediaRecorderRef.current) {
         mediaRecorderRef.current.onstop = () => resolve();
       }
     });
 
-    // Create audio blob
     const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
 
-    // Update draft and finish
-    const completeDraft = {
-      ...draft,
-      title: draft.title || "Untitled Story",
-      audioBlob,
-      durationSeconds: elapsedSeconds,
-      recordingMode: (draft.photoUrl ? "photo_audio" : "audio") as "photo_audio" | "audio",
-    };
+    // Call transcription API
+    try {
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "recording.webm");
 
-    onFinishAndReview(completeDraft as any);
-    cleanup();
+      const response = await fetch("/api/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        const completeDraft = {
+          ...draft,
+          title: data.title || draft.title || "Untitled Story",
+          audioBlob,
+          durationSeconds: elapsedSeconds,
+          recordingMode: (draft.photoUrl ? "photo_audio" : "audio") as "photo_audio" | "audio",
+          transcription: data.transcription,
+          lessonOptions: data.lessonOptions,
+        };
+
+        onFinishAndReview(completeDraft as any);
+      } else {
+        // If transcription fails, continue without it
+        console.error("Transcription failed:", await response.text());
+        const completeDraft = {
+          ...draft,
+          title: draft.title || "Untitled Story",
+          audioBlob,
+          durationSeconds: elapsedSeconds,
+          recordingMode: (draft.photoUrl ? "photo_audio" : "audio") as "photo_audio" | "audio",
+        };
+        onFinishAndReview(completeDraft as any);
+      }
+    } catch (error) {
+      console.error("Error during transcription:", error);
+      // Continue without transcription on error
+      const completeDraft = {
+        ...draft,
+        title: draft.title || "Untitled Story",
+        audioBlob,
+        durationSeconds: elapsedSeconds,
+        recordingMode: (draft.photoUrl ? "photo_audio" : "audio") as "photo_audio" | "audio",
+      };
+      onFinishAndReview(completeDraft as any);
+    } finally {
+      cleanup();
+    }
   };
 
   const handleSaveForLater = () => {
@@ -168,31 +193,21 @@ export function AudioRecordingScreen({
     cleanup();
   };
 
-  const handleSwitchToText = () => {
-    if (confirm("Switch to text mode? Your recording will be discarded.")) {
-      cleanup();
-      onSwitchToText();
-    }
-  };
-
   const cleanup = () => {
-    // Stop timer
     stopTimer();
-
-    // Stop visualization
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
     }
-
-    // Stop media recorder
     if (mediaRecorderRef.current?.state !== "inactive") {
       mediaRecorderRef.current?.stop();
     }
+    // Only close AudioContext if it exists and is not already closed
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+      audioContextRef.current.close();
+    }
+    audioContextRef.current = null;
 
-    // Close audio context
-    audioContextRef.current?.close();
-
-    // Stop all tracks
     mediaRecorderRef.current?.stream.getTracks().forEach((track) => track.stop());
   };
 
@@ -204,121 +219,175 @@ export function AudioRecordingScreen({
 
   const isRecording = recordingState === "recording";
   const isPaused = recordingState === "paused";
-  const isProcessing = recordingState === "processing";
+  const isIdle = recordingState === "idle";
+
+  // Waveform visualization
+  const waveformBars = Array.from({ length: 12 }, (_, i) => {
+    if (isIdle) return 0.2;
+    const baseHeight = 0.2 + audioLevel * 0.6;
+    const waveOffset = Math.sin((Date.now() / 300) + (i * 0.5)) * 0.15;
+    const randomness = Math.random() * 0.1;
+    return Math.max(0.15, Math.min(0.95, baseHeight + waveOffset + randomness));
+  });
 
   return (
-    <div className="hw-screen-wrapper">
+    <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div className="hw-screen-header">
-        <button
-          onClick={onBack}
-          className="hw-btn-icon hw-btn-ghost"
-          aria-label="Back"
-          disabled={isProcessing}
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex items-center gap-2">
-          {draft.photoUrl && (
-            <img
-              src={draft.photoUrl}
-              alt="Story photo"
-              className="w-8 h-8 rounded object-cover"
-            />
-          )}
-          <h1 className="hw-heading-md">{draft.title || "Recording..."}</h1>
+      <div className="flex items-center justify-between px-6 pt-6 pb-4">
+        <div>
+          <h1 className="font-bold text-lg tracking-wide" style={{ color: "#2C3E50" }}>
+            HERITAGE WHISPER
+          </h1>
+          <p className="text-sm" style={{ color: "#6B7280" }}>
+            {draft.title || "Record your story"}
+          </p>
         </div>
-        <div className="w-10" />
+        {onSaveForLater && (
+          <button
+            onClick={handleSaveForLater}
+            className="text-base font-medium"
+            style={{ color: "#6B7280" }}
+          >
+            Save later
+          </button>
+        )}
       </div>
 
-      {/* Content */}
-      <div className="hw-screen-content">
-        <div className="hw-stack-lg">
-          {/* Timer */}
-          <div className="hw-text-center">
-            <div className="hw-timer">{formatTime(elapsedSeconds)}</div>
-            <p className="hw-body-sm hw-text-muted mt-2">
-              {MAX_DURATION_SECONDS - elapsedSeconds > 0
-                ? `${MAX_DURATION_SECONDS - elapsedSeconds}s remaining`
-                : "Maximum duration reached"}
-            </p>
+      {/* Photo Preview */}
+      {draft.photoUrl && (
+        <div className="mx-6 mb-6 relative rounded-2xl overflow-hidden" style={{ aspectRatio: "16/10" }}>
+          <img src={draft.photoUrl} alt="Story" className="w-full h-full object-cover" />
+          <div className="absolute top-4 left-4">
+            <button className="bg-black/60 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Edit photo
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 px-6">
+        {/* Timer Card */}
+        <div className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: isIdle ? "#9CA3AF" : "#10B981" }} />
+              <span className="text-sm font-medium" style={{ color: "#6B7280" }}>
+                {isIdle ? "Ready to record" : isRecording ? "Recording" : "Paused"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-sm" style={{ color: "#9CA3AF" }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                <path strokeLinecap="round" strokeWidth="2" d="M12 6v6l4 2" />
+              </svg>
+              Max 30m
+            </div>
           </div>
 
-          {/* Waveform */}
-          <WaveformVisualizer isRecording={isRecording} audioLevel={audioLevel} />
-
-          {/* Guidance Text */}
-          <div className="hw-text-center">
-            <p className="hw-body-base hw-text-muted">
-              {isRecording && "Take your time. You can pause anytime..."}
-              {isPaused && "Paused. Tap to resume when ready."}
-              {isProcessing && "Processing your recording..."}
-            </p>
+          <div className="text-center mb-4">
+            <div className="text-5xl font-semibold tabular-nums" style={{ color: "#2C3E50" }}>
+              {formatTime(elapsedSeconds)}
+            </div>
+            {!isIdle && (
+              <p className="text-sm mt-1" style={{ color: "#9CA3AF" }}>
+                {MAX_DURATION_SECONDS - elapsedSeconds}s remaining
+              </p>
+            )}
           </div>
+        </div>
 
-          {/* Main Controls */}
-          <div className="flex justify-center gap-4">
-            {/* Pause/Resume Button */}
+        {/* Waveform Card */}
+        <div className="bg-white rounded-2xl p-8 mb-4 shadow-sm">
+          <div className="flex items-center justify-center gap-1 h-20">
+            {waveformBars.map((height, index) => (
+              <div
+                key={index}
+                className="w-1 rounded-full transition-all duration-100"
+                style={{
+                  height: `${height * 80}px`,
+                  backgroundColor: isIdle ? "#D1D5DB" : "#10B981"
+                }}
+              />
+            ))}
+          </div>
+          <p className="text-center text-sm mt-4" style={{ color: "#9CA3AF" }}>
+            {isIdle ? "READY TO RECORD" : isRecording ? "RECORDING" : "PAUSED"}
+          </p>
+        </div>
+
+        {/* Tip */}
+        <div className="flex gap-3 mb-6">
+          <div className="w-1 rounded-full" style={{ backgroundColor: "#D4A574" }} />
+          <p className="text-base" style={{ color: "#6B7280" }}>
+            Take your time. You can pause anytime and edit later.
+          </p>
+        </div>
+
+        {/* Controls */}
+        {isIdle ? (
+          <>
+            <button
+              onClick={startRecording}
+              className="w-full py-4 rounded-xl font-medium text-base text-white flex items-center justify-center gap-2 mb-4"
+              style={{ backgroundColor: "#2C3E50" }}
+            >
+              <Mic className="w-5 h-5" />
+              Start recording
+            </button>
+            <p className="text-center text-sm mb-6" style={{ color: "#9CA3AF" }}>
+              Stop and continue to review
+            </p>
+          </>
+        ) : (
+          <div className="flex gap-3 mb-4">
             <button
               onClick={handlePauseResume}
-              disabled={isProcessing}
-              className="hw-btn hw-btn-primary hw-btn-lg"
-              style={{ minWidth: "120px" }}
+              className="flex-1 py-3 rounded-xl font-medium text-base text-white flex items-center justify-center gap-2"
+              style={{ backgroundColor: "#2C3E50" }}
             >
-              {isPaused ? (
-                <>
-                  <Play className="w-5 h-5" />
-                  Resume
-                </>
-              ) : (
-                <>
-                  <Pause className="w-5 h-5" />
-                  Pause
-                </>
-              )}
+              {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
+              {isPaused ? "Resume" : "Pause"}
             </button>
-
-            {/* Stop/Finish Button */}
             <button
               onClick={handleStop}
-              disabled={isProcessing || elapsedSeconds < 1}
-              className="hw-btn hw-btn-secondary hw-btn-lg"
+              className="flex-1 py-3 rounded-xl font-medium text-base flex items-center justify-center gap-2"
+              style={{ backgroundColor: "white", border: "2px solid #E5E7EB", color: "#2C3E50" }}
             >
               <Square className="w-5 h-5" />
               Finish
             </button>
           </div>
+        )}
 
-          {/* Secondary Actions */}
-          <div className="hw-stack-sm mt-4">
-            {onSaveForLater && (
-              <button
-                onClick={handleSaveForLater}
-                disabled={isProcessing}
-                className="hw-btn hw-btn-ghost w-full"
-              >
-                <Save className="w-5 h-5" />
-                Save for Later
-              </button>
-            )}
+        {/* Text Option */}
+        {isIdle && (
+          <div className="text-center mb-6">
             <button
-              onClick={handleSwitchToText}
-              disabled={isProcessing}
-              className="hw-btn hw-btn-ghost w-full"
+              onClick={onSwitchToText}
+              className="text-base font-medium mb-2"
+              style={{ color: "#2C3E50" }}
             >
-              <Type className="w-5 h-5" />
-              Switch to Text
+              Prefer to type this story instead?
             </button>
-          </div>
-
-          {/* Hint */}
-          <div className="hw-card mt-4">
-            <p className="hw-body-sm hw-text-muted">
-              💡 <strong>Tip:</strong> Speak naturally as if telling a friend. Don't
-              worry about perfection – you can edit the transcript later.
+            <p className="text-sm" style={{ color: "#9CA3AF" }}>
+              Audio captures your voice best, but typing is always an option.
             </p>
           </div>
-        </div>
+        )}
+
+        {/* Back Button */}
+        {isIdle && (
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 mb-6"
+          >
+            <ArrowLeft className="w-5 h-5" style={{ color: "#6B7280" }} />
+          </button>
+        )}
       </div>
     </div>
   );

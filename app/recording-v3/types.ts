@@ -32,9 +32,9 @@ export interface StoryDraft {
   // AI-generated fields (added during/after recording)
   transcription?: string;
   lessonOptions?: {
-    practical?: string;
-    emotional?: string;
-    character?: string;
+    practical: string;
+    emotional: string;
+    character: string;
   };
 
   // Metadata

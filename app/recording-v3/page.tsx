@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { navCache } from "@/lib/navCache";
 import {
@@ -20,7 +20,7 @@ import "./recording-v3.css";
  * Manages navigation between Start → PhotoTitle → Audio/Text → Review
  * Based on heritage-whisper-recorder with Next.js router integration
  */
-export default function RecordingV3Page() {
+function RecordingV3Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -40,7 +40,7 @@ export default function RecordingV3Page() {
     }
 
     if (navId) {
-      const cachedData = navCache.get<Partial<StoryDraft>>(navId);
+      const cachedData = navCache.get(navId) as Partial<StoryDraft> | null;
       if (cachedData) {
         setDraft(cachedData);
       }
@@ -116,6 +116,8 @@ export default function RecordingV3Page() {
       photoUrl: completeDraft.photoUrl,
       photoFile: completeDraft.photoFile,
       duration: completeDraft.durationSeconds,
+      transcription: completeDraft.transcription,
+      lessonOptions: completeDraft.lessonOptions,
       recordingMode: completeDraft.recordingMode,
       sourcePromptId: completeDraft.sourcePromptId,
       storyYear: completeDraft.storyYear,
@@ -214,5 +216,13 @@ export default function RecordingV3Page() {
         />
       )}
     </>
+  );
+}
+
+export default function RecordingV3Page() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <RecordingV3Content />
+    </Suspense>
   );
 }

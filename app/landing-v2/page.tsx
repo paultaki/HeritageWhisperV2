@@ -11,9 +11,14 @@ const IMAGES = {
   timelineFull: "/timeline.webp", // Full scrolling image for feature section
   book: "/book full.webp",
   memoryBox: "/treasurebox.webp",
+  pocketwatch: "/pocketwatch.png",
   family: "https://picsum.photos/seed/family/1200/800",
   senior: "https://picsum.photos/seed/grandma/200/200",
   logo: "/images/logo.png",
+};
+
+const AUDIO = {
+  pocketwatch: "/Pocket Watch.mp3",
 };
 
 // --- Components for Page Sections ---
@@ -210,64 +215,133 @@ const HowItWorks = () => (
   </section>
 );
 
-const AudioDemo = () => (
-  <section className="py-24 bg-navy-900 text-cream-100 overflow-hidden relative">
-    {/* Background texture */}
-    <div className="absolute inset-0 opacity-10 pointer-events-none"
-      style={{ backgroundImage: "radial-gradient(#ffffff 1px, transparent 1px)", backgroundSize: "30px 30px" }}>
-    </div>
+const AudioDemo = () => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
-    <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10 grid md:grid-cols-2 gap-12 items-center">
-      <div>
-        <span className="text-gold-500 font-bold tracking-wider uppercase text-sm mb-4 block">The Power of Voice</span>
-        <h2 className="text-3xl md:text-5xl font-serif font-medium mb-6 text-white">
-          Text captures the facts.<br />Voice captures the soul.
-        </h2>
-        <p className="text-lg text-cream-200/80 leading-relaxed mb-8">
-          When you read &quot;I was happy,&quot; you know the fact. When you <em>hear</em> the chuckle in Dad&apos;s voice as he tells the story, you feel the moment.
-        </p>
-        <p className="text-lg text-cream-200/80 leading-relaxed mb-8">
-          HeritageWhisper is built to capture the accents, the pauses, and the laughter that text alone leaves out.
-        </p>
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+    };
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("ended", handleEnded);
+
+    return () => {
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, []);
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  return (
+    <section className="py-24 bg-navy-900 text-cream-100 overflow-hidden relative">
+      {/* Background texture */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none"
+        style={{ backgroundImage: "radial-gradient(#ffffff 1px, transparent 1px)", backgroundSize: "30px 30px" }}>
       </div>
 
-      {/* Simulated Player Card */}
-      <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 md:p-8 shadow-2xl">
-        <div className="flex items-center gap-4 mb-6">
-          <img src={IMAGES.senior} alt="Dad" className="w-16 h-16 rounded-full object-cover border-2 border-gold-500" />
-          <div>
-            <h4 className="text-white font-serif text-xl">Dad&apos;s First Car</h4>
-            <p className="text-cream-200/60 text-sm">Recorded Oct 12, 1965 • 4 mins</p>
-          </div>
+      <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10 grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <span className="text-gold-500 font-bold tracking-wider uppercase text-sm mb-4 block">The Power of Voice</span>
+          <h2 className="text-3xl md:text-5xl font-serif font-medium mb-6 text-white">
+            Text captures the facts.<br />Voice captures the soul.
+          </h2>
+          <p className="text-lg text-cream-200/80 leading-relaxed mb-8">
+            When you read &quot;I was happy,&quot; you know the fact. When you <em>hear</em> the chuckle in Dad&apos;s voice as he tells the story, you feel the moment.
+          </p>
+          <p className="text-lg text-cream-200/80 leading-relaxed mb-8">
+            HeritageWhisper is built to capture the accents, the pauses, and the laughter that text alone leaves out.
+          </p>
         </div>
 
-        {/* Waveform Visualization */}
-        <div className="h-16 flex items-center gap-1 mb-6 justify-center opacity-80">
-          {[...Array(40)].map((_, i) => (
-            <div
-              key={i}
-              className="w-1 bg-gold-400 rounded-full animate-pulse"
-              style={{
-                height: `${Math.max(20, Math.random() * 100)}%`,
-                animationDelay: `${i * 0.05}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="flex items-center gap-4">
-          <button className="w-12 h-12 bg-gold-500 rounded-full flex items-center justify-center text-navy-900 hover:bg-gold-400 transition-colors">
-            <IconPlay className="w-5 h-5 fill-current" />
-          </button>
-          <div className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
-            <div className="w-1/3 h-full bg-gold-500"></div>
+        {/* Audio Player Card */}
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 md:p-8 shadow-2xl">
+          <div className="flex items-center gap-4 mb-6">
+            <img src={IMAGES.pocketwatch} alt="Pocket Watch" className="w-16 h-16 rounded-full object-cover border-2 border-gold-500" />
+            <div>
+              <h4 className="text-white font-serif text-xl">Frozen at 3:17</h4>
+              <p className="text-cream-200/60 text-sm">A cherished memory</p>
+            </div>
           </div>
-          <span className="text-xs font-mono text-gold-400">1:24 / 4:02</span>
+
+          {/* Waveform Visualization */}
+          <div className="h-16 flex items-center gap-1 mb-6 justify-center opacity-80">
+            {[...Array(40)].map((_, i) => (
+              <div
+                key={i}
+                className="w-1 bg-gold-400 rounded-full animate-pulse"
+                style={{
+                  height: `${Math.max(20, Math.random() * 100)}%`,
+                  animationDelay: `${i * 0.05}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button
+              onClick={togglePlay}
+              className="w-12 h-12 bg-gold-500 rounded-full flex items-center justify-center text-navy-900 hover:bg-gold-400 transition-colors"
+            >
+              {isPlaying ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="6" y="4" width="4" height="16" />
+                  <rect x="14" y="4" width="4" height="16" />
+                </svg>
+              ) : (
+                <IconPlay className="w-5 h-5 fill-current" />
+              )}
+            </button>
+            <div className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
+              <div className="h-full bg-gold-500 transition-all duration-200" style={{ width: `${progress}%` }}></div>
+            </div>
+            <span className="text-xs font-mono text-gold-400">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
+          </div>
+
+          {/* Hidden audio element */}
+          <audio ref={audioRef} src={AUDIO.pocketwatch} preload="metadata" />
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 const DistributedAccess = () => (
   <section className="py-24 bg-white">
@@ -594,7 +668,6 @@ const Footer = () => (
 export default function LandingV2() {
   return (
     <div className="min-h-screen flex flex-col font-sans text-navy-900 bg-cream-100 selection:bg-gold-400/30">
-      <Navbar />
       <main className="flex-grow">
         <Hero />
         <ComparisonSection />

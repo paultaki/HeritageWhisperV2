@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { ArrowLeft, Camera, Upload } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { type PhotoTitleScreenProps } from "../types";
 import "../recording-v3.css";
 
 /**
  * PhotoTitleScreen - Collect photo + title before recording
- * Single photo MVP (multi-photo support planned for phase 2)
- * Based on heritage-whisper-recorder reference implementation
+ * Matches heritage-whisper-recorder reference design exactly
  */
 export function PhotoTitleScreen({
   draft,
@@ -31,19 +30,16 @@ export function PhotoTitleScreen({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       alert("Please select an image file");
       return;
     }
 
-    // Validate file size (10MB max)
     if (file.size > 10 * 1024 * 1024) {
       alert("Image must be smaller than 10MB");
       return;
     }
 
-    // Create blob URL for preview
     const photoUrl = URL.createObjectURL(file);
     onChange({
       ...draft,
@@ -65,115 +61,120 @@ export function PhotoTitleScreen({
   };
 
   return (
-    <div className="hw-screen-wrapper">
+    <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div className="hw-screen-header">
-        <button
-          onClick={onBack}
-          className="hw-btn-icon hw-btn-ghost"
-          aria-label="Back"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-hw-charcoal rounded-full flex items-center justify-center">
-            <span className="text-white font-serif text-sm font-semibold">HW</span>
-          </div>
-          <h1 className="hw-heading-md">Photo & Title</h1>
+      <div className="flex items-center gap-3 px-6 pt-6 pb-4">
+        <div className="w-12 h-12 bg-hw-charcoal rounded-full flex items-center justify-center">
+          <span className="text-white font-serif text-base font-bold">HW</span>
         </div>
-        <div className="w-10" /> {/* Spacer for centering */}
+        <div>
+          <h1 className="font-bold text-lg tracking-wide" style={{ color: "#2C3E50" }}>
+            HERITAGE WHISPER
+          </h1>
+          <p className="text-sm" style={{ color: "#6B7280" }}>
+            Start a new memory
+          </p>
+        </div>
       </div>
 
       {/* Content */}
-      <div className="hw-screen-content">
-        <div className="hw-stack-lg">
-          {/* Instructions */}
-          <div className="hw-text-center">
-            <p className="hw-body-base hw-text-muted">
-              Give your story a title and add a photo to help you remember
-            </p>
-          </div>
+      <div className="flex-1 px-6 pt-6 pb-24">
+        <h2 className="font-serif font-semibold text-3xl mb-3" style={{ color: "#2C3E50" }}>
+          Capture this memory
+        </h2>
 
-          {/* Title Input */}
-          <div>
-            <label htmlFor="story-title" className="hw-label">
-              Story Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="story-title"
-              type="text"
-              value={draft.title || ""}
-              onChange={handleTitleChange}
-              placeholder="e.g., My first day of school"
-              className="hw-input"
-              maxLength={100}
-              autoFocus
-            />
-            {titleError && (
-              <p className="hw-text-error hw-body-sm mt-1">{titleError}</p>
-            )}
-            <p className="hw-body-sm hw-text-muted mt-1">
-              {draft.title?.length || 0}/100 characters
-            </p>
-          </div>
+        <p className="text-base mb-6" style={{ color: "#6B7280" }}>
+          Add a simple title and an optional photo to help you remember the details.
+        </p>
 
-          {/* Photo Upload */}
-          <div>
-            <label className="hw-label">Photo (Optional)</label>
+        {/* Title Card */}
+        <div className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
+          <label className="block text-base font-semibold mb-3" style={{ color: "#2C3E50" }}>
+            Story title
+          </label>
+          <input
+            type="text"
+            value={draft.title || ""}
+            onChange={handleTitleChange}
+            placeholder="Grandma's first apartment"
+            className="w-full px-4 py-3 rounded-xl text-base"
+            style={{
+              backgroundColor: "#F5F1ED",
+              border: "none",
+              color: "#2C3E50"
+            }}
+            maxLength={100}
+            autoFocus
+          />
+          <p className="text-sm mt-3" style={{ color: "#9CA3AF" }}>
+            A simple title helps your family find this story later.
+          </p>
+          {titleError && (
+            <p className="text-sm mt-2" style={{ color: "#DC2626" }}>{titleError}</p>
+          )}
+        </div>
 
-            {draft.photoUrl ? (
-              // Photo Preview
-              <div className="hw-photo-preview">
-                <img src={draft.photoUrl} alt="Selected photo" />
-                <div
-                  className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                  onClick={handlePhotoClick}
-                >
-                  <button className="hw-btn hw-btn-secondary bg-white">
-                    <Camera className="w-5 h-5" />
-                    Edit Photo
-                  </button>
-                </div>
+        {/* Photo Card */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm">
+          <h3 className="text-base font-semibold mb-2" style={{ color: "#2C3E50" }}>
+            Add a photo (optional)
+          </h3>
+          <p className="text-sm mb-4" style={{ color: "#6B7280" }}>
+            A photo can help you recall details while you talk.
+          </p>
+
+          {draft.photoUrl ? (
+            <div className="relative rounded-xl overflow-hidden" style={{ aspectRatio: "16/10" }}>
+              <img src={draft.photoUrl} alt="Selected" className="w-full h-full object-cover" />
+              <button
+                onClick={handlePhotoClick}
+                className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+              >
+                <span className="text-white font-medium">Edit photo</span>
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handlePhotoClick}
+              className="w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center py-12"
+              style={{ borderColor: "#D1D5DB", backgroundColor: "#FAFAFA" }}
+            >
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3" style={{ backgroundColor: "#E5E7EB" }}>
+                <Plus className="w-8 h-8" style={{ color: "#6B7280" }} />
               </div>
-            ) : (
-              // Photo Placeholder
-              <div className="hw-photo-placeholder" onClick={handlePhotoClick}>
-                <Upload className="w-12 h-12 hw-text-muted mb-2" />
-                <p className="hw-body-base hw-text-muted">
-                  Tap to add a photo
-                </p>
-                <p className="hw-body-sm hw-text-muted mt-1">
-                  Or skip and add one later
-                </p>
-              </div>
-            )}
+              <p className="text-base" style={{ color: "#6B7280" }}>
+                Tap to choose a photo
+              </p>
+            </button>
+          )}
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoSelect}
-              className="hidden"
-            />
-          </div>
-
-          {/* Helper Text */}
-          <div className="hw-card">
-            <p className="hw-body-sm hw-text-muted">
-              💡 <strong>Tip:</strong> Photos help bring your stories to life. You
-              can always add or change them later.
-            </p>
-          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoSelect}
+            className="hidden"
+          />
         </div>
       </div>
 
       {/* Footer */}
-      <div className="hw-screen-footer">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between" style={{ borderColor: "#E5E7EB" }}>
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 px-4 py-2"
+        >
+          <ArrowLeft className="w-5 h-5" style={{ color: "#6B7280" }} />
+          <span className="text-base font-medium" style={{ color: "#2C3E50" }}>
+            Back
+          </span>
+        </button>
         <button
           onClick={handleContinue}
-          className="hw-btn hw-btn-primary hw-btn-lg w-full"
+          className="px-8 py-3 rounded-xl font-medium text-base text-white"
+          style={{ backgroundColor: "#6B7280" }}
         >
-          Continue to Recording
+          Continue to recording
         </button>
       </div>
     </div>
