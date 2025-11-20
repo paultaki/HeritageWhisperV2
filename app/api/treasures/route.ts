@@ -159,6 +159,8 @@ export async function GET(request: NextRequest) {
           displayPath: treasure.display_path,
           masterUrl,
           displayUrl,
+          imageWidth: treasure.image_width,
+          imageHeight: treasure.image_height,
           transform: treasure.transform,
           // DEPRECATED (backward compatibility):
           imageUrl: displayUrl || treasure.image_url,
@@ -256,6 +258,10 @@ export async function POST(request: NextRequest) {
     // Process image to dual WebP versions (Master + Display)
     const { master, display } = await processImageToWebP(buffer);
 
+    // Extract dimensions from master WebP for database storage
+    const imageWidth = master.width;
+    const imageHeight = master.height;
+
     // Generate unique filenames with suffix naming
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(7);
@@ -323,6 +329,8 @@ export async function POST(request: NextRequest) {
       year,
       master_path: masterFilename,
       display_path: displayFilename,
+      image_width: imageWidth,
+      image_height: imageHeight,
       // DEPRECATED (backward compatibility):
       image_url: displaySignedUrl?.signedUrl || displayFilename,
       is_favorite: false,
@@ -360,6 +368,8 @@ export async function POST(request: NextRequest) {
       displayPath: treasure.display_path,
       masterUrl: masterSignedUrl?.signedUrl || masterFilename,
       displayUrl: displaySignedUrl?.signedUrl || displayFilename,
+      imageWidth: treasure.image_width,
+      imageHeight: treasure.image_height,
       transform: treasure.transform,
       // DEPRECATED (backward compatibility):
       imageUrl: displaySignedUrl?.signedUrl || displayFilename,

@@ -38,6 +38,7 @@ interface StoryPhotoWithBlurExtendProps {
     zoom: number;
     position: { x: number; y: number };
   };
+  sizes?: string; // responsive image sizes for Next.js Image optimization
 }
 
 export function StoryPhotoWithBlurExtend({
