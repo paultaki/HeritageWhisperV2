@@ -24,7 +24,7 @@ type Props = {
  *
  * Compact pill-style filters without emojis:
  * - All, Favorites, By decade, Timeless, Shared, Private
- * - Active: filled heritage-brown background
+ * - Active: filled secondary green background (--hw-secondary)
  * - Inactive: outline with transparent background
  * - Shows counts in parentheses
  */
@@ -81,10 +81,11 @@ export function StoryFilters({
               flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium
               transition-all duration-200 whitespace-nowrap
               ${activeFilter === filter.key
-                ? "bg-heritage-brown text-white"
-                : "border border-gray-300 bg-transparent text-gray-700 hover:border-heritage-brown/30"
+                ? "text-white"
+                : "border border-gray-300 bg-transparent text-gray-700 hover:border-[#3E6A5A]/30"
               }
             `}
+            style={activeFilter === filter.key ? { backgroundColor: "var(--hw-secondary, #3E6A5A)" } : undefined}
             aria-label={`Filter by ${filter.label}: ${filter.count} stories`}
             aria-pressed={activeFilter === filter.key}
           >
@@ -106,11 +107,11 @@ export function StoryFilters({
                   px-4 py-2 rounded-full text-sm font-semibold
                   transition-all duration-200
                   ${selectedDecade === decade
-                    ? "bg-heritage-brown text-white"
-                    : "bg-white border border-gray-300 text-gray-700 hover:border-heritage-brown/30"
+                    ? "text-white"
+                    : "bg-white border border-gray-300 text-gray-700 hover:border-[#3E6A5A]/30"
                   }
                 `}
-                style={{ minHeight: "36px" }}
+                style={selectedDecade === decade ? { backgroundColor: "var(--hw-secondary, #3E6A5A)", minHeight: "36px" } : { minHeight: "36px" }}
               >
                 {decade}
               </button>

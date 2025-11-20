@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, X } from "lucide-react";
 import { type PhotoTitleScreenProps } from "../types";
 import "../recording-v3.css";
 
@@ -63,33 +63,52 @@ export function PhotoTitleScreen({
   return (
     <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div className="flex items-center gap-3 px-6 pt-6 pb-4">
-        <div className="w-12 h-12 bg-hw-charcoal rounded-full flex items-center justify-center">
-          <span className="text-white font-serif text-base font-bold">HW</span>
+      <div className="flex items-start justify-between px-6 pt-6 pb-4">
+        <button
+          onClick={onBack}
+          className="w-10 h-10 flex items-center justify-center"
+          aria-label="Back"
+        >
+          <ArrowLeft className="w-6 h-6" style={{ color: "#2C3E50" }} />
+        </button>
+        <div className="flex items-center gap-3">
+          <img
+            src="/final logo/logo hw.svg"
+            alt="HW"
+            className="w-12 h-12"
+          />
+          <div className="leading-tight">
+            <h1 className="font-bold text-lg tracking-wide m-0" style={{ color: "#2C3E50", lineHeight: "1.2" }}>
+              HERITAGE WHISPER
+            </h1>
+            <p className="text-sm m-0" style={{ color: "#6B7280", lineHeight: "1.3" }}>
+              Start a new memory
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-bold text-lg tracking-wide" style={{ color: "#2C3E50" }}>
-            HERITAGE WHISPER
-          </h1>
-          <p className="text-sm" style={{ color: "#6B7280" }}>
-            Start a new memory
-          </p>
-        </div>
+        <button
+          onClick={onBack}
+          className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"
+          style={{ marginRight: "-20px" }}
+          aria-label="Cancel"
+        >
+          <X className="w-5 h-5" style={{ color: "#2C3E50" }} />
+        </button>
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-6 pt-6 pb-24">
-        <h2 className="font-serif font-semibold text-3xl mb-3" style={{ color: "#2C3E50" }}>
+      <div className="flex-1 px-6 pt-6 pb-24" style={{ maxWidth: "600px", margin: "0 auto" }}>
+        <h2 className="font-serif font-semibold text-3xl mb-2 hw-text-center" style={{ color: "#2C3E50" }}>
           Capture this memory
         </h2>
 
-        <p className="text-base mb-6" style={{ color: "#6B7280" }}>
+        <p className="text-lg mb-6 hw-text-center" style={{ color: "#6B7280" }}>
           Add a simple title and an optional photo to help you remember the details.
         </p>
 
         {/* Title Card */}
-        <div className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-          <label className="block text-base font-semibold mb-3" style={{ color: "#2C3E50" }}>
+        <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+          <label className="block text-base font-semibold mb-3 hw-text-center" style={{ color: "#2C3E50" }}>
             Story title
           </label>
           <input
@@ -106,20 +125,20 @@ export function PhotoTitleScreen({
             maxLength={100}
             autoFocus
           />
-          <p className="text-sm mt-3" style={{ color: "#9CA3AF" }}>
+          <p className="text-base mt-2 mb-0 hw-text-center" style={{ color: "#9CA3AF" }}>
             A simple title helps your family find this story later.
           </p>
           {titleError && (
-            <p className="text-sm mt-2" style={{ color: "#DC2626" }}>{titleError}</p>
+            <p className="text-sm mt-2 hw-text-center" style={{ color: "#DC2626" }}>{titleError}</p>
           )}
         </div>
 
         {/* Photo Card */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <h3 className="text-base font-semibold mb-2" style={{ color: "#2C3E50" }}>
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <h3 className="text-base font-semibold mb-2 hw-text-center" style={{ color: "#2C3E50" }}>
             Add a photo (optional)
           </h3>
-          <p className="text-sm mb-4" style={{ color: "#6B7280" }}>
+          <p className="text-base mb-3 hw-text-center" style={{ color: "#6B7280" }}>
             A photo can help you recall details while you talk.
           </p>
 
@@ -159,22 +178,20 @@ export function PhotoTitleScreen({
       </div>
 
       {/* Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between" style={{ borderColor: "#E5E7EB" }}>
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between gap-3" style={{ borderColor: "#E5E7EB", maxWidth: "650px", margin: "0 auto", width: "100%" }}>
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-4 py-2"
+          className="flex-1 px-4 py-3 rounded-xl font-medium text-base"
+          style={{ backgroundColor: "white", border: "2px solid #E5E7EB", color: "#2C3E50" }}
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: "#6B7280" }} />
-          <span className="text-base font-medium" style={{ color: "#2C3E50" }}>
-            Back
-          </span>
+          Save and continue later
         </button>
         <button
           onClick={handleContinue}
-          className="px-8 py-3 rounded-xl font-medium text-base text-white"
-          style={{ backgroundColor: "#6B7280" }}
+          className="flex-1 px-4 py-3 rounded-xl font-medium text-base text-white"
+          style={{ backgroundColor: "#2C3E50" }}
         >
-          Continue to recording
+          Continue
         </button>
       </div>
     </div>

@@ -7,7 +7,7 @@ import { IconMic, IconBookOpen, IconHeart, IconShare, IconPlay, IconCheck, IconL
 // --- Placeholder Image Constants ---
 // Mapping to actual screenshots from /public folder
 const IMAGES = {
-  timelineSmall: "/timeline small.png", // Small static image for hero
+  timelineSmall: "/timeline-small.webp", // Small static image for hero
   timelineFull: "/timeline.webp", // Full scrolling image for feature section
   book: "/book full.webp",
   memoryBox: "/treasurebox.webp",
@@ -80,8 +80,8 @@ const Hero = () => (
             <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200">
               <img src={IMAGES.memoryBox} alt="Memory Box Interface" className="w-full h-auto rounded-lg bg-gray-100" />
               <div className="p-3 text-center">
-                <h3 className="font-serif text-navy-900 font-bold">Memory Box</h3>
-                <p className="text-xs text-navy-800/60 mt-1">Keepsakes &amp; loose photos</p>
+                <h3 className="font-serif text-navy-900 font-bold text-center">Memory Box</h3>
+                <p className="text-xs text-navy-800/60 mt-1 text-center">Keepsakes &amp; loose photos</p>
               </div>
             </div>
           </div>
@@ -91,8 +91,8 @@ const Hero = () => (
             <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200">
               <img src={IMAGES.timelineSmall} alt="Timeline Interface" className="w-full h-auto rounded-lg bg-gray-100" />
               <div className="p-3 text-center">
-                <h3 className="font-serif text-navy-900 font-bold">The Timeline</h3>
-                <p className="text-xs text-navy-800/60 mt-1">See every story in order</p>
+                <h3 className="font-serif text-navy-900 font-bold text-center">The Timeline</h3>
+                <p className="text-xs text-navy-800/60 mt-1 text-center">See every story in order</p>
               </div>
             </div>
           </div>
@@ -102,8 +102,8 @@ const Hero = () => (
             <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200">
               <img src={IMAGES.book} alt="Book View Interface" className="w-full h-auto rounded-lg bg-gray-100" />
               <div className="p-3 text-center">
-                <h3 className="font-serif text-navy-900 font-bold">Living Book</h3>
-                <p className="text-xs text-navy-800/60 mt-1">Grows with every story</p>
+                <h3 className="font-serif text-navy-900 font-bold text-center">Living Book</h3>
+                <p className="text-xs text-navy-800/60 mt-1 text-center">Grows with every story</p>
               </div>
             </div>
           </div>
@@ -356,16 +356,16 @@ const DistributedAccess = () => (
 
       <div className="grid md:grid-cols-3 gap-6">
         <Card className="bg-cream-50 border-none">
-          <h4 className="font-bold text-navy-900 mb-2">Grandma in Florida</h4>
-          <p className="text-sm text-navy-800/70">Records a story about her wedding day while having morning coffee.</p>
+          <h4 className="font-bold text-navy-900 mb-2 text-center">Grandma in Florida</h4>
+          <p className="text-sm text-navy-800/70 text-center">Records a story about her wedding day while having morning coffee.</p>
         </Card>
         <Card className="bg-cream-50 border-none">
-          <h4 className="font-bold text-navy-900 mb-2">Instant Update</h4>
-          <p className="text-sm text-navy-800/70">The story is securely saved and added to the family timeline immediately.</p>
+          <h4 className="font-bold text-navy-900 mb-2 text-center">Instant Update</h4>
+          <p className="text-sm text-navy-800/70 text-center">The story is securely saved and added to the family timeline immediately.</p>
         </Card>
         <Card className="bg-cream-50 border-none">
-          <h4 className="font-bold text-navy-900 mb-2">You in New York</h4>
-          <p className="text-sm text-navy-800/70">Get an email notification and listen to her voice on your commute.</p>
+          <h4 className="font-bold text-navy-900 mb-2 text-center">You in New York</h4>
+          <p className="text-sm text-navy-800/70 text-center">Get an email notification and listen to her voice on your commute.</p>
         </Card>
       </div>
     </div>
@@ -527,7 +527,7 @@ const Pricing = () => (
   <section id="pricing" className="py-24 bg-white">
     <div className="max-w-3xl mx-auto px-4 md:px-8 text-center">
       <SectionHeading centered>Simple, transparent pricing</SectionHeading>
-      <p className="text-lg text-navy-800/60 mb-12">Start capturing stories today. No commitment required.</p>
+      <p className="text-lg text-navy-800/60 mb-12">No credit card required for the first 3 stories.</p>
 
       <div className="relative bg-white rounded-3xl shadow-2xl border border-cream-200 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-700 to-green-900"></div>

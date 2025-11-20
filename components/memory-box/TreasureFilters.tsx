@@ -22,7 +22,7 @@ type Props = {
  *
  * Filters treasures by category without emojis:
  * - All, Photos, Documents, Heirlooms, Keepsakes, Recipes, Memorabilia
- * - Active: filled heritage-brown background
+ * - Active: filled secondary green background (--hw-secondary)
  * - Inactive: outline with transparent background
  * - Shows counts in parentheses
  */
@@ -81,10 +81,11 @@ export function TreasureFilters({
               flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium
               transition-all duration-200 whitespace-nowrap
               ${activeFilter === filter.key
-                ? "bg-heritage-brown text-white"
-                : "border border-gray-300 bg-transparent text-gray-700 hover:border-heritage-brown/30"
+                ? "text-white"
+                : "border border-gray-300 bg-transparent text-gray-700 hover:border-[#3E6A5A]/30"
               }
             `}
+            style={activeFilter === filter.key ? { backgroundColor: "var(--hw-secondary, #3E6A5A)" } : undefined}
             aria-label={`Filter by ${filter.label}: ${filter.count} treasures`}
             aria-pressed={activeFilter === filter.key}
           >

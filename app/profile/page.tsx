@@ -556,7 +556,7 @@ export default function Profile() {
       <div className="flex flex-1 w-full overflow-x-visible">
         {/* Main content - centered */}
         <main className="flex-1 min-w-0 pb-20 md:pb-0 overflow-x-visible">
-          <div className="max-w-3xl px-4 md:px-6 py-6 md:py-8" style={{ marginLeft: 0, marginRight: "auto" }}>
+          <div className="max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-8">
         {/* Profile Interests - Help personalize prompts */}
         {user && (
           <ProfileInterests
@@ -1191,17 +1191,17 @@ export default function Profile() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    className="w-full min-h-[48px] text-base font-medium justify-start"
-                  >
-                    <Trash2 className="w-5 h-5 mr-2" />
-                    Delete Account
-                  </Button>
-                </AlertDialogTrigger>
+              <div className="flex justify-center">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      className="w-auto min-h-[48px] px-8 text-base font-medium"
+                    >
+                      <Trash2 className="w-5 h-5 mr-2" />
+                      Delete Account
+                    </Button>
+                  </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
@@ -1253,6 +1253,7 @@ export default function Profile() {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
+              </div>
             </CardContent>
           </Card>
 

@@ -112,7 +112,7 @@ export function MemoryBoxHeader({
         <input
           type="search"
           className="w-full px-5 py-3 text-base border-2 border-gray-300 rounded-xl
-                     focus:border-heritage-brown focus:ring-2 focus:ring-heritage-brown/20 outline-none
+                     focus:border-[#203954] focus:ring-2 focus:ring-[#203954]/20 outline-none
                      transition-all duration-200"
           placeholder="Search by name, person, or place..."
           value={searchQuery}

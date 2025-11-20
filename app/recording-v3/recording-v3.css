@@ -392,7 +392,7 @@
    ========================================================================== */
 
 .hw-text-center {
-  text-align: center;
+  text-align: center !important;
 }
 
 .hw-text-muted {

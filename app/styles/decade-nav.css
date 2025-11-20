@@ -52,12 +52,26 @@
   color: var(--color-text-muted);
 }
 
-/* mobile collapsed pill */
+/* collapsed pill button */
 .hw-decade-fab {
   position: fixed;
-  right: max(16px, env(safe-area-inset-right));
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 90px);
   z-index: 50;
+}
+
+/* On mobile, position at bottom right */
+@media (max-width: 1023px) {
+  .hw-decade-fab {
+    right: max(16px, env(safe-area-inset-right));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 90px);
+  }
+}
+
+/* On desktop, position in header on right side */
+@media (min-width: 1024px) {
+  .hw-decade-fab {
+    position: relative;
+    /* Relative positioning so the dropdown sheet positions relative to this container */
+  }
 }
 .hw-decade-pill {
   display: flex;
@@ -96,11 +110,9 @@
   transform: rotate(45deg);
 }
 
-/* mobile expanded list */
+/* expanded decade list */
 .hw-decade-sheet {
   position: fixed;
-  right: max(16px, env(safe-area-inset-right));
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 140px);
   max-height: 50vh;
   width: 140px;
   overflow: auto;
@@ -114,6 +126,24 @@
   flex-direction: column;
   gap: 8px;
 }
+
+/* On mobile, position above the pill button at bottom */
+@media (max-width: 1023px) {
+  .hw-decade-sheet {
+    right: max(16px, env(safe-area-inset-right));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 140px);
+  }
+}
+
+/* On desktop, position below the pill button in header */
+@media (min-width: 1024px) {
+  .hw-decade-sheet {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    /* Position below the button with 8px gap */
+  }
+}
 .hw-decade-sheet .hw-decade-item {
   height: 34px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -121,19 +151,14 @@
   opacity: 1;
 }
 
-/* show desktop sidebar only at md+ */
-@media (max-width: 1023px) {
-  .hw-decade-nav,
-  .hw-book-nav {
-    display: none !important;
-  }
+/* Always hide desktop sidebar - use collapsed pill button on all screen sizes */
+.hw-decade-nav,
+.hw-book-nav {
+  display: none !important;
 }
-@media (min-width: 1024px) {
-  .hw-decade-fab,
-  .hw-decade-sheet {
-    display: none;
-  }
-}
+
+/* Mobile pill and sheet now shown on all screen sizes */
+/* No media query needed - always visible */
 
 /* reduced motion */
 @media (prefers-reduced-motion: reduce) {

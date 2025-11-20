@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  HelpCircle,
   Mic,
   Edit3,
   Image as ImageIcon,
@@ -18,8 +17,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { LeftSidebar } from "@/components/LeftSidebar";
-import { useMediaQuery } from "@/hooks/use-media-query";
+import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 
 interface FAQItem {
   question: string;
@@ -37,22 +35,7 @@ export const dynamic = 'force-dynamic';
 
 export default function HelpPage() {
   const router = useRouter();
-  const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const updateFromDom = () => {
-      const dark =
-        document.documentElement.classList.contains("dark") ||
-        document.body.classList.contains("dark");
-      setIsDark(dark);
-    };
-    updateFromDom();
-    const handler = () => updateFromDom();
-    window.addEventListener("hw-theme-change", handler);
-    return () => window.removeEventListener("hw-theme-change", handler);
-  }, []);
 
   const toggleItem = (key: string) => {
     const newExpanded = new Set(expandedItems);
@@ -510,69 +493,30 @@ export default function HelpPage() {
   ];
 
   return (
-    <div
-      className="hw-page flex"
-      style={{ backgroundColor: isDark ? "#1c1c1d" : "#FFF8F3" }}
-    >
-      {/* Header */}
-      <header
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur"
-        style={{
-          backgroundColor: isDark ? '#252728' : 'rgba(255,255,255,0.95)',
-          borderBottom: `1px solid ${isDark ? '#3b3d3f' : '#e5e7eb'}`,
-          color: isDark ? '#b0b3b8' : undefined,
-          height: 55,
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 16px',
-          width: '100%'
-        }}
-      >
-        <div className="flex items-center gap-3 w-full">
-          <Image
-            src="/final logo/logo-new.svg"
-            alt="Heritage Whisper"
-            width={36}
-            height={36}
-            className="h-9 w-auto"
-          />
-          <HelpCircle className="w-6 h-6" style={{ color: isDark ? '#b0b3b8' : '#1f2937' }} />
-          <h1 className="text-2xl font-bold" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>Help & FAQ</h1>
-        </div>
-      </header>
+    <div className="hw-page" style={{ backgroundColor: "var(--hw-page-bg, #faf8f5)" }}>
+      {/* Desktop Header */}
+      <DesktopPageHeader
+        title="Help & FAQ"
+        subtitle="Find answers to common questions about recording, editing, and sharing your memories"
+      />
 
-      {/* Left Sidebar - Desktop Only */}
-      {isDesktop && (
-        <aside
-          className="hidden lg:flex lg:w-56 flex-col gap-1.5 p-2"
-          style={{
-            position: "fixed",
-            top: 72,
-            left: 0,
-            height: "calc(100vh - 72px)",
-            backgroundColor: "transparent",
-            borderRight: "none",
-            color: isDark ? "#b0b3b8" : undefined,
-          }}
-        >
-          <LeftSidebar />
-        </aside>
-      )}
+      {/* Mobile Header */}
+      <MobilePageHeader
+        title="Help & FAQ"
+        subtitle="Common questions"
+      />
 
-      {/* Main content - with header and sidebar spacing */}
-      <main className="flex-1 min-w-0 pb-20 md:pb-0 lg:ml-56" style={{ marginTop: 55 }}>
-        <div className="max-w-4xl mx-auto p-4 md:p-6">
+      {/* Main content - centered */}
+      <main className="flex-1 min-w-0 pb-20 md:pb-0">
+        <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8">
 
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-heritage-coral/5 to-heritage-coral/10 border rounded-lg mx-4 md:-mx-6 px-4 md:px-6 mb-8">
+        <section className="rounded-xl px-4 md:px-6 mb-8" style={{ backgroundColor: "var(--hw-section-bg, #EFE6DA)" }}>
           <div className="py-12 text-center">
-            <h2
-              className="text-3xl md:text-4xl font-bold mb-4"
-              style={{ color: "#1f0f08" }}
-            >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: "var(--hw-text-primary, #1F1F1F)" }}>
               How can we help you?
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg max-w-2xl mx-auto" style={{ color: "var(--hw-text-secondary, #4A4A4A)" }}>
               Find answers to common questions about recording, editing, and
               sharing your life memories.
             </p>
@@ -583,10 +527,7 @@ export default function HelpPage() {
         <section className="px-4 md:px-0">
           {categories.map((category, categoryIndex) => (
             <div key={categoryIndex} className="mb-10">
-              <h3
-                className="text-2xl font-bold mb-6"
-                style={{ color: "#1f0f08" }}
-              >
+              <h3 className="text-2xl font-bold mb-6" style={{ color: "var(--hw-text-primary, #1F1F1F)" }}>
                 {category.title}
               </h3>
               <div className="space-y-3">
@@ -597,33 +538,38 @@ export default function HelpPage() {
                   return (
                     <div
                       key={key}
-                      className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                      className="rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                      style={{
+                        backgroundColor: "var(--hw-surface, #FFFFFF)",
+                        border: "1px solid var(--hw-border-subtle, #D2C9BD)"
+                      }}
                     >
                       <button
                         onClick={() => toggleItem(key)}
-                        className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 transition-colors"
+                        className="w-full flex items-center justify-between p-5 text-left transition-colors"
+                        style={{
+                          backgroundColor: isExpanded ? "var(--hw-section-bg, #EFE6DA)" : "transparent"
+                        }}
                       >
                         <div className="flex items-center gap-3 flex-1">
-                          <div className="flex-shrink-0 text-heritage-coral">
+                          <div className="flex-shrink-0" style={{ color: "var(--hw-secondary, #3E6A5A)" }}>
                             {item.icon}
                           </div>
-                          <span
-                            className="font-semibold text-lg"
-                            style={{ color: "#1f0f08" }}
-                          >
+                          <span className="font-semibold text-lg" style={{ color: "var(--hw-text-primary, #1F1F1F)" }}>
                             {item.question}
                           </span>
                         </div>
                         <ChevronDown
-                          className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ml-3 ${
+                          className={`w-5 h-5 transition-transform flex-shrink-0 ml-3 ${
                             isExpanded ? "transform rotate-180" : ""
                           }`}
+                          style={{ color: "var(--hw-text-muted, #8A8378)" }}
                         />
                       </button>
 
                       {isExpanded && (
                         <div className="px-5 pb-5 pt-0">
-                          <div className="pl-8 text-gray-700 leading-relaxed">
+                          <div className="pl-8 leading-relaxed" style={{ color: "var(--hw-text-secondary, #4A4A4A)" }}>
                             {typeof item.answer === "string" ? (
                               <p>{item.answer}</p>
                             ) : (
@@ -642,24 +588,24 @@ export default function HelpPage() {
 
         {/* Contact Section */}
         <section className="py-12 mb-8 px-4 md:px-0">
-          <div className="bg-gradient-to-br from-heritage-coral/10 to-heritage-coral/5 border border-heritage-coral/20 rounded-xl p-8 text-center">
-            <h3
-              className="text-2xl font-bold mb-3"
-              style={{ color: "#1f0f08" }}
-            >
+          <div className="rounded-xl p-8 text-center" style={{
+            backgroundColor: "var(--hw-section-bg, #EFE6DA)",
+            border: "1px solid var(--hw-border-subtle, #D2C9BD)"
+          }}>
+            <h3 className="text-2xl font-bold mb-3" style={{ color: "var(--hw-text-primary, #1F1F1F)" }}>
               Still have questions?
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-lg mb-6" style={{ color: "var(--hw-text-secondary, #4A4A4A)" }}>
               We're here to help! Reach out to our support team anytime.
             </p>
             <Button
               onClick={() =>
                 (window.location.href = "mailto:support@heritagewhisper.com")
               }
-              className="text-white px-6 py-3 rounded-full"
-              style={{ backgroundColor: '#7C6569' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9C7280'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C6569'}
+              className="text-white px-8 rounded-xl min-h-[60px] text-lg font-medium"
+              style={{ backgroundColor: "var(--hw-primary, #203954)" }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--hw-primary-hover, #1B3047)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--hw-primary, #203954)"}
             >
               Contact Support
             </Button>

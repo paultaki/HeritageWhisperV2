@@ -540,7 +540,7 @@ export default function MemoryBoxV2Page() {
   };
 
   return (
-    <div className="hw-page" style={{ backgroundColor: "#FFF8F3" }}>
+    <div className="hw-page" style={{ backgroundColor: "#faf8f5" }}>
       {/* Desktop Header */}
       <DesktopPageHeader
         title="Memory Box"

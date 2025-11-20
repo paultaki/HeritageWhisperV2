@@ -233,14 +233,21 @@ export function AudioRecordingScreen({
   return (
     <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-4">
-        <div>
-          <h1 className="font-bold text-lg tracking-wide" style={{ color: "#2C3E50" }}>
-            HERITAGE WHISPER
-          </h1>
-          <p className="text-sm" style={{ color: "#6B7280" }}>
-            {draft.title || "Record your story"}
-          </p>
+      <div className="flex items-center justify-between px-6 pt-6 pb-4" style={{ maxWidth: "650px", margin: "0 auto", width: "100%" }}>
+        <div className="flex items-center gap-3">
+          <img
+            src="/final logo/logo hw.svg"
+            alt="HW"
+            className="w-12 h-12"
+          />
+          <div className="leading-tight">
+            <h1 className="font-bold text-lg tracking-wide m-0" style={{ color: "#2C3E50", lineHeight: "1.2" }}>
+              HERITAGE WHISPER
+            </h1>
+            <p className="text-sm m-0" style={{ color: "#6B7280", lineHeight: "1.3" }}>
+              {draft.title || "Record your story"}
+            </p>
+          </div>
         </div>
         {onSaveForLater && (
           <button
@@ -255,7 +262,7 @@ export function AudioRecordingScreen({
 
       {/* Photo Preview */}
       {draft.photoUrl && (
-        <div className="mx-6 mb-6 relative rounded-2xl overflow-hidden" style={{ aspectRatio: "16/10" }}>
+        <div className="mx-6 mb-6 relative rounded-2xl overflow-hidden" style={{ aspectRatio: "16/10", maxWidth: "600px", margin: "0 auto 1.5rem auto" }}>
           <img src={draft.photoUrl} alt="Story" className="w-full h-full object-cover" />
           <div className="absolute top-4 left-4">
             <button className="bg-black/60 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
@@ -269,7 +276,7 @@ export function AudioRecordingScreen({
       )}
 
       {/* Main Content */}
-      <div className="flex-1 px-6">
+      <div className="flex-1 px-6" style={{ maxWidth: "600px", margin: "0 auto" }}>
         {/* Timer Card */}
         <div className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
           <div className="flex items-center justify-between mb-4">
@@ -320,9 +327,8 @@ export function AudioRecordingScreen({
         </div>
 
         {/* Tip */}
-        <div className="flex gap-3 mb-6">
-          <div className="w-1 rounded-full" style={{ backgroundColor: "#D4A574" }} />
-          <p className="text-base" style={{ color: "#6B7280" }}>
+        <div className="mb-6">
+          <p className="text-lg hw-text-center" style={{ color: "#6B7280" }}>
             Take your time. You can pause anytime and edit later.
           </p>
         </div>
@@ -338,7 +344,7 @@ export function AudioRecordingScreen({
               <Mic className="w-5 h-5" />
               Start recording
             </button>
-            <p className="text-center text-sm mb-6" style={{ color: "#9CA3AF" }}>
+            <p className="text-base hw-text-center mb-6" style={{ color: "#9CA3AF" }}>
               Stop and continue to review
             </p>
           </>
@@ -365,7 +371,7 @@ export function AudioRecordingScreen({
 
         {/* Text Option */}
         {isIdle && (
-          <div className="text-center mb-6">
+          <div className="hw-text-center mb-6" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <button
               onClick={onSwitchToText}
               className="text-base font-medium mb-2"
@@ -373,7 +379,7 @@ export function AudioRecordingScreen({
             >
               Prefer to type this story instead?
             </button>
-            <p className="text-sm" style={{ color: "#9CA3AF" }}>
+            <p className="text-base hw-text-center" style={{ color: "#9CA3AF" }}>
               Audio captures your voice best, but typing is always an option.
             </p>
           </div>
