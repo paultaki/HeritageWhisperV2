@@ -2,8 +2,10 @@
  * Test script to manually trigger story notification
  *
  * Usage:
- * 1. Update the STORY_ID and USER_ID constants below
- * 2. Run: npx tsx scripts/test-notification.ts
+ * 1. Make sure .env.local exists in the project root
+ * 2. Update the STORY_ID and USER_ID constants below
+ * 3. Run: npx tsx -r dotenv/config scripts/test-notification.ts dotenv_config_path=.env.local
+ *    OR: node -r dotenv/config --import tsx/esm scripts/test-notification.ts dotenv_config_path=.env.local
  */
 
 import { sendNewStoryNotifications } from '../lib/notifications/send-new-story-notifications';
@@ -11,8 +13,8 @@ import { sendNewStoryNotifications } from '../lib/notifications/send-new-story-n
 // ============================================================================
 // CONFIGURATION - Update these values
 // ============================================================================
-const USER_ID = 'YOUR_USER_ID_HERE'; // The storyteller's user ID
-const STORY_ID = 'YOUR_STORY_ID_HERE'; // The story ID you just created
+const USER_ID = '38ad3036-e423-4e41-a3f3-020664a1ee0e'; // The storyteller's user ID
+const STORY_ID = 'fb9e9e99-fb82-4880-8d02-30c4829168e3'; // The story ID you just created
 const STORY_TITLE = 'Test Story Title';
 const STORY_YEAR = 2024;
 const TRANSCRIPT = 'This is a test story transcript to verify notifications are working.';

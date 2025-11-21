@@ -636,8 +636,8 @@ function BookV4PageContent() {
             onClick={goToPrevSpread}
             disabled={currentSpreadIndex === 0}
             className="absolute left-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
-            style={{ 
-              width: "calc((100vw - min(95vw, calc((100dvh - 240px) * 1.294))) / 2 + 11px)",
+            style={{
+              width: "60px",
               background: "transparent"
             }}
             aria-label="Previous page"
@@ -657,8 +657,8 @@ function BookV4PageContent() {
             onClick={goToNextSpread}
             disabled={currentSpreadIndex >= spreads.length - 1}
             className="absolute right-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
-            style={{ 
-              width: "calc((100vw - min(95vw, calc((100dvh - 240px) * 1.294))) / 2 + 11px)",
+            style={{
+              width: "60px",
               background: "transparent"
             }}
             aria-label="Next page"

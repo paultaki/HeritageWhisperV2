@@ -39,7 +39,7 @@ export async function sendQuestionReceivedNotification({
     // Fetch storyteller's email and name
     const { data: storyteller, error: storytellerError } = await supabaseAdmin
       .from('users')
-      .select('email, firstName, lastName')
+      .select('email, name')
       .eq('id', storytellerUserId)
       .single();
 
@@ -61,9 +61,7 @@ export async function sendQuestionReceivedNotification({
     }
 
     // Build storyteller's name
-    const storytellerName = storyteller.firstName
-      ? `${storyteller.firstName} ${storyteller.lastName || ''}`.trim()
-      : 'there';
+    const storytellerName = storyteller.name || 'there';
 
     // Build submitter's name (prefer name field, fallback to email)
     const submitterName = submitter.name || submitter.email.split('@')[0];

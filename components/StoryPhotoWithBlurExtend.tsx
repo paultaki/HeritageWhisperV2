@@ -1,22 +1,20 @@
 /**
  * StoryPhotoWithBlurExtend Component
  *
- * A reusable image component that handles portrait-oriented photos by adding
- * a subtle blurred background extension to eliminate white bars.
+ * A reusable image component that displays photos with a subtle blurred background.
+ * The background is always present but only visible when the image doesn't perfectly
+ * fill the 16:10 aspect ratio container.
  *
- * Portrait Detection:
- * - Determines portrait orientation when height/width > 1.15
- * - Falls back to standard object-cover for landscape images
+ * Key Features:
+ * - Always uses object-fit: cover to fill the frame (no letterboxing)
+ * - Respects user's zoom/pan transform settings
+ * - Blur background provides elegant fill for any aspect ratio mismatch
+ * - Matches editor preview exactly
  *
  * Intended Use:
  * - Timeline story cards
  * - Book view story photos
  * - Memory Box thumbnails and cards
- *
- * NOT intended for:
- * - Recording UIs
- * - Small avatars or icons
- * - Circular images
  */
 
 "use client";
@@ -57,30 +55,22 @@ export function StoryPhotoWithBlurExtend({
   const ratio = aspectRatio ?? 16 / 10;
 
   /**
-   * Portrait Detection:
-   * - Uses provided width/height when available
-   * - Threshold: height/width > 1.15 triggers blur-extend
-   * - Falls back to false if dimensions unavailable
+   * Transform Style:
+   * - ALWAYS use object-fit: cover to fill the frame (matches editor preview)
+   * - Apply user's zoom/pan transform if provided
+   * - This ensures WYSIWYG: editor preview = display view
    */
-  const isPortrait = width && height ? height / width > 1.15 : false;
-
-  /**
-   * Transform Logic:
-   * - For PORTRAIT images: IGNORE transforms (show original with blur-extend)
-   * - For LANDSCAPE images: APPLY transforms (zoom/pan as intended)
-   *
-   * Rationale: Portrait photos with zoom/pan transforms were "cropped" to fit
-   * landscape frames. Ignoring transforms lets blur-extend show the full portrait.
-   */
-  const shouldApplyTransform = !isPortrait && transform;
-
-  // Build transform style for foreground image (only for landscape)
-  const transformStyle = shouldApplyTransform
+  const transformStyle = transform
     ? {
         transform: `scale(${transform.zoom}) translate(${transform.position.x}%, ${transform.position.y}%)`,
         transformOrigin: "center center",
+        objectFit: "cover" as const,
+        objectPosition: "center center",
       }
-    : undefined;
+    : {
+        objectFit: "cover" as const,
+        objectPosition: "center center",
+      };
 
   return (
     <div
@@ -92,65 +82,41 @@ export function StoryPhotoWithBlurExtend({
       )}
       style={ratio !== 16 / 10 ? { aspectRatio: ratio } : undefined}
     >
-      {isPortrait ? (
-        <>
-          {/*
-            Background Layer: Blurred extension
-            - Fills entire container with scaled, blurred version
-            - Static (no transforms applied)
-            - scale-110 ensures blur extends beyond edges
-            - opacity-70 for subtle, non-distracting effect
-          */}
-          <Image
-            src={src}
-            alt=""
-            fill
-            sizes={sizes}
-            priority={priority}
-            aria-hidden="true"
-            className="object-cover scale-110 blur-xl opacity-70"
-          />
+      {/*
+        Background Layer: Blurred extension
+        - ALWAYS rendered for all images (provides elegant background fill)
+        - Fills entire container with scaled, blurred version
+        - Static (no transforms applied to blur layer)
+        - scale-110 ensures blur extends beyond edges
+        - opacity-70 for subtle, non-distracting effect
+        - z-0 to ensure it stays behind foreground
+      */}
+      <Image
+        src={src}
+        alt=""
+        fill
+        sizes={sizes}
+        priority={priority}
+        aria-hidden="true"
+        className="object-cover scale-110 blur-xl opacity-70 z-0"
+      />
 
-          {/*
-            Foreground Layer: Centered portrait
-            - Receives zoom/pan transforms (if provided)
-            - object-contain preserves aspect ratio
-            - Centered with flexbox
-          */}
-          <div className="relative flex h-full w-full items-center justify-center">
-            <img
-              src={src}
-              alt={alt}
-              style={transformStyle}
-              className={cn(
-                "h-full w-auto max-h-full max-w-full object-contain rounded-2xl shadow-md",
-                shouldApplyTransform ? "will-change-transform" : "",
-                imgClassName
-              )}
-            />
-          </div>
-        </>
-      ) : (
-        /*
-          Non-Portrait Fallback: Standard fill behavior
-          - Uses Next.js Image component for optimization
-          - object-cover fills container
-          - Applies transforms if provided
-        */
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          sizes={sizes}
-          priority={priority}
-          style={transformStyle}
-          className={cn(
-            "object-cover",
-            shouldApplyTransform ? "will-change-transform" : "",
-            imgClassName
-          )}
-        />
-      )}
+      {/*
+        Foreground Layer: Main image with user's zoom/pan
+        - Uses object-fit: cover to fill frame (matches editor preview)
+        - Transform is applied via inline styles (matches MultiPhotoUploader)
+        - z-10 to ensure it appears above blur background
+      */}
+      <img
+        src={src}
+        alt={alt}
+        style={transformStyle}
+        className={cn(
+          "absolute inset-0 w-full h-full z-10",
+          transform && "will-change-transform",
+          imgClassName
+        )}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { NewStoryNotificationEmail } from '@/lib/emails/new-story-notification';
+import crypto from 'crypto';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -19,6 +20,53 @@ export interface SendStoryNotificationsParams {
   storyYear?: number;
   heroPhotoPath?: string; // File path in Supabase Storage
   transcript: string;
+}
+
+/**
+ * Get or create a valid invite token for a family member
+ * This ensures the notification link will work even if their session expired
+ */
+async function getOrCreateInviteToken(familyMemberId: string): Promise<string | null> {
+  try {
+    // First, check if they have a valid unused invite token
+    const { data: existingInvite } = await supabaseAdmin
+      .from('family_invites')
+      .select('token, expires_at, used_at')
+      .eq('family_member_id', familyMemberId)
+      .is('used_at', null)
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (existingInvite) {
+      return existingInvite.token;
+    }
+
+    // No valid token exists - create a new one for this notification
+    // Use 7-day expiry for notification links (similar to resend invites)
+    const newToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    const { error } = await supabaseAdmin
+      .from('family_invites')
+      .insert({
+        family_member_id: familyMemberId,
+        token: newToken,
+        expires_at: expiresAt.toISOString(),
+      });
+
+    if (error) {
+      console.error('[StoryNotification] Failed to create invite token:', error);
+      return null;
+    }
+
+    return newToken;
+  } catch (error) {
+    console.error('[StoryNotification] Error getting/creating invite token:', error);
+    return null;
+  }
 }
 
 /**
@@ -89,7 +137,7 @@ export async function sendNewStoryNotifications({
     // Fetch storyteller's name
     const { data: storyteller, error: storytellerError } = await supabaseAdmin
       .from('users')
-      .select('firstName, lastName')
+      .select('name')
       .eq('id', storytellerUserId)
       .single();
 
@@ -98,9 +146,7 @@ export async function sendNewStoryNotifications({
       return;
     }
 
-    const storytellerName = storyteller.firstName
-      ? `${storyteller.firstName} ${storyteller.lastName || ''}`.trim()
-      : 'Your family member';
+    const storytellerName = storyteller.name || 'Your family member';
 
     // Fetch all family members with access to this storyteller
     // This includes both magic-link-based (V2) and account-based (V3) family sharing
@@ -125,7 +171,6 @@ export async function sendNewStoryNotifications({
 
     // Prepare email content
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002';
-    const viewStoryLink = `${appUrl}/timeline`; // Link to timeline where they can see the new story
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -136,6 +181,19 @@ export async function sendNewStoryNotifications({
     for (const member of familyMembers) {
       try {
         const familyMemberName = member.name || member.email.split('@')[0];
+
+        // Get or create a valid invite token for this family member
+        // This ensures the link works even if their session expired
+        const inviteToken = await getOrCreateInviteToken(member.id);
+
+        if (!inviteToken) {
+          console.error(`[StoryNotification] Failed to get invite token for ${member.email}`);
+          failureCount++;
+          continue;
+        }
+
+        // Generate magic link with their invite token
+        const viewStoryLink = `${appUrl}/family/access?token=${inviteToken}`;
 
         const emailContent = NewStoryNotificationEmail({
           storytellerName,

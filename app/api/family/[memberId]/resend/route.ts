@@ -104,13 +104,11 @@ export async function POST(
     // Get user's profile info for email
     const { data: userProfile } = await supabaseAdmin
       .from('users')
-      .select('firstName, lastName')
+      .select('name')
       .eq('id', user.id)
       .single();
 
-    const senderName = userProfile
-      ? `${userProfile.firstName || ''} ${userProfile.lastName || ''}`.trim()
-      : 'A family member';
+    const senderName = userProfile?.name || 'A family member';
 
     // Send email with Resend
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/family/access?token=${inviteToken}`;

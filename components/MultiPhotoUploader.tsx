@@ -543,7 +543,7 @@ export function MultiPhotoUploader({
                             ? `scale(${photo.transform.zoom}) translate(${photo.transform.position.x}%, ${photo.transform.position.y}%)`
                             : 'scale(1) translate(0%, 0%)',
                           transformOrigin: "center center",
-                          objectFit: "contain",
+                          objectFit: "cover",
                           objectPosition: "center center",
                         }}
                       />
@@ -713,7 +713,7 @@ export function MultiPhotoUploader({
                       style={{
                         transform: `scale(${editingTransform.zoom}) translate(${editingTransform.position.x}%, ${editingTransform.position.y}%)`,
                         transformOrigin: "center center",
-                        objectFit: "contain",
+                        objectFit: "cover",
                         objectPosition: "center center",
                       }}
                       draggable={false}
