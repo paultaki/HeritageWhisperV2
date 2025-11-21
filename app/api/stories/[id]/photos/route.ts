@@ -178,8 +178,8 @@ export async function POST(
     }
 
     logger.debug(
-      "[POST /api/stories/[id]/photos] Current story metadata:",
-      story.metadata,
+      "[POST /api/stories/[id]/photos] Current story photos:",
+      (story as any).photos,
     );
 
     // Create new photo object - store the PATHS, not signed URLs
@@ -244,8 +244,8 @@ export async function POST(
     }
 
     logger.debug(
-      "[POST /api/stories/[id]/photos] Story updated successfully. New metadata:",
-      updatedStory.metadata,
+      "[POST /api/stories/[id]/photos] Story updated successfully. New photos:",
+      (updatedStory as any).photos,
     );
 
     // Generate signed URLs for both master and display versions
