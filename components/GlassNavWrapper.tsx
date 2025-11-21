@@ -38,10 +38,10 @@ export default function GlassNavWrapper() {
   const isLandingPage = pathname === '/';
   const isInterviewChat = pathname === '/interview-chat';
   const isAuthPage = pathname.startsWith('/auth');
-  const isRecordingV3 = pathname.startsWith('/recording-v3');
+  const isRecordingPage = pathname.startsWith('/recording');
 
   // Don't show glass nav on these pages
-  if (isLandingPage || isInterviewChat || isAuthPage || isRecordingV3) {
+  if (isLandingPage || isInterviewChat || isAuthPage || isRecordingPage) {
     return null;
   }
 
