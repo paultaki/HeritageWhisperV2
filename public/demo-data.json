@@ -1,0 +1,2105 @@
+{
+  "exportedAt": "2025-11-20T11:05:37.368Z",
+  "expiresAt": "2025-11-27T11:05:37.368Z",
+  "note": "Signed URLs expire after 7 days. Regenerate export for fresh URLs.",
+  "user": {
+    "id": "38ad3036-e423-4e41-a3f3-020664a1ee0e",
+    "email": "hello@heritagewhisper.com",
+    "name": "John Heritage",
+    "birthYear": 1955,
+    "bio": "I'm John. A husband to Molly and a proud Father of 3 kids: Mark, Ashley and Luke. ",
+    "profilePhotoUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/profile-photos/38ad3036-e423-4e41-a3f3-020664a1ee0e-1760323811928.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Byb2ZpbGUtcGhvdG9zLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS0xNzYwMzIzODExOTI4LmpwZyIsImlhdCI6MTc2MzYzNjczNywiZXhwIjoxNzY0MjQxNTM3fQ.YC5LmpXmahM4367hmTvwoYY1TKYdB-mx0v7ol1OdNlA",
+    "profileInterests": {
+      "people": "My wife Molly and 3 kids.",
+      "places": "The lake house, and our first home on 26th ave.",
+      "general": "DIY projects, being with my grandbabies, hiking and outdoor adventures"
+    },
+    "storyCount": 41,
+    "createdAt": "2025-10-04T21:47:06.277194+00:00"
+  },
+  "stories": [
+    {
+      "id": "3ef89932-9e01-4895-8a4f-9f08e996c90e",
+      "title": "Lukes Rocket That Almost Wasn't",
+      "year": 1991,
+      "storyDate": null,
+      "transcript": "The kitchen became mission control. Glue was spread across the table, and fins were nestled in the fruit bowl. Luke narrated liftoff while I rescued the cat from the launch pad. The first test fizzled, producing just a sad puff. He looked at me, and I could see that the sky had closed.\n\nI said, “We troubleshoot, not tantrum.” We adjusted the angle, dried the fuse, and tried again. Whoosh! The blue streak shot high enough to make John clap like a kid. \n\nLuke retrieved the rocket, cradled it like a newborn, and whispered, “It worked because we fixed it.” I replied, “That's how most good things happen.”",
+      "wisdomText": "This taught me the joy of shared victories, and how teamwork can lift our spirits even when faced with setbacks.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1761460239858-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYxNDYwMjM5ODU4LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzMsImV4cCI6MTc2NDI0MTUzM30.gQeE-bH-qCxJ2Jop5brgzxaljb8hflguN2kxC5bM_oA",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "temp-1761460195316",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/temp/1761460241089.jpg",
+          "isHero": true,
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/temp/1761460241089.jpg",
+          "transform": {
+            "zoom": 1.1,
+            "position": {
+              "x": -4.966101694915254,
+              "y": 4.271203273348429
+            }
+          },
+          "masterPath": "photo/migrated/3ef89932-9e01-4895-8a4f-9f08e996c90e/1762639524048-8za81l-master.webp",
+          "displayPath": "photo/migrated/3ef89932-9e01-4895-8a4f-9f08e996c90e/1762639524048-8za81l-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/3ef89932-9e01-4895-8a4f-9f08e996c90e/1762639524048-8za81l-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzNlZjg5OTMyLTllMDEtNDg5NS04YTRmLTlmMDhlOTk2YzkwZS8xNzYyNjM5NTI0MDQ4LTh6YTgxbC1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjQsImV4cCI6MTc2NDI0MTUyNH0.pXYXfg-mdkzjd66iJxqSopj8vFaw6HVG_8GIOeNP5Yw",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/3ef89932-9e01-4895-8a4f-9f08e996c90e/1762639524048-8za81l-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzNlZjg5OTMyLTllMDEtNDg5NS04YTRmLTlmMDhlOTk2YzkwZS8xNzYyNjM5NTI0MDQ4LTh6YTgxbC1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNCwiZXhwIjoxNzY0MjQxNTI0fQ.yRphfA_J1rSgxrddcnxasXA-p8PJkp8iuCZVp3LrWRU"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 36,
+        "is_favorite": false,
+        "actual_duration": 37,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-26T06:30:42.183539+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "018c2179-37ab-4281-b218-538242acfe48",
+      "title": "The Tree Fort",
+      "year": 1961,
+      "storyDate": null,
+      "transcript": "We called it a fort because \"platform in a maple\" didn't sound brave enough. Tommy Ray and I hauled up scrap boards, a bent coffee tin of nails, and a rope that squeaked like a mouse every time we climbed the ladder. The rungs were crooked, the floor had splinters that knew our names, and a red transistor radio buzzed baseball through the leaves.\n\nWe unwrapped orange Creamsicles, our elbows sticky, making official rules with the gravity only ten-year-olds can manage. No parents passed the third rung. Passwords changed on Saturdays. Anyone who brought a hammer was a general. Far below, summer smelled of cut grass and warm dirt, and the streets sounded far enough away to make us feel important.\n\nWhen a Creamsicle snapped off the stick and splatted the plank, we swore it in as a flag. That afternoon, I learned that friendship doesn't need much—just a wobbly floor, a shared secret, and something sweet melting faster than you can eat it.",
+      "wisdomText": "",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1761347677274-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYxMzQ3Njc3Mjc0LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzMsImV4cCI6MTc2NDI0MTUzM30.t7pIiGNPG5vVF8eSsZznkBAefaCYT9LB9bPBgUrmEXo",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1761348236562-lweliknk0",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/018c2179-37ab-4281-b218-538242acfe48/1761348235643-gw0tdpxpshq.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/018c2179-37ab-4281-b218-538242acfe48/1761348235643-gw0tdpxpshq.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/018c2179-37ab-4281-b218-538242acfe48/1762639537689-3rggl-master.webp",
+          "displayPath": "photo/migrated/018c2179-37ab-4281-b218-538242acfe48/1762639537689-3rggl-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/018c2179-37ab-4281-b218-538242acfe48/1762639537689-3rggl-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzAxOGMyMTc5LTM3YWItNDI4MS1iMjE4LTUzODI0MmFjZmU0OC8xNzYyNjM5NTM3Njg5LTNyZ2dsLWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjcyNCwiZXhwIjoxNzY0MjQxNTI0fQ.IxczYFhKbHG1ESwI_mGynDFurxTRbMqEHSiF9uLyFzc",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/018c2179-37ab-4281-b218-538242acfe48/1762639537689-3rggl-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzAxOGMyMTc5LTM3YWItNDI4MS1iMjE4LTUzODI0MmFjZmU0OC8xNzYyNjM5NTM3Njg5LTNyZ2dsLW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzI0LCJleHAiOjE3NjQyNDE1MjR9.nq1wZDAq-oBaZ-0ox7inGVsZVr7gHgA2wV8NLNQcnfY"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 6,
+        "is_favorite": false,
+        "actual_duration": 60,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-24T23:14:39.638957+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "8b0541a4-59f1-4e4d-a9a6-235ed9a06deb",
+      "title": "Downsizing Day",
+      "year": 2021,
+      "storyDate": null,
+      "transcript": "I remember the light that June. We stood in the living room with boxes labeled \"Keep,\" \"Donate,\" and \"Argue.\" Later, the truck idled outside while the kitchen pretended every spoon had a story. John held up that dented colander from our first apartment, the one that drops a noodle every time, and said, \"Non-negotiable.\" I found Mark's painted handprint, Ashley's glitter crown, and Luke's ticket stubs taped in a crooked line.\n\nWe let the heavy things go. We kept the paper things, the ones that weigh nothing until you read them at noon. We ate sandwiches on the floor and just listened. Houses make a sound when you're about to leave. I walked room to room and said thank you out loud. Silly maybe, but it felt right.\n\nThe new place is smaller. The hall light still hits the picture frames just so. Our mugs still clink the same in the morning. People think downsizing is subtraction. It wasn't. It was editing. We kept who we are and the proof of who we've loved.",
+      "wisdomText": null,
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1761347313433-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYxMzQ3MzEzNDMzLXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzMsImV4cCI6MTc2NDI0MTUzM30.M2U07Z5t52fLfhdtEtg60pVN-1MMyI3g6nVEhkLCtx4",
+      "durationSeconds": 71,
+      "photos": [
+        {
+          "id": "temp-1761347301899",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/temp/1761347314775.jpg",
+          "isHero": true,
+          "transform": {
+            "zoom": 1.1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          }
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "is_favorite": false,
+        "actual_duration": 71,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-24T23:08:35.780146+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "4213adc1-ad5c-4a49-96f3-b05194c2d342",
+      "title": "Grandbaby Sleepover",
+      "year": 2016,
+      "storyDate": null,
+      "transcript": "I can still see that evening in March of 2016. We were overpacked rookies. Diapers, wipes, those tiny pajamas with the clouds on them. Three kinds of bottles, just in case. Our daughter dropped the baby off at six and gave me that look that says, \"Please keep her alive.\"\n\nJohn wrestled with the not-so-portable crib. It came with a manual in twelve languages. I set the lamp low and sat in my old rocker. The house felt smaller, softer. The baby fussed, then hiccuped, then gave that little sigh babies make when they decide to sleep. I watched her fingers uncurl and thought, imagine that my heart can still feel brand new at sixty-one.\n\nAt two in the morning, we did it all again. Warm bottle, warm shoulder, a little humming that probably helped me more than her. In the morning, she smelled like powdered sugar and victory. John whispered, \"We remembered how.\" I smiled. No, we learned a new kind of remembering.",
+      "wisdomText": "",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1761347217022-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYxMzQ3MjE3MDIyLXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzMsImV4cCI6MTc2NDI0MTUzM30.7m3IRz9C-Isk5a38XR9-qf8b0uAwkWPGnYG-dDbGtTY",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "temp-1761347187977",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/temp/1761347218666.jpg",
+          "isHero": true,
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/temp/1761347218666.jpg",
+          "transform": {
+            "zoom": 1.1,
+            "position": {
+              "x": -2,
+              "y": 3.694871489294085
+            }
+          },
+          "masterPath": "photo/migrated/4213adc1-ad5c-4a49-96f3-b05194c2d342/1762639525277-0ood2q-master.webp",
+          "displayPath": "photo/migrated/4213adc1-ad5c-4a49-96f3-b05194c2d342/1762639525277-0ood2q-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/4213adc1-ad5c-4a49-96f3-b05194c2d342/1762639525277-0ood2q-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzQyMTNhZGMxLWFkNWMtNGE0OS05NmYzLWIwNTE5NGMyZDM0Mi8xNzYyNjM5NTI1Mjc3LTBvb2QycS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjUsImV4cCI6MTc2NDI0MTUyNX0.9lL4E76WBHGn-vvXdaOsTreK1p6fkvEVMZUMofzxQDo",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/4213adc1-ad5c-4a49-96f3-b05194c2d342/1762639525277-0ood2q-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzQyMTNhZGMxLWFkNWMtNGE0OS05NmYzLWIwNTE5NGMyZDM0Mi8xNzYyNjM5NTI1Mjc3LTBvb2QycS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNSwiZXhwIjoxNzY0MjQxNTI1fQ.JLI-nfqYYa5jsZ0mayhlfOyxlyRcOnw8R8OLyFvO7WI"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 61,
+        "is_favorite": false,
+        "actual_duration": 72,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-24T23:06:59.958903+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "09d9bc00-e4b8-4622-a9f0-05a37d61a42b",
+      "title": "The Garage Computer",
+      "year": 1984,
+      "storyDate": null,
+      "transcript": "The first family computer didn't even make it into the kitchen. We parked that beige tower in the garage on a wobbly card table under a buzzing lamp, a spaceship we were scared to land. Mark kept clicking harder. Ashley whispered that maybe the mouse was shy, and Luke, still in a diaper, hammered the space bar as if it owed him rent. I wanted to be the dad who just knew, but I was learning too.\n\nWe quashed something called Print Manager, and I thought I had broken the future, so I slowed down. A paper plate served as a clock, marking two o'clock to four o'clock. Gentle double-click drills filled the air, accompanied by cheers for Luke's laughing masterpiece. By the time we finally printed a page, it felt like we had built it from wood.\n\nThat night, I realized the point wasn't the computer. It was the way we learned it together. Teaching gently is faster than fixing fear. Later.",
+      "wisdomText": null,
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1761291124926-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYxMjkxMTI0OTI2LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzMsImV4cCI6MTc2NDI0MTUzM30.phQnAo5SQscxvO80QAaq1IFtDUYf_MlPuW5H8g_wG3o",
+      "durationSeconds": 57,
+      "photos": [
+        {
+          "id": "temp-1761291096611",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/temp/1761291126145.jpg",
+          "isHero": false,
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          }
+        },
+        {
+          "id": "temp-1761291110139",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/temp/1761291126016.jpg",
+          "isHero": true,
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          }
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "is_favorite": false,
+        "actual_duration": 57,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-24T07:32:07.159249+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "943a156a-9a85-4979-a1c9-f900a7851d1c",
+      "title": "Ashley Steals the Show",
+      "year": 1984,
+      "storyDate": null,
+      "transcript": "School auditorium, paint still drying on the cardboard castle. Ashley had one line: \"Welcome to the feast.\" She practiced for a week, adding a bow, then a curtsy, then a twirl. When her moment came, the microphone squealed, and she froze.\n\nI stood in the aisle, hand on my heart, and mouthed the words. She took a breath, lifted her chin, and delivered it like a queen, greeting her people. The audience laughed, then applauded.\n\nIn the car, she said, \"I thought I couldn't, then I could.\" I told her, \"That's a good sentence to remember.\"\n\nMy, do I miss those days?",
+      "wisdomText": "",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1761290848191-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYxMjkwODQ4MTkxLXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzMsImV4cCI6MTc2NDI0MTUzM30.MoWUZV5xRaGWZXa7zlL3wLxC4uoArVrJlikWCfdw8Dc",
+      "durationSeconds": 1,
+      "photos": [
+        {
+          "id": "temp-1761290828815",
+          "url": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/943a156a-9a85-4979-a1c9-f900a7851d1c/1762639489036-i1dko2-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzk0M2ExNTZhLTlhODUtNDk3OS1hMWM5LWY5MDBhNzg1MWQxYy8xNzYyNjM5NDg5MDM2LWkxZGtvMi1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjUsImV4cCI6MTc2NDI0MTUyNX0.5NGehLVOlYCe3sK4pPGClcZU-id11HGoOEOBIfnL7ys",
+          "isHero": true,
+          "filePath": "photo/migrated/943a156a-9a85-4979-a1c9-f900a7851d1c/1762639489036-i1dko2-display.webp",
+          "transform": {
+            "zoom": 1.2,
+            "position": {
+              "x": 6.4576271186440675,
+              "y": 0.983037381321257
+            }
+          }
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 29,
+        "is_favorite": false,
+        "actual_duration": 41,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-24T07:27:30.314772+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "0f193c3c-7a1c-4b68-92db-f226db9397ba",
+      "title": "Orientation Day",
+      "year": 1973,
+      "storyDate": null,
+      "transcript": "I showed up to State U with a duffel bag, long hair, and exactly $42. The campus smelled of wet leaves and coffee. I pretended I knew where I was going, following a herd toward the gym where they handed out maps and bad pens.\n\nA kid named Russell asked if I played tennis. I said sometimes, which meant only against my garage door. That afternoon, I called Mom from a payphone and told her, “It feels big here, but good big.”\n\nThat night, I slept on a lumpy mattress, listening to the radiator ping like a metronome, and promised myself one thing: I’m going to leave different than I arrived.",
+      "wisdomText": "I learned that sometimes you have to fake confidence to find your way; it often leads to unexpected friendships and opportunities.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1761288959335-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYxMjg4OTU5MzM1LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzMsImV4cCI6MTc2NDI0MTUzM30.ZtBDG2IPvygYqg0qvRG3BfA18tILe205cYfGwNx2ekA",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1761289807718-kq604l9pw",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0f193c3c-7a1c-4b68-92db-f226db9397ba/1761289806381-pn7rrwd42v8.png",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0f193c3c-7a1c-4b68-92db-f226db9397ba/1761289806381-pn7rrwd42v8.png",
+          "transform": {
+            "zoom": 1.5,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/0f193c3c-7a1c-4b68-92db-f226db9397ba/1762639520739-lan2ji-master.webp",
+          "displayPath": "photo/migrated/0f193c3c-7a1c-4b68-92db-f226db9397ba/1762639520739-lan2ji-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0f193c3c-7a1c-4b68-92db-f226db9397ba/1762639520739-lan2ji-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBmMTkzYzNjLTdhMWMtNGI2OC05MmRiLWYyMjZkYjkzOTdiYS8xNzYyNjM5NTIwNzM5LWxhbjJqaS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjUsImV4cCI6MTc2NDI0MTUyNX0.3ZX35Ehd1LLrNiWLBirgPQXvY5lzRQ9bk1Z3it1MXC0",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0f193c3c-7a1c-4b68-92db-f226db9397ba/1762639520739-lan2ji-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBmMTkzYzNjLTdhMWMtNGI2OC05MmRiLWYyMjZkYjkzOTdiYS8xNzYyNjM5NTIwNzM5LWxhbjJqaS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNSwiZXhwIjoxNzY0MjQxNTI1fQ.A35PPdMM4s5exEf4TAia9P0JDyo1K5CqKtVAu1TVmW4"
+        },
+        {
+          "id": "photo-1762545604449-vb6bo0eyg",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0f193c3c-7a1c-4b68-92db-f226db9397ba/1762545602272-v3nfnhzqyzp.png",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0f193c3c-7a1c-4b68-92db-f226db9397ba/1762545602272-v3nfnhzqyzp.png",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": -2.0085038809940734,
+              "y": 2.429054523336476
+            }
+          },
+          "masterPath": "photo/migrated/0f193c3c-7a1c-4b68-92db-f226db9397ba/1762639521587-dnghrl-master.webp",
+          "displayPath": "photo/migrated/0f193c3c-7a1c-4b68-92db-f226db9397ba/1762639521587-dnghrl-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0f193c3c-7a1c-4b68-92db-f226db9397ba/1762639521587-dnghrl-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBmMTkzYzNjLTdhMWMtNGI2OC05MmRiLWYyMjZkYjkzOTdiYS8xNzYyNjM5NTIxNTg3LWRuZ2hybC1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjUsImV4cCI6MTc2NDI0MTUyNX0.ZLANa0tHUYiS-5YM9fUYowKljg_kUM3np4JUt_tRdDs",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0f193c3c-7a1c-4b68-92db-f226db9397ba/1762639521587-dnghrl-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBmMTkzYzNjLTdhMWMtNGI2OC05MmRiLWYyMjZkYjkzOTdiYS8xNzYyNjM5NTIxNTg3LWRuZ2hybC1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNSwiZXhwIjoxNzY0MjQxNTI1fQ.EWmzbgXP0Di3i946pl8XSh1_uF_bcT3FG__9m--7MYU"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 18,
+        "is_favorite": false,
+        "actual_duration": 40,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-24T06:56:00.876983+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "f76db816-6a5c-4b1b-bc6a-5dbfbb959e45",
+      "title": "Shelby",
+      "year": 1971,
+      "storyDate": null,
+      "transcript": "I can still hear that engine in my chest. It was too much car for a kid stocking shells at night, but I bought it anyway. My neighbor showed me how to listen with a screwdriver pressed to the block. It felt like magic. \n\nI stalled it in front of a girl I liked and wanted to sink into the pavement. Embarrassment fades faster than payments. That summer, I learned to respect power and to maintain what you love so it does not own you. The smells, sounds, warm oil, gasoline on knuckles, and the low idle rumble became part of my world.",
+      "wisdomText": "I discovered that my passion for cars revealed a part of me that craved freedom and adventure, shaping who I would become.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1760786798236-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYwNzg2Nzk4MjM2LXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzMzLCJleHAiOjE3NjQyNDE1MzN9.2EmaDksj1nqCVYmaURDpclaPAqcP_6e8vYcvDG_pmsE",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760786801281-d86qwqch6",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1760786799493-95j69rko7h5.webp",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1760786799493-95j69rko7h5.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1762639529219-icr0rm-master.webp",
+          "displayPath": "photo/migrated/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1762639529219-icr0rm-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1762639529219-icr0rm-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2Y3NmRiODE2LTZhNWMtNGIxYi1iYzZhLTVkYmZiYjk1OWU0NS8xNzYyNjM5NTI5MjE5LWljcjBybS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjUsImV4cCI6MTc2NDI0MTUyNX0.9ZD_Mag5S48UvO0jFLdE4ktEOnWpQ4AUwnTNgUtvO7I",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1762639529219-icr0rm-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2Y3NmRiODE2LTZhNWMtNGIxYi1iYzZhLTVkYmZiYjk1OWU0NS8xNzYyNjM5NTI5MjE5LWljcjBybS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNSwiZXhwIjoxNzY0MjQxNTI1fQ.1cotNul79ZwvtcTt1ksGpraHbkfc-Md3rntDtIQiya8"
+        },
+        {
+          "id": "photo-1760786802148-g8mtx0iib",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1760786801572-we5l6irhla.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1760786801572-we5l6irhla.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1762639530098-9j3fc-master.webp",
+          "displayPath": "photo/migrated/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1762639530098-9j3fc-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1762639530098-9j3fc-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2Y3NmRiODE2LTZhNWMtNGIxYi1iYzZhLTVkYmZiYjk1OWU0NS8xNzYyNjM5NTMwMDk4LTlqM2ZjLWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjcyNiwiZXhwIjoxNzY0MjQxNTI2fQ.GPr86P4OWiY_sHu9f1DGAsXgynp9I2B5KClHrp42Huc",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/f76db816-6a5c-4b1b-bc6a-5dbfbb959e45/1762639530098-9j3fc-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2Y3NmRiODE2LTZhNWMtNGIxYi1iYzZhLTVkYmZiYjk1OWU0NS8xNzYyNjM5NTMwMDk4LTlqM2ZjLW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzI2LCJleHAiOjE3NjQyNDE1MjZ9.49EOPFrD03IyA-qHAnyg-G_0WN2KntQBIOWaQ8uHvSU"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 16,
+        "is_favorite": false,
+        "actual_duration": 45,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-18T11:26:35.842716+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "694a6d51-a508-4645-a042-780fa18fd84e",
+      "title": "The Trailhead Promise",
+      "year": 2018,
+      "storyDate": null,
+      "transcript": "We stood at the trail map, arguing easy versus worth it. The loop looked polite. The ridge looked personal. \n\n“We don't have to prove anything,” I said. \n\n“We don't,” Molly smiled, “but we could remember something.” \n\nWith the kids grown, the house had an echo. We chose the long path. Switchbacks made our legs honest, and old conversations started breathing again. Money we made, apologies we owed, the names we still say softly.\n\nAt the overlook, the wind took our breath and gave it back cleaner. We laughed—new parents, tired, proud, very alive. I had assumed empty nest meant autopilot. It actually meant choosing again on purpose. \n\nOn the way down, we named the next ridge after us and promised to keep picking the trail that asked for a little more. Choosing hard together keeps you close when life gets easier. That's the map I want our kids to inherit.",
+      "wisdomText": "Choose challenging paths together; they foster deeper connections and create lasting memories worth cherishing.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1760749510963-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYwNzQ5NTEwOTYzLXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzMsImV4cCI6MTc2NDI0MTUzM30.FIQSrowiKe9angZ91gU-1k9FAxv98utTZEgnP3Qc3io",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1761291846758-g4whe1d2c",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/694a6d51-a508-4645-a042-780fa18fd84e/1761291845817-t0ps1yfeo4.webp",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/694a6d51-a508-4645-a042-780fa18fd84e/1761291845817-t0ps1yfeo4.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/694a6d51-a508-4645-a042-780fa18fd84e/1762639527566-f3r05f-master.webp",
+          "displayPath": "photo/migrated/694a6d51-a508-4645-a042-780fa18fd84e/1762639527566-f3r05f-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/694a6d51-a508-4645-a042-780fa18fd84e/1762639527566-f3r05f-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzY5NGE2ZDUxLWE1MDgtNDY0NS1hMDQyLTc4MGZhMThmZDg0ZS8xNzYyNjM5NTI3NTY2LWYzcjA1Zi1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjYsImV4cCI6MTc2NDI0MTUyNn0.ta5A6Ahnkh00yssQr12YNe2QyhmOwYEJI_cnN2-iXT0",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/694a6d51-a508-4645-a042-780fa18fd84e/1762639527566-f3r05f-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzY5NGE2ZDUxLWE1MDgtNDY0NS1hMDQyLTc4MGZhMThmZDg0ZS8xNzYyNjM5NTI3NTY2LWYzcjA1Zi1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNiwiZXhwIjoxNzY0MjQxNTI2fQ.mbzTBcatOChgn-G2dN898CRwvgg6r-3_7SBRBvxK2s4"
+        },
+        {
+          "id": "photo-1761291847690-was0aklrc",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/694a6d51-a508-4645-a042-780fa18fd84e/1761291847032-9b4qmvs246w.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/694a6d51-a508-4645-a042-780fa18fd84e/1761291847032-9b4qmvs246w.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/694a6d51-a508-4645-a042-780fa18fd84e/1762639528357-5ah76h-master.webp",
+          "displayPath": "photo/migrated/694a6d51-a508-4645-a042-780fa18fd84e/1762639528357-5ah76h-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/694a6d51-a508-4645-a042-780fa18fd84e/1762639528357-5ah76h-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzY5NGE2ZDUxLWE1MDgtNDY0NS1hMDQyLTc4MGZhMThmZDg0ZS8xNzYyNjM5NTI4MzU3LTVhaDc2aC1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjYsImV4cCI6MTc2NDI0MTUyNn0.ay-Ral3GqmzqZ7tJfNlBeDODz5DXiAPQNbMYwrqKQh4",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/694a6d51-a508-4645-a042-780fa18fd84e/1762639528357-5ah76h-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzY5NGE2ZDUxLWE1MDgtNDY0NS1hMDQyLTc4MGZhMThmZDg0ZS8xNzYyNjM5NTI4MzU3LTVhaDc2aC1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNiwiZXhwIjoxNzY0MjQxNTI2fQ.l3dotwg10_BnW2urAW220lsa3gouX7V-KSOxehrB9ig"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 63,
+        "is_favorite": false,
+        "actual_duration": 30,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-18T01:05:08.733072+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "e71b4a3d-c81e-4f83-96cb-293bbe49ec7b",
+      "title": "The Next Tree, Just Higher",
+      "year": 2003,
+      "storyDate": null,
+      "transcript": "I remember the tent zipper at base camp and thinking my knees were older than my boots. The icefall groaned like an old house. The Sherpa said, \"Slow is fast.\" I heard Molly's steady voice from 1981. Back then, with Mark and Ashley, we climbed by landmarks: crooked pine, then grapes, tree to rock, rock to bend. \n\n\"Are we on top of the world?\" Mark asked. \n\n\"Not the world,\" I said, \"just our part of it.\" \n\n\"Next tree,\" he answered. \n\nOn Everest, \"next tree\" became \"next ladder,\" \"next anchor,\" \"next breath.\" At Camp Two, I had one bad hour where fear unpacked its bags. I gave it five minutes, then five more. Fear got bored before I did. \n\nSummit morning was headlamps and black ice. At the top, I did not feel like a conqueror. I felt like a dad keeping an old promise. We move by small promises. We respect the mountain, and we come home safe. I thanked the ridge, touched the rope, and turned back toward Molly. Different mountain, same rule.",
+      "wisdomText": "Break daunting tasks into smaller, manageable steps to maintain focus and progress in challenging situations.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1760723884864-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYwNzIzODg0ODY0LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzQsImV4cCI6MTc2NDI0MTUzNH0.teND-kAdjsuIVvstFXy7j4_qm17rfO7a6rmdZ9LzB90",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760723938682-obq7id0t6",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1760723937540-pe6a5uimwti.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1760723937540-pe6a5uimwti.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1762639514301-xjlgr-master.webp",
+          "displayPath": "photo/migrated/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1762639514301-xjlgr-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1762639514301-xjlgr-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2U3MWI0YTNkLWM4MWUtNGY4My05NmNiLTI5M2JiZTQ5ZWM3Yi8xNzYyNjM5NTE0MzAxLXhqbGdyLWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjcyNiwiZXhwIjoxNzY0MjQxNTI2fQ.NvrPFA-ZJB4I9bAR2nYq2RaeMhLTFxr6Ppzuj_rNI10",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1762639514301-xjlgr-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2U3MWI0YTNkLWM4MWUtNGY4My05NmNiLTI5M2JiZTQ5ZWM3Yi8xNzYyNjM5NTE0MzAxLXhqbGdyLW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzI2LCJleHAiOjE3NjQyNDE1MjZ9.JDiBLHxj1cobMJTskd_NYa9XjWrWGe6ut98rBBN30Ak"
+        },
+        {
+          "id": "photo-1760723939832-17wksmfjw",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1760723939084-mipbv1gttc.webp",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1760723939084-mipbv1gttc.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1762639515219-dqjz4u-master.webp",
+          "displayPath": "photo/migrated/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1762639515219-dqjz4u-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1762639515219-dqjz4u-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2U3MWI0YTNkLWM4MWUtNGY4My05NmNiLTI5M2JiZTQ5ZWM3Yi8xNzYyNjM5NTE1MjE5LWRxano0dS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjYsImV4cCI6MTc2NDI0MTUyNn0.8bDHOSveJjQvayfmw6c8J8_31fv0vcjXaPHRBCUBMCM",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/e71b4a3d-c81e-4f83-96cb-293bbe49ec7b/1762639515219-dqjz4u-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2U3MWI0YTNkLWM4MWUtNGY4My05NmNiLTI5M2JiZTQ5ZWM3Yi8xNzYyNjM5NTE1MjE5LWRxano0dS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNiwiZXhwIjoxNzY0MjQxNTI2fQ.iZJZturKPCOfSsPTPkWaGGnrqE-vGMdmGHdPHrQYH2c"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 48,
+        "is_favorite": false,
+        "actual_duration": 30,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-17T17:58:03.106+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "0ddaf4d0-1a21-49d2-9a18-545263f9cc19",
+      "title": "Curbside Birthday",
+      "year": 2020,
+      "storyDate": null,
+      "transcript": "We taped balloons to the mailbox and chalked wide hugs later across the driveway. One by one, friends rolled past in minivans and pickup trucks, windows cracked, masks on, honking like we were celebrities. Molly handed out cupcake boxes with tongs. Mark filmed on an old tripod while Ashley waved a cardboard sign. Luke tried to measure six feet with a rake.\n\nIt was the strangest birthday we ever loved. No candles to blow out, no pile of shoes by the door, just car radios and laughter floating over the curb. A stack of handmade cards quarantined in a baking pan.\n\nI kept thinking how loud kindness can be from a distance. We learned that celebration is not a room. It is a decision you make together.",
+      "wisdomText": "Celebrate creatively by adapting to circumstances, ensuring safety while still connecting with loved ones from a distance.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1760230716509-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYwMjMwNzE2NTA5LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzQsImV4cCI6MTc2NDI0MTUzNH0.FFpf8tMpymXo4ksOGAmlr5gbkzGR6MWGfHSjiIFTtjY",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760758879927-g1t70dgmx",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1760758879348-fh6m22u0vgc.webp",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1760758879348-fh6m22u0vgc.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1762639485453-ozl17a-master.webp",
+          "displayPath": "photo/migrated/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1762639485453-ozl17a-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1762639485453-ozl17a-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBkZGFmNGQwLTFhMjEtNDlkMi05YTE4LTU0NTI2M2Y5Y2MxOS8xNzYyNjM5NDg1NDUzLW96bDE3YS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjYsImV4cCI6MTc2NDI0MTUyNn0.ieYeDC2-toykTv9z6xreksFIgX0Ssl0hFkGKCRkxeBg",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1762639485453-ozl17a-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBkZGFmNGQwLTFhMjEtNDlkMi05YTE4LTU0NTI2M2Y5Y2MxOS8xNzYyNjM5NDg1NDUzLW96bDE3YS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNiwiZXhwIjoxNzY0MjQxNTI2fQ.dwkfO1RkWNqyqzoRCBNXEd4dEVy0p_dd_V3J99vU9_M"
+        },
+        {
+          "id": "photo-1760758891781-y6szl6ktu",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1760758891013-ho4i8qnusjh.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1760758891013-ho4i8qnusjh.webp",
+          "transform": {
+            "zoom": 1.3,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1762639486363-lxz4ei-master.webp",
+          "displayPath": "photo/migrated/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1762639486363-lxz4ei-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1762639486363-lxz4ei-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBkZGFmNGQwLTFhMjEtNDlkMi05YTE4LTU0NTI2M2Y5Y2MxOS8xNzYyNjM5NDg2MzYzLWx4ejRlaS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjYsImV4cCI6MTc2NDI0MTUyNn0.Tw_j_v7yupEdk1ymZRCsR7OgMpA7QYi85K2AGznfWmo",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0ddaf4d0-1a21-49d2-9a18-545263f9cc19/1762639486363-lxz4ei-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBkZGFmNGQwLTFhMjEtNDlkMi05YTE4LTU0NTI2M2Y5Y2MxOS8xNzYyNjM5NDg2MzYzLWx4ejRlaS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNywiZXhwIjoxNzY0MjQxNTI3fQ.xyUsC8lPfkTJA7kiH62UAjCPczQSDTTNtTSzyp06K3Q"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 65,
+        "is_favorite": false,
+        "actual_duration": 0,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-12T00:58:34.243063+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "e4390141-20ef-4f84-8cd6-340ee83859c3",
+      "title": "My Tennis Years",
+      "year": 1972,
+      "storyDate": null,
+      "transcript": "I remember those shorts being a little braver than I was. Wooden racket, tape on the grip, socks fighting gravity. Coach kept saying, \"Move your feet.\" So, I moved everything else. I tried to impress the girl by the fence and double faulted so hard the ball found another court. If I'm honest, my backhand was a rumor.\n\nBut I learned the trick, breathe, hit the next ball clean. Five more minutes of boring footwork beat my fancy swing every time. I think I won that match by not trying to be interesting.",
+      "wisdomText": "Focus on fundamentals and consistent practice to improve performance rather than seeking immediate flair.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1760078817671-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYwMDc4ODE3NjcxLXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM0LCJleHAiOjE3NjQyNDE1MzR9.wpkCGbOWcEAyzto5H65MrKWORhJdBGfuh-xDXCCIsOw",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760739257369-v7i9who7t",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/e4390141-20ef-4f84-8cd6-340ee83859c3/1760739256109-cxlcshdgnai.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/e4390141-20ef-4f84-8cd6-340ee83859c3/1760739256109-cxlcshdgnai.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/e4390141-20ef-4f84-8cd6-340ee83859c3/1762639540172-m683o-master.webp",
+          "displayPath": "photo/migrated/e4390141-20ef-4f84-8cd6-340ee83859c3/1762639540172-m683o-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/e4390141-20ef-4f84-8cd6-340ee83859c3/1762639540172-m683o-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2U0MzkwMTQxLTIwZWYtNGY4NC04Y2Q2LTM0MGVlODM4NTljMy8xNzYyNjM5NTQwMTcyLW02ODNvLWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjcyNywiZXhwIjoxNzY0MjQxNTI3fQ.e6a9syiZGczXPV6rYH23Zqra4pfMpacIPSDBLmfOAxg",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/e4390141-20ef-4f84-8cd6-340ee83859c3/1762639540172-m683o-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2U0MzkwMTQxLTIwZWYtNGY4NC04Y2Q2LTM0MGVlODM4NTljMy8xNzYyNjM5NTQwMTcyLW02ODNvLW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzI3LCJleHAiOjE3NjQyNDE1Mjd9.hpLNsAQ2C8Qh4m9vn6TyBAZyNcSaXadkmXMjzt-EdB4"
+        },
+        {
+          "id": "photo-1761348146143-dpc82as44",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/e4390141-20ef-4f84-8cd6-340ee83859c3/1761348145453-sq6hhns60mq.webp",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/e4390141-20ef-4f84-8cd6-340ee83859c3/1761348145453-sq6hhns60mq.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/e4390141-20ef-4f84-8cd6-340ee83859c3/1762639541255-bq1rab-master.webp",
+          "displayPath": "photo/migrated/e4390141-20ef-4f84-8cd6-340ee83859c3/1762639541255-bq1rab-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/e4390141-20ef-4f84-8cd6-340ee83859c3/1762639541255-bq1rab-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2U0MzkwMTQxLTIwZWYtNGY4NC04Y2Q2LTM0MGVlODM4NTljMy8xNzYyNjM5NTQxMjU1LWJxMXJhYi1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjcsImV4cCI6MTc2NDI0MTUyN30.h7n9M2e5sz4RVAn9jFEQGaSi5y8WOvXSRcccyBujn3E",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/e4390141-20ef-4f84-8cd6-340ee83859c3/1762639541255-bq1rab-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2U0MzkwMTQxLTIwZWYtNGY4NC04Y2Q2LTM0MGVlODM4NTljMy8xNzYyNjM5NTQxMjU1LWJxMXJhYi1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNywiZXhwIjoxNzY0MjQxNTI3fQ.deRAitWcYDsDtmDU6yI1RbWpWuK6vHUspoO6c3hdCbA"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 17,
+        "is_favorite": false,
+        "actual_duration": 0,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-10T06:46:56.712365+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "c5828264-5926-47c8-bd4e-020c11435af6",
+      "title": "Love Holds Through",
+      "year": 2024,
+      "storyDate": null,
+      "transcript": "There are days that change you, and this was one of them. Molly wasn't feeling right, and before I knew it, we were in a hospital room surrounded by machines and nurses moving fast. I sat in a chair that felt like it was made of bricks, holding her hand, trying not to let my fear show. For the first time, I felt completely powerless.\nBut then, she squeezed my hand. Just that small squeeze was enough to remind me we were still in this fight together.\nThat scare taught me something I'll never forget. Life is fragile, but love is stubborn.",
+      "wisdomText": "",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1760072946903-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYwMDcyOTQ2OTAzLXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzQsImV4cCI6MTc2NDI0MTUzNH0.kLyP1jT6SQ8tXgxbJCcUeA-HRyHwuNfcUi59BDKbCQ8",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760072949420-ytqqt76r0",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/c5828264-5926-47c8-bd4e-020c11435af6/1760072948027-5nn3ntoe5ph.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/c5828264-5926-47c8-bd4e-020c11435af6/1760072948027-5nn3ntoe5ph.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/c5828264-5926-47c8-bd4e-020c11435af6/1762639551319-lxu1tw-master.webp",
+          "displayPath": "photo/migrated/c5828264-5926-47c8-bd4e-020c11435af6/1762639551319-lxu1tw-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/c5828264-5926-47c8-bd4e-020c11435af6/1762639551319-lxu1tw-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2M1ODI4MjY0LTU5MjYtNDdjOC1iZDRlLTAyMGMxMTQzNWFmNi8xNzYyNjM5NTUxMzE5LWx4dTF0dy1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjcsImV4cCI6MTc2NDI0MTUyN30.MNJ5hSThpESLETCBHbvuri6QWsEquvzj5-F4iCpqN_8",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/c5828264-5926-47c8-bd4e-020c11435af6/1762639551319-lxu1tw-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2M1ODI4MjY0LTU5MjYtNDdjOC1iZDRlLTAyMGMxMTQzNWFmNi8xNzYyNjM5NTUxMzE5LWx4dTF0dy1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyNywiZXhwIjoxNzY0MjQxNTI3fQ.MifIhM6xtxgw22ezhN-GEnNlzFi4JUR85rSC5Xp9e6c"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 69,
+        "is_favorite": false,
+        "actual_duration": 0,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-10T05:04:57.559409+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "ca90af96-17f4-4de7-9c0d-db20e412f8cd",
+      "title": "Love Multiplies Chaos Doubles",
+      "year": 1980,
+      "storyDate": null,
+      "transcript": "When Mark was born, your grandma and I were learning everything the hard way. Every cry felt like an emergency, and we called the doctor so often that I'm surprised they didn't block our number. \n\nBy the time Ashley came along, we thought we were seasoned pros. We strutted into the hospital, convinced we had it all figured out. But the minute we got home, the baby cried, Mark ran circles around the house, and the coffee pot became the hardest working member of the family. \n\nIt wasn't just round two; it was a sequel with even more chaos. But when Ashley wrapped her tiny hand around my finger, and when Mark looked at her, she was magic. In that moment, I realized something important: love doesn't divide between children. It multiplies.",
+      "wisdomText": "Embrace each parenting moment with humility; every child brings new challenges and learning opportunities.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1760725538810-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYwNzI1NTM4ODEwLXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzQsImV4cCI6MTc2NDI0MTUzNH0.nPx8T-I4TITDJiA-B0L9WdGk8YO_h8XffuarcWQRCtc",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1759825697373-4m459x4kf",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/ca90af96-17f4-4de7-9c0d-db20e412f8cd/1759825695895-yheli2c7m3s.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/ca90af96-17f4-4de7-9c0d-db20e412f8cd/1759825695895-yheli2c7m3s.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/ca90af96-17f4-4de7-9c0d-db20e412f8cd/1762639535609-rx0lk-master.webp",
+          "displayPath": "photo/migrated/ca90af96-17f4-4de7-9c0d-db20e412f8cd/1762639535609-rx0lk-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/ca90af96-17f4-4de7-9c0d-db20e412f8cd/1762639535609-rx0lk-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2NhOTBhZjk2LTE3ZjQtNGRlNy05YzBkLWRiMjBlNDEyZjhjZC8xNzYyNjM5NTM1NjA5LXJ4MGxrLWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjcyNywiZXhwIjoxNzY0MjQxNTI3fQ.Jn5tsgfO6MPyE1EcmnEeq0ASmhx-SwUcYNWqoJfZu9o",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/ca90af96-17f4-4de7-9c0d-db20e412f8cd/1762639535609-rx0lk-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2NhOTBhZjk2LTE3ZjQtNGRlNy05YzBkLWRiMjBlNDEyZjhjZC8xNzYyNjM5NTM1NjA5LXJ4MGxrLW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzI3LCJleHAiOjE3NjQyNDE1Mjd9.MkaB2DSghqsgIbE2jZe9OLbjyUqSkrc_wCTbv5WpBj4"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 25,
+        "is_favorite": false,
+        "actual_duration": 0,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-07T08:28:14.43371+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "fb9e9e99-fb82-4880-8d02-30c4829168e3",
+      "title": "The Boy Who Became My Father",
+      "year": 1934,
+      "storyDate": "1934-01-05T08:00:00",
+      "transcript": "This was Dad at eight years old, 1934, the middle of the Depression. He didn't have much, but you'd never know it from that clean shirt and serious look. There's something steady in his eyes, even then. He grew up with little but carried himself like a man who had everything that mattered: gratitude, work ethic, and heart.",
+      "wisdomText": "True wealth lies not in what we possess but in the strength of our character and the richness of our spirit.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759694749397-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5Njk0NzQ5Mzk3LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzQsImV4cCI6MTc2NDI0MTUzNH0.VnVQ1QWXRJdCmWTIN5qV7te06g4hSSkNRjQDMbI6WLE",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1761347815790-iyac5a8wr",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/fb9e9e99-fb82-4880-8d02-30c4829168e3/1761347814572-is86bnbdewh.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/fb9e9e99-fb82-4880-8d02-30c4829168e3/1761347814572-is86bnbdewh.webp",
+          "transform": {
+            "zoom": 1.3,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/fb9e9e99-fb82-4880-8d02-30c4829168e3/1762639518875-qyfvqjn-master.webp",
+          "displayPath": "photo/migrated/fb9e9e99-fb82-4880-8d02-30c4829168e3/1762639518875-qyfvqjn-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/fb9e9e99-fb82-4880-8d02-30c4829168e3/1762639518875-qyfvqjn-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2ZiOWU5ZTk5LWZiODItNDg4MC04ZDAyLTMwYzQ4MjkxNjhlMy8xNzYyNjM5NTE4ODc1LXF5ZnZxam4tZGlzcGxheS53ZWJwIiwiaWF0IjoxNzYzNjM2NzI3LCJleHAiOjE3NjQyNDE1Mjd9.YOmz4wyKo2uS159vsrfHaXzFvePJFpep-_PosX36eS8",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/fb9e9e99-fb82-4880-8d02-30c4829168e3/1762639518875-qyfvqjn-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2ZiOWU5ZTk5LWZiODItNDg4MC04ZDAyLTMwYzQ4MjkxNjhlMy8xNzYyNjM5NTE4ODc1LXF5ZnZxam4tbWFzdGVyLndlYnAiLCJpYXQiOjE3NjM2MzY3MjcsImV4cCI6MTc2NDI0MTUyN30.ht7XATe-rMEYBuWFHl41i9I2xk9yTQ9ImqHk50a6lAI"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": -21,
+        "story_date": "1934-01-05T08:00:00.000Z",
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-05T06:36:58.614538+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "bc2da50e-254a-46da-8353-fc370f8cb77e",
+      "title": "The Promise",
+      "year": 1950,
+      "storyDate": null,
+      "transcript": "Here's the big day. I love how they're holding hands, nervous but certain. You can almost feel the anticipation for better or worse before the words were even spoken. They didn't have a photographer, just a friend with a borrowed camera, but this photo says everything.\n\nThey built a life from that moment: a small house, big dreams, and a love that carried us all. Looking at it now, I realize the promise they made that day didn't just build a marriage; it built a family and every good thing I've ever known.",
+      "wisdomText": "Invest in meaningful relationships and cherish the memories you create together, no matter the circumstances.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1761931064465-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYxOTMxMDY0NDY1LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzQsImV4cCI6MTc2NDI0MTUzNH0.4zTjT_AJYcQLqnGknHhBy1e2M4DVKOEysL1l3rrOUbs",
+      "durationSeconds": 1,
+      "photos": [
+        {
+          "id": "photo-1761291657744-t2ly6c1hm",
+          "url": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/bc2da50e-254a-46da-8353-fc370f8cb77e/1762639518082-ed72ja-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2JjMmRhNTBlLTI1NGEtNDZkYS04MzUzLWZjMzcwZjhjYjc3ZS8xNzYyNjM5NTE4MDgyLWVkNzJqYS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjcsImV4cCI6MTc2NDI0MTUyN30._bFgllifCyUtXP2Ww6tes5LQK3auf7nYCDry3a5TFho",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/migrated/bc2da50e-254a-46da-8353-fc370f8cb77e/1762639518082-ed72ja-display.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          }
+        },
+        {
+          "id": "photo-1763599386635-5qtauzrjf",
+          "url": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/bc2da50e-254a-46da-8353-fc370f8cb77e/1763599374379-k1oy93jhkoi.JPG?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS9iYzJkYTUwZS0yNTRhLTQ2ZGEtODM1My1mYzM3MGY4Y2I3N2UvMTc2MzU5OTM3NDM3OS1rMW95OTNqaGtvaS5KUEciLCJpYXQiOjE3NjM2MzY3MjgsImV4cCI6MTc2NDI0MTUyOH0.sy6SgyM1YAuLlaBzq0oml4csBsY_5J9h086jGsKXNNE",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/bc2da50e-254a-46da-8353-fc370f8cb77e/1763599374379-k1oy93jhkoi.JPG",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          }
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": -5,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-05T06:05:02.606029+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "0d89155f-e3c2-48de-821a-2fdf95a8f443",
+      "title": "The Diner",
+      "year": 1948,
+      "storyDate": null,
+      "transcript": "This one makes me smile. Mom and Dad at the old diner on Main Street. Milkshakes, laughter, and no idea what life would throw at them. They didn't have much back then, but from the stories I've heard, they had enough. \n\nDad used to joke that he fell in love halfway through her strawberry shake. It wasn't fancy, but that's where forever started, in a vinyl booth with two straws and a whole lot of hope.",
+      "wisdomText": "Cherish simple moments with loved ones; they often hold the most memorable experiences and connection.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1761931868949-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYxOTMxODY4OTQ5LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzQsImV4cCI6MTc2NDI0MTUzNH0.BmfkG3NwH5Tqasxhx3doGAXIsMl-Nb7stsywS-dJTvo",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1761291624719-2acnj9mof",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0d89155f-e3c2-48de-821a-2fdf95a8f443/1761291624012-46cm32j6gak.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0d89155f-e3c2-48de-821a-2fdf95a8f443/1761291624012-46cm32j6gak.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/0d89155f-e3c2-48de-821a-2fdf95a8f443/1762639542396-vjsb3-master.webp",
+          "displayPath": "photo/migrated/0d89155f-e3c2-48de-821a-2fdf95a8f443/1762639542396-vjsb3-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0d89155f-e3c2-48de-821a-2fdf95a8f443/1762639542396-vjsb3-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBkODkxNTVmLWUzYzItNDhkZS04MjFhLTJmZGY5NWE4ZjQ0My8xNzYyNjM5NTQyMzk2LXZqc2IzLWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjcyOCwiZXhwIjoxNzY0MjQxNTI4fQ.hIQLaGkYGB7FiaQQx6D_YiF2BN5JNHovZBigVrW1wZU",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0d89155f-e3c2-48de-821a-2fdf95a8f443/1762639542396-vjsb3-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBkODkxNTVmLWUzYzItNDhkZS04MjFhLTJmZGY5NWE4ZjQ0My8xNzYyNjM5NTQyMzk2LXZqc2IzLW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzI4LCJleHAiOjE3NjQyNDE1Mjh9.eQxA7Bd869Wow4Hng6JfZEcgRQWs8ekQCOBzGZNqzl0"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": -7,
+        "is_favorite": false,
+        "actual_duration": 0,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-05T06:03:47.967001+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "3d2d24e1-8291-4fec-860d-551eb594c8b0",
+      "title": "Before I Was Born",
+      "year": 1944,
+      "storyDate": null,
+      "transcript": "I stumbled upon this old photo of Dad from the war, just a boy, hardly older than my grandson is now. He never talked much about his time over there, always saying the mud and cold were worse than the fear. But if you look closely, you can see the weight of it in his eyes—a haunting mix of resilience and weariness. \n\nThe way he knelt for this picture, strong yet so tired, speaks volumes. His uniform is worn, and his face is etched with an unspoken story, a silent testament to what he endured. I imagine the chill of the air, the smell of damp earth, and the sound of distant gunfire echoing in his mind as he tried to hold still for the camera. \n\nWhen he finally came home, he was quiet, grateful, and ready to start over. Those days were filled with unvoiced memories, a heavy past tucked away beneath a surface of normalcy. \n\nThat picture reminds me that before he was my dad, he was just a kid, lost in a world on fire, doing whatever it took to survive. It's a snapshot of a life forever changed, a glimpse into the heart of a young man who carried the weight of history with him.",
+      "wisdomText": "This taught me that behind every quiet face lies a story of resilience, and it's okay to feel the weight of those unspoken histories.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1761963663997-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYxOTYzNjYzOTk3LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzQsImV4cCI6MTc2NDI0MTUzNH0.iYNlnWAJIV8gFV_0jMVoah-RtIMZf1RlzPslw9UOsF8",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1761347902474-e2g93rnip",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/3d2d24e1-8291-4fec-860d-551eb594c8b0/1761347901715-n1ofrxz2r0n.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/3d2d24e1-8291-4fec-860d-551eb594c8b0/1761347901715-n1ofrxz2r0n.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/3d2d24e1-8291-4fec-860d-551eb594c8b0/1762639513463-4s80lk-master.webp",
+          "displayPath": "photo/migrated/3d2d24e1-8291-4fec-860d-551eb594c8b0/1762639513463-4s80lk-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/3d2d24e1-8291-4fec-860d-551eb594c8b0/1762639513463-4s80lk-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzNkMmQyNGUxLTgyOTEtNGZlYy04NjBkLTU1MWViNTk0YzhiMC8xNzYyNjM5NTEzNDYzLTRzODBsay1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjgsImV4cCI6MTc2NDI0MTUyOH0.lDQTw_RWCHCpUcdttDsmy9nDSmS7tumgxpO_a3DUvrE",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/3d2d24e1-8291-4fec-860d-551eb594c8b0/1762639513463-4s80lk-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzNkMmQyNGUxLTgyOTEtNGZlYy04NjBkLTU1MWViNTk0YzhiMC8xNzYyNjM5NTEzNDYzLTRzODBsay1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyOCwiZXhwIjoxNzY0MjQxNTI4fQ.d1LIMUCtSNIhuirlDQOel-5_dUnWkXGoyZdZDYAtef4"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": -11,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-05T06:01:35.392005+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "8f1bb5bf-96b2-4003-a875-6394a342028b",
+      "title": "Stories by Firelight",
+      "year": 1990,
+      "storyDate": null,
+      "transcript": "The date stamp read June 14th, 1990. Luke was off at summer camp, so the empty chair by the fire wore his blanket. Mark learned marshmallow math, gold is dessert, black is regret. Ashley built engineer-grade s'mores.\n\nThen the drama unfolded. A wind gust kicked sparks into dry needles, and the cooler toppled, smoke curled fast. I stomped with my boot, Pam dumped cocoa like a tiny fire crew. Ashley handed the water jug, and Mark fanned the edge with a plate, eyes huge. Ten loud seconds, then quiet, pine and steam.\n\nWe sat again, a little proud and a lot together. I held up one perfect s'more toward the empty chair, for Luke, click.",
+      "wisdomText": "In moments of unexpected challenge, it's the collective quick thinking and unity of a family that not only quenches fires but also ignites a stronger bond among us.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759642322733-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NjQyMzIyNzMzLXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM0LCJleHAiOjE3NjQyNDE1MzR9.jWeWDdTGXmyc-sgm_-PwBGK7M3NctwFVZiBzInm01tA",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760395443892-snk7i6ka5",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/8f1bb5bf-96b2-4003-a875-6394a342028b/1760395442781-h7ppydlhhzq.png",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/8f1bb5bf-96b2-4003-a875-6394a342028b/1760395442781-h7ppydlhhzq.png",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/8f1bb5bf-96b2-4003-a875-6394a342028b/1762639526403-wh04gb-master.webp",
+          "displayPath": "photo/migrated/8f1bb5bf-96b2-4003-a875-6394a342028b/1762639526403-wh04gb-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/8f1bb5bf-96b2-4003-a875-6394a342028b/1762639526403-wh04gb-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzhmMWJiNWJmLTk2YjItNDAwMy1hODc1LTYzOTRhMzQyMDI4Yi8xNzYyNjM5NTI2NDAzLXdoMDRnYi1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjgsImV4cCI6MTc2NDI0MTUyOH0.zyBpQTFAzpWHajm9P2BfrAChMu_A27geS_WB5feoFr0",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/8f1bb5bf-96b2-4003-a875-6394a342028b/1762639526403-wh04gb-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzhmMWJiNWJmLTk2YjItNDAwMy1hODc1LTYzOTRhMzQyMDI4Yi8xNzYyNjM5NTI2NDAzLXdoMDRnYi1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyOCwiZXhwIjoxNzY0MjQxNTI4fQ.eUHIeCbIPEX39_uTMIbJw-GHGEUyTAotmfQWNYMp-vk"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 35,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-05T05:32:01.931327+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "cda48e77-c710-4dff-b3e6-d09ba6382699",
+      "title": "Becoming a Grandparent",
+      "year": 2010,
+      "storyDate": null,
+      "transcript": "Mark was 33 when he made me a grandfather. 2010. He hands me Emma in that hospital room, and I swear, time stopped. Six pounds of future wrapped in that pink hospital blanket. I'd been a father at 30, young, terrified, reading every parenting book Molly brought home. With Emma, I just knew what to do, maybe because the terror was gone. This wasn't my test to pass anymore.\n\nMolly was laughing at me, 64 years old, crying like a baby. Mark's wife, Sarah, was taking pictures. \"First time grandpa cried,\" she said. But here's what hit me. I was holding someone who might live to see the year 2100. Can you imagine? This little person would tell stories about me to people not even born yet.\n\nMy father died when Mark was five, barely remembers him. But Emma, she'd remember me, really remember me. Ashley flew in from Seattle. Luke drove all night from Milwaukee. Three days old, and Emma had the whole family wrapped around her tiny finger. Still does.",
+      "wisdomText": "Holding a new generation in your arms brings a profound realization that our legacy isn't about the wealth or objects we leave behind, but the love, stories, and memories we instill in those who will tell our tales long after we're gone.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759725941865-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NzI1OTQxODY1LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzUsImV4cCI6MTc2NDI0MTUzNX0.s2Gt381d4AmOK-ZHQgkyrJ9bAoo0v8Lak48VuyKAWG4",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760395493096-j5vnnaaf2",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/cda48e77-c710-4dff-b3e6-d09ba6382699/1760395492234-j91na94jkbj.png",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/cda48e77-c710-4dff-b3e6-d09ba6382699/1760395492234-j91na94jkbj.png",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/cda48e77-c710-4dff-b3e6-d09ba6382699/1762639539246-f2270y-master.webp",
+          "displayPath": "photo/migrated/cda48e77-c710-4dff-b3e6-d09ba6382699/1762639539246-f2270y-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/cda48e77-c710-4dff-b3e6-d09ba6382699/1762639539246-f2270y-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2NkYTQ4ZTc3LWM3MTAtNGRmZi1iM2U2LWQwOWJhNjM4MjY5OS8xNzYyNjM5NTM5MjQ2LWYyMjcweS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjgsImV4cCI6MTc2NDI0MTUyOH0.Tr4KVMdLY6ldy3MjmBQuqJu_Mfben26HI_bld0nfPg4",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/cda48e77-c710-4dff-b3e6-d09ba6382699/1762639539246-f2270y-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2NkYTQ4ZTc3LWM3MTAtNGRmZi1iM2U2LWQwOWJhNjM4MjY5OS8xNzYyNjM5NTM5MjQ2LWYyMjcweS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyOCwiZXhwIjoxNzY0MjQxNTI4fQ.Dz3jShpKm6NQ2y3s3RAkdO5SlfNP-7ro9cYlm1U1txg"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 55,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T17:08:30.714749+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "019dacf7-6672-480c-9ea1-fbb04738c867",
+      "title": "September 11th",
+      "year": 2001,
+      "storyDate": null,
+      "transcript": "September 11th. I was frosting Luke's birthday cake. His birthday's the 13th. The phone rang. John's voice. 26 years married, I'd never heard him sound like that. \"Turn on the TV. Now!\" I watched those towers fall with chocolate frosting still on my fingers.\n\nMark was 24, working in Boston. Ashley, 22, was finishing college at Ohio State. Luke was 18, senior year of high school. My babies were scattered everywhere.\n\nThe school wouldn't release Luke. I may have threatened the principal. Drove there and pulled him out anyway. \"When the world's ending,\" I told them, \"I want my children where I can see them.\"\n\nMark couldn't get through until noon. Ashley's calls wouldn't connect until evening. She drove home that night. Five hours. Even though we said stay put. Mark showed up Thursday. No warning, just appeared.\n\nThat week we all slept in the living room. Nobody planned it. John on the couch, kids on the floor, me in the recliner. Just needed to hear each other breathing.\n\nLuke told me to forget his birthday cake. \"18 years old, giving up his birthday because the world had shifted.\" That's when I knew my baby had become a man. When he understood that sometimes your own joy has to step aside for collective grief.",
+      "wisdomText": "In times of profound uncertainty, the presence and unity of family transcends all else, reminding us that love is both a refuge and a strength.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759725912634-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NzI1OTEyNjM0LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzUsImV4cCI6MTc2NDI0MTUzNX0.aVJUe6TtvGUA_0SNyuaHU-lMh7dW8s1exnOJlMxucTs",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1761348353514-ydx8w4xgx",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/019dacf7-6672-480c-9ea1-fbb04738c867/1761348352803-o9h0j91mc5j.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/019dacf7-6672-480c-9ea1-fbb04738c867/1761348352803-o9h0j91mc5j.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/019dacf7-6672-480c-9ea1-fbb04738c867/1762639511494-ds52lk-master.webp",
+          "displayPath": "photo/migrated/019dacf7-6672-480c-9ea1-fbb04738c867/1762639511494-ds52lk-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/019dacf7-6672-480c-9ea1-fbb04738c867/1762639511494-ds52lk-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzAxOWRhY2Y3LTY2NzItNDgwYy05ZWExLWZiYjA0NzM4Yzg2Ny8xNzYyNjM5NTExNDk0LWRzNTJsay1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjgsImV4cCI6MTc2NDI0MTUyOH0.ZC6x4OIkqTfqE5D-sxmtQZi8xuaTs0GY51e34o0Vx-U",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/019dacf7-6672-480c-9ea1-fbb04738c867/1762639511494-ds52lk-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzAxOWRhY2Y3LTY2NzItNDgwYy05ZWExLWZiYjA0NzM4Yzg2Ny8xNzYyNjM5NTExNDk0LWRzNTJsay1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyOCwiZXhwIjoxNzY0MjQxNTI4fQ.Nnnv6rF8ks33erlPu4gKl11If7ST8921CAjsGekaSAc"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 46,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T17:06:20.368867+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "69d567ae-47f2-4dd5-8dbb-fd4b24f0771a",
+      "title": "Moving Away from Home",
+      "year": 1976,
+      "storyDate": null,
+      "transcript": "One year married. Molly pregnant with Mark. And I got the transfer to Chicago. Summer of '76. My mother acted like we were moving to Siberia. \"You're taking my grandchild away before I even meet him.\"\n\nWe had everything we owned in that brown Chevy wagon. Wedding gifts still in boxes, never even unpacked. Molly was so sick those first months pregnant, but she never complained. Not once.\n\nMy dad pulled me aside at the gas station. He'd followed us there. Pressed $50 into my hand and said, \"A man takes care of his family, even if it means leaving family behind.\" Only time I ever saw him tear up.\n\nPeterson from the hardware store where I'd worked said I was a fool leaving a sure thing. But Molly, seven months pregnant, sweating in that vinyl seat, she said, \"John, our kids are going to have opportunities we never dreamed of.\" She was right. That move to Chicago changed everything.\n\nBut I still remember looking back at that little town disappearing, thinking I was gambling with more than just my life now.",
+      "wisdomText": "\"Sometimes the hardest choices require us to leave behind what we know and love, but it's the belief in a better future for our family that guides us forward. Trusting in that vision, even when it's not shared by all, is a cornerstone of building a life filled with growth and opportunity.\"",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759725971155-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NzI1OTcxMTU1LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzUsImV4cCI6MTc2NDI0MTUzNX0.Pm3H2M1QfzrAO2fpYSXNiMF5__YgnjGvMUtX1qY9Rak",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1761291516088-qry3vus3b",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1761291515404-4wewh2y8r8s.webp",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1761291515404-4wewh2y8r8s.webp",
+          "transform": {
+            "zoom": 1.3,
+            "position": {
+              "x": -14,
+              "y": 1
+            }
+          },
+          "masterPath": "photo/migrated/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1762639516145-24juum-master.webp",
+          "displayPath": "photo/migrated/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1762639516145-24juum-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1762639516145-24juum-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzY5ZDU2N2FlLTQ3ZjItNGRkNS04ZGJiLWZkNGIyNGYwNzcxYS8xNzYyNjM5NTE2MTQ1LTI0anV1bS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjgsImV4cCI6MTc2NDI0MTUyOH0.sQ7pxZIC4eXMw-VzqUMfLA2IK3LFmDFJTNn8H4W3XVo",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1762639516145-24juum-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzY5ZDU2N2FlLTQ3ZjItNGRkNS04ZGJiLWZkNGIyNGYwNzcxYS8xNzYyNjM5NTE2MTQ1LTI0anV1bS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyOCwiZXhwIjoxNzY0MjQxNTI4fQ.bp7Ip5Qp_EKwrwVWq0sTaGa0E9r0NKFMhGpWptgPgxM"
+        },
+        {
+          "id": "photo-1761291517063-75eoavofu",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1761291516424-q1zkddrtwt.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1761291516424-q1zkddrtwt.webp",
+          "transform": {
+            "zoom": 1.1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1762639517034-b2e7s-master.webp",
+          "displayPath": "photo/migrated/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1762639517034-b2e7s-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1762639517034-b2e7s-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzY5ZDU2N2FlLTQ3ZjItNGRkNS04ZGJiLWZkNGIyNGYwNzcxYS8xNzYyNjM5NTE3MDM0LWIyZTdzLWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjcyOSwiZXhwIjoxNzY0MjQxNTI5fQ.pVldXmXhEMfcwJAoReUiNfdr1pTEjdp73i0LVZTwb20",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/69d567ae-47f2-4dd5-8dbb-fd4b24f0771a/1762639517034-b2e7s-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzY5ZDU2N2FlLTQ3ZjItNGRkNS04ZGJiLWZkNGIyNGYwNzcxYS8xNzYyNjM5NTE3MDM0LWIyZTdzLW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzI5LCJleHAiOjE3NjQyNDE1Mjl9.KsbrpPbtGvDBEmXirkEpoNcMaG1XP485SX3LeJZQ8Jc"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 21,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T15:25:17.109675+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "3a98f043-eaee-4672-a69b-3e934cfb190d",
+      "title": "Top of the World",
+      "year": 1981,
+      "storyDate": null,
+      "transcript": "We called it a hike. Mark called it a mountain. The trail rose like a polite staircase through the pines. Ashley rode in my chest carrier, feet kicking a steady drum. Your mom set the pace the way she does everything, calm and certain. Two minutes in, Mark grabbed my hand. \"My legs are done.\" I knelt to his eye level and pointed at a crooked pine up the trail. \"Just get to that tree, then grapes.\" He nodded like we had signed a contract.\n\nWe climbed in small promises. Tree to rock, rock to turn. At one stop, Ashley's sock vanished. Your mom pulled a clothespin from nowhere and clipped it on like she had planned it since Tuesday. The mountain kept testing us. We kept answering with the next landmark.\n\nAt the overlook, the clouds lifted. Mark whispered, \"Are we on top of the world?\" \n\n\"Not the world,\" I said, \"just our part of it.\" \n\nHe squeezed my fingers and said, \"Next tree.\"",
+      "wisdomText": "In life's challenging climbs, it's the small milestones and shared perseverance that lead us to breathtaking views, teaching us that sometimes, reaching \"just our part of the world\" together is a triumph in itself.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759563878044-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTYzODc4MDQ0LXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM1LCJleHAiOjE3NjQyNDE1MzV9.B-vnMQwXkFCAEOBANBtiGaH5AS7d7nx3lxeTb8heI-4",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760395571551-s1gh0picd",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/3a98f043-eaee-4672-a69b-3e934cfb190d/1760395570425-zlrfon9w8z.png",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/3a98f043-eaee-4672-a69b-3e934cfb190d/1760395570425-zlrfon9w8z.png",
+          "transform": {
+            "zoom": 1.3,
+            "position": {
+              "x": -3,
+              "y": -10
+            }
+          },
+          "masterPath": "photo/migrated/3a98f043-eaee-4672-a69b-3e934cfb190d/1762639480291-9ufnvu-master.webp",
+          "displayPath": "photo/migrated/3a98f043-eaee-4672-a69b-3e934cfb190d/1762639480291-9ufnvu-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/3a98f043-eaee-4672-a69b-3e934cfb190d/1762639480291-9ufnvu-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzNhOThmMDQzLWVhZWUtNDY3Mi1hNjliLTNlOTM0Y2ZiMTkwZC8xNzYyNjM5NDgwMjkxLTl1Zm52dS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjksImV4cCI6MTc2NDI0MTUyOX0.-EQpB415dNxkS6IDZS_93iA6TkwKabi8Ac0Lrwv66Ww",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/3a98f043-eaee-4672-a69b-3e934cfb190d/1762639480291-9ufnvu-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzNhOThmMDQzLWVhZWUtNDY3Mi1hNjliLTNlOTM0Y2ZiMTkwZC8xNzYyNjM5NDgwMjkxLTl1Zm52dS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyOSwiZXhwIjoxNzY0MjQxNTI5fQ.vEXD9cKR9WbkFGz5JGCE2f9UcsI04LKgQ2bVDOJwwFk"
+        },
+        {
+          "id": "photo-1761348266877-9hwnml7vv",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/3a98f043-eaee-4672-a69b-3e934cfb190d/1761348266172-cpqer3annav.webp",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/3a98f043-eaee-4672-a69b-3e934cfb190d/1761348266172-cpqer3annav.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/3a98f043-eaee-4672-a69b-3e934cfb190d/1762639481345-t0qbnn-master.webp",
+          "displayPath": "photo/migrated/3a98f043-eaee-4672-a69b-3e934cfb190d/1762639481345-t0qbnn-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/3a98f043-eaee-4672-a69b-3e934cfb190d/1762639481345-t0qbnn-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzNhOThmMDQzLWVhZWUtNDY3Mi1hNjliLTNlOTM0Y2ZiMTkwZC8xNzYyNjM5NDgxMzQ1LXQwcWJubi1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjksImV4cCI6MTc2NDI0MTUyOX0.8rstNq3kH4oe7-GoN9JmgtMSGzcY8tkcFR0Uqi3Y6D8",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/3a98f043-eaee-4672-a69b-3e934cfb190d/1762639481345-t0qbnn-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzNhOThmMDQzLWVhZWUtNDY3Mi1hNjliLTNlOTM0Y2ZiMTkwZC8xNzYyNjM5NDgxMzQ1LXQwcWJubi1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyOSwiZXhwIjoxNzY0MjQxNTI5fQ.DBy669nmoIZS-Wo-gNWiulOM8pHZxJsyBQJpUdYfsr4"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 26,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T07:44:36.464627+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "7cad229b-63ae-49da-9da7-d48e812ebb97",
+      "title": "Full House, Full Hearts",
+      "year": 1995,
+      "storyDate": null,
+      "transcript": "I remember stepping on a Lego in the dark and learning new vocabulary. Spaghetti on the stove, homework on the table, the washing machine pleading for mercy. \n\nOne night, I came home tired and barked at everybody. The room froze. I took a lap around the block, came back, and said the sentence that fixes more than most: \"I was wrong.\" If I am honest, that is when our house felt strong. Not when we had money, but when we could reset fast. \n\nWe were not fancy, but we were quick to forgive and laugh at that same dumb joke ten minutes later.",
+      "wisdomText": "Admitting when you're wrong knits a family closer than any shared success; it's the humility to reset and the grace to forgive that truly makes a home strong.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759563129168-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTYzMTI5MTY4LXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM1LCJleHAiOjE3NjQyNDE1MzV9.EKbop4BjHXUquBIinpb8EM2jLI6cBs1lw6bfHVc8SVM",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760395467135-yhnpgm2wq",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/7cad229b-63ae-49da-9da7-d48e812ebb97/1760395466271-tlwp7j3xs7d.png",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/7cad229b-63ae-49da-9da7-d48e812ebb97/1760395466271-tlwp7j3xs7d.png",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/7cad229b-63ae-49da-9da7-d48e812ebb97/1762639549250-v6fll6-master.webp",
+          "displayPath": "photo/migrated/7cad229b-63ae-49da-9da7-d48e812ebb97/1762639549250-v6fll6-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/7cad229b-63ae-49da-9da7-d48e812ebb97/1762639549250-v6fll6-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzdjYWQyMjliLTYzYWUtNDlkYS05ZGE3LWQ0OGU4MTJlYmI5Ny8xNzYyNjM5NTQ5MjUwLXY2ZmxsNi1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MjksImV4cCI6MTc2NDI0MTUyOX0.WIVhmo-IXfq0Hc6T8iUYIZY_7_zUTLf_f8ExNvBq4Y8",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/7cad229b-63ae-49da-9da7-d48e812ebb97/1762639549250-v6fll6-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzdjYWQyMjliLTYzYWUtNDlkYS05ZGE3LWQ0OGU4MTJlYmI5Ny8xNzYyNjM5NTQ5MjUwLXY2ZmxsNi1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjcyOSwiZXhwIjoxNzY0MjQxNTI5fQ.BOsdDJBoEh5_o6ge5FRE74Ig09NLDZVqqzdBt-C4Yf4"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 40,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T07:32:07.674478+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "a35a999a-e398-4d3a-9cdc-44070b49e787",
+      "title": "DIY Weekends",
+      "year": 1982,
+      "storyDate": null,
+      "transcript": "I remember snapping a blue chalk line and feeling like a real carpenter. The first board I cut was too short. I kept it as a shim to remind me to measure twice. The saw bucked a little until I learned to let the blade do the work. \n\nA neighbor wandered over with a level older than me, and we argued about an eighth of an inch until the bubble made peace. The kids brought warm lemonade and left little footprints in the sawdust. \n\nI set the last screw at dusk and lay on my back listening to the wood cool. If I am honest, I thought I was building a deck. We ended up building summers. Birthday candles, wet towels, late talks after the porch light clicked on. The best boards were the ones nobody noticed.",
+      "wisdomText": "In the craft of life, it's not just about constructing things perfectly but in building moments that gather memories. Measure twice and cut once, but never forget that the true value lies in the unseen boards that support the laughter, the whispers, and the shared sunsets.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759562942960-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTYyOTQyOTYwLXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM1LCJleHAiOjE3NjQyNDE1MzV9.qAzMwDk9Jx-PUbTM5M0w5HUnlWD1LwMG8kjb1sRLYUU",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1759562946310-sp5sbnl97",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/a35a999a-e398-4d3a-9cdc-44070b49e787/1759562943799-4aqsfy913jg.png",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/a35a999a-e398-4d3a-9cdc-44070b49e787/1759562943799-4aqsfy913jg.png",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/a35a999a-e398-4d3a-9cdc-44070b49e787/1762639482418-8ihy1-master.webp",
+          "displayPath": "photo/migrated/a35a999a-e398-4d3a-9cdc-44070b49e787/1762639482418-8ihy1-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/a35a999a-e398-4d3a-9cdc-44070b49e787/1762639482418-8ihy1-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2EzNWE5OTlhLWUzOTgtNGQzYS05Y2RjLTQ0MDcwYjQ5ZTc4Ny8xNzYyNjM5NDgyNDE4LThpaHkxLWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjcyOSwiZXhwIjoxNzY0MjQxNTI5fQ.jiL6qR4-f12B7Ogp__ZuOuWFWwIjmNIAxaDqP99nCro",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/a35a999a-e398-4d3a-9cdc-44070b49e787/1762639482418-8ihy1-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2EzNWE5OTlhLWUzOTgtNGQzYS05Y2RjLTQ0MDcwYjQ5ZTc4Ny8xNzYyNjM5NDgyNDE4LThpaHkxLW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzI5LCJleHAiOjE3NjQyNDE1Mjl9.2uU03_U3mW4FXj_VGGK8ZYXhDVlIhBubtYedA4Kx0wY"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 27,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T07:29:01.317021+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "7d6faf22-04f4-40ca-9ecb-aeabdb69a86a",
+      "title": "Passing the Torch",
+      "year": 2025,
+      "storyDate": null,
+      "transcript": "I remember wishing parenting came with a scoreboard. It does not. The only buzzer was the smoke alarm on spaghetti night. Most days were car seats that required a PhD, permission slips that bred in the backpack, and a hamper that multiplied socks like a magic trick. If I am honest, 80% of the job was locating shoes last seen in a separate zip code. We were the snack police, and \"we'll see\" was our way of spelling no. The minivan became a rolling museum of crackers.\n\nThe funny thing is, the long game pays slow, and then all at once. One day your kid tells their kid the same lines you muttered on tired Tuesdays. \"Please and thank you. We tell the truth here. Try again.\" You hear your voice come out of a smaller mouth, and you nearly fall off the swing.\n\nOut in the yard, somebody yells, \"Mine!\" The dog ignores his name again, and still, everyone showed up. That is the payoff. Not perfect children, not perfect parents. Just a family that keeps returning to the same patch of grass. Five more minutes on this swing, and we might call it a victory parade. No trophies, just two dents in the seat with our names on them.",
+      "wisdomText": "The true measure of parenting isn't found in flawless moments but in the echoes of our words and actions in our children's lives, a testament to love's enduring presence over perfection.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759562893862-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTYyODkzODYyLXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM1LCJleHAiOjE3NjQyNDE1MzV9._AIR_Ld2q--ZqVUsL-aI3G3oS6vMylXpUiCR0TyEgzA",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1761348105899-021i005gl",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/7d6faf22-04f4-40ca-9ecb-aeabdb69a86a/1761348105255-ggtbaxwhy9o.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/7d6faf22-04f4-40ca-9ecb-aeabdb69a86a/1761348105255-ggtbaxwhy9o.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/7d6faf22-04f4-40ca-9ecb-aeabdb69a86a/1762639484454-r9bha-master.webp",
+          "displayPath": "photo/migrated/7d6faf22-04f4-40ca-9ecb-aeabdb69a86a/1762639484454-r9bha-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/7d6faf22-04f4-40ca-9ecb-aeabdb69a86a/1762639484454-r9bha-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzdkNmZhZjIyLTA0ZjQtNDBjYS05ZWNiLWFlYWJkYjY5YTg2YS8xNzYyNjM5NDg0NDU0LXI5YmhhLWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjcyOSwiZXhwIjoxNzY0MjQxNTI5fQ.AtJgCWflIHCJLyuq0e6Bmd5MQw3BQR3B4AdpGxa6Deg",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/7d6faf22-04f4-40ca-9ecb-aeabdb69a86a/1762639484454-r9bha-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzdkNmZhZjIyLTA0ZjQtNDBjYS05ZWNiLWFlYWJkYjY5YTg2YS8xNzYyNjM5NDg0NDU0LXI5YmhhLW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzI5LCJleHAiOjE3NjQyNDE1Mjl9.13rCabuaEkWByKD8v7lhboQ01pd1p-mQCkt1qiCfuc8"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 70,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T07:28:12.554395+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "9abd128a-7303-4045-b885-31d2a30df803",
+      "title": "The Next Chapter Begins",
+      "year": 2017,
+      "storyDate": null,
+      "transcript": "At the retirement party, people told stories I barely remembered. Small favors that somehow grew legs. Funny how your legacy piles up while you are busy doing the job.\n\nI looked at your grandma and thought, we did not do it perfectly, but we stayed.\n\nIf I am honest, the best compliment I heard was simple. \"You were steady.\" I can live with that.",
+      "wisdomText": "The true measure of our impact often lies in the smallest acts of steadiness and kindness we show to others, not in the grand gestures we remember.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759562853961-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTYyODUzOTYxLXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM1LCJleHAiOjE3NjQyNDE1MzV9.Lg0kcWHLIWNvcwa5CHWkyXuiLN6bln6kd1gAC0h_a9o",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1759562856189-vkmgbob7b",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/9abd128a-7303-4045-b885-31d2a30df803/1759562854951-kn8o24goppm.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/9abd128a-7303-4045-b885-31d2a30df803/1759562854951-kn8o24goppm.webp",
+          "transform": {
+            "zoom": 1.2,
+            "position": {
+              "x": -2,
+              "y": 7.423668215945656
+            }
+          },
+          "masterPath": "photo/migrated/9abd128a-7303-4045-b885-31d2a30df803/1762639533577-9l8w3h-master.webp",
+          "displayPath": "photo/migrated/9abd128a-7303-4045-b885-31d2a30df803/1762639533577-9l8w3h-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/9abd128a-7303-4045-b885-31d2a30df803/1762639533577-9l8w3h-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzlhYmQxMjhhLTczMDMtNDA0NS1iODg1LTMxZDJhMzBkZjgwMy8xNzYyNjM5NTMzNTc3LTlsOHczaC1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzAsImV4cCI6MTc2NDI0MTUzMH0.twBu_kwcwNkpaT5fEln9dRRIYJrrMxOhpoX6LzqSF-4",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/9abd128a-7303-4045-b885-31d2a30df803/1762639533577-9l8w3h-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzlhYmQxMjhhLTczMDMtNDA0NS1iODg1LTMxZDJhMzBkZjgwMy8xNzYyNjM5NTMzNTc3LTlsOHczaC1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMCwiZXhwIjoxNzY0MjQxNTMwfQ.XfkFiRWS_yuaEBGqMrvI460M2uPCbRH_69fsyRDobYg"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 62,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T07:27:32.633484+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "70922350-18ce-41a5-8789-44365f84f695",
+      "title": "Hands that Serve",
+      "year": 1988,
+      "storyDate": null,
+      "transcript": "I remember the first night I served, cold air, hot steam, and me overfilling every bowl until a lady tapped my elbow and said, \"Leave room for the line.\" I learned to ask names and say them back, Marcus, Gloria, Ray. When you use a name, eyes lift.\n\nSome nights we had ten volunteers, some nights four. We showed up anyway. In winter, I doubled my socks and ladled chili until my shoulder ached. If I am honest, I went to be useful and kept going because I needed it.\n\nThe lesson was simple. None of us is only our worst week. You serve, you listen, you wipe the tables, and you leave the place a little better than you found it. Then you come back.",
+      "wisdomText": "In giving, I discovered not only the power of acknowledging each person by name, lifting their spirits, but also the profound personal fulfillment that comes from serving others. It taught me that by striving to leave every place—and every life—a little better than I found it, I too, find purpose and meaning.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759562725736-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTYyNzI1NzM2LXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM1LCJleHAiOjE3NjQyNDE1MzV9.MbO21g1snvVuIpeb640hOZKQwJ-alZxI-hEZPSTzuik",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760395417640-luifhfrpe",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/70922350-18ce-41a5-8789-44365f84f695/1760395416766-qg4e4zt6czp.png",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/70922350-18ce-41a5-8789-44365f84f695/1760395416766-qg4e4zt6czp.png",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/70922350-18ce-41a5-8789-44365f84f695/1762639477815-j5nihh-master.webp",
+          "displayPath": "photo/migrated/70922350-18ce-41a5-8789-44365f84f695/1762639477815-j5nihh-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/70922350-18ce-41a5-8789-44365f84f695/1762639477815-j5nihh-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzcwOTIyMzUwLTE4Y2UtNDFhNS04Nzg5LTQ0MzY1Zjg0ZjY5NS8xNzYyNjM5NDc3ODE1LWo1bmloaC1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzAsImV4cCI6MTc2NDI0MTUzMH0.EwHORCYc1H1M7dUisB0N4hJWBCnQ4z-wM3yHmeMrmbw",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/70922350-18ce-41a5-8789-44365f84f695/1762639477815-j5nihh-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzcwOTIyMzUwLTE4Y2UtNDFhNS04Nzg5LTQ0MzY1Zjg0ZjY5NS8xNzYyNjM5NDc3ODE1LWo1bmloaC1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMCwiZXhwIjoxNzY0MjQxNTMwfQ.S6acpNq9AhCddTmDxXMFPi0AAL2lFI44k5VgNN9wq64"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 33,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T07:25:24.410044+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "03f4e49c-a16a-4f27-bae3-d7269bc1585e",
+      "title": "Sleepless Nights",
+      "year": 1978,
+      "storyDate": null,
+      "transcript": "We brought our first child home and realized we needed a plan, not bravery. The floral couch became headquarters. The lamp table got an index card that said, feed, burp, change, walk, pray. At 1:12 a.m., he announced himself to the neighborhood. I wore a blazer because every shirt was dirty. Your mom wound the kitchen timer to 20 minutes. When it ticked, we traded the baby. No debate. The rule was the boss.\n\nI tried the shoulder rock. Nothing. I tried the slow walk. Nothing. I whispered box scores because it was the only script in my head. He calmed at the sound of something ordinary. Your mom laughed and added a step to the card. Talk about anything simple.\n\nBy 3 a.m., the system held. We were tired, not angry. We were teammates, not heroes. The timer dinged. Trade. Kiss. Keep going.\n\nMorning came. We snapped the photo on that couch. People see a happy young family. I see a pact that still works. Make small rules while you were calm. To carry you when you were tired.",
+      "wisdomText": "\"In the whirlwind of life's unexpected challenges, the strength of a family lies not in individual heroics, but in creating simple, shared systems that guide us through our toughest moments together.\"",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759562664732-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTYyNjY0NzMyLXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM1LCJleHAiOjE3NjQyNDE1MzV9.7nRaiBNjAj1Lx1bbCizxq2ZsS7DndJwZOH-LRWSfDBc",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760395379404-9cbtt4z2n",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/03f4e49c-a16a-4f27-bae3-d7269bc1585e/1760395378314-veuz1s90vq.png",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/03f4e49c-a16a-4f27-bae3-d7269bc1585e/1760395378314-veuz1s90vq.png",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/03f4e49c-a16a-4f27-bae3-d7269bc1585e/1762639512581-64hpq4-master.webp",
+          "displayPath": "photo/migrated/03f4e49c-a16a-4f27-bae3-d7269bc1585e/1762639512581-64hpq4-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/03f4e49c-a16a-4f27-bae3-d7269bc1585e/1762639512581-64hpq4-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzAzZjRlNDljLWExNmEtNGYyNy1iYWUzLWQ3MjY5YmMxNTg1ZS8xNzYyNjM5NTEyNTgxLTY0aHBxNC1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzAsImV4cCI6MTc2NDI0MTUzMH0.liGJJmdIauc78-uPFW4pNOnF7ABCmkkcAkbQKWisX9k",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/03f4e49c-a16a-4f27-bae3-d7269bc1585e/1762639512581-64hpq4-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzAzZjRlNDljLWExNmEtNGYyNy1iYWUzLWQ3MjY5YmMxNTg1ZS8xNzYyNjM5NTEyNTgxLTY0aHBxNC1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMCwiZXhwIjoxNzY0MjQxNTMwfQ.JZVeFFuNjMYgbUkTq26vPffO3ZFmuTdDwf5mYAQICK0"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 23,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T07:24:23.359519+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "a2e65a9d-d156-4f5d-93a0-c35bb6cc5832",
+      "title": "Time to Slow Down",
+      "year": 1977,
+      "storyDate": null,
+      "transcript": "I remember the sound more than the sight, a low grind than a rain of headlight glass. It was late. The pavement was still damp from a summer storm. I came into the curve a little hot and a little proud. The back end stepped out and by the time my brain caught up, the nose found a pole. Air went thin, then quiet. Steam wrote white against the dark. I sat on the curb with my hands shaking and the taste of metal in my mouth. A neighbor asked if I was all right. I nodded because men nod. I was not all right. I had turned something beautiful into a pile of angles with one small, dumb choice.\n\nI called Dad. The silence before he spoke is a sound I can still hear. No one was hurt. That should have been enough. It was not, not that night. If I am honest, the burn was not the money. It was who I had been becoming in that seat. Show off. Hurry. I used to think respect was polish. It is not. Respect is the speed you choose and the call you make before you need help.\n\nWe hauled the Shelby home on a flatbed. I kept the key on my dresser for a year to remember. If I had given the storm five more minutes, we would have driven home.",
+      "wisdomText": "In the echo of our mistakes, we find the humbling path to true respect; it's not in the shine of what we own but in the wisdom of our choices and the courage to face their aftermath.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759562548902-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTYyNTQ4OTAyLXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM1LCJleHAiOjE3NjQyNDE1MzV9.rsTDkPvLOsbuWYJT7DO79XeLK3-cC5w3Lie0HcHcYvA",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760395209047-6i2fa4zkc",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/a2e65a9d-d156-4f5d-93a0-c35bb6cc5832/1760395207802-el1yyvwhbg.png",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/a2e65a9d-d156-4f5d-93a0-c35bb6cc5832/1760395207802-el1yyvwhbg.png",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/a2e65a9d-d156-4f5d-93a0-c35bb6cc5832/1762639536641-aych1k-master.webp",
+          "displayPath": "photo/migrated/a2e65a9d-d156-4f5d-93a0-c35bb6cc5832/1762639536641-aych1k-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/a2e65a9d-d156-4f5d-93a0-c35bb6cc5832/1762639536641-aych1k-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2EyZTY1YTlkLWQxNTYtNGY1ZC05M2EwLWMzNWJiNmNjNTgzMi8xNzYyNjM5NTM2NjQxLWF5Y2gxay1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzAsImV4cCI6MTc2NDI0MTUzMH0.0jheS1ZiNdR1LzTRJZKF-C4CN5vYh7p8uZLdpHRW-5Y",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/a2e65a9d-d156-4f5d-93a0-c35bb6cc5832/1762639536641-aych1k-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2EyZTY1YTlkLWQxNTYtNGY1ZC05M2EwLWMzNWJiNmNjNTgzMi8xNzYyNjM5NTM2NjQxLWF5Y2gxay1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMCwiZXhwIjoxNzY0MjQxNTMwfQ.Yp2IAbMcMB_1TlkB0L8azSjT5tfc9GzkrjOX3diwK74"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 22,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T07:22:27.108322+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "8041484b-9e6d-4b05-b259-3ce9fcc9d798",
+      "title": "Passport to Wonder",
+      "year": 1977,
+      "storyDate": null,
+      "transcript": "We saved for ages and landed in a plaza with stone older than our country. Your grandma tucked her hand into my elbow, and we stood there, small, in the best way.\n\nWe got lost, pointed a lot, met kind waiters, and ate something I still cannot pronounce.\n\nTravel did not make me fancy. It made me grateful.",
+      "wisdomText": "Travel taught me that the true wealth of our experiences lies not in the grandeur of our destinations, but in the humility and gratitude they inspire within us.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759550540128-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTUwNTQwMTI4LXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM1LCJleHAiOjE3NjQyNDE1MzV9.JqfIArBq79ozHbwNeDlUnrF8dzTmfncgf2fWyCrY9o0",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1761348470797-mp9olrmk1",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1761348469273-94ilv7q98hs.png",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1761348469273-94ilv7q98hs.png",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639543617-1jnit-master.webp",
+          "displayPath": "photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639543617-1jnit-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639543617-1jnit-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzgwNDE0ODRiLTllNmQtNGIwNS1iMjU5LTNjZTlmY2M5ZDc5OC8xNzYyNjM5NTQzNjE3LTFqbml0LWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjczMCwiZXhwIjoxNzY0MjQxNTMwfQ.Yvy9C3c3SqBuuDZeh7l3OcmSQ9zp7l_SIldZC7NwwEo",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639543617-1jnit-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzgwNDE0ODRiLTllNmQtNGIwNS1iMjU5LTNjZTlmY2M5ZDc5OC8xNzYyNjM5NTQzNjE3LTFqbml0LW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzMwLCJleHAiOjE3NjQyNDE1MzB9.0x1NDm_Qpl6w9i9R3neiZ7mpa8i4b92KfNHpotUu3CQ"
+        },
+        {
+          "id": "photo-1761348472557-66eqpa0lv",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1761348471165-gi8nqg1tkjq.png",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1761348471165-gi8nqg1tkjq.png",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639545023-gypcx-master.webp",
+          "displayPath": "photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639545023-gypcx-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639545023-gypcx-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzgwNDE0ODRiLTllNmQtNGIwNS1iMjU5LTNjZTlmY2M5ZDc5OC8xNzYyNjM5NTQ1MDIzLWd5cGN4LWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjczMCwiZXhwIjoxNzY0MjQxNTMwfQ.poP-gW1JBXXJjdfo5_noKXpbyeUsw2kWn_2mGtsOIro",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639545023-gypcx-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzgwNDE0ODRiLTllNmQtNGIwNS1iMjU5LTNjZTlmY2M5ZDc5OC8xNzYyNjM5NTQ1MDIzLWd5cGN4LW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzMwLCJleHAiOjE3NjQyNDE1MzB9.ub4c0yUX_pVGTOl6_b4a7IZife31EEZU0rhIBXbfGrA"
+        },
+        {
+          "id": "photo-1761348473480-2qw9u8pq4",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1761348472860-dc6yb8mlmgk.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1761348472860-dc6yb8mlmgk.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639546226-4kr5pq-master.webp",
+          "displayPath": "photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639546226-4kr5pq-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639546226-4kr5pq-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzgwNDE0ODRiLTllNmQtNGIwNS1iMjU5LTNjZTlmY2M5ZDc5OC8xNzYyNjM5NTQ2MjI2LTRrcjVwcS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzAsImV4cCI6MTc2NDI0MTUzMH0.7_2Bt5MbLaT13WbZTGL8H_8pvWndaLq0NXQqd--PGUA",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/8041484b-9e6d-4b05-b259-3ce9fcc9d798/1762639546226-4kr5pq-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzgwNDE0ODRiLTllNmQtNGIwNS1iMjU5LTNjZTlmY2M5ZDc5OC8xNzYyNjM5NTQ2MjI2LTRrcjVwcS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMSwiZXhwIjoxNzY0MjQxNTMxfQ.H9VUEOKrHLK9SwdyXaPzbER47rm2bQPzWEoi0akkGyg"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 22,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T04:02:19.409733+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "e42ceb23-c49d-4243-95d0-c11c9b72094e",
+      "title": "Planting Our Roots",
+      "year": 1973,
+      "storyDate": null,
+      "transcript": "We posed with a giant key like fools. The carpet was avocado, and the sink leaked if you looked at it wrong. The hardware clerk taught me how to shut off a valve and find a stud. Saturdays became paint on our elbows and music on the radio. It was not about status. It was a place to become a family.\n\nIf I'm honest, buying a little less house gave us a lot more peace.",
+      "wisdomText": "Investing in simplicity rather than excess allowed us to focus on what truly matters: becoming a family.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759549395388-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTQ5Mzk1Mzg4LXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM2LCJleHAiOjE3NjQyNDE1MzZ9.cHK3Q0AN7nwQMDO-3yh4-Prz9sXeBVPn1r2nHEGdPGA",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1759549398252-q36j47pkl",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/e42ceb23-c49d-4243-95d0-c11c9b72094e/1759549396324-x9ycd65ncb.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/e42ceb23-c49d-4243-95d0-c11c9b72094e/1759549396324-x9ycd65ncb.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/e42ceb23-c49d-4243-95d0-c11c9b72094e/1762639508400-j4yjp-master.webp",
+          "displayPath": "photo/migrated/e42ceb23-c49d-4243-95d0-c11c9b72094e/1762639508400-j4yjp-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/e42ceb23-c49d-4243-95d0-c11c9b72094e/1762639508400-j4yjp-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2U0MmNlYjIzLWM0OWQtNDI0My05NWQwLWMxMWM5YjcyMDk0ZS8xNzYyNjM5NTA4NDAwLWo0eWpwLWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjczMSwiZXhwIjoxNzY0MjQxNTMxfQ.1y3TZWMWjDhkWK3K15lZNWSIKSDIAkgiYxWshxIjiRk",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/e42ceb23-c49d-4243-95d0-c11c9b72094e/1762639508400-j4yjp-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2U0MmNlYjIzLWM0OWQtNDI0My05NWQwLWMxMWM5YjcyMDk0ZS8xNzYyNjM5NTA4NDAwLWo0eWpwLW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzMxLCJleHAiOjE3NjQyNDE1MzF9.GD_ShPe7L9bJh4R3wn3iQ0dMeykA55F7EBj6gY-5Vc0"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 18,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T03:43:14.592278+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "1f755be6-3147-419f-8279-475d0557d2f3",
+      "title": "My Best Decision Ever",
+      "year": 1975,
+      "storyDate": null,
+      "transcript": "My hands were sweating through a rented suit. When she walked in, the noise in my head went quiet. Our vows were simple, more like good tools than pretty words. From then on, it was us against the problem, not me against her.\n\nWe ate cake off paper plates and laughed at how grown up we felt. If I'm honest, love lasted because we said sorry fast, and we kept our inside jokes.",
+      "wisdomText": "In love, the strength of our bond is not measured by the grandeur of our celebrations, but by the simplicity of our understanding and the swiftness of our forgiveness.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759548637376-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTQ4NjM3Mzc2LXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM2LCJleHAiOjE3NjQyNDE1MzZ9._rVnFrhRT5nk9TbjqCgrzq2h9qPFQyTJrqufHuQL7No",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1759548639497-7gp2xl03m",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/1f755be6-3147-419f-8279-475d0557d2f3/1759548638381-by7quc7hfn5.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/1f755be6-3147-419f-8279-475d0557d2f3/1759548638381-by7quc7hfn5.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/1f755be6-3147-419f-8279-475d0557d2f3/1762639507373-8p5ma4-master.webp",
+          "displayPath": "photo/migrated/1f755be6-3147-419f-8279-475d0557d2f3/1762639507373-8p5ma4-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/1f755be6-3147-419f-8279-475d0557d2f3/1762639507373-8p5ma4-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzFmNzU1YmU2LTMxNDctNDE5Zi04Mjc5LTQ3NWQwNTU3ZDJmMy8xNzYyNjM5NTA3MzczLThwNW1hNC1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzEsImV4cCI6MTc2NDI0MTUzMX0.d-f5lzU5rdQSyMtblHiDOw14ByQqbua0zbY1tfgHrdc",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/1f755be6-3147-419f-8279-475d0557d2f3/1762639507373-8p5ma4-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzFmNzU1YmU2LTMxNDctNDE5Zi04Mjc5LTQ3NWQwNTU3ZDJmMy8xNzYyNjM5NTA3MzczLThwNW1hNC1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMSwiZXhwIjoxNzY0MjQxNTMxfQ.J28aOVc2C5ODMOMLCjZy1fYtDNQOkztj6LcFwFoxUy0"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T03:30:36.508668+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "b4b50587-c5a2-4cf9-ad78-a8cfac014f36",
+      "title": "Completing a Marathon",
+      "year": 1973,
+      "storyDate": null,
+      "transcript": "I think the training mattered more than the medal. I ran before sunrise when the sprinklers argued with the grass. On race day, miles 1 to 18 felt like a promise kept. 19 to 22 felt like a negotiation. At 23, I was borrowing legs from my future self.\n\nA stranger yelled my name off the bib, and I believed him just long enough to finish. Crossing the line felt like a receipt for a thousand boring mornings.",
+      "wisdomText": "The true value of our endeavors lies not in the accolades we receive, but in the commitment and perseverance we demonstrate along the journey.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759547877122-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTQ3ODc3MTIyLXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM2LCJleHAiOjE3NjQyNDE1MzZ9.fbYR3aNEqAqWTC3zbtf1qFNitTyzM04wI2867zsZM7g",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1761291309713-a8xllv3e9",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/b4b50587-c5a2-4cf9-ad78-a8cfac014f36/1761291308711-4pllew0zosb.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/b4b50587-c5a2-4cf9-ad78-a8cfac014f36/1761291308711-4pllew0zosb.webp",
+          "transform": {
+            "zoom": 1.1,
+            "position": {
+              "x": 0.6271186440677978,
+              "y": -3.864497676081516
+            }
+          },
+          "masterPath": "photo/migrated/b4b50587-c5a2-4cf9-ad78-a8cfac014f36/1762639550199-kvbq6f-master.webp",
+          "displayPath": "photo/migrated/b4b50587-c5a2-4cf9-ad78-a8cfac014f36/1762639550199-kvbq6f-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/b4b50587-c5a2-4cf9-ad78-a8cfac014f36/1762639550199-kvbq6f-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2I0YjUwNTg3LWM1YTItNGNmOS1hZDc4LWE4Y2ZhYzAxNGYzNi8xNzYyNjM5NTUwMTk5LWt2YnE2Zi1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzEsImV4cCI6MTc2NDI0MTUzMX0.NRVmhimN8ok1uoHSz0jIm3qyD1ytK1wWHEXFK0QvF4c",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/b4b50587-c5a2-4cf9-ad78-a8cfac014f36/1762639550199-kvbq6f-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2I0YjUwNTg3LWM1YTItNGNmOS1hZDc4LWE4Y2ZhYzAxNGYzNi8xNzYyNjM5NTUwMTk5LWt2YnE2Zi1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMSwiZXhwIjoxNzY0MjQxNTMxfQ.9OSXyWcxQCt8PhZL1YdJdCUK391pTxk2pE9Fv7BATJs"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 18,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T03:17:56.387229+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "0fea7e23-20a6-4693-a7a5-aa6593e978dc",
+      "title": "One Small Step",
+      "year": 1969,
+      "storyDate": null,
+      "transcript": "I remember sitting there in the living room, eyes glued to the TV. The picture was grainy, the sound crackled, but none of that mattered. When Neil Armstrong set foot on the moon, it felt like we were all up there with him. I didn't fully understand the science, but I knew something big had happened. Humanity had left Earth.\n\nMy parents clapped, my dad muttered something about beating the Russians, and I just sat there with goosebumps. For one night, the whole world was staring at the same sky in awe.",
+      "wisdomText": "Take time to witness and appreciate transformative events, as they can unite and inspire across generations.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1760078880664-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYwMDc4ODgwNjY0LXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzYsImV4cCI6MTc2NDI0MTUzNn0.40ng22uyOmU-AG21APH2mzsf7G4sJaz5LTGDn_ap6X0",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1759547763232-lx0rj3m80",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0fea7e23-20a6-4693-a7a5-aa6593e978dc/1759547761959-rrueofkvae.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/0fea7e23-20a6-4693-a7a5-aa6593e978dc/1759547761959-rrueofkvae.webp",
+          "transform": {
+            "zoom": 1.2,
+            "position": {
+              "x": -2.9689265536723193,
+              "y": 2.961635482461369
+            }
+          },
+          "masterPath": "photo/migrated/0fea7e23-20a6-4693-a7a5-aa6593e978dc/1762639503222-l0l1t-master.webp",
+          "displayPath": "photo/migrated/0fea7e23-20a6-4693-a7a5-aa6593e978dc/1762639503222-l0l1t-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0fea7e23-20a6-4693-a7a5-aa6593e978dc/1762639503222-l0l1t-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBmZWE3ZTIzLTIwYTYtNDY5My1hN2E1LWFhNjU5M2U5NzhkYy8xNzYyNjM5NTAzMjIyLWwwbDF0LWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjczMSwiZXhwIjoxNzY0MjQxNTMxfQ.O1rSg1orjIvtRwbt6Mp8TBzEu-XTG-2ueNfE_czajQ4",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/0fea7e23-20a6-4693-a7a5-aa6593e978dc/1762639503222-l0l1t-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzBmZWE3ZTIzLTIwYTYtNDY5My1hN2E1LWFhNjU5M2U5NzhkYy8xNzYyNjM5NTAzMjIyLWwwbDF0LW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzMxLCJleHAiOjE3NjQyNDE1MzF9.X6IgdlqYovakIuQPM75dnSypZ_KwX6G_YnJYqBdFYMs"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 14,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T03:16:00.247828+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "4fd48beb-a08c-4f7f-85b7-432f4a36c3b5",
+      "title": "Meeting a Lifelong Friend",
+      "year": 1962,
+      "storyDate": null,
+      "transcript": "My best friend lived two houses down. We traded baseball cards, built a fort behind the fence, and swore a secret we forgot the next summer. His red bike always had a chain squeak, so you heard him before you saw him. When my dad worked late, his mom set a plate for me without asking. When he took a ball to the eye, I walked him home slow so he would not cry alone. We drifted for a while and then found each other again. He was the first call when I asked your grandma to marry me. If I am honest, that is love too, showing up for the ordinary years.",
+      "wisdomText": "True love isn't just found in grand gestures, but in the quiet presence and shared moments of everyday life.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759547514986-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTQ3NTE0OTg2LXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM2LCJleHAiOjE3NjQyNDE1MzZ9.6ij5M7YyeS0Lq7bfTTmbflMd_KaHx1daOs8iYdmet7o",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1759547516768-s8ersd42z",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1759547515723-4jcwdf2bk4n.webp",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1759547515723-4jcwdf2bk4n.webp",
+          "transform": {
+            "zoom": 1.3,
+            "position": {
+              "x": -0.5768507075224942,
+              "y": 8.381835303863928
+            }
+          },
+          "masterPath": "photo/migrated/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1762639487398-iv1z0o-master.webp",
+          "displayPath": "photo/migrated/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1762639487398-iv1z0o-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1762639487398-iv1z0o-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzRmZDQ4YmViLWEwOGMtNGY3Zi04NWI3LTQzMmY0YTM2YzNiNS8xNzYyNjM5NDg3Mzk4LWl2MXowby1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzEsImV4cCI6MTc2NDI0MTUzMX0.VMf_oCeAS62oHnLrcd3YJmYp5JEACDC-Us6MpASZ-qY",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1762639487398-iv1z0o-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzRmZDQ4YmViLWEwOGMtNGY3Zi04NWI3LTQzMmY0YTM2YzNiNS8xNzYyNjM5NDg3Mzk4LWl2MXowby1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMSwiZXhwIjoxNzY0MjQxNTMxfQ.e1bXVRGL9vDiriwRXKEGcvUJA5Ti2q0uLj606emut8U"
+        },
+        {
+          "id": "photo-1759547517915-ehrtoa6r0",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1759547517213-9kg3p244g6c.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1759547517213-9kg3p244g6c.webp",
+          "transform": {
+            "zoom": 1.3,
+            "position": {
+              "x": -1.962878773017367,
+              "y": 0.06853896556661265
+            }
+          },
+          "masterPath": "photo/migrated/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1762639488185-traq9d-master.webp",
+          "displayPath": "photo/migrated/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1762639488185-traq9d-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1762639488185-traq9d-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzRmZDQ4YmViLWEwOGMtNGY3Zi04NWI3LTQzMmY0YTM2YzNiNS8xNzYyNjM5NDg4MTg1LXRyYXE5ZC1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzEsImV4cCI6MTc2NDI0MTUzMX0.NPFCDj1wbhokTCAug6oqaaBsBO3WnGCSmto2Sw2L3L8",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/4fd48beb-a08c-4f7f-85b7-432f4a36c3b5/1762639488185-traq9d-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzRmZDQ4YmViLWEwOGMtNGY3Zi04NWI3LTQzMmY0YTM2YzNiNS8xNzYyNjM5NDg4MTg1LXRyYXE5ZC1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMiwiZXhwIjoxNzY0MjQxNTMyfQ.eatsLx753NAgva2-bx2gjeF_sjUOiM4homa7WW0H3rE"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 7,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T03:11:53.866776+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "2abe08fd-5338-46dd-b9a1-52c11540000d",
+      "title": "New Beginnings",
+      "year": 1960,
+      "storyDate": null,
+      "transcript": "I remember that hand-painted sign out front and the glue smell that lived in the classroom. My socks were too high, and my lunchbox smelled like peanut butter. I wanted to bolt.\n\nMrs. Harris crouched to my height and said, “Everyone here is new at something today.” That helped. I sat, hands sweaty on the desk, and counted to sixty more than once. If I am honest, I was not brave. I just stayed.\n\nBy pick-up time, I was the same kid, only a little taller on the inside. Smells, sounds, white glue, floor wax, and the metal lunchbox latch lingered in my memory.",
+      "wisdomText": "When facing new situations, take deep breaths and remind yourself everyone begins as a beginner.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1761933910380-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzYxOTMzOTEwMzgwLXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzYsImV4cCI6MTc2NDI0MTUzNn0.G3YG1bGMkScZeVKySv8uFXmu4OVE_c_51X4MyrFQF3s",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1759544058888-1lo8kr6xa",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/2abe08fd-5338-46dd-b9a1-52c11540000d/1759544058090-8cjq4qxb8w.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/2abe08fd-5338-46dd-b9a1-52c11540000d/1759544058090-8cjq4qxb8w.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/2abe08fd-5338-46dd-b9a1-52c11540000d/1762639532694-0bqw3b-master.webp",
+          "displayPath": "photo/migrated/2abe08fd-5338-46dd-b9a1-52c11540000d/1762639532694-0bqw3b-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/2abe08fd-5338-46dd-b9a1-52c11540000d/1762639532694-0bqw3b-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzJhYmUwOGZkLTUzMzgtNDZkZC1iOWExLTUyYzExNTQwMDAwZC8xNzYyNjM5NTMyNjk0LTBicXczYi1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzIsImV4cCI6MTc2NDI0MTUzMn0.tJUXbfKwakw5ab6aSJLSMnz55odjVTOhFCZxSYcnxf0",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/2abe08fd-5338-46dd-b9a1-52c11540000d/1762639532694-0bqw3b-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzJhYmUwOGZkLTUzMzgtNDZkZC1iOWExLTUyYzExNTQwMDAwZC8xNzYyNjM5NTMyNjk0LTBicXczYi1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMiwiZXhwIjoxNzY0MjQxNTMyfQ.q4Lu6rIAqzXY25YYUXwv5U_tbY1L3XjVpjIuwMjDiJw"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 5,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T02:14:16.329186+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "572f0d37-bb9d-4d69-afee-615d26fd88de",
+      "title": "My Earliest Memory",
+      "year": 1959,
+      "storyDate": null,
+      "transcript": "I can still feel the wobble of those first pedals. My little legs were pumping, but balance was a mystery I hadn't solved yet. Dad's hand was firm on the back of the seat, steadying me as we rolled down that tree-lined path. He kept saying, \"You've got it. Just keep going.\" And I wanted so badly to believe him. The world around me, Mom with the stroller, the parked cars, the shade of those old trees blurred into the background. All I could think about was not tipping over.\n\nAnd then there was this mix of fear and freedom, the kind you only feel once in life, when the ground looks a little too close and the future looks a little too big. I don't remember how long Dad held on before he let go. What I do remember is his laugh, that proud, half-nervous chuckle, and the look on his face when I glanced back. It wasn't just about riding a bike. It was the first time I felt him teaching me something bigger, that even when he wasn't holding on, I'd still be okay.",
+      "wisdomText": "In life, as with learning to ride a bike, the true test of courage isn't in avoiding the fall but in trusting that we have the strength to get back up and keep going, even when those who guide us let go.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759726007592-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NzI2MDA3NTkyLXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzcsImV4cCI6MTc2NDI0MTUzN30.5RV7HNdb83oSINEFpl4y6MF0tOupc_y-0Na15fedh_s",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1759543901770-o8e8h669l",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/572f0d37-bb9d-4d69-afee-615d26fd88de/1759543900754-to0ga764nef.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/572f0d37-bb9d-4d69-afee-615d26fd88de/1759543900754-to0ga764nef.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/572f0d37-bb9d-4d69-afee-615d26fd88de/1762639522804-98fo3l-master.webp",
+          "displayPath": "photo/migrated/572f0d37-bb9d-4d69-afee-615d26fd88de/1762639522804-98fo3l-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/572f0d37-bb9d-4d69-afee-615d26fd88de/1762639522804-98fo3l-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzU3MmYwZDM3LWJiOWQtNGQ2OS1hZmVlLTYxNWQyNmZkODhkZS8xNzYyNjM5NTIyODA0LTk4Zm8zbC1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzIsImV4cCI6MTc2NDI0MTUzMn0.sTFTLKsyh8CgocCPRF95KK-sgM73XJa9fuH7uaAXN3s",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/572f0d37-bb9d-4d69-afee-615d26fd88de/1762639522804-98fo3l-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzU3MmYwZDM3LWJiOWQtNGQ2OS1hZmVlLTYxNWQyNmZkODhkZS8xNzYyNjM5NTIyODA0LTk4Zm8zbC1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMiwiZXhwIjoxNzY0MjQxNTMyfQ.-MXOsAKECO6mCwYj8ecWsvuvtv5ySiTpImcoHS-ukVQ"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 4,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T02:11:39.373963+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "41df6334-b869-4689-9481-96aa9caec551",
+      "title": "My Hero",
+      "year": 1958,
+      "storyDate": null,
+      "transcript": "When I think back to being little, one memory always stands taller than the rest. Dad in his uniform, kneeling down to my level, listening like I was the most important person in the world. I was only three, holding a toy fire truck, but to me, he was larger than life. A real hero. He didn't just fight fires. He carried himself with quiet strength and steady patience. I remember tracing the patch on his sleeve with my eyes, thinking it was the same as Superman's cape.\n\nThat day, sitting in our living room with his helmet resting on the table, I realized I wanted to grow up to be like him. Brave. Dependable. Someone others could count on.\n\nLooking back, it wasn't the badge or the helmet that made him my hero. It was the way he looked at me, as if who I was becoming mattered just as much as who he already was.",
+      "wisdomText": "True heroism lies not in the grandeur of our deeds but in the depth of our presence and the steadiness of our patience with the ones we love.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759726049320-recording.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NzI2MDQ5MzIwLXJlY29yZGluZy5tcDMiLCJpYXQiOjE3NjM2MzY3MzcsImV4cCI6MTc2NDI0MTUzN30.nL9m6NVwu2UeNwhzIQzYIr7diR16kZqJPVy4j13EAxA",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1759543796474-xf3t9adk9",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/41df6334-b869-4689-9481-96aa9caec551/1759543795519-hxlrp5vbxvp.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/41df6334-b869-4689-9481-96aa9caec551/1759543795519-hxlrp5vbxvp.webp",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/41df6334-b869-4689-9481-96aa9caec551/1762639531099-dtveqa-master.webp",
+          "displayPath": "photo/migrated/41df6334-b869-4689-9481-96aa9caec551/1762639531099-dtveqa-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/41df6334-b869-4689-9481-96aa9caec551/1762639531099-dtveqa-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzQxZGY2MzM0LWI4NjktNDY4OS05NDgxLTk2YWE5Y2FlYzU1MS8xNzYyNjM5NTMxMDk5LWR0dmVxYS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzIsImV4cCI6MTc2NDI0MTUzMn0.Z0CFMl4ysSJ2AMVf3bv6FS7A6aKpM4WsJjBBJ5Q12QI",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/41df6334-b869-4689-9481-96aa9caec551/1762639531099-dtveqa-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzQxZGY2MzM0LWI4NjktNDY4OS05NDgxLTk2YWE5Y2FlYzU1MS8xNzYyNjM5NTMxMDk5LWR0dmVxYS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMiwiZXhwIjoxNzY0MjQxNTMyfQ.cZkbQ7j4OwGlDTgt_V3i00KqWf8Wx86LK_uNg4ZUuMY"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 3,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T02:09:53.947827+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "1490c4f5-b86e-4801-8959-4411ccf98feb",
+      "title": "The Beginning",
+      "year": 1955,
+      "storyDate": null,
+      "transcript": "I do not remember it firsthand, of course, but I have heard it enough to picture it. July heat, a box fan ticking in the window. Dad said I came in loud, then went quiet like I had finished a job. Mom swore one eye stayed half open, as if I was already keeping watch. Someone laughed, someone cried, and the room softened.\n\nIf I am honest, that is how a lot of life went for me. Noise, then relief, then a plan. I was the first kid, which meant I was the experiment and the hope at the same time.",
+      "wisdomText": "In the symphony of life, embracing the cycles of challenge and calm, noise and silence, teaches us resilience and the value of vigilance, always ready to face what comes next with courage.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759539760142-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTM5NzYwMTQyLXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM3LCJleHAiOjE3NjQyNDE1Mzd9._kGSwOZRYsVnrxyQgEdKMnoOh7_zk9nNgn_gfnzoeRk",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1759539762650-hcm8d66fa",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/1490c4f5-b86e-4801-8959-4411ccf98feb/1759539761275-gg5jld6co0e.webp",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/1490c4f5-b86e-4801-8959-4411ccf98feb/1759539761275-gg5jld6co0e.webp",
+          "transform": {
+            "zoom": 1.1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/1490c4f5-b86e-4801-8959-4411ccf98feb/1762639501116-fnsbxe-master.webp",
+          "displayPath": "photo/migrated/1490c4f5-b86e-4801-8959-4411ccf98feb/1762639501116-fnsbxe-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/1490c4f5-b86e-4801-8959-4411ccf98feb/1762639501116-fnsbxe-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzE0OTBjNGY1LWI4NmUtNDgwMS04OTU5LTQ0MTFjY2Y5OGZlYi8xNzYyNjM5NTAxMTE2LWZuc2J4ZS1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzIsImV4cCI6MTc2NDI0MTUzMn0.H9VrFac4SkvJEinsY4Pq8doVQBgK5z2Fa9-TBqYb5rQ",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/1490c4f5-b86e-4801-8959-4411ccf98feb/1762639501116-fnsbxe-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkLzE0OTBjNGY1LWI4NmUtNDgwMS04OTU5LTQ0MTFjY2Y5OGZlYi8xNzYyNjM5NTAxMTE2LWZuc2J4ZS1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMiwiZXhwIjoxNzY0MjQxNTMyfQ.sSAfkosfga-YnjLIsb08Kzk4JRlRSJ1Ivk81GeIIYYM"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T01:02:39.038698+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    },
+    {
+      "id": "d5e1d382-6f52-40c0-95ba-e1ef61bd73dd",
+      "title": "Taste of Responsibility",
+      "year": 1962,
+      "storyDate": null,
+      "transcript": "I can picture the moment vividly. The box was breathing on the floral couch. I lifted the lid and a golden face popped up. He climbed my shirt and licked my ear like he was notarizing me. Every name I'd practiced vanished. \"You're mine\" was all I had.\n\nMom slid over the contract. Before school walks, after school feeding, winter counts as weather. I signed. He ate the pen. He celebrated with a tiny sprinkle shaped like Ohio.\n\nWe tried names, Duke, Rocket, Mr. President. He chewed the list and answered to Chewy. Then he napped on my shoe, breathing like a small accordion and smelling like corn chips and hope. That's how I learned responsibility in kid language. Keep your shoe still so someone small can trust it. We snapped the couch photo. People see a boy and his dog. I see the day I got housebroken by love.",
+      "wisdomText": "In the unexpected moments of joy, like a puppy's unconditional affection, we learn the profound lessons of responsibility and love—keep your heart open and your foundation steady, so those who depend on you find trust and comfort.",
+      "audioUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/audio/38ad3036-e423-4e41-a3f3-020664a1ee0e/1759537137957-recording.webm?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL2F1ZGlvLzM4YWQzMDM2LWU0MjMtNGU0MS1hM2YzLTAyMDY2NGExZWUwZS8xNzU5NTM3MTM3OTU3LXJlY29yZGluZy53ZWJtIiwiaWF0IjoxNzYzNjM2NzM3LCJleHAiOjE3NjQyNDE1Mzd9.pKZiwDj9oXfQhuOAWyKwRise4vchz7X390gGJZVkyiE",
+      "durationSeconds": 30,
+      "photos": [
+        {
+          "id": "photo-1760395051075-pjzgf2ess",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1760395050158-5g0qqgw2do5.png",
+          "isHero": false,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1760395050158-5g0qqgw2do5.png",
+          "transform": {
+            "zoom": 1.2,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639509365-q7u91b-master.webp",
+          "displayPath": "photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639509365-q7u91b-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639509365-q7u91b-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2Q1ZTFkMzgyLTZmNTItNDBjMC05NWJhLWUxZWY2MWJkNzNkZC8xNzYyNjM5NTA5MzY1LXE3dTkxYi1kaXNwbGF5LndlYnAiLCJpYXQiOjE3NjM2MzY3MzMsImV4cCI6MTc2NDI0MTUzM30.0NNi7pKRSJEpx8RWr1rNnBkvA9ASqxg1DdsuzOZEtag",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639509365-q7u91b-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2Q1ZTFkMzgyLTZmNTItNDBjMC05NWJhLWUxZWY2MWJkNzNkZC8xNzYyNjM5NTA5MzY1LXE3dTkxYi1tYXN0ZXIud2VicCIsImlhdCI6MTc2MzYzNjczMywiZXhwIjoxNzY0MjQxNTMzfQ.Zi2kDf0O2EI2-RwmYSZsJHq3xthQ7Cncps1NMli0oEU"
+        },
+        {
+          "id": "photo-1760395052255-opb8uvs15",
+          "url": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1760395051407-3sm8qf7csoh.png",
+          "isHero": true,
+          "caption": "",
+          "filePath": "photo/38ad3036-e423-4e41-a3f3-020664a1ee0e/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1760395051407-3sm8qf7csoh.png",
+          "transform": {
+            "zoom": 1,
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "masterPath": "photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639510481-zshno-master.webp",
+          "displayPath": "photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639510481-zshno-display.webp",
+          "displayUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639510481-zshno-display.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2Q1ZTFkMzgyLTZmNTItNDBjMC05NWJhLWUxZWY2MWJkNzNkZC8xNzYyNjM5NTEwNDgxLXpzaG5vLWRpc3BsYXkud2VicCIsImlhdCI6MTc2MzYzNjczMywiZXhwIjoxNzY0MjQxNTMzfQ.DQWHML-g4hOY1KpxhR2-YwPhd0vhspDA8ouoG5PhiXg",
+          "masterUrl": "https://tjycibrhoammxohemyhq.supabase.co/storage/v1/object/sign/heritage-whisper-files/photo/migrated/d5e1d382-6f52-40c0-95ba-e1ef61bd73dd/1762639510481-zshno-master.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9hY2FhZThlNS04MjRlLTQ1NmMtOTJhZS0yMjFjZDdhM2M5NDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoZXJpdGFnZS13aGlzcGVyLWZpbGVzL3Bob3RvL21pZ3JhdGVkL2Q1ZTFkMzgyLTZmNTItNDBjMC05NWJhLWUxZWY2MWJkNzNkZC8xNzYyNjM5NTEwNDgxLXpzaG5vLW1hc3Rlci53ZWJwIiwiaWF0IjoxNzYzNjM2NzMzLCJleHAiOjE3NjQyNDE1MzN9.fYsLmbl-qzQCeXYC7bDPHXVPxTMD0cshTXxi5mqtDIQ"
+        }
+      ],
+      "includeInBook": true,
+      "includeInTimeline": true,
+      "isFavorite": false,
+      "metadata": {
+        "life_age": 7,
+        "is_favorite": false,
+        "include_in_book": true,
+        "include_in_timeline": true
+      },
+      "createdAt": "2025-10-04T00:18:57.680742+00:00",
+      "updatedAt": "2025-11-20T09:18:34.728204+00:00"
+    }
+  ],
+  "treasures": [
+    {
+      "id": "dc71f662-9c95-46cd-a7a2-01dba7d4c760",
+      "title": "Nana's Apple Pie",
+      "description": "88",
+      "year": null,
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "createdAt": "2025-11-20T10:39:17.16865"
+    },
+    {
+      "id": "70c7ea9e-f15f-40fc-a546-7ac11c6c12f8",
+      "title": "Nana's Apple Pie",
+      "description": null,
+      "year": null,
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "createdAt": "2025-11-20T09:04:30.975897"
+    },
+    {
+      "id": "aeb24dbc-eb15-4fa2-8d96-0748f391c15f",
+      "title": "Dad's Karate Gi",
+      "description": null,
+      "year": 1972,
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "createdAt": "2025-11-10T03:32:10.386445"
+    },
+    {
+      "id": "538dd008-4e14-4325-b6b0-ad448d55fe7e",
+      "title": "Dad's Wooden Racer",
+      "description": null,
+      "year": null,
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "createdAt": "2025-11-09T02:35:27.657191"
+    },
+    {
+      "id": "71bb4718-901e-4716-9a1f-823479c96735",
+      "title": "Senior Year Varsity Jacket",
+      "description": null,
+      "year": 1972,
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "createdAt": "2025-11-09T02:35:00.980503"
+    },
+    {
+      "id": "ae4773b4-2c19-4f8c-82d7-40c2d1292d5d",
+      "title": "My Childhood Companion",
+      "description": null,
+      "year": 1980,
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "createdAt": "2025-11-09T02:34:31.003164"
+    },
+    {
+      "id": "662b9cc1-0f25-4524-b3fb-b3187ed2e043",
+      "title": "Our First Frontdoor",
+      "description": null,
+      "year": null,
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "createdAt": "2025-11-09T02:33:18.74838"
+    },
+    {
+      "id": "83c9151b-9b79-44de-8e5d-5ffd9dfb18b6",
+      "title": "County Fair Ticket",
+      "description": null,
+      "year": 1982,
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "createdAt": "2025-11-09T02:32:05.765684"
+    },
+    {
+      "id": "1ba34d19-b3ac-42d4-a0ba-f1c47cd1bfc6",
+      "title": "Dad's Dog Tags",
+      "description": null,
+      "year": null,
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "createdAt": "2025-11-09T02:31:19.761366"
+    },
+    {
+      "id": "98d3ddbc-099c-405e-be62-64f9aa3c3209",
+      "title": "Pressed Daisies Bookmark",
+      "description": null,
+      "year": 2015,
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "createdAt": "2025-11-09T02:30:47.410796"
+    },
+    {
+      "id": "e13b282e-a29c-4172-a796-7a41dd7abb80",
+      "title": "Little League Mitt, 1972",
+      "description": null,
+      "year": 1972,
+      "transform": {
+        "zoom": 1,
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "createdAt": "2025-11-09T02:30:05.325653"
+    },
+    {
+      "id": "2cd811df-6f41-464b-9500-43f53e0834ce",
+      "title": "First Record Purchase",
+      "description": null,
+      "year": 1975,
+      "transform": null,
+      "createdAt": "2025-11-09T02:17:13.942544"
+    }
+  ],
+  "stats": {
+    "totalStories": 41,
+    "totalTreasures": 12,
+    "storiesWithAudio": 41,
+    "storiesWithPhotos": 41,
+    "storiesWithWisdom": 35
+  }
+}
