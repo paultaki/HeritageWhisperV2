@@ -64,17 +64,6 @@ export function StoryPhotoWithBlurExtend({
    */
   const isPortrait = width && height ? height / width > 1.15 : false;
 
-  // DEBUG: Log portrait detection
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[StoryPhotoWithBlurExtend] Portrait detection:', {
-      src: src.substring(0, 50) + '...',
-      width,
-      height,
-      ratio: width && height ? (height / width).toFixed(2) : 'N/A',
-      isPortrait,
-    });
-  }
-
   /**
    * Transform Logic:
    * - For PORTRAIT images: IGNORE transforms (show original with blur-extend)

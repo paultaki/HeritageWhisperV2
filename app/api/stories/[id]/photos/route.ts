@@ -161,7 +161,7 @@ export async function POST(
     // Get the story from Supabase database to verify ownership and get current photos
     const { data: story, error: fetchError } = await supabaseAdmin
       .from("stories")
-      .select("metadata, user_id")
+      .select("photos, user_id")
       .eq("id", id)
       .eq("user_id", user.id)
       .single();

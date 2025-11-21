@@ -7,10 +7,10 @@ import { IconMic, IconBookOpen, IconHeart, IconShare, IconPlay, IconCheck, IconL
 // --- Placeholder Image Constants ---
 // Mapping to actual screenshots from /public folder
 const IMAGES = {
-  timelineSmall: "/timeline-small.webp", // Small static image for hero
+  timelineSmall: "/timeline-hero.webp", // Vertical hero image
   timelineFull: "/timeline.webp", // Full scrolling image for feature section
   book: "/book full.webp",
-  memoryBox: "/treasurebox.webp",
+  memoryBox: "/memory-box.webp",
   pocketwatch: "/pocketwatch.png",
   family: "https://picsum.photos/seed/family/1200/800",
   senior: "https://picsum.photos/seed/grandma/200/200",
@@ -69,41 +69,63 @@ const Hero = () => (
       </div>
 
       {/* Product Gallery Composite */}
-      <div className="relative mt-12 max-w-5xl mx-auto">
+      <div className="relative mt-12 max-w-7xl mx-auto">
         {/* Background decorative elements */}
         <div className="absolute -inset-4 bg-gradient-to-b from-cream-200/0 to-cream-200/50 rounded-[3rem] -z-10"></div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
 
-          {/* Left Card: Memory Box */}
-          <div className="transform transition-transform hover:-translate-y-2 duration-500">
-            <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200">
-              <img src={IMAGES.memoryBox} alt="Memory Box Interface" className="w-full h-auto rounded-lg bg-gray-100" />
-              <div className="p-3 text-center">
-                <h3 className="font-serif text-navy-900 font-bold text-center">Memory Box</h3>
-                <p className="text-xs text-navy-800/60 mt-1 text-center">Keepsakes &amp; loose photos</p>
+          {/* Left Card: Timeline (Vertical) */}
+          <div className="md:col-span-3 transform translate-y-0 md:translate-y-8 transition-transform hover:-translate-y-2 duration-500 relative group">
+            <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200 h-full">
+              <div className="relative overflow-hidden rounded-lg h-[320px] md:h-[420px] bg-cream-50">
+                {/* Object-top is crucial here for the long vertical timeline image */}
+                <img
+                  src={IMAGES.timelineSmall}
+                  alt="Timeline Interface"
+                  className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/40 pointer-events-none"></div>
+              </div>
+              <div className="px-3 py-1 absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur shadow-md rounded-lg border border-cream-100">
+                <h3 className="font-serif text-navy-900 font-bold text-sm text-center leading-none">The Timeline</h3>
+                <p className="text-xs text-navy-800/60 hidden xl:block text-center leading-none">Every story in order</p>
               </div>
             </div>
           </div>
 
-          {/* Center Card: Timeline */}
-          <div className="transform transition-transform hover:-translate-y-2 duration-500">
-            <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200">
-              <img src={IMAGES.timelineSmall} alt="Timeline Interface" className="w-full h-auto rounded-lg bg-gray-100" />
-              <div className="p-3 text-center">
-                <h3 className="font-serif text-navy-900 font-bold text-center">The Timeline</h3>
-                <p className="text-xs text-navy-800/60 mt-1 text-center">See every story in order</p>
+          {/* Center Card: Book View (Landscape/Wide) */}
+          <div className="md:col-span-6 z-20 transform transition-transform hover:scale-[1.02] duration-500">
+            <div className="bg-white p-3 rounded-2xl shadow-2xl border border-cream-200">
+              <div className="relative overflow-hidden rounded-xl bg-cream-50 aspect-[16/10]">
+                <img
+                  src={IMAGES.book}
+                  alt="Book View Interface"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="px-4 py-1.5 text-center border-t border-cream-100 mt-2">
+                <h3 className="font-serif text-xl text-navy-900 font-bold leading-tight">The Living Book</h3>
+                <p className="text-sm text-navy-800/60 text-center leading-tight">Grows automatically with every memory you share.</p>
               </div>
             </div>
           </div>
 
-          {/* Right Card: Book View */}
-          <div className="transform transition-transform hover:-translate-y-2 duration-500">
-            <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200">
-              <img src={IMAGES.book} alt="Book View Interface" className="w-full h-auto rounded-lg bg-gray-100" />
-              <div className="p-3 text-center">
-                <h3 className="font-serif text-navy-900 font-bold text-center">Living Book</h3>
-                <p className="text-xs text-navy-800/60 mt-1 text-center">Grows with every story</p>
+          {/* Right Card: Memory Box (Grid) */}
+          <div className="md:col-span-3 transform translate-y-0 md:translate-y-8 transition-transform hover:-translate-y-2 duration-500 relative group">
+            <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200 h-full">
+              <div className="relative overflow-hidden rounded-lg h-[320px] md:h-[420px] bg-cream-50">
+                <img
+                  src={IMAGES.memoryBox}
+                  alt="Memory Box Interface"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  style={{ objectPosition: 'center 10%' }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/40 pointer-events-none"></div>
+              </div>
+              <div className="px-3 py-1 absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur shadow-md rounded-lg border border-cream-100">
+                <h3 className="font-serif text-navy-900 font-bold text-sm text-center leading-none">Memory Box</h3>
+                <p className="text-xs text-navy-800/60 hidden xl:block text-center leading-none">Keepsakes & loose photos</p>
               </div>
             </div>
           </div>

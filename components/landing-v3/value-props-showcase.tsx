@@ -1,44 +1,18 @@
 'use client'
 
-import Image from 'next/image'
-import { useScrollFadeIn, fadeInClasses } from '@/lib/scroll-animations'
+// Fallback images (placeholder data URIs)
+const IMAGES = {
+  timeline: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600"%3E%3Crect fill="%23f5f5f4" width="400" height="600"/%3E%3C/svg%3E',
+  book: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000"%3E%3Crect fill="%23f5f5f4" width="1600" height="1000"/%3E%3C/svg%3E',
+  memoryBox: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600"%3E%3Crect fill="%23f5f5f4" width="400" height="600"/%3E%3C/svg%3E'
+};
 
 export default function ValuePropsShowcase() {
-  const features = [
-    {
-      badge: 'Timeline View',
-      title: 'Your Life in Beautiful Cards',
-      description: 'Every story becomes a moment on your timeline. Photos, voice, and wisdom extracted by our Storyteller. Scroll through decades in seconds.',
-      image: '/timeline.webp',
-      imageAlt: 'Timeline view showing story cards',
-      isScrolling: true,
-      imagePosition: 'left'
-    },
-    {
-      badge: 'Book View',
-      title: 'A Digital Book That Never Ends',
-      description: 'Beautiful dual-page layout for reading. But unlike printed books, add new chapters forever. Your grandkids read it on their phones.',
-      image: '/book full.webp',
-      imageAlt: 'Book view with dual-page layout',
-      isScrolling: false,
-      imagePosition: 'right'
-    },
-    {
-      badge: 'Memory Box',
-      title: 'More Than Stories',
-      description: 'Store recipes, heirlooms, keepsakes. One place for everything you want to pass down. Not just stories – treasures.',
-      image: '/treasurebox.webp?v=2',
-      imageAlt: 'Memory Box interface showing recipes, photos, and keepsakes',
-      isScrolling: false,
-      imagePosition: 'left'
-    }
-  ]
-
   return (
     <section className="py-16 md:py-24 px-6 md:px-12 bg-heritage-warm-paper">
-      <div className="max-w-7xl mx-auto space-y-24">
+      <div className="max-w-7xl mx-auto">
         {/* Section header */}
-        <div className="text-center">
+        <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/80 backdrop-blur-sm rounded-full border border-heritage-deep-slate/10 shadow-sm mb-6">
             <span className="text-sm font-semibold text-heritage-deep-slate tracking-wide">Premium Experience</span>
           </div>
@@ -47,73 +21,73 @@ export default function ValuePropsShowcase() {
           </h2>
         </div>
 
-        {/* Features */}
-        {features.map((feature, index) => {
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const { ref, isVisible } = useScrollFadeIn(0.2, index * 100)
+        {/* Product Gallery Composite */}
+        <div className="relative mt-12 max-w-7xl mx-auto">
+          {/* Background decorative elements */}
+          <div className="absolute -inset-4 bg-gradient-to-b from-heritage-warm-paper/0 to-heritage-warm-paper/50 rounded-[3rem] -z-10"></div>
 
-          return (
-          <div
-            key={index}
-            ref={ref}
-            className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${
-              feature.imagePosition === 'right' ? 'lg:flex-row-reverse' : ''
-            } ${fadeInClasses.initial} ${isVisible ? fadeInClasses.animate : ''}`}
-          >
-            {/* Copy */}
-            <div className={`space-y-6 ${feature.imagePosition === 'right' ? 'lg:order-2' : 'lg:order-1'}`}>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-heritage-deep-slate/5 rounded-full border border-heritage-deep-slate/20 transition-all duration-300 hover:bg-heritage-deep-slate/10">
-                <span className="text-sm font-semibold text-heritage-deep-slate tracking-wide">{feature.badge}</span>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+
+            {/* Left Card: Timeline (Vertical) */}
+            <div className="md:col-span-3 transform translate-y-0 md:translate-y-8 transition-transform hover:-translate-y-2 duration-500 relative group">
+              <div className="bg-white p-2 rounded-xl shadow-xl border border-heritage-deep-slate/10 h-full">
+                <div className="relative overflow-hidden rounded-lg h-[320px] md:h-[420px] bg-heritage-warm-paper">
+                  {/* Object-top is crucial here for the long vertical timeline image */}
+                  <img
+                    src="/images/timeline-hero.webp"
+                    alt="Timeline Interface"
+                    className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                    onError={(e) => e.currentTarget.src = IMAGES.timeline}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10 pointer-events-none"></div>
+                </div>
+                <div className="p-3 text-center absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur shadow-md rounded-lg border border-heritage-deep-slate/5">
+                  <h3 className="font-serif text-heritage-text-primary font-bold text-sm">The Timeline</h3>
+                  <p className="text-xs text-heritage-text-primary/60 hidden xl:block">Every story in order</p>
+                </div>
               </div>
-
-              <h3 className="text-3xl md:text-4xl font-bold text-heritage-text-primary leading-tight">
-                {feature.title}
-              </h3>
-
-              <p className="text-lg md:text-xl text-heritage-text-primary/70 leading-relaxed">
-                {feature.description}
-              </p>
             </div>
 
-            {/* Image */}
-            <div className={`${feature.imagePosition === 'right' ? 'lg:order-1' : 'lg:order-2'}`}>
-              {feature.image ? (
-                <div className={`relative rounded-2xl overflow-hidden shadow-lg border border-heritage-deep-slate/10 bg-white transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] group ${feature.isScrolling ? 'h-[500px]' : ''}`}>
-                  <Image
-                    src={feature.image}
-                    alt={feature.imageAlt || ''}
-                    width={600}
-                    height={feature.isScrolling ? 800 : 600}
-                    quality={100}
-                    className={`w-full ${feature.isScrolling ? 'animate-scroll-slow' : 'h-auto transition-transform duration-500 group-hover:scale-105'}`}
+            {/* Center Card: Book View (Landscape/Wide) */}
+            <div className="md:col-span-6 z-20 transform transition-transform hover:scale-[1.02] duration-500">
+              <div className="bg-white p-3 rounded-2xl shadow-2xl border border-heritage-deep-slate/10">
+                <div className="relative overflow-hidden rounded-xl bg-heritage-warm-paper aspect-[16/10]">
+                  <img
+                    src="/images/book-view.png"
+                    alt="Book View Interface"
+                    className="w-full h-full object-cover"
+                    onError={(e) => e.currentTarget.src = IMAGES.book}
                   />
                 </div>
-              ) : (
-                <div className="aspect-[4/3] bg-gradient-to-br from-stone-200 to-stone-300 rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center border border-stone-300 p-8">
-                  <p className="text-gray-600 text-lg font-medium text-center">
-                    {feature.description}
-                  </p>
+                <div className="p-4 text-center border-t border-heritage-deep-slate/5 mt-2">
+                  <h3 className="font-serif text-xl text-heritage-text-primary font-bold">The Living Book</h3>
+                  <p className="text-sm text-heritage-text-primary/60 mt-1">Grows automatically with every memory you share.</p>
                 </div>
-              )}
+              </div>
             </div>
+
+            {/* Right Card: Memory Box (Grid) */}
+            <div className="md:col-span-3 transform translate-y-0 md:translate-y-8 transition-transform hover:-translate-y-2 duration-500 relative group">
+              <div className="bg-white p-2 rounded-xl shadow-xl border border-heritage-deep-slate/10 h-full">
+                <div className="relative overflow-hidden rounded-lg h-[320px] md:h-[420px] bg-heritage-warm-paper">
+                  <img
+                    src="/images/memory-box.webp"
+                    alt="Memory Box Interface"
+                    className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                    onError={(e) => e.currentTarget.src = IMAGES.memoryBox}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10 pointer-events-none"></div>
+                </div>
+                <div className="p-3 text-center absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur shadow-md rounded-lg border border-heritage-deep-slate/5">
+                  <h3 className="font-serif text-heritage-text-primary font-bold text-sm">Memory Box</h3>
+                  <p className="text-xs text-heritage-text-primary/60 hidden xl:block">Keepsakes & loose photos</p>
+                </div>
+              </div>
+            </div>
+
           </div>
-        )})}
+        </div>
       </div>
-
-      <style jsx>{`
-        @keyframes scroll-slow {
-          0% {
-            transform: translateY(0);
-          }
-          100% {
-            transform: translateY(-70%);
-          }
-        }
-
-        :global(.animate-scroll-slow) {
-          animation: scroll-slow 20s ease-in-out infinite alternate;
-        }
-      `}</style>
     </section>
   )
 }

@@ -135,7 +135,6 @@ export function TreasureCard({
             className="hidden"
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageError(true)}
-            loading="lazy"
           />
         )}
 

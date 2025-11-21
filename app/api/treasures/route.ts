@@ -134,17 +134,40 @@ export async function GET(request: NextRequest) {
 
         // Generate signed URLs for new dual-path treasures
         if (treasure.master_path && !treasure.master_path.startsWith("http")) {
-          const { data: masterSignedData } = await supabaseAdmin.storage
+          const { data: masterSignedData, error: masterError } = await supabaseAdmin.storage
             .from("heritage-whisper-files")
             .createSignedUrl(treasure.master_path, 3600); // 1 hour expiry
+
+          if (masterError) {
+            console.error(`[Treasures API] Failed to generate master signed URL:`, masterError);
+          }
           masterUrl = masterSignedData?.signedUrl || treasure.master_path;
         }
 
         if (treasure.display_path && !treasure.display_path.startsWith("http")) {
-          const { data: displaySignedData } = await supabaseAdmin.storage
+          const { data: displaySignedData, error: displayError } = await supabaseAdmin.storage
             .from("heritage-whisper-files")
             .createSignedUrl(treasure.display_path, 3600);
+
+          if (displayError) {
+            console.error(`[Treasures API] Failed to generate display signed URL:`, displayError);
+          }
           displayUrl = displaySignedData?.signedUrl || treasure.display_path;
+        }
+
+        // Backward compatibility: Generate signed URL for old image_url field
+        let legacyImageUrl = treasure.image_url;
+        if (!displayUrl && treasure.image_url && !treasure.image_url.startsWith("http")) {
+          const { data: legacySignedData, error: signError } = await supabaseAdmin.storage
+            .from("heritage-whisper-files")
+            .createSignedUrl(treasure.image_url, 3600);
+
+          if (signError) {
+            console.error(`[Treasures API] Failed to generate signed URL:`, signError);
+          }
+          legacyImageUrl = legacySignedData?.signedUrl || treasure.image_url;
+          // Use legacy URL as displayUrl for old treasures
+          displayUrl = legacyImageUrl;
         }
 
         return {
@@ -163,8 +186,8 @@ export async function GET(request: NextRequest) {
           imageHeight: treasure.image_height,
           transform: treasure.transform,
           // DEPRECATED (backward compatibility):
-          imageUrl: displayUrl || treasure.image_url,
-          thumbnailUrl: displayUrl || treasure.thumbnail_url,
+          imageUrl: displayUrl || legacyImageUrl,
+          thumbnailUrl: displayUrl || legacyImageUrl,
           isFavorite: treasure.is_favorite,
           linkedStoryId: treasure.linked_story_id,
           createdAt: treasure.created_at,
