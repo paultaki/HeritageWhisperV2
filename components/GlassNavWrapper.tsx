@@ -22,7 +22,7 @@ export default function GlassNavWrapper() {
   // Timeline, recording, memory box, prompts have light backgrounds → use dark ink
   const defaultInk =
     pathname.startsWith('/book') ||
-    pathname.startsWith('/story')
+      pathname.startsWith('/story')
       ? 'light'
       : 'dark';
 
@@ -39,9 +39,10 @@ export default function GlassNavWrapper() {
   const isInterviewChat = pathname === '/interview-chat';
   const isAuthPage = pathname.startsWith('/auth');
   const isRecordingPage = pathname.startsWith('/recording');
+  const isReviewPage = pathname.startsWith('/review/book-style');
 
   // Don't show glass nav on these pages
-  if (isLandingPage || isInterviewChat || isAuthPage || isRecordingPage) {
+  if (isLandingPage || isInterviewChat || isAuthPage || isRecordingPage || isReviewPage) {
     return null;
   }
 

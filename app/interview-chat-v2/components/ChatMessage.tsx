@@ -29,22 +29,26 @@ export function ChatMessage({ message }: ChatMessageProps) {
       <div className="flex justify-start">
         <div className="max-w-[75%]">
           {/* Sender label */}
-          <div className="mb-1 px-3 text-xs font-medium">
-            <span className="shimmer-text">Pearl</span>
+          <div className="mb-1 px-3 text-xs font-medium flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xs font-bold">
+              G
+            </div>
+            <span className="text-amber-900/60 font-serif italic">Grandchild</span>
           </div>
           {/* Bubble */}
           <div
-            className="px-5 py-3 rounded-3xl rounded-tl-sm bg-white shadow-md"
+            className="px-6 py-4 rounded-3xl rounded-tl-none bg-[#fffdf5] border border-amber-100/50 shadow-sm"
             style={{
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              boxShadow: '0 4px 12px rgba(251, 191, 36, 0.05)',
             }}
           >
             <p
-              className="text-base leading-relaxed"
+              className="leading-relaxed"
               style={{
                 fontFamily: 'var(--font-serif)',
-                color: '#1f0f08',
-                fontSize: '19px',
+                color: '#2d1810',
+                fontSize: '22px', // Larger for seniors
+                lineHeight: '1.5',
               }}
             >
               {message.content}

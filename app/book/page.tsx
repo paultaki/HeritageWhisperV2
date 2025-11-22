@@ -16,12 +16,14 @@ import DarkBookProgressBar from "./components/DarkBookProgressBar";
 import { BookPage as BookPageType } from "@/lib/bookPagination";
 import { ScrollIndicator } from "@/components/ScrollIndicators";
 import MobileBookViewV2 from "../book-new/components/MobileBookViewV2";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import "./book.css";
 
 // Import handwriting font
 import { Caveat } from "next/font/google";
 
-const caveat = Caveat({ 
+const caveat = Caveat({
   subsets: ["latin"],
   weight: ["400", "600"],
   display: "swap",
@@ -58,6 +60,14 @@ interface Story {
     questions?: Array<{ text: string }>;
   };
   createdAt: string;
+  chapterId?: string;
+  chapterOrderIndex?: number;
+}
+
+interface Chapter {
+  id: string;
+  title: string;
+  orderIndex: number;
 }
 
 function BookV4PageContent() {
@@ -69,7 +79,7 @@ function BookV4PageContent() {
 
   // Extract storyId from URL for deep linking (e.g., from timeline)
   const initialStoryId = searchParams?.get('storyId') || undefined;
-  
+
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
@@ -148,19 +158,19 @@ function BookV4PageContent() {
       console.warn(`[Book] Story "${s.title}" excluded: includeInBook is ${s.includeInBook}`);
       return false;
     }
-    
+
     // Must have a year (can't sort without it)
     if (!s.storyYear) {
       console.warn(`[Book] Story "${s.title}" excluded: missing storyYear`);
       return false;
     }
-    
+
     // Must have transcription (nothing to display without it)
     if (!s.transcription) {
       console.warn(`[Book] Story "${s.title}" excluded: missing transcription`);
       return false;
     }
-    
+
     return true;
   });
 
@@ -172,7 +182,7 @@ function BookV4PageContent() {
 
   // Debug logging
   console.log('[Book] Loading states:', { isLoading, isFetching, hasData: !!data, storiesCount: stories.length, bookStoriesCount: bookStories.length, sortedStoriesCount: sortedStories.length });
-  
+
   // Debug logging for excluded stories
   if (stories.length !== bookStories.length) {
     const excludedStories = stories.filter(s => !bookStories.includes(s));
@@ -188,64 +198,126 @@ function BookV4PageContent() {
   // Group stories by decade
   const decadeGroups = useMemo(() => {
     const groups = new Map<string, Story[]>();
-    
+
     sortedStories.forEach((story) => {
       const year = story.storyYear;
       const decade = `${Math.floor(year / 10) * 10}s`;
-      
+
       if (!groups.has(decade)) {
         groups.set(decade, []);
       }
       groups.get(decade)!.push(story);
     });
-    
+
     return Array.from(groups.entries()).sort(([a], [b]) => parseInt(a) - parseInt(b));
   }, [sortedStories]);
 
-  // Create spreads - intro, TOC (2 pages), decade pages, then story pairs
+  const [viewMode, setViewMode] = useState<'chronological' | 'chapters'>('chronological');
+
+  const { data: chapters = [] } = useQuery<Chapter[]>({
+    queryKey: ["chapters", storytellerId],
+    queryFn: async () => {
+      const url = storytellerId
+        ? `${getApiUrl("/api/chapters")}?storyteller_id=${storytellerId}`
+        : getApiUrl("/api/chapters");
+      const res = await apiRequest("GET", url);
+      return res.json().then((d: any) => d.chapters);
+    },
+    enabled: !!user,
+  });
+
+  // Group stories by chapter
+  const chapterGroups = useMemo(() => {
+    if (viewMode !== 'chapters' || chapters.length === 0) return [];
+
+    const groups: { chapter: { id: string, title: string }, stories: Story[] }[] = [];
+
+    // Sort chapters by orderIndex
+    const sortedChapters = [...chapters].sort((a, b) => a.orderIndex - b.orderIndex);
+
+    sortedChapters.forEach(chapter => {
+      const chapterStories = sortedStories.filter(s => s.chapterId === chapter.id);
+      // Sort by chapterOrderIndex
+      chapterStories.sort((a, b) => (a.chapterOrderIndex || 0) - (b.chapterOrderIndex || 0));
+
+      if (chapterStories.length > 0) {
+        groups.push({ chapter, stories: chapterStories });
+      }
+    });
+
+    // Handle stories without chapters
+    const orphanedStories = sortedStories.filter(s => !s.chapterId);
+    if (orphanedStories.length > 0) {
+      groups.push({ chapter: { id: 'uncategorized', title: "Uncategorized" }, stories: orphanedStories });
+    }
+
+    return groups;
+  }, [sortedStories, chapters, viewMode]);
+
+  // Create spreads - intro, TOC (2 pages), decade/chapter pages, then story pairs
   const spreads = useMemo(() => {
-    const result: Array<{ 
-      left?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number }; 
+    const result: Array<{
+      left?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number };
       right?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number };
       type: 'intro' | 'toc' | 'decade' | 'stories';
     }> = [];
-    
+
     // First spread: endpaper left, intro right
     result.push({
       left: 'endpaper',
       right: 'intro',
       type: 'intro'
     });
-    
+
     // Second spread: table of contents across both pages
     result.push({
       left: 'toc-left',
       right: 'toc-right',
       type: 'toc'
     });
-    
-    // Add decade pages and stories for each decade
-    decadeGroups.forEach(([decade, stories]) => {
-      const decadeYear = decade.replace('s', '');
-      const decadePage = {
-        type: 'decade' as const,
-        decade,
-        title: `The ${decadeYear}s`,
+
+    // Choose groups based on viewMode
+    const groupsToRender = viewMode === 'chapters' ? chapterGroups : decadeGroups;
+
+    // Add group pages and stories
+    groupsToRender.forEach((group) => {
+      // Handle different group structures
+      let title: string;
+      let id: string;
+      let stories: Story[];
+
+      if (Array.isArray(group)) {
+        // Decade group: [string, Story[]]
+        id = group[0];
+        stories = group[1];
+        const decadeYear = id.replace('s', '');
+        title = `The ${decadeYear}s`;
+      } else {
+        // Chapter group: { chapter: { id, title }, stories: Story[] }
+        id = group.chapter.id;
+        title = group.chapter.title;
+        stories = group.stories;
+      }
+
+      const groupPage = {
+        type: 'decade' as const, // Reuse decade type for styling
+        decade: id,
+        title: title,
         count: stories.length
       };
-      
-      // Check if we need to add decade marker on left or right
+
+      // Check if we need to add marker on left or right
       const lastSpread = result[result.length - 1];
       const needsNewSpread = !lastSpread || (lastSpread.left && lastSpread.right);
-      
+
       if (needsNewSpread) {
-        // Create new spread with decade on left
+        // Create new spread with marker on left
         result.push({
-          left: decadePage,
+          left: groupPage,
           right: stories[0],
           type: 'stories'
         });
-        
+
         // Add remaining story spreads
         for (let i = 1; i < stories.length; i += 2) {
           result.push({
@@ -255,11 +327,11 @@ function BookV4PageContent() {
           });
         }
       } else {
-        // Fill the empty right slot with decade marker
-        lastSpread.right = decadePage;
+        // Fill the empty right slot with marker
+        lastSpread.right = groupPage;
         lastSpread.type = 'decade';
-        
-        // Add all story spreads for this decade
+
+        // Add all story spreads for this group
         for (let i = 0; i < stories.length; i += 2) {
           result.push({
             left: stories[i],
@@ -269,15 +341,15 @@ function BookV4PageContent() {
         }
       }
     });
-    
+
     return result;
-  }, [decadeGroups]);
+  }, [decadeGroups, chapterGroups, viewMode]);
 
   // Create book pages array for progress bar
   const bookPages: BookPageType[] = useMemo(() => {
     const pages: BookPageType[] = [];
     let pageNum = 1;
-    
+
     spreads.forEach((spread) => {
       // Left page
       if (spread.left) {
@@ -290,7 +362,7 @@ function BookV4PageContent() {
         } else {
           pageType = 'story-start';
         }
-        
+
         const leftPage: BookPageType = {
           pageNumber: pageNum++,
           type: pageType,
@@ -301,7 +373,7 @@ function BookV4PageContent() {
         };
         pages.push(leftPage);
       }
-      
+
       // Right page
       if (spread.right) {
         let pageType: 'intro' | 'table-of-contents' | 'decade-marker' | 'story-start' = 'intro';
@@ -313,7 +385,7 @@ function BookV4PageContent() {
         } else {
           pageType = 'story-start';
         }
-        
+
         const rightPage: BookPageType = {
           pageNumber: pageNum++,
           type: pageType,
@@ -325,25 +397,25 @@ function BookV4PageContent() {
         pages.push(rightPage);
       }
     });
-    
+
     return pages;
   }, [spreads]);
 
   // Create mobile pages array (intro + TOC + all stories)
   const mobilePages = useMemo(() => {
     const pages: Array<{ type: 'intro' | 'toc' | 'story'; story?: Story; index: number }> = [];
-    
+
     // Add intro page
     pages.push({ type: 'intro', index: 0 });
-    
+
     // Add TOC page
     pages.push({ type: 'toc', index: 1 });
-    
+
     // Add all story pages
     sortedStories.forEach((story, idx) => {
       pages.push({ type: 'story', story, index: idx + 2 });
     });
-    
+
     return pages;
   }, [sortedStories]);
 
@@ -385,7 +457,7 @@ function BookV4PageContent() {
   // Handle Timeline navigation with smart routing
   const handleTimelineClick = useCallback(() => {
     console.log('[Book] Timeline clicked. currentStoryId:', getCurrentStoryId());
-    
+
     const currentStoryId = getCurrentStoryId();
     if (currentStoryId) {
       const context = {
@@ -399,7 +471,7 @@ function BookV4PageContent() {
     } else {
       console.log('[Book] No current story ID - timeline will go to top');
     }
-    
+
     router.push('/timeline');
   }, [getCurrentStoryId, router]);
 
@@ -426,7 +498,7 @@ function BookV4PageContent() {
     if (flowRightRef.current) {
       flowRightRef.current.scrollTop = 0;
     }
-    
+
     // Stop all audio elements when navigating
     const audioElements = document.querySelectorAll('audio');
     audioElements.forEach(audio => {
@@ -461,22 +533,22 @@ function BookV4PageContent() {
   // Navigate to story from URL parameter (from timeline)
   useEffect(() => {
     if (hasNavigatedToStory || sortedStories.length === 0 || spreads.length === 0) return;
-    
+
     // Check for storyId in URL params
     const urlParams = new URLSearchParams(window.location.search);
     const storyId = urlParams.get('storyId');
-    
+
     if (storyId) {
       // Find the story index
       const storyIndex = sortedStories.findIndex(s => s.id === storyId);
-      
+
       if (storyIndex !== -1) {
         // Desktop: Find which spread contains this story
         let targetSpreadIndex = 0;
-        
+
         for (let i = 0; i < spreads.length; i++) {
           const spread = spreads[i];
-          
+
           // Check left page
           if (spread.left && typeof spread.left !== 'string' && !('type' in spread.left)) {
             if ((spread.left as Story).id === storyId) {
@@ -484,7 +556,7 @@ function BookV4PageContent() {
               break;
             }
           }
-          
+
           // Check right page
           if (spread.right && typeof spread.right !== 'string' && !('type' in spread.right)) {
             if ((spread.right as Story).id === storyId) {
@@ -493,17 +565,17 @@ function BookV4PageContent() {
             }
           }
         }
-        
+
         setCurrentSpreadIndex(targetSpreadIndex);
-        
+
         // Mobile: Navigate to story page (intro + toc + stories)
         setCurrentMobilePage(storyIndex + 2);
-        
+
         // Open the book automatically when navigating from timeline
         setIsBookOpen(true);
-        
+
         setHasNavigatedToStory(true);
-        
+
         // Clean up URL
         window.history.replaceState({}, '', '/book');
       }
@@ -551,13 +623,13 @@ function BookV4PageContent() {
     // For mobile: navigate to the story page directly
     // Mobile pages: 0=intro, 1=toc, 2+=stories
     setCurrentMobilePage(storyIndex + 2);
-    
+
     // For desktop: find which spread contains this story
     let currentStoryCount = 0;
-    
+
     for (let i = 0; i < spreads.length; i++) {
       const spread = spreads[i];
-      
+
       // Count stories in this spread
       let storiesInSpread = 0;
       if (spread.left && typeof spread.left !== 'string' && !('type' in spread.left)) {
@@ -566,13 +638,13 @@ function BookV4PageContent() {
       if (spread.right && typeof spread.right !== 'string' && !('type' in spread.right)) {
         storiesInSpread++;
       }
-      
+
       // Check if our target story is in this spread
       if (currentStoryCount + storiesInSpread > storyIndex) {
         setCurrentSpreadIndex(i);
         return;
       }
-      
+
       currentStoryCount += storiesInSpread;
     }
   };
@@ -603,245 +675,259 @@ function BookV4PageContent() {
         />
       </div>
 
+      {/* View Mode Toggle */}
+      {chapters.length > 0 && (
+        <div className="hidden lg:flex justify-center items-center gap-3 mb-4 pt-4 absolute top-20 left-1/2 -translate-x-1/2 z-50">
+          <Label htmlFor="view-mode" className={`text-sm font-medium cursor-pointer ${viewMode === 'chronological' ? 'text-white' : 'text-slate-400'}`}>Chronological</Label>
+          <Switch
+            id="view-mode"
+            checked={viewMode === 'chapters'}
+            onCheckedChange={(checked) => setViewMode(checked ? 'chapters' : 'chronological')}
+            className="data-[state=checked]:bg-[#d4af87]"
+          />
+          <Label htmlFor="view-mode" className={`text-sm font-medium cursor-pointer ${viewMode === 'chapters' ? 'text-[#d4af87]' : 'text-slate-400'}`}>Chapters</Label>
+        </div>
+      )}
+
       {/* Desktop: Book view with dual-page spread */}
       <div className={`hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
-      {/* ARIA live region for page announcements */}
-      <div
-        id="sr-live"
-        ref={liveRegionRef}
-        className="sr-only"
-        aria-live="polite"
-        aria-atomic="true"
-      ></div>
+        {/* ARIA live region for page announcements */}
+        <div
+          id="sr-live"
+          ref={liveRegionRef}
+          className="sr-only"
+          aria-live="polite"
+          aria-atomic="true"
+        ></div>
 
-      {/* Dark Book Progress Bar - hidden on mobile */}
-      <div className="hidden md:block">
-        <DarkBookProgressBar
-          pages={bookPages}
-          currentPage={currentSpreadIndex * 2}
-          totalPages={bookPages.length}
-          onNavigateToPage={handleNavigateToPage}
-          onTocClick={() => setShowToc(!showToc)}
-          fontSize={fontSize}
-          onFontSizeChange={setFontSize}
-        />
-      </div>
-    
-      <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6" style={{ paddingTop: '80px' }}>
-    
-        {/* Desktop: Dual-page spread */}
-        <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100dvh - 240px)" }}>
-          {/* Clickable Navigation Zones - Left margin for previous */}
-          <button
-            onClick={goToPrevSpread}
-            disabled={currentSpreadIndex === 0}
-            className="absolute left-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
-            style={{
-              width: "60px",
-              background: "transparent"
-            }}
-            aria-label="Previous page"
-            onMouseEnter={(e) => {
-              if (currentSpreadIndex > 0) {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
-                e.currentTarget.style.cursor = "pointer";
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-            }}
+        {/* Dark Book Progress Bar - hidden on mobile */}
+        <div className="hidden md:block">
+          <DarkBookProgressBar
+            pages={bookPages}
+            currentPage={currentSpreadIndex * 2}
+            totalPages={bookPages.length}
+            onNavigateToPage={handleNavigateToPage}
+            onTocClick={() => setShowToc(!showToc)}
+            fontSize={fontSize}
+            onFontSizeChange={setFontSize}
           />
-          
-          {/* Clickable Navigation Zones - Right margin for next */}
-          <button
-            onClick={goToNextSpread}
-            disabled={currentSpreadIndex >= spreads.length - 1}
-            className="absolute right-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
-            style={{
-              width: "60px",
-              background: "transparent"
-            }}
-            aria-label="Next page"
-            onMouseEnter={(e) => {
-              if (currentSpreadIndex < spreads.length - 1) {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
-                e.currentTarget.style.cursor = "pointer";
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-            }}
-          />
-
-          {/* Book container with fixed aspect ratio: 11" x 8.5" (dual-page spread) */}
-          <div 
-            className="relative [perspective:2000px]" 
-            style={{ 
-              width: "min(95vw, calc((100dvh - 240px) * 1.294))",
-              aspectRatio: "11 / 8.5",
-              maxWidth: "1600px"
-            }}
-          >
-            {/* Ambient shadow/vignette */}
-            <div className="pointer-events-none absolute -inset-8 rounded-2xl bg-[radial-gradient(1000px_400px_at_50%_30%,rgba(59,130,246,0.08)_0%,rgba(59,130,246,0.04)_35%,transparent_70%)]"></div>
-            <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[0_40px_120px_-30px_rgba(0,0,0,0.6)]"></div>
-    
-            {/* Outer book cover/border - wider on left/right */}
-            <div 
-              aria-hidden="true" 
-              className="pointer-events-none absolute rounded-[28px]" 
-              style={{ 
-                top: "-14px",
-                bottom: "-14px",
-                left: "-29px",
-                right: "-29px",
-                background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
-                boxShadow: "0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04)" 
-              }}
-            ></div>
-    
-            {/* Right page - RENDERED FIRST so it's on top in case of overlap */}
-            <BookPage
-              story={currentSpread.right}
-              pageNum={currentSpreadIndex * 2 + 2}
-              onScroll={() => {}}
-              ref={flowRightRef}
-              position="right"
-              allStories={sortedStories}
-              onNavigateToStory={handleNavigateToStory}
-              fontSize={fontSize}
-              isOwnAccount={isOwnAccount}
-            />
-
-            {/* Left page */}
-            <BookPage
-              story={currentSpread.left}
-              pageNum={currentSpreadIndex * 2 + 1}
-              onScroll={() => {}}
-              ref={flowLeftRef}
-              position="left"
-              fontSize={fontSize}
-              allStories={sortedStories}
-              onNavigateToStory={handleNavigateToStory}
-              isOwnAccount={isOwnAccount}
-            />
-    
-            {/* Refined spine */}
-            <div className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 w-12 md:w-14 lg:w-16">
-              <div className="absolute inset-y-6 left-0 w-1/2 bg-gradient-to-r from-black/30 via-black/10 to-transparent opacity-20"></div>
-              <div className="absolute inset-y-6 right-0 w-1/2 bg-gradient-to-l from-black/30 via-black/10 to-transparent opacity-20"></div>
-              <div className="absolute inset-y-6 left-1/2 -translate-x-1/2 w-px bg-white/70 opacity-60"></div>
-              <div className="absolute inset-y-6 left-1/2 -translate-x-1/2 w-0.5 opacity-20 shadow-[inset_1px_0_0_rgba(0,0,0,0.35),0_0_0_1px_rgba(255,255,255,0.45)]"></div>
-              <div 
-                className="absolute left-1/2 -translate-x-1/2 top-3 h-1.5 w-14 rounded-sm ring-1 ring-black/10 shadow-sm" 
-                style={{ background: "repeating-linear-gradient(90deg, rgba(59,130,246,0.25) 0 6px, rgba(99,102,241,0.25) 6px 12px, rgba(16,185,129,0.25) 12px 18px, rgba(253,186,116,0.25) 18px 24px, rgba(244,63,94,0.25) 24px 30px)" }}
-              ></div>
-              <div 
-                className="absolute left-1/2 -translate-x-1/2 bottom-3 h-1.5 w-14 rounded-sm ring-1 ring-black/10 shadow-sm" 
-                style={{ background: "repeating-linear-gradient(90deg, rgba(59,130,246,0.25) 0 6px, rgba(99,102,241,0.25) 6px 12px, rgba(16,185,129,0.25) 12px 18px, rgba(253,186,116,0.25) 18px 24px, rgba(244,63,94,0.25) 24px 30px)" }}
-              ></div>
-            </div>
-    
-            {/* Navigation removed from center - now in bottom bar */}
-    
-            {/* Left margin click indicator - Previous page */}
-            {currentSpreadIndex > 0 && (
-              <button
-                onClick={() => setCurrentSpreadIndex(currentSpreadIndex - 1)}
-                className="group absolute top-0 bottom-0 w-24 flex items-center justify-start pl-4 opacity-30 hover:opacity-100 transition-opacity duration-300"
-                style={{ zIndex: 9999, left: '-21px' }}
-                aria-label="Previous page"
-              >
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-xl border border-neutral-300 group-hover:bg-white group-hover:scale-110 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="m15 18-6-6 6-6"></path>
-                  </svg>
-                </div>
-              </button>
-            )}
-    
-            {/* Right margin click indicator - Next page */}
-            {currentSpreadIndex < spreads.length - 1 && (
-              <button
-                onClick={() => setCurrentSpreadIndex(currentSpreadIndex + 1)}
-                className="group absolute top-0 bottom-0 w-24 flex items-center justify-end pr-4 opacity-30 hover:opacity-100 transition-opacity duration-300"
-                style={{ zIndex: 9999, right: '-21px' }}
-                aria-label="Next page"
-              >
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-xl border border-neutral-300 group-hover:bg-white group-hover:scale-110 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="m9 18 6-6-6-6"></path>
-                  </svg>
-                </div>
-              </button>
-            )}
-    
-            {/* Ground shadow */}
-            <div className="pointer-events-none absolute -bottom-10 left-1/2 -translate-x-1/2 h-16 w-[80%] rounded-[100%] blur-2xl bg-black/60"></div>
-          </div>
         </div>
-    
-        {/* Mobile view is rendered at root level below */}
-    
-        {/* TOC Drawer - Above Bottom Nav */}
-        {showToc && (
-          <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[580px] max-w-[calc(100vw-3rem)]">
-            <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-6 py-4 text-black shadow-2xl">
-              <div className="mb-4 flex items-center justify-center relative">
+
+        <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6" style={{ paddingTop: '80px' }}>
+
+          {/* Desktop: Dual-page spread */}
+          <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100dvh - 240px)" }}>
+            {/* Clickable Navigation Zones - Left margin for previous */}
+            <button
+              onClick={goToPrevSpread}
+              disabled={currentSpreadIndex === 0}
+              className="absolute left-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
+              style={{
+                width: "60px",
+                background: "transparent"
+              }}
+              aria-label="Previous page"
+              onMouseEnter={(e) => {
+                if (currentSpreadIndex > 0) {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                  e.currentTarget.style.cursor = "pointer";
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+            />
+
+            {/* Clickable Navigation Zones - Right margin for next */}
+            <button
+              onClick={goToNextSpread}
+              disabled={currentSpreadIndex >= spreads.length - 1}
+              className="absolute right-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
+              style={{
+                width: "60px",
+                background: "transparent"
+              }}
+              aria-label="Next page"
+              onMouseEnter={(e) => {
+                if (currentSpreadIndex < spreads.length - 1) {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                  e.currentTarget.style.cursor = "pointer";
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+            />
+
+            {/* Book container with fixed aspect ratio: 11" x 8.5" (dual-page spread) */}
+            <div
+              className="relative [perspective:2000px]"
+              style={{
+                width: "min(95vw, calc((100dvh - 240px) * 1.294))",
+                aspectRatio: "11 / 8.5",
+                maxWidth: "1600px"
+              }}
+            >
+              {/* Ambient shadow/vignette */}
+              <div className="pointer-events-none absolute -inset-8 rounded-2xl bg-[radial-gradient(1000px_400px_at_50%_30%,rgba(59,130,246,0.08)_0%,rgba(59,130,246,0.04)_35%,transparent_70%)]"></div>
+              <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[0_40px_120px_-30px_rgba(0,0,0,0.6)]"></div>
+
+              {/* Outer book cover/border - wider on left/right */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute rounded-[28px]"
+                style={{
+                  top: "-14px",
+                  bottom: "-14px",
+                  left: "-29px",
+                  right: "-29px",
+                  background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)",
+                  boxShadow: "0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04)"
+                }}
+              ></div>
+
+              {/* Right page - RENDERED FIRST so it's on top in case of overlap */}
+              <BookPage
+                story={currentSpread.right}
+                pageNum={currentSpreadIndex * 2 + 2}
+                onScroll={() => { }}
+                ref={flowRightRef}
+                position="right"
+                allStories={sortedStories}
+                onNavigateToStory={handleNavigateToStory}
+                fontSize={fontSize}
+                isOwnAccount={isOwnAccount}
+              />
+
+              {/* Left page */}
+              <BookPage
+                story={currentSpread.left}
+                pageNum={currentSpreadIndex * 2 + 1}
+                onScroll={() => { }}
+                ref={flowLeftRef}
+                position="left"
+                fontSize={fontSize}
+                allStories={sortedStories}
+                onNavigateToStory={handleNavigateToStory}
+                isOwnAccount={isOwnAccount}
+              />
+
+              {/* Refined spine */}
+              <div className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 w-12 md:w-14 lg:w-16">
+                <div className="absolute inset-y-6 left-0 w-1/2 bg-gradient-to-r from-black/30 via-black/10 to-transparent opacity-20"></div>
+                <div className="absolute inset-y-6 right-0 w-1/2 bg-gradient-to-l from-black/30 via-black/10 to-transparent opacity-20"></div>
+                <div className="absolute inset-y-6 left-1/2 -translate-x-1/2 w-px bg-white/70 opacity-60"></div>
+                <div className="absolute inset-y-6 left-1/2 -translate-x-1/2 w-0.5 opacity-20 shadow-[inset_1px_0_0_rgba(0,0,0,0.35),0_0_0_1px_rgba(255,255,255,0.45)]"></div>
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 top-3 h-1.5 w-14 rounded-sm ring-1 ring-black/10 shadow-sm"
+                  style={{ background: "repeating-linear-gradient(90deg, rgba(59,130,246,0.25) 0 6px, rgba(99,102,241,0.25) 6px 12px, rgba(16,185,129,0.25) 12px 18px, rgba(253,186,116,0.25) 18px 24px, rgba(244,63,94,0.25) 24px 30px)" }}
+                ></div>
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 bottom-3 h-1.5 w-14 rounded-sm ring-1 ring-black/10 shadow-sm"
+                  style={{ background: "repeating-linear-gradient(90deg, rgba(59,130,246,0.25) 0 6px, rgba(99,102,241,0.25) 6px 12px, rgba(16,185,129,0.25) 12px 18px, rgba(253,186,116,0.25) 18px 24px, rgba(244,63,94,0.25) 24px 30px)" }}
+                ></div>
+              </div>
+
+              {/* Navigation removed from center - now in bottom bar */}
+
+              {/* Left margin click indicator - Previous page */}
+              {currentSpreadIndex > 0 && (
                 <button
-                  onClick={() => {
-                    // Navigate to TOC page
-                    // Mobile: Navigate to page 1 (intro is 0, TOC is 1)
-                    setCurrentMobilePage(1);
-
-                    // Desktop: Find the spread containing TOC
-                    // TOC is typically on spread index 1 (after intro on spread 0)
-                    const tocSpreadIndex = spreads.findIndex(spread =>
-                      spread.left === 'toc-left' || spread.right === 'toc-right' ||
-                      spread.left === 'toc-right' || spread.right === 'toc-left'
-                    );
-
-                    if (tocSpreadIndex !== -1) {
-                      setCurrentSpreadIndex(tocSpreadIndex);
-                    }
-
-                    setShowToc(false);
-                  }}
-                  className="font-semibold tracking-tight text-3xl whitespace-nowrap hover:text-indigo-600 transition-colors cursor-pointer"
+                  onClick={() => setCurrentSpreadIndex(currentSpreadIndex - 1)}
+                  className="group absolute top-0 bottom-0 w-24 flex items-center justify-start pl-4 opacity-30 hover:opacity-100 transition-opacity duration-300"
+                  style={{ zIndex: 9999, left: '-21px' }}
+                  aria-label="Previous page"
                 >
-                  Table of Contents
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-xl border border-neutral-300 group-hover:bg-white group-hover:scale-110 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="m15 18-6-6 6-6"></path>
+                    </svg>
+                  </div>
                 </button>
-                <button 
-                  onClick={() => setShowToc(false)}
-                  className="absolute right-0 p-1 rounded-md hover:bg-black/10 flex-shrink-0"
+              )}
+
+              {/* Right margin click indicator - Next page */}
+              {currentSpreadIndex < spreads.length - 1 && (
+                <button
+                  onClick={() => setCurrentSpreadIndex(currentSpreadIndex + 1)}
+                  className="group absolute top-0 bottom-0 w-24 flex items-center justify-end pr-4 opacity-30 hover:opacity-100 transition-opacity duration-300"
+                  style={{ zIndex: 9999, right: '-21px' }}
+                  aria-label="Next page"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
-                  </svg>
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-xl border border-neutral-300 group-hover:bg-white group-hover:scale-110 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="m9 18 6-6-6-6"></path>
+                    </svg>
+                  </div>
                 </button>
-              </div>
-              <div className="max-h-[60vh] overflow-y-auto">
-                <ul className="space-y-2.5">
-                  {sortedStories.map((story, index) => (
-                    <li key={story.id}>
-                      <button
-                        onClick={() => {
-                          handleNavigateToStory(index);
-                          setShowToc(false);
-                        }}
-                        className="w-full text-center px-3 py-2.5 rounded-md hover:bg-black/10 transition-colors text-lg font-medium"
-                      >
-                        {story.title} ({story.storyDate || story.storyYear})
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              )}
+
+              {/* Ground shadow */}
+              <div className="pointer-events-none absolute -bottom-10 left-1/2 -translate-x-1/2 h-16 w-[80%] rounded-[100%] blur-2xl bg-black/60"></div>
             </div>
           </div>
-        )}
 
-      </div>
+          {/* Mobile view is rendered at root level below */}
+
+          {/* TOC Drawer - Above Bottom Nav */}
+          {showToc && (
+            <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[580px] max-w-[calc(100vw-3rem)]">
+              <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-6 py-4 text-black shadow-2xl">
+                <div className="mb-4 flex items-center justify-center relative">
+                  <button
+                    onClick={() => {
+                      // Navigate to TOC page
+                      // Mobile: Navigate to page 1 (intro is 0, TOC is 1)
+                      setCurrentMobilePage(1);
+
+                      // Desktop: Find the spread containing TOC
+                      // TOC is typically on spread index 1 (after intro on spread 0)
+                      const tocSpreadIndex = spreads.findIndex(spread =>
+                        spread.left === 'toc-left' || spread.right === 'toc-right' ||
+                        spread.left === 'toc-right' || spread.right === 'toc-left'
+                      );
+
+                      if (tocSpreadIndex !== -1) {
+                        setCurrentSpreadIndex(tocSpreadIndex);
+                      }
+
+                      setShowToc(false);
+                    }}
+                    className="font-semibold tracking-tight text-3xl whitespace-nowrap hover:text-indigo-600 transition-colors cursor-pointer"
+                  >
+                    Table of Contents
+                  </button>
+                  <button
+                    onClick={() => setShowToc(false)}
+                    className="absolute right-0 p-1 rounded-md hover:bg-black/10 flex-shrink-0"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+                <div className="max-h-[60vh] overflow-y-auto">
+                  <ul className="space-y-2.5">
+                    {sortedStories.map((story, index) => (
+                      <li key={story.id}>
+                        <button
+                          onClick={() => {
+                            handleNavigateToStory(index);
+                            setShowToc(false);
+                          }}
+                          className="w-full text-center px-3 py-2.5 rounded-md hover:bg-black/10 transition-colors text-lg font-medium"
+                        >
+                          {story.title} ({story.storyDate || story.storyYear})
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </div>
       </div>
     </>
   );
@@ -857,7 +943,7 @@ const LeftPage = React.forwardRef<HTMLDivElement, { story?: Story; pageNum: numb
           <div className="absolute inset-0 translate-y-0.5 -translate-x-0.5 scale-[0.998] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] opacity-70 bg-neutral-50 ring-black/10"></div>
           <div className="absolute inset-0 translate-y-1 -translate-x-[3px] scale-[0.996] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] opacity-55 bg-neutral-50 ring-black/10"></div>
           <div className="-translate-x-[6px] bg-neutral-50 opacity-35 ring-black/10 ring-1 rounded-[18px] absolute top-0 right-0 bottom-0 left-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] translate-y-[6px] scale-[0.992]"></div>
-          
+
           {/* Main page - Empty */}
           <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(3deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
             <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
@@ -878,8 +964,8 @@ const LeftPage = React.forwardRef<HTMLDivElement, { story?: Story; pageNum: numb
         {/* Main page */}
         <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(3deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
           {/* Paper texture/vignette */}
-          <div 
-            className="absolute inset-0 pointer-events-none" 
+          <div
+            className="absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: `
                 radial-gradient(160% 85% at 110% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
@@ -891,17 +977,17 @@ const LeftPage = React.forwardRef<HTMLDivElement, { story?: Story; pageNum: numb
           {/* Inner gutter shadow */}
           <div className="absolute inset-y-0 right-0 w-10 pointer-events-none bg-gradient-to-l to-transparent from-black/12 via-black/6"></div>
           {/* Outer edge lines */}
-          <div 
-            className="absolute inset-y-0 left-0 w-3 pointer-events-none" 
-            style={{ 
-              backgroundImage: "repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)", 
-              opacity: 0.25 
+          <div
+            className="absolute inset-y-0 left-0 w-3 pointer-events-none"
+            style={{
+              backgroundImage: "repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)",
+              opacity: 0.25
             }}
           ></div>
 
           <div className="md:p-8 lg:p-10 w-full h-full pt-7 pr-7 pb-7 pl-7 relative">
             <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden">
-              <div 
+              <div
                 ref={ref}
                 onScroll={onScroll}
                 className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
@@ -951,8 +1037,8 @@ const RightPage = React.forwardRef<HTMLDivElement, { story?: Story; pageNum: num
         {/* Main page */}
         <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(-3deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
           {/* Paper texture/vignette */}
-          <div 
-            className="absolute inset-0 pointer-events-none" 
+          <div
+            className="absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: `
                 radial-gradient(160% 85% at -10% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
@@ -964,17 +1050,17 @@ const RightPage = React.forwardRef<HTMLDivElement, { story?: Story; pageNum: num
           {/* Inner gutter shadow */}
           <div className="absolute inset-y-0 left-0 w-10 pointer-events-none bg-gradient-to-r to-transparent from-black/12 via-black/6"></div>
           {/* Outer edge lines */}
-          <div 
-            className="absolute inset-y-0 right-0 w-3 pointer-events-none" 
-            style={{ 
-              backgroundImage: "repeating-linear-gradient(270deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)", 
-              opacity: 0.25 
+          <div
+            className="absolute inset-y-0 right-0 w-3 pointer-events-none"
+            style={{
+              backgroundImage: "repeating-linear-gradient(270deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)",
+              opacity: 0.25
             }}
           ></div>
 
           <div className="relative h-full w-full p-7 md:p-8 lg:p-10">
             <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden">
-              <div 
+              <div
                 ref={ref}
                 onScroll={onScroll}
                 className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
@@ -1060,12 +1146,12 @@ function StoryContent({ story }: { story: Story }) {
 }
 
 // Mobile View Component
-function MobileView({ 
+function MobileView({
   allPages,
   currentPage,
   onPageChange,
   sortedStories
-}: { 
+}: {
   allPages: Array<{ type: 'intro' | 'toc' | 'story'; story?: Story; index: number }>;
   currentPage: number;
   onPageChange: (index: number) => void;
@@ -1079,7 +1165,7 @@ function MobileView({
     if (scrollerRef.current) {
       const pageWidth = scrollerRef.current.clientWidth;
       isProgrammaticScroll.current = true;
-      
+
       // Use requestAnimationFrame to ensure scroll happens after render
       requestAnimationFrame(() => {
         if (scrollerRef.current) {
@@ -1087,7 +1173,7 @@ function MobileView({
             left: currentPage * pageWidth,
             behavior: 'smooth'
           });
-          
+
           // Reset flag after scroll completes
           setTimeout(() => {
             isProgrammaticScroll.current = false;
@@ -1101,11 +1187,11 @@ function MobileView({
   const handleScroll = useCallback(() => {
     // Ignore scroll events triggered by programmatic scrolling
     if (isProgrammaticScroll.current || !scrollerRef.current) return;
-    
+
     const pageWidth = scrollerRef.current.clientWidth;
     const scrollLeft = scrollerRef.current.scrollLeft;
     const newPage = Math.round(scrollLeft / pageWidth);
-    
+
     if (newPage !== currentPage && newPage >= 0 && newPage < allPages.length) {
       onPageChange(newPage);
     }
@@ -1128,7 +1214,7 @@ function MobileView({
       <div className="relative w-full flex items-center justify-center" style={{ height: 'calc(100dvh - 80px)', minHeight: 'calc(100dvh - 80px)' }}>
         {/* Mobile prev/next controls */}
         {/* Left edge clickable zone */}
-        <button 
+        <button
           onClick={handlePrev}
           disabled={currentPage === 0}
           className="absolute left-0 top-0 bottom-0 z-20 disabled:cursor-not-allowed"
@@ -1136,7 +1222,7 @@ function MobileView({
           aria-label="Previous page"
         />
         {/* Right edge clickable zone */}
-        <button 
+        <button
           onClick={handleNext}
           disabled={currentPage === allPages.length - 1}
           className="absolute right-0 top-0 bottom-0 z-20 disabled:cursor-not-allowed"
@@ -1144,11 +1230,11 @@ function MobileView({
           aria-label="Next page"
         />
 
-        <div 
+        <div
           ref={scrollerRef}
           onScroll={handleScroll}
           className="h-full w-full flex items-start md:items-center justify-center overflow-x-scroll hide-scrollbar -mt-[26px] md:mt-0"
-          style={{ 
+          style={{
             scrollSnapType: 'x mandatory',
             scrollSnapStop: 'always',
             WebkitOverflowScrolling: 'touch',
@@ -1159,11 +1245,11 @@ function MobileView({
           }}
         >
           {allPages.map((page, index) => (
-            <div 
-              key={index} 
-              className="shrink-0 flex items-center justify-center" 
-              style={{ 
-                minWidth: '100%', 
+            <div
+              key={index}
+              className="shrink-0 flex items-center justify-center"
+              style={{
+                minWidth: '100%',
                 width: '100%',
                 height: '100%',
                 padding: '0',
@@ -1181,17 +1267,17 @@ function MobileView({
 }
 
 // Closed Book Cover Component
-function ClosedBookCover({ 
-  userName, 
-  storyCount, 
-  onOpen 
-}: { 
-  userName: string; 
-  storyCount: number; 
+function ClosedBookCover({
+  userName,
+  storyCount,
+  onOpen
+}: {
+  userName: string;
+  storyCount: number;
   onOpen: () => void;
 }) {
   return (
-    <div className="relative mx-auto" style={{ 
+    <div className="relative mx-auto" style={{
       width: "min(95vw, calc((100dvh - 180px) * 0.647))",
       aspectRatio: "5.5 / 8.5",
       maxWidth: "800px"
@@ -1203,7 +1289,7 @@ function ClosedBookCover({
       {/* Book cover with spine */}
       <div className="relative w-full h-full">
         {/* Book spine (left edge) */}
-        <div 
+        <div
           className="absolute left-0 top-0 bottom-0 rounded-l-lg pointer-events-none"
           style={{
             width: '32px',
@@ -1230,7 +1316,7 @@ function ClosedBookCover({
           aria-label="Open book"
         >
           {/* Leather grain texture */}
-          <div 
+          <div
             className="absolute inset-0 opacity-40 pointer-events-none"
             style={{
               borderRadius: '0 12px 12px 0',
@@ -1240,7 +1326,7 @@ function ClosedBookCover({
           ></div>
 
           {/* Subtle highlight along edges */}
-          <div 
+          <div
             className="absolute inset-0 pointer-events-none"
             style={{
               borderRadius: '0 12px 12px 0',
@@ -1249,7 +1335,7 @@ function ClosedBookCover({
           ></div>
 
           {/* Vignette for depth */}
-          <div 
+          <div
             className="absolute inset-0 pointer-events-none"
             style={{
               borderRadius: '0 12px 12px 0',
@@ -1258,7 +1344,7 @@ function ClosedBookCover({
           ></div>
 
           {/* Book crease shadow (where the book opens) */}
-          <div 
+          <div
             className="absolute top-0 bottom-0 left-0 pointer-events-none"
             style={{
               width: '24px',
@@ -1267,7 +1353,7 @@ function ClosedBookCover({
           ></div>
 
           {/* Embossed border frame (like real book covers) */}
-          <div 
+          <div
             className="absolute pointer-events-none"
             style={{
               top: '48px',
@@ -1293,14 +1379,14 @@ function ClosedBookCover({
             >
               {userName}&apos;s<br />Story
             </h1>
-            
+
             <div className="w-32 h-0.5 mb-6" style={{ background: "linear-gradient(90deg, transparent, #d4af87, transparent)" }}></div>
-            
+
             <p className="text-xl md:text-2xl font-medium" style={{ color: "#c4a87a", textShadow: "0 2px 4px rgba(0,0,0,0.7)" }}>
               {storyCount} {storyCount === 1 ? 'memory' : 'memories'}
             </p>
 
-            <div className="mt-12 px-5 py-2 rounded-full border" style={{ 
+            <div className="mt-12 px-5 py-2 rounded-full border" style={{
               backgroundColor: "rgba(212, 175, 135, 0.08)",
               borderColor: "rgba(212, 175, 135, 0.25)"
             }}>
@@ -1328,48 +1414,48 @@ function MobileAudioPlayer({ story }: { story: Story }) {
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  
+
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-  
+
   const formatTime = (seconds: number) => {
     if (isNaN(seconds)) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-  
+
   // Initialize audio element on mount - ONLY ONCE per story
   useEffect(() => {
     if (!story.audioUrl) return;
     if (audioRef.current) {
       return;
     }
-    
+
     const audio = new Audio(story.audioUrl);
     audio.preload = 'auto';
     audioRef.current = audio;
-    
+
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
     };
-    
+
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
     };
-    
+
     const handleEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
     };
-    
+
     const handlePause = () => {
       setIsPlaying(false);
     };
-    
+
     const handlePlay = () => {
       setIsPlaying(true);
     };
-    
+
     const handleError = (err: Event) => {
       console.error(`Mobile audio error for ${story.title}:`, err);
       if (audio.error) {
@@ -1377,14 +1463,14 @@ function MobileAudioPlayer({ story }: { story: Story }) {
       }
       setIsLoading(false);
     };
-    
+
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('error', handleError);
-    
+
     return () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
@@ -1400,13 +1486,13 @@ function MobileAudioPlayer({ story }: { story: Story }) {
     // This prevents recreating the audio element unnecessarily which would cause playback issues.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [story.id]);
-  
+
   const toggleAudio = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!audioRef.current) return;
-    
+
     try {
       // Stop other audio elements first
       const allAudioElements = document.querySelectorAll('audio');
@@ -1415,7 +1501,7 @@ function MobileAudioPlayer({ story }: { story: Story }) {
           audio.pause();
         }
       });
-      
+
       if (audioRef.current.paused) {
         setIsLoading(true);
         await audioRef.current.play();
@@ -1428,7 +1514,7 @@ function MobileAudioPlayer({ story }: { story: Story }) {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="mb-3">
       <div className="flex items-center gap-2.5">
@@ -1471,29 +1557,29 @@ function MobileAudioPlayer({ story }: { story: Story }) {
             )}
           </div>
         </button>
-        
+
         <div className="flex-1">
-          <div 
+          <div
             className="h-1.5 bg-neutral-200 rounded-full overflow-hidden cursor-pointer hover:h-2 transition-all"
             onClick={(e) => {
               if (!audioRef.current || !duration) return;
-              
+
               const rect = e.currentTarget.getBoundingClientRect();
               const x = e.clientX - rect.left;
               const percentage = x / rect.width;
               const newTime = percentage * duration;
-              
+
               audioRef.current.currentTime = newTime;
               setCurrentTime(newTime);
             }}
           >
-            <div 
-              className="h-full bg-neutral-400 transition-all duration-100 pointer-events-none" 
-              style={{ width: `${progress}%` }} 
+            <div
+              className="h-full bg-neutral-400 transition-all duration-100 pointer-events-none"
+              style={{ width: `${progress}%` }}
             />
           </div>
         </div>
-        
+
         <span className="text-[11px] text-neutral-500 whitespace-nowrap tabular-nums">
           {formatTime(currentTime)} / {formatTime(duration)}
         </span>
@@ -1503,18 +1589,18 @@ function MobileAudioPlayer({ story }: { story: Story }) {
 }
 
 // Mobile Page Component  
-function MobilePage({ 
-  page, 
+function MobilePage({
+  page,
   pageNum,
   allStories
-}: { 
+}: {
   page: { type: 'intro' | 'toc' | 'story'; story?: Story; index: number };
   pageNum: number;
   allStories: Story[];
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
-  
+
   // Check if content is scrollable and track user scroll
   useEffect(() => {
     const checkScroll = () => {
@@ -1523,13 +1609,13 @@ function MobilePage({
         setShowScrollIndicator(isScrollable);
       }
     };
-    
+
     checkScroll();
     setTimeout(checkScroll, 500); // Recheck after content loads
-    
-    return () => {};
+
+    return () => { };
   }, [page]);
-  
+
   const handleScrollClick = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({ top: 300, behavior: 'smooth' });
@@ -1539,7 +1625,7 @@ function MobilePage({
   // Intro page
   if (page.type === 'intro') {
     return (
-      <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
+      <div className="mobile-page relative mx-auto [perspective:1600px]" style={{
         width: "100%",
         height: "100%",
         maxWidth: "calc(100vw + 20px)",
@@ -1548,13 +1634,13 @@ function MobilePage({
         objectFit: "contain",
         pointerEvents: 'none'
       }}>
-        <div 
-          aria-hidden="true" 
-          className="pointer-events-none absolute rounded-[24px]" 
-          style={{ 
-            inset: "-5px", 
-            background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
-            boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute rounded-[24px]"
+          style={{
+            inset: "-5px",
+            background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)",
+            boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)"
           }}
         ></div>
         <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
@@ -1573,11 +1659,11 @@ function MobilePage({
       </div>
     );
   }
-  
+
   // TOC page
   if (page.type === 'toc') {
     return (
-      <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
+      <div className="mobile-page relative mx-auto [perspective:1600px]" style={{
         width: "100%",
         height: "100%",
         maxWidth: "calc(100vw + 20px)",
@@ -1586,13 +1672,13 @@ function MobilePage({
         objectFit: "contain",
         pointerEvents: 'none'
       }}>
-        <div 
-          aria-hidden="true" 
-          className="pointer-events-none absolute rounded-[24px]" 
-          style={{ 
-            inset: "-5px", 
-            background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
-            boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute rounded-[24px]"
+          style={{
+            inset: "-5px",
+            background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)",
+            boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)"
           }}
         ></div>
         <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
@@ -1623,13 +1709,13 @@ function MobilePage({
       </div>
     );
   }
-  
+
   // Story page
   const story = page.story;
   if (!story) return null;
-  
+
   return (
-    <div className="mobile-page relative mx-auto [perspective:1600px]" style={{ 
+    <div className="mobile-page relative mx-auto [perspective:1600px]" style={{
       width: "100%",
       height: "100%",
       maxWidth: "calc(100vw + 20px)",
@@ -1639,20 +1725,20 @@ function MobilePage({
       pointerEvents: 'none'
     }}>
       {/* Outer book cover/border */}
-      <div 
-        aria-hidden="true" 
-        className="pointer-events-none absolute rounded-[24px]" 
-        style={{ 
-          inset: "-5px", 
-          background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)", 
-          boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)" 
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute rounded-[24px]"
+        style={{
+          inset: "-5px",
+          background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)",
+          boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)"
         }}
       ></div>
 
       <div className="absolute inset-0 translate-y-[5px] -translate-x-[5px] scale-[0.994] rounded-[18px] ring-1 opacity-35 bg-neutral-50 ring-black/10"></div>
       <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
-        <div 
-          className="absolute inset-0" 
+        <div
+          className="absolute inset-0"
           style={{
             backgroundImage: `
               radial-gradient(120% 65% at 110% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 60%),
@@ -1661,20 +1747,20 @@ function MobilePage({
           }}
         ></div>
         <div className="absolute inset-y-0 right-0 w-8 pointer-events-none bg-gradient-to-l to-transparent from-black/10 via-black/5"></div>
-        <div 
-          className="absolute inset-y-0 left-0 w-3 pointer-events-none" 
-          style={{ 
-            backgroundImage: "repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)", 
-            opacity: 0.22 
+        <div
+          className="absolute inset-y-0 left-0 w-3 pointer-events-none"
+          style={{
+            backgroundImage: "repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)",
+            opacity: 0.22
           }}
         ></div>
 
         <div className="relative h-full w-full p-2">
           <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden relative">
-            <div 
+            <div
               ref={scrollRef}
               className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-3 overflow-y-auto relative z-0"
-              style={{ 
+              style={{
                 overscrollBehavior: 'contain',
                 pointerEvents: 'auto'
               }}
@@ -1700,12 +1786,12 @@ function MobilePage({
                   </div>
                 );
               })()}
-              
+
               {/* Title */}
               <h2 className="mb-2.5 text-[19px] tracking-tight font-semibold text-neutral-900">
                 {story.title}
               </h2>
-              
+
               {/* Age and year */}
               <div className="text-[13px] text-neutral-600 mb-3">
                 {story.lifeAge !== undefined && `Age ${story.lifeAge} • `}
@@ -1743,10 +1829,10 @@ function MobilePage({
                 </div>
               )}
             </div>
-            
+
             {/* Mobile scroll indicator */}
             {showScrollIndicator && (
-              <ScrollIndicator 
+              <ScrollIndicator
                 show={true}
                 position="right"
                 contentType="book"

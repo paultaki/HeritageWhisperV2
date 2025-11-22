@@ -224,6 +224,8 @@ export async function GET(request: NextRequest) {
           pivotalCategory: story.metadata?.pivotal_category,
           storyDate: story.story_date || story.metadata?.story_date, // Read from column first, fallback to metadata for legacy data
           photoTransform: story.metadata?.photo_transform,
+          chapterId: story.chapter_id,
+          chapterOrderIndex: story.chapter_order_index,
         };
       }),
     );
@@ -619,11 +621,11 @@ export async function POST(request: NextRequest) {
 
     try {
       const echoPromptText = await generateEchoPrompt(newStory.transcript || "");
-      
+
       if (echoPromptText) {
         // Quality gate: validate echo prompt before storing
         const isValid = validatePromptQuality(echoPromptText);
-        
+
         if (isValid) {
           logger.debug("[Stories API] Echo prompt generated (validated):", echoPromptText);
 
@@ -752,7 +754,7 @@ export async function POST(request: NextRequest) {
                 setImmediate(async () => {
                   try {
                     logger.debug(`[Tier 3 Background] Starting analysis for Story #${storyCount}...`);
-                    
+
                     // Perform GPT-4o/GPT-5 combined analysis
                     const tier3Result = await performTier3Analysis(
                       allStories,

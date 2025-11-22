@@ -89,6 +89,9 @@ function BookStyleReviewContent() {
   const [returnPath, setReturnPath] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [storyNotFound, setStoryNotFound] = useState(false);
+  const [nextNavId, setNextNavId] = useState<string | null>(null);
+  const [storyIndex, setStoryIndex] = useState<number | null>(null);
+  const [totalStories, setTotalStories] = useState<number | null>(null);
 
   const handleAudioChange = (url: string | null, blob?: Blob | null) => {
     setAudioUrl(url);
@@ -153,8 +156,8 @@ function BookStyleReviewContent() {
 
         // If story not found (404), redirect to timeline
         if (error instanceof Error &&
-            (error.message.toLowerCase().includes("not found") ||
-             error.message.toLowerCase().includes("unauthorized"))) {
+          (error.message.toLowerCase().includes("not found") ||
+            error.message.toLowerCase().includes("unauthorized"))) {
           console.warn("[Edit Mode] Story not found or unauthorized, redirecting to timeline");
           setStoryNotFound(true);
           toast({
@@ -259,6 +262,17 @@ function BookStyleReviewContent() {
           }
           if (cachedData.returnPath) {
             setReturnPath(cachedData.returnPath);
+          }
+
+          // Handle multi-story flow
+          if (cachedData.nextNavId) {
+            setNextNavId(cachedData.nextNavId as string);
+          }
+          if (cachedData.storyIndex) {
+            setStoryIndex(cachedData.storyIndex as number);
+          }
+          if (cachedData.totalStories) {
+            setTotalStories(cachedData.totalStories as number);
           }
 
           // Handle audio - convert base64 back to blob if available
@@ -441,7 +455,7 @@ function BookStyleReviewContent() {
           durationSeconds: actualDuration && actualDuration >= 1 ? Math.round(actualDuration) : 1, // Minimum 1 second (database constraint)
           sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
         };
-        
+
         // Only include storyDate if it's defined (not null)
         if (storyDate) {
           tempStoryData.storyDate = storyDate;
@@ -779,7 +793,7 @@ function BookStyleReviewContent() {
         durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 1, // Minimum 1 second (database constraint)
         sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
       };
-      
+
       // Only include storyDate if it's defined (not null)
       if (storyDate) {
         storyData.storyDate = storyDate;
@@ -828,16 +842,14 @@ function BookStyleReviewContent() {
 
         // Return to book page
         router.push(`/book?page=${bookPageNumber}`);
+      } else if (nextNavId) {
+        // Redirect to next story in the chain
+        router.push(`/review/book-style?nav=${nextNavId}&mode=wizard`);
       } else if (returnPath) {
-        // Return to where we came from (book view, memory box, etc.)
         router.push(returnPath);
       } else {
-        // Navigate to timeline and scroll to top where new prompt awaits
+        // Default redirect to timeline
         router.push("/timeline");
-        // Scroll to top after navigation
-        setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }, 100);
       }
     },
     onError: (error: any) => {
@@ -845,8 +857,8 @@ function BookStyleReviewContent() {
 
       // If story not found during save, redirect to timeline
       if (error.message &&
-          (error.message.toLowerCase().includes("not found") ||
-           error.message.toLowerCase().includes("unauthorized"))) {
+        (error.message.toLowerCase().includes("not found") ||
+          error.message.toLowerCase().includes("unauthorized"))) {
         toast({
           title: "Story not found",
           description: "This story may have been deleted. Redirecting to timeline.",

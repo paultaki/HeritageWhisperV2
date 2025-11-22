@@ -105,7 +105,7 @@ export function BookStyleReview({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showRemoveAudioConfirm, setShowRemoveAudioConfirm] = useState(false);
   const [removeAudioAction, setRemoveAudioAction] = useState<'remove' | 'rerecord'>('remove');
-  
+
   // Transcription replacement confirmation
   const [showTranscriptionReplaceConfirm, setShowTranscriptionReplaceConfirm] = useState(false);
   const [pendingTranscription, setPendingTranscription] = useState<string>("");
@@ -239,7 +239,7 @@ export function BookStyleReview({
 
       // Check if there's existing transcription text
       const hasExistingText = transcription && transcription.trim().length > 0;
-      
+
       if (hasExistingText) {
         // Store the new transcription and show confirmation modal
         setPendingTranscription(result.transcription.formatted);
@@ -287,10 +287,10 @@ export function BookStyleReview({
     setShowRecordingOverlay(true);
     setIsInitialRecordingShow(false); // This is a manual re-record, not initial
   };
-  
+
   const handleRecordingOverlayClose = () => {
     setShowRecordingOverlay(false);
-    
+
     // If this was the initial automatic show (new/draft without audio),
     // and user cancels, navigate back
     if (isInitialRecordingShow && !hasExistingRecording) {
@@ -777,7 +777,7 @@ export function BookStyleReview({
                         Undo Enhancement
                       </Button>
                     )}
-                    
+
                     {/* Mobile: Show "Undo" when originalTranscription exists, otherwise show "Enhance Story" */}
                     {/* Desktop: Always show "Enhance Story" */}
                     {originalTranscription ? (
@@ -814,7 +814,7 @@ export function BookStyleReview({
                         )}
                       </Button>
                     )}
-                    
+
                     {/* Desktop only: Always show Enhance Story button */}
                     <Button
                       type="button"
@@ -859,14 +859,14 @@ export function BookStyleReview({
                     "w-full min-h-[300px] resize-none bg-white border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400",
                     (transcriptionStatus !== "complete" &&
                       transcriptionStatus !== "idle") &&
-                      "opacity-60 cursor-not-allowed"
+                    "opacity-60 cursor-not-allowed"
                   )}
                   placeholder={
                     transcriptionStatus === "transcribing"
                       ? "Transcribing your story..."
                       : transcriptionStatus === "extracting"
-                      ? "Extracting insights..."
-                      : "Type or paste your story here. This is how it will appear in your book..."
+                        ? "Extracting insights..."
+                        : "Type or paste your story here. This is how it will appear in your book..."
                   }
                   disabled={
                     isEnhancing ||
@@ -1126,15 +1126,22 @@ export function BookStyleReview({
                 onSave();
               }}
               disabled={isSaving}
-              className="flex-1 bg-heritage-coral hover:bg-heritage-coral/90 text-white rounded-full py-3 text-base font-medium"
+              className="flex-1 bg-[#203954] hover:bg-[#1B3047] text-white rounded-2xl py-6 text-lg font-medium shadow-lg shadow-blue-900/10 transition-all active:scale-[0.99]"
             >
-              {isSaving ? "Saving..." : "Save"}
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Memory"
+              )}
             </Button>
             <Button
               type="button"
               onClick={onCancel}
               disabled={isSaving}
-              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded-full py-3 text-base font-medium"
+              className="flex-1 bg-white hover:bg-gray-50 text-[#203954] border-2 border-[#E5E7EB] rounded-2xl py-6 text-lg font-medium transition-all active:scale-[0.99]"
             >
               Cancel
             </Button>
@@ -1189,19 +1196,19 @@ export function BookStyleReview({
                   setShowTranscriptionReplaceConfirm(false);
                   // Apply new transcription, keep old lesson
                   onTranscriptionChange(pendingTranscription);
-                  
+
                   // Note: Keep the old lesson as per user requirement (2a)
                   // Only update if there was no lesson before
                   if (!wisdomText && pendingLessonOptions?.practical) {
                     onWisdomChange(pendingLessonOptions.practical);
                     setTempWisdom(pendingLessonOptions.practical);
                   }
-                  
+
                   toast({
                     title: "Story updated!",
                     description: "Your story has been replaced with the new transcription.",
                   });
-                  
+
                   // Clear pending data
                   setPendingTranscription("");
                   setPendingLessonOptions(null);
@@ -1235,7 +1242,7 @@ export function BookStyleReview({
 
               {/* Message */}
               <p className="text-lg sm:text-xl text-gray-700 leading-relaxed whitespace-pre-line">
-                {removeAudioAction === 'rerecord' 
+                {removeAudioAction === 'rerecord'
                   ? 'This will replace your current audio recording with a new one.'
                   : 'This will remove the audio recording from this memory. Your story text and photos will remain unchanged.'}
               </p>

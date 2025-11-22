@@ -48,21 +48,33 @@ export function useNavInk({ defaultInk, navId }: UseNavInkOptions): NavInk {
       // Debounce with requestAnimationFrame for smooth performance
       rafRef.current = requestAnimationFrame(() => {
         entries.forEach((entry) => {
-          // Switch to light when element significantly intersects (≥35% visible)
+          const target = entry.target as HTMLElement;
+          const targetInk = target.getAttribute('data-nav-ink') as NavInk | null;
+
+          // Switch to target ink when element significantly intersects (≥35% visible)
           if (entry.intersectionRatio >= 0.35) {
-            intersectingElements.add(entry.target);
+            if (targetInk) {
+              intersectingElements.add(target);
+            }
           }
           // Switch back when element mostly exits (<15% visible)
           else if (entry.intersectionRatio < 0.15) {
-            intersectingElements.delete(entry.target);
+            intersectingElements.delete(target);
           }
           // Between 0.15-0.35: hysteresis zone, maintain current state
         });
 
-        // Use light ink if ANY elements are intersecting the nav zone
-        // Otherwise use the default ink for this page
-        const shouldUseLightInk = intersectingElements.size > 0;
-        setInk(shouldUseLightInk ? "light" : defaultInk);
+        // Determine the ink color based on intersecting elements
+        // If ANY intersecting element requests a specific ink, we use it
+        // If multiple elements intersect (rare), we prioritize the last one added (most recent)
+        let requestedInk: NavInk | null = null;
+        if (intersectingElements.size > 0) {
+          // Get the last element added to the set (most likely the one the user just scrolled to)
+          const lastElement = Array.from(intersectingElements).pop() as HTMLElement;
+          requestedInk = lastElement.getAttribute('data-nav-ink') as NavInk | null;
+        }
+
+        setInk(requestedInk || defaultInk);
       });
     };
 
@@ -77,8 +89,8 @@ export function useNavInk({ defaultInk, navId }: UseNavInkOptions): NavInk {
       threshold: [0, 0.15, 0.35, 0.5, 0.75, 1], // Multiple thresholds for smooth transitions
     });
 
-    // Observe all existing elements marked with data-nav-ink="light"
-    const elementsToObserve = document.querySelectorAll('[data-nav-ink="light"]');
+    // Observe all existing elements marked with data-nav-ink
+    const elementsToObserve = document.querySelectorAll('[data-nav-ink]');
     elementsToObserve.forEach((el) => {
       observerRef.current?.observe(el);
     });
@@ -89,11 +101,11 @@ export function useNavInk({ defaultInk, navId }: UseNavInkOptions): NavInk {
         mutation.addedNodes.forEach((node) => {
           if (node instanceof Element) {
             // Check if the node itself has the attribute
-            if (node.getAttribute('data-nav-ink') === 'light') {
+            if (node.hasAttribute('data-nav-ink')) {
               observerRef.current?.observe(node);
             }
             // Check children for the attribute
-            const children = node.querySelectorAll('[data-nav-ink="light"]');
+            const children = node.querySelectorAll('[data-nav-ink]');
             children.forEach((child) => {
               observerRef.current?.observe(child);
             });

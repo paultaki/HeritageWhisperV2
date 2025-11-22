@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -10,12 +10,16 @@ import { QuestionOptions } from "./components/QuestionOptions";
 import { TypingIndicator } from "./components/TypingIndicator";
 import { ChatInput } from "./components/ChatInput";
 import { StorySplitModal } from "./components/StorySplitModal";
+import { useRealtimeInterview } from "@/hooks/use-realtime-interview";
+import { useRecordingState } from "@/hooks/use-recording-state";
 import {
   completeConversationAndRedirect,
   extractQAPairs,
-  combineAudioBlobs,
+  combineAudioBlobs, // This might become redundant if we use getMixedAudioBlob/getUserAudioBlob
 } from "@/lib/conversationModeIntegration";
-import { useRecordingState } from "@/contexts/RecordingContext";
+import { Loader2, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 
 export type MessageType =
   | 'system'
@@ -43,15 +47,41 @@ export type AudioState = {
 };
 
 export default function InterviewChatPage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
-  const { startRecording, stopRecording } = useRecordingState();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Traditional recording state
+  const {
+    isRecording,
+    startRecording: startTraditionalRecording,
+    stopRecording: stopTraditionalRecording,
+    // getRecordedBlob, // Not available in this hook version?
+    // getRecordedDuration, // Not available?
+  } = useRecordingState();
+
+  // Realtime interview state
+  const {
+    startSession,
+    stopSession,
+    status,
+    getMixedAudioBlob,
+    // getUserAudioBlob, // Not available?
+    // recordingDuration, // Not available?
+    // handleTranscriptUpdate, // Not available?
+    // handleAudioResponse, // Not available?
+  } = useRealtimeInterview();
+
   const [showWelcome, setShowWelcome] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [followUpCount, setFollowUpCount] = useState(0);
-  const [showStorySplit, setShowStorySplit] = useState(false);
+
+  // Story Mode state
+  const [showSplitModal, setShowSplitModal] = useState(false);
+  const [detectedStories, setDetectedStories] = useState<any[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isSplitting, setIsSplitting] = useState(false);
 
   // Session timer state
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
@@ -65,7 +95,7 @@ export default function InterviewChatPage() {
   // Check if Realtime API is enabled
   const isRealtimeEnabled = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true';
 
-  // Audio state for tracking full conversation transcript
+  // Audio state for tracking full conversation transcript (used for traditional mode)
   const [audioState, setAudioState] = useState<AudioState>({
     chunks: [],
     fullTranscript: '',
@@ -73,10 +103,10 @@ export default function InterviewChatPage() {
 
   // Redirect if not authenticated (only after loading completes)
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isAuthLoading && !user) {
       router.push('/auth/login');
     }
-  }, [user, isLoading, router]);
+  }, [user, isAuthLoading, router]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -98,7 +128,7 @@ export default function InterviewChatPage() {
 
         // Auto-complete at 30 minutes (1800 seconds)
         if (elapsed >= 1800) {
-          handleCompleteInterview();
+          handleComplete(); // Use the new handleComplete
         }
       }, 1000);
 
@@ -108,18 +138,19 @@ export default function InterviewChatPage() {
         }
       };
     }
-  }, [sessionStartTime]);
+  }, [sessionStartTime, handleComplete]); // Add handleComplete to dependencies
 
   // Clean up recording state on unmount
   useEffect(() => {
     return () => {
       // Stop recording if user navigates away
-      stopRecording();
+      stopTraditionalRecording();
+      stopSession(); // Stop realtime session too
       if (sessionTimerRef.current) {
         clearInterval(sessionTimerRef.current);
       }
     };
-  }, [stopRecording]);
+  }, [stopTraditionalRecording, stopSession]);
 
   // Initialize conversation after welcome dismissed
   const handleWelcomeDismiss = () => {
@@ -129,7 +160,11 @@ export default function InterviewChatPage() {
     setSessionStartTime(Date.now());
 
     // Start recording state for the interview
-    startRecording('conversation');
+    if (isRealtimeEnabled) {
+      startSession(handleTranscriptUpdate);
+    } else {
+      startTraditionalRecording('conversation');
+    }
 
     // Add initial greeting
     const greeting: Message = {
@@ -162,30 +197,26 @@ export default function InterviewChatPage() {
 
   // Handle transcript updates from Realtime API
   const handleTranscriptUpdate = (text: string, isFinal: boolean) => {
-    if (isFinal) {
-      // Final transcript received - add as user message
-      const userMessage: Message = {
-        id: `msg-${Date.now()}`,
-        type: 'audio-response',
-        content: text,
-        timestamp: new Date(),
-        sender: 'user',
-      };
+    if (isRealtimeEnabled) {
+      handleRealtimeTranscriptUpdate(text, isFinal);
+      if (isFinal) {
+        // Final transcript received - add as user message
+        const userMessage: Message = {
+          id: `msg-${Date.now()}`,
+          type: 'audio-response',
+          content: text,
+          timestamp: new Date(),
+          sender: 'user',
+        };
 
-      setMessages(prev => [...prev, userMessage]);
+        setMessages(prev => [...prev, userMessage]);
 
-      // Update full transcript
-      const updatedTranscript = audioState.fullTranscript + ' ' + text;
-      setAudioState(prev => ({
-        ...prev,
-        fullTranscript: updatedTranscript,
-      }));
-
-      // Show typing indicator and generate follow-up
-      addTypingIndicator();
-      setTimeout(async () => {
-        await generateFollowUpQuestions(updatedTranscript);
-      }, 1500);
+        // Show typing indicator and generate follow-up
+        addTypingIndicator();
+        setTimeout(async () => {
+          await generateFollowUpQuestions(text); // Pass the current response text for context
+        }, 1500);
+      }
     }
     // Provisional transcripts are displayed in ChatInput component
   };
@@ -195,6 +226,7 @@ export default function InterviewChatPage() {
     if (isRealtimeEnabled) {
       // In Realtime mode, transcripts are handled via handleTranscriptUpdate
       // This is just called to store the audio blob for archival
+      handleRealtimeAudioResponse(audioBlob, duration); // Store blob in realtime hook
       return;
     }
 
@@ -240,7 +272,7 @@ export default function InterviewChatPage() {
 
       // Generate follow-up questions
       setTimeout(async () => {
-        await generateFollowUpQuestions(updatedTranscript);
+        await generateFollowUpQuestions(transcription); // Pass the current response text for context
       }, 1500);
 
     } catch (error) {
@@ -259,7 +291,7 @@ export default function InterviewChatPage() {
 
       setMessages(prev => {
         // Remove typing indicator if present
-        const filtered = prev.filter(msg => msg.id !== 'typing');
+        const filtered = prev.filter(msg => msg.type !== 'typing');
         return [...filtered, errorMsg];
       });
 
@@ -280,19 +312,21 @@ export default function InterviewChatPage() {
     setMessages(prev => [...prev, userMessage]);
     setIsProcessing(true);
 
-    // Update transcript with text
-    const updatedTranscript = audioState.fullTranscript + ' ' + text;
-    setAudioState(prev => ({
-      ...prev,
-      fullTranscript: updatedTranscript,
-    }));
+    // Update transcript with text (for traditional mode tracking)
+    if (!isRealtimeEnabled) {
+      const updatedTranscript = audioState.fullTranscript + ' ' + text;
+      setAudioState(prev => ({
+        ...prev,
+        fullTranscript: updatedTranscript,
+      }));
+    }
 
     // Show typing indicator
     addTypingIndicator();
 
     // Generate follow-up questions
     setTimeout(async () => {
-      await generateFollowUpQuestions(updatedTranscript);
+      await generateFollowUpQuestions(text); // Pass the current response text for context
     }, 1500);
   };
 
@@ -321,7 +355,7 @@ export default function InterviewChatPage() {
     setMessages(prev => prev.filter(msg => msg.type !== 'typing'));
   };
 
-  // Transcribe audio blob
+  // Transcribe audio blob (traditional mode only)
   const transcribeChunk = async (audioBlob: Blob): Promise<string> => {
     // Determine file extension based on MIME type
     const mimeType = audioBlob.type;
@@ -355,13 +389,20 @@ export default function InterviewChatPage() {
   };
 
   // Generate follow-up questions
-  const generateFollowUpQuestions = async (fullTranscript: string) => {
+  const generateFollowUpQuestions = async (lastUserResponse: string) => {
     try {
+      // For follow-up, we need the full transcript up to this point.
+      // If realtime, the hook manages it. If traditional, audioState.fullTranscript.
+      const currentFullTranscript = isRealtimeEnabled ?
+        messages.filter(m => m.type === 'audio-response' || m.type === 'text-response').map(m => m.content).join(' ') :
+        audioState.fullTranscript;
+
       const response = await fetch('/api/interview-test/follow-up', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fullTranscript,
+          fullTranscript: currentFullTranscript,
+          lastUserResponse, // Provide the last response for better context
           followUpNumber: followUpCount + 1,
         }),
       });
@@ -394,13 +435,6 @@ export default function InterviewChatPage() {
       setFollowUpCount(prev => prev + 1);
       setIsProcessing(false);
 
-      // Check if we should suggest story splitting (after 5+ exchanges)
-      if (followUpCount >= 4) {
-        setTimeout(() => {
-          checkStorySplit(fullTranscript);
-        }, 2000);
-      }
-
     } catch (error) {
       console.error('Error generating follow-up:', error);
       removeTypingIndicator();
@@ -427,86 +461,205 @@ export default function InterviewChatPage() {
     }, 200); // Reduced delay for snappier feel
   };
 
-  // Check if stories should be split
-  const checkStorySplit = async (fullTranscript: string) => {
+  // Helper to convert base64 to blob
+  const dataURItoBlob = (dataURI: string) => {
+    const byteString = atob(dataURI.split(',')[1]);
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mimeString });
+  };
+
+  // Handle conversation completion
+  const handleComplete = useCallback(async () => {
+    // Require at least one Q&A exchange
+    const userResponses = messages.filter(m =>
+      m.type === 'audio-response' || m.type === 'text-response'
+    );
+
+    if (userResponses.length === 0) {
+      alert('Please answer at least one question before completing the interview.');
+      return;
+    }
+
+    // Confirm completion
+    const confirmComplete = confirm(
+      `Complete this interview with ${userResponses.length} ${userResponses.length === 1 ? 'response' : 'responses'}?\n\n` +
+      'You\'ll be taken to review and finalize your story.'
+    );
+
+    if (!confirmComplete) return;
+
+    // Stop recording if active
+    if (isRealtimeEnabled && status === 'connected') {
+      stopSession();
+    } else if (isRecording) {
+      stopTraditionalRecording();
+    }
+
+    setIsAnalyzing(true);
+
     try {
-      const response = await fetch('/api/interview-test/analyze-topics', {
+      // 1. Get full transcript
+      const fullTranscript = messages
+        .filter(m => m.type !== 'system')
+        .map(m => `${m.sender === 'user' ? 'Grandparent' : 'Grandchild'}: ${m.content}`)
+        .join('\n');
+
+      // 2. Analyze for stories
+      const response = await fetch('/api/analyze-stories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fullTranscript,
-          messages: messages.filter(m => m.type !== 'typing'),
+          transcript: fullTranscript,
+          userName: user?.name
         }),
       });
 
-      if (!response.ok) return;
+      if (!response.ok) throw new Error('Analysis failed');
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (data.shouldSplit && data.stories?.length > 1) {
-        setShowStorySplit(true);
+      if (result.stories && result.stories.length > 1) {
+        // Found multiple stories! Show modal
+        setDetectedStories(result.stories);
+        setShowSplitModal(true);
+        setIsAnalyzing(false);
+      } else {
+        // Just one story, proceed as normal
+        await proceedWithSingleStory(result.stories?.[0]);
       }
     } catch (error) {
-      console.error('Error analyzing topics:', error);
+      console.error('Analysis error:', error);
+      // Fallback to single story flow
+      await proceedWithSingleStory();
     }
-  };
+  }, [messages, isRealtimeEnabled, status, isRecording, stopSession, stopTraditionalRecording, user?.name]);
 
-  // Complete interview and redirect to post-recording flow prototype
-  const handleCompleteInterview = async () => {
+  const proceedWithSingleStory = async (analyzedStory?: any) => {
+    setIsProcessing(true);
     try {
-      // Require at least one Q&A exchange
-      const userResponses = messages.filter(m =>
-        m.type === 'audio-response' || m.type === 'text-response'
-      );
+      let mixedBlob: Blob | null = null;
+      let userBlob: Blob | null = null;
+      let finalDuration = 0;
 
-      if (userResponses.length === 0) {
-        alert('Please answer at least one question before completing the interview.');
-        return;
+      if (isRealtimeEnabled) {
+        mixedBlob = getMixedAudioBlob();
+        userBlob = getUserAudioBlob();
+        finalDuration = recordingDuration;
+      } else {
+        mixedBlob = await combineAudioBlobs(audioState.chunks); // Combine traditional chunks
+        userBlob = mixedBlob; // In traditional, user and mixed are the same
+        finalDuration = getTraditionalRecordedDuration();
       }
 
-      // Confirm completion
-      const confirmComplete = confirm(
-        `Complete this interview with ${userResponses.length} ${userResponses.length === 1 ? 'response' : 'responses'}?\n\n` +
-        'You\'ll be taken to review and finalize your story.'
-      );
-
-      if (!confirmComplete) return;
-
-      // Extract Q&A pairs from messages
       const qaPairs = extractQAPairs(messages);
 
-      // Collect all audio blobs (if any)
-      const audioBlobs = messages
-        .filter(m => m.audioBlob)
-        .map(m => m.audioBlob as Blob);
+      const fullTranscript = messages
+        .filter(m => m.type !== 'system')
+        .map(m => `${m.sender === 'user' ? 'User' : 'Pearl'}: ${m.content}`)
+        .join('\n\n');
 
-      // Combine audio blobs if multiple
-      let combinedAudio: Blob | null = null;
-      if (audioBlobs.length > 0) {
-        combinedAudio = await combineAudioBlobs(audioBlobs);
-      }
-
-      // Calculate total duration
-      const totalDuration = messages
-        .filter(m => m.audioDuration)
-        .reduce((sum, m) => sum + (m.audioDuration || 0), 0);
-
-      // Complete conversation and redirect
       await completeConversationAndRedirect({
         qaPairs,
-        audioBlob: combinedAudio,
-        fullTranscript: audioState.fullTranscript,
-        totalDuration,
-      });
-
-      // Stop recording state when interview is completed
-      stopRecording();
+        audioBlob: mixedBlob,
+        userOnlyAudioBlob: userBlob,
+        fullTranscript: analyzedStory?.bridged_text || fullTranscript, // Use bridged text if available
+        totalDuration: finalDuration
+      }, analyzedStory ? [analyzedStory] : []); // Pass as an array if it's a single story
 
     } catch (error) {
-      console.error('❌ [Interview] Error completing interview:', error);
-      alert('Failed to complete interview. Please try again.');
+      console.error('Failed to complete conversation:', error);
+      setIsProcessing(false);
+    } finally {
+      setIsAnalyzing(false);
+      setIsProcessing(false);
     }
   };
+
+  const handleSplitConfirm = async () => {
+    setIsSplitting(true);
+    try {
+      let userAudioBlob: Blob | null = null;
+      let finalDuration = 0;
+
+      if (isRealtimeEnabled) {
+        userAudioBlob = getUserAudioBlob();
+        finalDuration = recordingDuration;
+      } else {
+        userAudioBlob = await combineAudioBlobs(audioState.chunks);
+        finalDuration = getTraditionalRecordedDuration();
+      }
+
+      if (!userAudioBlob) throw new Error('No user audio found to split.');
+
+      // The analysis API returns start/end indices of TEXT.
+      // We need to map char index to time.
+      // For now, let's assume the `detectedStories` from `/api/analyze-stories`
+      // already contains `start_time` and `end_time` for each story segment.
+      // This would require the `analyze-stories` API to perform this mapping or estimation.
+
+      const splitSegments = detectedStories.map(s => ({
+        start: s.start_time || 0, // Assuming start_time is provided by API
+        end: s.end_time || finalDuration, // Assuming end_time is provided by API
+        title: s.title
+      }));
+
+      const splitFormData = new FormData();
+      splitFormData.append('audio', userAudioBlob);
+      splitFormData.append('segments', JSON.stringify(splitSegments));
+
+      const splitRes = await fetch('/api/process-audio/split', {
+        method: 'POST',
+        body: splitFormData
+      });
+
+      if (!splitRes.ok) throw new Error('Splitting failed');
+
+      const { files } = await splitRes.json();
+
+      // Map back to stories
+      const finalStories = detectedStories.map((story, i) => {
+        const file = files.find((f: any) => f.index === i);
+        // Convert base64 url to blob
+        const blob = file ? dataURItoBlob(file.url) : userAudioBlob; // Fallback to full blob if split fails for a segment
+
+        return {
+          title: story.title,
+          bridged_text: story.bridged_text,
+          audioBlob: blob,
+          duration: file ? file.duration : finalDuration // Fallback to full duration
+        };
+      });
+
+      // We still need to pass the full conversation data for overall context
+      const qaPairs = extractQAPairs(messages);
+      const fullTranscript = messages.map(m => m.content).join('\n');
+      const mixedAudioBlob = isRealtimeEnabled ? getMixedAudioBlob() : await combineAudioBlobs(audioState.chunks);
+
+      await completeConversationAndRedirect({
+        qaPairs,
+        audioBlob: mixedAudioBlob, // Original full mixed audio
+        userOnlyAudioBlob: userAudioBlob, // Original full user audio
+        fullTranscript,
+        totalDuration: finalDuration
+      }, finalStories); // Pass the array of split stories
+
+    } catch (error) {
+      console.error('Split error:', error);
+      // Fallback to single story flow if splitting fails
+      await proceedWithSingleStory();
+    } finally {
+      setIsSplitting(false);
+      setShowSplitModal(false);
+      setIsAnalyzing(false);
+      setIsProcessing(false);
+    }
+  };
+
 
   // Show "Coming Soon" if feature is disabled
   if (!isFeatureEnabled) {
@@ -537,7 +690,7 @@ export default function InterviewChatPage() {
   }
 
   // Show loading state while checking auth
-  if (isLoading) {
+  if (isAuthLoading) {
     return (
       <div className="hw-page flex items-center justify-center" style={{ background: 'var(--color-page)' }}>
         <div className="text-center">
@@ -554,24 +707,22 @@ export default function InterviewChatPage() {
   }
 
   return (
-    <div className="hw-page" style={{ background: 'var(--color-page)' }}>
+    <div className="hw-page" style={{ background: '#fdfbf7' }}>{/* Warm paper-like background */}
+      {/* Story Split Modal */}
+      <StorySplitModal
+        isOpen={showSplitModal}
+        onClose={() => setShowSplitModal(false)}
+        stories={detectedStories}
+        onConfirmSplit={handleSplitConfirm}
+        onKeepOne={() => proceedWithSingleStory(detectedStories[0])}
+        isProcessing={isSplitting}
+      />
+
       {/* Welcome Modal */}
       {showWelcome && (
         <WelcomeModal
           userName={user?.name || 'friend'}
           onDismiss={handleWelcomeDismiss}
-        />
-      )}
-
-      {/* Story Split Modal */}
-      {showStorySplit && (
-        <StorySplitModal
-          stories={[]} // Will be populated from API
-          onKeepTogether={() => setShowStorySplit(false)}
-          onSplit={() => {
-            setShowStorySplit(false);
-            // Handle split logic
-          }}
         />
       )}
 
@@ -590,27 +741,35 @@ export default function InterviewChatPage() {
                 className="h-8 sm:h-10 w-auto"
                 priority
               />
-              <button
-                onClick={handleCompleteInterview}
-                disabled={isProcessing}
-                className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-semibold px-5 py-2 sm:px-6 sm:py-3 rounded-full text-sm transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                style={{ minHeight: '36px' }}
-              >
-                Complete Interview
-              </button>
+              {isAnalyzing ? (
+                <div className="flex items-center gap-2 text-amber-800">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="font-medium">Analyzing your story...</span>
+                </div>
+              ) : (
+                <Button
+                  onClick={handleComplete}
+                  className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-200 shadow-sm transition-all"
+                  size="sm"
+                  disabled={isProcessing}
+                >
+                  <Check className="w-4 h-4 mr-1.5" />
+                  Finish Interview
+                </Button>
+              )}
             </div>
           ) : (
             // Original layout when no complete button
-            <div className="flex flex-col items-center gap-0.5 sm:gap-2">
+            <div className="flex flex-col items-center gap-1 sm:gap-2">
               <Image
                 src="/final logo/logo-new.svg"
                 alt="Heritage Whisper"
                 width={200}
                 height={50}
-                className="h-10 w-auto"
+                className="h-10 w-auto opacity-90" // Slightly softer logo
                 priority
               />
-              <p className="text-lg font-medium text-gray-600">Guided Interview</p>
+              <p className="text-xl font-serif text-amber-900/80 italic">Sharing your story</p>
             </div>
           )}
 
@@ -618,13 +777,12 @@ export default function InterviewChatPage() {
           {sessionStartTime && (
             <div className="mt-2 flex flex-col items-center gap-1">
               {/* Timer Display */}
-              <div className={`text-sm font-medium tabular-nums transition-colors ${
-                sessionDuration >= 1740 // Last 60 seconds (29 minutes)
-                  ? 'text-red-600 font-bold text-base animate-pulse'
-                  : sessionDuration >= 1500 // After 25 minutes
+              <div className={`text-sm font-medium tabular-nums transition-colors ${sessionDuration >= 1740 // Last 60 seconds (29 minutes)
+                ? 'text-red-600 font-bold text-base animate-pulse'
+                : sessionDuration >= 1500 // After 25 minutes
                   ? 'text-amber-600'
                   : 'text-gray-500'
-              }`}>
+                }`}>
                 {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
                 {sessionDuration >= 1740 && ' remaining'}
               </div>
@@ -674,6 +832,7 @@ export default function InterviewChatPage() {
           onTranscriptUpdate={handleTranscriptUpdate}
           disabled={isProcessing}
           useRealtime={isRealtimeEnabled}
+          userName={user?.name}
         />
       </div>
     </div>

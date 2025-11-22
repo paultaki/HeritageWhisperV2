@@ -23,66 +23,51 @@ import { shouldCancelResponse } from '@/lib/responseTrimmer';
 
 export type RealtimeStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
-// Pearl's Expert Interviewer Instructions - Personalized and Flexible
-// NOTE: Personalization sections temporarily disabled due to hallucination issue
-// Issue: Instructions reference "previous stories" but no data is passed to session
-// Result: Pearl fabricates non-existent stories ("grandparents' farm", "early days in NYC")
-// TODO: Implement proper personalization by fetching user stories and injecting into session config
-export const PEARL_WITNESS_INSTRUCTIONS = `You are Pearl, an expert interviewer helping someone capture vivid life stories in HeritageWhisper.
+// "Grandchild" Persona - Curious, loving, and eager to learn
+// Designed to make seniors feel like they are sharing wisdom with a younger generation
+export const GRANDCHILD_INSTRUCTIONS = `You are a curious, loving, and patient grandchild interviewing your grandparent (or elder relative) for HeritageWhisper.
 
-YOUR ROLE:
-You're like a skilled documentary interviewer - drawing out details, emotions, and forgotten moments that make stories come alive.
+YOUR PERSONA:
+- Name: You don't need to say your name, just act like their loving grandchild.
+- Tone: Warm, enthusiastic, respectful, and genuinely curious.
+- Voice: You are talking to your grandparent. Be gentle but engaged.
 
-EXPERT INTERVIEWING TECHNIQUES:
-- Draw out sensory details: "What did you see/hear/smell in that moment?"
-- Explore emotions: "What was going through your mind when that happened?"
-- Add context: "How old were you? Who else was there? What year was this?"
-- Uncover forgotten details: "Close your eyes for a second - what else do you remember?"
-- Follow the energy: When they light up about something, dig deeper there
-- Use their exact words: If they say "housebroken by love," ask what that meant to them
+YOUR GOAL:
+- Help them tell their stories by asking simple, open-ended questions.
+- Make them feel listened to and valued.
+- Uncover details they might have forgotten by asking about sensory things (smells, sounds, colors).
 
-// DISABLED: Personalization causes hallucination when no data provided
-// PERSONALIZATION (USE THEIR DETAILS):
-// - Reference their actual workplace, hometown, people they've mentioned
-// - Every 3-4 questions, naturally connect to a previous story they've told
-// - "You mentioned working at PG&E - was this during that time?"
-// - "This reminds me of your story about Coach - were they still in your life then?"
-// - "You've talked about feeling responsible before, with Chewy - how was this different?"
+HOW TO SPEAK:
+- Use simple, natural language. Don't sound like a robot or a professor.
+- Say things like: "Wow!", "Really?", "That's amazing!", "I never knew that!"
+- If they mention a specific person or place, ask about it: "Who was that?", "What did it look like?"
+- If they pause, give them time. Don't rush.
+- If they get emotional, be supportive: "It's okay to feel that way. I'm here listening."
 
-ENCOURAGEMENT (LIGHT TOUCH):
-- After good details: "I can really picture that now..."
-- After emotional shares: "Thank you for trusting me with this..."
-- When they're stuck: "Take your time. Sometimes the details come back slowly..."
+KEY RULES:
+- Ask ONE question at a time.
+- Keep your responses short (1-2 sentences max) so they can talk more.
+- NEVER make up facts. If you don't know something, ask them!
+- If they ask for advice, say: "I'm not sure, but I'd love to hear what you think, Grandma/Grandpa."
 
-SAFETY THROUGH REDIRECTION (NOT REFUSAL):
-- If they want to chat/joke: Give a warm brief response, then redirect: "Ha! Speaking of that topic, tell me more about..."
-- If they ask for advice: "That's an important question. While I'm not equipped for advice, I'd love to hear how you handled that situation. What did you decide?"
-- If they go off-topic: "That's interesting! Let me ask you about..."
-- For therapy/medical/legal: "That sounds really significant. While I can't provide [medical/therapy] guidance, I'd love to hear how that experience shaped you. What was going through your mind during that time?"
-
-CONVERSATION FLOW:
-- One thoughtful question at a time (but can add a follow-up phrase if needed)
-- When energy is high: Ask for more details, emotions, what happened next
-- When energy drops: Pivot to a new angle or try a different topic
-- When they're done: "Is there more to add, or shall we save this beautiful story?"
-
-// DISABLED: Previous story awareness causes hallucination
-// PREVIOUS STORY AWARENESS:
-// You have access to their previous stories. Use this knowledge to:
-// - Make connections: "This sounds like it happened around the same time as [previous story]"
-// - Fill gaps: "You've told me about your 20s and 40s - what about your 30s?"
-// - Deepen understanding: "You've mentioned [person] in three stories now - they seem important"
-
-Remember: You're not just collecting facts - you're helping them relive and share the moments that matter. Be the interviewer who makes them think "Wow, you really understand my story."`;
+EXAMPLE INTERACTION:
+User: "I grew up on a farm."
+You: "Wow, a farm! What was your favorite animal there?"
+User: "We had a horse named Buster."
+You: "Buster! That's a great name. Did you get to ride him often?"
+`;
 
 // Legacy export for backwards compatibility
-export const PEARL_INSTRUCTIONS = PEARL_WITNESS_INSTRUCTIONS;
+export const PEARL_INSTRUCTIONS = GRANDCHILD_INSTRUCTIONS;
 
 export function useRealtimeInterview() {
   const [status, setStatus] = useState<RealtimeStatus>('disconnected');
   const [provisionalTranscript, setProvisionalTranscript] = useState('');
   const [voiceEnabled, setVoiceEnabled] = useState(true); // Enable voice by default for V2
   const [error, setError] = useState<string | null>(null);
+  const [recordingDuration, setRecordingDuration] = useState(0); // Track duration internally
+  const startTimeRef = useRef<number>(0);
+  const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const realtimeHandlesRef = useRef<RealtimeHandles | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
@@ -103,11 +88,19 @@ export function useRealtimeInterview() {
     onError?: (error: Error) => void,
     config?: RealtimeConfig,
     onAssistantResponse?: (text: string) => void,
-    onUserSpeechStart?: () => void  // Callback when user starts speaking
+    onUserSpeechStart?: () => void,  // Callback when user starts speaking
+    userName?: string // Optional user name for personalization
   ) => {
     try {
       setStatus('connecting');
       setError(null);
+      startTimeRef.current = Date.now();
+      setRecordingDuration(0);
+
+      // Start duration timer
+      durationTimerRef.current = setInterval(() => {
+        setRecordingDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
+      }, 1000);
 
       const handles = await startRealtime({
         // Live transcript updates (gray provisional text)
@@ -334,12 +327,17 @@ export function useRealtimeInterview() {
           onError?.(err);
         },
       },
-      // TODO: SECURITY - Implement server-side ephemeral token proxy before re-enabling
-      // Client-side API key exposure removed for beta launch
-      // See: /app/api/realtime-session/route.ts (needs implementation)
-      '' /* process.env.NEXT_PUBLIC_OPENAI_API_KEY || '' */,
-      config
-    );
+        // TODO: SECURITY - Implement server-side ephemeral token proxy before re-enabling
+        // Client-side API key exposure removed for beta launch
+        // See: /app/api/realtime-session/route.ts (needs implementation)
+        '' /* process.env.NEXT_PUBLIC_OPENAI_API_KEY || '' */,
+        {
+          ...config,
+          instructions: config?.instructions
+            ? config.instructions.replace('{{userName}}', userName || 'Grandma/Grandpa')
+            : GRANDCHILD_INSTRUCTIONS.replace('{{userName}}', userName || 'Grandma/Grandpa'),
+        }
+      );
 
       realtimeHandlesRef.current = handles;
 
@@ -403,6 +401,12 @@ export function useRealtimeInterview() {
     setStatus('disconnected');
     setProvisionalTranscript('');
     assistantResponseRef.current = ''; // Reset accumulated response
+
+    // Stop duration timer
+    if (durationTimerRef.current) {
+      clearInterval(durationTimerRef.current);
+      durationTimerRef.current = null;
+    }
   }, []);
 
   // Toggle voice output
@@ -491,10 +495,14 @@ export function useRealtimeInterview() {
     toggleMic,
     startMixedRecording,
     getMixedAudioBlob,
-    getUserOnlyAudioBlob,
+    getUserAudioBlob: getUserOnlyAudioBlob, // Alias for consistency
     getMicStream,
     updateInstructions,
     sendTextMessage,
     triggerPearlResponse,
+    recordingDuration,
+    // These are managed internally by the hook now, but exposed for flexibility if needed
+    handleTranscriptUpdate: (text: string, isFinal: boolean) => { }, // No-op as hook handles it
+    handleAudioResponse: (blob: Blob, duration: number) => { }, // No-op
   };
 }

@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Image from "next/image";
-import { Volume2, Edit3, MoreVertical, Star, Copy, Trash2 } from "lucide-react";
+import { Heart, MoreVertical, Play, Edit3, Trash2, Copy, Volume2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import { VisibilityModal } from "./VisibilityModal";
 import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
 
@@ -38,23 +38,14 @@ type Props = {
 };
 
 /**
- * StoryCard V5 - Management-First with Enhanced Typography
+ * StoryCard V6 - Premium & Simple (Treasure-style)
  *
- * Key changes:
- * - Replaced Timeline/Book badges with subtle top-right StatusIcons
- * - Added visible Listen and Edit quick action buttons at bottom
- * - Redesigned dropdown: Toggle Favorite, Manage Visibility, Duplicate, Delete
- * - Integrated VisibilityModal for Timeline/Book management
- * - 16:10 aspect ratio for consistent image sizing
- * - Larger fonts: title (18px), metadata (16px), buttons (16px)
- *
- * Design principles:
- * - Management interface (not display showcase)
- * - Minimize visual clutter with status icons
- * - Quick actions always visible for common tasks
- * - Dropdown for secondary actions
- * - 44x44px minimum touch targets (WCAG AAA)
- * - 2-column mobile layout (grid-cols-2)
+ * Changes:
+ * - Removed bottom action bar (Listen/Edit buttons)
+ * - Added large Play overlay on hover/idle
+ * - Increased Title font size
+ * - Moved Edit to dropdown
+ * - Consistent 16:10 aspect ratio
  */
 export function StoryCard({
   id,
@@ -80,7 +71,7 @@ export function StoryCard({
   onToggleBook,
   onDuplicate,
 }: Props) {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isFavoriting, setIsFavoriting] = useState(false);
   const [visibilityModalOpen, setVisibilityModalOpen] = useState(false);
 
   const formatDuration = (seconds: number) => {
@@ -91,8 +82,18 @@ export function StoryCard({
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsPlaying(!isPlaying);
     onPlay?.();
+  };
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isFavoriting) return;
+
+    setIsFavoriting(true);
+    onToggleFavorite?.();
+
+    // Reset after animation (120ms for micro-interaction)
+    setTimeout(() => setIsFavoriting(false), 120);
   };
 
   const handleVisibilitySave = (settings: {
@@ -109,12 +110,13 @@ export function StoryCard({
 
   return (
     <>
-      <article className="bg-white rounded-xl border-2 border-gray-200 hover:shadow-xl transition-all duration-200 overflow-hidden flex flex-col">
-        {/* Thumbnail with 16:10 Aspect Ratio - Now with blur-extend for portrait images */}
-        <div
-          className="relative cursor-pointer"
-          onClick={onView}
-        >
+      <article
+        className="story-card group bg-white rounded-2xl overflow-hidden border border-black/8 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer w-full flex flex-col"
+        style={{ maxWidth: "480px" }}
+        onClick={onView}
+      >
+        {/* Image Container - 16:10 Aspect Ratio */}
+        <div className="relative">
           <StoryPhotoWithBlurExtend
             src={imageUrl}
             alt={title}
@@ -122,126 +124,75 @@ export function StoryCard({
             height={photoHeight}
             transform={photoTransform}
             aspectRatio={16 / 10}
-            className="rounded-t-xl overflow-hidden"
+            className="rounded-t-2xl overflow-hidden"
           />
 
-          {/* Duration Badge - Top left */}
+          {/* Play Button Overlay - Center */}
           {durationSeconds > 0 && (
-            <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1">
-              <Volume2 className="w-4 h-4" />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
+              <button
+                onClick={handlePlayClick}
+                className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg transform transition-transform duration-200 hover:scale-110 active:scale-95 group-hover:bg-white"
+                aria-label="Play story"
+              >
+                <Play className="w-6 h-6 text-heritage-coral ml-1" fill="currentColor" />
+              </button>
+            </div>
+          )}
+
+          {/* Duration Badge - Bottom Left */}
+          {durationSeconds > 0 && (
+            <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
+              <Volume2 className="w-3.5 h-3.5" />
               {formatDuration(durationSeconds)}
             </div>
           )}
 
-          {/* Timeline/Book Toggle Badges - Top right */}
-          <div className="absolute top-2 right-2 flex flex-col gap-2">
-            {/* Timeline Badge */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleTimeline?.();
-              }}
-              className={`w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${
-                inTimeline ? "bg-black/75" : "bg-black/50"
-              }`}
-              aria-pressed={inTimeline}
-              aria-label={inTimeline ? "Remove from timeline" : "Add to timeline"}
-              type="button"
-            >
-              <Image
-                src={inTimeline ? "/timeline-open.svg" : "/timeline-closed.svg"}
-                width={24}
-                height={24}
-                alt=""
-                className="pointer-events-none"
-              />
-            </button>
-
-            {/* Book Badge */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleBook?.();
-              }}
-              className={`w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${
-                inBook ? "bg-black/75" : "bg-black/50"
-              }`}
-              aria-pressed={inBook}
-              aria-label={inBook ? "Remove from book view" : "Add to book view"}
-              type="button"
-            >
-              <Image
-                src={inBook ? "/book-open.svg" : "/book-closed.svg"}
-                width={24}
-                height={24}
-                alt=""
-                className="pointer-events-none"
-              />
-            </button>
-          </div>
+          {/* Favorite Button - Top Right */}
+          <button
+            onClick={handleFavoriteClick}
+            className="absolute top-3 right-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-all"
+            style={{ minWidth: "36px", minHeight: "36px" }}
+            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Heart
+              className={cn(
+                "w-4 h-4 transition-all duration-75",
+                isFavorite ? "fill-red-500 text-red-500" : "text-gray-600",
+                isFavoriting && "scale-125"
+              )}
+            />
+          </button>
         </div>
 
         {/* Card Content */}
-        <div className="p-4 flex flex-col flex-1">
-          {/* Title and Year - Compact */}
-          <div className="mb-3 flex-1">
-            <h3
-              className="text-lg font-bold text-gray-900 mb-1 line-clamp-2 cursor-pointer hover:text-heritage-coral transition-colors"
-              onClick={onView}
-            >
-              {title}
-            </h3>
-            <div className="text-base text-gray-600 font-medium">
-              {year ? (
-                <>
-                  {year}
-                  {age && <span className="text-gray-400"> • Age {age}</span>}
-                </>
-              ) : (
-                <span className="text-gray-400 flex items-center gap-1">
-                  ☁️ Timeless
-                </span>
-              )}
+        <div className="px-5 pt-4 pb-5 flex-1 flex flex-col">
+          <div className="flex items-start justify-between gap-3">
+            {/* Title and Metadata */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xl font-semibold text-gray-900 mb-1 line-clamp-2 leading-tight">
+                {title}
+              </h3>
+              <div className="text-base text-gray-500 font-medium">
+                {year ? (
+                  <>
+                    {year}
+                    {age && <span className="text-gray-400"> • Age {age}</span>}
+                  </>
+                ) : (
+                  <span className="text-gray-400 flex items-center gap-1">
+                    Timeless
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-
-          {/* Quick Actions + Dropdown - All Visible */}
-          <div className="flex items-center gap-2 mt-auto">
-            {/* Listen button - Quick action */}
-            {onPlay && durationSeconds > 0 && (
-              <button
-                onClick={handlePlayClick}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors font-medium text-base"
-                style={{ minHeight: "44px" }}
-                aria-label="Listen to story"
-              >
-                <Volume2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Listen</span>
-              </button>
-            )}
-
-            {/* Edit button - Quick action */}
-            {onEdit && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit();
-                }}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors font-medium text-base"
-                style={{ minHeight: "44px" }}
-                aria-label="Edit story"
-              >
-                <Edit3 className="w-4 h-4" />
-                <span className="hidden sm:inline">Edit</span>
-              </button>
-            )}
 
             {/* Three-dot menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors"
-                  style={{ minHeight: "44px", minWidth: "44px" }}
+                  className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors -mr-2"
+                  style={{ minHeight: "40px", minWidth: "40px" }}
                   aria-label="More actions"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -249,21 +200,31 @@ export function StoryCard({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                {/* Toggle Favorite */}
-                {onToggleFavorite && (
+                {/* Play Option */}
+                {onPlay && durationSeconds > 0 && (
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
-                      onToggleFavorite();
+                      onPlay();
                     }}
                     className="cursor-pointer"
                   >
-                    <Star
-                      size={16}
-                      className="mr-2"
-                      fill={isFavorite ? "currentColor" : "none"}
-                    />
-                    {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+                    <Play size={16} className="mr-2" />
+                    Play Story
+                  </DropdownMenuItem>
+                )}
+
+                {/* Edit Details */}
+                {onEdit && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit();
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <Edit3 size={16} className="mr-2" />
+                    Edit Details
                   </DropdownMenuItem>
                 )}
 

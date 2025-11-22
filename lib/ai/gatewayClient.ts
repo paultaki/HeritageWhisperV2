@@ -31,13 +31,14 @@ export const gateway = new OpenAI({
 
 export interface ChatRequest {
   model: string;
-  messages: Array<{ 
-    role: "system" | "user" | "assistant"; 
+  messages: Array<{
+    role: "system" | "user" | "assistant";
     content: string;
   }>;
   reasoning_effort?: "low" | "medium" | "high";
   temperature?: number;
   max_tokens?: number;
+  response_format?: { type: "text" | "json_object" };
 }
 
 export interface ChatResponse {
@@ -65,13 +66,14 @@ export interface ChatResponse {
  */
 export async function chat(request: ChatRequest): Promise<ChatResponse> {
   const start = Date.now();
-  
+
   try {
     const completion = await gateway.chat.completions.create({
       model: request.model,
       messages: request.messages,
       temperature: request.temperature ?? 0.2,
       max_tokens: request.max_tokens,
+      response_format: request.response_format,
       ...(request.reasoning_effort && {
         // @ts-ignore - GPT-5 reasoning parameter (not in types yet)
         reasoning: { effort: request.reasoning_effort },
@@ -79,13 +81,13 @@ export async function chat(request: ChatRequest): Promise<ChatResponse> {
     });
 
     const text = completion.choices?.[0]?.message?.content ?? "";
-    
+
     // Extract Gateway telemetry headers (if available)
     // Note: Headers may not be available in all Gateway configurations
     const headers = (completion as any).headers || {};
     const ttftMs = Number(headers["x-vercel-ai-ttft-ms"] || headers["x-ttft-ms"] || 0);
     const costUsd = Number(headers["x-vercel-ai-cost-usd"] || headers["x-cost-usd"] || 0);
-    
+
     // Extract token usage
     const usage = completion.usage;
     const tokensUsed = usage ? {

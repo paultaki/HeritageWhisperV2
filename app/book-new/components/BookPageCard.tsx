@@ -27,7 +27,7 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [showContinueHint, setShowContinueHint] = useState(false);
   const [showFade, setShowFade] = useState(false);
-  
+
   // Fixed padding for top bar (56px)
   // Note: Dynamic viewport detection not needed since book page has overflow:hidden on body
   const fixedPadding = 56;
@@ -104,6 +104,7 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
     <section
       className="relative flex h-[100dvh] min-w-full snap-start"
       data-story-id={story.id}
+      data-nav-ink="dark"
     >
       <div className="relative mx-auto my-0 h-[100dvh] w-full rounded-none bg-stone-50 text-stone-900 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] ring-1 ring-black/5">
         {/* Subtle inner edge shadow */}
@@ -211,16 +212,14 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
 
           {/* Fade gradient */}
           <div
-            className={`pointer-events-none absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-stone-50 to-transparent transition-opacity duration-300 ${
-              showFade ? "opacity-100" : "opacity-0"
-            }`}
+            className={`pointer-events-none absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-stone-50 to-transparent transition-opacity duration-300 ${showFade ? "opacity-100" : "opacity-0"
+              }`}
           ></div>
 
           {/* Continue reading hint */}
           <div
-            className={`absolute bottom-[63px] left-0 right-0 flex justify-center transition-opacity duration-300 ${
-              showContinueHint ? "opacity-100" : "opacity-0"
-            }`}
+            className={`absolute bottom-[63px] left-0 right-0 flex justify-center transition-opacity duration-300 ${showContinueHint ? "opacity-100" : "opacity-0"
+              }`}
           >
             <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-stone-900 shadow-lg backdrop-blur-md ring-1 ring-white/40">
               <span className="text-sm font-medium">Continue reading</span>

@@ -12,6 +12,7 @@ import {
   numeric,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
+import { relations } from "drizzle-orm";
 import { z } from "zod";
 
 export const users = pgTable("users", {
@@ -112,6 +113,21 @@ export const passkeys = pgTable(
     ),
   }),
 );
+
+// Chapters table for organizing stories
+export const chapters = pgTable("chapters", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
+  title: text("title").notNull(),
+  orderIndex: integer("order_index").notNull().default(0),
+  introText: text("intro_text"), // Phase 2: AI generated intro
+  isAiGenerated: boolean("is_ai_generated").default(false),
+  createdAt: timestamp("created_at").default(sql`NOW()`),
+});
 
 export const stories = pgTable("stories", {
   id: uuid("id")
@@ -216,6 +232,10 @@ export const stories = pgTable("stories", {
     extractedAt: string;
     version: string;
   }>(),
+  // Chapter View additions
+  chapterId: uuid("chapter_id").references(() => chapters.id, { onDelete: "set null" }),
+  chapterOrderIndex: integer("chapter_order_index"),
+  transitionText: text("transition_text"), // Phase 2: AI generated transition
   createdAt: timestamp("created_at").default(sql`NOW()`),
 });
 
@@ -493,6 +513,11 @@ export const insertFollowUpSchema = createInsertSchema(followUps).omit({
 });
 
 export const insertGhostPromptSchema = createInsertSchema(ghostPrompts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertChapterSchema = createInsertSchema(chapters).omit({
   id: true,
   createdAt: true,
 });
@@ -898,3 +923,17 @@ export type InsertAiUsageLog = z.infer<typeof insertAiUsageLogSchema>;
 export type AiUsageLog = typeof aiUsageLog.$inferSelect;
 export type InsertPromptFeedback = z.infer<typeof insertPromptFeedbackSchema>;
 export type PromptFeedback = typeof promptFeedback.$inferSelect;
+
+export const chaptersRelations = relations(chapters, ({ many }) => ({
+  stories: many(stories),
+}));
+
+export const storiesRelations = relations(stories, ({ one }) => ({
+  chapter: one(chapters, {
+    fields: [stories.chapterId],
+    references: [chapters.id],
+  }),
+}));
+
+export type InsertChapter = z.infer<typeof insertChapterSchema>;
+export type Chapter = typeof chapters.$inferSelect;

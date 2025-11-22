@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Pause, Play, Square, Mic } from "lucide-react";
+import { ArrowLeft, Pause, Play, Square, Mic, Clock } from "lucide-react";
 import { type AudioRecordingScreenProps, type RecordingState } from "../types";
 import "../recording.css";
 
@@ -20,6 +20,7 @@ export function AudioRecordingScreen({
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -55,7 +56,8 @@ export function AudioRecordingScreen({
       const audioContext = new AudioContext();
       const source = audioContext.createMediaStreamSource(stream);
       const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
+      analyser.fftSize = 64; // Smaller FFT size for fewer bars but more responsive
+      analyser.smoothingTimeConstant = 0.5; // Make it snappier
       source.connect(analyser);
 
       audioContextRef.current = audioContext;
@@ -92,6 +94,7 @@ export function AudioRecordingScreen({
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
     analyserRef.current.getByteFrequencyData(dataArray);
 
+    // Calculate average volume for the whole frame
     const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
     setAudioLevel(average / 255);
 
@@ -114,6 +117,7 @@ export function AudioRecordingScreen({
     if (!mediaRecorderRef.current) return;
 
     setRecordingState("processing");
+    setIsProcessing(true); // Show loading spinner
     stopTimer();
 
     if (animationFrameRef.current) {
@@ -179,6 +183,7 @@ export function AudioRecordingScreen({
       onFinishAndReview(completeDraft as any);
     } finally {
       cleanup();
+      setIsProcessing(false);
     }
   };
 
@@ -221,39 +226,49 @@ export function AudioRecordingScreen({
   const isPaused = recordingState === "paused";
   const isIdle = recordingState === "idle";
 
-  // Waveform visualization
-  const waveformBars = Array.from({ length: 12 }, (_, i) => {
-    if (isIdle) return 0.2;
-    const baseHeight = 0.2 + audioLevel * 0.6;
-    const waveOffset = Math.sin((Date.now() / 300) + (i * 0.5)) * 0.15;
-    const randomness = Math.random() * 0.1;
-    return Math.max(0.15, Math.min(0.95, baseHeight + waveOffset + randomness));
+  // Improved Waveform visualization
+  // Create 20 bars that react to audio level with some randomness and symmetry
+  const waveformBars = Array.from({ length: 20 }, (_, i) => {
+    if (isIdle) return 0.15; // Low idle state
+
+    // Calculate a "wave" effect that moves
+    const waveOffset = Math.sin((Date.now() / 150) + (i * 0.5));
+
+    // Base height driven by audio volume (amplified)
+    const volumeHeight = Math.max(0.15, audioLevel * 2.5);
+
+    // Combine volume with wave effect, but keep volume as primary driver
+    // Center bars are taller
+    const centerFactor = 1 - Math.abs(i - 10) / 10; // 0 at edges, 1 at center
+
+    let height = volumeHeight * (0.5 + centerFactor * 0.5);
+
+    // Add some jitter for liveliness
+    height += (Math.random() * 0.1 * audioLevel);
+
+    return Math.max(0.15, Math.min(1.0, height));
   });
 
   return (
-    <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="min-h-screen flex flex-col bg-[#F7F2EC]">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-4" style={{ maxWidth: "650px", margin: "0 auto", width: "100%" }}>
+      <div className="flex items-center justify-between px-6 pt-8 pb-6 max-w-2xl mx-auto w-full">
         <div className="flex items-center gap-3">
           <img
-            src="/final logo/logo hw.svg"
-            alt="HW"
-            className="w-12 h-12"
+            src="/final logo/logo-new.svg"
+            alt="Heritage Whisper"
+            className="h-10 w-auto"
           />
           <div className="leading-tight">
-            <h1 className="font-bold text-lg tracking-wide m-0" style={{ color: "#2C3E50", lineHeight: "1.2" }}>
-              HERITAGE WHISPER
-            </h1>
-            <p className="text-sm m-0" style={{ color: "#6B7280", lineHeight: "1.3" }}>
+            <p className="text-sm m-0 text-[#8A8378] leading-tight">
               {draft.title || "Record your story"}
             </p>
           </div>
         </div>
-        {onSaveForLater && (
+        {onSaveForLater && !isProcessing && (
           <button
             onClick={handleSaveForLater}
-            className="text-base font-medium"
-            style={{ color: "#6B7280" }}
+            className="text-base font-medium text-[#6B7280] hover:text-[#203954] transition-colors"
           >
             Save later
           </button>
@@ -262,10 +277,10 @@ export function AudioRecordingScreen({
 
       {/* Photo Preview */}
       {draft.photoUrl && (
-        <div className="mx-6 mb-6 relative rounded-2xl overflow-hidden" style={{ aspectRatio: "16/10", maxWidth: "600px", margin: "0 auto 1.5rem auto" }}>
+        <div className="mx-6 mb-6 relative rounded-2xl overflow-hidden shadow-md max-w-2xl mx-auto w-full aspect-[16/10]">
           <img src={draft.photoUrl} alt="Story" className="w-full h-full object-cover" />
           <div className="absolute top-4 left-4">
-            <button className="bg-black/60 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+            <button className="bg-black/60 hover:bg-black/70 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 backdrop-blur-sm transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
@@ -276,124 +291,130 @@ export function AudioRecordingScreen({
       )}
 
       {/* Main Content */}
-      <div className="flex-1 px-6" style={{ maxWidth: "600px", margin: "0 auto" }}>
+      <div className="flex-1 px-6 pb-12 max-w-2xl mx-auto w-full flex flex-col">
         {/* Timer Card */}
-        <div className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-[#EFE6DA]">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: isIdle ? "#9CA3AF" : "#10B981" }} />
-              <span className="text-sm font-medium" style={{ color: "#6B7280" }}>
-                {isIdle ? "Ready to record" : isRecording ? "Recording" : "Paused"}
+              <div className={`w-3 h-3 rounded-full ${isIdle ? "bg-[#9CA3AF]" : "bg-[#10B981] animate-pulse"}`} />
+              <span className="text-sm font-medium text-[#6B7280]">
+                {isIdle ? "Ready to record" : isRecording ? "Recording" : isProcessing ? "Processing..." : "Paused"}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-sm" style={{ color: "#9CA3AF" }}>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                <path strokeLinecap="round" strokeWidth="2" d="M12 6v6l4 2" />
-              </svg>
+            <div className="flex items-center gap-2 text-sm text-[#9CA3AF]">
+              <Clock className="w-4 h-4" />
               Max 30m
             </div>
           </div>
 
-          <div className="text-center mb-4">
-            <div className="text-5xl font-semibold tabular-nums" style={{ color: "#2C3E50" }}>
+          <div className="text-center mb-2">
+            <div className="text-6xl font-semibold tabular-nums text-[#203954] tracking-tight">
               {formatTime(elapsedSeconds)}
             </div>
             {!isIdle && (
-              <p className="text-sm mt-1" style={{ color: "#9CA3AF" }}>
-                {MAX_DURATION_SECONDS - elapsedSeconds}s remaining
+              <p className="text-sm mt-2 text-[#9CA3AF]">
+                {Math.floor((MAX_DURATION_SECONDS - elapsedSeconds) / 60)}m {(MAX_DURATION_SECONDS - elapsedSeconds) % 60}s remaining
               </p>
             )}
           </div>
         </div>
 
         {/* Waveform Card */}
-        <div className="bg-white rounded-2xl p-8 mb-4 shadow-sm">
-          <div className="flex items-center justify-center gap-1 h-20">
+        <div className="bg-white rounded-2xl p-8 mb-8 shadow-sm border border-[#EFE6DA]">
+          <div className="flex items-center justify-center gap-1.5 h-24">
             {waveformBars.map((height, index) => (
               <div
                 key={index}
-                className="w-1 rounded-full transition-all duration-100"
+                className="w-1.5 rounded-full transition-all duration-75"
                 style={{
-                  height: `${height * 80}px`,
-                  backgroundColor: isIdle ? "#D1D5DB" : "#10B981"
+                  height: `${height * 100}%`,
+                  backgroundColor: isIdle ? "#E5E7EB" : "#10B981",
+                  opacity: isIdle ? 0.5 : 1
                 }}
               />
             ))}
           </div>
-          <p className="text-center text-sm mt-4" style={{ color: "#9CA3AF" }}>
-            {isIdle ? "READY TO RECORD" : isRecording ? "RECORDING" : "PAUSED"}
+          <p className="text-center text-sm mt-6 font-medium tracking-wider text-[#9CA3AF] uppercase">
+            {isIdle ? "Tap microphone to start" : isRecording ? "Listening..." : isProcessing ? "Saving your story..." : "Paused"}
           </p>
         </div>
 
         {/* Tip */}
-        <div className="mb-6">
-          <p className="text-lg hw-text-center" style={{ color: "#6B7280" }}>
-            Take your time. You can pause anytime and edit later.
+        <div className="mb-8 text-center">
+          <p className="text-lg text-[#6B7280]">
+            {isProcessing ? "Please wait while we save and transcribe your story." : "Take your time. You can pause anytime and edit later."}
           </p>
         </div>
 
         {/* Controls */}
-        {isIdle ? (
-          <>
-            <button
-              onClick={startRecording}
-              className="w-full py-4 rounded-xl font-medium text-base text-white flex items-center justify-center gap-2 mb-4"
-              style={{ backgroundColor: "#2C3E50" }}
-            >
-              <Mic className="w-5 h-5" />
-              Start recording
-            </button>
-            <p className="text-base hw-text-center mb-6" style={{ color: "#9CA3AF" }}>
-              Stop and continue to review
-            </p>
-          </>
-        ) : (
-          <div className="flex gap-3 mb-4">
-            <button
-              onClick={handlePauseResume}
-              className="flex-1 py-3 rounded-xl font-medium text-base text-white flex items-center justify-center gap-2"
-              style={{ backgroundColor: "#2C3E50" }}
-            >
-              {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
-              {isPaused ? "Resume" : "Pause"}
-            </button>
-            <button
-              onClick={handleStop}
-              className="flex-1 py-3 rounded-xl font-medium text-base flex items-center justify-center gap-2"
-              style={{ backgroundColor: "white", border: "2px solid #E5E7EB", color: "#2C3E50" }}
-            >
-              <Square className="w-5 h-5" />
-              Finish
-            </button>
-          </div>
-        )}
+        <div className="mt-auto">
+          {isProcessing ? (
+            <div className="w-full py-6 flex flex-col items-center justify-center gap-3">
+              <div className="w-12 h-12 border-4 border-[#203954] border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-[#203954] font-medium">Finishing up...</p>
+            </div>
+          ) : isIdle ? (
+            <>
+              <button
+                onClick={startRecording}
+                className="w-full py-5 rounded-2xl font-medium text-lg text-white flex items-center justify-center gap-3 mb-4 shadow-lg shadow-blue-900/10 hover:shadow-blue-900/20 transition-all active:scale-[0.99]"
+                style={{ backgroundColor: "#203954" }}
+              >
+                <div className="p-1 bg-white/20 rounded-full">
+                  <Mic className="w-6 h-6" />
+                </div>
+                Start recording
+              </button>
+              <p className="text-base text-center mb-8 text-[#9CA3AF]">
+                Stop and continue to review
+              </p>
+            </>
+          ) : (
+            <div className="flex gap-4 mb-8">
+              <button
+                onClick={handlePauseResume}
+                className="flex-1 py-4 rounded-2xl font-medium text-lg text-white flex items-center justify-center gap-3 shadow-lg shadow-blue-900/10 transition-all active:scale-[0.99]"
+                style={{ backgroundColor: "#203954" }}
+              >
+                {isPaused ? <Play className="w-6 h-6 fill-current" /> : <Pause className="w-6 h-6 fill-current" />}
+                {isPaused ? "Resume" : "Pause"}
+              </button>
+              <button
+                onClick={handleStop}
+                className="flex-1 py-4 rounded-2xl font-medium text-lg flex items-center justify-center gap-3 bg-white border-2 border-[#E5E7EB] text-[#203954] hover:bg-gray-50 transition-all active:scale-[0.99]"
+              >
+                <Square className="w-5 h-5 fill-current" />
+                Finish
+              </button>
+            </div>
+          )}
 
-        {/* Text Option */}
-        {isIdle && (
-          <div className="hw-text-center mb-6" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <button
-              onClick={onSwitchToText}
-              className="text-base font-medium mb-2"
-              style={{ color: "#2C3E50" }}
-            >
-              Prefer to type this story instead?
-            </button>
-            <p className="text-base hw-text-center" style={{ color: "#9CA3AF" }}>
-              Audio captures your voice best, but typing is always an option.
-            </p>
-          </div>
-        )}
+          {/* Text Option */}
+          {isIdle && (
+            <div className="text-center mb-8">
+              <button
+                onClick={onSwitchToText}
+                className="text-base font-medium mb-2 text-[#203954] hover:underline decoration-[#CBA46A] underline-offset-4"
+              >
+                Prefer to type this story instead?
+              </button>
+              <p className="text-base text-[#9CA3AF]">
+                Audio captures your voice best, but typing is always an option.
+              </p>
+            </div>
+          )}
 
-        {/* Back Button */}
-        {isIdle && (
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 mb-6"
-          >
-            <ArrowLeft className="w-5 h-5" style={{ color: "#6B7280" }} />
-          </button>
-        )}
+          {/* Back Button */}
+          {isIdle && (
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 text-[#6B7280] hover:text-[#203954] transition-colors px-2 py-1 -ml-2"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="font-medium">Back</span>
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

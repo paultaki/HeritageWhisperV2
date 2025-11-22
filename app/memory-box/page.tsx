@@ -465,8 +465,14 @@ export default function MemoryBoxV2Page() {
       );
     }
 
-    // Sort by date added (newest first)
-    filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    // Sort by date added (newest first), with favorites on top if viewing "all"
+    filtered.sort((a, b) => {
+      if (storyFilter === "all" && !searchQuery) {
+        if (a.isFavorite && !b.isFavorite) return -1;
+        if (!a.isFavorite && b.isFavorite) return 1;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
     return filtered;
   }, [stories, storyFilter, selectedDecade, searchQuery]);
@@ -605,7 +611,6 @@ export default function MemoryBoxV2Page() {
             {/* Stories Tab */}
             {activeTab === "stories" && (
               <>
-
                 {/* Stories Grid */}
                 <div className="mt-6">
                   {isLoading ? (
@@ -635,63 +640,102 @@ export default function MemoryBoxV2Page() {
                       )}
                     </Card>
                   ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {processedStories.map((story) => {
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {processedStories.map((story, index) => {
                         const heroPhoto = story.photos?.find((p) => p.isHero) || story.photos?.[0];
                         const imageUrl = heroPhoto?.url || story.photoUrl || "/images/placeholder.jpg";
                         const photoTransform = heroPhoto?.transform;
                         const isPrivate = !story.includeInTimeline && !story.includeInBook;
 
+                        // Calculate headers
+                        const showFavoritesHeader = index === 0 && story.isFavorite && storyFilter === "all" && !searchQuery;
+                        const firstNonFavoriteIndex = processedStories.findIndex(s => !s.isFavorite);
+                        const showAllHeader = index === firstNonFavoriteIndex && firstNonFavoriteIndex > 0 && storyFilter === "all" && !searchQuery;
+
                         return (
-                          <StoryCard
-                            key={story.id}
-                            id={story.id}
-                            title={story.title}
-                            preview=""
-                            imageUrl={imageUrl}
-                            photoTransform={photoTransform}
-                            year={story.storyYear}
-                            age={calculateAge(story.storyYear)}
-                            durationSeconds={story.durationSeconds}
-                            isFavorite={story.isFavorite}
-                            inTimeline={story.includeInTimeline}
-                            inBook={story.includeInBook}
-                            isPrivate={isPrivate}
-                            onView={() => {
-                              setSelectedStory(story);
-                              setOverlayOpen(true);
-                            }}
-                            onPlay={() => {
-                              if (story.audioUrl) {
-                                AudioManager.getInstance().play(story.id, story.audioUrl);
+                          <React.Fragment key={story.id}>
+                            {/* Favorites Header */}
+                            {showFavoritesHeader && (
+                              <div className="col-span-full mb-2 mt-2">
+                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                                  <span className="text-heritage-coral">★</span> Favorites (Pinned)
+                                </h3>
+                              </div>
+                            )}
+
+                            {/* All Memories Header */}
+                            {showAllHeader && (
+                              <div className="col-span-full mb-2 mt-6">
+                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                                  All Memories
+                                </h3>
+                              </div>
+                            )}
+
+                            <StoryCard
+                              id={story.id}
+                              title={story.title}
+                              preview=""
+                              imageUrl={imageUrl}
+                              photoTransform={photoTransform}
+                              year={story.storyYear}
+                              age={calculateAge(story.storyYear)}
+                              durationSeconds={story.durationSeconds}
+                              isFavorite={story.isFavorite}
+                              inTimeline={story.includeInTimeline}
+                              inBook={story.includeInBook}
+                              isPrivate={isPrivate}
+                              onView={() => {
+                                setSelectedStory(story);
+                                setOverlayOpen(true);
+                              }}
+                              onPlay={() => {
+                                if (story.audioUrl) {
+                                  AudioManager.getInstance().play(story.id, story.audioUrl);
+                                }
+                              }}
+                              onEdit={() => setStoryToEdit(story)}
+                              onDelete={() => {
+                                setStoryToDelete(story.id);
+                                setShowDeleteConfirm(true);
+                              }}
+                              onToggleFavorite={() =>
+                                updateStory.mutate({ id: story.id, updates: { isFavorite: !story.isFavorite } })
                               }
-                            }}
-                            onEdit={() => setStoryToEdit(story)}
-                            onDelete={() => {
-                              setStoryToDelete(story.id);
-                              setShowDeleteConfirm(true);
-                            }}
-                            onToggleFavorite={() =>
-                              updateStory.mutate({ id: story.id, updates: { isFavorite: !story.isFavorite } })
-                            }
-                            onToggleTimeline={() =>
-                              updateStory.mutate({ id: story.id, updates: { includeInTimeline: !story.includeInTimeline } })
-                            }
-                            onToggleBook={() =>
-                              updateStory.mutate({ id: story.id, updates: { includeInBook: !story.includeInBook } })
-                            }
-                            onDuplicate={() => {
-                              toast({
-                                title: "Duplicate feature coming soon",
-                                description: "Memory duplication will be available in a future update.",
-                              });
-                            }}
-                          />
+                              onToggleTimeline={() =>
+                                updateStory.mutate({ id: story.id, updates: { includeInTimeline: !story.includeInTimeline } })
+                              }
+                              onToggleBook={() =>
+                                updateStory.mutate({ id: story.id, updates: { includeInBook: !story.includeInBook } })
+                              }
+                              onDuplicate={() => {
+                                toast({
+                                  title: "Duplicate feature coming soon",
+                                  description: "Memory duplication will be available in a future update.",
+                                });
+                              }}
+                            />
+                          </React.Fragment>
                         );
                       })}
                     </div>
                   )}
                 </div>
+
+                {/* Floating Action Button for Recording */}
+                {isOwnAccount && (
+                  <div className="fixed bottom-24 right-6 z-40">
+                    <button
+                      onClick={() => modeSelection.openQuickRecorder()}
+                      className="flex items-center justify-center gap-2 px-6 py-4 bg-heritage-coral text-white rounded-full font-semibold shadow-2xl hover:bg-heritage-coral/90 transition-all hover:scale-105 active:scale-95"
+                      style={{ minHeight: "56px", minWidth: "56px" }}
+                      aria-label="Record memory"
+                    >
+                      <div className="w-3 h-3 rounded-full bg-white animate-pulse" />
+                      <span className="hidden sm:inline">Record Memory</span>
+                    </button>
+                  </div>
+                )}
               </>
             )}
 
@@ -872,10 +916,10 @@ export default function MemoryBoxV2Page() {
                 metadata: updates.metadata,
                 photos: updates.photoTransform && storyToEdit.photos
                   ? storyToEdit.photos.map(p =>
-                      p.isHero
-                        ? { ...p, transform: updates.photoTransform }
-                        : p
-                    )
+                    p.isHero
+                      ? { ...p, transform: updates.photoTransform }
+                      : p
+                  )
                   : storyToEdit.photos,
               },
             });

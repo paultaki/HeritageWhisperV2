@@ -77,13 +77,58 @@ async function extractLessonFromTranscript(transcript: string): Promise<string> 
 
 /**
  * Save conversation data to NavCache and redirect to wizard
+ * Supports saving multiple stories in a chain
  */
 export async function completeConversationAndRedirect(
-  conversationData: ConversationData
+  conversationData: ConversationData,
+  splitStories?: Array<{
+    title: string;
+    bridged_text: string;
+    audioBlob: Blob;
+    duration: number;
+  }>
 ): Promise<void> {
   try {
     const { qaPairs, audioBlob, userOnlyAudioBlob, fullTranscript, totalDuration } = conversationData;
 
+    // If we have split stories, we need to create a chain of NavCache entries
+    if (splitStories && splitStories.length > 0) {
+      const navIds: string[] = [];
+
+      // 1. Generate all IDs first so we can link them
+      for (let i = 0; i < splitStories.length; i++) {
+        navIds.push(navCache.generateId());
+      }
+
+      // 2. Save each story, pointing to the next one
+      for (let i = 0; i < splitStories.length; i++) {
+        const story = splitStories[i];
+        const nextNavId = i < splitStories.length - 1 ? navIds[i + 1] : undefined;
+
+        const recordingData = {
+          mode: 'conversation' as const,
+          audioBlob: story.audioBlob,
+          duration: story.duration,
+          timestamp: new Date().toISOString(),
+          rawTranscript: fullTranscript, // Keep full context
+          transcription: story.bridged_text, // Use bridged text as the main content
+          title: story.title,
+          qaPairs: qaPairs || [],
+          lessonLearned: '', // Can be extracted later per story
+          nextNavId, // Link to next story
+          storyIndex: i + 1,
+          totalStories: splitStories.length
+        };
+
+        await navCache.set(navIds[i], recordingData);
+      }
+
+      // 3. Redirect to the first story
+      window.location.href = `/review/book-style?nav=${navIds[0]}&mode=wizard`;
+      return;
+    }
+
+    // Default single story flow
     // Prefer user-only audio (no Pearl voice) for final story
     const finalAudioBlob = userOnlyAudioBlob || audioBlob;
 
