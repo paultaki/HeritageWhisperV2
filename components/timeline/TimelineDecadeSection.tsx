@@ -46,7 +46,8 @@ export const TimelineDecadeSection = React.memo(
     highlightedStoryId,
     returnHighlightId,
     useV2Features = false,
-  }: TimelineDecadeSectionProps) {
+    getGhostAction,
+  }: TimelineDecadeSectionProps & { getGhostAction?: (story: any) => { label: string; onClick: (story: any) => void } | undefined }) {
     return (
       <section
         id={decadeId}
@@ -61,14 +62,14 @@ export const TimelineDecadeSection = React.memo(
           style={
             isDarkTheme
               ? {
-                  // Enhanced glassmorphism for dark theme - very transparent to see spine through
-                  backgroundColor: "rgba(37, 39, 40, 0.40)",
-                  backdropFilter: "blur(20px) saturate(180%)",
-                  WebkitBackdropFilter: "blur(20px) saturate(180%)",
-                  borderBottom: "1px solid rgba(59, 61, 63, 0.5)",
-                  borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-                  color: "#b0b3b8",
-                }
+                // Enhanced glassmorphism for dark theme - very transparent to see spine through
+                backgroundColor: "rgba(37, 39, 40, 0.40)",
+                backdropFilter: "blur(20px) saturate(180%)",
+                WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                borderBottom: "1px solid rgba(59, 61, 63, 0.5)",
+                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#b0b3b8",
+              }
               : undefined
           }
         >
@@ -102,6 +103,10 @@ export const TimelineDecadeSection = React.memo(
                 />
               );
             }
+
+            // Check for custom action (ghost story)
+            const ghostAction = getGhostAction?.(storyOrPrompt);
+
             // Regular story
             return (
               <MemoryCard
@@ -114,6 +119,8 @@ export const TimelineDecadeSection = React.memo(
                 onOpenOverlay={onOpenOverlay}
                 birthYear={birthYear}
                 useV2Features={useV2Features}
+                customActionLabel={ghostAction?.label}
+                onCustomAction={ghostAction?.onClick}
               />
             );
           })}

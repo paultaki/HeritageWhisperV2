@@ -280,10 +280,12 @@ export function EditTreasureModal({ isOpen, onClose, treasure, onSave }: EditTre
                 <img
                   src={newPhotoPreview || treasure.imageUrl}
                   alt={title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
                   style={{
                     transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x}%, ${editTransform.position.y}%)`,
                     transformOrigin: "center center",
+                    objectFit: "contain",
+                    objectPosition: "center center",
                   }}
                 />
                 {/* Overlay hint */}
@@ -432,10 +434,12 @@ export function EditTreasureModal({ isOpen, onClose, treasure, onSave }: EditTre
               <img
                 src={newPhotoPreview || treasure.imageUrl}
                 alt={title}
-                className="w-full h-full object-cover select-none pointer-events-none"
+                className="w-full h-full select-none pointer-events-none"
                 style={{
                   transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x}%, ${editTransform.position.y}%)`,
                   transformOrigin: "center center",
+                  objectFit: "contain",
+                  objectPosition: "center center",
                 }}
                 draggable={false}
               />

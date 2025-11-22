@@ -24,6 +24,7 @@ import { type Story } from "@/lib/supabase";
 import { type GhostPrompt } from "@/lib/ghostPrompts";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { normalizeYear } from "@/lib/utils";
 
 // Hooks
 import { useTimelineData } from "@/hooks/use-timeline-data";
@@ -131,29 +132,29 @@ export function TimelineMobileV2() {
   const pageStyle = ui.isDark
     ? { backgroundColor: "#1c1c1d", color: "#b0b3b8" }
     : {
-        backgroundColor:
-          ui.currentColorScheme === "original"
-            ? "#fafaf9"
-            : ui.currentColorScheme === "white"
+      backgroundColor:
+        ui.currentColorScheme === "original"
+          ? "#fafaf9"
+          : ui.currentColorScheme === "white"
+            ? "#FFFFFF"
+            : ui.currentColorScheme === "inverted"
               ? "#FFFFFF"
-              : ui.currentColorScheme === "inverted"
-                ? "#FFFFFF"
-                : ui.currentColorScheme === "soft"
-                  ? "#F9FAFB"
-                  : ui.currentColorScheme === "cool"
-                    ? "#F8FAFC"
-                    : ui.currentColorScheme === "dark"
-                      ? "#0F0F0F"
-                      : ui.currentColorScheme === "retro"
-                        ? "#F5E6D3"
-                        : "#fafaf9",
-        color:
-          ui.currentColorScheme === "dark"
-            ? "#E5E5E5"
-            : ui.currentColorScheme === "retro"
-              ? "#6B4E42"
-              : undefined,
-      };
+              : ui.currentColorScheme === "soft"
+                ? "#F9FAFB"
+                : ui.currentColorScheme === "cool"
+                  ? "#F8FAFC"
+                  : ui.currentColorScheme === "dark"
+                    ? "#0F0F0F"
+                    : ui.currentColorScheme === "retro"
+                      ? "#F5E6D3"
+                      : "#fafaf9",
+      color:
+        ui.currentColorScheme === "dark"
+          ? "#E5E5E5"
+          : ui.currentColorScheme === "retro"
+            ? "#6B4E42"
+            : undefined,
+    };
 
   return (
     <div className="timeline-page timeline-v2-premium hw-page" style={pageStyle}>
@@ -183,7 +184,7 @@ export function TimelineMobileV2() {
                       description: "Stripe integration will be added soon.",
                     });
                   }}
-                  onDismiss={() => {}}
+                  onDismiss={() => { }}
                 />
               )}
 
@@ -191,114 +192,185 @@ export function TimelineMobileV2() {
             {!(
               user?.freeStoriesUsed === 3 && user?.subscriptionStatus !== "active"
             ) && (
-              <NextStoryCard
-                onRecordClick={(promptId) => {
-                  router.push("/review/book-style?new=true");
-                  if (promptId) {
-                    sessionStorage.setItem("activePromptId", promptId);
-                  }
-                }}
-              />
-            )}
+                <NextStoryCard
+                  onRecordClick={(promptId) => {
+                    router.push("/review/book-style?new=true");
+                    if (promptId) {
+                      sessionStorage.setItem("activePromptId", promptId);
+                    }
+                  }}
+                />
+              )}
           </>
         )}
 
         <div className="hw-layout">
-          {/* Empty State - Context-aware based on account type */}
-          {timelineData.stories.length === 0 ? (
-            <div className="py-12 space-y-8 px-4">
-              {activeContext?.type === 'own' || activeContext?.permissionLevel === 'contributor' ? (
-                // Viewing own account or contributor - show premium starter cards
-                <>
-                  {/* Intro text */}
-                  <p className="text-center text-lg text-stone-600 max-w-2xl mx-auto">
-                    {activeContext?.type === 'own'
-                      ? "Let's start your story. Choose a moment below or tap Create First Memory."
-                      : `Let's start ${activeContext.storytellerName}'s story. Choose a moment below or tap Record Story.`
+          {/* Ghost Story Logic */}
+          {(() => {
+            // Clone stories to avoid mutating original data
+            let sortedStories = [...timelineData.stories].sort((a: any, b: any) => {
+              const yearA = normalizeYear(a.storyYear);
+              const yearB = normalizeYear(b.storyYear);
+              return (yearA ?? 0) - (yearB ?? 0);
+            });
+
+            // Check if birth story exists
+            const hasBirthStory = sortedStories.some(s => normalizeYear(s.storyYear) === birthYear);
+
+            // Inject virtual birth story if missing
+            if (!hasBirthStory) {
+              const virtualBirthStory: any = {
+                id: 'birth-story-virtual',
+                userId: user?.id || 'ghost-user',
+                title: 'When I was born',
+                storyYear: birthYear,
+                storyDate: `${birthYear}-01-01`,
+                photos: [], // Empty photos triggers "pill" style
+                audioUrl: "",
+                transcription: "The beginning of my story.",
+                includeInTimeline: true,
+                createdAt: new Date().toISOString(),
+                templateId: 'birth-story', // Link to birth story template
+              };
+              sortedStories.unshift(virtualBirthStory);
+            }
+
+            // Ghost Stories Logic
+            // Show ghost stories if we have NO stories, OR if we only have the birth story (virtual or real)
+            // This ensures ghost stories persist until the user adds a SECOND memory
+            const isGhostMode = sortedStories.length === 0 || (sortedStories.length === 1 && normalizeYear(sortedStories[0].storyYear) === birthYear);
+
+            if (isGhostMode) {
+              // Map templates to ghost stories (excluding birth-story since it's already handled)
+              const ghostStories = STARTER_TEMPLATES
+                .filter(t => t.id !== 'birth-story')
+                .map((template) => {
+                  let yearOffset = 0;
+                  let photoUrl = "";
+
+                  switch (template.id) {
+                    case 'childhood-photo':
+                      yearOffset = 10;
+                      photoUrl = "/demo-dad-boy.png";
+                      break;
+                    case 'turning-point':
+                      yearOffset = 25;
+                      photoUrl = "/demo-hiking.png";
+                      break;
+                    case 'family-memory':
+                      yearOffset = 35;
+                      photoUrl = "/johnsons.png";
+                      break;
+                  }
+
+                  return {
+                    id: template.id,
+                    userId: 'ghost-user',
+                    title: template.title,
+                    storyYear: birthYear + yearOffset,
+                    storyDate: `${birthYear + yearOffset}-01-01`,
+                    photos: [{ id: `ghost-photo-${template.id}`, url: photoUrl, isHero: true }],
+                    audioUrl: "", // No audio
+                    transcription: template.subtitle, // Use subtitle as snippet
+                    includeInTimeline: true,
+                    createdAt: new Date().toISOString(),
+                    templateId: template.id, // Keep track of template
+                  };
+                });
+
+              sortedStories = [...sortedStories, ...ghostStories];
+            }
+
+            // Re-group stories by decade with the new ghost stories
+            // We need to rebuild the timeline items structure locally since we modified the stories
+            // This is a simplified version of useTimelineData's grouping logic
+            const storiesByDecade = new Map<string, Story[]>();
+            sortedStories.forEach((story: Story) => {
+              const year = normalizeYear(story.storyYear);
+              const decade = Math.floor((year ?? 0) / 10) * 10;
+              const decadeKey = `${decade}s`;
+              if (!storiesByDecade.has(decadeKey)) {
+                storiesByDecade.set(decadeKey, []);
+              }
+              storiesByDecade.get(decadeKey)?.push(story);
+            });
+
+            const timelineItems = Array.from(storiesByDecade.entries())
+              .sort(([decadeA], [decadeB]) => {
+                const yearA = parseInt(decadeA.replace('s', ''));
+                const yearB = parseInt(decadeB.replace('s', ''));
+                return yearA - yearB;
+              })
+              .map(([decade, decadeStories]) => ({
+                id: decade,
+                title: decade,
+                subtitle: `${decadeStories.length} memories`,
+                stories: decadeStories,
+              }));
+
+            // Helper to get ghost action
+            const getGhostAction = (story: any) => {
+              if (isGhostMode && story.templateId) {
+                return {
+                  label: story.templateId === 'birth-story' ? 'Add birth info' :
+                    story.templateId === 'turning-point' ? 'Record story' :
+                      'Add memory',
+                  onClick: (s: any) => {
+                    const templateId = s.templateId;
+                    const template = STARTER_TEMPLATES.find(t => t.id === templateId);
+                    if (template) {
+                      sessionStorage.setItem('starterTemplate', JSON.stringify({
+                        id: template.id,
+                        title: template.title,
+                      }));
+                      router.push('/recording');
                     }
-                  </p>
+                  }
+                };
+              }
+              return undefined;
+            };
 
-                  {/* Starter Cards - Responsive Grid (stacked on mobile) */}
-                  <div className="grid grid-cols-1 gap-6 max-w-md mx-auto">
-                    {STARTER_TEMPLATES.map((template) => (
-                      <StarterMemoryCard
-                        key={template.id}
-                        template={template}
-                        onStart={(template) => {
-                          // Store template in sessionStorage for /recording page to read
-                          sessionStorage.setItem('starterTemplate', JSON.stringify({
-                            id: template.id,
-                            title: template.title,
-                          }));
+            return (
+              <>
+                <div
+                  className="hw-spine"
+                  style={
+                    ui.isDark ? { backgroundColor: "#ffffff", opacity: 1 } : undefined
+                  }
+                >
+                  {timelineItems.map((item, index) => (
+                    <TimelineDecadeSection
+                      key={item.id ?? String(index)}
+                      decadeId={item.id}
+                      title={item.title}
+                      subtitle={item.subtitle}
+                      stories={item.stories}
+                      isActive={navigation.activeDecade === item.id}
+                      isDarkTheme={ui.isDark}
+                      colorScheme={ui.currentColorScheme}
+                      birthYear={birthYear}
+                      onRegisterRef={navigation.registerDecadeRef}
+                      onGhostPromptClick={handleGhostPromptClick}
+                      highlightedStoryId={navigation.highlightedStoryId}
+                      returnHighlightId={navigation.returnHighlightId}
+                      useV2Features={true}
+                      getGhostAction={getGhostAction}
+                    />
+                  ))}
+                </div>
 
-                          // Navigate to recording page (same as nav bar "Record" button)
-                          router.push('/recording');
-                        }}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Helper text */}
-                  <p className="text-center text-sm text-stone-400 max-w-xl mx-auto">
-                    These are just suggestions. Once you save your first memory, your real timeline will appear here.
-                  </p>
-
-                  {/* Original "Create First Memory" button - kept as fallback */}
-                  <div className="flex justify-center">
-                    <Button
-                      onClick={() => router.push('/recording')}
-                      variant="outline"
-                      className="border-orange-500 text-orange-600 hover:bg-orange-50">
-                      <Plus className="w-5 h-5 mr-2" />
-                      {activeContext?.type === 'own' ? 'Create First Memory' : 'Record Story'}
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                // Viewing family member as viewer - read-only
-                <p className="text-gray-500 text-lg text-center">
-                  No stories have been shared yet.
-                </p>
-              )}
-            </div>
-          ) : (
-            <>
-              <div
-                className="hw-spine"
-                style={
-                  ui.isDark ? { backgroundColor: "#ffffff", opacity: 1 } : undefined
-                }
-              >
-                {timelineData.allTimelineItems.map((item, index) => (
-                  <TimelineDecadeSection
-                    key={item.id ?? String(index)}
-                    decadeId={item.id}
-                    title={item.title}
-                    subtitle={item.subtitle}
-                    stories={item.stories}
-                    isActive={navigation.activeDecade === item.id}
-                    isDarkTheme={ui.isDark}
-                    colorScheme={ui.currentColorScheme}
-                    birthYear={birthYear}
-                    onRegisterRef={navigation.registerDecadeRef}
-                    onGhostPromptClick={handleGhostPromptClick}
-                    highlightedStoryId={navigation.highlightedStoryId}
-                    returnHighlightId={navigation.returnHighlightId}
-                    useV2Features={true}
-                  />
-                ))}
-              </div>
-
-              {/* Timeline End - Terminal node + CTA */}
-              <TimelineEnd
-                isDark={ui.isDark}
-                hasCurrentYearContent={timelineData.stories.some(
-                  (s) => new Date(s.createdAt).getFullYear() === new Date().getFullYear()
-                )}
-                onAddMemory={() => router.push("/review/book-style?new=true")}
-              />
-            </>
-          )}
+                {/* Timeline End - Terminal node + CTA */}
+                <TimelineEnd
+                  isDark={ui.isDark}
+                  hasCurrentYearContent={sortedStories.some(
+                    (s: any) => new Date(s.createdAt).getFullYear() === new Date().getFullYear()
+                  )}
+                  onAddMemory={() => router.push("/review/book-style?new=true")}
+                />
+              </>
+            );
+          })()}
         </div>
       </main>
 

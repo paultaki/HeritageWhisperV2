@@ -224,11 +224,11 @@ export function EditMemoryModal({ isOpen, onClose, story, onSave }: EditMemoryMo
                   <img
                     src={story.photoUrl}
                     alt={title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full"
                     style={{
                       transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x}%, ${editTransform.position.y}%)`,
                       transformOrigin: "center center",
-                      objectFit: "cover",
+                      objectFit: "contain",
                       objectPosition: "center center",
                     }}
                   />
@@ -323,11 +323,11 @@ export function EditMemoryModal({ isOpen, onClose, story, onSave }: EditMemoryMo
                 <img
                   src={story.photoUrl}
                   alt={title}
-                  className="w-full h-full object-cover select-none pointer-events-none"
+                  className="w-full h-full select-none pointer-events-none"
                   style={{
                     transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x}%, ${editTransform.position.y}%)`,
                     transformOrigin: "center center",
-                    objectFit: "cover",
+                    objectFit: "contain",
                     objectPosition: "center center",
                   }}
                   draggable={false}

@@ -393,10 +393,12 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
               >
                 <img
                   src={imagePreview}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full"
                   style={{
                     transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x}%, ${editTransform.position.y}%)`,
                     transformOrigin: 'center center',
+                    objectFit: 'contain',
+                    objectPosition: 'center center',
                   }}
                   alt="Editing"
                   draggable={false}

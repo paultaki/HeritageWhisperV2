@@ -25,7 +25,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Pause, Volume2 } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Pause, Volume2, Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { normalizeYear, formatYear } from "@/lib/utils";
 import { getTopTraits } from "@/utils/getTopTraits";
@@ -33,6 +33,7 @@ import PlayPauseButton from "@/components/ui/PlayPauseButton";
 import { audioManager } from "@/lib/audioManager";
 import type { MemoryCardProps } from "@/types/timeline";
 import { formatStoryDate, formatStoryDateForMetadata, formatV2TimelineDate } from "@/lib/dateFormatting";
+import { type Story } from "@/lib/supabase";
 
 /**
  * MemoryCard - Story card component with audio playback
@@ -49,7 +50,9 @@ export const MemoryCard = React.memo(
     birthYear,
     onOpenOverlay,
     useV2Features = false,
-  }: MemoryCardProps) {
+    customActionLabel,
+    onCustomAction,
+  }: MemoryCardProps & { customActionLabel?: string; onCustomAction?: (story: Story) => void }) {
     const router = useRouter();
 
     // ==================================================================================
@@ -409,13 +412,12 @@ export const MemoryCard = React.memo(
       return (
         <div
           ref={cardRef}
-          className={`hw-card cursor-pointer ${
-            isHighlighted
-              ? "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
-              : isReturnHighlight
-                ? "return-highlight-animation"
-                : ""
-          } ${isVisible ? "hw-card-visible" : "hw-card-hidden"}`}
+          className={`hw-card cursor-pointer ${isHighlighted
+            ? "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
+            : isReturnHighlight
+              ? "return-highlight-animation"
+              : ""
+            } ${isVisible ? "hw-card-visible" : "hw-card-hidden"}`}
           style={{
             "--title-offset": "22px",
             border: "1.5px solid var(--color-timeline-card-border)",
@@ -432,10 +434,10 @@ export const MemoryCard = React.memo(
             style={
               isDarkTheme
                 ? {
-                    backgroundColor: "#252728F2",
-                    border: "1px solid #3b3d3f",
-                    color: "#b0b3b8",
-                  }
+                  backgroundColor: "#252728F2",
+                  border: "1px solid #3b3d3f",
+                  color: "#b0b3b8",
+                }
                 : undefined
             }
           >
@@ -497,46 +499,65 @@ export const MemoryCard = React.memo(
                 )}
               </div>
 
-              {/* Right: Action button */}
-              <div className="flex-shrink-0">
-                {hasAudio ? (
-                  <button
-                    onClick={handlePlayAudio}
-                    className="w-11 h-11 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md hover:shadow-lg transition-all hover:scale-105"
-                    aria-label={isPlaying ? "Pause audio" : hasError ? "Retry playing audio" : "Play audio"}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : hasError ? (
-                      <AlertCircle className="w-5 h-5" />
-                    ) : isPlaying ? (
-                      <Pause className="w-5 h-5 fill-current" />
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
+              {/* Right: Action button (Standard Read/Play only) */}
+              {!customActionLabel && (
+                <div className="flex-shrink-0">
+                  {hasAudio ? (
+                    <button
+                      onClick={handlePlayAudio}
+                      className="w-11 h-11 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md hover:shadow-lg transition-all hover:scale-105"
+                      aria-label={isPlaying ? "Pause audio" : hasError ? "Retry playing audio" : "Play audio"}
+                    >
+                      {isLoading ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : hasError ? (
+                        <AlertCircle className="w-5 h-5" />
+                      ) : isPlaying ? (
+                        <Pause className="w-5 h-5 fill-current" />
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      className="w-11 h-11 md:w-auto md:h-auto md:px-4 md:py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold flex items-center justify-center md:gap-1.5 transition-colors"
+                      aria-label="Read story"
+                    >
+                      <span className="hidden md:inline">Read</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                    )}
-                  </button>
-                ) : (
-                  <button
-                    className="w-11 h-11 md:w-auto md:h-auto md:px-4 md:py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold flex items-center justify-center md:gap-1.5 transition-colors"
-                    aria-label="Read story"
-                  >
-                    <span className="hidden md:inline">Read</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                )}
-              </div>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
+
+            {/* Bottom: Custom Action Button (Full width/Centered for prompts) */}
+            {customActionLabel && (
+              <div className="mt-4 flex justify-center w-full">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCustomAction?.(story);
+                  }}
+                  className="w-full md:w-auto px-6 py-2.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg active:scale-95"
+                >
+                  <span>{customActionLabel}</span>
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
 
             {/* Helper text */}
             <p className="text-xs text-stone-400 mt-3 text-center">
               {hasAudio ? "Tap to listen to this story" : "Tap to read this story"}
             </p>
           </div>
-        </div>
+        </div >
       );
     }
 
@@ -550,13 +571,12 @@ export const MemoryCard = React.memo(
     return (
       <div
         ref={cardRef}
-        className={`hw-card cursor-pointer ${
-          isHighlighted
-            ? "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
-            : isReturnHighlight
-              ? "return-highlight-animation"
-              : ""
-        } ${isVisible ? "hw-card-visible" : "hw-card-hidden"}`}
+        className={`hw-card cursor-pointer ${isHighlighted
+          ? "ring-2 ring-heritage-orange shadow-xl shadow-heritage-orange/20 scale-[1.01]"
+          : isReturnHighlight
+            ? "return-highlight-animation"
+            : ""
+          } ${isVisible ? "hw-card-visible" : "hw-card-hidden"}`}
         style={{ "--title-offset": titleOffset, border: "1.5px solid var(--color-timeline-card-border)" } as React.CSSProperties}
         onClick={handleCardClick}
         data-testid={`memory-card-${story.id}`}
@@ -567,10 +587,10 @@ export const MemoryCard = React.memo(
           style={
             isDarkTheme
               ? {
-                  backgroundColor: "#252728F2",
-                  border: "1px solid #3b3d3f",
-                  color: "#b0b3b8",
-                }
+                backgroundColor: "#252728F2",
+                border: "1px solid #3b3d3f",
+                color: "#b0b3b8",
+              }
               : undefined
           }
         >
@@ -604,10 +624,10 @@ export const MemoryCard = React.memo(
                 style={
                   photoTransform
                     ? {
-                        transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x}%, ${photoTransform.position.y}%)`,
-                        transformOrigin: "center center",
-                        objectFit: "cover",
-                      }
+                      transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x}%, ${photoTransform.position.y}%)`,
+                      transformOrigin: "center center",
+                      objectFit: "cover",
+                    }
                     : undefined
                 }
               />
@@ -644,11 +664,10 @@ export const MemoryCard = React.memo(
                 {Array.from({ length: photoCount }).map((_, idx) => (
                   <div
                     key={idx}
-                    className={`w-1.5 h-1.5 rounded-full transition-all ${
-                      idx === currentPhotoIndex
-                        ? "bg-white w-4"
-                        : "bg-white/50"
-                    }`}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${idx === currentPhotoIndex
+                      ? "bg-white w-4"
+                      : "bg-white/50"
+                      }`}
                   />
                 ))}
               </div>
@@ -744,14 +763,27 @@ export const MemoryCard = React.memo(
 
               {/* Right column: Audio button with progress indicator */}
               <div className="flex-shrink-0">
-                <PlayPauseButton
-                  isPlaying={isPlaying}
-                  isLoading={isLoading}
-                  progress={progress}
-                  onClick={handlePlayAudio}
-                  size={48}
-                  className="text-white shadow-md"
-                />
+                {customActionLabel ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCustomAction?.(story);
+                    }}
+                    className="px-4 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
+                  >
+                    <span>{customActionLabel}</span>
+                    <Plus className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <PlayPauseButton
+                    isPlaying={isPlaying}
+                    isLoading={isLoading}
+                    progress={progress}
+                    onClick={handlePlayAudio}
+                    size={48}
+                    className="text-white shadow-md"
+                  />
+                )}
               </div>
             </div>
           ) : (

@@ -162,8 +162,8 @@ export default function MemoryBoxV2Page() {
       ? { Authorization: `Bearer ${familySession.sessionToken}` }
       : {};
 
-  // Force viewers to Treasures tab, owners can use either
-  const defaultTab: TabType = isOwnAccount ? "stories" : "treasures";
+  // Default to Treasures tab for all users (primary view)
+  const defaultTab: TabType = "treasures";
   const [activeTab, setActiveTab] = useState<TabType>(defaultTab);
   const [storyFilter, setStoryFilter] = useState<StoryFilterType>("all");
   const [treasureFilter, setTreasureFilter] = useState<TreasureFilterType>("all");
