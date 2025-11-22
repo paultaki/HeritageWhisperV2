@@ -6,7 +6,7 @@
  */
 
 export type StarterMemoryTemplate = {
-  id: 'childhood-photo' | 'turning-point' | 'family-memory';
+  id: 'birth-story' | 'childhood-photo' | 'turning-point' | 'family-memory';
   title: string;
   subtitle: string;
   microPrompts: string[];
@@ -17,12 +17,25 @@ export type StarterMemoryTemplate = {
 
 export const STARTER_TEMPLATES: StarterMemoryTemplate[] = [
   {
+    id: 'birth-story',
+    title: 'When were you born?',
+    subtitle: 'Establish the beginning of your timeline.',
+    microPrompts: [
+      'What is your birthdate?',
+      'Where were you born?',
+      'Any stories about the day you arrived?',
+    ],
+    placeholderText: 'Add your birth details',
+    buttonLabel: 'Add birth info',
+    helperText: 'This helps set up your timeline structure.',
+  },
+  {
     id: 'childhood-photo',
     title: 'A Favorite Childhood Photo',
     subtitle: 'Start with a picture from when you were young.',
     microPrompts: [
       'Who is in this photo?',
-      'Where were you?',
+      'Where were you born?',
       'What made this moment special?',
     ],
     placeholderText: 'Add your childhood photo here',

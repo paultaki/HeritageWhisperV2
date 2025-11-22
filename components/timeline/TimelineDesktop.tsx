@@ -75,7 +75,7 @@ function DecadeLabel({ decade, isDark = false }: DecadeLabelProps) {
   const decadeNum = decade.replace("s", "");
 
   return (
-    <div 
+    <div
       className="relative flex items-center justify-center md:-mt-[50px]"
       style={{
         height: '60px',
@@ -189,9 +189,11 @@ interface CenteredMemoryCardProps {
   birthYear: number;
   onOpenOverlay?: (story: Story) => void;
   useV2Features?: boolean;
+  customActionLabel?: string;
+  onCustomAction?: (story: Story) => void;
 }
 
-function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear, onOpenOverlay, useV2Features = false }: CenteredMemoryCardProps) {
+function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear, onOpenOverlay, useV2Features = false, customActionLabel, onCustomAction }: CenteredMemoryCardProps) {
   const router = useRouter();
 
   // Narrow story type for traits access
@@ -436,6 +438,11 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   }, [currentAudio]);
 
   const handleCardClick = () => {
+    if (onCustomAction) {
+      onCustomAction(story);
+      return;
+    }
+
     // If overlay handler is provided, use it instead of navigation
     if (onOpenOverlay) {
       onOpenOverlay(story);
@@ -463,9 +470,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
     if (displayPhoto?.url) {
       return (
         <div
-          className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer ${
-            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-          }`}
+          className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+            }`}
           onClick={handleCardClick}
           style={{
             boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
@@ -500,7 +506,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 className={`object-cover ${isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''}`}
                 loading="eager"
                 priority={index < 8}
-                quality={85}
+                quality={90}
                 placeholder="blur"
                 blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
                 onError={(e) => console.error("[Timeline] Image failed to load:", displayPhoto.url)}
@@ -599,7 +605,18 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </div>
 
               {/* Right: V2 audio button with progress indicator */}
-              {useV2Features && story.audioUrl && (
+              {customActionLabel ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCustomAction?.(story);
+                  }}
+                  className="px-5 py-2.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold flex items-center gap-2 transition-all shadow-md hover:shadow-lg hover:scale-105"
+                >
+                  <span>{customActionLabel}</span>
+                  <Plus className="w-4 h-4" />
+                </button>
+              ) : useV2Features && story.audioUrl && (
                 <PlayPauseButton
                   isPlaying={isPlaying}
                   isLoading={isLoading}
@@ -621,9 +638,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
 
     return (
       <div
-        className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer ${
-          isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-        }`}
+        className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}
         onClick={handleCardClick}
         style={{
           boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
@@ -685,7 +701,18 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
 
             {/* Right: Action button */}
             <div className="flex-shrink-0">
-              {hasAudio ? (
+              {customActionLabel ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCustomAction?.(story);
+                  }}
+                  className="px-4 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
+                >
+                  <span>{customActionLabel}</span>
+                  <Plus className="w-4 h-4" />
+                </button>
+              ) : hasAudio ? (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -702,7 +729,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                     <Pause className="w-5 h-5 fill-current" />
                   ) : (
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
+                      <path d="M8 5v14l11-7z" />
                     </svg>
                   )}
                 </button>
@@ -732,9 +759,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   return (
     <div
       ref={cardRef}
-      className={`timeline-step flex flex-col lg:flex-row items-center gap-6 lg:gap-0 transition-all duration-500 ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      }`}
+      className={`timeline-step flex flex-col lg:flex-row items-center gap-6 lg:gap-0 transition-all duration-500 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+        }`}
       style={{
         transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
         pointerEvents: 'none',
@@ -980,13 +1006,13 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
 
       // Query all timeline-dot elements
       const bubbles = Array.from(document.querySelectorAll('.timeline-dot'));
-      
+
       bubbles.forEach((bubble, index) => {
         if (!(bubble instanceof HTMLElement)) return;
 
         const rect = bubble.getBoundingClientRect();
         const distanceFromTop = rect.top;
-        
+
         // Check if there's a bubble below this one
         const nextBubble = bubbles[index + 1];
         let nextBubbleDistance = Infinity;
@@ -1003,7 +1029,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
         // This bubble is at or above sticky position
         if (distanceFromTop <= stickyTop) {
           bubble.classList.add('is-sticky');
-          
+
           // Check if next bubble is approaching
           const proximityToNext = nextBubbleDistance - stickyTop;
 
@@ -1062,14 +1088,80 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
 
   // V3: Extract storyteller metadata for family sharing (birth year for age calculations)
   const storytellerData = (storiesData as any)?.storyteller || null;
-  const birthYear = storytellerData?.birthYear || user?.birthYear || 0;
+  const birthYear = storytellerData?.birthYear || user?.birthYear || 1950; // Default to 1950 if unknown
 
-  // Sort stories chronologically
-  const sortedStories = [...stories].sort((a: any, b: any) => {
+  let sortedStories = [...stories].sort((a: any, b: any) => {
     const yearA = normalizeYear(a.storyYear);
     const yearB = normalizeYear(b.storyYear);
     return (yearA ?? 0) - (yearB ?? 0);
   });
+
+  // Check if birth story exists
+  const hasBirthStory = sortedStories.some(s => normalizeYear(s.storyYear) === birthYear);
+
+  // Inject virtual birth story if missing
+  if (!hasBirthStory) {
+    const virtualBirthStory: any = {
+      id: 'birth-story-virtual',
+      userId: user?.id || 'ghost-user',
+      title: 'When I was born',
+      storyYear: birthYear,
+      storyDate: `${birthYear}-01-01`,
+      photos: [], // Empty photos triggers "pill" style
+      audioUrl: "",
+      transcription: "The beginning of my story.",
+      includeInTimeline: true,
+      createdAt: new Date().toISOString(),
+      templateId: 'birth-story', // Link to birth story template
+    };
+    sortedStories.unshift(virtualBirthStory);
+  }
+
+  // Ghost Stories Logic
+  // Show ghost stories if we have NO stories, OR if we only have the birth story (virtual or real)
+  // This ensures ghost stories persist until the user adds a SECOND memory
+  const isGhostMode = sortedStories.length === 0 || (sortedStories.length === 1 && normalizeYear(sortedStories[0].storyYear) === birthYear);
+
+  if (isGhostMode) {
+    // Map templates to ghost stories (excluding birth-story since it's already handled)
+    const ghostStories = STARTER_TEMPLATES
+      .filter(t => t.id !== 'birth-story')
+      .map((template) => {
+        let yearOffset = 0;
+        let photoUrl = "";
+
+        switch (template.id) {
+          case 'childhood-photo':
+            yearOffset = 10;
+            photoUrl = "/demo-dad-boy.png";
+            break;
+          case 'turning-point':
+            yearOffset = 25;
+            photoUrl = "/demo-hiking.png";
+            break;
+          case 'family-memory':
+            yearOffset = 35;
+            photoUrl = "/johnsons.png";
+            break;
+        }
+
+        return {
+          id: template.id,
+          userId: 'ghost-user',
+          title: template.title,
+          storyYear: birthYear + yearOffset,
+          storyDate: `${birthYear + yearOffset}-01-01`,
+          photos: [{ id: `ghost-photo-${template.id}`, url: photoUrl, isHero: true }],
+          audioUrl: "", // No audio
+          transcription: template.subtitle, // Use subtitle as snippet
+          includeInTimeline: true,
+          createdAt: new Date().toISOString(),
+          templateId: template.id, // Keep track of template
+        };
+      });
+
+    sortedStories = [...sortedStories, ...ghostStories];
+  }
 
   // Group stories by decade for dividers
   const storiesByDecade = new Map<string, Story[]>();
@@ -1154,11 +1246,11 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                 const decadeLabel = decade.replace('s', '') + 's';
                 // Skip decade banner entirely for the first decade
                 const isFirstDecade = decadeIndex === 0;
-                
+
                 return (
                   <div key={decade}>
                     {/* V3: Decade labels removed per user request */}
-                    
+
                     {/* Stories in this decade */}
                     {decadeStories.map((story: Story, storyIndex: number) => {
                       // Calculate global index for alternating left/right positioning
@@ -1209,6 +1301,22 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                             decadeLabel={showDecadeMarker ? decadeLabel : undefined}
                             birthYear={birthYear}
                             useV2Features={useV2Features}
+                            customActionLabel={isGhostMode && (story as any).templateId ? (
+                              (story as any).templateId === 'birth-story' ? 'Add birth info' :
+                                (story as any).templateId === 'turning-point' ? 'Record story' :
+                                  'Add memory'
+                            ) : undefined}
+                            onCustomAction={isGhostMode && (story as any).templateId ? (s) => {
+                              const templateId = (s as any).templateId;
+                              const template = STARTER_TEMPLATES.find(t => t.id === templateId);
+                              if (template) {
+                                sessionStorage.setItem('starterTemplate', JSON.stringify({
+                                  id: template.id,
+                                  title: template.title,
+                                }));
+                                router.push('/recording');
+                              }
+                            } : undefined}
                           />
                         </div>
                       );
@@ -1217,63 +1325,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                 );
               })}
 
-            {sortedStories.length === 0 && (
-              <div className="py-12 space-y-8">
-                {activeContext?.type === 'own' || activeContext?.permissionLevel === 'contributor' ? (
-                  // Viewing own account or contributor - show premium starter cards
-                  <>
-                    {/* Intro text */}
-                    <p className="text-center text-lg text-stone-600 max-w-2xl mx-auto">
-                      {activeContext?.type === 'own'
-                        ? "Let's start your story. Choose a moment below or tap Create First Memory."
-                        : `Let's start ${activeContext.storytellerName}'s story. Choose a moment below or tap Record Story.`
-                      }
-                    </p>
-
-                    {/* Starter Cards - Responsive Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
-                      {STARTER_TEMPLATES.map((template) => (
-                        <StarterMemoryCard
-                          key={template.id}
-                          template={template}
-                          onStart={(template) => {
-                            // Store template in sessionStorage for /recording page to read
-                            sessionStorage.setItem('starterTemplate', JSON.stringify({
-                              id: template.id,
-                              title: template.title,
-                            }));
-
-                            // Navigate to recording page (same as nav bar "Record" button)
-                            router.push('/recording');
-                          }}
-                        />
-                      ))}
-                    </div>
-
-                    {/* Helper text */}
-                    <p className="text-center text-sm text-stone-400 max-w-xl mx-auto">
-                      These are just suggestions. Once you save your first memory, your real timeline will appear here.
-                    </p>
-
-                    {/* Original "Create First Memory" button - kept as fallback */}
-                    <div className="flex justify-center">
-                      <Button
-                        onClick={() => router.push('/recording')}
-                        variant="outline"
-                        className="border-orange-500 text-orange-600 hover:bg-orange-50">
-                        <Plus className="w-5 h-5 mr-2" />
-                        {activeContext?.type === 'own' ? 'Create First Memory' : 'Record Story'}
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  // Viewing family member as viewer - read-only
-                  <p className="text-gray-500 text-lg text-center">
-                    No stories have been shared yet.
-                  </p>
-                )}
-              </div>
-            )}
+            {/* Empty state removed - replaced by ghost stories */}
 
             {/* Timeline End - Terminal node + CTA */}
             {sortedStories.length > 0 && (

@@ -51,6 +51,27 @@ function RecordingContent() {
     if (promptId) {
       setDraft((prev) => ({ ...prev, sourcePromptId: promptId }));
     }
+
+    // Check for starter template from timeline ghost stories
+    const starterTemplateJson = sessionStorage.getItem('starterTemplate');
+    if (starterTemplateJson) {
+      try {
+        const template = JSON.parse(starterTemplateJson);
+        let title = template.title;
+
+        // Special case for birth story
+        if (template.id === 'birth-story') {
+          title = "When I was born";
+        }
+
+        setDraft((prev) => ({ ...prev, title }));
+
+        // Clear it so it doesn't persist if they come back later
+        sessionStorage.removeItem('starterTemplate');
+      } catch (e) {
+        console.error("Failed to parse starter template", e);
+      }
+    }
   }, []);
 
   // Update URL when step changes
