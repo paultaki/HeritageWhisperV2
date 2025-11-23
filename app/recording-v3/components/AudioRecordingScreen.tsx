@@ -20,6 +20,7 @@ export function AudioRecordingScreen({
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [audioLevels, setAudioLevels] = useState<number[]>(new Array(20).fill(0));
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -155,6 +156,7 @@ export function AudioRecordingScreen({
     if (!mediaRecorderRef.current) return;
 
     setRecordingState("processing");
+    setIsProcessing(true);
     stopTimer();
 
     if (animationFrameRef.current) {
@@ -219,6 +221,7 @@ export function AudioRecordingScreen({
       };
       onFinishAndReview(completeDraft as any);
     } finally {
+      setIsProcessing(false);
       cleanup();
     }
   };
@@ -286,7 +289,7 @@ export function AudioRecordingScreen({
             </p>
           </div>
         </div>
-        {onSaveForLater && (
+        {onSaveForLater && !isProcessing && (
           <button
             onClick={handleSaveForLater}
             className="text-base font-medium"

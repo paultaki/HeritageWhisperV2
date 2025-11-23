@@ -94,17 +94,17 @@ function SortableChapter({
                 }`}
             onClick={onClick}
         >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
                 <button
                     {...attributes}
                     {...listeners}
-                    className={`cursor-grab hover:text-primary touch-none ${isUncategorized ? 'opacity-0 pointer-events-none' : ''}`}
+                    className={`cursor-grab hover:text-primary touch-none flex-shrink-0 ${isUncategorized ? 'opacity-0 pointer-events-none' : ''}`}
                 >
                     <GripVertical className="h-4 w-4 text-muted-foreground" />
                 </button>
 
                 {isEditing ? (
-                    <form onSubmit={handleSave} className="flex-1 flex gap-2" onClick={e => e.stopPropagation()}>
+                    <form onSubmit={handleSave} className="flex-1 flex gap-2 min-w-0" onClick={e => e.stopPropagation()}>
                         <Input
                             value={editTitle}
                             onChange={e => setEditTitle(e.target.value)}
@@ -115,19 +115,19 @@ function SortableChapter({
                     </form>
                 ) : (
                     <span
-                        className="font-medium truncate flex-1"
+                        className="font-medium truncate flex-1 min-w-0"
                         onDoubleClick={() => !isUncategorized && setIsEditing(true)}
                     >
                         {chapter.title}
                     </span>
                 )}
 
-                <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full flex-shrink-0">
                     {chapter.stories.length}
                 </span>
 
                 {!isUncategorized && (
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 flex-shrink-0">
                         <Button
                             variant="ghost"
                             size="icon"
@@ -182,11 +182,11 @@ function SortableStory({ story }: { story: Story }) {
             style={style}
             className="mb-2 p-4 rounded-lg border bg-card flex items-center gap-3 hover:shadow-sm transition-shadow"
         >
-            <button {...attributes} {...listeners} className="cursor-grab hover:text-primary touch-none">
+            <button {...attributes} {...listeners} className="cursor-grab hover:text-primary touch-none flex-shrink-0">
                 <GripVertical className="h-4 w-4 text-muted-foreground" />
             </button>
-            <div className="flex-1">
-                <div className="font-medium text-lg">{story.title}</div>
+            <div className="flex-1 min-w-0">
+                <div className="font-medium text-lg break-words">{story.title}</div>
                 {story.storyYear && <div className="text-sm text-muted-foreground">{story.storyYear}</div>}
             </div>
         </div>

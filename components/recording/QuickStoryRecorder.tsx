@@ -13,7 +13,7 @@ import { useAuth } from "@/lib/auth";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
-import { WaveformVisualizer } from "./WaveformVisualizer";
+import { PremiumAudioVisualizer } from "./PremiumAudioVisualizer";
 import { useAudioAnalyzer } from "@/hooks/use-audio-analyzer";
 import { WaveformAudioPlayer } from "./WaveformAudioPlayer";
 
@@ -641,11 +641,10 @@ export function QuickStoryRecorder({ isOpen, onClose, promptQuestion }: QuickSto
                 {/* Waveform Visualizer - Max width 490px on desktop */}
                 <div className="mx-auto w-full max-w-[490px] mb-6">
                   <div className="rounded-xl border border-[#E0D9D7] bg-[#EBE8E6] p-4 shadow-sm ring-1 ring-inset ring-[#E0D9D7]">
-                    <WaveformVisualizer
+                    <PremiumAudioVisualizer
                       frequencyData={frequencyData}
                       isRecording={state === "recording"}
                       isPaused={state === "paused"}
-                      decibelLevel={decibelLevel}
                     />
 
                   {/* Controls inside the card */}
