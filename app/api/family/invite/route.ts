@@ -41,25 +41,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get authenticated user
+    // Get authenticated user (support both Supabase JWT and Passkey session)
+    let userId: string | null = null;
+
+    // Try Supabase JWT first
     const authHeader = req.headers.get('authorization');
     const token = authHeader && authHeader.split(' ')[1];
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+    if (token) {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (!authError && user) {
+        userId = user.id;
+      }
     }
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseAdmin.auth.getUser(token);
+    // Fall back to passkey session if no Supabase JWT
+    if (!userId) {
+      const passkeySession = await getPasskeySession();
+      if (passkeySession?.userId) {
+        userId = passkeySession.userId;
+      }
+    }
 
-    if (authError || !user) {
+    // If no valid auth method found
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Invalid authentication' },
+        { error: 'Authentication required' },
         { status: 401 }
       );
     }

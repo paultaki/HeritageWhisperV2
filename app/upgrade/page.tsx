@@ -6,12 +6,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Sparkles, Users, MessageSquare, Eye, Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Suspense } from 'react';
+import { useAuth } from '@/lib/auth';
 
 function UpgradePageContent() {
   const searchParams = useSearchParams();
   const reason = searchParams.get('reason');
   const canceled = searchParams.get('canceled') === 'true';
   const router = useRouter();
+  const { session, isLoading } = useAuth();
 
   const getReasonText = () => {
     switch (reason) {
@@ -27,12 +29,24 @@ function UpgradePageContent() {
   };
 
   const handleUpgrade = async () => {
+    // Wait for auth to finish loading
+    if (isLoading) {
+      return;
+    }
+
+    // Check if user is logged in
+    if (!session) {
+      router.push('/auth/login?redirect=/upgrade');
+      return;
+    }
+
     try {
-      // Create Stripe Checkout session
+      // Create Stripe Checkout session with auth token
       const response = await fetch('/api/stripe/create-checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           triggerLocation: reason || 'direct_link',
@@ -171,9 +185,10 @@ function UpgradePageContent() {
           <CardFooter className="flex flex-col gap-3 p-8">
             <Button
               onClick={handleUpgrade}
+              disabled={isLoading}
               className="h-14 w-full bg-gradient-to-r from-amber-500 to-amber-600 text-lg hover:from-amber-600 hover:to-amber-700"
             >
-              Upgrade for $79/year
+              {isLoading ? 'Loading...' : 'Upgrade for $79/year'}
             </Button>
             <Button
               variant="ghost"
