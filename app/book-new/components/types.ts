@@ -6,6 +6,12 @@ import { Story } from "@/shared/schema";
 export interface BookStory extends Story {
   storyYear: number;
   transcription: string;
+  lifeAge?: number;
+  photoTransform?: {
+    zoom: number;
+    position: { x: number; y: number };
+  };
+  // Ensure these are present as they are returned by API
 }
 
 /**
@@ -69,6 +75,8 @@ export interface BookTableOfContentsProps {
   isOpen: boolean;
   onClose: () => void;
   onStorySelect: (storyId: string) => void;
+  viewMode?: 'chronological' | 'chapters';
+  onViewModeChange?: (mode: 'chronological' | 'chapters') => void;
 }
 
 /**
@@ -80,6 +88,8 @@ export interface BookTopBarProps {
   onTimelineClick: () => void;
   onEditClick: () => void;
   onTocClick: () => void;
+  viewMode?: 'chronological' | 'chapters';
+  onViewModeChange?: (mode: 'chronological' | 'chapters') => void;
 }
 
 /**
@@ -90,4 +100,23 @@ export interface NavigationArrowsProps {
   canGoNext: boolean;
   onPrevious: () => void;
   onNext: () => void;
+}
+
+/**
+ * Mobile book page types - union of all possible page types in the book
+ */
+export type MobileBookPage =
+  | { type: "cover"; userName: string; storyCount: number }
+  | { type: "intro" }
+  | { type: "toc"; stories: BookStory[] }
+  | { type: "decade"; decade: string; title: string; count: number; isChapter?: boolean }
+  | { type: "story"; story: BookStory };
+
+/**
+ * Props for BookPageRenderer component
+ */
+export interface BookPageRendererProps {
+  page: MobileBookPage;
+  isActive: boolean;
+  caveatFont?: string;
 }

@@ -5,6 +5,7 @@ import { Resend } from 'resend';
 import { FamilyInviteEmail } from '@/lib/emails/family-invite';
 import { logActivityEvent } from '@/lib/activity';
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
     const { data: existing } = await supabaseAdmin
       .from('family_members')
       .select('id, status')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('email', email.toLowerCase())
       .single();
 
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
     const { count } = await supabaseAdmin
       .from('family_members')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 
     if ((count || 0) >= 10) {
       return NextResponse.json(
@@ -95,7 +96,7 @@ export async function POST(req: NextRequest) {
     const { data: familyMember, error: memberError } = await supabaseAdmin
       .from('family_members')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         email: email.toLowerCase(),
         name: name.trim(),
         relationship: relationship || null,
@@ -145,7 +146,7 @@ export async function POST(req: NextRequest) {
     const { data: userProfile } = await supabaseAdmin
       .from('users')
       .select('name')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single();
 
     const senderName = userProfile?.name || 'A family member';
@@ -187,8 +188,8 @@ export async function POST(req: NextRequest) {
 
     // Log invite_sent activity event (async, non-blocking)
     logActivityEvent({
-      userId: user.id,
-      actorId: user.id,
+      userId: userId,
+      actorId: userId,
       familyMemberId: familyMember.id,
       eventType: 'invite_sent',
       metadata: {

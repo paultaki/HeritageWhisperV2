@@ -51,12 +51,14 @@ function SortableChapter({
     chapter,
     isActive,
     onClick,
-    onRename
+    onRename,
+    onDelete
 }: {
     chapter: Chapter;
     isActive: boolean;
     onClick: () => void;
     onRename: (id: string, newTitle: string) => void;
+    onDelete: (id: string) => void;
 }) {
     const {
         attributes,
@@ -82,6 +84,8 @@ function SortableChapter({
         setIsEditing(false);
     };
 
+    const isUncategorized = chapter.id === 'uncategorized';
+
     return (
         <div
             ref={setNodeRef}
@@ -91,7 +95,11 @@ function SortableChapter({
             onClick={onClick}
         >
             <div className="flex items-center gap-2">
-                <button {...attributes} {...listeners} className="cursor-grab hover:text-primary touch-none">
+                <button
+                    {...attributes}
+                    {...listeners}
+                    className={`cursor-grab hover:text-primary touch-none ${isUncategorized ? 'opacity-0 pointer-events-none' : ''}`}
+                >
                     <GripVertical className="h-4 w-4 text-muted-foreground" />
                 </button>
 
@@ -108,7 +116,7 @@ function SortableChapter({
                 ) : (
                     <span
                         className="font-medium truncate flex-1"
-                        onDoubleClick={() => setIsEditing(true)}
+                        onDoubleClick={() => !isUncategorized && setIsEditing(true)}
                     >
                         {chapter.title}
                     </span>
@@ -117,6 +125,35 @@ function SortableChapter({
                 <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
                     {chapter.stories.length}
                 </span>
+
+                {!isUncategorized && (
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsEditing(true);
+                            }}
+                        >
+                            <Sparkles className="h-3 w-3" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-destructive hover:text-destructive"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm("Are you sure you want to delete this chapter? Stories will be moved to Uncategorized.")) {
+                                    onDelete(chapter.id);
+                                }
+                            }}
+                        >
+                            <Trash2 className="h-3 w-3" />
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -167,7 +204,25 @@ export default function ChaptersPage() {
         queryKey: ["chapters"],
         queryFn: async () => {
             const res = await apiRequest("GET", "/api/chapters");
-            return res.json().then((d: any) => d.chapters);
+            const data = await res.json();
+
+            const fetchedChapters = data.chapters || [];
+            const orphanedStories = data.orphanedStories || [];
+
+            // If there are orphaned stories, add a virtual "Uncategorized" chapter
+            if (orphanedStories.length > 0) {
+                return [
+                    {
+                        id: "uncategorized",
+                        title: "Uncategorized Stories",
+                        orderIndex: -1,
+                        stories: orphanedStories
+                    },
+                    ...fetchedChapters
+                ];
+            }
+
+            return fetchedChapters;
         },
         enabled: !!user,
     });
@@ -202,11 +257,121 @@ export default function ChaptersPage() {
         },
     });
 
+    const deleteChapterMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await apiRequest("DELETE", `/api/chapters/${id}`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["chapters"] });
+            toast.success("Chapter deleted");
+            // Reset active chapter if deleted
+            setActiveChapterId(null);
+        },
+        onError: () => {
+            toast.error("Failed to delete chapter");
+        },
+    });
+
     const moveStoryMutation = useMutation({
         mutationFn: async (updates: any[]) => {
             await apiRequest("POST", "/api/stories/move", { updates });
         },
+        onMutate: async (updates) => {
+            await queryClient.cancelQueries({ queryKey: ["chapters"] });
+            const previousChapters = queryClient.getQueryData<Chapter[]>(["chapters"]);
+
+            queryClient.setQueryData<Chapter[]>(["chapters"], (old) => {
+                if (!old) return [];
+                const newChapters = JSON.parse(JSON.stringify(old)); // Deep copy
+
+                updates.forEach((update: any) => {
+                    // Find source chapter and remove story
+                    let story: any;
+                    newChapters.forEach((c: any) => {
+                        const sIndex = c.stories.findIndex((s: any) => s.id === update.storyId);
+                        if (sIndex !== -1) {
+                            story = c.stories.splice(sIndex, 1)[0];
+                        }
+                    });
+
+                    // If story found, add to target chapter
+                    if (story) {
+                        const targetChapter = newChapters.find((c: any) => c.id === update.chapterId);
+                        if (targetChapter) {
+                            story.chapterId = update.chapterId;
+                            story.chapterOrderIndex = update.orderIndex;
+
+                            // Insert at specific index or append
+                            if (update.orderIndex >= targetChapter.stories.length) {
+                                targetChapter.stories.push(story);
+                            } else {
+                                targetChapter.stories.splice(update.orderIndex, 0, story);
+                            }
+
+                            // Re-sort stories in target chapter to ensure correct order
+                            // Note: We might need to re-index all stories in the chapter to be safe, 
+                            // but for optimistic UI, just placing it is usually enough if the list is sorted by index.
+                            // However, since we are splicing, the array order is what matters for display.
+                        }
+                    }
+                });
+
+                return newChapters;
+            });
+
+            return { previousChapters };
+        },
+        onError: (err, newTodo, context) => {
+            queryClient.setQueryData(["chapters"], context?.previousChapters);
+            toast.error("Failed to move story");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["chapters"] });
+        },
+    });
+
+    const createChapterMutation = useMutation({
+        mutationFn: async () => {
+            const res = await apiRequest("POST", "/api/chapters", { title: "New Chapter" });
+            return res.json();
+        },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["chapters"] });
+            toast.success("New chapter created");
+        },
+    });
+
+    const reorderChaptersMutation = useMutation({
+        mutationFn: async (updates: any[]) => {
+            await apiRequest("POST", "/api/chapters/reorder", { updates });
+        },
+        onMutate: async (updates) => {
+            await queryClient.cancelQueries({ queryKey: ["chapters"] });
+            const previousChapters = queryClient.getQueryData<Chapter[]>(["chapters"]);
+
+            queryClient.setQueryData<Chapter[]>(["chapters"], (old) => {
+                if (!old) return [];
+                const newChapters = [...old];
+
+                // Apply updates
+                updates.forEach((update: any) => {
+                    const chapter = newChapters.find(c => c.id === update.id);
+                    if (chapter) {
+                        chapter.orderIndex = update.orderIndex;
+                    }
+                });
+
+                // Sort by new order index
+                return newChapters.sort((a, b) => a.orderIndex - b.orderIndex);
+            });
+
+            return { previousChapters };
+        },
+        onError: (err, newTodo, context) => {
+            queryClient.setQueryData(["chapters"], context?.previousChapters);
+            toast.error("Failed to reorder chapters");
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ["chapters"] });
         },
     });
@@ -233,6 +398,23 @@ export default function ChaptersPage() {
         setActiveDragItem(null);
 
         if (!over) return;
+
+        // Handle Chapter Reorder
+        if (active.data.current?.type === "chapter" && over.data.current?.type === "chapter") {
+            if (active.id !== over.id) {
+                const oldIndex = chapters.findIndex(c => c.id === active.id);
+                const newIndex = chapters.findIndex(c => c.id === over.id);
+
+                const newChapters = arrayMove(chapters, oldIndex, newIndex);
+                const updates = newChapters.map((c, index) => ({
+                    id: c.id,
+                    orderIndex: index
+                }));
+
+                reorderChaptersMutation.mutate(updates);
+            }
+            return;
+        }
 
         // Handle Story Drop
         if (active.data.current?.type === "story") {
@@ -282,16 +464,25 @@ export default function ChaptersPage() {
 
     return (
         <div className="container mx-auto py-8 px-4 max-w-7xl">
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-serif text-[#2c3e50] mb-2">Organize Your Story</h1>
                     <p className="text-muted-foreground">Group your memories into chapters to create a beautiful book.</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full md:w-auto">
+                    <Button
+                        variant="outline"
+                        onClick={() => createChapterMutation.mutate()}
+                        disabled={createChapterMutation.isPending}
+                        className="flex-1 md:flex-none"
+                    >
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Chapter
+                    </Button>
                     <Button
                         onClick={() => organizeMutation.mutate()}
                         disabled={organizeMutation.isPending}
-                        className="bg-[#d4af87] hover:bg-[#c49f77] text-white"
+                        className="bg-[#d4af87] hover:bg-[#c49f77] text-white flex-1 md:flex-none"
                     >
                         {organizeMutation.isPending ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -309,9 +500,9 @@ export default function ChaptersPage() {
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
             >
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 h-[calc(100vh-200px)]">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 h-auto md:h-[calc(100vh-200px)]">
                     {/* Sidebar: Chapters List */}
-                    <div className="md:col-span-4 lg:col-span-3 flex flex-col h-full">
+                    <div className="md:col-span-4 lg:col-span-3 flex flex-col h-[500px] md:h-full">
                         <div className="bg-white rounded-xl shadow-sm border p-4 flex-1 flex flex-col overflow-hidden">
                             <h2 className="font-serif text-xl mb-4 flex items-center gap-2">
                                 <BookOpen className="h-5 w-5 text-[#d4af87]" />
@@ -330,6 +521,7 @@ export default function ChaptersPage() {
                                             isActive={activeChapterId === chapter.id}
                                             onClick={() => setActiveChapterId(chapter.id)}
                                             onRename={(id, title) => renameChapterMutation.mutate({ id, title })}
+                                            onDelete={(id) => deleteChapterMutation.mutate(id)}
                                         />
                                     ))}
                                 </SortableContext>
@@ -344,7 +536,7 @@ export default function ChaptersPage() {
                     </div>
 
                     {/* Main Content: Stories in Chapter */}
-                    <div className="md:col-span-8 lg:col-span-9 h-full">
+                    <div className="md:col-span-8 lg:col-span-9 h-[600px] md:h-full">
                         <div className="bg-white rounded-xl shadow-sm border p-6 h-full flex flex-col overflow-hidden">
                             {activeChapter ? (
                                 <>

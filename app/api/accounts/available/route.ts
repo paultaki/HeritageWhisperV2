@@ -11,6 +11,8 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
+import { getPasskeySession } from "@/lib/iron-session";
+
 /**
  * GET /api/accounts/available
  * Returns list of storytellers the authenticated user can access
@@ -18,37 +20,46 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get the Authorization header
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader && authHeader.split(' ')[1];
+    let userId: string | undefined;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+    // 1. Try passkey session first
+    const passkeySession = await getPasskeySession();
+    if (passkeySession) {
+      userId = passkeySession.userId;
+    } else {
+      // 2. Fall back to Supabase auth
+      const authHeader = request.headers.get('authorization');
+      const token = authHeader && authHeader.split(' ')[1];
+
+      if (!token) {
+        return NextResponse.json(
+          { error: 'Authentication required' },
+          { status: 401 }
+        );
+      }
+
+      // Verify the JWT token with Supabase
+      const {
+        data: { user },
+        error: authError,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (authError || !user) {
+        console.error('[AvailableAccounts] Auth error:', authError);
+        return NextResponse.json(
+          { error: 'Invalid authentication' },
+          { status: 401 }
+        );
+      }
+      userId = user.id;
     }
 
-    // Verify the JWT token with Supabase
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseAdmin.auth.getUser(token);
-
-    if (authError || !user) {
-      console.error('[AvailableAccounts] Auth error:', authError);
-      return NextResponse.json(
-        { error: 'Invalid authentication' },
-        { status: 401 }
-      );
-    }
-
-    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[AvailableAccounts] Fetching collaborations for user:', user.id);
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[AvailableAccounts] Fetching collaborations for user:', userId);
 
     // Use the RPC function to get available storytellers
     const { data: storytellers, error: rpcError } = await supabaseAdmin.rpc(
       'get_user_collaborations',
-      { p_user_id: user.id }
+      { p_user_id: userId }
     );
 
     if (rpcError) {

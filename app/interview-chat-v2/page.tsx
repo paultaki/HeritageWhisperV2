@@ -11,12 +11,12 @@ import { TypingIndicator } from "./components/TypingIndicator";
 import { ChatInput } from "./components/ChatInput";
 import { StorySplitModal } from "./components/StorySplitModal";
 import { useRealtimeInterview } from "@/hooks/use-realtime-interview";
-import { useRecordingState } from "@/hooks/use-recording-state";
 import {
   completeConversationAndRedirect,
   extractQAPairs,
   combineAudioBlobs, // This might become redundant if we use getMixedAudioBlob/getUserAudioBlob
 } from "@/lib/conversationModeIntegration";
+import { useRecordingState } from "@/contexts/RecordingContext";
 import { Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -44,6 +44,7 @@ export type Message = {
 export type AudioState = {
   chunks: Blob[];
   fullTranscript: string;
+  totalDuration: number;
 };
 
 export default function InterviewChatPage() {
@@ -66,10 +67,10 @@ export default function InterviewChatPage() {
     stopSession,
     status,
     getMixedAudioBlob,
-    // getUserAudioBlob, // Not available?
-    // recordingDuration, // Not available?
-    // handleTranscriptUpdate, // Not available?
-    // handleAudioResponse, // Not available?
+    getUserAudioBlob,
+    recordingDuration,
+    handleTranscriptUpdate: handleRealtimeTranscriptUpdate,
+    handleAudioResponse: handleRealtimeAudioResponse,
   } = useRealtimeInterview();
 
   const [showWelcome, setShowWelcome] = useState(true);
@@ -90,16 +91,216 @@ export default function InterviewChatPage() {
   const sessionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check if feature is enabled (for beta launch)
-  const isFeatureEnabled = process.env.NEXT_PUBLIC_FEATURE_REALTIME_INTERVIEW === 'true';
+  // Default to true for development/testing if env var is not set
+  const isFeatureEnabled = process.env.NEXT_PUBLIC_FEATURE_REALTIME_INTERVIEW !== 'false';
 
   // Check if Realtime API is enabled
-  const isRealtimeEnabled = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true';
+  const isRealtimeEnabled = process.env.NEXT_PUBLIC_ENABLE_REALTIME !== 'false';
 
-  // Audio state for tracking full conversation transcript (used for traditional mode)
   const [audioState, setAudioState] = useState<AudioState>({
     chunks: [],
     fullTranscript: '',
+    totalDuration: 0,
   });
+
+  // Helper to convert base64 to blob
+  const dataURItoBlob = (dataURI: string) => {
+    const byteString = atob(dataURI.split(',')[1]);
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mimeString });
+  };
+
+  const proceedWithSingleStory = async (analyzedStory?: any) => {
+    setIsProcessing(true);
+    try {
+      let mixedBlob: Blob | null = null;
+      let userBlob: Blob | null = null;
+      let finalDuration = 0;
+
+      if (isRealtimeEnabled) {
+        mixedBlob = getMixedAudioBlob();
+        userBlob = getUserAudioBlob();
+        finalDuration = recordingDuration;
+      } else {
+        mixedBlob = await combineAudioBlobs(audioState.chunks); // Combine traditional chunks
+        userBlob = mixedBlob; // In traditional, user and mixed are the same
+        finalDuration = audioState.totalDuration;
+      }
+
+      const qaPairs = extractQAPairs(messages);
+
+      const fullTranscript = messages
+        .filter(m => m.type !== 'system')
+        .map(m => `${m.sender === 'user' ? 'User' : 'Pearl'}: ${m.content}`)
+        .join('\n\n');
+
+      await completeConversationAndRedirect({
+        qaPairs,
+        audioBlob: mixedBlob,
+        userOnlyAudioBlob: userBlob,
+        fullTranscript: analyzedStory?.bridged_text || fullTranscript, // Use bridged text if available
+        totalDuration: finalDuration
+      }, analyzedStory ? [analyzedStory] : []); // Pass as an array if it's a single story
+
+    } catch (error) {
+      console.error('Failed to complete conversation:', error);
+      setIsProcessing(false);
+    } finally {
+      setIsAnalyzing(false);
+      setIsProcessing(false);
+    }
+  };
+
+  const handleSplitConfirm = async () => {
+    setIsSplitting(true);
+    try {
+      let userAudioBlob: Blob | null = null;
+      let finalDuration = 0;
+
+      if (isRealtimeEnabled) {
+        userAudioBlob = getUserAudioBlob();
+        finalDuration = recordingDuration;
+      } else {
+        userAudioBlob = await combineAudioBlobs(audioState.chunks);
+        finalDuration = audioState.totalDuration;
+      }
+
+      if (!userAudioBlob) throw new Error('No user audio found to split.');
+
+      // The analysis API returns start/end indices of TEXT.
+      // We need to map char index to time.
+      // For now, let's assume the `detectedStories` from `/api/analyze-stories`
+      // already contains `start_time` and `end_time` for each story segment.
+      // This would require the `analyze-stories` API to perform this mapping or estimation.
+
+      const splitSegments = detectedStories.map(s => ({
+        start: s.start_time || 0, // Assuming start_time is provided by API
+        end: s.end_time || finalDuration, // Assuming end_time is provided by API
+        title: s.title
+      }));
+
+      const splitFormData = new FormData();
+      splitFormData.append('audio', userAudioBlob);
+      splitFormData.append('segments', JSON.stringify(splitSegments));
+
+      const splitRes = await fetch('/api/process-audio/split', {
+        method: 'POST',
+        body: splitFormData
+      });
+
+      if (!splitRes.ok) throw new Error('Splitting failed');
+
+      const { files } = await splitRes.json();
+
+      // Map back to stories
+      const finalStories = detectedStories.map((story, i) => {
+        const file = files.find((f: any) => f.index === i);
+        // Convert base64 url to blob
+        const blob = file ? dataURItoBlob(file.url) : userAudioBlob; // Fallback to full blob if split fails for a segment
+
+        return {
+          title: story.title,
+          bridged_text: story.bridged_text,
+          audioBlob: blob,
+          duration: file ? file.duration : finalDuration // Fallback to full duration
+        };
+      });
+
+      // We still need to pass the full conversation data for overall context
+      const qaPairs = extractQAPairs(messages);
+      const fullTranscript = messages.map(m => m.content).join('\n');
+      const mixedAudioBlob = isRealtimeEnabled ? getMixedAudioBlob() : await combineAudioBlobs(audioState.chunks);
+
+      await completeConversationAndRedirect({
+        qaPairs,
+        audioBlob: mixedAudioBlob, // Original full mixed audio
+        userOnlyAudioBlob: userAudioBlob, // Original full user audio
+        fullTranscript,
+        totalDuration: finalDuration
+      }, finalStories); // Pass the array of split stories
+
+    } catch (error) {
+      console.error('Split error:', error);
+      // Fallback to single story flow if splitting fails
+      await proceedWithSingleStory();
+    } finally {
+      setIsSplitting(false);
+      setShowSplitModal(false);
+      setIsAnalyzing(false);
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle conversation completion
+  const handleComplete = useCallback(async () => {
+    // Require at least one Q&A exchange
+    const userResponses = messages.filter(m =>
+      m.type === 'audio-response' || m.type === 'text-response'
+    );
+
+    if (userResponses.length === 0) {
+      alert('Please answer at least one question before completing the interview.');
+      return;
+    }
+
+    // Confirm completion
+    const confirmComplete = confirm(
+      `Complete this interview with ${userResponses.length} ${userResponses.length === 1 ? 'response' : 'responses'}?\n\n` +
+      'You\'ll be taken to review and finalize your story.'
+    );
+
+    if (!confirmComplete) return;
+
+    // Stop recording if active
+    if (isRealtimeEnabled && status === 'connected') {
+      stopSession();
+    } else if (isRecording) {
+      stopTraditionalRecording();
+    }
+
+    setIsAnalyzing(true);
+
+    try {
+      // 1. Get full transcript
+      const fullTranscript = messages
+        .filter(m => m.type !== 'system')
+        .map(m => `${m.sender === 'user' ? 'Grandparent' : 'Grandchild'}: ${m.content}`)
+        .join('\n');
+
+      // 2. Analyze for stories
+      const response = await fetch('/api/analyze-stories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: fullTranscript,
+          userName: user?.name
+        }),
+      });
+
+      if (!response.ok) throw new Error('Analysis failed');
+
+      const result = await response.json();
+
+      if (result.stories && result.stories.length > 1) {
+        // Found multiple stories! Show modal
+        setDetectedStories(result.stories);
+        setShowSplitModal(true);
+        setIsAnalyzing(false);
+      } else {
+        // Just one story, proceed as normal
+        await proceedWithSingleStory(result.stories?.[0]);
+      }
+    } catch (error) {
+      console.error('Analysis error:', error);
+      // Fallback to single story flow
+      await proceedWithSingleStory();
+    }
+  }, [messages, isRealtimeEnabled, status, isRecording, stopSession, stopTraditionalRecording, user?.name, audioState.chunks, audioState.totalDuration, recordingDuration, getMixedAudioBlob, getUserAudioBlob]);
 
   // Redirect if not authenticated (only after loading completes)
   useEffect(() => {
@@ -161,7 +362,7 @@ export default function InterviewChatPage() {
 
     // Start recording state for the interview
     if (isRealtimeEnabled) {
-      startSession(handleTranscriptUpdate);
+      startSession((text) => handleTranscriptUpdate(text, true));
     } else {
       startTraditionalRecording('conversation');
     }
@@ -461,204 +662,7 @@ export default function InterviewChatPage() {
     }, 200); // Reduced delay for snappier feel
   };
 
-  // Helper to convert base64 to blob
-  const dataURItoBlob = (dataURI: string) => {
-    const byteString = atob(dataURI.split(',')[1]);
-    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([ab], { type: mimeString });
-  };
 
-  // Handle conversation completion
-  const handleComplete = useCallback(async () => {
-    // Require at least one Q&A exchange
-    const userResponses = messages.filter(m =>
-      m.type === 'audio-response' || m.type === 'text-response'
-    );
-
-    if (userResponses.length === 0) {
-      alert('Please answer at least one question before completing the interview.');
-      return;
-    }
-
-    // Confirm completion
-    const confirmComplete = confirm(
-      `Complete this interview with ${userResponses.length} ${userResponses.length === 1 ? 'response' : 'responses'}?\n\n` +
-      'You\'ll be taken to review and finalize your story.'
-    );
-
-    if (!confirmComplete) return;
-
-    // Stop recording if active
-    if (isRealtimeEnabled && status === 'connected') {
-      stopSession();
-    } else if (isRecording) {
-      stopTraditionalRecording();
-    }
-
-    setIsAnalyzing(true);
-
-    try {
-      // 1. Get full transcript
-      const fullTranscript = messages
-        .filter(m => m.type !== 'system')
-        .map(m => `${m.sender === 'user' ? 'Grandparent' : 'Grandchild'}: ${m.content}`)
-        .join('\n');
-
-      // 2. Analyze for stories
-      const response = await fetch('/api/analyze-stories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          transcript: fullTranscript,
-          userName: user?.name
-        }),
-      });
-
-      if (!response.ok) throw new Error('Analysis failed');
-
-      const result = await response.json();
-
-      if (result.stories && result.stories.length > 1) {
-        // Found multiple stories! Show modal
-        setDetectedStories(result.stories);
-        setShowSplitModal(true);
-        setIsAnalyzing(false);
-      } else {
-        // Just one story, proceed as normal
-        await proceedWithSingleStory(result.stories?.[0]);
-      }
-    } catch (error) {
-      console.error('Analysis error:', error);
-      // Fallback to single story flow
-      await proceedWithSingleStory();
-    }
-  }, [messages, isRealtimeEnabled, status, isRecording, stopSession, stopTraditionalRecording, user?.name]);
-
-  const proceedWithSingleStory = async (analyzedStory?: any) => {
-    setIsProcessing(true);
-    try {
-      let mixedBlob: Blob | null = null;
-      let userBlob: Blob | null = null;
-      let finalDuration = 0;
-
-      if (isRealtimeEnabled) {
-        mixedBlob = getMixedAudioBlob();
-        userBlob = getUserAudioBlob();
-        finalDuration = recordingDuration;
-      } else {
-        mixedBlob = await combineAudioBlobs(audioState.chunks); // Combine traditional chunks
-        userBlob = mixedBlob; // In traditional, user and mixed are the same
-        finalDuration = getTraditionalRecordedDuration();
-      }
-
-      const qaPairs = extractQAPairs(messages);
-
-      const fullTranscript = messages
-        .filter(m => m.type !== 'system')
-        .map(m => `${m.sender === 'user' ? 'User' : 'Pearl'}: ${m.content}`)
-        .join('\n\n');
-
-      await completeConversationAndRedirect({
-        qaPairs,
-        audioBlob: mixedBlob,
-        userOnlyAudioBlob: userBlob,
-        fullTranscript: analyzedStory?.bridged_text || fullTranscript, // Use bridged text if available
-        totalDuration: finalDuration
-      }, analyzedStory ? [analyzedStory] : []); // Pass as an array if it's a single story
-
-    } catch (error) {
-      console.error('Failed to complete conversation:', error);
-      setIsProcessing(false);
-    } finally {
-      setIsAnalyzing(false);
-      setIsProcessing(false);
-    }
-  };
-
-  const handleSplitConfirm = async () => {
-    setIsSplitting(true);
-    try {
-      let userAudioBlob: Blob | null = null;
-      let finalDuration = 0;
-
-      if (isRealtimeEnabled) {
-        userAudioBlob = getUserAudioBlob();
-        finalDuration = recordingDuration;
-      } else {
-        userAudioBlob = await combineAudioBlobs(audioState.chunks);
-        finalDuration = getTraditionalRecordedDuration();
-      }
-
-      if (!userAudioBlob) throw new Error('No user audio found to split.');
-
-      // The analysis API returns start/end indices of TEXT.
-      // We need to map char index to time.
-      // For now, let's assume the `detectedStories` from `/api/analyze-stories`
-      // already contains `start_time` and `end_time` for each story segment.
-      // This would require the `analyze-stories` API to perform this mapping or estimation.
-
-      const splitSegments = detectedStories.map(s => ({
-        start: s.start_time || 0, // Assuming start_time is provided by API
-        end: s.end_time || finalDuration, // Assuming end_time is provided by API
-        title: s.title
-      }));
-
-      const splitFormData = new FormData();
-      splitFormData.append('audio', userAudioBlob);
-      splitFormData.append('segments', JSON.stringify(splitSegments));
-
-      const splitRes = await fetch('/api/process-audio/split', {
-        method: 'POST',
-        body: splitFormData
-      });
-
-      if (!splitRes.ok) throw new Error('Splitting failed');
-
-      const { files } = await splitRes.json();
-
-      // Map back to stories
-      const finalStories = detectedStories.map((story, i) => {
-        const file = files.find((f: any) => f.index === i);
-        // Convert base64 url to blob
-        const blob = file ? dataURItoBlob(file.url) : userAudioBlob; // Fallback to full blob if split fails for a segment
-
-        return {
-          title: story.title,
-          bridged_text: story.bridged_text,
-          audioBlob: blob,
-          duration: file ? file.duration : finalDuration // Fallback to full duration
-        };
-      });
-
-      // We still need to pass the full conversation data for overall context
-      const qaPairs = extractQAPairs(messages);
-      const fullTranscript = messages.map(m => m.content).join('\n');
-      const mixedAudioBlob = isRealtimeEnabled ? getMixedAudioBlob() : await combineAudioBlobs(audioState.chunks);
-
-      await completeConversationAndRedirect({
-        qaPairs,
-        audioBlob: mixedAudioBlob, // Original full mixed audio
-        userOnlyAudioBlob: userAudioBlob, // Original full user audio
-        fullTranscript,
-        totalDuration: finalDuration
-      }, finalStories); // Pass the array of split stories
-
-    } catch (error) {
-      console.error('Split error:', error);
-      // Fallback to single story flow if splitting fails
-      await proceedWithSingleStory();
-    } finally {
-      setIsSplitting(false);
-      setShowSplitModal(false);
-      setIsAnalyzing(false);
-      setIsProcessing(false);
-    }
-  };
 
 
   // Show "Coming Soon" if feature is disabled

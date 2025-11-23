@@ -42,7 +42,6 @@ import {
   Copy,
   Check,
   Eye,
-  Activity,
   ChevronDown,
   ChevronUp,
   HelpCircle,
@@ -54,12 +53,7 @@ import { FamilySummaryTile } from "@/components/family/FamilySummaryTile";
 import { FamilyMemberCard } from "@/components/family/FamilyMemberCard";
 import { PendingInviteCard } from "@/components/family/PendingInviteCard";
 import { PrivacyInfoCard } from "@/components/family/PrivacyInfoCard";
-import {
-  useRecentActivity,
-  formatActivityEvent,
-  getActivitySummary,
-  getRelativeTime,
-} from "@/hooks/useRecentActivity";
+import { getRelativeTime } from "@/hooks/useRecentActivity";
 
 interface FamilyMember {
   id: string;
@@ -135,13 +129,6 @@ export default function FamilyPage() {
   });
 
   const familyMembers = familyMembersData?.members || [];
-
-  // Fetch recent activity
-  const { data: activityEvents = [], isLoading: loadingActivity } = useRecentActivity({
-    limit: 8,
-    days: 30,
-    enabled: !!user,
-  });
 
   // Confetti celebration function
   const celebrateInvite = () => {
@@ -396,9 +383,6 @@ export default function FamilyPage() {
   // Calculate stats
   const totalMembers = activeMembers.length;
 
-  // Calculate activity summary for the Recent Activity card
-  const activitySummary = getActivitySummary(activityEvents);
-
   const relationshipOptions = [
     "Son",
     "Daughter",
@@ -471,93 +455,8 @@ export default function FamilyPage() {
               />
             </div>
 
-            {/* Row 2: Privacy + Activity Cards (Desktop side-by-side, Mobile stacked) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
-              {/* Privacy Card */}
-              <PrivacyInfoCard />
-
-              {/* Recent Activity Card */}
-              <Card className="bg-white border border-heritage-deep-slate/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2.5 text-xl md:text-2xl font-semibold text-heritage-text-primary leading-tight">
-                    <div className="w-10 h-10 rounded-xl bg-heritage-deep-slate/10 flex items-center justify-center shrink-0">
-                      <Activity className="w-6 h-6 text-heritage-deep-slate" />
-                    </div>
-                    Recent Activity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loadingActivity ? (
-                    <div className="space-y-3">
-                      {[...Array(4)].map((_, i) => (
-                        <div key={i} className="flex gap-2.5 animate-pulse">
-                          <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
-                          <div className="flex-1 space-y-2">
-                            <div className="h-5 bg-gray-200 rounded w-3/4" />
-                            <div className="h-4 bg-gray-200 rounded w-1/2" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : activityEvents.length === 0 ? (
-                    <div className="text-center py-6">
-                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                        <Activity className="w-8 h-8 text-gray-400" />
-                      </div>
-                      <h4 className="text-lg md:text-xl font-semibold text-gray-900 mb-2 leading-tight">
-                        No activity yet
-                      </h4>
-                      <p className="text-base md:text-lg text-gray-600 leading-snug max-w-xs mx-auto">
-                        When your family listens to a story or joins your circle,
-                        you'll see it here.
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Summary line */}
-                      {activitySummary.storiesListened > 0 && (
-                        <div className="mb-4 pb-3 border-b border-gray-200">
-                          <p className="text-base md:text-lg text-gray-700 font-medium">
-                            This month:{" "}
-                            {activitySummary.uniqueListeners > 0 && (
-                              <>
-                                {activitySummary.uniqueListeners} family{" "}
-                                {activitySummary.uniqueListeners === 1 ? "member" : "members"}{" "}
-                                listened to{" "}
-                              </>
-                            )}
-                            {activitySummary.storiesListened}{" "}
-                            {activitySummary.storiesListened === 1 ? "story" : "stories"}
-                            {activitySummary.storiesRecorded > 0 && (
-                              <>
-                                {" "}• {activitySummary.storiesRecorded} new{" "}
-                                {activitySummary.storiesRecorded === 1 ? "story" : "stories"} recorded
-                              </>
-                            )}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Activity list */}
-                      <div className="space-y-3">
-                        {activityEvents.slice(0, 8).map((event) => (
-                          <div key={event.id} className="flex flex-col gap-1">
-                            <p className="text-base md:text-lg font-medium text-gray-900 leading-snug">
-                              {formatActivityEvent(event)}
-                            </p>
-                            {event.storyTitle && event.eventType === "story_listened" && (
-                              <p className="text-sm md:text-base text-gray-600">
-                                "{event.storyTitle}"
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+            {/* Privacy Card */}
+            <PrivacyInfoCard />
 
               {/* Active Family Members Section */}
               <section>

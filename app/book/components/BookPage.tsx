@@ -26,8 +26,11 @@ interface Story {
     isHero?: boolean;
     width?: number;
     height?: number;
+    transform?: { zoom: number; position: { x: number; y: number } };
   }>;
   wisdomClipText?: string;
+  chapterId?: string;
+  chapterTitle?: string;
 }
 
 interface DecadePage {
@@ -35,6 +38,7 @@ interface DecadePage {
   decade: string;
   title: string;
   count: number;
+  isChapter?: boolean; // NEW: Flag to distinguish chapter pages from decade pages
 }
 
 interface BookPageProps {
@@ -43,16 +47,17 @@ interface BookPageProps {
   onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
   position: "left" | "right";
   allStories?: Story[]; // For TOC
-  onNavigateToStory?: (storyIndex: number) => void; // For TOC navigation
+  onNavigateToStory?: (storyId: string) => void; // For TOC navigation - pass story ID
   fontSize?: number; // Font size for story text
   isOwnAccount?: boolean; // Whether user owns this account (for edit permissions)
+  viewMode?: 'chronological' | 'chapters';
 }
 
 export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
-  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory, fontSize = 18, isOwnAccount = true }, ref) => {
+  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory, fontSize = 18, isOwnAccount = true, viewMode = 'chronological' }, ref) => {
     const pageRef = React.useRef<HTMLDivElement>(null);
-    const [scrollState, setScrollState] = React.useState<{ 
-      hasScroll: boolean; 
+    const [scrollState, setScrollState] = React.useState<{
+      hasScroll: boolean;
       isAnimating: boolean;
       hasUserScrolled: boolean;
     }>({
@@ -62,34 +67,82 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
     });
     const currentPageIdRef = React.useRef<string>('');
 
+    // Helper to render TOC items with grouping
+    const renderTOCItems = (stories: Story[], startIndex: number) => {
+      let lastGroup = '';
+
+      return stories.map((storyItem, idx) => {
+        let currentGroup = '';
+        let groupTitle = '';
+
+        if (viewMode === 'chapters') {
+          currentGroup = storyItem.chapterId || 'uncategorized';
+          groupTitle = storyItem.chapterTitle || 'Uncategorized';
+        } else {
+          const decade = Math.floor(storyItem.storyYear / 10) * 10;
+          currentGroup = `${decade}s`;
+          groupTitle = `${decade}s`;
+        }
+
+        const showHeader = currentGroup !== lastGroup;
+        lastGroup = currentGroup;
+
+        return (
+          <div key={storyItem.id}>
+            {showHeader && (
+              <h3 className="text-sm font-semibold tracking-tight text-neutral-800 uppercase mt-6 mb-2 first:mt-0">
+                {groupTitle}
+              </h3>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onNavigateToStory) {
+                  onNavigateToStory(storyItem.id);
+                }
+              }}
+              className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left block"
+            >
+              <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
+                {storyItem.title}
+              </span>
+              <span className="text-gray-500 text-base whitespace-nowrap">
+                {storyItem.storyYear}
+              </span>
+            </button>
+          </div>
+        );
+      });
+    };
+
     // Single effect to manage everything
     React.useEffect(() => {
       // Generate unique page ID
-      const pageId = typeof story === 'string' ? story : 
-                     (story && typeof story === 'object' && 'id' in story) ? story.id : 
-                     `page-${pageNum}`;
-      
+      const pageId = typeof story === 'string' ? story :
+        (story && typeof story === 'object' && 'id' in story) ? story.id :
+          `page-${pageNum}`;
+
       // Check if this is a new page
       const isNewPage = pageId !== currentPageIdRef.current;
-      
+
       if (isNewPage) {
         currentPageIdRef.current = pageId;
-        
+
         // Reset state for new page
         setScrollState({ hasScroll: false, isAnimating: false, hasUserScrolled: false });
-        
+
         let stopAnimationTimer: NodeJS.Timeout | null = null;
-        
+
         // Check for scroll after content loads
         const checkScrollTimer = setTimeout(() => {
           if (ref && typeof ref !== 'function' && ref.current) {
             const element = ref.current;
             const isScrollable = element.scrollHeight > element.clientHeight + 5;
-            
+
             if (isScrollable) {
               // Start showing indicators (bouncing for first 1.5 seconds)
               setScrollState({ hasScroll: true, isAnimating: true, hasUserScrolled: false });
-              
+
               // Stop bouncing animation after 1.5 seconds, but KEEP indicators visible
               stopAnimationTimer = setTimeout(() => {
                 setScrollState(prev => ({ ...prev, isAnimating: false }));
@@ -97,7 +150,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             }
           }
         }, 1200);
-        
+
         // Cleanup
         return () => {
           clearTimeout(checkScrollTimer);
@@ -164,7 +217,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             }}
           >
             {/* Marbled texture pattern */}
-            <div 
+            <div
               className="absolute inset-0 opacity-30"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='marble'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='8' seed='2' /%3E%3CfeColorMatrix type='saturate' values='0.3'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23marble)' fill='%23D4B896'/%3E%3C/svg%3E")`,
@@ -173,7 +226,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             ></div>
 
             {/* Subtle swirl pattern */}
-            <div 
+            <div
               className="absolute inset-0 opacity-10"
               style={{
                 backgroundImage: `radial-gradient(ellipse at 20% 30%, rgba(139,111,71,0.3) 0%, transparent 50%),
@@ -198,7 +251,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
 
             {/* Subtle vignette */}
-            <div 
+            <div
               className="absolute inset-0 pointer-events-none"
               style={{
                 background: position === "left"
@@ -221,7 +274,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
     if (story === 'toc-left') {
       const midpoint = Math.ceil(allStories.length / 2);
       const leftStories = allStories.slice(0, midpoint);
-      
+
       return (
         <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
           {/* Main page */}
@@ -263,34 +316,15 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   <h1 className="text-5xl font-serif text-center mb-8 text-gray-800">
                     Table of Contents
                   </h1>
-                  <div className="space-y-4" style={{ pointerEvents: 'auto' }}>
-                    {leftStories.map((storyItem, idx) => (
-                      <button
-                        key={storyItem.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (onNavigateToStory) {
-                            onNavigateToStory(idx);
-                          }
-                        }}
-                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left block"
-                      >
-                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
-                          {storyItem.title}
-                        </span>
-                        <span className="text-gray-500 text-base whitespace-nowrap">
-                          {storyItem.storyYear}
-                          {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
-                        </span>
-                      </button>
-                    ))}
+                  <div className="space-y-0" style={{ pointerEvents: 'auto' }}>
+                    {renderTOCItems(leftStories, 0)}
                   </div>
                 </div>
               </div>
-              
+
               {/* Senior-friendly scroll indicator for TOC left */}
               {scrollState.hasScroll && !scrollState.hasUserScrolled && (
-                <ScrollIndicator 
+                <ScrollIndicator
                   show={true}
                   position={position}
                   contentType="book"
@@ -302,7 +336,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   }}
                 />
               )}
-              
+
               <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-base text-neutral-600 pointer-events-none z-20">
                 {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
                 {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
@@ -317,15 +351,15 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
     if (story === 'toc-right') {
       const midpoint = Math.ceil(allStories.length / 2);
       const rightStories = allStories.slice(midpoint);
-      
+
       return (
-        <div 
-          ref={pageRef} 
+        <div
+          ref={pageRef}
           className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}
           style={{ pointerEvents: 'none' }}
         >
           {/* Main page */}
-          <div 
+          <div
             className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}
             style={{ pointerEvents: 'auto' }}
           >
@@ -363,35 +397,16 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                     pointerEvents: 'auto'
                   }}
                 >
-                  <div className="space-y-4 pt-[72px]" style={{ pointerEvents: 'auto' }}>
-                    {rightStories.map((storyItem, idx) => (
-                      <button
-                        key={storyItem.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (onNavigateToStory) {
-                            onNavigateToStory(midpoint + idx);
-                          }
-                        }}
-                        className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left block"
-                      >
-                        <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
-                          {storyItem.title}
-                        </span>
-                        <span className="text-gray-500 text-base whitespace-nowrap">
-                          {storyItem.storyYear}
-                          {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
-                        </span>
-                      </button>
-                    ))}
+                  <div className="space-y-0 pt-[72px]" style={{ pointerEvents: 'auto' }}>
+                    {renderTOCItems(rightStories, midpoint)}
                   </div>
                 </div>
               </div>
-              
-              
+
+
               {/* Senior-friendly scroll indicator for TOC right */}
               {scrollState.hasScroll && !scrollState.hasUserScrolled && (
-                <ScrollIndicator 
+                <ScrollIndicator
                   show={true}
                   position={position}
                   contentType="book"
@@ -403,7 +418,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   }}
                 />
               )}
-              
+
               <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-base text-neutral-600 pointer-events-none z-20">
                 {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
                 {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
@@ -424,6 +439,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               decade={story.decade}
               title={story.title}
               storiesCount={story.count}
+              isChapter={story.isChapter}
             />
             <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
               {position === "left" && <span className="tracking-tight">{pageNum}</span>}
@@ -441,7 +457,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
           <div className={`absolute inset-0 translate-y-0.5 ${position === "left" ? "-translate-x-0.5" : "translate-x-0.5"} scale-[0.998] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] opacity-70 bg-neutral-50 ring-black/10`} style={{ display: 'none' }}></div>
           <div className={`absolute inset-0 translate-y-1 ${position === "left" ? "-translate-x-[3px]" : "translate-x-[3px]"} scale-[0.996] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] opacity-55 bg-neutral-50 ring-black/10`} style={{ display: 'none' }}></div>
           <div className={`absolute inset-0 translate-y-[6px] ${position === "left" ? "-translate-x-[6px]" : "translate-x-[6px]"} scale-[0.992] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] opacity-35 bg-neutral-50 ring-black/10`} style={{ display: 'none' }}></div>
-          
+
           {/* Main page - Empty */}
           <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
             <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
@@ -453,10 +469,10 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
     }
 
     return (
-      <div 
-        ref={pageRef} 
-        className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`} 
-        style={{ 
+      <div
+        ref={pageRef}
+        className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}
+        style={{
           zIndex: position === "right" ? 50 : 40,
           pointerEvents: 'none', // Don't catch clicks at this level
           overflow: 'visible'
@@ -468,7 +484,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
         <div className={`absolute inset-0 translate-y-[6px] ${position === "left" ? "-translate-x-[6px]" : "translate-x-[6px]"} scale-[0.992] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] opacity-35 bg-neutral-50 ring-black/10`} style={{ display: 'none' }}></div>
 
         {/* Main page */}
-        <div 
+        <div
           className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}
           style={{
             maxWidth: '100%',
@@ -508,7 +524,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 onScroll={(e) => {
                   // Call parent scroll handler
                   onScroll(e);
-                  
+
                   // Check scroll position to hide indicator
                   const element = e.currentTarget;
                   if (element.scrollTop > 50) {
@@ -528,10 +544,10 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               >
                 <StoryContent story={story as Story} position={position} pageNum={pageNum} fontSize={fontSize} isOwnAccount={isOwnAccount} />
               </div>
-              
+
               {/* Scroll indicators - stay visible until user scrolls */}
               {scrollState.hasScroll && !scrollState.hasUserScrolled && (
-                <ScrollIndicator 
+                <ScrollIndicator
                   show={true}
                   position={position}
                   contentType="book"
@@ -545,7 +561,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 />
               )}
             </div>
-            
+
             <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
               {position === "left" && <span className="tracking-tight">{pageNum}</span>}
               {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
@@ -561,7 +577,7 @@ BookPage.displayName = "BookPage";
 // Story Content Component
 function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = true }: { story: Story; position: "left" | "right"; pageNum: number; fontSize?: number; isOwnAccount?: boolean }) {
   const router = useRouter();
-  
+
   // Audio state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -571,10 +587,10 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
 
   // Activity tracking state - only log once per playback session
   const hasLoggedListeningRef = useRef(false);
-  
+
   // Calculate progress percentage
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-  
+
   // Format time helper
   const formatTime = (seconds: number) => {
     if (isNaN(seconds)) return '0:00';
@@ -582,41 +598,41 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-  
+
   // Initialize audio element on mount - ONLY ONCE per story
   useEffect(() => {
     if (!story.audioUrl) return;
-    
+
     // Only initialize if we don't already have an audio element
     if (audioRef.current) {
       return;
     }
-    
+
     const audio = new Audio(story.audioUrl);
     audio.preload = 'auto';
     audioRef.current = audio;
-    
+
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
     };
-    
+
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
     };
-    
+
     const handleEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
     };
-    
+
     const handlePause = () => {
       setIsPlaying(false);
     };
-    
+
     const handlePlay = () => {
       setIsPlaying(true);
     };
-    
+
     const handleError = (err: Event) => {
       console.error(`Audio error for ${story.title} (${position} page):`, err);
       if (audio.error) {
@@ -632,14 +648,14 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
       setIsLoading(false);
       setIsPlaying(false);
     };
-    
+
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('error', handleError);
-    
+
     // Cleanup only on unmount
     return () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
@@ -697,11 +713,11 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
   const toggleAudio = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!audioRef.current) {
       return;
     }
-    
+
     try {
       // Stop other audio on the page first
       const allAudioElements = document.querySelectorAll('audio');
@@ -710,7 +726,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
           audio.pause();
         }
       });
-      
+
       if (audioRef.current.paused) {
         setIsLoading(true);
         await audioRef.current.play();
@@ -762,6 +778,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
                 alt={story.title}
                 width={heroPhoto.width}
                 height={heroPhoto.height}
+                transform={heroPhoto.transform}
                 aspectRatio={16 / 10}
                 className="rounded-md shadow ring-1 ring-black/5"
               />
@@ -906,7 +923,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
           </p>
         </div>
       )}
-      
+
     </>
   );
 }

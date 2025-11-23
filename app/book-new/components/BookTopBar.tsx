@@ -9,6 +9,8 @@ export default function BookTopBar({
   onTimelineClick,
   onEditClick,
   onTocClick,
+  viewMode,
+  onViewModeChange,
 }: BookTopBarProps) {
   return (
     <header className="fixed inset-x-0 top-0 z-40 flex h-[56px] items-center justify-between gap-3 px-4 pt-[env(safe-area-inset-top)]">
@@ -26,6 +28,30 @@ export default function BookTopBar({
           </div>
         </div>
       </div>
+
+      {/* Center: View Mode Toggle (visible if provided) */}
+      {viewMode && onViewModeChange && (
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden sm:flex items-center bg-white/10 rounded-full p-1 border border-white/10 backdrop-blur-sm">
+          <button
+            onClick={() => onViewModeChange('chronological')}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${viewMode === 'chronological'
+              ? 'bg-white text-black shadow-sm'
+              : 'text-white/70 hover:text-white'
+              }`}
+          >
+            Time
+          </button>
+          <button
+            onClick={() => onViewModeChange('chapters')}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${viewMode === 'chapters'
+              ? 'bg-[#d4af87] text-white shadow-sm'
+              : 'text-white/70 hover:text-white'
+              }`}
+          >
+            Chapters
+          </button>
+        </div>
+      )}
 
       {/* Right side: Action buttons */}
       <div className="flex items-center gap-2">

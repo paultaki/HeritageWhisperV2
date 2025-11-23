@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { uploadAudioToSupabase } from "@/lib/supabase-storage";
 
+import { getPasskeySession } from "@/lib/iron-session";
 export const maxDuration = 180; // 3 minutes for parallel processing
 export const dynamic = "force-dynamic";
 
@@ -148,7 +149,7 @@ export async function POST(request: NextRequest) {
     const audioBuffer = Buffer.from(arrayBuffer);
 
     logger.api("[ProcessRecording] Starting parallel processing", {
-      userId: user.id,
+      userId: userId,
       memoryId,
       fileSize: audioBuffer.length,
     });
@@ -198,7 +199,7 @@ export async function POST(request: NextRequest) {
     // Upload to Supabase Storage (use admin client with service role to bypass RLS)
     const uploadResult = await uploadAudioToSupabase(
       audioToStore,
-      user.id,
+      userId,
       memoryId,
       supabaseAdmin
     );

@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { chapters } from "@/shared/schema";
 import { eq, and } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { getPasskeySession } from "@/lib/iron-session";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -17,17 +18,25 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const authHeader = request.headers.get("authorization");
-        const token = authHeader && authHeader.split(" ")[1];
+        // 1. Try session-based auth (primary)
+        const session = await getPasskeySession();
+        let userId = session?.userId;
 
-        if (!token) {
-            return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+        // 2. Fallback to Supabase token (secondary)
+        if (!userId) {
+            const authHeader = request.headers.get("authorization");
+            const token = authHeader && authHeader.split(" ")[1];
+
+            if (token) {
+                const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+                if (!error && user) {
+                    userId = user.id;
+                }
+            }
         }
 
-        const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-
-        if (error || !user) {
-            return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+        if (!userId) {
+            return NextResponse.json({ error: "Authentication required" }, { status: 401 });
         }
 
         const { id } = await params;
@@ -39,7 +48,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
                 ...(title && { title }),
                 ...(orderIndex !== undefined && { orderIndex }),
             })
-            .where(and(eq(chapters.id, id), eq(chapters.userId, user.id)))
+            .where(and(eq(chapters.id, id), eq(chapters.userId, userId)))
             .returning();
 
         if (!updatedChapter) {
@@ -55,23 +64,32 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const authHeader = request.headers.get("authorization");
-        const token = authHeader && authHeader.split(" ")[1];
+        // 1. Try session-based auth (primary)
+        const session = await getPasskeySession();
+        let userId = session?.userId;
 
-        if (!token) {
-            return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+        // 2. Fallback to Supabase token (secondary)
+        if (!userId) {
+            const authHeader = request.headers.get("authorization");
+            const token = authHeader && authHeader.split(" ")[1];
+
+            if (token) {
+                const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+                if (!error && user) {
+                    userId = user.id;
+                }
+            }
         }
 
-        const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-
-        if (error || !user) {
-            return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+        if (!userId) {
+            return NextResponse.json({ error: "Authentication required" }, { status: 401 });
         }
 
         const { id } = await params;
 
+        // Note: stories.chapterId has ON DELETE SET NULL, so stories will automatically be unlinked.
         const [deletedChapter] = await db.delete(chapters)
-            .where(and(eq(chapters.id, id), eq(chapters.userId, user.id)))
+            .where(and(eq(chapters.id, id), eq(chapters.userId, userId)))
             .returning();
 
         if (!deletedChapter) {

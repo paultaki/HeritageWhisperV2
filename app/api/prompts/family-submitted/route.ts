@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { logger } from '@/lib/logger';
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -45,14 +46,14 @@ export async function GET(request: NextRequest) {
 
     // V3: Support storyteller_id query parameter for family sharing
     const { searchParams } = new URL(request.url);
-    const storytellerId = searchParams.get('storyteller_id') || user.id;
+    const storytellerId = searchParams.get('storyteller_id') || userId;
 
     // If requesting another storyteller's prompts, verify access permission
-    if (storytellerId !== user.id) {
+    if (storytellerId !== userId) {
       const { data: hasAccess, error: accessError } = await supabaseAdmin.rpc(
         'has_collaboration_access',
         {
-          p_user_id: user.id,
+          p_user_id: userId,
           p_storyteller_id: storytellerId,
         }
       );
@@ -179,7 +180,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Verify user owns this prompt (is the storyteller)
-    if (prompt.storyteller_user_id !== user.id) {
+    if (prompt.storyteller_user_id !== userId) {
       return NextResponse.json(
         { error: 'You can only dismiss your own prompts' },
         { status: 403 }

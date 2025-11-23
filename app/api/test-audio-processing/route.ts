@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { checkAIConsentOrError } from "@/lib/aiConsent";
+import { getPasskeySession } from "@/lib/iron-session";
 import {
   PathResult,
   calculateAssemblyAICost,
@@ -378,9 +379,9 @@ export async function POST(request: NextRequest) {
     }
     
     // Check AI consent
-    const consentError = await checkAIConsentOrError(user.id);
+    const consentError = await checkAIConsentOrError(userId);
     if (consentError) {
-      logger.warn("[TestAudioProcessing] AI consent denied for user:", user.id);
+      logger.warn("[TestAudioProcessing] AI consent denied for user:", userId);
       return NextResponse.json(consentError, { status: 403 });
     }
     
@@ -411,7 +412,7 @@ export async function POST(request: NextRequest) {
     }
     
     logger.api("[TestAudioProcessing] Starting parallel test", {
-      userId: user.id,
+      userId: userId,
       fileSize: audioBuffer.length,
       estimatedDuration: estimateAudioDuration(audioBuffer.length),
     });
@@ -479,7 +480,7 @@ export async function POST(request: NextRequest) {
         };
     
     logger.api("[TestAudioProcessing] Test completed", {
-      userId: user.id,
+      userId: userId,
       testTotalTimeMs: testTotalTime,
       pathAStatus: pathA.status,
       pathBStatus: pathB.status,

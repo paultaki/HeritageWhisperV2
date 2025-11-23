@@ -15,19 +15,31 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     },
 });
 
+import { getPasskeySession } from "@/lib/iron-session";
+
 export async function POST(request: NextRequest) {
     try {
-        const authHeader = request.headers.get("authorization");
-        const token = authHeader && authHeader.split(" ")[1];
+        let userId: string | undefined;
 
-        if (!token) {
-            return NextResponse.json({ error: "Authentication required" }, { status: 401 });
-        }
+        // 1. Try passkey session first
+        const passkeySession = await getPasskeySession();
+        if (passkeySession) {
+            userId = passkeySession.userId;
+        } else {
+            // 2. Fall back to Supabase auth
+            const authHeader = request.headers.get("authorization");
+            const token = authHeader && authHeader.split(" ")[1];
 
-        const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+            if (!token) {
+                return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+            }
 
-        if (error || !user) {
-            return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+            const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+
+            if (error || !user) {
+                return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+            }
+            userId = user.id;
         }
 
         const body = await request.json();
@@ -41,7 +53,7 @@ export async function POST(request: NextRequest) {
         const storyIdsToUpdate = updates.map((u: any) => u.storyId);
         if (storyIdsToUpdate.length > 0) {
             const userStories = await db.select({ id: stories.id }).from(stories)
-                .where(and(inArray(stories.id, storyIdsToUpdate), eq(stories.userId, user.id)));
+                .where(and(inArray(stories.id, storyIdsToUpdate), eq(stories.userId, userId)));
 
             if (userStories.length !== storyIdsToUpdate.length) {
                 return NextResponse.json({ error: "Unauthorized access to some stories" }, { status: 403 });

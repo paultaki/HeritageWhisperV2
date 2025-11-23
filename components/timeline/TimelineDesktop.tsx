@@ -50,6 +50,7 @@ import { STARTER_TEMPLATES, type StarterMemoryTemplate } from "@/lib/starterTemp
 import { StarterMemoryCard } from "@/components/timeline/StarterMemoryCard";
 import PlayPauseButton from "@/components/ui/PlayPauseButton";
 import DecadeNav, { type DecadeEntry } from "@/components/ui/DecadeNav";
+import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
 
 const logoUrl = "/final logo/logo-new.svg";
 
@@ -486,32 +487,16 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         >
           {/* Photo Section - 16:10 aspect ratio to match mobile, rounded top corners only */}
           <div className="relative w-full aspect-[16/10] overflow-hidden">
-            {displayPhoto.transform ? (
-              <img
-                src={displayPhoto.url}
-                alt={story.title}
-                className="w-full h-full object-cover"
-                style={{
-                  transform: `scale(${displayPhoto.transform.zoom}) translate(${displayPhoto.transform.position.x}%, ${displayPhoto.transform.position.y}%)`,
-                  transformOrigin: "center center",
-                }}
-                onError={(e) => console.error("[Timeline] Image failed to load:", displayPhoto.url)}
-              />
-            ) : (
-              <Image
-                src={displayPhoto.url}
-                alt={story.title}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
-                className={`object-cover ${isVisible && !prefersReducedMotion ? 'ken-burns-effect' : ''}`}
-                loading="eager"
-                priority={index < 8}
-                quality={90}
-                placeholder="blur"
-                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
-                onError={(e) => console.error("[Timeline] Image failed to load:", displayPhoto.url)}
-              />
-            )}
+            <StoryPhotoWithBlurExtend
+              src={displayPhoto.url}
+              alt={story.title}
+              width={(displayPhoto as any).width}
+              height={(displayPhoto as any).height}
+              transform={displayPhoto.transform}
+              aspectRatio={16 / 10}
+              priority={index < 8}
+              className="w-full h-full"
+            />
 
             {/* Photo count badge */}
             {photoCount > 1 && (

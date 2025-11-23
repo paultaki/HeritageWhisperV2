@@ -226,6 +226,17 @@ function BookV4PageContent() {
     enabled: !!user,
   });
 
+  // Enriched stories with chapter titles for TOC
+  const enrichedStories = useMemo(() => {
+    return sortedStories.map(story => {
+      const chapter = chapters.find(c => c.id === story.chapterId);
+      return {
+        ...story,
+        chapterTitle: chapter ? chapter.title : undefined
+      };
+    });
+  }, [sortedStories, chapters]);
+
   // Group stories by chapter
   const chapterGroups = useMemo(() => {
     if (viewMode !== 'chapters' || chapters.length === 0) return [];
@@ -303,7 +314,8 @@ function BookV4PageContent() {
         type: 'decade' as const, // Reuse decade type for styling
         decade: id,
         title: title,
-        count: stories.length
+        count: stories.length,
+        isChapter: viewMode === 'chapters' // NEW: Pass flag to distinguish chapters from decades
       };
 
       // Check if we need to add marker on left or right
@@ -369,7 +381,9 @@ function BookV4PageContent() {
           isLeftPage: true,
           isRightPage: false,
           decade: typeof spread.left === 'object' && 'decade' in spread.left ? spread.left.decade : undefined,
+          decadeTitle: typeof spread.left === 'object' && 'title' in spread.left ? spread.left.title : undefined,
           year: typeof spread.left === 'object' && 'storyYear' in spread.left ? spread.left.storyYear.toString() : undefined,
+          isChapter: typeof spread.left === 'object' && 'isChapter' in spread.left ? Boolean(spread.left.isChapter) : undefined,
         };
         pages.push(leftPage);
       }
@@ -392,7 +406,9 @@ function BookV4PageContent() {
           isLeftPage: false,
           isRightPage: true,
           decade: typeof spread.right === 'object' && 'decade' in spread.right ? spread.right.decade : undefined,
+          decadeTitle: typeof spread.right === 'object' && 'title' in spread.right ? spread.right.title : undefined,
           year: typeof spread.right === 'object' && 'storyYear' in spread.right ? spread.right.storyYear.toString() : undefined,
+          isChapter: typeof spread.right === 'object' && 'isChapter' in spread.right ? Boolean(spread.right.isChapter) : undefined,
         };
         pages.push(rightPage);
       }
@@ -619,33 +635,31 @@ function BookV4PageContent() {
   const currentSpread = spreads[currentSpreadIndex] || { left: undefined, right: undefined, type: 'stories' as const };
 
   // Navigate to a story from TOC
-  const handleNavigateToStory = (storyIndex: number) => {
-    // For mobile: navigate to the story page directly
-    // Mobile pages: 0=intro, 1=toc, 2+=stories
-    setCurrentMobilePage(storyIndex + 2);
+  const handleNavigateToStory = (storyId: string) => {
+    // For mobile: find the story's index in mobilePages
+    const mobileStoryIndex = mobilePages.findIndex((page) => {
+      return page.type === 'story' && page.story?.id === storyId;
+    });
+    
+    if (mobileStoryIndex !== -1) {
+      setCurrentMobilePage(mobileStoryIndex);
+    }
 
-    // For desktop: find which spread contains this story
-    let currentStoryCount = 0;
-
+    // For desktop: find which spread contains this story by ID
     for (let i = 0; i < spreads.length; i++) {
       const spread = spreads[i];
 
-      // Count stories in this spread
-      let storiesInSpread = 0;
-      if (spread.left && typeof spread.left !== 'string' && !('type' in spread.left)) {
-        storiesInSpread++;
-      }
-      if (spread.right && typeof spread.right !== 'string' && !('type' in spread.right)) {
-        storiesInSpread++;
-      }
-
-      // Check if our target story is in this spread
-      if (currentStoryCount + storiesInSpread > storyIndex) {
+      // Check if the story is on the left page
+      if (spread.left && typeof spread.left !== 'string' && !('type' in spread.left) && spread.left.id === storyId) {
         setCurrentSpreadIndex(i);
         return;
       }
 
-      currentStoryCount += storiesInSpread;
+      // Check if the story is on the right page
+      if (spread.right && typeof spread.right !== 'string' && !('type' in spread.right) && spread.right.id === storyId) {
+        setCurrentSpreadIndex(i);
+        return;
+      }
     }
   };
 
@@ -675,19 +689,7 @@ function BookV4PageContent() {
         />
       </div>
 
-      {/* View Mode Toggle */}
-      {chapters.length > 0 && (
-        <div className="hidden lg:flex justify-center items-center gap-3 mb-4 pt-4 absolute top-20 left-1/2 -translate-x-1/2 z-50">
-          <Label htmlFor="view-mode" className={`text-sm font-medium cursor-pointer ${viewMode === 'chronological' ? 'text-white' : 'text-slate-400'}`}>Chronological</Label>
-          <Switch
-            id="view-mode"
-            checked={viewMode === 'chapters'}
-            onCheckedChange={(checked) => setViewMode(checked ? 'chapters' : 'chronological')}
-            className="data-[state=checked]:bg-[#d4af87]"
-          />
-          <Label htmlFor="view-mode" className={`text-sm font-medium cursor-pointer ${viewMode === 'chapters' ? 'text-[#d4af87]' : 'text-slate-400'}`}>Chapters</Label>
-        </div>
-      )}
+      {/* View Mode Toggle moved to DarkBookProgressBar */}
 
       {/* Desktop: Book view with dual-page spread */}
       <div className={`hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
@@ -710,6 +712,8 @@ function BookV4PageContent() {
             onTocClick={() => setShowToc(!showToc)}
             fontSize={fontSize}
             onFontSizeChange={setFontSize}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
           />
         </div>
 
@@ -793,10 +797,11 @@ function BookV4PageContent() {
                 onScroll={() => { }}
                 ref={flowRightRef}
                 position="right"
-                allStories={sortedStories}
+                allStories={enrichedStories}
                 onNavigateToStory={handleNavigateToStory}
                 fontSize={fontSize}
                 isOwnAccount={isOwnAccount}
+                viewMode={viewMode}
               />
 
               {/* Left page */}
@@ -806,10 +811,11 @@ function BookV4PageContent() {
                 onScroll={() => { }}
                 ref={flowLeftRef}
                 position="left"
-                fontSize={fontSize}
-                allStories={sortedStories}
+                allStories={enrichedStories}
                 onNavigateToStory={handleNavigateToStory}
+                fontSize={fontSize}
                 isOwnAccount={isOwnAccount}
+                viewMode={viewMode}
               />
 
               {/* Refined spine */}
@@ -908,11 +914,11 @@ function BookV4PageContent() {
                 </div>
                 <div className="max-h-[60vh] overflow-y-auto">
                   <ul className="space-y-2.5">
-                    {sortedStories.map((story, index) => (
+                    {sortedStories.map((story) => (
                       <li key={story.id}>
                         <button
                           onClick={() => {
-                            handleNavigateToStory(index);
+                            handleNavigateToStory(story.id);
                             setShowToc(false);
                           }}
                           className="w-full text-center px-3 py-2.5 rounded-md hover:bg-black/10 transition-colors text-lg font-medium"

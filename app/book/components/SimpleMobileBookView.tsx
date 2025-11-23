@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Pencil, Menu, ChevronLeft, ChevronRight, BookOpen, X, Play, Pause, ChevronDown } from "lucide-react";
+import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
 
 // Story interface matching your API structure
 interface Story {
@@ -24,6 +25,8 @@ interface Story {
     transform?: { zoom: number; position: { x: number; y: number } };
     caption?: string;
     isHero?: boolean;
+    width?: number;
+    height?: number;
   }>;
   emotions?: string[];
   pivotalCategory?: string;
@@ -216,9 +219,8 @@ export default function SimpleMobileBookView({
       <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-20 flex items-center justify-between px-2">
         <button
           onClick={goToPrev}
-          className={`pointer-events-auto h-11 w-11 grid place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-md shadow-lg active:scale-95 transition ${
-            currentPageIndex <= 0 ? "hidden" : ""
-          }`}
+          className={`pointer-events-auto h-11 w-11 grid place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-md shadow-lg active:scale-95 transition ${currentPageIndex <= 0 ? "hidden" : ""
+            }`}
           aria-label="Previous"
           style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
         >
@@ -226,9 +228,8 @@ export default function SimpleMobileBookView({
         </button>
         <button
           onClick={goToNext}
-          className={`pointer-events-auto h-11 w-11 grid place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-md shadow-lg active:scale-95 transition ${
-            currentPageIndex >= stories.length - 1 ? "hidden" : ""
-          }`}
+          className={`pointer-events-auto h-11 w-11 grid place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-md shadow-lg active:scale-95 transition ${currentPageIndex >= stories.length - 1 ? "hidden" : ""
+            }`}
           aria-label="Next"
           style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
         >
@@ -301,8 +302,8 @@ function StoryPage({
   }, []);
 
   return (
-    <section 
-      className="relative min-w-full h-[100dvh] snap-start flex" 
+    <section
+      className="relative min-w-full h-[100dvh] snap-start flex"
       data-story-id={story.id}
       style={{ scrollSnapAlign: "start", scrollSnapStop: "always" }}
     >
@@ -315,10 +316,18 @@ function StoryPage({
           {/* Header image */}
           <div className="px-3 pt-4">
             <div
-              className="overflow-hidden rounded-3xl ring-1 ring-stone-200 shadow-sm bg-white"
+              className="overflow-hidden rounded-3xl ring-1 ring-stone-200 shadow-sm bg-white relative"
               style={{ aspectRatio: "16/10" }}
             >
-              <img src={photoUrl} alt={story.title} className="w-full h-full object-cover" />
+              <StoryPhotoWithBlurExtend
+                src={photoUrl}
+                alt={story.title}
+                width={heroPhoto?.width}
+                height={heroPhoto?.height}
+                transform={heroPhoto?.transform || story.photoTransform}
+                aspectRatio={16 / 10}
+                className="w-full h-full"
+              />
             </div>
           </div>
 
@@ -507,16 +516,14 @@ function TOCSheet({
 
   return (
     <div
-      className={`fixed inset-0 z-50 transition-opacity duration-300 ${
-        isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-      }`}
+      className={`fixed inset-0 z-50 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
       onClick={handleClose}
     >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       <div
-        className={`absolute inset-x-0 top-0 transition-transform duration-300 ${
-          isOpen ? "translate-y-0" : "-translate-y-full"
-        }`}
+        className={`absolute inset-x-0 top-0 transition-transform duration-300 ${isOpen ? "translate-y-0" : "-translate-y-full"
+          }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="rounded-b-2xl bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5 pt-[env(safe-area-inset-top)]">

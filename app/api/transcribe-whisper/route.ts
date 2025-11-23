@@ -12,6 +12,7 @@ import * as path from "path";
 import { nanoid } from "nanoid";
 import { checkAIConsentOrError } from "@/lib/aiConsent";
 
+import { getPasskeySession } from "@/lib/iron-session";
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
@@ -304,15 +305,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (user) {
-      const consentError = await checkAIConsentOrError(user.id);
+      const consentError = await checkAIConsentOrError(userId);
       if (consentError) {
-        logger.warn("[TranscribeWhisper] AI consent denied for user:", user.id);
+        logger.warn("[TranscribeWhisper] AI consent denied for user:", userId);
         return NextResponse.json(consentError, { status: 403 });
       }
     }
 
     const rateLimitIdentifier = user
-      ? `api:transcribe:whisper:${user.id}`
+      ? `api:transcribe:whisper:${userId}`
       : `api:transcribe:whisper:ip:${getClientIp(request)}`;
     const rateLimitResponse = await checkRateLimit(
       rateLimitIdentifier,

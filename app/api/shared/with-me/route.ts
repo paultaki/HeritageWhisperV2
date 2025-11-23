@@ -5,6 +5,7 @@ import { sharedAccess, users } from "@/shared/schema";
 import { eq, and, or } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
         and(
           or(
             eq(sharedAccess.sharedWithEmail, user.email || ""),
-            eq(sharedAccess.sharedWithUserId, user.id),
+            eq(sharedAccess.sharedWithUserId, userId),
           ),
           eq(sharedAccess.isActive, true),
         ),

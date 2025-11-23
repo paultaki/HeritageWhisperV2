@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { stripe, PREMIUM_PRICE_ID, getOrCreateCustomer } from '@/lib/stripe';
 import { trackCheckoutStarted } from '@/lib/analytics/paywall';
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
     const { data: profile } = await supabaseAdmin
       .from('users')
       .select('email, name')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single();
 
     if (!profile?.email) {
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // 4. Get or create Stripe customer
     const customerId = await getOrCreateCustomer(
-      user.id,
+      userId,
       profile.email,
       profile.name || undefined
     );
@@ -104,12 +105,12 @@ export async function POST(request: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/profile?upgraded=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/upgrade?canceled=true`,
       metadata: {
-        supabase_user_id: user.id,
+        supabase_user_id: userId,
         trigger_location: triggerLocation,
       },
       subscription_data: {
         metadata: {
-          supabase_user_id: user.id,
+          supabase_user_id: userId,
         },
       },
       allow_promotion_codes: true,

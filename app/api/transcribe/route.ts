@@ -12,6 +12,7 @@ import * as path from "path";
 import { nanoid } from "nanoid";
 import { checkAIConsentOrError } from "@/lib/aiConsent";
 
+import { getPasskeySession } from "@/lib/iron-session";
 // Initialize Supabase Admin client for token verification
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -411,16 +412,16 @@ export async function POST(request: NextRequest) {
 
     // Check AI consent (only for authenticated users)
     if (user) {
-      const consentError = await checkAIConsentOrError(user.id);
+      const consentError = await checkAIConsentOrError(userId);
       if (consentError) {
-        logger.warn("[Transcribe] AI consent denied for user:", user.id);
+        logger.warn("[Transcribe] AI consent denied for user:", userId);
         return NextResponse.json(consentError, { status: 403 });
       }
     }
 
     // Rate limiting: 30 API requests per minute per user (or IP if no auth)
     const rateLimitIdentifier = user
-      ? `api:transcribe:${user.id}`
+      ? `api:transcribe:${userId}`
       : `api:transcribe:ip:${getClientIp(request)}`;
     const rateLimitResponse = await checkRateLimit(
       rateLimitIdentifier,

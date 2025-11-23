@@ -38,7 +38,15 @@ const PhotoSchema = z.object({
       scale: z.number().min(0.1).max(5),
       rotation: z.number().optional(),
     }),
+    z.object({
+      x: z.number(),
+      y: z.number(),
+      scale: z.number().min(0.1).max(5),
+      rotation: z.number().optional(),
+    }),
   ]).optional(),
+  width: z.number().int().optional(),
+  height: z.number().int().optional(),
 }).refine(
   (data) => data.url || data.filePath,
   { message: 'Photo must have either url or filePath' }

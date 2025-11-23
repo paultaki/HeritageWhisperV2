@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 
+import { getPasskeySession } from "@/lib/iron-session";
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -533,7 +534,7 @@ export async function GET(request: NextRequest) {
       // Authentication data
       auth: {
         user: authUserRecord?.user ? {
-          id: authUserRecord.user.id,
+          id: authUserRecord.userId,
           email: authUserRecord.user.email,
           email_confirmed_at: authUserRecord.user.email_confirmed_at,
           created_at: authUserRecord.user.created_at,

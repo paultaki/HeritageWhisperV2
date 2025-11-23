@@ -99,6 +99,8 @@ export interface Story {
     transform?: { zoom: number; position: { x: number; y: number } };
     caption?: string;
     isHero?: boolean;
+    width?: number;
+    height?: number;
   }>;
   emotions?: string[];
   pivotalCategory?: string;

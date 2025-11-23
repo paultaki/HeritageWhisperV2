@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Load prompt (verify ownership)
-    const { data: prompt, error: promptError } = await loadPromptForUser(user.id, promptId, promptText);
+    const { data: prompt, error: promptError } = await loadPromptForUser(userId, promptId, promptText);
     if (promptError || !prompt) {
       logger.error("Prompt not found or unauthorized:", promptError);
       return NextResponse.json({ error: "Prompt not found" }, { status: 404 });
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
       const { error: historyError } = await supabaseAdmin
         .from("prompt_history")
         .insert({
-          user_id: user.id,
+          user_id: userId,
           prompt_id: prompt.id,
           prompt_text: prompt.prompt_text,
           tier: prompt.tier,
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
         .from("active_prompts")
         .delete()
         .eq("id", prompt.id)
-        .eq("user_id", user.id);
+        .eq("user_id", userId);
 
       if (deleteError) {
         logger.error("Failed to delete retired prompt:", deleteError);
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
       .from("active_prompts")
       .update(updatePayload)
       .eq("id", prompt.id)
-      .eq("user_id", user.id);
+      .eq("user_id", userId);
 
     if (updateError) {
       logger.error("Error updating prompt skip/shown counters:", updateError);

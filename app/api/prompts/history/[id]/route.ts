@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 
+import { getPasskeySession } from "@/lib/iron-session";
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -18,28 +19,37 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Get the Authorization header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
+    let userId: string | undefined;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
+    // 1. Try passkey session first
+    const passkeySession = await getPasskeySession();
+    if (passkeySession) {
+      userId = passkeySession.userId;
+    } else {
+      // 2. Fall back to Supabase auth
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
 
-    // Verify the JWT token with Supabase
-    const {
-      data: { user },
-      error,
-    } = await supabaseAdmin.auth.getUser(token);
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 },
+        );
+      }
 
-    if (error || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 }
-      );
+      // Verify the JWT token with Supabase
+      const {
+        data: { user },
+        error: authError,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (authError || !user) {
+        return NextResponse.json(
+          { error: "Invalid authentication" },
+          { status: 401 },
+        );
+      }
+      userId = user.id;
     }
 
     const promptId = params.id;
@@ -56,7 +66,7 @@ export async function DELETE(
       .from("prompt_history")
       .delete()
       .eq("id", promptId)
-      .eq("user_id", user.id);
+      .eq("user_id", userId);
 
     if (deleteError) {
       logger.error("Error deleting prompt from history:", deleteError);

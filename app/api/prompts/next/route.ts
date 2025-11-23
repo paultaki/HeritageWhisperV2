@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { generateTier1Prompts, validatePromptQuality } from "@/lib/promptGeneration";
 import { hasAIConsent } from "@/lib/aiConsent";
 
+import { getPasskeySession } from "@/lib/iron-session";
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -122,22 +123,41 @@ async function fetchLastStoryBundle(userId: string) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Auth: same as your code
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
-    if (!token) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    let userId: string | undefined;
 
-    const {
-      data: { user },
-      error: userErr,
-    } = await supabaseAdmin.auth.getUser(token);
+    // 1. Try passkey session first
+    const passkeySession = await getPasskeySession();
+    if (passkeySession) {
+      userId = passkeySession.userId;
+    } else {
+      // 2. Fall back to Supabase auth
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
 
-    if (userErr || !user) {
-      return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 },
+        );
+      }
+
+      // Verify the JWT token with Supabase
+      const {
+        data: { user },
+        error: authError,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (authError || !user) {
+        return NextResponse.json(
+          { error: "Invalid authentication" },
+          { status: 401 },
+        );
+      }
+      userId = user.id;
     }
 
     // Check AI consent - return empty if disabled
-    const aiEnabled = await hasAIConsent(user.id);
+    const aiEnabled = await hasAIConsent(userId);
     if (!aiEnabled) {
       logger.debug("[Prompts Next] AI processing disabled for user, returning no prompts");
       return NextResponse.json({ prompt: null });
@@ -147,7 +167,7 @@ export async function GET(request: NextRequest) {
     const { data: prompts, error: promptsError } = await supabaseAdmin
       .from("active_prompts")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .eq("is_locked", false)
       .gt("expires_at", new Date().toISOString())
       .order("tier", { ascending: false })
@@ -170,11 +190,11 @@ export async function GET(request: NextRequest) {
     }
 
     // 2) No valid existing → try Tier-1 generation from the most recent story
-    const bundle = await fetchLastStoryBundle(user.id);
+    const bundle = await fetchLastStoryBundle(userId);
 
     if (bundle) {
       const t1 = generateTier1Prompts({
-        userId: user.id,
+        userId: userId,
         storyId: bundle.storyId,
         text: bundle.text,
         entities: bundle.entities,
@@ -188,7 +208,7 @@ export async function GET(request: NextRequest) {
       if (top) {
         // Insert into active_prompts so your app sees it everywhere
         const insertPayload: any = {
-          user_id: user.id,
+          user_id: userId,
           prompt_text: top.prompt_text,
           type: top.type,                 // if you have a type column
           tier: 1,                        // Tier-1
@@ -226,7 +246,7 @@ export async function GET(request: NextRequest) {
     const { data: userData, error: userError } = await supabaseAdmin
       .from("users")
       .select("birth_year")
-      .eq("id", user.id)
+      .eq("id", userId)
       .single();
 
     if (userError || !userData?.birth_year) {
@@ -236,7 +256,7 @@ export async function GET(request: NextRequest) {
     const { data: stories, error: storiesError } = await supabaseAdmin
       .from("stories")
       .select("story_year")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .not("story_year", "is", null);
 
     if (storiesError) {
@@ -254,7 +274,7 @@ export async function GET(request: NextRequest) {
       prompt: {
         ...fallbackPrompt,
         id: null,
-        user_id: user.id,
+        user_id: userId,
         created_at: new Date().toISOString(),
         expires_at: null,
         shown_count: 0,

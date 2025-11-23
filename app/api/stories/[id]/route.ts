@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { UpdateStorySchema, safeValidateRequestBody } from "@/lib/validationSchemas";
+import { getPasskeySession } from "@/lib/iron-session";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -22,28 +23,37 @@ export async function GET(
   // Await params (Next.js 15 requirement)
   const { id } = await params;
   try {
-    // Get the Authorization header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
+    let userId: string | undefined;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
-    }
+    // 1. Try passkey session first
+    const passkeySession = await getPasskeySession();
+    if (passkeySession) {
+      userId = passkeySession.userId;
+    } else {
+      // 2. Fall back to Supabase auth
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
 
-    // Verify the JWT token with Supabase
-    const {
-      data: { user },
-      error,
-    } = await supabaseAdmin.auth.getUser(token);
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 },
+        );
+      }
 
-    if (error || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 },
-      );
+      // Verify the JWT token with Supabase
+      const {
+        data: { user },
+        error,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (error || !user) {
+        return NextResponse.json(
+          { error: "Invalid authentication" },
+          { status: 401 },
+        );
+      }
+      userId = user.id;
     }
 
     // Fetch the story from Supabase database
@@ -51,7 +61,7 @@ export async function GET(
       .from("stories")
       .select("*")
       .eq("id", id)
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .single();
 
     if (fetchError || !story) {
@@ -182,28 +192,37 @@ export async function PUT(
   const { id } = await params;
   
   try {
-    // Get the Authorization header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
+    let userId: string | undefined;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
-    }
+    // 1. Try passkey session first
+    const passkeySession = await getPasskeySession();
+    if (passkeySession) {
+      userId = passkeySession.userId;
+    } else {
+      // 2. Fall back to Supabase auth
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
 
-    // Verify the JWT token with Supabase
-    const {
-      data: { user },
-      error,
-    } = await supabaseAdmin.auth.getUser(token);
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 },
+        );
+      }
 
-    if (error || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 },
-      );
+      // Verify the JWT token with Supabase
+      const {
+        data: { user },
+        error,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (error || !user) {
+        return NextResponse.json(
+          { error: "Invalid authentication" },
+          { status: 401 },
+        );
+      }
+      userId = user.id;
     }
 
     // Parse and validate request body
@@ -237,18 +256,18 @@ export async function PUT(
     const body = validationResult.data;
 
     // First, fetch the existing story to get current values
-    logger.debug(`[PUT /api/stories/${id}] Fetching story for user:`, user.id);
+    logger.debug(`[PUT /api/stories/${id}] Fetching story for user:`, userId);
     const { data: existingStory, error: fetchError } = await supabaseAdmin
       .from("stories")
       .select("*")
       .eq("id", id)
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .single();
 
     if (fetchError || !existingStory) {
       logger.error("Story fetch error:", {
         storyId: id,
-        userId: user.id,
+        userId: userId,
         error: fetchError,
         message: fetchError?.message,
         code: fetchError?.code
@@ -400,7 +419,7 @@ export async function PUT(
       .from("stories")
       .update(storyData)
       .eq("id", id)
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .select()
       .single();
 
@@ -505,28 +524,37 @@ export async function DELETE(
   const { id } = await params;
   
   try {
-    // Get the Authorization header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
+    let userId: string | undefined;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
-    }
+    // 1. Try passkey session first
+    const passkeySession = await getPasskeySession();
+    if (passkeySession) {
+      userId = passkeySession.userId;
+    } else {
+      // 2. Fall back to Supabase auth
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
 
-    // Verify the JWT token with Supabase
-    const {
-      data: { user },
-      error,
-    } = await supabaseAdmin.auth.getUser(token);
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 },
+        );
+      }
 
-    if (error || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 },
-      );
+      // Verify the JWT token with Supabase
+      const {
+        data: { user },
+        error,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (error || !user) {
+        return NextResponse.json(
+          { error: "Invalid authentication" },
+          { status: 401 },
+        );
+      }
+      userId = user.id;
     }
 
     // Delete the story from Supabase database
@@ -534,7 +562,7 @@ export async function DELETE(
       .from("stories")
       .delete()
       .eq("id", id)
-      .eq("user_id", user.id);
+      .eq("user_id", userId);
 
     if (deleteError) {
       logger.error("Story deletion error:", deleteError);

@@ -16,39 +16,63 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     },
 });
 
+import { getPasskeySession } from "@/lib/iron-session";
+
 export async function POST(request: NextRequest) {
     try {
-        const authHeader = request.headers.get("authorization");
-        const token = authHeader && authHeader.split(" ")[1];
+        let userId: string | undefined;
 
-        if (!token) {
-            return NextResponse.json({ error: "Authentication required" }, { status: 401 });
-        }
+        // 1. Try passkey session first
+        const passkeySession = await getPasskeySession();
+        if (passkeySession) {
+            userId = passkeySession.userId;
+        } else {
+            // 2. Fall back to Supabase auth
+            const authHeader = request.headers.get("authorization");
+            const token = authHeader && authHeader.split(" ")[1];
 
-        const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+            if (!token) {
+                return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+            }
 
-        if (error || !user) {
-            return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+            const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+
+            if (error || !user) {
+                return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+            }
+            userId = user.id;
         }
 
         // Fetch all stories for the user
-        const userStories = await db.select().from(stories).where(eq(stories.userId, user.id));
+        logger.info(`[Organize] Fetching stories for user ${userId}`);
+        const userStories = await db.select().from(stories).where(eq(stories.userId, userId));
 
         if (userStories.length === 0) {
+            logger.warn(`[Organize] No stories found for user ${userId}`);
             return NextResponse.json({ error: "No stories to organize" }, { status: 400 });
         }
 
+        logger.info(`[Organize] Found ${userStories.length} stories. Calling AI suggestion...`);
+
         // Get AI suggestions
-        const suggestions = await suggestChapters(userStories);
+        let suggestions;
+        try {
+            suggestions = await suggestChapters(userStories);
+            logger.info(`[Organize] AI returned ${suggestions.length} chapters`);
+        } catch (aiError) {
+            logger.error("[Organize] AI suggestion failed:", aiError);
+            return NextResponse.json({ error: "AI organization failed" }, { status: 500 });
+        }
 
         // Apply suggestions in a transaction
         await db.transaction(async (tx) => {
+            logger.info(`[Organize] Starting transaction to apply changes`);
             // Delete existing chapters (stories will be unlinked via ON DELETE SET NULL)
-            await tx.delete(chapters).where(eq(chapters.userId, user.id));
+            await tx.delete(chapters).where(eq(chapters.userId, userId!));
 
             for (const chapterData of suggestions) {
                 const [newChapter] = await tx.insert(chapters).values({
-                    userId: user.id,
+                    userId: userId!,
                     title: chapterData.title,
                     orderIndex: chapterData.orderIndex,
                     isAiGenerated: true,
@@ -66,6 +90,7 @@ export async function POST(request: NextRequest) {
                     }
                 }
             }
+            logger.info(`[Organize] Transaction completed successfully`);
         });
 
         return NextResponse.json({ success: true, count: suggestions.length });

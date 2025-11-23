@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { checkAIConsentOrError } from "@/lib/aiConsent";
 
+import { getPasskeySession } from "@/lib/iron-session";
 export const maxDuration = 180; // Allow 3 minutes for Auphonic processing
 export const dynamic = 'force-dynamic';
 
@@ -303,9 +304,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check AI consent
-    const consentError = await checkAIConsentOrError(user.id);
+    const consentError = await checkAIConsentOrError(userId);
     if (consentError) {
-      logger.warn("[AuphonicClean] AI consent denied for user:", user.id);
+      logger.warn("[AuphonicClean] AI consent denied for user:", userId);
       return NextResponse.json(consentError, { status: 403 });
     }
 
@@ -336,7 +337,7 @@ export async function POST(request: NextRequest) {
     }
 
     logger.api("[AuphonicClean] Starting audio cleaning", {
-      userId: user.id,
+      userId: userId,
       fileSize: audioBuffer.length,
       mode,
       presetId,
@@ -381,7 +382,7 @@ export async function POST(request: NextRequest) {
     const cleanedAudioBase64 = cleanedAudioBuffer.toString('base64');
 
     logger.api("[AuphonicClean] Success", {
-      userId: user.id,
+      userId: userId,
       productionUuid,
       createLatencyMs: createLatency,
       pollLatencyMs: pollLatency,

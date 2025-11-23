@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { stripe } from '@/lib/stripe';
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
     const { data: profile } = await supabaseAdmin
       .from('users')
       .select('isPaid, email')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single();
 
     if (!profile?.isPaid) {
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
     const { data: stripeCustomer } = await supabaseAdmin
       .from('stripe_customers')
       .select('stripe_customer_id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     let stripeCustomerId: string;
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin
         .from('stripe_customers')
         .upsert({
-          user_id: user.id,
+          user_id: userId,
           stripe_customer_id: customers.data[0].id,
         }, {
           onConflict: 'user_id',

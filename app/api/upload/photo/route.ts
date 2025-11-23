@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { uploadRatelimit, checkRateLimit } from "@/lib/ratelimit";
 import { logger } from "@/lib/logger";
+import { getPasskeySession } from "@/lib/iron-session";
 
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -16,33 +17,42 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the Authorization header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
+    let userId: string | undefined;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
-    }
+    // 1. Try passkey session first
+    const passkeySession = await getPasskeySession();
+    if (passkeySession) {
+      userId = passkeySession.userId;
+    } else {
+      // 2. Fall back to Supabase auth
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
 
-    // Verify the JWT token with Supabase
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseAdmin.auth.getUser(token);
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 },
+        );
+      }
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 },
-      );
+      // Verify the JWT token with Supabase
+      const {
+        data: { user },
+        error: authError,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (authError || !user) {
+        return NextResponse.json(
+          { error: "Invalid authentication" },
+          { status: 401 },
+        );
+      }
+      userId = user.id;
     }
 
     // Rate limiting: 10 uploads per minute per user
     const rateLimitResponse = await checkRateLimit(
-      `upload:photo:${user.id}`,
+      `upload:photo:${userId}`,
       uploadRatelimit,
     );
     if (rateLimitResponse) {
@@ -87,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filenames with suffix naming
     const timestamp = Date.now();
-    const baseFilename = `photo/${user.id}/${storyId || "temp"}/${timestamp}`;
+    const baseFilename = `photo/${userId}/${storyId || "temp"}/${timestamp}`;
     const masterFilename = `${baseFilename}-master.webp`;
     const displayFilename = `${baseFilename}-display.webp`;
 

@@ -140,33 +140,33 @@ export const stories = pgTable("stories", {
   audioUrl: text("audio_url"),
   textBody: text("text_body"), // Text content for text-only stories (alternative to audio)
   recordingMode: text("recording_mode"), // How story was created: 'audio', 'text', 'photo_audio'
-  transcription: text("transcription"),
+  transcription: text("transcript"),
   durationSeconds: integer("duration_seconds"),
   wisdomClipUrl: text("wisdom_clip_url"),
-  wisdomClipText: text("wisdom_clip_text"),
-  wisdomClipDuration: integer("wisdom_clip_duration"),
-  storyYear: integer("story_year"), // Nullable to support undated memories
+  wisdomClipText: text("wisdom_text"),
+  // wisdomClipDuration: integer("wisdom_clip_duration"), // Not in DB
+  storyYear: integer("year"), // Nullable to support undated memories
   storyDate: timestamp("story_date"),
-  lifeAge: integer("life_age"),
+  // lifeAge: integer("life_age"), // Not in DB
   // AI Prompt System additions
   lessonLearned: text("lesson_learned"),
   lessonAlternatives: jsonb("lesson_alternatives")
     .$type<string[]>()
     .default(sql`'[]'::jsonb`),
-  entitiesExtracted: jsonb("entities_extracted").$type<{
+  /* entitiesExtracted: jsonb("entities_extracted").$type<{
     people: string[];
     places: string[];
     objects: string[];
     emotions: string[];
     temporalBoundaries: string[];
-  }>(),
+  }>(), */
   sourcePromptId: uuid("source_prompt_id"),
   lifePhase: text("life_phase"), // 'childhood', 'teen', 'early_adult', 'mid_adult', 'late_adult', 'senior'
   photoUrl: text("photo_url"),
-  photoTransform: jsonb("photo_transform").$type<{
+  /* photoTransform: jsonb("photo_transform").$type<{
     zoom: number;
     position: { x: number; y: number };
-  }>(),
+  }>(), */
   photos: jsonb("photos").$type<
     Array<{
       id: string;
@@ -181,14 +181,16 @@ export const stories = pgTable("stories", {
       transform?: { zoom: number; position: { x: number; y: number } };
       caption?: string;
       isHero?: boolean;
+      width?: number;
+      height?: number;
     }>
   >(),
   emotions: jsonb("emotions").$type<string[]>(),
-  pivotalCategory: text("pivotal_category"),
+  // pivotalCategory: text("pivotal_category"), // Not in DB
   includeInBook: boolean("include_in_book").default(true).notNull(),
   includeInTimeline: boolean("include_in_timeline").default(true).notNull(),
   isFavorite: boolean("is_favorite").default(false).notNull(),
-  formattedContent: jsonb("formatted_content").$type<{
+  /* formattedContent: jsonb("formatted_content").$type<{
     fullText: string;
     paragraphs: string[];
     pages: {
@@ -203,8 +205,8 @@ export const stories = pgTable("stories", {
     themes?: string[];
     processedAt: string;
     version: string;
-  }>(),
-  extractedFacts: jsonb("extracted_facts").$type<{
+  }>(), */
+  /* extractedFacts: jsonb("extracted_facts").$type<{
     people: Array<{
       name: string;
       relationship?: string;
@@ -231,7 +233,7 @@ export const stories = pgTable("stories", {
     }>;
     extractedAt: string;
     version: string;
-  }>(),
+  }>(), */
   // Chapter View additions
   chapterId: uuid("chapter_id").references(() => chapters.id, { onDelete: "set null" }),
   chapterOrderIndex: integer("chapter_order_index"),

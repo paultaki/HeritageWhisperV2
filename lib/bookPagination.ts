@@ -204,6 +204,7 @@ export interface BookPage {
   decade?: string;
   decadeTitle?: string;
   storiesInDecade?: number;
+  isChapter?: boolean; // True if this decade marker represents a chapter (not a chronological decade)
 
   // For story pages
   photos?: StoryPhoto[];

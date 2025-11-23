@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { BookPageCardProps } from "./types";
 import BookAudioPlayer from "./BookAudioPlayer";
+import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
 
 /**
  * Format a date string or ISO date to readable format
@@ -102,7 +103,7 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
 
   return (
     <section
-      className="relative flex h-[100dvh] min-w-full snap-start"
+      className="relative flex h-[100dvh] w-screen flex-shrink-0 snap-start"
       data-story-id={story.id}
       data-nav-ink="dark"
     >
@@ -125,28 +126,15 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
               style={{ aspectRatio: "16/10" }}
             >
               {photoUrl ? (
-                photoTransform ? (
-                  // Use <img> tag for images with transform (crop/zoom)
-                  <img
-                    src={photoUrl}
-                    alt={story.title}
-                    className="h-full w-full object-cover"
-                    style={{
-                      transform: `scale(${photoTransform.zoom || 1})`,
-                      transformOrigin: `${photoTransform.position?.x || 50}% ${photoTransform.position?.y || 50}%`,
-                    }}
-                  />
-                ) : (
-                  // Use Next.js Image for untransformed images
-                  <Image
-                    src={photoUrl}
-                    alt={story.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    priority={isActive}
-                  />
-                )
+                <StoryPhotoWithBlurExtend
+                  src={photoUrl}
+                  alt={story.title}
+                  transform={photoTransform}
+                  width={heroPhoto?.width}
+                  height={heroPhoto?.height}
+                  aspectRatio={16 / 10}
+                  className="h-full w-full"
+                />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
                   <span className="text-4xl text-stone-400">📖</span>

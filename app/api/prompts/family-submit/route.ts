@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { promptSubmitRatelimit } from '@/lib/ratelimit';
 import { sendQuestionReceivedNotification } from '@/lib/notifications/send-question-received';
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -49,9 +50,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limiting: 5 prompt submissions per minute per user
-    const { success, limit, reset, remaining } = await promptSubmitRatelimit.limit(user.id);
+    const { success, limit, reset, remaining } = await promptSubmitRatelimit.limit(userId);
     if (!success) {
-      console.warn('[FamilySubmit] Rate limit exceeded for user:', user.id);
+      console.warn('[FamilySubmit] Rate limit exceeded for user:', userId);
       return NextResponse.json(
         {
           error: 'Too many questions submitted',
@@ -88,19 +89,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[FamilySubmit] User', user.id, 'submitting question to', storyteller_id);
+    console.log('[FamilySubmit] User', userId, 'submitting question to', storyteller_id);
 
     // Verify the user has contributor access to this storyteller
     const { data: hasAccess, error: accessError } = await supabaseAdmin.rpc(
       'has_collaboration_access',
       {
-        p_user_id: user.id,
+        p_user_id: userId,
         p_storyteller_id: storyteller_id,
       }
     );
 
     if (accessError || !hasAccess) {
-      console.warn('[FamilySubmit] Access denied for user', user.id, 'to storyteller', storyteller_id);
+      console.warn('[FamilySubmit] Access denied for user', userId, 'to storyteller', storyteller_id);
       return NextResponse.json(
         { error: "You don't have permission to submit questions to this storyteller" },
         { status: 403 }
@@ -111,11 +112,11 @@ export async function POST(request: NextRequest) {
     const { data: familyMember, error: memberError } = await supabaseAdmin
       .from('family_members')
       .select('id')
-      .eq('auth_user_id', user.id)
+      .eq('auth_user_id', userId)
       .single();
 
     if (memberError || !familyMember) {
-      console.error('[FamilySubmit] No family_member record found for user', user.id);
+      console.error('[FamilySubmit] No family_member record found for user', userId);
       return NextResponse.json(
         { error: 'Family member record not found' },
         { status: 404 }

@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 import { apiRatelimit, checkRateLimit } from "@/lib/ratelimit";
+import { getPasskeySession } from "@/lib/iron-session";
 import {
   sanitizeUserInput,
   validateSanitizedInput,
@@ -195,33 +196,42 @@ ${FOLLOWUP_RULES}`;
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the Authorization header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
+    let userId: string | undefined;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
-    }
+    // 1. Try passkey session first
+    const passkeySession = await getPasskeySession();
+    if (passkeySession) {
+      userId = passkeySession.userId;
+    } else {
+      // 2. Fall back to Supabase auth
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
 
-    // Verify the JWT token with Supabase
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseAdmin.auth.getUser(token);
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 },
+        );
+      }
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 },
-      );
+      // Verify the JWT token with Supabase
+      const {
+        data: { user },
+        error: authError,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (authError || !user) {
+        return NextResponse.json(
+          { error: "Invalid authentication" },
+          { status: 401 },
+        );
+      }
+      userId = user.id;
     }
 
     // Rate limiting: 30 API requests per minute per user
     const rateLimitResponse = await checkRateLimit(
-      `api:followups:${user.id}`,
+      `api:followups:${userId}`,
       apiRatelimit,
     );
     if (rateLimitResponse) {
@@ -238,13 +248,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.api("Generating follow-ups for user:", user.id);
+    logger.api("Generating follow-ups for user:", userId);
 
     // Get user info from Supabase database
     const { data: dbUser, error: userError } = await supabaseAdmin
       .from("users")
       .select("name, birth_year")
-      .eq("id", user.id)
+      .eq("id", userId)
       .single();
 
     if (userError || !dbUser) {

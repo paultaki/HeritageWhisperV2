@@ -23,74 +23,97 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
+import { getPasskeySession } from "@/lib/iron-session";
+
 export async function GET(request: NextRequest) {
   try {
-    // Get the Authorization header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
+    let targetUserId: string | undefined;
+    let isViewerMode = false;
+    let isAuthenticatedOwner = false;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
+    // 1. Try passkey session first
+    const passkeySession = await getPasskeySession();
+    if (passkeySession) {
+      targetUserId = passkeySession.userId;
+      isAuthenticatedOwner = true;
     }
 
-    let targetUserId: string;
-    let isViewerMode = false;
+    // 2. If no passkey, try Supabase JWT (Authorization header)
+    if (!isAuthenticatedOwner) {
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
 
-    // Try JWT authentication first (owners with Supabase Auth)
-    const {
-      data: { user },
-      error: jwtError,
-    } = await supabaseAdmin.auth.getUser(token);
+      if (token) {
+        const {
+          data: { user },
+          error: jwtError,
+        } = await supabaseAdmin.auth.getUser(token);
 
-    if (user && !jwtError) {
-      // JWT authentication successful (authenticated owner)
-      // V3: Support storyteller_id query parameter for family sharing
-      const { searchParams } = new URL(request.url);
-      const storytellerId = searchParams.get('storyteller_id');
-      targetUserId = user.id; // Default to own stories
+        if (user && !jwtError) {
+          // JWT authentication successful (authenticated owner)
+          isAuthenticatedOwner = true;
 
-      // If requesting another storyteller's stories, verify access permission
-      if (storytellerId && storytellerId !== user.id) {
-        // Use RPC function to verify access
-        const { data: hasAccess, error: accessError } = await supabaseAdmin.rpc(
-          'has_collaboration_access',
-          {
-            p_user_id: user.id,
-            p_storyteller_id: storytellerId,
+          // V3: Support storyteller_id query parameter for family sharing
+          const url = new URL(request.url);
+          const storytellerId = url.searchParams.get("storyteller_id");
+
+          if (storytellerId && storytellerId !== user.id) {
+            // Check if user has access to this storyteller
+            const { data: hasAccess } = await supabaseAdmin.rpc(
+              "check_user_access",
+              {
+                p_user_id: user.id,
+                p_storyteller_id: storytellerId,
+              },
+            );
+
+            if (hasAccess) {
+              targetUserId = storytellerId;
+              isViewerMode = true; // Viewing someone else's stories
+            } else {
+              return NextResponse.json(
+                { error: "Unauthorized access to storyteller" },
+                { status: 403 },
+              );
+            }
+          } else {
+            targetUserId = user.id;
           }
-        );
-
-        if (accessError || !hasAccess) {
-          logger.warn(`[Stories API] User ${user.id} denied access to ${storytellerId}'s stories`);
-          return NextResponse.json(
-            { error: "You don't have permission to view these stories" },
-            { status: 403 },
-          );
+        } else {
+          // Token present but invalid/expired - check if it's a family session token
+          // This falls through to step 3
         }
-
-        targetUserId = storytellerId;
-        logger.debug(`[Stories API] User ${user.id} viewing ${storytellerId}'s stories`);
       }
-    } else {
+    }
+
+    // 3. Fall back to Family/Guest Access (if not authenticated as owner)
+    if (!isAuthenticatedOwner && !targetUserId) {
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
+
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 },
+        );
+      }
+
       // JWT failed - try sessionToken authentication (unauthenticated family viewers)
       const { data: familySession, error: sessionError } = await supabaseAdmin
         .from('family_sessions')
         .select(`
-          id,
-          family_member_id,
-          expires_at,
-          family_members!inner (
             id,
-            user_id,
-            email,
-            name,
-            relationship,
-            permission_level
-          )
-        `)
+            family_member_id,
+            expires_at,
+            family_members!inner (
+              id,
+              user_id,
+              email,
+              name,
+              relationship,
+              permission_level
+            )
+          `)
         .eq('token', token)
         .single();
 
@@ -115,6 +138,14 @@ export async function GET(request: NextRequest) {
       targetUserId = (familySession as any).family_members.user_id;
       isViewerMode = true;
       logger.debug(`[Stories API] Family viewer accessing ${targetUserId}'s stories via sessionToken`);
+    }
+
+    // Ensure we have a target user
+    if (!targetUserId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 },
+      );
     }
 
     // Fetch stories from Supabase database
@@ -264,28 +295,37 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the Authorization header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
+    let userId: string | undefined;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
-    }
+    // 1. Try passkey session first
+    const passkeySession = await getPasskeySession();
+    if (passkeySession) {
+      userId = passkeySession.userId;
+    } else {
+      // 2. Fall back to Supabase auth
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
 
-    // Verify the JWT token with Supabase
-    const {
-      data: { user },
-      error,
-    } = await supabaseAdmin.auth.getUser(token);
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 },
+        );
+      }
 
-    if (error || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 },
-      );
+      // Verify the JWT token with Supabase
+      const {
+        data: { user },
+        error: authError,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (authError || !user) {
+        return NextResponse.json(
+          { error: "Invalid authentication" },
+          { status: 401 },
+        );
+      }
+      userId = user.id;
     }
 
     // Parse and validate request body
@@ -340,7 +380,7 @@ export async function POST(request: NextRequest) {
     const durationForDb = Math.min(body.durationSeconds, 120);
 
     const storyData = {
-      user_id: user.id,
+      user_id: userId,
       title: body.title || "Untitled Story",
       transcript: body.transcription || body.content,
       text_body: body.textBody || undefined, // Text-only story content
@@ -392,7 +432,7 @@ export async function POST(request: NextRequest) {
     // FAMILY NOTIFICATIONS: Notify family members about new story (async, non-blocking)
     // ============================================================================
     sendNewStoryNotifications({
-      storytellerUserId: user.id,
+      storytellerUserId: userId,
       storyId: newStory.id,
       storyTitle: newStory.title,
       storyYear: newStory.year || undefined,
@@ -407,8 +447,8 @@ export async function POST(request: NextRequest) {
     // ACTIVITY TRACKING: Log story_recorded event (async, non-blocking)
     // ============================================================================
     logActivityEvent({
-      userId: user.id,
-      actorId: user.id,
+      userId: userId,
+      actorId: userId,
       storyId: newStory.id,
       eventType: "story_recorded",
       metadata: {
@@ -438,7 +478,7 @@ export async function POST(request: NextRequest) {
             .from("active_prompts")
             .select("*")
             .eq("id", body.sourcePromptId)
-            .eq("user_id", user.id)
+            .eq("user_id", userId)
             .single();
 
         if (promptFetchError) {
@@ -451,7 +491,7 @@ export async function POST(request: NextRequest) {
           const { error: historyError } = await supabaseAdmin
             .from("prompt_history")
             .insert({
-              user_id: user.id,
+              user_id: userId,
               prompt_text: usedPrompt.prompt_text,
               anchor_hash: usedPrompt.anchor_hash,
               anchor_entity: usedPrompt.anchor_entity,
@@ -501,7 +541,7 @@ export async function POST(request: NextRequest) {
     // ============================================================================
     // AI CONSENT CHECK: Skip all prompt generation if AI is disabled
     // ============================================================================
-    const aiEnabled = await hasAIConsent(user.id);
+    const aiEnabled = await hasAIConsent(userId);
 
     if (!aiEnabled) {
       logger.debug("[Stories API] AI processing disabled for user, skipping prompt generation");
@@ -563,7 +603,7 @@ export async function POST(request: NextRequest) {
 
         // Store ALL prompts in active_prompts table
         const promptsToInsert = tier1Prompts.map((prompt) => ({
-          user_id: user.id,
+          user_id: userId,
           prompt_text: prompt.text,
           context_note: prompt.context,
           anchor_entity: prompt.entity,
@@ -637,7 +677,7 @@ export async function POST(request: NextRequest) {
           const { error: echoError } = await supabaseAdmin
             .from("active_prompts")
             .insert({
-              user_id: user.id,
+              user_id: userId,
               prompt_text: echoPromptText,
               context_note: "Inspired by what you just shared",
               anchor_entity: "echo",
@@ -681,7 +721,7 @@ export async function POST(request: NextRequest) {
       const { count: storyCount, error: countError } = await supabaseAdmin
         .from("stories")
         .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id);
+        .eq("user_id", userId);
 
       if (countError) {
         logger.error("[Stories API] Failed to count stories:", countError);
@@ -699,7 +739,7 @@ export async function POST(request: NextRequest) {
           const { data: allStories, error: storiesError } = await supabaseAdmin
             .from("stories")
             .select("id, title, transcript, lesson_learned, created_at")
-            .eq("user_id", user.id)
+            .eq("user_id", userId)
             .order("created_at", { ascending: true });
 
           if (storiesError || !allStories) {
@@ -713,7 +753,7 @@ export async function POST(request: NextRequest) {
               const clientIp = getClientIp(request);
 
               // Layer 1: User-based rate limit (1 per 5 minutes)
-              const userRateLimitResult = await tier3Ratelimit.limit(user.id);
+              const userRateLimitResult = await tier3Ratelimit.limit(userId);
 
               // Layer 2: IP-based rate limit (10 per hour per IP)
               const ipRateLimitResult = await aiIpRatelimit.limit(clientIp);
@@ -724,7 +764,7 @@ export async function POST(request: NextRequest) {
               // Check if any rate limit failed
               if (!userRateLimitResult.success) {
                 logger.warn(
-                  `[Stories API] ⏱️  Tier 3 USER rate limit exceeded for ${user.id}. Skipping analysis.`,
+                  `[Stories API] ⏱️  Tier 3 USER rate limit exceeded for ${userId}. Skipping analysis.`,
                   {
                     reset: new Date(userRateLimitResult.reset),
                     remaining: userRateLimitResult.remaining,
@@ -779,7 +819,7 @@ export async function POST(request: NextRequest) {
                     // Store prompts and character insights
                     await storeTier3Results(
                       supabaseAdmin,
-                      user.id,
+                      userId,
                       storyCount ?? 0,
                       tier3Result,
                     );

@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { db, familyMembers } from "@/lib/db";
 import { eq, and } from "drizzle-orm";
 
+import { getPasskeySession } from "@/lib/iron-session";
 // Initialize Supabase Admin client for token verification
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -21,39 +22,48 @@ export async function DELETE(
   { params }: { params: { id: string } },
 ) {
   try {
-    // Get the Authorization header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
+    let userId: string | undefined;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
-    }
+    // 1. Try passkey session first
+    const passkeySession = await getPasskeySession();
+    if (passkeySession) {
+      userId = passkeySession.userId;
+    } else {
+      // 2. Fall back to Supabase auth
+      const authHeader = request.headers.get("authorization");
+      const token = authHeader && authHeader.split(" ")[1];
 
-    // Verify the JWT token with Supabase
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseAdmin.auth.getUser(token);
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 },
+        );
+      }
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 },
-      );
+      // Verify the JWT token with Supabase
+      const {
+        data: { user },
+        error: authError,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (authError || !user) {
+        return NextResponse.json(
+          { error: "Invalid authentication" },
+          { status: 401 },
+        );
+      }
+      userId = user.id;
     }
 
     const memberId = params.id;
 
-    logger.api("Removing family member:", memberId, "for user:", user.id);
+    logger.api("Removing family member:", memberId, "for user:", userId);
 
     // Delete the family member (only if it belongs to the user)
     const deletedMembers = await db
       .delete(familyMembers)
       .where(
-        and(eq(familyMembers.id, memberId), eq(familyMembers.userId, user.id)),
+        and(eq(familyMembers.id, memberId), eq(familyMembers.userId, userId)),
       )
       .returning();
 

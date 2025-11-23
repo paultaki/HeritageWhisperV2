@@ -15,23 +15,39 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     },
 });
 
+import { getPasskeySession } from "@/lib/iron-session";
+
 export async function GET(request: NextRequest) {
     try {
-        const authHeader = request.headers.get("authorization");
-        const token = authHeader && authHeader.split(" ")[1];
+        let userId: string | undefined;
 
-        if (!token) {
-            return NextResponse.json({ error: "Authentication required" }, { status: 401 });
-        }
+        // 1. Try passkey session first
+        const passkeySession = await getPasskeySession();
+        if (passkeySession) {
+            userId = passkeySession.userId;
+        } else {
+            // 2. Fall back to Supabase auth
+            const authHeader = request.headers.get("authorization");
+            const token = authHeader && authHeader.split(" ")[1];
 
-        const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+            if (!token) {
+                console.log("[API] No token provided");
+                return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+            }
 
-        if (error || !user) {
-            return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+            console.log(`[API] Verifying token: ${token.substring(0, 10)}...${token.substring(token.length - 5)} (Length: ${token.length})`);
+
+            const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+
+            if (error || !user) {
+                console.error("[API] Auth error:", error);
+                return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+            }
+            userId = user.id;
         }
 
         const userChapters = await db.query.chapters.findMany({
-            where: eq(chapters.userId, user.id),
+            where: eq(chapters.userId, userId),
             orderBy: [asc(chapters.orderIndex)],
             with: {
                 stories: {
@@ -40,26 +56,45 @@ export async function GET(request: NextRequest) {
             }
         });
 
-        return NextResponse.json({ chapters: userChapters });
+        // Fetch orphaned stories (stories without a chapter)
+        const orphanedStories = await db.query.stories.findMany({
+            where: (stories, { and, eq, isNull }) => and(
+                eq(stories.userId, userId),
+                isNull(stories.chapterId)
+            ),
+            orderBy: [asc(stories.storyDate)] // Default to chronological for unorganized
+        });
+
+        return NextResponse.json({ chapters: userChapters, orphanedStories });
     } catch (error) {
         logger.error("Chapters fetch error:", error);
-        return NextResponse.json({ error: "Failed to fetch chapters" }, { status: 500 });
+        return NextResponse.json({ error: "Failed to fetch chapters", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
     }
 }
 
 export async function POST(request: NextRequest) {
     try {
-        const authHeader = request.headers.get("authorization");
-        const token = authHeader && authHeader.split(" ")[1];
+        let userId: string | undefined;
 
-        if (!token) {
-            return NextResponse.json({ error: "Authentication required" }, { status: 401 });
-        }
+        // 1. Try passkey session first
+        const passkeySession = await getPasskeySession();
+        if (passkeySession) {
+            userId = passkeySession.userId;
+        } else {
+            // 2. Fall back to Supabase auth
+            const authHeader = request.headers.get("authorization");
+            const token = authHeader && authHeader.split(" ")[1];
 
-        const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+            if (!token) {
+                return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+            }
 
-        if (error || !user) {
-            return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+            const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+
+            if (error || !user) {
+                return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+            }
+            userId = user.id;
         }
 
         const body = await request.json();
@@ -70,11 +105,11 @@ export async function POST(request: NextRequest) {
         }
 
         // Get max order index
-        const existingChapters = await db.select({ id: chapters.id }).from(chapters).where(eq(chapters.userId, user.id));
+        const existingChapters = await db.select({ id: chapters.id }).from(chapters).where(eq(chapters.userId, userId));
         const orderIndex = existingChapters.length;
 
         const [newChapter] = await db.insert(chapters).values({
-            userId: user.id,
+            userId: userId,
             title,
             orderIndex,
         }).returning();

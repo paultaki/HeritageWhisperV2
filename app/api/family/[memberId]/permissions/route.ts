@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -62,7 +63,7 @@ export async function PATCH(
       .from('family_members')
       .select('id, user_id, email, name, permission_level')
       .eq('id', memberId)
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (memberError || !member) {

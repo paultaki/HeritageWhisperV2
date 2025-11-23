@@ -34,6 +34,7 @@ import { audioManager } from "@/lib/audioManager";
 import type { MemoryCardProps } from "@/types/timeline";
 import { formatStoryDate, formatStoryDateForMetadata, formatV2TimelineDate } from "@/lib/dateFormatting";
 import { type Story } from "@/lib/supabase";
+import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
 
 /**
  * MemoryCard - Story card component with audio playback
@@ -616,20 +617,17 @@ export const MemoryCard = React.memo(
 
             const photoTransform = currentPhoto?.transform || displayPhoto.transform;
 
+            const activePhoto = currentPhoto || displayPhoto;
+
             return (
-              <img
-                src={photoUrl}
+              <StoryPhotoWithBlurExtend
+                src={photoUrl || ""}
                 alt={story.title}
+                width={(activePhoto as any).width}
+                height={(activePhoto as any).height}
+                transform={photoTransform}
+                aspectRatio={16 / 10}
                 className="hw-card-media"
-                style={
-                  photoTransform
-                    ? {
-                      transform: `scale(${photoTransform.zoom}) translate(${photoTransform.position.x}%, ${photoTransform.position.y}%)`,
-                      transformOrigin: "center center",
-                      objectFit: "cover",
-                    }
-                    : undefined
-                }
               />
             );
           })()}

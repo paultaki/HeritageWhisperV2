@@ -5,6 +5,7 @@ import { Resend } from 'resend';
 import { FamilyInviteEmail } from '@/lib/emails/family-invite';
 import { logActivityEvent } from '@/lib/activity';
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -61,7 +62,7 @@ export async function POST(
       .from('family_members')
       .select('*')
       .eq('id', memberId)
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (memberError || !member) {
@@ -105,7 +106,7 @@ export async function POST(
     const { data: userProfile } = await supabaseAdmin
       .from('users')
       .select('name')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single();
 
     const senderName = userProfile?.name || 'A family member';
@@ -147,8 +148,8 @@ export async function POST(
 
     // Log invite_resent activity event (async, non-blocking)
     logActivityEvent({
-      userId: user.id,
-      actorId: user.id,
+      userId: userId,
+      actorId: userId,
       familyMemberId: member.id,
       eventType: 'invite_resent',
       metadata: {

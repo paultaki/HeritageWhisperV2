@@ -13,6 +13,7 @@ import * as path from "path";
 import { nanoid } from "nanoid";
 import { checkAIConsentOrError } from "@/lib/aiConsent";
 
+import { getPasskeySession } from "@/lib/iron-session";
 // Route segment config for Next.js 15
 export const maxDuration = 60; // Maximum function execution time (seconds)
 export const dynamic = 'force-dynamic'; // Disable static optimization
@@ -319,16 +320,16 @@ export async function POST(request: NextRequest) {
 
     // Check AI consent (only for authenticated users)
     if (user) {
-      const consentError = await checkAIConsentOrError(user.id);
+      const consentError = await checkAIConsentOrError(userId);
       if (consentError) {
-        logger.warn("[TranscribeAssemblyAI] AI consent denied for user:", user.id);
+        logger.warn("[TranscribeAssemblyAI] AI consent denied for user:", userId);
         return NextResponse.json(consentError, { status: 403 });
       }
     }
 
     // Rate limiting
     const rateLimitIdentifier = user
-      ? `api:transcribe:${user.id}`
+      ? `api:transcribe:${userId}`
       : `api:transcribe:ip:${getClientIp(request)}`;
     const rateLimitResponse = await checkRateLimit(
       rateLimitIdentifier,

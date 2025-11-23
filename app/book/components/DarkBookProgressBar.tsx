@@ -7,6 +7,7 @@ interface DecadeSection {
   decade: string;
   title: string;
   startPage: number;
+  isChapter?: boolean; // True if this is a chapter marker (not a chronological decade)
 }
 
 interface BookStructure {
@@ -20,6 +21,8 @@ interface DarkBookProgressBarProps {
   totalPages: number;
   onNavigateToPage: (pageNumber: number) => void;
   onTocClick: () => void;
+  viewMode?: 'chronological' | 'chapters';
+  onViewModeChange?: (mode: 'chronological' | 'chapters') => void;
   fontSize: number;
   onFontSizeChange: (size: number) => void;
 }
@@ -38,6 +41,7 @@ function buildBookStructure(pages: BookPage[]): BookStructure {
           decade: page.decade,
           title: page.decadeTitle || page.decade,
           startPage: page.pageNumber,
+          isChapter: page.isChapter || false, // Capture isChapter flag from page
         });
       }
     }
@@ -45,9 +49,18 @@ function buildBookStructure(pages: BookPage[]): BookStructure {
 
   // Convert to array and sort by decade
   const sortedDecades = Array.from(decadeMap.values()).sort((a, b) => {
+    // Try to parse as years first (for chronological view)
     const aYear = parseInt(a.decade);
     const bYear = parseInt(b.decade);
-    return aYear - bYear;
+
+    if (!isNaN(aYear) && !isNaN(bYear)) {
+      return aYear - bYear;
+    }
+
+    // Fallback to string comparison (for chapter view)
+    // Ideally we should use the original order index, but we don't have it here easily.
+    // Since pages are already sorted by the main page logic, we can sort by startPage.
+    return a.startPage - b.startPage;
   });
 
   return {
@@ -64,6 +77,8 @@ export default function DarkBookProgressBar({
   onTocClick,
   fontSize,
   onFontSizeChange,
+  viewMode,
+  onViewModeChange,
 }: DarkBookProgressBarProps) {
   const [isHovering, setIsHovering] = useState(false);
   const [hoverPosition, setHoverPosition] = useState(0);
@@ -101,7 +116,7 @@ export default function DarkBookProgressBar({
   const getHoverPageInfo = () => {
     const pageNum = getHoverPage();
     const page = pages[pageNum - 1]; // Convert to 0-indexed
-    
+
     if (!page) {
       return { pageNum, year: null };
     }
@@ -113,9 +128,9 @@ export default function DarkBookProgressBar({
   };
 
   return (
-    <div 
+    <div
       className="fixed top-0 left-0 right-0"
-      style={{ 
+      style={{
         zIndex: 50,
         height: '56px',
         background: 'transparent',
@@ -123,7 +138,7 @@ export default function DarkBookProgressBar({
     >
       <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex flex-col md:flex-row md:items-center gap-2 md:gap-0 pt-[20px] md:pt-0 py-2 md:py-0">
         {/* Top on mobile / Left on desktop: Progress bar area */}
-        <div className="flex-1 md:mr-4 w-full max-w-[calc(100%-90px)] md:max-w-[calc(100%-220px)]">
+        <div className="flex-1 md:mr-4 w-full max-w-[calc(100%-90px)] md:max-w-[calc(100%-350px)]">
           <div className="relative">
             {/* Progress bar */}
             <div
@@ -167,7 +182,7 @@ export default function DarkBookProgressBar({
                   <div
                     key={decade.decade}
                     className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border-2 border-white/80 shadow-sm cursor-pointer hover:scale-150 transition-transform"
-                    style={{ 
+                    style={{
                       left: `${markerPosition}%`,
                       backgroundColor: 'rgba(99, 102, 241, 0.9)',
                     }}
@@ -209,14 +224,14 @@ export default function DarkBookProgressBar({
 
                 bookStructure.decades.forEach((decade) => {
                   if (decade.startPage > totalPages) return;
-                  
+
                   const rawPosition = (decade.startPage / totalPages) * 100;
                   const markerPosition = Math.min(rawPosition, 98);
-                  
+
                   // Get container width to calculate pixel position
                   const containerWidth = document.querySelector('.progress-bar-container')?.clientWidth || 1000;
                   const pixelPosition = (markerPosition / 100) * containerWidth;
-                  
+
                   // Only show if it doesn't overlap with previous
                   if (pixelPosition - lastPosition >= MIN_SPACING) {
                     visibleDecades.push(decade);
@@ -224,9 +239,24 @@ export default function DarkBookProgressBar({
                   }
                 });
 
-                return visibleDecades.map((decade) => {
+                return visibleDecades.map((decade, index) => {
                   const rawPosition = (decade.startPage / totalPages) * 100;
                   const markerPosition = Math.min(rawPosition, 98);
+
+                  // Check if this is a year (chronological) or chapter
+                  // Check if this is a chapter marker or a decade marker
+                  const isChapter = decade.isChapter;
+                  const isNumeric = !isNaN(parseInt(decade.decade.replace('s', '')));
+
+                  // For chapters, display abbreviated format; for decades, show year
+                  const displayText = isChapter
+                    ? `Ch. ${index + 1}` // Chapters: "Ch. 1", "Ch. 2", etc.
+                    : isNumeric
+                    ? decade.decade.replace('s', '') // Years: "1950", "1960", etc.
+                    : decade.decade; // Fallback to raw decade value
+
+                  // Full text for tooltip
+                  const fullTitle = decade.title;
 
                   return (
                     <div
@@ -268,9 +298,10 @@ export default function DarkBookProgressBar({
                           boxSizing: 'border-box',
                           margin: 0,
                         }}
-                        aria-label={`Jump to ${decade.title}`}
+                        aria-label={`Jump to ${fullTitle}`}
+                        title={!isNumeric ? fullTitle : undefined}
                       >
-                        {decade.decade.replace('s', '')}
+                        {displayText}
                       </button>
                     </div>
                   );
@@ -280,8 +311,32 @@ export default function DarkBookProgressBar({
           </div>
         </div>
 
-        {/* Right: Controls - TOC and Text Size */}
+        {/* Right: Controls - View Mode, TOC and Text Size */}
         <div className="hidden md:flex items-center justify-end gap-2 flex-shrink-0">
+          {/* View Mode Toggle */}
+          {viewMode && onViewModeChange && (
+            <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/20 mr-2">
+              <button
+                onClick={() => onViewModeChange('chronological')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${viewMode === 'chronological'
+                  ? 'bg-white text-black shadow-sm'
+                  : 'text-white/70 hover:text-white'
+                  }`}
+              >
+                Time
+              </button>
+              <button
+                onClick={() => onViewModeChange('chapters')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${viewMode === 'chapters'
+                  ? 'bg-[#d4af87] text-white shadow-sm'
+                  : 'text-white/70 hover:text-white'
+                  }`}
+              >
+                Chapters
+              </button>
+            </div>
+          )}
+
           {/* TOC button - Book icon */}
           <button
             onClick={onTocClick}

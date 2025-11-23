@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+import { getPasskeySession } from "@/lib/iron-session";
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -107,7 +108,7 @@ export async function PATCH(
       // Generate unique filenames
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substring(7);
-      const baseFilename = `treasure/${user.id}/${timestamp}-${randomId}`;
+      const baseFilename = `treasure/${userId}/${timestamp}-${randomId}`;
       const masterFilename = `${baseFilename}-master.webp`;
       const displayFilename = `${baseFilename}-display.webp`;
 
@@ -211,7 +212,7 @@ export async function PATCH(
       .from("treasures")
       .update(updates)
       .eq("id", id)
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .select()
       .single();
 
@@ -293,7 +294,7 @@ export async function DELETE(
       .from("treasures")
       .select("image_url")
       .eq("id", id)
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .single();
 
     if (!treasure) {
@@ -308,7 +309,7 @@ export async function DELETE(
       .from("treasures")
       .delete()
       .eq("id", id)
-      .eq("user_id", user.id);
+      .eq("user_id", userId);
 
     if (dbError) {
       console.error("Error deleting treasure:", dbError);
@@ -324,7 +325,7 @@ export async function DELETE(
       if (fileName) {
         await supabaseAdmin.storage
           .from("heritage-whisper-files")
-          .remove([`${user.id}/${fileName}`])
+          .remove([`${userId}/${fileName}`])
           .catch((err) => console.error("Error deleting image:", err));
       }
     }

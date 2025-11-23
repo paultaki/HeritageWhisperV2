@@ -264,6 +264,19 @@ function BookStyleReviewContent() {
             setReturnPath(cachedData.returnPath);
           }
 
+          // Handle photo from recording flow
+          // Recording flow stores: photoUrl (blob URL) and photoFile (File object)
+          // We need to convert to photos array format expected by the UI
+          if (cachedData.photoUrl && cachedData.photoFile) {
+            const photoFromRecording: StoryPhoto = {
+              id: `recording-photo-${Date.now()}`,
+              url: cachedData.photoUrl as string,
+              // Note: photoFile is stored in cachedData but we use the blob URL for preview
+              // The actual file will be uploaded when the story is saved
+            };
+            setPhotos([photoFromRecording]);
+          }
+
           // Handle multi-story flow
           if (cachedData.nextNavId) {
             setNextNavId(cachedData.nextNavId as string);
@@ -878,22 +891,7 @@ function BookStyleReviewContent() {
   });
 
   const handleSave = async () => {
-    // Check for authentication first
-    const { supabase } = await import("@/lib/supabase");
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to save your story.",
-        variant: "destructive",
-      });
-      router.push("/auth/login");
-      return;
-    }
-
+    // Validate content before attempting save
     if (!transcription?.trim()) {
       toast({
         title: "Story content required",
@@ -903,6 +901,8 @@ function BookStyleReviewContent() {
       return;
     }
 
+    // Note: Auth validation happens in the API route - it supports both JWT and passkey sessions
+    // No need to check client-side since the API will handle both authentication methods
     saveMutation.mutate();
   };
 

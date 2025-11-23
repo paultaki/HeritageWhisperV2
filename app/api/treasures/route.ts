@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+import { getPasskeySession } from "@/lib/iron-session";
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -50,15 +51,15 @@ export async function GET(request: NextRequest) {
 
     if (user && !authError) {
       // JWT authentication successful (account owner)
-      storytellerId = requestedStorytellerUserGuess || user.id;
+      storytellerId = requestedStorytellerUserGuess || userId;
       isAuthenticated = true;
 
       // Check family sharing access if viewing someone else's treasures
-      if (storytellerId !== user.id) {
+      if (storytellerId !== userId) {
         const { data: hasAccess } = await supabaseAdmin.rpc(
           "has_collaboration_access",
           {
-            p_user_id: user.id,
+            p_user_id: userId,
             p_storyteller_id: storytellerId,
           }
         );
@@ -288,7 +289,7 @@ export async function POST(request: NextRequest) {
     // Generate unique filenames with suffix naming
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(7);
-    const baseFilename = `treasure/${user.id}/${timestamp}-${randomId}`;
+    const baseFilename = `treasure/${userId}/${timestamp}-${randomId}`;
     const masterFilename = `${baseFilename}-master.webp`;
     const displayFilename = `${baseFilename}-display.webp`;
 
@@ -345,7 +346,7 @@ export async function POST(request: NextRequest) {
 
     // Create treasure record with new dual-path fields
     const insertData: any = {
-      user_id: user.id,
+      user_id: userId,
       title,
       description,
       category,

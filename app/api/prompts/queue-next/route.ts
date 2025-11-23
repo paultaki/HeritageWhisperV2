@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     // Get next queue position using the helper function
     const { data: positionData, error: positionError } = await supabaseAdmin
-      .rpc('get_next_queue_position', { p_user_id: user.id });
+      .rpc('get_next_queue_position', { p_user_id: userId });
 
     if (positionError) {
       console.error('Error getting next queue position:', positionError);
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
     const { data: existingPrompt } = await supabaseAdmin
       .from('user_prompts')
       .select('id, status')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('text', text)
       .in('status', ['queued', 'dismissed'])
       .single();
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
     const { error: insertError } = await supabaseAdmin
       .from('user_prompts')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         text,
         category,
         status: 'queued',

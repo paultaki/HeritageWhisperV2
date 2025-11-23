@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -55,7 +56,7 @@ export async function DELETE(
       .eq('id', memberId)
       .single();
 
-    if (!member || member.user_id !== user.id) {
+    if (!member || member.user_id !== userId) {
       return NextResponse.json(
         { error: 'Family member not found' },
         { status: 404 }

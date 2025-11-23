@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+import { getPasskeySession } from "@/lib/iron-session";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
     const { data: existingPrompt } = await supabaseAdmin
       .from('user_prompts')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('text', text)
       .in('status', ['queued', 'dismissed'])
       .single();
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
     const { error: insertError } = await supabaseAdmin
       .from('user_prompts')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         text,
         category,
         status: 'dismissed',

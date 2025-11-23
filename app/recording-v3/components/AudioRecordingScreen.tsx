@@ -19,7 +19,7 @@ export function AudioRecordingScreen({
 }: AudioRecordingScreenProps) {
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [audioLevel, setAudioLevel] = useState(0);
+  const [audioLevels, setAudioLevels] = useState<number[]>(new Array(20).fill(0));
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -56,6 +56,9 @@ export function AudioRecordingScreen({
       const source = audioContext.createMediaStreamSource(stream);
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.8; // Smooth out the jitter
+      analyser.minDecibels = -90;
+      analyser.maxDecibels = -10;
       source.connect(analyser);
 
       audioContextRef.current = audioContext;
@@ -89,12 +92,50 @@ export function AudioRecordingScreen({
   const updateAudioLevel = () => {
     if (!analyserRef.current) return;
 
-    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+    const bufferLength = analyserRef.current.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
     analyserRef.current.getByteFrequencyData(dataArray);
 
-    const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-    setAudioLevel(average / 255);
+    // We want 20 bars total for the mirrored effect (10 per side)
+    // We'll calculate 10 distinct levels from the frequency data
+    const levelsCount = 10;
 
+    // Skip the first few bins to avoid DC offset/hum (index 0-2 usually)
+    const startIndex = 2;
+    // We focus on the lower-mid range where voice energy sits (up to ~index 60 out of 128)
+    const effectiveBufferLength = 60;
+    const step = Math.floor((effectiveBufferLength - startIndex) / levelsCount);
+
+    const calculatedLevels = [];
+
+    for (let i = 0; i < levelsCount; i++) {
+      const start = startIndex + (i * step);
+      const end = start + step;
+      let sum = 0;
+      let count = 0;
+
+      for (let j = start; j < end && j < bufferLength; j++) {
+        sum += dataArray[j];
+        count++;
+      }
+
+      const average = count > 0 ? sum / count : 0;
+      // Normalize to 0-1 range with some boost
+      const normalized = Math.min(1, (average / 255) * 1.2);
+      calculatedLevels.push(normalized);
+    }
+
+    // Create mirrored pattern: [0, 1, 2, ... 9, 9, ... 2, 1, 0]
+    // But we want the center to be the highest energy (low freqs)
+    // So if calculatedLevels[0] is low freq (high energy), we want it in the center.
+    // Let's arrange as: [9, 8, ... 0, 0, ... 8, 9] where 0 is low freq.
+
+    const mirrored = [
+      ...[...calculatedLevels].reverse(),
+      ...calculatedLevels
+    ];
+
+    setAudioLevels(mirrored);
     animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
   };
 
@@ -222,13 +263,9 @@ export function AudioRecordingScreen({
   const isIdle = recordingState === "idle";
 
   // Waveform visualization
-  const waveformBars = Array.from({ length: 12 }, (_, i) => {
-    if (isIdle) return 0.2;
-    const baseHeight = 0.2 + audioLevel * 0.6;
-    const waveOffset = Math.sin((Date.now() / 300) + (i * 0.5)) * 0.15;
-    const randomness = Math.random() * 0.1;
-    return Math.max(0.15, Math.min(0.95, baseHeight + waveOffset + randomness));
-  });
+  const waveformBars = isIdle
+    ? new Array(20).fill(0.1)
+    : audioLevels;
 
   return (
     <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -308,20 +345,23 @@ export function AudioRecordingScreen({
         </div>
 
         {/* Waveform Card */}
-        <div className="bg-white rounded-2xl p-8 mb-4 shadow-sm">
-          <div className="flex items-center justify-center gap-1 h-20">
+        <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+          <div className="flex items-center justify-center gap-1 h-12">
             {waveformBars.map((height, index) => (
               <div
                 key={index}
-                className="w-1 rounded-full transition-all duration-100"
+                className="w-1.5 rounded-full"
                 style={{
-                  height: `${height * 80}px`,
-                  backgroundColor: isIdle ? "#D1D5DB" : "#10B981"
+                  height: `${Math.max(4, height * 48)}px`,
+                  backgroundColor: isIdle ? "#D1D5DB" : "#10B981",
+                  opacity: isIdle ? 0.5 : 1,
+                  // Remove transition for instant response to the smoothed data
+                  transition: isIdle ? "all 0.3s ease" : "none"
                 }}
               />
             ))}
           </div>
-          <p className="text-center text-sm mt-4" style={{ color: "#9CA3AF" }}>
+          <p className="text-center text-xs mt-2 font-medium tracking-wide" style={{ color: "#9CA3AF" }}>
             {isIdle ? "READY TO RECORD" : isRecording ? "RECORDING" : "PAUSED"}
           </p>
         </div>

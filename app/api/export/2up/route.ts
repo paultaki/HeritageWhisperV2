@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { pdfshift } from "@/lib/pdfshift";
 import { generatePrintToken } from "@/lib/printToken";
 
+import { getPasskeySession } from "@/lib/iron-session";
 export const maxDuration = 60;
 export const runtime = "nodejs";
 
@@ -43,13 +44,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    logger.debug("[Export 2up] Auth successful, user:", user.id);
+    logger.debug("[Export 2up] Auth successful, user:", userId);
 
     const { bookId } = await request.json();
 
     // Generate a temporary print token (valid for 5 minutes)
-    const printToken = generatePrintToken(user.id);
-    logger.debug("[Export 2up] Generated print token for user:", user.id);
+    const printToken = generatePrintToken(userId);
+    logger.debug("[Export 2up] Generated print token for user:", userId);
 
     // Use actual domain when deployed
     // PDFShift cannot access localhost - must use publicly accessible URL
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     // Use both print token AND userId for maximum compatibility
     // Token for validation, userId for direct access
-    const printUrl = `${baseUrl}/book/print/2up?printToken=${printToken}&userId=${user.id}`;
+    const printUrl = `${baseUrl}/book/print/2up?printToken=${printToken}&userId=${userId}`;
     logger.debug("[Export 2up] Generating PDF from:", printUrl.replace(printToken, 'TOKEN_REDACTED'));
 
     // Use PDFShift to generate PDF
@@ -92,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     // Track PDF export
     try {
-      await supabaseAdmin.rpc('increment_pdf_export', { user_id: user.id });
+      await supabaseAdmin.rpc('increment_pdf_export', { user_id: userId });
     } catch (trackError) {
       // Don't fail the export if tracking fails
       logger.error("[Export 2up] Failed to track export:", trackError);
