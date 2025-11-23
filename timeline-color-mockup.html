@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heritage Whisper Timeline - Color Options Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #1F1F1F;
+            margin-bottom: 12px;
+        }
+
+        .header p {
+            color: #4A4A4A;
+            font-size: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .option-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .option-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1F1F1F;
+        }
+
+        .option-description {
+            font-size: 14px;
+            color: #4A4A4A;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        /* Timeline Structure */
+        .timeline-preview {
+            position: relative;
+        }
+
+        /* Decade Section */
+        .decade-section {
+            padding: 16px 0;
+            margin-bottom: 24px;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+        }
+
+        .decade-text {
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Timeline Spine */
+        .timeline-spine {
+            position: absolute;
+            left: 52px;
+            top: 100px;
+            bottom: 0;
+            width: 2px;
+        }
+
+        /* Year Badge */
+        .year-badge {
+            position: absolute;
+            left: 16px;
+            top: 120px;
+            width: 72px;
+            height: 72px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            border: 1px solid;
+            z-index: 2;
+        }
+
+        /* Memory Card */
+        .memory-card {
+            background: white;
+            border-radius: 16px;
+            padding: 0;
+            margin-left: 100px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            border: 1.5px solid;
+        }
+
+        .memory-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .memory-content {
+            padding: 16px;
+        }
+
+        .memory-title {
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .memory-meta {
+            font-size: 15px;
+            color: #78716c;
+        }
+
+        /* Color Swatches */
+        .color-legend {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .color-legend h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1F1F1F;
+            margin-bottom: 12px;
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            margin-right: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .color-label {
+            color: #4A4A4A;
+            flex: 1;
+        }
+
+        .color-code {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            color: #8A8378;
+        }
+
+        /* Option-specific styles */
+        /* OPTION 1: Current Mauve/Lavender */
+        .option-1 .decade-section {
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 42%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)),
+                rgba(134, 108, 122, 0.45);
+            border-top: 1px solid rgba(255, 255, 255, 0.35);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        .option-1 .decade-text {
+            color: #6B5243;
+        }
+
+        .option-1 .timeline-spine {
+            background: #E4D4CB;
+        }
+
+        .option-1 .year-badge {
+            background: #F6E5DD;
+            color: #6B5243;
+            border-color: #C9B5A8;
+        }
+
+        .option-1 .memory-card {
+            border-color: #D7C6BB;
+        }
+
+        .option-1 .memory-title {
+            color: #1c1917;
+        }
+
+        /* OPTION 2: Design Guidelines (Green/Blue) */
+        .option-2 .decade-section {
+            background: #EFE6DA;
+        }
+
+        .option-2 .decade-text {
+            color: #203954;
+        }
+
+        .option-2 .timeline-spine {
+            background: #3E6A5A;
+        }
+
+        .option-2 .year-badge {
+            background: #E0E5ED;
+            color: #203954;
+            border-color: #203954;
+        }
+
+        .option-2 .memory-card {
+            border-color: #D2C9BD;
+        }
+
+        .option-2 .memory-title {
+            color: #1F1F1F;
+        }
+
+        /* OPTION 3: Hybrid Warm (Documented) */
+        .option-3 .decade-section {
+            background: #F4E6CC;
+        }
+
+        .option-3 .decade-text {
+            color: #6B5243;
+        }
+
+        .option-3 .timeline-spine {
+            background: #CBA46A;
+        }
+
+        .option-3 .year-badge {
+            background: #F4E6CC;
+            color: #203954;
+            border-color: #CBA46A;
+        }
+
+        .option-3 .memory-card {
+            border-color: #D2C9BD;
+        }
+
+        .option-3 .memory-title {
+            color: #1F1F1F;
+        }
+
+        .recommendation {
+            background: #FFFBEB;
+            border-left: 4px solid #B45309;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 24px;
+        }
+
+        .recommendation h3 {
+            color: #B45309;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .recommendation p {
+            color: #1F1F1F;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .memory-card {
+                margin-left: 90px;
+            }
+
+            .year-badge {
+                width: 64px;
+                height: 64px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Heritage Whisper Timeline - Color Comparison</h1>
+        <p>Compare three color approaches for your timeline. Each option shows the same memory cards with different color palettes. Consider readability, visual warmth, and brand consistency.</p>
+    </div>
+
+    <div class="comparison-grid">
+        <!-- OPTION 1: Current Implementation -->
+        <div class="option-container">
+            <div class="option-title">Option 1: Current (Mauve/Lavender)</div>
+            <div class="option-description">
+                Warm vintage aesthetic with mauve/lavender tones. Creates a nostalgic photo album feel. <strong>Not documented in design guidelines.</strong>
+            </div>
+
+            <div class="timeline-preview option-1">
+                <div class="decade-section">
+                    <div class="decade-text">1950s</div>
+                </div>
+
+                <div class="timeline-spine"></div>
+                <div class="year-badge">1959</div>
+
+                <div class="memory-card">
+                    <div class="memory-image">📷 Vintage Photo</div>
+                    <div class="memory-content">
+                        <div class="memory-title">My Earliest Memory</div>
+                        <div class="memory-meta">Age 4 • 1959</div>
+                    </div>
+                </div>
+
+                <div class="memory-card">
+                    <div class="memory-image">📷 Vintage Photo</div>
+                    <div class="memory-content">
+                        <div class="memory-title">Summer at the Lake</div>
+                        <div class="memory-meta">Age 4 • 1959</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="color-legend">
+                <h4>Color Palette</h4>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: rgba(134, 108, 122, 0.45);"></div>
+                    <div class="color-label">Decade Header</div>
+                    <div class="color-code">#866C7A</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #F6E5DD;"></div>
+                    <div class="color-label">Year Badge BG</div>
+                    <div class="color-code">#F6E5DD</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #6B5243;"></div>
+                    <div class="color-label">Badge Text</div>
+                    <div class="color-code">#6B5243</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #E4D4CB;"></div>
+                    <div class="color-label">Timeline Spine</div>
+                    <div class="color-code">#E4D4CB</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #D7C6BB;"></div>
+                    <div class="color-label">Card Border</div>
+                    <div class="color-code">#D7C6BB</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OPTION 2: Design Guidelines -->
+        <div class="option-container">
+            <div class="option-title">Option 2: Guidelines Aligned (Green/Blue)</div>
+            <div class="option-description">
+                Uses official brand colors: slate blue primary (#203954), muted green (#3E6A5A), warm beige. <strong>Documented in design guidelines.</strong>
+            </div>
+
+            <div class="timeline-preview option-2">
+                <div class="decade-section">
+                    <div class="decade-text">1950s</div>
+                </div>
+
+                <div class="timeline-spine"></div>
+                <div class="year-badge">1959</div>
+
+                <div class="memory-card">
+                    <div class="memory-image">📷 Vintage Photo</div>
+                    <div class="memory-content">
+                        <div class="memory-title">My Earliest Memory</div>
+                        <div class="memory-meta">Age 4 • 1959</div>
+                    </div>
+                </div>
+
+                <div class="memory-card">
+                    <div class="memory-image">📷 Vintage Photo</div>
+                    <div class="memory-content">
+                        <div class="memory-title">Summer at the Lake</div>
+                        <div class="memory-meta">Age 4 • 1959</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="color-legend">
+                <h4>Color Palette</h4>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #EFE6DA;"></div>
+                    <div class="color-label">Decade Header</div>
+                    <div class="color-code">#EFE6DA</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #E0E5ED;"></div>
+                    <div class="color-label">Year Badge BG</div>
+                    <div class="color-code">#E0E5ED</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #203954;"></div>
+                    <div class="color-label">Badge Text</div>
+                    <div class="color-code">#203954</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #3E6A5A;"></div>
+                    <div class="color-label">Timeline Spine</div>
+                    <div class="color-code">#3E6A5A</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #D2C9BD;"></div>
+                    <div class="color-label">Card Border</div>
+                    <div class="color-code">#D2C9BD</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OPTION 3: Hybrid Warm -->
+        <div class="option-container">
+            <div class="option-title">Option 3: Hybrid Warm (Documented)</div>
+            <div class="option-description">
+                Uses accent gold (#CBA46A) from guidelines for warm vintage feel while staying within documented brand palette. Middle ground approach.
+            </div>
+
+            <div class="timeline-preview option-3">
+                <div class="decade-section">
+                    <div class="decade-text">1950s</div>
+                </div>
+
+                <div class="timeline-spine"></div>
+                <div class="year-badge">1959</div>
+
+                <div class="memory-card">
+                    <div class="memory-image">📷 Vintage Photo</div>
+                    <div class="memory-content">
+                        <div class="memory-title">My Earliest Memory</div>
+                        <div class="memory-meta">Age 4 • 1959</div>
+                    </div>
+                </div>
+
+                <div class="memory-card">
+                    <div class="memory-image">📷 Vintage Photo</div>
+                    <div class="memory-content">
+                        <div class="memory-title">Summer at the Lake</div>
+                        <div class="memory-meta">Age 4 • 1959</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="color-legend">
+                <h4>Color Palette</h4>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #F4E6CC;"></div>
+                    <div class="color-label">Decade Header</div>
+                    <div class="color-code">#F4E6CC</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #F4E6CC;"></div>
+                    <div class="color-label">Year Badge BG</div>
+                    <div class="color-code">#F4E6CC</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #203954;"></div>
+                    <div class="color-label">Badge Text</div>
+                    <div class="color-code">#203954</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #CBA46A;"></div>
+                    <div class="color-label">Timeline Spine</div>
+                    <div class="color-code">#CBA46A</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #D2C9BD;"></div>
+                    <div class="color-label">Card Border</div>
+                    <div class="color-code">#D2C9BD</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="recommendation">
+        <h3>💡 Considerations</h3>
+        <p><strong>Option 1 (Current):</strong> Beautiful vintage aesthetic but not in official guidelines. May create inconsistency if other parts of the app use documented colors.</p>
+        <p style="margin-top: 8px;"><strong>Option 2 (Guidelines):</strong> Most consistent with brand guidelines. Green spine provides good visual anchor. Cooler tone may feel less "nostalgic."</p>
+        <p style="margin-top: 8px;"><strong>Option 3 (Hybrid):</strong> Maintains warmth using documented accent gold. Good middle ground. Gold is meant to be "used sparingly" per guidelines, so verify if appropriate for large sections.</p>
+    </div>
+
+    <div class="recommendation" style="background: #E0E5ED; border-color: #203954; margin-top: 16px;">
+        <h3 style="color: #203954;">📋 Next Steps</h3>
+        <p>1. View this mockup on mobile to see how colors feel on your actual device</p>
+        <p style="margin-top: 8px;">2. Consider testing with target demographic (middle-aged adults/seniors)</p>
+        <p style="margin-top: 8px;">3. Decide if guidelines need updating to document Option 1, or if timeline should align with existing guidelines</p>
+        <p style="margin-top: 8px;">4. Run contrast checks for accessibility compliance (especially decade text on backgrounds)</p>
+    </div>
+</body>
+</html>
