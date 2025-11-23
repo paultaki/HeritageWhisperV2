@@ -793,7 +793,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
       })()}
 
       {/* Title */}
-      <h2 className="text-2xl tracking-tight font-semibold mb-2 text-neutral-900">
+      <h2 className="text-3xl tracking-tight font-serif font-semibold mb-2 text-neutral-900" style={{ fontFamily: "Crimson Text, serif" }}>
         {story.title}
       </h2>
 
@@ -883,12 +883,13 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
       )}
 
       {/* Story text */}
-      <div className="text-neutral-800/95 space-y-3">
+      <div className="text-neutral-800/95 space-y-3 font-serif">
         {story.transcription?.split("\n\n").map((paragraph, i) => (
           <p
             key={i}
             style={{
-              fontSize: `${fontSize}px`,
+              fontFamily: "Crimson Text, serif",
+              fontSize: `${fontSize + 1}px`, // Slightly larger for serif readability
               lineHeight: fontSize <= 16 ? '1.6' : fontSize >= 20 ? '1.8' : '1.7'
             }}
           >

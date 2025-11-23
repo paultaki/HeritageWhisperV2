@@ -466,7 +466,7 @@ export const MemoryCard = React.memo(
 
               {/* Middle: Title + metadata + snippet */}
               <div className="flex-1 min-w-0 overflow-hidden">
-                <h3 className="text-[19px] tracking-tight font-semibold text-stone-900 mb-1 truncate w-full">
+                <h3 className="text-[19px] tracking-tight font-semibold text-[var(--hw-text-primary)] mb-1 truncate w-full">
                   {story.title}
                 </h3>
 

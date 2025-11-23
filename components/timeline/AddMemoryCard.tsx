@@ -88,12 +88,12 @@ export function AddMemoryCard({ onCreateMemory, isDark = false }: AddMemoryCardP
         className="flex flex-col items-center justify-center rounded-t-2xl border-b"
         style={{
           aspectRatio: "16/10",
-          background: "linear-gradient(to bottom right, #f5f5f4, #e7e5e4)",
-          borderColor: "#e7e5e4",
+          background: "linear-gradient(to bottom right, #F4E6CC, #EFE6DA)", // Warm beige gradient
+          borderColor: "var(--color-timeline-card-border)",
         }}
       >
-        <Camera className="mb-2" size={64} strokeWidth={1.5} style={{ color: "#d6d3d1" }} />
-        <p className="text-sm px-4 text-center" style={{ color: "#a8a29e" }}>
+        <Camera className="mb-2" size={64} strokeWidth={1.5} style={{ color: "var(--color-timeline-spine-mid)" }} />
+        <p className="text-sm px-4 text-center" style={{ color: "var(--color-text-decade)" }}>
           Your next memory will appear here
         </p>
       </div>
@@ -103,7 +103,7 @@ export function AddMemoryCard({ onCreateMemory, isDark = false }: AddMemoryCardP
         {/* Title */}
         <h3
           className="text-[19px] font-semibold text-center"
-          style={{ color: "#78716c" }}
+          style={{ color: "var(--hw-text-primary)" }}
         >
           Add a New Memory
         </h3>
@@ -111,7 +111,7 @@ export function AddMemoryCard({ onCreateMemory, isDark = false }: AddMemoryCardP
         {/* Subtitle */}
         <p
           className="text-[15px] text-center mx-auto"
-          style={{ color: "#a8a29e", maxWidth: "320px" }}
+          style={{ color: "var(--color-text-muted)", maxWidth: "320px" }}
         >
           Record a story, upload a photo, or write about a moment
         </p>

@@ -10,97 +10,105 @@ import "../recording.css";
  */
 export function StartStoryScreen({ onSelectMode, onCancel }: StartStoryScreenProps) {
   return (
-    <div className="hw-screen-wrapper bg-[#F7F2EC] flex flex-col min-h-screen">
-      {/* Header - Clean Logo Only */}
-      <div className="flex items-center justify-center pt-12 pb-6">
-        <div className="flex flex-col items-center gap-3 text-center">
+    <div className="hw-screen-wrapper" style={{ backgroundColor: "#F5F1ED" }}>
+      {/* Header */}
+      <div className="flex items-start justify-between px-6 pt-6 pb-4">
+        <div className="flex items-center gap-3">
           <img
-            src="/final logo/logo-new.svg"
-            alt="Heritage Whisper"
-            className="h-16 w-auto"
+            src="/final logo/logo hw.svg"
+            alt="HW"
+            className="w-12 h-12"
           />
+          <div className="leading-tight">
+            <h1 className="font-bold text-lg tracking-wide m-0" style={{ color: "#2C3E50", lineHeight: "1.2" }}>
+              HERITAGE WHISPER
+            </h1>
+            <p className="text-sm m-0" style={{ color: "#6B7280", lineHeight: "1.3" }}>
+              Record a new memory
+            </p>
+          </div>
         </div>
+        <button
+          onClick={onCancel}
+          className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"
+          style={{ marginRight: "-20px" }}
+          aria-label="Cancel"
+        >
+          <X className="w-5 h-5" style={{ color: "#2C3E50" }} />
+        </button>
       </div>
 
       {/* Content */}
-      <div className="px-6 pb-12 max-w-md mx-auto w-full flex-1 flex flex-col">
-        {/* Main Heading */}
-        <div className="mt-4 mb-8 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl text-[#203954] mb-4 leading-tight">
-            Every memory matters.<br />
-            <span className="text-[#3E6A5A]">Start with your voice.</span>
-          </h2>
-          <p className="text-lg text-[#4A4A4A] leading-relaxed mx-auto max-w-xs">
-            Capture a story in your own words. You can always add photos or edit the text later.
-          </p>
-        </div>
+      <div className="px-6 pt-6 pb-6" style={{ maxWidth: "600px", margin: "0 auto" }}>
+        {/* Main Heading - Centered */}
+        <h2
+          className="font-serif font-semibold mb-3 text-center"
+          style={{
+            fontSize: "32px",
+            lineHeight: "1.2",
+            color: "#2C3E50"
+          }}
+        >
+          Every memory matters.<br />Start with your voice.
+        </h2>
+
+        <p className="text-lg mb-6 hw-text-center" style={{ color: "#6B7280", margin: "0 0 1.5rem 0", width: "100%" }}>
+          Capture a story in your own words. Add photos now or later.
+        </p>
 
         {/* Primary Options */}
         <div className="space-y-4 mb-8">
           {/* Record with photo */}
           <button
             onClick={() => onSelectMode("photo_audio")}
-            className="w-full bg-white rounded-2xl p-4 text-left shadow-sm hover:shadow-md transition-all active:scale-[0.99] border border-[#EFE6DA] group"
+            className="w-full bg-white rounded-2xl py-4 px-5 active:scale-[0.98] transition-transform shadow-sm"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-[#E0E5ED] flex items-center justify-center flex-shrink-0 group-hover:bg-[#D1D9E4] transition-colors">
-                <Camera className="w-5 h-5 text-[#203954]" />
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#E8E8E8" }}>
+                <Camera className="w-6 h-6" style={{ color: "#2C3E50" }} />
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg text-[#203954] mb-0.5">
-                  Record with photo
-                </h3>
-                <p className="text-sm text-[#6B7280] leading-tight">
-                  Choose a photo first, then tell the story behind it.
-                </p>
-              </div>
+              <h3 className="font-semibold text-lg flex-1 text-left" style={{ color: "#2C3E50" }}>
+                Record with photo
+              </h3>
             </div>
+            <p className="text-base hw-text-center" style={{ color: "#6B7280", margin: 0, width: "100%", display: "block" }}>
+              Choose a photo, then tell the story behind it.
+            </p>
           </button>
 
           {/* Start recording (no photo) */}
           <button
             onClick={() => onSelectMode("audio")}
-            className="w-full bg-white rounded-2xl p-4 text-left shadow-sm hover:shadow-md transition-all active:scale-[0.99] border border-[#EFE6DA] group"
+            className="w-full bg-white rounded-2xl py-4 px-5 active:scale-[0.98] transition-transform shadow-sm"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-[#E0E5ED] flex items-center justify-center flex-shrink-0 group-hover:bg-[#D1D9E4] transition-colors">
-                <Mic className="w-5 h-5 text-[#203954]" />
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#E8E8E8" }}>
+                <Mic className="w-6 h-6" style={{ color: "#2C3E50" }} />
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg text-[#203954] mb-0.5">
-                  Start recording
-                </h3>
-                <p className="text-sm text-[#6B7280] leading-tight">
-                  Just start talking. We'll transcribe it for you.
-                </p>
-              </div>
+              <h3 className="font-semibold text-lg flex-1 text-left" style={{ color: "#2C3E50" }}>
+                Start recording (no photo)
+              </h3>
             </div>
+            <p className="text-base hw-text-center" style={{ color: "#6B7280", margin: 0, width: "100%", display: "block" }}>
+              Record now, add photos anytime later.
+            </p>
           </button>
         </div>
 
-        {/* Text Mode */}
-        <div className="text-center mb-12 flex justify-center">
+        {/* Text Mode - De-emphasized */}
+        <div className="hw-text-center" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <button
             onClick={() => onSelectMode("text")}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[#6B7280] hover:text-[#203954] hover:bg-[#EFE6DA]/50 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2"
           >
-            <Keyboard className="w-4 h-4" />
-            <span className="text-sm font-medium">
+            <Keyboard className="w-5 h-5" style={{ color: "#6B7280" }} />
+            <span className="text-base font-medium" style={{ color: "#2C3E50" }}>
               Prefer to type instead?
             </span>
           </button>
-        </div>
-
-        {/* Cancel Button at Bottom */}
-        <div className="mt-auto flex flex-col items-center justify-center pb-6">
-          <button
-            onClick={onCancel}
-            className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-[#D2C9BD] text-[#203954] shadow-sm hover:bg-gray-50 transition-colors mb-2"
-            aria-label="Cancel"
-          >
-            <X className="w-6 h-6" />
-          </button>
-          <p className="text-xs text-[#8A8378] font-medium uppercase tracking-wider">Cancel</p>
+          <p className="text-sm mt-1 hw-text-center" style={{ color: "#9CA3AF", margin: "0.25rem 0 0 0" }}>
+            Audio is best, but you can always type if you prefer.
+          </p>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import "../recording-v3.css";
+import "../recording.css";
 
 type WaveformVisualizerProps = {
   isRecording: boolean;

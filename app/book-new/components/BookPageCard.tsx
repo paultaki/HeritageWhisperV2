@@ -146,7 +146,7 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
           {/* Content */}
           <div className="px-5 pt-5 pb-40">
             {/* Title and metadata */}
-            <h1 className="text-[26px] font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            <h1 className="text-[26px] font-serif font-semibold tracking-tight text-stone-900 sm:text-3xl" style={{ fontFamily: "Crimson Text, serif" }}>
               {story.title}
             </h1>
             <div className="mt-1 text-[15px] text-stone-500">
@@ -170,7 +170,7 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
             )}
 
             {/* Transcription */}
-            <div className="mt-5 space-y-4 text-[17px] leading-8 text-stone-800">
+            <div className="mt-5 space-y-4 text-[18px] leading-8 text-stone-800 font-serif" style={{ fontFamily: "Crimson Text, serif" }}>
               {paragraphs.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}

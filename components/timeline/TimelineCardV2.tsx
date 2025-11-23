@@ -223,11 +223,11 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
   // CHANGE 4: Format metadata (Age 7 • Summer 1962)
   const formatMetadata = () => {
     const year = normalizeYear(story.storyYear);
-    const age = story.lifeAge !== null && story.lifeAge !== undefined 
-      ? story.lifeAge > 0 
-        ? `Age ${story.lifeAge}` 
-        : story.lifeAge === 0 
-          ? 'Birth' 
+    const age = story.lifeAge !== null && story.lifeAge !== undefined
+      ? story.lifeAge > 0
+        ? `Age ${story.lifeAge}`
+        : story.lifeAge === 0
+          ? 'Birth'
           : 'Before birth'
       : null;
 
@@ -306,9 +306,8 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
               {photos.map((_, index) => (
                 <div
                   key={index}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentPhotoIndex ? 'bg-white w-4' : 'bg-white/60'
-                  }`}
+                  className={`w-2 h-2 rounded-full transition-all ${index === currentPhotoIndex ? 'bg-white w-4' : 'bg-white/60'
+                    }`}
                 />
               ))}
             </div>
@@ -321,7 +320,7 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
         <div className="flex items-center justify-between gap-4">
           {/* Left: Title and metadata stacked */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-[19px] tracking-tight font-semibold text-stone-900 mb-0.5 truncate">
+            <h3 className="text-[19px] tracking-tight font-semibold text-[var(--hw-text-primary)] mb-0.5 truncate">
               {story.title}
             </h3>
             <p className="text-[15px] text-stone-500">

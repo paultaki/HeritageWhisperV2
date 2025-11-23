@@ -569,7 +569,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             <div className="flex items-center justify-between gap-4">
               {/* Left: Title and metadata stacked */}
               <div className="flex-1 min-w-0">
-                <h3 className="text-[19px] tracking-tight font-semibold text-stone-900 mb-0.5 truncate">
+                <h3 className="text-[19px] tracking-tight font-semibold text-[var(--hw-text-primary)] mb-0.5 truncate">
                   {story.title}
                 </h3>
                 <div className="flex items-center gap-2 text-[15px] text-stone-500">
@@ -658,7 +658,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
 
             {/* Middle: Title + metadata + snippet */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-[19px] tracking-tight font-semibold text-stone-900 mb-1 truncate">
+              <h3 className="text-[19px] tracking-tight font-semibold text-[var(--hw-text-primary)] mb-1 truncate">
                 {story.title}
               </h3>
 

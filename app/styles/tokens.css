@@ -10,17 +10,17 @@
   --color-accent-2: #b89b5e; /* soft gold */
   --color-focus: #b89b5e;
 
-  /* Timeline-specific colors (refined warm mauve/taupe palette) */
-  --color-timeline-card-border: #D7C6BB;   /* soft warm taupe - book-like borders */
-  --color-timeline-border-badge: #C9B5A8;  /* slightly darker taupe for badge borders */
-  --color-timeline-badge-bg: #F6E5DD;      /* light creamy mauve badge background */
-  --color-timeline-badge-text: #6B5243;    /* muted ink/brown badge text */
-  --color-text-decade: #6B5243;            /* decade titles match badge text */
-  --color-timeline-spine: #E4D4CB;         /* lighter warm taupe for vertical line */
-  --color-timeline-spine-mid: #C9B5A8;     /* refined gradient midpoint */
-  --color-timeline-connector-fade: rgba(215, 198, 187, 0.15); /* connector fade matches border */
-  --color-timeline-connector-hover: rgba(215, 198, 187, 0.6); /* connector hover */
-  --color-timeline-decade-bg: rgba(215, 198, 187, 0.12); /* decade band subtle tint */
+  /* Timeline-specific colors (Option 3: Hybrid Warm) */
+  --color-timeline-card-border: #D2C9BD;
+  --color-timeline-border-badge: #CBA46A;
+  --color-timeline-badge-bg: #F4E6CC;
+  --color-timeline-badge-text: #203954;
+  --color-text-decade: #6B5243;
+  --color-timeline-spine: #CBA46A;
+  --color-timeline-spine-mid: #CBA46A;
+  --color-timeline-connector-fade: rgba(203, 164, 106, 0.15);
+  --color-timeline-connector-hover: rgba(203, 164, 106, 0.6);
+  --color-timeline-decade-bg: #F4E6CC;
 
   /* radius */
   --radius-card: 12px;

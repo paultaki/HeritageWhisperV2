@@ -114,6 +114,26 @@ export const passkeys = pgTable(
   }),
 );
 
+// Stripe Customers table for subscription management
+export const stripeCustomers = pgTable("stripe_customers", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull()
+    .unique(),
+  stripeCustomerId: text("stripe_customer_id").notNull().unique(),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  status: text("status").default("active"), // active, canceled, past_due, unpaid, trialing, incomplete, incomplete_expired, paused
+  planType: text("plan_type").default("founding_family"),
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+  createdAt: timestamp("created_at").default(sql`NOW()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`NOW()`).notNull(),
+});
+
 // Chapters table for organizing stories
 export const chapters = pgTable("chapters", {
   id: uuid("id")
@@ -870,6 +890,14 @@ export const insertPromptFeedbackSchema = createInsertSchema(
   reviewedAt: true,
 });
 
+export const insertStripeCustomerSchema = createInsertSchema(
+  stripeCustomers,
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStory = z.infer<typeof insertStorySchema>;
@@ -925,6 +953,8 @@ export type InsertAiUsageLog = z.infer<typeof insertAiUsageLogSchema>;
 export type AiUsageLog = typeof aiUsageLog.$inferSelect;
 export type InsertPromptFeedback = z.infer<typeof insertPromptFeedbackSchema>;
 export type PromptFeedback = typeof promptFeedback.$inferSelect;
+export type InsertStripeCustomer = z.infer<typeof insertStripeCustomerSchema>;
+export type StripeCustomer = typeof stripeCustomers.$inferSelect;
 
 export const chaptersRelations = relations(chapters, ({ many }) => ({
   stories: many(stories),

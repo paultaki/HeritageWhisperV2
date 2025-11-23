@@ -10,6 +10,7 @@ import { Suspense } from 'react';
 function UpgradePageContent() {
   const searchParams = useSearchParams();
   const reason = searchParams.get('reason');
+  const canceled = searchParams.get('canceled') === 'true';
   const router = useRouter();
 
   const getReasonText = () => {
@@ -62,6 +63,23 @@ function UpgradePageContent() {
   return (
     <div className="hw-page bg-gradient-to-b from-amber-50 to-white py-12">
       <div className="container mx-auto max-w-4xl px-4">
+        {/* Cancellation Notice */}
+        {canceled && (
+          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
+                <X className="h-4 w-4 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-amber-900">Checkout Canceled</h3>
+                <p className="text-sm text-amber-700">
+                  No worries! Your checkout was canceled. You can try again when you're ready, or continue using HeritageWhisper for free.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-amber-600">

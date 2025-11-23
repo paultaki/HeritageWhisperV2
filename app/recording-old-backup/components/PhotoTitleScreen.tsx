@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import { type PhotoTitleScreenProps } from "../types";
-import "../recording-v3.css";
+import "../recording.css";
 
 /**
  * PhotoTitleScreen - Collect photo + title before recording

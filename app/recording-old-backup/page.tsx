@@ -13,14 +13,14 @@ import { StartStoryScreen } from "./components/StartStoryScreen";
 import { PhotoTitleScreen } from "./components/PhotoTitleScreen";
 import { AudioRecordingScreen } from "./components/AudioRecordingScreen";
 import { TextEntryScreen } from "./components/TextEntryScreen";
-import "./recording-v3.css";
+import "./recording.css";
 
 /**
- * Recording Flow V3 - State Machine Orchestrator
+ * Recording Flow - State Machine Orchestrator
  * Manages navigation between Start → PhotoTitle → Audio/Text → Review
  * Based on heritage-whisper-recorder with Next.js router integration
  */
-function RecordingV3Content() {
+function RecordingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -83,7 +83,7 @@ function RecordingV3Content() {
       params.set("prompt", draft.sourcePromptId);
     }
 
-    router.replace(`/recording-v3?${params.toString()}`, { scroll: false });
+    router.replace(`/recording?${params.toString()}`, { scroll: false });
   }, [step]);
 
   // Handlers
@@ -240,10 +240,10 @@ function RecordingV3Content() {
   );
 }
 
-export default function RecordingV3Page() {
+export default function RecordingPage() {
   return (
     <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-      <RecordingV3Content />
+      <RecordingContent />
     </Suspense>
   );
 }

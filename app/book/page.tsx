@@ -640,7 +640,7 @@ function BookV4PageContent() {
     const mobileStoryIndex = mobilePages.findIndex((page) => {
       return page.type === 'story' && page.story?.id === storyId;
     });
-    
+
     if (mobileStoryIndex !== -1) {
       setCurrentMobilePage(mobileStoryIndex);
     }
@@ -666,16 +666,27 @@ function BookV4PageContent() {
   // Render closed book cover state
   if (!isBookOpen) {
     return (
-      <div className={`hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
-        {/* Closed book cover - centered */}
-        <div className="flex items-center justify-center" style={{ height: "100dvh" }}>
-          <ClosedBookCover
-            userName={user?.name || "Your"}
-            storyCount={sortedStories.length}
-            onOpen={() => setIsBookOpen(true)}
+      <>
+        {/* Mobile & Tablet: Full-screen mobile view - Always rendered on mobile */}
+        <div className="lg:hidden">
+          <MobileBookViewV2
+            initialStoryId={initialStoryId}
+            caveatFont={caveat.className}
           />
         </div>
-      </div>
+
+        {/* Desktop: Closed book cover */}
+        <div className={`hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
+          {/* Closed book cover - centered */}
+          <div className="flex items-center justify-center" style={{ height: "100dvh" }}>
+            <ClosedBookCover
+              userName={user?.name || "Your"}
+              storyCount={sortedStories.length}
+              onOpen={() => setIsBookOpen(true)}
+            />
+          </div>
+        </div>
+      </>
     );
   }
 

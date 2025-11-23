@@ -15,7 +15,12 @@ export function GhostPromptCard({ prompt, onClick }: GhostPromptCardProps) {
       data-testid={`ghost-prompt-${prompt.id}`}
     >
       {/* Main Card */}
-      <div className="relative p-4 bg-white/70 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-300/50 hover:border-heritage-coral/40 transition-colors">
+      <div className="relative p-4 backdrop-blur-sm rounded-lg border-2 border-dashed transition-colors"
+        style={{
+          borderColor: 'var(--color-timeline-card-border)',
+          backgroundColor: 'rgba(244, 230, 204, 0.3)' // Low opacity version of badge bg #F4E6CC
+        }}
+      >
         {/* Sparkle Icon */}
         <div className="absolute -top-2 -right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-md opacity-90 group-hover:opacity-100 transition-opacity">
           <Sparkles className="w-4 h-4 text-heritage-coral animate-pulse" />
@@ -24,7 +29,7 @@ export function GhostPromptCard({ prompt, onClick }: GhostPromptCardProps) {
         {/* Content */}
         <div className="space-y-2">
           {/* Year and Age */}
-          <div className="flex items-center gap-2 text-xs text-gray-500">
+          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
             <span className="font-medium">{prompt.year}</span>
             <span>•</span>
             <span>Age {prompt.age}</span>
@@ -32,12 +37,14 @@ export function GhostPromptCard({ prompt, onClick }: GhostPromptCardProps) {
           </div>
 
           {/* Title - Italic for ghost prompts */}
-          <h3 className="font-medium text-gray-800 text-sm line-clamp-1 italic group-hover:text-heritage-coral transition-colors">
+          <h3 className="font-medium text-sm line-clamp-1 italic group-hover:text-heritage-coral transition-colors"
+            style={{ color: 'var(--hw-text-primary)' }}
+          >
             {prompt.title}
           </h3>
 
           {/* Get Started Label */}
-          <div className="flex items-center gap-1 text-xs text-gray-400">
+          <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>
             <Plus className="w-3 h-3" />
             <span className="italic font-medium">Get Started</span>
           </div>

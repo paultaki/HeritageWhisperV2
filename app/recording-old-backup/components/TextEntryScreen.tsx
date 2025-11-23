@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowLeft, Mic } from "lucide-react";
 import { type TextEntryScreenProps } from "../types";
-import "../recording-v3.css";
+import "../recording.css";
 
 /**
  * TextEntryScreen - Text-only alternative to audio recording
