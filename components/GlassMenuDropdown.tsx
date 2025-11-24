@@ -138,12 +138,12 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[110] w-[90%] max-w-sm max-h-[calc(100vh-8rem)] rounded-2xl shadow-2xl overflow-y-auto bg-white/95 backdrop-blur-xl border border-white/30"
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[110] w-[90%] max-w-sm max-h-[calc(100vh-12rem)] rounded-2xl shadow-2xl overflow-y-auto bg-white/95 backdrop-blur-xl border border-white/30"
         >
           {/* User Info */}
           {user && (
-            <div className="px-4 py-3 flex items-center gap-3 border-b border-gray-100 bg-gray-50/50">
-              <Avatar className="w-10 h-10 flex-shrink-0">
+            <div className="px-4 py-4 flex flex-col items-center gap-2 border-b border-gray-100 bg-gray-50/50">
+              <Avatar className="w-12 h-12 flex-shrink-0">
                 <AvatarImage
                   src={profileUser?.profilePhotoUrl || ""}
                   alt={user.name || "User"}
@@ -157,12 +157,9 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
                     .slice(0, 2)}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user.name || "User"}
-                </p>
-                <p className="text-xs text-gray-500 truncate">{user.email}</p>
-              </div>
+              <p className="text-sm font-medium text-gray-900 text-center">
+                {user.name || "User"}
+              </p>
             </div>
           )}
 
