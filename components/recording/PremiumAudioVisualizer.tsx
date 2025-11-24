@@ -53,7 +53,7 @@ export function PremiumAudioVisualizer({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const dataArrayRef = useRef<Uint8Array | null>(null);
+  const dataArrayRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const previousBarsRef = useRef<number[]>(Array(32).fill(0.2));
 
@@ -213,7 +213,7 @@ export function PremiumAudioVisualizer({
       }
 
       // Get frequency data from analyser
-      analyserRef.current.getByteFrequencyData(dataArrayRef.current as Uint8Array);
+      analyserRef.current.getByteFrequencyData(dataArrayRef.current);
 
       // Map frequency bins to bars (logarithmic scale)
       const barHeights: number[] = [];
