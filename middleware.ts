@@ -14,8 +14,12 @@ import { csrfProtection } from './lib/csrf';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only apply CSRF protection to API routes
-  if (pathname.startsWith('/api/')) {
+  // Exclude webhook routes from CSRF protection
+  // Webhooks use signature verification instead of CSRF tokens
+  const isWebhook = pathname.startsWith('/api/stripe/webhook');
+
+  // Only apply CSRF protection to API routes (except webhooks)
+  if (pathname.startsWith('/api/') && !isWebhook) {
     // Check CSRF token for state-changing requests
     const csrfResponse = await csrfProtection(request);
 
