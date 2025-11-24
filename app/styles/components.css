@@ -228,8 +228,8 @@ body {
   /* aligns to title baseline */
   width: 24px;
   height: 4px;
-  /* Gradient from solid at spine to faded at card - using explicit colors for visibility */
-  background: linear-gradient(to right, rgba(220, 218, 216, 0.8), rgba(220, 218, 216, 0.3));
+  /* Gradient from solid at spine to faded at card - extended solid part */
+  background: linear-gradient(to right, var(--color-timeline-spine) 70%, var(--color-timeline-connector-fade));
   border-radius: 1px;
   opacity: 1;
   pointer-events: none;
@@ -469,6 +469,13 @@ body {
   .hw-grid>.hw-card:nth-child(even) .hw-year {
     display: none;
   }
+
+  /* Left column cards (odd): Connector on right side, gradient to left */
+  .hw-grid>.hw-card:nth-child(odd)::before {
+    left: auto;
+    right: -29px;
+    background: linear-gradient(to left, var(--color-timeline-spine) 70%, var(--color-timeline-connector-fade));
+  }
 }
 
 /* collapse control */
@@ -598,8 +605,8 @@ body {
     width: 24px;
     /* exactly 24px gap from spine to card */
     height: 4px;
-    /* Gradient from solid at spine to faded at card */
-    background: linear-gradient(to right, var(--color-timeline-spine), var(--color-timeline-connector-fade));
+    /* Gradient from solid at spine to faded at card - extended solid part */
+    background: linear-gradient(to right, var(--color-timeline-spine) 70%, var(--color-timeline-connector-fade));
     border-radius: 1px;
     opacity: 1;
     pointer-events: none;
