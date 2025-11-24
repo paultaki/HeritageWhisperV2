@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+    const userId = user.id;
 
     // Get next queue position using the helper function
     const { data: positionData, error: positionError } = await supabaseAdmin

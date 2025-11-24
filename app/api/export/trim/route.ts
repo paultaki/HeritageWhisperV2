@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
       logger.debug("[Export Trim] Auth failed:", authError);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const userId = user.id;
 
     logger.debug("[Export Trim] Auth successful, user:", userId);
 

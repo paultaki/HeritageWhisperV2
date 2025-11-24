@@ -322,7 +322,7 @@ export async function POST(request: NextRequest) {
 
     // Check AI consent (only for authenticated users)
     if (user) {
-      const consentError = await checkAIConsentOrError(userId);
+      const consentError = await checkAIConsentOrError(userId!);
       if (consentError) {
         logger.warn("[TranscribeAssemblyAI] AI consent denied for user:", userId);
         return NextResponse.json(consentError, { status: 403 });

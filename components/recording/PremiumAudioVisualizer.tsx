@@ -213,7 +213,7 @@ export function PremiumAudioVisualizer({
       }
 
       // Get frequency data from analyser
-      analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+      analyserRef.current.getByteFrequencyData(dataArrayRef.current as Uint8Array);
 
       // Map frequency bins to bars (logarithmic scale)
       const barHeights: number[] = [];

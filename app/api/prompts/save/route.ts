@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+    const userId = user.id;
 
     // Check if prompt already exists for this user in queued or dismissed status
     const { data: existingPrompt } = await supabaseAdmin

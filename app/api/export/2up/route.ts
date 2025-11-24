@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
       logger.debug("[Export 2up] Auth failed:", authError);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const userId = user.id;
 
     logger.debug("[Export 2up] Auth successful, user:", userId);
 

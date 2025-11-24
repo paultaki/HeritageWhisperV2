@@ -306,7 +306,7 @@ export async function POST(request: NextRequest) {
     const userId = user?.id;
 
     if (user) {
-      const consentError = await checkAIConsentOrError(userId);
+      const consentError = await checkAIConsentOrError(userId!);
       if (consentError) {
         logger.warn("[TranscribeWhisper] AI consent denied for user:", userId);
         return NextResponse.json(consentError, { status: 403 });

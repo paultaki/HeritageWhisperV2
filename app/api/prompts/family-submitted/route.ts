@@ -44,6 +44,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const userId = user.id;
+
     // V3: Support storyteller_id query parameter for family sharing
     const { searchParams } = new URL(request.url);
     const storytellerId = searchParams.get('storyteller_id') || userId;
@@ -153,6 +155,8 @@ export async function DELETE(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    const userId = user.id;
 
     // Get prompt ID from query params
     const { searchParams } = new URL(request.url);

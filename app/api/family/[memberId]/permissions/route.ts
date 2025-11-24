@@ -57,6 +57,7 @@ export async function PATCH(
         { status: 401 }
       );
     }
+    const userId = user.id;
 
     // Verify this family member belongs to the user
     const { data: member, error: memberError } = await supabaseAdmin

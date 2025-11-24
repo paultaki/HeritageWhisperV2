@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+    const userId = user.id;
 
     // Rate limiting: 5 prompt submissions per minute per user
     const { success, limit, reset, remaining } = await promptSubmitRatelimit.limit(userId);

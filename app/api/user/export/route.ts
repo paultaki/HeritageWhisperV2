@@ -534,7 +534,7 @@ export async function GET(request: NextRequest) {
       // Authentication data
       auth: {
         user: authUserRecord?.user ? {
-          id: authUserRecord.userId,
+          id: authUserRecord.user.id,
           email: authUserRecord.user.email,
           email_confirmed_at: authUserRecord.user.email_confirmed_at,
           created_at: authUserRecord.user.created_at,

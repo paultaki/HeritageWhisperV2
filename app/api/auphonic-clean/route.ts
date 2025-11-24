@@ -302,6 +302,7 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+    const userId = user.id;
 
     // Check AI consent
     const consentError = await checkAIConsentOrError(userId);

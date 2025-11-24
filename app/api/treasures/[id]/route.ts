@@ -57,6 +57,7 @@ export async function PATCH(
         { status: 401 }
       );
     }
+    const userId = user.id;
 
     const { id } = await context.params;
 
@@ -286,6 +287,7 @@ export async function DELETE(
         { status: 401 }
       );
     }
+    const userId = user.id;
 
     const { id } = await context.params;
 

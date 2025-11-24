@@ -128,6 +128,7 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+    const userId = user.id;
 
     // Extract audio and memoryId from FormData
     const formData = await request.formData();
