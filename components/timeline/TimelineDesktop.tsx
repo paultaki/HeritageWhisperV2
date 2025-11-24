@@ -1319,7 +1319,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                 hasCurrentYearContent={sortedStories.some(
                   (s) => new Date(s.createdAt).getFullYear() === new Date().getFullYear()
                 )}
-                onAddMemory={() => router.push("/review/book-style?new=true")}
+                onAddMemory={() => router.push("/recording")}
               />
             )}
           </div>

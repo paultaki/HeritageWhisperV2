@@ -32,7 +32,7 @@ export function TimelineEnd({
     if (onAddMemory) {
       onAddMemory();
     } else {
-      router.push("/review/book-style?new=true");
+      router.push("/recording");
     }
   };
 

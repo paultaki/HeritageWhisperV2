@@ -75,7 +75,7 @@ export function TimelineMobileV2() {
   // Event Handlers
   const handleGhostPromptClick = useCallback(
     (_prompt: GhostPrompt) => {
-      router.push("/review/book-style?new=true");
+      router.push("/recording");
     },
     [router],
   );
@@ -194,7 +194,7 @@ export function TimelineMobileV2() {
             ) && (
                 <NextStoryCard
                   onRecordClick={(promptId) => {
-                    router.push("/review/book-style?new=true");
+                    router.push("/recording");
                     if (promptId) {
                       sessionStorage.setItem("activePromptId", promptId);
                     }
@@ -366,7 +366,7 @@ export function TimelineMobileV2() {
                   hasCurrentYearContent={sortedStories.some(
                     (s: any) => new Date(s.createdAt).getFullYear() === new Date().getFullYear()
                   )}
-                  onAddMemory={() => router.push("/review/book-style?new=true")}
+                  onAddMemory={() => router.push("/recording")}
                 />
               </>
             );

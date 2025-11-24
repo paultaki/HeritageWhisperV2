@@ -91,7 +91,12 @@ body {
 .hw-decade {
   position: relative;
   margin-bottom: 0;
-  /* No gap between sections - sticky headers should touch */
+  margin-top: 60px;
+  /* Space above decade banner */
+}
+
+.hw-decade:first-child {
+  margin-top: 0;
 }
 
 /* decade band - sticky chapter divider */
