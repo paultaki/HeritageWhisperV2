@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
@@ -13,7 +13,7 @@ type SubscriptionStatus = {
   currentPeriodEnd: string | null;
 };
 
-export default function UpgradeSuccessPage() {
+function UpgradeSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
@@ -212,5 +212,22 @@ export default function UpgradeSuccessPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function UpgradeSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <UpgradeSuccessContent />
+    </Suspense>
   );
 }

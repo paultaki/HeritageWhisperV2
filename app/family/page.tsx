@@ -666,7 +666,7 @@ export default function FamilyPage() {
                 id="message"
                 value={inviteMessage}
                 onChange={(e) => setInviteMessage(e.target.value)}
-                className="mt-2 min-h-[88px] w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-offset-0"
+                className="mt-2 min-h-[88px] w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-[#2C3E50] focus:ring-2 focus:ring-[#2C3E50] focus:ring-offset-0"
                 placeholder="Add a personal message to your invitation..."
                 rows={3}
               />
@@ -682,7 +682,7 @@ export default function FamilyPage() {
                 type="button"
                 variant="outline"
                 onClick={handleCopyInviteLink}
-                className="w-full min-h-[48px] px-5 py-2.5 bg-white text-gray-900 text-sm md:text-base font-medium border border-gray-300 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200 justify-start"
+                className="w-full min-h-[48px] px-5 py-2.5 bg-white text-gray-900 text-sm md:text-base font-medium border border-gray-300 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2C3E50] transition-all duration-200 justify-start"
               >
                 {copiedLink ? (
                   <>

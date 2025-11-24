@@ -45,7 +45,7 @@ export function FamilyMemberCard({
         {/* Top section: Avatar + Info + Remove button */}
         <div className="flex items-start gap-3 mb-3">
           <Avatar className="w-14 h-14 md:w-16 md:h-16 shrink-0">
-            <AvatarFallback className="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 text-xl md:text-2xl font-semibold">
+            <AvatarFallback className="bg-gradient-to-br from-slate-100 to-slate-200 text-[#2C3E50] text-xl md:text-2xl font-semibold">
               {initial}
             </AvatarFallback>
           </Avatar>
@@ -65,7 +65,7 @@ export function FamilyMemberCard({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="shrink-0 min-h-[44px] min-w-[44px] text-red-600 hover:text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 rounded-xl"
+                      className="shrink-0 min-h-[44px] min-w-[44px] text-red-600 hover:text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2C3E50] rounded-xl"
                     >
                       <Trash2 className="w-5 h-5" />
                     </Button>
@@ -81,7 +81,7 @@ export function FamilyMemberCard({
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="gap-3 flex-col sm:flex-row">
-                      <AlertDialogCancel className="w-full min-h-[48px] px-6 py-3 bg-white text-gray-900 text-base font-medium border border-gray-300 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200">
+                      <AlertDialogCancel className="w-full min-h-[48px] px-6 py-3 bg-white text-gray-900 text-base font-medium border border-gray-300 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2C3E50] transition-all duration-200">
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
@@ -97,7 +97,7 @@ export function FamilyMemberCard({
             </div>
 
             {member.relationship && (
-              <Badge className="bg-blue-100 text-blue-700 border-0 text-sm md:text-base px-3 py-1 font-medium rounded-full mb-2">
+              <Badge className="bg-slate-100 text-[#2C3E50] border-0 text-sm md:text-base px-3 py-1 font-medium rounded-full mb-2">
                 {member.relationship}
               </Badge>
             )}
@@ -121,7 +121,7 @@ export function FamilyMemberCard({
             <Button
               onClick={onSendLoginLink}
               disabled={isSendingLink}
-              className="w-full sm:w-auto min-h-[48px] px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-base font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+              className="w-full sm:w-auto min-h-[48px] px-5 py-2.5 bg-[#2C3E50] hover:bg-[#2C3E50]/90 text-white text-base font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2C3E50] transition-all duration-200"
             >
               <LinkIcon className="w-5 h-5 mr-2" />
               {isSendingLink ? "Sending..." : "Send Sign-In Link"}
@@ -137,7 +137,7 @@ export function FamilyMemberCard({
               <AlertDialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full min-h-[48px] px-5 py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 text-sm font-medium rounded-xl active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+                  className="w-full min-h-[48px] px-5 py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 text-sm font-medium rounded-xl active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2C3E50] transition-all duration-200"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Remove Member
@@ -154,7 +154,7 @@ export function FamilyMemberCard({
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="gap-3 flex-col sm:flex-row">
-                  <AlertDialogCancel className="w-full min-h-[48px] px-6 py-3 bg-white text-gray-900 text-base font-medium border border-gray-300 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200">
+                  <AlertDialogCancel className="w-full min-h-[48px] px-6 py-3 bg-white text-gray-900 text-base font-medium border border-gray-300 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2C3E50] transition-all duration-200">
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
