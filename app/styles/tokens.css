@@ -12,17 +12,17 @@
   /* soft gold */
   --color-focus: #b89b5e;
 
-  /* Timeline-specific colors (Option 2: Guidelines Aligned) */
-  --color-timeline-card-border: #D2C9BD;
+  /* Timeline-specific colors (Option 4: Blue Primary - Refined Solid) */
+  --color-timeline-card-border: #E0E5ED;
   --color-timeline-border-badge: #203954;
-  --color-timeline-badge-bg: #E0E5ED;
+  --color-timeline-badge-bg: #E6EEF5;
   --color-timeline-badge-text: #203954;
   --color-text-decade: #203954;
-  --color-timeline-spine: #3E6A5A;
-  --color-timeline-spine-mid: #3E6A5A;
-  --color-timeline-connector-fade: rgba(62, 106, 90, 0.15);
-  --color-timeline-connector-hover: rgba(62, 106, 90, 0.6);
-  --color-timeline-decade-bg: #EFE6DA;
+  --color-timeline-spine: #203954;
+  --color-timeline-spine-mid: #203954;
+  --color-timeline-connector-fade: rgba(32, 57, 84, 0.15);
+  --color-timeline-connector-hover: rgba(32, 57, 84, 0.6);
+  --color-timeline-decade-bg: #E0E5ED;
 
   /* radius */
   --radius-card: 12px;

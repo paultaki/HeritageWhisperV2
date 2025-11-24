@@ -88,7 +88,7 @@ export function AddMemoryCard({ onCreateMemory, isDark = false }: AddMemoryCardP
         className="flex flex-col items-center justify-center rounded-t-2xl border-b"
         style={{
           aspectRatio: "16/10",
-          background: "linear-gradient(to bottom right, #E0E5ED, #EFE6DA)", // Cool/Neutral gradient
+          background: "linear-gradient(to bottom right, #F0F4F8, #E0E5ED)", // Cool/Neutral gradient
           borderColor: "var(--color-timeline-card-border)",
         }}
       >
