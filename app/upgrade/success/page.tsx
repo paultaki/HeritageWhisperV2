@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import { CheckCircle2, Book, Users, Clock, ArrowRight } from "lucide-react";
 
 type SubscriptionStatus = {
@@ -17,20 +18,29 @@ function UpgradeSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
-  const { session } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [subscriptionStatus, setSubscriptionStatus] =
     useState<SubscriptionStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session) {
-      router.push("/auth/signin?redirect=/upgrade/success");
+    if (isAuthLoading) return;
+
+    if (!user) {
+      router.push("/auth/login?redirect=/upgrade/success");
       return;
     }
 
     // Fetch subscription status
     const fetchStatus = async () => {
       try {
+        // Get fresh session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          router.push("/auth/login?redirect=/upgrade/success");
+          return;
+        }
+
         const token = session.access_token;
         const response = await fetch("/api/user/subscription-status", {
           headers: {
@@ -50,7 +60,7 @@ function UpgradeSuccessContent() {
     };
 
     fetchStatus();
-  }, [session, router]);
+  }, [user, isAuthLoading, router]);
 
   if (loading) {
     return (
