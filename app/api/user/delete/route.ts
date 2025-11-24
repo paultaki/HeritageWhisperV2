@@ -64,8 +64,6 @@ export async function DELETE(request: NextRequest) {
       userId = user.id;
     }
 
-    const userId = user.id;
-
     logger.debug(
       `[Account Deletion] Starting deletion process for user: ${userId}`,
     );
