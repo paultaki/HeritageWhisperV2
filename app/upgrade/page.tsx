@@ -69,8 +69,8 @@ function UpgradePageContent() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Checkout error:', errorData);
-        alert('Failed to start checkout. Please try again.');
+        console.error('[Upgrade] Checkout error details:', errorData);
+        alert(`Failed to start checkout: ${errorData.error || 'Unknown error'}. Please try again.`);
         return;
       }
 
