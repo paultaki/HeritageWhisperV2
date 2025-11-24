@@ -303,6 +303,7 @@ export async function POST(request: NextRequest) {
 
       audioBuffer = Buffer.from(audioBase64, "base64");
     }
+    const userId = user?.id;
 
     if (user) {
       const consentError = await checkAIConsentOrError(userId);

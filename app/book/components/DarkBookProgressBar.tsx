@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { BookOpen } from "lucide-react";
 import { BookPage } from "@/lib/bookPagination";
 
 interface DecadeSection {
@@ -344,19 +345,7 @@ export default function DarkBookProgressBar({
             aria-label="Table of Contents"
             title="Table of Contents"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
+            <BookOpen className="h-5 w-5" />
           </button>
 
           {/* Decrease text size - Small A */}

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Image from "next/image";
-import { BookOpen, X } from "lucide-react";
+import { BookOpen, X, Settings } from "lucide-react";
 import { BookTableOfContentsProps, DecadeGroup } from "./types";
 
 /**
@@ -25,7 +25,11 @@ function formatDate(dateString: string | undefined): string {
 /**
  * Group stories by decade or chapter
  */
-function groupStories(stories: BookTableOfContentsProps["stories"], viewMode: 'chronological' | 'chapters' = 'chronological'): { title: string; stories: typeof stories }[] {
+function groupStories(
+  stories: BookTableOfContentsProps["stories"],
+  viewMode: 'chronological' | 'chapters' = 'chronological',
+  chapters?: Array<{ id: string; title: string; orderIndex: number }>
+): { title: string; stories: typeof stories }[] {
   const groups: { [key: string]: { title: string; stories: typeof stories } } = {};
   const groupOrder: string[] = [];
 
@@ -37,35 +41,9 @@ function groupStories(stories: BookTableOfContentsProps["stories"], viewMode: 'c
       // Group by Chapter
       if (story.chapterId) {
         groupKey = story.chapterId;
-        // We need the chapter title. Since story object might not have it directly populated in a convenient way for grouping if it's flat,
-        // we rely on the fact that stories are likely sorted by chapter order.
-        // However, the story object in this component might need to be checked.
-        // Assuming story.chapterId is the UUID.
-        // We might need to find the chapter title from the story if available, or use a fallback.
-        // Actually, the previous implementation of `groupByDecade` just used the decade string.
-        // Let's check if `story` has `chapterTitle` or similar.
-        // Looking at the `Story` interface in `types.ts` (implied), it usually has `chapterId`.
-        // If we don't have the chapter title here, we might need to pass it or infer it.
-        // BUT, in `app/book/page.tsx`, we saw `chapterTitle` being passed to `BookPage`.
-        // Let's assume for now we group by `chapterId` and use a placeholder or try to find the title.
-        // WAIT: The user's screenshot shows "The 1940s" as a chapter title.
-        // If the story object has `chapterTitle`, we use it.
-        // If not, we might be in trouble. Let's check `types.ts` or `app/book/page.tsx` again to see what `Story` has.
-        // For now, let's assume we can use `story.chapterId` as key and we need to find the title.
-        // If `story` doesn't have `chapterTitle`, we might need to fetch it or pass it.
-        // However, `BookTableOfContents` receives `stories`.
-        // Let's look at `BookTableOfContentsProps` in `types.ts` later if needed.
-        // For now, let's use `story.chapterId` and hope `story` has a title field or we can group by `story.chapterId` and use the first story's chapter info if available.
-        // Actually, let's look at the `groupByDecade` function again. It was simple.
-
-        // Let's try to use the `decade` logic for chapters if `chapterId` is missing (fallback).
-        groupKey = story.chapterId || 'uncategorized';
-        // We need a way to get the title.
-        // If we can't get the title easily, we might need to update the parent to pass it.
-        // But wait, `app/book/page.tsx` constructs `mobilePages` with `story`.
-        // Let's assume `story` has `chapterTitle` property added or available.
-        // If not, I will need to add it.
-        groupTitle = (story as any).chapterTitle || 'Uncategorized';
+        // Look up the chapter title from the chapters array
+        const chapter = chapters?.find(c => c.id === story.chapterId);
+        groupTitle = chapter?.title || 'Uncategorized';
       } else {
         groupKey = 'uncategorized';
         groupTitle = 'Uncategorized';
@@ -92,6 +70,7 @@ function groupStories(stories: BookTableOfContentsProps["stories"], viewMode: 'c
 
 export default function BookTableOfContents({
   stories,
+  chapters,
   isOpen,
   onClose,
   onStorySelect,
@@ -99,7 +78,7 @@ export default function BookTableOfContents({
   onViewModeChange,
 }: BookTableOfContentsProps) {
   // Group stories based on view mode
-  const groups = useMemo(() => groupStories(stories, viewMode), [stories, viewMode]);
+  const groups = useMemo(() => groupStories(stories, viewMode, chapters), [stories, viewMode, chapters]);
 
   // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -124,43 +103,55 @@ export default function BookTableOfContents({
       >
         <div className="rounded-b-2xl bg-white pt-[env(safe-area-inset-top)] text-neutral-900 shadow-2xl ring-1 ring-black/5">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-neutral-700" />
+          <div className="px-4 py-4">
+            {/* Title row */}
+            <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold tracking-tight">Table of Contents</h2>
+              <button
+                onClick={onClose}
+                className="w-9 h-9 bg-neutral-100 rounded-full flex items-center justify-center shadow-sm hover:bg-neutral-200 transition active:scale-95"
+                style={{ marginRight: "-8px" }}
+                aria-label="Close"
+              >
+                <X className="h-5 w-5 text-neutral-700" />
+              </button>
             </div>
 
-            {/* View Mode Toggle */}
+            {/* View Mode Toggle - Full width below title */}
             {viewMode && onViewModeChange && (
-              <div className="flex items-center bg-neutral-100 rounded-full p-1 border border-neutral-200 mx-auto">
-                <button
-                  onClick={() => onViewModeChange('chronological')}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${viewMode === 'chronological'
-                    ? 'bg-white text-black shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                    }`}
-                >
-                  Time
-                </button>
-                <button
-                  onClick={() => onViewModeChange('chapters')}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${viewMode === 'chapters'
-                    ? 'bg-[#d4af87] text-white shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                    }`}
-                >
-                  Chapters
-                </button>
+              <div className="flex flex-col gap-3 w-full max-w-[240px] mx-auto">
+                <div className="flex items-center justify-center bg-neutral-100 rounded-full p-1 border border-neutral-200 w-full">
+                  <button
+                    onClick={() => onViewModeChange('chronological')}
+                    className={`flex-1 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${viewMode === 'chronological'
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-900'
+                      }`}
+                  >
+                    Time
+                  </button>
+                  <button
+                    onClick={() => onViewModeChange('chapters')}
+                    className={`flex-1 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${viewMode === 'chapters'
+                      ? 'bg-[#d4af87] text-white shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-900'
+                      }`}
+                  >
+                    Chapters
+                  </button>
+                </div>
+
+                {viewMode === 'chapters' && (
+                  <a
+                    href="/chapters-v2"
+                    className="flex items-center justify-center gap-2 text-xs font-medium text-neutral-500 hover:text-[#d4af87] transition-colors py-1"
+                  >
+                    <Settings className="w-3.5 h-3.5" />
+                    Manage Chapters
+                  </a>
+                )}
               </div>
             )}
-
-            <button
-              onClick={onClose}
-              className="rounded-full p-2 transition hover:bg-neutral-100 active:scale-95"
-              aria-label="Close"
-            >
-              <X className="h-5 w-5 text-neutral-700" />
-            </button>
           </div>
 
           {/* Content */}

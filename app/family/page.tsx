@@ -422,16 +422,6 @@ export default function FamilyPage() {
         style={{ marginTop: 55 }}
       >
         <div className="max-w-2xl mx-auto py-5 md:py-6">
-          {/* Emotional Header */}
-          <div className="text-center md:text-left mb-6 md:mb-8">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-heritage-text-primary mb-3">
-              Family Circle
-            </h1>
-            <p className="text-lg md:text-xl lg:text-2xl text-heritage-text-primary/70 max-w-lg mx-auto md:mx-0 leading-relaxed">
-              A private place to share your stories with the people who matter.
-            </p>
-          </div>
-
           {/* Upgrade Callout for Free Users */}
           {!isPaid && <FamilyUpgradeCallout className="mb-6 md:mb-8" />}
 

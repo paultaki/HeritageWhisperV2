@@ -108,7 +108,7 @@ body {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 42%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)),
-    rgba(244, 230, 204, 0.9);
+    rgba(239, 230, 218, 0.9);
   border-top: 1px solid rgba(255, 255, 255, 0.35);
   border-bottom: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.45);

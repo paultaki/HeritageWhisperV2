@@ -57,6 +57,13 @@ export default function MobileBookViewV2({
     enabled: !!storytellerId,
   });
 
+  // Reset view mode if no chapters
+  useEffect(() => {
+    if (chaptersData?.chapters && chaptersData.chapters.length === 0 && viewMode === 'chapters') {
+      setViewMode('chronological');
+    }
+  }, [chaptersData, viewMode]);
+
   // Filter and sort stories for book view
   const bookStories = useMemo<BookStory[]>(() => {
     if (!data?.stories) return [];
@@ -382,6 +389,8 @@ export default function MobileBookViewV2({
         onTimelineClick={handleTimelineClick}
         onEditClick={handleEditClick}
         onTocClick={() => setIsTocOpen(true)}
+        viewMode={chaptersData?.chapters && chaptersData.chapters.length > 0 ? viewMode : undefined}
+        onViewModeChange={chaptersData?.chapters && chaptersData.chapters.length > 0 ? setViewMode : undefined}
       />
 
       {/* Horizontal pager */}
@@ -415,6 +424,7 @@ export default function MobileBookViewV2({
       {/* Table of contents - pass only story pages */}
       <BookTableOfContents
         stories={bookStories}
+        chapters={chaptersData?.chapters || []}
         isOpen={isTocOpen}
         onClose={() => setIsTocOpen(false)}
         onStorySelect={handleStorySelect}

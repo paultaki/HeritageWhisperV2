@@ -18,7 +18,7 @@ export function GhostPromptCard({ prompt, onClick }: GhostPromptCardProps) {
       <div className="relative p-4 backdrop-blur-sm rounded-lg border-2 border-dashed transition-colors"
         style={{
           borderColor: 'var(--color-timeline-card-border)',
-          backgroundColor: 'rgba(244, 230, 204, 0.3)' // Low opacity version of badge bg #F4E6CC
+          backgroundColor: 'rgba(224, 229, 237, 0.4)' // Low opacity version of badge bg #E0E5ED
         }}
       >
         {/* Sparkle Icon */}

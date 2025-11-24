@@ -6,21 +6,23 @@
   --color-text: #30343a;
   --color-text-muted: #8a8f98;
   --color-border: #eaeaea;
-  --color-accent: #d36a3d; /* clay */
-  --color-accent-2: #b89b5e; /* soft gold */
+  --color-accent: #d36a3d;
+  /* clay */
+  --color-accent-2: #b89b5e;
+  /* soft gold */
   --color-focus: #b89b5e;
 
-  /* Timeline-specific colors (Option 3: Hybrid Warm) */
+  /* Timeline-specific colors (Option 2: Guidelines Aligned) */
   --color-timeline-card-border: #D2C9BD;
-  --color-timeline-border-badge: #CBA46A;
-  --color-timeline-badge-bg: #F4E6CC;
+  --color-timeline-border-badge: #203954;
+  --color-timeline-badge-bg: #E0E5ED;
   --color-timeline-badge-text: #203954;
-  --color-text-decade: #6B5243;
-  --color-timeline-spine: #CBA46A;
-  --color-timeline-spine-mid: #CBA46A;
-  --color-timeline-connector-fade: rgba(203, 164, 106, 0.15);
-  --color-timeline-connector-hover: rgba(203, 164, 106, 0.6);
-  --color-timeline-decade-bg: #F4E6CC;
+  --color-text-decade: #203954;
+  --color-timeline-spine: #3E6A5A;
+  --color-timeline-spine-mid: #3E6A5A;
+  --color-timeline-connector-fade: rgba(62, 106, 90, 0.15);
+  --color-timeline-connector-hover: rgba(62, 106, 90, 0.6);
+  --color-timeline-decade-bg: #EFE6DA;
 
   /* radius */
   --radius-card: 12px;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Menu } from "lucide-react";
+import { Pencil, BookOpen } from "lucide-react";
 import { BookTopBarProps } from "./types";
 
 export default function BookTopBar({
@@ -68,9 +68,9 @@ export default function BookTopBar({
         <button
           onClick={onTocClick}
           className="pointer-events-auto grid h-9 w-9 place-items-center rounded-full bg-white/6 text-white backdrop-blur-sm ring-1 ring-white/10 transition active:scale-[0.98]"
-          aria-label="Open contents"
+          aria-label="Open table of contents"
         >
-          <Menu className="h-5 w-5" style={{ marginLeft: '1px' }} />
+          <BookOpen className="h-5 w-5" />
         </button>
       </div>
     </header>

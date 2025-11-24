@@ -72,6 +72,7 @@ export interface BookAudioPlayerProps {
  */
 export interface BookTableOfContentsProps {
   stories: BookStory[];
+  chapters?: Array<{ id: string; title: string; orderIndex: number }>;
   isOpen: boolean;
   onClose: () => void;
   onStorySelect: (storyId: string) => void;

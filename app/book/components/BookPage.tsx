@@ -313,7 +313,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                     pointerEvents: 'auto'
                   }}
                 >
-                  <h1 className="text-5xl font-serif text-center mb-8 text-gray-800">
+                  <h1 className="text-5xl font-semibold text-center mb-8 text-gray-800">
                     Table of Contents
                   </h1>
                   <div className="space-y-0" style={{ pointerEvents: 'auto' }}>

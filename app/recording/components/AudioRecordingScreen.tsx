@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Pause, Play, Square, Mic } from "lucide-react";
+import { ArrowLeft, Pause, Play, Square, Mic, X } from "lucide-react";
 import { type AudioRecordingScreenProps, type RecordingState } from "../types";
 import "../recording.css";
 
@@ -273,29 +273,40 @@ export function AudioRecordingScreen({
   return (
     <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-4" style={{ maxWidth: "650px", margin: "0 auto", width: "100%" }}>
+      <div className="flex items-center justify-between pt-4 pb-4 pl-6" style={{ maxWidth: "650px", margin: "0 auto", width: "100%", paddingRight: "calc(24px - 65px)" }}>
         <div className="flex items-center gap-3">
           <img
             src="/final logo/logo hw.svg"
             alt="HW"
-            className="w-12 h-12"
+            className="w-14 h-14"
           />
           <div className="leading-tight">
-            <h1 className="font-bold text-lg tracking-wide m-0" style={{ color: "#2C3E50", lineHeight: "1.2" }}>
-              HERITAGE WHISPER
-            </h1>
-            <p className="text-sm m-0" style={{ color: "#6B7280", lineHeight: "1.3" }}>
-              {draft.title || "Record your story"}
+            <p className="text-base m-0 font-medium whitespace-nowrap" style={{ color: "#6B7280", lineHeight: "1.3" }}>
+              Record your story
             </p>
           </div>
         </div>
-        {onSaveForLater && !isProcessing && (
+        {!isProcessing && (
           <button
-            onClick={handleSaveForLater}
-            className="text-base font-medium"
-            style={{ color: "#6B7280" }}
+            onClick={() => {
+              if (confirm("Are you sure you want to cancel? Your progress will be lost.")) {
+                onBack();
+              }
+            }}
+            className="rounded-full p-2 transition-colors hover:bg-gray-200 flex-shrink-0"
+            style={{ 
+              backgroundColor: "#E5E7EB",
+              width: "36px",
+              height: "36px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginLeft: "auto",
+              transform: "translateX(15px)"
+            }}
+            aria-label="Cancel"
           >
-            Save later
+            <X className="w-5 h-5" style={{ color: "#6B7280" }} />
           </button>
         )}
       </div>
@@ -432,9 +443,11 @@ export function AudioRecordingScreen({
         {isIdle && (
           <button
             onClick={onBack}
-            className="flex items-center gap-2 mb-6"
+            className="w-full py-3 rounded-xl font-medium text-base flex items-center justify-center gap-2 mb-6"
+            style={{ backgroundColor: "white", border: "2px solid #E5E7EB", color: "#2C3E50" }}
           >
-            <ArrowLeft className="w-5 h-5" style={{ color: "#6B7280" }} />
+            <ArrowLeft className="w-5 h-5" />
+            Back
           </button>
         )}
       </div>

@@ -10,7 +10,7 @@ export function PrivacyInfoCard() {
 
   return (
     <Card className="bg-gradient-to-br from-green-50 to-emerald-50/50 border border-green-200 rounded-2xl overflow-hidden">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2.5 text-xl md:text-2xl font-semibold text-gray-900 leading-tight">
           <div className="inline-flex w-10 h-10 rounded-xl bg-green-600 items-center justify-center shrink-0">
             <Shield className="w-6 h-6 text-white" />
@@ -18,7 +18,7 @@ export function PrivacyInfoCard() {
           Who can see your stories?
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-1.5 pt-0">
         {privacyPoints.map((point, index) => (
           <div key={index} className="flex items-center gap-2.5">
             <div className="inline-flex w-6 h-6 rounded-full bg-green-600 items-center justify-center shrink-0">

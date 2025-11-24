@@ -89,11 +89,11 @@ function SortableChapter({
         <div
             ref={setNodeRef}
             style={style}
-            className={`mb-2 p-3 rounded-lg border cursor-pointer transition-colors group ${isActive ? "bg-primary/10 border-primary" : "bg-card hover:bg-accent"
+            className={`mb-3 p-4 rounded-xl border cursor-pointer transition-all duration-200 group ${isActive ? "bg-primary/10 border-primary shadow-sm" : "bg-card hover:bg-accent border-border"
                 }`}
             onClick={onClick}
         >
-            <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 w-full">
+            <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 w-full">
                 <button
                     {...attributes}
                     {...listeners}
@@ -107,7 +107,7 @@ function SortableChapter({
                         <Input
                             value={editTitle}
                             onChange={e => setEditTitle(e.target.value)}
-                            className="h-8 text-sm w-full"
+                            className="h-10 text-base w-full"
                             autoFocus
                             onBlur={() => setIsEditing(false)}
                         />
@@ -117,33 +117,33 @@ function SortableChapter({
                         className="w-full overflow-hidden"
                         onDoubleClick={() => !isUncategorized && setIsEditing(true)}
                     >
-                        <p className="font-medium text-sm md:text-base truncate w-full">
+                        <p className="font-semibold text-base leading-snug truncate w-full">
                             {chapter.title}
                         </p>
                     </div>
                 )}
 
-                <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full flex-shrink-0 whitespace-nowrap">
+                <span className="text-xs font-medium text-muted-foreground bg-muted px-2.5 py-1 rounded-full flex-shrink-0 whitespace-nowrap">
                     {chapter.stories.length}
                 </span>
 
                 {!isUncategorized && (
-                    <div className="flex items-center gap-1 flex-shrink-0">
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 flex-shrink-0"
+                            className="h-8 w-8 flex-shrink-0 hover:bg-muted"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setIsEditing(true);
                             }}
                         >
-                            <Pencil className="h-3 w-3" />
+                            <Pencil className="h-4 w-4" />
                         </Button>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 flex-shrink-0 text-destructive hover:text-destructive"
+                            className="h-8 w-8 flex-shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 if (window.confirm("Are you sure you want to delete this chapter? Stories will be moved to Uncategorized.")) {
@@ -151,7 +151,7 @@ function SortableChapter({
                                 }
                             }}
                         >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-4 w-4" />
                         </Button>
                     </div>
                 )}
@@ -181,14 +181,14 @@ function SortableStory({ story }: { story: Story }) {
         <div
             ref={setNodeRef}
             style={style}
-            className="mb-2 p-4 rounded-lg border bg-card grid grid-cols-[auto_1fr] items-center gap-3 hover:shadow-sm transition-shadow w-full"
+            className="mb-3 p-4 rounded-xl border bg-card grid grid-cols-[auto_1fr] items-center gap-3 hover:shadow-sm transition-all duration-200 w-full"
         >
             <button {...attributes} {...listeners} className="cursor-grab hover:text-primary touch-none">
                 <GripVertical className="h-4 w-4 text-muted-foreground" />
             </button>
-            <div className="w-full overflow-hidden flex flex-col gap-1">
-                <p className="font-medium text-sm md:text-base truncate w-full">{story.title}</p>
-                {story.storyYear && <p className="text-xs md:text-sm text-muted-foreground">{story.storyYear}</p>}
+            <div className="w-full overflow-hidden flex flex-col gap-1.5">
+                <p className="font-medium text-base leading-snug truncate w-full">{story.title}</p>
+                {story.storyYear && <p className="text-sm text-muted-foreground">{story.storyYear}</p>}
             </div>
         </div>
     );
@@ -464,8 +464,8 @@ export default function ChaptersPage() {
     const activeChapter = chapters.find(c => c.id === activeChapterId);
 
     return (
-        <div className="container mx-auto py-8 px-4 max-w-7xl">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div className="container mx-auto py-6 md:py-8 px-4 max-w-7xl">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
                 <div>
                     <h1 className="text-3xl font-serif text-[#2c3e50] mb-2">Organize Your Story</h1>
                     <p className="text-muted-foreground">Group your memories into chapters to create a beautiful book.</p>
@@ -504,8 +504,8 @@ export default function ChaptersPage() {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[calc(100vh-200px)] max-w-full overflow-hidden">
                     {/* Sidebar: Chapters List */}
                     <div className="md:col-span-5 flex flex-col min-h-[400px] max-h-[60vh] md:h-full w-full">
-                        <div className="bg-white rounded-xl shadow-sm border p-4 flex-1 flex flex-col w-full">
-                            <h2 className="font-serif text-xl mb-4 flex items-center gap-2">
+                        <div className="bg-white rounded-xl shadow-sm border p-5 flex-1 flex flex-col w-full">
+                            <h2 className="font-serif text-xl font-semibold mb-5 flex items-center gap-2">
                                 <BookOpen className="h-5 w-5 text-[#d4af87]" />
                                 Chapters
                             </h2>
@@ -538,13 +538,13 @@ export default function ChaptersPage() {
 
                     {/* Main Content: Stories in Chapter */}
                     <div className="md:col-span-7 min-h-[500px] max-h-[70vh] md:h-full">
-                        <div className="bg-white rounded-xl shadow-sm border p-6 h-full flex flex-col overflow-hidden">
+                        <div className="bg-white rounded-xl shadow-sm border p-5 md:p-6 h-full flex flex-col overflow-hidden">
                             {activeChapter ? (
                                 <>
-                                    <div className="mb-6 pb-4 border-b">
-                                        <h2 className="text-2xl font-serif text-[#2c3e50]">{activeChapter.title}</h2>
-                                        <p className="text-muted-foreground text-sm mt-1">
-                                            {activeChapter.stories.length} stories in this chapter
+                                    <div className="mb-5 md:mb-6 pb-4 border-b">
+                                        <h2 className="text-xl md:text-2xl font-serif font-semibold text-[#2c3e50] leading-snug">{activeChapter.title}</h2>
+                                        <p className="text-muted-foreground text-sm mt-2">
+                                            {activeChapter.stories.length} {activeChapter.stories.length === 1 ? 'story' : 'stories'} in this chapter
                                         </p>
                                     </div>
 

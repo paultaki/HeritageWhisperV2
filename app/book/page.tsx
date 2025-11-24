@@ -676,7 +676,7 @@ function BookV4PageContent() {
         </div>
 
         {/* Desktop: Closed book cover */}
-        <div className={`hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
+        <div className="hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12]">
           {/* Closed book cover - centered */}
           <div className="flex items-center justify-center" style={{ height: "100dvh" }}>
             <ClosedBookCover
@@ -703,7 +703,7 @@ function BookV4PageContent() {
       {/* View Mode Toggle moved to DarkBookProgressBar */}
 
       {/* Desktop: Book view with dual-page spread */}
-      <div className={`hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12] ${caveat.className}`}>
+      <div className="hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12]">
         {/* ARIA live region for page announcements */}
         <div
           id="sr-live"
@@ -889,56 +889,130 @@ function BookV4PageContent() {
           {/* TOC Drawer - Above Bottom Nav */}
           {showToc && (
             <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[580px] max-w-[calc(100vw-3rem)]">
-              <div className="rounded-lg border border-white/10 bg-white/95 backdrop-blur-md px-6 py-4 text-black shadow-2xl">
-                <div className="mb-4 flex items-center justify-center relative">
-                  <button
-                    onClick={() => {
-                      // Navigate to TOC page
-                      // Mobile: Navigate to page 1 (intro is 0, TOC is 1)
-                      setCurrentMobilePage(1);
-
-                      // Desktop: Find the spread containing TOC
-                      // TOC is typically on spread index 1 (after intro on spread 0)
-                      const tocSpreadIndex = spreads.findIndex(spread =>
-                        spread.left === 'toc-left' || spread.right === 'toc-right' ||
-                        spread.left === 'toc-right' || spread.right === 'toc-left'
-                      );
-
-                      if (tocSpreadIndex !== -1) {
-                        setCurrentSpreadIndex(tocSpreadIndex);
-                      }
-
-                      setShowToc(false);
-                    }}
-                    className="font-semibold tracking-tight text-3xl whitespace-nowrap hover:text-indigo-600 transition-colors cursor-pointer"
-                  >
-                    Table of Contents
-                  </button>
-                  <button
-                    onClick={() => setShowToc(false)}
-                    className="absolute right-0 p-1 rounded-md hover:bg-black/10 flex-shrink-0"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
-                    </svg>
-                  </button>
+              <div className="rounded-2xl bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5">
+                {/* Header */}
+                <div className="px-6 py-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg font-semibold tracking-tight">Table of Contents</h2>
+                    <button
+                      onClick={() => setShowToc(false)}
+                      className="w-9 h-9 bg-neutral-100 rounded-full flex items-center justify-center shadow-sm hover:bg-neutral-200 transition active:scale-95"
+                      aria-label="Close"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-                <div className="max-h-[60vh] overflow-y-auto">
-                  <ul className="space-y-2.5">
-                    {sortedStories.map((story) => (
-                      <li key={story.id}>
-                        <button
-                          onClick={() => {
-                            handleNavigateToStory(story.id);
-                            setShowToc(false);
-                          }}
-                          className="w-full text-center px-3 py-2.5 rounded-md hover:bg-black/10 transition-colors text-lg font-medium"
-                        >
-                          {story.title} ({story.storyDate || story.storyYear})
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+
+                {/* Content */}
+                <div className="max-h-[60vh] space-y-6 overflow-y-auto overscroll-contain px-6 pb-6">
+                  {viewMode === 'chapters' && chapterGroups.length > 0 ? (
+                    // Chapter view - grouped by chapters
+                    <>
+                      {chapterGroups.map((group) => (
+                        <section key={group.chapter.id} className="space-y-3">
+                          {/* Group header */}
+                          <h3 className="text-sm font-semibold tracking-tight text-neutral-800 uppercase">
+                            {group.chapter.title}
+                          </h3>
+
+                          {/* Stories in this group */}
+                          <div className="divide-y divide-neutral-100 overflow-hidden rounded-xl bg-white ring-1 ring-neutral-100">
+                            {group.stories.map((story) => (
+                              <button
+                                key={story.id}
+                                onClick={() => {
+                                  handleNavigateToStory(story.id);
+                                  setShowToc(false);
+                                }}
+                                className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-neutral-50 active:bg-neutral-100"
+                              >
+                                {/* Story thumbnail */}
+                                <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md ring-1 ring-neutral-200 bg-neutral-100 flex items-center justify-center">
+                                  {story.photoUrl ? (
+                                    <img
+                                      src={story.photoUrl}
+                                      alt={story.title}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                    </svg>
+                                  )}
+                                </div>
+
+                                {/* Story info */}
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-neutral-900 truncate">
+                                    {story.title}
+                                  </h4>
+                                  <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-0.5">
+                                    <span>{story.storyYear}</span>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </section>
+                      ))}
+                    </>
+                  ) : (
+                    // Chronological view - grouped by decades
+                    <>
+                      {decadeGroups.map(([decade, stories]) => (
+                        <section key={decade} className="space-y-3">
+                          {/* Group header */}
+                          <h3 className="text-sm font-semibold tracking-tight text-neutral-800 uppercase">
+                            {decade}
+                          </h3>
+
+                          {/* Stories in this group */}
+                          <div className="divide-y divide-neutral-100 overflow-hidden rounded-xl bg-white ring-1 ring-neutral-100">
+                            {stories.map((story) => (
+                              <button
+                                key={story.id}
+                                onClick={() => {
+                                  handleNavigateToStory(story.id);
+                                  setShowToc(false);
+                                }}
+                                className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-neutral-50 active:bg-neutral-100"
+                              >
+                                {/* Story thumbnail */}
+                                <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md ring-1 ring-neutral-200 bg-neutral-100 flex items-center justify-center">
+                                  {story.photoUrl ? (
+                                    <img
+                                      src={story.photoUrl}
+                                      alt={story.title}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                    </svg>
+                                  )}
+                                </div>
+
+                                {/* Story info */}
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-neutral-900 truncate">
+                                    {story.title}
+                                  </h4>
+                                  <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-0.5">
+                                    <span>{story.storyYear}</span>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </section>
+                      ))}
+                    </>
+                  )}
                 </div>
               </div>
             </div>

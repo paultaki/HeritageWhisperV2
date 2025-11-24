@@ -51,6 +51,7 @@ export async function GET(request: NextRequest) {
 
     if (user && !authError) {
       // JWT authentication successful (account owner)
+      const userId = user.id;
       storytellerId = requestedStorytellerUserGuess || userId;
       isAuthenticated = true;
 
@@ -241,6 +242,8 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    const userId = user.id;
 
     const formData = await request.formData();
     const imageFile = formData.get("image") as File;

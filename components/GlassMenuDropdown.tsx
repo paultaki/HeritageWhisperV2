@@ -15,6 +15,7 @@ import {
   Box,
   Lightbulb,
   Archive,
+  BookOpen,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
@@ -105,6 +106,7 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
 
   const allMenuItems = [
     { icon: Home, label: "Home", href: "/" },
+    { icon: BookOpen, label: "Manage Chapters", href: "/chapters-v2", ownerOnly: true },
     { icon: Lightbulb, label: "Story Ideas", href: "/prompts", ownerOnly: true },
     { icon: Archive, label: "Memory Box", href: "/memory-box" },
     { icon: Settings, label: "Settings", href: "/profile", ownerOnly: true },
@@ -193,9 +195,8 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
                 <button
                   key={item.href}
                   onClick={() => handleNavigation(item.href)}
-                  className={`w-full flex items-center px-4 py-2.5 text-sm text-gray-700 transition-colors ${
-                    isActive ? "bg-heritage-coral/10 text-heritage-coral" : "hover:bg-gray-50"
-                  }`}
+                  className={`w-full flex items-center px-4 py-2.5 text-sm text-gray-700 transition-colors ${isActive ? "bg-heritage-coral/10 text-heritage-coral" : "hover:bg-gray-50"
+                    }`}
                 >
                   <Icon className="w-4 h-4 mr-3" />
                   {item.label}

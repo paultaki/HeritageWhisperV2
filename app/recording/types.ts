@@ -21,6 +21,7 @@ export interface StoryDraft {
   // Photo fields (single photo MVP)
   photoUrl?: string;  // blob URL for preview
   photoFile?: File;   // actual file for upload
+  photoTransform?: { zoom: number; position: { x: number; y: number } }; // zoom/pan transform
 
   // Audio fields
   audioBlob?: Blob;

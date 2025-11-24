@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sparkles, Users, MessageSquare, Eye, Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 
 function UpgradePageContent() {
@@ -14,6 +14,15 @@ function UpgradePageContent() {
   const canceled = searchParams.get('canceled') === 'true';
   const router = useRouter();
   const { session, isLoading } = useAuth();
+
+  // Debug: Log auth state changes
+  useEffect(() => {
+    console.log('[Upgrade] Auth state:', {
+      hasSession: !!session,
+      isLoading,
+      sessionDetails: session ? { access_token: session.access_token?.substring(0, 10) + '...' } : null
+    });
+  }, [session, isLoading]);
 
   const getReasonText = () => {
     switch (reason) {
@@ -31,14 +40,21 @@ function UpgradePageContent() {
   const handleUpgrade = async () => {
     // Wait for auth to finish loading
     if (isLoading) {
+      console.log('[Upgrade] Still loading auth...');
       return;
     }
 
+    // Debug: Log session state
+    console.log('[Upgrade] Session:', session ? 'exists' : 'null', { isLoading });
+
     // Check if user is logged in
     if (!session) {
+      console.log('[Upgrade] No session, redirecting to login');
       router.push('/auth/login?redirect=/upgrade');
       return;
     }
+
+    console.log('[Upgrade] Creating checkout session...');
 
     try {
       // Create Stripe Checkout session with auth token
