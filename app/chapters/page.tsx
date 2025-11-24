@@ -103,7 +103,7 @@ function SortableChapter({
                 </button>
 
                 {isEditing ? (
-                    <form onSubmit={handleSave} className="flex-1 flex gap-2" style={{ width: 0 }} onClick={e => e.stopPropagation()}>
+                    <form onSubmit={handleSave} className="flex-1 min-w-0 flex gap-2" onClick={e => e.stopPropagation()}>
                         <Input
                             value={editTitle}
                             onChange={e => setEditTitle(e.target.value)}
@@ -113,12 +113,11 @@ function SortableChapter({
                         />
                     </form>
                 ) : (
-                    <div 
-                        className="flex-1 overflow-hidden"
-                        style={{ width: 0 }}
+                    <div
+                        className="flex-1 min-w-0 overflow-hidden"
                         onDoubleClick={() => !isUncategorized && setIsEditing(true)}
                     >
-                        <p className="font-medium text-sm md:text-base line-clamp-2">
+                        <p className="font-medium text-sm md:text-base line-clamp-2 break-words">
                             {chapter.title}
                         </p>
                     </div>
@@ -187,8 +186,8 @@ function SortableStory({ story }: { story: Story }) {
             <button {...attributes} {...listeners} className="cursor-grab hover:text-primary touch-none flex-shrink-0">
                 <GripVertical className="h-4 w-4 text-muted-foreground" />
             </button>
-            <div className="flex-1 overflow-hidden flex flex-col gap-1" style={{ width: 0 }}>
-                <p className="font-medium text-sm md:text-base">{story.title}</p>
+            <div className="flex-1 min-w-0 overflow-hidden flex flex-col gap-1">
+                <p className="font-medium text-sm md:text-base break-words">{story.title}</p>
                 {story.storyYear && <p className="text-xs md:text-sm text-muted-foreground">{story.storyYear}</p>}
             </div>
         </div>
@@ -502,9 +501,9 @@ export default function ChaptersPage() {
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
             >
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[calc(100vh-200px)]">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[calc(100vh-200px)] max-w-full overflow-hidden">
                     {/* Sidebar: Chapters List */}
-                    <div className="md:col-span-5 flex flex-col h-[500px] md:h-full">
+                    <div className="md:col-span-5 flex flex-col min-h-[400px] max-h-[60vh] md:h-full">
                         <div className="bg-white rounded-xl shadow-sm border p-4 flex-1 flex flex-col overflow-hidden">
                             <h2 className="font-serif text-xl mb-4 flex items-center gap-2">
                                 <BookOpen className="h-5 w-5 text-[#d4af87]" />
@@ -538,7 +537,7 @@ export default function ChaptersPage() {
                     </div>
 
                     {/* Main Content: Stories in Chapter */}
-                    <div className="md:col-span-7 h-[600px] md:h-full">
+                    <div className="md:col-span-7 min-h-[500px] max-h-[70vh] md:h-full">
                         <div className="bg-white rounded-xl shadow-sm border p-6 h-full flex flex-col overflow-hidden">
                             {activeChapter ? (
                                 <>

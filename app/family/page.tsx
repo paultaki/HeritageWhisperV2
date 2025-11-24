@@ -421,7 +421,7 @@ export default function FamilyPage() {
         className="w-full pb-20 md:pb-0 px-4 md:px-6 overflow-x-hidden"
         style={{ marginTop: 55 }}
       >
-        <div className="max-w-4xl mx-auto py-5 md:py-6">
+        <div className="max-w-2xl mx-auto py-5 md:py-6">
           {/* Emotional Header */}
           <div className="text-center md:text-left mb-6 md:mb-8">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-heritage-text-primary mb-3">

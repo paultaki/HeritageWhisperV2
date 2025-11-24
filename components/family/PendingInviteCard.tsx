@@ -76,7 +76,7 @@ export function PendingInviteCard({
           <Button
             onClick={onResend}
             disabled={isResending}
-            className="flex-1 min-h-[48px] px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-base md:text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+            className="w-full sm:w-auto min-h-[48px] px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-base font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
           >
             {isResending ? "Sending..." : "Resend Invitation"}
           </Button>
@@ -85,7 +85,7 @@ export function PendingInviteCard({
             <AlertDialogTrigger asChild>
               <Button
                 variant="outline"
-                className="flex-1 sm:flex-none min-h-[48px] px-5 py-2.5 text-gray-700 hover:text-gray-900 hover:bg-gray-100 border-gray-300 text-base md:text-lg font-medium rounded-xl active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+                className="w-full sm:w-auto min-h-[48px] px-5 py-2.5 text-gray-700 hover:text-gray-900 hover:bg-gray-100 border-gray-300 text-base font-medium rounded-xl active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
               >
                 Cancel
               </Button>

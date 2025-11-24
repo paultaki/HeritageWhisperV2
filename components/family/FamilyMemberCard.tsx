@@ -117,11 +117,11 @@ export function FamilyMemberCard({
 
         {/* Bottom section: Actions */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-start gap-2 pt-3 border-t border-gray-100">
-          <div className="flex-1">
+          <div className="w-full sm:w-auto">
             <Button
               onClick={onSendLoginLink}
               disabled={isSendingLink}
-              className="w-full min-h-[48px] px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-base md:text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
+              className="w-full sm:w-auto min-h-[48px] px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-base font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
             >
               <LinkIcon className="w-5 h-5 mr-2" />
               {isSendingLink ? "Sending..." : "Send Sign-In Link"}

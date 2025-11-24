@@ -153,64 +153,65 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get user's profile info for email
-    const { data: userProfile } = await supabaseAdmin
-      .from('users')
-      .select('name')
-      .eq('id', userId)
-      .single();
-
-    const senderName = userProfile?.name || 'A family member';
-
-    // Send email with Resend
+    // Send email in background (non-blocking)
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/family/access?token=${inviteToken}`;
-    
-    try {
-      // Only initialize Resend if API key is available
-      if (process.env.RESEND_API_KEY) {
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        
-        const emailContent = FamilyInviteEmail({
-          storytellerName: senderName,
-          familyMemberName: name,
-          relationship,
-          magicLink: inviteUrl,
-          expiresAt: expiresAt.toISOString(),
-        });
 
-        const { data: emailData, error: emailError } = await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
-          to: email,
-          subject: emailContent.subject,
-          html: emailContent.html,
-          text: emailContent.text,
-        });
+    // Fire-and-forget: Send email without blocking response
+    (async () => {
+      try {
+        // Get user's profile info for email
+        const { data: userProfile } = await supabaseAdmin
+          .from('users')
+          .select('name')
+          .eq('id', userId)
+          .single();
 
-        if (emailError) {
-          console.error('Error sending email:', emailError);
+        const senderName = userProfile?.name || 'A family member';
+
+        // Only initialize Resend if API key is available
+        if (process.env.RESEND_API_KEY) {
+          const resend = new Resend(process.env.RESEND_API_KEY);
+
+          const emailContent = FamilyInviteEmail({
+            storytellerName: senderName,
+            familyMemberName: name,
+            relationship,
+            magicLink: inviteUrl,
+            expiresAt: expiresAt.toISOString(),
+          });
+
+          const { error: emailError } = await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+            to: email,
+            subject: emailContent.subject,
+            html: emailContent.html,
+            text: emailContent.text,
+          });
+
+          if (emailError) {
+            console.error('Error sending email:', emailError);
+          }
+        } else {
+          // No Resend API key configured - email will not be sent
+          console.error('Resend API key not configured - cannot send email');
         }
-      } else {
-        // No Resend API key configured - email will not be sent
-        console.error('Resend API key not configured - cannot send email');
-      }
-    } catch (emailError) {
-      console.error('Exception sending email:', emailError);
-    }
 
-    // Log invite_sent activity event (async, non-blocking)
-    logActivityEvent({
-      userId: userId,
-      actorId: userId,
-      familyMemberId: familyMember.id,
-      eventType: 'invite_sent',
-      metadata: {
-        email: familyMember.email,
-        name: familyMember.name,
-        relationship: familyMember.relationship,
-      },
-    }).catch((error) => {
-      console.error('[Family Invite] Failed to log invite_sent activity:', error);
-    });
+        // Log invite_sent activity event
+        await logActivityEvent({
+          userId: userId,
+          actorId: userId,
+          familyMemberId: familyMember.id,
+          eventType: 'invite_sent',
+          metadata: {
+            email: familyMember.email,
+            name: familyMember.name,
+            relationship: familyMember.relationship,
+          },
+        });
+      } catch (error) {
+        console.error('[Family Invite] Background task error:', error);
+      }
+    })();
 
     return NextResponse.json({
       success: true,
