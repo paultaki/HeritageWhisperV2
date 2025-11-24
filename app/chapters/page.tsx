@@ -93,17 +93,17 @@ function SortableChapter({
                 }`}
             onClick={onClick}
         >
-            <div className="flex items-center gap-2 w-full">
+            <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 w-full">
                 <button
                     {...attributes}
                     {...listeners}
-                    className={`cursor-grab hover:text-primary touch-none flex-shrink-0 ${isUncategorized ? 'opacity-0 pointer-events-none' : ''}`}
+                    className={`cursor-grab hover:text-primary touch-none ${isUncategorized ? 'opacity-0 pointer-events-none' : ''}`}
                 >
                     <GripVertical className="h-4 w-4 text-muted-foreground" />
                 </button>
 
                 {isEditing ? (
-                    <form onSubmit={handleSave} className="flex-1 min-w-0 flex gap-2" onClick={e => e.stopPropagation()}>
+                    <form onSubmit={handleSave} className="w-full" onClick={e => e.stopPropagation()}>
                         <Input
                             value={editTitle}
                             onChange={e => setEditTitle(e.target.value)}
@@ -114,10 +114,10 @@ function SortableChapter({
                     </form>
                 ) : (
                     <div
-                        className="flex-1 min-w-0 overflow-hidden"
+                        className="w-full overflow-hidden"
                         onDoubleClick={() => !isUncategorized && setIsEditing(true)}
                     >
-                        <p className="font-medium text-sm md:text-base line-clamp-2 break-words">
+                        <p className="font-medium text-sm md:text-base truncate w-full">
                             {chapter.title}
                         </p>
                     </div>
@@ -181,13 +181,13 @@ function SortableStory({ story }: { story: Story }) {
         <div
             ref={setNodeRef}
             style={style}
-            className="mb-2 p-4 rounded-lg border bg-card flex items-center gap-3 hover:shadow-sm transition-shadow w-full"
+            className="mb-2 p-4 rounded-lg border bg-card grid grid-cols-[auto_1fr] items-center gap-3 hover:shadow-sm transition-shadow w-full"
         >
-            <button {...attributes} {...listeners} className="cursor-grab hover:text-primary touch-none flex-shrink-0">
+            <button {...attributes} {...listeners} className="cursor-grab hover:text-primary touch-none">
                 <GripVertical className="h-4 w-4 text-muted-foreground" />
             </button>
-            <div className="flex-1 min-w-0 overflow-hidden flex flex-col gap-1">
-                <p className="font-medium text-sm md:text-base break-words">{story.title}</p>
+            <div className="w-full overflow-hidden flex flex-col gap-1">
+                <p className="font-medium text-sm md:text-base truncate w-full">{story.title}</p>
                 {story.storyYear && <p className="text-xs md:text-sm text-muted-foreground">{story.storyYear}</p>}
             </div>
         </div>
@@ -503,14 +503,14 @@ export default function ChaptersPage() {
             >
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[calc(100vh-200px)] max-w-full overflow-hidden">
                     {/* Sidebar: Chapters List */}
-                    <div className="md:col-span-5 flex flex-col min-h-[400px] max-h-[60vh] md:h-full">
-                        <div className="bg-white rounded-xl shadow-sm border p-4 flex-1 flex flex-col overflow-hidden">
+                    <div className="md:col-span-5 flex flex-col min-h-[400px] max-h-[60vh] md:h-full w-full">
+                        <div className="bg-white rounded-xl shadow-sm border p-4 flex-1 flex flex-col w-full">
                             <h2 className="font-serif text-xl mb-4 flex items-center gap-2">
                                 <BookOpen className="h-5 w-5 text-[#d4af87]" />
                                 Chapters
                             </h2>
 
-                            <div className="flex-1 overflow-y-auto pr-2">
+                            <div className="flex-1 overflow-y-auto pr-2 w-full">
                                 <SortableContext
                                     items={chapters.map(c => c.id)}
                                     strategy={verticalListSortingStrategy}
