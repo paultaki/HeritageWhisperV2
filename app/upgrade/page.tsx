@@ -7,22 +7,14 @@ import { Sparkles, Users, MessageSquare, Eye, Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Suspense, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 
 function UpgradePageContent() {
   const searchParams = useSearchParams();
   const reason = searchParams.get('reason');
   const canceled = searchParams.get('canceled') === 'true';
   const router = useRouter();
-  const { session, isLoading } = useAuth();
-
-  // Debug: Log auth state changes
-  useEffect(() => {
-    console.log('[Upgrade] Auth state:', {
-      hasSession: !!session,
-      isLoading,
-      sessionDetails: session ? { access_token: session.access_token?.substring(0, 10) + '...' } : null
-    });
-  }, [session, isLoading]);
+  const { user, isLoading } = useAuth();
 
   const getReasonText = () => {
     switch (reason) {
@@ -44,12 +36,9 @@ function UpgradePageContent() {
       return;
     }
 
-    // Debug: Log session state
-    console.log('[Upgrade] Session:', session ? 'exists' : 'null', { isLoading });
-
     // Check if user is logged in
-    if (!session) {
-      console.log('[Upgrade] No session, redirecting to login');
+    if (!user) {
+      console.log('[Upgrade] No user, redirecting to login');
       router.push('/auth/login?redirect=/upgrade');
       return;
     }
@@ -57,6 +46,15 @@ function UpgradePageContent() {
     console.log('[Upgrade] Creating checkout session...');
 
     try {
+      // Get fresh session from Supabase
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        console.error('[Upgrade] Failed to get session:', sessionError);
+        router.push('/auth/login?redirect=/upgrade');
+        return;
+      }
+
       // Create Stripe Checkout session with auth token
       const response = await fetch('/api/stripe/create-checkout', {
         method: 'POST',
@@ -201,7 +199,7 @@ function UpgradePageContent() {
           <CardFooter className="flex flex-col gap-3 p-8">
             <Button
               onClick={handleUpgrade}
-              disabled={isLoading}
+              disabled={isLoading || !user}
               className="h-14 w-full bg-gradient-to-r from-amber-500 to-amber-600 text-lg hover:from-amber-600 hover:to-amber-700"
             >
               {isLoading ? 'Loading...' : 'Upgrade for $79/year'}
