@@ -50,6 +50,8 @@ export async function POST(request: NextRequest) {
 
     if (userErr || !user) return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
 
+    const userId = user.id;
+
     // Body
     const body = await request.json().catch(() => ({}));
     const promptId: string | undefined = body?.promptId;

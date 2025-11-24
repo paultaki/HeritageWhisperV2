@@ -146,11 +146,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
             stripe_subscription_id: subscriptionId,
             status: subscription?.status,
             plan_type: "founding_family",
-            current_period_start: subscription?.current_period_start
-              ? new Date(subscription.current_period_start * 1000).toISOString()
+            current_period_start: (subscription as any)?.current_period_start
+              ? new Date((subscription as any).current_period_start * 1000).toISOString()
               : new Date().toISOString(),
-            current_period_end: subscription?.current_period_end
-              ? new Date(subscription.current_period_end * 1000).toISOString()
+            current_period_end: (subscription as any)?.current_period_end
+              ? new Date((subscription as any).current_period_end * 1000).toISOString()
               : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
             cancel_at_period_end: subscription?.cancel_at_period_end ?? false,
             updated_at: new Date().toISOString(),

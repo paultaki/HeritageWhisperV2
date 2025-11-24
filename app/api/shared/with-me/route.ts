@@ -41,6 +41,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const userId = user.id;
+
     // Find all active shares where current user is the recipient (by email or userId)
     const shares = await db
       .select({
