@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Plus, X, ZoomIn, ZoomOut, RefreshCw, Trash2 } from "lucide-react";
+import { Plus, ZoomIn, ZoomOut, RefreshCw, Trash2 } from "lucide-react";
 import * as Slider from "@radix-ui/react-slider";
 import { type PhotoTitleScreenProps } from "../types";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -212,7 +212,7 @@ export function PhotoTitleScreen({
   return (
     <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-4">
+      <div className="flex items-center justify-between px-6 pt-6 pb-4" style={{ maxWidth: "600px", margin: "0 auto", width: "100%" }}>
         <div className="flex items-center gap-3">
           <img
             src="/final logo/logo hw.svg"
@@ -224,20 +224,11 @@ export function PhotoTitleScreen({
           onClick={() => {
             setShowCancelConfirm(true);
           }}
-          className="rounded-full p-2 transition-colors hover:bg-gray-200 flex-shrink-0"
-          style={{ 
-            backgroundColor: "#E5E7EB",
-            width: "36px",
-            height: "36px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginLeft: "auto",
-            transform: "translateX(15px)"
-          }}
+          className="text-base font-medium transition-colors hover:opacity-70"
+          style={{ color: "#6B7280", marginRight: "-125px" }}
           aria-label="Cancel"
         >
-          <X className="w-5 h-5" style={{ color: "#6B7280" }} />
+          Cancel
         </button>
       </div>
 

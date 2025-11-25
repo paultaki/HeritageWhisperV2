@@ -1,6 +1,6 @@
 "use client";
 
-import { Keyboard, X, MessageCircle } from "lucide-react";
+import { Keyboard, MessageCircle } from "lucide-react";
 import { type StartStoryScreenProps } from "../types";
 import "../recording.css";
 
@@ -12,7 +12,7 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
   return (
     <div className="hw-screen-wrapper" style={{ backgroundColor: "#F5F1ED" }}>
       {/* Header */}
-      <div className="flex items-start justify-between px-6 pt-6 pb-4">
+      <div className="flex items-center justify-between px-6 pt-6 pb-4" style={{ maxWidth: "600px", margin: "0 auto", width: "100%" }}>
         <div className="flex items-center gap-3">
           <img
             src="/final logo/logo hw.svg"
@@ -22,11 +22,11 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
         </div>
         <button
           onClick={onCancel}
-          className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"
-          style={{ marginRight: "-20px" }}
+          className="text-base font-medium transition-colors hover:opacity-70"
+          style={{ color: "#6B7280", marginRight: "-125px" }}
           aria-label="Cancel"
         >
-          <X className="w-5 h-5" style={{ color: "#2C3E50" }} />
+          Cancel
         </button>
       </div>
 
