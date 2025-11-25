@@ -51,7 +51,7 @@ export function DecadeIntroPage({
 
   const decadeYear = isBirthYear
     ? title.split(" ")[0]
-    : isNumericDecade ? decade.replace("s", "") : "";
+    : isNumericDecade ? decade.replace(/s$/i, "") : "";
 
   const getDecadeStyle = () => {
     if (isBirthYear) {
@@ -149,7 +149,7 @@ export function DecadeIntroPage({
         />
 
         <div className="text-2xl md:text-3xl text-gray-600 font-medium">
-          {isBirthYear ? "The Beginning" : (!isNumericDecade ? "" : title)}
+          {isBirthYear ? "The Beginning" : ""}
         </div>
 
         <div className="flex items-center justify-center gap-2 text-xl md:text-2xl text-gray-500">

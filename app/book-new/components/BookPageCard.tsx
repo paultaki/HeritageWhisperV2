@@ -44,8 +44,8 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   const currentPhoto = photos[currentPhotoIndex];
   const photoUrl = currentPhoto?.url;
   const photoTransform = currentPhoto?.transform;
-  const photoWidth = 'width' in currentPhoto ? currentPhoto.width : undefined;
-  const photoHeight = 'height' in currentPhoto ? currentPhoto.height : undefined;
+  const photoWidth = currentPhoto?.width;
+  const photoHeight = currentPhoto?.height;
 
   // Photo carousel handlers
   const handlePrevPhoto = (e?: React.MouseEvent) => {

@@ -431,10 +431,28 @@ export function BookStyleReview({
 
       {/* Top Navigation */}
       <div className="sticky top-0 z-50 bg-[#faf8f5]/95 backdrop-blur-sm border-b border-[#8B6F47]/20">
-        <div className="max-w-6xl mx-auto px-4 py-4">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-2xl md:text-3xl font-serif text-gray-800">
             Review Memory
           </h1>
+          <Button
+            type="button"
+            onClick={() => {
+              console.log("BookStyleReview: Top Save button clicked, calling onSave");
+              onSave();
+            }}
+            disabled={isSaving}
+            className="bg-[#203954] hover:bg-[#1B3047] text-white rounded-xl px-6 py-2 text-base font-medium shadow-md transition-all active:scale-[0.98]"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save"
+            )}
+          </Button>
         </div>
       </div>
 
