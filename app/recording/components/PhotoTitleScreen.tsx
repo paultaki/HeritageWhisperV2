@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Plus, X, ZoomIn, ZoomOut } from "lucide-react";
+import { Plus, X, ZoomIn, ZoomOut, RefreshCw, Trash2 } from "lucide-react";
 import * as Slider from "@radix-ui/react-slider";
 import { type PhotoTitleScreenProps } from "../types";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -193,6 +193,22 @@ export function PhotoTitleScreen({
     setIsEditingPhoto(false);
   };
 
+  const handleRemovePhoto = () => {
+    onChange({
+      ...draft,
+      photoUrl: undefined,
+      photoFile: undefined,
+      photoTransform: undefined,
+      photoWidth: undefined,
+      photoHeight: undefined,
+    });
+    setImageDimensions(null);
+  };
+
+  const handleChangePhoto = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
@@ -200,12 +216,9 @@ export function PhotoTitleScreen({
         <div className="flex items-center gap-3">
           <img
             src="/final logo/logo hw.svg"
-            alt="HW"
+            alt="Heritage Whisper"
             className="w-12 h-12"
           />
-          <h1 className="font-bold text-lg tracking-wide m-0" style={{ color: "#2C3E50", lineHeight: "1.2" }}>
-            HERITAGE WHISPER
-          </h1>
         </div>
         <button
           onClick={() => {
@@ -346,33 +359,54 @@ export function PhotoTitleScreen({
                 </div>
               </div>
             ) : (
-              <div className="relative rounded-xl overflow-hidden" style={{ aspectRatio: "16/10", backgroundColor: "#faf8f5" }}>
-                {/* Blurred background layer - fills empty space for portrait images */}
-                <img
-                  src={draft.photoUrl}
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-70 z-0"
-                />
-                {/* Foreground image with saved transform */}
-                <img
-                  src={draft.photoUrl}
-                  alt="Selected"
-                  className="absolute inset-0 w-full h-full z-10"
-                  style={{
-                    transform: draft.photoTransform
-                      ? `scale(${draft.photoTransform.zoom}) translate(${draft.photoTransform.position.x}%, ${draft.photoTransform.position.y}%)`
-                      : undefined,
-                    transformOrigin: 'center center',
-                    objectFit: 'contain',
-                    objectPosition: 'center center'
-                  }}
-                />
-                <button
-                  onClick={handlePhotoClick}
-                  className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20"
-                >
-                  <span className="text-white font-medium">Edit photo</span>
-                </button>
+              <div className="space-y-3">
+                <div className="relative rounded-xl overflow-hidden" style={{ aspectRatio: "16/10", backgroundColor: "#faf8f5" }}>
+                  {/* Blurred background layer - fills empty space for portrait images */}
+                  <img
+                    src={draft.photoUrl}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-70 z-0"
+                  />
+                  {/* Foreground image with saved transform */}
+                  <img
+                    src={draft.photoUrl}
+                    alt="Selected"
+                    className="absolute inset-0 w-full h-full z-10"
+                    style={{
+                      transform: draft.photoTransform
+                        ? `scale(${draft.photoTransform.zoom}) translate(${draft.photoTransform.position.x}%, ${draft.photoTransform.position.y}%)`
+                        : undefined,
+                      transformOrigin: 'center center',
+                      objectFit: 'contain',
+                      objectPosition: 'center center'
+                    }}
+                  />
+                  <button
+                    onClick={handlePhotoClick}
+                    className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20"
+                  >
+                    <span className="text-white font-medium">Tap to edit</span>
+                  </button>
+                </div>
+                {/* Photo Action Buttons */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleChangePhoto}
+                    className="flex-1 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-2"
+                    style={{ backgroundColor: "white", border: "2px solid #E5E7EB", color: "#2C3E50" }}
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Change photo
+                  </button>
+                  <button
+                    onClick={handleRemovePhoto}
+                    className="flex-1 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-2"
+                    style={{ backgroundColor: "white", border: "2px solid #E5E7EB", color: "#DC2626" }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Remove
+                  </button>
+                </div>
               </div>
             )
           ) : (

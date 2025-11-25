@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Mic, Keyboard, X, MessageCircle } from "lucide-react";
+import { Keyboard, X, MessageCircle } from "lucide-react";
 import { type StartStoryScreenProps } from "../types";
 import "../recording.css";
 
@@ -16,12 +16,9 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
         <div className="flex items-center gap-3">
           <img
             src="/final logo/logo hw.svg"
-            alt="HW"
+            alt="Heritage Whisper"
             className="w-12 h-12"
           />
-          <h1 className="font-bold text-lg tracking-wide m-0" style={{ color: "#2C3E50", lineHeight: "1.2" }}>
-            HERITAGE WHISPER
-          </h1>
         </div>
         <button
           onClick={onCancel}
@@ -84,7 +81,7 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
           >
             <div className="flex items-center gap-4 mb-2">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#E8E8E8" }}>
-                <Camera className="w-6 h-6" style={{ color: "#2C3E50" }} />
+                <img src="/camera-icon.svg" alt="" className="w-8 h-8" />
               </div>
               <h3 className="font-semibold text-lg flex-1 text-left" style={{ color: "#2C3E50" }}>
                 Record with photo
@@ -102,7 +99,7 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
           >
             <div className="flex items-center gap-4 mb-2">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#E8E8E8" }}>
-                <Mic className="w-6 h-6" style={{ color: "#2C3E50" }} />
+                <img src="/mic-icon.svg" alt="" className="w-8 h-8" />
               </div>
               <h3 className="font-semibold text-lg flex-1 text-left" style={{ color: "#2C3E50" }}>
                 Start recording

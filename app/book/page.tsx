@@ -745,8 +745,9 @@ function BookV4PageContent() {
             <button
               onClick={goToPrevSpread}
               disabled={currentSpreadIndex === 0}
-              className="absolute left-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
+              className="absolute left-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
               style={{
+                top: "60px",
                 width: "60px",
                 background: "transparent"
               }}
@@ -766,8 +767,9 @@ function BookV4PageContent() {
             <button
               onClick={goToNextSpread}
               disabled={currentSpreadIndex >= spreads.length - 1}
-              className="absolute right-0 top-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
+              className="absolute right-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
               style={{
+                top: "60px",
                 width: "60px",
                 background: "transparent"
               }}
@@ -860,8 +862,8 @@ function BookV4PageContent() {
               {currentSpreadIndex > 0 && (
                 <button
                   onClick={() => setCurrentSpreadIndex(currentSpreadIndex - 1)}
-                  className="group absolute top-0 bottom-0 w-24 flex items-center justify-start pl-4 opacity-30 hover:opacity-100 transition-opacity duration-300"
-                  style={{ zIndex: 9999, left: '-21px' }}
+                  className="group absolute bottom-0 w-24 flex items-center justify-start pl-4 opacity-30 hover:opacity-100 transition-opacity duration-300"
+                  style={{ zIndex: 9999, left: '-21px', top: '60px' }}
                   aria-label="Previous page"
                 >
                   <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-xl border border-neutral-300 group-hover:bg-white group-hover:scale-110 transition-all">
@@ -876,8 +878,8 @@ function BookV4PageContent() {
               {currentSpreadIndex < spreads.length - 1 && (
                 <button
                   onClick={() => setCurrentSpreadIndex(currentSpreadIndex + 1)}
-                  className="group absolute top-0 bottom-0 w-24 flex items-center justify-end pr-4 opacity-30 hover:opacity-100 transition-opacity duration-300"
-                  style={{ zIndex: 9999, right: '-21px' }}
+                  className="group absolute bottom-0 w-24 flex items-center justify-end pr-4 opacity-30 hover:opacity-100 transition-opacity duration-300"
+                  style={{ zIndex: 9999, right: '-21px', top: '60px' }}
                   aria-label="Next page"
                 >
                   <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-xl border border-neutral-300 group-hover:bg-white group-hover:scale-110 transition-all">

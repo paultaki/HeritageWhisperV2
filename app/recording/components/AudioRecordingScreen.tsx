@@ -294,19 +294,19 @@ export function AudioRecordingScreen({
   return (
     <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div className="flex items-center justify-between pt-4 pb-4 pl-6" style={{ maxWidth: "650px", margin: "0 auto", width: "100%", paddingRight: "calc(24px - 65px)" }}>
+      <div className="flex items-center justify-between px-6 pt-6 pb-4" style={{ maxWidth: "650px", margin: "0 auto", width: "100%" }}>
         <div className="flex items-center gap-3">
           <img
             src="/final logo/logo hw.svg"
-            alt="HW"
-            className="w-14 h-14"
+            alt="Heritage Whisper"
+            className="w-12 h-12"
           />
         </div>
         {!isProcessing && (
           <button
             onClick={() => setShowCancelConfirm(true)}
             className="rounded-full p-2 transition-colors hover:bg-gray-200 flex-shrink-0"
-            style={{ 
+            style={{
               backgroundColor: "#E5E7EB",
               width: "36px",
               height: "36px",
@@ -321,6 +321,20 @@ export function AudioRecordingScreen({
             <X className="w-5 h-5" style={{ color: "#6B7280" }} />
           </button>
         )}
+      </div>
+
+      {/* Hero Text */}
+      <div className="px-6 mb-4" style={{ maxWidth: "600px", margin: "0 auto" }}>
+        <h2
+          className="font-serif font-semibold text-center"
+          style={{
+            fontSize: "32px",
+            lineHeight: "1.2",
+            color: "#2C3E50"
+          }}
+        >
+          Record your story
+        </h2>
       </div>
 
       {/* Photo Preview */}
