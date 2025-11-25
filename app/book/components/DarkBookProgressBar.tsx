@@ -133,17 +133,17 @@ export default function DarkBookProgressBar({
       className="fixed top-0 left-0 right-0"
       style={{
         zIndex: 50,
-        height: '56px',
+        height: '40px',
         background: 'transparent',
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex flex-col md:flex-row md:items-center gap-2 md:gap-0 pt-[20px] md:pt-0 py-2 md:py-0">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex flex-col md:flex-row md:items-center gap-2 md:gap-0 pt-[14px] md:pt-0 py-1 md:py-0">
         {/* Top on mobile / Left on desktop: Progress bar area */}
-        <div className="flex-1 md:mr-4 w-full max-w-[calc(100%-90px)] md:max-w-[calc(100%-350px)]">
+        <div className="flex-1 md:mr-3 w-full max-w-[calc(100%-90px)] md:max-w-[calc(100%-280px)]">
           <div className="relative">
             {/* Progress bar */}
             <div
-              className="progress-bar-container relative w-full h-4 md:h-4 cursor-pointer overflow-visible group"
+              className="progress-bar-container relative w-full h-3 md:h-3 cursor-pointer overflow-visible group"
               onClick={handleClick}
               onMouseMove={handleMouseMove}
               onMouseEnter={() => setIsHovering(true)}
@@ -182,7 +182,7 @@ export default function DarkBookProgressBar({
                 return (
                   <div
                     key={decade.decade}
-                    className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border-2 border-white/80 shadow-sm cursor-pointer hover:scale-150 transition-transform"
+                    className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full border border-white/80 shadow-sm cursor-pointer hover:scale-150 transition-transform"
                     style={{
                       left: `${markerPosition}%`,
                       backgroundColor: 'rgba(99, 102, 241, 0.9)',
@@ -216,7 +216,7 @@ export default function DarkBookProgressBar({
             </div>
 
             {/* Decade date markers below progress bar - Timeline style (desktop only) */}
-            <div className="relative h-7 mt-0 hidden md:block">
+            <div className="relative h-5 mt-0 hidden md:block">
               {(() => {
                 // Collision detection: filter decades to prevent overlap
                 const MIN_SPACING = 70; // Minimum pixels between decade markers
@@ -268,8 +268,8 @@ export default function DarkBookProgressBar({
                       {/* Connector line */}
                       <div
                         style={{
-                          width: '1.5px',
-                          height: '10px',
+                          width: '1px',
+                          height: '6px',
                           background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1))',
                           margin: '0 auto 0px',
                         }}
@@ -282,17 +282,17 @@ export default function DarkBookProgressBar({
                           backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           border: '1px solid rgba(255, 255, 255, 0.2)',
                           color: 'rgba(255, 255, 255, 0.9)',
-                          fontSize: '15px',
+                          fontSize: '11px',
                           fontWeight: 600,
-                          padding: '3px 10px',
-                          borderRadius: '4px',
-                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+                          padding: '2px 6px',
+                          borderRadius: '3px',
+                          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
                           whiteSpace: 'nowrap',
                           cursor: 'pointer',
                           lineHeight: '1',
-                          height: '24px',
-                          minHeight: '24px',
-                          maxHeight: '24px',
+                          height: '18px',
+                          minHeight: '18px',
+                          maxHeight: '18px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -313,13 +313,13 @@ export default function DarkBookProgressBar({
         </div>
 
         {/* Right: Controls - View Mode, TOC and Text Size */}
-        <div className="hidden md:flex items-center justify-end gap-2 flex-shrink-0">
+        <div className="hidden md:flex items-center justify-end gap-1.5 flex-shrink-0">
           {/* View Mode Toggle */}
           {viewMode && onViewModeChange && (
-            <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/20 mr-2">
+            <div className="flex items-center bg-white/5 rounded-full p-0.5 border border-white/20 mr-1.5">
               <button
                 onClick={() => onViewModeChange('chronological')}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${viewMode === 'chronological'
+                className={`px-2 py-1 rounded-full text-[10px] font-medium transition-all ${viewMode === 'chronological'
                   ? 'bg-white text-black shadow-sm'
                   : 'text-white/70 hover:text-white'
                   }`}
@@ -328,7 +328,7 @@ export default function DarkBookProgressBar({
               </button>
               <button
                 onClick={() => onViewModeChange('chapters')}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${viewMode === 'chapters'
+                className={`px-2 py-1 rounded-full text-[10px] font-medium transition-all ${viewMode === 'chapters'
                   ? 'bg-[#d4af87] text-white shadow-sm'
                   : 'text-white/70 hover:text-white'
                   }`}
@@ -341,33 +341,33 @@ export default function DarkBookProgressBar({
           {/* TOC button - Book icon */}
           <button
             onClick={onTocClick}
-            className="flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white"
+            className="flex items-center justify-center w-8 h-8 rounded-full border border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white"
             aria-label="Table of Contents"
             title="Table of Contents"
           >
-            <BookOpen className="h-5 w-5" />
+            <BookOpen className="h-4 w-4" />
           </button>
 
           {/* Decrease text size - Small A */}
           <button
             onClick={() => onFontSizeChange(Math.max(14, fontSize - 2))}
-            className="flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white font-semibold"
+            className="flex items-center justify-center w-8 h-8 rounded-full border border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white font-semibold"
             aria-label="Decrease text size"
             title="Smaller text"
             disabled={fontSize <= 14}
           >
-            <span style={{ fontSize: '14px' }}>A</span>
+            <span style={{ fontSize: '11px' }}>A</span>
           </button>
 
           {/* Increase text size - Large A */}
           <button
             onClick={() => onFontSizeChange(Math.min(26, fontSize + 2))}
-            className="flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white font-semibold"
+            className="flex items-center justify-center w-8 h-8 rounded-full border border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white font-semibold"
             aria-label="Increase text size"
             title="Larger text"
             disabled={fontSize >= 26}
           >
-            <span style={{ fontSize: '20px' }}>A</span>
+            <span style={{ fontSize: '15px' }}>A</span>
           </button>
         </div>
       </div>

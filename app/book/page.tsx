@@ -750,10 +750,10 @@ function BookV4PageContent() {
           />
         </div>
 
-        <div className="md:py-4 max-w-[1800px] mr-auto ml-auto pr-6 pb-16 pl-6" style={{ paddingTop: '72px' }}>
+        <div className="md:py-2 max-w-[1800px] mr-auto ml-auto pr-4 pb-12 pl-4" style={{ paddingTop: '52px' }}>
 
           {/* Desktop: Dual-page spread */}
-          <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100dvh - 160px)" }}>
+          <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100dvh - 110px)" }}>
             {/* Clickable Navigation Zones - Left margin for previous */}
             <button
               onClick={goToPrevSpread}
@@ -814,14 +814,14 @@ function BookV4PageContent() {
               {/* Outer book cover/border - wider on left/right */}
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute rounded-[28px]"
+                className="pointer-events-none absolute rounded-[20px]"
                 style={{
-                  top: "-14px",
-                  bottom: "-14px",
-                  left: "-29px",
-                  right: "-29px",
+                  top: "-10px",
+                  bottom: "-10px",
+                  left: "-20px",
+                  right: "-20px",
                   background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)",
-                  boxShadow: "0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04)"
+                  boxShadow: "0 15px 50px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04)"
                 }}
               ></div>
 

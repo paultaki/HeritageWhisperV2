@@ -166,7 +166,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
       return (
         <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
           {/* Main page */}
-          <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
+          <div className={`relative h-full w-full rounded-[16px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
             {/* Paper texture/vignette */}
             <div
               className="absolute inset-0 pointer-events-none z-10"
@@ -179,8 +179,8 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               }}
             ></div>
 
-            <div className="relative h-full w-full p-4 md:p-5 lg:p-6">
-              <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 flex items-center justify-center">
+            <div className="relative h-full w-full p-2.5 md:p-3 lg:p-3.5">
+              <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 flex items-center justify-center">
                 <div className="text-center space-y-8 p-8 w-full flex flex-col items-center">
                   <h1
                     className="text-5xl font-serif text-gray-800 mb-4 text-center"
@@ -197,7 +197,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   </p>
                 </div>
               </div>
-              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-base text-neutral-600 pointer-events-none z-20">
+              <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-sm text-neutral-600 pointer-events-none z-20">
                 {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
                 {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
               </div>
@@ -211,7 +211,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
     if (story === 'endpaper') {
       return (
         <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
-          <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15`}
+          <div className={`relative h-full w-full rounded-[16px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15`}
             style={{
               background: "linear-gradient(135deg, #F5E6D3 0%, #EAD5BA 50%, #F5E6D3 100%)"
             }}
@@ -261,7 +261,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             ></div>
 
             {/* Page number */}
-            <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
+            <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-[11px] text-neutral-500/80 pointer-events-none z-20">
               {position === "left" && <span className="tracking-tight">{pageNum}</span>}
               {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
             </div>
@@ -278,7 +278,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
       return (
         <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
           {/* Main page */}
-          <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
+          <div className={`relative h-full w-full rounded-[16px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
             {/* Paper texture/vignette */}
             <div
               className="absolute inset-0 pointer-events-none z-10"
@@ -294,8 +294,8 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             {/* Inner gutter shadow */}
             <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
 
-            <div className="relative h-full w-full p-4 md:p-5 lg:p-6" style={{ pointerEvents: 'auto' }}>
-              <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
+            <div className="relative h-full w-full p-2.5 md:p-3 lg:p-3.5" style={{ pointerEvents: 'auto' }}>
+              <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
                   onScroll={(e) => {
@@ -305,7 +305,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                       setScrollState(prev => ({ ...prev, hasUserScrolled: true }));
                     }
                   }}
-                  className="h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
+                  className="h-full w-full rounded-[8px] text-neutral-900 outline-none p-4 overflow-y-auto"
                   style={{
                     scrollBehavior: 'smooth',
                     WebkitOverflowScrolling: 'touch',
@@ -337,7 +337,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 />
               )}
 
-              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-base text-neutral-600 pointer-events-none z-20">
+              <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-sm text-neutral-600 pointer-events-none z-20">
                 {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
                 {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
               </div>
@@ -360,7 +360,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
         >
           {/* Main page */}
           <div
-            className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}
+            className={`relative h-full w-full rounded-[16px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}
             style={{ pointerEvents: 'auto' }}
           >
             {/* Paper texture/vignette */}
@@ -378,8 +378,8 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             {/* Inner gutter shadow */}
             <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
 
-            <div className="relative h-full w-full p-4 md:p-5 lg:p-6" style={{ pointerEvents: 'auto' }}>
-              <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
+            <div className="relative h-full w-full p-2.5 md:p-3 lg:p-3.5" style={{ pointerEvents: 'auto' }}>
+              <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
                   onScroll={(e) => {
@@ -389,7 +389,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                       setScrollState(prev => ({ ...prev, hasUserScrolled: true }));
                     }
                   }}
-                  className="h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
+                  className="h-full w-full rounded-[8px] text-neutral-900 outline-none p-4 overflow-y-auto"
                   style={{
                     scrollBehavior: 'smooth',
                     WebkitOverflowScrolling: 'touch',
@@ -419,7 +419,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                 />
               )}
 
-              <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-base text-neutral-600 pointer-events-none z-20">
+              <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-sm text-neutral-600 pointer-events-none z-20">
                 {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
                 {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
               </div>
@@ -434,14 +434,14 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
       return (
         <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
           {/* Main page */}
-          <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
+          <div className={`relative h-full w-full rounded-[16px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
             <DecadeIntroPage
               decade={story.decade}
               title={story.title}
               storiesCount={story.count}
               isChapter={story.isChapter}
             />
-            <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
+            <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-[11px] text-neutral-500/80 pointer-events-none z-20">
               {position === "left" && <span className="tracking-tight">{pageNum}</span>}
               {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
             </div>
@@ -459,7 +459,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
           <div className={`absolute inset-0 translate-y-[6px] ${position === "left" ? "-translate-x-[6px]" : "translate-x-[6px]"} scale-[0.992] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] opacity-35 bg-neutral-50 ring-black/10`} style={{ display: 'none' }}></div>
 
           {/* Main page - Empty */}
-          <div className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
+          <div className={`relative h-full w-full rounded-[16px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
             <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
               <span className="text-sm">No story</span>
             </div>
@@ -485,7 +485,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
 
         {/* Main page */}
         <div
-          className={`relative h-full w-full rounded-[20px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}
+          className={`relative h-full w-full rounded-[16px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}
           style={{
             maxWidth: '100%',
             pointerEvents: 'auto'
@@ -517,8 +517,8 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             }}
           ></div>
 
-          <div className="relative h-full w-full p-4 md:p-5 lg:p-6" style={{ zIndex: 10 }}>
-            <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
+          <div className="relative h-full w-full p-2.5 md:p-3 lg:p-3.5" style={{ zIndex: 10 }}>
+            <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
               <div
                 ref={ref}
                 onScroll={(e) => {
@@ -532,7 +532,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   }
                 }}
                 tabIndex={0}
-                className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
+                className="js-flow h-full w-full rounded-[8px] text-neutral-900 outline-none p-4 overflow-y-auto"
                 style={{
                   scrollBehavior: 'smooth',
                   WebkitOverflowScrolling: 'touch',
@@ -562,7 +562,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               )}
             </div>
 
-            <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80 pointer-events-none z-20">
+            <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-[11px] text-neutral-500/80 pointer-events-none z-20">
               {position === "left" && <span className="tracking-tight">{pageNum}</span>}
               {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
             </div>
