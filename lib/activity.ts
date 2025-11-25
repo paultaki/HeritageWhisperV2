@@ -7,7 +7,6 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-import { type InsertActivityEvent } from "@/shared/schema";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -63,13 +62,13 @@ export async function logActivityEvent(
       return { success: false, error: "Missing userId or eventType" };
     }
 
-    // Build insert data
-    const insertData: InsertActivityEvent = {
-      userId: payload.userId,
-      actorId: payload.actorId || null,
-      familyMemberId: payload.familyMemberId || null,
-      storyId: payload.storyId || null,
-      eventType: payload.eventType,
+    // Build insert data with snake_case column names for Supabase
+    const insertData = {
+      user_id: payload.userId,
+      actor_id: payload.actorId || null,
+      family_member_id: payload.familyMemberId || null,
+      story_id: payload.storyId || null,
+      event_type: payload.eventType,
       metadata: payload.metadata || {},
     };
 

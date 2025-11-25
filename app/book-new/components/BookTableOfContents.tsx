@@ -157,10 +157,10 @@ export default function BookTableOfContents({
           {/* Content */}
           <div className="max-h-[70dvh] space-y-6 overflow-y-auto overscroll-contain px-4 pb-4">
             {groups.map((group) => (
-              <section key={group.title} className="space-y-3">
+              <section key={group.title} className="space-y-2">
                 {/* Group header */}
-                <h3 className="text-sm font-semibold tracking-tight text-neutral-800 uppercase">
-                  {group.title}
+                <h3 className="text-base font-bold tracking-tight text-neutral-700">
+                  {group.title.toLowerCase()}
                 </h3>
 
                 {/* Stories in this group */}
@@ -188,10 +188,10 @@ export default function BookTableOfContents({
 
                       {/* Story info */}
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-neutral-900 truncate">
+                        <h4 className="text-sm text-neutral-700 truncate">
                           {story.title}
                         </h4>
-                        <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-0.5">
+                        <div className="flex items-center gap-1.5 text-base font-medium text-neutral-900 mt-0.5">
                           <span>{story.storyYear}</span>
                         </div>
                       </div>

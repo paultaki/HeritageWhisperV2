@@ -85,10 +85,20 @@
 
 @media (max-width: 768px) {
     .hw-play-pill {
-        padding: 0.4rem;
-        width: 36px;
-        height: 36px;
+        padding: 0;
+        width: 44px;
+        height: 44px;
         justify-content: center;
+        border: none;
+        background: transparent;
+        backdrop-filter: none;
+    }
+
+    .hw-play-pill:hover,
+    .hw-play-pill:focus-visible {
+        border: none;
+        background: transparent;
+        box-shadow: none;
     }
 
     .hw-play-pill__label {
@@ -97,5 +107,24 @@
 
     .hw-play-pill__icon {
         margin: 0;
+        width: 44px;
+        height: 44px;
+    }
+
+    .hw-play-pill__ring-track {
+        stroke: rgba(32, 57, 84, 0.15);
+        stroke-width: 2.5;
+    }
+
+    .hw-play-pill__ring-progress {
+        stroke-width: 2.5;
+    }
+
+    .hw-play-pill__triangle {
+        font-size: 0.85rem;
+    }
+
+    .hw-play-pill[aria-label="Pause story"] .hw-play-pill__triangle {
+        font-size: 0.75rem;
     }
 }

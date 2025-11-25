@@ -90,8 +90,8 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
         return (
           <div key={storyItem.id}>
             {showHeader && (
-              <h3 className="text-sm font-semibold tracking-tight text-neutral-800 uppercase mt-6 mb-2 first:mt-0">
-                {groupTitle}
+              <h3 className="text-lg font-bold tracking-tight text-neutral-700 mt-5 mb-1.5 first:mt-0">
+                {groupTitle.toLowerCase()}
               </h3>
             )}
             <button
@@ -101,12 +101,12 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
                   onNavigateToStory(storyItem.id);
                 }
               }}
-              className="flex justify-between items-baseline text-lg w-full hover:bg-gray-100 px-3 py-2.5 rounded transition-colors cursor-pointer text-left block"
+              className="flex justify-between items-baseline w-full hover:bg-gray-100 px-2 py-1.5 rounded transition-colors cursor-pointer text-left"
             >
-              <span className="text-gray-700 flex-1 pr-3 hover:text-indigo-600 font-medium">
+              <span className="text-gray-600 flex-1 pr-3 hover:text-indigo-600 text-base">
                 {storyItem.title}
               </span>
-              <span className="text-gray-500 text-base whitespace-nowrap">
+              <span className="text-gray-400 text-sm whitespace-nowrap">
                 {storyItem.storyYear}
               </span>
             </button>
@@ -595,13 +595,13 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
   const hasMultiplePhotos = photos.length > 1;
 
   // Photo carousel handlers
-  const handlePrevPhoto = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handlePrevPhoto = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setCurrentPhotoIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
   };
 
-  const handleNextPhoto = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleNextPhoto = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setCurrentPhotoIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
   };
 
@@ -617,11 +617,11 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
   const handleTouchEnd = () => {
     if (touchStart - touchEnd > 75) {
       // Swiped left - next photo
-      handleNextPhoto({} as React.MouseEvent);
+      handleNextPhoto();
     }
     if (touchStart - touchEnd < -75) {
       // Swiped right - prev photo
-      handlePrevPhoto({} as React.MouseEvent);
+      handlePrevPhoto();
     }
   };
 

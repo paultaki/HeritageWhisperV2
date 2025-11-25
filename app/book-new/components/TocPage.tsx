@@ -73,22 +73,22 @@ export default function TocPage({ stories }: { stories: BookStory[] }) {
             Table of Contents
           </h1>
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             {sortedDecades.map((decade) => (
-              <div key={decade} className="space-y-3">
-                <h3 className="text-sm tracking-tight font-semibold text-gray-700 uppercase">
-                  {decade}
+              <div key={decade} className="space-y-2">
+                <h3 className="text-lg tracking-tight font-bold text-gray-700">
+                  {decade.toLowerCase()}
                 </h3>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {decadeGroups[decade].map((story) => (
                     <div
                       key={story.id}
-                      className="flex justify-between items-baseline text-base border-b border-gray-200 pb-2"
+                      className="flex justify-between items-baseline border-b border-gray-200/60 pb-1.5"
                     >
-                      <span className="text-gray-700 flex-1 pr-3">
+                      <span className="text-gray-600 flex-1 pr-3 text-sm">
                         {story.title}
                       </span>
-                      <span className="text-gray-500 text-sm whitespace-nowrap">
+                      <span className="text-gray-700 font-medium text-base whitespace-nowrap">
                         {story.storyYear}
                         {story.lifeAge !== undefined && ` • Age ${story.lifeAge}`}
                       </span>
