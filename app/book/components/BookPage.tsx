@@ -790,7 +790,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
     <>
       {/* Edit button - only show for account owners with actual stories */}
       {isOwnAccount && typeof story === 'object' && 'id' in story && (
-        <div className={`flex gap-2 mb-1.5 -mt-5 ${position === "right" ? "justify-end" : ""}`}>
+        <div className={`flex gap-2 mb-1.5 -mt-3 ${position === "right" ? "justify-end" : ""}`}>
           <button
             onClick={() =>
               router.push(

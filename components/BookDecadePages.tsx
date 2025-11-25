@@ -19,25 +19,24 @@ export function DecadeIntroPage({
   // NEW: Early return for chapter view - simpler and clearer
   if (isChapter) {
     return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-gray-50 to-slate-50">
-        <div className="text-center space-y-6">
+      <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-gray-50 to-slate-50">
+        <div className="text-center space-y-4">
           <div className="relative">
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-700 tracking-tight leading-tight max-w-4xl mx-auto">
+            <h1
+              className="font-bold text-gray-700 tracking-tight leading-tight max-w-4xl mx-auto"
+              style={{ fontSize: 'clamp(2rem, 6vw, 4rem)' }}
+            >
               {title}
             </h1>
           </div>
 
-          <div className="w-32 h-1 mx-auto bg-gray-400" />
+          <div className="w-24 h-0.5 mx-auto bg-gray-400" />
 
-          <div className="flex items-center justify-center gap-2 text-xl md:text-2xl text-gray-500">
-            <Clock className="w-5 h-5" />
+          <div className="flex items-center justify-center gap-2 text-lg md:text-xl text-gray-500">
+            <Clock className="w-4 h-4" />
             <span>
               {storiesCount} {storiesCount === 1 ? "Memory" : "Memories"} in this chapter
             </span>
-          </div>
-
-          <div className="mt-12 text-base uppercase tracking-widest text-gray-400">
-            Chapter
           </div>
         </div>
       </div>
@@ -93,12 +92,14 @@ export function DecadeIntroPage({
           {isBirthYear ? (
             <>
               <h1
-                className={`text-5xl md:text-6xl font-bold ${style.accent} tracking-tight`}
+                className={`font-bold ${style.accent} tracking-tight`}
+                style={{ fontSize: 'clamp(1.5rem, 5vw, 3.5rem)' }}
               >
                 The Year I Was Born
               </h1>
               <h2
-                className={`text-6xl md:text-8xl font-black ${style.accent} tracking-tight mt-2`}
+                className={`font-black ${style.accent} tracking-tight mt-2`}
+                style={{ fontSize: 'clamp(2.5rem, 8vw, 6rem)' }}
               >
                 {decadeYear}
               </h2>
@@ -106,22 +107,25 @@ export function DecadeIntroPage({
           ) : !isNumericDecade ? (
             /* Chapter View */
             <h1
-              className={`text-5xl md:text-7xl font-bold ${style.accent} tracking-tight leading-tight max-w-4xl mx-auto`}
+              className={`font-bold ${style.accent} tracking-tight leading-tight max-w-4xl mx-auto`}
+              style={{ fontSize: 'clamp(2rem, 6vw, 4rem)' }}
             >
               {title}
             </h1>
           ) : (
-            /* Decade View */
+            /* Decade View - responsive sizing */
             <>
               <h1
-                className={`text-6xl md:text-8xl font-bold ${style.accent} tracking-tight`}
+                className={`font-bold ${style.accent} tracking-tight`}
+                style={{ fontSize: 'clamp(2.5rem, 8vw, 6rem)' }}
               >
                 THE
               </h1>
               <h2
-                className={`text-7xl md:text-9xl font-black ${style.accent} tracking-tighter -mt-4`}
+                className={`font-black ${style.accent} tracking-tighter -mt-2`}
+                style={{ fontSize: 'clamp(3rem, 10vw, 8rem)' }}
               >
-                {decadeYear}s
+                {decadeYear}<span style={{ textTransform: 'lowercase' }}>s</span>
               </h2>
             </>
           )}
@@ -152,16 +156,11 @@ export function DecadeIntroPage({
           {isBirthYear ? "The Beginning" : ""}
         </div>
 
-        <div className="flex items-center justify-center gap-2 text-xl md:text-2xl text-gray-500">
-          <Clock className="w-5 h-5" />
+        <div className="flex items-center justify-center gap-2 text-lg md:text-xl text-gray-500">
+          <Clock className="w-4 h-4" />
           <span>
-            {storiesCount} {storiesCount === 1 ? "Memory" : "Memories"} in this
-            chapter
+            {storiesCount} {storiesCount === 1 ? "Memory" : "Memories"} in this chapter
           </span>
-        </div>
-
-        <div className="mt-12 text-base uppercase tracking-widest text-gray-400">
-          Chapter
         </div>
       </div>
     </div>
