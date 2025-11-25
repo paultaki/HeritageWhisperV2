@@ -108,9 +108,15 @@ function RecordingContent() {
   };
 
   const handleCancel = () => {
+    // Used by StartStoryScreen which has its own confirm dialog
     if (confirm("Are you sure you want to cancel? Your progress will be lost.")) {
       router.push("/timeline");
     }
+  };
+
+  const handleCancelConfirmed = () => {
+    // Used by other screens that already showed a confirmation modal
+    router.push("/timeline");
   };
 
   const handlePhotoTitleBack = () => {
@@ -227,6 +233,7 @@ function RecordingContent() {
           onChange={handleDraftChange}
           onBack={handlePhotoTitleBack}
           onContinue={handlePhotoTitleContinue}
+          onCancel={handleCancelConfirmed}
         />
       )}
 
@@ -238,6 +245,7 @@ function RecordingContent() {
           onFinishAndReview={handleAudioFinish}
           onSaveForLater={handleSaveForLater}
           onSwitchToText={handleSwitchToText}
+          onCancel={handleCancelConfirmed}
         />
       )}
 

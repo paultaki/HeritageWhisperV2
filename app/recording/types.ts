@@ -64,6 +64,7 @@ export interface PhotoTitleScreenProps {
   onChange: (draft: Partial<StoryDraft>) => void;
   onBack: () => void;
   onContinue: () => void;
+  onCancel: () => void;
 }
 
 export interface AudioRecordingScreenProps {
@@ -73,6 +74,7 @@ export interface AudioRecordingScreenProps {
   onFinishAndReview: (draft: StoryDraft) => void;
   onSaveForLater?: (draft: Partial<StoryDraft>) => void;
   onSwitchToText: () => void;
+  onCancel: () => void;
 }
 
 export interface TextEntryScreenProps {

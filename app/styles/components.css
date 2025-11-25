@@ -596,6 +596,13 @@ body {
     border: 1.5px solid var(--color-timeline-card-border);
   }
 
+  /* Ensure photo fills card width on mobile - use clip-path to clip content without hiding overflow for year badges */
+  .hw-card > div:first-of-type {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
   .hw-card::before {
     content: "";
     position: absolute;

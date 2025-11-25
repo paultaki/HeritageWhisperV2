@@ -24,11 +24,15 @@ export function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
+    <div
+      className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center"
+      style={{ padding: '16px' }}
+    >
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in fade-in slide-in-from-bottom-4 duration-300"
+        className="bg-white rounded-2xl shadow-2xl w-full animate-in fade-in slide-in-from-bottom-4 duration-300"
         style={{
           boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+          maxWidth: 'min(400px, calc(100vw - 32px))',
         }}
       >
         {/* Content */}

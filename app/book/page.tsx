@@ -77,23 +77,13 @@ function BookV4PageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Extract storyId from URL for deep linking (e.g., from timeline)
-  // Store in state so it persists even after URL is cleaned up
+  // Extract storyId from URL for deep linking (e.g., from timeline or returning from edit)
   const urlStoryId = searchParams?.get('storyId') || undefined;
-  const [initialStoryId, setInitialStoryId] = useState<string | undefined>(undefined);
-
-  // Capture the storyId from URL on first load (before URL cleanup)
-  useEffect(() => {
-    if (urlStoryId && !initialStoryId) {
-      setInitialStoryId(urlStoryId);
-    }
-  }, [urlStoryId, initialStoryId]);
 
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
   const [currentMobilePage, setCurrentMobilePage] = useState(0);
   const [showToc, setShowToc] = useState(false);
-  const [hasNavigatedToStory, setHasNavigatedToStory] = useState(false);
   const [fontSize, setFontSize] = useState(18); // Default text size in pixels (senior-first)
 
   const flowLeftRef = useRef<HTMLDivElement>(null);
@@ -555,57 +545,59 @@ function BookV4PageContent() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentSpreadIndex, spreads.length, goToPrevSpread, goToNextSpread]);
 
-  // Navigate to story from URL parameter (from timeline)
+  // Track which storyId we've already navigated to (prevents duplicate navigation)
+  const [navigatedStoryId, setNavigatedStoryId] = useState<string | null>(null);
+
+  // Navigate to story from URL parameter (from timeline or returning from edit)
   useEffect(() => {
-    if (hasNavigatedToStory || sortedStories.length === 0 || spreads.length === 0) return;
+    // Skip if no storyId in URL or data not loaded yet
+    if (!urlStoryId || sortedStories.length === 0 || spreads.length === 0) return;
 
-    // Check for storyId in URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const storyId = urlParams.get('storyId');
+    // Skip if we've already navigated to this exact storyId
+    if (navigatedStoryId === urlStoryId) return;
 
-    if (storyId) {
-      // Find the story index
-      const storyIndex = sortedStories.findIndex(s => s.id === storyId);
+    // Find the story index
+    const storyIndex = sortedStories.findIndex(s => s.id === urlStoryId);
 
-      if (storyIndex !== -1) {
-        // Desktop: Find which spread contains this story
-        let targetSpreadIndex = 0;
+    if (storyIndex !== -1) {
+      // Desktop: Find which spread contains this story
+      let targetSpreadIndex = 0;
 
-        for (let i = 0; i < spreads.length; i++) {
-          const spread = spreads[i];
+      for (let i = 0; i < spreads.length; i++) {
+        const spread = spreads[i];
 
-          // Check left page
-          if (spread.left && typeof spread.left !== 'string' && !('type' in spread.left)) {
-            if ((spread.left as Story).id === storyId) {
-              targetSpreadIndex = i;
-              break;
-            }
-          }
-
-          // Check right page
-          if (spread.right && typeof spread.right !== 'string' && !('type' in spread.right)) {
-            if ((spread.right as Story).id === storyId) {
-              targetSpreadIndex = i;
-              break;
-            }
+        // Check left page
+        if (spread.left && typeof spread.left !== 'string' && !('type' in spread.left)) {
+          if ((spread.left as Story).id === urlStoryId) {
+            targetSpreadIndex = i;
+            break;
           }
         }
 
-        setCurrentSpreadIndex(targetSpreadIndex);
-
-        // Mobile: Navigate to story page (intro + toc + stories)
-        setCurrentMobilePage(storyIndex + 2);
-
-        // Open the book automatically when navigating from timeline
-        setIsBookOpen(true);
-
-        setHasNavigatedToStory(true);
-
-        // Clean up URL
-        window.history.replaceState({}, '', '/book');
+        // Check right page
+        if (spread.right && typeof spread.right !== 'string' && !('type' in spread.right)) {
+          if ((spread.right as Story).id === urlStoryId) {
+            targetSpreadIndex = i;
+            break;
+          }
+        }
       }
+
+      setCurrentSpreadIndex(targetSpreadIndex);
+
+      // Mobile: Navigate to story page (intro + toc + stories)
+      setCurrentMobilePage(storyIndex + 2);
+
+      // Open the book automatically when navigating from URL
+      setIsBookOpen(true);
+
+      // Mark this storyId as navigated to prevent re-navigation
+      setNavigatedStoryId(urlStoryId);
+
+      // Clean up URL
+      window.history.replaceState({}, '', '/book');
     }
-  }, [sortedStories, spreads, hasNavigatedToStory]);
+  }, [urlStoryId, sortedStories, spreads, navigatedStoryId]);
 
   // Loading state - show spinner while fetching data OR waiting for user
   if (isLoading || isFetching || !data) {
@@ -679,13 +671,34 @@ function BookV4PageContent() {
         {/* Mobile & Tablet: Full-screen mobile view - Always rendered on mobile */}
         <div className="lg:hidden">
           <MobileBookViewV2
-            initialStoryId={initialStoryId}
+            initialStoryId={urlStoryId}
             caveatFont={caveat.className}
           />
         </div>
 
         {/* Desktop: Closed book cover */}
         <div className="hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12]">
+          {/* Progress bar and controls - shown even on cover */}
+          <div className="hidden md:block">
+            <DarkBookProgressBar
+              pages={bookPages}
+              currentPage={0}
+              totalPages={bookPages.length}
+              onNavigateToPage={(pageIndex) => {
+                setIsBookOpen(true);
+                handleNavigateToPage(pageIndex);
+              }}
+              onTocClick={() => {
+                setIsBookOpen(true);
+                setShowToc(true);
+              }}
+              fontSize={fontSize}
+              onFontSizeChange={setFontSize}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
+          </div>
+
           {/* Closed book cover - centered */}
           <div className="flex items-center justify-center" style={{ height: "100dvh" }}>
             <ClosedBookCover
@@ -704,7 +717,7 @@ function BookV4PageContent() {
       {/* Mobile & Tablet: Full-screen mobile view */}
       <div className="lg:hidden">
         <MobileBookViewV2
-          initialStoryId={initialStoryId}
+          initialStoryId={urlStoryId}
           caveatFont={caveat.className}
         />
       </div>

@@ -17,6 +17,7 @@ export function AudioRecordingScreen({
   onFinishAndReview,
   onSaveForLater,
   onSwitchToText,
+  onCancel,
 }: AudioRecordingScreenProps) {
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -495,7 +496,7 @@ export function AudioRecordingScreen({
         cancelText="Keep Recording"
         onConfirm={() => {
           setShowCancelConfirm(false);
-          onBack();
+          onCancel();
         }}
         onCancel={() => setShowCancelConfirm(false)}
         variant="danger"

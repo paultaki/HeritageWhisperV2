@@ -558,7 +558,7 @@ export function MultiPhotoUploader({
 
                     {/* Hero Star Overlay - Shows when photo is marked as hero */}
                     {photo.isHero && (
-                      <div className="absolute top-2 left-2 pointer-events-none">
+                      <div className="absolute top-2 left-2 z-[15] pointer-events-none">
                         <Star
                           className="w-5 h-5 fill-yellow-500 text-yellow-500"
                           style={{

@@ -16,6 +16,7 @@ export function PhotoTitleScreen({
   onChange,
   onBack,
   onContinue,
+  onCancel,
 }: PhotoTitleScreenProps) {
   const [titleError, setTitleError] = useState<string>("");
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -452,7 +453,7 @@ export function PhotoTitleScreen({
         cancelText="Keep Going"
         onConfirm={() => {
           setShowCancelConfirm(false);
-          onBack();
+          onCancel();
         }}
         onCancel={() => setShowCancelConfirm(false)}
         variant="danger"

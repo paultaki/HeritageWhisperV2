@@ -595,7 +595,8 @@ export const MemoryCard = React.memo(
 
         {/* Image container with audio overlay */}
         <div
-          style={{ position: "relative", overflow: "hidden" }}
+          className="w-full block"
+          style={{ position: "relative", overflow: "hidden", margin: 0, padding: 0 }}
           onTouchStart={useV2Features && photoCount > 1 ? handleTouchStart : undefined}
           onTouchMove={useV2Features && photoCount > 1 ? handleTouchMove : undefined}
           onTouchEnd={useV2Features && photoCount > 1 ? handleTouchEnd : undefined}
