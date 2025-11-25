@@ -858,8 +858,9 @@ function BookStyleReviewContent() {
       } else if (nextNavId) {
         // Redirect to next story in the chain
         router.push(`/review/book-style?nav=${nextNavId}&mode=wizard`);
-      } else if (returnPath) {
-        router.push(returnPath);
+      } else if (returnPath || urlReturnPath) {
+        // Use returnPath state or urlReturnPath directly (avoids stale closure issue)
+        router.push(returnPath || urlReturnPath!);
       } else {
         // Default redirect to timeline
         router.push("/timeline");

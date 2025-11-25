@@ -11,6 +11,7 @@ export default function BookTopBar({
   onTocClick,
   viewMode,
   onViewModeChange,
+  showEditButton = true,
 }: BookTopBarProps) {
   return (
     <header className="fixed inset-x-0 top-0 z-40 flex h-[56px] items-center justify-between gap-3 px-4 pt-[env(safe-area-inset-top)]">
@@ -55,14 +56,16 @@ export default function BookTopBar({
 
       {/* Right side: Action buttons */}
       <div className="flex items-center gap-2">
-        {/* Edit button */}
-        <button
-          onClick={onEditClick}
-          className="pointer-events-auto grid h-9 w-9 place-items-center rounded-full bg-white/6 text-white backdrop-blur-sm ring-1 ring-white/10 transition active:scale-[0.98]"
-          aria-label="Edit"
-        >
-          <Pencil className="h-5 w-5" style={{ marginLeft: '1px' }} />
-        </button>
+        {/* Edit button - only show on story pages */}
+        {showEditButton && (
+          <button
+            onClick={onEditClick}
+            className="pointer-events-auto grid h-9 w-9 place-items-center rounded-full bg-white/6 text-white backdrop-blur-sm ring-1 ring-white/10 transition active:scale-[0.98]"
+            aria-label="Edit"
+          >
+            <Pencil className="h-5 w-5" style={{ marginLeft: '1px' }} />
+          </button>
+        )}
 
         {/* TOC/Menu button */}
         <button

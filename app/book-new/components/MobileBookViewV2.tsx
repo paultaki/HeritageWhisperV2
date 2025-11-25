@@ -296,7 +296,7 @@ export default function MobileBookViewV2({
   const handleEditClick = useCallback(() => {
     const currentPage = bookPages[currentIndex];
     if (currentPage && currentPage.type === "story") {
-      router.push(`/review/book-style?edit=${currentPage.story.id}&returnPath=${encodeURIComponent('/book')}`);
+      router.push(`/review/book-style?edit=${currentPage.story.id}&returnPath=${encodeURIComponent(`/book?storyId=${currentPage.story.id}`)}`);
     }
   }, [bookPages, currentIndex, router]);
 
@@ -391,6 +391,7 @@ export default function MobileBookViewV2({
         onTocClick={() => setIsTocOpen(true)}
         viewMode={chaptersData?.chapters && chaptersData.chapters.length > 0 ? viewMode : undefined}
         onViewModeChange={chaptersData?.chapters && chaptersData.chapters.length > 0 ? setViewMode : undefined}
+        showEditButton={bookPages[currentIndex]?.type === "story"}
       />
 
       {/* Horizontal pager */}

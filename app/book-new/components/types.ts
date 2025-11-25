@@ -91,6 +91,7 @@ export interface BookTopBarProps {
   onTocClick: () => void;
   viewMode?: 'chronological' | 'chapters';
   onViewModeChange?: (mode: 'chronological' | 'chapters') => void;
+  showEditButton?: boolean; // Only show edit button on story pages
 }
 
 /**

@@ -78,7 +78,16 @@ function BookV4PageContent() {
   const searchParams = useSearchParams();
 
   // Extract storyId from URL for deep linking (e.g., from timeline)
-  const initialStoryId = searchParams?.get('storyId') || undefined;
+  // Store in state so it persists even after URL is cleaned up
+  const urlStoryId = searchParams?.get('storyId') || undefined;
+  const [initialStoryId, setInitialStoryId] = useState<string | undefined>(undefined);
+
+  // Capture the storyId from URL on first load (before URL cleanup)
+  useEffect(() => {
+    if (urlStoryId && !initialStoryId) {
+      setInitialStoryId(urlStoryId);
+    }
+  }, [urlStoryId, initialStoryId]);
 
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);

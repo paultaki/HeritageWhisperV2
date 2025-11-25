@@ -794,7 +794,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
           <button
             onClick={() =>
               router.push(
-                `/review/book-style?edit=${story.id}&returnPath=${encodeURIComponent(`/book?page=${pageNum}`)}`,
+                `/review/book-style?edit=${story.id}&returnPath=${encodeURIComponent(`/book?storyId=${story.id}`)}`,
               )
             }
             className="hidden md:flex items-center gap-1.5 px-2.5 py-0 min-h-[34px] rounded-md border border-gray-300 hover:bg-gray-50 transition-colors text-base font-medium text-gray-700"
