@@ -19,14 +19,9 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
             alt="HW"
             className="w-12 h-12"
           />
-          <div className="leading-tight">
-            <h1 className="font-bold text-lg tracking-wide m-0" style={{ color: "#2C3E50", lineHeight: "1.2" }}>
-              HERITAGE WHISPER
-            </h1>
-            <p className="text-sm m-0" style={{ color: "#6B7280", lineHeight: "1.3" }}>
-              Record a new memory
-            </p>
-          </div>
+          <h1 className="font-bold text-lg tracking-wide m-0" style={{ color: "#2C3E50", lineHeight: "1.2" }}>
+            HERITAGE WHISPER
+          </h1>
         </div>
         <button
           onClick={onCancel}
@@ -70,7 +65,7 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
 
         {/* Main Heading - Centered */}
         <h2
-          className="font-serif font-semibold mb-3 text-center"
+          className="font-serif font-semibold mb-6 text-center"
           style={{
             fontSize: "32px",
             lineHeight: "1.2",
@@ -79,10 +74,6 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
         >
           Every memory matters.<br />Start with your voice.
         </h2>
-
-        <p className="text-lg mb-6 hw-text-center" style={{ color: "#6B7280", margin: "0 0 1.5rem 0", width: "100%" }}>
-          Capture a story in your own words. Add photos now or later.
-        </p>
 
         {/* Primary Options */}
         <div className="space-y-4 mb-8">
@@ -100,7 +91,7 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
               </h3>
             </div>
             <p className="text-base hw-text-center" style={{ color: "#6B7280", margin: 0, width: "100%", display: "block" }}>
-              Choose a photo, then tell the story behind it.
+              Choose a photo, then tell its story.
             </p>
           </button>
 
@@ -114,29 +105,26 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
                 <Mic className="w-6 h-6" style={{ color: "#2C3E50" }} />
               </div>
               <h3 className="font-semibold text-lg flex-1 text-left" style={{ color: "#2C3E50" }}>
-                Start recording (no photo)
+                Start recording
               </h3>
             </div>
             <p className="text-base hw-text-center" style={{ color: "#6B7280", margin: 0, width: "100%", display: "block" }}>
-              Record now, add photos anytime later.
+              Start now. Add photos any time.
             </p>
           </button>
         </div>
 
         {/* Text Mode - De-emphasized */}
-        <div className="hw-text-center" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div className="text-center">
           <button
             onClick={() => onSelectMode("text")}
-            className="inline-flex items-center gap-2 px-4 py-2"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 mx-auto"
           >
             <Keyboard className="w-5 h-5" style={{ color: "#6B7280" }} />
             <span className="text-base font-medium" style={{ color: "#2C3E50" }}>
               Prefer to type instead?
             </span>
           </button>
-          <p className="text-sm mt-1 hw-text-center" style={{ color: "#9CA3AF", margin: "0.25rem 0 0 0" }}>
-            Audio is best, but you can always type if you prefer.
-          </p>
         </div>
       </div>
     </div>

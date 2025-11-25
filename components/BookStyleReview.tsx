@@ -1108,10 +1108,10 @@ export function BookStyleReview({
               size="icon"
               onClick={() => setShowDeleteConfirm(true)}
               disabled={isSaving}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 min-w-[48px] min-h-[48px]"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 min-w-[56px] min-h-[56px]"
               title="Delete story"
             >
-              <Trash2 className="w-5 h-5" />
+              <Trash2 className="w-9 h-9" />
             </Button>
           )}
 

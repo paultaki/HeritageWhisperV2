@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Plus, X, ZoomIn, ZoomOut } from "lucide-react";
 import * as Slider from "@radix-ui/react-slider";
 import { type PhotoTitleScreenProps } from "../types";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import "../recording.css";
 
 /**
@@ -17,14 +18,42 @@ export function PhotoTitleScreen({
   onContinue,
 }: PhotoTitleScreenProps) {
   const [titleError, setTitleError] = useState<string>("");
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Zoom/Pan state
   const [isEditingPhoto, setIsEditingPhoto] = useState(false);
   const [editTransform, setEditTransform] = useState({ zoom: 1, position: { x: 0, y: 0 } });
   const [isDraggingImage, setIsDraggingImage] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageRef = useRef<HTMLDivElement>(null);
+
+  // Image dimensions for portrait detection
+  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
+
+  // Measure image dimensions when photo URL changes and save to draft
+  useEffect(() => {
+    if (draft.photoUrl) {
+      const img = new window.Image();
+      img.onload = () => {
+        setImageDimensions({ width: img.width, height: img.height });
+        // Save dimensions to draft if not already set
+        if (!draft.photoWidth || !draft.photoHeight) {
+          onChange({
+            ...draft,
+            photoWidth: img.width,
+            photoHeight: img.height,
+          });
+        }
+      };
+      img.src = draft.photoUrl;
+    } else {
+      setImageDimensions(null);
+    }
+  }, [draft.photoUrl]);
+
+  // Always use contain to show full image - blur fills any empty space
+  // This works for both portrait AND wide landscape images
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;
@@ -174,17 +203,13 @@ export function PhotoTitleScreen({
             alt="HW"
             className="w-12 h-12"
           />
-          <div className="leading-tight">
-            <p className="text-sm m-0 font-medium" style={{ color: "#6B7280", lineHeight: "1.3" }}>
-              Start a new memory
-            </p>
-          </div>
+          <h1 className="font-bold text-lg tracking-wide m-0" style={{ color: "#2C3E50", lineHeight: "1.2" }}>
+            HERITAGE WHISPER
+          </h1>
         </div>
         <button
           onClick={() => {
-            if (confirm("Are you sure you want to cancel? Your progress will be lost.")) {
-              onBack();
-            }
+            setShowCancelConfirm(true);
           }}
           className="rounded-full p-2 transition-colors hover:bg-gray-200 flex-shrink-0"
           style={{ 
@@ -205,13 +230,9 @@ export function PhotoTitleScreen({
 
       {/* Content */}
       <div className="flex-1 px-6 pt-6 pb-24" style={{ maxWidth: "600px", margin: "0 auto" }}>
-        <h2 className="font-serif font-semibold text-3xl mb-2 hw-text-center" style={{ color: "#2C3E50" }}>
+        <h2 className="font-serif font-semibold text-3xl mb-6 hw-text-center" style={{ color: "#2C3E50" }}>
           Capture this memory
         </h2>
-
-        <p className="text-lg mb-6 hw-text-center" style={{ color: "#6B7280" }}>
-          Add a simple title and an optional photo to help you remember the details.
-        </p>
 
         {/* Title Card */}
         <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
@@ -232,9 +253,6 @@ export function PhotoTitleScreen({
             maxLength={100}
             autoFocus
           />
-          <p className="text-base mt-2 mb-0 hw-text-center" style={{ color: "#9CA3AF" }}>
-            A simple title helps your family find this story later.
-          </p>
           {titleError && (
             <p className="text-sm mt-2 hw-text-center" style={{ color: "#DC2626" }}>{titleError}</p>
           )}
@@ -242,20 +260,17 @@ export function PhotoTitleScreen({
 
         {/* Photo Card */}
         <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <h3 className="text-base font-semibold mb-2 hw-text-center" style={{ color: "#2C3E50" }}>
+          <h3 className="text-base font-semibold mb-3 hw-text-center" style={{ color: "#2C3E50" }}>
             Add a photo (optional)
           </h3>
-          <p className="text-base mb-3 hw-text-center" style={{ color: "#6B7280" }}>
-            A photo can help you recall details while you talk.
-          </p>
 
           {draft.photoUrl ? (
             isEditingPhoto ? (
               <div className="space-y-4">
-                <div 
+                <div
                   ref={imageRef}
                   className="relative rounded-xl overflow-hidden cursor-move touch-none"
-                  style={{ aspectRatio: "16/10", backgroundColor: "#000" }}
+                  style={{ aspectRatio: "16/10", backgroundColor: "#faf8f5" }}
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
@@ -264,13 +279,23 @@ export function PhotoTitleScreen({
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
                 >
-                  <img 
-                    src={draft.photoUrl} 
-                    alt="Selected" 
-                    className="w-full h-full object-cover pointer-events-none select-none"
+                  {/* Blurred background layer - fills empty space for portrait images */}
+                  <img
+                    src={draft.photoUrl}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-70 z-0 pointer-events-none"
+                    draggable={false}
+                  />
+                  {/* Foreground image with zoom/pan */}
+                  <img
+                    src={draft.photoUrl}
+                    alt="Selected"
+                    className="absolute inset-0 w-full h-full pointer-events-none select-none z-10"
                     style={{
                       transform: `scale(${editTransform.zoom}) translate(${editTransform.position.x}%, ${editTransform.position.y}%)`,
-                      transformOrigin: 'center center'
+                      transformOrigin: 'center center',
+                      objectFit: 'contain',
+                      objectPosition: 'center center'
                     }}
                     draggable={false}
                   />
@@ -321,23 +346,30 @@ export function PhotoTitleScreen({
                 </div>
               </div>
             ) : (
-              <div className="relative rounded-xl overflow-hidden" style={{ aspectRatio: "16/10" }}>
-                <img 
-                  src={draft.photoUrl} 
-                  alt="Selected" 
-                  className="w-full h-full object-cover"
-                  style={
-                    draft.photoTransform
-                      ? {
-                          transform: `scale(${draft.photoTransform.zoom}) translate(${draft.photoTransform.position.x}%, ${draft.photoTransform.position.y}%)`,
-                          transformOrigin: 'center center'
-                        }
-                      : undefined
-                  }
+              <div className="relative rounded-xl overflow-hidden" style={{ aspectRatio: "16/10", backgroundColor: "#faf8f5" }}>
+                {/* Blurred background layer - fills empty space for portrait images */}
+                <img
+                  src={draft.photoUrl}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-70 z-0"
+                />
+                {/* Foreground image with saved transform */}
+                <img
+                  src={draft.photoUrl}
+                  alt="Selected"
+                  className="absolute inset-0 w-full h-full z-10"
+                  style={{
+                    transform: draft.photoTransform
+                      ? `scale(${draft.photoTransform.zoom}) translate(${draft.photoTransform.position.x}%, ${draft.photoTransform.position.y}%)`
+                      : undefined,
+                    transformOrigin: 'center center',
+                    objectFit: 'contain',
+                    objectPosition: 'center center'
+                  }}
                 />
                 <button
                   onClick={handlePhotoClick}
-                  className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+                  className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20"
                 >
                   <span className="text-white font-medium">Edit photo</span>
                 </button>
@@ -385,6 +417,21 @@ export function PhotoTitleScreen({
           Continue
         </button>
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        title="Cancel Recording?"
+        message="Are you sure you want to cancel? Your progress will be lost."
+        confirmText="Yes, Cancel"
+        cancelText="Keep Going"
+        onConfirm={() => {
+          setShowCancelConfirm(false);
+          onBack();
+        }}
+        onCancel={() => setShowCancelConfirm(false)}
+        variant="danger"
+      />
     </div>
   );
 }

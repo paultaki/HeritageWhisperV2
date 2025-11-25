@@ -2,12 +2,12 @@
  * StoryPhotoWithBlurExtend Component
  *
  * A reusable image component that displays photos with a subtle blurred background.
- * Uses smart object-fit strategy based on image orientation for optimal display.
+ * Always uses object-fit: contain to show the full image without cropping.
  *
  * Key Features:
- * - Smart object-fit: portrait uses "contain", landscape uses "cover"
- * - Portrait photos: show full image with blur filling left/right sides
- * - Landscape photos: fill width with blur on top/bottom edges (if needed)
+ * - Always uses "contain" - never crops the image
+ * - All photos: show full image with blur filling any empty space
+ * - Works for portrait, landscape, and ultra-wide images alike
  * - Respects user's zoom/pan transform settings
  * - Blur background provides elegant fill for any aspect ratio mismatch
  * - Matches editor preview exactly (WYSIWYG)
@@ -20,7 +20,6 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -56,40 +55,10 @@ export function StoryPhotoWithBlurExtend({
   // Default aspect ratio is 16:10 (standard for story cards)
   const ratio = aspectRatio ?? 16 / 10;
 
-  // State for runtime-measured dimensions (for old photos without saved dimensions)
-  const [measuredDimensions, setMeasuredDimensions] = useState<{ width: number; height: number } | null>(null);
-
-  // Measure image dimensions if not provided (for backward compatibility)
-  useEffect(() => {
-    if (!width || !height) {
-      const img = new window.Image();
-      img.onload = () => {
-        setMeasuredDimensions({ width: img.width, height: img.height });
-      };
-      img.onerror = () => {
-        console.warn('[StoryPhotoWithBlurExtend] Failed to measure dimensions for:', alt);
-      };
-      img.src = src;
-    }
-  }, [src, width, height, alt]);
-
-  // Use provided dimensions, or fall back to measured dimensions
-  const actualWidth = width || measuredDimensions?.width;
-  const actualHeight = height || measuredDimensions?.height;
-
-  /**
-   * Smart Object-Fit Strategy:
-   * - Portrait (height > width): use "contain" - show full image, blur fills sides
-   * - Landscape (width >= height): use "cover" - fill width, crop top/bottom if needed
-   * - This gives the best visual result for each orientation
-   */
-  const isPortrait = actualWidth && actualHeight ? actualHeight > actualWidth : false;
-  const objectFitStrategy = isPortrait ? ("contain" as const) : ("cover" as const);
-
   /**
    * Transform Style:
    * - Apply user's zoom/pan transform if provided
-   * - Use smart object-fit based on image orientation
+   * - Always use "contain" to show full image without cropping
    * - Blur background fills any empty space (no white bars)
    * - This ensures WYSIWYG: editor preview = display view
    */
@@ -97,11 +66,11 @@ export function StoryPhotoWithBlurExtend({
     ? {
         transform: `scale(${transform.zoom}) translate(${transform.position.x}%, ${transform.position.y}%)`,
         transformOrigin: "center center",
-        objectFit: objectFitStrategy,
+        objectFit: "contain" as const,
         objectPosition: "center center",
       }
     : {
-        objectFit: objectFitStrategy,
+        objectFit: "contain" as const,
         objectPosition: "center center",
       };
 
@@ -136,9 +105,8 @@ export function StoryPhotoWithBlurExtend({
 
       {/*
         Foreground Layer: Main image with user's zoom/pan
-        - Smart object-fit: portrait uses "contain", landscape uses "cover"
-        - Portrait: shows full image with blur on sides
-        - Landscape: fills width with blur on top/bottom edges (if needed)
+        - Always uses "contain" to show full image without cropping
+        - Blur background fills any empty space (sides, top/bottom)
         - Transform is applied via inline styles (matches MultiPhotoUploader)
         - z-10 to ensure it appears above blur background
       */}

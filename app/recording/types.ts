@@ -22,6 +22,8 @@ export interface StoryDraft {
   photoUrl?: string;  // blob URL for preview
   photoFile?: File;   // actual file for upload
   photoTransform?: { zoom: number; position: { x: number; y: number } }; // zoom/pan transform
+  photoWidth?: number;  // original image width for portrait detection
+  photoHeight?: number; // original image height for portrait detection
 
   // Audio fields
   audioBlob?: Blob;
@@ -88,6 +90,9 @@ export interface RecordingNavCache {
   title: string;
   photoUrl?: string;
   photoFile?: File;
+  photoTransform?: { zoom: number; position: { x: number; y: number } }; // zoom/pan transform
+  photoWidth?: number;  // original image width for portrait detection
+  photoHeight?: number; // original image height for portrait detection
   duration?: number;
   transcription?: string;
   lessonOptions?: {

@@ -48,13 +48,13 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   const photoHeight = 'height' in currentPhoto ? currentPhoto.height : undefined;
 
   // Photo carousel handlers
-  const handlePrevPhoto = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handlePrevPhoto = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setCurrentPhotoIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
   };
 
-  const handleNextPhoto = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleNextPhoto = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setCurrentPhotoIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
   };
 
@@ -70,11 +70,11 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   const handlePhotoTouchEnd = () => {
     if (touchStart - touchEnd > 75) {
       // Swiped left - next photo
-      handleNextPhoto({} as React.MouseEvent);
+      handleNextPhoto();
     }
     if (touchStart - touchEnd < -75) {
       // Swiped right - prev photo
-      handlePrevPhoto({} as React.MouseEvent);
+      handlePrevPhoto();
     }
   };
 

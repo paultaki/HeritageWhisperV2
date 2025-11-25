@@ -271,8 +271,12 @@ function BookStyleReviewContent() {
             const photoFromRecording: StoryPhoto = {
               id: `recording-photo-${Date.now()}`,
               url: cachedData.photoUrl as string,
-              // Note: photoFile is stored in cachedData but we use the blob URL for preview
-              // The actual file will be uploaded when the story is saved
+              file: cachedData.photoFile as File,
+              // Include transform and dimensions for portrait detection
+              transform: cachedData.photoTransform as { zoom: number; position: { x: number; y: number } } | undefined,
+              width: cachedData.photoWidth as number | undefined,
+              height: cachedData.photoHeight as number | undefined,
+              isHero: true,
             };
             setPhotos([photoFromRecording]);
           }

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Pause, Play, Square, Mic, X } from "lucide-react";
+import { ArrowLeft, Pause, Play, Square, Mic, X, Loader2 } from "lucide-react";
 import { type AudioRecordingScreenProps, type RecordingState } from "../types";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import "../recording.css";
 
 /**
@@ -21,6 +22,7 @@ export function AudioRecordingScreen({
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [audioLevels, setAudioLevels] = useState<number[]>(new Array(20).fill(0));
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -29,11 +31,30 @@ export function AudioRecordingScreen({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
+  // Image dimensions for portrait detection
+  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
+
   const MAX_DURATION_SECONDS = 1800; // 30 minutes
 
   useEffect(() => {
     return cleanup;
   }, []);
+
+  // Measure image dimensions when photo URL changes
+  useEffect(() => {
+    if (draft.photoUrl) {
+      const img = new window.Image();
+      img.onload = () => {
+        setImageDimensions({ width: img.width, height: img.height });
+      };
+      img.src = draft.photoUrl;
+    } else {
+      setImageDimensions(null);
+    }
+  }, [draft.photoUrl]);
+
+  // Always use contain to show full image - blur fills any empty space
+  // This works for both portrait AND wide landscape images
 
   const startRecording = async () => {
     try {
@@ -280,19 +301,10 @@ export function AudioRecordingScreen({
             alt="HW"
             className="w-14 h-14"
           />
-          <div className="leading-tight">
-            <p className="text-base m-0 font-medium whitespace-nowrap" style={{ color: "#6B7280", lineHeight: "1.3" }}>
-              Record your story
-            </p>
-          </div>
         </div>
         {!isProcessing && (
           <button
-            onClick={() => {
-              if (confirm("Are you sure you want to cancel? Your progress will be lost.")) {
-                onBack();
-              }
-            }}
+            onClick={() => setShowCancelConfirm(true)}
             className="rounded-full p-2 transition-colors hover:bg-gray-200 flex-shrink-0"
             style={{ 
               backgroundColor: "#E5E7EB",
@@ -313,9 +325,28 @@ export function AudioRecordingScreen({
 
       {/* Photo Preview */}
       {draft.photoUrl && (
-        <div className="mx-6 mb-6 relative rounded-2xl overflow-hidden" style={{ aspectRatio: "16/10", maxWidth: "600px", margin: "0 auto 1.5rem auto" }}>
-          <img src={draft.photoUrl} alt="Story" className="w-full h-full object-cover" />
-          <div className="absolute top-4 left-4">
+        <div className="mx-6 mb-6 relative rounded-2xl overflow-hidden" style={{ aspectRatio: "16/10", maxWidth: "600px", margin: "0 auto 1.5rem auto", backgroundColor: "#faf8f5" }}>
+          {/* Blurred background layer - fills empty space for portrait images */}
+          <img
+            src={draft.photoUrl}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-70 z-0"
+          />
+          {/* Foreground image with transform */}
+          <img
+            src={draft.photoUrl}
+            alt="Story"
+            className="absolute inset-0 w-full h-full z-10"
+            style={{
+              transform: draft.photoTransform
+                ? `scale(${draft.photoTransform.zoom}) translate(${draft.photoTransform.position.x}%, ${draft.photoTransform.position.y}%)`
+                : undefined,
+              transformOrigin: 'center center',
+              objectFit: 'contain',
+              objectPosition: 'center center'
+            }}
+          />
+          <div className="absolute top-4 left-4 z-20">
             <button className="bg-black/60 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -380,33 +411,24 @@ export function AudioRecordingScreen({
           </p>
         </div>
 
-        {/* Tip */}
-        <div className="mb-6">
-          <p className="text-lg hw-text-center" style={{ color: "#6B7280" }}>
-            Take your time. You can pause anytime and edit later.
-          </p>
-        </div>
-
         {/* Controls */}
         {isIdle ? (
           <>
             <button
               onClick={startRecording}
-              className="w-full py-4 rounded-xl font-medium text-base text-white flex items-center justify-center gap-2 mb-4"
+              className="w-full py-4 rounded-xl font-medium text-base text-white flex items-center justify-center gap-2 mb-6"
               style={{ backgroundColor: "#2C3E50" }}
             >
               <Mic className="w-5 h-5" />
               Start recording
             </button>
-            <p className="text-base hw-text-center mb-6" style={{ color: "#9CA3AF" }}>
-              Stop and continue to review
-            </p>
           </>
         ) : (
           <div className="flex gap-3 mb-4">
             <button
               onClick={handlePauseResume}
-              className="flex-1 py-3 rounded-xl font-medium text-base text-white flex items-center justify-center gap-2"
+              disabled={isProcessing}
+              className="flex-1 py-3 rounded-xl font-medium text-base text-white flex items-center justify-center gap-2 disabled:opacity-70"
               style={{ backgroundColor: "#2C3E50" }}
             >
               {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
@@ -414,28 +436,35 @@ export function AudioRecordingScreen({
             </button>
             <button
               onClick={handleStop}
-              className="flex-1 py-3 rounded-xl font-medium text-base flex items-center justify-center gap-2"
+              disabled={isProcessing}
+              className="flex-1 py-3 rounded-xl font-medium text-base flex items-center justify-center gap-2 disabled:opacity-70"
               style={{ backgroundColor: "white", border: "2px solid #E5E7EB", color: "#2C3E50" }}
             >
-              <Square className="w-5 h-5" />
-              Finish
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Square className="w-5 h-5" />
+                  Finish
+                </>
+              )}
             </button>
           </div>
         )}
 
         {/* Text Option */}
         {isIdle && (
-          <div className="hw-text-center mb-6" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div className="text-center mb-6">
             <button
               onClick={onSwitchToText}
-              className="text-base font-medium mb-2"
+              className="text-base font-medium"
               style={{ color: "#2C3E50" }}
             >
-              Prefer to type this story instead?
+              Prefer to type instead?
             </button>
-            <p className="text-base hw-text-center" style={{ color: "#9CA3AF" }}>
-              Audio captures your voice best, but typing is always an option.
-            </p>
           </div>
         )}
 
@@ -451,6 +480,21 @@ export function AudioRecordingScreen({
           </button>
         )}
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        title="Cancel Recording?"
+        message="Are you sure you want to cancel? Your progress will be lost."
+        confirmText="Yes, Cancel"
+        cancelText="Keep Recording"
+        onConfirm={() => {
+          setShowCancelConfirm(false);
+          onBack();
+        }}
+        onCancel={() => setShowCancelConfirm(false)}
+        variant="danger"
+      />
     </div>
   );
 }

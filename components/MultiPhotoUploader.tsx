@@ -533,17 +533,24 @@ export function MultiPhotoUploader({
                 {photo ? (
                   <>
                     {/* Image container with consistent aspect ratio */}
-                    <div className="absolute inset-0 overflow-hidden">
+                    <div className="absolute inset-0 overflow-hidden" style={{ backgroundColor: "#faf8f5" }}>
+                      {/* Blurred background layer - fills empty space for portrait images */}
+                      <img
+                        src={getPhotoDisplayUrl(photo)}
+                        alt=""
+                        className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-70 z-0"
+                      />
+                      {/* Foreground image with transform - always contain to show full image */}
                       <img
                         src={getPhotoDisplayUrl(photo)}
                         alt={`Photo ${index + 1}`}
-                        className="absolute inset-0 w-full h-full"
+                        className="absolute inset-0 w-full h-full z-10"
                         style={{
                           transform: photo.transform
                             ? `scale(${photo.transform.zoom}) translate(${photo.transform.position.x}%, ${photo.transform.position.y}%)`
                             : 'scale(1) translate(0%, 0%)',
                           transformOrigin: "center center",
-                          objectFit: photo.width && photo.height && photo.height > photo.width ? "contain" : "cover",
+                          objectFit: "contain",
                           objectPosition: "center center",
                         }}
                       />
@@ -703,17 +710,24 @@ export function MultiPhotoUploader({
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                     onTouchCancel={handleTouchEnd}
-                    style={{ touchAction: "none" }}
+                    style={{ touchAction: "none", backgroundColor: "#faf8f5" }}
                   >
+                    {/* Blurred background layer - fills empty space for portrait images */}
+                    <img
+                      src={getPhotoDisplayUrl(selectedPhoto)}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-70 z-0 pointer-events-none"
+                    />
+                    {/* Foreground image with zoom/pan - always contain to show full image */}
                     <img
                       ref={imageRef}
                       src={getPhotoDisplayUrl(selectedPhoto)}
                       alt="Edit photo"
-                      className="absolute inset-0 w-full h-full transition-transform cursor-move"
+                      className="absolute inset-0 w-full h-full transition-transform cursor-move z-10"
                       style={{
                         transform: `scale(${editingTransform.zoom}) translate(${editingTransform.position.x}%, ${editingTransform.position.y}%)`,
                         transformOrigin: "center center",
-                        objectFit: selectedPhoto.width && selectedPhoto.height && selectedPhoto.height > selectedPhoto.width ? "contain" : "cover",
+                        objectFit: "contain",
                         objectPosition: "center center",
                       }}
                       draggable={false}
