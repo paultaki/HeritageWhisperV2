@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Mic, Keyboard, X } from "lucide-react";
+import { Camera, Mic, Keyboard, X, MessageCircle } from "lucide-react";
 import { type StartStoryScreenProps } from "../types";
 import "../recording.css";
 
@@ -8,7 +8,7 @@ import "../recording.css";
  * StartStoryScreen - Entry point for recording flow V3
  * Matches heritage-whisper-recorder reference design exactly
  */
-export function StartStoryScreen({ onSelectMode, onCancel }: StartStoryScreenProps) {
+export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartStoryScreenProps) {
   return (
     <div className="hw-screen-wrapper" style={{ backgroundColor: "#F5F1ED" }}>
       {/* Header */}
@@ -40,6 +40,34 @@ export function StartStoryScreen({ onSelectMode, onCancel }: StartStoryScreenPro
 
       {/* Content */}
       <div className="px-6 pt-6 pb-6" style={{ maxWidth: "600px", margin: "0 auto" }}>
+        {/* Prompt Reference - shown when coming from prompts page */}
+        {promptText && (
+          <div
+            className="mb-6 p-4 rounded-xl border-2"
+            style={{
+              backgroundColor: "#EBF4FF",
+              borderColor: "#2C5282",
+            }}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: "#2C5282" }}
+              >
+                <MessageCircle className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-1" style={{ color: "#2C5282" }}>
+                  Your prompt
+                </p>
+                <p className="text-lg font-semibold" style={{ color: "#1A202C" }}>
+                  "{promptText}"
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Heading - Centered */}
         <h2
           className="font-serif font-semibold mb-3 text-center"

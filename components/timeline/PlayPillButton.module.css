@@ -1,0 +1,101 @@
+.hw-play-pill {
+    --progress: 0;
+    /* 0 to 1 */
+    --pill-border: rgba(17, 35, 52, 0.18);
+    /* soft ink */
+    --pill-bg: rgba(255, 255, 255, 0.85);
+    --pill-text: #203954;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid var(--pill-border);
+    background: var(--pill-bg);
+    color: var(--pill-text);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+    outline: none;
+}
+
+.hw-play-pill:hover,
+.hw-play-pill:focus-visible {
+    border-color: rgba(32, 57, 84, 0.25);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.hw-play-pill__icon {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hw-play-pill__ring {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+    /* start at top */
+    width: 100%;
+    height: 100%;
+}
+
+.hw-play-pill__ring-track {
+    fill: none;
+    stroke: rgba(32, 57, 84, 0.10);
+    stroke-width: 2;
+}
+
+.hw-play-pill__ring-progress {
+    fill: none;
+    stroke: rgba(32, 57, 84, 0.75);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 82;
+    /* approx 2πr for r=13 */
+    stroke-dashoffset: calc(82 - 82 * var(--progress));
+    transition: stroke-dashoffset 80ms linear;
+}
+
+.hw-play-pill__triangle {
+    position: relative;
+    font-size: 0.7rem;
+    line-height: 1;
+    margin-left: 1px;
+    /* Visual centering for play icon */
+}
+
+/* Adjust center for pause icon */
+.hw-play-pill[aria-label="Pause story"] .hw-play-pill__triangle {
+    margin-left: 0;
+    font-size: 0.6rem;
+}
+
+.hw-play-pill__label {
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .hw-play-pill {
+        padding: 0.4rem;
+        width: 36px;
+        height: 36px;
+        justify-content: center;
+    }
+
+    .hw-play-pill__label {
+        display: none;
+    }
+
+    .hw-play-pill__icon {
+        margin: 0;
+    }
+}

@@ -54,6 +54,7 @@ export interface RecordFlowCallbacks {
 export interface StartStoryScreenProps {
   onSelectMode: (mode: RecordingMode) => void;
   onCancel: () => void;
+  promptText?: string | null; // Prompt question from prompts page
 }
 
 export interface PhotoTitleScreenProps {
@@ -97,6 +98,7 @@ export interface RecordingNavCache {
   recordingMode: RecordingMode;
   storyYear?: string;
   sourcePromptId?: string;
+  sourcePromptText?: string; // Prompt question text from prompts page
 }
 
 // URL params for state persistence

@@ -585,6 +585,54 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Photo carousel state
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+
+  // Get all photos and check if multiple
+  const photos = story.photos || [];
+  const hasMultiplePhotos = photos.length > 1;
+
+  // Debug logging to identify photo carousel issues
+  console.log('[BookPage StoryContent] Story:', story.title, 'Photos count:', photos.length, 'hasMultiple:', hasMultiplePhotos, 'photos:', photos);
+
+  // Photo carousel handlers
+  const handlePrevPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentPhotoIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+  };
+
+  const handleNextPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentPhotoIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
+  };
+
+  // Touch handlers for swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 75) {
+      // Swiped left - next photo
+      handleNextPhoto({} as React.MouseEvent);
+    }
+    if (touchStart - touchEnd < -75) {
+      // Swiped right - prev photo
+      handlePrevPhoto({} as React.MouseEvent);
+    }
+  };
+
+  // Reset photo index when story changes
+  useEffect(() => {
+    setCurrentPhotoIndex(0);
+  }, [story.id]);
+
   // Activity tracking state - only log once per playback session
   const hasLoggedListeningRef = useRef(false);
 
@@ -760,32 +808,90 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
         </div>
       )}
 
-      {/* Photo at top if available - Now with blur-extend for portrait images */}
-      {story.photos && story.photos.length > 0 && (() => {
-        // Find the hero photo, or use the first photo as fallback
-        const heroPhoto = story.photos.find(p => p.isHero) || story.photos[0];
+      {/* Photo at top if available - Now with carousel for multiple photos */}
+      {photos.length > 0 && (() => {
+        // Get current photo from carousel
+        const currentPhoto = photos[currentPhotoIndex];
         // Get display URL (prefer displayUrl, fall back to url for backward compatibility)
-        const photoUrl = heroPhoto.displayUrl || heroPhoto.url;
+        const photoUrl = currentPhoto?.displayUrl || currentPhoto?.url;
 
         // Only render if we have a valid photo URL
         if (!photoUrl) return null;
 
         return (
           <div className="mb-2">
-            <div data-nav-ink="light">
+            <div
+              className="relative"
+              data-nav-ink="light"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
               <StoryPhotoWithBlurExtend
                 src={photoUrl}
                 alt={story.title}
-                width={heroPhoto.width}
-                height={heroPhoto.height}
-                transform={heroPhoto.transform}
+                width={currentPhoto.width}
+                height={currentPhoto.height}
+                transform={currentPhoto.transform}
                 aspectRatio={16 / 10}
                 className="rounded-md shadow ring-1 ring-black/5"
               />
+
+              {/* Photo count indicator */}
+              {hasMultiplePhotos && (
+                <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                  {currentPhotoIndex + 1} / {photos.length}
+                </div>
+              )}
+
+              {/* Navigation arrows (44x44px for senior-friendly touch targets) */}
+              {hasMultiplePhotos && (
+                <>
+                  <button
+                    onClick={handlePrevPhoto}
+                    className="absolute left-1.5 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-all"
+                    aria-label="Previous photo"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="m15 18-6-6 6-6"></path>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleNextPhoto}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-all"
+                    aria-label="Next photo"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="m9 18 6-6-6-6"></path>
+                    </svg>
+                  </button>
+                </>
+              )}
+
+              {/* Dot indicators */}
+              {hasMultiplePhotos && (
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {photos.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentPhotoIndex(index);
+                      }}
+                      className={`h-2 rounded-full transition-all ${
+                        index === currentPhotoIndex
+                          ? 'bg-white w-4'
+                          : 'bg-white/60 w-2 hover:bg-white/80'
+                      }`}
+                      aria-label={`Go to photo ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-            {heroPhoto.caption && (
+            {currentPhoto?.caption && (
               <p className="text-[12px] text-neutral-600 mt-1">
-                {heroPhoto.caption}
+                {currentPhoto.caption}
               </p>
             )}
           </div>

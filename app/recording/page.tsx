@@ -26,6 +26,7 @@ function RecordingContent() {
 
   const [step, setStep] = useState<FlowStep>("start");
   const [originStep, setOriginStep] = useState<FlowStep | null>(null);
+  const [promptText, setPromptText] = useState<string | null>(null);
   const [draft, setDraft] = useState<Partial<StoryDraft>>({
     recordingMode: "audio",
   });
@@ -46,10 +47,11 @@ function RecordingContent() {
       }
     }
 
-    // Get source prompt ID if coming from prompts page
-    const promptId = searchParams.get("prompt");
-    if (promptId) {
-      setDraft((prev) => ({ ...prev, sourcePromptId: promptId }));
+    // Get prompt text if coming from prompts page
+    const promptParam = searchParams.get("prompt");
+    if (promptParam) {
+      setPromptText(promptParam);
+      setDraft((prev) => ({ ...prev, sourcePromptText: promptParam }));
     }
 
     // Check for starter template from timeline ghost stories
@@ -79,12 +81,12 @@ function RecordingContent() {
     const params = new URLSearchParams();
     params.set("step", step);
 
-    if (draft.sourcePromptId) {
-      params.set("prompt", draft.sourcePromptId);
+    if (promptText) {
+      params.set("prompt", promptText);
     }
 
     router.replace(`/recording?${params.toString()}`, { scroll: false });
-  }, [step]);
+  }, [step, promptText]);
 
   // Handlers
   const handleSelectMode = (mode: RecordingMode) => {
@@ -141,6 +143,7 @@ function RecordingContent() {
       lessonOptions: completeDraft.lessonOptions,
       recordingMode: completeDraft.recordingMode,
       sourcePromptId: completeDraft.sourcePromptId,
+      sourcePromptText: promptText || undefined,
       storyYear: completeDraft.storyYear,
     };
 
@@ -181,6 +184,7 @@ function RecordingContent() {
       photoFile: completeDraft.photoFile,
       recordingMode: "text",
       sourcePromptId: completeDraft.sourcePromptId,
+      sourcePromptText: promptText || undefined,
       storyYear: completeDraft.storyYear,
     };
 
@@ -204,7 +208,11 @@ function RecordingContent() {
   return (
     <>
       {step === "start" && (
-        <StartStoryScreen onSelectMode={handleSelectMode} onCancel={handleCancel} />
+        <StartStoryScreen
+          onSelectMode={handleSelectMode}
+          onCancel={handleCancel}
+          promptText={promptText}
+        />
       )}
 
       {step === "photoTitle" && (

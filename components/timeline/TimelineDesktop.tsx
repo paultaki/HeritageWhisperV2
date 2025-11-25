@@ -51,6 +51,7 @@ import { StarterMemoryCard } from "@/components/timeline/StarterMemoryCard";
 import PlayPauseButton from "@/components/ui/PlayPauseButton";
 import DecadeNav, { type DecadeEntry } from "@/components/ui/DecadeNav";
 import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
+import { PlayPillButton } from "@/components/timeline/PlayPillButton";
 
 const logoUrl = "/final logo/logo-new.svg";
 
@@ -601,14 +602,11 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   <span>{customActionLabel}</span>
                   <Plus className="w-4 h-4" />
                 </button>
-              ) : useV2Features && story.audioUrl && (
-                <PlayPauseButton
+              ) : (
+                <PlayPillButton
                   isPlaying={isPlaying}
-                  isLoading={isLoading}
                   progress={progress}
                   onClick={handlePlayAudio}
-                  size={48}
-                  className="text-white shadow-md"
                 />
               )}
             </div>
@@ -698,26 +696,14 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   <Plus className="w-4 h-4" />
                 </button>
               ) : hasAudio ? (
-                <button
+                <PlayPillButton
+                  isPlaying={isPlaying}
+                  progress={progress}
                   onClick={(e) => {
                     e.stopPropagation();
                     handlePlayAudio(e);
                   }}
-                  className="w-11 h-11 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md hover:shadow-lg transition-all hover:scale-105"
-                  aria-label={isPlaying ? "Pause audio" : hasError ? "Retry playing audio" : "Play audio"}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : hasError ? (
-                    <AlertCircle className="w-5 h-5" />
-                  ) : isPlaying ? (
-                    <Pause className="w-5 h-5 fill-current" />
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  )}
-                </button>
+                />
               ) : (
                 <button
                   className="px-4 py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold flex items-center gap-1.5 transition-colors"

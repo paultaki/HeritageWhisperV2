@@ -29,14 +29,62 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   const [showContinueHint, setShowContinueHint] = useState(false);
   const [showFade, setShowFade] = useState(false);
 
+  // Photo carousel state
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+
   // Fixed padding for top bar (56px)
   // Note: Dynamic viewport detection not needed since book page has overflow:hidden on body
   const fixedPadding = 56;
 
-  // Get the hero photo or first photo (same logic as SimpleMobileBookView)
-  const heroPhoto = story.photos?.find((p) => p.isHero) || story.photos?.[0];
-  const photoUrl = heroPhoto?.url || story.photoUrl;
-  const photoTransform = heroPhoto?.transform || story.photoTransform;
+  // Get all photos
+  const photos = story.photos || (story.photoUrl ? [{ url: story.photoUrl, transform: story.photoTransform, width: undefined, height: undefined }] : []);
+  const hasMultiplePhotos = photos.length > 1;
+
+  // Debug logging to identify photo carousel issues
+  console.log('[BookPageCard] Story:', story.title, 'Photos count:', photos.length, 'hasMultiple:', hasMultiplePhotos, 'photos:', photos);
+  const currentPhoto = photos[currentPhotoIndex];
+  const photoUrl = currentPhoto?.url;
+  const photoTransform = currentPhoto?.transform;
+  const photoWidth = 'width' in currentPhoto ? currentPhoto.width : undefined;
+  const photoHeight = 'height' in currentPhoto ? currentPhoto.height : undefined;
+
+  // Photo carousel handlers
+  const handlePrevPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentPhotoIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+  };
+
+  const handleNextPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentPhotoIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
+  };
+
+  // Touch handlers for photo swipe (only on photo area)
+  const handlePhotoTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handlePhotoTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handlePhotoTouchEnd = () => {
+    if (touchStart - touchEnd > 75) {
+      // Swiped left - next photo
+      handleNextPhoto({} as React.MouseEvent);
+    }
+    if (touchStart - touchEnd < -75) {
+      // Swiped right - prev photo
+      handlePrevPhoto({} as React.MouseEvent);
+    }
+  };
+
+  // Reset photo index when story changes
+  useEffect(() => {
+    setCurrentPhotoIndex(0);
+  }, [story.id]);
 
   // Check if content overflows and update hint visibility
   const checkOverflow = useCallback(() => {
@@ -119,25 +167,80 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
             paddingTop: `${fixedPadding}px`
           }}
         >
-          {/* Header image */}
+          {/* Header image with carousel */}
           <div className="px-3 pt-0">
             <div
               className="relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-stone-200"
               style={{ aspectRatio: "16/10" }}
+              onTouchStart={hasMultiplePhotos ? handlePhotoTouchStart : undefined}
+              onTouchMove={hasMultiplePhotos ? handlePhotoTouchMove : undefined}
+              onTouchEnd={hasMultiplePhotos ? handlePhotoTouchEnd : undefined}
             >
               {photoUrl ? (
                 <StoryPhotoWithBlurExtend
                   src={photoUrl}
                   alt={story.title}
                   transform={photoTransform}
-                  width={heroPhoto?.width}
-                  height={heroPhoto?.height}
+                  width={photoWidth}
+                  height={photoHeight}
                   aspectRatio={16 / 10}
                   className="h-full w-full"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
                   <span className="text-4xl text-stone-400">📖</span>
+                </div>
+              )}
+
+              {/* Photo count indicator */}
+              {hasMultiplePhotos && (
+                <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                  {currentPhotoIndex + 1} / {photos.length}
+                </div>
+              )}
+
+              {/* Navigation arrows (44x44px for senior-friendly touch targets) */}
+              {hasMultiplePhotos && (
+                <>
+                  <button
+                    onClick={handlePrevPhoto}
+                    className="absolute left-1.5 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 hover:bg-black/80 active:bg-black/90 rounded-full flex items-center justify-center text-white transition-all"
+                    aria-label="Previous photo"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="m15 18-6-6 6-6"></path>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleNextPhoto}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 hover:bg-black/80 active:bg-black/90 rounded-full flex items-center justify-center text-white transition-all"
+                    aria-label="Next photo"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="m9 18 6-6-6-6"></path>
+                    </svg>
+                  </button>
+                </>
+              )}
+
+              {/* Dot indicators */}
+              {hasMultiplePhotos && (
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {photos.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentPhotoIndex(index);
+                      }}
+                      className={`h-2 rounded-full transition-all ${
+                        index === currentPhotoIndex
+                          ? 'bg-white w-4'
+                          : 'bg-white/60 w-2'
+                      }`}
+                      aria-label={`Go to photo ${index + 1}`}
+                    />
+                  ))}
                 </div>
               )}
             </div>

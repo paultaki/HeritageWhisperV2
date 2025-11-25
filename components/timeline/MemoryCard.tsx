@@ -35,6 +35,7 @@ import type { MemoryCardProps } from "@/types/timeline";
 import { formatStoryDate, formatStoryDateForMetadata, formatV2TimelineDate } from "@/lib/dateFormatting";
 import { type Story } from "@/lib/supabase";
 import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
+import { PlayPillButton } from "@/components/timeline/PlayPillButton";
 
 /**
  * MemoryCard - Story card component with audio playback
@@ -500,27 +501,21 @@ export const MemoryCard = React.memo(
                 )}
               </div>
 
+
+
+              // ... (existing imports)
+
+              // Inside MemoryCard component:
+
               {/* Right: Action button (Standard Read/Play only) */}
               {!customActionLabel && (
                 <div className="flex-shrink-0">
                   {hasAudio ? (
-                    <button
+                    <PlayPillButton
+                      isPlaying={isPlaying}
+                      progress={progress}
                       onClick={handlePlayAudio}
-                      className="w-11 h-11 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md hover:shadow-lg transition-all hover:scale-105"
-                      aria-label={isPlaying ? "Pause audio" : hasError ? "Retry playing audio" : "Play audio"}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : hasError ? (
-                        <AlertCircle className="w-5 h-5" />
-                      ) : isPlaying ? (
-                        <Pause className="w-5 h-5 fill-current" />
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      )}
-                    </button>
+                    />
                   ) : (
                     <button
                       className="w-11 h-11 md:w-auto md:h-auto md:px-4 md:py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold flex items-center justify-center md:gap-1.5 transition-colors"
@@ -773,13 +768,10 @@ export const MemoryCard = React.memo(
                     <Plus className="w-4 h-4" />
                   </button>
                 ) : (
-                  <PlayPauseButton
+                  <PlayPillButton
                     isPlaying={isPlaying}
-                    isLoading={isLoading}
                     progress={progress}
                     onClick={handlePlayAudio}
-                    size={48}
-                    className="text-white shadow-md"
                   />
                 )}
               </div>
@@ -842,8 +834,8 @@ export const MemoryCard = React.memo(
               </div>
             </>
           )}
-        </div>
-      </div>
+        </div >
+      </div >
     );
   },
   // Custom comparison function for React.memo
