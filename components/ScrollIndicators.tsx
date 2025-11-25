@@ -71,12 +71,15 @@ export function ScrollIndicator({
           }}
           aria-label="Scroll down to continue reading"
         >
-          <div className="flex items-center gap-1.5 px-3 py-0 min-h-[32px] bg-neutral-50/95 rounded-full border-2 border-neutral-400/70 shadow-lg hover:shadow-xl hover:bg-white/95 transition-all cursor-pointer">
-            <ChevronDown className="w-4 h-4 text-neutral-700" />
-            <span className="text-xl text-neutral-800 font-bold">
+          <div className="flex items-center gap-1 px-2.5 py-0 min-h-[28px] bg-neutral-50/95 rounded-full border border-neutral-400/70 shadow-lg hover:shadow-xl hover:bg-white/95 transition-all cursor-pointer">
+            <ChevronDown className="w-3 h-3 text-neutral-700" />
+            <span
+              className="text-neutral-800 font-semibold"
+              style={{ fontSize: "clamp(0.75rem, 1.2vw, 1rem)" }}
+            >
               continue reading
             </span>
-            <ChevronDown className="w-4 h-4 text-neutral-700" />
+            <ChevronDown className="w-3 h-3 text-neutral-700" />
           </div>
         </button>
       </div>

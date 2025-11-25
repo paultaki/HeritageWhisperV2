@@ -41,9 +41,6 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   // Get all photos
   const photos = story.photos || (story.photoUrl ? [{ url: story.photoUrl, transform: story.photoTransform, width: undefined, height: undefined }] : []);
   const hasMultiplePhotos = photos.length > 1;
-
-  // Debug logging to identify photo carousel issues
-  console.log('[BookPageCard] Story:', story.title, 'Photos count:', photos.length, 'hasMultiple:', hasMultiplePhotos, 'photos:', photos);
   const currentPhoto = photos[currentPhotoIndex];
   const photoUrl = currentPhoto?.url;
   const photoTransform = currentPhoto?.transform;
@@ -192,19 +189,19 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
                 </div>
               )}
 
-              {/* Photo count indicator */}
+              {/* Photo count indicator - z-20 to appear above image (which has z-10) */}
               {hasMultiplePhotos && (
-                <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                <div className="absolute top-2 right-2 z-20 bg-black/70 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
                   {currentPhotoIndex + 1} / {photos.length}
                 </div>
               )}
 
-              {/* Navigation arrows (44x44px for senior-friendly touch targets) */}
+              {/* Navigation arrows (44x44px for senior-friendly touch targets) - z-20 to appear above image */}
               {hasMultiplePhotos && (
                 <>
                   <button
                     onClick={handlePrevPhoto}
-                    className="absolute left-1.5 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 hover:bg-black/80 active:bg-black/90 rounded-full flex items-center justify-center text-white transition-all"
+                    className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-black/40 hover:bg-black/60 active:bg-black/70 rounded-full flex items-center justify-center text-white transition-all"
                     aria-label="Previous photo"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -213,7 +210,7 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
                   </button>
                   <button
                     onClick={handleNextPhoto}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 hover:bg-black/80 active:bg-black/90 rounded-full flex items-center justify-center text-white transition-all"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-black/40 hover:bg-black/60 active:bg-black/70 rounded-full flex items-center justify-center text-white transition-all"
                     aria-label="Next photo"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -221,27 +218,6 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
                     </svg>
                   </button>
                 </>
-              )}
-
-              {/* Dot indicators */}
-              {hasMultiplePhotos && (
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {photos.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentPhotoIndex(index);
-                      }}
-                      className={`h-2 rounded-full transition-all ${
-                        index === currentPhotoIndex
-                          ? 'bg-white w-4'
-                          : 'bg-white/60 w-2'
-                      }`}
-                      aria-label={`Go to photo ${index + 1}`}
-                    />
-                  ))}
-                </div>
               )}
             </div>
           </div>

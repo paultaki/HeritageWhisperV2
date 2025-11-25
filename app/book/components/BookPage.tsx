@@ -179,7 +179,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               }}
             ></div>
 
-            <div className="relative h-full w-full p-7 md:p-8 lg:p-10">
+            <div className="relative h-full w-full p-4 md:p-5 lg:p-6">
               <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 flex items-center justify-center">
                 <div className="text-center space-y-8 p-8 w-full flex flex-col items-center">
                   <h1
@@ -294,7 +294,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             {/* Inner gutter shadow */}
             <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
 
-            <div className="relative h-full w-full p-7 md:p-8 lg:p-10" style={{ pointerEvents: 'auto' }}>
+            <div className="relative h-full w-full p-4 md:p-5 lg:p-6" style={{ pointerEvents: 'auto' }}>
               <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
@@ -378,7 +378,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             {/* Inner gutter shadow */}
             <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
 
-            <div className="relative h-full w-full p-7 md:p-8 lg:p-10" style={{ pointerEvents: 'auto' }}>
+            <div className="relative h-full w-full p-4 md:p-5 lg:p-6" style={{ pointerEvents: 'auto' }}>
               <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
@@ -517,7 +517,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             }}
           ></div>
 
-          <div className="relative h-full w-full p-7 md:p-8 lg:p-10" style={{ zIndex: 10 }}>
+          <div className="relative h-full w-full p-4 md:p-5 lg:p-6" style={{ zIndex: 10 }}>
             <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
               <div
                 ref={ref}
@@ -593,9 +593,6 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
   // Get all photos and check if multiple
   const photos = story.photos || [];
   const hasMultiplePhotos = photos.length > 1;
-
-  // Debug logging to identify photo carousel issues
-  console.log('[BookPage StoryContent] Story:', story.title, 'Photos count:', photos.length, 'hasMultiple:', hasMultiplePhotos, 'photos:', photos);
 
   // Photo carousel handlers
   const handlePrevPhoto = (e: React.MouseEvent) => {
@@ -837,19 +834,19 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
                 className="rounded-md shadow ring-1 ring-black/5"
               />
 
-              {/* Photo count indicator */}
+              {/* Photo count indicator - z-20 to appear above image (which has z-10) */}
               {hasMultiplePhotos && (
-                <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                <div className="absolute top-2 right-2 z-20 bg-black/70 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
                   {currentPhotoIndex + 1} / {photos.length}
                 </div>
               )}
 
-              {/* Navigation arrows (44x44px for senior-friendly touch targets) */}
+              {/* Navigation arrows (44x44px for senior-friendly touch targets) - z-20 to appear above image */}
               {hasMultiplePhotos && (
                 <>
                   <button
                     onClick={handlePrevPhoto}
-                    className="absolute left-1.5 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-all"
+                    className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-all"
                     aria-label="Previous photo"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -858,7 +855,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
                   </button>
                   <button
                     onClick={handleNextPhoto}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-all"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-all"
                     aria-label="Next photo"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -866,27 +863,6 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
                     </svg>
                   </button>
                 </>
-              )}
-
-              {/* Dot indicators */}
-              {hasMultiplePhotos && (
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {photos.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentPhotoIndex(index);
-                      }}
-                      className={`h-2 rounded-full transition-all ${
-                        index === currentPhotoIndex
-                          ? 'bg-white w-4'
-                          : 'bg-white/60 w-2 hover:bg-white/80'
-                      }`}
-                      aria-label={`Go to photo ${index + 1}`}
-                    />
-                  ))}
-                </div>
               )}
             </div>
             {currentPhoto?.caption && (
@@ -898,70 +874,80 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
         );
       })()}
 
-      {/* Title */}
-      <h2 className="text-3xl tracking-tight font-serif font-semibold mb-2 text-neutral-900" style={{ fontFamily: "Crimson Text, serif" }}>
+      {/* Title - responsive sizing */}
+      <h2
+        className="tracking-tight font-serif font-semibold mb-1.5 text-neutral-900"
+        style={{
+          fontFamily: "Crimson Text, serif",
+          fontSize: "clamp(1.25rem, 2.5vw, 1.875rem)",
+          lineHeight: 1.2
+        }}
+      >
         {story.title}
       </h2>
 
-      {/* Age and year */}
+      {/* Age and year - responsive sizing */}
       <div className="mb-2 flex items-center justify-between">
-        <div className="text-xl text-neutral-600 font-medium">
+        <div
+          className="text-neutral-600 font-medium"
+          style={{ fontSize: "clamp(0.875rem, 1.5vw, 1.125rem)" }}
+        >
           {story.lifeAge !== undefined && `Age ${story.lifeAge} • `}
           {story.storyYear}
         </div>
       </div>
 
-      {/* Audio Player - Senior-friendly 48px controls */}
+      {/* Audio Player - responsive controls */}
       {story.audioUrl && (
-        <div className="mb-3 flex items-center gap-3">
-          {/* Play button - 48px minimum touch target */}
+        <div className="mb-2 flex items-center gap-2">
+          {/* Play button - responsive size */}
           <button
             onClick={toggleAudio}
-            className="relative flex-shrink-0 w-12 h-12 rounded-full border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+            className="relative flex-shrink-0 rounded-full bg-white hover:bg-gray-50 transition-colors"
+            style={{ width: "clamp(36px, 4vw, 48px)", height: "clamp(36px, 4vw, 48px)" }}
             aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
           >
-            <svg className="absolute inset-0 w-12 h-12 -rotate-90">
-              {/* Background ring */}
+            <svg className="absolute inset-0 w-full h-full -rotate-90">
+              {/* Background ring - always visible */}
               <circle
-                cx="24"
-                cy="24"
-                r="20"
+                cx="50%"
+                cy="50%"
+                r="45%"
                 fill="none"
-                stroke="rgba(139,107,122,0.15)"
-                strokeWidth="2"
+                stroke="rgba(180,180,180,0.4)"
+                strokeWidth="1.5"
               />
-              {/* Progress ring */}
-              {isPlaying && (
-                <circle
-                  cx="24"
-                  cy="24"
-                  r="20"
-                  fill="none"
-                  stroke="rgba(139,107,122,0.5)"
-                  strokeWidth="2"
-                  strokeDasharray={`${2 * Math.PI * 20}`}
-                  strokeDashoffset={`${2 * Math.PI * 20 * (1 - progress / 100)}`}
-                  strokeLinecap="round"
-                  className="transition-all duration-300"
-                />
-              )}
+              {/* Progress ring - fills as audio plays */}
+              <circle
+                cx="50%"
+                cy="50%"
+                r="45%"
+                fill="none"
+                stroke="rgba(139,107,122,0.7)"
+                strokeWidth="2"
+                strokeDasharray="283"
+                strokeDashoffset={`${283 * (1 - progress / 100)}`}
+                strokeLinecap="round"
+                className="transition-all duration-100"
+              />
             </svg>
             {/* Icon in center */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
+                <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
               ) : isPlaying ? (
-                <Pause className="w-5 h-5 text-neutral-600 fill-neutral-600" />
+                <Pause className="w-4 h-4 text-neutral-600 fill-neutral-600" />
               ) : (
-                <Volume2 className="w-5 h-5 text-neutral-600" />
+                <Volume2 className="w-4 h-4 text-neutral-600" />
               )}
             </div>
           </button>
 
-          {/* Linear progress bar - 8px tall, easy to click */}
+          {/* Linear progress bar - responsive height */}
           <div className="flex-1">
             <div
-              className="h-2 bg-neutral-200 rounded-full overflow-hidden cursor-pointer hover:h-2.5 transition-all"
+              className="bg-neutral-200 rounded-full overflow-hidden cursor-pointer transition-all"
+              style={{ height: "clamp(6px, 0.8vw, 8px)" }}
               onClick={(e) => {
                 if (!audioRef.current || !duration) return;
 
@@ -981,8 +967,11 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
             </div>
           </div>
 
-          {/* Timestamps - tabular nums, fixed width to prevent wrapping */}
-          <div className="text-xs text-neutral-500 font-mono tabular-nums whitespace-nowrap min-w-[70px] text-right">
+          {/* Timestamps - tabular nums, responsive sizing */}
+          <div
+            className="text-neutral-500 font-mono tabular-nums whitespace-nowrap text-right"
+            style={{ fontSize: "clamp(0.625rem, 1vw, 0.75rem)" }}
+          >
             {formatTime(currentTime)}<span className="text-neutral-400"> / </span>{formatTime(duration)}
           </div>
         </div>

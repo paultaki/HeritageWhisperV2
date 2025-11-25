@@ -728,10 +728,10 @@ function BookV4PageContent() {
           />
         </div>
 
-        <div className="md:py-8 max-w-[1800px] mr-auto ml-auto pr-6 pb-24 pl-6" style={{ paddingTop: '80px' }}>
+        <div className="md:py-4 max-w-[1800px] mr-auto ml-auto pr-6 pb-16 pl-6" style={{ paddingTop: '72px' }}>
 
           {/* Desktop: Dual-page spread */}
-          <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100dvh - 240px)" }}>
+          <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100dvh - 160px)" }}>
             {/* Clickable Navigation Zones - Left margin for previous */}
             <button
               onClick={goToPrevSpread}
@@ -778,7 +778,7 @@ function BookV4PageContent() {
             <div
               className="relative [perspective:2000px]"
               style={{
-                width: "min(95vw, calc((100dvh - 240px) * 1.294))",
+                width: "min(95vw, calc((100dvh - 160px) * 1.294))",
                 aspectRatio: "11 / 8.5",
                 maxWidth: "1600px"
               }}
