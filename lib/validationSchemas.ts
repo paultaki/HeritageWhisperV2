@@ -178,11 +178,13 @@ export const CreateStorySchema = z.object({
   content: z.string().optional(),
 }).refine(
   (data) => {
-    // At least one content field must be present
-    return !!(data.transcription || data.textBody || data.content);
+    // At least one content field OR photos must be present
+    const hasText = !!(data.transcription || data.textBody || data.content);
+    const hasPhotos = data.photos && data.photos.length > 0;
+    return hasText || hasPhotos;
   },
   {
-    message: 'Story must have either transcription or text content',
+    message: 'Story must have either text content or at least one photo',
     path: ['transcription'],
   }
 );

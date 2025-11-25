@@ -63,6 +63,7 @@ interface BookStyleReviewProps {
   isSaving?: boolean;
   isEditing?: boolean;
   userBirthYear?: number;
+  highlightDateField?: boolean;
 }
 
 export function BookStyleReview({
@@ -87,6 +88,7 @@ export function BookStyleReview({
   onCancel,
   onDelete,
   isSaving = false,
+  highlightDateField = false,
   isEditing = false,
   userBirthYear = 1950,
 }: BookStyleReviewProps) {
@@ -530,7 +532,11 @@ export function BookStyleReview({
                 </label>
                 <div className="flex gap-2 md:gap-3 items-center">
                   {/* Year Selector */}
-                  <div className="border-2 border-gray-300 rounded-lg focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all">
+                  <div className={`border-2 rounded-lg transition-all ${
+                    highlightDateField
+                      ? "border-red-500 ring-2 ring-red-500/20 animate-pulse"
+                      : "border-gray-300 focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20"
+                  }`}>
                     <select
                       value={storyYear}
                       onChange={(e) => onYearChange(e.target.value)}

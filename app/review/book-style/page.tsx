@@ -88,6 +88,8 @@ function BookStyleReviewContent() {
   const [isLoading, setIsLoading] = useState(isEditing);
   const [returnPath, setReturnPath] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showNoDateConfirm, setShowNoDateConfirm] = useState(false);
+  const [highlightDateField, setHighlightDateField] = useState(false);
   const [storyNotFound, setStoryNotFound] = useState(false);
   const [nextNavId, setNextNavId] = useState<string | null>(null);
   const [storyIndex, setStoryIndex] = useState<number | null>(null);
@@ -459,13 +461,17 @@ function BookStyleReviewContent() {
         }
 
         // Step 1: Create the story WITHOUT media to get an ID
+        // If no date, save to memory box only (not timeline/book)
+        const hasDate = !!storyYear;
+        // Use placeholder if no text but has photos (photos uploaded separately)
+        const storyTranscription = transcription || (photos.length > 0 ? "(Photo memory)" : "");
         const tempStoryData: any = {
           title: title || `Memory from ${storyYear || "the past"}`,
-          transcription,
-          storyYear: parseInt(storyYear) || new Date().getFullYear(),
-          lifeAge: age,
-          includeInTimeline: true,
-          includeInBook: true,
+          transcription: storyTranscription,
+          storyYear: hasDate ? parseInt(storyYear) : null,
+          lifeAge: hasDate ? age : null,
+          includeInTimeline: hasDate,
+          includeInBook: hasDate,
           isFavorite: false,
           audioUrl: null, // Will be set after upload
           wisdomClipText: wisdomText || "", // Ensure it's always a string
@@ -796,13 +802,17 @@ function BookStyleReviewContent() {
         }
       }
 
+      // If no date, save to memory box only (not timeline/book)
+      const hasDate = !!storyYear;
+      // Use placeholder if no text but has photos
+      const storyTranscription = transcription || (finalPhotos.length > 0 ? "(Photo memory)" : "");
       const storyData: any = {
         title: title || `Memory from ${storyYear || "the past"}`,
-        transcription,
-        storyYear: parseInt(storyYear) || new Date().getFullYear(),
-        lifeAge: age,
-        includeInTimeline: true,
-        includeInBook: true,
+        transcription: storyTranscription,
+        storyYear: hasDate ? parseInt(storyYear) : null,
+        lifeAge: hasDate ? age : null,
+        includeInTimeline: hasDate,
+        includeInBook: hasDate,
         isFavorite: false,
         photos: finalPhotos,
         audioUrl: finalAudioUrl,
@@ -831,9 +841,12 @@ function BookStyleReviewContent() {
       return response.json();
     },
     onSuccess: (data) => {
+      const savedToMemoryBoxOnly = !storyYear;
       toast({
         title: `Story ${isEditing ? "updated" : "saved"} successfully!`,
-        description: `Your memory has been ${isEditing ? "updated" : "added to your timeline"}.`,
+        description: savedToMemoryBoxOnly
+          ? "Your memory has been saved to your Memory Box."
+          : `Your memory has been ${isEditing ? "updated" : "added to your timeline"}.`,
       });
 
       // Clear session storage
@@ -895,20 +908,41 @@ function BookStyleReviewContent() {
     },
   });
 
-  const handleSave = async () => {
-    // Validate content before attempting save
-    if (!transcription?.trim()) {
+  const handleSave = async (skipDateCheck = false) => {
+    // Validate content before attempting save - require either text OR at least one photo
+    const hasText = transcription?.trim();
+    const hasPhotos = photos.length > 0;
+
+    if (!hasText && !hasPhotos) {
       toast({
-        title: "Story content required",
-        description: "Please add some content to your story before saving.",
+        title: "Content required",
+        description: "Please add some text or a photo to your story before saving.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Check if date is missing and show confirmation (unless skipped)
+    if (!skipDateCheck && !storyYear) {
+      setShowNoDateConfirm(true);
       return;
     }
 
     // Note: Auth validation happens in the API route - it supports both JWT and passkey sessions
     // No need to check client-side since the API will handle both authentication methods
     saveMutation.mutate();
+  };
+
+  const handleNoDateGoBack = () => {
+    setShowNoDateConfirm(false);
+    setHighlightDateField(true);
+    // Clear highlight after 5 seconds
+    setTimeout(() => setHighlightDateField(false), 5000);
+  };
+
+  const handleSaveWithoutDate = () => {
+    setShowNoDateConfirm(false);
+    handleSave(true); // Skip date check and save
   };
 
   const handleCancel = () => {
@@ -1126,19 +1160,23 @@ function BookStyleReviewContent() {
         audioUrl={audioUrl}
         audioDuration={audioDuration}
         onTitleChange={setTitle}
-        onYearChange={setStoryYear}
+        onYearChange={(year) => {
+          setStoryYear(year);
+          setHighlightDateField(false); // Clear highlight when user selects a date
+        }}
         onMonthChange={setStoryMonth}
         onDayChange={setStoryDay}
         onTranscriptionChange={setTranscription}
         onPhotosChange={setPhotos}
         onWisdomChange={setWisdomText}
         onAudioChange={handleAudioChange}
-        onSave={handleSave}
+        onSave={() => handleSave()}
         onCancel={handleCancel}
         onDelete={handleDelete}
         isSaving={saveMutation.isPending}
         isEditing={isEditing}
         userBirthYear={user.birthYear}
+        highlightDateField={highlightDateField}
       />
 
       {/* Cancel Confirmation Modal */}
@@ -1151,6 +1189,18 @@ function BookStyleReviewContent() {
         onConfirm={handleConfirmCancel}
         onCancel={() => setShowCancelConfirm(false)}
         variant="danger"
+      />
+
+      {/* No Date Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showNoDateConfirm}
+        title="No Date Selected"
+        message="Without a date, this memory won't appear in your Timeline or Book. You'll find it in your Memory Box instead. Would you like to add a date?"
+        confirmText="Save to Memory Box"
+        cancelText="Go Back to Add Date"
+        onConfirm={handleSaveWithoutDate}
+        onCancel={handleNoDateGoBack}
+        variant="primary"
       />
     </>
   );
