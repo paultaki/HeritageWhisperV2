@@ -394,15 +394,22 @@ export function MemoryOverlay({
           {/* Photo Gallery */}
           {hasPhotos && currentPhoto && (
             <div
-              className="relative w-full aspect-[3/2] overflow-hidden rounded-xl my-6 shadow-lg bg-gray-100"
+              className="relative w-full aspect-[16/10] overflow-hidden rounded-xl my-6 shadow-lg bg-[#faf8f5]"
               onTouchStart={handlePhotoTouchStart}
               onTouchEnd={handlePhotoTouchEnd}
             >
+              {/* Blurred background layer */}
+              <img
+                src={currentPhoto.url}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-70 z-0"
+                aria-hidden="true"
+              />
               {/* Photo */}
               <img
                 src={currentPhoto.url}
                 alt={currentPhoto.caption || story.title}
-                className="absolute inset-0 w-full h-full object-cover select-none"
+                className="absolute inset-0 w-full h-full object-contain select-none z-10"
                 style={
                   currentPhoto.transform
                     ? {
