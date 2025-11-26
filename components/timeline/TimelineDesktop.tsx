@@ -34,10 +34,12 @@ import {
   X,
   Clock,
   Volume2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { normalizeYear, formatYear } from "@/lib/utils";
 import StoryTraits from "@/components/StoryTraits";
 import { getTopTraits } from "@/utils/getTopTraits";
@@ -210,26 +212,37 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   const [duration, setDuration] = useState(story.durationSeconds || 0);
   const [isVisible, setIsVisible] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Get display photo
-  const getDisplayPhoto = () => {
-    if (story.photos && story.photos.length > 0) {
-      const heroPhoto = story.photos.find((p) => p.isHero && p.url);
-      if (heroPhoto) return heroPhoto;
-      const firstValidPhoto = story.photos.find((p) => p.url);
-      if (firstValidPhoto) return firstValidPhoto;
+  // Sort photos with hero first, then rest in original order
+  const sortedPhotos = useMemo(() => {
+    if (!story.photos || story.photos.length === 0) {
+      if (story.photoUrl) {
+        return [{ url: story.photoUrl, transform: story.photoTransform, isHero: true }];
+      }
+      return [];
     }
-    if (story.photoUrl) {
-      return { url: story.photoUrl, transform: story.photoTransform };
-    }
-    return null;
+    const heroPhoto = story.photos.find((p) => p.isHero && p.url);
+    const otherPhotos = story.photos.filter((p) => p.url && (!p.isHero || p !== heroPhoto));
+    return heroPhoto ? [heroPhoto, ...otherPhotos] : otherPhotos;
+  }, [story.photos, story.photoUrl, story.photoTransform]);
+
+  const photoCount = sortedPhotos.length;
+  const currentPhoto = sortedPhotos[currentPhotoIndex] || null;
+
+  // Photo navigation handlers
+  const handlePrevPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentPhotoIndex((prev) => (prev === 0 ? sortedPhotos.length - 1 : prev - 1));
   };
 
-  const displayPhoto = getDisplayPhoto();
-  const photoCount = story.photos?.length || (story.photoUrl ? 1 : 0);
+  const handleNextPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentPhotoIndex((prev) => (prev === sortedPhotos.length - 1 ? 0 : prev + 1));
+  };
 
   // Derive a safe display age to avoid bad or missing metadata
   const normalizedStoryYear = normalizeYear(story.storyYear);
@@ -469,7 +482,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   // Render function for card content - mobile style with white card below photo
   const renderCardContent = () => {
     // If there's a photo, render with white card below (mobile style)
-    if (displayPhoto?.url) {
+    if (currentPhoto?.url) {
       return (
         <div
           className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
@@ -487,23 +500,45 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           }}
         >
           {/* Photo Section - 16:10 aspect ratio to match mobile, rounded top corners only */}
-          <div className="relative w-full aspect-[16/10] overflow-hidden">
+          <div className="relative w-full aspect-[16/10] overflow-hidden group">
             <StoryPhotoWithBlurExtend
-              src={displayPhoto.url}
+              src={currentPhoto.url}
               alt={story.title}
-              width={(displayPhoto as any).width}
-              height={(displayPhoto as any).height}
-              transform={displayPhoto.transform}
+              width={(currentPhoto as any).width}
+              height={(currentPhoto as any).height}
+              transform={currentPhoto.transform}
               aspectRatio={16 / 10}
               priority={index < 8}
               className="w-full h-full"
             />
 
-            {/* Photo count badge */}
+            {/* Photo count badge - z-20 to stay above photo */}
             {photoCount > 1 && (
-              <div className="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
+              <div className="absolute top-3 left-3 z-20 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
                 {photoCount} photos
               </div>
+            )}
+
+            {/* Photo navigation arrows - only show when multiple photos */}
+            {photoCount > 1 && (
+              <>
+                {/* Left arrow */}
+                <button
+                  onClick={handlePrevPhoto}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Previous photo"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                {/* Right arrow */}
+                <button
+                  onClick={handleNextPhoto}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Next photo"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </>
             )}
 
             {/* Book-style audio button overlaid on photo (hidden in V2) */}

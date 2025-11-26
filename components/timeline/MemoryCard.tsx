@@ -23,7 +23,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Pause, Volume2, Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -80,6 +80,19 @@ export const MemoryCard = React.memo(
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [touchStart, setTouchStart] = useState(0);
     const [touchEnd, setTouchEnd] = useState(0);
+
+    // Sort photos with hero first, then rest in original order
+    const sortedPhotos = useMemo(() => {
+      if (!story.photos || story.photos.length === 0) {
+        if (story.photoUrl) {
+          return [{ url: story.photoUrl, transform: story.photoTransform, isHero: true }];
+        }
+        return [];
+      }
+      const heroPhoto = story.photos.find((p) => p.isHero && p.url);
+      const otherPhotos = story.photos.filter((p) => p.url && (!p.isHero || p !== heroPhoto));
+      return heroPhoto ? [heroPhoto, ...otherPhotos] : otherPhotos;
+    }, [story.photos, story.photoUrl, story.photoTransform]);
 
     // ==================================================================================
     // Card Scroll Animation State
@@ -368,12 +381,12 @@ export const MemoryCard = React.memo(
 
     const handlePrevPhoto = (e: React.MouseEvent) => {
       e.stopPropagation();
-      setCurrentPhotoIndex((prev) => (prev === 0 ? photoCount - 1 : prev - 1));
+      setCurrentPhotoIndex((prev) => (prev === 0 ? sortedPhotos.length - 1 : prev - 1));
     };
 
     const handleNextPhoto = (e: React.MouseEvent) => {
       e.stopPropagation();
-      setCurrentPhotoIndex((prev) => (prev === photoCount - 1 ? 0 : prev + 1));
+      setCurrentPhotoIndex((prev) => (prev === sortedPhotos.length - 1 ? 0 : prev + 1));
     };
 
     const handleTouchStart = (e: React.TouchEvent) => {
@@ -603,8 +616,8 @@ export const MemoryCard = React.memo(
         >
           {/* Get current photo for V2 carousel or fallback to displayPhoto */}
           {(() => {
-            const currentPhoto = useV2Features && story.photos && story.photos.length > 0
-              ? story.photos[currentPhotoIndex]
+            const currentPhoto = useV2Features && sortedPhotos.length > 0
+              ? sortedPhotos[currentPhotoIndex]
               : null;
 
             const photoUrl = currentPhoto
@@ -631,15 +644,15 @@ export const MemoryCard = React.memo(
           {/* V2: Photo carousel navigation */}
           {useV2Features && photoCount > 1 && (
             <>
-              {/* Photo counter badge */}
-              <div className="absolute top-3 right-3 bg-black/70 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
+              {/* Photo counter badge - z-20 to stay above photo */}
+              <div className="absolute top-3 right-3 z-20 bg-black/70 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
                 {currentPhotoIndex + 1} of {photoCount}
               </div>
 
               {/* Navigation arrows */}
               <button
                 onClick={handlePrevPhoto}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all z-10"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all z-20"
                 aria-label="Previous photo"
               >
                 <ChevronLeft className="w-6 h-6" />
@@ -647,7 +660,7 @@ export const MemoryCard = React.memo(
 
               <button
                 onClick={handleNextPhoto}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all z-10"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all z-20"
                 aria-label="Next photo"
               >
                 <ChevronRight className="w-6 h-6" />
@@ -668,9 +681,9 @@ export const MemoryCard = React.memo(
             </>
           )}
 
-          {/* Original photo count badge (non-V2) */}
+          {/* Original photo count badge (non-V2) - z-20 to stay above photo */}
           {!useV2Features && photoCount > 1 && (
-            <div className="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
+            <div className="absolute bottom-3 left-3 z-20 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
               {photoCount} photos
             </div>
           )}

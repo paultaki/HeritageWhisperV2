@@ -179,7 +179,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               }}
             ></div>
 
-            <div className="relative h-full w-full p-2.5 md:p-3 lg:p-3.5">
+            <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]">
               <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 flex items-center justify-center">
                 <div className="text-center space-y-8 p-8 w-full flex flex-col items-center">
                   <h1
@@ -294,7 +294,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             {/* Inner gutter shadow */}
             <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
 
-            <div className="relative h-full w-full p-2.5 md:p-3 lg:p-3.5" style={{ pointerEvents: 'auto' }}>
+            <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]" style={{ pointerEvents: 'auto' }}>
               <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
@@ -378,7 +378,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             {/* Inner gutter shadow */}
             <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/12 via-black/6`}></div>
 
-            <div className="relative h-full w-full p-2.5 md:p-3 lg:p-3.5" style={{ pointerEvents: 'auto' }}>
+            <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]" style={{ pointerEvents: 'auto' }}>
               <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
@@ -447,7 +447,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               }}
             ></div>
 
-            <div className="relative h-full w-full p-2.5 md:p-3 lg:p-3.5 z-10">
+            <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px] z-10">
               {/* Inner gutter shadow - inside the padding container, behind the white paper */}
               <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-8 pointer-events-none z-[1] bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/10 via-black/5`}></div>
 
@@ -537,7 +537,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             }}
           ></div>
 
-          <div className="relative h-full w-full p-2.5 md:p-3 lg:p-3.5" style={{ zIndex: 10 }}>
+          <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]" style={{ zIndex: 10 }}>
             <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
               <div
                 ref={ref}
