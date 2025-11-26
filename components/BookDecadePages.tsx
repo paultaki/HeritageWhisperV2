@@ -19,7 +19,7 @@ export function DecadeIntroPage({
   // NEW: Early return for chapter view - simpler and clearer
   if (isChapter) {
     return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-gray-50 to-slate-50">
+      <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-amber-50/40">
         <div className="text-center space-y-4">
           <div className="relative">
             <h1
@@ -85,7 +85,7 @@ export function DecadeIntroPage({
 
   return (
     <div
-      className={`absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br ${style.bg}`}
+      className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-amber-50/40"
     >
       <div className="text-center space-y-6">
         <div className="relative">
@@ -131,32 +131,15 @@ export function DecadeIntroPage({
           )}
         </div>
 
-        <div
-          className={`w-32 h-1 mx-auto ${isBirthYear
-            ? "bg-rose-400"
-            : style.bg.includes("orange")
-              ? "bg-orange-400"
-              : style.bg.includes("blue")
-                ? "bg-blue-400"
-                : style.bg.includes("purple")
-                  ? "bg-purple-400"
-                  : style.bg.includes("teal")
-                    ? "bg-teal-400"
-                    : style.bg.includes("pink")
-                      ? "bg-pink-400"
-                      : style.bg.includes("yellow")
-                        ? "bg-yellow-400"
-                        : style.bg.includes("amber")
-                          ? "bg-amber-400"
-                          : "bg-gray-400"
-            }`}
-        />
+        <div className="w-24 h-0.5 mx-auto bg-amber-600/50" />
 
-        <div className="text-2xl md:text-3xl text-gray-600 font-medium">
-          {isBirthYear ? "The Beginning" : ""}
-        </div>
+        {isBirthYear && (
+          <div className="text-xl text-gray-600 font-medium">
+            The Beginning
+          </div>
+        )}
 
-        <div className="flex items-center justify-center gap-2 text-lg md:text-xl text-gray-500">
+        <div className="flex items-center justify-center gap-2 text-base text-gray-500">
           <Clock className="w-4 h-4" />
           <span>
             {storiesCount} {storiesCount === 1 ? "Memory" : "Memories"} in this chapter

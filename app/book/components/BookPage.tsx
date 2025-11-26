@@ -429,18 +429,38 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
       );
     }
 
-    // Handle decade page
+    // Handle decade page - with same paper layers as story pages
     if (story && typeof story !== 'string' && 'type' in story && story.type === 'decade') {
       return (
         <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
           {/* Main page */}
-          <div className={`relative h-full w-full rounded-[16px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
-            <DecadeIntroPage
-              decade={story.decade}
-              title={story.title}
-              storiesCount={story.count}
-              isChapter={story.isChapter}
-            />
+          <div className={`relative h-full w-full rounded-[16px] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 bg-neutral-50`}>
+            {/* Paper texture/vignette */}
+            <div
+              className="absolute inset-0 pointer-events-none z-[1]"
+              style={{
+                backgroundImage: position === "left"
+                  ? `radial-gradient(160% 85% at 110% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
+                     radial-gradient(120% 60% at -10% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%)`
+                  : `radial-gradient(160% 85% at -10% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
+                     radial-gradient(120% 60% at 110% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%)`,
+              }}
+            ></div>
+
+            <div className="relative h-full w-full p-2.5 md:p-3 lg:p-3.5 z-10">
+              {/* Inner gutter shadow - inside the padding container, behind the white paper */}
+              <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-8 pointer-events-none z-[1] bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/10 via-black/5`}></div>
+
+              <div className="relative h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden z-10">
+                <DecadeIntroPage
+                  decade={story.decade}
+                  title={story.title}
+                  storiesCount={story.count}
+                  isChapter={story.isChapter}
+                />
+              </div>
+            </div>
+
             <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-[11px] text-neutral-500/80 pointer-events-none z-20">
               {position === "left" && <span className="tracking-tight">{pageNum}</span>}
               {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
