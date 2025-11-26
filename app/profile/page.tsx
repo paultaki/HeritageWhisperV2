@@ -763,8 +763,15 @@ export default function Profile() {
                   <Button
                     onClick={async () => {
                       try {
+                        if (!session?.access_token) {
+                          throw new Error('No active session');
+                        }
+
                         const response = await fetch('/api/stripe/customer-portal', {
                           method: 'POST',
+                          headers: {
+                            'Authorization': `Bearer ${session.access_token}`,
+                          },
                         });
 
                         if (!response.ok) {
