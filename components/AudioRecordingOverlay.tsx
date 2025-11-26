@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { X } from "lucide-react";
 import { AudioRecordingScreen } from "@/app/recording/components/AudioRecordingScreen";
 import { type StoryDraft } from "@/app/recording/types";
 import { cn } from "@/lib/utils";
@@ -95,15 +94,6 @@ export function AudioRecordingOverlay({
             "overflow-hidden"
           )}
         >
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-20 text-[#8B7355] hover:text-[#4A3428] transition-colors bg-white/80 rounded-full p-2 shadow-md"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
           {/* Re-record indicator */}
           {existingAudioUrl && (
             <div className="absolute top-4 left-4 z-20 bg-amber-100 text-amber-800 text-sm px-3 py-1 rounded-full font-medium">
