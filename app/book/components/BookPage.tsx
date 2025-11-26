@@ -605,14 +605,17 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Photo carousel state
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-
-  // Get all photos and check if multiple
+  // Get all photos and check if multiple (must be before state initialization)
   const photos = story.photos || [];
   const hasMultiplePhotos = photos.length > 1;
+
+  // Photo carousel state - initialize to hero image index to avoid flash
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(() => {
+    const heroIdx = photos.findIndex(p => p.isHero);
+    return heroIdx >= 0 ? heroIdx : 0;
+  });
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   // Photo carousel handlers
   const handlePrevPhoto = (e?: React.MouseEvent) => {
@@ -645,10 +648,11 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
     }
   };
 
-  // Reset photo index when story changes
+  // Reset photo index to hero image when story changes
   useEffect(() => {
-    setCurrentPhotoIndex(0);
-  }, [story.id]);
+    const heroIndex = photos.findIndex(p => p.isHero);
+    setCurrentPhotoIndex(heroIndex >= 0 ? heroIndex : 0);
+  }, [story.id, photos]);
 
   // Activity tracking state - only log once per playback session
   const hasLoggedListeningRef = useRef(false);

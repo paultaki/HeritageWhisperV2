@@ -86,6 +86,22 @@ function BookV4PageContent() {
   const [showToc, setShowToc] = useState(false);
   const [fontSize, setFontSize] = useState(18); // Default text size in pixels (senior-first)
 
+  // Load font size from localStorage on mount
+  useEffect(() => {
+    const savedFontSize = localStorage.getItem('bookViewFontSize');
+    if (savedFontSize) {
+      const parsed = parseInt(savedFontSize, 10);
+      if (!isNaN(parsed) && parsed >= 14 && parsed <= 28) {
+        setFontSize(parsed);
+      }
+    }
+  }, []);
+
+  // Save font size to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('bookViewFontSize', fontSize.toString());
+  }, [fontSize]);
+
   const flowLeftRef = useRef<HTMLDivElement>(null);
   const flowRightRef = useRef<HTMLDivElement>(null);
   const liveRegionRef = useRef<HTMLDivElement>(null);

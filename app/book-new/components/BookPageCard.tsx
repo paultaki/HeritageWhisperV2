@@ -29,17 +29,20 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   const [showContinueHint, setShowContinueHint] = useState(false);
   const [showFade, setShowFade] = useState(false);
 
-  // Photo carousel state
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-
   // Fixed padding for top bar (56px)
   // Note: Dynamic viewport detection not needed since book page has overflow:hidden on body
   const fixedPadding = 56;
 
-  // Get all photos
-  const photos = story.photos || (story.photoUrl ? [{ url: story.photoUrl, transform: story.photoTransform, width: undefined, height: undefined }] : []);
+  // Get all photos (must be before state initialization)
+  const photos = story.photos || (story.photoUrl ? [{ url: story.photoUrl, transform: story.photoTransform, width: undefined, height: undefined, isHero: false }] : []);
+
+  // Photo carousel state - initialize to hero image index to avoid flash
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(() => {
+    const heroIdx = photos.findIndex(p => p.isHero);
+    return heroIdx >= 0 ? heroIdx : 0;
+  });
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
   const hasMultiplePhotos = photos.length > 1;
   const currentPhoto = photos[currentPhotoIndex];
   const photoUrl = currentPhoto?.url;
@@ -66,6 +69,12 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
   const handlePhotoTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
+
+  // Set initial photo to hero image when story changes
+  useEffect(() => {
+    const heroIndex = photos.findIndex(p => p.isHero);
+    setCurrentPhotoIndex(heroIndex >= 0 ? heroIndex : 0);
+  }, [story.id]);
 
   const handlePhotoTouchEnd = () => {
     if (touchStart - touchEnd > 75) {

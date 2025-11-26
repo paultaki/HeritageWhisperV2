@@ -286,7 +286,7 @@ export default function Login() {
                               className="w-full rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
                               style={{
                                 fontSize: '16px',
-                                padding: '12px 16px 12px 16px',
+                                padding: '12px 72px 12px 16px',
                                 backgroundColor: 'var(--hw-surface, #FFFFFF)',
                                 border: '1px solid var(--hw-border-subtle, #D2C9BD)',
                                 color: 'var(--hw-text-primary, #1F1F1F)',
@@ -297,6 +297,9 @@ export default function Login() {
                               data-testid="input-email"
                               suppressHydrationWarning
                             />
+                            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                              <Mail className="w-5 h-5" style={{ color: 'var(--hw-text-muted, #8A8378)' }} />
+                            </div>
                           </div>
                         </div>
 
@@ -323,7 +326,7 @@ export default function Login() {
                               className="w-full rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
                               style={{
                                 fontSize: '16px',
-                                padding: '12px 48px 12px 16px',
+                                padding: '12px 72px 12px 16px',
                                 backgroundColor: 'var(--hw-surface, #FFFFFF)',
                                 border: '1px solid var(--hw-border-subtle, #D2C9BD)',
                                 color: 'var(--hw-text-primary, #1F1F1F)',

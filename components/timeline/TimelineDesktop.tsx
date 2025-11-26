@@ -590,7 +590,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 </div>
               </div>
 
-              {/* Right: V2 audio button with progress indicator */}
+              {/* Right: V2 audio button with progress indicator - only show if audio exists */}
               {customActionLabel ? (
                 <button
                   onClick={(e) => {
@@ -602,13 +602,13 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   <span>{customActionLabel}</span>
                   <Plus className="w-4 h-4" />
                 </button>
-              ) : (
+              ) : story.audioUrl && story.audioUrl.trim() !== "" ? (
                 <PlayPillButton
                   isPlaying={isPlaying}
                   progress={progress}
                   onClick={handlePlayAudio}
                 />
-              )}
+              ) : null}
             </div>
           </div>
         </div>
