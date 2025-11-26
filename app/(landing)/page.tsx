@@ -9,7 +9,6 @@ import ComparisonTable from '@/components/landing-v3/comparison-table'
 import TestimonialStories from '@/components/landing-v3/testimonial-stories'
 import FounderStory from '@/components/landing-v3/founder-story'
 import PricingSection from '@/components/landing-v3/pricing-section'
-import FAQSection from '@/components/landing-v3/faq-section'
 import GiftSection from '@/components/landing-v3/gift-section'
 import FooterCTA from '@/components/landing-v3/footer-cta'
 import LandingFooter from '@/components/landing-v3/landing-footer'
@@ -40,9 +39,6 @@ export default function LandingV3() {
           <FounderStory />
           <div id="pricing">
             <PricingSection />
-          </div>
-          <div id="faq">
-            <FAQSection />
           </div>
           <GiftSection />
           <FooterCTA />
