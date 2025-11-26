@@ -75,6 +75,8 @@ export interface AudioRecordingScreenProps {
   onSaveForLater?: (draft: Partial<StoryDraft>) => void;
   onSwitchToText: () => void;
   onCancel: () => void;
+  /** When true, hides navigation elements for use in modal overlay */
+  isOverlayMode?: boolean;
 }
 
 export interface TextEntryScreenProps {

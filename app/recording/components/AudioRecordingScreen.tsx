@@ -18,6 +18,7 @@ export function AudioRecordingScreen({
   onSaveForLater,
   onSwitchToText,
   onCancel,
+  isOverlayMode = false,
 }: AudioRecordingScreenProps) {
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -293,21 +294,27 @@ export function AudioRecordingScreen({
     : audioLevels;
 
   return (
-    <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div style={{ backgroundColor: "#F5F1ED", minHeight: isOverlayMode ? "auto" : "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <div className="flex items-center justify-between px-6 pt-6 pb-4" style={{ maxWidth: "600px", margin: "0 auto", width: "100%" }}>
         <div className="flex items-center gap-3">
-          <img
-            src="/final logo/logo hw.svg"
-            alt="Heritage Whisper"
-            className="w-12 h-12"
-          />
+          {isOverlayMode ? (
+            <h2 className="text-xl font-serif font-semibold" style={{ color: "#2C3E50" }}>
+              Record Your Memory
+            </h2>
+          ) : (
+            <img
+              src="/final logo/logo hw.svg"
+              alt="Heritage Whisper"
+              className="w-12 h-12"
+            />
+          )}
         </div>
         {!isProcessing && (
           <button
             onClick={() => setShowCancelConfirm(true)}
             className="text-base font-medium transition-colors hover:opacity-70"
-            style={{ color: "#6B7280", marginRight: "-125px" }}
+            style={{ color: "#6B7280", marginRight: isOverlayMode ? "0" : "-125px" }}
             aria-label="Cancel"
           >
             Cancel
@@ -315,19 +322,21 @@ export function AudioRecordingScreen({
         )}
       </div>
 
-      {/* Hero Text */}
-      <div className="px-6 mb-4" style={{ maxWidth: "600px", margin: "0 auto" }}>
-        <h2
-          className="font-serif font-semibold text-center"
-          style={{
-            fontSize: "32px",
-            lineHeight: "1.2",
-            color: "#2C3E50"
-          }}
-        >
-          Record your story
-        </h2>
-      </div>
+      {/* Hero Text - hidden in overlay mode since header has title */}
+      {!isOverlayMode && (
+        <div className="px-6 mb-4" style={{ maxWidth: "600px", margin: "0 auto" }}>
+          <h2
+            className="font-serif font-semibold text-center"
+            style={{
+              fontSize: "32px",
+              lineHeight: "1.2",
+              color: "#2C3E50"
+            }}
+          >
+            Record your story
+          </h2>
+        </div>
+      )}
 
       {/* Photo Preview */}
       {draft.photoUrl && (
@@ -461,8 +470,8 @@ export function AudioRecordingScreen({
           </div>
         )}
 
-        {/* Text Option */}
-        {isIdle && (
+        {/* Text Option - hidden in overlay mode */}
+        {isIdle && !isOverlayMode && (
           <div className="text-center mb-6">
             <button
               onClick={onSwitchToText}
@@ -474,8 +483,8 @@ export function AudioRecordingScreen({
           </div>
         )}
 
-        {/* Back Button */}
-        {isIdle && (
+        {/* Back Button - hidden in overlay mode */}
+        {isIdle && !isOverlayMode && (
           <button
             onClick={onBack}
             className="w-full py-3 rounded-xl font-medium text-base flex items-center justify-center gap-2 mb-6"

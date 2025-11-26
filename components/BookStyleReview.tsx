@@ -28,7 +28,7 @@ import {
   type StoryPhoto,
 } from "@/components/MultiPhotoUploader";
 import { CustomAudioPlayer } from "@/components/CustomAudioPlayer";
-import { RecordingOverlay } from "@/components/RecordingOverlay";
+import { AudioRecordingOverlay } from "@/components/AudioRecordingOverlay";
 import { AudioProcessingCard } from "@/components/AudioProcessingCard";
 import { ProcessingStatus } from "@/components/ProcessingStatus";
 import { supabase } from "@/lib/supabase";
@@ -183,104 +183,66 @@ export function BookStyleReview({
   // Note: Background transcription logic removed - users now select transcription
   // BEFORE reaching this screen via TranscriptionSelectionScreen component
 
-  const handleContinueRecording = async (audioBlob: Blob, duration: number) => {
+  const handleContinueRecording = async (
+    audioBlob: Blob,
+    duration: number,
+    newTranscription?: string,
+    newLessonOptions?: { practical?: string; emotional?: string; character?: string }
+  ) => {
     // Close overlay
     setShowRecordingOverlay(false);
     setIsInitialRecordingShow(false); // No longer initial show
 
-    // Start processing
-    setAudioProcessingStatus("uploading");
-    setTranscriptionStatus("transcribing");
+    // Create blob URL for audio playback
+    const blobUrl = URL.createObjectURL(audioBlob);
+
+    // Update audio state
+    setCleanedAudioUrl(blobUrl);
+    setAudioSource("original");
+    setAudioProcessingStatus("complete");
+
+    // Call the parent callback with audio URL and blob
+    if (onAudioChange) {
+      onAudioChange(blobUrl, audioBlob);
+    }
+
+    setTranscriptionStatus("complete");
     setProcessingError(null);
 
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) throw new Error("No session");
+    // Check if there's existing transcription text
+    const hasExistingText = transcription && transcription.trim().length > 0;
 
-      // Generate or get memoryId (you may want to pass this as a prop)
-      const memoryId = crypto.randomUUID();
+    if (hasExistingText && newTranscription) {
+      // Store the new transcription and show confirmation modal
+      setPendingTranscription(newTranscription);
+      setPendingLessonOptions(newLessonOptions || null);
+      setPendingAudioUrl(blobUrl);
+      setPendingAudioBlob(audioBlob);
+      setPendingAudioDuration(duration);
+      setShowTranscriptionReplaceConfirm(true);
+    } else if (newTranscription) {
+      // No existing text, apply transcription directly
+      onTranscriptionChange(newTranscription);
 
-      // Upload and process
-      const formData = new FormData();
-      formData.append("audio", audioBlob);
-      formData.append("memoryId", memoryId);
-
-      setAudioProcessingStatus("enhancing");
-
-      const response = await fetch("/api/process-recording", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${session.access_token}` },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-        console.error("[BookStyleReview] API Error:", {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData,
-        });
-        throw new Error(errorData.error || `API request failed with status ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      // Update audio
-      setCleanedAudioUrl(result.audio.url);
-      setAudioSource(result.audio.source);
-      setAudioProcessingStatus("complete");
-
-      // Call the parent callback with audio URL
-      if (onAudioChange) {
-        onAudioChange(result.audio.url, audioBlob);
-      }
-
-      setTranscriptionStatus("complete");
-
-      // Check if there's existing transcription text
-      const hasExistingText = transcription && transcription.trim().length > 0;
-
-      if (hasExistingText) {
-        // Store the new transcription and show confirmation modal
-        setPendingTranscription(result.transcription.formatted);
-        setPendingLessonOptions(result.transcription.lessons || null);
-        setPendingAudioUrl(result.audio.url);
-        setPendingAudioBlob(audioBlob);
-        setPendingAudioDuration(duration);
-        setShowTranscriptionReplaceConfirm(true);
-      } else {
-        // No existing text, apply transcription directly
-        onTranscriptionChange(result.transcription.formatted);
-
-        // Update lessons
-        if (result.transcription.lessons) {
-          setLessonOptions(result.transcription.lessons);
-          // Set default lesson (practical)
-          if (result.transcription.lessons.practical) {
-            onWisdomChange(result.transcription.lessons.practical);
-            setTempWisdom(result.transcription.lessons.practical);
-          }
+      // Update lessons
+      if (newLessonOptions) {
+        setLessonOptions(newLessonOptions);
+        // Set default lesson (practical)
+        if (newLessonOptions.practical) {
+          onWisdomChange(newLessonOptions.practical);
+          setTempWisdom(newLessonOptions.practical);
         }
-
-        toast({
-          title: "Recording processed!",
-          description: "Your memory has been transcribed and enhanced.",
-        });
       }
-    } catch (error) {
-      console.error("[BookStyleReview] Processing error:", error);
-      setAudioProcessingStatus("error");
-      setTranscriptionStatus("error");
-      setProcessingError(
-        error instanceof Error ? error.message : "Processing failed"
-      );
 
       toast({
-        title: "Processing failed",
-        description: "Please try recording again.",
-        variant: "destructive",
+        title: "Recording processed!",
+        description: "Your memory has been transcribed.",
+      });
+    } else {
+      // No transcription provided (maybe transcription failed), just save the audio
+      toast({
+        title: "Recording saved!",
+        description: "Audio recorded successfully.",
       });
     }
   };
@@ -423,8 +385,8 @@ export function BookStyleReview({
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#2c2416] via-[#1a1410] to-[#2c2416] md:bg-gradient-to-b md:from-amber-50 md:to-white overflow-x-hidden">
-      {/* Recording Overlay - Rendered at top level for proper z-index */}
-      <RecordingOverlay
+      {/* Recording Overlay - Uses AudioRecordingScreen with 30-min max, immediate transcription */}
+      <AudioRecordingOverlay
         isOpen={showRecordingOverlay}
         onClose={handleRecordingOverlayClose}
         onContinue={handleContinueRecording}
