@@ -1223,16 +1223,19 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
 
         {/* Timeline Container */}
         <div ref={timelineContainerRef} className="relative">
-          {/* V3: Subtle vertical timeline ruler - warm gray for definition */}
+          {/* V3: Subtle vertical timeline ruler - warm gray for definition with gradient fades */}
           <div
             className="absolute left-1/2 md:w-[3.5px] w-[4px] rounded-full overflow-hidden pointer-events-none"
             style={{
               backgroundColor: isDark ? 'rgba(176, 179, 184, 0.25)' : 'var(--color-timeline-spine)',
               transform: 'translateX(-50%)',
               top: '0',
-              bottom: '500px',
+              bottom: '660px',
               opacity: 0.8,
               boxShadow: '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)',
+              // Gradient mask: fade in at top (80px), solid middle, fade out at bottom (120px)
+              maskImage: 'linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 120px), transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 120px), transparent 100%)',
             }}
           />
 

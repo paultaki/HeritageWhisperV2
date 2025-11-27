@@ -80,11 +80,14 @@ body {
   position: absolute;
   left: 18px;
   top: 0;
-  bottom: 0;
+  bottom: 660px;
   width: 4px;
   /* Lighter mauve to match desktop */
   background: var(--color-timeline-spine);
   box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12);
+  /* Gradient mask: fade in at top (80px), solid middle, fade out at bottom (120px) */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 120px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 120px), transparent 100%);
 }
 
 /* decade section */
