@@ -155,6 +155,15 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
     .split("\n")
     .filter((p) => p.trim().length > 0);
 
+  // Determine if this is a left or right page (like in a real book)
+  // Odd pages = right side of spread (rounded on right)
+  // Even pages = left side of spread (rounded on left)
+  const isRightPage = !pageNumber || pageNumber % 2 === 1;
+  const borderRadius = isRightPage ? '2px 12px 12px 2px' : '12px 2px 2px 12px';
+  const insetShadow = isRightPage
+    ? 'inset -4px 0 8px -4px rgba(0,0,0,0.08), inset 4px 0 12px -4px rgba(0,0,0,0.12)'
+    : 'inset 4px 0 8px -4px rgba(0,0,0,0.08), inset -4px 0 12px -4px rgba(0,0,0,0.12)';
+
   return (
     <section
       className="relative flex h-[100dvh] w-screen flex-shrink-0 snap-start"
@@ -166,19 +175,15 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
         className="relative mx-auto my-0 h-[100dvh] w-full text-stone-900 ring-1 ring-black/5 overflow-hidden"
         style={{
           backgroundColor: '#FFFDF8', // Cream paper instead of pure white
-          borderRadius: '2px 12px 12px 2px', // Asymmetric: sharp on left (spine), rounded on right (page edge)
-          boxShadow: `
-            inset -4px 0 8px -4px rgba(0,0,0,0.08),
-            inset 4px 0 12px -4px rgba(0,0,0,0.12),
-            0 10px 40px -10px rgba(0,0,0,0.5)
-          `, // Left edge inset shadow for bound-page depth + outer shadow
+          borderRadius, // Asymmetric: alternates based on page position
+          boxShadow: `${insetShadow}, 0 10px 40px -10px rgba(0,0,0,0.5)`,
         }}
       >
         {/* Subtle paper texture overlay - barely perceptible grain */}
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            borderRadius: '2px 12px 12px 2px',
+            borderRadius,
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
             opacity: 0.035,
           }}
@@ -187,7 +192,7 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            borderRadius: '2px 12px 12px 2px',
+            borderRadius,
             boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.02), inset 0 -1px 0 rgba(0,0,0,0.02)',
           }}
         />
@@ -332,9 +337,12 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
           </div>
         </div>
 
-        {/* Page number - subtle, book-style positioning */}
+        {/* Page number - subtle, book-style positioning on outer edge */}
         {pageNumber && (
-          <div className="absolute bottom-[calc(env(safe-area-inset-bottom)+12px)] right-5 pointer-events-none">
+          <div
+            className="absolute bottom-[calc(env(safe-area-inset-bottom)+12px)] pointer-events-none"
+            style={{ [isRightPage ? 'right' : 'left']: '20px' }}
+          >
             <span className="text-xs font-medium text-stone-400 tabular-nums tracking-wide">
               {pageNumber}
             </span>
