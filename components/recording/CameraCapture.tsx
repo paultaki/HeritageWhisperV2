@@ -269,8 +269,8 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
         ) : (
           /* Camera view - only shown when user clicks "Take Photo" */
           <>
-            {/* 16:10 aspect ratio preview frame */}
-            <div className="relative w-full max-w-4xl mx-auto" style={{ aspectRatio: '16/10' }}>
+            {/* 4:3 aspect ratio preview frame */}
+            <div className="relative w-full max-w-4xl mx-auto" style={{ aspectRatio: '4/3' }}>
               <video
                 ref={videoRef}
                 autoPlay
@@ -353,11 +353,11 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
             </p>
           </div>
 
-          {/* 16:10 aspect ratio editing frame */}
+          {/* 4:3 aspect ratio editing frame */}
           <div className="flex-1 flex items-center justify-center px-4">
             <div
               className="relative w-full max-w-4xl bg-black rounded-lg overflow-hidden border-2 border-white/30"
-              style={{ aspectRatio: '16/10' }}
+              style={{ aspectRatio: '4/3' }}
             >
               <div
                 ref={imageRef}

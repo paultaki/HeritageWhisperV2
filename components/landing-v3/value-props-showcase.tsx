@@ -51,7 +51,7 @@ export default function ValuePropsShowcase() {
             {/* Center Card: Book View (Landscape/Wide) */}
             <div className="md:col-span-6 z-20 transform transition-transform hover:scale-[1.02] duration-500">
               <div className="bg-white p-3 rounded-2xl shadow-2xl border border-heritage-deep-slate/10">
-                <div className="relative overflow-hidden rounded-xl bg-heritage-warm-paper aspect-[16/10]">
+                <div className="relative overflow-hidden rounded-xl bg-heritage-warm-paper aspect-[4/3]">
                   <img
                     src="/images/book-view.png"
                     alt="Book View Interface"

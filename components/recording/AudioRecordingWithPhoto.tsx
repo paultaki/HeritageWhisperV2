@@ -413,11 +413,11 @@ export function AudioRecordingWithPhoto({
             </p>
           </div>
 
-          {/* 16:10 aspect ratio editing frame */}
+          {/* 4:3 aspect ratio editing frame */}
           <div className="flex-1 flex items-center justify-center px-4">
             <div
               className="relative w-full max-w-4xl bg-black rounded-lg overflow-hidden border-2 border-white/30"
-              style={{ aspectRatio: '16/10' }}
+              style={{ aspectRatio: '4/3' }}
             >
               <div
                 ref={photoImageRef}
@@ -484,10 +484,10 @@ export function AudioRecordingWithPhoto({
         </div>
       )}
 
-      {/* Photo section - 16:10 aspect ratio on desktop */}
+      {/* Photo section - 4:3 aspect ratio on desktop */}
       <div className="h-[40%] md:h-auto md:flex-shrink-0 bg-black flex items-center justify-center">
         {photoDataURL ? (
-          <div className="relative w-full h-full md:h-auto md:w-full md:max-w-4xl md:mx-auto overflow-hidden" style={{ aspectRatio: '16/10' }}>
+          <div className="relative w-full h-full md:h-auto md:w-full md:max-w-4xl md:mx-auto overflow-hidden" style={{ aspectRatio: '4/3' }}>
             <img
               src={photoDataURL}
               className="absolute inset-0 w-full h-full object-contain"
@@ -510,7 +510,7 @@ export function AudioRecordingWithPhoto({
             )}
           </div>
         ) : (
-          <div className="w-full md:max-w-4xl bg-gray-900 flex items-center justify-center overflow-hidden" style={{ aspectRatio: '16/10' }}>
+          <div className="w-full md:max-w-4xl bg-gray-900 flex items-center justify-center overflow-hidden" style={{ aspectRatio: '4/3' }}>
             <p className="text-white/50">No photo selected</p>
           </div>
         )}

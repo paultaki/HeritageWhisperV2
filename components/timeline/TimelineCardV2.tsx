@@ -269,7 +269,7 @@ export default function TimelineCardV2({ story, birthYear, audioManager }: Timel
             width={currentPhoto.width}
             height={currentPhoto.height}
             transform={currentPhoto.transform}
-            aspectRatio={16 / 10}
+            aspectRatio={4 / 3}
             className="bg-gray-100"
           />
 

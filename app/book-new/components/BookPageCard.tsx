@@ -177,7 +177,7 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
           <div className="px-3 pt-0">
             <div
               className="relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-stone-200"
-              style={{ aspectRatio: "16/10" }}
+              style={{ aspectRatio: "4/3" }}
               onTouchStart={hasMultiplePhotos ? handlePhotoTouchStart : undefined}
               onTouchMove={hasMultiplePhotos ? handlePhotoTouchMove : undefined}
               onTouchEnd={hasMultiplePhotos ? handlePhotoTouchEnd : undefined}
@@ -189,7 +189,7 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
                   transform={photoTransform}
                   width={photoWidth}
                   height={photoHeight}
-                  aspectRatio={16 / 10}
+                  aspectRatio={4 / 3}
                   className="h-full w-full"
                 />
               ) : (

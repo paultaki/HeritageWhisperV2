@@ -2,6 +2,14 @@ import {withSentryConfig} from '@sentry/nextjs';
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Enable MDX page extensions
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+
+  // Use Rust-based MDX compiler (Turbopack compatible)
+  experimental: {
+    mdxRs: true,
+  },
+
   /* config options here */
 
   // Performance optimizations for development

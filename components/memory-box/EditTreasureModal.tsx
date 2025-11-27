@@ -57,7 +57,7 @@ type EditTreasureModalProps = {
  * - Edit title, category, year, description
  * - Click photo to enter pan/zoom editor
  * - Mobile-first responsive design
- * - 16:10 aspect ratio photo display
+ * - 4:3 aspect ratio photo display
  * - Preserves existing photo
  *
  * Based on: AddTreasureModal pattern
@@ -274,7 +274,7 @@ export function EditTreasureModal({ isOpen, onClose, treasure, onSave }: EditTre
             <div className="space-y-2">
               <Label>Photo</Label>
               <div
-                className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border-2 border-gray-300 cursor-pointer hover:border-heritage-coral transition-colors group"
+                className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border-2 border-gray-300 cursor-pointer hover:border-heritage-coral transition-colors group"
                 onClick={() => !newPhotoPreview && setIsEditingPhoto(true)}
               >
                 <img
@@ -421,7 +421,7 @@ export function EditTreasureModal({ isOpen, onClose, treasure, onSave }: EditTre
             {/* Photo Preview */}
             <div
               ref={imageRef}
-              className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border-2 border-heritage-coral bg-gray-100"
+              className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border-2 border-heritage-coral bg-gray-100"
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}

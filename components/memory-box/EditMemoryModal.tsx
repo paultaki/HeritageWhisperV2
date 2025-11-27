@@ -46,7 +46,7 @@ type EditMemoryModalProps = {
  * - Edit title, year, transcription, lessons learned
  * - Click photo to enter pan/zoom editor
  * - Mobile-first responsive design
- * - 16:10 aspect ratio photo display
+ * - 4:3 aspect ratio photo display
  * - Preserves existing photo and audio
  *
  * Based on: AddTreasureModal pattern
@@ -218,7 +218,7 @@ export function EditMemoryModal({ isOpen, onClose, story, onSave }: EditMemoryMo
               <div className="space-y-2">
                 <Label>Photo</Label>
                 <div
-                  className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border-2 border-gray-300 cursor-pointer hover:border-heritage-coral transition-colors group"
+                  className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border-2 border-gray-300 cursor-pointer hover:border-heritage-coral transition-colors group"
                   onClick={() => setIsEditingPhoto(true)}
                 >
                   <img
@@ -309,7 +309,7 @@ export function EditMemoryModal({ isOpen, onClose, story, onSave }: EditMemoryMo
             {/* Photo Preview */}
             <div
               ref={imageRef}
-              className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border-2 border-heritage-coral bg-gray-100"
+              className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border-2 border-heritage-coral bg-gray-100"
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}

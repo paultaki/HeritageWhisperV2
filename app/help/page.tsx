@@ -135,7 +135,7 @@ export default function HelpPage() {
             <div className="space-y-4">
               <p className="text-base"><strong>You can edit any memory anytime.</strong> Here's how:</p>
               <ol className="list-none space-y-3 ml-0 text-base">
-                <li><strong>Step 1:</strong> Go to <strong>Timeline</strong>, <strong>Book</strong>, or <strong>Memory Box</strong></li>
+                <li><strong>Step 1:</strong> Go to <strong>Book</strong> or <strong>Memory Box</strong></li>
                 <li><strong>Step 2:</strong> Click on a memory card to open it</li>
                 <li><strong>Step 3:</strong> Click the <strong>"Edit"</strong> button at the top</li>
                 <li><strong>Step 4:</strong> Change anything you want: title, date, text, photos, or lesson learned</li>
@@ -231,46 +231,6 @@ export default function HelpPage() {
     {
       title: "Printing & Exporting",
       items: [
-        {
-          question: "How do I print my story?",
-          answer: (
-            <div className="space-y-3">
-              <p>You have multiple printing options:</p>
-
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-3">
-                <strong className="block mb-2">
-                  📄 2-Up Format (Home Printing)
-                </strong>
-                <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
-                  <li>Designed for standard 8.5" × 11" paper</li>
-                  <li>Two pages per sheet</li>
-                  <li>Perfect for home or office printers</li>
-                  <li>Access from Book view → Print icon</li>
-                </ul>
-              </div>
-
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-3">
-                <strong className="block mb-2">
-                  📚 Trim Format (Professional Printing)
-                </strong>
-                <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
-                  <li>
-                    Full-page layout optimized for print-on-demand services
-                  </li>
-                  <li>Professional book formatting with proper margins</li>
-                  <li>Export as PDF to send to a printing service</li>
-                  <li>Access from Book view → Print icon</li>
-                </ul>
-              </div>
-
-              <p className="text-sm text-gray-600 mt-3">
-                💡 <strong>Tip:</strong> Use Print Preview in your browser to
-                adjust page settings before printing.
-              </p>
-            </div>
-          ),
-          icon: <Printer className="w-5 h-5" />,
-        },
         {
           question: "Do you offer printed books?",
           answer: (

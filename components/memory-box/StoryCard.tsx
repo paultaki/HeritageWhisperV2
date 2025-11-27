@@ -45,7 +45,7 @@ type Props = {
  * - Added large Play overlay on hover/idle
  * - Increased Title font size
  * - Moved Edit to dropdown
- * - Consistent 16:10 aspect ratio
+ * - Consistent 4:3 aspect ratio
  */
 export function StoryCard({
   id,
@@ -115,7 +115,7 @@ export function StoryCard({
         style={{ maxWidth: "480px" }}
         onClick={onView}
       >
-        {/* Image Container - 16:10 Aspect Ratio */}
+        {/* Image Container - 4:3 Aspect Ratio */}
         <div className="relative">
           <StoryPhotoWithBlurExtend
             src={imageUrl}
@@ -123,7 +123,7 @@ export function StoryCard({
             width={photoWidth}
             height={photoHeight}
             transform={photoTransform}
-            aspectRatio={16 / 10}
+            aspectRatio={4 / 3}
             className="rounded-t-2xl overflow-hidden"
           />
 

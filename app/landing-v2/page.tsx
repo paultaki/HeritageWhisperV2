@@ -97,7 +97,7 @@ const Hero = () => (
           {/* Center Card: Book View (Landscape/Wide) */}
           <div className="md:col-span-6 z-20 transform transition-transform hover:scale-[1.02] duration-500">
             <div className="bg-white p-3 rounded-2xl shadow-2xl border border-cream-200">
-              <div className="relative overflow-hidden rounded-xl bg-cream-50 aspect-[16/10]">
+              <div className="relative overflow-hidden rounded-xl bg-cream-50 aspect-[4/3]">
                 <img
                   src={IMAGES.book}
                   alt="Book View Interface"

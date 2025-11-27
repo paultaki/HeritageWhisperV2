@@ -322,7 +322,7 @@ Configured in `~/.mcp.json`:
 - **AI Transcription**: AssemblyAI "universal" batch (~3.7s, 58% cheaper, 93.4% accuracy)
 - **Pearl AI Interviewer**: Conversational AI via OpenAI Realtime API with WebRTC (see [AI_PROMPTING.md](AI_PROMPTING.md))
 - **AI Prompt System**: Multi-tier reflection prompts (Tier 1: entity-based, Tier 3: milestone analysis)
-- **My Treasures**: Photo upload with zoom/pan editing (16:10 aspect ratio), stores transform as JSONB in `treasures.transform`
+- **My Treasures**: Photo upload with zoom/pan editing (4:3 aspect ratio), stores transform as JSONB in `treasures.transform`
 - **Photo Management**: Multi-upload with cropping & hero images (EXIF data stripped for privacy)
 - **Timeline View**: Chronological story organization by decade
 - **Book View**: Dual-page layout with natural pagination

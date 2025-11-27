@@ -340,7 +340,7 @@ export function AudioRecordingScreen({
 
       {/* Photo Preview */}
       {draft.photoUrl && (
-        <div className="mx-6 mb-6 relative rounded-2xl overflow-hidden" style={{ aspectRatio: "16/10", maxWidth: "600px", margin: "0 auto 1.5rem auto", backgroundColor: "#faf8f5" }}>
+        <div className="mx-6 mb-6 relative rounded-2xl overflow-hidden" style={{ aspectRatio: "4/3", maxWidth: "600px", margin: "0 auto 1.5rem auto", backgroundColor: "#faf8f5" }}>
           {/* Blurred background layer - fills empty space for portrait images */}
           <img
             src={draft.photoUrl}

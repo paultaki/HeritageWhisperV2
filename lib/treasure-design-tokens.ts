@@ -48,7 +48,7 @@ export const TREASURE_TOKENS = {
 
   // Photo container
   photo: {
-    aspectRatio: '16/10',                  // Consistent aspect ratio
+    aspectRatio: '4/3',                     // Consistent aspect ratio
     innerStroke: 'ring-1 ring-inset ring-black/10', // Sharpens edges on retina
   },
 

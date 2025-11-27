@@ -149,7 +149,31 @@ export async function POST(request: NextRequest) {
 
       if (userInsertError) {
         logger.error("[Registration] Error creating user:", userInsertError.message);
-        // Don't fail registration - user exists in auth.users
+
+        // If we failed to insert into public.users, we need to abort
+        // The auth.users entry was created but we can't complete registration
+        if (userInsertError.message?.includes("duplicate key") ||
+            userInsertError.message?.includes("unique constraint")) {
+          // Try to clean up the orphaned auth.users entry
+          try {
+            await supabase.auth.admin.deleteUser(data.user.id);
+            logger.debug("[Registration] Cleaned up orphaned auth user after duplicate email");
+          } catch (cleanupError) {
+            logger.error("[Registration] Failed to cleanup orphaned auth user:",
+              cleanupError instanceof Error ? cleanupError.message : 'Unknown error');
+          }
+
+          return NextResponse.json(
+            { error: "This email is already registered. Please sign in or reset your password." },
+            { status: 400 }
+          );
+        }
+
+        // For other insert errors, also abort to prevent cascading failures
+        return NextResponse.json(
+          { error: "Registration failed. Please try again." },
+          { status: 500 }
+        );
       }
 
       // Then record both agreements in parallel

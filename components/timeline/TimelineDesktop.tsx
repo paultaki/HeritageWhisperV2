@@ -499,15 +499,15 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)';
           }}
         >
-          {/* Photo Section - 16:10 aspect ratio to match mobile, rounded top corners only */}
-          <div className="relative w-full aspect-[16/10] overflow-hidden group">
+          {/* Photo Section - 4:3 aspect ratio to match mobile, rounded top corners only */}
+          <div className="relative w-full aspect-[4/3] overflow-hidden group">
             <StoryPhotoWithBlurExtend
               src={currentPhoto.url}
               alt={story.title}
               width={(currentPhoto as any).width}
               height={(currentPhoto as any).height}
               transform={currentPhoto.transform}
-              aspectRatio={16 / 10}
+              aspectRatio={4 / 3}
               priority={index < 8}
               className="w-full h-full"
             />

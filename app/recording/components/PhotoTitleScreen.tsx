@@ -275,7 +275,7 @@ export function PhotoTitleScreen({
                 <div
                   ref={imageRef}
                   className="relative rounded-xl overflow-hidden cursor-move touch-none"
-                  style={{ aspectRatio: "16/10", backgroundColor: "#faf8f5" }}
+                  style={{ aspectRatio: "4/3", backgroundColor: "#faf8f5" }}
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
@@ -352,7 +352,7 @@ export function PhotoTitleScreen({
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="relative rounded-xl overflow-hidden" style={{ aspectRatio: "16/10", backgroundColor: "#faf8f5" }}>
+                <div className="relative rounded-xl overflow-hidden" style={{ aspectRatio: "4/3", backgroundColor: "#faf8f5" }}>
                   {/* Blurred background layer - fills empty space for portrait images */}
                   <img
                     src={draft.photoUrl}

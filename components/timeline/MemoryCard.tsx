@@ -635,7 +635,7 @@ export const MemoryCard = React.memo(
                 width={(activePhoto as any).width}
                 height={(activePhoto as any).height}
                 transform={photoTransform}
-                aspectRatio={16 / 10}
+                aspectRatio={4 / 3}
                 className="hw-card-media"
               />
             );

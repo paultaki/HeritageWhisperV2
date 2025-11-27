@@ -394,7 +394,7 @@ export function MemoryOverlay({
           {/* Photo Gallery */}
           {hasPhotos && currentPhoto && (
             <div
-              className="relative w-full aspect-[16/10] overflow-hidden rounded-xl my-6 shadow-lg bg-[#faf8f5]"
+              className="relative w-full aspect-[4/3] overflow-hidden rounded-xl my-6 shadow-lg bg-[#faf8f5]"
               onTouchStart={handlePhotoTouchStart}
               onTouchEnd={handlePhotoTouchEnd}
             >

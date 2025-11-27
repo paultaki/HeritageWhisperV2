@@ -157,8 +157,12 @@ function useAccountContextInternal() {
         setError(data.error);
       }
     } catch (err: any) {
-      // Silently handle if endpoint doesn't exist yet (V3 migration in progress)
-      if (err.message?.includes('Failed to fetch') || err.message?.includes('500')) {
+      // Silently handle expected errors:
+      // - "Authentication required" = race condition where user exists but session doesn't yet
+      // - "Failed to fetch" / "500" = endpoint doesn't exist yet (V3 migration in progress)
+      if (err.message?.includes('Authentication required') ||
+          err.message?.includes('Failed to fetch') ||
+          err.message?.includes('500')) {
         setAvailableStorytellers([]);
         return;
       }

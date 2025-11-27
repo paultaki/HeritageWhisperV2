@@ -64,7 +64,7 @@ export default function MemoryCardCompact(p: Props) {
       onClick={p.onEdit}
       style={{ cursor: 'pointer', width: '160px' }}
     >
-      {/* Image - Compact Fixed 16:10 Ratio */}
+      {/* Image - Compact Fixed 4:3 Ratio */}
       <div className="relative overflow-hidden" style={{ height: '100px' }}>
         <img
           className="w-full h-full object-cover"

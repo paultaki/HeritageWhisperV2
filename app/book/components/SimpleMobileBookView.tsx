@@ -317,7 +317,7 @@ function StoryPage({
           <div className="px-3 pt-4">
             <div
               className="overflow-hidden rounded-3xl ring-1 ring-stone-200 shadow-sm bg-white relative"
-              style={{ aspectRatio: "16/10" }}
+              style={{ aspectRatio: "4/3" }}
             >
               <StoryPhotoWithBlurExtend
                 src={photoUrl}
@@ -325,7 +325,7 @@ function StoryPage({
                 width={heroPhoto?.width}
                 height={heroPhoto?.height}
                 transform={heroPhoto?.transform || story.photoTransform}
-                aspectRatio={16 / 10}
+                aspectRatio={4 / 3}
                 className="w-full h-full"
               />
             </div>

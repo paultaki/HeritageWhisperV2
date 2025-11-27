@@ -1,7 +1,155 @@
 # HeritageWhisper SEO Strategy & Keyword Research
 
 **Document Created:** November 18, 2025
-**Last Updated:** November 18, 2025
+**Last Updated:** November 26, 2025
+
+---
+
+## ✅ IMPLEMENTATION STATUS (November 2025)
+
+### What's Been Built
+
+The SEO infrastructure is now production-ready. Here's what's implemented:
+
+#### Core SEO Library (`lib/seo/`)
+
+| File | Purpose |
+|------|---------|
+| `config.ts` | Central config with `indexingEnabled` flag (currently `false`) |
+| `metadata.ts` | `buildPageMetadata()` helper for consistent Next.js Metadata |
+| `schema/organization.ts` | Organization JSON-LD generator |
+| `schema/product.ts` | SoftwareApplication JSON-LD generator |
+| `schema/article.ts` | Article JSON-LD generator for content pages |
+| `components/JsonLd.tsx` | Generic JSON-LD script renderer |
+| `components/OrganizationSchema.tsx` | Organization structured data component |
+| `components/ProductSchema.tsx` | Product structured data component |
+| `components/ArticleSchema.tsx` | Article structured data component |
+
+#### MDX Content System (`lib/mdx/`)
+
+| File | Purpose |
+|------|---------|
+| `loader.ts` | Loads MDX files with frontmatter parsing via `gray-matter` |
+| `index.ts` | Barrel exports for `loadMDXContent`, `getAllMDXSlugs`, etc. |
+
+#### Dynamic SEO Files
+
+| File | Purpose |
+|------|---------|
+| `app/robots.ts` | Dynamic robots.txt respecting `indexingEnabled` flag |
+| `app/sitemap.ts` | Dynamic sitemap with all public SEO pages |
+| `app/layout.tsx` | Root layout with SEO metadata + OrganizationSchema |
+| `mdx-components.tsx` | MDX component overrides (root level) |
+| `next.config.ts` | MDX support via `experimental.mdxRs` (Turbopack compatible) |
+
+#### Marketing Route Structure (`app/(marketing)/`)
+
+```
+app/(marketing)/
+├── layout.tsx              # Shared layout with ProductSchema
+├── guides/
+│   ├── page.tsx            # Guides index page
+│   ├── [slug]/page.tsx     # Dynamic guide articles with ArticleSchema
+│   └── _content/           # MDX content files
+│       ├── recording-family-stories.mdx
+│       ├── questions-for-grandparents.mdx
+│       ├── urgent-story-preservation.mdx
+│       └── recording-dying-parent-stories.mdx
+├── alternatives/
+│   ├── page.tsx            # Alternatives index page
+│   ├── [slug]/page.tsx     # Dynamic comparison articles
+│   └── _content/
+│       ├── storyworth-alternatives.mdx
+│       └── heritagewhisper-vs-storyworth.mdx
+└── features/
+    ├── page.tsx            # Features index page
+    ├── [slug]/page.tsx     # Dynamic feature articles
+    └── _content/           # (empty - add feature MDX files here)
+```
+
+### Content Pages Live
+
+| URL | Status | Primary Keyword |
+|-----|--------|-----------------|
+| `/guides` | ✅ Live | "preserve family stories" |
+| `/guides/recording-family-stories` | ✅ Live | "how to record family stories" |
+| `/guides/questions-for-grandparents` | ✅ Live | "questions to ask grandparents" |
+| `/guides/urgent-story-preservation` | ✅ Live | "preserve memories before too late" |
+| `/guides/recording-dying-parent-stories` | ✅ Live | "record dying parent stories" |
+| `/alternatives` | ✅ Live | "storyworth alternatives" |
+| `/alternatives/storyworth-alternatives` | ✅ Live | "storyworth alternatives 2025" |
+| `/alternatives/heritagewhisper-vs-storyworth` | ✅ Live | "heritagewhisper vs storyworth" |
+| `/features` | ✅ Live | "heritagewhisper features" |
+
+### How to Use
+
+#### Toggle Indexing (When Ready to Launch)
+
+```typescript
+// lib/seo/config.ts
+export const SEO_CONFIG = {
+  indexingEnabled: true,  // Change to true when ready
+  // ...
+}
+```
+
+This single flag controls:
+- `robots.txt` (allow vs disallow)
+- `<meta name="robots">` tags
+- All page-level indexing settings
+
+#### Add New Content Pages
+
+1. Create MDX file in the appropriate `_content/` directory:
+   ```mdx
+   ---
+   title: "Your Page Title"
+   description: "Meta description for SEO"
+   datePublished: "2025-01-15"
+   ---
+
+   Your content here...
+   ```
+
+2. Add URL to `app/sitemap.ts` (if not auto-discovered)
+
+3. The page auto-generates:
+   - SEO metadata via `buildPageMetadata()`
+   - Article JSON-LD via `ArticleSchema`
+   - Proper canonical URLs
+
+#### Build Page-Specific Metadata
+
+```typescript
+import { buildPageMetadata } from '@/lib/seo/metadata';
+
+export const metadata = buildPageMetadata({
+  title: 'Page Title',
+  description: 'Meta description',
+  path: '/your-page',
+  ogType: 'article', // or 'website'
+});
+```
+
+### Next Steps (Remaining from Strategy)
+
+**Phase 1 Content (High Priority):**
+- [ ] `/alternatives/storyworth-remento-comparison`
+- [ ] `/alternatives/free-story-apps`
+- [ ] `/guides/family-legacy-preservation` (pillar page)
+- [ ] `/guides/save-old-photo-albums`
+
+**Phase 2 Features:**
+- [ ] `/features/ai-story-interviewer`
+- [ ] `/features/pearl-ai-interviewer`
+- [ ] `/features/living-timeline`
+- [ ] `/features/family-sharing`
+
+**Technical:**
+- [ ] Create placeholder OG images in `/public/og/`
+- [ ] Add FAQ schema to content pages
+- [ ] Set up Google Search Console
+- [ ] Create lead magnet PDFs
 
 ---
 

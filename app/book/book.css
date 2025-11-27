@@ -230,7 +230,7 @@ body {
   font-size: 16px;
 }
 
-/* Note: Image aspect ratio is handled by StoryPhotoWithBlurExtend component (16:10) */
+/* Note: Image aspect ratio is handled by StoryPhotoWithBlurExtend component (4:3) */
 
 /* Left and Right Page Spacing */
 .page-left {

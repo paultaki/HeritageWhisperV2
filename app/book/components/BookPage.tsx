@@ -854,7 +854,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
                 width={currentPhoto.width}
                 height={currentPhoto.height}
                 transform={currentPhoto.transform}
-                aspectRatio={16 / 10}
+                aspectRatio={4 / 3}
                 className="rounded-md shadow ring-1 ring-black/5"
               />
 

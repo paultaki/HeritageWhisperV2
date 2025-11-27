@@ -34,8 +34,8 @@ export function StarterMemoryCard({ template, onStart }: Props) {
       }}
       aria-label={`Start recording: ${template.title}`}
     >
-      {/* Image Placeholder - 16:10 aspect ratio to match real cards */}
-      <div className="aspect-[16/10] bg-gradient-to-br from-stone-100 to-stone-200
+      {/* Image Placeholder - 4:3 aspect ratio to match real cards */}
+      <div className="aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-200
                       rounded-t-2xl flex flex-col items-center justify-center
                       border-b border-stone-200">
         <Camera className="w-16 h-16 text-stone-300 mb-2" strokeWidth={1.5} />

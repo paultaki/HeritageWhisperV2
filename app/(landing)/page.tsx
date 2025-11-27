@@ -1,50 +1,60 @@
-import LandingHeader from '@/components/landing-v3/landing-header'
-import HeroSection from '@/components/landing-v3/hero-section'
-import ProblemStatement from '@/components/landing-v3/problem-statement'
-import ThreePillars from '@/components/landing-v3/three-pillars'
-import SocialProofSnapshot from '@/components/landing-v3/social-proof-snapshot'
-import ValuePropsShowcase from '@/components/landing-v3/value-props-showcase'
-import HowItWorks from '@/components/landing-v3/how-it-works'
-import ComparisonTable from '@/components/landing-v3/comparison-table'
-import TestimonialStories from '@/components/landing-v3/testimonial-stories'
-import FounderStory from '@/components/landing-v3/founder-story'
-import PricingSection from '@/components/landing-v3/pricing-section'
-import GiftSection from '@/components/landing-v3/gift-section'
-import FooterCTA from '@/components/landing-v3/footer-cta'
-import LandingFooter from '@/components/landing-v3/landing-footer'
+import { Metadata } from 'next'
+import {
+  Header,
+  Hero,
+  StakesSection,
+  ComparisonSection,
+  ThreeSteps,
+  VoiceSection,
+  TechObjection,
+  ProductShowcase,
+  Testimonials,
+  FounderStory,
+  PricingSection,
+  FAQ,
+  FinalCTA,
+  Footer,
+} from '@/components/landing'
 
-export default function LandingV3() {
+export const metadata: Metadata = {
+  title: 'HeritageWhisper | Preserve Family Stories in Their Own Voice',
+  description:
+    "AI-powered family storytelling. Record memories, hear their voice forever. No typing required—just conversation.",
+  openGraph: {
+    title: 'HeritageWhisper | Preserve Family Stories in Their Own Voice',
+    description:
+      "AI-powered family storytelling. Record memories, hear their voice forever. No typing required—just conversation.",
+    type: 'website',
+  },
+}
+
+export default function LandingPage() {
   return (
     <>
-      <LandingHeader />
-      <main className="relative bg-heritage-warm-paper overflow-hidden">
-        {/* Subtle vertical line accents */}
-        <div className="hidden lg:block fixed left-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-stone-300/20 to-transparent" />
-        <div className="hidden lg:block fixed right-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-stone-300/20 to-transparent" />
-
-        <div className="relative">
-          <HeroSection />
-          {/* Three Ways section moved up - key differentiator */}
-          <ValuePropsShowcase />
-          <ProblemStatement />
-          <div id="features">
-            <ThreePillars />
-          </div>
-          <SocialProofSnapshot />
-          <div id="how-it-works">
-            <HowItWorks />
-          </div>
-          <ComparisonTable />
-          <TestimonialStories />
-          <FounderStory />
-          <div id="pricing">
-            <PricingSection />
-          </div>
-          <GiftSection />
-          <FooterCTA />
+      <Header />
+      <main className="relative bg-[var(--hw-page-bg)] overflow-hidden">
+        <Hero />
+        <StakesSection />
+        <ComparisonSection />
+        <div id="how-it-works">
+          <ThreeSteps />
         </div>
+        <VoiceSection />
+        <TechObjection />
+        <ProductShowcase />
+        <Testimonials />
+        <div id="founder-story">
+          <FounderStory />
+        </div>
+        <div id="pricing">
+          <PricingSection />
+        </div>
+        <div id="faq">
+          <FAQ />
+        </div>
+        <FinalCTA />
       </main>
-      <LandingFooter />
+      <Footer />
     </>
   )
 }

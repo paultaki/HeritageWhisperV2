@@ -371,10 +371,10 @@ export function AddTreasureModal({ isOpen, onClose, onSave }: Props) {
               </p>
             </div>
 
-            {/* 16:10 aspect ratio editing frame */}
+            {/* 4:3 aspect ratio editing frame */}
             <div
               className="relative w-full bg-black rounded-lg overflow-hidden border-2 border-gray-300"
-              style={{ aspectRatio: '16/10' }}
+              style={{ aspectRatio: '4/3' }}
             >
               <div
                 ref={imageRef}

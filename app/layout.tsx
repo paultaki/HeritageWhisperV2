@@ -8,13 +8,25 @@ import GlassNavWrapper from "@/components/GlassNavWrapper";
 import AgreementGuard from "@/components/AgreementGuard";
 import LayoutContent from "@/components/LayoutContent";
 import DarkModeCleanup from "@/components/DarkModeCleanup";
+import { OrganizationSchema } from "@/lib/seo/components/OrganizationSchema";
+import {
+  SEO_CONFIG,
+  indexingEnabled,
+  siteUrl,
+  defaultTitle,
+  titleTemplate,
+  defaultDescription,
+} from "@/lib/seo/config";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "HeritageWhisper - Preserve Your Life Stories",
-  description:
-    "An AI-powered storytelling platform for seniors to capture and share life memories with family.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: defaultTitle,
+    template: titleTemplate,
+  },
+  description: defaultDescription,
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -27,12 +39,37 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   robots: {
-    index: false,
-    follow: false,
+    index: indexingEnabled,
+    follow: indexingEnabled,
     googleBot: {
-      index: false,
-      follow: false,
+      index: indexingEnabled,
+      follow: indexingEnabled,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    title: defaultTitle,
+    description: defaultDescription,
+    siteName: SEO_CONFIG.organization.name,
+    images: [
+      {
+        url: `${siteUrl}${SEO_CONFIG.defaultOgImage}`,
+        width: 1200,
+        height: 630,
+        alt: defaultTitle,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: defaultDescription,
+    images: [`${siteUrl}${SEO_CONFIG.defaultOgImage}`],
   },
 };
 
@@ -59,6 +96,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
+        <OrganizationSchema />
         <Providers>
           <AgreementGuard>
             <DarkModeCleanup />

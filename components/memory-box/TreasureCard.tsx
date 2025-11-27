@@ -112,7 +112,7 @@ export function TreasureCard({
             width={imageWidth}
             height={imageHeight}
             transform={transform}
-            aspectRatio={16 / 10}
+            aspectRatio={4 / 3}
             className={cn(
               "overflow-hidden ring-1 ring-inset ring-black/10 transition-opacity duration-300",
               imageLoaded ? "opacity-100" : "opacity-0"
@@ -122,7 +122,7 @@ export function TreasureCard({
         ) : (
           <div
             className="w-full bg-gray-100 flex items-center justify-center overflow-hidden ring-1 ring-inset ring-black/10"
-            style={{ minHeight: "200px", aspectRatio: "16/10" }}
+            style={{ minHeight: "200px", aspectRatio: "4/3" }}
           >
             <CategoryIcon className="w-16 h-16 text-gray-300" />
           </div>

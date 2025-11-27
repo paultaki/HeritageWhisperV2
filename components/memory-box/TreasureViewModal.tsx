@@ -53,7 +53,7 @@ export function TreasureViewModal({ isOpen, onClose, treasure }: TreasureViewMod
 
         <div className="space-y-6">
           {/* Photo Display - Full size with transform */}
-          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border-2 border-gray-200 bg-gray-100">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border-2 border-gray-200 bg-gray-100">
             <img
               src={treasure.imageUrl}
               alt={treasure.title}

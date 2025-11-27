@@ -1223,7 +1223,7 @@ function StoryContent({ story }: { story: Story }) {
         const heroPhoto = story.photos.find(p => p.isHero) || story.photos[0];
         return (
           <div className="mb-4 max-w-sm">
-            <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
+            <div className="w-full aspect-[4/3] overflow-hidden rounded-md shadow ring-1 ring-black/5">
               <img
                 src={heroPhoto.url}
                 alt={story.title}
@@ -1899,7 +1899,7 @@ function MobilePage({
                 const heroPhoto = story.photos.find(p => p.isHero) || story.photos[0];
                 return (
                   <div className="mb-3">
-                    <div className="w-full aspect-[16/10] overflow-hidden rounded-md shadow ring-1 ring-black/5">
+                    <div className="w-full aspect-[4/3] overflow-hidden rounded-md shadow ring-1 ring-black/5">
                       <img
                         src={heroPhoto.url}
                         alt={story.title}

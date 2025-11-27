@@ -513,7 +513,7 @@ export function MultiPhotoUploader({
 
               <Card
                 className={`
-                group relative aspect-[16/10] overflow-hidden rounded-lg transition-all cursor-pointer
+                group relative aspect-[4/3] overflow-hidden rounded-lg transition-all cursor-pointer
                 ${!photo ? "border-2 border-dashed hover:border-primary/50" : "border-0"}
                 ${dragOverIndex === index ? "border-primary bg-primary/5" : ""}
                 ${uploadingIndex === index ? "opacity-50" : ""}
@@ -697,7 +697,7 @@ export function MultiPhotoUploader({
               {/* Outer container for context */}
               <div className="relative w-full bg-gray-200 p-2 sm:p-4 rounded-lg">
                 {/* The actual crop frame that matches thumbnail aspect ratio EXACTLY */}
-                <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-white shadow-lg">
+                <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-white shadow-lg">
                   {/* Image container - must match thumbnail structure EXACTLY */}
                   <div
                     ref={containerRef}

@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 interface StoryPhotoWithBlurExtendProps {
   src: string;
   alt: string;
-  aspectRatio?: number; // default 16/10
+  aspectRatio?: number; // default 4/3
   priority?: boolean;
   className?: string; // extra classes for outer wrapper
   imgClassName?: string; // extra classes for foreground image
@@ -52,8 +52,8 @@ export function StoryPhotoWithBlurExtend({
   transform,
   sizes = "(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw",
 }: StoryPhotoWithBlurExtendProps) {
-  // Default aspect ratio is 16:10 (standard for story cards)
-  const ratio = aspectRatio ?? 16 / 10;
+  // Default aspect ratio is 4:3 (standard for story cards)
+  const ratio = aspectRatio ?? 4 / 3;
 
   /**
    * Transform Style:
@@ -78,11 +78,11 @@ export function StoryPhotoWithBlurExtend({
     <div
       className={cn(
         "relative w-full overflow-hidden bg-[var(--color-page,#faf8f5)]",
-        // Use Tailwind aspect ratio utility for common 16:10 case
-        ratio === 16 / 10 ? "aspect-[16/10]" : "",
+        // Use Tailwind aspect ratio utility for common 4:3 case
+        ratio === 4 / 3 ? "aspect-[4/3]" : "",
         className
       )}
-      style={ratio !== 16 / 10 ? { aspectRatio: ratio } : undefined}
+      style={ratio !== 4 / 3 ? { aspectRatio: ratio } : undefined}
     >
       {/*
         Background Layer: Blurred extension

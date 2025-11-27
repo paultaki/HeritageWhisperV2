@@ -255,7 +255,7 @@ body {
 }
 
 .hw-card-media {
-  aspect-ratio: 16/10;
+  aspect-ratio: 4/3;
   width: 100%;
   object-fit: cover;
   display: block;

@@ -383,7 +383,7 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
           }}
         >
           {/* Photo Section */}
-          <div className="relative w-full aspect-[16/10] overflow-hidden">
+          <div className="relative w-full aspect-[4/3] overflow-hidden">
             {(displayPhoto as any).transform ? (
               <img
                 src={displayPhoto.url}
@@ -515,7 +515,7 @@ function TimelineCard({ story, position, index, birthYear, userId, onOpenOverlay
         }}
       >
         {/* Placeholder */}
-        <div className="relative w-full aspect-[16/10] overflow-hidden">
+        <div className="relative w-full aspect-[4/3] overflow-hidden">
           <div
             className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 flex items-center justify-center"
           >
