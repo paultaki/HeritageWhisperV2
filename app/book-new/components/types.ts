@@ -57,6 +57,7 @@ export interface BookPageCardProps {
   story: BookStory;
   isActive: boolean;
   caveatFont?: string; // Handwritten font class name
+  pageNumber?: number; // Page number for display in bottom corner
 }
 
 /**
@@ -121,4 +122,5 @@ export interface BookPageRendererProps {
   page: MobileBookPage;
   isActive: boolean;
   caveatFont?: string;
+  pageNumber?: number; // Page number for display
 }

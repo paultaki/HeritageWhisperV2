@@ -1,4 +1,5 @@
 import {withSentryConfig} from '@sentry/nextjs';
+import createMDX from '@next/mdx';
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -143,9 +144,14 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Create MDX wrapper for Next.js
+const withMDX = createMDX({
+  // Add any MDX options here if needed
+});
+
 // TEMPORARILY DISABLED - Sentry build plugin breaks webpack
 // Will re-enable for production builds only
-export default nextConfig;
+export default withMDX(nextConfig);
 
 // Commented out the wrapper:
 // export default withSentryConfig(nextConfig, {

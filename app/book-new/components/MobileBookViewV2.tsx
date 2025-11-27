@@ -410,6 +410,7 @@ export default function MobileBookViewV2({
             page={page}
             isActive={index === currentIndex}
             caveatFont={caveatFont}
+            pageNumber={index + 1}
           />
         ))}
       </div>

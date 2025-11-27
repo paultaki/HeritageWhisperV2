@@ -832,10 +832,10 @@ function BookV4PageContent() {
                 aria-hidden="true"
                 className="pointer-events-none absolute rounded-[20px]"
                 style={{
-                  top: "-10px",
-                  bottom: "-10px",
-                  left: "-20px",
-                  right: "-20px",
+                  top: "-15px",
+                  bottom: "-15px",
+                  left: "-30px",
+                  right: "-30px",
                   background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)",
                   boxShadow: "0 15px 50px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04)"
                 }}

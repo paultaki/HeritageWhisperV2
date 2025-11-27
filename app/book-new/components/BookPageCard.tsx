@@ -24,7 +24,7 @@ function formatDate(dateString: string | undefined): string {
   }
 }
 
-export default function BookPageCard({ story, isActive, caveatFont }: BookPageCardProps) {
+export default function BookPageCard({ story, isActive, caveatFont, pageNumber }: BookPageCardProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [showContinueHint, setShowContinueHint] = useState(false);
   const [showFade, setShowFade] = useState(false);
@@ -161,9 +161,36 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
       data-story-id={story.id}
       data-nav-ink="dark"
     >
-      <div className="relative mx-auto my-0 h-[100dvh] w-full rounded-none bg-stone-50 text-stone-900 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] ring-1 ring-black/5">
-        {/* Subtle inner edge shadow */}
-        <div className="pointer-events-none absolute inset-0 shadow-[inset_0_1px_0_rgba(0,0,0,0.03),inset_0_-1px_0_rgba(0,0,0,0.03)]"></div>
+      {/* Premium book page card - cream paper with bound-page styling */}
+      <div
+        className="relative mx-auto my-0 h-[100dvh] w-full text-stone-900 ring-1 ring-black/5 overflow-hidden"
+        style={{
+          backgroundColor: '#FFFDF8', // Cream paper instead of pure white
+          borderRadius: '2px 12px 12px 2px', // Asymmetric: sharp on left (spine), rounded on right (page edge)
+          boxShadow: `
+            inset -4px 0 8px -4px rgba(0,0,0,0.08),
+            inset 4px 0 12px -4px rgba(0,0,0,0.12),
+            0 10px 40px -10px rgba(0,0,0,0.5)
+          `, // Left edge inset shadow for bound-page depth + outer shadow
+        }}
+      >
+        {/* Subtle paper texture overlay - barely perceptible grain */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            borderRadius: '2px 12px 12px 2px',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            opacity: 0.035,
+          }}
+        />
+        {/* Subtle inner edge shadow for page depth */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            borderRadius: '2px 12px 12px 2px',
+            boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.02), inset 0 -1px 0 rgba(0,0,0,0.02)',
+          }}
+        />
 
         {/* Vertical scroller */}
         <div
@@ -286,10 +313,11 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
             )}
           </div>
 
-          {/* Fade gradient */}
+          {/* Fade gradient - matches cream paper background */}
           <div
-            className={`pointer-events-none absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-stone-50 to-transparent transition-opacity duration-300 ${showFade ? "opacity-100" : "opacity-0"
+            className={`pointer-events-none absolute bottom-0 left-0 right-0 h-28 transition-opacity duration-300 ${showFade ? "opacity-100" : "opacity-0"
               }`}
+            style={{ background: 'linear-gradient(to top, #FFFDF8, transparent)' }}
           ></div>
 
           {/* Continue reading hint */}
@@ -303,6 +331,15 @@ export default function BookPageCard({ story, isActive, caveatFont }: BookPageCa
             </div>
           </div>
         </div>
+
+        {/* Page number - subtle, book-style positioning */}
+        {pageNumber && (
+          <div className="absolute bottom-[calc(env(safe-area-inset-bottom)+12px)] right-5 pointer-events-none">
+            <span className="text-xs font-medium text-stone-400 tabular-nums tracking-wide">
+              {pageNumber}
+            </span>
+          </div>
+        )}
       </div>
     </section>
   );

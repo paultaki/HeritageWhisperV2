@@ -1425,8 +1425,8 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             height: 3.5px;
             background: linear-gradient(
               to right,
-              rgba(220, 218, 216, 0.3),
-              rgba(220, 218, 216, 0.8)
+              rgba(32, 57, 84, 0.3),
+              rgba(32, 57, 84, 0.8)
             );
             border-radius: 1px;
             opacity: 1;
@@ -1436,25 +1436,25 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.1);
           }
 
-          /* Left-positioned cards - connector goes to the right (dark at card, light at spine) */
+          /* Left-positioned cards - connector goes to the right (light at card, dark at spine) */
           .timeline-step .justify-end .timeline-card-container::after {
             right: -78px;
             background: linear-gradient(
               to right,
-              rgba(220, 218, 216, 0.4) 0%,
-              rgba(220, 218, 216, 0.6) 70%,
-              rgba(220, 218, 216, 0.8) 100%
+              rgba(32, 57, 84, 0.4) 0%,
+              rgba(32, 57, 84, 0.6) 70%,
+              rgba(32, 57, 84, 0.8) 100%
             );
           }
 
-          /* Right-positioned cards - connector goes to the left (dark at card, light at spine) */
+          /* Right-positioned cards - connector goes to the left (dark at spine, light at card) */
           .timeline-step .justify-start .timeline-card-container::after {
             left: -78px;
             background: linear-gradient(
               to right,
-              rgba(220, 218, 216, 0.8) 0%,
-              rgba(220, 218, 216, 0.6) 30%,
-              rgba(220, 218, 216, 0.4) 100%
+              rgba(32, 57, 84, 0.8) 0%,
+              rgba(32, 57, 84, 0.6) 30%,
+              rgba(32, 57, 84, 0.4) 100%
             );
           }
 
@@ -1462,24 +1462,24 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           .timeline-step:hover .timeline-card-container::after {
             background: linear-gradient(
               to right,
-              rgba(220, 218, 216, 0.5),
-              rgba(220, 218, 216, 0.9)
+              rgba(32, 57, 84, 0.5),
+              rgba(32, 57, 84, 0.9)
             );
           }
 
           .timeline-step:hover .justify-end .timeline-card-container::after {
             background: linear-gradient(
               to right,
-              rgba(220, 218, 216, 0.9),
-              rgba(220, 218, 216, 0.5)
+              rgba(32, 57, 84, 0.5) 0%,
+              rgba(32, 57, 84, 0.9) 100%
             );
           }
 
           .timeline-step:hover .justify-start .timeline-card-container::after {
             background: linear-gradient(
               to left,
-              rgba(220, 218, 216, 0.9),
-              rgba(220, 218, 216, 0.5)
+              rgba(32, 57, 84, 0.5) 0%,
+              rgba(32, 57, 84, 0.9) 100%
             );
           }
         }
