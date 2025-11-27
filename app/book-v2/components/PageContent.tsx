@@ -21,6 +21,7 @@ export interface ContentBlock {
     id: string;
     url: string;
     transform?: { zoom: number; position: { x: number; y: number } };
+    isHero?: boolean;
   }>;
   // For audio
   audioUrl?: string;
