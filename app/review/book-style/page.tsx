@@ -195,17 +195,6 @@ function BookStyleReviewContent() {
         const rawCached = navCache.get(navId); // Use get instead of consume for now
         const cachedData = rawCached as NavPayloadExtended;
 
-        console.log("[Review] NavCache data for navId:", navId, {
-          hasAudioBlob: !!cachedData?.audioBlob,
-          audioBlobSize: cachedData?.audioBlob?.size,
-          hasMainAudioBase64: !!cachedData?.mainAudioBase64,
-          hasAudioUrl: !!cachedData?.audioUrl,
-          duration: cachedData?.duration,
-          audioDuration: cachedData?.audioDuration,
-          mode: mode,
-          keys: cachedData ? Object.keys(cachedData) : [],
-        });
-
         if (cachedData) {
 
           // For edit mode coming from transcription selection, use the selected transcript
@@ -306,13 +295,10 @@ function BookStyleReviewContent() {
           }
 
           // Handle audio - check for audioBlob first (from recording flow)
-          console.log("[Review] Audio handling - checking audioBlob:", !!cachedData.audioBlob);
           if (cachedData.audioBlob) {
-            console.log("[Review] Found audioBlob, creating URL...");
             const url = URL.createObjectURL(cachedData.audioBlob);
             setMainAudioBlob(cachedData.audioBlob);
             setAudioUrl(url);
-            console.log("[Review] Audio URL set:", url);
           } else if (cachedData.mainAudioBase64 && cachedData.mainAudioType) {
             // Fallback: convert base64 back to blob if available (legacy format)
             try {

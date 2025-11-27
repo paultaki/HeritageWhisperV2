@@ -156,22 +156,7 @@ function RecordingContent() {
       storyYear: completeDraft.storyYear,
     };
 
-    console.log("[Recording] Storing to navCache:", navId, {
-      hasAudioBlob: !!cacheData.audioBlob,
-      audioBlobSize: cacheData.audioBlob?.size,
-      duration: cacheData.duration,
-      title: cacheData.title,
-    });
-
     await navCache.set(navId, cacheData);
-
-    // Verify the data was stored
-    const verifyData = navCache.get(navId);
-    console.log("[Recording] Verify navCache after set:", {
-      hasData: !!verifyData,
-      hasAudioBlob: !!verifyData?.audioBlob,
-      audioBlobSize: verifyData?.audioBlob?.size,
-    });
 
     // Navigate to book-style review
     router.push(`/review/book-style?nav=${navId}`);
