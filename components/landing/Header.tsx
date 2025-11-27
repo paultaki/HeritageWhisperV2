@@ -96,11 +96,11 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - explicitly positioned right */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-[var(--hw-text-primary)] hover:text-[var(--hw-primary)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--hw-primary)] rounded"
-              aria-label="Toggle menu"
+              className="lg:hidden ml-auto p-2 min-h-[44px] flex items-center justify-end text-[var(--hw-text-primary)] hover:text-[var(--hw-primary)] active:text-[var(--hw-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hw-primary)] rounded-lg"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             >
               {isMobileMenuOpen ? (
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
