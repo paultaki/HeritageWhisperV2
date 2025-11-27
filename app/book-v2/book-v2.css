@@ -1,0 +1,511 @@
+/**
+ * Book V2 - Premium Page-Based Reading Experience
+ * No scrolling within pages - content flows across multiple pages
+ */
+
+/* ============================================================================
+   CSS Custom Properties
+   ============================================================================ */
+
+:root {
+  --book-page-bg: #fafaf9;
+  --book-text: #1f1f1f;
+  --book-text-muted: #6b7280;
+  --book-accent: var(--hw-accent-gold, #CBA46A);
+  --book-primary: var(--hw-primary, #203954);
+  --book-font-size: 18px;
+  --book-line-height: 1.65;
+  --book-content-height: 700px;
+}
+
+/* ============================================================================
+   Page Container - Never Scrolls
+   ============================================================================ */
+
+.book-v2-container {
+  position: fixed;
+  inset: 0;
+  background: #0b0d12;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.book-v2-pages {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============================================================================
+   Page Styling
+   ============================================================================ */
+
+.book-v2-page {
+  background: var(--book-page-bg);
+  border-radius: 4px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    0 12px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden; /* NEVER scroll */
+  position: relative;
+}
+
+/* Paper texture for premium feel */
+.book-v2-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, rgba(0,0,0,0.02) 0%, transparent 5%, transparent 95%, rgba(0,0,0,0.02) 100%);
+  pointer-events: none;
+}
+
+/* Desktop dual-page spread */
+@media (min-width: 1024px) {
+  .book-v2-spread {
+    display: flex;
+    gap: 4px;
+    perspective: 2000px;
+  }
+
+  .book-v2-page {
+    width: min(528px, 45vw);
+    height: min(816px, 85vh);
+    aspect-ratio: 528 / 816;
+  }
+
+  .book-v2-page--left {
+    transform-origin: right center;
+    border-radius: 4px 0 0 4px;
+  }
+
+  .book-v2-page--right {
+    transform-origin: left center;
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* Spine shadow between pages */
+  .book-v2-spread::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 5%;
+    bottom: 5%;
+    width: 8px;
+    transform: translateX(-50%);
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(0, 0, 0, 0.08) 30%,
+      rgba(0, 0, 0, 0.12) 50%,
+      rgba(0, 0, 0, 0.08) 70%,
+      transparent
+    );
+    pointer-events: none;
+  }
+}
+
+/* Mobile single page */
+@media (max-width: 1023px) {
+  .book-v2-page {
+    width: calc(100vw - 32px);
+    height: calc(100dvh - 160px);
+    margin: 0 16px;
+  }
+}
+
+/* ============================================================================
+   Page Content
+   ============================================================================ */
+
+.book-v2-content {
+  padding: 24px 24px 40px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* NEVER scroll */
+  font-family: "Crimson Text", Georgia, serif;
+  font-size: var(--book-font-size);
+  line-height: var(--book-line-height);
+  color: var(--book-text);
+}
+
+/* Story title */
+.book-v2-title {
+  font-family: "Crimson Text", Georgia, serif;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 600;
+  color: var(--book-primary);
+  margin: 0 0 0.5rem;
+  line-height: 1.2;
+}
+
+/* Story metadata (year, age) */
+.book-v2-meta {
+  font-size: 0.9rem;
+  color: var(--book-text-muted);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.book-v2-meta-divider {
+  width: 4px;
+  height: 4px;
+  background: var(--book-accent);
+  border-radius: 50%;
+}
+
+/* Story text paragraphs */
+.book-v2-text {
+  flex: 1;
+  overflow: hidden; /* Content must fit - no scroll */
+}
+
+.book-v2-text p {
+  margin: 0 0 1em;
+  text-align: left;
+  hyphens: auto;
+}
+
+.book-v2-text p:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================================================
+   Drop Cap for Story Starts (no photo)
+   ============================================================================ */
+
+.book-v2-drop-cap p:first-of-type::first-letter {
+  float: left;
+  font-size: 3.5em;
+  line-height: 0.8;
+  margin-right: 0.1em;
+  margin-top: 0.1em;
+  font-family: Georgia, serif;
+  color: var(--book-primary);
+  font-weight: 400;
+}
+
+/* ============================================================================
+   Decorative Header (for stories without photos)
+   ============================================================================ */
+
+.book-v2-decorative-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 0;
+}
+
+.book-v2-decorative-line {
+  width: 4rem;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--book-accent),
+    transparent
+  );
+}
+
+.book-v2-decorative-diamond {
+  width: 8px;
+  height: 8px;
+  background: var(--book-accent);
+  transform: rotate(45deg);
+}
+
+/* ============================================================================
+   Photo Styling
+   ============================================================================ */
+
+.book-v2-photo-carousel {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.book-v2-photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+
+.book-v2-photo-count {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+}
+
+/* ============================================================================
+   Audio Player
+   ============================================================================ */
+
+.book-v2-audio {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.book-v2-audio-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--book-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.book-v2-audio-button:hover {
+  transform: scale(1.05);
+}
+
+.book-v2-audio-button:active {
+  transform: scale(0.98);
+}
+
+/* ============================================================================
+   Wisdom Clip / Lesson Learned
+   ============================================================================ */
+
+.book-v2-wisdom {
+  background: rgba(203, 164, 106, 0.1);
+  border-left: 4px solid var(--book-accent);
+  padding: 1rem 1.5rem;
+  margin-top: auto;
+  border-radius: 0 8px 8px 0;
+}
+
+.book-v2-wisdom-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--book-accent);
+  margin-bottom: 0.5rem;
+}
+
+.book-v2-wisdom-text {
+  font-family: "Caveat", cursive;
+  font-size: 1.25rem;
+  color: var(--book-text);
+  line-height: 1.4;
+}
+
+/* ============================================================================
+   Continuation Indicators
+   ============================================================================ */
+
+.book-v2-continued-from {
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--book-text-muted);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.book-v2-continued-to {
+  font-size: 0.875rem;
+  color: var(--book-text-muted);
+  text-align: right;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+/* ============================================================================
+   Page Numbers
+   ============================================================================ */
+
+.book-v2-page-number {
+  position: absolute;
+  bottom: 16px;
+  font-size: 0.875rem;
+  color: var(--book-text-muted);
+}
+
+.book-v2-page-number--left {
+  left: 24px;
+}
+
+.book-v2-page-number--right {
+  right: 24px;
+}
+
+/* ============================================================================
+   Navigation Controls
+   ============================================================================ */
+
+.book-v2-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to top, rgba(11, 13, 18, 0.95), transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0 1rem;
+  z-index: 10;
+}
+
+.book-v2-nav-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.book-v2-nav-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.book-v2-nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   Progress Indicator
+   ============================================================================ */
+
+.book-v2-progress {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.875rem;
+  z-index: 10;
+}
+
+/* ============================================================================
+   Loading State
+   ============================================================================ */
+
+.book-v2-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: white;
+}
+
+.book-v2-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--book-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   Empty State
+   ============================================================================ */
+
+.book-v2-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: white;
+  padding: 2rem;
+}
+
+.book-v2-empty h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.book-v2-empty p {
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 300px;
+}
+
+/* ============================================================================
+   Animations - Smooth slide with reduced motion support
+   ============================================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  .book-v2-page {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-v2-page {
+    transition: opacity 0.2s ease;
+  }
+}
+
+/* ============================================================================
+   Accessibility
+   ============================================================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus indicators */
+.book-v2-nav-button:focus-visible {
+  outline: 3px solid var(--book-accent);
+  outline-offset: 2px;
+}
+
+.book-v2-page:focus-visible {
+  outline: 3px solid var(--book-accent);
+  outline-offset: 4px;
+}

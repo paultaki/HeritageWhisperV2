@@ -109,13 +109,17 @@ export function StoryPhotoWithBlurExtend({
         - Blur background fills any empty space (sides, top/bottom)
         - Transform is applied via inline styles (matches MultiPhotoUploader)
         - z-10 to ensure it appears above blur background
+        - Uses Next.js Image for optimization (format negotiation, caching)
       */}
-      <img
+      <Image
         src={src}
         alt={alt}
+        fill
+        sizes={sizes}
+        priority={priority}
         style={transformStyle}
         className={cn(
-          "absolute inset-0 w-full h-full z-10",
+          "z-10",
           transform && "will-change-transform",
           imgClassName
         )}
