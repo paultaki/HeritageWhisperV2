@@ -580,6 +580,8 @@ body {
     left: calc(-3px + env(safe-area-inset-left));
     /* Moved 3px further left */
     box-shadow: 0 3px 8px -2px rgba(0, 0, 0, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* Mobile needs spine to extend further down */
+    bottom: -80px;
   }
 
   /* Year badges adjusted to fit within spine padding - moved 3px left */
