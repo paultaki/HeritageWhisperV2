@@ -4,10 +4,10 @@ import { useRouter } from 'next/navigation'
 
 const features = [
   'Unlimited story recordings',
-  'AI interviewer that listens & asks',
+  'Your stories automatically transcribed',
   'Timeline, Living Book & Memory Box',
   'Share with unlimited family members',
-  'Yours forever—no subscriptions',
+  'Secure and backed up',
 ]
 
 export default function PricingSection() {
@@ -22,7 +22,7 @@ export default function PricingSection() {
             Simple, transparent pricing
           </h2>
           <p className="text-lg text-[var(--hw-text-secondary)]">
-            One story. One price. Forever yours.
+            One simple price. Unlimited memories.
           </p>
         </div>
 
@@ -39,6 +39,7 @@ export default function PricingSection() {
               <div className="mb-4">
                 <span className="text-2xl text-[var(--hw-text-muted)] line-through mr-3">$99</span>
                 <span className="text-5xl md:text-6xl font-bold text-[var(--hw-primary)]">$79</span>
+                <span className="text-xl text-[var(--hw-text-secondary)]">/year</span>
               </div>
 
               {/* Launch Badge */}
@@ -53,7 +54,7 @@ export default function PricingSection() {
                 onClick={() => router.push('/auth/register')}
                 className="w-full min-h-[60px] px-8 py-4 bg-[var(--hw-primary)] text-white text-lg font-medium rounded-xl shadow-sm hover:bg-[var(--hw-primary-hover)] hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--hw-primary)] focus:ring-offset-[var(--hw-surface)] transition-all duration-200"
               >
-                Start Your Stories – $79
+                Start Your Stories – $79/year
               </button>
             </div>
 
@@ -77,7 +78,7 @@ export default function PricingSection() {
 
               {/* Comparison text */}
               <p className="text-sm text-[var(--hw-text-secondary)] text-center mt-4 italic">
-                "Unlike StoryWorth's $99/year, you pay once and own it forever."
+                "Save $20 compared to StoryWorth's $99/year."
               </p>
             </div>
           </div>

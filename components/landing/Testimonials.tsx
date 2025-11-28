@@ -1,21 +1,23 @@
+import Image from 'next/image'
+
 const testimonials = [
   {
     quote: "I gave this to my dad for his 75th birthday. Within a week, he'd recorded stories I'd never heard—about his time in the Navy, meeting Mom, starting his business. Best gift I've ever given.",
-    name: '[Name]',
+    name: 'Lisa',
     role: 'Gave HeritageWhisper to her father',
-    photoPlaceholder: 'Professional headshot, 35-50 year old',
+    photo: '/lisa.webp',
   },
   {
     quote: "I've told stories I forgot I had. The questions it asks—they're not the obvious ones. It asked me about the smell of my grandmother's kitchen, and suddenly I was eight years old again.",
-    name: '[Name]',
+    name: 'Eleanor',
     role: 'Recording her family legacy',
-    photoPlaceholder: 'Warm photo, 65-75 year old',
+    photo: '/eleanor.webp',
   },
   {
     quote: "Hearing Grandpa's voice telling his stories... that's something I'll play for my own kids someday. It's not just memories—it's him.",
-    name: '[Name]',
+    name: 'Ben',
     role: 'Family member',
-    photoPlaceholder: '25-40 year old',
+    photo: '/ben.webp',
   },
 ]
 
@@ -35,7 +37,7 @@ export default function Testimonials() {
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="bg-[var(--hw-surface)] rounded-xl p-8 shadow-sm border border-[var(--hw-border-subtle)]"
+              className="bg-[var(--hw-surface)] rounded-xl p-8 shadow-sm border border-[var(--hw-border-subtle)] flex flex-col"
             >
               {/* Quote mark */}
               <div className="text-[var(--hw-accent-gold)] text-5xl font-serif leading-none mb-4">
@@ -48,12 +50,24 @@ export default function Testimonials() {
               </blockquote>
 
               {/* Author */}
-              <div className="flex items-center gap-4">
-                {/* Photo placeholder with gold ring */}
-                <div className="w-16 h-16 rounded-full bg-[var(--hw-section-bg)] border-2 border-[var(--hw-accent-gold)] flex items-center justify-center flex-shrink-0">
-                  <span className="text-[var(--hw-text-muted)] text-xs text-center px-1">
-                    [Photo]
-                  </span>
+              <div className="flex items-center gap-4 mt-auto">
+                {/* Photo with gold ring */}
+                <div className="w-16 h-16 rounded-full border-2 border-[var(--hw-accent-gold)] flex-shrink-0 overflow-hidden">
+                  {testimonial.photo ? (
+                    <Image
+                      src={testimonial.photo}
+                      alt={testimonial.name}
+                      width={64}
+                      height={64}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[var(--hw-section-bg)] flex items-center justify-center">
+                      <span className="text-[var(--hw-text-muted)] text-xs text-center px-1">
+                        [Photo]
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div>

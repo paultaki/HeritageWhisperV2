@@ -1,15 +1,112 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 type TabKey = 'timeline' | 'book' | 'memory'
 
-const tabs: { key: TabKey; label: string; description: string }[] = [
-  { key: 'timeline', label: 'Live Timeline', description: 'Timeline view screenshot' },
-  { key: 'book', label: 'The Living Book', description: 'Book view screenshot' },
-  { key: 'memory', label: 'Memory Box', description: 'Memory box screenshot' },
+const tabs: { key: TabKey; label: string; description: string; desktopImage: string; mobileImage: string }[] = [
+  { key: 'timeline', label: 'Live Timeline', description: 'Timeline view screenshot', desktopImage: '/TimeLine.webp', mobileImage: '/Timeline-mobile.webp' },
+  { key: 'book', label: 'Living Book', description: 'Book view screenshot', desktopImage: '/book.webp', mobileImage: '/book-mobile.webp' },
+  { key: 'memory', label: 'Memory Box', description: 'Memory box screenshot', desktopImage: '/memory-box.webp', mobileImage: '/memory-box-mobile.webp' },
 ]
+
+function ScrollingImage({ desktopImage, mobileImage, alt }: { desktopImage: string; mobileImage: string; alt: string }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const imageRef = useRef<HTMLDivElement>(null)
+  const [isHovered, setIsHovered] = useState(false)
+  const [scrollDirection, setScrollDirection] = useState<'down' | 'up'>('down')
+  const animationRef = useRef<number | null>(null)
+  const scrollPositionRef = useRef(0)
+
+  useEffect(() => {
+    const container = containerRef.current
+    const image = imageRef.current
+    if (!container || !image) return
+
+    const scrollSpeed = 0.5
+
+    const animate = () => {
+      if (isHovered) {
+        animationRef.current = requestAnimationFrame(animate)
+        return
+      }
+
+      const maxScroll = image.scrollHeight - container.clientHeight
+
+      if (scrollDirection === 'down') {
+        scrollPositionRef.current += scrollSpeed
+        if (scrollPositionRef.current >= maxScroll) {
+          scrollPositionRef.current = maxScroll
+          setScrollDirection('up')
+        }
+      } else {
+        scrollPositionRef.current -= scrollSpeed
+        if (scrollPositionRef.current <= 0) {
+          scrollPositionRef.current = 0
+          setScrollDirection('down')
+        }
+      }
+
+      container.scrollTop = scrollPositionRef.current
+      animationRef.current = requestAnimationFrame(animate)
+    }
+
+    animationRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [isHovered, scrollDirection])
+
+  const handleScroll = () => {
+    if (containerRef.current) {
+      scrollPositionRef.current = containerRef.current.scrollTop
+    }
+  }
+
+  return (
+    <div className="relative rounded-2xl overflow-hidden shadow-xl bg-[var(--hw-surface)] aspect-[4/3]">
+      {/* Scrollable container */}
+      <div
+        ref={containerRef}
+        className="h-full overflow-y-auto scrollbar-hide"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onScroll={handleScroll}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        <div ref={imageRef} className="relative">
+          {/* Top gradient - scrolls with image */}
+          <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-[var(--hw-surface)] to-transparent z-10 pointer-events-none" />
+
+          <Image
+            src={desktopImage}
+            alt={alt}
+            width={900}
+            height={1800}
+            className="w-full h-auto hidden md:block"
+            priority
+          />
+          <Image
+            src={mobileImage}
+            alt={alt}
+            width={400}
+            height={800}
+            className="w-full h-auto md:hidden"
+            priority
+          />
+
+          {/* Bottom gradient - scrolls with image */}
+          <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[var(--hw-surface)] to-transparent z-10 pointer-events-none" />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function Hero() {
   const router = useRouter()
@@ -60,7 +157,7 @@ export default function Hero() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`min-h-[48px] px-6 py-3 text-base font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--hw-primary)] ${
+                className={`flex-1 min-h-[48px] py-3 text-base font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--hw-primary)] flex items-center justify-center text-center ${
                   activeTab === tab.key
                     ? 'bg-[var(--hw-primary)] text-white shadow-sm'
                     : 'bg-[var(--hw-surface)] text-[var(--hw-text-secondary)] border border-[var(--hw-border-subtle)] hover:bg-[var(--hw-section-bg)]'
@@ -71,12 +168,39 @@ export default function Hero() {
             ))}
           </div>
 
-          {/* Tab Content - Product Screenshot Placeholder */}
-          <div className="bg-[var(--hw-section-bg)] border-2 border-dashed border-[var(--hw-border-subtle)] rounded-2xl flex items-center justify-center aspect-[4/3] shadow-sm">
-            <span className="text-[var(--hw-text-muted)] text-base">
-              [IMAGE: {tabs.find(t => t.key === activeTab)?.description}]
-            </span>
-          </div>
+          {/* Tab Content - Product Screenshot */}
+          {tabs.map((tab) => (
+            <div key={tab.key} className={activeTab === tab.key ? 'block' : 'hidden'}>
+              {tab.key === 'book' ? (
+                // Book view - static image, no scroll, no gradient
+                <div className="rounded-2xl overflow-hidden shadow-xl bg-[var(--hw-surface)]">
+                  <Image
+                    src={tab.desktopImage}
+                    alt={tab.description}
+                    width={900}
+                    height={675}
+                    className="w-full h-auto hidden md:block"
+                    priority
+                  />
+                  <Image
+                    src={tab.mobileImage}
+                    alt={tab.description}
+                    width={400}
+                    height={300}
+                    className="w-full h-auto md:hidden"
+                    priority
+                  />
+                </div>
+              ) : (
+                // Timeline and Memory Box - scrolling with gradients
+                <ScrollingImage
+                  desktopImage={tab.desktopImage}
+                  mobileImage={tab.mobileImage}
+                  alt={tab.description}
+                />
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </section>
