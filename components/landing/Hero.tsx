@@ -7,7 +7,7 @@ import Image from 'next/image'
 type TabKey = 'timeline' | 'book' | 'memory'
 
 const tabs: { key: TabKey; label: string; description: string; desktopImage: string; mobileImage: string }[] = [
-  { key: 'timeline', label: 'Live Timeline', description: 'Timeline view screenshot', desktopImage: '/TimeLine.webp', mobileImage: '/Timeline-mobile.webp' },
+  { key: 'timeline', label: 'Live Timeline', description: 'Timeline view screenshot', desktopImage: '/timeline.webp', mobileImage: '/Timeline-mobile.webp' },
   { key: 'book', label: 'Living Book', description: 'Book view screenshot', desktopImage: '/book.webp', mobileImage: '/book-mobile.webp' },
   { key: 'memory', label: 'Memory Box', description: 'Memory box screenshot', desktopImage: '/memory-box.webp', mobileImage: '/memory-box-mobile.webp' },
 ]

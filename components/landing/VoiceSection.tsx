@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export default function VoiceSection() {
   return (
     <section className="bg-[var(--hw-page-bg)] py-16 md:py-24 px-6 md:px-12">
@@ -29,12 +31,16 @@ export default function VoiceSection() {
             </div>
           </div>
 
-          {/* Image Placeholder */}
+          {/* Image */}
           <div className="order-1 md:order-2">
-            <div className="bg-[var(--hw-section-bg)] border-2 border-dashed border-[var(--hw-border-subtle)] rounded-2xl flex items-center justify-center aspect-[4/3] shadow-sm">
-              <span className="text-[var(--hw-text-muted)] text-base text-center px-4">
-                [IMAGE: Senior recording on phone, or family listening together. Warm, authentic, not staged.]
-              </span>
+            <div className="rounded-2xl overflow-hidden shadow-lg">
+              <Image
+                src="/grandpa-story.webp"
+                alt="Grandpa sharing stories with family"
+                width={600}
+                height={450}
+                className="w-full h-auto"
+              />
             </div>
           </div>
         </div>

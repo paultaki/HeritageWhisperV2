@@ -840,9 +840,9 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
         if (!photoUrl) return null;
 
         return (
-          <div className="mb-2">
+          <div className="mb-3">
             <div
-              className="relative"
+              className="relative max-h-[200px] overflow-hidden rounded-lg"
               data-nav-ink="light"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -854,8 +854,8 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
                 width={currentPhoto.width}
                 height={currentPhoto.height}
                 transform={currentPhoto.transform}
-                aspectRatio={4 / 3}
-                className="rounded-md shadow ring-1 ring-black/5"
+                aspectRatio={16 / 9}
+                className="shadow-sm ring-1 ring-black/5"
               />
 
               {/* Photo count indicator - z-20 to appear above image (which has z-10) */}
