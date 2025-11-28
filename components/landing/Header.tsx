@@ -8,6 +8,7 @@ const navItems = [
   { label: 'Features', id: 'how-it-works' },
   { label: 'How It Works', id: 'how-it-works' },
   { label: 'Pricing', id: 'pricing' },
+  { label: 'Gift', id: 'gift', href: '/gift-plans' },
   { label: 'FAQ', id: 'faq' },
 ]
 
@@ -72,7 +73,7 @@ export default function Header() {
                 {navItems.map((item) => (
                   <button
                     key={item.id + item.label}
-                    onClick={() => scrollToSection(item.id)}
+                    onClick={() => item.href ? router.push(item.href) : scrollToSection(item.id)}
                     className="text-[var(--hw-text-secondary)] hover:text-[var(--hw-primary)] font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--hw-primary)] rounded px-2 py-1"
                   >
                     {item.label}
@@ -122,7 +123,14 @@ export default function Header() {
               {navItems.map((item) => (
                 <button
                   key={item.id + item.label}
-                  onClick={() => scrollToSection(item.id)}
+                  onClick={() => {
+                    if (item.href) {
+                      router.push(item.href)
+                    } else {
+                      scrollToSection(item.id)
+                    }
+                    setIsMobileMenuOpen(false)
+                  }}
                   className="block w-full text-left text-[var(--hw-text-primary)] hover:text-[var(--hw-primary)] font-medium py-3 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--hw-primary)] rounded"
                 >
                   {item.label}
