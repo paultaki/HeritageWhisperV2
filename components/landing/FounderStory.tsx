@@ -41,31 +41,20 @@ export default function FounderStory() {
               </p>
 
               <p>
-                Books capture stories in a single moment, then sit on a shelf collecting dust. I wanted something
-                that could grow forever, alert me the moment a new story was added, and let me listen instantly anywhere.
+                With four siblings scattered across the country and 16 grandkids, sharing a physical book
+                was impossible. Now we all have instant access the moment a story is recorded—and our kids
+                treasure hearing these memories in their grandparents' own voices.
               </p>
 
               <p>
-                With four siblings scattered across the country and 16 grandkids in our immediate family,
-                it's impossible to share a physical book. But now we all have the same access to our
-                parents' stories the moment they're recorded. Our kids treasure hearing these memories
-                in their grandparents' own voices.
+                After 20 years as a Fortune 50 executive, I left to build this full-time alongside my
+                retired father. We're committed to making it easy to capture your parents' memories,
+                with an interface so simple it reduces your tech support calls :)
               </p>
 
               <p>
-                Most seniors are on smartphones. We can submit questions directly to them, capturing those
-                precious memories before it's too late.
-              </p>
-
-              <p>
-                After 20 years as a senior executive at a Fortune 50 company, I left to build this full-time
-                alongside my retired father. We're committed to making it easy for you to capture your parents'
-                memories in their voices, with an interface so simple it reduces your tech support calls :)
-              </p>
-
-              <p>
-                Your privacy and the longevity of your precious stories matter to us. We will never sell or
-                share your data. You're always in full control.
+                Your privacy and the longevity of your stories matter to us. We never sell or share
+                your data. You're always in full control.
               </p>
             </div>
 
