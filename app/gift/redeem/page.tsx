@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -12,7 +12,38 @@ interface GiftDetails {
   expiresAt: string
 }
 
+// Wrapper with Suspense boundary for useSearchParams
 export default function GiftRedeemPage() {
+  return (
+    <Suspense fallback={<RedeemPageSkeleton />}>
+      <GiftRedeemContent />
+    </Suspense>
+  )
+}
+
+function RedeemPageSkeleton() {
+  return (
+    <div className="min-h-screen bg-[var(--hw-page-bg)]">
+      <header className="bg-[var(--hw-surface)] border-b border-[var(--hw-border-subtle)]">
+        <div className="max-w-[1140px] mx-auto px-6 py-4">
+          <div className="h-10 w-[200px] bg-gray-200 rounded animate-pulse" />
+        </div>
+      </header>
+      <main className="max-w-xl mx-auto px-6 py-12">
+        <div className="text-center mb-10">
+          <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-6 animate-pulse" />
+          <div className="h-10 w-64 bg-gray-200 rounded mx-auto mb-3 animate-pulse" />
+          <div className="h-6 w-48 bg-gray-200 rounded mx-auto animate-pulse" />
+        </div>
+        <div className="bg-[var(--hw-surface)] rounded-2xl p-8 border border-[var(--hw-border-subtle)]">
+          <div className="h-14 w-full bg-gray-200 rounded-xl animate-pulse" />
+        </div>
+      </main>
+    </div>
+  )
+}
+
+function GiftRedeemContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const codeFromUrl = searchParams.get('code')
