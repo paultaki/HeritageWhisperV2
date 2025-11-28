@@ -1,12 +1,41 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Gift, Heart, Mic, Clock, Check, ChevronRight } from 'lucide-react'
 
+// Wrapper component that provides Suspense boundary for useSearchParams
 export default function GiftPage() {
+  return (
+    <Suspense fallback={<GiftPageSkeleton />}>
+      <GiftPageContent />
+    </Suspense>
+  )
+}
+
+// Loading skeleton for the page
+function GiftPageSkeleton() {
+  return (
+    <div className="min-h-screen bg-[var(--hw-page-bg)]">
+      <header className="bg-[var(--hw-surface)] border-b border-[var(--hw-border-subtle)]">
+        <div className="max-w-[1140px] mx-auto px-6 py-4">
+          <div className="h-10 w-[200px] bg-gray-200 rounded animate-pulse" />
+        </div>
+      </header>
+      <main className="max-w-[1140px] mx-auto px-6 py-12">
+        <div className="text-center mb-12">
+          <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-6 animate-pulse" />
+          <div className="h-12 w-96 bg-gray-200 rounded mx-auto mb-4 animate-pulse" />
+          <div className="h-6 w-80 bg-gray-200 rounded mx-auto animate-pulse" />
+        </div>
+      </main>
+    </div>
+  )
+}
+
+function GiftPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const canceled = searchParams.get('canceled')
