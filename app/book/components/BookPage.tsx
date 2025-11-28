@@ -840,9 +840,10 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
         if (!photoUrl) return null;
 
         return (
-          <div className="mb-3">
+          <div className="mb-3 mx-auto" style={{ maxWidth: "85%" }}>
             <div
-              className="relative max-h-[200px] overflow-hidden rounded-lg"
+              className="relative overflow-hidden rounded-xl"
+              style={{ aspectRatio: "4 / 3" }}
               data-nav-ink="light"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -854,7 +855,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
                 width={currentPhoto.width}
                 height={currentPhoto.height}
                 transform={currentPhoto.transform}
-                aspectRatio={16 / 9}
+                aspectRatio={4 / 3}
                 className="shadow-sm ring-1 ring-black/5"
               />
 

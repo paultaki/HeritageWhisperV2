@@ -138,8 +138,18 @@ export default function DarkBookProgressBar({
       }}
     >
       <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex flex-col md:flex-row md:items-center gap-2 md:gap-0 pt-[14px] md:pt-2 py-1 md:py-0">
+        {/* TOC button - Left side on desktop */}
+        <button
+          onClick={onTocClick}
+          className="hidden md:flex items-center justify-center w-8 h-8 rounded-full border border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white mr-3 flex-shrink-0"
+          aria-label="Table of Contents"
+          title="Table of Contents"
+        >
+          <BookOpen className="h-4 w-4" />
+        </button>
+
         {/* Top on mobile / Left on desktop: Progress bar area */}
-        <div className="flex-1 md:mr-3 w-full max-w-[calc(100%-90px)] md:max-w-[calc(100%-280px)]">
+        <div className="flex-1 w-full max-w-[calc(100%-90px)] md:max-w-[calc(100%-240px)]">
           <div className="relative">
             {/* Progress bar */}
             <div
@@ -337,16 +347,6 @@ export default function DarkBookProgressBar({
               </button>
             </div>
           )}
-
-          {/* TOC button - Book icon */}
-          <button
-            onClick={onTocClick}
-            className="flex items-center justify-center w-8 h-8 rounded-full border border-white/30 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-colors text-white"
-            aria-label="Table of Contents"
-            title="Table of Contents"
-          >
-            <BookOpen className="h-4 w-4" />
-          </button>
 
           {/* Decrease text size - Small A */}
           <button

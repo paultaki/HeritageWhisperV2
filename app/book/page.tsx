@@ -998,7 +998,7 @@ function BookV4PageContent() {
                       {decadeGroups.map(([decade, stories]) => (
                         <section key={decade} className="space-y-3">
                           {/* Group header */}
-                          <h3 className="text-sm font-semibold tracking-tight text-neutral-800 uppercase">
+                          <h3 className="text-sm font-semibold tracking-tight text-neutral-800">
                             {decade}
                           </h3>
 
