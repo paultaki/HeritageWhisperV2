@@ -12,8 +12,8 @@ const faqs = [
     answer: "StoryWorth sends weekly email prompts and prints a book after 12 months. HeritageWhisper captures voice—not just text—with an AI that asks personalized follow-up questions. Your family can listen immediately, and there's no subscription.",
   },
   {
-    question: "Can multiple family members record?",
-    answer: "Yes. Invite parents, grandparents, aunts, uncles—anyone with stories to share. Each person gets their own recording space within your family's legacy.",
+    question: "Can I share with my family?",
+    answer: "Yes! Invite kids, grandkids, parents, aunts, uncles, nieces, nephews—anyone with stories to share. Each person gets their own recording space. Your family is notified when you add a new story, and they can submit questions or requests for new stories they'd love to hear.",
   },
   {
     question: "What happens to my recordings?",

@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export default function FounderStory() {
   return (
     <section className="bg-[var(--hw-page-bg)] py-16 md:py-24 px-6 md:px-12">
@@ -6,10 +8,14 @@ export default function FounderStory() {
           {/* Photo - 2 columns */}
           <div className="md:col-span-2 order-1 md:order-1">
             <div className="aspect-square max-w-[300px] mx-auto">
-              <div className="w-full h-full bg-[var(--hw-section-bg)] border-2 border-dashed border-[var(--hw-border-subtle)] rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-[var(--hw-text-muted)] text-base text-center px-4">
-                  [PHOTO: Founder headshot - professional but warm]
-                </span>
+              <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg">
+                <Image
+                  src="/Paul.webp"
+                  alt="Paul, Founder of HeritageWhisper"
+                  width={300}
+                  height={300}
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           </div>
