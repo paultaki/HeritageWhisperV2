@@ -105,18 +105,18 @@ export default function HelpPage() {
           answer: (
             <div className="space-y-4">
               <p className="text-base">
-                <strong>Yes!</strong> You can type your stories if you prefer. Here's how:
+                <strong>Yes!</strong> You can type your stories if you prefer writing. Here's how:
               </p>
               <ol className="list-none space-y-3 ml-0 text-base">
-                <li><strong>Step 1:</strong> Record a short placeholder audio (just say "testing" for a few seconds)</li>
-                <li><strong>Step 2:</strong> On the review screen, you'll see your transcribed text</li>
-                <li><strong>Step 3:</strong> Click on the text to edit it</li>
-                <li><strong>Step 4:</strong> Delete everything and type your own story</li>
-                <li><strong>Step 5:</strong> Click <strong>"Save Memory"</strong> when you're done</li>
+                <li><strong>Step 1:</strong> Tap <strong>Record</strong> in the navigation</li>
+                <li><strong>Step 2:</strong> Tap <strong>"Prefer to type instead?"</strong> at the bottom</li>
+                <li><strong>Step 3:</strong> Type your story</li>
+                <li><strong>Step 4:</strong> Add photos (optional)</li>
+                <li><strong>Step 5:</strong> Tap <strong>"Save Memory"</strong> when you're done</li>
               </ol>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
                 <p className="text-base">
-                  💡 <strong>Good to know:</strong> You can edit any text anytime. Your stories, your way!
+                  💡 <strong>Good to know:</strong> You can edit any story's text anytime. Your stories, your way!
                 </p>
               </div>
             </div>
@@ -180,17 +180,16 @@ export default function HelpPage() {
           question: "How do I navigate through the Book view?",
           answer: (
             <div className="space-y-3">
-              <p>There are several ways to navigate your book:</p>
+              <p className="text-base">There are several ways to navigate your book:</p>
 
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Keyboard className="w-4 h-4 text-heritage-coral" />
                   <strong>Desktop (Keyboard)</strong>
                 </div>
-                <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                <ul className="list-disc list-inside space-y-1 ml-2 text-base">
                   <li>
-                    <strong>Left/Right Arrow Keys:</strong> Navigate between
-                    pages
+                    <strong>Left/Right Arrow Keys:</strong> Navigate between pages
                   </li>
                   <li>Works on all desktop browsers</li>
                 </ul>
@@ -201,14 +200,12 @@ export default function HelpPage() {
                   <Smartphone className="w-4 h-4 text-heritage-coral" />
                   <strong>Mobile & Desktop (Touch/Click)</strong>
                 </div>
-                <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                <ul className="list-disc list-inside space-y-1 ml-2 text-base">
                   <li>
-                    <strong>Navigation Arrows:</strong> Tap/click the arrows on
-                    each side to turn pages
+                    <strong>Navigation Arrows:</strong> Tap/click the arrows on each side to turn pages
                   </li>
                   <li>
-                    <strong>Decade Navigation:</strong> Click any decade to jump
-                    to that section
+                    <strong>Decade Timeline:</strong> Use the timeline bar at the top to jump to any decade
                   </li>
                   <li>
                     <strong>Swipe:</strong> Swipe left/right on mobile devices
@@ -216,10 +213,20 @@ export default function HelpPage() {
                 </ul>
               </div>
 
-              <p className="text-sm text-gray-600 mt-3">
-                💡 <strong>Tip:</strong> The decade navigation menu on the left
-                side collapses by default. Click it to see your full table of
-                contents!
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-3">
+                <strong className="block mb-2">View Options</strong>
+                <ul className="list-disc list-inside space-y-1 ml-2 text-base">
+                  <li>
+                    <strong>Time/Chapters toggle:</strong> Switch between timeline view and chapter view using the toggle in the top right
+                  </li>
+                  <li>
+                    <strong>Table of Contents:</strong> Tap the book icon to see all your stories organized by decade
+                  </li>
+                </ul>
+              </div>
+
+              <p className="text-base text-gray-600 mt-3">
+                💡 <strong>Tip:</strong> Use the "Chapters" view to see your stories organized by life chapters rather than strict timeline order!
               </p>
             </div>
           ),
@@ -255,8 +262,8 @@ export default function HelpPage() {
               </ul>
               <p className="text-sm text-gray-600 mt-3">
                 📬 Want to be notified when printed books are available? Enable
-                the "Printed Books Availability" toggle in your{" "}
-                <strong>Profile → Notification Preferences</strong>.
+                the "Printed Books Availability" toggle in{" "}
+                <strong>Menu → Settings → Notification Preferences</strong>.
               </p>
             </div>
           ),
@@ -267,6 +274,66 @@ export default function HelpPage() {
     {
       title: "Pricing & Subscription",
       items: [
+        {
+          question: "How much does Heritage Whisper cost?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">
+                Heritage Whisper offers simple, transparent pricing:
+              </p>
+
+              <div className="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-lg p-5 mt-3">
+                <strong className="block mb-3 text-lg text-amber-900">
+                  The Family Legacy Plan - $79/year (Launch Special)
+                </strong>
+                <p className="text-sm text-amber-800 mb-3">Regular price: $99/year</p>
+                <ul className="space-y-2 ml-0 text-base">
+                  <li className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
+                    <span>Unlimited story recordings</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
+                    <span>Automatic transcription</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
+                    <span>Timeline, Living Book & Memory Box</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
+                    <span>Share with unlimited family members</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
+                    <span>Secure cloud storage</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5 mt-3">
+                <strong className="block mb-3 text-lg">
+                  Free Trial
+                </strong>
+                <ul className="space-y-2 ml-0 text-base">
+                  <li className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
+                    <span>Try your first 3 stories completely free</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
+                    <span>Access all features to test the experience</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-heritage-coral mt-1 flex-shrink-0" />
+                    <span>No credit card required to start</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          ),
+          icon: <DollarSign className="w-5 h-5" />,
+        },
         {
           question: "What's included in the subscription?",
           answer: (
@@ -424,25 +491,25 @@ export default function HelpPage() {
           question: "How do I delete my account?",
           answer: (
             <div className="space-y-3">
-              <p>
+              <p className="text-base">
                 We hope you'll stay, but if you need to delete your account:
               </p>
-              <ol className="list-decimal list-inside space-y-2 ml-2">
+              <ol className="list-none space-y-2 ml-0 text-base">
                 <li>
-                  Go to <strong>Profile</strong> → <strong>Settings</strong>
+                  <strong>Step 1:</strong> Tap <strong>Menu</strong> → <strong>Settings</strong>
                 </li>
                 <li>
-                  Scroll to <strong>Account Management</strong>
+                  <strong>Step 2:</strong> Scroll down to <strong>Danger Zone</strong>
                 </li>
                 <li>
-                  Click <strong>"Delete Account"</strong>
+                  <strong>Step 3:</strong> Tap <strong>"Delete Account"</strong>
                 </li>
-                <li>Confirm the deletion (this cannot be undone)</li>
+                <li>
+                  <strong>Step 4:</strong> Confirm the deletion (this cannot be undone)
+                </li>
               </ol>
-              <p className="text-sm text-red-600 mt-3">
-                ⚠️ <strong>Warning:</strong> This permanently deletes all your
-                memories, photos, and audio recordings. Consider exporting your
-                data first!
+              <p className="text-base text-red-600 mt-3">
+                ⚠️ <strong>Warning:</strong> This permanently deletes all your memories, photos, and audio recordings. Consider exporting your data first using the "Export All Data" option in the Data & Privacy section above.
               </p>
             </div>
           ),
