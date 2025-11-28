@@ -5,6 +5,7 @@ import { buildPageMetadata } from '@/lib/seo/metadata';
 import { loadMDXContent, getAllMDXSlugs } from '@/lib/mdx/loader';
 import { ArticleSchema } from '@/lib/seo/components/ArticleSchema';
 import { siteUrl } from '@/lib/seo/config';
+import { MDXRemote } from 'next-mdx-remote/rsc';
 
 const CONTENT_DIR = path.join(
   process.cwd(),
@@ -46,14 +47,6 @@ export default async function GuidePage({ params }: Props) {
 
   const { frontmatter } = content;
 
-  // Dynamic import of the MDX component
-  let MDXContent;
-  try {
-    MDXContent = (await import(`../_content/${slug}.mdx`)).default;
-  } catch {
-    notFound();
-  }
-
   return (
     <>
       <ArticleSchema
@@ -78,7 +71,7 @@ export default async function GuidePage({ params }: Props) {
             </p>
           )}
         </header>
-        <MDXContent />
+        <MDXRemote source={content.content} />
       </article>
     </>
   );

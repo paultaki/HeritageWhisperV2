@@ -1,11 +1,14 @@
 import {withSentryConfig} from '@sentry/nextjs';
 import type { NextConfig } from "next";
-import createMDX from '@next/mdx';
-import remarkFrontmatter from 'remark-frontmatter';
 
 const nextConfig: NextConfig = {
   // Enable MDX page extensions
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+
+  // Use Rust-based MDX compiler (handles frontmatter automatically)
+  experimental: {
+    mdxRs: true,
+  },
 
   /* config options here */
 
@@ -140,16 +143,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Configure MDX with frontmatter support
-const withMDX = createMDX({
-  options: {
-    remarkPlugins: [remarkFrontmatter],
-  },
-});
-
 // TEMPORARILY DISABLED - Sentry build plugin breaks webpack
 // Will re-enable for production builds only
-export default withMDX(nextConfig);
+// Note: mdxRs: true in experimental handles MDX compilation without needing @next/mdx wrapper
+export default nextConfig;
 
 // Commented out the wrapper:
 // export default withSentryConfig(nextConfig, {
