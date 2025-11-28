@@ -124,8 +124,9 @@ export default function Hero() {
       <div className="max-w-[1140px] mx-auto">
         {/* Headline & Subhead */}
         <div className="text-center mb-12 md:mb-16">
-          <h1 className="text-[36px] md:text-[42px] font-semibold leading-tight text-[var(--hw-primary)] mb-6 max-w-[55ch] mx-auto">
-            The story of a lifetime. Spoken, not just written.
+          <h1 className="text-[40px] md:text-[52px] lg:text-[60px] font-serif font-medium leading-[1.1] text-[var(--hw-primary)] mb-8 max-w-4xl mx-auto">
+            The story of a lifetime.<br />
+            <span className="text-[var(--hw-secondary)] italic">Spoken,</span> not just written.
           </h1>
           <p className="text-lg md:text-xl text-[var(--hw-text-secondary)] leading-relaxed max-w-[55ch] mx-auto">
             HeritageWhisper's AI interviewer guides your loved ones through their memories—asking

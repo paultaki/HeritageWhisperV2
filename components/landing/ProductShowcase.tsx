@@ -32,7 +32,7 @@ const features: Feature[] = [
     description: 'Photos, documents, and keepsakes—each with the story behind it. Upload the artifact, record the memory. Context for every treasure.',
     imageAlt: 'Memory box view showing photos with associated stories',
     imagePosition: 'left',
-    image: '/memory-box.webp',
+    image: '/memory-box-2.webp',
   },
 ]
 
