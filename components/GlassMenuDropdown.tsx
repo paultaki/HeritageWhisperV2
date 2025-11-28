@@ -106,7 +106,8 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
 
   const allMenuItems = [
     { icon: Home, label: "Home", href: "/" },
-    { icon: BookOpen, label: "Manage Chapters", href: "/chapters-v2", ownerOnly: true },
+    // HIDDEN: Chapters feature not ready for launch
+    // { icon: BookOpen, label: "Manage Chapters", href: "/chapters-v2", ownerOnly: true },
     { icon: Lightbulb, label: "Story Ideas", href: "/prompts", ownerOnly: true },
     { icon: Archive, label: "Memory Box", href: "/memory-box" },
     { icon: Settings, label: "Settings", href: "/profile", ownerOnly: true },

@@ -324,7 +324,8 @@ export default function DarkBookProgressBar({
 
         {/* Right: Controls - View Mode, TOC and Text Size */}
         <div className="hidden md:flex items-center justify-end gap-1.5 flex-shrink-0">
-          {/* View Mode Toggle */}
+          {/* View Mode Toggle - HIDDEN: Not ready for launch */}
+          {/* TODO: Re-enable when chapters feature is ready
           {viewMode && onViewModeChange && (
             <div className="flex items-center bg-white/5 rounded-full p-0.5 border border-white/20 mr-1.5">
               <button
@@ -347,6 +348,7 @@ export default function DarkBookProgressBar({
               </button>
             </div>
           )}
+          */}
 
           {/* Decrease text size - Small A */}
           <button

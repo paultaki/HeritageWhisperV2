@@ -105,18 +105,27 @@ export default function HelpPage() {
           answer: (
             <div className="space-y-4">
               <p className="text-base">
-                <strong>Yes!</strong> You can type your stories if you prefer writing. Here's how:
+                <strong>Absolutely!</strong> You can type all your stories if you prefer writing. Here's how:
               </p>
               <ol className="list-none space-y-3 ml-0 text-base">
                 <li><strong>Step 1:</strong> Tap <strong>Record</strong> in the navigation</li>
-                <li><strong>Step 2:</strong> Tap <strong>"Prefer to type instead?"</strong> at the bottom</li>
-                <li><strong>Step 3:</strong> Type your story</li>
-                <li><strong>Step 4:</strong> Add photos (optional)</li>
-                <li><strong>Step 5:</strong> Tap <strong>"Save Memory"</strong> when you're done</li>
+                <li><strong>Step 2:</strong> Tap <strong>"Prefer to type instead?"</strong> at the bottom of the screen</li>
+                <li><strong>Step 3:</strong> Write your story at your own pace</li>
+                <li><strong>Step 4:</strong> Add photos if you'd like</li>
+                <li><strong>Step 5:</strong> Save when you're ready</li>
               </ol>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-3">
+                <p className="text-base mb-2"><strong>Why you might prefer typing:</strong></p>
+                <ul className="list-disc list-inside space-y-1 ml-2 text-base text-gray-700">
+                  <li>You can take your time and edit as you go</li>
+                  <li>No need to worry about background noise</li>
+                  <li>Write a little each day and save when it's finished</li>
+                  <li>Easier if you're in a shared space</li>
+                </ul>
+              </div>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
                 <p className="text-base">
-                  💡 <strong>Good to know:</strong> You can edit any story's text anytime. Your stories, your way!
+                  💡 <strong>Tip:</strong> Typed stories are just as meaningful! Your words and memories matter most - not how they're captured.
                 </p>
               </div>
             </div>
@@ -214,6 +223,132 @@ export default function HelpPage() {
       ],
     },
     {
+      title: "Memory & Photos",
+      items: [
+        {
+          question: "What kinds of stories should I record?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">Anything that matters to you! Some ideas:</p>
+              <ul className="list-none space-y-2 ml-0 text-base">
+                <li>How you met your spouse</li>
+                <li>Your first job or career memories</li>
+                <li>Favorite family vacations</li>
+                <li>Holiday traditions and recipes</li>
+                <li>Lessons you learned the hard way</li>
+                <li>Funny moments with your kids</li>
+                <li>What life was like when you were young</li>
+                <li>Advice you'd give to your grandchildren</li>
+              </ul>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  💡 <strong>Tip:</strong> Tap "Menu" → "Story Ideas" for personalized prompts to help you get started.
+                </p>
+              </div>
+            </div>
+          ),
+          icon: <ImageIcon className="w-5 h-5" />,
+        },
+        {
+          question: "I have old photos. Can I add them?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base"><strong>Yes!</strong> You can add photos to any memory:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>
+                  <strong>Printed photos:</strong> Take a picture of them with your phone or tablet, then upload
+                </li>
+                <li>
+                  <strong>Digital photos:</strong> Upload directly from your device
+                </li>
+                <li>
+                  <strong>Photo albums:</strong> Snap pictures of album pages to capture multiple photos
+                </li>
+              </ul>
+              <p className="text-base mt-3">
+                Each memory can have as many photos as you want.
+              </p>
+            </div>
+          ),
+          icon: <ImageIcon className="w-5 h-5" />,
+        },
+        {
+          question: "What's the difference between Stories and Treasures in Memory Box?",
+          answer: (
+            <div className="space-y-4">
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>
+                  <strong>Stories:</strong> Your recorded or typed memories with photos
+                </li>
+                <li>
+                  <strong>Treasures:</strong> Special keepsakes like recipes, documents, heirlooms, and memorabilia that you want to preserve with a story behind them
+                </li>
+              </ul>
+              <p className="text-base mt-3">
+                Both appear in your Book and Timeline!
+              </p>
+            </div>
+          ),
+          icon: <ImageIcon className="w-5 h-5" />,
+        },
+      ],
+    },
+    {
+      title: "Family",
+      items: [
+        {
+          question: "How does my family listen to my stories?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">Once you invite family members:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>They'll receive a sign-in link by email</li>
+                <li>They tap the link to access your stories</li>
+                <li>They can read your stories AND hear them in your voice</li>
+                <li>They can view from anywhere in the world</li>
+              </ul>
+              <p className="text-base mt-3">
+                You stay in control - only people you invite can see your memories.
+              </p>
+            </div>
+          ),
+          icon: <HelpCircle className="w-5 h-5" />,
+        },
+        {
+          question: "Can my family help me record?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base"><strong>Absolutely!</strong> A family member can:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>Sit with you and tap the buttons while you talk</li>
+                <li>Help you choose photos to add</li>
+                <li>Type stories for you if you prefer not to record</li>
+                <li>Ask you questions to help spark memories</li>
+              </ul>
+              <p className="text-base mt-3">
+                Many families make it a weekly activity together.
+              </p>
+            </div>
+          ),
+          icon: <HelpCircle className="w-5 h-5" />,
+        },
+        {
+          question: "Can my children or grandchildren add their own memories?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">Currently, each account has one storyteller. But you can:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>Invite family to view and listen to your stories</li>
+                <li>Have family members create their own Heritage Whisper account to record their memories</li>
+                <li>Record stories about your children and grandchildren in your own account</li>
+              </ul>
+            </div>
+          ),
+          icon: <HelpCircle className="w-5 h-5" />,
+        },
+      ],
+    },
+    {
       title: "Editing & Managing Memories",
       items: [
         {
@@ -262,7 +397,7 @@ export default function HelpPage() {
       ],
     },
     {
-      title: "Navigating Your Story",
+      title: "Viewing Your Stories",
       items: [
         {
           question: "How do I navigate through the Book view?",
