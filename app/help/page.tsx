@@ -56,33 +56,32 @@ export default function HelpPage() {
           question: "How do I record a new memory?",
           answer: (
             <div className="space-y-4">
-              <p className="text-base">When you click the <strong>+ button</strong>, you'll see two recording options. Pick the one that feels right for your story:</p>
+              <p className="text-base">When you tap <strong>Record</strong> in the navigation, you'll see options to start your story. Pick the one that feels right:</p>
 
               <div className="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-lg p-5 mt-3">
                 <strong className="block mb-3 text-lg text-amber-900">
-                  💬 Conversation Mode
+                  📷 Record with photo
                 </strong>
-                <p className="text-base mb-3">A guided interview with thoughtful follow-up questions to help you share a deeper story.</p>
+                <p className="text-base mb-3">Choose a photo first, then tell its story.</p>
                 <ul className="list-none space-y-2 ml-0 text-base">
-                  <li><strong>Step 1:</strong> Click the <strong>+</strong> button</li>
-                  <li><strong>Step 2:</strong> Choose <strong>"Conversation Mode"</strong></li>
-                  <li><strong>Step 3:</strong> Answer the questions naturally - like talking to a friend</li>
-                  <li className="text-sm text-amber-800 mt-3">⏱️ Takes about 10-15 minutes</li>
+                  <li><strong>Step 1:</strong> Tap <strong>"Record with photo"</strong></li>
+                  <li><strong>Step 2:</strong> Select a photo from your device</li>
+                  <li><strong>Step 3:</strong> Speak about the memory behind the photo</li>
+                  <li><strong>Step 4:</strong> Tap <strong>"Stop"</strong> when done</li>
                 </ul>
               </div>
 
               <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5 mt-3">
                 <strong className="block mb-3 text-lg">
-                  🎤 Quick Story
+                  🎤 Start recording
                 </strong>
-                <p className="text-base mb-3">Record a 2-5 minute story in one take. Simple and fast.</p>
+                <p className="text-base mb-3">Start now and add photos anytime.</p>
                 <ul className="list-none space-y-2 ml-0 text-base">
-                  <li><strong>Step 1:</strong> Click the <strong>+</strong> button</li>
-                  <li><strong>Step 2:</strong> Choose <strong>"Quick Story"</strong></li>
-                  <li><strong>Step 3:</strong> Wait for the 3-2-1 countdown</li>
-                  <li><strong>Step 4:</strong> Speak about your memory</li>
-                  <li><strong>Step 5:</strong> Click <strong>"Stop"</strong> when done</li>
-                  <li className="text-sm text-gray-600 mt-3">⏱️ Takes about 5 minutes total</li>
+                  <li><strong>Step 1:</strong> Tap <strong>"Start recording"</strong></li>
+                  <li><strong>Step 2:</strong> Wait for the countdown</li>
+                  <li><strong>Step 3:</strong> Speak about your memory</li>
+                  <li><strong>Step 4:</strong> Tap <strong>"Stop"</strong> when done</li>
+                  <li><strong>Step 5:</strong> Add photos on the review screen (optional)</li>
                 </ul>
               </div>
 
@@ -94,7 +93,7 @@ export default function HelpPage() {
                   <li>Find a quiet room</li>
                   <li>Speak clearly and at a comfortable pace</li>
                   <li>Your voice is automatically transcribed to text</li>
-                  <li>You can use both modes for different stories</li>
+                  <li>You can add or change photos after recording</li>
                 </ul>
               </div>
             </div>

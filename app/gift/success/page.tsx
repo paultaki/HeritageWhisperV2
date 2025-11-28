@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -12,7 +12,35 @@ interface GiftCodeData {
   purchaserName: string | null
 }
 
+// Wrapper with Suspense boundary for useSearchParams
 export default function GiftSuccessPage() {
+  return (
+    <Suspense fallback={<SuccessPageSkeleton />}>
+      <GiftSuccessContent />
+    </Suspense>
+  )
+}
+
+function SuccessPageSkeleton() {
+  return (
+    <div className="min-h-screen bg-[var(--hw-page-bg)]">
+      <header className="bg-[var(--hw-surface)] border-b border-[var(--hw-border-subtle)]">
+        <div className="max-w-[1140px] mx-auto px-6 py-4">
+          <div className="h-10 w-[200px] bg-gray-200 rounded animate-pulse" />
+        </div>
+      </header>
+      <main className="max-w-2xl mx-auto px-6 py-12">
+        <div className="text-center py-12">
+          <div className="w-12 h-12 border-4 border-[var(--hw-primary)]/30 border-t-[var(--hw-primary)] rounded-full animate-spin mx-auto mb-6" />
+          <div className="h-8 w-64 bg-gray-200 rounded mx-auto mb-2 animate-pulse" />
+          <div className="h-5 w-48 bg-gray-200 rounded mx-auto animate-pulse" />
+        </div>
+      </main>
+    </div>
+  )
+}
+
+function GiftSuccessContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
 
