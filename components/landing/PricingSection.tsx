@@ -17,11 +17,11 @@ export default function PricingSection() {
     <section id="pricing" className="bg-[var(--hw-section-bg)] py-16 md:py-24 px-6 md:px-12">
       <div className="max-w-[1140px] mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-[28px] md:text-[32px] font-semibold text-[var(--hw-primary)] mb-3">
+        <div className="mb-12">
+          <h2 className="text-[28px] md:text-[32px] font-semibold text-[var(--hw-primary)] mb-3 text-center">
             Simple, transparent pricing
           </h2>
-          <p className="text-lg text-[var(--hw-text-secondary)]">
+          <p className="text-lg text-[var(--hw-text-secondary)] text-center">
             One simple price. Unlimited memories.
           </p>
         </div>

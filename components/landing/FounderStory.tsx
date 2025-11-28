@@ -5,11 +5,11 @@ export default function FounderStory() {
     <section className="bg-[var(--hw-page-bg)] py-16 md:py-24 px-6 md:px-12">
       <div className="max-w-[1140px] mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <p className="text-sm font-medium text-[var(--hw-secondary)] uppercase tracking-wide mb-2">
+        <div className="mb-12">
+          <p className="text-sm font-medium text-[var(--hw-secondary)] uppercase tracking-wide mb-2 text-center">
             Our Story
           </p>
-          <h2 className="text-[28px] md:text-[32px] font-semibold text-[var(--hw-primary)]">
+          <h2 className="text-[28px] md:text-[32px] font-semibold text-[var(--hw-primary)] text-center">
             Built by Family, for Families
           </h2>
         </div>

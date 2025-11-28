@@ -23,7 +23,7 @@ export default function FinalCTA() {
           Start Your Stories
         </button>
 
-        <p className="text-sm text-white/70 mt-6">
+        <p className="text-sm text-white/70 mt-6 text-center">
           No credit card required to explore
         </p>
       </div>
