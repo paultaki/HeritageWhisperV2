@@ -19,11 +19,11 @@ import {
 export const metadata: Metadata = {
   title: 'HeritageWhisper | Preserve Family Stories in Their Own Voice',
   description:
-    "AI-powered family storytelling. Record memories, hear their voice forever. No typing required—just conversation.",
+    "Voice-first family storytelling. Record memories, hear their voice forever. No typing required—just conversation.",
   openGraph: {
     title: 'HeritageWhisper | Preserve Family Stories in Their Own Voice',
     description:
-      "AI-powered family storytelling. Record memories, hear their voice forever. No typing required—just conversation.",
+      "Voice-first family storytelling. Record memories, hear their voice forever. No typing required—just conversation.",
     type: 'website',
   },
 }

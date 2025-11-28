@@ -15,7 +15,7 @@ const steps = [
       </svg>
     ),
     title: 'See & Organize',
-    description: 'Our AI transcribes every word, organizes by timeline, and surfaces the wisdom hidden in your stories.',
+    description: 'We transcribe every word, organize by timeline, and surface the wisdom hidden in your stories.',
   },
   {
     icon: (

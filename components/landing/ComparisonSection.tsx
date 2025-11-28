@@ -8,7 +8,7 @@ export default function ComparisonSection() {
 
   const heritageWay = [
     'Record anytime the mood strikes',
-    'AI asks follow-up questions in real time',
+    'Follow-up questions draw out deeper memories',
     'Family listens instantly—from anywhere',
     'A living legacy that grows with every story',
   ]

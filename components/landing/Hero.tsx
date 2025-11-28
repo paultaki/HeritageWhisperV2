@@ -129,7 +129,7 @@ export default function Hero() {
             <span className="text-[var(--hw-secondary)] italic">Spoken,</span> not just written.
           </h1>
           <p className="text-lg md:text-xl text-[var(--hw-text-secondary)] leading-relaxed max-w-[55ch] mx-auto">
-            HeritageWhisper's AI interviewer guides your loved ones through their memories—asking
+            HeritageWhisper guides your loved ones through their memories—asking
             the questions you never thought to ask, preserving not just facts, but the feeling behind them.
           </p>
         </div>

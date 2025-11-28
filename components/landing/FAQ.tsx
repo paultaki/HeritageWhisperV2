@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: "How is this different from StoryWorth?",
-    answer: "StoryWorth sends weekly email prompts and prints a book after 12 months. HeritageWhisper captures voice—not just text—with an AI that asks personalized follow-up questions. Your family can listen immediately, and there's no subscription.",
+    answer: "StoryWorth sends weekly email prompts and prints a book after 12 months. HeritageWhisper captures voice—not just text—with follow-up questions that draw out deeper memories. Your family can listen immediately, and there's no subscription.",
   },
   {
     question: "Can I share with my family?",
