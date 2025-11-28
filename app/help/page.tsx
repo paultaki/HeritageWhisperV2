@@ -123,6 +123,94 @@ export default function HelpPage() {
           ),
           icon: <Edit3 className="w-5 h-5" />,
         },
+        {
+          question: "How do I get back to my stories?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">Your stories are always safe and easy to find:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>
+                  <strong>Timeline:</strong> Tap "Timeline" to see all your memories organized by year
+                </li>
+                <li>
+                  <strong>Book:</strong> Tap "Book" to read your stories like a memoir
+                </li>
+                <li>
+                  <strong>Memory Box:</strong> Tap "Menu" → "Memory Box" to see all stories and treasures in one place
+                </li>
+              </ul>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  💡 <strong>Tip:</strong> The navigation bar at the bottom of the screen is always there to help you move around.
+                </p>
+              </div>
+            </div>
+          ),
+          icon: <Book className="w-5 h-5" />,
+        },
+        {
+          question: "What if I make a mistake while recording?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">No worries! You can always re-record or edit:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>If you don't like a recording, simply don't save it and start over</li>
+                <li>If you already saved it, you can edit the text anytime</li>
+                <li>You can also delete any memory and record it again</li>
+              </ul>
+              <p className="text-base mt-3">
+                There's no pressure to get it perfect the first time. Just talk naturally!
+              </p>
+            </div>
+          ),
+          icon: <Mic className="w-5 h-5" />,
+        },
+        {
+          question: "Do I need to finish my story in one sitting?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">Each recording is saved as its own memory, so you can:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>Record one short story today and another tomorrow</li>
+                <li>Keep each memory to 2-5 minutes (easier to record and nicer to listen to)</li>
+                <li>Add as many separate memories as you want over time</li>
+              </ul>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  💡 <strong>Tip:</strong> Short stories are often the most meaningful. It's better to have 20 short memories than to wait for time to record one long one.
+                </p>
+              </div>
+            </div>
+          ),
+          icon: <Mic className="w-5 h-5" />,
+        },
+        {
+          question: "I don't know what stories to tell. Where do I start?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">We've got you covered! Heritage Whisper includes personalized <strong>Story Ideas</strong> to spark your memory:</p>
+              <ol className="list-none space-y-3 ml-0 text-base">
+                <li><strong>Step 1:</strong> Tap <strong>Menu</strong> → <strong>Story Ideas</strong></li>
+                <li><strong>Step 2:</strong> Browse through thoughtful prompts designed to help you remember meaningful moments</li>
+                <li><strong>Step 3:</strong> Tap any idea that speaks to you to start recording</li>
+              </ol>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-3">
+                <p className="text-base mb-2"><strong>Some example prompts:</strong></p>
+                <ul className="list-disc list-inside space-y-1 ml-2 text-base text-gray-700">
+                  <li>"What's a smell that instantly takes you back to childhood?"</li>
+                  <li>"Tell me about a time you were really proud of yourself"</li>
+                  <li>"What's a tradition you hope your family continues?"</li>
+                </ul>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  💡 <strong>Tip:</strong> You don't have to answer the prompt exactly - let it be a jumping-off point. One memory often leads to another!
+                </p>
+              </div>
+            </div>
+          ),
+          icon: <HelpCircle className="w-5 h-5" />,
+        },
       ],
     },
     {
@@ -231,6 +319,80 @@ export default function HelpPage() {
             </div>
           ),
           icon: <Book className="w-5 h-5" />,
+        },
+      ],
+    },
+    {
+      title: "Technical Help",
+      items: [
+        {
+          question: "What if I can't hear my recording?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">Try these steps:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>Make sure your device volume is turned up</li>
+                <li>Check that your device isn't on silent/mute</li>
+                <li>Look for the Play button (▶️) on any story and tap it</li>
+                <li>If using headphones, make sure they're connected properly</li>
+              </ul>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  💡 <strong>Tip:</strong> You can always read the written transcript even if audio isn't working.
+                </p>
+              </div>
+            </div>
+          ),
+          icon: <HelpCircle className="w-5 h-5" />,
+        },
+        {
+          question: "The app isn't responding. What do I do?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">Try these simple fixes:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>
+                  <strong>Refresh the page</strong> - On a computer, press the circular arrow or F5. On a tablet, pull down on the screen.
+                </li>
+                <li>
+                  <strong>Close and reopen</strong> - Close your browser completely and open Heritage Whisper again
+                </li>
+                <li>
+                  <strong>Check your internet</strong> - Make sure you're connected to WiFi or cellular data
+                </li>
+                <li>
+                  <strong>Try again later</strong> - Sometimes waiting a few minutes helps
+                </li>
+              </ul>
+              <p className="text-base mt-3">
+                Your stories are safely saved, so you won't lose anything.
+              </p>
+            </div>
+          ),
+          icon: <HelpCircle className="w-5 h-5" />,
+        },
+        {
+          question: "Can I use Heritage Whisper on my tablet/iPad?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base"><strong>Yes!</strong> Heritage Whisper works on:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>
+                  <strong>Tablets and iPads</strong> (recommended for seniors - bigger screen!)
+                </li>
+                <li>
+                  <strong>Computers</strong> (desktop or laptop)
+                </li>
+                <li>
+                  <strong>Smartphones</strong> (iPhone or Android)
+                </li>
+              </ul>
+              <p className="text-base mt-3">
+                Simply open your web browser (Safari, Chrome, etc.) and go to heritagewhisper.com. No app download needed.
+              </p>
+            </div>
+          ),
+          icon: <Smartphone className="w-5 h-5" />,
         },
       ],
     },
@@ -453,35 +615,187 @@ export default function HelpPage() {
       ],
     },
     {
-      title: "Privacy & Account",
+      title: "Family",
       items: [
         {
-          question: "Is my data private and secure?",
+          question: "How does my family listen to my stories?",
           answer: (
-            <div className="space-y-3">
-              <p>
-                Yes! Your memories are precious, and we take privacy seriously:
+            <div className="space-y-4">
+              <p className="text-base">Once you invite family members:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>They'll receive a sign-in link by email</li>
+                <li>They tap the link to access your stories</li>
+                <li>They can read your stories AND hear them in your voice</li>
+                <li>They can view from anywhere in the world</li>
+              </ul>
+              <p className="text-base mt-3">
+                You stay in control - only people you invite can see your memories.
               </p>
-              <ul className="list-disc list-inside space-y-2 ml-2">
+            </div>
+          ),
+          icon: <HelpCircle className="w-5 h-5" />,
+        },
+        {
+          question: "Can my family help me record?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base"><strong>Absolutely!</strong> A family member can:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>Sit with you and tap the buttons while you talk</li>
+                <li>Help you choose photos to add</li>
+                <li>Type stories for you if you prefer not to record</li>
+                <li>Ask you questions to help spark memories</li>
+              </ul>
+              <p className="text-base mt-3">
+                Many families make it a weekly activity together.
+              </p>
+            </div>
+          ),
+          icon: <HelpCircle className="w-5 h-5" />,
+        },
+        {
+          question: "Can my children or grandchildren add their own memories?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">Currently, each account has one storyteller. But you can:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>Invite family to view and listen to your stories</li>
+                <li>Have family members create their own Heritage Whisper account to record their memories</li>
+                <li>Record stories about your children and grandchildren in your own account</li>
+              </ul>
+            </div>
+          ),
+          icon: <HelpCircle className="w-5 h-5" />,
+        },
+      ],
+    },
+    {
+      title: "Memory & Photos",
+      items: [
+        {
+          question: "What kinds of stories should I record?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">Anything that matters to you! Some ideas:</p>
+              <ul className="list-none space-y-2 ml-0 text-base">
+                <li>How you met your spouse</li>
+                <li>Your first job or career memories</li>
+                <li>Favorite family vacations</li>
+                <li>Holiday traditions and recipes</li>
+                <li>Lessons you learned the hard way</li>
+                <li>Funny moments with your kids</li>
+                <li>What life was like when you were young</li>
+                <li>Advice you'd give to your grandchildren</li>
+              </ul>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  💡 <strong>Tip:</strong> Tap "Menu" → "Story Ideas" for personalized prompts to help you get started.
+                </p>
+              </div>
+            </div>
+          ),
+          icon: <ImageIcon className="w-5 h-5" />,
+        },
+        {
+          question: "I have old photos. Can I add them?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base"><strong>Yes!</strong> You can add photos to any memory:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
                 <li>
-                  <strong>Private by default:</strong> Only you can see your
-                  memories
+                  <strong>Printed photos:</strong> Take a picture of them with your phone or tablet, then upload
                 </li>
                 <li>
-                  <strong>EXIF stripping:</strong> Location data and camera info
-                  are removed from photos
+                  <strong>Digital photos:</strong> Upload directly from your device
                 </li>
                 <li>
-                  <strong>Secure storage:</strong> All data encrypted and stored
-                  securely
+                  <strong>Photo albums:</strong> Snap pictures of album pages to capture multiple photos
+                </li>
+              </ul>
+              <p className="text-base mt-3">
+                Each memory can have as many photos as you want.
+              </p>
+            </div>
+          ),
+          icon: <ImageIcon className="w-5 h-5" />,
+        },
+        {
+          question: "What's the difference between Stories and Treasures in Memory Box?",
+          answer: (
+            <div className="space-y-4">
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>
+                  <strong>Stories:</strong> Your recorded or typed memories with photos
                 </li>
                 <li>
-                  <strong>Control what's visible:</strong> Mark memories as
-                  private, timeline-only, or book-only
+                  <strong>Treasures:</strong> Special keepsakes like recipes, documents, heirlooms, and memorabilia that you want to preserve with a story behind them
+                </li>
+              </ul>
+              <p className="text-base mt-3">
+                Both appear in your Book and Timeline!
+              </p>
+            </div>
+          ),
+          icon: <ImageIcon className="w-5 h-5" />,
+        },
+      ],
+    },
+    {
+      title: "Privacy & Trust",
+      items: [
+        {
+          question: "Who can see my stories?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">Only the people you choose:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>
+                  <strong>Private by default:</strong> Your stories are only visible to you until you invite family
                 </li>
                 <li>
-                  <strong>Data export:</strong> Download all your data anytime
+                  <strong>You control access:</strong> Invite specific family members through the Family page
                 </li>
+                <li>
+                  <strong>Nothing is public:</strong> Your stories never appear on the internet for strangers to see
+                </li>
+                <li>
+                  <strong>Remove access anytime:</strong> You can uninvite anyone at any time
+                </li>
+              </ul>
+            </div>
+          ),
+          icon: <HelpCircle className="w-5 h-5" />,
+        },
+        {
+          question: "What happens to my stories if something happens to me?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base">Your stories live on for your family:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>Family members you've invited will continue to have access</li>
+                <li>Your stories, voice recordings, and photos are preserved</li>
+                <li>Consider inviting a trusted family member now so they have access</li>
+              </ul>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-base">
+                  💡 <strong>Tip:</strong> Let a family member know about your Heritage Whisper account and how to access it.
+                </p>
+              </div>
+            </div>
+          ),
+          icon: <HelpCircle className="w-5 h-5" />,
+        },
+        {
+          question: "Is my information safe?",
+          answer: (
+            <div className="space-y-4">
+              <p className="text-base"><strong>Yes.</strong> We take your privacy seriously:</p>
+              <ul className="list-none space-y-3 ml-0 text-base">
+                <li>All your data is encrypted and stored securely</li>
+                <li>We automatically remove location data from your photos</li>
+                <li>We never sell or share your information</li>
+                <li>You can download all your data anytime</li>
+                <li>You can delete your account anytime</li>
               </ul>
             </div>
           ),

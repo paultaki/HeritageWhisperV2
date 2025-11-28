@@ -1,6 +1,28 @@
+'use client'
+
+import { useState, useRef } from 'react'
 import Image from 'next/image'
+import { Play, Pause } from 'lucide-react'
 
 export default function VoiceSection() {
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
+
+  const togglePlay = () => {
+    if (!audioRef.current) return
+
+    if (isPlaying) {
+      audioRef.current.pause()
+    } else {
+      audioRef.current.play()
+    }
+    setIsPlaying(!isPlaying)
+  }
+
+  const handleEnded = () => {
+    setIsPlaying(false)
+  }
+
   return (
     <section className="bg-[var(--hw-page-bg)] py-16 md:py-24 px-6 md:px-12">
       <div className="max-w-[1140px] mx-auto">
@@ -16,18 +38,47 @@ export default function VoiceSection() {
               her wedding day, you hear the catch in her throat. That's what gets preserved.
             </p>
 
-            {/* Optional audio waveform hint */}
-            <div className="mt-8 flex items-center gap-3 text-[var(--hw-text-muted)]">
-              <div className="flex items-end gap-1 h-6">
-                {[3, 5, 8, 6, 9, 4, 7, 5, 8, 6, 4, 7, 5, 3].map((height, i) => (
-                  <div
-                    key={i}
-                    className="w-1 bg-[var(--hw-secondary)] rounded-full opacity-60"
-                    style={{ height: `${height * 2.5}px` }}
-                  />
-                ))}
-              </div>
-              <span className="text-sm font-medium">Hear the difference</span>
+            {/* Audio player */}
+            <div className="mt-8">
+              <button
+                onClick={togglePlay}
+                className="group flex items-center gap-4 px-5 py-3 bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] rounded-xl hover:border-[var(--hw-secondary)] hover:shadow-md transition-all duration-200"
+              >
+                <div className="w-10 h-10 rounded-full bg-[var(--hw-secondary)] flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                  {isPlaying ? (
+                    <Pause className="w-5 h-5" />
+                  ) : (
+                    <Play className="w-5 h-5 ml-0.5" />
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-end gap-1 h-6">
+                    {[3, 5, 8, 6, 9, 4, 7, 5, 8, 6, 4, 7, 5, 3].map((height, i) => (
+                      <div
+                        key={i}
+                        className={`w-1 rounded-full transition-all duration-150 ${
+                          isPlaying
+                            ? 'bg-[var(--hw-secondary)] animate-pulse'
+                            : 'bg-[var(--hw-secondary)] opacity-60'
+                        }`}
+                        style={{
+                          height: `${height * 2.5}px`,
+                          animationDelay: isPlaying ? `${i * 50}ms` : '0ms'
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-medium text-[var(--hw-text-secondary)]">
+                    {isPlaying ? 'Now playing...' : 'Hear the difference'}
+                  </span>
+                </div>
+              </button>
+              <audio
+                ref={audioRef}
+                src="/Pocket Watch.mp3"
+                onEnded={handleEnded}
+                preload="metadata"
+              />
             </div>
           </div>
 
