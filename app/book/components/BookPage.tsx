@@ -657,12 +657,12 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
   // Activity tracking state - only log once per playback session
   const hasLoggedListeningRef = useRef(false);
 
-  // Calculate progress percentage
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  // Calculate progress percentage (guard against non-finite duration)
+  const progress = duration > 0 && isFinite(duration) ? (currentTime / duration) * 100 : 0;
 
-  // Format time helper
+  // Format time helper - handles NaN, Infinity, and negative values
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return '0:00';
+    if (!isFinite(seconds) || seconds < 0) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -682,7 +682,10 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
     audioRef.current = audio;
 
     const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
+      // Only set duration if it's a valid finite number
+      if (isFinite(audio.duration) && audio.duration > 0) {
+        setDuration(audio.duration);
+      }
     };
 
     const handleTimeUpdate = () => {
@@ -974,11 +977,12 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
               className="bg-neutral-200 rounded-full overflow-hidden cursor-pointer transition-all"
               style={{ height: "clamp(6px, 0.8vw, 8px)" }}
               onClick={(e) => {
-                if (!audioRef.current || !duration) return;
+                // Guard against non-finite duration (Infinity, NaN)
+                if (!audioRef.current || !isFinite(duration) || duration <= 0) return;
 
                 const rect = e.currentTarget.getBoundingClientRect();
                 const x = e.clientX - rect.left;
-                const percentage = x / rect.width;
+                const percentage = Math.max(0, Math.min(1, x / rect.width));
                 const newTime = percentage * duration;
 
                 audioRef.current.currentTime = newTime;
