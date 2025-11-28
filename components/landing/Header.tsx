@@ -8,7 +8,7 @@ const navItems = [
   { label: 'Features', id: 'how-it-works' },
   { label: 'How It Works', id: 'how-it-works' },
   { label: 'Pricing', id: 'pricing' },
-  { label: 'Gift', id: 'gift', href: '/gift-plans' },
+  { label: 'Gift', id: 'gift', href: '/gift' },
   { label: 'FAQ', id: 'faq' },
 ]
 

@@ -37,6 +37,17 @@ if (!PREMIUM_PRICE_ID) {
 }
 
 /**
+ * Price ID for Gift subscription (one-time payment, $79)
+ * This should be created in the Stripe Dashboard as a one-time payment product
+ * Format: price_xxxxxxxxxxxxxxxxxxxxx
+ */
+export const GIFT_PRICE_ID = process.env.STRIPE_GIFT_PRICE_ID || '';
+
+if (!GIFT_PRICE_ID) {
+  console.warn('Warning: STRIPE_GIFT_PRICE_ID is not defined. Gift purchase will not work.');
+}
+
+/**
  * Webhook secret for verifying webhook signatures
  */
 export const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';

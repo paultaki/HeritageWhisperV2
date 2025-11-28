@@ -7,6 +7,7 @@ import {
   trackCheckoutFailed,
 } from "@/lib/analytics/paywall";
 import { logger } from "@/lib/logger";
+import { createGiftCode, markGiftCodeRefunded } from "@/lib/giftCodes";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -61,7 +62,12 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutCompleted(session);
+        // Check if this is a gift purchase
+        if (session.metadata?.purchase_type === "gift") {
+          await handleGiftCheckoutCompleted(session);
+        } else {
+          await handleCheckoutCompleted(session);
+        }
         break;
       }
 
@@ -80,6 +86,12 @@ export async function POST(request: NextRequest) {
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         await handlePaymentFailed(invoice);
+        break;
+      }
+
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        await handleChargeRefunded(charge);
         break;
       }
 
@@ -323,6 +335,84 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   } catch (error) {
     logger.error("Error handling payment failure:", error);
     throw error;
+  }
+}
+
+/**
+ * Handle gift checkout completion
+ * Creates a gift code after successful payment
+ */
+async function handleGiftCheckoutCompleted(session: Stripe.Checkout.Session) {
+  const purchaserEmail = session.metadata?.purchaser_email || session.customer_email;
+  const purchaserName = session.metadata?.purchaser_name;
+
+  if (!purchaserEmail) {
+    logger.error("No purchaser email in gift checkout session metadata");
+    return;
+  }
+
+  try {
+    // Get payment intent ID for tracking
+    const paymentIntentId = session.payment_intent as string | undefined;
+
+    // Create the gift code in the database
+    const giftCode = await createGiftCode({
+      stripeCheckoutSessionId: session.id,
+      stripePaymentIntentId: paymentIntentId,
+      purchaserEmail,
+      purchaserName: purchaserName || undefined,
+      amountPaidCents: session.amount_total || 7900,
+    });
+
+    logger.info(
+      `Gift code created: ${giftCode.code} for purchaser ${purchaserEmail} (session: ${session.id})`
+    );
+
+    // TODO: Send receipt email to purchaser with the gift code
+    // This will be implemented in the email templates phase
+  } catch (error) {
+    logger.error("Error handling gift checkout completion:", error);
+    throw error;
+  }
+}
+
+/**
+ * Handle charge refunded
+ * Marks gift codes as refunded if applicable
+ */
+async function handleChargeRefunded(charge: Stripe.Charge) {
+  try {
+    // Get the payment intent from the charge
+    const paymentIntentId = charge.payment_intent as string | undefined;
+
+    if (!paymentIntentId) {
+      return;
+    }
+
+    // Try to find the checkout session for this payment intent
+    const sessions = await stripe.checkout.sessions.list({
+      payment_intent: paymentIntentId,
+      limit: 1,
+    });
+
+    if (sessions.data.length === 0) {
+      return;
+    }
+
+    const session = sessions.data[0];
+
+    // Check if this was a gift purchase
+    if (session.metadata?.purchase_type !== "gift") {
+      return;
+    }
+
+    // Mark the gift code as refunded
+    await markGiftCodeRefunded(session.id);
+
+    logger.info(`Gift code marked as refunded for session: ${session.id}`);
+  } catch (error) {
+    logger.error("Error handling charge refund:", error);
+    // Don't throw - refund should still process even if we can't update the gift code
   }
 }
 

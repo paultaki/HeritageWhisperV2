@@ -134,6 +134,39 @@ export const stripeCustomers = pgTable("stripe_customers", {
   updatedAt: timestamp("updated_at").default(sql`NOW()`).notNull(),
 });
 
+// Gift Codes table for gift subscription system
+export const giftCodes = pgTable("gift_codes", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  // Gift code (format: GIFT-XXXX-XXXX-XXXX)
+  code: text("code").notNull().unique(),
+  // Purchase info
+  stripeCheckoutSessionId: text("stripe_checkout_session_id").unique(),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  amountPaidCents: integer("amount_paid_cents").notNull().default(7900),
+  // Purchaser info
+  purchaserEmail: text("purchaser_email").notNull(),
+  purchaserName: text("purchaser_name"),
+  purchaserUserId: uuid("purchaser_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  // Recipient info (filled in on redemption, not purchase)
+  recipientEmail: text("recipient_email"),
+  recipientName: text("recipient_name"),
+  // Redemption tracking
+  redeemedByUserId: uuid("redeemed_by_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  redeemedAt: timestamp("redeemed_at"),
+  // Lifecycle
+  status: text("status").notNull().default("active"), // pending, active, redeemed, expired, refunded
+  expiresAt: timestamp("expires_at").notNull(),
+  // Timestamps
+  createdAt: timestamp("created_at").default(sql`NOW()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`NOW()`).notNull(),
+});
+
 // Chapters table for organizing stories
 export const chapters = pgTable("chapters", {
   id: uuid("id")
@@ -898,6 +931,12 @@ export const insertStripeCustomerSchema = createInsertSchema(
   updatedAt: true,
 });
 
+export const insertGiftCodeSchema = createInsertSchema(giftCodes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStory = z.infer<typeof insertStorySchema>;
@@ -955,6 +994,8 @@ export type InsertPromptFeedback = z.infer<typeof insertPromptFeedbackSchema>;
 export type PromptFeedback = typeof promptFeedback.$inferSelect;
 export type InsertStripeCustomer = z.infer<typeof insertStripeCustomerSchema>;
 export type StripeCustomer = typeof stripeCustomers.$inferSelect;
+export type InsertGiftCode = z.infer<typeof insertGiftCodeSchema>;
+export type GiftCode = typeof giftCodes.$inferSelect;
 
 export const chaptersRelations = relations(chapters, ({ many }) => ({
   stories: many(stories),
