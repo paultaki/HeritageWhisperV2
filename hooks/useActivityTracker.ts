@@ -74,6 +74,7 @@ export function useActivityTracker(options: ActivityTrackerOptions = {}): Activi
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const warningTriggeredRef = useRef(false);
+  const isInitializedRef = useRef(false);
 
   // Calculate when warning should trigger
   const warningTime = timeoutDuration - warningDuration;
@@ -170,12 +171,19 @@ export function useActivityTracker(options: ActivityTrackerOptions = {}): Activi
     }
   }, [enabled, isWarning, resetTimer]);
 
-  // Initialize on mount
+  // Initialize on mount - use ref to prevent infinite loop
   useEffect(() => {
     if (!enabled) {
       clearAllTimers();
+      isInitializedRef.current = false;
       return;
     }
+
+    // Prevent re-initialization on every render
+    if (isInitializedRef.current) {
+      return;
+    }
+    isInitializedRef.current = true;
 
     // Check if there's a stored last activity time
     try {
@@ -183,19 +191,19 @@ export function useActivityTracker(options: ActivityTrackerOptions = {}): Activi
       if (stored) {
         const storedDate = new Date(stored);
         const timeSinceActivity = Date.now() - storedDate.getTime();
-        
+
         // If more than timeout duration has passed, trigger timeout immediately
         if (timeSinceActivity >= timeoutDuration) {
           triggerTimeout();
           return;
         }
-        
+
         // If in warning period, show warning
         if (timeSinceActivity >= warningTime) {
           startWarning();
           return;
         }
-        
+
         setLastActivity(storedDate);
       }
     } catch (error) {
@@ -208,6 +216,7 @@ export function useActivityTracker(options: ActivityTrackerOptions = {}): Activi
     // Cleanup on unmount
     return () => {
       clearAllTimers();
+      isInitializedRef.current = false;
     };
   }, [enabled, timeoutDuration, warningTime, resetTimer, startWarning, triggerTimeout, clearAllTimers]);
 
