@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
       .from("stories")
       .select("*")
       .eq("user_id", targetUserId)
-      .order("year", { ascending: false })
+      .order("story_year", { ascending: false })
       .order("created_at", { ascending: false });
 
     if (storiesError) {
@@ -231,30 +231,26 @@ export async function GET(request: NextRequest) {
         return {
           id: story.id,
           title: story.title || "Untitled Story",
-          content: story.transcript,
-          transcription: story.transcript,
+          content: story.transcription,
+          transcription: story.transcription,
           textBody: story.text_body,
           recordingMode: story.recording_mode,
           createdAt: story.created_at,
           updatedAt: story.updated_at,
-          age: story.metadata?.life_age || story.metadata?.age,
-          year: story.year,
-          storyYear: story.year,
-          lifeAge: story.metadata?.life_age,
-          includeInTimeline: story.metadata?.include_in_timeline ?? true,
-          includeInBook: story.metadata?.include_in_book ?? true,
-          isFavorite: story.metadata?.is_favorite ?? false,
+          year: story.story_year,
+          storyYear: story.story_year,
+          includeInTimeline: story.include_in_timeline ?? true,
+          includeInBook: story.include_in_book ?? true,
+          isFavorite: story.is_favorite ?? false,
           photoUrl: photoUrl,
           photos: photos,
           audioUrl: story.audio_url,
-          wisdomTranscription: story.wisdom_text,
-          wisdomClipText: story.wisdom_text,
+          wisdomTranscription: story.wisdom_clip_text,
+          wisdomClipText: story.wisdom_clip_text,
           wisdomClipUrl: story.wisdom_clip_url,
           durationSeconds: story.duration_seconds,
           emotions: story.emotions,
-          pivotalCategory: story.metadata?.pivotal_category,
-          storyDate: story.story_date || story.metadata?.story_date, // Read from column first, fallback to metadata for legacy data
-          photoTransform: story.metadata?.photo_transform,
+          storyDate: story.story_date,
           chapterId: story.chapter_id,
           chapterOrderIndex: story.chapter_order_index,
         };
@@ -382,16 +378,16 @@ export async function POST(request: NextRequest) {
     const storyData = {
       user_id: userId,
       title: body.title || "Untitled Story",
-      transcript: body.transcription || body.content,
+      transcription: body.transcription || body.content,
       text_body: body.textBody || undefined, // Text-only story content
       recording_mode: body.recordingMode || (body.audioUrl ? 'audio' : body.textBody ? 'text' : 'audio'), // Track recording method
-      year: body.year || body.storyYear,
+      story_year: body.year || body.storyYear,
       story_date: body.storyDate || null, // Store full date with month/day
       audio_url:
         body.audioUrl && !body.audioUrl.startsWith("blob:")
           ? body.audioUrl
           : undefined,
-      wisdom_text: body.wisdomClipText || body.wisdomTranscription,
+      wisdom_clip_text: body.wisdomClipText || body.wisdomTranscription,
       wisdom_clip_url: body.wisdomClipUrl,
       duration_seconds: body.textBody ? null : durationForDb, // No duration for text-only stories
       emotions: body.emotions,
@@ -399,18 +395,12 @@ export async function POST(request: NextRequest) {
         body.photoUrl && !body.photoUrl.startsWith("blob:")
           ? body.photoUrl
           : undefined,
-      is_saved: true,
       source_prompt_id: body.sourcePromptId || null, // Track which prompt generated this story
-      metadata: {
-        life_age: body.lifeAge || body.age,
-        include_in_timeline: body.includeInTimeline ?? true,
-        include_in_book: body.includeInBook ?? true,
-        is_favorite: body.isFavorite ?? false,
-        photos: processedPhotos,
-        pivotal_category: body.pivotalCategory,
-        photo_transform: body.photoTransform,
-        actual_duration: body.durationSeconds, // Store actual validated duration in metadata
-      },
+      // Individual columns (not metadata JSONB - that column doesn't exist)
+      include_in_timeline: body.includeInTimeline ?? true,
+      include_in_book: body.includeInBook ?? true,
+      is_favorite: body.isFavorite ?? false,
+      photos: processedPhotos.length > 0 ? processedPhotos : undefined,
     };
 
     // Save the story to Supabase
@@ -435,9 +425,9 @@ export async function POST(request: NextRequest) {
       storytellerUserId: userId,
       storyId: newStory.id,
       storyTitle: newStory.title,
-      storyYear: newStory.year || undefined,
+      storyYear: newStory.story_year || undefined,
       heroPhotoPath: newStory.photo_url || undefined,
-      transcript: newStory.transcript || '',
+      transcript: newStory.transcription || '',
     }).catch((error) => {
       // Log error but don't fail the request
       logger.error('[Stories API] Failed to send story notification emails:', error);
@@ -453,7 +443,7 @@ export async function POST(request: NextRequest) {
       eventType: "story_recorded",
       metadata: {
         storyTitle: newStory.title,
-        year: newStory.year,
+        year: newStory.story_year,
         hasAudio: !!newStory.audio_url,
         hasPhoto: !!newStory.photo_url,
       },
@@ -550,27 +540,24 @@ export async function POST(request: NextRequest) {
       const transformedStory = {
         id: newStory.id,
         title: newStory.title,
-        content: newStory.transcript,
-        transcription: newStory.transcript,
+        content: newStory.transcription,
+        transcription: newStory.transcription,
         createdAt: newStory.created_at,
         updatedAt: newStory.updated_at,
-        year: newStory.year,
-        storyYear: newStory.year,
-        lifeAge: newStory.metadata?.life_age,
-        includeInTimeline: newStory.metadata?.include_in_timeline,
-        includeInBook: newStory.metadata?.include_in_book,
-        isFavorite: newStory.metadata?.is_favorite,
+        year: newStory.story_year,
+        storyYear: newStory.story_year,
+        includeInTimeline: newStory.include_in_timeline,
+        includeInBook: newStory.include_in_book,
+        isFavorite: newStory.is_favorite,
         photoUrl: newStory.photo_url,
         photos: newStory.photos || [],
         audioUrl: newStory.audio_url,
-        wisdomTranscription: newStory.wisdom_text,
-        wisdomClipText: newStory.wisdom_text,
+        wisdomTranscription: newStory.wisdom_clip_text,
+        wisdomClipText: newStory.wisdom_clip_text,
         wisdomClipUrl: newStory.wisdom_clip_url,
         durationSeconds: newStory.duration_seconds,
         emotions: newStory.emotions,
-        pivotalCategory: newStory.metadata?.pivotal_category,
-        storyDate: newStory.metadata?.story_date,
-        photoTransform: newStory.metadata?.photo_transform,
+        storyDate: newStory.story_date,
       };
 
       return NextResponse.json({ story: transformedStory });
@@ -586,8 +573,8 @@ export async function POST(request: NextRequest) {
 
     try {
       const tier1Prompts = generateTier1TemplatesV2(
-        newStory.transcript || "",
-        newStory.year,
+        newStory.transcription || "",
+        newStory.story_year,
       );
 
       // V2 already filters through quality gates during generation
@@ -607,7 +594,7 @@ export async function POST(request: NextRequest) {
           prompt_text: prompt.text,
           context_note: prompt.context,
           anchor_entity: prompt.entity,
-          anchor_year: newStory.year,
+          anchor_year: newStory.story_year,
           anchor_hash: prompt.anchorHash,
           tier: 1,
           memory_type: prompt.memoryType,
@@ -660,7 +647,7 @@ export async function POST(request: NextRequest) {
     logger.debug("[Stories API] Generating echo prompt for immediate engagement");
 
     try {
-      const echoPromptText = await generateEchoPrompt(newStory.transcript || "");
+      const echoPromptText = await generateEchoPrompt(newStory.transcription || "");
 
       if (echoPromptText) {
         // Quality gate: validate echo prompt before storing
@@ -681,8 +668,8 @@ export async function POST(request: NextRequest) {
               prompt_text: echoPromptText,
               context_note: "Inspired by what you just shared",
               anchor_entity: "echo",
-              anchor_year: newStory.year,
-              anchor_hash: generateEchoAnchorHash(newStory.transcript || ""),
+              anchor_year: newStory.story_year,
+              anchor_hash: generateEchoAnchorHash(newStory.transcription || ""),
               tier: 1,
               memory_type: "echo",
               prompt_score: 75, // High score - immediate engagement
@@ -738,7 +725,7 @@ export async function POST(request: NextRequest) {
           // Fetch all user stories for analysis
           const { data: allStories, error: storiesError } = await supabaseAdmin
             .from("stories")
-            .select("id, title, transcript, lesson_learned, created_at")
+            .select("id, title, transcription, lesson_learned, created_at")
             .eq("user_id", userId)
             .order("created_at", { ascending: true });
 
@@ -863,27 +850,24 @@ export async function POST(request: NextRequest) {
     const transformedStory = {
       id: newStory.id,
       title: newStory.title,
-      content: newStory.transcript,
-      transcription: newStory.transcript,
+      content: newStory.transcription,
+      transcription: newStory.transcription,
       createdAt: newStory.created_at,
       updatedAt: newStory.updated_at,
-      year: newStory.year,
-      storyYear: newStory.year,
-      lifeAge: newStory.metadata?.life_age,
-      includeInTimeline: newStory.metadata?.include_in_timeline,
-      includeInBook: newStory.metadata?.include_in_book,
-      isFavorite: newStory.metadata?.is_favorite,
+      year: newStory.story_year,
+      storyYear: newStory.story_year,
+      includeInTimeline: newStory.include_in_timeline,
+      includeInBook: newStory.include_in_book,
+      isFavorite: newStory.is_favorite,
       photoUrl: newStory.photo_url,
       photos: newStory.photos || [],
       audioUrl: newStory.audio_url,
-      wisdomTranscription: newStory.wisdom_text,
-      wisdomClipText: newStory.wisdom_text,
+      wisdomTranscription: newStory.wisdom_clip_text,
+      wisdomClipText: newStory.wisdom_clip_text,
       wisdomClipUrl: newStory.wisdom_clip_url,
       durationSeconds: newStory.duration_seconds,
       emotions: newStory.emotions,
-      pivotalCategory: newStory.metadata?.pivotal_category,
-      storyDate: newStory.story_date || newStory.metadata?.story_date, // Read from column first, fallback to metadata for legacy data
-      photoTransform: newStory.metadata?.photo_transform,
+      storyDate: newStory.story_date,
     };
 
     return NextResponse.json({ story: transformedStory });

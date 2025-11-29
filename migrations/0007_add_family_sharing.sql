@@ -3,10 +3,45 @@
 -- Description: Enables users to invite family members to view their stories via magic links
 
 -- ============================================================================
--- PART 1: CREATE TABLES
+-- PART 1A: EXTEND EXISTING family_members TABLE (created in 0000)
 -- ============================================================================
 
--- Family members table
+-- Add columns that 0007 expects but 0000 did not create
+ALTER TABLE public.family_members
+  ADD COLUMN IF NOT EXISTS access_count INTEGER DEFAULT 0;
+
+ALTER TABLE public.family_members
+  ADD COLUMN IF NOT EXISTS first_accessed_at TIMESTAMPTZ;
+
+ALTER TABLE public.family_members
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Add relationship CHECK constraint (0000 did not have one)
+ALTER TABLE public.family_members
+  DROP CONSTRAINT IF EXISTS family_members_relationship_check;
+
+ALTER TABLE public.family_members
+  ADD CONSTRAINT family_members_relationship_check
+  CHECK (relationship IN ('spouse', 'partner', 'child', 'parent', 'sibling', 'grandparent', 'grandchild', 'other'));
+
+-- Add unique constraint if not exists (may already exist from 0000)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'family_members_user_email_unique'
+  ) THEN
+    ALTER TABLE public.family_members
+      ADD CONSTRAINT family_members_user_email_unique UNIQUE(user_id, email);
+  END IF;
+END $$;
+
+-- ============================================================================
+-- PART 1B: CREATE TABLES (family_members already exists from 0000, commented out)
+-- ============================================================================
+
+-- Family members table - COMMENTED OUT: already created in 0000
+/*
 CREATE TABLE IF NOT EXISTS public.family_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
@@ -21,6 +56,7 @@ CREATE TABLE IF NOT EXISTS public.family_members (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT family_members_user_email_unique UNIQUE(user_id, email)
 );
+*/
 
 -- Family invite tokens (magic links)
 CREATE TABLE IF NOT EXISTS public.family_invites (

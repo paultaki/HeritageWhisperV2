@@ -100,13 +100,13 @@ export async function POST(request: NextRequest) {
     if (prompt.user_id) {
       const { data: stories } = await supabaseAdmin
         .from("stories")
-        .select("id, transcript")
+        .select("id, transcription")
         .eq("user_id", prompt.user_id)
         .order("created_at", { ascending: false })
         .limit(1);
 
       if (stories && stories.length > 0) {
-        storyExcerpt = stories[0].transcript?.substring(0, 200) + "...";
+        storyExcerpt = stories[0].transcription?.substring(0, 200) + "...";
       }
     }
 

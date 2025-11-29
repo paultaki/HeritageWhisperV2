@@ -33,7 +33,7 @@ const openai = new OpenAI({
 interface Story {
   id: string;
   title: string;
-  transcript: string;
+  transcription: string;
   lesson_learned?: string;
   created_at: string;
 }
@@ -275,7 +275,7 @@ function buildUserPrompt(stories: Story[]): string {
   const storyTexts = stories
     .map((s, i) => {
       // Sanitize transcript and lesson to prevent injection attacks
-      const sanitizedTranscript = sanitizeForGPT(s.transcript || "");
+      const sanitizedTranscript = sanitizeForGPT(s.transcription || "");
       const sanitizedLesson = s.lesson_learned 
         ? `\nLesson: ${sanitizeForGPT(s.lesson_learned)}` 
         : "";

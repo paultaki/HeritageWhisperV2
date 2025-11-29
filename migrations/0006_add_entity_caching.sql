@@ -15,6 +15,9 @@ COMMENT ON COLUMN stories.entities_extracted IS 'Cached entities extracted from 
 
 -- Add updated_at trigger if it doesn't exist
 -- This helps invalidate cache when story is edited
+-- COMMENTED OUT: update_updated_at_column() is defined in 0010, not available yet
+-- Can add this trigger in a later migration if needed
+/*
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_stories_updated_at') THEN
@@ -24,5 +27,6 @@ BEGIN
     EXECUTE FUNCTION update_updated_at_column();
   END IF;
 END $$;
+*/
 
 -- Migration complete

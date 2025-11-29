@@ -101,7 +101,8 @@ ON public.family_sessions(absolute_expires_at);
 
 COMMENT ON COLUMN public.family_sessions.absolute_expires_at IS 'Absolute max session lifetime - cannot be extended';
 COMMENT ON FUNCTION cleanup_expired_family_sessions IS 'Removes all expired family sessions';
-COMMENT ON FUNCTION rotate_family_session_token IS 'Rotates session token and extends expiry (up to absolute limit)';
+COMMENT ON FUNCTION public.rotate_family_session_token(UUID)
+  IS 'Rotates session token and extends expiry (up to absolute limit)';
 
 -- Run initial cleanup
 SELECT cleanup_expired_family_sessions();

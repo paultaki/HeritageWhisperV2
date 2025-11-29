@@ -20,7 +20,7 @@ import { getModelConfig } from "./ai/modelConfig";
 interface Story {
   id: string;
   title: string;
-  transcript: string;
+  transcription: string;
   lesson_learned?: string;
   story_year?: number | null;
   created_at: string;
@@ -254,7 +254,7 @@ function getIntimacyStrategy(phase: string, count: number, promptCount: number):
 function buildUserPrompt(stories: Story[]): string {
   const storyTexts = stories
     .map((s, i) => {
-      const sanitizedTranscript = sanitizeForGPT(s.transcript || "");
+      const sanitizedTranscript = sanitizeForGPT(s.transcription || "");
       const sanitizedLesson = s.lesson_learned 
         ? `\nLesson Learned: ${sanitizeForGPT(s.lesson_learned)}` 
         : "";
@@ -274,7 +274,7 @@ ${sanitizedTranscript}${sanitizedLesson}`;
 function generateFallbackPrompt(stories: Story[], storyCount: number): Tier3Prompt {
   // Extract a person or theme from first story as anchor
   const firstStory = stories[0];
-  const transcript = firstStory.transcript || "";
+  const transcript = firstStory.transcription || "";
   
   // Try to find a person name
   const nameMatch = transcript.match(/\b([A-Z][a-z]{2,})\b/);

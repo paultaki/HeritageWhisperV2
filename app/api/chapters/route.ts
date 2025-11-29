@@ -67,8 +67,15 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ chapters: userChapters, orphanedStories });
     } catch (error) {
+        // Chapters feature not yet implemented - return empty data gracefully
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('relation "chapters" does not exist') ||
+            errorMessage.includes('does not exist in the schema cache')) {
+            logger.debug("Chapters table not yet created - returning empty data");
+            return NextResponse.json({ chapters: [], orphanedStories: [] });
+        }
         logger.error("Chapters fetch error:", error);
-        return NextResponse.json({ error: "Failed to fetch chapters", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+        return NextResponse.json({ error: "Failed to fetch chapters", details: errorMessage }, { status: 500 });
     }
 }
 

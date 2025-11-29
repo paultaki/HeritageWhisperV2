@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     // Get all visible stories for this test account
     const { data: stories, error: storiesError } = await supabaseAdmin
       .from("stories")
-      .select("id, title, transcript, year, created_at")
+      .select("id, title, transcription, year, created_at")
       .eq("user_id", sanitizedUserId)
       .eq("is_private", false)
       .order("created_at", { ascending: true });
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     for (const story of stories) {
       try {
         const tier1Prompts = generateTier1TemplatesV2(
-          story.transcript || "",
+          story.transcription || "",
           story.year,
         );
 

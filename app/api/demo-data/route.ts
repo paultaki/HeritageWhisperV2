@@ -103,17 +103,16 @@ export async function GET() {
       stories: stories?.map(story => ({
         id: story.id,
         title: story.title,
-        year: story.year,
+        year: story.story_year,
         storyDate: story.story_date,
-        transcript: story.transcript,
-        wisdomText: story.wisdom_text,
+        transcript: story.transcription,
+        wisdomText: story.wisdom_clip_text,
         audioUrl: story.audio_url,
         durationSeconds: story.duration_seconds,
         photos: story.photos || [],
         includeInBook: story.include_in_book,
         includeInTimeline: story.include_in_timeline,
         isFavorite: story.is_favorite,
-        metadata: story.metadata,
         createdAt: story.created_at,
         updatedAt: story.updated_at,
       })) || [],
@@ -132,7 +131,7 @@ export async function GET() {
         totalTreasures: treasures?.length || 0,
         storiesWithAudio: stories?.filter(s => s.audio_url).length || 0,
         storiesWithPhotos: stories?.filter(s => s.photos && s.photos.length > 0).length || 0,
-        storiesWithWisdom: stories?.filter(s => s.wisdom_text).length || 0,
+        storiesWithWisdom: stories?.filter(s => s.wisdom_clip_text).length || 0,
       }
     };
 

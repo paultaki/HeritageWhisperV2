@@ -63,6 +63,19 @@ export async function GET(request: NextRequest) {
     );
 
     if (rpcError) {
+      // If the RPC function doesn't exist yet, return self as only account
+      if (rpcError.message?.includes('function') && rpcError.message?.includes('does not exist')) {
+        console.log('[AvailableAccounts] RPC function not yet created - returning self only');
+        return NextResponse.json({
+          storytellers: [{
+            storytellerId: userId,
+            storytellerName: 'My Stories',
+            permissionLevel: 'owner',
+            relationship: null,
+            lastViewedAt: null,
+          }],
+        });
+      }
       console.error('[AvailableAccounts] RPC error:', rpcError);
       return NextResponse.json(
         { error: 'Failed to fetch available accounts' },

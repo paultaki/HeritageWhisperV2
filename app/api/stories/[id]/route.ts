@@ -149,28 +149,24 @@ export async function GET(
     const transformedStory = {
       id: story.id,
       title: story.title || "Untitled Story",
-      content: story.transcript,
-      transcription: story.transcript,
+      content: story.transcription,
+      transcription: story.transcription,
       createdAt: story.created_at,
       updatedAt: story.updated_at,
-      age: story.metadata?.life_age || story.metadata?.age,
-      year: story.year,
-      storyYear: story.year,
-      lifeAge: story.metadata?.life_age,
-      includeInTimeline: story.metadata?.include_in_timeline ?? true,
-      includeInBook: story.metadata?.include_in_book ?? true,
-      isFavorite: story.metadata?.is_favorite ?? false,
+      year: story.story_year,
+      storyYear: story.story_year,
+      includeInTimeline: story.include_in_timeline ?? true,
+      includeInBook: story.include_in_book ?? true,
+      isFavorite: story.is_favorite ?? false,
       photoUrl: photoUrl,
       photos: photos,
       audioUrl: story.audio_url,
-      wisdomTranscription: story.wisdom_text,
-      wisdomClipText: story.wisdom_text,
+      wisdomTranscription: story.wisdom_clip_text,
+      wisdomClipText: story.wisdom_clip_text,
       wisdomClipUrl: story.wisdom_clip_url,
       durationSeconds: story.duration_seconds,
       emotions: story.emotions,
-      pivotalCategory: story.metadata?.pivotal_category,
-      storyDate: story.story_date || story.metadata?.story_date, // Read from column first, fallback to metadata for legacy data
-      photoTransform: story.metadata?.photo_transform,
+      storyDate: story.story_date,
     };
 
     return NextResponse.json({ story: transformedStory });
@@ -334,10 +330,10 @@ export async function PUT(
     // Only update fields that are explicitly provided in the request body
     if (body.title !== undefined) storyData.title = body.title;
     if (body.transcription !== undefined || body.content !== undefined) {
-      storyData.transcript = body.transcription || body.content;
+      storyData.transcription = body.transcription || body.content;
     }
     if (body.year !== undefined || body.storyYear !== undefined) {
-      storyData.year = body.year || body.storyYear;
+      storyData.story_year = body.year || body.storyYear;
     }
     if (body.storyDate !== undefined) {
       storyData.story_date = body.storyDate || null; // Store full date with month/day
@@ -353,13 +349,13 @@ export async function PUT(
       body.wisdomTranscription !== undefined
     ) {
       // Allow empty string to clear the lesson learned
-      storyData.wisdom_text =
+      storyData.wisdom_clip_text =
         body.wisdomClipText !== undefined
           ? body.wisdomClipText
           : body.wisdomTranscription;
       logger.debug(
-        "[PUT /api/stories/[id]] Updating wisdom_text to:",
-        storyData.wisdom_text,
+        "[PUT /api/stories/[id]] Updating wisdom_clip_text to:",
+        storyData.wisdom_clip_text,
       );
     }
     if (body.wisdomClipUrl !== undefined)
@@ -377,41 +373,21 @@ export async function PUT(
           : null;
     }
 
-    // Always set is_saved to true for updates
-    storyData.is_saved = true;
-
-    // Build metadata object - merge with existing metadata
-    const metadata = { ...existingStory.metadata };
-
-    if (body.lifeAge !== undefined || body.age !== undefined) {
-      metadata.life_age = body.lifeAge || body.age;
-    }
+    // Update individual columns (no metadata JSONB column exists)
     if (body.includeInTimeline !== undefined) {
-      metadata.include_in_timeline = body.includeInTimeline;
+      storyData.include_in_timeline = body.includeInTimeline;
     }
     if (body.includeInBook !== undefined) {
-      metadata.include_in_book = body.includeInBook;
+      storyData.include_in_book = body.includeInBook;
     }
     if (body.isFavorite !== undefined) {
-      metadata.is_favorite = body.isFavorite;
+      storyData.is_favorite = body.isFavorite;
     }
     if (processedPhotos !== undefined) {
-      // Store photos in top-level photos column (not metadata.photos)
       storyData.photos = processedPhotos;
     }
-    if (body.pivotalCategory !== undefined) {
-      metadata.pivotal_category = body.pivotalCategory;
-    }
     if (body.storyDate !== undefined) {
-      metadata.story_date = body.storyDate;
-    }
-    if (body.photoTransform !== undefined) {
-      metadata.photo_transform = body.photoTransform;
-    }
-
-    // Only update metadata if we have changes
-    if (Object.keys(metadata).length > 0) {
-      storyData.metadata = metadata;
+      storyData.story_date = body.storyDate;
     }
 
     // Update the story in Supabase database
@@ -481,28 +457,24 @@ export async function PUT(
     const transformedStory = {
       id: updatedStory.id,
       title: updatedStory.title || "Untitled Story",
-      content: updatedStory.transcript,
-      transcription: updatedStory.transcript,
+      content: updatedStory.transcription,
+      transcription: updatedStory.transcription,
       createdAt: updatedStory.created_at,
       updatedAt: updatedStory.updated_at,
-      age: updatedStory.metadata?.life_age || updatedStory.metadata?.age,
-      year: updatedStory.year,
-      storyYear: updatedStory.year,
-      lifeAge: updatedStory.metadata?.life_age,
-      includeInTimeline: updatedStory.metadata?.include_in_timeline ?? true,
-      includeInBook: updatedStory.metadata?.include_in_book ?? true,
-      isFavorite: updatedStory.metadata?.is_favorite ?? false,
+      year: updatedStory.story_year,
+      storyYear: updatedStory.story_year,
+      includeInTimeline: updatedStory.include_in_timeline ?? true,
+      includeInBook: updatedStory.include_in_book ?? true,
+      isFavorite: updatedStory.is_favorite ?? false,
       photoUrl: photoUrl,
       photos: photos,
       audioUrl: updatedStory.audio_url,
-      wisdomTranscription: updatedStory.wisdom_text,
-      wisdomClipText: updatedStory.wisdom_text,
+      wisdomTranscription: updatedStory.wisdom_clip_text,
+      wisdomClipText: updatedStory.wisdom_clip_text,
       wisdomClipUrl: updatedStory.wisdom_clip_url,
       durationSeconds: updatedStory.duration_seconds,
       emotions: updatedStory.emotions,
-      pivotalCategory: updatedStory.metadata?.pivotal_category,
-      storyDate: updatedStory.story_date || updatedStory.metadata?.story_date, // Read from column first, fallback to metadata for legacy data
-      photoTransform: updatedStory.metadata?.photo_transform,
+      storyDate: updatedStory.story_date,
     };
 
     return NextResponse.json({ story: transformedStory });

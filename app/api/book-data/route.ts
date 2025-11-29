@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       );
       logger.debug("[Book Data API] Sample lesson data:", {
         lesson_learned: stories[0].lesson_learned,
-        wisdom_text: stories[0].wisdom_text,
+        wisdom_clip_text: stories[0].wisdom_clip_text,
       });
       logger.debug("[Book Data API] Sample photo data:", {
         photo_url: stories[0].photo_url,
@@ -86,10 +86,9 @@ export async function GET(request: NextRequest) {
       userId: story.user_id,
       title: story.title,
       audioUrl: story.audio_url,
-      transcription: story.transcript, // Database column is 'transcript'
-      storyYear: story.year, // Database column is 'year'
+      transcription: story.transcription,
+      storyYear: story.story_year,
       storyDate: story.story_date,
-      lifeAge: story.metadata?.life_age,
       photoUrl: getAbsolutePhotoUrl(story.photo_url),
       // Photos are stored in top-level photos column
       photos:
@@ -100,9 +99,9 @@ export async function GET(request: NextRequest) {
             photo.url ||
             photo.filePath,
         })) || [],
-      // Map lesson (prefer new lesson_learned, fallback to wisdom_text)
-      lessonLearned: story.lesson_learned || story.wisdom_text,
-      includeInBook: story.metadata?.include_in_book !== false, // Respect database setting
+      // Map lesson (prefer new lesson_learned, fallback to wisdom_clip_text)
+      lessonLearned: story.lesson_learned || story.wisdom_clip_text,
+      includeInBook: story.include_in_book !== false, // Respect database setting
     }));
 
     return NextResponse.json({ stories: transformedStories });

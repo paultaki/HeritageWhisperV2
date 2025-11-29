@@ -38,16 +38,12 @@ BEGIN
     FOR SELECT
     USING (id = (SELECT auth.uid()));
 
-    -- Users can update their own record (except role)
+    -- Users can update their own record
     CREATE POLICY "Users can update their own profile"
     ON public.users
     FOR UPDATE
     USING (id = (SELECT auth.uid()))
-    WITH CHECK (
-        id = (SELECT auth.uid()) AND
-        -- Prevent users from changing their own role
-        (role = (SELECT role FROM public.users WHERE id = (SELECT auth.uid())) OR role IS NULL)
-    );
+    WITH CHECK (id = (SELECT auth.uid()));
 
     -- Service role has full access
     CREATE POLICY "Service role has full access to users"
@@ -63,7 +59,10 @@ END $$;
 -- ============================================================================
 -- RECORDING_SESSIONS TABLE RLS
 -- ============================================================================
+-- COMMENTED OUT: recording_sessions table is deprecated and not in shared/schema.ts
+-- Commented out on 2025-11-29 during database rebuild
 
+/*
 -- Check and enable RLS on recording_sessions table
 DO $$
 BEGIN
@@ -126,6 +125,7 @@ BEGIN
         RAISE NOTICE 'recording_sessions table does not exist';
     END IF;
 END $$;
+*/
 
 -- ============================================================================
 -- STORIES TABLE RLS (Re-enable if disabled)
@@ -196,7 +196,10 @@ END $$;
 -- ============================================================================
 -- USAGE_TRACKING TABLE RLS
 -- ============================================================================
+-- COMMENTED OUT: usage_tracking table is deprecated and not in shared/schema.ts
+-- Commented out on 2025-11-29 during database rebuild
 
+/*
 DO $$
 BEGIN
     -- Check if table exists
@@ -245,6 +248,7 @@ BEGIN
         RAISE NOTICE 'usage_tracking table does not exist';
     END IF;
 END $$;
+*/
 
 -- ============================================================================
 -- VERIFICATION
@@ -288,6 +292,6 @@ WHERE schemaname = 'public'
 ORDER BY rowsecurity DESC, tablename;
 
 COMMENT ON TABLE public.users IS 'RLS ENABLED - Users can only access their own profile';
-COMMENT ON TABLE public.recording_sessions IS 'RLS ENABLED - Users can only access their own sessions';
+-- COMMENT ON TABLE public.recording_sessions IS 'RLS ENABLED - Users can only access their own sessions'; -- Table deprecated
 COMMENT ON TABLE public.stories IS 'RLS ENABLED - Users can only access their own stories';
-COMMENT ON TABLE public.usage_tracking IS 'RLS ENABLED - Users can only access their own usage data';
+-- COMMENT ON TABLE public.usage_tracking IS 'RLS ENABLED - Users can only access their own usage data'; -- Table deprecated

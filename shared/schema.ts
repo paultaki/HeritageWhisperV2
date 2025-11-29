@@ -193,12 +193,12 @@ export const stories = pgTable("stories", {
   audioUrl: text("audio_url"),
   textBody: text("text_body"), // Text content for text-only stories (alternative to audio)
   recordingMode: text("recording_mode"), // How story was created: 'audio', 'text', 'photo_audio'
-  transcription: text("transcript"),
+  transcription: text("transcription"),
   durationSeconds: integer("duration_seconds"),
   wisdomClipUrl: text("wisdom_clip_url"),
-  wisdomClipText: text("wisdom_text"),
+  wisdomClipText: text("wisdom_clip_text"),
   // wisdomClipDuration: integer("wisdom_clip_duration"), // Not in DB
-  storyYear: integer("year"), // Nullable to support undated memories
+  storyYear: integer("story_year"), // Nullable to support undated memories
   storyDate: timestamp("story_date"),
   // lifeAge: integer("life_age"), // Not in DB
   // AI Prompt System additions

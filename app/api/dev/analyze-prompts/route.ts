@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     // Fetch stories
     const { data: stories, error: storiesError } = await supabaseAdmin
       .from("stories")
-      .select("id, title, transcript, lesson_learned, year, created_at")
+      .select("id, title, transcription, lesson_learned, year, created_at")
       .eq("user_id", userId)
       .in("id", storyIds)
       .order("created_at", { ascending: true });
@@ -120,10 +120,10 @@ export async function POST(request: NextRequest) {
       const allPrompts: any[] = [];
 
       for (const story of stories) {
-        const entities = extractEntities(story.transcript || "");
+        const entities = extractEntities(story.transcription || "");
         const prompts = (generateTier1Templates as any)(
           entities,
-          story.transcript || "",
+          story.transcription || "",
           story.title || "Untitled",
         ) as unknown as AnyTier1Prompt[];
 

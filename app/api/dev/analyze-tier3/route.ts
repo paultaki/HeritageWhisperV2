@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     // Fetch stories
     const { data: stories, error: storiesError } = await supabaseAdmin
       .from("stories")
-      .select("id, title, transcript, lesson_learned, created_at")
+      .select("id, title, transcription, lesson_learned, created_at")
       .eq("user_id", userId)
       .in("id", storyIds)
       .order("created_at", { ascending: true });

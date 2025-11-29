@@ -12,7 +12,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "migrate:webp": "tsx scripts/migrate-to-webp.ts",
-    "migrate:webp:dry": "tsx scripts/migrate-to-webp.ts --dry-run"
+    "migrate:webp:dry": "tsx scripts/migrate-to-webp.ts --dry-run",
+    "seed:test-family": "tsx scripts/seedTestFamily.ts",
+    "reset:test-family": "tsx scripts/resetTestFamily.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

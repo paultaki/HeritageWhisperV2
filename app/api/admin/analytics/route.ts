@@ -334,7 +334,7 @@ async function getTopUsers(supabase: any) {
 async function getEngagementMetrics(supabase: any) {
   const { data: stories, error } = await supabase
     .from('stories')
-    .select('audio_url, metadata, wisdom_text, transcript, duration_seconds');
+    .select('audio_url, photos, wisdom_clip_text, transcription, duration_seconds, include_in_book, include_in_timeline, is_favorite');
 
   if (error) {
     console.error("[Admin Analytics] Error fetching engagement metrics:", error);
@@ -343,15 +343,15 @@ async function getEngagementMetrics(supabase: any) {
 
   const totalStories = stories.length;
   const storiesWithAudio = stories.filter((s: any) => s.audio_url).length;
-  const storiesWithPhotos = stories.filter((s: any) => s.metadata?.photos && s.metadata.photos.length > 0).length;
-  const storiesWithLessons = stories.filter((s: any) => s.wisdom_text).length;
+  const storiesWithPhotos = stories.filter((s: any) => s.photos && s.photos.length > 0).length;
+  const storiesWithLessons = stories.filter((s: any) => s.wisdom_clip_text).length;
   const totalWords = stories.reduce((sum: number, s: any) => {
-    return sum + (s.transcript ? s.transcript.split(/\s+/).length : 0);
+    return sum + (s.transcription ? s.transcription.split(/\s+/).length : 0);
   }, 0);
   const totalDuration = stories.reduce((sum: number, s: any) => sum + (s.duration_seconds || 0), 0);
-  const storiesInBook = stories.filter((s: any) => s.metadata?.include_in_book !== false).length;
-  const storiesInTimeline = stories.filter((s: any) => s.metadata?.include_in_timeline !== false).length;
-  const favoriteStories = stories.filter((s: any) => s.metadata?.is_favorite === true).length;
+  const storiesInBook = stories.filter((s: any) => s.include_in_book !== false).length;
+  const storiesInTimeline = stories.filter((s: any) => s.include_in_timeline !== false).length;
+  const favoriteStories = stories.filter((s: any) => s.is_favorite === true).length;
 
   return {
     totalStories,

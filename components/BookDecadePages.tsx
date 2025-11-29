@@ -123,9 +123,9 @@ export function DecadeIntroPage({
               </h1>
               <h2
                 className={`font-black ${style.accent} tracking-tighter -mt-2`}
-                style={{ fontSize: 'clamp(3rem, 10vw, 8rem)' }}
+                style={{ fontSize: 'clamp(3rem, 10vw, 8rem)', textTransform: 'none' }}
               >
-                {decadeYear}<span style={{ textTransform: 'lowercase' }}>s</span>
+                {decadeYear}s
               </h2>
             </>
           )}
