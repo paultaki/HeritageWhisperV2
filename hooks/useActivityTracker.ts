@@ -74,7 +74,12 @@ export function useActivityTracker(options: ActivityTrackerOptions = {}): Activi
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const warningTriggeredRef = useRef(false);
-  const isInitializedRef = useRef(false);
+
+  // Refs to store latest callback versions for use in initialization effect
+  const resetTimerRef = useRef<() => void>(() => {});
+  const startWarningRef = useRef<() => void>(() => {});
+  const triggerTimeoutRef = useRef<() => void>(() => {});
+  const clearAllTimersRef = useRef<() => void>(() => {});
 
   // Calculate when warning should trigger
   const warningTime = timeoutDuration - warningDuration;
@@ -160,10 +165,16 @@ export function useActivityTracker(options: ActivityTrackerOptions = {}): Activi
     }
   }, [enabled, clearAllTimers, warningTime, timeoutDuration, startWarning, triggerTimeout, onActivity]);
 
+  // Keep refs updated with latest callbacks
+  resetTimerRef.current = resetTimer;
+  startWarningRef.current = startWarning;
+  triggerTimeoutRef.current = triggerTimeout;
+  clearAllTimersRef.current = clearAllTimers;
+
   // Handle user activity events
   const handleActivity = useCallback(() => {
     if (!enabled) return;
-    
+
     // Only reset timer if not in warning state (to prevent accidental cancellation)
     // During warning, user must explicitly click "Continue Session"
     if (!isWarning) {
@@ -171,19 +182,12 @@ export function useActivityTracker(options: ActivityTrackerOptions = {}): Activi
     }
   }, [enabled, isWarning, resetTimer]);
 
-  // Initialize on mount - use ref to prevent infinite loop
+  // Initialize on mount only - use empty deps to run once
   useEffect(() => {
     if (!enabled) {
-      clearAllTimers();
-      isInitializedRef.current = false;
+      clearAllTimersRef.current();
       return;
     }
-
-    // Prevent re-initialization on every render
-    if (isInitializedRef.current) {
-      return;
-    }
-    isInitializedRef.current = true;
 
     // Check if there's a stored last activity time
     try {
@@ -194,13 +198,13 @@ export function useActivityTracker(options: ActivityTrackerOptions = {}): Activi
 
         // If more than timeout duration has passed, trigger timeout immediately
         if (timeSinceActivity >= timeoutDuration) {
-          triggerTimeout();
+          triggerTimeoutRef.current();
           return;
         }
 
         // If in warning period, show warning
         if (timeSinceActivity >= warningTime) {
-          startWarning();
+          startWarningRef.current();
           return;
         }
 
@@ -211,14 +215,14 @@ export function useActivityTracker(options: ActivityTrackerOptions = {}): Activi
     }
 
     // Start tracking
-    resetTimer();
+    resetTimerRef.current();
 
-    // Cleanup on unmount
+    // Cleanup on unmount only
     return () => {
-      clearAllTimers();
-      isInitializedRef.current = false;
+      clearAllTimersRef.current();
     };
-  }, [enabled, timeoutDuration, warningTime, resetTimer, startWarning, triggerTimeout, clearAllTimers]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, timeoutDuration, warningTime]); // Only re-run if config changes, not callbacks
 
   // Set up event listeners
   useEffect(() => {
