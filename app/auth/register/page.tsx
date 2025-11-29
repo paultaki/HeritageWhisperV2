@@ -28,7 +28,7 @@ export default function Register() {
   const { register, user } = useAuth();
   const { toast } = useToast();
   
-  // Check if beta code is required
+  // Check if beta code is required (disabled for open registration)
   const requireBetaCode = process.env.NEXT_PUBLIC_REQUIRE_BETA_CODE === "true";
 
   // Redirect if already logged in
