@@ -1085,53 +1085,52 @@ export function BookStyleReview({
 
       {/* Bottom Action Buttons */}
       <div className="max-w-3xl mx-auto px-4 pb-8">
-        <div className="flex items-center gap-3">
-          {/* Delete icon button - far left to prevent accidental clicks */}
+        <div className={`grid gap-3 ${isEditing && onDelete ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          {/* Delete button - only shown when editing */}
           {isEditing && onDelete && (
             <Button
               type="button"
-              variant="ghost"
-              size="icon"
+              variant="outline"
               onClick={() => setShowDeleteConfirm(true)}
               disabled={isSaving}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 min-w-[56px] min-h-[56px]"
-              title="Delete story"
+              className="bg-white hover:bg-red-50 text-red-600 hover:text-red-700 border-2 border-red-200 hover:border-red-300 rounded-2xl py-6 text-lg font-medium transition-all active:scale-[0.99]"
             >
-              <Trash2 className="w-9 h-9" />
+              <Trash2 className="w-5 h-5 mr-2" />
+              Delete
             </Button>
           )}
 
-          {/* Spacer to push main buttons to the right */}
-          <div className="flex-1 flex gap-3">
-            <Button
-              type="button"
-              onClick={() => {
-                console.log(
-                  "BookStyleReview: Bottom Save button clicked, calling onSave",
-                );
-                onSave();
-              }}
-              disabled={isSaving}
-              className="flex-1 bg-[#203954] hover:bg-[#1B3047] text-white rounded-2xl py-6 text-lg font-medium shadow-lg shadow-blue-900/10 transition-all active:scale-[0.99]"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Memory"
-              )}
-            </Button>
-            <Button
-              type="button"
-              onClick={onCancel}
-              disabled={isSaving}
-              className="flex-1 bg-white hover:bg-gray-50 text-[#203954] border-2 border-[#E5E7EB] rounded-2xl py-6 text-lg font-medium transition-all active:scale-[0.99]"
-            >
-              Cancel
-            </Button>
-          </div>
+          {/* Save Memory button */}
+          <Button
+            type="button"
+            onClick={() => {
+              console.log(
+                "BookStyleReview: Bottom Save button clicked, calling onSave",
+              );
+              onSave();
+            }}
+            disabled={isSaving}
+            className="bg-[#203954] hover:bg-[#1B3047] text-white rounded-2xl py-6 text-lg font-medium shadow-lg shadow-blue-900/10 transition-all active:scale-[0.99]"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Memory"
+            )}
+          </Button>
+
+          {/* Cancel button */}
+          <Button
+            type="button"
+            onClick={onCancel}
+            disabled={isSaving}
+            className="bg-white hover:bg-gray-50 text-[#203954] border-2 border-[#E5E7EB] rounded-2xl py-6 text-lg font-medium transition-all active:scale-[0.99]"
+          >
+            Cancel
+          </Button>
         </div>
       </div>
 
