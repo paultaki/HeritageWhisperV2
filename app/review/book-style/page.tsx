@@ -987,6 +987,12 @@ function BookStyleReviewContent() {
           title: "Story deleted",
           description: "Your story has been deleted successfully.",
         });
+
+        // Invalidate all story-related queries to ensure fresh data
+        queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+        queryClient.invalidateQueries({ queryKey: ["stories"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/prompts/next"] });
+
         router.push("/timeline");
       } else {
         throw new Error("Failed to delete story");
