@@ -36,6 +36,7 @@ import {
   Volume2,
   ChevronLeft,
   ChevronRight,
+  ImagePlus,
 } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
@@ -195,9 +196,10 @@ interface CenteredMemoryCardProps {
   useV2Features?: boolean;
   customActionLabel?: string;
   onCustomAction?: (story: Story) => void;
+  isGhostStory?: boolean;
 }
 
-function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear, onOpenOverlay, useV2Features = false, customActionLabel, onCustomAction }: CenteredMemoryCardProps) {
+function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear, onOpenOverlay, useV2Features = false, customActionLabel, onCustomAction, isGhostStory = false }: CenteredMemoryCardProps) {
   const router = useRouter();
 
   // Narrow story type for traits access
@@ -481,6 +483,66 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
 
   // Render function for card content - mobile style with white card below photo
   const renderCardContent = () => {
+    // Ghost story placeholder - show 4:3 gray box with add icon
+    if (isGhostStory && !currentPhoto?.url) {
+      return (
+        <div
+          className={`bg-white rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer border-[1.5px] border-dashed ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+            }`}
+          onClick={handleCardClick}
+          style={{
+            boxShadow: '0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.06)',
+            borderColor: 'var(--color-timeline-card-border)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = '0 8px 20px -3px rgba(0, 0, 0, 0.15), 0 4px 9px -1px rgba(0, 0, 0, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = '0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.06)';
+          }}
+        >
+          {/* Ghost Placeholder - 4:3 aspect ratio with gray background and icon */}
+          <div className="relative w-full aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200 flex flex-col items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-stone-300/50 flex items-center justify-center mb-3">
+              <ImagePlus className="w-8 h-8 text-stone-400" strokeWidth={1.5} />
+            </div>
+            <p className="text-sm text-stone-400 font-medium">Add your photo</p>
+          </div>
+
+          {/* Card Content Section */}
+          <div className="px-4 py-3 bg-white relative">
+            <div className="flex items-center justify-between gap-4">
+              {/* Left: Title and metadata stacked */}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-[19px] tracking-tight font-semibold text-[var(--hw-text-primary)] mb-0.5 truncate">
+                  {story.title}
+                </h3>
+                <div className="flex items-center gap-2 text-[15px] text-stone-500">
+                  <span>
+                    {formatStoryDateForMetadata(story.storyDate, story.storyYear)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Right: Action button for ghost stories */}
+              {customActionLabel && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCustomAction?.(story);
+                  }}
+                  className="px-5 py-2.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold flex items-center gap-2 transition-all shadow-md hover:shadow-lg hover:scale-105"
+                >
+                  <span>{customActionLabel}</span>
+                  <Plus className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // If there's a photo, render with white card below (mobile style)
     if (currentPhoto?.url) {
       return (
@@ -1139,15 +1201,15 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
         switch (template.id) {
           case 'childhood-photo':
             yearOffset = 10;
-            photoUrl = "/demo-dad-boy.png";
+            // No placeholder image - show add photo icon instead
             break;
           case 'turning-point':
             yearOffset = 25;
-            photoUrl = "/demo-hiking.png";
+            // No placeholder image - show add photo icon instead
             break;
           case 'family-memory':
             yearOffset = 35;
-            photoUrl = "/johnsons.png";
+            // No placeholder image - show add photo icon instead
             break;
         }
 
@@ -1157,12 +1219,13 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           title: template.title,
           storyYear: birthYear + yearOffset,
           storyDate: `${birthYear + yearOffset}-01-01`,
-          photos: [{ id: `ghost-photo-${template.id}`, url: photoUrl, isHero: true }],
+          photos: [], // Empty - shows placeholder with add icon
           audioUrl: "", // No audio
           transcription: template.subtitle, // Use subtitle as snippet
           includeInTimeline: true,
           createdAt: new Date().toISOString(),
           templateId: template.id, // Keep track of template
+          isGhostStory: true, // Flag for special rendering
         };
       });
 
@@ -1310,6 +1373,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                             decadeLabel={showDecadeMarker ? decadeLabel : undefined}
                             birthYear={birthYear}
                             useV2Features={useV2Features}
+                            isGhostStory={(story as any).isGhostStory === true}
                             customActionLabel={isGhostMode && (story as any).templateId ? (
                               (story as any).templateId === 'birth-story' ? 'Add birth info' :
                                 (story as any).templateId === 'turning-point' ? 'Record story' :
