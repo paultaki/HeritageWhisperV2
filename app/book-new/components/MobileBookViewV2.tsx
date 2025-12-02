@@ -347,7 +347,7 @@ export default function MobileBookViewV2({
     return (
       <div className="flex h-[100dvh] w-screen items-center justify-center bg-neutral-950">
         <div className="text-center">
-          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-white/20 border-t-white"></div>
+          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-[#8B7355]/30 border-t-[#8B7355]"></div>
           <p className="text-sm text-white/60">Loading your story...</p>
         </div>
       </div>

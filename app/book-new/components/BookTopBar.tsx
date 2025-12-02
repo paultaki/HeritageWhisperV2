@@ -45,7 +45,7 @@ export default function BookTopBar({
           <button
             onClick={() => onViewModeChange('chapters')}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${viewMode === 'chapters'
-              ? 'bg-[#d4af87] text-white shadow-sm'
+              ? 'bg-[#8B7355] text-white shadow-sm'
               : 'text-white/70 hover:text-white'
               }`}
           >

@@ -1,10 +1,23 @@
 'use client';
 
-import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useEffect, useState, useCallback, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Users, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { useAuth } from '@/lib/auth';
+
+// Storage key for signed-in users' active storyteller context
+const STORYTELLER_CONTEXT_KEY = 'hw_active_storyteller_context';
+
+// AccountContext type for signed-in users
+interface AccountContext {
+  storytellerId: string;
+  storytellerName: string;
+  type: 'own' | 'viewing';
+  permissionLevel: 'viewer' | 'contributor' | 'owner';
+  relationship: string | null;
+}
 
 interface SessionData {
   sessionToken: string;
@@ -22,13 +35,23 @@ type Status = 'loading' | 'success' | 'error';
 function FamilyAccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [status, setStatus] = useState<Status>('loading');
   const [error, setError] = useState<string | null>(null);
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [countdown, setCountdown] = useState(5);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const verificationStarted = useRef(false);
 
+  // Wait for auth to load, then verify token
   useEffect(() => {
+    // Don't start verification until auth loading is complete
+    if (isAuthLoading) return;
+    
+    // Prevent double verification
+    if (verificationStarted.current) return;
+    
     const token = searchParams?.get('token');
 
     if (!token) {
@@ -37,15 +60,33 @@ function FamilyAccessContent() {
       return;
     }
 
-    verifyToken(token);
-  }, [searchParams]);
+    verificationStarted.current = true;
+    setIsSignedIn(!!user);
+    verifyToken(token, !!user);
+  }, [searchParams, isAuthLoading, user]);
 
   // Memoized redirect handler to prevent stale closures
   const handleContinue = useCallback(() => {
     if (!sessionData) return;
 
-    // Force a synchronous write to localStorage and verify it succeeded
-    localStorage.setItem('family_session', JSON.stringify(sessionData));
+    if (isSignedIn) {
+      // For signed-in users: Store as active storyteller context
+      // This allows the account context hook to pick it up automatically
+      const viewerContext: AccountContext = {
+        storytellerId: sessionData.storytellerId,
+        storytellerName: sessionData.storytellerName,
+        type: 'viewing',
+        permissionLevel: sessionData.permissionLevel,
+        relationship: sessionData.relationship,
+      };
+      localStorage.setItem(STORYTELLER_CONTEXT_KEY, JSON.stringify(viewerContext));
+      
+      // Also store family_session as backup for session token (used for API calls)
+      localStorage.setItem('family_session', JSON.stringify(sessionData));
+    } else {
+      // For non-signed-in users: Store as family_session (current behavior)
+      localStorage.setItem('family_session', JSON.stringify(sessionData));
+    }
 
     // Use requestAnimationFrame to ensure localStorage write is flushed to disk
     // before we navigate (gives browser a chance to complete I/O)
@@ -56,7 +97,7 @@ function FamilyAccessContent() {
         window.location.href = '/timeline';
       });
     });
-  }, [sessionData]);
+  }, [sessionData, isSignedIn]);
 
   // Countdown timer effect
   useEffect(() => {
@@ -70,7 +111,7 @@ function FamilyAccessContent() {
     }
   }, [showWelcome, countdown, handleContinue]);
 
-  async function verifyToken(token: string) {
+  async function verifyToken(token: string, userIsSignedIn: boolean) {
     try {
       const response = await fetch(`/api/family/verify?token=${token}`);
       const data = await response.json();
@@ -79,7 +120,7 @@ function FamilyAccessContent() {
         throw new Error(data.error || 'Verification failed');
       }
 
-      // Store session in localStorage
+      // Build session data
       const familySession: SessionData = {
         sessionToken: data.sessionToken,
         storytellerId: data.storyteller.id,
@@ -91,7 +132,30 @@ function FamilyAccessContent() {
         firstAccess: true,
       };
 
-      localStorage.setItem('family_session', JSON.stringify(familySession));
+      // Store session data based on auth state
+      if (userIsSignedIn) {
+        // For signed-in users: Store as active storyteller context
+        // This will make use-account-context automatically switch to this storyteller
+        const viewerContext: AccountContext = {
+          storytellerId: data.storyteller.id,
+          storytellerName: data.storyteller.name,
+          type: 'viewing',
+          permissionLevel: data.familyMember.permissionLevel || 'viewer',
+          relationship: data.familyMember.relationship,
+        };
+        localStorage.setItem(STORYTELLER_CONTEXT_KEY, JSON.stringify(viewerContext));
+        
+        // Also store family_session for API calls that need the session token
+        localStorage.setItem('family_session', JSON.stringify(familySession));
+        
+        console.log('[FamilyAccess] Signed-in user - stored viewer context:', viewerContext);
+      } else {
+        // For non-signed-in users: Store only family_session
+        localStorage.setItem('family_session', JSON.stringify(familySession));
+        
+        console.log('[FamilyAccess] Non-signed-in user - stored family session');
+      }
+
       setSessionData(familySession);
       setStatus('success');
       setShowWelcome(true);

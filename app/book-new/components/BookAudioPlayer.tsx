@@ -173,7 +173,11 @@ export default function BookAudioPlayer({
       {/* Play/Pause button */}
       <button
         onClick={togglePlay}
-        className="relative grid h-12 w-12 flex-shrink-0 place-items-center rounded-full bg-stone-900 text-white shadow-md ring-1 ring-stone-800 transition active:scale-95"
+        className="relative grid h-12 w-12 flex-shrink-0 place-items-center rounded-full text-white transition active:scale-95"
+        style={{
+          background: 'linear-gradient(135deg, #8B7355 0%, #9f8a6c 100%)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+        }}
         aria-label={isPlaying ? "Pause" : "Play"}
       >
         {isPlaying ? (
@@ -190,17 +194,17 @@ export default function BookAudioPlayer({
           ref={scrubBarRef}
           onMouseDown={handleDragStart}
           onTouchStart={handleDragStart}
-          className="relative h-3 cursor-pointer rounded-full bg-stone-200"
+          className="relative h-3 cursor-pointer rounded-full bg-[#8B7355]/20"
         >
           {/* Progress fill */}
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-stone-900 transition-all"
+            className="absolute inset-y-0 left-0 rounded-full bg-[#8B7355] transition-all"
             style={{ width: `${progressPercentage}%` }}
           ></div>
 
           {/* Thumb */}
           <div
-            className="absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow ring-1 ring-stone-300 transition-all"
+            className="absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow ring-1 ring-[#8B7355]/40 transition-all"
             style={{ left: `${progressPercentage}%` }}
           ></div>
         </div>

@@ -169,6 +169,14 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
     ? 'inset -4px 0 8px -4px rgba(0,0,0,0.08), inset 4px 0 12px -4px rgba(0,0,0,0.12)'
     : 'inset 4px 0 8px -4px rgba(0,0,0,0.08), inset -4px 0 12px -4px rgba(0,0,0,0.12)';
 
+  // Deterministic photo rotation based on story ID
+  const getPhotoRotation = (id: string) => {
+    const hash = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    const rotations = [-0.5, 0, 0.5];
+    return rotations[hash % rotations.length];
+  };
+  const photoRotation = getPhotoRotation(story.id);
+
   return (
     <section
       className="relative flex h-[100dvh] w-screen flex-shrink-0 snap-start"
@@ -179,7 +187,7 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
       <div
         className="relative mx-auto my-0 h-[100dvh] w-full text-stone-900 ring-1 ring-black/5 overflow-hidden"
         style={{
-          backgroundColor: '#FFFDF8', // Cream paper instead of pure white
+          backgroundColor: '#F5F1E8', // Warm cream paper (matches desktop sepia theme)
           borderRadius, // Asymmetric: alternates based on page position
           boxShadow: `${insetShadow}, 0 10px 40px -10px rgba(0,0,0,0.5)`,
         }}
@@ -213,8 +221,12 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
           {/* Header image with carousel */}
           <div className="px-3 pt-0">
             <div
-              className="relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-stone-200 cursor-pointer group"
-              style={{ aspectRatio: "4/3" }}
+              className="relative overflow-hidden rounded-3xl bg-white cursor-pointer group"
+              style={{
+                aspectRatio: "4/3",
+                transform: `rotate(${photoRotation}deg)`,
+                boxShadow: '0 8px 20px -6px rgba(0,0,0,0.2)',
+              }}
               onTouchStart={hasMultiplePhotos ? handlePhotoTouchStart : undefined}
               onTouchMove={hasMultiplePhotos ? handlePhotoTouchMove : undefined}
               onTouchEnd={hasMultiplePhotos ? handlePhotoTouchEnd : undefined}
@@ -342,20 +354,20 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
 
             {/* Lesson learned / Wisdom clip */}
             {story.wisdomClipText && (
-              <div className="relative my-8 -mx-2 p-6 bg-white shadow-sm rotate-[0.5deg]">
+              <div className="relative my-8 -mx-2 p-6 rounded-lg rotate-[0.5deg]" style={{ backgroundColor: 'rgba(139, 115, 85, 0.08)' }}>
                 <div
-                  className="absolute inset-0 opacity-10"
+                  className="absolute inset-0 opacity-10 rounded-lg"
                   style={{
                     backgroundImage: `repeating-linear-gradient(
                       0deg,
                       transparent,
                       transparent 27px,
-                      #cbd5e1 27px,
-                      #cbd5e1 28px
+                      rgba(139, 115, 85, 0.3) 27px,
+                      rgba(139, 115, 85, 0.3) 28px
                     )`
                   }}
                 />
-                <p className={`relative text-slate-700 text-lg leading-relaxed ${caveatFont || ''}`}>
+                <p className={`relative text-[#2D2926] text-lg leading-relaxed ${caveatFont || ''}`}>
                   {story.wisdomClipText}
                 </p>
               </div>
@@ -366,7 +378,7 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
           <div
             className={`pointer-events-none absolute bottom-0 left-0 right-0 h-28 transition-opacity duration-300 ${showFade ? "opacity-100" : "opacity-0"
               }`}
-            style={{ background: 'linear-gradient(to top, #FFFDF8, transparent)' }}
+            style={{ background: 'linear-gradient(to top, #F5F1E8, transparent)' }}
           ></div>
 
           {/* Continue reading hint */}
