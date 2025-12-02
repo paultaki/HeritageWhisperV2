@@ -1,130 +1,112 @@
-# Book V4 - Premium 3D Book Design
+# Book V4 - Premium Skeuomorphic Book View
 
-## Overview
-A complete redesign of the book view with premium 3D perspective, page stacking effects, and dual-page spread layout.
+A premium version of the book view with enhanced skeuomorphic design elements based on Gemini's feedback.
 
 ## Features
 
-### Desktop
-- **Dual-page spread** with realistic 3D perspective
-- **Page stack layers** behind main pages (3 layers with progressive opacity)
-- **Spine binding** with decorative elements
-- **Scrollable content** within each page (hidden scrollbars)
-- **Progress bar** at top showing scroll progress
-- **Table of contents** drawer
-- **Click margins** to navigate between spreads
-- **Paper textures** and vignettes for realism
+### Visual Enhancements
 
-### Mobile
-- **Single-page view** with horizontal swipe
-- **Snap scrolling** for smooth navigation
-- **Touch-friendly controls** with arrow buttons
-- **Same premium styling** adapted for mobile
+- **Cream Paper Background** (`#F5F1E8`) - Warm, authentic paper feel
+- **Paper Texture Overlay** - SVG feTurbulence noise for subtle grain
+- **Gutter Shadow** - Gradient shadow toward spine for depth
+- **Page Stack Lines** - Vertical lines on outer edges (desktop only)
 
-## Design Elements
+### Typography
 
-### Colors
-- Dark background: `#0b0d12`
-- Indigo accents: `#6366f1`, `#818cf8`
-- Page color: `#fafaf9` (neutral-50)
-- Book cover: Brown leather gradient (`#2e1f14` → `#1f150d`)
+- **Drop Caps** - Decorative first letter on story first paragraph
+- **Enhanced Line Height** (1.85) - Print-like readability
+- **Small-Caps Dates** - `font-variant: small-caps` with letter spacing
+- **Crimson Text Serif** - Premium body font
 
-### 3D Effects
-- Perspective: `2000px`
-- Page rotation: `rotateY(±3deg)`
-- Stacked pages with translate transforms
-- Ground shadow with blur
-- Gutter shadows (inner spine shadows)
+### Photo Styling
 
-## Data Flow
+- **Subtle Rotation** - ±0.8 degree tilt (±0.5 on mobile)
+- **Lifted Shadow** - Multi-layer shadow for depth
+- **Rounded Corners** (12px) - Soft edges
+
+### Audio Player
+
+- **Waveform Visualization** - Real audio peaks with wavesurfer.js
+- **Click-to-Seek** - Navigate by clicking waveform
+- **Sepia/Gold Theming** - Matches book color scheme
+- **Tabular Numerals** - Aligned time display
+
+### UI Refinements
+
+- **Hover-Only Edit Button** - Pencil icon in corner, appears on hover
+- **Continue Reading Fade** - Gradient fade at bottom for long content
+- **Reduced Motion Support** - Respects `prefers-reduced-motion`
+
+## Dual Theme System
+
+The book supports two color themes via CSS custom properties:
+
+### Sepia Theme (Default)
+- Paper: `#F5F1E8` (warm cream)
+- Accent: `#8B7355` (sepia brown)
+
+### Gold Theme
+- Paper: `#FFFDF8` (bright ivory)
+- Accent: `#CBA46A` (warm gold)
+
+To switch themes, add `.book-theme-gold` class to the root element.
+
+## File Structure
 
 ```
-API (/api/stories)
-  ↓
-Filter (includeInBook && storyYear && transcription)
-  ↓
-Sort by storyYear
-  ↓
-Split into spreads (pairs)
-  ↓
-Render LeftPage + RightPage
+app/book-v4/
+├── page.tsx                    # Main page component
+├── book-v4.css                 # Premium CSS with dual themes
+├── README.md                   # This file
+└── components/
+    ├── index.ts                # Component exports
+    ├── BookPageV4.tsx          # Enhanced page renderer
+    ├── DarkBookProgressBarV4.tsx
+    ├── PaperTexture.tsx        # SVG noise overlay
+    ├── GutterShadow.tsx        # Spine shadow effect
+    ├── PageStack.tsx           # Page edge lines
+    ├── DropCap.tsx             # Typography components
+    ├── PhotoFrame.tsx          # Rotated photo frame
+    ├── WaveformAudioPlayer.tsx # Audio with waveform
+    ├── EditButton.tsx          # Hover-only edit
+    └── ContinueReading.tsx     # Fade indicator
 ```
 
-## Components
+## Dependencies
 
-### Main: `BookV4Page`
-- Fetches stories from API
-- Manages current spread index
-- Handles navigation and scroll progress
+- `wavesurfer.js` - Waveform visualization (~15KB)
+- `@wavesurfer/react` - React bindings
 
-### `LeftPage` & `RightPage`
-- Renders 3D page with stack layers
-- Contains scrollable `StoryContent`
-- Page numbers
-- Paper textures
+## Accessibility
 
-### `StoryContent`
-- Title, year, age
-- Photos with captions
-- Story transcription (split into paragraphs)
-- Lesson learned callout
+- **WCAG AA Contrast** - All text meets contrast requirements
+- **Keyboard Navigation** - Arrow keys + Space for page turns
+- **Screen Reader Support** - ARIA live region announces page changes
+- **Focus Indicators** - High-visibility focus ring (3px blue)
+- **Reduced Motion** - Animations disabled when preferred
 
-### `MobileView` & `MobilePage`
-- Horizontal scroll container
-- Individual mobile pages with snap
-- Same content, mobile-optimized
+## Mobile Considerations
 
-## Navigation
+- Paper texture reduced (opacity 0.02)
+- Page stack lines hidden
+- Photo rotation limited (±0.5 deg)
+- Simplified shadows
+- Waveform works on touch
 
-- **Desktop spreads**: Click left/right margins (8% width)
-- **Mobile**: Swipe or use arrow buttons
-- **Table of Contents**: Jump to specific stories
-- **Progress bar**: Shows scroll position within current page
+## Usage
 
-## Accessing
+Navigate to `/book-v4` to view the premium book experience.
 
-Visit: `http://localhost:3000/book-v4`
+## Comparison with /book
 
-## Differences from Original Book
-
-| Feature | Original (/book) | Book V4 |
-|---------|------------------|---------|
-| Layout | Single vertical scroll | Dual-page spreads |
-| Navigation | Arrow keys, scroll | Click margins, spreads |
-| Design | Flat pages | 3D perspective book |
-| Background | Cream | Dark (#0b0d12) |
-| Mobile | Responsive columns | Swipeable pages |
-| Progress | Sidebar | Top bar |
-| Editing | Not editable (was in HTML) | Read-only |
-
-## Story Data Required
-
-Each story needs:
-- `title` - Story title
-- `storyYear` - Year of the story
-- `transcription` - Story content
-- `includeInBook` - Must not be false
-- Optional:
-  - `lifeAge` - Age at time of story
-  - `photos[]` - Array with `url`, `caption`
-  - `wisdomClipText` - Lesson learned
-
-## Styling
-
-All styles use Tailwind CSS with custom classes for:
-- 3D transforms (`[transform-style:preserve-3d]`)
-- Perspective (`[perspective:2000px]`)
-- Aspect ratios (`aspect-[110/85]`, `aspect-[55/85]`)
-- Hidden scrollbars (`js-flow` class in book.css)
-
-## Future Enhancements
-
-Potential additions:
-- [ ] Keyboard navigation (arrow keys)
-- [ ] Page flip animations
-- [ ] Print-friendly export
-- [ ] Edit mode (if needed)
-- [ ] Audio player integration
-- [ ] Search within book
-- [ ] Bookmarks
-- [ ] Night mode toggle
+| Feature | /book | /book-v4 |
+|---------|-------|----------|
+| Paper color | White (#FFFFFF) | Cream (#F5F1E8) |
+| Paper texture | None | SVG noise |
+| Gutter shadow | Simple gradient | Multi-stop gradient |
+| Page stack | Hidden | Visible lines |
+| Drop caps | None | First paragraph |
+| Line height | 1.6-1.7 | 1.85 |
+| Audio player | Simple progress | Waveform |
+| Edit button | Always visible | Hover only |
+| Photo styling | Basic | Rotated + shadow |

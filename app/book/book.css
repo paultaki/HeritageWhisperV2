@@ -1,45 +1,377 @@
-/* Book V4 Styles - Senior-First Premium v1.0 */
+/* Book V4 Premium Skeuomorphic Styles
+   ============================================================================ */
 
 /* ============================================================================
-   CSS Custom Properties - Senior-First Premium Color System
+   CSS Custom Properties - Dual Theme System (Sepia default, Gold alternate)
    ============================================================================ */
 :root {
-  /* Core Colors */
-  --text: #111827;
-  --muted: #6B7280;
-  --blue: #2563EB;
-  --blue-700: #1D4ED8;
-  --border: #E5E7EB;
-  --paper: #FFFFFF;
-  --paper-2: #F9FAFB;
+  /* Theme identifier - swap between 'sepia' and 'gold' */
+  --book-theme: 'sepia';
+
+  /* Paper Colors */
+  --book-paper-cream: #F5F1E8;        /* Sepia theme - warm cream */
+  --book-paper-ivory: #FFFDF8;        /* Gold theme - bright ivory */
+  --book-paper: var(--book-paper-cream);
+
+  /* Accent Colors - Sepia (default) */
+  --book-accent-sepia: #8B7355;
+  --book-accent-sepia-light: rgba(139, 115, 85, 0.3);
+  --book-accent-sepia-bg: rgba(139, 115, 85, 0.08);
+
+  /* Accent Colors - Gold (alternate) */
+  --book-accent-gold: #CBA46A;
+  --book-accent-gold-light: rgba(203, 164, 106, 0.3);
+  --book-accent-gold-bg: rgba(203, 164, 106, 0.08);
+
+  /* Active theme accent (swap CSS vars to compare themes) */
+  --book-accent: var(--book-accent-sepia);
+  --book-accent-light: var(--book-accent-sepia-light);
+  --book-accent-bg: var(--book-accent-sepia-bg);
+
+  /* Typography */
+  --book-text: #2D2926;
+  --book-text-muted: #6B6460;
+  --book-line-height: 1.85;
+  --book-drop-cap-size: 3.5em;
+  --book-date-letter-spacing: 0.15em;
+
+  /* Shadows - Warm tones */
+  --book-shadow-soft: 0 1px 2px rgba(139, 115, 85, 0.06), 0 8px 24px rgba(139, 115, 85, 0.08);
+  --book-shadow-lifted: 0 12px 28px -8px rgba(0,0,0,0.25), 0 6px 12px -4px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.08);
+
+  /* Gutter/Spine */
+  --book-gutter-dark: rgba(0, 0, 0, 0.12);
+  --book-gutter-medium: rgba(0, 0, 0, 0.06);
+  --book-gutter-light: rgba(0, 0, 0, 0.02);
+
+  /* Page Stack */
+  --book-page-stack-color: rgba(0, 0, 0, 0.06);
+
+  /* Photo styling */
+  --book-photo-rotation-max: 1deg;
 
   /* Border Radius */
-  --radius: 16px;
-  --radius-img: 12px;
+  --book-radius: 16px;
+  --book-radius-img: 12px;
+}
 
-  /* Shadows - Soft elevation */
-  --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+/* Gold theme variant - add .book-theme-gold class to switch */
+.book-theme-gold {
+  --book-paper: var(--book-paper-ivory);
+  --book-accent: var(--book-accent-gold);
+  --book-accent-light: var(--book-accent-gold-light);
+  --book-accent-bg: var(--book-accent-gold-bg);
 }
 
 /* ============================================================================
-   Book Viewport - Fixed container that prevents page scrolling
+   Paper Texture - SVG noise overlay for authentic paper feel
    ============================================================================ */
-/* Ensure book view fills viewport and doesn't scroll */
-.book-viewport-wrapper {
-  position: fixed;
+.book-paper-texture {
+  position: absolute;
   inset: 0;
-  overflow: hidden;
-  background: #0b0d12;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  mix-blend-mode: multiply;
 }
 
-/* Book content should be constrained within fixed viewport */
-.book-content-fixed {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+.book-paper-texture--subtle {
+  opacity: 0.025;
 }
+
+.book-paper-texture--mobile {
+  opacity: 0.02;
+}
+
+/* ============================================================================
+   Premium Typography
+   ============================================================================ */
+
+/* Story body text - enhanced line height for print aesthetic */
+.book-story-text {
+  font-family: 'Crimson Text', Georgia, serif;
+  line-height: var(--book-line-height);
+  color: var(--book-text);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Date styling - small caps with letter spacing */
+.book-date-label {
+  font-variant: small-caps;
+  letter-spacing: var(--book-date-letter-spacing);
+  font-weight: 500;
+  color: var(--book-text-muted);
+  font-size: 0.9em;
+  text-transform: lowercase;
+}
+
+/* Drop cap - CSS-only approach with float fallback */
+.book-drop-cap::first-letter {
+  float: left;
+  font-size: var(--book-drop-cap-size);
+  line-height: 0.85;
+  margin-right: 0.15em;
+  margin-top: 0.1em;
+  font-family: 'Crimson Text', Georgia, serif;
+  font-weight: 700;
+  color: var(--book-accent);
+}
+
+/* Modern browsers with initial-letter support */
+@supports (initial-letter: 3) {
+  .book-drop-cap-modern::first-letter {
+    initial-letter: 3;
+    float: none;
+    margin-right: 0;
+    margin-top: 0;
+    color: var(--book-accent);
+  }
+}
+
+/* ============================================================================
+   Gutter Shadow - Spine curve effect
+   ============================================================================ */
+.book-gutter-shadow-left {
+  position: absolute;
+  inset: 0;
+  right: auto;
+  width: 64px;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    var(--book-gutter-dark) 0%,
+    var(--book-gutter-medium) 30%,
+    var(--book-gutter-light) 60%,
+    transparent 100%
+  );
+  z-index: 5;
+}
+
+.book-gutter-shadow-right {
+  position: absolute;
+  inset: 0;
+  left: auto;
+  width: 64px;
+  pointer-events: none;
+  background: linear-gradient(
+    to left,
+    var(--book-gutter-dark) 0%,
+    var(--book-gutter-medium) 30%,
+    var(--book-gutter-light) 60%,
+    transparent 100%
+  );
+  z-index: 5;
+}
+
+/* ============================================================================
+   Page Stack - Lines showing pages underneath
+   ============================================================================ */
+.book-page-stack-left {
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 0;
+  width: 8px;
+  pointer-events: none;
+}
+
+.book-page-stack-left::before,
+.book-page-stack-left::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--book-page-stack-color);
+}
+
+.book-page-stack-left::before {
+  left: 0;
+  opacity: 0.8;
+}
+
+.book-page-stack-left::after {
+  left: 2px;
+  opacity: 0.6;
+}
+
+.book-page-stack-right {
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  right: 0;
+  width: 8px;
+  pointer-events: none;
+}
+
+.book-page-stack-right::before,
+.book-page-stack-right::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--book-page-stack-color);
+}
+
+.book-page-stack-right::before {
+  right: 0;
+  opacity: 0.8;
+}
+
+.book-page-stack-right::after {
+  right: 2px;
+  opacity: 0.6;
+}
+
+/* ============================================================================
+   Photo Frame - Lifted shadow with subtle rotation
+   ============================================================================ */
+.book-photo-frame {
+  position: relative;
+}
+
+.book-photo-frame--shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--book-radius-img);
+  box-shadow: var(--book-shadow-lifted);
+  transform: translateY(4px) scale(0.98);
+  z-index: -1;
+}
+
+/* Photo rotation variants - use data attribute */
+.book-photo-frame[data-rotation="slight-left"] {
+  transform: rotate(-0.6deg);
+}
+
+.book-photo-frame[data-rotation="slight-right"] {
+  transform: rotate(0.6deg);
+}
+
+.book-photo-frame[data-rotation="left"] {
+  transform: rotate(-0.8deg);
+}
+
+.book-photo-frame[data-rotation="right"] {
+  transform: rotate(0.8deg);
+}
+
+/* ============================================================================
+   Premium Audio Player - Waveform container
+   ============================================================================ */
+.book-audio-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.book-audio-button {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--book-accent) 0%, color-mix(in srgb, var(--book-accent) 80%, white) 100%);
+  color: white;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.book-audio-button:hover {
+  transform: scale(1.05);
+}
+
+.book-audio-button:active {
+  transform: scale(0.95);
+}
+
+.book-audio-waveform {
+  flex: 1;
+  height: 40px;
+  min-width: 0;
+}
+
+.book-audio-time {
+  color: var(--book-text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ============================================================================
+   Edit Button - Corner icon, hover-only
+   ============================================================================ */
+.book-edit-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  opacity: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 30;
+}
+
+.group:hover .book-edit-button,
+.book-edit-button:focus {
+  opacity: 1;
+}
+
+.book-edit-button:hover {
+  background: white;
+  transform: scale(1.05);
+}
+
+.book-edit-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.9);
+}
+
+/* ============================================================================
+   Continue Reading - Gradient fade
+   ============================================================================ */
+.book-fade-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 128px;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    var(--book-paper) 0%,
+    var(--book-paper) 20%,
+    color-mix(in srgb, var(--book-paper) 80%, transparent) 50%,
+    transparent 100%
+  );
+  z-index: 40;
+}
+
+.book-fade-indicator {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================================
+   Scroll and Animation Styles (inherited from book.css)
+   ============================================================================ */
 
 /* Smooth scrolling with visible styled scrollbars */
 .js-flow {
@@ -47,11 +379,11 @@
   overflow-x: hidden !important;
   overscroll-behavior: contain;
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch; /* Critical for smooth iOS/trackpad scrolling */
+  -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
 }
 
-/* Styled scrollbar - always visible and more compact */
+/* Styled scrollbar */
 .js-flow::-webkit-scrollbar {
   width: 10px;
   -webkit-appearance: none;
@@ -69,7 +401,7 @@
   transition: background 0.2s ease;
   border: 2px solid transparent;
   background-clip: padding-box;
-  min-height: 40px; /* Ensure thumb is always visible */
+  min-height: 40px;
 }
 
 .js-flow::-webkit-scrollbar-thumb:hover {
@@ -77,88 +409,21 @@
   background-clip: padding-box;
 }
 
-/* Force scrollbar to always be visible (not auto-hide) */
-.js-flow::-webkit-scrollbar-button {
-  display: none;
-}
-
-/* Firefox scrollbar styling - force always visible */
+/* Firefox scrollbar styling */
 .js-flow {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.4) rgba(0, 0, 0, 0.08);
-  scrollbar-gutter: stable; /* Reserve space for scrollbar */
+  scrollbar-gutter: stable;
 }
 
-/* Ensure parent allows scrolling */
-.js-flow:focus {
-  outline: none;
-}
-
-/* Perspective and 3D transforms */
-[style*="perspective"] {
-  transform-style: preserve-3d;
-}
-
-/* Mobile snap scroll */
-#mobileScroller::-webkit-scrollbar {
-  display: none;
-}
-
-#mobileScroller {
+/* Hide scrollbar for mobile */
+.hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-}
-
-/* Smooth transitions with reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .js-flow {
-    scroll-behavior: auto !important;
-  }
-  
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Ensure smooth wheel/trackpad scrolling */
-.js-flow {
-  will-change: scroll-position;
-  /* Make scroll container capture all scroll events */
-  position: relative;
-  z-index: 1;
-}
-
-/* Prevent momentum scrolling from causing layout issues */
-html,
-body {
-  overscroll-behavior-y: none;
-}
-
-/* Removed overly broad pointer-events rule that was blocking all buttons 
-   with Tailwind classes like disabled:pointer-events-none */
-
-/* Make the entire page area scrollable by forwarding events to content */
-.page {
-  /* This will be handled by React component */
-}
-
-/* Hide scrollbar for mobile horizontal scroll */
-.hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
 .hide-scrollbar::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari, Opera */
+  display: none;
 }
 
 /* Senior-friendly scroll indicator animations */
@@ -191,200 +456,46 @@ body {
   animation: bounce-gentle 2s ease-in-out infinite;
 }
 
-/* Reduce motion for accessibility */
+/* ============================================================================
+   Accessibility - Reduced Motion
+   ============================================================================ */
 @media (prefers-reduced-motion: reduce) {
+  .js-flow {
+    scroll-behavior: auto !important;
+  }
+
   .animate-pulse-subtle,
   .animate-bounce-gentle {
     animation: none !important;
   }
+
+  .book-audio-button,
+  .book-edit-button,
+  .book-photo-frame {
+    transition: none;
+  }
 }
 
 /* ============================================================================
-   Senior-First Premium Book Styles
+   Mobile-specific styles
    ============================================================================ */
-
-/* Page Cards - Premium styling with soft elevation */
-.page-card {
-  background: var(--paper);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 24px;
-  font-size: 18px;
-  line-height: 1.6;
-}
-
-.page-card .prose {
-  max-width: 65ch;
-  color: var(--text);
-}
-
-.page-card h2 {
-  color: var(--text);
-  font-weight: 600;
-  letter-spacing: .005em;
-  line-height: 1.25;
-}
-
-.page-card .sub {
-  color: var(--muted);
-  font-size: 16px;
-}
-
-/* Note: Image aspect ratio is handled by StoryPhotoWithBlurExtend component (4:3) */
-
-/* Left and Right Page Spacing */
-.page-left {
-  padding-right: 32px;
-}
-
-.page-right {
-  padding-left: 32px;
-}
-
-/* Page Numbers */
-.page-number {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-/* Chips and Buttons - 48px minimum touch target */
-.chip, .btn {
-  height: 44px;
-  min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  background: #fff;
-  font-size: 14px;
-  transition: all .2s;
-}
-
-.chip:hover, .btn:hover {
-  background: var(--paper-2);
-  border-color: var(--blue);
-}
-
-.chip:active, .btn:active {
-  transform: scale(0.98);
-}
-
-/* Continue/More Button */
-.more {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 60px;
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  background: #fff;
-  font-size: 18px;
-  font-weight: 500;
-  transition: all .2s;
-}
-
-.more:hover {
-  background: var(--paper-2);
-  border-color: var(--blue);
-}
-
-.more:active {
-  transform: scale(0.98);
-}
-
-/* Navigation Arrows - 60px senior-friendly */
-.nav-arrow {
-  width: 60px;
-  height: 60px;
-  min-width: 60px;
-  min-height: 60px;
-  border-radius: 9999px;
-  border: 1px solid var(--border);
-  background: #fff;
-  box-shadow: var(--shadow);
-  transition: all .2s;
-}
-
-.nav-arrow:hover {
-  background: var(--paper-2);
-  border-color: var(--blue);
-}
-
-.nav-arrow:active {
-  transform: scale(0.98);
-}
-
-/* Focus States - High-visibility for keyboard navigation */
-.chip:focus,
-.btn:focus,
-.more:focus,
-.nav-arrow:focus,
-.audio-button:focus,
-.toc-item:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(147, 197, 253, .9);
-}
-
-/* Audio Controls - Senior-friendly sizing (48px minimum) */
-.audio {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  height: 48px;
-}
-
-.audio .play {
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  min-height: 48px;
-  border-radius: 9999px;
-  border: 1px solid var(--border);
-  background: #fff;
-  transition: all .2s;
-}
-
-.audio .play:hover {
-  background: var(--paper-2);
-  border-color: var(--blue);
-}
-
-.audio .play:active {
-  transform: scale(0.98);
-}
-
-.audio .track {
-  flex: 1;
-  height: 8px;
-  border-radius: 9999px;
-  background: var(--border);
-}
-
-.audio .time {
-  width: 56px;
-  text-align: right;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Reduced Motion - Page transitions become cross-fades */
-@media (prefers-reduced-motion: reduce) {
-  .page-flip {
-    animation: none;
-    transition: opacity .2s ease;
+@media (max-width: 1024px) {
+  .book-paper-texture {
+    opacity: 0.02;
   }
 
-  .nav-arrow,
-  .chip,
-  .btn,
-  .more,
-  .audio .play {
-    transition: opacity .2s ease;
+  .book-gutter-shadow-left,
+  .book-gutter-shadow-right {
+    width: 32px;
+  }
+
+  .book-page-stack-left,
+  .book-page-stack-right {
+    display: none;
   }
 }
 
-/* Mobile scroll-snap improvements */
+/* Mobile snap scroll */
 .snap-x {
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
@@ -398,18 +509,19 @@ body {
   scroll-snap-stop: always;
 }
 
-.scroll-smooth {
-  scroll-behavior: smooth;
-}
-
-/* Improve mobile swipe performance */
-@media (max-width: 1024px) {
-  .snap-x {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+/* ============================================================================
+   Print styles
+   ============================================================================ */
+@media print {
+  .no-print {
+    display: none !important;
   }
-  
-  .snap-x::-webkit-scrollbar {
+
+  .book-paper-texture,
+  .book-gutter-shadow-left,
+  .book-gutter-shadow-right,
+  .book-page-stack-left,
+  .book-page-stack-right {
     display: none;
   }
 }

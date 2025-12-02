@@ -10,14 +10,12 @@ import { useAuth } from "@/lib/auth";
 import { useAccountContext } from "@/hooks/use-account-context";
 import { apiRequest } from "@/lib/queryClient";
 import { getApiUrl } from "@/lib/config";
-import { Volume2, Pause, Loader2, Clock3, Pencil, Type } from "lucide-react";
-import { BookPage } from "./components/BookPage";
-import DarkBookProgressBar from "./components/DarkBookProgressBar";
+import { BookPageV4 } from "./components/BookPageV4";
+import DarkBookProgressBarV4 from "./components/DarkBookProgressBarV4";
 import { BookPage as BookPageType } from "@/lib/bookPagination";
-import { ScrollIndicator } from "@/components/ScrollIndicators";
 import MobileBookViewV2 from "../book-new/components/MobileBookViewV2";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+
+// Import premium book CSS
 import "./book.css";
 
 // Import handwriting font
@@ -29,7 +27,7 @@ const caveat = Caveat({
   display: "swap",
 });
 
-// Story interface matching your API structure
+// Story interface
 interface Story {
   id: string;
   userId: string;
@@ -47,9 +45,12 @@ interface Story {
   photos?: Array<{
     id: string;
     url: string;
+    displayUrl?: string;
     transform?: { zoom: number; position: { x: number; y: number } };
     caption?: string;
     isHero?: boolean;
+    width?: number;
+    height?: number;
   }>;
   emotions?: string[];
   pivotalCategory?: string;
@@ -70,6 +71,21 @@ interface Chapter {
   orderIndex: number;
 }
 
+/**
+ * Book V4 - Premium Skeuomorphic Book View
+ *
+ * Enhanced version with:
+ * - Cream paper background (#F5F1E8)
+ * - Paper texture overlay (SVG noise)
+ * - Gutter shadow (spine depth)
+ * - Page stack lines (outer edges)
+ * - Drop caps on first paragraph
+ * - Premium typography (1.85 line-height)
+ * - Photo frames with rotation/shadow
+ * - Waveform audio player
+ * - Hover-only edit button
+ * - Dual theme support (sepia/gold)
+ */
 function BookV4PageContent() {
   const { user } = useAuth();
   const { activeContext, isLoading: isContextLoading } = useAccountContext();
@@ -77,10 +93,9 @@ function BookV4PageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Extract storyId from URL for deep linking (e.g., from timeline or returning from edit)
   const urlStoryId = searchParams?.get('storyId') || undefined;
 
-  // Initialize state from sessionStorage for session persistence
+  // State initialization from sessionStorage
   const [isBookOpen, setIsBookOpen] = useState(() => {
     if (typeof window !== 'undefined') {
       return sessionStorage.getItem('book-is-open') === 'true';
@@ -102,11 +117,11 @@ function BookV4PageContent() {
     return 0;
   });
   const [showToc, setShowToc] = useState(false);
-  const [fontSize, setFontSize] = useState(18); // Default text size in pixels (senior-first)
+  const [fontSize, setFontSize] = useState(18);
 
-  // Load font size from localStorage on mount
+  // Font size persistence
   useEffect(() => {
-    const savedFontSize = localStorage.getItem('bookViewFontSize');
+    const savedFontSize = localStorage.getItem('bookV4FontSize');
     if (savedFontSize) {
       const parsed = parseInt(savedFontSize, 10);
       if (!isNaN(parsed) && parsed >= 14 && parsed <= 28) {
@@ -115,12 +130,11 @@ function BookV4PageContent() {
     }
   }, []);
 
-  // Save font size to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem('bookViewFontSize', fontSize.toString());
+    localStorage.setItem('bookV4FontSize', fontSize.toString());
   }, [fontSize]);
 
-  // Persist book state to sessionStorage for navigation memory
+  // Session storage persistence
   useEffect(() => {
     sessionStorage.setItem('book-is-open', isBookOpen.toString());
   }, [isBookOpen]);
@@ -137,13 +151,12 @@ function BookV4PageContent() {
   const flowRightRef = useRef<HTMLDivElement>(null);
   const liveRegionRef = useRef<HTMLDivElement>(null);
 
-  // Announce page changes to screen readers
+  // Screen reader announcements
   const announcePageChange = (spreadIndex: number) => {
     if (liveRegionRef.current && spreadIndex >= 0) {
-      const pageNum = spreadIndex * 2 + 1; // Convert to page number
+      const pageNum = spreadIndex * 2 + 1;
       liveRegionRef.current.textContent = `Page ${pageNum}`;
 
-      // Focus on the heading of the current page for keyboard users
       setTimeout(() => {
         const leftHeading = document.querySelector(`#page-${spreadIndex}-left h2`) as HTMLElement;
         const rightHeading = document.querySelector(`#page-${spreadIndex}-right h2`) as HTMLElement;
@@ -157,91 +170,41 @@ function BookV4PageContent() {
     }
   };
 
-  // Fetch stories - with storyteller_id support for family sharing
-  // Always default to user.id if no active context (prevents query from being disabled)
+  // Data fetching
   const storytellerId = activeContext?.storytellerId || user?.id;
   const queryEnabled = !isContextLoading && ((!!user && !!user.id) || !!activeContext);
-
-  // Debug logging
-  console.log('[Book] Query setup:', {
-    user: user?.id,
-    activeContext,
-    storytellerId,
-    isContextLoading,
-    queryEnabled
-  });
 
   const { data, isLoading, isFetching } = useQuery<{ stories: Story[] }>({
     queryKey: ["/api/stories", storytellerId],
     queryFn: async () => {
-      console.log('[Book] Fetching stories for storytellerId:', storytellerId);
-
-      // Build URL with storyteller_id if viewing someone else's stories
       const url = storytellerId
         ? `${getApiUrl("/api/stories")}?storyteller_id=${storytellerId}`
         : getApiUrl("/api/stories");
 
-      console.log('[Book] Fetch URL:', url);
-
-      // Use apiRequest which handles authentication (JWT or family session token)
       const res = await apiRequest("GET", url);
-      const result = await res.json();
-
-      console.log('[Book] Fetched stories:', result?.stories?.length || 0);
-      return result;
+      return await res.json();
     },
-    enabled: queryEnabled, // Wait for context to load, then enable for users OR viewers
+    enabled: queryEnabled,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   const stories = data?.stories || [];
 
-  // Filter stories that should be included in book (must be explicitly true)
+  // Filter and sort stories
   const bookStories = stories.filter((s) => {
-    // Must be explicitly marked for book inclusion
-    if (s.includeInBook !== true) {
-      console.warn(`[Book] Story "${s.title}" excluded: includeInBook is ${s.includeInBook}`);
-      return false;
-    }
-
-    // Must have a year (can't sort without it)
-    if (!s.storyYear) {
-      console.warn(`[Book] Story "${s.title}" excluded: missing storyYear`);
-      return false;
-    }
-
-    // Must have transcription (nothing to display without it)
-    if (!s.transcription) {
-      console.warn(`[Book] Story "${s.title}" excluded: missing transcription`);
-      return false;
-    }
-
+    if (s.includeInBook !== true) return false;
+    if (!s.storyYear) return false;
+    if (!s.transcription) return false;
     return true;
   });
 
-  // Sort by year
   const sortedStories = useMemo(() =>
     [...bookStories].sort((a, b) => a.storyYear - b.storyYear),
     [bookStories]
   );
 
-  // Debug logging
-  console.log('[Book] Loading states:', { isLoading, isFetching, hasData: !!data, storiesCount: stories.length, bookStoriesCount: bookStories.length, sortedStoriesCount: sortedStories.length });
-
-  // Debug logging for excluded stories
-  if (stories.length !== bookStories.length) {
-    const excludedStories = stories.filter(s => !bookStories.includes(s));
-    console.log('[Book] Summary of excluded stories:', excludedStories.map(s => ({
-      id: s.id,
-      title: s.title,
-      includeInBook: s.includeInBook,
-      hasYear: !!s.storyYear,
-      hasTranscription: !!s.transcription,
-    })));
-  }
-
-  // Group stories by decade
+  // Group by decade
   const decadeGroups = useMemo(() => {
     const groups = new Map<string, Story[]>();
 
@@ -272,7 +235,7 @@ function BookV4PageContent() {
     enabled: !!user,
   });
 
-  // Enriched stories with chapter titles for TOC
+  // Enriched stories with chapter titles
   const enrichedStories = useMemo(() => {
     return sortedStories.map(story => {
       const chapter = chapters.find(c => c.id === story.chapterId);
@@ -283,18 +246,15 @@ function BookV4PageContent() {
     });
   }, [sortedStories, chapters]);
 
-  // Group stories by chapter
+  // Group by chapters
   const chapterGroups = useMemo(() => {
     if (viewMode !== 'chapters' || chapters.length === 0) return [];
 
     const groups: { chapter: { id: string, title: string }, stories: Story[] }[] = [];
-
-    // Sort chapters by orderIndex
     const sortedChapters = [...chapters].sort((a, b) => a.orderIndex - b.orderIndex);
 
     sortedChapters.forEach(chapter => {
       const chapterStories = sortedStories.filter(s => s.chapterId === chapter.id);
-      // Sort by chapterOrderIndex
       chapterStories.sort((a, b) => (a.chapterOrderIndex || 0) - (b.chapterOrderIndex || 0));
 
       if (chapterStories.length > 0) {
@@ -302,7 +262,6 @@ function BookV4PageContent() {
       }
     });
 
-    // Handle stories without chapters
     const orphanedStories = sortedStories.filter(s => !s.chapterId);
     if (orphanedStories.length > 0) {
       groups.push({ chapter: { id: 'uncategorized', title: "Uncategorized" }, stories: orphanedStories });
@@ -311,105 +270,84 @@ function BookV4PageContent() {
     return groups;
   }, [sortedStories, chapters, viewMode]);
 
-  // Create spreads - intro, TOC (2 pages), decade/chapter pages, then story pairs
+  // Create spreads
   const spreads = useMemo(() => {
     const result: Array<{
-      left?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number };
-      right?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | { type: 'decade'; decade: string; title: string; count: number };
-      type: 'intro' | 'toc' | 'decade' | 'stories';
+      left?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | 'add-story' | { type: 'decade'; decade: string; title: string; count: number; isChapter?: boolean };
+      right?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | 'add-story' | { type: 'decade'; decade: string; title: string; count: number; isChapter?: boolean };
+      type: 'intro' | 'toc' | 'decade' | 'stories' | 'add-story';
     }> = [];
 
-    // First spread: endpaper left, intro right
-    result.push({
-      left: 'endpaper',
-      right: 'intro',
-      type: 'intro'
-    });
+    result.push({ left: 'endpaper', right: 'intro', type: 'intro' });
+    result.push({ left: 'toc-left', right: 'toc-right', type: 'toc' });
 
-    // Second spread: table of contents across both pages
-    result.push({
-      left: 'toc-left',
-      right: 'toc-right',
-      type: 'toc'
-    });
-
-    // Choose groups based on viewMode
     const groupsToRender = viewMode === 'chapters' ? chapterGroups : decadeGroups;
 
-    // Add group pages and stories
     groupsToRender.forEach((group) => {
-      // Handle different group structures
       let title: string;
       let id: string;
       let stories: Story[];
 
       if (Array.isArray(group)) {
-        // Decade group: [string, Story[]]
         id = group[0];
         stories = group[1];
         const decadeYear = id.replace('s', '');
         title = `The ${decadeYear}s`;
       } else {
-        // Chapter group: { chapter: { id, title }, stories: Story[] }
         id = group.chapter.id;
         title = group.chapter.title;
         stories = group.stories;
       }
 
       const groupPage = {
-        type: 'decade' as const, // Reuse decade type for styling
+        type: 'decade' as const,
         decade: id,
         title: title,
         count: stories.length,
-        isChapter: viewMode === 'chapters' // NEW: Pass flag to distinguish chapters from decades
+        isChapter: viewMode === 'chapters'
       };
 
-      // Check if we need to add marker on left or right
       const lastSpread = result[result.length - 1];
       const needsNewSpread = !lastSpread || (lastSpread.left && lastSpread.right);
 
       if (needsNewSpread) {
-        // Create new spread with marker on left
-        result.push({
-          left: groupPage,
-          right: stories[0],
-          type: 'stories'
-        });
+        result.push({ left: groupPage, right: stories[0], type: 'stories' });
 
-        // Add remaining story spreads
         for (let i = 1; i < stories.length; i += 2) {
-          result.push({
-            left: stories[i],
-            right: stories[i + 1],
-            type: 'stories'
-          });
+          result.push({ left: stories[i], right: stories[i + 1], type: 'stories' });
         }
       } else {
-        // Fill the empty right slot with marker
         lastSpread.right = groupPage;
         lastSpread.type = 'decade';
 
-        // Add all story spreads for this group
         for (let i = 0; i < stories.length; i += 2) {
-          result.push({
-            left: stories[i],
-            right: stories[i + 1],
-            type: 'stories'
-          });
+          result.push({ left: stories[i], right: stories[i + 1], type: 'stories' });
         }
       }
     });
 
-    return result;
-  }, [decadeGroups, chapterGroups, viewMode]);
+    // Add the "add new story" page at the end (only for own account)
+    if (sortedStories.length > 0) {
+      // Check if the last spread has an empty right side
+      const lastSpread = result[result.length - 1];
+      if (lastSpread && !lastSpread.right) {
+        // Add to the right side of existing spread
+        lastSpread.right = 'add-story';
+      } else {
+        // Create a new spread with add-story on left
+        result.push({ left: 'add-story', right: undefined, type: 'add-story' });
+      }
+    }
 
-  // Create book pages array for progress bar
+    return result;
+  }, [decadeGroups, chapterGroups, viewMode, sortedStories.length]);
+
+  // Create book pages for progress bar
   const bookPages: BookPageType[] = useMemo(() => {
     const pages: BookPageType[] = [];
     let pageNum = 1;
 
     spreads.forEach((spread) => {
-      // Left page
       if (spread.left) {
         let pageType: 'intro' | 'table-of-contents' | 'decade-marker' | 'story-start' = 'intro';
         if (typeof spread.left === 'string') {
@@ -421,7 +359,7 @@ function BookV4PageContent() {
           pageType = 'story-start';
         }
 
-        const leftPage: BookPageType = {
+        pages.push({
           pageNumber: pageNum++,
           type: pageType,
           isLeftPage: true,
@@ -430,11 +368,9 @@ function BookV4PageContent() {
           decadeTitle: typeof spread.left === 'object' && 'title' in spread.left ? spread.left.title : undefined,
           year: typeof spread.left === 'object' && 'storyYear' in spread.left ? spread.left.storyYear.toString() : undefined,
           isChapter: typeof spread.left === 'object' && 'isChapter' in spread.left ? Boolean(spread.left.isChapter) : undefined,
-        };
-        pages.push(leftPage);
+        });
       }
 
-      // Right page
       if (spread.right) {
         let pageType: 'intro' | 'table-of-contents' | 'decade-marker' | 'story-start' = 'intro';
         if (typeof spread.right === 'string') {
@@ -446,7 +382,7 @@ function BookV4PageContent() {
           pageType = 'story-start';
         }
 
-        const rightPage: BookPageType = {
+        pages.push({
           pageNumber: pageNum++,
           type: pageType,
           isLeftPage: false,
@@ -455,33 +391,25 @@ function BookV4PageContent() {
           decadeTitle: typeof spread.right === 'object' && 'title' in spread.right ? spread.right.title : undefined,
           year: typeof spread.right === 'object' && 'storyYear' in spread.right ? spread.right.storyYear.toString() : undefined,
           isChapter: typeof spread.right === 'object' && 'isChapter' in spread.right ? Boolean(spread.right.isChapter) : undefined,
-        };
-        pages.push(rightPage);
+        });
       }
     });
 
     return pages;
   }, [spreads]);
 
-  // Create mobile pages array (intro + TOC + all stories)
+  // Mobile pages array
   const mobilePages = useMemo(() => {
     const pages: Array<{ type: 'intro' | 'toc' | 'story'; story?: Story; index: number }> = [];
-
-    // Add intro page
     pages.push({ type: 'intro', index: 0 });
-
-    // Add TOC page
     pages.push({ type: 'toc', index: 1 });
-
-    // Add all story pages
     sortedStories.forEach((story, idx) => {
       pages.push({ type: 'story', story, index: idx + 2 });
     });
-
     return pages;
   }, [sortedStories]);
 
-  // Validate restored indexes don't exceed available pages (in case content changed)
+  // Validate restored indexes
   useEffect(() => {
     if (spreads.length > 0 && currentSpreadIndex >= spreads.length) {
       setCurrentSpreadIndex(Math.max(0, spreads.length - 1));
@@ -494,15 +422,17 @@ function BookV4PageContent() {
     }
   }, [mobilePages.length, currentMobilePage]);
 
-  // Navigate to specific page from progress bar
+  // Navigation handlers
   const handleNavigateToPage = useCallback((pageIndex: number) => {
     const spreadIndex = Math.floor(pageIndex / 2);
     setCurrentSpreadIndex(Math.min(Math.max(0, spreadIndex), spreads.length - 1));
   }, [spreads.length]);
 
-  // Navigate spreads
   const goToPrevSpread = useCallback(() => {
-    if (currentSpreadIndex > 0) {
+    if (currentSpreadIndex === 0) {
+      // On first page, go back to cover
+      setIsBookOpen(false);
+    } else {
       setCurrentSpreadIndex(currentSpreadIndex - 1);
     }
   }, [currentSpreadIndex]);
@@ -513,68 +443,35 @@ function BookV4PageContent() {
     }
   }, [currentSpreadIndex, spreads.length]);
 
-  // Get current story ID for smart navigation
+  // Get current story ID
   const getCurrentStoryId = useCallback(() => {
     const spread = spreads[currentSpreadIndex];
     if (!spread) return undefined;
 
-    // Check left page first
     if (spread.left && typeof spread.left === 'object' && 'id' in spread.left) {
       return spread.left.id;
     }
-    // Check right page
     if (spread.right && typeof spread.right === 'object' && 'id' in spread.right) {
       return spread.right.id;
     }
     return undefined;
   }, [spreads, currentSpreadIndex]);
 
-  // Handle Timeline navigation with smart routing
-  const handleTimelineClick = useCallback(() => {
-    console.log('[Book] Timeline clicked. currentStoryId:', getCurrentStoryId());
-
-    const currentStoryId = getCurrentStoryId();
-    if (currentStoryId) {
-      const context = {
-        memoryId: currentStoryId,
-        scrollPosition: 0,
-        timestamp: Date.now(),
-        returnPath: '/timeline',
-      };
-      console.log('[Book] Setting timeline navigation context:', context);
-      sessionStorage.setItem('timeline-navigation-context', JSON.stringify(context));
-    } else {
-      console.log('[Book] No current story ID - timeline will go to top');
-    }
-
-    router.push('/timeline');
-  }, [getCurrentStoryId, router]);
-
-  // Update sessionStorage whenever current story changes (for GlassNav smart routing)
+  // Update session storage with current story
   useEffect(() => {
     const storyId = getCurrentStoryId();
     if (storyId) {
       sessionStorage.setItem('current-book-story-id', storyId);
-      console.log('[Book] Updated current story ID in storage:', storyId);
     } else {
       sessionStorage.removeItem('current-book-story-id');
-      console.log('[Book] Cleared current story ID (on intro/TOC/decade page)');
     }
   }, [getCurrentStoryId]);
 
-  // Note: Scroll locking is handled by MobileBookViewV2 component for mobile
-  // Desktop book view uses h-screen overflow-hidden on the container
-
-  // Reset scroll position and stop audio when spread changes
+  // Reset scroll on spread change
   useEffect(() => {
-    if (flowLeftRef.current) {
-      flowLeftRef.current.scrollTop = 0;
-    }
-    if (flowRightRef.current) {
-      flowRightRef.current.scrollTop = 0;
-    }
+    if (flowLeftRef.current) flowLeftRef.current.scrollTop = 0;
+    if (flowRightRef.current) flowRightRef.current.scrollTop = 0;
 
-    // Stop all audio elements when navigating
     const audioElements = document.querySelectorAll('audio');
     audioElements.forEach(audio => {
       audio.pause();
@@ -582,13 +479,10 @@ function BookV4PageContent() {
     });
   }, [currentSpreadIndex]);
 
-  // Keyboard navigation (Arrow keys + Space)
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is typing in an input field
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
       if (e.key === "ArrowLeft") {
         e.preventDefault();
@@ -605,28 +499,21 @@ function BookV4PageContent() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentSpreadIndex, spreads.length, goToPrevSpread, goToNextSpread]);
 
-  // Track which storyId we've already navigated to (prevents duplicate navigation)
+  // URL parameter navigation
   const [navigatedStoryId, setNavigatedStoryId] = useState<string | null>(null);
 
-  // Navigate to story from URL parameter (from timeline or returning from edit)
   useEffect(() => {
-    // Skip if no storyId in URL or data not loaded yet
     if (!urlStoryId || sortedStories.length === 0 || spreads.length === 0) return;
-
-    // Skip if we've already navigated to this exact storyId
     if (navigatedStoryId === urlStoryId) return;
 
-    // Find the story index
     const storyIndex = sortedStories.findIndex(s => s.id === urlStoryId);
 
     if (storyIndex !== -1) {
-      // Desktop: Find which spread contains this story
       let targetSpreadIndex = 0;
 
       for (let i = 0; i < spreads.length; i++) {
         const spread = spreads[i];
 
-        // Check left page
         if (spread.left && typeof spread.left !== 'string' && !('type' in spread.left)) {
           if ((spread.left as Story).id === urlStoryId) {
             targetSpreadIndex = i;
@@ -634,7 +521,6 @@ function BookV4PageContent() {
           }
         }
 
-        // Check right page
         if (spread.right && typeof spread.right !== 'string' && !('type' in spread.right)) {
           if ((spread.right as Story).id === urlStoryId) {
             targetSpreadIndex = i;
@@ -644,22 +530,14 @@ function BookV4PageContent() {
       }
 
       setCurrentSpreadIndex(targetSpreadIndex);
-
-      // Mobile: Navigate to story page (intro + toc + stories)
       setCurrentMobilePage(storyIndex + 2);
-
-      // Open the book automatically when navigating from URL
       setIsBookOpen(true);
-
-      // Mark this storyId as navigated to prevent re-navigation
       setNavigatedStoryId(urlStoryId);
-
-      // Clean up URL
       window.history.replaceState({}, '', '/book');
     }
   }, [urlStoryId, sortedStories, spreads, navigatedStoryId]);
 
-  // Loading state - show spinner while fetching data OR waiting for user
+  // Loading state
   if (isLoading || isFetching || !data) {
     return (
       <div className="hw-page bg-[#0b0d12] flex items-center justify-center">
@@ -671,17 +549,13 @@ function BookV4PageContent() {
     );
   }
 
-  // No stories state (only show if we have data and it's truly empty)
+  // No stories state
   if (data && sortedStories.length === 0) {
     return (
       <div className="hw-page bg-[#0b0d12] flex items-center justify-center">
         <div className="text-center max-w-md px-4">
-          <h2 className="text-2xl font-semibold text-white mb-4">
-            Your Book is Empty
-          </h2>
-          <p className="text-slate-300 mb-6">
-            Start creating memories to see them appear here.
-          </p>
+          <h2 className="text-2xl font-semibold text-white mb-4">Your Book is Empty</h2>
+          <p className="text-slate-300 mb-6">Start creating memories to see them appear here.</p>
           <button
             onClick={() => router.push("/")}
             className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-md transition-all"
@@ -695,9 +569,8 @@ function BookV4PageContent() {
 
   const currentSpread = spreads[currentSpreadIndex] || { left: undefined, right: undefined, type: 'stories' as const };
 
-  // Navigate to a story from TOC
+  // Navigate to story from TOC
   const handleNavigateToStory = (storyId: string) => {
-    // For mobile: find the story's index in mobilePages
     const mobileStoryIndex = mobilePages.findIndex((page) => {
       return page.type === 'story' && page.story?.id === storyId;
     });
@@ -706,17 +579,14 @@ function BookV4PageContent() {
       setCurrentMobilePage(mobileStoryIndex);
     }
 
-    // For desktop: find which spread contains this story by ID
     for (let i = 0; i < spreads.length; i++) {
       const spread = spreads[i];
 
-      // Check if the story is on the left page
       if (spread.left && typeof spread.left !== 'string' && !('type' in spread.left) && spread.left.id === storyId) {
         setCurrentSpreadIndex(i);
         return;
       }
 
-      // Check if the story is on the right page
       if (spread.right && typeof spread.right !== 'string' && !('type' in spread.right) && spread.right.id === storyId) {
         setCurrentSpreadIndex(i);
         return;
@@ -724,11 +594,10 @@ function BookV4PageContent() {
     }
   };
 
-  // Render closed book cover state
+  // Closed book cover
   if (!isBookOpen) {
     return (
       <>
-        {/* Mobile & Tablet: Full-screen mobile view - Always rendered on mobile */}
         <div className="lg:hidden">
           <MobileBookViewV2
             initialStoryId={urlStoryId}
@@ -736,11 +605,9 @@ function BookV4PageContent() {
           />
         </div>
 
-        {/* Desktop: Closed book cover */}
         <div className="hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12]">
-          {/* Progress bar and controls - shown even on cover */}
           <div className="hidden md:block">
-            <DarkBookProgressBar
+            <DarkBookProgressBarV4
               pages={bookPages}
               currentPage={0}
               totalPages={bookPages.length}
@@ -759,9 +626,8 @@ function BookV4PageContent() {
             />
           </div>
 
-          {/* Closed book cover - centered */}
           <div className="flex items-center justify-center" style={{ height: "100dvh" }}>
-            <ClosedBookCover
+            <ClosedBookCoverV4
               userName={user?.name || "Your"}
               storyCount={sortedStories.length}
               onOpen={() => setIsBookOpen(true)}
@@ -774,7 +640,7 @@ function BookV4PageContent() {
 
   return (
     <>
-      {/* Mobile & Tablet: Full-screen mobile view */}
+      {/* Mobile view */}
       <div className="lg:hidden">
         <MobileBookViewV2
           initialStoryId={urlStoryId}
@@ -782,11 +648,9 @@ function BookV4PageContent() {
         />
       </div>
 
-      {/* View Mode Toggle moved to DarkBookProgressBar */}
-
-      {/* Desktop: Book view with dual-page spread */}
+      {/* Desktop: Book view */}
       <div className="hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12]">
-        {/* ARIA live region for page announcements */}
+        {/* ARIA live region */}
         <div
           id="sr-live"
           ref={liveRegionRef}
@@ -795,9 +659,9 @@ function BookV4PageContent() {
           aria-atomic="true"
         ></div>
 
-        {/* Dark Book Progress Bar - hidden on mobile */}
+        {/* Progress bar */}
         <div className="hidden md:block">
-          <DarkBookProgressBar
+          <DarkBookProgressBarV4
             pages={bookPages}
             currentPage={currentSpreadIndex * 2}
             totalPages={bookPages.length}
@@ -811,41 +675,28 @@ function BookV4PageContent() {
         </div>
 
         <div className="md:py-2 max-w-[1800px] mr-auto ml-auto pr-4 pb-12 pl-4" style={{ paddingTop: '52px' }}>
-
-          {/* Desktop: Dual-page spread */}
+          {/* Dual-page spread */}
           <div className="relative mx-auto hidden lg:flex items-center justify-center" style={{ height: "calc(100dvh - 110px)" }}>
-            {/* Clickable Navigation Zones - Left margin for previous */}
+            {/* Navigation zones */}
             <button
               onClick={goToPrevSpread}
-              disabled={currentSpreadIndex === 0}
-              className="absolute left-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
-              style={{
-                top: "60px",
-                width: "40px",
-                background: "transparent"
-              }}
-              aria-label="Previous page"
+              className="absolute left-0 bottom-0 z-40 transition-all duration-200"
+              style={{ top: "60px", width: "40px", background: "transparent" }}
+              aria-label={currentSpreadIndex === 0 ? "Return to book cover" : "Previous page"}
               onMouseEnter={(e) => {
-                if (currentSpreadIndex > 0) {
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
-                  e.currentTarget.style.cursor = "pointer";
-                }
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                e.currentTarget.style.cursor = "pointer";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = "transparent";
               }}
             />
 
-            {/* Clickable Navigation Zones - Right margin for next */}
             <button
               onClick={goToNextSpread}
               disabled={currentSpreadIndex >= spreads.length - 1}
               className="absolute right-0 bottom-0 z-40 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-0"
-              style={{
-                top: "60px",
-                width: "40px",
-                background: "transparent"
-              }}
+              style={{ top: "60px", width: "40px", background: "transparent" }}
               aria-label="Next page"
               onMouseEnter={(e) => {
                 if (currentSpreadIndex < spreads.length - 1) {
@@ -858,7 +709,7 @@ function BookV4PageContent() {
               }}
             />
 
-            {/* Book container with fixed aspect ratio: 11" x 8.5" (dual-page spread) */}
+            {/* Book container */}
             <div
               className="relative [perspective:2000px]"
               style={{
@@ -867,11 +718,11 @@ function BookV4PageContent() {
                 maxWidth: "1600px"
               }}
             >
-              {/* Ambient shadow/vignette */}
+              {/* Ambient shadow */}
               <div className="pointer-events-none absolute -inset-8 rounded-2xl bg-[radial-gradient(1000px_400px_at_50%_30%,rgba(59,130,246,0.08)_0%,rgba(59,130,246,0.04)_35%,transparent_70%)]"></div>
               <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[0_40px_120px_-30px_rgba(0,0,0,0.6)]"></div>
 
-              {/* Outer book cover/border - wider on left/right */}
+              {/* Outer book cover */}
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute rounded-[20px]"
@@ -885,8 +736,8 @@ function BookV4PageContent() {
                 }}
               ></div>
 
-              {/* Right page - RENDERED FIRST so it's on top in case of overlap */}
-              <BookPage
+              {/* Right page */}
+              <BookPageV4
                 story={currentSpread.right}
                 pageNum={currentSpreadIndex * 2 + 2}
                 onScroll={() => { }}
@@ -900,7 +751,7 @@ function BookV4PageContent() {
               />
 
               {/* Left page */}
-              <BookPage
+              <BookPageV4
                 story={currentSpread.left}
                 pageNum={currentSpreadIndex * 2 + 1}
                 onScroll={() => { }}
@@ -913,7 +764,7 @@ function BookV4PageContent() {
                 viewMode={viewMode}
               />
 
-              {/* Refined spine */}
+              {/* Spine */}
               <div className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 w-12 md:w-14 lg:w-16">
                 <div className="absolute inset-y-6 left-0 w-1/2 bg-gradient-to-r from-black/30 via-black/10 to-transparent opacity-20"></div>
                 <div className="absolute inset-y-6 right-0 w-1/2 bg-gradient-to-l from-black/30 via-black/10 to-transparent opacity-20"></div>
@@ -921,25 +772,21 @@ function BookV4PageContent() {
                 <div className="absolute inset-y-6 left-1/2 -translate-x-1/2 w-0.5 opacity-20 shadow-[inset_1px_0_0_rgba(0,0,0,0.35),0_0_0_1px_rgba(255,255,255,0.45)]"></div>
               </div>
 
-              {/* Navigation removed from center - now in bottom bar */}
+              {/* Navigation arrows */}
+              <button
+                onClick={goToPrevSpread}
+                className="group absolute bottom-0 w-14 flex items-center justify-center opacity-30 hover:opacity-100 transition-opacity duration-300"
+                style={{ zIndex: 9999, left: '-50px', top: '60px' }}
+                aria-label={currentSpreadIndex === 0 ? "Return to book cover" : "Previous page"}
+                title={currentSpreadIndex === 0 ? "Back to cover" : "Previous page"}
+              >
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-xl border border-neutral-300 group-hover:bg-white group-hover:scale-110 transition-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="m15 18-6-6 6-6"></path>
+                  </svg>
+                </div>
+              </button>
 
-              {/* Left margin click indicator - Previous page */}
-              {currentSpreadIndex > 0 && (
-                <button
-                  onClick={() => setCurrentSpreadIndex(currentSpreadIndex - 1)}
-                  className="group absolute bottom-0 w-14 flex items-center justify-center opacity-30 hover:opacity-100 transition-opacity duration-300"
-                  style={{ zIndex: 9999, left: '-50px', top: '60px' }}
-                  aria-label="Previous page"
-                >
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-xl border border-neutral-300 group-hover:bg-white group-hover:scale-110 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="m15 18-6-6 6-6"></path>
-                    </svg>
-                  </div>
-                </button>
-              )}
-
-              {/* Right margin click indicator - Next page */}
               {currentSpreadIndex < spreads.length - 1 && (
                 <button
                   onClick={() => setCurrentSpreadIndex(currentSpreadIndex + 1)}
@@ -960,13 +807,10 @@ function BookV4PageContent() {
             </div>
           </div>
 
-          {/* Mobile view is rendered at root level below */}
-
-          {/* TOC Drawer - Above Bottom Nav */}
+          {/* TOC Drawer */}
           {showToc && (
             <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[580px] max-w-[calc(100vw-3rem)]">
               <div className="rounded-2xl bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5">
-                {/* Header */}
                 <div className="px-6 py-4">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="text-lg font-semibold tracking-tight">Table of Contents</h2>
@@ -982,459 +826,55 @@ function BookV4PageContent() {
                   </div>
                 </div>
 
-                {/* Content */}
                 <div className="max-h-[60vh] space-y-6 overflow-y-auto overscroll-contain px-6 pb-6">
-                  {viewMode === 'chapters' && chapterGroups.length > 0 ? (
-                    // Chapter view - grouped by chapters
-                    <>
-                      {chapterGroups.map((group) => (
-                        <section key={group.chapter.id} className="space-y-3">
-                          {/* Group header */}
-                          <h3 className="text-sm font-semibold tracking-tight text-neutral-800 uppercase">
-                            {group.chapter.title}
-                          </h3>
-
-                          {/* Stories in this group */}
-                          <div className="divide-y divide-neutral-100 overflow-hidden rounded-xl bg-white ring-1 ring-neutral-100">
-                            {group.stories.map((story) => (
-                              <button
-                                key={story.id}
-                                onClick={() => {
-                                  handleNavigateToStory(story.id);
-                                  setShowToc(false);
-                                }}
-                                className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-neutral-50 active:bg-neutral-100"
-                              >
-                                {/* Story thumbnail */}
-                                <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md ring-1 ring-neutral-200 bg-neutral-100 flex items-center justify-center">
-                                  {story.photoUrl ? (
-                                    <img
-                                      src={story.photoUrl}
-                                      alt={story.title}
-                                      className="h-full w-full object-cover"
-                                    />
-                                  ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                                    </svg>
-                                  )}
-                                </div>
-
-                                {/* Story info */}
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-medium text-neutral-900 truncate">
-                                    {story.title}
-                                  </h4>
-                                  <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-0.5">
-                                    <span>{story.storyYear}</span>
-                                  </div>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        </section>
-                      ))}
-                    </>
-                  ) : (
-                    // Chronological view - grouped by decades
-                    <>
-                      {decadeGroups.map(([decade, stories]) => (
-                        <section key={decade} className="space-y-3">
-                          {/* Group header */}
-                          <h3 className="text-sm font-semibold tracking-tight text-neutral-800">
-                            {decade}
-                          </h3>
-
-                          {/* Stories in this group */}
-                          <div className="divide-y divide-neutral-100 overflow-hidden rounded-xl bg-white ring-1 ring-neutral-100">
-                            {stories.map((story) => (
-                              <button
-                                key={story.id}
-                                onClick={() => {
-                                  handleNavigateToStory(story.id);
-                                  setShowToc(false);
-                                }}
-                                className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-neutral-50 active:bg-neutral-100"
-                              >
-                                {/* Story thumbnail */}
-                                <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md ring-1 ring-neutral-200 bg-neutral-100 flex items-center justify-center">
-                                  {story.photoUrl ? (
-                                    <img
-                                      src={story.photoUrl}
-                                      alt={story.title}
-                                      className="h-full w-full object-cover"
-                                    />
-                                  ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                                    </svg>
-                                  )}
-                                </div>
-
-                                {/* Story info */}
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-medium text-neutral-900 truncate">
-                                    {story.title}
-                                  </h4>
-                                  <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-0.5">
-                                    <span>{story.storyYear}</span>
-                                  </div>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        </section>
-                      ))}
-                    </>
-                  )}
+                  {decadeGroups.map(([decade, stories]) => (
+                    <section key={decade} className="space-y-3">
+                      <h3 className="text-sm font-semibold tracking-tight text-neutral-800">{decade}</h3>
+                      <div className="divide-y divide-neutral-100 overflow-hidden rounded-xl bg-white ring-1 ring-neutral-100">
+                        {stories.map((story) => (
+                          <button
+                            key={story.id}
+                            onClick={() => {
+                              handleNavigateToStory(story.id);
+                              setShowToc(false);
+                            }}
+                            className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-neutral-50 active:bg-neutral-100"
+                          >
+                            <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md ring-1 ring-neutral-200 bg-neutral-100 flex items-center justify-center">
+                              {story.photoUrl ? (
+                                <img src={story.photoUrl} alt={story.title} className="h-full w-full object-cover" />
+                              ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                </svg>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-neutral-900 truncate">{story.title}</h4>
+                              <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-0.5">
+                                <span>{story.storyYear}</span>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+                  ))}
                 </div>
               </div>
             </div>
           )}
-
         </div>
       </div>
     </>
   );
 }
 
-// Left Page Component
-const LeftPage = React.forwardRef<HTMLDivElement, { story?: Story; pageNum: number; onScroll: (e: React.UIEvent<HTMLDivElement>) => void }>(
-  ({ story, pageNum, onScroll }, ref) => {
-    if (!story) {
-      return (
-        <div className="absolute inset-y-0 left-0 w-1/2 [transform-style:preserve-3d]">
-          {/* Page stack layers */}
-          <div className="absolute inset-0 translate-y-0.5 -translate-x-0.5 scale-[0.998] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] opacity-70 bg-neutral-50 ring-black/10"></div>
-          <div className="absolute inset-0 translate-y-1 -translate-x-[3px] scale-[0.996] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] opacity-55 bg-neutral-50 ring-black/10"></div>
-          <div className="-translate-x-[6px] bg-neutral-50 opacity-35 ring-black/10 ring-1 rounded-[18px] absolute top-0 right-0 bottom-0 left-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] translate-y-[6px] scale-[0.992]"></div>
-
-          {/* Main page - Empty */}
-          <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(3deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
-            <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
-              <span className="text-sm">No story</span>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="absolute inset-y-0 left-0 w-1/2 [transform-style:preserve-3d]">
-        {/* Page stack layers */}
-        <div className="absolute inset-0 translate-y-0.5 -translate-x-0.5 scale-[0.998] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] opacity-70 bg-neutral-50 ring-black/10"></div>
-        <div className="absolute inset-0 translate-y-1 -translate-x-[3px] scale-[0.996] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] opacity-55 bg-neutral-50 ring-black/10"></div>
-        <div className="-translate-x-[6px] bg-neutral-50 opacity-35 ring-black/10 ring-1 rounded-[18px] absolute top-0 right-0 bottom-0 left-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] translate-y-[6px] scale-[0.992]"></div>
-
-        {/* Main page */}
-        <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(3deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
-          {/* Paper texture/vignette */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: `
-                radial-gradient(160% 85% at 110% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
-                radial-gradient(120% 60% at -10% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%),
-                linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.85))
-              `
-            }}
-          ></div>
-          {/* Inner gutter shadow */}
-          <div className="absolute inset-y-0 right-0 w-10 pointer-events-none bg-gradient-to-l to-transparent from-black/12 via-black/6"></div>
-          {/* Outer edge lines */}
-          <div
-            className="absolute inset-y-0 left-0 w-3 pointer-events-none"
-            style={{
-              backgroundImage: "repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)",
-              opacity: 0.25
-            }}
-          ></div>
-
-          <div className="md:p-8 lg:p-10 w-full h-full pt-7 pr-7 pb-7 pl-7 relative">
-            <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden">
-              <div
-                ref={ref}
-                onScroll={onScroll}
-                className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
-              >
-                <StoryContent story={story} />
-              </div>
-            </div>
-            <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80">
-              <span className="tracking-tight">{pageNum}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-);
-LeftPage.displayName = "LeftPage";
-
-// Right Page Component
-const RightPage = React.forwardRef<HTMLDivElement, { story?: Story; pageNum: number; onScroll: (e: React.UIEvent<HTMLDivElement>) => void }>(
-  ({ story, pageNum, onScroll }, ref) => {
-    if (!story) {
-      return (
-        <div className="absolute inset-y-0 right-0 w-1/2 [transform-style:preserve-3d]">
-          {/* Page stack layers */}
-          <div className="absolute inset-0 translate-y-0.5 translate-x-0.5 scale-[0.998] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] opacity-70 bg-neutral-50 ring-black/10"></div>
-          <div className="absolute inset-0 translate-y-1 translate-x-[3px] scale-[0.996] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] opacity-55 bg-neutral-50 ring-black/10"></div>
-          <div className="absolute inset-0 translate-y-[6px] translate-x-[6px] scale-[0.992] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] opacity-35 bg-neutral-50 ring-black/10"></div>
-
-          {/* Main page - Empty */}
-          <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(-3deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
-            <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
-              <span className="text-sm">No story</span>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="absolute inset-y-0 right-0 w-1/2 [transform-style:preserve-3d]">
-        {/* Page stack layers */}
-        <div className="absolute inset-0 translate-y-0.5 translate-x-0.5 scale-[0.998] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] opacity-70 bg-neutral-50 ring-black/10"></div>
-        <div className="absolute inset-0 translate-y-1 translate-x-[3px] scale-[0.996] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] opacity-55 bg-neutral-50 ring-black/10"></div>
-        <div className="absolute inset-0 translate-y-[6px] translate-x-[6px] scale-[0.992] rounded-[18px] ring-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)] opacity-35 bg-neutral-50 ring-black/10"></div>
-
-        {/* Main page */}
-        <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(-3deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
-          {/* Paper texture/vignette */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: `
-                radial-gradient(160% 85% at -10% 50%, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0) 55%),
-                radial-gradient(120% 60% at 110% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 58%),
-                linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.85))
-              `
-            }}
-          ></div>
-          {/* Inner gutter shadow */}
-          <div className="absolute inset-y-0 left-0 w-10 pointer-events-none bg-gradient-to-r to-transparent from-black/12 via-black/6"></div>
-          {/* Outer edge lines */}
-          <div
-            className="absolute inset-y-0 right-0 w-3 pointer-events-none"
-            style={{
-              backgroundImage: "repeating-linear-gradient(270deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)",
-              opacity: 0.25
-            }}
-          ></div>
-
-          <div className="relative h-full w-full p-7 md:p-8 lg:p-10">
-            <div className="h-full w-full rounded-[14px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden">
-              <div
-                ref={ref}
-                onScroll={onScroll}
-                className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-6 overflow-y-auto"
-              >
-                <StoryContent story={story} />
-              </div>
-            </div>
-            <div className="absolute bottom-3 left-0 right-0 flex justify-between px-8 text-[12px] text-neutral-500/80">
-              <span className="tracking-tight"></span>
-              <span className="tracking-tight">{pageNum}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-);
-RightPage.displayName = "RightPage";
-
-// Story Content Component
-function StoryContent({ story }: { story: Story }) {
-  return (
-    <>
-      <div className="mb-3 flex items-center justify-between">
-        <div className="text-sm text-neutral-600">
-          {story.storyDate || story.storyYear}
-          {story.lifeAge !== undefined && ` • Age ${story.lifeAge}`}
-        </div>
-      </div>
-
-      <h2 className="text-2xl tracking-tight font-semibold mb-3 text-neutral-900">
-        {story.title}
-      </h2>
-
-      {story.photos && story.photos.length > 0 && (() => {
-        // Find the hero photo, or use the first photo as fallback
-        const heroPhoto = story.photos.find(p => p.isHero) || story.photos[0];
-        return (
-          <div className="mb-4 max-w-sm">
-            <div className="w-full aspect-[4/3] overflow-hidden rounded-md shadow ring-1 ring-black/5">
-              <img
-                src={heroPhoto.url}
-                alt={story.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {heroPhoto.caption && (
-              <p className="text-[12px] text-neutral-600 mt-1">
-                {heroPhoto.caption}
-              </p>
-            )}
-          </div>
-        );
-      })()}
-
-      <div className="text-[15.5px] leading-7 text-neutral-800/95 space-y-3">
-        {story.transcription?.split('\n\n').map((paragraph, i) => (
-          <p key={i}>{paragraph}</p>
-        ))}
-      </div>
-
-      {story.wisdomClipText && (
-        <div className="relative my-8 -mx-2 p-6 bg-white shadow-sm rotate-[0.5deg]">
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: `repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 27px,
-                #cbd5e1 27px,
-                #cbd5e1 28px
-              )`
-            }}
-          />
-          <p className={`relative text-slate-700 text-lg leading-relaxed ${caveat.className}`}>
-            {story.wisdomClipText}
-          </p>
-        </div>
-      )}
-    </>
-  );
-}
-
-// Mobile View Component
-function MobileView({
-  allPages,
-  currentPage,
-  onPageChange,
-  sortedStories
-}: {
-  allPages: Array<{ type: 'intro' | 'toc' | 'story'; story?: Story; index: number }>;
-  currentPage: number;
-  onPageChange: (index: number) => void;
-  sortedStories: Story[];
-}) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const isProgrammaticScroll = useRef(false);
-
-  // Scroll to current page when it changes
-  useEffect(() => {
-    if (scrollerRef.current) {
-      const pageWidth = scrollerRef.current.clientWidth;
-      isProgrammaticScroll.current = true;
-
-      // Use requestAnimationFrame to ensure scroll happens after render
-      requestAnimationFrame(() => {
-        if (scrollerRef.current) {
-          scrollerRef.current.scrollTo({
-            left: currentPage * pageWidth,
-            behavior: 'smooth'
-          });
-
-          // Reset flag after scroll completes
-          setTimeout(() => {
-            isProgrammaticScroll.current = false;
-          }, 500);
-        }
-      });
-    }
-  }, [currentPage]);
-
-  // Detect page change from scroll (throttled for performance)
-  const handleScroll = useCallback(() => {
-    // Ignore scroll events triggered by programmatic scrolling
-    if (isProgrammaticScroll.current || !scrollerRef.current) return;
-
-    const pageWidth = scrollerRef.current.clientWidth;
-    const scrollLeft = scrollerRef.current.scrollLeft;
-    const newPage = Math.round(scrollLeft / pageWidth);
-
-    if (newPage !== currentPage && newPage >= 0 && newPage < allPages.length) {
-      onPageChange(newPage);
-    }
-  }, [currentPage, allPages.length, onPageChange]);
-
-  const handlePrev = () => {
-    if (currentPage > 0) {
-      onPageChange(currentPage - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPage < allPages.length - 1) {
-      onPageChange(currentPage + 1);
-    }
-  };
-
-  return (
-    <div className="lg:hidden w-full" style={{ marginTop: '-10px' }}>
-      <div className="relative w-full flex items-center justify-center" style={{ height: 'calc(100dvh - 80px)', minHeight: 'calc(100dvh - 80px)' }}>
-        {/* Mobile prev/next controls */}
-        {/* Left edge clickable zone */}
-        <button
-          onClick={handlePrev}
-          disabled={currentPage === 0}
-          className="absolute left-0 top-0 bottom-0 z-20 disabled:cursor-not-allowed"
-          style={{ width: '20px' }}
-          aria-label="Previous page"
-        />
-        {/* Right edge clickable zone */}
-        <button
-          onClick={handleNext}
-          disabled={currentPage === allPages.length - 1}
-          className="absolute right-0 top-0 bottom-0 z-20 disabled:cursor-not-allowed"
-          style={{ width: '20px' }}
-          aria-label="Next page"
-        />
-
-        <div
-          ref={scrollerRef}
-          onScroll={handleScroll}
-          className="h-full w-full flex items-start md:items-center justify-center overflow-x-scroll hide-scrollbar -mt-[26px] md:mt-0"
-          style={{
-            scrollSnapType: 'x mandatory',
-            scrollSnapStop: 'always',
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehaviorX: 'contain',
-            touchAction: 'pan-x pan-y',
-            zIndex: 10,
-            position: 'relative'
-          }}
-        >
-          {allPages.map((page, index) => (
-            <div
-              key={index}
-              className="shrink-0 flex items-center justify-center"
-              style={{
-                minWidth: '100%',
-                width: '100%',
-                height: '100%',
-                padding: '0',
-                scrollSnapAlign: 'center',
-                scrollSnapStop: 'always'
-              }}
-            >
-              <MobilePage page={page} pageNum={index + 1} allStories={sortedStories} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Closed Book Cover Component
-function ClosedBookCover({
+/**
+ * Closed Book Cover V4 - Premium version with sepia accent colors
+ */
+function ClosedBookCoverV4({
   userName,
   storyCount,
   onOpen
@@ -1449,12 +889,10 @@ function ClosedBookCover({
       aspectRatio: "5.5 / 8.5",
       maxWidth: "800px"
     }}>
-      {/* Ambient shadow - no border, just glow */}
       <div className="pointer-events-none absolute -inset-12 bg-[radial-gradient(600px_300px_at_50%_60%,rgba(0,0,0,0.4)_0%,transparent_70%)]"></div>
 
-      {/* Book cover with spine */}
       <div className="relative w-full h-full">
-        {/* Book spine (left edge) */}
+        {/* Book spine */}
         <div
           className="absolute left-0 top-0 bottom-0 rounded-l-lg pointer-events-none"
           style={{
@@ -1464,13 +902,12 @@ function ClosedBookCover({
             borderRight: '1px solid rgba(0,0,0,0.4)',
           }}
         >
-          {/* Spine ridges */}
           <div className="absolute inset-y-8 left-1/2 -translate-x-1/2 w-0.5 bg-black/20"></div>
           <div className="absolute inset-y-8 left-1/3 w-px bg-black/15"></div>
           <div className="absolute inset-y-8 right-1/3 w-px bg-black/15"></div>
         </div>
 
-        {/* Main cover button */}
+        {/* Cover button */}
         <button
           onClick={onOpen}
           className="relative w-full h-full cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.99]"
@@ -1481,7 +918,7 @@ function ClosedBookCover({
           }}
           aria-label="Open book"
         >
-          {/* Leather grain texture */}
+          {/* Leather texture */}
           <div
             className="absolute inset-0 opacity-40 pointer-events-none"
             style={{
@@ -1491,7 +928,7 @@ function ClosedBookCover({
             }}
           ></div>
 
-          {/* Subtle highlight along edges */}
+          {/* Highlights */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -1500,7 +937,7 @@ function ClosedBookCover({
             }}
           ></div>
 
-          {/* Vignette for depth */}
+          {/* Vignette */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -1509,7 +946,7 @@ function ClosedBookCover({
             }}
           ></div>
 
-          {/* Book crease shadow (where the book opens) */}
+          {/* Crease shadow */}
           <div
             className="absolute top-0 bottom-0 left-0 pointer-events-none"
             style={{
@@ -1518,7 +955,7 @@ function ClosedBookCover({
             }}
           ></div>
 
-          {/* Embossed border frame (like real book covers) */}
+          {/* Embossed frame */}
           <div
             className="absolute pointer-events-none"
             style={{
@@ -1538,7 +975,7 @@ function ClosedBookCover({
               className="text-4xl md:text-5xl lg:text-6xl font-serif mb-6 tracking-tight"
               style={{
                 fontFamily: "Crimson Text, serif",
-                color: "#d4af87",
+                color: "var(--book-accent, #8B7355)",
                 textShadow: "0 3px 6px rgba(0,0,0,0.9), 0 -1px 2px rgba(255,255,255,0.1)",
                 fontWeight: 600,
               }}
@@ -1546,483 +983,41 @@ function ClosedBookCover({
               {userName}&apos;s<br />Story
             </h1>
 
-            <div className="w-32 h-0.5 mb-6" style={{ background: "linear-gradient(90deg, transparent, #d4af87, transparent)" }}></div>
+            <div className="w-32 h-0.5 mb-6" style={{ background: "linear-gradient(90deg, transparent, var(--book-accent, #8B7355), transparent)" }}></div>
 
-            <p className="text-xl md:text-2xl font-medium" style={{ color: "#c4a87a", textShadow: "0 2px 4px rgba(0,0,0,0.7)" }}>
+            <p className="text-xl md:text-2xl font-medium" style={{ color: "var(--book-accent-light, rgba(139, 115, 85, 0.8))", textShadow: "0 2px 4px rgba(0,0,0,0.7)" }}>
               {storyCount} {storyCount === 1 ? 'memory' : 'memories'}
             </p>
 
             <div className="mt-12 px-5 py-2 rounded-full border" style={{
-              backgroundColor: "rgba(212, 175, 135, 0.08)",
-              borderColor: "rgba(212, 175, 135, 0.25)"
+              backgroundColor: "rgba(139, 115, 85, 0.08)",
+              borderColor: "rgba(139, 115, 85, 0.25)"
             }}>
-              <p className="text-sm font-medium" style={{ color: "#d4af87" }}>
+              <p className="text-sm font-medium" style={{ color: "var(--book-accent, #8B7355)" }}>
                 Tap to open
               </p>
             </div>
           </div>
 
-          {/* Decorative embossed corner accents inside the border */}
-          <div className="absolute top-14 left-14 w-8 h-8 border-l border-t rounded-tl" style={{ borderColor: "rgba(212, 175, 135, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
-          <div className="absolute top-14 right-14 w-8 h-8 border-r border-t rounded-tr" style={{ borderColor: "rgba(212, 175, 135, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
-          <div className="absolute bottom-14 left-14 w-8 h-8 border-l border-b rounded-bl" style={{ borderColor: "rgba(212, 175, 135, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
-          <div className="absolute bottom-14 right-14 w-8 h-8 border-r border-b rounded-br" style={{ borderColor: "rgba(212, 175, 135, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
+          {/* Corner accents */}
+          <div className="absolute top-14 left-14 w-8 h-8 border-l border-t rounded-tl" style={{ borderColor: "rgba(139, 115, 85, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
+          <div className="absolute top-14 right-14 w-8 h-8 border-r border-t rounded-tr" style={{ borderColor: "rgba(139, 115, 85, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
+          <div className="absolute bottom-14 left-14 w-8 h-8 border-l border-b rounded-bl" style={{ borderColor: "rgba(139, 115, 85, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
+          <div className="absolute bottom-14 right-14 w-8 h-8 border-r border-b rounded-br" style={{ borderColor: "rgba(139, 115, 85, 0.25)", filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.6))" }}></div>
         </button>
       </div>
     </div>
   );
 }
 
-// Mobile Audio Player Component
-function MobileAudioPlayer({ story }: { story: Story }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // Initialize audio element on mount - ONLY ONCE per story
-  useEffect(() => {
-    if (!story.audioUrl) return;
-    if (audioRef.current) {
-      return;
-    }
-
-    const audio = new Audio(story.audioUrl);
-    audio.preload = 'auto';
-    audioRef.current = audio;
-
-    const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
-    };
-
-    const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-    };
-
-    const handleEnded = () => {
-      setIsPlaying(false);
-      setCurrentTime(0);
-    };
-
-    const handlePause = () => {
-      setIsPlaying(false);
-    };
-
-    const handlePlay = () => {
-      setIsPlaying(true);
-    };
-
-    const handleError = (err: Event) => {
-      console.error(`Mobile audio error for ${story.title}:`, err);
-      if (audio.error) {
-        console.error('Error code:', audio.error.code);
-      }
-      setIsLoading(false);
-    };
-
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('error', handleError);
-
-    return () => {
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('error', handleError);
-      audio.pause();
-      audio.src = '';
-      audioRef.current = null;
-    };
-    // Only re-run when story.id changes, not when other story properties change.
-    // This prevents recreating the audio element unnecessarily which would cause playback issues.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [story.id]);
-
-  const toggleAudio = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!audioRef.current) return;
-
-    try {
-      // Stop other audio elements first
-      const allAudioElements = document.querySelectorAll('audio');
-      allAudioElements.forEach(audio => {
-        if (audio !== audioRef.current) {
-          audio.pause();
-        }
-      });
-
-      if (audioRef.current.paused) {
-        setIsLoading(true);
-        await audioRef.current.play();
-        setIsLoading(false);
-      } else {
-        audioRef.current.pause();
-      }
-    } catch (error) {
-      console.error('Mobile audio playback error:', error);
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="mb-3">
-      <div className="flex items-center gap-2.5">
-        <button
-          onClick={toggleAudio}
-          className="relative flex-shrink-0 hover:scale-105 transition-transform"
-          aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-        >
-          <svg className="w-9 h-9 -rotate-90">
-            <circle
-              cx="18"
-              cy="18"
-              r="14"
-              fill="none"
-              stroke="rgba(139,107,122,0.15)"
-              strokeWidth="2"
-            />
-            {isPlaying && (
-              <circle
-                cx="18"
-                cy="18"
-                r="14"
-                fill="none"
-                stroke="rgba(139,107,122,0.5)"
-                strokeWidth="2"
-                strokeDasharray={`${2 * Math.PI * 14}`}
-                strokeDashoffset={`${2 * Math.PI * 14 * (1 - progress / 100)}`}
-                strokeLinecap="round"
-                className="transition-all duration-300"
-              />
-            )}
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            {isLoading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-neutral-600" />
-            ) : isPlaying ? (
-              <Pause className="w-3.5 h-3.5 text-neutral-600 fill-neutral-600" />
-            ) : (
-              <Volume2 className="w-3.5 h-3.5 text-neutral-600" />
-            )}
-          </div>
-        </button>
-
-        <div className="flex-1">
-          <div
-            className="h-1.5 bg-neutral-200 rounded-full overflow-hidden cursor-pointer hover:h-2 transition-all"
-            onClick={(e) => {
-              if (!audioRef.current || !duration) return;
-
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const percentage = x / rect.width;
-              const newTime = percentage * duration;
-
-              audioRef.current.currentTime = newTime;
-              setCurrentTime(newTime);
-            }}
-          >
-            <div
-              className="h-full bg-neutral-400 transition-all duration-100 pointer-events-none"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
-
-        <span className="text-[11px] text-neutral-500 whitespace-nowrap tabular-nums">
-          {formatTime(currentTime)} / {formatTime(duration)}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// Mobile Page Component  
-function MobilePage({
-  page,
-  pageNum,
-  allStories
-}: {
-  page: { type: 'intro' | 'toc' | 'story'; story?: Story; index: number };
-  pageNum: number;
-  allStories: Story[];
-}) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
-
-  // Check if content is scrollable and track user scroll
-  useEffect(() => {
-    const checkScroll = () => {
-      if (scrollRef.current) {
-        const isScrollable = scrollRef.current.scrollHeight > scrollRef.current.clientHeight + 5;
-        setShowScrollIndicator(isScrollable);
-      }
-    };
-
-    checkScroll();
-    setTimeout(checkScroll, 500); // Recheck after content loads
-
-    return () => { };
-  }, [page]);
-
-  const handleScrollClick = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ top: 300, behavior: 'smooth' });
-      setShowScrollIndicator(false);
-    }
-  };
-  // Intro page
-  if (page.type === 'intro') {
-    return (
-      <div className="mobile-page relative mx-auto [perspective:1600px]" style={{
-        width: "100%",
-        height: "100%",
-        maxWidth: "calc(100vw + 20px)",
-        maxHeight: "calc(100dvh - 100px)",
-        aspectRatio: "5.5 / 8.5",
-        objectFit: "contain",
-        pointerEvents: 'none'
-      }}>
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute rounded-[24px]"
-          style={{
-            inset: "-5px",
-            background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)",
-            boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)"
-          }}
-        ></div>
-        <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
-          <div className="relative h-full w-full p-2 flex items-center justify-center">
-            <div className="text-center space-y-6">
-              <h1 className="text-4xl font-serif text-gray-800" style={{ fontFamily: "Crimson Text, serif" }}>
-                Family Memories
-              </h1>
-              <div className="w-20 h-1 bg-indigo-500 mx-auto"></div>
-              <p className="text-base text-gray-600 leading-relaxed italic px-4">
-                A collection of cherished moments, stories, and lessons from a life well-lived.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // TOC page
-  if (page.type === 'toc') {
-    return (
-      <div className="mobile-page relative mx-auto [perspective:1600px]" style={{
-        width: "100%",
-        height: "100%",
-        maxWidth: "calc(100vw + 20px)",
-        maxHeight: "calc(100dvh - 100px)",
-        aspectRatio: "5.5 / 8.5",
-        objectFit: "contain",
-        pointerEvents: 'none'
-      }}>
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute rounded-[24px]"
-          style={{
-            inset: "-5px",
-            background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)",
-            boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)"
-          }}
-        ></div>
-        <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
-          <div className="relative h-full w-full p-2">
-            <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden">
-              <div className="h-full w-full rounded-[12px] text-neutral-900 outline-none p-3 overflow-y-auto">
-                <h1 className="text-3xl font-serif text-center mb-6 text-gray-800">
-                  Table of Contents
-                </h1>
-                <div className="space-y-3">
-                  {allStories.map((storyItem) => (
-                    <div
-                      key={storyItem.id}
-                      className="text-sm border-b border-gray-200 pb-2"
-                    >
-                      <div className="font-medium text-gray-700">{storyItem.title}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">
-                        {storyItem.storyDate || storyItem.storyYear}
-                        {storyItem.lifeAge !== undefined && ` • Age ${storyItem.lifeAge}`}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Story page
-  const story = page.story;
-  if (!story) return null;
-
-  return (
-    <div className="mobile-page relative mx-auto [perspective:1600px]" style={{
-      width: "100%",
-      height: "100%",
-      maxWidth: "calc(100vw + 20px)",
-      maxHeight: "calc(100dvh - 100px)",
-      aspectRatio: "5.5 / 8.5",
-      objectFit: "contain",
-      pointerEvents: 'none'
-    }}>
-      {/* Outer book cover/border */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute rounded-[24px]"
-        style={{
-          inset: "-5px",
-          background: "linear-gradient(180deg, #2e1f14 0%, #1f150d 100%)",
-          boxShadow: "0 18px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.04)"
-        }}
-      ></div>
-
-      <div className="absolute inset-0 translate-y-[5px] -translate-x-[5px] scale-[0.994] rounded-[18px] ring-1 opacity-35 bg-neutral-50 ring-black/10"></div>
-      <div className="relative h-full w-full rounded-[20px] ring-1 shadow-2xl overflow-hidden [transform:rotateY(2.2deg)_translateZ(0.001px)] ring-black/15 bg-neutral-50">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              radial-gradient(120% 65% at 110% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 60%),
-              linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.9))
-            `
-          }}
-        ></div>
-        <div className="absolute inset-y-0 right-0 w-8 pointer-events-none bg-gradient-to-l to-transparent from-black/10 via-black/5"></div>
-        <div
-          className="absolute inset-y-0 left-0 w-3 pointer-events-none"
-          style={{
-            backgroundImage: "repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px)",
-            opacity: 0.22
-          }}
-        ></div>
-
-        <div className="relative h-full w-full p-2">
-          <div className="h-full w-full rounded-[14px] ring-1 ring-black/5 bg-white/60 overflow-hidden relative">
-            <div
-              ref={scrollRef}
-              className="js-flow h-full w-full rounded-[12px] text-neutral-900 outline-none p-3 overflow-y-auto relative z-0"
-              style={{
-                overscrollBehavior: 'contain',
-                pointerEvents: 'auto'
-              }}
-              onScroll={() => {
-                if (scrollRef.current && scrollRef.current.scrollTop > 50) {
-                  setShowScrollIndicator(false);
-                }
-              }}
-            >
-              {/* Photo first if available */}
-              {story.photos && story.photos.length > 0 && (() => {
-                // Find the hero photo, or use the first photo as fallback
-                const heroPhoto = story.photos.find(p => p.isHero) || story.photos[0];
-                return (
-                  <div className="mb-3">
-                    <div className="w-full aspect-[4/3] overflow-hidden rounded-md shadow ring-1 ring-black/5">
-                      <img
-                        src={heroPhoto.url}
-                        alt={story.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Title */}
-              <h2 className="mb-2.5 text-[19px] tracking-tight font-semibold text-neutral-900">
-                {story.title}
-              </h2>
-
-              {/* Age and year */}
-              <div className="text-[13px] text-neutral-600 mb-3">
-                {story.lifeAge !== undefined && `Age ${story.lifeAge} • `}
-                {story.storyDate || story.storyYear}
-              </div>
-
-              {/* Audio Player - Mobile */}
-              {story.audioUrl && <MobileAudioPlayer story={story} />}
-
-              {/* Story text */}
-              <div className="text-[14.5px] leading-6 text-neutral-800/95 space-y-2.5">
-                {story.transcription?.split('\n\n').map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
-                ))}
-              </div>
-
-              {/* Lesson learned */}
-              {story.wisdomClipText && (
-                <div className="relative my-8 -mx-2 p-6 bg-white shadow-sm rotate-[0.5deg] clear-both">
-                  <div
-                    className="absolute inset-0 opacity-10"
-                    style={{
-                      backgroundImage: `repeating-linear-gradient(
-                        0deg,
-                        transparent,
-                        transparent 27px,
-                        #cbd5e1 27px,
-                        #cbd5e1 28px
-                      )`
-                    }}
-                  />
-                  <p className={`relative text-slate-700 text-lg leading-relaxed ${caveat.className}`}>
-                    {story.wisdomClipText}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile scroll indicator */}
-            {showScrollIndicator && (
-              <ScrollIndicator
-                show={true}
-                position="right"
-                contentType="book"
-                onScrollClick={handleScrollClick}
-              />
-            )}
-          </div>
-          <div className="absolute bottom-3 left-0 right-0 px-6 text-right text-[12px] text-neutral-500/80">
-            {pageNum}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Wrapper component with Suspense boundary
+// Main export with Suspense wrapper
 export default function BookV4Page() {
   return (
     <Suspense fallback={
       <div className="hw-page bg-[#0b0d12] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
-          <p className="text-slate-300">Loading your stories...</p>
+          <p className="text-slate-300">Loading...</p>
         </div>
       </div>
     }>
