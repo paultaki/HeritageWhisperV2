@@ -173,10 +173,17 @@ export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
 
     // Common page wrapper with premium styling
     const PageWrapper = ({ children, showTexture = true }: { children: React.ReactNode; showTexture?: boolean }) => (
-      <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
+      <div
+        ref={pageRef}
+        className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}
+        style={{
+          zIndex: position === "right" ? 50 : 40,
+          pointerEvents: 'none',
+        }}
+      >
         <div
           className={`relative h-full w-full rounded-[var(--book-radius)] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15`}
-          style={{ background: 'var(--book-paper)' }}
+          style={{ background: 'var(--book-paper)', pointerEvents: 'auto' }}
         >
           {/* Paper texture overlay */}
           {showTexture && <PaperTexture />}
@@ -771,7 +778,7 @@ function AddStoryPrompt({ isOwnAccount = true }: { isOwnAccount?: boolean }) {
   const router = useRouter();
 
   const handleRecordClick = () => {
-    router.push('/');
+    router.push('/recording');
   };
 
   return (
