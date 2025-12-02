@@ -401,7 +401,7 @@ export default function MobileBookViewV2({
         className="relative z-10 flex h-[100dvh] w-screen snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth"
         style={{
           scrollSnapType: "x mandatory",
-          touchAction: "pan-x",
+          touchAction: "pan-x pan-y", // Allow both horizontal swipe and vertical scroll within pages
         }}
       >
         {bookPages.map((page, index) => (

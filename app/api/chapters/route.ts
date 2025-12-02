@@ -46,8 +46,30 @@ export async function GET(request: NextRequest) {
             userId = user.id;
         }
 
+        // Get storyteller_id for family sharing (default to authenticated user)
+        const { searchParams } = new URL(request.url);
+        const storytellerId = searchParams.get("storyteller_id") || userId;
+
+        // Check family sharing access if viewing another user's chapters
+        if (storytellerId !== userId) {
+            const { data: hasAccess } = await supabaseAdmin.rpc(
+                "has_collaboration_access",
+                {
+                    p_user_id: userId,
+                    p_storyteller_id: storytellerId,
+                }
+            );
+
+            if (!hasAccess) {
+                return NextResponse.json(
+                    { error: "Access denied" },
+                    { status: 403 }
+                );
+            }
+        }
+
         const userChapters = await db.query.chapters.findMany({
-            where: eq(chapters.userId, userId),
+            where: eq(chapters.userId, storytellerId),
             orderBy: [asc(chapters.orderIndex)],
             with: {
                 stories: {
@@ -59,7 +81,7 @@ export async function GET(request: NextRequest) {
         // Fetch orphaned stories (stories without a chapter)
         const orphanedStories = await db.query.stories.findMany({
             where: (stories, { and, eq, isNull }) => and(
-                eq(stories.userId, userId),
+                eq(stories.userId, storytellerId),
                 isNull(stories.chapterId)
             ),
             orderBy: [asc(stories.storyDate)] // Default to chronological for unorganized
