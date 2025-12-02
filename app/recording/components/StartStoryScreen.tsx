@@ -79,15 +79,15 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
             onClick={() => onSelectMode("photo_audio")}
             className="w-full bg-white rounded-2xl py-4 px-5 active:scale-[0.98] transition-transform shadow-sm"
           >
-            <div className="flex items-center gap-4 mb-2">
+            <div className="flex items-center justify-center gap-4 mb-2">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#E8E8E8" }}>
                 <img src="/camera-icon.svg" alt="" className="w-8 h-8" />
               </div>
-              <h3 className="font-semibold text-lg flex-1 text-left" style={{ color: "#2C3E50" }}>
+              <h3 className="font-semibold text-lg" style={{ color: "#2C3E50" }}>
                 Record with photo
               </h3>
             </div>
-            <p className="text-base hw-text-center" style={{ color: "#6B7280", margin: 0, width: "100%", display: "block" }}>
+            <p className="text-base text-center" style={{ color: "#6B7280", margin: 0, width: "100%", display: "block" }}>
               Choose a photo, then tell its story.
             </p>
           </button>
@@ -97,15 +97,15 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
             onClick={() => onSelectMode("audio")}
             className="w-full bg-white rounded-2xl py-4 px-5 active:scale-[0.98] transition-transform shadow-sm"
           >
-            <div className="flex items-center gap-4 mb-2">
+            <div className="flex items-center justify-center gap-4 mb-2">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#E8E8E8" }}>
                 <img src="/mic-icon.svg" alt="" className="w-8 h-8" />
               </div>
-              <h3 className="font-semibold text-lg flex-1 text-left" style={{ color: "#2C3E50" }}>
+              <h3 className="font-semibold text-lg" style={{ color: "#2C3E50" }}>
                 Start recording
               </h3>
             </div>
-            <p className="text-base hw-text-center" style={{ color: "#6B7280", margin: 0, width: "100%", display: "block" }}>
+            <p className="text-base text-center" style={{ color: "#6B7280", margin: 0, width: "100%", display: "block" }}>
               Start now. Add photos any time.
             </p>
           </button>

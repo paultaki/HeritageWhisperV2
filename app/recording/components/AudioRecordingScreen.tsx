@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Pause, Play, Square, Mic, Loader2 } from "lucide-react";
+import { ArrowLeft, Pause, Play, Square, Mic, Loader2, Upload } from "lucide-react";
 import { type AudioRecordingScreenProps, type RecordingState } from "../types";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import "../recording.css";
@@ -32,6 +32,7 @@ export function AudioRecordingScreen({
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Image dimensions for portrait detection
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
@@ -260,6 +261,86 @@ export function AudioRecordingScreen({
     cleanup();
   };
 
+  // Handle audio file upload
+  const handleAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave', 'audio/ogg', 'audio/mp4', 'audio/m4a', 'audio/webm', 'audio/x-m4a'];
+    if (!validTypes.some(type => file.type.includes(type.split('/')[1]))) {
+      alert('Please upload a valid audio file (MP3, WAV, M4A, OGG, or WebM)');
+      return;
+    }
+
+    // Check size (25MB max for OpenAI Whisper)
+    const MAX_SIZE = 25 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert(`Audio file is too large. Maximum size is 25MB, your file is ${(file.size / 1024 / 1024).toFixed(1)}MB`);
+      return;
+    }
+
+    setRecordingState("processing");
+    setIsProcessing(true);
+
+    try {
+      // Get audio duration using Audio element
+      const audioUrl = URL.createObjectURL(file);
+      const audio = new Audio(audioUrl);
+
+      const duration = await new Promise<number>((resolve) => {
+        audio.addEventListener('loadedmetadata', () => {
+          resolve(Math.round(audio.duration));
+        });
+        audio.addEventListener('error', () => {
+          resolve(0); // Default to 0 if we can't get duration
+        });
+      });
+
+      URL.revokeObjectURL(audioUrl);
+
+      // Create FormData and send to transcribe API
+      const formData = new FormData();
+      formData.append("audio", file, file.name);
+
+      const response = await fetch("/api/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        const completeDraft = {
+          ...draft,
+          title: data.title || draft.title || "Untitled Story",
+          audioBlob: file,
+          durationSeconds: duration || data.duration,
+          recordingMode: (draft.photoUrl ? "photo_audio" : "audio") as "photo_audio" | "audio",
+          transcription: data.transcription,
+          lessonOptions: data.lessonOptions,
+        };
+
+        onFinishAndReview(completeDraft as any);
+      } else {
+        const errorData = await response.text();
+        console.error("Transcription failed:", errorData);
+        alert("Failed to process audio file. Please try again.");
+        setRecordingState("idle");
+      }
+    } catch (error) {
+      console.error("Error processing uploaded audio:", error);
+      alert("Error processing audio file. Please try again.");
+      setRecordingState("idle");
+    } finally {
+      setIsProcessing(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const cleanup = () => {
     stopTimer();
     if (animationFrameRef.current) {
@@ -470,9 +551,9 @@ export function AudioRecordingScreen({
           </div>
         )}
 
-        {/* Text Option - hidden in overlay mode */}
+        {/* Text & Upload Options - hidden in overlay mode */}
         {isIdle && !isOverlayMode && (
-          <div className="text-center mb-6">
+          <div className="flex items-center justify-center gap-6 mb-6">
             <button
               onClick={onSwitchToText}
               className="text-base font-medium"
@@ -480,6 +561,22 @@ export function AudioRecordingScreen({
             >
               Prefer to type instead?
             </button>
+            <span className="text-stone-300">|</span>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="text-base font-medium flex items-center gap-2"
+              style={{ color: "#2C3E50" }}
+            >
+              <Upload className="w-4 h-4" />
+              Upload audio
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="audio/*,.mp3,.wav,.m4a,.ogg,.webm"
+              onChange={handleAudioUpload}
+              className="hidden"
+            />
           </div>
         )}
 

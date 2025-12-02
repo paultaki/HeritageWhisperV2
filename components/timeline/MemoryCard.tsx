@@ -25,7 +25,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Pause, Volume2, Plus } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Pause, Volume2, Plus, ImagePlus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { normalizeYear, formatYear } from "@/lib/utils";
 import { getTopTraits } from "@/utils/getTopTraits";
@@ -514,12 +514,6 @@ export const MemoryCard = React.memo(
                 )}
               </div>
 
-
-
-              // ... (existing imports)
-
-              // Inside MemoryCard component:
-
               {/* Right: Action button (Standard Read/Play only) */}
               {!customActionLabel && (
                 <div className="flex-shrink-0">
@@ -616,6 +610,21 @@ export const MemoryCard = React.memo(
         >
           {/* Get current photo for V2 carousel or fallback to displayPhoto */}
           {(() => {
+            // Check if this is a ghost story (starter template)
+            const isGhostStory = !!(story as any).templateId || (story as any).userId === 'ghost-user';
+
+            // For ghost stories, show placeholder instead of photo
+            if (isGhostStory) {
+              return (
+                <div className="relative w-full aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200 flex flex-col items-center justify-center text-center hw-card-media">
+                  <div className="w-16 h-16 rounded-full bg-stone-300/50 flex items-center justify-center mb-2">
+                    <ImagePlus className="w-9 h-9 text-stone-500" strokeWidth={1.5} />
+                  </div>
+                  <p className="text-lg text-stone-500 font-semibold">Add your photo</p>
+                </div>
+              );
+            }
+
             const currentPhoto = useV2Features && sortedPhotos.length > 0
               ? sortedPhotos[currentPhotoIndex]
               : null;

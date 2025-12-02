@@ -14,7 +14,7 @@ export default function GlassNavWrapper() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isQuestionDialogOpen, setIsQuestionDialogOpen] = useState(false);
-  const { activeContext } = useAccountContext();
+  const { activeContext, isLoading: isContextLoading } = useAccountContext();
   const isOwnAccount = activeContext?.type === 'own';
 
   // Determine default ink based on page context
@@ -43,6 +43,11 @@ export default function GlassNavWrapper() {
 
   // Don't show glass nav on these pages
   if (isLandingPage || isInterviewChat || isAuthPage || isRecordingPage || isReviewPage) {
+    return null;
+  }
+
+  // Don't render until account context is loaded to prevent flash of wrong nav
+  if (isContextLoading) {
     return null;
   }
 

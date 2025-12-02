@@ -503,10 +503,10 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         >
           {/* Ghost Placeholder - 4:3 aspect ratio with gray background and icon */}
           <div className="relative w-full aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200 flex flex-col items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-stone-300/50 flex items-center justify-center mb-3">
-              <ImagePlus className="w-8 h-8 text-stone-400" strokeWidth={1.5} />
+            <div className="w-16 h-16 rounded-full bg-stone-300/50 flex items-center justify-center mb-2 mt-10">
+              <ImagePlus className="w-9 h-9 text-stone-500" strokeWidth={1.5} />
             </div>
-            <p className="text-sm text-stone-400 font-medium">Add your photo</p>
+            <p className="text-lg text-stone-500 font-semibold mt-[30px]">Add your photo</p>
           </div>
 
           {/* Card Content Section */}
