@@ -538,7 +538,7 @@ export function AudioRecordingScreen({
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#2C3E50" }} />
                   Processing...
                 </>
               ) : (
