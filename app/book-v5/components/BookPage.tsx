@@ -189,7 +189,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
 
             <div className="relative h-full w-full p-[24px] md:p-[28px] lg:p-[32px]">
               <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] flex items-center justify-center"
-                style={{ background: `${COLORS.page}cc`, ringColor: 'rgba(32, 57, 84, 0.05)' }}
+                style={{ background: `${COLORS.page}cc`, '--tw-ring-color': 'rgba(32, 57, 84, 0.05)' }}
               >
                 <div className="text-center space-y-8 p-8 w-full flex flex-col items-center">
                   <h1
@@ -296,7 +296,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/8 via-black/4`}></div>
 
             <div className="relative h-full w-full p-[24px] md:p-[28px] lg:p-[32px]" style={{ pointerEvents: 'auto' }}>
-              <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px]" style={{ background: `${COLORS.page}cc`, ringColor: 'rgba(32, 57, 84, 0.05)', pointerEvents: 'auto' }}>
+              <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px]" style={{ background: `${COLORS.page}cc`, '--tw-ring-color': 'rgba(32, 57, 84, 0.05)', pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
                   onScroll={(e) => {
@@ -379,7 +379,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
             <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-10 pointer-events-none z-10 bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/8 via-black/4`}></div>
 
             <div className="relative h-full w-full p-[24px] md:p-[28px] lg:p-[32px]" style={{ pointerEvents: 'auto' }}>
-              <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px]" style={{ background: `${COLORS.page}cc`, ringColor: 'rgba(32, 57, 84, 0.05)', pointerEvents: 'auto' }}>
+              <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px]" style={{ background: `${COLORS.page}cc`, '--tw-ring-color': 'rgba(32, 57, 84, 0.05)', pointerEvents: 'auto' }}>
                 <div
                   ref={ref}
                   onScroll={(e) => {
@@ -451,7 +451,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
               <div className={`absolute inset-y-0 ${position === "left" ? "right-0" : "left-0"} w-8 pointer-events-none z-[1] bg-gradient-to-${position === "left" ? "l" : "r"} to-transparent from-black/6 via-black/3`}></div>
 
               <div className="relative h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] overflow-hidden z-10"
-                style={{ background: `${COLORS.page}cc`, ringColor: 'rgba(32, 57, 84, 0.05)' }}
+                style={{ background: `${COLORS.page}cc`, '--tw-ring-color': 'rgba(32, 57, 84, 0.05)' }}
               >
                 <DecadeIntroPage
                   decade={story.decade}
@@ -554,7 +554,7 @@ export const BookPage = React.forwardRef<HTMLDivElement, BookPageProps>(
 
           <div className="relative h-full w-full p-[24px] md:p-[28px] lg:p-[32px]" style={{ zIndex: 10 }}>
             <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] overflow-hidden" 
-              style={{ position: 'relative', zIndex: 15, background: `${COLORS.page}cc`, ringColor: 'rgba(32, 57, 84, 0.05)' }}
+              style={{ position: 'relative', zIndex: 15, background: `${COLORS.page}cc`, '--tw-ring-color': 'rgba(32, 57, 84, 0.05)' }}
             >
               <div
                 ref={ref}

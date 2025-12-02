@@ -167,7 +167,7 @@ export default function SimpleMobileBookView({
             className="h-8 w-8 rounded-full ring-1 grid place-items-center text-sm font-medium"
             style={{ 
               background: "rgba(203, 164, 106, 0.15)",
-              ringColor: "rgba(203, 164, 106, 0.3)",
+              '--tw-ring-color': "rgba(203, 164, 106, 0.3)",
               color: "#CBA46A"
             }}
           >
@@ -188,7 +188,7 @@ export default function SimpleMobileBookView({
             className="pointer-events-auto rounded-full p-2 backdrop-blur-sm ring-1 active:scale-[0.98] transition flex items-center justify-center"
             style={{
               background: "rgba(203, 164, 106, 0.1)",
-              ringColor: "rgba(203, 164, 106, 0.25)",
+              '--tw-ring-color': "rgba(203, 164, 106, 0.25)",
               color: "#CBA46A"
             }}
             aria-label="Edit"
@@ -200,7 +200,7 @@ export default function SimpleMobileBookView({
             className="pointer-events-auto rounded-full p-2 backdrop-blur-sm ring-1 active:scale-[0.98] transition flex items-center justify-center"
             style={{
               background: "rgba(203, 164, 106, 0.1)",
-              ringColor: "rgba(203, 164, 106, 0.25)",
+              '--tw-ring-color': "rgba(203, 164, 106, 0.25)",
               color: "#CBA46A"
             }}
             aria-label="Open contents"
@@ -238,7 +238,7 @@ export default function SimpleMobileBookView({
           style={{
             background: "rgba(253, 251, 247, 0.2)",
             color: "#fdfbf7",
-            ringColor: "rgba(253, 251, 247, 0.3)"
+            '--tw-ring-color': "rgba(253, 251, 247, 0.3)"
           }}
           aria-label="Previous"
         >
@@ -252,7 +252,7 @@ export default function SimpleMobileBookView({
           style={{
             background: "rgba(253, 251, 247, 0.2)",
             color: "#fdfbf7",
-            ringColor: "rgba(253, 251, 247, 0.3)"
+            '--tw-ring-color': "rgba(253, 251, 247, 0.3)"
           }}
           aria-label="Next"
         >
@@ -334,7 +334,7 @@ function StoryPage({
         style={{ 
           background: "#fdfbf7",
           color: "#2d2a26",
-          ringColor: "rgba(139, 107, 74, 0.1)"
+          '--tw-ring-color': "rgba(139, 107, 74, 0.1)"
         }}
       >
         {/* Subtle inner edge */}
@@ -349,7 +349,7 @@ function StoryPage({
               style={{ 
                 aspectRatio: "4/3",
                 background: "white",
-                ringColor: "rgba(139, 107, 74, 0.15)"
+                '--tw-ring-color': "rgba(139, 107, 74, 0.15)"
               }}
               onClick={() => setLightboxOpen(true)}
               role="button"
@@ -439,7 +439,7 @@ function StoryPage({
                 style={{
                   background: "white",
                   color: "#3d2e1f",
-                  ringColor: "rgba(139, 107, 74, 0.2)"
+                  '--tw-ring-color': "rgba(139, 107, 74, 0.2)"
                 }}
               >
                 <span className="text-sm font-medium">Continue reading</span>
@@ -596,7 +596,7 @@ function TOCSheet({
           style={{
             background: "#fdfbf7",
             color: "#2d2a26",
-            ringColor: "rgba(139, 107, 74, 0.1)"
+            '--tw-ring-color': "rgba(139, 107, 74, 0.1)"
           }}
         >
           <div className="flex items-center justify-between px-4 py-3">
@@ -621,8 +621,8 @@ function TOCSheet({
                   className="divide-y rounded-xl ring-1 overflow-hidden"
                   style={{ 
                     background: "white",
-                    divideColor: "rgba(139, 107, 74, 0.1)",
-                    ringColor: "rgba(139, 107, 74, 0.1)"
+                    '--tw-divide-color': "rgba(139, 107, 74, 0.1)",
+                    '--tw-ring-color': "rgba(139, 107, 74, 0.1)"
                   }}
                 >
                   {stories.map((story) => {
@@ -640,7 +640,7 @@ function TOCSheet({
                           <img
                             src={photoUrl}
                             className="h-10 w-10 rounded-md object-cover ring-1"
-                            style={{ ringColor: "rgba(139, 107, 74, 0.15)" }}
+                            style={{ '--tw-ring-color': "rgba(139, 107, 74, 0.15)" }}
                             alt=""
                           />
                         )}

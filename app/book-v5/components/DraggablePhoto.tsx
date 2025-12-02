@@ -146,7 +146,7 @@ export function DraggablePhoto({
               src={photoUrl}
               alt={caption || "Story photo"}
               className="rounded-md shadow ring-1 select-none w-full book-v5-photo"
-              style={{ ringColor: 'rgba(32, 57, 84, 0.1)' }}
+              style={{ '--tw-ring-color': 'rgba(32, 57, 84, 0.1)' }}
               draggable={false}
             />
           </div>

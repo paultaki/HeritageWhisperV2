@@ -932,7 +932,7 @@ function BookV5PageContent() {
           {/* TOC Drawer - Above Bottom Nav */}
           {showToc && (
             <div className="fixed bottom-[100px] md:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[580px] max-w-[calc(100vw-3rem)]">
-              <div className="rounded-2xl shadow-2xl ring-1" style={{ background: 'var(--hw-page-bg, #F7F2EC)', color: 'var(--hw-text-primary, #1F1F1F)', ringColor: 'rgba(0,0,0,0.05)' }}>
+              <div className="rounded-2xl shadow-2xl ring-1" style={{ background: 'var(--hw-page-bg, #F7F2EC)', color: 'var(--hw-text-primary, #1F1F1F)', '--tw-ring-color': 'rgba(0,0,0,0.05)' }}>
                 {/* Header */}
                 <div className="px-6 py-4">
                   <div className="flex items-center justify-between mb-3">
@@ -963,7 +963,7 @@ function BookV5PageContent() {
                           </h3>
 
                           {/* Stories in this group */}
-                          <div className="divide-y overflow-hidden rounded-xl ring-1" style={{ background: 'white', divideColor: 'var(--hw-border-subtle, #D2C9BD)', ringColor: 'var(--hw-border-subtle, #D2C9BD)' }}>
+                          <div className="divide-y overflow-hidden rounded-xl ring-1" style={{ background: 'white', '--tw-divide-color': 'var(--hw-border-subtle, #D2C9BD)', '--tw-ring-color': 'var(--hw-border-subtle, #D2C9BD)' }}>
                             {group.stories.map((story) => (
                               <button
                                 key={story.id}
@@ -975,7 +975,7 @@ function BookV5PageContent() {
                                 style={{ background: 'transparent' }}
                               >
                                 {/* Story thumbnail */}
-                                <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md ring-1 flex items-center justify-center" style={{ background: 'var(--hw-section-bg, #EFE6DA)', ringColor: 'var(--hw-border-subtle, #D2C9BD)' }}>
+                                <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md ring-1 flex items-center justify-center" style={{ background: 'var(--hw-section-bg, #EFE6DA)', '--tw-ring-color': 'var(--hw-border-subtle, #D2C9BD)' }}>
                                   {story.photoUrl ? (
                                     <img
                                       src={story.photoUrl}
@@ -1016,7 +1016,7 @@ function BookV5PageContent() {
                           </h3>
 
                           {/* Stories in this group */}
-                          <div className="divide-y overflow-hidden rounded-xl ring-1" style={{ background: 'white', divideColor: 'var(--hw-border-subtle, #D2C9BD)', ringColor: 'var(--hw-border-subtle, #D2C9BD)' }}>
+                          <div className="divide-y overflow-hidden rounded-xl ring-1" style={{ background: 'white', '--tw-divide-color': 'var(--hw-border-subtle, #D2C9BD)', '--tw-ring-color': 'var(--hw-border-subtle, #D2C9BD)' }}>
                             {stories.map((story) => (
                               <button
                                 key={story.id}
@@ -1028,7 +1028,7 @@ function BookV5PageContent() {
                                 style={{ background: 'transparent' }}
                               >
                                 {/* Story thumbnail */}
-                                <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md ring-1 flex items-center justify-center" style={{ background: 'var(--hw-section-bg, #EFE6DA)', ringColor: 'var(--hw-border-subtle, #D2C9BD)' }}>
+                                <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md ring-1 flex items-center justify-center" style={{ background: 'var(--hw-section-bg, #EFE6DA)', '--tw-ring-color': 'var(--hw-border-subtle, #D2C9BD)' }}>
                                   {story.photoUrl ? (
                                     <img
                                       src={story.photoUrl}
