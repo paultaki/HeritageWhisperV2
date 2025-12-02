@@ -10,7 +10,9 @@ import { QuestionOptions } from "./components/QuestionOptions";
 import { TypingIndicator } from "./components/TypingIndicator";
 import { ChatInput } from "./components/ChatInput";
 import { StorySplitModal } from "./components/StorySplitModal";
+import { ThemeSelector } from "./components/ThemeSelector";
 import { useRealtimeInterview } from "@/hooks/use-realtime-interview";
+import { type InterviewTheme, getFirstMainPrompt } from "@/lib/interviewThemes";
 import {
   completeConversationAndRedirect,
   extractQAPairs,
@@ -77,6 +79,12 @@ export default function InterviewChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [followUpCount, setFollowUpCount] = useState(0);
+
+  // Interview phase tracking (research-backed warm-up flow)
+  type InterviewPhase = 'theme_selection' | 'warmup' | 'main';
+  const [interviewPhase, setInterviewPhase] = useState<InterviewPhase>('theme_selection');
+  const [selectedTheme, setSelectedTheme] = useState<InterviewTheme | null>(null);
+  const [warmUpIndex, setWarmUpIndex] = useState(0); // Track which warm-up question we're on
 
   // Story Mode state
   const [showSplitModal, setShowSplitModal] = useState(false);
@@ -356,6 +364,15 @@ export default function InterviewChatPage() {
   // Initialize conversation after welcome dismissed
   const handleWelcomeDismiss = () => {
     setShowWelcome(false);
+    // Show theme selector (don't start session yet)
+    setInterviewPhase('theme_selection');
+  };
+
+  // Handle theme selection - start the warm-up phase
+  const handleThemeSelect = (theme: InterviewTheme) => {
+    setSelectedTheme(theme);
+    setInterviewPhase('warmup');
+    setWarmUpIndex(0);
 
     // Start session timer
     setSessionStartTime(Date.now());
@@ -371,24 +388,71 @@ export default function InterviewChatPage() {
     const greeting: Message = {
       id: `msg-${Date.now()}`,
       type: 'system',
-      content: `Welcome, ${user?.name?.split(' ')[0] || 'friend'}! I'm Pearl, your Heritage Whisper guide. Let's begin your interview.`,
+      content: `Welcome, ${user?.name?.split(' ')[0] || 'friend'}! I'm Pearl, your Heritage Whisper guide. Let's explore "${theme.title}" together.`,
       timestamp: new Date(),
       sender: 'system',
     };
 
     setMessages([greeting]);
 
-    // Add first question after brief delay
+    // Add first warm-up question after brief delay
     setTimeout(() => {
-      addFirstQuestion();
+      addWarmUpQuestion(theme, 0);
     }, 800);
   };
 
-  const addFirstQuestion = () => {
+  // Add a warm-up question (ice-breaker)
+  const addWarmUpQuestion = (theme: InterviewTheme, index: number) => {
+    const warmUpQuestions = theme.warmUpQuestions;
+    if (index >= warmUpQuestions.length) {
+      // All warm-up done, transition to main interview
+      transitionToMainInterview(theme);
+      return;
+    }
+
+    const warmUpMsg: Message = {
+      id: `msg-warmup-${Date.now()}`,
+      type: 'question',
+      content: warmUpQuestions[index],
+      timestamp: new Date(),
+      sender: 'hw',
+    };
+
+    setMessages(prev => [...prev, warmUpMsg]);
+    setWarmUpIndex(index);
+  };
+
+  // Transition from warm-up to main interview
+  const transitionToMainInterview = (theme: InterviewTheme) => {
+    setInterviewPhase('main');
+
+    // Add transition message
+    const transitionMsg: Message = {
+      id: `msg-transition-${Date.now()}`,
+      type: 'system',
+      content: "Wonderful! Now let's dive a little deeper...",
+      timestamp: new Date(),
+      sender: 'system',
+    };
+
+    setMessages(prev => [...prev, transitionMsg]);
+
+    // Add first main question
+    setTimeout(() => {
+      addFirstQuestion(theme);
+    }, 1000);
+  };
+
+  // Add the first main interview question (themed)
+  const addFirstQuestion = (theme?: InterviewTheme) => {
+    const questionContent = theme
+      ? getFirstMainPrompt(theme.id)
+      : 'Tell me about a moment that changed how you saw yourself.';
+
     const firstQuestion: Message = {
       id: `msg-${Date.now()}`,
       type: 'question',
-      content: 'Tell me about a moment that changed how you saw yourself.',
+      content: questionContent,
       timestamp: new Date(),
       sender: 'hw',
     };
@@ -412,11 +476,28 @@ export default function InterviewChatPage() {
 
         setMessages(prev => [...prev, userMessage]);
 
-        // Show typing indicator and generate follow-up
-        addTypingIndicator();
-        setTimeout(async () => {
-          await generateFollowUpQuestions(text); // Pass the current response text for context
-        }, 1500);
+        // Handle based on interview phase
+        if (interviewPhase === 'warmup' && selectedTheme) {
+          // Progress to next warm-up question or transition to main
+          const nextIndex = warmUpIndex + 1;
+          if (nextIndex < selectedTheme.warmUpQuestions.length) {
+            // More warm-up questions to go
+            setTimeout(() => {
+              addWarmUpQuestion(selectedTheme, nextIndex);
+            }, 1000);
+          } else {
+            // Warm-up complete, transition to main interview
+            setTimeout(() => {
+              transitionToMainInterview(selectedTheme);
+            }, 1000);
+          }
+        } else {
+          // Main interview - show typing indicator and generate follow-up
+          addTypingIndicator();
+          setTimeout(async () => {
+            await generateFollowUpQuestions(text); // Pass the current response text for context
+          }, 1500);
+        }
       }
     }
     // Provisional transcripts are displayed in ChatInput component
@@ -522,13 +603,27 @@ export default function InterviewChatPage() {
       }));
     }
 
-    // Show typing indicator
-    addTypingIndicator();
-
-    // Generate follow-up questions
-    setTimeout(async () => {
-      await generateFollowUpQuestions(text); // Pass the current response text for context
-    }, 1500);
+    // Handle based on interview phase
+    if (interviewPhase === 'warmup' && selectedTheme) {
+      // Progress to next warm-up question or transition to main
+      const nextIndex = warmUpIndex + 1;
+      setIsProcessing(false);
+      if (nextIndex < selectedTheme.warmUpQuestions.length) {
+        setTimeout(() => {
+          addWarmUpQuestion(selectedTheme, nextIndex);
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          transitionToMainInterview(selectedTheme);
+        }, 1000);
+      }
+    } else {
+      // Main interview - show typing indicator and generate follow-up
+      addTypingIndicator();
+      setTimeout(async () => {
+        await generateFollowUpQuestions(text);
+      }, 1500);
+    }
   };
 
   // Add typing indicator (only if not already present)
@@ -730,8 +825,17 @@ export default function InterviewChatPage() {
         />
       )}
 
+      {/* Theme Selector - shown after welcome, before interview starts */}
+      {!showWelcome && interviewPhase === 'theme_selection' && (
+        <ThemeSelector
+          userName={user?.name}
+          onSelectTheme={handleThemeSelect}
+        />
+      )}
+
       {/* Chat Container - adjust height to account for bottom nav on mobile */}
-      <div className="max-w-3xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 80px)', marginBottom: '80px' }}>
+      {/* Hide when showing theme selector */}
+      <div className={`max-w-3xl mx-auto flex flex-col ${interviewPhase === 'theme_selection' && !showWelcome ? 'hidden' : ''}`} style={{ height: 'calc(100vh - 80px)', marginBottom: '80px' }}>
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-2 sm:py-4">
           {/* Mobile Layout - stacked when complete button is visible */}

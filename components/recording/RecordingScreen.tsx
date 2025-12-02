@@ -198,9 +198,9 @@ export function RecordingScreen(props: RecordingScreenProps) {
               </TooltipTrigger>
               <TooltipContent className="max-w-[280px]">
                 <div className="space-y-2">
-                  <p className="font-semibold">AI recording is disabled</p>
+                  <p className="font-semibold">Recording is disabled</p>
                   <p className="text-sm text-muted-foreground">
-                    Enable AI processing in Settings to use voice recording and transcription.
+                    Enable Whisper Storyteller in Settings to use voice recording and transcription.
                   </p>
                   <Button
                     size="sm"
@@ -233,7 +233,7 @@ export function RecordingScreen(props: RecordingScreenProps) {
             {!props.isAIEnabled && !props.isAILoading ? (
               <>
                 <Settings className="w-4 h-4" />
-                <span>Enable AI in Settings</span>
+                <span>Enable Whisper Storyteller in Settings</span>
               </>
             ) : (
               <>

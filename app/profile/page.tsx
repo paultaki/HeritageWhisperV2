@@ -544,7 +544,7 @@ export default function Profile() {
               <h3 className="font-semibold text-lg mb-2">Need a hand?</h3>
               <ul className="space-y-1 text-base leading-relaxed">
                 <li>• Update your photo, bio, and contact preferences here.</li>
-                <li>• Toggle AI features if you want manual-only storytelling.</li>
+                <li>• Toggle Whisper Storyteller features if you want manual-only storytelling.</li>
                 <li>• Export your entire archive or print-ready book PDFs.</li>
                 <li>• Scroll to the bottom for account deletion and logout.</li>
               </ul>
@@ -1090,7 +1090,7 @@ export default function Profile() {
                     Enable Storyteller Features
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    When enabled, AI transcribes your recordings. When disabled, you can still type stories manually.
+                    When enabled, Whisper Storyteller transcribes your recordings. When disabled, you can still type stories manually.
                   </p>
                   <div className="mt-3 pt-2 border-t">
                     <p className="text-sm font-medium text-gray-700 mb-2">What happens when disabled:</p>

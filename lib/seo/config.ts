@@ -23,7 +23,7 @@ export const SEO_CONFIG = {
 
   /** Default meta description */
   defaultDescription:
-    'An AI-powered storytelling platform for seniors to capture and share life memories with family. Record unlimited stories with voice, AI transcribes, family listens anywhere.',
+    'A voice-powered storytelling platform for seniors to capture and share life memories with family. Record unlimited stories, Whisper Storyteller transcribes, family listens anywhere.',
 
   /** Default OG image path (relative to public/) */
   defaultOgImage: '/og/default.png',
@@ -35,7 +35,7 @@ export const SEO_CONFIG = {
     url: 'https://heritagewhisper.com',
     logoUrl: 'https://heritagewhisper.com/logo.png',
     description:
-      'AI-powered storytelling platform for preserving family memories through voice recording.',
+      'Voice-powered storytelling platform for preserving family memories through voice recording.',
     foundingDate: '2024',
     sameAs: [] as string[],
   },
@@ -44,7 +44,7 @@ export const SEO_CONFIG = {
   product: {
     name: 'HeritageWhisper',
     description:
-      'Record, transcribe, and share family stories with AI-powered voice storytelling. Preserve your family legacy forever.',
+      'Record, transcribe, and share family stories with voice-powered storytelling. Preserve your family legacy forever.',
     applicationCategory: 'LifestyleApplication',
     operatingSystem: 'Web',
     priceRange: 'Free - $79/year',

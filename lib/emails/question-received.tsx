@@ -96,7 +96,7 @@ export function QuestionReceivedEmail({
                 <strong>About Family Questions</strong>
               </p>
               <p style="margin: 0 0 20px; font-size: 14px; color: #6B7280; line-height: 1.6;">
-                Family members with access to your Heritage Whisper account can submit questions they'd like you to answer. These prompts appear alongside AI-generated questions to help you capture the stories that matter most to your family.
+                Family members with access to your Heritage Whisper account can submit questions they'd like you to answer. These prompts appear alongside Whisper Storyteller questions to help you capture the stories that matter most to your family.
               </p>
 
               <p style="margin: 0; font-size: 13px; color: #9CA3AF; line-height: 1.5;">
@@ -137,7 +137,7 @@ ${answersPageLink}
 ---
 
 About Family Questions:
-Family members with access to your Heritage Whisper account can submit questions they'd like you to answer. These prompts appear alongside AI-generated questions to help you capture the stories that matter most to your family.
+Family members with access to your Heritage Whisper account can submit questions they'd like you to answer. These prompts appear alongside Whisper Storyteller questions to help you capture the stories that matter most to your family.
 
 You're receiving this email because a family member submitted a question for you. You can manage your notification preferences in your profile settings.
 

@@ -8,7 +8,7 @@ export default function PricingSection() {
   const freeFeatures = [
     'Unlimited voice recordings',
     'Unlimited photos & memories',
-    'AI-powered story transcription',
+    'Whisper Storyteller transcription',
     'Beautiful timeline & book views',
     'Wisdom extraction from stories',
     'Memory box for treasures',

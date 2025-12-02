@@ -77,7 +77,7 @@ function GiftPageContent() {
   const features = [
     'One full year of HeritageWhisper Premium',
     'Unlimited story recordings',
-    'AI-guided prompts and follow-up questions',
+    'Guided prompts and follow-up questions',
     'Share with unlimited family members',
     'Timeline and book views',
     'Download stories anytime',

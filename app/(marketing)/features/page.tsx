@@ -6,7 +6,7 @@ import { loadAllMDXContent } from '@/lib/mdx/loader';
 export const metadata = buildPageMetadata({
   title: 'Features - HeritageWhisper Story Preservation',
   description:
-    'Discover HeritageWhisper features: voice recording, AI transcription, family sharing, book creation, and more. Everything you need to preserve family stories.',
+    'Discover HeritageWhisper features: voice recording, automatic transcription, family sharing, book creation, and more. Everything you need to preserve family stories.',
   path: '/features',
 });
 
@@ -54,7 +54,7 @@ export default function FeaturesPage() {
                 prompts
               </li>
               <li>
-                <strong>AI Transcription</strong> - Automatic speech-to-text for
+                <strong>Whisper Storyteller Transcription</strong> - Automatic speech-to-text for
                 all recordings
               </li>
               <li>
