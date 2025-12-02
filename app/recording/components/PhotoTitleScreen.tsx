@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Plus, ZoomIn, ZoomOut, RefreshCw, Trash2 } from "lucide-react";
 import * as Slider from "@radix-ui/react-slider";
 import { type PhotoTitleScreenProps } from "../types";
@@ -34,6 +34,18 @@ export function PhotoTitleScreen({
   // Drag and drop state
   const [isDragOver, setIsDragOver] = useState(false);
 
+  // Continue button highlight state (after user adds photo)
+  const [showContinueHighlight, setShowContinueHighlight] = useState(false);
+  const [continueHighlightDismissed, setContinueHighlightDismissed] = useState(false);
+
+  // Dismiss highlight handler
+  const dismissContinueHighlight = useCallback(() => {
+    if (showContinueHighlight) {
+      setShowContinueHighlight(false);
+      setContinueHighlightDismissed(true);
+    }
+  }, [showContinueHighlight]);
+
   // Measure image dimensions when photo URL changes and save to draft
   useEffect(() => {
     if (draft.photoUrl) {
@@ -54,6 +66,25 @@ export function PhotoTitleScreen({
       setImageDimensions(null);
     }
   }, [draft.photoUrl]);
+
+  // Show Continue highlight after photo is added and editing is done
+  useEffect(() => {
+    if (draft.photoUrl && !isEditingPhoto && !continueHighlightDismissed) {
+      // Small delay to let user see the saved photo first
+      const timer = setTimeout(() => setShowContinueHighlight(true), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [draft.photoUrl, isEditingPhoto, continueHighlightDismissed]);
+
+  // Auto-dismiss highlight after 5 seconds
+  useEffect(() => {
+    if (!showContinueHighlight) return;
+    const timer = setTimeout(() => {
+      setShowContinueHighlight(false);
+      setContinueHighlightDismissed(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [showContinueHighlight]);
 
   // Always use contain to show full image - blur fills any empty space
   // This works for both portrait AND wide landscape images
@@ -459,8 +490,13 @@ export function PhotoTitleScreen({
           Back
         </button>
         <button
-          onClick={handleContinue}
-          className="flex-1 px-4 py-3 rounded-xl font-medium text-base text-white"
+          onClick={() => {
+            dismissContinueHighlight();
+            handleContinue();
+          }}
+          className={`flex-1 px-4 py-3 rounded-xl font-medium text-base text-white ${
+            showContinueHighlight && !continueHighlightDismissed ? "gentle-field-highlight" : ""
+          }`}
           style={{ backgroundColor: "#2C3E50" }}
         >
           Continue
