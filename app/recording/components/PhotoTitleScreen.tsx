@@ -8,8 +8,8 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import "../recording.css";
 
 /**
- * PhotoTitleScreen - Collect photo + title before recording
- * Matches heritage-whisper-recorder reference design exactly
+ * PhotoTitleScreen - Collect optional photo before recording
+ * Title is collected later on the review screen
  */
 export function PhotoTitleScreen({
   draft,
@@ -18,7 +18,6 @@ export function PhotoTitleScreen({
   onContinue,
   onCancel,
 }: PhotoTitleScreenProps) {
-  const [titleError, setTitleError] = useState<string>("");
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,6 +30,9 @@ export function PhotoTitleScreen({
 
   // Image dimensions for portrait detection
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
+
+  // Drag and drop state
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // Measure image dimensions when photo URL changes and save to draft
   useEffect(() => {
@@ -55,14 +57,6 @@ export function PhotoTitleScreen({
 
   // Always use contain to show full image - blur fills any empty space
   // This works for both portrait AND wide landscape images
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const title = e.target.value;
-    onChange({ ...draft, title });
-    if (titleError && title.trim()) {
-      setTitleError("");
-    }
-  };
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -90,11 +84,50 @@ export function PhotoTitleScreen({
     setEditTransform({ zoom: 1, position: { x: 0, y: 0 } });
   };
 
-  const handleContinue = () => {
-    if (!draft.title?.trim()) {
-      setTitleError("Please enter a title for your story");
+  // Drag and drop handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please drop an image file");
       return;
     }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Image must be smaller than 10MB");
+      return;
+    }
+
+    const photoUrl = URL.createObjectURL(file);
+    onChange({
+      ...draft,
+      photoUrl,
+      photoFile: file,
+    });
+
+    // Enter editing mode after photo drop
+    setIsEditingPhoto(true);
+    setEditTransform({ zoom: 1, position: { x: 0, y: 0 } });
+  };
+
+  const handleContinue = () => {
     onContinue();
   };
 
@@ -236,38 +269,14 @@ export function PhotoTitleScreen({
       {/* Content */}
       <div className="flex-1 px-6 pt-6 pb-24" style={{ maxWidth: "600px", margin: "0 auto" }}>
         <h2 className="font-serif font-semibold text-3xl mb-6 hw-text-center" style={{ color: "#2C3E50" }}>
-          Capture this memory
+          Add a Photo
         </h2>
-
-        {/* Title Card */}
-        <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
-          <label className="block text-base font-semibold mb-3 hw-text-center" style={{ color: "#2C3E50" }}>
-            Story title
-          </label>
-          <input
-            type="text"
-            value={draft.title || ""}
-            onChange={handleTitleChange}
-            placeholder="Grandma's first apartment"
-            className="w-full px-4 py-3 rounded-xl text-base"
-            style={{
-              backgroundColor: "#F5F1ED",
-              border: "none",
-              color: "#2C3E50"
-            }}
-            maxLength={100}
-            autoFocus
-          />
-          {titleError && (
-            <p className="text-sm mt-2 hw-text-center" style={{ color: "#DC2626" }}>{titleError}</p>
-          )}
-        </div>
 
         {/* Photo Card */}
         <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <h3 className="text-base font-semibold mb-3 hw-text-center" style={{ color: "#2C3E50" }}>
-            Add a photo (optional)
-          </h3>
+          <p className="text-sm mb-3 hw-text-center" style={{ color: "#6B7280" }}>
+            Optional - you can skip this step
+          </p>
 
           {draft.photoUrl ? (
             isEditingPhoto ? (
@@ -404,14 +413,28 @@ export function PhotoTitleScreen({
           ) : (
             <button
               onClick={handlePhotoClick}
-              className="w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center py-12"
-              style={{ borderColor: "#D1D5DB", backgroundColor: "#FAFAFA" }}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className="w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center py-12 transition-all duration-200"
+              style={{
+                borderColor: isDragOver ? "#2C3E50" : "#D1D5DB",
+                backgroundColor: isDragOver ? "#E8F4F8" : "#FAFAFA",
+                transform: isDragOver ? "scale(1.02)" : "scale(1)"
+              }}
             >
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3" style={{ backgroundColor: "#E5E7EB" }}>
-                <Plus className="w-8 h-8" style={{ color: "#6B7280" }} />
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center mb-3 transition-colors duration-200"
+                style={{ backgroundColor: isDragOver ? "#2C3E50" : "#E5E7EB" }}
+              >
+                <Plus className="w-8 h-8 transition-colors duration-200" style={{ color: isDragOver ? "#FFFFFF" : "#6B7280" }} />
               </div>
-              <p className="text-base" style={{ color: "#6B7280" }}>
-                Tap to choose a photo
+              <p className="text-base" style={{ color: isDragOver ? "#2C3E50" : "#6B7280" }}>
+                {isDragOver ? "Drop your photo here" : "Tap to choose a photo"}
+              </p>
+              <p className="text-sm mt-1 hidden md:block" style={{ color: "#9CA3AF" }}>
+                or drag and drop an image
               </p>
             </button>
           )}

@@ -5,7 +5,6 @@ const navLinks = [
   { href: '#pricing', label: 'Pricing' },
   { href: '#founder-story', label: 'Our Story' },
   { href: '#faq', label: 'FAQ' },
-  { href: '/contact', label: 'Contact' },
 ]
 
 const legalLinks = [

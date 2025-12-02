@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: "How is this different from StoryWorth?",
-    answer: "StoryWorth sends weekly email prompts and prints a book after 12 months. HeritageWhisper captures voice—not just text—with follow-up questions that draw out deeper memories. Your family can listen immediately, and there's no subscription.",
+    answer: "StoryWorth sends weekly email prompts and prints a book after 12 months. HeritageWhisper captures voice—not just text—so your family can hear the stories in your loved one's own voice. Plus, it's a living digital book that continues to grow with every new memory, not a one-time print that sits on a shelf.",
   },
   {
     question: "Can I share with my family?",

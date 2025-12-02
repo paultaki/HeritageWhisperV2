@@ -173,7 +173,7 @@ function UpgradePageContent() {
                 </div>
                 <div>
                   <h4 className="font-semibold">Everything Free Users Get</h4>
-                  <p className="text-gray-600">Unlimited recordings, AI transcription, lessons learned extraction - all included</p>
+                  <p className="text-gray-600">Unlimited recordings, Whisper Storyteller transcription, lessons learned extraction - all included</p>
                 </div>
               </div>
             </div>
@@ -242,7 +242,7 @@ function UpgradePageContent() {
               </div>
               <div className="flex items-center gap-2 text-green-600">
                 <Check className="h-4 w-4" />
-                <span>AI transcription</span>
+                <span>Whisper Storyteller transcription</span>
               </div>
             </CardContent>
           </Card>
@@ -273,7 +273,7 @@ function UpgradePageContent() {
               </div>
               <div className="flex items-center gap-2 text-green-600">
                 <Check className="h-4 w-4" />
-                <span>AI transcription</span>
+                <span>Whisper Storyteller transcription</span>
               </div>
             </CardContent>
           </Card>

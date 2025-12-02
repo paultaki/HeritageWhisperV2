@@ -5,7 +5,7 @@ const steps = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
       </svg>
     ),
-    label: 'Open the App',
+    label: 'Open the Website',
   },
   {
     icon: (
@@ -76,8 +76,7 @@ export default function TechObjection() {
 
         {/* Subtext */}
         <p className="text-base md:text-lg text-[var(--hw-text-secondary)] max-w-[50ch] mx-auto">
-          No accounts to manage. No passwords to remember. No complicated uploads.
-          Just press record and talk.
+          Just press record and talk. Easily invite family members to see and hear your stories.
         </p>
       </div>
     </section>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Pencil, Menu, ChevronLeft, ChevronRight, BookOpen, X, Play, Pause, ChevronDown } from "lucide-react";
 import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
+import { PhotoLightbox, type LightboxPhoto } from "@/components/PhotoLightbox";
 
 // Story interface matching your API structure
 interface Story {
@@ -270,6 +271,10 @@ function StoryPage({
   const heroPhoto = story.photos?.find((p) => p.isHero) || story.photos?.[0];
   const photoUrl = heroPhoto?.url || story.photoUrl || "https://images.unsplash.com/photo-1621619856624-42fd193a0661?w=1080&q=80";
 
+  // Photo lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const photos = story.photos || [];
+
   // Check if content is scrollable
   useEffect(() => {
     const checkScroll = () => {
@@ -316,8 +321,18 @@ function StoryPage({
           {/* Header image */}
           <div className="px-3 pt-4">
             <div
-              className="overflow-hidden rounded-3xl ring-1 ring-stone-200 shadow-sm bg-white relative"
+              className="overflow-hidden rounded-3xl ring-1 ring-stone-200 shadow-sm bg-white relative cursor-pointer group"
               style={{ aspectRatio: "4/3" }}
+              onClick={() => setLightboxOpen(true)}
+              role="button"
+              tabIndex={0}
+              aria-label={`View ${story.title} photo in full screen`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setLightboxOpen(true);
+                }
+              }}
             >
               <StoryPhotoWithBlurExtend
                 src={photoUrl}
@@ -326,9 +341,29 @@ function StoryPage({
                 height={heroPhoto?.height}
                 transform={heroPhoto?.transform || story.photoTransform}
                 aspectRatio={4 / 3}
-                className="w-full h-full"
+                className="w-full h-full transition-all duration-200 group-hover:brightness-105 group-hover:scale-[1.02]"
               />
             </div>
+
+            {/* Photo Lightbox */}
+            <PhotoLightbox
+              photos={photos.length > 0 ? photos.map(p => ({
+                url: p.url || '',
+                caption: p.caption,
+                transform: p.transform,
+                width: p.width,
+                height: p.height,
+              })) as LightboxPhoto[] : [{
+                url: photoUrl,
+                transform: heroPhoto?.transform || story.photoTransform,
+                width: heroPhoto?.width,
+                height: heroPhoto?.height,
+              }]}
+              initialIndex={0}
+              isOpen={lightboxOpen}
+              onClose={() => setLightboxOpen(false)}
+              alt={story.title}
+            />
           </div>
 
           {/* Content */}

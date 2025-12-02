@@ -1030,6 +1030,37 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     }
   }, [storiesData]);
 
+  // Scroll Position Persistence (Session Memory)
+  // Restore scroll position on mount
+  useEffect(() => {
+    const savedPosition = sessionStorage.getItem("timeline-scroll-position");
+    if (savedPosition) {
+      const position = parseInt(savedPosition, 10);
+      // Wait for DOM to be ready, then restore position
+      setTimeout(() => {
+        window.scrollTo({ top: position, behavior: "instant" });
+      }, 100);
+    }
+  }, []);
+
+  // Save scroll position as user scrolls (throttled)
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const saveScrollPosition = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        sessionStorage.setItem("timeline-scroll-position", window.scrollY.toString());
+      }, 150);
+    };
+
+    window.addEventListener("scroll", saveScrollPosition, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", saveScrollPosition);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
   // Animate progress line on scroll
   useEffect(() => {
     if (!timelineContainerRef.current || !progressLineRef.current) return;

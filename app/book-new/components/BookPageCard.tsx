@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 import { BookPageCardProps } from "./types";
 import BookAudioPlayer from "./BookAudioPlayer";
 import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
+import { PhotoLightbox, type LightboxPhoto } from "@/components/PhotoLightbox";
 
 /**
  * Format a date string or ISO date to readable format
@@ -44,6 +45,10 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const hasMultiplePhotos = photos.length > 1;
+
+  // Photo lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const currentPhoto = photos[currentPhotoIndex];
   const photoUrl = currentPhoto?.url;
   const photoTransform = currentPhoto?.transform;
@@ -208,11 +213,27 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
           {/* Header image with carousel */}
           <div className="px-3 pt-0">
             <div
-              className="relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-stone-200"
+              className="relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-stone-200 cursor-pointer group"
               style={{ aspectRatio: "4/3" }}
               onTouchStart={hasMultiplePhotos ? handlePhotoTouchStart : undefined}
               onTouchMove={hasMultiplePhotos ? handlePhotoTouchMove : undefined}
               onTouchEnd={hasMultiplePhotos ? handlePhotoTouchEnd : undefined}
+              onClick={() => {
+                if (photoUrl) {
+                  setLightboxIndex(currentPhotoIndex);
+                  setLightboxOpen(true);
+                }
+              }}
+              role="button"
+              tabIndex={photoUrl ? 0 : undefined}
+              aria-label={photoUrl ? `View ${story.title} photo in full screen` : undefined}
+              onKeyDown={(e) => {
+                if (photoUrl && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  setLightboxIndex(currentPhotoIndex);
+                  setLightboxOpen(true);
+                }
+              }}
             >
               {photoUrl ? (
                 <StoryPhotoWithBlurExtend
@@ -222,7 +243,7 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
                   width={photoWidth}
                   height={photoHeight}
                   aspectRatio={4 / 3}
-                  className="h-full w-full"
+                  className="h-full w-full transition-all duration-200 group-hover:brightness-105 group-hover:scale-[1.02]"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
@@ -241,7 +262,10 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
               {hasMultiplePhotos && (
                 <>
                   <button
-                    onClick={handlePrevPhoto}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrevPhoto(e);
+                    }}
                     className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-black/40 hover:bg-black/60 active:bg-black/70 rounded-full flex items-center justify-center text-white transition-all"
                     aria-label="Previous photo"
                   >
@@ -250,7 +274,10 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
                     </svg>
                   </button>
                   <button
-                    onClick={handleNextPhoto}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextPhoto(e);
+                    }}
                     className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-black/40 hover:bg-black/60 active:bg-black/70 rounded-full flex items-center justify-center text-white transition-all"
                     aria-label="Next photo"
                   >
@@ -261,6 +288,23 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
                 </>
               )}
             </div>
+
+            {/* Photo Lightbox */}
+            {photos.length > 0 && (
+              <PhotoLightbox
+                photos={photos.map(p => ({
+                  url: p.url || '',
+                  caption: undefined,
+                  transform: p.transform,
+                  width: p.width,
+                  height: p.height,
+                })) as LightboxPhoto[]}
+                initialIndex={lightboxIndex}
+                isOpen={lightboxOpen}
+                onClose={() => setLightboxOpen(false)}
+                alt={story.title}
+              />
+            )}
           </div>
 
           {/* Content */}

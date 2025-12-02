@@ -80,9 +80,27 @@ function BookV4PageContent() {
   // Extract storyId from URL for deep linking (e.g., from timeline or returning from edit)
   const urlStoryId = searchParams?.get('storyId') || undefined;
 
-  const [isBookOpen, setIsBookOpen] = useState(false);
-  const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
-  const [currentMobilePage, setCurrentMobilePage] = useState(0);
+  // Initialize state from sessionStorage for session persistence
+  const [isBookOpen, setIsBookOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('book-is-open') === 'true';
+    }
+    return false;
+  });
+  const [currentSpreadIndex, setCurrentSpreadIndex] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('book-spread-index');
+      return saved ? parseInt(saved, 10) : 0;
+    }
+    return 0;
+  });
+  const [currentMobilePage, setCurrentMobilePage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('book-mobile-page');
+      return saved ? parseInt(saved, 10) : 0;
+    }
+    return 0;
+  });
   const [showToc, setShowToc] = useState(false);
   const [fontSize, setFontSize] = useState(18); // Default text size in pixels (senior-first)
 
@@ -101,6 +119,19 @@ function BookV4PageContent() {
   useEffect(() => {
     localStorage.setItem('bookViewFontSize', fontSize.toString());
   }, [fontSize]);
+
+  // Persist book state to sessionStorage for navigation memory
+  useEffect(() => {
+    sessionStorage.setItem('book-is-open', isBookOpen.toString());
+  }, [isBookOpen]);
+
+  useEffect(() => {
+    sessionStorage.setItem('book-spread-index', currentSpreadIndex.toString());
+  }, [currentSpreadIndex]);
+
+  useEffect(() => {
+    sessionStorage.setItem('book-mobile-page', currentMobilePage.toString());
+  }, [currentMobilePage]);
 
   const flowLeftRef = useRef<HTMLDivElement>(null);
   const flowRightRef = useRef<HTMLDivElement>(null);
@@ -449,6 +480,19 @@ function BookV4PageContent() {
 
     return pages;
   }, [sortedStories]);
+
+  // Validate restored indexes don't exceed available pages (in case content changed)
+  useEffect(() => {
+    if (spreads.length > 0 && currentSpreadIndex >= spreads.length) {
+      setCurrentSpreadIndex(Math.max(0, spreads.length - 1));
+    }
+  }, [spreads.length, currentSpreadIndex]);
+
+  useEffect(() => {
+    if (mobilePages.length > 0 && currentMobilePage >= mobilePages.length) {
+      setCurrentMobilePage(Math.max(0, mobilePages.length - 1));
+    }
+  }, [mobilePages.length, currentMobilePage]);
 
   // Navigate to specific page from progress bar
   const handleNavigateToPage = useCallback((pageIndex: number) => {
@@ -1405,9 +1449,8 @@ function ClosedBookCover({
       aspectRatio: "5.5 / 8.5",
       maxWidth: "800px"
     }}>
-      {/* Ambient shadow */}
-      <div className="pointer-events-none absolute -inset-8 rounded-2xl bg-[radial-gradient(1000px_400px_at_50%_30%,rgba(139,111,71,0.15)_0%,rgba(139,111,71,0.08)_35%,transparent_70%)]"></div>
-      <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[0_40px_120px_-30px_rgba(0,0,0,0.6)]"></div>
+      {/* Ambient shadow - no border, just glow */}
+      <div className="pointer-events-none absolute -inset-12 bg-[radial-gradient(600px_300px_at_50%_60%,rgba(0,0,0,0.4)_0%,transparent_70%)]"></div>
 
       {/* Book cover with spine */}
       <div className="relative w-full h-full">

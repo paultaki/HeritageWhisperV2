@@ -7,6 +7,7 @@ import { DecadeIntroPage } from "@/components/BookDecadePages";
 import { ScrollIndicator } from "@/components/ScrollIndicators";
 import { apiRequest } from "@/lib/queryClient";
 import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
+import { PhotoLightbox, type LightboxPhoto } from "@/components/PhotoLightbox";
 
 interface Story {
   id: string;
@@ -617,6 +618,10 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
+  // Photo lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
   // Photo carousel handlers
   const handlePrevPhoto = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -845,12 +850,26 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
         return (
           <div className="mb-3 mx-auto" style={{ maxWidth: "85%" }}>
             <div
-              className="relative overflow-hidden rounded-xl"
+              className="relative overflow-hidden rounded-xl cursor-pointer group"
               style={{ aspectRatio: "4 / 3" }}
               data-nav-ink="light"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
+              onClick={() => {
+                setLightboxIndex(currentPhotoIndex);
+                setLightboxOpen(true);
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`View ${story.title} photo in full screen`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setLightboxIndex(currentPhotoIndex);
+                  setLightboxOpen(true);
+                }
+              }}
             >
               <StoryPhotoWithBlurExtend
                 src={photoUrl}
@@ -859,7 +878,7 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
                 height={currentPhoto.height}
                 transform={currentPhoto.transform}
                 aspectRatio={4 / 3}
-                className="shadow-sm ring-1 ring-black/5"
+                className="shadow-sm ring-1 ring-black/5 transition-all duration-200 group-hover:brightness-105 group-hover:scale-[1.02]"
               />
 
               {/* Photo count indicator - z-20 to appear above image (which has z-10) */}
@@ -898,6 +917,22 @@ function StoryContent({ story, position, pageNum, fontSize = 18, isOwnAccount = 
                 {currentPhoto.caption}
               </p>
             )}
+
+            {/* Photo Lightbox */}
+            <PhotoLightbox
+              photos={photos.map(p => ({
+                url: p.url || '',
+                displayUrl: p.displayUrl,
+                caption: p.caption,
+                transform: p.transform,
+                width: p.width,
+                height: p.height,
+              })) as LightboxPhoto[]}
+              initialIndex={lightboxIndex}
+              isOpen={lightboxOpen}
+              onClose={() => setLightboxOpen(false)}
+              alt={story.title}
+            />
           </div>
         );
       })()}
