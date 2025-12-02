@@ -277,7 +277,7 @@ export function PhotoTitleScreen({
   return (
     <div style={{ backgroundColor: "#F5F1ED", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-4" style={{ maxWidth: "600px", margin: "0 auto", width: "100%" }}>
+      <div className="flex items-center justify-between px-6 pt-6 pb-4" style={{ maxWidth: "650px", margin: "0 auto", width: "100%" }}>
         <div className="flex items-center gap-3">
           <img
             src="/final logo/logo hw.svg"
@@ -298,7 +298,7 @@ export function PhotoTitleScreen({
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-6 pt-6 pb-24" style={{ maxWidth: "600px", margin: "0 auto" }}>
+      <div className="flex-1 px-6 pt-6 pb-24" style={{ maxWidth: "650px", margin: "0 auto", width: "100%" }}>
         <h2 className="font-serif font-semibold text-3xl mb-6 hw-text-center" style={{ color: "#2C3E50" }}>
           Add a Photo
         </h2>
