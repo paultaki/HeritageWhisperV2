@@ -1,0 +1,465 @@
+/* Book V3 Styles - Premium Heirloom Edition */
+
+/* ============================================================================
+   CSS Custom Properties - Heirloom Premium Color System
+   ============================================================================ */
+:root {
+  /* Premium Book Colors */
+  --book-v3-bg: #1a1a1a;
+  --book-v3-page-cream: #fdfbf7;
+  --book-v3-page-cream-dark: #f5f0e6;
+  --book-v3-text: #2d2a26;
+  --book-v3-text-muted: #6b635a;
+  --book-v3-accent-gold: #CBA46A;
+  --book-v3-accent-brown: #8B6B4A;
+  --book-v3-spine-shadow: rgba(0,0,0,0.2);
+  
+  /* Typography */
+  --book-v3-line-height: 1.85;
+  --book-v3-font-serif: "Crimson Text", Georgia, serif;
+  
+  /* Shadows */
+  --book-v3-page-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.08);
+}
+
+/* ============================================================================
+   Page Container - Premium dark background
+   ============================================================================ */
+.book-v3-page {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--book-v3-bg);
+  /* Subtle dark wood texture effect */
+  background-image: 
+    radial-gradient(ellipse at 30% 20%, rgba(60, 45, 30, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(60, 45, 30, 0.1) 0%, transparent 50%),
+    linear-gradient(180deg, #1a1a1a 0%, #141414 100%);
+}
+
+/* ============================================================================
+   Premium Paper Styling
+   ============================================================================ */
+.book-v3-paper {
+  background: var(--book-v3-page-cream);
+  /* Subtle paper texture */
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ============================================================================
+   Typography - Luxurious spacing and styling
+   ============================================================================ */
+.book-v3-content {
+  font-family: var(--book-v3-font-serif);
+  color: var(--book-v3-text);
+  line-height: var(--book-v3-line-height);
+}
+
+/* Drop Cap - First letter styling */
+.book-v3-drop-cap::first-letter {
+  float: left;
+  font-size: 3.5em;
+  line-height: 0.85;
+  margin-right: 0.12em;
+  margin-top: 0.08em;
+  font-family: Georgia, serif;
+  color: var(--book-v3-accent-brown);
+  font-weight: 400;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.05);
+}
+
+/* Date/Year styling - uppercase, tracked */
+.book-v3-date {
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--book-v3-text-muted);
+  font-weight: 500;
+}
+
+/* ============================================================================
+   Smooth scrolling with styled scrollbars
+   ============================================================================ */
+.book-v3-scroll {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+/* Styled scrollbar - warm brown tones */
+.book-v3-scroll::-webkit-scrollbar {
+  width: 8px;
+  -webkit-appearance: none;
+}
+
+.book-v3-scroll::-webkit-scrollbar-track {
+  background: rgba(139, 107, 74, 0.1);
+  border-radius: 4px;
+  margin: 60px 0;
+}
+
+.book-v3-scroll::-webkit-scrollbar-thumb {
+  background: rgba(139, 107, 74, 0.35);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+  min-height: 40px;
+}
+
+.book-v3-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 107, 74, 0.5);
+}
+
+/* Firefox scrollbar styling */
+.book-v3-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 107, 74, 0.35) rgba(139, 107, 74, 0.1);
+}
+
+/* ============================================================================
+   Photo Styling - Polaroid Effect
+   ============================================================================ */
+.book-v3-photo {
+  /* Soft shadow to appear resting on paper */
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 16px 40px rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  /* White polaroid-style border */
+  border: 6px solid white;
+  background: white;
+}
+
+/* Slight random rotation for organic feel */
+.book-v3-photo-rotate-1 { transform: rotate(-0.8deg); }
+.book-v3-photo-rotate-2 { transform: rotate(0.6deg); }
+.book-v3-photo-rotate-3 { transform: rotate(-0.4deg); }
+.book-v3-photo-rotate-4 { transform: rotate(1deg); }
+.book-v3-photo-rotate-5 { transform: rotate(-0.5deg); }
+
+/* ============================================================================
+   Audio Player - Minimalist Gold/Brown Theme
+   ============================================================================ */
+.book-v3-audio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  background: transparent;
+}
+
+.book-v3-audio-button {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--book-v3-accent-gold);
+  background: transparent;
+  color: var(--book-v3-accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.book-v3-audio-button:hover {
+  background: rgba(203, 164, 106, 0.1);
+  transform: scale(1.05);
+}
+
+.book-v3-audio-button:active {
+  transform: scale(0.98);
+}
+
+/* Thin progress line */
+.book-v3-audio-track {
+  flex: 1;
+  height: 2px;
+  border-radius: 1px;
+  background: rgba(139, 107, 74, 0.2);
+  position: relative;
+  cursor: pointer;
+}
+
+.book-v3-audio-track:hover {
+  height: 4px;
+}
+
+.book-v3-audio-progress {
+  height: 100%;
+  background: var(--book-v3-accent-gold);
+  border-radius: 1px;
+  transition: width 0.1s linear;
+}
+
+.book-v3-audio-time {
+  font-size: 0.75rem;
+  color: var(--book-v3-text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 70px;
+  text-align: right;
+}
+
+/* ============================================================================
+   Edit Button - Subtle Pencil Icon
+   ============================================================================ */
+.book-v3-edit-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--book-v3-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.book-v3-edit-button:hover {
+  opacity: 1;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: var(--book-v3-accent-brown);
+}
+
+/* ============================================================================
+   Gradient Fade for Continue Reading
+   ============================================================================ */
+.book-v3-fade-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(
+    to top,
+    var(--book-v3-page-cream) 0%,
+    rgba(253, 251, 247, 0.95) 30%,
+    rgba(253, 251, 247, 0) 100%
+  );
+  pointer-events: none;
+}
+
+/* ============================================================================
+   Page Stack Effect (Depth on edges)
+   ============================================================================ */
+.book-v3-page-stack {
+  position: relative;
+}
+
+.book-v3-page-stack::before,
+.book-v3-page-stack::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  width: 4px;
+  pointer-events: none;
+}
+
+/* Left page stack (right edge) */
+.book-v3-page-stack-left::after {
+  right: -4px;
+  background: linear-gradient(
+    to right,
+    rgba(200, 195, 185, 0.6) 0%,
+    rgba(180, 175, 165, 0.4) 50%,
+    rgba(160, 155, 145, 0.2) 100%
+  );
+  border-radius: 0 2px 2px 0;
+}
+
+/* Right page stack (left edge) */
+.book-v3-page-stack-right::before {
+  left: -4px;
+  background: linear-gradient(
+    to left,
+    rgba(200, 195, 185, 0.6) 0%,
+    rgba(180, 175, 165, 0.4) 50%,
+    rgba(160, 155, 145, 0.2) 100%
+  );
+  border-radius: 2px 0 0 2px;
+}
+
+/* ============================================================================
+   Spine/Gutter Shadow
+   ============================================================================ */
+.book-v3-spine-shadow-left {
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  right: 0;
+  width: 40px;
+  background: linear-gradient(
+    to left,
+    rgba(0, 0, 0, 0.12) 0%,
+    rgba(0, 0, 0, 0.06) 40%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.book-v3-spine-shadow-right {
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 0;
+  width: 40px;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.12) 0%,
+    rgba(0, 0, 0, 0.06) 40%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* ============================================================================
+   Wisdom Clip - Handwritten Note Style
+   ============================================================================ */
+.book-v3-wisdom {
+  position: relative;
+  margin: 2rem -0.5rem;
+  padding: 1.5rem;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: rotate(0.3deg);
+}
+
+.book-v3-wisdom::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 27px,
+    rgba(203, 213, 225, 0.3) 27px,
+    rgba(203, 213, 225, 0.3) 28px
+  );
+  pointer-events: none;
+}
+
+.book-v3-wisdom-text {
+  font-family: "Caveat", cursive;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: var(--book-v3-text);
+  position: relative;
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+@keyframes book-v3-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.book-v3-animate-in {
+  animation: book-v3-fade-in 0.4s ease-out;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .book-v3-scroll {
+    scroll-behavior: auto !important;
+  }
+  
+  .book-v3-animate-in {
+    animation: none;
+  }
+  
+  .book-v3-photo-rotate-1,
+  .book-v3-photo-rotate-2,
+  .book-v3-photo-rotate-3,
+  .book-v3-photo-rotate-4,
+  .book-v3-photo-rotate-5 {
+    transform: none;
+  }
+}
+
+/* ============================================================================
+   Mobile Optimizations
+   ============================================================================ */
+@media (max-width: 1024px) {
+  .book-v3-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .book-v3-scroll {
+    scrollbar-width: none;
+  }
+}
+
+/* ============================================================================
+   Print Styles
+   ============================================================================ */
+@media print {
+  .book-v3-page {
+    background: white !important;
+  }
+  
+  .book-v3-edit-button,
+  .book-v3-audio {
+    display: none !important;
+  }
+}
+
+/* ============================================================================
+   Hide default scrollbar styling for mobile swipe
+   ============================================================================ */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================================================
+   Senior-friendly scroll indicator animations
+   ============================================================================ */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2.5s ease-in-out;
+  animation-iteration-count: 3;
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 2s ease-in-out infinite;
+}
+

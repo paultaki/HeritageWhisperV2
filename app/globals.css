@@ -1017,6 +1017,44 @@ textarea:focus-visible {
     transform: scale(1.01);
   }
 
+  /* Gentle field highlight animation for onboarding guidance
+     Senior-friendly: soft glow, no jarring movements */
+  @keyframes gentleFieldHighlight {
+    0% {
+      box-shadow: 0 0 0 0 rgba(212, 133, 58, 0);
+    }
+    30% {
+      box-shadow: 0 0 8px 6px rgba(212, 133, 58, 0.25);
+      border-color: rgba(212, 133, 58, 0.8);
+    }
+    50% {
+      box-shadow: 0 0 12px 8px rgba(212, 133, 58, 0.2);
+      border-color: rgba(212, 133, 58, 0.7);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(212, 133, 58, 0);
+    }
+  }
+
+  .gentle-field-highlight {
+    animation: gentleFieldHighlight 2.5s ease-in-out;
+    animation-iteration-count: 2;
+  }
+
+  /* Staggered delays: Title -> Year -> Lesson */
+  .gentle-field-highlight-delay-1 { animation-delay: 0s; }
+  .gentle-field-highlight-delay-2 { animation-delay: 0.3s; }
+  .gentle-field-highlight-delay-3 { animation-delay: 0.6s; }
+
+  /* Reduced motion: static highlight instead of animation */
+  @media (prefers-reduced-motion: reduce) {
+    .gentle-field-highlight {
+      animation: none !important;
+      border-color: rgba(212, 133, 58, 0.5) !important;
+      box-shadow: 0 0 0 2px rgba(212, 133, 58, 0.2) !important;
+    }
+  }
+
   .ghost-prompt {
     color: hsl(45, 15%, 70%);
     font-style: italic;

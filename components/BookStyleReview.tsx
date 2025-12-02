@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -135,6 +135,10 @@ export function BookStyleReview({
   const [audioSource, setAudioSource] = useState<AudioSource>("original");
   const [processingError, setProcessingError] = useState<string | null>(null);
 
+  // Field highlight state for guiding users to key inputs
+  const [showFieldHighlights, setShowFieldHighlights] = useState(false);
+  const [highlightsDismissed, setHighlightsDismissed] = useState(false);
+
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -179,6 +183,31 @@ export function BookStyleReview({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]); // Only run when searchParams change, not audioUrl
+
+  // Dismiss field highlights handler
+  const dismissHighlights = useCallback(() => {
+    if (showFieldHighlights) {
+      setShowFieldHighlights(false);
+      setHighlightsDismissed(true);
+    }
+  }, [showFieldHighlights]);
+
+  // Show highlights after 2.5s delay (new stories only)
+  useEffect(() => {
+    if (isEditing || highlightsDismissed) return;
+    const timer = setTimeout(() => setShowFieldHighlights(true), 2500);
+    return () => clearTimeout(timer);
+  }, [isEditing, highlightsDismissed]);
+
+  // Auto-dismiss highlights after 5 seconds
+  useEffect(() => {
+    if (!showFieldHighlights) return;
+    const timer = setTimeout(() => {
+      setShowFieldHighlights(false);
+      setHighlightsDismissed(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [showFieldHighlights]);
 
   // Note: Background transcription logic removed - users now select transcription
   // BEFORE reaching this screen via TranscriptionSelectionScreen component
@@ -474,12 +503,19 @@ export function BookStyleReview({
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
                   Story Title
                 </label>
-                <div className="border-2 border-gray-300 rounded-lg px-4 py-3 focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all">
+                <div
+                  className={cn(
+                    "border-2 border-gray-300 rounded-lg px-4 py-3 focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all",
+                    showFieldHighlights && !highlightsDismissed && "gentle-field-highlight gentle-field-highlight-delay-1"
+                  )}
+                  onClick={dismissHighlights}
+                >
                   <input
                     ref={titleInputRef}
                     type="text"
                     value={title}
                     onChange={(e) => onTitleChange(e.target.value)}
+                    onFocus={dismissHighlights}
                     className="w-full text-2xl font-serif text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 p-0"
                     placeholder="Story title"
                   />
@@ -494,14 +530,23 @@ export function BookStyleReview({
                 </label>
                 <div className="flex gap-2 md:gap-3 items-center">
                   {/* Year Selector */}
-                  <div className={`border-2 rounded-lg transition-all ${
-                    highlightDateField
-                      ? "border-red-500 ring-2 ring-red-500/20 animate-pulse"
-                      : "border-gray-300 focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20"
-                  }`}>
+                  <div
+                    className={cn(
+                      "border-2 rounded-lg transition-all",
+                      highlightDateField
+                        ? "border-red-500 ring-2 ring-red-500/20 animate-pulse"
+                        : "border-gray-300 focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20",
+                      showFieldHighlights && !highlightsDismissed && !highlightDateField && "gentle-field-highlight gentle-field-highlight-delay-2"
+                    )}
+                    onClick={dismissHighlights}
+                  >
                     <select
                       value={storyYear}
-                      onChange={(e) => onYearChange(e.target.value)}
+                      onChange={(e) => {
+                        onYearChange(e.target.value);
+                        dismissHighlights();
+                      }}
+                      onFocus={dismissHighlights}
                       className="px-2 md:px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg cursor-pointer"
                     >
                       <option value="">Year</option>
@@ -893,11 +938,17 @@ export function BookStyleReview({
                   <div className="flex justify-center mb-3">
                     <Button
                       type="button"
-                      onClick={handleGenerateLesson}
+                      onClick={() => {
+                        dismissHighlights();
+                        handleGenerateLesson();
+                      }}
                       disabled={isGeneratingLesson || !transcription?.trim()}
                       size="sm"
                       variant="outline"
-                      className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200"
+                      className={cn(
+                        "text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200",
+                        showFieldHighlights && !highlightsDismissed && "gentle-field-highlight gentle-field-highlight-delay-3"
+                      )}
                     >
                       {isGeneratingLesson ? (
                         <>
