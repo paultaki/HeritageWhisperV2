@@ -82,13 +82,17 @@ export async function GET(req: NextRequest) {
 
     // Mark invite as used (first time only)
     if (!invite.used_at) {
-      await supabaseAdmin
+      const { error: inviteUpdateError } = await supabaseAdmin
         .from('family_invites')
         .update({ used_at: new Date().toISOString() })
         .eq('id', invite.id);
 
+      if (inviteUpdateError) {
+        console.error('Failed to mark invite as used:', inviteUpdateError);
+      }
+
       // Update family member status to active
-      await supabaseAdmin
+      const { error: statusUpdateError } = await supabaseAdmin
         .from('family_members')
         .update({
           status: 'active',
@@ -97,6 +101,10 @@ export async function GET(req: NextRequest) {
           access_count: 1,
         })
         .eq('id', familyMember.id);
+
+      if (statusUpdateError) {
+        console.error('Failed to update family member status:', statusUpdateError);
+      }
 
       // Log family_member_joined activity event (async, non-blocking)
       logActivityEvent({
