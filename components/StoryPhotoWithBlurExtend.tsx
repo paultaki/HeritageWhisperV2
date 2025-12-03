@@ -78,11 +78,11 @@ export function StoryPhotoWithBlurExtend({
     <div
       className={cn(
         "relative w-full overflow-hidden bg-[var(--color-page,#faf8f5)]",
-        // Use Tailwind aspect ratio utility for common 4:3 case
-        ratio === 4 / 3 ? "aspect-[4/3]" : "",
         className
       )}
-      style={ratio !== 4 / 3 ? { aspectRatio: ratio } : undefined}
+      // Always use inline aspectRatio to ensure dimensions are available
+      // before Next.js Image calculates layout (fixes hydration race condition)
+      style={{ aspectRatio: ratio }}
     >
       {/*
         Background Layer: Blurred extension

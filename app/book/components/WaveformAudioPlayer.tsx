@@ -10,139 +10,176 @@ type WaveformAudioPlayerProps = {
 };
 
 /**
- * Waveform Audio Player
+ * Format seconds to MM:SS format
+ */
+function formatTime(seconds: number): string {
+  if (!isFinite(seconds) || seconds < 0) return "0:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
+/**
+ * Simple Audio Player
  *
- * Premium SoundCloud-style audio player with waveform visualization.
- * Uses wavesurfer.js for real audio peak visualization.
+ * Clean, sleek audio player with scrubber bar.
+ * Uses CSS variables for sepia/gold theming.
  *
  * Features:
- * - Real waveform from audio file peaks
- * - Click-to-seek on waveform
- * - Progress color fills waveform
- * - Sepia/Gold theme from CSS variables
+ * - Draggable progress scrubber
+ * - Click-to-seek on progress bar
  * - Circular play/pause button with gradient
  * - Tabular-nums time display
  * - Keyboard accessible (Space to play/pause)
- *
- * Theming:
- * - Uses --book-accent and --book-accent-light CSS vars
- * - Automatically adapts to sepia or gold theme
  */
 export default function WaveformAudioPlayer({
   src,
   className = "",
   onPlayStateChange
 }: WaveformAudioPlayerProps) {
-  const waveformRef = useRef<HTMLDivElement>(null);
-  const wavesurfer = useRef<import("wavesurfer.js").default | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const scrubBarRef = useRef<HTMLDivElement>(null);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Get CSS variable value for theme colors
-  const getThemeColor = useCallback((varName: string, fallback: string) => {
-    if (typeof window === "undefined") return fallback;
-    const value = getComputedStyle(document.documentElement)
-      .getPropertyValue(varName)
-      .trim();
-    return value || fallback;
-  }, []);
-
-  // Initialize wavesurfer
-  useEffect(() => {
-    if (!waveformRef.current || !src) return;
-
-    let ws: import("wavesurfer.js").default | null = null;
-
-    const initWavesurfer = async () => {
-      try {
-        const WaveSurfer = (await import("wavesurfer.js")).default;
-
-        // Get theme colors
-        const progressColor = getThemeColor("--book-accent", "#8B7355");
-        const waveColor = getThemeColor("--book-accent-light", "rgba(139, 115, 85, 0.3)");
-
-        ws = WaveSurfer.create({
-          container: waveformRef.current!,
-          waveColor: waveColor,
-          progressColor: progressColor,
-          cursorColor: "transparent",
-          barWidth: 3,
-          barGap: 2,
-          barRadius: 3,
-          height: 40,
-          normalize: true,
-          hideScrollbar: true,
-          interact: true,
-        });
-
-        ws.load(src);
-
-        ws.on("ready", () => {
-          setDuration(ws?.getDuration() || 0);
-          setIsLoaded(true);
-          setIsLoading(false);
-        });
-
-        ws.on("audioprocess", () => {
-          setCurrentTime(ws?.getCurrentTime() || 0);
-        });
-
-        ws.on("seeking", () => {
-          setCurrentTime(ws?.getCurrentTime() || 0);
-        });
-
-        ws.on("play", () => {
-          setIsPlaying(true);
-          onPlayStateChange?.(true);
-        });
-
-        ws.on("pause", () => {
-          setIsPlaying(false);
-          onPlayStateChange?.(false);
-        });
-
-        ws.on("finish", () => {
-          setIsPlaying(false);
-          onPlayStateChange?.(false);
-        });
-
-        ws.on("error", (e) => {
-          console.error("WaveSurfer error:", e);
-          setIsLoading(false);
-        });
-
-        wavesurfer.current = ws;
-      } catch (error) {
-        console.error("Failed to initialize WaveSurfer:", error);
-        setIsLoading(false);
-      }
-    };
-
-    initWavesurfer();
-
-    return () => {
-      if (ws) {
-        ws.destroy();
-      }
-    };
-  }, [src, getThemeColor, onPlayStateChange]);
-
-  // Format time as MM:SS
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  const [isDragging, setIsDragging] = useState(false);
 
   // Toggle play/pause
   const togglePlay = useCallback(() => {
-    if (wavesurfer.current) {
-      wavesurfer.current.playPause();
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
     }
+  }, [isPlaying]);
+
+  // Update progress
+  const updateProgress = useCallback(() => {
+    if (!audioRef.current) return;
+
+    const dur = audioRef.current.duration || 0;
+    const cur = Math.max(0, audioRef.current.currentTime || 0);
+
+    setDuration(dur);
+    setCurrentTime(cur);
   }, []);
+
+  // Calculate percentage from mouse/touch event
+  const getPercentageFromEvent = useCallback(
+    (e: MouseEvent | TouchEvent): number => {
+      if (!scrubBarRef.current) return 0;
+
+      const rect = scrubBarRef.current.getBoundingClientRect();
+      const clientX =
+        e instanceof TouchEvent ? e.touches[0]?.clientX : e.clientX;
+
+      if (!clientX) return 0;
+
+      const x = clientX - rect.left;
+      return Math.min(1, Math.max(0, x / rect.width));
+    },
+    []
+  );
+
+  // Seek to specific percentage
+  const seekToPercentage = useCallback((percentage: number) => {
+    if (!audioRef.current || !isFinite(audioRef.current.duration)) return;
+    audioRef.current.currentTime = percentage * audioRef.current.duration;
+  }, []);
+
+  // Start dragging
+  const handleDragStart = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      setIsDragging(true);
+      const nativeEvent = e.nativeEvent;
+      const percentage = getPercentageFromEvent(
+        nativeEvent as MouseEvent | TouchEvent
+      );
+      seekToPercentage(percentage);
+      updateProgress();
+    },
+    [getPercentageFromEvent, seekToPercentage, updateProgress]
+  );
+
+  // Dragging
+  const handleDragMove = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      if (!isDragging) return;
+      const percentage = getPercentageFromEvent(e);
+      seekToPercentage(percentage);
+      updateProgress();
+    },
+    [isDragging, getPercentageFromEvent, seekToPercentage, updateProgress]
+  );
+
+  // End dragging
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Set up global drag listeners
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => handleDragMove(e);
+    const handleTouchMove = (e: TouchEvent) => handleDragMove(e);
+    const handleMouseUp = () => handleDragEnd();
+    const handleTouchEnd = () => handleDragEnd();
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [isDragging, handleDragMove, handleDragEnd]);
+
+  // Audio event listeners
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlePlay = () => {
+      setIsPlaying(true);
+      onPlayStateChange?.(true);
+    };
+
+    const handlePause = () => {
+      setIsPlaying(false);
+      onPlayStateChange?.(false);
+    };
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      onPlayStateChange?.(false);
+      updateProgress();
+    };
+
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("timeupdate", updateProgress);
+    audio.addEventListener("loadedmetadata", updateProgress);
+    audio.addEventListener("ended", handleEnded);
+
+    // Initial update
+    setTimeout(updateProgress, 50);
+
+    return () => {
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("timeupdate", updateProgress);
+      audio.removeEventListener("loadedmetadata", updateProgress);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [onPlayStateChange, updateProgress]);
 
   // Keyboard handler
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -152,19 +189,28 @@ export default function WaveformAudioPlayer({
     }
   }, [togglePlay]);
 
+  // Calculate progress percentage
+  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
+
   return (
     <div
-      className={`book-audio-player ${className}`}
+      className={`flex items-center gap-3 ${className}`}
       role="region"
       aria-label="Audio player"
     >
-      {/* Play/Pause Button */}
+      {/* Hidden audio element */}
+      <audio ref={audioRef} src={src} preload="metadata" />
+
+      {/* Play/Pause button */}
       <button
         type="button"
         onClick={togglePlay}
         onKeyDown={handleKeyDown}
-        disabled={!isLoaded}
-        className="book-audio-button"
+        className="relative grid h-10 w-10 flex-shrink-0 place-items-center rounded-full text-white transition-all hover:scale-105 active:scale-95"
+        style={{
+          background: 'linear-gradient(135deg, var(--book-accent, #8B7355) 0%, color-mix(in srgb, var(--book-accent, #8B7355) 80%, white) 100%)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+        }}
         aria-label={isPlaying ? "Pause" : "Play"}
         aria-pressed={isPlaying}
       >
@@ -175,39 +221,50 @@ export default function WaveformAudioPlayer({
         )}
       </button>
 
-      {/* Waveform Container */}
-      <div
-        ref={waveformRef}
-        className="book-audio-waveform"
-        aria-hidden="true"
-      >
-        {isLoading && (
-          <div className="flex items-center justify-center h-full">
-            <div className="flex gap-1">
-              {[...Array(20)].map((_, i) => (
-                <div
-                  key={i}
-                  className="w-1 bg-current opacity-20 rounded-full animate-pulse"
-                  style={{
-                    height: `${Math.random() * 24 + 8}px`,
-                    animationDelay: `${i * 50}ms`
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Progress bar and time */}
+      <div className="flex flex-1 flex-col" style={{ marginTop: '15px' }}>
+        {/* Scrub bar */}
+        <div
+          ref={scrubBarRef}
+          onMouseDown={handleDragStart}
+          onTouchStart={handleDragStart}
+          className="relative h-2.5 cursor-pointer rounded-full"
+          style={{ backgroundColor: 'var(--book-accent-light, rgba(139, 115, 85, 0.3))' }}
+        >
+          {/* Progress fill */}
+          <div
+            className="absolute inset-y-0 left-0 rounded-full transition-all"
+            style={{
+              width: `${progressPercentage}%`,
+              backgroundColor: 'var(--book-accent, #8B7355)'
+            }}
+          />
 
-      {/* Time Display */}
-      <div className="book-audio-time" aria-live="polite">
-        <span aria-label={`Current time ${formatTime(currentTime)}`}>
-          {formatTime(currentTime)}
-        </span>
-        <span aria-hidden="true"> / </span>
-        <span aria-label={`Duration ${formatTime(duration)}`}>
-          {formatTime(duration)}
-        </span>
+          {/* Thumb */}
+          <div
+            className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-md transition-all"
+            style={{
+              left: `${progressPercentage}%`,
+              boxShadow: '0 1px 4px rgba(0,0,0,0.2), 0 0 0 1px var(--book-accent-light, rgba(139, 115, 85, 0.3))'
+            }}
+          />
+        </div>
+
+        {/* Time display */}
+        <div
+          className="mt-1 flex justify-end text-[11px] tabular-nums"
+          style={{ color: 'var(--book-text-muted, #6B6460)' }}
+        >
+          <span aria-live="polite">
+            <span aria-label={`Current time ${formatTime(currentTime)}`}>
+              {formatTime(currentTime)}
+            </span>
+            <span aria-hidden="true"> / </span>
+            <span aria-label={`Duration ${formatTime(duration)}`}>
+              {formatTime(duration)}
+            </span>
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -270,20 +327,18 @@ export function SimpleAudioPlayer({
     setIsPlaying(!isPlaying);
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
   return (
-    <div className={`book-audio-player ${className}`}>
+    <div className={`flex items-center gap-3 ${className}`}>
       <audio ref={audioRef} src={src} preload="metadata" />
 
       <button
         type="button"
         onClick={togglePlay}
-        className="book-audio-button"
+        className="relative grid h-10 w-10 flex-shrink-0 place-items-center rounded-full text-white transition-all hover:scale-105 active:scale-95"
+        style={{
+          background: 'linear-gradient(135deg, var(--book-accent, #8B7355) 0%, color-mix(in srgb, var(--book-accent, #8B7355) 80%, white) 100%)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+        }}
         aria-label={isPlaying ? "Pause" : "Play"}
       >
         {isPlaying ? (
@@ -294,16 +349,26 @@ export function SimpleAudioPlayer({
       </button>
 
       {/* Simple progress bar fallback */}
-      <div className="book-audio-waveform relative">
-        <div className="absolute inset-0 bg-[var(--book-accent-light)] rounded-full" />
+      <div className="flex flex-1 flex-col">
         <div
-          className="absolute inset-y-0 left-0 bg-[var(--book-accent)] rounded-full transition-all"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+          className="relative h-2.5 rounded-full"
+          style={{ backgroundColor: 'var(--book-accent-light, rgba(139, 115, 85, 0.3))' }}
+        >
+          <div
+            className="absolute inset-y-0 left-0 rounded-full transition-all"
+            style={{
+              width: `${progress}%`,
+              backgroundColor: 'var(--book-accent, #8B7355)'
+            }}
+          />
+        </div>
 
-      <div className="book-audio-time">
-        {formatTime(currentTime)} / {formatTime(duration)}
+        <div
+          className="mt-1 flex justify-end text-[11px] tabular-nums"
+          style={{ color: 'var(--book-text-muted, #6B6460)' }}
+        >
+          {formatTime(currentTime)} / {formatTime(duration)}
+        </div>
       </div>
     </div>
   );

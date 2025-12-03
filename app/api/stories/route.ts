@@ -31,74 +31,98 @@ export async function GET(request: NextRequest) {
     let isViewerMode = false;
     let isAuthenticatedOwner = false;
 
-    // 1. Try passkey session first
-    const passkeySession = await getPasskeySession();
-    if (passkeySession) {
-      targetUserId = passkeySession.userId;
-      isAuthenticatedOwner = true;
-    }
+    const authHeader = request.headers.get("authorization");
+    const token = authHeader && authHeader.split(" ")[1];
+    const url = new URL(request.url);
+    const storytellerId = url.searchParams.get("storyteller_id");
 
-    // 2. If no passkey, try Supabase JWT (Authorization header)
-    if (!isAuthenticatedOwner) {
-      const authHeader = request.headers.get("authorization");
-      const token = authHeader && authHeader.split(" ")[1];
+    // PRIORITY 1: If requesting another user's stories, check family session token FIRST
+    // This handles signed-in users viewing family content
+    if (storytellerId && token) {
+      const { data: familySession, error: sessionError } = await supabaseAdmin
+        .from('family_sessions')
+        .select(`
+            id,
+            family_member_id,
+            expires_at,
+            family_members!inner (
+              id,
+              user_id,
+              email,
+              name,
+              relationship,
+              permission_level
+            )
+          `)
+        .eq('token', token)
+        .single();
 
-      if (token) {
-        const {
-          data: { user },
-          error: jwtError,
-        } = await supabaseAdmin.auth.getUser(token);
-
-        if (user && !jwtError) {
-          // JWT authentication successful (authenticated owner)
-          isAuthenticatedOwner = true;
-
-          // V3: Support storyteller_id query parameter for family sharing
-          const url = new URL(request.url);
-          const storytellerId = url.searchParams.get("storyteller_id");
-
-          if (storytellerId && storytellerId !== user.id) {
-            // Check if user has access to this storyteller
-            const { data: hasAccess } = await supabaseAdmin.rpc(
-              "check_user_access",
-              {
-                p_user_id: user.id,
-                p_storyteller_id: storytellerId,
-              },
-            );
-
-            if (hasAccess) {
-              targetUserId = storytellerId;
-              isViewerMode = true; // Viewing someone else's stories
-            } else {
-              return NextResponse.json(
-                { error: "Unauthorized access to storyteller" },
-                { status: 403 },
-              );
-            }
-          } else {
-            targetUserId = user.id;
+      if (!sessionError && familySession) {
+        // Check if session expired
+        if (new Date(familySession.expires_at) >= new Date()) {
+          // Valid family session - check if it grants access to the requested storyteller
+          const familyMember = (familySession as unknown as { family_members: { user_id: string } }).family_members;
+          const familyMemberUserId = familyMember?.user_id;
+          if (familyMemberUserId === storytellerId) {
+            targetUserId = storytellerId;
+            isViewerMode = true;
+            logger.debug(`[Stories API] Family viewer (signed-in) accessing ${targetUserId}'s stories via sessionToken`);
           }
-        } else {
-          // Token present but invalid/expired - check if it's a family session token
-          // This falls through to step 3
         }
       }
     }
 
-    // 3. Fall back to Family/Guest Access (if not authenticated as owner)
-    if (!isAuthenticatedOwner && !targetUserId) {
-      const authHeader = request.headers.get("authorization");
-      const token = authHeader && authHeader.split(" ")[1];
-
-      if (!token) {
-        return NextResponse.json(
-          { error: "Authentication required" },
-          { status: 401 },
-        );
+    // PRIORITY 2: Try passkey session (for own stories)
+    if (!targetUserId) {
+      const passkeySession = await getPasskeySession();
+      if (passkeySession) {
+        // If no storyteller_id or it matches the user, use their own stories
+        if (!storytellerId || storytellerId === passkeySession.userId) {
+          targetUserId = passkeySession.userId;
+          isAuthenticatedOwner = true;
+        }
       }
+    }
 
-      // JWT failed - try sessionToken authentication (unauthenticated family viewers)
+    // PRIORITY 3: Try Supabase JWT (for own stories)
+    if (!targetUserId && token) {
+      const {
+        data: { user },
+        error: jwtError,
+      } = await supabaseAdmin.auth.getUser(token);
+
+      if (user && !jwtError) {
+        // If no storyteller_id or it matches the user, use their own stories
+        if (!storytellerId || storytellerId === user.id) {
+          targetUserId = user.id;
+          isAuthenticatedOwner = true;
+        } else {
+          // User is trying to access someone else's stories without a valid family session
+          // Check if they have access via email matching (for signed-in family members)
+          const { data: hasAccess } = await supabaseAdmin
+            .from('family_members')
+            .select('id')
+            .eq('user_id', storytellerId)
+            .eq('email', user.email)
+            .eq('status', 'active')
+            .single();
+
+          if (hasAccess) {
+            targetUserId = storytellerId;
+            isViewerMode = true;
+            logger.debug(`[Stories API] Signed-in family member accessing ${targetUserId}'s stories via email match`);
+          } else {
+            return NextResponse.json(
+              { error: "Unauthorized access to storyteller" },
+              { status: 403 },
+            );
+          }
+        }
+      }
+    }
+
+    // PRIORITY 4: Fall back to Family Session Token (for unauthenticated viewers)
+    if (!targetUserId && token) {
       const { data: familySession, error: sessionError } = await supabaseAdmin
         .from('family_sessions')
         .select(`
@@ -135,7 +159,8 @@ export async function GET(request: NextRequest) {
       }
 
       // Extract storyteller ID from family_members.user_id
-      targetUserId = (familySession as any).family_members.user_id;
+      const familyMember = (familySession as unknown as { family_members: { user_id: string } }).family_members;
+      targetUserId = familyMember?.user_id;
       isViewerMode = true;
       logger.debug(`[Stories API] Family viewer accessing ${targetUserId}'s stories via sessionToken`);
     }

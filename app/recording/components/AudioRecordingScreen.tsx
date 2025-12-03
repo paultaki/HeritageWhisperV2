@@ -491,19 +491,20 @@ export function AudioRecordingScreen({
             {waveformBars.map((height, index) => (
               <div
                 key={index}
-                className="w-1.5 rounded-full"
+                className={`w-1.5 rounded-full ${isProcessing ? "processing-wave-bar" : ""}`}
                 style={{
-                  height: `${Math.max(4, height * 48)}px`,
-                  backgroundColor: isIdle ? "#D1D5DB" : "#10B981",
-                  opacity: isIdle ? 0.5 : 1,
+                  height: isProcessing ? "24px" : `${Math.max(4, height * 48)}px`,
+                  backgroundColor: isProcessing ? "#6B7280" : isIdle ? "#D1D5DB" : "#10B981",
+                  opacity: isIdle && !isProcessing ? 0.5 : 1,
                   // Remove transition for instant response to the smoothed data
-                  transition: isIdle ? "all 0.3s ease" : "none"
+                  transition: isIdle && !isProcessing ? "all 0.3s ease" : "none",
+                  animationDelay: isProcessing ? `${index * 0.05}s` : undefined
                 }}
               />
             ))}
           </div>
           <p className="text-center text-xs mt-2 font-medium tracking-wide" style={{ color: "#9CA3AF" }}>
-            {isIdle ? "READY TO RECORD" : isRecording ? "RECORDING" : "PAUSED"}
+            {isProcessing ? "PROCESSING" : isIdle ? "READY TO RECORD" : isRecording ? "RECORDING" : "PAUSED"}
           </p>
         </div>
 

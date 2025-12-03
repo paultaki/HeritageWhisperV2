@@ -23,6 +23,23 @@ type Props = {
 export function MemoryBoxTabs({ activeTab, onTabChange, showStoriesTab = true }: Props) {
   return (
     <div className="flex gap-2 mb-6">
+      {/* Treasures tab first (default view) */}
+      <button
+        onClick={() => onTabChange("treasures")}
+        className={`
+          flex-1 rounded-lg px-6 py-3 text-base font-semibold
+          transition-all duration-200
+          ${activeTab === "treasures"
+            ? "text-white"
+            : "border-2 border-gray-300 bg-transparent text-gray-700 hover:border-[#203954]/30"
+          }
+        `}
+        style={activeTab === "treasures" ? { backgroundColor: "var(--hw-primary, #203954)", minHeight: "48px" } : { minHeight: "48px" }}
+        aria-pressed={activeTab === "treasures"}
+      >
+        Treasures
+      </button>
+
       {/* Only show Stories tab if showStoriesTab is true (owners only) */}
       {showStoriesTab && (
         <button
@@ -41,22 +58,6 @@ export function MemoryBoxTabs({ activeTab, onTabChange, showStoriesTab = true }:
           Stories
         </button>
       )}
-
-      <button
-        onClick={() => onTabChange("treasures")}
-        className={`
-          flex-1 rounded-lg px-6 py-3 text-base font-semibold
-          transition-all duration-200
-          ${activeTab === "treasures"
-            ? "text-white"
-            : "border-2 border-gray-300 bg-transparent text-gray-700 hover:border-[#203954]/30"
-          }
-        `}
-        style={activeTab === "treasures" ? { backgroundColor: "var(--hw-primary, #203954)", minHeight: "48px" } : { minHeight: "48px" }}
-        aria-pressed={activeTab === "treasures"}
-      >
-        Treasures
-      </button>
     </div>
   );
 }

@@ -450,3 +450,22 @@
     font-size: 2rem;    /* 32px */
   }
 }
+
+/* ==========================================================================
+   Processing Animation
+   ========================================================================== */
+
+@keyframes processing-pulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scaleY(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.processing-wave-bar {
+  animation: processing-pulse 1s ease-in-out infinite;
+}
