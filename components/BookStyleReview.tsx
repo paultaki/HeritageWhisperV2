@@ -475,7 +475,12 @@ export function BookStyleReview({
                   <div className="flex justify-end">
                     <Button
                       type="button"
-                      onClick={handleReRecord}
+                      onClick={() => {
+                        // Use the same confirmation flow as the audio section
+                        // to ensure audio is only cleared after explicit confirmation
+                        setRemoveAudioAction('rerecord');
+                        setShowRemoveAudioConfirm(true);
+                      }}
                       variant="outline"
                       size="sm"
                       className="border-[var(--book-border,#D4C5B5)] text-[var(--book-accent-sepia,#8B7355)] hover:bg-[var(--book-paper-cream,#F5F1E8)] rounded-[var(--book-radius-img,12px)]"
@@ -488,8 +493,8 @@ export function BookStyleReview({
 
               {/* 1. Photo Section */}
               <div>
-                <h3 className="text-lg font-medium text-[var(--book-text-muted,#6B5E54)] mb-3 flex items-center gap-2">
-                  <Camera className="w-5 h-5" />
+                <h3 className="text-sm font-medium text-[var(--book-text-muted,#6B5E54)] mb-3 flex items-center gap-2 uppercase tracking-wider">
+                  <Camera className="w-4 h-4" />
                   Photos (Optional)
                 </h3>
                 <MultiPhotoUploader
@@ -502,7 +507,7 @@ export function BookStyleReview({
 
               {/* 2. Title - Always Visible Input with Border */}
               <div className="group relative">
-                <label className="text-sm font-medium text-[var(--book-text-muted,#6B5E54)] mb-2 block">
+                <label className="text-sm font-medium text-[var(--book-text-muted,#6B5E54)] mb-2 block uppercase tracking-wider">
                   Story Title
                 </label>
                 <div
@@ -575,7 +580,7 @@ export function BookStyleReview({
                           onMonthChange?.(value);
                         }
                       }}
-                      className="w-16 md:w-24 px-2 md:px-4 py-3 text-[var(--book-text,#2D2926)] bg-transparent border-none focus:outline-none focus:ring-0 rounded-[var(--book-radius-img,12px)] font-medium tabular-nums"
+                      className="w-16 md:w-24 px-2 md:px-4 py-3 text-[var(--book-text,#2D2926)] bg-transparent border-none focus:outline-none focus:ring-0 rounded-[var(--book-radius-img,12px)] font-medium tabular-nums placeholder:text-[var(--book-text-muted,#6B5E54)]"
                       maxLength={2}
                     />
                   </div>
@@ -592,7 +597,7 @@ export function BookStyleReview({
                           onDayChange?.(value);
                         }
                       }}
-                      className="w-14 md:w-20 px-2 md:px-4 py-3 text-[var(--book-text,#2D2926)] bg-transparent border-none focus:outline-none focus:ring-0 rounded-[var(--book-radius-img,12px)] font-medium tabular-nums"
+                      className="w-14 md:w-20 px-2 md:px-4 py-3 text-[var(--book-text,#2D2926)] bg-transparent border-none focus:outline-none focus:ring-0 rounded-[var(--book-radius-img,12px)] font-medium tabular-nums placeholder:text-[var(--book-text-muted,#6B5E54)]"
                       maxLength={2}
                     />
                   </div>
@@ -641,7 +646,7 @@ export function BookStyleReview({
                           setRemoveAudioAction('remove');
                           setShowRemoveAudioConfirm(true);
                         }}
-                        className="text-red-600 hover:text-red-700 border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)]"
+                        className="text-[var(--book-text-muted,#6B5E54)] hover:text-red-600 hover:border-red-300 border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)] transition-colors"
                       >
                         <X className="w-3.5 h-3.5" />
                       </Button>
@@ -792,7 +797,7 @@ export function BookStyleReview({
               {/* 5. Your Story */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-medium text-[var(--book-text-muted,#6B5E54)]">
+                  <h3 className="text-sm font-medium text-[var(--book-text-muted,#6B5E54)] uppercase tracking-wider">
                     Your Story
                   </h3>
                   <div className="flex items-center gap-2">
@@ -1149,7 +1154,7 @@ export function BookStyleReview({
             </Button>
           )}
 
-          {/* Save Memory button */}
+          {/* Save button */}
           <Button
             type="button"
             onClick={() => {
@@ -1167,7 +1172,7 @@ export function BookStyleReview({
                 Saving...
               </>
             ) : (
-              "Save Memory"
+              "Save"
             )}
           </Button>
 
