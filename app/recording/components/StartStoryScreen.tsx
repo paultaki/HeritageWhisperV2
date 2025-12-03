@@ -1,6 +1,6 @@
 "use client";
 
-import { Keyboard, MessageCircle } from "lucide-react";
+import { Keyboard, MessageCircle, Heart } from "lucide-react";
 import { type StartStoryScreenProps } from "../types";
 import "../recording.css";
 
@@ -8,7 +8,7 @@ import "../recording.css";
  * StartStoryScreen - Entry point for recording flow V3
  * Matches heritage-whisper-recorder reference design exactly
  */
-export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartStoryScreenProps) {
+export function StartStoryScreen({ onSelectMode, onCancel, promptText, familyFrom, familyRelationship }: StartStoryScreenProps) {
   return (
     <div className="hw-screen-wrapper" style={{ backgroundColor: "#F5F1ED" }}>
       {/* Header */}
@@ -37,20 +37,27 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText }: StartSt
           <div
             className="mb-6 p-4 rounded-xl border-2"
             style={{
-              backgroundColor: "#EBF4FF",
-              borderColor: "#2C5282",
+              backgroundColor: familyFrom ? "#FFFDF7" : "#EBF4FF",
+              borderColor: familyFrom ? "#CBA46A" : "#2C5282",
             }}
           >
             <div className="flex items-start gap-3">
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: "#2C5282" }}
+                style={{ backgroundColor: familyFrom ? "#CBA46A" : "#2C5282" }}
               >
-                <MessageCircle className="w-5 h-5 text-white" />
+                {familyFrom ? (
+                  <Heart className="w-5 h-5 text-white fill-current" />
+                ) : (
+                  <MessageCircle className="w-5 h-5 text-white" />
+                )}
               </div>
               <div>
-                <p className="text-sm font-medium mb-1" style={{ color: "#2C5282" }}>
-                  Your prompt
+                <p className="text-sm font-medium mb-1" style={{ color: familyFrom ? "#92400E" : "#2C5282" }}>
+                  {familyFrom
+                    ? `Question from ${familyFrom}${familyRelationship ? ` • ${familyRelationship}` : ''}`
+                    : 'Your prompt'
+                  }
                 </p>
                 <p className="text-lg font-semibold" style={{ color: "#1A202C" }}>
                   "{promptText}"

@@ -333,7 +333,7 @@ function FamilyPromptCard({
   onDismiss
 }: {
   prompt: FamilyPrompt;
-  onRecord: (id: string, text: string, source: string) => void;
+  onRecord: (id: string, text: string, source: string, familyPrompt?: FamilyPrompt) => void;
   onDismiss: (id: string) => void;
 }) {
   return (
@@ -385,7 +385,7 @@ function FamilyPromptCard({
 
       {/* Action */}
       <Button
-        onClick={() => onRecord(prompt.id, prompt.prompt_text, 'family')}
+        onClick={() => onRecord(prompt.id, prompt.prompt_text, 'family', prompt)}
         size="lg"
         className="w-full text-white text-base py-3 md:py-4 px-4 md:px-6 h-auto border-0 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
         style={{ background: '#CBA46A' }}
@@ -558,10 +558,23 @@ export default function PromptsV2Page() {
     },
   });
 
-  const handleRecord = (promptId: string, promptText: string, source: string) => {
+  const handleRecord = (promptId: string, promptText: string, source: string, familyPrompt?: FamilyPrompt) => {
     if (source === 'ai') {
       sessionStorage.setItem("activePromptId", promptId);
     }
+
+    // For family questions, go directly to recording page (skip mode selection)
+    if (source === 'family' && familyPrompt) {
+      const params = new URLSearchParams();
+      params.set("prompt", promptText);
+      params.set("familyFrom", familyPrompt.submittedBy.name);
+      if (familyPrompt.submittedBy.relationship) {
+        params.set("familyRelationship", familyPrompt.submittedBy.relationship);
+      }
+      router.push(`/recording?${params.toString()}`);
+      return;
+    }
+
     modeSelection.openModal(promptText);
   };
 

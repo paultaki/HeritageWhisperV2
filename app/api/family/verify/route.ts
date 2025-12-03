@@ -122,13 +122,17 @@ export async function GET(req: NextRequest) {
       });
     } else {
       // Update last accessed time and increment count
-      await supabaseAdmin
+      const { error: accessUpdateError } = await supabaseAdmin
         .from('family_members')
         .update({
           last_accessed_at: new Date().toISOString(),
           access_count: (familyMember.access_count || 0) + 1,
         })
         .eq('id', familyMember.id);
+
+      if (accessUpdateError) {
+        console.error('Failed to update access count:', accessUpdateError);
+      }
     }
 
     // SECURITY: Session rotation - invalidate old sessions before creating new one

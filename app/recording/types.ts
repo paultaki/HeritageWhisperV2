@@ -57,6 +57,8 @@ export interface StartStoryScreenProps {
   onSelectMode: (mode: RecordingMode) => void;
   onCancel: () => void;
   promptText?: string | null; // Prompt question from prompts page
+  familyFrom?: string | null; // Name of family member who submitted the question
+  familyRelationship?: string | null; // Relationship of family member (e.g., "Daughter")
 }
 
 export interface PhotoTitleScreenProps {
@@ -77,6 +79,12 @@ export interface AudioRecordingScreenProps {
   onCancel: () => void;
   /** When true, hides navigation elements for use in modal overlay */
   isOverlayMode?: boolean;
+  /** Prompt question text from prompts page */
+  promptText?: string | null;
+  /** Name of family member who submitted the question */
+  familyFrom?: string | null;
+  /** Relationship of family member (e.g., "Daughter") */
+  familyRelationship?: string | null;
 }
 
 export interface TextEntryScreenProps {

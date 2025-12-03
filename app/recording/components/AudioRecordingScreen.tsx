@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Pause, Play, Square, Mic, Loader2, Upload } from "lucide-react";
+import { ArrowLeft, Pause, Play, Square, Mic, Loader2, Upload, Heart, MessageCircle } from "lucide-react";
 import { type AudioRecordingScreenProps, type RecordingState } from "../types";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import "../recording.css";
@@ -19,6 +19,9 @@ export function AudioRecordingScreen({
   onSwitchToText,
   onCancel,
   isOverlayMode = false,
+  promptText,
+  familyFrom,
+  familyRelationship,
 }: AudioRecordingScreenProps) {
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -416,6 +419,43 @@ export function AudioRecordingScreen({
           >
             Record your story
           </h2>
+        </div>
+      )}
+
+      {/* Prompt Reference - shown when recording from a prompt */}
+      {promptText && !isOverlayMode && (
+        <div className="px-6 mb-4" style={{ maxWidth: "600px", margin: "0 auto" }}>
+          <div
+            className="p-4 rounded-xl border-2"
+            style={{
+              backgroundColor: familyFrom ? "#FFFDF7" : "#EBF4FF",
+              borderColor: familyFrom ? "#CBA46A" : "#2C5282",
+            }}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: familyFrom ? "#CBA46A" : "#2C5282" }}
+              >
+                {familyFrom ? (
+                  <Heart className="w-5 h-5 text-white fill-current" />
+                ) : (
+                  <MessageCircle className="w-5 h-5 text-white" />
+                )}
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-1" style={{ color: familyFrom ? "#92400E" : "#2C5282" }}>
+                  {familyFrom
+                    ? `Question from ${familyFrom}${familyRelationship ? ` • ${familyRelationship}` : ''}`
+                    : 'Your prompt'
+                  }
+                </p>
+                <p className="text-lg font-semibold" style={{ color: "#1A202C" }}>
+                  "{promptText}"
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

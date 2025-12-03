@@ -413,7 +413,7 @@ export function BookStyleReview({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#2c2416] via-[#1a1410] to-[#2c2416] md:bg-gradient-to-b md:from-amber-50 md:to-white overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-[#2c2416] via-[#1a1410] to-[#2c2416] md:bg-[var(--book-paper-cream,#F5F1E8)] overflow-x-hidden">
       {/* Recording Overlay - Uses AudioRecordingScreen with 30-min max, immediate transcription */}
       <AudioRecordingOverlay
         isOpen={showRecordingOverlay}
@@ -423,9 +423,9 @@ export function BookStyleReview({
       />
 
       {/* Top Navigation */}
-      <div className="sticky top-0 z-50 bg-[#faf8f5]/95 backdrop-blur-sm border-b border-[#8B6F47]/20">
+      <div className="sticky top-0 z-50 bg-[var(--book-paper-cream,#F5F1E8)]/95 backdrop-blur-sm border-b border-[var(--book-accent-sepia,#8B7355)]/20">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-2xl md:text-3xl font-serif text-gray-800">
+          <h1 className="text-2xl md:text-3xl font-serif text-[var(--book-text,#2D2926)]">
             Review Memory
           </h1>
           <Button
@@ -435,7 +435,7 @@ export function BookStyleReview({
               onSave();
             }}
             disabled={isSaving}
-            className="bg-[#203954] hover:bg-[#1B3047] text-white rounded-xl px-6 py-2 text-base font-medium shadow-md transition-all active:scale-[0.98]"
+            className="bg-[var(--book-accent-sepia,#8B7355)] hover:bg-[var(--book-accent-sepia,#8B7355)]/90 text-white rounded-[var(--book-radius-img,12px)] px-6 py-2 text-base font-medium shadow-[var(--book-shadow-soft)] transition-all active:scale-[0.98]"
           >
             {isSaving ? (
               <>
@@ -452,10 +452,12 @@ export function BookStyleReview({
       {/* Single Page Book View */}
       <div className="flex justify-center px-2 py-4 pb-16 md:px-4 md:py-8">
         {/* Desktop: Wrap in brown leather border like book */}
-        <div className="w-full max-w-3xl md:bg-[#2c2416] md:p-8 md:rounded-xl md:shadow-[inset_0_0_40px_rgba(0,0,0,0.4),0_20px_60px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)]">
+        <div className="w-full max-w-3xl md:bg-[#2c2416] md:p-8 md:rounded-[var(--book-radius,16px)] md:shadow-[inset_0_0_40px_rgba(0,0,0,0.4),0_20px_60px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)]">
           {/* Page content - cream background like book pages */}
-          <div className="bg-[#faf8f5] rounded-lg shadow-[0_2px_12px_rgba(139,111,71,0.15)] md:shadow-[0_0_40px_rgba(0,0,0,0.1)_inset,0_0_2px_rgba(0,0,0,0.1)]">
-            <div className="p-6 md:p-12 space-y-8">
+          <div className="relative bg-[var(--book-paper-cream,#F5F1E8)] rounded-[var(--book-radius-img,12px)] shadow-[var(--book-shadow-soft)]">
+            {/* Paper texture overlay */}
+            <div className="book-paper-texture--subtle rounded-[var(--book-radius-img,12px)]" />
+            <div className="relative p-6 md:p-12 space-y-8">
               {/* Audio Processing Card - Only show during active processing */}
               {audioProcessingStatus !== "idle" && audioProcessingStatus !== "complete" && (
                 <AudioProcessingCard
@@ -476,7 +478,7 @@ export function BookStyleReview({
                       onClick={handleReRecord}
                       variant="outline"
                       size="sm"
-                      className="border-[#E8DDD3] text-[#8B7355] hover:bg-[#FAF8F6]"
+                      className="border-[var(--book-border,#D4C5B5)] text-[var(--book-accent-sepia,#8B7355)] hover:bg-[var(--book-paper-cream,#F5F1E8)] rounded-[var(--book-radius-img,12px)]"
                     >
                       <RotateCcw className="w-4 h-4 mr-2" />
                       Re-record
@@ -486,7 +488,7 @@ export function BookStyleReview({
 
               {/* 1. Photo Section */}
               <div>
-                <h3 className="text-lg font-medium text-gray-700 mb-3 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-[var(--book-text-muted,#6B5E54)] mb-3 flex items-center gap-2">
                   <Camera className="w-5 h-5" />
                   Photos (Optional)
                 </h3>
@@ -500,12 +502,12 @@ export function BookStyleReview({
 
               {/* 2. Title - Always Visible Input with Border */}
               <div className="group relative">
-                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                <label className="text-sm font-medium text-[var(--book-text-muted,#6B5E54)] mb-2 block">
                   Story Title
                 </label>
                 <div
                   className={cn(
-                    "border-2 border-gray-300 rounded-lg px-4 py-3 focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all",
+                    "border-2 border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)] px-4 py-3 focus-within:border-[var(--book-accent-sepia,#8B7355)] focus-within:ring-2 focus-within:ring-[var(--book-accent-sepia,#8B7355)]/20 transition-all bg-white/50",
                     showFieldHighlights && !highlightsDismissed && "gentle-field-highlight gentle-field-highlight-delay-1"
                   )}
                   onClick={dismissHighlights}
@@ -516,7 +518,7 @@ export function BookStyleReview({
                     value={title}
                     onChange={(e) => onTitleChange(e.target.value)}
                     onFocus={dismissHighlights}
-                    className="w-full text-2xl font-serif text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 p-0"
+                    className="w-full text-2xl font-serif text-[var(--book-text,#2D2926)] bg-transparent border-none focus:outline-none focus:ring-0 p-0"
                     placeholder="Story title"
                   />
                 </div>
@@ -524,7 +526,7 @@ export function BookStyleReview({
 
               {/* 3. Date - Always Visible with Year, Month, Day */}
               <div className="group relative">
-                <label className="text-sm font-medium text-gray-700 mb-2 block flex items-center gap-2">
+                <label className="text-sm font-medium text-[var(--book-text-muted,#6B5E54)] mb-2 block flex items-center gap-2 uppercase tracking-wider">
                   <Calendar className="w-4 h-4" />
                   Story Date
                 </label>
@@ -532,10 +534,10 @@ export function BookStyleReview({
                   {/* Year Selector */}
                   <div
                     className={cn(
-                      "border-2 rounded-lg transition-all",
+                      "border-2 rounded-[var(--book-radius-img,12px)] transition-all bg-white/50",
                       highlightDateField
                         ? "border-red-500 ring-2 ring-red-500/20 animate-pulse"
-                        : "border-gray-300 focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20",
+                        : "border-[var(--book-border,#D4C5B5)] focus-within:border-[var(--book-accent-sepia,#8B7355)] focus-within:ring-2 focus-within:ring-[var(--book-accent-sepia,#8B7355)]/20",
                       showFieldHighlights && !highlightsDismissed && !highlightDateField && "gentle-field-highlight gentle-field-highlight-delay-2"
                     )}
                     onClick={dismissHighlights}
@@ -547,7 +549,7 @@ export function BookStyleReview({
                         dismissHighlights();
                       }}
                       onFocus={dismissHighlights}
-                      className="px-2 md:px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg cursor-pointer"
+                      className="px-2 md:px-4 py-3 text-[var(--book-text,#2D2926)] bg-transparent border-none focus:outline-none focus:ring-0 rounded-[var(--book-radius-img,12px)] cursor-pointer font-medium tabular-nums"
                     >
                       <option value="">Year</option>
                       {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => {
@@ -562,7 +564,7 @@ export function BookStyleReview({
                   </div>
 
                   {/* Month Input */}
-                  <div className="border-2 border-gray-300 rounded-lg focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all flex-shrink-0">
+                  <div className="border-2 border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)] focus-within:border-[var(--book-accent-sepia,#8B7355)] focus-within:ring-2 focus-within:ring-[var(--book-accent-sepia,#8B7355)]/20 transition-all flex-shrink-0 bg-white/50">
                     <input
                       type="text"
                       placeholder="Month"
@@ -573,13 +575,13 @@ export function BookStyleReview({
                           onMonthChange?.(value);
                         }
                       }}
-                      className="w-16 md:w-24 px-2 md:px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg"
+                      className="w-16 md:w-24 px-2 md:px-4 py-3 text-[var(--book-text,#2D2926)] bg-transparent border-none focus:outline-none focus:ring-0 rounded-[var(--book-radius-img,12px)] font-medium tabular-nums"
                       maxLength={2}
                     />
                   </div>
 
                   {/* Day Input */}
-                  <div className="border-2 border-gray-300 rounded-lg focus-within:border-[#8b6b7a] focus-within:ring-2 focus-within:ring-[#8b6b7a]/20 transition-all flex-shrink-0">
+                  <div className="border-2 border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)] focus-within:border-[var(--book-accent-sepia,#8B7355)] focus-within:ring-2 focus-within:ring-[var(--book-accent-sepia,#8B7355)]/20 transition-all flex-shrink-0 bg-white/50">
                     <input
                       type="text"
                       placeholder="Day"
@@ -590,13 +592,13 @@ export function BookStyleReview({
                           onDayChange?.(value);
                         }
                       }}
-                      className="w-14 md:w-20 px-2 md:px-4 py-3 text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 rounded-lg"
+                      className="w-14 md:w-20 px-2 md:px-4 py-3 text-[var(--book-text,#2D2926)] bg-transparent border-none focus:outline-none focus:ring-0 rounded-[var(--book-radius-img,12px)] font-medium tabular-nums"
                       maxLength={2}
                     />
                   </div>
                 </div>
                 {storyYear && age !== null && (
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-sm text-[var(--book-text-muted,#6B5E54)] mt-2 italic">
                     {age === 0 && "Birth year"}
                     {age > 0 && `You were ${age} years old`}
                     {age < 0 && "Before you were born"}
@@ -606,12 +608,12 @@ export function BookStyleReview({
 
               {/* 4. Audio Recording - Compact Horizontal Layout */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <h3 className="text-sm font-medium text-[var(--book-text-muted,#6B5E54)] mb-2 flex items-center gap-2 uppercase tracking-wider">
                   <Mic className="w-4 h-4" />
                   Audio (Optional)
                 </h3>
                 {audioUrl ? (
-                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="p-3 bg-[var(--book-paper-cream,#F5F1E8)]/60 rounded-[var(--book-radius-img,12px)] border border-[var(--book-border,#D4C5B5)]">
                     <CustomAudioPlayer
                       src={audioUrl}
                       knownDuration={audioDuration}
@@ -626,7 +628,7 @@ export function BookStyleReview({
                           setRemoveAudioAction('rerecord');
                           setShowRemoveAudioConfirm(true);
                         }}
-                        className="flex items-center gap-1.5"
+                        className="flex items-center gap-1.5 border-[var(--book-border,#D4C5B5)] text-[var(--book-accent-sepia,#8B7355)] hover:bg-[var(--book-paper-cream,#F5F1E8)] rounded-[var(--book-radius-img,12px)]"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
                         Re-record
@@ -639,21 +641,21 @@ export function BookStyleReview({
                           setRemoveAudioAction('remove');
                           setShowRemoveAudioConfirm(true);
                         }}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700 border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)]"
                       >
                         <X className="w-3.5 h-3.5" />
                       </Button>
                     </div>
                   </div>
                 ) : isProcessing ? (
-                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="p-4 bg-[var(--book-paper-cream,#F5F1E8)]/60 rounded-[var(--book-radius-img,12px)] border border-[var(--book-border,#D4C5B5)]">
                     <div className="flex items-center gap-3">
-                      <Loader2 className="w-6 h-6 text-coral-500 animate-spin flex-shrink-0" />
-                      <p className="text-sm text-gray-600">Processing audio...</p>
+                      <Loader2 className="w-6 h-6 text-[var(--book-accent-sepia,#8B7355)] animate-spin flex-shrink-0" />
+                      <p className="text-sm text-[var(--book-text-muted,#6B5E54)]">Processing audio...</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                  <div className="flex items-center gap-2 p-2 bg-[var(--book-paper-cream,#F5F1E8)]/40 rounded-[var(--book-radius-img,12px)] border border-dashed border-[var(--book-border,#D4C5B5)]">
                     <Button
                       type="button"
                       variant="outline"
@@ -662,7 +664,7 @@ export function BookStyleReview({
                         setIsInitialRecordingShow(false);
                         setShowRecordingOverlay(true);
                       }}
-                      className="flex items-center gap-1.5 h-9"
+                      className="flex items-center gap-1.5 h-9 border-[var(--book-border,#D4C5B5)] text-[var(--book-accent-sepia,#8B7355)] hover:bg-[var(--book-paper-cream,#F5F1E8)] rounded-[var(--book-radius-img,12px)]"
                     >
                       <Mic className="w-4 h-4" />
                       Record
@@ -778,7 +780,7 @@ export function BookStyleReview({
                           }
                         }, 1000);
                       }}
-                      className="flex items-center gap-1.5 h-9"
+                      className="flex items-center gap-1.5 h-9 border-[var(--book-border,#D4C5B5)] text-[var(--book-accent-sepia,#8B7355)] hover:bg-[var(--book-paper-cream,#F5F1E8)] rounded-[var(--book-radius-img,12px)]"
                     >
                       <Upload className="w-4 h-4" />
                       Upload
@@ -790,7 +792,7 @@ export function BookStyleReview({
               {/* 5. Your Story */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-medium text-gray-700">
+                  <h3 className="text-lg font-medium text-[var(--book-text-muted,#6B5E54)]">
                     Your Story
                   </h3>
                   <div className="flex items-center gap-2">
@@ -802,7 +804,7 @@ export function BookStyleReview({
                         disabled={isEnhancing}
                         size="sm"
                         variant="outline"
-                        className="hidden md:flex text-gray-600 hover:text-gray-900"
+                        className="hidden md:flex text-[var(--book-text-muted,#6B5E54)] hover:text-[var(--book-text,#2D2926)] border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)]"
                       >
                         <Undo2 className="w-4 h-4 mr-1.5" />
                         Undo Enhancement
@@ -818,7 +820,7 @@ export function BookStyleReview({
                         disabled={isEnhancing}
                         size="sm"
                         variant="outline"
-                        className="md:hidden text-gray-600 hover:text-gray-900"
+                        className="md:hidden text-[var(--book-text-muted,#6B5E54)] hover:text-[var(--book-text,#2D2926)] border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)]"
                       >
                         <Undo2 className="w-4 h-4 mr-1.5" />
                         Undo
@@ -830,7 +832,7 @@ export function BookStyleReview({
                         disabled={isEnhancing || !transcription?.trim()}
                         size="sm"
                         variant="outline"
-                        className="md:hidden text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200"
+                        className="md:hidden text-[var(--book-accent-sepia,#8B7355)] hover:text-[var(--book-accent-sepia,#8B7355)]/80 hover:bg-[var(--book-paper-cream,#F5F1E8)] border-[var(--book-accent-sepia,#8B7355)]/30 rounded-[var(--book-radius-img,12px)]"
                       >
                         {isEnhancing ? (
                           <>
@@ -853,7 +855,7 @@ export function BookStyleReview({
                       disabled={isEnhancing || !transcription?.trim()}
                       size="sm"
                       variant="outline"
-                      className="hidden md:flex text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200"
+                      className="hidden md:flex text-[var(--book-accent-sepia,#8B7355)] hover:text-[var(--book-accent-sepia,#8B7355)]/80 hover:bg-[var(--book-paper-cream,#F5F1E8)] border-[var(--book-accent-sepia,#8B7355)]/30 rounded-[var(--book-radius-img,12px)]"
                     >
                       {isEnhancing ? (
                         <>
@@ -887,11 +889,17 @@ export function BookStyleReview({
                   value={transcription}
                   onChange={(e) => onTranscriptionChange(e.target.value)}
                   className={cn(
-                    "w-full min-h-[300px] resize-none bg-white border-gray-300 rounded-lg p-4 text-gray-800 leading-relaxed font-serif text-lg focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-gray-400",
+                    "w-full min-h-[300px] resize-none bg-white/80 border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)] p-4 text-[var(--book-text,#2D2926)] focus:outline-none focus:ring-2 focus:ring-[var(--book-accent-sepia,#8B7355)]/30 focus:border-[var(--book-accent-sepia,#8B7355)] placeholder:text-[var(--book-text-muted,#6B5E54)]/60",
+                    // Book typography: Crimson Text with proper line height
+                    "font-[var(--book-font-serif,'Crimson_Text',Georgia,serif)] text-lg leading-[var(--book-line-height,1.85)]",
                     (transcriptionStatus !== "complete" &&
                       transcriptionStatus !== "idle") &&
                     "opacity-60 cursor-not-allowed"
                   )}
+                  style={{
+                    fontFamily: "var(--book-font-serif, 'Crimson Text', Georgia, serif)",
+                    lineHeight: "var(--book-line-height, 1.85)",
+                  }}
                   placeholder={
                     transcriptionStatus === "transcribing"
                       ? "Transcribing your story..."
@@ -908,7 +916,7 @@ export function BookStyleReview({
 
                 {transcription && (
                   <div className="flex items-center justify-between mt-2">
-                    <p className="text-base text-gray-500">
+                    <p className="text-base text-[var(--book-text-muted,#6B5E54)]">
                       {
                         transcription.split(" ").filter((w) => w.length > 0)
                           .length
@@ -916,7 +924,7 @@ export function BookStyleReview({
                       words
                     </p>
                     {isEnhancing && (
-                      <p className="text-base text-purple-600 flex items-center gap-2">
+                      <p className="text-base text-[var(--book-accent-sepia,#8B7355)] flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Heritage Whisper Storyteller enhancing your story...
                       </p>
@@ -929,8 +937,8 @@ export function BookStyleReview({
               <div>
                 <div className="group relative">
                   {/* Centered Heading */}
-                  <h3 className="text-lg font-medium text-gray-700 flex items-center justify-center gap-2 mb-3">
-                    <Sparkles className="w-5 h-5 text-amber-500" />
+                  <h3 className="text-lg font-medium text-[var(--book-text-muted,#6B5E54)] flex items-center justify-center gap-2 mb-3">
+                    <Sparkles className="w-5 h-5 text-[var(--book-accent-gold,#C5A572)]" />
                     Lesson Learned
                   </h3>
 
@@ -946,7 +954,7 @@ export function BookStyleReview({
                       size="sm"
                       variant="outline"
                       className={cn(
-                        "text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200",
+                        "text-[var(--book-accent-gold,#C5A572)] hover:text-[var(--book-accent-gold,#C5A572)]/80 hover:bg-[var(--book-accent-gold,#C5A572)]/10 border-[var(--book-accent-gold,#C5A572)]/30 rounded-[var(--book-radius-img,12px)]",
                         showFieldHighlights && !highlightsDismissed && "gentle-field-highlight gentle-field-highlight-delay-3"
                       )}
                     >
@@ -966,33 +974,33 @@ export function BookStyleReview({
 
                   {/* Lesson Options Display */}
                   {showLessonOptions && lessonOptions && (
-                    <div className="mb-4 space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-sm font-medium text-blue-900">Choose a lesson or edit it:</p>
+                    <div className="mb-4 space-y-3 p-4 bg-[var(--book-accent-gold,#C5A572)]/10 rounded-[var(--book-radius-img,12px)] border border-[var(--book-accent-gold,#C5A572)]/30">
+                      <p className="text-sm font-medium text-[var(--book-text,#2D2926)]">Choose a lesson or edit it:</p>
                       {lessonOptions.practical && (
                         <button
                           onClick={() => handleSelectLesson(lessonOptions.practical!)}
-                          className="w-full text-left p-3 bg-white rounded border border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                          className="w-full text-left p-3 bg-white/80 rounded-[var(--book-radius-img,12px)] border border-[var(--book-border,#D4C5B5)] hover:border-[var(--book-accent-gold,#C5A572)] hover:bg-[var(--book-accent-gold,#C5A572)]/5 transition-colors"
                         >
-                          <p className="text-xs text-blue-600 font-medium mb-1">Practical</p>
-                          <p className="text-base text-gray-700">{lessonOptions.practical}</p>
+                          <p className="text-xs text-[var(--book-accent-gold,#C5A572)] font-medium mb-1 uppercase tracking-wider">Practical</p>
+                          <p className="text-base text-[var(--book-text,#2D2926)]">{lessonOptions.practical}</p>
                         </button>
                       )}
                       {lessonOptions.emotional && (
                         <button
                           onClick={() => handleSelectLesson(lessonOptions.emotional!)}
-                          className="w-full text-left p-3 bg-white rounded border border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                          className="w-full text-left p-3 bg-white/80 rounded-[var(--book-radius-img,12px)] border border-[var(--book-border,#D4C5B5)] hover:border-[var(--book-accent-gold,#C5A572)] hover:bg-[var(--book-accent-gold,#C5A572)]/5 transition-colors"
                         >
-                          <p className="text-xs text-blue-600 font-medium mb-1">Emotional</p>
-                          <p className="text-base text-gray-700">{lessonOptions.emotional}</p>
+                          <p className="text-xs text-[var(--book-accent-gold,#C5A572)] font-medium mb-1 uppercase tracking-wider">Emotional</p>
+                          <p className="text-base text-[var(--book-text,#2D2926)]">{lessonOptions.emotional}</p>
                         </button>
                       )}
                       {lessonOptions.character && (
                         <button
                           onClick={() => handleSelectLesson(lessonOptions.character!)}
-                          className="w-full text-left p-3 bg-white rounded border border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                          className="w-full text-left p-3 bg-white/80 rounded-[var(--book-radius-img,12px)] border border-[var(--book-border,#D4C5B5)] hover:border-[var(--book-accent-gold,#C5A572)] hover:bg-[var(--book-accent-gold,#C5A572)]/5 transition-colors"
                         >
-                          <p className="text-xs text-blue-600 font-medium mb-1">Character</p>
-                          <p className="text-base text-gray-700">{lessonOptions.character}</p>
+                          <p className="text-xs text-[var(--book-accent-gold,#C5A572)] font-medium mb-1 uppercase tracking-wider">Character</p>
+                          <p className="text-base text-[var(--book-text,#2D2926)]">{lessonOptions.character}</p>
                         </button>
                       )}
                       <Button
@@ -1000,7 +1008,7 @@ export function BookStyleReview({
                         onClick={() => setShowLessonOptions(false)}
                         size="sm"
                         variant="ghost"
-                        className="w-full"
+                        className="w-full text-[var(--book-text-muted,#6B5E54)]"
                       >
                         Cancel
                       </Button>
@@ -1009,62 +1017,49 @@ export function BookStyleReview({
 
                   {!editingWisdom ? (
                     <div
-                      className="wisdom-quote relative p-6 clear-both cursor-pointer hover:shadow-lg transition-shadow"
+                      className="wisdom-quote relative p-6 clear-both cursor-pointer hover:shadow-[var(--book-shadow-lifted)] transition-shadow rounded-[var(--book-radius-img,12px)]"
                       onClick={() => {
                         setTempWisdom(wisdomText);
                         setEditingWisdom(true);
                       }}
                       style={{
-                        background: '#FFFFFF',
-                        backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #E0E0E0 31px, #E0E0E0 32px)',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                        borderRadius: '4px',
-                        border: '1px solid #D0D0D0',
-                        paddingTop: '40px',
+                        background: 'var(--book-accent-gold-soft, #F8F3E8)',
+                        boxShadow: 'var(--book-shadow-soft, 0 2px 8px rgba(139,115,85,0.15))',
+                        border: '1px solid var(--book-accent-gold, #C5A572)',
+                        borderLeftWidth: '4px',
                       }}
                     >
-                      {/* Red vertical margin line (like notebook paper) */}
-                      <div
-                        className="absolute top-0 left-8 bottom-0 w-[2px] pointer-events-none"
-                        style={{
-                          background: '#FF6B6B',
-                          opacity: 0.3,
-                        }}
-                      ></div>
-
                       <p
-                        className="text-sm mb-2 relative z-10 pl-6"
+                        className="text-sm mb-2 relative z-10 uppercase tracking-wider font-medium"
                         style={{
-                          fontFamily: '"Caveat", cursive',
-                          fontSize: '18px',
-                          color: '#8b6b7a',
-                          fontWeight: 600,
-                          lineHeight: '32px',
+                          color: 'var(--book-accent-gold, #C5A572)',
+                          fontSize: '12px',
+                          letterSpacing: '0.1em',
                         }}
                       >
                         Lesson Learned
                       </p>
                       <p
-                        className="relative z-10 pl-6"
+                        className="relative z-10 italic"
                         style={{
-                          fontFamily: '"Caveat", cursive',
-                          fontSize: '22px',
-                          color: '#2c2c2c',
-                          lineHeight: '32px',
+                          fontFamily: "var(--book-font-serif, 'Crimson Text', Georgia, serif)",
+                          fontSize: '18px',
+                          color: 'var(--book-text, #2D2926)',
+                          lineHeight: 'var(--book-line-height, 1.85)',
                         }}
                       >
                         {wisdomText ||
                           "Click to add a lesson or wisdom from this memory..."}
                       </p>
-                      <div className="flex items-center gap-2 mt-4 relative z-10 pl-6">
-                        <Edit2 className="w-4 h-4 text-gray-400" />
+                      <div className="flex items-center gap-2 mt-4 relative z-10">
+                        <Edit2 className="w-4 h-4 text-[var(--book-accent-gold,#C5A572)]" />
                         {wisdomText && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation(); // Prevent triggering edit mode
                               onWisdomChange("");
                             }}
-                            className="text-gray-400 hover:text-red-600 transition-colors"
+                            className="text-[var(--book-text-muted,#6B5E54)] hover:text-red-600 transition-colors"
                             title="Delete lesson"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -1084,7 +1079,10 @@ export function BookStyleReview({
                             setEditingWisdom(false);
                           }
                         }}
-                        className="min-h-[100px]"
+                        className="min-h-[100px] border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)] focus:border-[var(--book-accent-gold,#C5A572)] focus:ring-[var(--book-accent-gold,#C5A572)]/30"
+                        style={{
+                          fontFamily: "var(--book-font-serif, 'Crimson Text', Georgia, serif)",
+                        }}
                         placeholder="What lesson or wisdom would you share from this memory?"
                       />
                       <div className="flex gap-2">
@@ -1093,7 +1091,7 @@ export function BookStyleReview({
                           size="sm"
                           variant="outline"
                           onClick={handleWisdomSave}
-                          className="text-green-600"
+                          className="text-[var(--book-accent-sepia,#8B7355)] border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)]"
                         >
                           <Check className="w-4 h-4 mr-1" />
                           Save
@@ -1107,7 +1105,7 @@ export function BookStyleReview({
                             setTempWisdom("");
                             setEditingWisdom(false);
                           }}
-                          className="text-amber-600"
+                          className="text-[var(--book-accent-gold,#C5A572)] border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)]"
                         >
                           Remove
                         </Button>
@@ -1119,7 +1117,7 @@ export function BookStyleReview({
                             setTempWisdom(wisdomText);
                             setEditingWisdom(false);
                           }}
-                          className="text-red-600"
+                          className="text-red-600 border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)]"
                         >
                           <X className="w-4 h-4 mr-1" />
                           Cancel
@@ -1144,7 +1142,7 @@ export function BookStyleReview({
               variant="outline"
               onClick={() => setShowDeleteConfirm(true)}
               disabled={isSaving}
-              className="bg-white hover:bg-red-50 text-red-600 hover:text-red-700 border-2 border-red-200 hover:border-red-300 rounded-2xl py-6 text-lg font-medium transition-all active:scale-[0.99]"
+              className="bg-white hover:bg-red-50 text-red-600 hover:text-red-700 border-2 border-red-200 hover:border-red-300 rounded-[var(--book-radius,16px)] py-6 text-lg font-medium transition-all active:scale-[0.99]"
             >
               <Trash2 className="w-5 h-5 mr-2" />
               Delete
@@ -1161,7 +1159,7 @@ export function BookStyleReview({
               onSave();
             }}
             disabled={isSaving}
-            className="bg-[#203954] hover:bg-[#1B3047] text-white rounded-2xl py-6 text-lg font-medium shadow-lg shadow-blue-900/10 transition-all active:scale-[0.99]"
+            className="bg-[var(--book-accent-sepia,#8B7355)] hover:bg-[var(--book-accent-sepia,#8B7355)]/90 text-white rounded-[var(--book-radius,16px)] py-6 text-lg font-medium shadow-[var(--book-shadow-soft)] transition-all active:scale-[0.99]"
           >
             {isSaving ? (
               <>
@@ -1178,7 +1176,7 @@ export function BookStyleReview({
             type="button"
             onClick={onCancel}
             disabled={isSaving}
-            className="bg-white hover:bg-gray-50 text-[#203954] border-2 border-[#E5E7EB] rounded-2xl py-6 text-lg font-medium transition-all active:scale-[0.99]"
+            className="bg-white hover:bg-[var(--book-paper-cream,#F5F1E8)] text-[var(--book-text,#2D2926)] border-2 border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius,16px)] py-6 text-lg font-medium transition-all active:scale-[0.99]"
           >
             Cancel
           </Button>

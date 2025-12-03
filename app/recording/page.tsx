@@ -27,6 +27,8 @@ function RecordingContent() {
   const [step, setStep] = useState<FlowStep>("start");
   const [originStep, setOriginStep] = useState<FlowStep | null>(null);
   const [promptText, setPromptText] = useState<string | null>(null);
+  const [familyFrom, setFamilyFrom] = useState<string | null>(null);
+  const [familyRelationship, setFamilyRelationship] = useState<string | null>(null);
   const [draft, setDraft] = useState<Partial<StoryDraft>>({
     recordingMode: "audio",
   });
@@ -52,6 +54,16 @@ function RecordingContent() {
     if (promptParam) {
       setPromptText(promptParam);
       setDraft((prev) => ({ ...prev, sourcePromptText: promptParam }));
+    }
+
+    // Get family member info if this is a family question
+    const familyFromParam = searchParams.get("familyFrom");
+    const familyRelationshipParam = searchParams.get("familyRelationship");
+    if (familyFromParam) {
+      setFamilyFrom(familyFromParam);
+    }
+    if (familyRelationshipParam) {
+      setFamilyRelationship(familyRelationshipParam);
     }
 
     // Check for starter template from timeline ghost stories
@@ -224,6 +236,8 @@ function RecordingContent() {
           onSelectMode={handleSelectMode}
           onCancel={handleCancel}
           promptText={promptText}
+          familyFrom={familyFrom}
+          familyRelationship={familyRelationship}
         />
       )}
 
@@ -246,6 +260,9 @@ function RecordingContent() {
           onSaveForLater={handleSaveForLater}
           onSwitchToText={handleSwitchToText}
           onCancel={handleCancelConfirmed}
+          promptText={promptText}
+          familyFrom={familyFrom}
+          familyRelationship={familyRelationship}
         />
       )}
 
