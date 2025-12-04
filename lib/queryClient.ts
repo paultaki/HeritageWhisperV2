@@ -274,7 +274,22 @@ export const getQueryFn: <T>(options: {
         if (e instanceof Error && e.message.includes('expired')) {
           throw e;
         }
+        // Parse error - handle based on URL requirements (matching apiRequest behavior)
+        if (!queryUrl.includes("/api/share/") && !queryUrl.includes("/api/auth/")) {
+          if (unauthorizedBehavior === "returnNull") {
+            return null;
+          }
+          throw new Error("Authentication required. Please sign in again.");
+        }
       }
+    }
+    
+    // If still no auth header and URL requires auth, handle appropriately
+    if (!headers["Authorization"] && !queryUrl.includes("/api/share/") && !queryUrl.includes("/api/auth/")) {
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      }
+      throw new Error("Authentication required. Please sign in again.");
     }
 
     const res = await fetch(getApiUrl(queryUrl), {

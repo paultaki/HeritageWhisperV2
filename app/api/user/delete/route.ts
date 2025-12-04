@@ -6,6 +6,7 @@ import { stories } from "@/shared/schema";
 import { eq } from "drizzle-orm";
 
 import { getPasskeySession } from "@/lib/iron-session";
+
 // Initialize Supabase Admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -28,6 +29,8 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
  * 3. Deletes user agreements and shared access records
  * 4. Deletes the user from auth.users (Supabase Auth)
  * 5. Deletes the user record from public.users
+ *
+ * Performance: Uses batch deletes and parallel operations where safe
  */
 export async function DELETE(request: NextRequest) {
   try {
@@ -78,7 +81,7 @@ export async function DELETE(request: NextRequest) {
       `[Account Deletion] Found ${userStories.length} stories to delete`,
     );
 
-    // Step 2: Delete all files from Supabase Storage
+    // Step 2: Collect all file paths (fast in-memory operation)
     const filesToDelete: string[] = [];
 
     for (const story of userStories) {
@@ -102,7 +105,7 @@ export async function DELETE(request: NextRequest) {
       }
     }
 
-    // Delete all files from storage
+    // Step 3: Delete files from storage (batch operation)
     if (filesToDelete.length > 0) {
       logger.debug(
         `[Account Deletion] Deleting ${filesToDelete.length} files from storage`,
@@ -126,94 +129,81 @@ export async function DELETE(request: NextRequest) {
       }
     }
 
-    // Also delete the entire user folder to catch any orphaned files
+    // Step 4: Clean up user folders in parallel
     const userFolderPaths = [`audio/${userId}`, `photo/${userId}`];
 
-    for (const folderPath of userFolderPaths) {
-      try {
-        const { data: folderFiles } = await supabaseAdmin.storage
-          .from("heritage-whisper-files")
-          .list(folderPath);
-
-        if (folderFiles && folderFiles.length > 0) {
-          const folderFilePaths = folderFiles.map(
-            (file) => `${folderPath}/${file.name}`,
-          );
-          await supabaseAdmin.storage
+    await Promise.all(
+      userFolderPaths.map(async (folderPath) => {
+        try {
+          const { data: folderFiles } = await supabaseAdmin.storage
             .from("heritage-whisper-files")
-            .remove(folderFilePaths);
+            .list(folderPath);
 
-          logger.debug(
-            `[Account Deletion] Cleaned up ${folderFilePaths.length} files from ${folderPath}`,
+          if (folderFiles && folderFiles.length > 0) {
+            const folderFilePaths = folderFiles.map(
+              (file) => `${folderPath}/${file.name}`,
+            );
+            await supabaseAdmin.storage
+              .from("heritage-whisper-files")
+              .remove(folderFilePaths);
+
+            logger.debug(
+              `[Account Deletion] Cleaned up ${folderFilePaths.length} files from ${folderPath}`,
+            );
+          }
+        } catch (error) {
+          logger.error(
+            `[Account Deletion] Error cleaning folder ${folderPath}:`,
+            error,
           );
+          // Continue with deletion
         }
-      } catch (error) {
-        logger.error(
-          `[Account Deletion] Error cleaning folder ${folderPath}:`,
-          error,
-        );
-        // Continue with deletion
+      }),
+    );
+
+    // Step 5: Delete database records
+    // Group 1: Independent tables (can be deleted in parallel)
+    logger.debug("[Account Deletion] Deleting independent records in parallel...");
+
+    // Helper to safely delete from tables that may not exist
+    const safeDelete = async (table: string, column: string) => {
+      try {
+        await supabaseAdmin.from(table).delete().eq(column, userId);
+      } catch {
+        // Table may not exist, continue silently
       }
-    }
+    };
 
-    // Step 3: Delete all database records (cascade will handle related records)
-    // Delete in order to avoid foreign key constraints
-    // Using Supabase client queries (graceful error handling for missing tables)
+    await Promise.all([
+      supabaseAdmin.from('family_activity').delete().eq('user_id', userId),
+      safeDelete('family_prompts', 'storyteller_user_id'),
+      supabaseAdmin.from('family_members').delete().eq('user_id', userId),
+      supabaseAdmin.from('shared_access').delete().eq('owner_user_id', userId),
+      supabaseAdmin.from('shared_access').delete().eq('shared_with_user_id', userId),
+      supabaseAdmin.from('user_agreements').delete().eq('user_id', userId),
+      supabaseAdmin.from('ai_usage_log').delete().eq('user_id', userId),
+      supabaseAdmin.from('historical_context').delete().eq('user_id', userId),
+      supabaseAdmin.from('profiles').delete().eq('user_id', userId),
+      safeDelete('passkeys', 'user_id'),
+    ]);
 
-    // Delete family activity
-    await supabaseAdmin.from('family_activity').delete().eq('user_id', userId);
-    logger.debug("[Account Deletion] Deleted family activity records");
+    logger.debug("[Account Deletion] Deleted independent records");
 
-    // Delete family prompts (graceful - may not exist yet)
-    try {
-      await supabaseAdmin.from('family_prompts').delete().eq('storyteller_user_id', userId);
-      logger.debug("[Account Deletion] Deleted family prompt records");
-    } catch (error) {
-      logger.debug("[Account Deletion] Family prompts table not available");
-    }
+    // Group 2: Prompt-related tables (can be deleted in parallel)
+    await Promise.all([
+      supabaseAdmin.from('active_prompts').delete().eq('user_id', userId),
+      supabaseAdmin.from('prompt_history').delete().eq('user_id', userId),
+      supabaseAdmin.from('user_prompts').delete().eq('user_id', userId),
+      supabaseAdmin.from('ghost_prompts').delete().eq('user_id', userId),
+    ]);
 
-    // Delete family members
-    await supabaseAdmin.from('family_members').delete().eq('user_id', userId);
-    logger.debug("[Account Deletion] Deleted family member records");
+    logger.debug("[Account Deletion] Deleted prompt records");
 
-    // Delete shared access (both owned and shared with)
-    await supabaseAdmin.from('shared_access').delete().eq('owner_user_id', userId);
-    await supabaseAdmin.from('shared_access').delete().eq('shared_with_user_id', userId);
-    logger.debug("[Account Deletion] Deleted shared access records");
-
-    // Delete user agreements
-    await supabaseAdmin.from('user_agreements').delete().eq('user_id', userId);
-    logger.debug("[Account Deletion] Deleted user agreement records");
-
-    // Delete AI prompt data
-    await supabaseAdmin.from('active_prompts').delete().eq('user_id', userId);
-    await supabaseAdmin.from('prompt_history').delete().eq('user_id', userId);
-    await supabaseAdmin.from('user_prompts').delete().eq('user_id', userId);
-    await supabaseAdmin.from('ghost_prompts').delete().eq('user_id', userId);
-    logger.debug("[Account Deletion] Deleted AI prompt records");
-
-    // Delete AI usage logs
-    await supabaseAdmin.from('ai_usage_log').delete().eq('user_id', userId);
-    logger.debug("[Account Deletion] Deleted AI usage log records");
-
-    // Delete personalization data
-    await supabaseAdmin.from('historical_context').delete().eq('user_id', userId);
-    await supabaseAdmin.from('profiles').delete().eq('user_id', userId);
-    logger.debug("[Account Deletion] Deleted personalization records");
-
-    // Delete passkeys (graceful - may not exist yet)
-    try {
-      await supabaseAdmin.from('passkeys').delete().eq('user_id', userId);
-      logger.debug("[Account Deletion] Deleted passkey records");
-    } catch (error) {
-      logger.debug("[Account Deletion] Passkeys table not available");
-    }
-
-    // Delete stories (this should cascade to follow_ups via DB constraints)
+    // Group 3: Stories (depends on prompts being deleted first due to potential FKs)
     await supabaseAdmin.from('stories').delete().eq('user_id', userId);
     logger.debug("[Account Deletion] Deleted story records");
 
-    // Step 4: Delete user from Supabase Auth
+    // Step 6: Delete user from Supabase Auth
     const { error: authDeleteError } =
       await supabaseAdmin.auth.admin.deleteUser(userId);
 
@@ -227,7 +217,7 @@ export async function DELETE(request: NextRequest) {
       logger.debug("[Account Deletion] Deleted user from Supabase Auth");
     }
 
-    // Step 5: Delete user record from public.users
+    // Step 7: Delete user record from public.users (must be last)
     await supabaseAdmin.from('users').delete().eq('id', userId);
     logger.debug("[Account Deletion] Deleted user record from database");
 

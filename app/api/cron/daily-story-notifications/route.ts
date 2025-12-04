@@ -28,8 +28,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
  * 5. Update last_story_notification_sent_at timestamp
  * 6. Respect user email notification preferences
  *
- * Note: This complements immediate notifications (sent when story is created).
- * If immediate notification succeeded, this cron skips those stories via timestamp check.
+ * Performance: Uses JOIN query to fetch all data in one request (was N+3 queries per member)
  */
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
@@ -64,17 +63,19 @@ export async function GET(request: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dev.heritagewhisper.com';
 
   // ============================================================================
-  // STEP 3: Find Family Members Who Need Notifications
+  // STEP 3: Fetch All Data in One Query (Optimized)
   // ============================================================================
-  // Query logic:
-  // - Status must be 'active' (not pending or suspended)
-  // - Either never been notified (last_story_notification_sent_at IS NULL)
-  // - OR last notified more than 24 hours ago
+  // Single query with JOIN to get:
+  // - Family members who need notifications
+  // - Their storyteller info
+  // - Story counts since last notification
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  logger.info('[DailyNotifications] Querying family members who need notifications...');
+  logger.info('[DailyNotifications] Fetching family members with storyteller data...');
 
-  const { data: familyMembers, error: membersError } = await supabaseAdmin
+  // Get family members with their storyteller info in one query
+  const { data: membersWithStorytellers, error: membersError } = await supabaseAdmin
     .from('family_members')
     .select(`
       id,
@@ -83,10 +84,15 @@ export async function GET(request: NextRequest) {
       name,
       relationship,
       last_story_notification_sent_at,
-      email_notifications
+      email_notifications,
+      users!family_members_user_id_fkey (
+        id,
+        name,
+        email_notifications
+      )
     `)
     .eq('status', 'active')
-    .eq('email_notifications', true) // Only notify users who haven't unsubscribed
+    .eq('email_notifications', true)
     .or(`last_story_notification_sent_at.is.null,last_story_notification_sent_at.lt.${twentyFourHoursAgo}`);
 
   if (membersError) {
@@ -97,7 +103,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (!familyMembers || familyMembers.length === 0) {
+  if (!membersWithStorytellers || membersWithStorytellers.length === 0) {
     logger.info('[DailyNotifications] No family members need notifications');
     return NextResponse.json({
       success: true,
@@ -107,79 +113,99 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  logger.info(`[DailyNotifications] Found ${familyMembers.length} family members to check`);
+  // Filter out members whose storytellers have email notifications disabled
+  // Note: Supabase returns users as array type but it's actually a single object due to FK
+  type Storyteller = { id: string; name: string; email_notifications: boolean };
+  const eligibleMembers = membersWithStorytellers.filter(
+    (m) => {
+      const storyteller = m.users as unknown as Storyteller | null;
+      return storyteller && storyteller.email_notifications !== false;
+    }
+  );
+
+  if (eligibleMembers.length === 0) {
+    logger.info('[DailyNotifications] All storytellers have notifications disabled');
+    return NextResponse.json({
+      success: true,
+      message: 'No notifications needed - storytellers have notifications disabled',
+      totalFamilyMembers: membersWithStorytellers.length,
+      emailsSent: 0,
+    });
+  }
+
+  logger.info(`[DailyNotifications] Found ${eligibleMembers.length} eligible family members`);
+
+  // Get unique storyteller IDs to batch fetch stories
+  const storytellerIds = [...new Set(eligibleMembers.map((m) => m.user_id))];
+
+  // Batch fetch all recent stories for all storytellers at once
+  const { data: allStories, error: storiesError } = await supabaseAdmin
+    .from('stories')
+    .select('id, user_id, title, year, photo_url, created_at')
+    .in('user_id', storytellerIds)
+    .gte('created_at', sevenDaysAgo) // Get stories from last 7 days (we'll filter per-member later)
+    .order('created_at', { ascending: false });
+
+  if (storiesError) {
+    logger.error('[DailyNotifications] Error fetching stories:', storiesError);
+    return NextResponse.json(
+      { error: 'Failed to fetch stories', details: storiesError.message },
+      { status: 500 }
+    );
+  }
+
+  // Index stories by user_id for fast lookup
+  const storiesByUser = new Map<string, typeof allStories>();
+  for (const story of allStories || []) {
+    if (!storiesByUser.has(story.user_id)) {
+      storiesByUser.set(story.user_id, []);
+    }
+    storiesByUser.get(story.user_id)!.push(story);
+  }
+
+  logger.info(`[DailyNotifications] Fetched ${allStories?.length || 0} stories for ${storytellerIds.length} storytellers`);
 
   // ============================================================================
-  // STEP 4: For Each Family Member, Find New Stories
+  // STEP 4: Process Each Family Member and Send Emails
   // ============================================================================
   const results = {
-    totalFamilyMembers: familyMembers.length,
+    totalFamilyMembers: eligibleMembers.length,
     emailsSent: 0,
     skipped: 0,
     errors: [] as string[],
   };
 
-  for (const member of familyMembers) {
+  // Track member IDs that need timestamp updates (batch at end)
+  const membersToUpdate: string[] = [];
+
+  for (const member of eligibleMembers) {
     try {
-      // Get the timestamp to query stories from
-      // If never notified, get all stories from the last 7 days (safety window)
-      // If previously notified, get stories since that timestamp
+      const storyteller = member.users as unknown as Storyteller | null;
+      if (!storyteller) {
+        results.skipped++;
+        continue;
+      }
+
+      // Get the timestamp to filter stories
       const sinceDate = member.last_story_notification_sent_at
         ? new Date(member.last_story_notification_sent_at)
-        : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
+        : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-      // ========================================================================
-      // STEP 4A: Check Storyteller's Email Notification Preference
-      // ========================================================================
-      const { data: storyteller, error: storytellerError } = await supabaseAdmin
-        .from('users')
-        .select('id, name, email_notifications')
-        .eq('id', member.user_id)
-        .single();
-
-      if (storytellerError || !storyteller) {
-        logger.error(`[DailyNotifications] Failed to fetch storyteller for member ${member.id}:`, storytellerError);
-        results.skipped++;
-        continue;
-      }
-
-      // Respect storyteller's email notification preferences
-      if (storyteller.email_notifications === false) {
-        logger.info(`[DailyNotifications] Skipping member ${member.id} - storyteller has email notifications disabled`);
-        results.skipped++;
-        continue;
-      }
-
-      // ========================================================================
-      // STEP 4B: Query New Stories Since Last Notification
-      // ========================================================================
-      const { data: newStories, error: storiesError } = await supabaseAdmin
-        .from('stories')
-        .select('id, title, year, photo_url, created_at')
-        .eq('user_id', member.user_id)
-        .gt('created_at', sinceDate.toISOString())
-        .order('created_at', { ascending: false });
-
-      if (storiesError) {
-        logger.error(`[DailyNotifications] Error fetching stories for member ${member.id}:`, storiesError);
-        results.errors.push(`Failed to fetch stories for ${member.email}: ${storiesError.message}`);
-        continue;
-      }
+      // Filter stories for this member's storyteller that are newer than their last notification
+      const memberStories = (storiesByUser.get(member.user_id) || []).filter(
+        (story) => new Date(story.created_at) > sinceDate
+      );
 
       // Skip if no new stories
-      if (!newStories || newStories.length === 0) {
-        logger.info(`[DailyNotifications] No new stories for member ${member.id}`);
+      if (memberStories.length === 0) {
         results.skipped++;
         continue;
       }
 
-      logger.info(`[DailyNotifications] Found ${newStories.length} new stories for member ${member.id}`);
+      logger.info(`[DailyNotifications] Found ${memberStories.length} new stories for member ${member.id}`);
 
-      // ========================================================================
-      // STEP 5: Send Email Notification
-      // ========================================================================
       // Use the FIRST story for the email (most recent)
-      const firstStory = newStories[0];
+      const firstStory = memberStories[0];
 
       // Generate signed URL for hero photo if it exists
       let heroPhotoUrl: string | undefined;
@@ -200,21 +226,18 @@ export async function GET(request: NextRequest) {
       const emailContent = NewStoryNotificationEmail({
         storytellerName: storyteller.name || 'Your family member',
         familyMemberName: member.name || undefined,
-        familyMemberId: member.id, // For unsubscribe link
+        familyMemberId: member.id,
         storyTitle: firstStory.title || 'Untitled Story',
         storyYear: firstStory.year || undefined,
         heroPhotoUrl,
-        firstSentence: undefined, // We don't have transcript in this query
+        firstSentence: undefined,
         viewStoryLink,
       });
 
       // Customize subject for batch notifications
-      let customSubject: string;
-      if (newStories.length === 1) {
-        customSubject = `${storyteller.name} just shared a new story`;
-      } else {
-        customSubject = `${storyteller.name} shared ${newStories.length} new stories`;
-      }
+      const customSubject = memberStories.length === 1
+        ? `${storyteller.name} just shared a new story`
+        : `${storyteller.name} shared ${memberStories.length} new stories`;
 
       // Send email via Resend
       const { data: emailData, error: emailError } = await resend.emails.send({
@@ -232,32 +255,36 @@ export async function GET(request: NextRequest) {
       }
 
       logger.info(`[DailyNotifications] ✅ Email sent to ${member.email} (Resend ID: ${emailData?.id})`);
-
-      // ========================================================================
-      // STEP 6: Update Last Notification Timestamp
-      // ========================================================================
-      const now = new Date().toISOString();
-      const { error: updateError } = await supabaseAdmin
-        .from('family_members')
-        .update({ last_story_notification_sent_at: now })
-        .eq('id', member.id);
-
-      if (updateError) {
-        logger.error(`[DailyNotifications] Failed to update timestamp for member ${member.id}:`, updateError);
-        // Don't fail the entire operation, just log the error
-        results.errors.push(`Failed to update timestamp for ${member.email}: ${updateError.message}`);
-      }
-
+      membersToUpdate.push(member.id);
       results.emailsSent++;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error(`[DailyNotifications] Unexpected error processing member ${member.id}:`, error);
-      results.errors.push(`Unexpected error for ${member.email}: ${error.message}`);
+      results.errors.push(`Unexpected error for ${member.email}: ${errorMessage}`);
     }
   }
 
   // ============================================================================
-  // STEP 7: Log Final Results
+  // STEP 5: Batch Update Timestamps (Single Query)
+  // ============================================================================
+  if (membersToUpdate.length > 0) {
+    const now = new Date().toISOString();
+    const { error: updateError } = await supabaseAdmin
+      .from('family_members')
+      .update({ last_story_notification_sent_at: now })
+      .in('id', membersToUpdate);
+
+    if (updateError) {
+      logger.error('[DailyNotifications] Failed to batch update timestamps:', updateError);
+      results.errors.push(`Failed to update timestamps: ${updateError.message}`);
+    } else {
+      logger.info(`[DailyNotifications] Updated timestamps for ${membersToUpdate.length} members`);
+    }
+  }
+
+  // ============================================================================
+  // STEP 6: Log Final Results
   // ============================================================================
   const duration = Date.now() - startTime;
 
