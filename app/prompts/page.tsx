@@ -558,6 +558,20 @@ export default function PromptsV2Page() {
     },
   });
 
+  // Mark family questions as seen when visiting this page (clears notification badges)
+  useEffect(() => {
+    if (user && isOwnAccount) {
+      apiRequest("POST", "/api/prompts/family-mark-seen")
+        .then(() => {
+          // Invalidate the unread count query to update the navigation badges
+          queryClient.invalidateQueries({ queryKey: ["/api/prompts/family-unread-count"] });
+        })
+        .catch((error) => {
+          console.error("Failed to mark family prompts as seen:", error);
+        });
+    }
+  }, [user, isOwnAccount, queryClient]);
+
   const handleRecord = (promptId: string, promptText: string, source: string, familyPrompt?: FamilyPrompt) => {
     if (source === 'ai') {
       sessionStorage.setItem("activePromptId", promptId);

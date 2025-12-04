@@ -796,6 +796,7 @@ export const familyPrompts = pgTable("family_prompts", {
   promptText: text("prompt_text").notNull(),
   status: text("status").default("pending"), // 'pending', 'answered', 'archived'
   answeredAt: timestamp("answered_at"),
+  seenAt: timestamp("seen_at"), // When storyteller first viewed this question (NULL = unseen, shows badge)
   createdAt: timestamp("created_at").default(sql`NOW()`),
 });
 

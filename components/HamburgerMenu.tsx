@@ -25,6 +25,7 @@ import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
 import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,6 +45,21 @@ export default function HamburgerMenu() {
     enabled: !!user,
     retry: false,
   });
+
+  // Fetch unread family questions count for notification badge
+  const { data: unreadData } = useQuery({
+    queryKey: ["/api/prompts/family-unread-count"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/prompts/family-unread-count");
+      if (!response.ok) throw new Error("Failed to fetch unread count");
+      return response.json();
+    },
+    enabled: !!user && isOwnAccount,
+    refetchInterval: 60000, // Refresh every minute
+    staleTime: 30000, // Consider data stale after 30 seconds
+  });
+
+  const unreadCount = (unreadData as any)?.count || 0;
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -120,13 +136,17 @@ export default function HamburgerMenu() {
       {/* Hamburger Button - Just lines, no circle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 transition-all"
+        className="p-2 transition-all relative"
         aria-label="Menu"
       >
         {isOpen ? (
           <X className="w-6 h-6 text-gray-700" />
         ) : (
           <Menu className="w-6 h-6 text-gray-700" />
+        )}
+        {/* Notification badge on hamburger icon */}
+        {unreadCount > 0 && !isOpen && (
+          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-heritage-coral rounded-full ring-2 ring-white" />
         )}
       </button>
 
@@ -190,6 +210,7 @@ export default function HamburgerMenu() {
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
+                const showBadge = item.href === "/prompts" && unreadCount > 0;
 
                 return (
                   <button
@@ -198,7 +219,12 @@ export default function HamburgerMenu() {
                     className={`w-full flex items-center px-4 py-2.5 text-sm text-gray-700 transition-colors ${isActive ? "bg-heritage-coral/10 text-heritage-coral" : "hover:bg-gray-50"}`}
                   >
                     <Icon className="w-4 h-4 mr-3" />
-                    {item.label}
+                    <span className="flex-1 text-left">{item.label}</span>
+                    {showBadge && (
+                      <span className="ml-2 px-1.5 py-0.5 text-xs font-semibold bg-heritage-coral text-white rounded-full min-w-[1.25rem] text-center">
+                        {unreadCount}
+                      </span>
+                    )}
                   </button>
                 );
               })}

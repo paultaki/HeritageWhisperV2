@@ -25,7 +25,7 @@ function formatDate(dateString: string | undefined): string {
   }
 }
 
-export default function BookPageCard({ story, isActive, caveatFont, pageNumber }: BookPageCardProps) {
+export default function BookPageCard({ story, isActive, caveatFont, pageNumber, isPriority = false }: BookPageCardProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [showContinueHint, setShowContinueHint] = useState(false);
   const [showFade, setShowFade] = useState(false);
@@ -35,7 +35,16 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
   const fixedPadding = 56;
 
   // Get all photos (must be before state initialization)
-  const photos = story.photos || (story.photoUrl ? [{ url: story.photoUrl, transform: story.photoTransform, width: undefined, height: undefined, isHero: false }] : []);
+  // Note: Legacy photoUrl fallback needs all fields for type compatibility
+  const photos = story.photos || (story.photoUrl ? [{ 
+    url: story.photoUrl, 
+    displayUrl: undefined,
+    masterUrl: undefined,
+    transform: story.photoTransform, 
+    width: undefined, 
+    height: undefined, 
+    isHero: false 
+  }] : []);
 
   // Photo carousel state - initialize to hero image index to avoid flash
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(() => {
@@ -50,7 +59,9 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const currentPhoto = photos[currentPhotoIndex];
-  const photoUrl = currentPhoto?.url;
+  // Use displayUrl (550px) as base, masterUrl (2400px) for high-res foreground
+  const photoUrl = currentPhoto?.displayUrl || currentPhoto?.url;
+  const masterUrl = currentPhoto?.masterUrl;
   const photoTransform = currentPhoto?.transform;
   const photoWidth = currentPhoto?.width;
   const photoHeight = currentPhoto?.height;
@@ -250,11 +261,16 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
               {photoUrl ? (
                 <StoryPhotoWithBlurExtend
                   src={photoUrl}
+                  masterUrl={masterUrl}
                   alt={story.title}
                   transform={photoTransform}
                   width={photoWidth}
                   height={photoHeight}
                   aspectRatio={4 / 3}
+                  quality={90}
+                  priority={isPriority}
+                  useRawImg={true}
+                  sizes="100vw"
                   className="h-full w-full transition-all duration-200 group-hover:brightness-105 group-hover:scale-[1.02]"
                 />
               ) : (
@@ -305,7 +321,9 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber }
             {photos.length > 0 && (
               <PhotoLightbox
                 photos={photos.map(p => ({
-                  url: p.url || '',
+                  url: p.masterUrl || p.url || '', // Use masterUrl for full-screen lightbox
+                  displayUrl: p.displayUrl,
+                  masterUrl: p.masterUrl,
                   caption: undefined,
                   transform: p.transform,
                   width: p.width,

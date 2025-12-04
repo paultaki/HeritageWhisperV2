@@ -59,6 +59,7 @@ interface BookPageV4Props {
   fontSize?: number;
   isOwnAccount?: boolean;
   viewMode?: 'chronological' | 'chapters';
+  isPriority?: boolean; // Whether images should load with priority (for first visible spread)
 }
 
 /**
@@ -76,7 +77,7 @@ interface BookPageV4Props {
  * - Hover-only edit button
  */
 export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
-  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory, fontSize = 18, isOwnAccount = true, viewMode = 'chronological' }, ref) => {
+  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory, fontSize = 18, isOwnAccount = true, viewMode = 'chronological', isPriority = false }, ref) => {
     const pageRef = React.useRef<HTMLDivElement>(null);
     const [scrollState, setScrollState] = React.useState<{
       hasScroll: boolean;
@@ -493,7 +494,7 @@ export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
                 }}
                 aria-label="Scroll down to continue reading"
               >
-                <StoryContentV4 story={story as Story} position={position} pageNum={pageNum} fontSize={fontSize} isOwnAccount={isOwnAccount} />
+                <StoryContentV4 story={story as Story} position={position} pageNum={pageNum} fontSize={fontSize} isOwnAccount={isOwnAccount} isPriority={isPriority} />
               </div>
 
               {/* Gradient fade indicator - shows when there's more content below */}
@@ -523,7 +524,7 @@ BookPageV4.displayName = "BookPageV4";
 /**
  * StoryContentV4 - Enhanced Story Content with Premium Styling
  */
-function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount = true }: { story: Story; position: "left" | "right"; pageNum: number; fontSize?: number; isOwnAccount?: boolean }) {
+function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount = true, isPriority = false }: { story: Story; position: "left" | "right"; pageNum: number; fontSize?: number; isOwnAccount?: boolean; isPriority?: boolean }) {
   const router = useRouter();
 
   // Photo state
@@ -596,7 +597,9 @@ function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount 
       {/* Photo with premium frame */}
       {photos.length > 0 && (() => {
         const currentPhoto = photos[currentPhotoIndex];
+        // Use displayUrl (550px) as base, masterUrl (2400px) for high-res foreground
         const photoUrl = currentPhoto?.displayUrl || currentPhoto?.url;
+        const masterUrl = currentPhoto?.masterUrl;
 
         if (!photoUrl) return null;
 
@@ -626,11 +629,16 @@ function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount 
               >
                 <StoryPhotoWithBlurExtend
                   src={photoUrl}
+                  masterUrl={masterUrl}
                   alt={story.title}
                   width={currentPhoto.width}
                   height={currentPhoto.height}
                   transform={currentPhoto.transform}
                   aspectRatio={4 / 3}
+                  quality={90}
+                  priority={isPriority}
+                  useRawImg={true}
+                  sizes="(min-width: 1024px) 680px, 100vw"
                   className="shadow-sm ring-1 ring-black/5 transition-all duration-200 group-hover:brightness-105 group-hover:scale-[1.02]"
                 />
 
@@ -675,8 +683,9 @@ function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount 
 
             <PhotoLightbox
               photos={photos.map(p => ({
-                url: p.url || '',
+                url: p.masterUrl || p.url || '', // Use masterUrl for full-screen lightbox
                 displayUrl: p.displayUrl,
+                masterUrl: p.masterUrl,
                 caption: p.caption,
                 transform: p.transform,
                 width: p.width,

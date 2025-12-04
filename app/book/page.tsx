@@ -3,7 +3,7 @@
 // Prevent static generation for this user-specific page
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense, lazy } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
@@ -13,7 +13,9 @@ import { getApiUrl } from "@/lib/config";
 import { BookPageV4 } from "./components/BookPageV4";
 import DarkBookProgressBarV4 from "./components/DarkBookProgressBarV4";
 import { BookPage as BookPageType } from "@/lib/bookPagination";
-import MobileBookViewV2 from "../book-new/components/MobileBookViewV2";
+
+// Lazy load mobile book view to reduce initial bundle for desktop users (~30-50KB savings)
+const MobileBookViewV2 = lazy(() => import("../book-new/components/MobileBookViewV2"));
 
 // Import premium book CSS
 import "./book.css";
@@ -46,6 +48,7 @@ interface Story {
     id: string;
     url: string;
     displayUrl?: string;
+    masterUrl?: string;
     transform?: { zoom: number; position: { x: number; y: number } };
     caption?: string;
     isHero?: boolean;
@@ -499,6 +502,53 @@ function BookV4PageContent() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentSpreadIndex, spreads.length, goToPrevSpread, goToNextSpread]);
 
+  // Preload images for adjacent spreads (reduces perceived navigation delay)
+  useEffect(() => {
+    if (!isBookOpen || spreads.length === 0) return;
+    
+    // Ensure currentSpreadIndex is valid
+    if (currentSpreadIndex < 0 || currentSpreadIndex >= spreads.length) return;
+
+    // Helper to extract photo URLs from a spread page
+    const getPhotoUrls = (page: typeof spreads[0]['left'] | typeof spreads[0]['right']): string[] => {
+      if (!page || typeof page === 'string' || 'type' in page) return [];
+      const story = page as Story;
+      if (!story.photos || story.photos.length === 0) return [];
+      
+      // Prefer masterUrl for high-res, fall back to displayUrl/url
+      return story.photos
+        .map(p => p.masterUrl || p.displayUrl || p.url)
+        .filter((url): url is string => !!url);
+    };
+
+    // Collect URLs from adjacent spreads
+    const urlsToPreload: string[] = [];
+    
+    // Next spread
+    if (currentSpreadIndex < spreads.length - 1) {
+      const nextSpread = spreads[currentSpreadIndex + 1];
+      if (nextSpread) {
+        urlsToPreload.push(...getPhotoUrls(nextSpread.left));
+        urlsToPreload.push(...getPhotoUrls(nextSpread.right));
+      }
+    }
+    
+    // Previous spread (for back navigation)
+    if (currentSpreadIndex > 0) {
+      const prevSpread = spreads[currentSpreadIndex - 1];
+      if (prevSpread) {
+        urlsToPreload.push(...getPhotoUrls(prevSpread.left));
+        urlsToPreload.push(...getPhotoUrls(prevSpread.right));
+      }
+    }
+
+    // Preload images using Image constructor (browser will cache them)
+    urlsToPreload.forEach(url => {
+      const img = new Image();
+      img.src = url;
+    });
+  }, [currentSpreadIndex, spreads, isBookOpen]);
+
   // URL parameter navigation
   const [navigatedStoryId, setNavigatedStoryId] = useState<string | null>(null);
 
@@ -594,15 +644,27 @@ function BookV4PageContent() {
     }
   };
 
+  // Mobile loading fallback for lazy-loaded component
+  const MobileLoadingFallback = (
+    <div className="flex h-[100dvh] w-screen items-center justify-center bg-neutral-950">
+      <div className="text-center">
+        <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-[#8B7355]/30 border-t-[#8B7355] mx-auto"></div>
+        <p className="text-sm text-white/60">Loading your story...</p>
+      </div>
+    </div>
+  );
+
   // Closed book cover
   if (!isBookOpen) {
     return (
       <>
         <div className="lg:hidden">
-          <MobileBookViewV2
-            initialStoryId={urlStoryId}
-            caveatFont={caveat.className}
-          />
+          <Suspense fallback={MobileLoadingFallback}>
+            <MobileBookViewV2
+              initialStoryId={urlStoryId}
+              caveatFont={caveat.className}
+            />
+          </Suspense>
         </div>
 
         <div className="hidden lg:block hw-page-full overflow-hidden antialiased selection:bg-indigo-500/30 selection:text-indigo-100 text-slate-200 bg-[#0b0d12]">
@@ -642,10 +704,12 @@ function BookV4PageContent() {
     <>
       {/* Mobile view */}
       <div className="lg:hidden">
-        <MobileBookViewV2
-          initialStoryId={urlStoryId}
-          caveatFont={caveat.className}
-        />
+        <Suspense fallback={MobileLoadingFallback}>
+          <MobileBookViewV2
+            initialStoryId={urlStoryId}
+            caveatFont={caveat.className}
+          />
+        </Suspense>
       </div>
 
       {/* Desktop: Book view */}
@@ -748,6 +812,7 @@ function BookV4PageContent() {
                 fontSize={fontSize}
                 isOwnAccount={isOwnAccount}
                 viewMode={viewMode}
+                isPriority={currentSpreadIndex === 0}
               />
 
               {/* Left page */}
@@ -762,6 +827,7 @@ function BookV4PageContent() {
                 fontSize={fontSize}
                 isOwnAccount={isOwnAccount}
                 viewMode={viewMode}
+                isPriority={currentSpreadIndex === 0}
               />
 
               {/* Spine */}

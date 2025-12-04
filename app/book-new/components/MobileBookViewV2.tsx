@@ -404,15 +404,22 @@ export default function MobileBookViewV2({
           touchAction: "pan-x pan-y", // Allow both horizontal swipe and vertical scroll within pages
         }}
       >
-        {bookPages.map((page, index) => (
-          <BookPageRenderer
-            key={index}
-            page={page}
-            isActive={index === currentIndex}
-            caveatFont={caveatFont}
-            pageNumber={index + 1}
-          />
-        ))}
+        {bookPages.map((page, index) => {
+          // Find first story page index for priority loading
+          const firstStoryIndex = bookPages.findIndex(p => p.type === "story");
+          const isPriority = page.type === "story" && index === firstStoryIndex;
+          
+          return (
+            <BookPageRenderer
+              key={index}
+              page={page}
+              isActive={index === currentIndex}
+              caveatFont={caveatFont}
+              pageNumber={index + 1}
+              isPriority={isPriority}
+            />
+          );
+        })}
       </div>
 
       {/* Navigation arrows */}

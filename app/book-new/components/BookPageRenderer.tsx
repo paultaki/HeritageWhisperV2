@@ -15,6 +15,7 @@ export default function BookPageRenderer({
   isActive,
   caveatFont,
   pageNumber,
+  isPriority = false,
 }: BookPageRendererProps) {
   switch (page.type) {
     case "cover":
@@ -98,6 +99,7 @@ export default function BookPageRenderer({
           isActive={isActive}
           caveatFont={caveatFont}
           pageNumber={pageNumber}
+          isPriority={isPriority}
         />
       );
 

@@ -58,6 +58,7 @@ export interface BookPageCardProps {
   isActive: boolean;
   caveatFont?: string; // Handwritten font class name
   pageNumber?: number; // Page number for display in bottom corner
+  isPriority?: boolean; // Whether images should load with priority (for first visible story)
 }
 
 /**
@@ -123,4 +124,5 @@ export interface BookPageRendererProps {
   isActive: boolean;
   caveatFont?: string;
   pageNumber?: number; // Page number for display
+  isPriority?: boolean; // Whether images should load with priority (for first story)
 }

@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export interface LightboxPhoto {
   url: string;
   displayUrl?: string;
+  masterUrl?: string; // High-res (2400px) for full-screen lightbox
   caption?: string;
   transform?: { zoom: number; position: { x: number; y: number } };
   width?: number;
@@ -85,7 +86,8 @@ export function PhotoLightbox({
 
   const hasMultiplePhotos = photos.length > 1;
   const currentPhoto = photos[currentIndex];
-  const photoUrl = currentPhoto?.displayUrl || currentPhoto?.url;
+  // Prefer masterUrl (2400px) for full-screen lightbox display
+  const photoUrl = currentPhoto?.masterUrl || currentPhoto?.url;
 
   // Navigation handlers
   const goToPrev = useCallback(() => {
