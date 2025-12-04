@@ -128,6 +128,7 @@ export function StoryPhotoWithBlurExtend({
       {(useRawImg || masterUrl) ? (
         // Use raw img tag to bypass Next.js optimization entirely
         // This matches the lightbox behavior and guarantees full quality
+        // Use auto sizing (like lightbox) instead of 100% to preserve image sharpness
         <img
           src={masterUrl || src}
           alt={alt}
@@ -135,8 +136,12 @@ export function StoryPhotoWithBlurExtend({
             ...transformStyle,
             position: 'absolute',
             inset: 0,
-            width: '100%',
-            height: '100%',
+            width: 'auto',
+            height: 'auto',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            margin: 'auto', // center the image within the container
+            imageRendering: 'auto', // ensure high-quality rendering
           }}
           className={cn(
             "z-10",

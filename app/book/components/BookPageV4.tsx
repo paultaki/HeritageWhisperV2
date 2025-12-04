@@ -605,7 +605,7 @@ function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount 
 
         return (
           <div className="mb-3 mx-auto" style={{ maxWidth: "85%" }}>
-            <PhotoFrame storyId={story.id}>
+            <PhotoFrame storyId={story.id} rotation="none">
               <div
                 className="relative overflow-hidden cursor-pointer group"
                 style={{ aspectRatio: "4 / 3", borderRadius: 'var(--book-radius-img)' }}
