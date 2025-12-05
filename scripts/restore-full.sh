@@ -9,15 +9,24 @@
 set -e
 
 # Configuration
-PROJECT_REF="tjycibrhoammxohemyhq"
+PROJECT_REF="pwuzksomxnbdndeeivzf"
 BUCKET_NAME="heritage-whisper-files"
+PROJECT_DIR="/Users/paul/Development/HeritageWhisper"
+
+# Database connection
+DB_HOST="aws-0-us-west-2.pooler.supabase.com"
+DB_USER="postgres.$PROJECT_REF"
+DB_NAME="postgres"
+DB_PORT="5432"
 
 # Check arguments
+BACKUP_ROOT="/Volumes/OWC Express 1M2/HW Supabase Backup"
+
 if [ -z "$1" ]; then
     echo "Usage: ./scripts/restore-full.sh /path/to/backup/folder"
     echo ""
     echo "Available backups:"
-    ls -la ~/Backups/HeritageWhisper/ 2>/dev/null || echo "  No backups found in ~/Backups/HeritageWhisper/"
+    ls -la "$BACKUP_ROOT" 2>/dev/null || echo "  No backups found (is external drive connected?)"
     exit 1
 fi
 
@@ -64,27 +73,17 @@ echo ""
 # ============================================
 echo "📦 Step 1/2: Restoring database..."
 
-# Get database password
-if [ -z "$SUPABASE_DB_PASSWORD" ]; then
-    echo ""
-    echo "To get your password:"
-    echo "1. Go to: https://supabase.com/dashboard/project/$PROJECT_REF/settings/database"
-    echo "2. Use your database password"
-    echo ""
-    read -sp "Enter your database password: " SUPABASE_DB_PASSWORD
-    echo ""
-fi
-
-DB_HOST="db.$PROJECT_REF.supabase.co"
-DB_USER="postgres"
-DB_NAME="postgres"
+# Auto-extract password from DATABASE_URL in .env.local
+DATABASE_URL=$(grep "^DATABASE_URL=" "$PROJECT_DIR/.env.local" | cut -d= -f2-)
+SUPABASE_DB_PASSWORD=$(echo "$DATABASE_URL" | sed -E 's|.*://[^:]+:([^@]+)@.*|\1|' | python3 -c "import sys, urllib.parse; print(urllib.parse.unquote(sys.stdin.read().strip()))")
+echo "   Using database password from .env.local"
 
 export PGPASSWORD="$SUPABASE_DB_PASSWORD"
 
 echo "   Restoring database (this may take a few minutes)..."
 /opt/homebrew/opt/postgresql@17/bin/pg_restore \
     -h "$DB_HOST" \
-    -p 5432 \
+    -p "$DB_PORT" \
     -U "$DB_USER" \
     -d "$DB_NAME" \
     --clean \
@@ -108,17 +107,84 @@ STORAGE_DIR="$BACKUP_DIR/storage"
 if [ ! -d "$STORAGE_DIR" ] || [ -z "$(ls -A "$STORAGE_DIR" 2>/dev/null)" ]; then
     echo "   ⚠️  No storage files found in backup, skipping..."
 else
-    # Check if logged into Supabase
-    if ! supabase projects list &>/dev/null; then
-        echo "   Please log into Supabase CLI..."
-        supabase login
-    fi
+    # Create upload script
+    UPLOAD_SCRIPT="$PROJECT_DIR/scripts/upload-storage-temp.mjs"
+    cat > "$UPLOAD_SCRIPT" << 'NODESCRIPT'
+import { createClient } from '@supabase/supabase-js';
+import { readFile, readdir, stat } from 'fs/promises';
+import { join } from 'path';
 
-    echo "   Uploading files to '$BUCKET_NAME'..."
-    supabase storage cp -r "$STORAGE_DIR/" "ss:///$BUCKET_NAME" --project-ref "$PROJECT_REF" 2>&1 || {
-        echo "   ⚠️  Some files may have failed to upload. Check manually."
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+const bucketName = process.env.BUCKET_NAME;
+const inputDir = process.env.INPUT_DIR;
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function getAllFiles(dir, baseDir = dir) {
+  const files = [];
+  const entries = await readdir(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...await getAllFiles(fullPath, baseDir));
+    } else {
+      const relativePath = fullPath.replace(baseDir + '/', '');
+      files.push({ fullPath, relativePath });
+    }
+  }
+  return files;
+}
+
+async function uploadFile(bucket, filePath, relativePath) {
+  try {
+    const fileBuffer = await readFile(filePath);
+    const { error } = await supabase.storage.from(bucket).upload(relativePath, fileBuffer, {
+      upsert: true
+    });
+
+    if (error) {
+      console.error(`  ❌ ${relativePath}: ${error.message}`);
+      return false;
+    }
+    console.log(`  ✓ ${relativePath}`);
+    return true;
+  } catch (err) {
+    console.error(`  ❌ ${relativePath}: ${err.message}`);
+    return false;
+  }
+}
+
+async function main() {
+  console.log(`   Finding files in backup...`);
+  const files = await getAllFiles(inputDir);
+  console.log(`   Found ${files.length} files to upload.`);
+
+  let uploaded = 0;
+  for (const { fullPath, relativePath } of files) {
+    if (await uploadFile(bucketName, fullPath, relativePath)) {
+      uploaded++;
+    }
+  }
+
+  console.log(`   Uploaded ${uploaded}/${files.length} files.`);
+}
+
+main().catch(console.error);
+NODESCRIPT
+
+    echo "   Uploading files to storage..."
+    cd "$PROJECT_DIR"
+    SUPABASE_URL="https://$PROJECT_REF.supabase.co" \
+    SUPABASE_SERVICE_KEY="$(grep SUPABASE_SERVICE_ROLE_KEY "$PROJECT_DIR/.env.local" | cut -d= -f2)" \
+    BUCKET_NAME="$BUCKET_NAME" \
+    INPUT_DIR="$STORAGE_DIR" \
+    node "$UPLOAD_SCRIPT" 2>&1 || {
+        echo "   ⚠️  Some files may have failed to upload."
     }
 
+    rm -f "$UPLOAD_SCRIPT"
     echo "   ✅ Storage restored"
 fi
 

@@ -11,13 +11,20 @@ set -e
 # Configuration - from .env.local
 PROJECT_REF="pwuzksomxnbdndeeivzf"
 BUCKET_NAME="heritage-whisper-files"
-BACKUP_ROOT="$HOME/Backups/HeritageWhisper"
+BACKUP_ROOT="/Volumes/OWC Express 1M2/HW Supabase Backup"
 
 # Database connection from DATABASE_URL
 DB_HOST="aws-0-us-west-2.pooler.supabase.com"
 DB_USER="postgres.$PROJECT_REF"
 DB_NAME="postgres"
 DB_PORT="5432"
+
+# Check if external drive is connected
+if [ ! -d "$BACKUP_ROOT" ]; then
+    echo "❌ External drive not found: $BACKUP_ROOT"
+    echo "   Please connect your OWC Express drive and try again."
+    exit 1
+fi
 
 # Create dated backup folder
 BACKUP_DATE=$(date +%Y-%m-%d_%H%M%S)
@@ -37,20 +44,18 @@ echo ""
 # ============================================
 echo "📦 Step 1/2: Backing up database..."
 
-# Check if we have the database password
+# Get database password
+PASSWORD_FILE="$HOME/.heritagewhisper/db-password"
 if [ -z "$SUPABASE_DB_PASSWORD" ]; then
-    echo ""
-    echo "⚠️  Database password required."
-    echo ""
-    echo "Your password (from DATABASE_URL): HeriTaG3Wh9sperCantd#l3g3"
-    echo "(Or get it from: https://supabase.com/dashboard/project/$PROJECT_REF/settings/database)"
-    echo ""
-    read -sp "Enter your database password (or press Enter to use the one above): " SUPABASE_DB_PASSWORD
-    echo ""
-
-    # Use default if empty
-    if [ -z "$SUPABASE_DB_PASSWORD" ]; then
-        SUPABASE_DB_PASSWORD="HeriTaG3Wh9sperCantd#l3g3"
+    if [ -f "$PASSWORD_FILE" ]; then
+        SUPABASE_DB_PASSWORD=$(cat "$PASSWORD_FILE")
+        echo "   Using stored database password"
+    else
+        echo ""
+        echo "   Get your password from: https://supabase.com/dashboard/project/$PROJECT_REF/settings/database"
+        echo ""
+        read -sp "   Enter database password: " SUPABASE_DB_PASSWORD
+        echo ""
     fi
 fi
 
