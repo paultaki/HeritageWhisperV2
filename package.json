@@ -52,6 +52,7 @@
     "@types/pg": "^8.15.5",
     "@upstash/ratelimit": "^2.0.6",
     "@upstash/redis": "^1.35.4",
+    "@use-gesture/react": "^10.3.1",
     "@wavesurfer/react": "^1.0.11",
     "assemblyai": "^4.17.0",
     "bcryptjs": "^3.0.2",

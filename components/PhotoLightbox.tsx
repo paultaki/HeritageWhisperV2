@@ -19,6 +19,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ZoomableImage } from "./ZoomableImage";
 
 export interface LightboxPhoto {
   url: string;
@@ -68,8 +69,6 @@ export function PhotoLightbox({
 }: PhotoLightboxProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
 
   // Only render portal on client side
@@ -176,36 +175,6 @@ export function PhotoLightbox({
     };
   }, [isOpen]);
 
-  // Touch handlers for swipe gestures
-  const minSwipeDistance = 75;
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (hasMultiplePhotos) {
-      if (isLeftSwipe) {
-        goToNext();
-      } else if (isRightSwipe) {
-        goToPrev();
-      }
-    }
-
-    setTouchStart(null);
-    setTouchEnd(null);
-  };
 
   // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -301,36 +270,35 @@ export function PhotoLightbox({
             style={{ width: '100vw', height: '100vh' }}
             variants={photoVariants}
             transition={transition}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
             onClick={handleBackdropClick}
           >
             <div
               className="relative flex items-center justify-center"
+              style={{
+                maxWidth: 'min(90vw, 100%)',
+                maxHeight: '85vh',
+                width: '100%',
+                height: '100%',
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* 
-                Photo display logic:
-                - Shows at native size (100%) if image fits within viewport
-                - Scales down to fit if image is larger than viewport
-                - Max constraints: 90vw width, 85vh height (leaves room for padding/controls)
+                ZoomableImage handles:
+                - Pinch-to-zoom (1x to 4x)
+                - Pan when zoomed
+                - Double-tap to toggle zoom
+                - Proper touch-action handling
               */}
-              <img
+              <ZoomableImage
                 src={photoUrl}
                 alt={alt}
-                className="rounded-lg shadow-2xl"
-                style={{
-                  maxWidth: 'min(90vw, 100%)',
-                  maxHeight: '85vh',
-                  width: 'auto',
-                  height: 'auto',
-                  objectFit: 'contain',
-                  ...(currentPhoto.transform ? {
-                    transform: `scale(${currentPhoto.transform.zoom}) translate(${currentPhoto.transform.position.x}%, ${currentPhoto.transform.position.y}%)`,
-                    transformOrigin: 'center center',
-                  } : {}),
-                }}
+                className="w-full h-full rounded-lg shadow-2xl"
+                resetKey={currentIndex}
+                style={currentPhoto.transform ? {
+                  // Apply any pre-set transform from photo editing
+                  transform: `scale(${currentPhoto.transform.zoom}) translate(${currentPhoto.transform.position.x}%, ${currentPhoto.transform.position.y}%)`,
+                  transformOrigin: 'center center',
+                } : undefined}
               />
             </div>
           </motion.div>
