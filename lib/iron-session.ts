@@ -3,10 +3,13 @@
  *
  * This module manages encrypted httpOnly cookies for passkey sessions.
  * The cookie stores the RLS JWT token for server-side Supabase calls.
+ *
+ * SECURITY: Uses validated env vars from lib/env.ts
  */
 
 import { getIronSession, IronSession } from "iron-session";
 import { cookies } from "next/headers";
+import { env } from "@/lib/env";
 
 // Session data structure
 export interface PasskeySessionData {
@@ -17,10 +20,16 @@ export interface PasskeySessionData {
   expiresAt: number;
 }
 
+// Validate password at module load (fail fast if missing in production)
+const sessionPassword = env.IRON_SESSION_PASSWORD;
+if (!sessionPassword && process.env.NODE_ENV === 'production') {
+  throw new Error('IRON_SESSION_PASSWORD is required in production');
+}
+
 // Iron session configuration
 const sessionOptions = {
-  password: process.env.IRON_SESSION_PASSWORD!,
-  cookieName: process.env.COOKIE_NAME || "hw_passkey_session",
+  password: sessionPassword || 'development-only-password-min-32-chars!!',
+  cookieName: env.COOKIE_NAME || "hw_passkey_session",
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,

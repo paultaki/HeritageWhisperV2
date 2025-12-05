@@ -1,5 +1,6 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { env } from "@/lib/env";
 
 // Lazy-load Redis client to avoid build-time errors
 let redis: Redis | null = null;
@@ -11,9 +12,10 @@ function getRedis() {
     return redis;
   }
 
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  const nodeEnv = process.env.NODE_ENV;
+  // Use validated env vars from lib/env.ts
+  const url = env.UPSTASH_REDIS_REST_URL;
+  const token = env.UPSTASH_REDIS_REST_TOKEN;
+  const nodeEnv = env.NODE_ENV;
 
   if (!url || !token) {
     const errorMsg = "[Rate Limit] Redis credentials not configured";
@@ -62,7 +64,7 @@ function getRateLimiter(type: "auth" | "upload" | "api" | "tier3" | "ai-ip" | "a
   // CRITICAL CHANGE: Fail in production if Redis not available
   if (!redis) {
     // In production, don't throw; degrade gracefully to allow traffic while logging loudly
-    if (process.env.NODE_ENV === 'production' || redisInitError) {
+    if (env.NODE_ENV === 'production' || redisInitError) {
       console.error(
         `Rate limiting unavailable. Redis initialization failed: ${redisInitError?.message || 'No credentials'}. ` +
         `Proceeding without enforcement until Redis is configured.`
@@ -171,7 +173,7 @@ export const authRatelimit = {
     } catch (error) {
       console.error('[Rate Limit] Auth rate limit check failed:', error);
       // In production, fail closed (deny request)
-      if (process.env.NODE_ENV === 'production') {
+      if (env.NODE_ENV === 'production') {
         return {
           success: false,
           limit: 0,
@@ -205,7 +207,7 @@ export const uploadRatelimit = {
       return limiter.limit(identifier);
     } catch (error) {
       console.error('[Rate Limit] Upload rate limit check failed:', error);
-      if (process.env.NODE_ENV === 'production') {
+      if (env.NODE_ENV === 'production') {
         return {
           success: false,
           limit: 0,
@@ -238,7 +240,7 @@ export const apiRatelimit = {
       return limiter.limit(identifier);
     } catch (error) {
       console.error('[Rate Limit] API rate limit check failed:', error);
-      if (process.env.NODE_ENV === 'production') {
+      if (env.NODE_ENV === 'production') {
         return {
           success: false,
           limit: 0,
@@ -271,7 +273,7 @@ export const tier3Ratelimit = {
       return limiter.limit(identifier);
     } catch (error) {
       console.error('[Rate Limit] Tier 3 rate limit check failed:', error);
-      if (process.env.NODE_ENV === 'production') {
+      if (env.NODE_ENV === 'production') {
         return {
           success: false,
           limit: 0,
@@ -304,7 +306,7 @@ export const aiIpRatelimit = {
       return limiter.limit(identifier);
     } catch (error) {
       console.error('[Rate Limit] AI IP rate limit check failed:', error);
-      if (process.env.NODE_ENV === 'production') {
+      if (env.NODE_ENV === 'production') {
         return {
           success: false,
           limit: 0,
@@ -337,7 +339,7 @@ export const aiGlobalRatelimit = {
       return limiter.limit(identifier);
     } catch (error) {
       console.error('[Rate Limit] AI global rate limit check failed:', error);
-      if (process.env.NODE_ENV === 'production') {
+      if (env.NODE_ENV === 'production') {
         return {
           success: false,
           limit: 0,
@@ -370,7 +372,7 @@ export const promptSubmitRatelimit = {
       return limiter.limit(identifier);
     } catch (error) {
       console.error('[Rate Limit] Prompt submit rate limit check failed:', error);
-      if (process.env.NODE_ENV === 'production') {
+      if (env.NODE_ENV === 'production') {
         return {
           success: false,
           limit: 0,
@@ -460,7 +462,7 @@ export async function healthCheckRateLimit(): Promise<{
     const redis = getRedis();
     if (!redis) {
       return {
-        healthy: process.env.NODE_ENV !== 'production',
+        healthy: env.NODE_ENV !== 'production',
         error: 'Redis not configured',
       };
     }

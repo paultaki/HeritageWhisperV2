@@ -1,14 +1,38 @@
+/**
+ * Server-only Unsubscribe Token Utilities
+ *
+ * SECURITY: This file uses 'server-only' to guarantee it can NEVER be imported
+ * into client-side code. Uses SESSION_SECRET for HMAC signing (not the Supabase
+ * service role key, which should only be used for Supabase authentication).
+ *
+ * @module lib/unsubscribe-token
+ */
+
+import "server-only";
+
 import crypto from 'crypto';
+import { env } from "@/lib/env";
+
+// =============================================================================
+// Secret Validation
+// =============================================================================
+
+// SESSION_SECRET is validated by lib/env.ts (min 32 chars, required)
+const tokenSecret: string = env.SESSION_SECRET;
+
+// =============================================================================
+// Token Generation & Verification
+// =============================================================================
 
 /**
  * Generate an unsubscribe token for a family member
  * Format: {familyMemberId}.{hmacSignature}
  *
- * This is used by email templates to create unsubscribe links
+ * This is used by email templates to create unsubscribe links.
+ * Uses SESSION_SECRET (not Supabase service key) for cryptographic signing.
  */
 export function generateUnsubscribeToken(familyMemberId: string): string {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || 'fallback-secret';
-  const hmac = crypto.createHmac('sha256', secret);
+  const hmac = crypto.createHmac('sha256', tokenSecret);
   hmac.update(familyMemberId);
   const signature = hmac.digest('hex');
   return `${familyMemberId}.${signature}`;
@@ -17,6 +41,8 @@ export function generateUnsubscribeToken(familyMemberId: string): string {
 /**
  * Verify an unsubscribe token and extract the family member ID
  * Returns the family member ID if valid, null otherwise
+ *
+ * Uses constant-time comparison to prevent timing attacks.
  */
 export function verifyUnsubscribeToken(token: string): string | null {
   try {
@@ -26,9 +52,8 @@ export function verifyUnsubscribeToken(token: string): string | null {
       return null;
     }
 
-    // Regenerate the signature
-    const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || 'fallback-secret';
-    const hmac = crypto.createHmac('sha256', secret);
+    // Regenerate the signature using the same secret
+    const hmac = crypto.createHmac('sha256', tokenSecret);
     hmac.update(familyMemberId);
     const expectedSignature = hmac.digest('hex');
 

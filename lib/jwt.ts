@@ -3,9 +3,12 @@
  *
  * This module creates Supabase-compatible JWT tokens for Row Level Security (RLS).
  * These tokens are stored in httpOnly cookies and used in server-side API calls.
+ *
+ * SECURITY: Uses validated env vars from lib/env.ts
  */
 
 import { SignJWT } from "jose";
+import { env } from "@/lib/env";
 
 /**
  * Mint a Supabase-compatible JWT for RLS
@@ -19,7 +22,7 @@ import { SignJWT } from "jose";
  * - iat: issued at
  */
 export async function mintRLSJwt(userId: string): Promise<string> {
-  const jwtSecret = process.env.SUPABASE_JWT_SECRET;
+  const jwtSecret = env.SUPABASE_JWT_SECRET;
 
   if (!jwtSecret) {
     throw new Error(
@@ -51,7 +54,7 @@ export async function mintRLSJwt(userId: string): Promise<string> {
  */
 export async function verifyRLSJwt(token: string): Promise<string | null> {
   try {
-    const jwtSecret = process.env.SUPABASE_JWT_SECRET;
+    const jwtSecret = env.SUPABASE_JWT_SECRET;
 
     if (!jwtSecret) {
       console.error("[verifyRLSJwt] SUPABASE_JWT_SECRET not configured");

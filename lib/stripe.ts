@@ -3,9 +3,12 @@
  *
  * Initializes Stripe with secret key for server-side operations.
  * Used for creating checkout sessions, managing subscriptions, and webhooks.
+ *
+ * SECURITY: Uses validated env vars from lib/env.ts
  */
 
 import Stripe from 'stripe';
+import { env } from '@/lib/env';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not defined in environment variables');
@@ -30,9 +33,9 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
  * This should be created in the Stripe Dashboard
  * Format: price_xxxxxxxxxxxxxxxxxxxxx
  */
-export const PREMIUM_PRICE_ID = process.env.STRIPE_PREMIUM_PRICE_ID || '';
+export const PREMIUM_PRICE_ID = env.STRIPE_PREMIUM_PRICE_ID || '';
 
-if (!PREMIUM_PRICE_ID) {
+if (!PREMIUM_PRICE_ID && env.NODE_ENV !== 'test') {
   console.warn('Warning: STRIPE_PREMIUM_PRICE_ID is not defined. Stripe integration will not work.');
 }
 
@@ -41,19 +44,20 @@ if (!PREMIUM_PRICE_ID) {
  * This should be created in the Stripe Dashboard as a one-time payment product
  * Format: price_xxxxxxxxxxxxxxxxxxxxx
  */
-export const GIFT_PRICE_ID = process.env.STRIPE_GIFT_PRICE_ID || '';
+export const GIFT_PRICE_ID = env.STRIPE_GIFT_PRICE_ID || '';
 
-if (!GIFT_PRICE_ID) {
+if (!GIFT_PRICE_ID && env.NODE_ENV !== 'test') {
   console.warn('Warning: STRIPE_GIFT_PRICE_ID is not defined. Gift purchase will not work.');
 }
 
 /**
  * Webhook secret for verifying webhook signatures
+ * SECURITY: Required in production, validated by lib/env.ts
  */
-export const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+export const WEBHOOK_SECRET = env.STRIPE_WEBHOOK_SECRET;
 
-if (!WEBHOOK_SECRET) {
-  console.warn('Warning: STRIPE_WEBHOOK_SECRET is not defined. Webhook verification will fail.');
+if (!WEBHOOK_SECRET && env.NODE_ENV === 'production') {
+  throw new Error('STRIPE_WEBHOOK_SECRET is required in production for webhook verification');
 }
 
 /**
