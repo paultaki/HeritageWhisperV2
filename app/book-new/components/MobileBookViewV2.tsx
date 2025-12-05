@@ -23,8 +23,19 @@ export default function MobileBookViewV2({
 
   console.log('[MobileBookViewV2] Render - activeContext:', activeContext);
 
-  // State
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // State - initialize from sessionStorage for position persistence
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('book-mobile-page');
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 0) {
+          return parsed;
+        }
+      }
+    }
+    return 0;
+  });
   const [isTocOpen, setIsTocOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'chronological' | 'chapters'>('chronological');
 
@@ -254,7 +265,11 @@ export default function MobileBookViewV2({
   );
 
   // Update sessionStorage whenever current story changes (for GlassNav smart routing)
+  // Also persist page index for navigation memory
   useEffect(() => {
+    // Persist page index for return navigation
+    sessionStorage.setItem('book-mobile-page', currentIndex.toString());
+
     const currentPage = bookPages[currentIndex];
     if (currentPage && currentPage.type === "story") {
       const storyId = currentPage.story.id;
@@ -329,18 +344,26 @@ export default function MobileBookViewV2({
     }
   }, []);
 
-  // Jump to initial story if provided
+  // Jump to initial story if provided, OR restore saved position
   useEffect(() => {
-    if (initialStoryId && bookPages.length > 0) {
+    if (bookPages.length === 0) return;
+
+    // Priority 1: initialStoryId from URL/props
+    if (initialStoryId) {
       const pageIndex = bookPages.findIndex(
         (page) => page.type === "story" && page.story.id === initialStoryId
       );
       if (pageIndex >= 0) {
-        // Use setTimeout to ensure DOM is ready
         setTimeout(() => scrollToIndex(pageIndex), 100);
+        return;
       }
     }
-  }, [initialStoryId, bookPages, scrollToIndex]);
+
+    // Priority 2: Restore saved position (with bounds check)
+    if (currentIndex > 0 && currentIndex < bookPages.length) {
+      setTimeout(() => scrollToIndex(currentIndex), 100);
+    }
+  }, [initialStoryId, bookPages.length]); // Only run when initialStoryId or page count changes
 
   // Loading state
   if (isLoading) {
@@ -408,7 +431,7 @@ export default function MobileBookViewV2({
           // Find first story page index for priority loading
           const firstStoryIndex = bookPages.findIndex(p => p.type === "story");
           const isPriority = page.type === "story" && index === firstStoryIndex;
-          
+
           return (
             <BookPageRenderer
               key={index}
