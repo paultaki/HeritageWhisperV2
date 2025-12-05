@@ -116,10 +116,7 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
     setTouchEnd(0);
   };
 
-  // Reset photo index when story changes
-  useEffect(() => {
-    setCurrentPhotoIndex(0);
-  }, [story.id]);
+
 
   // Check if content overflows and update hint visibility
   const checkOverflow = useCallback(() => {
