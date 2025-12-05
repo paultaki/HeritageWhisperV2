@@ -38,16 +38,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // ==========================================================================
-  // CSP with Nonce - Generate unique nonce per request for inline script safety
+  // Content Security Policy
   // ==========================================================================
-  // Generate a cryptographically random nonce for this request
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-
-  // Build CSP header with nonce
-  // 'strict-dynamic' allows scripts loaded by trusted scripts to also execute
+  // Using 'unsafe-inline' for scripts because Next.js nonce support is inconsistent.
+  // This is less secure but necessary for the app to function.
+  // TODO: Revisit nonce-based CSP when Next.js improves support
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval';
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' data: blob: https://*.supabase.co;
     font-src 'self' https://fonts.gstatic.com;
@@ -61,22 +59,11 @@ export async function middleware(request: NextRequest) {
     ${isProd ? 'upgrade-insecure-requests;' : ''}
   `.replace(/\s{2,}/g, ' ').trim();
 
-  // Clone request headers and add nonce for server components to read
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-nonce', nonce);
-  requestHeaders.set('Content-Security-Policy', cspHeader);
-
-  // Create response with updated headers
-  const response = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  // Create response with CSP header
+  const response = NextResponse.next();
 
   // Set CSP header on response
   response.headers.set('Content-Security-Policy', cspHeader);
-  // Set nonce header for debugging/verification
-  response.headers.set('x-nonce', nonce);
 
   // Additional security headers (previously in next.config.ts)
   if (isProd) {
