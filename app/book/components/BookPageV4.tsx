@@ -285,33 +285,34 @@ export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
       );
     }
 
-    // Handle blank endpaper page (paired with CTA page)
+    // Handle blank endpaper page (paired with CTA page) - same as front endpaper, minus logo
     if (story === 'blank-endpaper') {
       return (
         <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
           <div
-            className={`relative h-full w-full rounded-[var(--book-radius)] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 endpaper-blank`}
-            style={{ backgroundColor: '#FAF8F5' }}
+            className={`relative h-full w-full rounded-[var(--book-radius)] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15`}
+            style={{
+              background: "linear-gradient(135deg, #F5E6D3 0%, #EAD5BA 50%, #F5E6D3 100%)"
+            }}
           >
-            {/* Subtle aged paper gradient */}
+            {/* Marbled texture pattern */}
             <div
-              className="absolute inset-0 pointer-events-none"
+              className="absolute inset-0 opacity-30"
               style={{
-                backgroundImage: `
-                  radial-gradient(ellipse at 20% 30%, rgba(139, 119, 101, 0.03) 0%, transparent 50%),
-                  radial-gradient(ellipse at 80% 70%, rgba(139, 119, 101, 0.04) 0%, transparent 50%)
-                `,
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='marble'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='8' seed='2' /%3E%3CfeColorMatrix type='saturate' values='0.3'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23marble)' fill='%23D4B896'/%3E%3C/svg%3E")`,
+                backgroundSize: '400px 400px',
               }}
-            />
+            ></div>
 
-            {/* Subtle noise texture */}
+            {/* Subtle swirl pattern */}
             <div
-              className="absolute inset-0 pointer-events-none"
+              className="absolute inset-0 opacity-10"
               style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-                opacity: 0.03,
+                backgroundImage: `radial-gradient(ellipse at 20% 30%, rgba(139,111,71,0.3) 0%, transparent 50%),
+                                  radial-gradient(ellipse at 80% 70%, rgba(139,111,71,0.25) 0%, transparent 50%),
+                                  radial-gradient(ellipse at 40% 80%, rgba(139,111,71,0.2) 0%, transparent 40%)`,
               }}
-            />
+            ></div>
 
             {/* Inner gutter shadow */}
             <GutterShadow side={position === "left" ? "right" : "left"} />

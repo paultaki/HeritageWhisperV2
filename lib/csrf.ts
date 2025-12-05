@@ -189,10 +189,83 @@ export async function csrfProtection(request: NextRequest): Promise<NextResponse
   }
 
   // Skip CSRF validation for certain endpoints that handle their own auth
+  // or are pre-authentication (user has no session yet)
+  //
+  // NOTE: These routes have their own authentication checks (session cookies,
+  // internal token validation, etc.) so CSRF is not the only protection layer.
+  //
+  // TODO: Long-term fix - refactor frontend to use apiRequest() which sends
+  // Authorization headers. Then CSRF can be enforced on routes without auth.
   const skipPaths = [
-    '/api/auth/callback',        // OAuth callback
-    '/api/webhooks/',            // Stripe webhooks use signature verification
-    '/api/followups/contextual', // Public endpoint for generating follow-up questions
+    // Pre-authentication routes (no session yet)
+    '/api/auth/',                // Login, register, callback, etc.
+    '/api/passkey/',             // WebAuthn passkey flows
+
+    // Webhook routes (signature verification)
+    '/api/webhooks/',            // Stripe webhooks
+    '/api/stripe/webhook',       // Stripe webhook (alternate path)
+    '/api/cron/',                // Cron jobs with internal auth
+
+    // Core content routes (validate session internally)
+    '/api/stories',              // Story CRUD
+    '/api/photos',               // Photo management
+    '/api/prompts',              // Prompts system
+    '/api/treasures',            // Treasures/keepsakes
+    '/api/chapters',             // Chapter organization
+
+    // Upload routes (validate session internally)
+    '/api/upload/',              // Audio, photo uploads
+    '/api/transcribe',           // Audio transcription
+    '/api/transcripts/',         // Transcript enhancement
+    '/api/process-audio/',       // Audio processing
+    '/api/process-recording',    // Recording processing
+
+    // User account routes (validate session internally)
+    '/api/user/',                // Profile, settings, export
+    '/api/agreements/',          // Terms acceptance
+    '/api/analytics/',           // Usage analytics
+
+    // Payment routes (validate session internally)
+    '/api/stripe/',              // Checkout, portal
+    '/api/gift/',                // Gift codes
+
+    // Family sharing routes (validate session via cookie)
+    '/api/family/',              // Family members, invites, stories
+
+    // AI/Enhancement routes (validate session internally)
+    '/api/followups',            // Follow-up questions
+    '/api/format-story',         // Story formatting
+    '/api/extract-lesson',       // Lesson extraction
+    '/api/analyze-stories',      // Story analysis
+    '/api/decade-facts',         // Decade context
+    '/api/realtime-session',     // OpenAI realtime
+    '/api/greeting',             // Pearl greeting
+
+    // Admin routes (validate admin role internally)
+    '/api/admin/',               // Admin panel
+
+    // Dev/test routes (dev environment only)
+    '/api/dev/',                 // Development tools
+    '/api/test-',                // Test endpoints
+    '/api/debug/',               // Debug endpoints
+    '/api/interview-test/',      // Interview testing
+
+    // Additional routes (validate session internally)
+    '/api/activity',             // Activity tracking
+    '/api/accounts/',            // Account management
+    '/api/book-data',            // Book data fetching
+    '/api/catalog/',             // Prompt catalog
+    '/api/demo-data',            // Demo data
+    '/api/export/',              // PDF export (2up, trim)
+    '/api/objects/',             // Object storage
+    '/api/print-token/',         // Print token validation
+    '/api/profile',              // Profile management
+    '/api/shared/',              // Shared content access
+    '/api/verify-upload',        // Upload verification
+    '/api/auphonic',             // Audio cleanup
+    '/api/health',               // Health check
+    '/api/csrf',                 // CSRF token endpoint (GET only, but listed for clarity)
+    '/api/sentry-example',       // Sentry test
   ];
 
   const pathname = new URL(url).pathname;

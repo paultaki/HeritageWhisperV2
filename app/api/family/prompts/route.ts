@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { promptSubmitRatelimit } from '@/lib/ratelimit';
 import { sendQuestionReceivedNotification } from '@/lib/notifications/send-question-received';
 
 // SECURITY: Use centralized admin client (enforces server-only via import)
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
+// Cookie name for HttpOnly family session
+const FAMILY_SESSION_COOKIE = 'family_session';
 
 // POST - Submit a new prompt from family member
 export async function POST(req: NextRequest) {
@@ -11,9 +15,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { storytellerUserId, promptText, context } = body;
 
-    // Get family session token from header
+    // Get family session token from HttpOnly cookie (preferred) or Authorization header (legacy)
+    const cookieStore = await cookies();
+    const cookieToken = cookieStore.get(FAMILY_SESSION_COOKIE)?.value;
+
+    // Fallback to Authorization header for legacy support
     const authHeader = req.headers.get('authorization');
-    const token = authHeader?.split(' ')[1];
+    const headerToken = authHeader?.split(' ')[1];
+
+    const token = cookieToken || headerToken;
 
     if (!token) {
       return NextResponse.json(
