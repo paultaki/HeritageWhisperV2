@@ -1,10 +1,10 @@
 .hw-play-pill {
     --progress: 0;
     /* 0 to 1 */
-    --pill-border: rgba(17, 35, 52, 0.18);
-    /* soft ink */
-    --pill-bg: rgba(255, 255, 255, 0.85);
-    --pill-text: #203954;
+    /* Updated to use soft primary background */
+    --pill-bg: var(--hw-primary-soft, #E0E5ED);
+    --pill-text: var(--hw-primary, #203954);
+    --pill-border: transparent;
 
     display: inline-flex;
     align-items: center;
@@ -17,16 +17,20 @@
     font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;
-    backdrop-filter: blur(4px);
-    transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+    transition: background 120ms ease, transform 120ms ease, box-shadow 120ms ease;
     outline: none;
 }
 
 .hw-play-pill:hover,
 .hw-play-pill:focus-visible {
-    border-color: rgba(32, 57, 84, 0.25);
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    /* Slightly darker on hover */
+    background: #D1D9E4; 
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.hw-play-pill:active {
+    transform: translateY(0);
 }
 
 .hw-play-pill__icon {
@@ -50,13 +54,13 @@
 
 .hw-play-pill__ring-track {
     fill: none;
-    stroke: rgba(32, 57, 84, 0.10);
+    stroke: rgba(32, 57, 84, 0.15);
     stroke-width: 2;
 }
 
 .hw-play-pill__ring-progress {
     fill: none;
-    stroke: rgba(32, 57, 84, 0.75);
+    stroke: var(--hw-primary, #203954);
     stroke-width: 2;
     stroke-linecap: round;
     stroke-dasharray: 82;
@@ -67,16 +71,10 @@
 
 .hw-play-pill__triangle {
     position: relative;
-    font-size: 0.7rem;
-    line-height: 1;
-    margin-left: 1px;
-    /* Visual centering for play icon */
-}
-
-/* Adjust center for pause icon */
-.hw-play-pill[aria-label="Pause story"] .hw-play-pill__triangle {
-    margin-left: 0;
-    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Icons are centered by flexbox now */
 }
 
 .hw-play-pill__label {
@@ -90,14 +88,13 @@
         height: 44px;
         justify-content: center;
         border: none;
-        background: transparent;
-        backdrop-filter: none;
+        /* Keep the background on mobile too for consistency, or make it transparent if preferred */
+        background: var(--pill-bg); 
     }
 
     .hw-play-pill:hover,
     .hw-play-pill:focus-visible {
-        border: none;
-        background: transparent;
+        background: #D1D9E4;
         box-shadow: none;
     }
 
@@ -118,13 +115,5 @@
 
     .hw-play-pill__ring-progress {
         stroke-width: 2.5;
-    }
-
-    .hw-play-pill__triangle {
-        font-size: 0.85rem;
-    }
-
-    .hw-play-pill[aria-label="Pause story"] .hw-play-pill__triangle {
-        font-size: 0.75rem;
     }
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Play, Pause } from 'lucide-react';
 import styles from './PlayPillButton.module.css';
 
 type PlayPillButtonProps = {
@@ -33,7 +34,11 @@ export function PlayPillButton({
                     <circle className={styles['hw-play-pill__ring-progress']} cx="16" cy="16" r="13" />
                 </svg>
                 <span className={styles['hw-play-pill__triangle']}>
-                    {isPlaying ? '❚❚' : '▶'}
+                    {isPlaying ? (
+                        <Pause size={10} fill="currentColor" className="text-current" />
+                    ) : (
+                        <Play size={10} fill="currentColor" className="text-current ml-0.5" />
+                    )}
                 </span>
             </span>
             <span className={styles['hw-play-pill__label']}>
