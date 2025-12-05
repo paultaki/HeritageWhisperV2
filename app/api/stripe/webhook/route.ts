@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { stripe, WEBHOOK_SECRET } from "@/lib/stripe";
 import Stripe from "stripe";
 import {
@@ -9,15 +8,9 @@ import {
 import { logger } from "@/lib/logger";
 import { createGiftCode, markGiftCodeRefunded } from "@/lib/giftCodes";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+// SECURITY: Use centralized admin client (enforces server-only via import)
+// Webhooks require admin access as there's no user session context
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 /**
  * POST /api/stripe/webhook

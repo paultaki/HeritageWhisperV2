@@ -19,8 +19,9 @@ interface AccountContext {
   relationship: string | null;
 }
 
+// Session data from /api/family/verify response
+// Note: sessionToken is no longer included - it's set as HttpOnly cookie
 interface SessionData {
-  sessionToken: string;
   storytellerId: string;
   storytellerName: string;
   familyMemberName: string;
@@ -80,23 +81,16 @@ function FamilyAccessContent() {
         relationship: sessionData.relationship,
       };
       localStorage.setItem(STORYTELLER_CONTEXT_KEY, JSON.stringify(viewerContext));
-      
-      // Also store family_session as backup for session token (used for API calls)
-      localStorage.setItem('family_session', JSON.stringify(sessionData));
-    } else {
-      // For non-signed-in users: Store as family_session (current behavior)
-      localStorage.setItem('family_session', JSON.stringify(sessionData));
-    }
 
-    // Use requestAnimationFrame to ensure localStorage write is flushed to disk
-    // before we navigate (gives browser a chance to complete I/O)
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        // Use window.location instead of router to force a full page load
-        // This ensures timeline reads fresh localStorage state
-        window.location.href = '/timeline';
-      });
-    });
+      // NOTE: family_session token is now stored as HttpOnly cookie by /api/family/verify
+      // No need to store it in localStorage - browser sends cookie automatically
+    }
+    // For non-signed-in users: Session is already set via HttpOnly cookie by /api/family/verify
+    // No localStorage needed - the cookie is sent with all requests automatically
+
+    // Navigate to timeline
+    // Using window.location for full page load to ensure hooks re-initialize
+    window.location.href = '/timeline';
   }, [sessionData, isSignedIn]);
 
   // Countdown timer effect
@@ -113,16 +107,18 @@ function FamilyAccessContent() {
 
   async function verifyToken(token: string, userIsSignedIn: boolean) {
     try {
-      const response = await fetch(`/api/family/verify?token=${token}`);
+      const response = await fetch(`/api/family/verify?token=${token}`, {
+        credentials: 'include', // Receive HttpOnly cookie from server
+      });
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.error || 'Verification failed');
       }
 
-      // Build session data
+      // Build session data for UI display
+      // Note: sessionToken is NOT in the response - it's set as HttpOnly cookie
       const familySession: SessionData = {
-        sessionToken: data.sessionToken,
         storytellerId: data.storyteller.id,
         storytellerName: data.storyteller.name,
         familyMemberName: data.familyMember.name || 'Family Member',
@@ -132,10 +128,9 @@ function FamilyAccessContent() {
         firstAccess: true,
       };
 
-      // Store session data based on auth state
+      // For signed-in users: Also store storyteller context for account switcher
+      // The family_session token is already set as HttpOnly cookie by the server
       if (userIsSignedIn) {
-        // For signed-in users: Store as active storyteller context
-        // This will make use-account-context automatically switch to this storyteller
         const viewerContext: AccountContext = {
           storytellerId: data.storyteller.id,
           storytellerName: data.storyteller.name,
@@ -144,16 +139,10 @@ function FamilyAccessContent() {
           relationship: data.familyMember.relationship,
         };
         localStorage.setItem(STORYTELLER_CONTEXT_KEY, JSON.stringify(viewerContext));
-        
-        // Also store family_session for API calls that need the session token
-        localStorage.setItem('family_session', JSON.stringify(familySession));
-        
+
         console.log('[FamilyAccess] Signed-in user - stored viewer context:', viewerContext);
       } else {
-        // For non-signed-in users: Store only family_session
-        localStorage.setItem('family_session', JSON.stringify(familySession));
-        
-        console.log('[FamilyAccess] Non-signed-in user - stored family session');
+        console.log('[FamilyAccess] Non-signed-in user - session set via HttpOnly cookie');
       }
 
       setSessionData(familySession);

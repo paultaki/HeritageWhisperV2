@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin as supabase } from "@/lib/supabaseAdmin";
 
 const DEMO_USER_ID = '38ad3036-e423-4e41-a3f3-020664a1ee0e';
 const SEVEN_DAYS = 7 * 24 * 60 * 60; // seconds

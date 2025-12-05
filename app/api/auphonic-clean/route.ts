@@ -1,21 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { checkAIConsentOrError } from "@/lib/aiConsent";
 
 import { getPasskeySession } from "@/lib/iron-session";
+
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 export const maxDuration = 180; // Allow 3 minutes for Auphonic processing
 export const dynamic = 'force-dynamic';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
 
 const AUPHONIC_API_KEY = process.env.AUPHONIC_API_KEY;
 const AUPHONIC_CLEANER_PRESET_ID = process.env.AUPHONIC_CLEANER_PRESET_ID;

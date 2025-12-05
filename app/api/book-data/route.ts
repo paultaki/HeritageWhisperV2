@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 
-// Initialize Supabase Admin client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+// Supabase URL needed for building storage URLs
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 
 export async function GET(request: NextRequest) {
   try {

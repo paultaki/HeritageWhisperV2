@@ -276,8 +276,8 @@ function BookV4PageContent() {
   // Create spreads
   const spreads = useMemo(() => {
     const result: Array<{
-      left?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | 'add-story' | { type: 'decade'; decade: string; title: string; count: number; isChapter?: boolean };
-      right?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | 'add-story' | { type: 'decade'; decade: string; title: string; count: number; isChapter?: boolean };
+      left?: Story | 'intro' | 'endpaper' | 'blank-endpaper' | 'toc-left' | 'toc-right' | 'add-story' | { type: 'decade'; decade: string; title: string; count: number; isChapter?: boolean };
+      right?: Story | 'intro' | 'endpaper' | 'blank-endpaper' | 'toc-left' | 'toc-right' | 'add-story' | { type: 'decade'; decade: string; title: string; count: number; isChapter?: boolean };
       type: 'intro' | 'toc' | 'decade' | 'stories' | 'add-story';
     }> = [];
 
@@ -337,8 +337,8 @@ function BookV4PageContent() {
         // Add to the right side of existing spread
         lastSpread.right = 'add-story';
       } else {
-        // Create a new spread with add-story on left
-        result.push({ left: 'add-story', right: undefined, type: 'add-story' });
+        // Create a new spread with add-story on left, blank endpaper on right
+        result.push({ left: 'add-story', right: 'blank-endpaper', type: 'add-story' });
       }
     }
 
@@ -354,7 +354,7 @@ function BookV4PageContent() {
       if (spread.left) {
         let pageType: 'intro' | 'table-of-contents' | 'decade-marker' | 'story-start' = 'intro';
         if (typeof spread.left === 'string') {
-          if (spread.left === 'intro' || spread.left === 'endpaper') pageType = 'intro';
+          if (spread.left === 'intro' || spread.left === 'endpaper' || spread.left === 'blank-endpaper') pageType = 'intro';
           else if (spread.left === 'toc-left' || spread.left === 'toc-right') pageType = 'table-of-contents';
         } else if ('type' in spread.left) {
           pageType = 'decade-marker';
@@ -377,7 +377,7 @@ function BookV4PageContent() {
       if (spread.right) {
         let pageType: 'intro' | 'table-of-contents' | 'decade-marker' | 'story-start' = 'intro';
         if (typeof spread.right === 'string') {
-          if (spread.right === 'intro' || spread.right === 'endpaper') pageType = 'intro';
+          if (spread.right === 'intro' || spread.right === 'endpaper' || spread.right === 'blank-endpaper') pageType = 'intro';
           else if (spread.right === 'toc-left' || spread.right === 'toc-right') pageType = 'table-of-contents';
         } else if ('type' in spread.right) {
           pageType = 'decade-marker';

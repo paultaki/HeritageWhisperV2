@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 /**
  * GET /api/user/ai-settings
@@ -16,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = supabaseAdmin;
 
     // Get user from token
     const {
@@ -69,7 +68,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = supabaseAdmin;
 
     // Get user from token
     const {

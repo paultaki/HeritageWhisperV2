@@ -5,18 +5,10 @@
  * that appear in the Recent Activity feed on the Family Circle page.
  */
 
-import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export type ActivityEventType =
   | "story_listened"

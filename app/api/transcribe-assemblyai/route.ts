@@ -7,27 +7,18 @@ import {
   validateSanitizedInput,
 } from "@/lib/promptSanitizer";
 import OpenAI from "openai";
-import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
 import { nanoid } from "nanoid";
 import { checkAIConsentOrError } from "@/lib/aiConsent";
 
 import { getPasskeySession } from "@/lib/iron-session";
+
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 // Route segment config for Next.js 15
 export const maxDuration = 60; // Maximum function execution time (seconds)
 export const dynamic = 'force-dynamic'; // Disable static optimization
-
-// Initialize Supabase Admin client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
 
 // Initialize AssemblyAI client
 if (!process.env.ASSEMBLYAI_API_KEY) {

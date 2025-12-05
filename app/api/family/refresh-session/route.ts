@@ -1,21 +1,44 @@
+/**
+ * Family Session Refresh API
+ *
+ * Refreshes family session expiry (up to 90-day absolute limit).
+ *
+ * Security (Dec 2024):
+ * - Reads session token from HttpOnly cookie (preferred)
+ * - Falls back to Authorization header for legacy support
+ * - Updates cookie with new expiry
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+const COOKIE_NAME = 'family_session';
+
+function getCookieOptions(maxAgeSeconds: number) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge: maxAgeSeconds,
+  };
+}
 
 export async function POST(req: NextRequest) {
   try {
-    // Get family session token from header
-    const authHeader = req.headers.get('authorization');
-    const token = authHeader?.split(' ')[1];
+    // Get token from HttpOnly cookie (preferred) or Authorization header (legacy)
+    const cookieStore = await cookies();
+    let token = cookieStore.get(COOKIE_NAME)?.value;
+
+    // Fallback to Authorization header for legacy support
+    if (!token) {
+      const authHeader = req.headers.get('authorization');
+      token = authHeader?.split(' ')[1];
+    }
 
     if (!token) {
       return NextResponse.json(
@@ -103,13 +126,22 @@ export async function POST(req: NextRequest) {
       (finalExpiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    return NextResponse.json({
+    // Calculate new cookie maxAge
+    const maxAgeSeconds = Math.floor((finalExpiresAt.getTime() - now.getTime()) / 1000);
+
+    // Build response with updated cookie
+    const response = NextResponse.json({
       success: true,
       expiresAt: finalExpiresAt.toISOString(),
       absoluteExpiresAt: session.absolute_expires_at,
       daysUntilExpiry,
       message: 'Session refreshed successfully',
     });
+
+    // Update the HttpOnly cookie with new expiry
+    response.cookies.set(COOKIE_NAME, token, getCookieOptions(maxAgeSeconds));
+
+    return response;
   } catch (error) {
     console.error('Error in refresh session API:', error);
     return NextResponse.json(

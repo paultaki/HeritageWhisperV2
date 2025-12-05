@@ -307,6 +307,12 @@
   box-shadow: 0 0 0 3px rgba(29, 49, 71, 0.1);
 }
 
+.hw-textarea-lg {
+  font-size: 1.25rem;  /* 20px - larger for readability */
+  line-height: 1.6;
+  padding: var(--hw-space-lg);
+}
+
 .hw-label {
   display: block;
   font-family: var(--hw-font-sans);

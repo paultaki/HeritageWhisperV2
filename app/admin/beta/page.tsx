@@ -7,18 +7,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, UserPlus, Users, CheckCircle, XCircle, Clock, Ban, Search } from "lucide-react";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
+// SECURITY FIX: Removed direct import of supabaseAdmin.
+// Client components must NEVER import the admin client.
+// All database operations now go through API routes.
 
 interface BetaCode {
   id: string;
   code: string;
-  issued_to_user_id: string | null;
-  issued_to_email?: string;
-  used_by_user_id: string | null;
-  used_by_email?: string;
-  created_at: string;
-  used_at: string | null;
-  expires_at: string | null;
+  issuedToUserId: string | null;
+  issuedToEmail?: string | null;
+  usedByUserId: string | null;
+  usedByEmail?: string | null;
+  createdAt: string;
+  usedAt: string | null;
+  expiresAt: string | null;
   revoked: boolean;
 }
 
@@ -68,45 +71,36 @@ export default function AdminBetaPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch all beta codes with user emails
-      const { data: codesData, error: codesError } = await supabaseAdmin
-        .from("beta_codes")
-        .select(`
-          *,
-          issued_to:issued_to_user_id(email),
-          used_by:used_by_user_id(email)
-        `)
-        .order("created_at", { ascending: false });
+      // SECURITY: Fetch via API route instead of direct supabaseAdmin access
+      const response = await fetch("/api/admin/beta");
 
-      if (codesError) throw codesError;
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to fetch beta codes");
+      }
 
-      // Transform data to include emails
-      const transformedCodes = (codesData || []).map((code: any) => ({
-        ...code,
-        issued_to_email: code.issued_to?.email,
-        used_by_email: code.used_by?.email,
-      }));
+      const { codes: fetchedCodes } = await response.json();
 
-      setCodes(transformedCodes);
+      setCodes(fetchedCodes);
 
-      // Calculate metrics
+      // Calculate metrics using camelCase property names from API
       const now = new Date();
       const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
       const newMetrics = {
-        total: transformedCodes.length,
-        unused: transformedCodes.filter((c: BetaCode) => 
-          !c.used_by_user_id && !c.revoked && 
-          (!c.expires_at || new Date(c.expires_at) > now)
+        total: fetchedCodes.length,
+        unused: fetchedCodes.filter((c: BetaCode) =>
+          !c.usedByUserId && !c.revoked &&
+          (!c.expiresAt || new Date(c.expiresAt) > now)
         ).length,
-        used: transformedCodes.filter((c: BetaCode) => c.used_by_user_id !== null).length,
-        revoked: transformedCodes.filter((c: BetaCode) => c.revoked).length,
-        signups7d: transformedCodes.filter((c: BetaCode) => 
-          c.used_at && new Date(c.used_at) > sevenDaysAgo
+        used: fetchedCodes.filter((c: BetaCode) => c.usedByUserId !== null).length,
+        revoked: fetchedCodes.filter((c: BetaCode) => c.revoked).length,
+        signups7d: fetchedCodes.filter((c: BetaCode) =>
+          c.usedAt && new Date(c.usedAt) > sevenDaysAgo
         ).length,
-        signups30d: transformedCodes.filter((c: BetaCode) => 
-          c.used_at && new Date(c.used_at) > thirtyDaysAgo
+        signups30d: fetchedCodes.filter((c: BetaCode) =>
+          c.usedAt && new Date(c.usedAt) > thirtyDaysAgo
         ).length,
       };
 
@@ -126,28 +120,28 @@ export default function AdminBetaPage() {
   const applyFilters = () => {
     let filtered = [...codes];
 
-    // Apply search filter
+    // Apply search filter (using camelCase property names from API)
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(code =>
         code.code.toLowerCase().includes(term) ||
-        code.issued_to_email?.toLowerCase().includes(term) ||
-        code.used_by_email?.toLowerCase().includes(term)
+        code.issuedToEmail?.toLowerCase().includes(term) ||
+        code.usedByEmail?.toLowerCase().includes(term)
       );
     }
 
-    // Apply status filter
+    // Apply status filter (using camelCase property names from API)
     const now = new Date();
     filtered = filtered.filter(code => {
       if (statusFilter === "unused") {
-        return !code.used_by_user_id && !code.revoked && 
-               (!code.expires_at || new Date(code.expires_at) > now);
+        return !code.usedByUserId && !code.revoked &&
+               (!code.expiresAt || new Date(code.expiresAt) > now);
       } else if (statusFilter === "used") {
-        return code.used_by_user_id !== null;
+        return code.usedByUserId !== null;
       } else if (statusFilter === "revoked") {
         return code.revoked;
       } else if (statusFilter === "expired") {
-        return code.expires_at && new Date(code.expires_at) < now && !code.used_by_user_id;
+        return code.expiresAt && new Date(code.expiresAt) < now && !code.usedByUserId;
       }
       return true; // "all"
     });
@@ -326,14 +320,14 @@ export default function AdminBetaPage() {
 
   const getCodeStatus = (code: BetaCode) => {
     const now = new Date();
-    
+
     if (code.revoked) {
       return { label: "Revoked", color: "text-red-700 bg-red-50", icon: Ban };
     }
-    if (code.expires_at && new Date(code.expires_at) < now && !code.used_by_user_id) {
+    if (code.expiresAt && new Date(code.expiresAt) < now && !code.usedByUserId) {
       return { label: "Expired", color: "text-gray-700 bg-gray-50", icon: Clock };
     }
-    if (code.used_by_user_id) {
+    if (code.usedByUserId) {
       return { label: "Used", color: "text-green-700 bg-green-50", icon: CheckCircle };
     }
     return { label: "Unused", color: "text-blue-700 bg-blue-50", icon: UserPlus };
@@ -601,9 +595,9 @@ export default function AdminBetaPage() {
                     {filteredCodes.map((code) => {
                       const status = getCodeStatus(code);
                       const StatusIcon = status.icon;
-                      const isUnused = !code.used_by_user_id && !code.revoked &&
-                                     (!code.expires_at || new Date(code.expires_at) > new Date());
-                      
+                      const isUnused = !code.usedByUserId && !code.revoked &&
+                                     (!code.expiresAt || new Date(code.expiresAt) > new Date());
+
                       return (
                         <tr key={code.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-2">
@@ -616,16 +610,16 @@ export default function AdminBetaPage() {
                             </div>
                           </td>
                           <td className="py-3 px-2 text-sm text-gray-600">
-                            {code.issued_to_email || <span className="text-gray-400">Generic</span>}
+                            {code.issuedToEmail || <span className="text-gray-400">Generic</span>}
                           </td>
                           <td className="py-3 px-2 text-sm text-gray-600">
-                            {code.used_by_email || <span className="text-gray-400">—</span>}
+                            {code.usedByEmail || <span className="text-gray-400">—</span>}
                           </td>
                           <td className="py-3 px-2 text-sm text-gray-600">
-                            {new Date(code.created_at).toLocaleDateString()}
+                            {new Date(code.createdAt).toLocaleDateString()}
                           </td>
                           <td className="py-3 px-2 text-sm text-gray-600">
-                            {code.used_at ? new Date(code.used_at).toLocaleDateString() : <span className="text-gray-400">—</span>}
+                            {code.usedAt ? new Date(code.usedAt).toLocaleDateString() : <span className="text-gray-400">—</span>}
                           </td>
                           <td className="py-3 px-2 text-right">
                             <div className="flex items-center justify-end gap-2">

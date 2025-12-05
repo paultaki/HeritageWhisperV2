@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { performTier3Analysis as performTier3AnalysisV1 } from "@/lib/tier3Analysis";
 import { performTier3Analysis as performTier3AnalysisV2 } from "@/lib/tier3AnalysisV2";
 import { extractEntities, generateTier1Templates } from "@/lib/promptGenerationV2";
 import { logger } from "@/lib/logger";
-
 import { getPasskeySession } from "@/lib/iron-session";
+
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
 type MaybePromise<T> = T | Promise<T>;
 
 // Local widened Tier1 prompt shape
@@ -17,17 +19,6 @@ type AnyTier1Prompt = {
   reasoning?: string;
   [k: string]: unknown;
 };
-
-// Initialize Supabase Admin client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
 
 export async function POST(request: NextRequest) {
   try {

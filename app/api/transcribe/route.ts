@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 import { apiRatelimit, checkRateLimit, getClientIp } from "@/lib/ratelimit";
@@ -13,16 +12,9 @@ import { nanoid } from "nanoid";
 import { checkAIConsentOrError } from "@/lib/aiConsent";
 
 import { getPasskeySession } from "@/lib/iron-session";
-// Initialize Supabase Admin client for token verification
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 // Initialize TWO OpenAI clients:
 // 1. Direct OpenAI for Whisper (AI Gateway doesn't support audio endpoints)

@@ -18,6 +18,80 @@ const CSRF_HEADER_NAME = 'x-csrf-token';
 const TOKEN_BYTE_LENGTH = 32;
 const TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
+// ============================================================================
+// ORIGIN VALIDATION (CSRF Bypass Prevention)
+// ============================================================================
+
+/**
+ * Explicit allowlist of trusted origins for development.
+ * Only used when NODE_ENV !== 'production'.
+ */
+const DEV_TRUSTED_ORIGINS = new Set([
+  'http://localhost:3000',
+  'http://localhost:3002',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3002',
+]);
+
+/**
+ * Validates whether an origin is trusted for CSRF purposes.
+ *
+ * SECURITY RULES:
+ * - Production: Requires HTTPS and exact host match (no .includes())
+ * - Development: Only allows explicit localhost origins from allowlist
+ * - Never uses substring matching which could be bypassed by crafted domains
+ *
+ * @param origin - The Origin header value from the request
+ * @param expectedHost - The Host header value (e.g., "heritagewhisper.com")
+ * @returns boolean - True only if origin is strictly trusted
+ */
+function isTrustedOrigin(origin: string | null, expectedHost: string | null): boolean {
+  if (!origin || !expectedHost) {
+    return false;
+  }
+
+  // Development: Check against explicit allowlist (no substring matching)
+  if (process.env.NODE_ENV !== 'production') {
+    if (DEV_TRUSTED_ORIGINS.has(origin)) {
+      return true;
+    }
+  }
+
+  // Parse origin for strict validation
+  let parsedOrigin: URL;
+  try {
+    parsedOrigin = new URL(origin);
+  } catch {
+    // Invalid URL - not trusted
+    logger.warn(`[CSRF] Invalid origin URL: ${origin}`);
+    return false;
+  }
+
+  // Production: Require HTTPS protocol
+  if (process.env.NODE_ENV === 'production') {
+    if (parsedOrigin.protocol !== 'https:') {
+      logger.warn(`[CSRF] Non-HTTPS origin rejected in production: ${origin}`);
+      return false;
+    }
+  }
+
+  // Strict host comparison - no .includes(), exact match only
+  // This prevents bypass via subdomains (evil.heritagewhisper.com)
+  // or crafted domains (heritagewhisper.com.evil.com)
+  const originHost = parsedOrigin.host; // includes port if non-standard
+
+  // Normalize expectedHost (remove port if origin doesn't have one on standard ports)
+  const normalizedExpectedHost = expectedHost.split(':')[0];
+  const originHostWithoutPort = originHost.split(':')[0];
+
+  if (originHostWithoutPort !== normalizedExpectedHost) {
+    logger.debug(`[CSRF] Origin host mismatch: ${originHost} !== ${expectedHost}`);
+    return false;
+  }
+
+  return true;
+}
+
 function generateRandomToken(): string {
   const randomValues = new Uint8Array(TOKEN_BYTE_LENGTH);
   globalThis.crypto.getRandomValues(randomValues);
@@ -123,17 +197,40 @@ export async function csrfProtection(request: NextRequest): Promise<NextResponse
 
   const pathname = new URL(url).pathname;
 
-  // Skip CSRF for API routes with JWT authentication (Authorization header present)
-  // and for same-origin requests with credentials (fetch includes cookies) to avoid breaking SPA flows
-  const hasAuthHeader = request.headers.get('authorization');
+  // ============================================================================
+  // CSRF SKIP LOGIC (Strict Rules)
+  // ============================================================================
+  //
+  // SECURITY: We ONLY skip CSRF validation for API routes when:
+  // 1. An Authorization header is present (JWT/Bearer token auth)
+  //    - These are programmatic API clients, not browser requests
+  //    - They are not vulnerable to CSRF because cookies aren't used
+  //
+  // We do NOT skip CSRF just because the origin "looks same" because:
+  // - Browser form submissions and fetch() with credentials need CSRF protection
+  // - SameSite cookies alone are not sufficient protection
+  // - Defense in depth requires token validation
+  // ============================================================================
+
+  const hasAuthHeader = !!request.headers.get('authorization');
   const origin = request.headers.get('origin');
   const host = request.headers.get('host');
-  const sameOrigin = !!origin && !!host && origin.includes(host);
-  if ((hasAuthHeader || sameOrigin) && pathname.startsWith('/api/')) {
-    logger.debug(`[CSRF] Skipping validation for authenticated/same-origin API request: ${pathname}`);
+
+  // Only skip CSRF for Authorization header (API clients with bearer tokens)
+  // These clients authenticate via token, not cookies, so CSRF doesn't apply
+  if (hasAuthHeader && pathname.startsWith('/api/')) {
+    logger.debug(`[CSRF] Skipping validation for token-authenticated API request: ${pathname}`);
     return null;
   }
-  
+
+  // Log origin validation for debugging (but don't skip CSRF based on it)
+  if (origin && host) {
+    const trusted = isTrustedOrigin(origin, host);
+    if (!trusted) {
+      logger.warn(`[CSRF] Untrusted origin detected: ${origin} (host: ${host})`);
+    }
+  }
+
   const shouldSkip = skipPaths.some(path => pathname.startsWith(path));
 
   if (shouldSkip) {

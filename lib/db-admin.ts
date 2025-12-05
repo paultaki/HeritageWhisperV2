@@ -5,25 +5,13 @@
  * which bypasses Row Level Security (RLS) for passkey registration and verification.
  */
 
-import { createClient } from "@supabase/supabase-js";
 import type { Passkey, InsertPasskey } from "@/shared/schema";
 
-// Admin client with service role key (bypasses RLS)
-const getAdminClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Missing Supabase configuration for admin client");
-  }
-
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-};
+// Legacy alias for backward compatibility
+const getAdminClient = () => supabaseAdmin;
 
 /**
  * Get user by email (for passkey registration)

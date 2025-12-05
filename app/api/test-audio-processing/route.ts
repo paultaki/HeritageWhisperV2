@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { checkAIConsentOrError } from "@/lib/aiConsent";
 import { getPasskeySession } from "@/lib/iron-session";
@@ -12,18 +11,11 @@ import {
   withTimeout,
 } from "@/lib/audioTestUtils";
 
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
 export const maxDuration = 180; // Allow 3 minutes for parallel processing
 export const dynamic = 'force-dynamic';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
 
 /**
  * Path A: AssemblyAI transcription + GPT formatting/lessons

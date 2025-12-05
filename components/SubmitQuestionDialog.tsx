@@ -19,13 +19,12 @@ import { MessageSquarePlus, Loader2 } from 'lucide-react';
 
 interface SubmitQuestionDialogProps {
   storytellerId: string;
-  sessionToken: string;
   storytellerName: string;
+  // Note: sessionToken removed - now uses HttpOnly cookie
 }
 
 export function SubmitQuestionDialog({
   storytellerId,
-  sessionToken,
   storytellerName,
 }: SubmitQuestionDialogProps) {
   const [open, setOpen] = useState(false);
@@ -38,9 +37,9 @@ export function SubmitQuestionDialog({
     mutationFn: async () => {
       const response = await fetch('/api/family/prompts', {
         method: 'POST',
+        credentials: 'include', // Send HttpOnly cookie
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
           storytellerUserId: storytellerId,

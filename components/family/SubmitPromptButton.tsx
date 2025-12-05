@@ -32,9 +32,9 @@ export function SubmitPromptButton({ storytellerUserId, storytellerName }: Submi
 
       const response = await fetch('/api/family/prompts', {
         method: 'POST',
+        credentials: 'include', // Send HttpOnly cookie
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.sessionToken}`,
         },
         body: JSON.stringify({
           storytellerUserId,

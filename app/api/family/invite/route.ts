@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { Resend } from 'resend';
 import { FamilyInviteEmail } from '@/lib/emails/family-invite';
 import { logActivityEvent } from '@/lib/activity';
 
 import { getPasskeySession } from "@/lib/iron-session";
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 // Generate a secure random token (32 bytes = 64 hex characters)
 function generateSecureToken(): string {

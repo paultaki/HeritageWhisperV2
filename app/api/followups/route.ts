@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 import { apiRatelimit, checkRateLimit } from "@/lib/ratelimit";
@@ -9,16 +8,8 @@ import {
   validateSanitizedInput,
 } from "@/lib/promptSanitizer";
 
-// Initialize Supabase Admin client for token verification
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 // Initialize OpenAI client with Vercel AI Gateway
 // Falls back to direct OpenAI API if AI_GATEWAY_API_KEY is not set

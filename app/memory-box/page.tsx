@@ -154,13 +154,13 @@ export default function MemoryBoxV2Page() {
   const storytellerId = activeContext?.storytellerId || user?.id;
   const isOwnAccount = activeContext?.type === 'own';
 
-  // Dual authentication: Use JWT for owners, sessionToken for viewers
-  const authToken = session?.access_token || familySession?.sessionToken;
+  // Dual authentication: Use JWT for owners, HttpOnly cookie for family viewers
+  // Note: Family session token is now in HttpOnly cookie, sent automatically with credentials: 'include'
+  const authToken = session?.access_token || (familySession ? 'cookie' : null);
   const authHeaders: Record<string, string> = session?.access_token
     ? { Authorization: `Bearer ${session.access_token}` }
-    : familySession?.sessionToken
-      ? { Authorization: `Bearer ${familySession.sessionToken}` }
-      : {};
+    : {};
+  // Family viewers authenticate via HttpOnly cookie, not Authorization header
 
   // Default to Treasures tab for all users (primary view)
   const defaultTab: TabType = "treasures";
@@ -203,6 +203,7 @@ export default function MemoryBoxV2Page() {
         : "/api/stories";
 
       const response = await fetch(url, {
+        credentials: 'include', // Send HttpOnly cookie for family viewers
         headers: authHeaders,
       });
 

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { userAgreements, users } from "@/shared/schema";
 import { eq } from "drizzle-orm";
@@ -8,13 +7,10 @@ import { logger } from "@/lib/logger";
 import { RegisterUserSchema, safeValidateRequestBody } from "@/lib/validationSchemas";
 import { validateBetaCode, markBetaCodeUsed, createInviteCodesForUser } from "@/lib/betaCodes";
 
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin as supabase } from "@/lib/supabaseAdmin";
+
 type MaybePromise<T> = T | Promise<T>;
-
-// Initialize Supabase client with service role key to bypass RLS
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Current versions of legal documents
 const CURRENT_TERMS_VERSION = "1.0";

@@ -92,63 +92,25 @@ export async function apiRequest(
 
   const headers: HeadersInit = {};
 
-  // Check for family_session first - this takes priority when viewing family content
-  const familySessionStr = typeof window !== 'undefined'
-    ? localStorage.getItem('family_session')
-    : null;
-  
-  // Check if we're viewing family content (storyteller_id in URL that's not our own)
-  const isViewingFamilyContent = url.includes('storyteller_id=') && familySessionStr;
-
-  if (isViewingFamilyContent && familySessionStr) {
-    // When viewing family content, prefer the family session token
-    // This ensures access even if Supabase session is stale/invalid
-    try {
-      const familySession = JSON.parse(familySessionStr);
-      if (new Date(familySession.expiresAt) > new Date()) {
-        headers["Authorization"] = `Bearer ${familySession.sessionToken}`;
-      } else {
-        // Session expired - clear it and fall back to Supabase session
-        localStorage.removeItem('family_session');
-      }
-    } catch (e) {
-      // Parse error - fall back to Supabase session
-    }
-  }
-  
-  // If no family session header set, try Supabase session
-  if (!headers["Authorization"] && session?.access_token) {
+  // Set Authorization header from Supabase session if available
+  // NOTE: Family session is now handled via HttpOnly cookie (sent automatically by browser)
+  // The server reads the family_session cookie directly - no localStorage needed
+  if (session?.access_token) {
     headers["Authorization"] = `Bearer ${session.access_token}`;
   }
-  
-  // Final fallback: try family_session if still no auth
+
+  // For routes that don't require auth, we can proceed without a header
+  // Family session cookie will be sent automatically with credentials: "include"
   if (!headers["Authorization"]) {
-    if (familySessionStr) {
-      try {
-        const familySession = JSON.parse(familySessionStr);
-        // Check if session expired
-        if (new Date(familySession.expiresAt) > new Date()) {
-          headers["Authorization"] = `Bearer ${familySession.sessionToken}`;
-        } else {
-          // Session expired - clear it
-          localStorage.removeItem('family_session');
-          throw new Error("Your viewing session has expired. Please request a new link.");
-        }
-      } catch (e) {
-        // Failed to parse or expired
-        if (e instanceof Error && e.message.includes('expired')) {
-          throw e;
-        }
-        // Otherwise, authentication required
-        if (!url.includes("/api/share/") && !url.includes("/api/auth/")) {
-          throw new Error("Authentication required. Please sign in again.");
-        }
-      }
-    } else {
-      // Don't proceed with auth-required requests
-      if (!url.includes("/api/share/") && !url.includes("/api/auth/")) {
+    // Skip auth requirement for public endpoints
+    if (!url.includes("/api/share/") && !url.includes("/api/auth/") && !url.includes("/api/family/")) {
+      // Check if this might be a family session request
+      // The cookie is sent automatically, so the server will validate it
+      // Only throw if we're sure no session exists
+      if (!url.includes("storyteller_id=")) {
         throw new Error("Authentication required. Please sign in again.");
       }
+      // For family content requests, let the server validate the cookie
     }
   }
 
@@ -232,64 +194,29 @@ export const getQueryFn: <T>(options: {
     const headers: HeadersInit = {};
     const queryUrl = queryKey.join("/") as string;
 
-    // Check for family_session first - this takes priority when viewing family content
-    const familySessionStr = typeof window !== 'undefined'
-      ? localStorage.getItem('family_session')
-      : null;
-    
-    // Check if we're viewing family content (storyteller_id in URL)
-    const isViewingFamilyContent = queryUrl.includes('storyteller_id=') && familySessionStr;
-
-    if (isViewingFamilyContent && familySessionStr) {
-      // When viewing family content, prefer the family session token
-      try {
-        const familySession = JSON.parse(familySessionStr);
-        if (new Date(familySession.expiresAt) > new Date()) {
-          headers["Authorization"] = `Bearer ${familySession.sessionToken}`;
-        }
-      } catch (e) {
-        // Parse error - fall back to Supabase session
-      }
-    }
-    
-    // If no family session header set, try Supabase session
-    if (!headers["Authorization"] && session?.access_token) {
+    // Set Authorization header from Supabase session if available
+    // NOTE: Family session is now handled via HttpOnly cookie (sent automatically by browser)
+    // The server reads the family_session cookie directly - no localStorage needed
+    if (session?.access_token) {
       headers["Authorization"] = `Bearer ${session.access_token}`;
     }
-    
-    // Final fallback: try family_session if still no auth
-    if (!headers["Authorization"] && familySessionStr) {
-      try {
-        const familySession = JSON.parse(familySessionStr);
-        if (new Date(familySession.expiresAt) > new Date()) {
-          headers["Authorization"] = `Bearer ${familySession.sessionToken}`;
-        } else {
-          localStorage.removeItem('family_session');
-          if (unauthorizedBehavior === "returnNull") {
-            return null;
-          }
-          throw new Error("Your viewing session has expired. Please request a new link.");
+
+    // For routes that don't require auth, we can proceed without a header
+    // Family session cookie will be sent automatically with credentials: "include"
+    if (!headers["Authorization"]) {
+      // Skip auth requirement for public/family endpoints
+      const isPublicEndpoint = queryUrl.includes("/api/share/") ||
+                               queryUrl.includes("/api/auth/") ||
+                               queryUrl.includes("/api/family/");
+      const isFamilyContentRequest = queryUrl.includes("storyteller_id=");
+
+      if (!isPublicEndpoint && !isFamilyContentRequest) {
+        if (unauthorizedBehavior === "returnNull") {
+          return null;
         }
-      } catch (e) {
-        if (e instanceof Error && e.message.includes('expired')) {
-          throw e;
-        }
-        // Parse error - handle based on URL requirements (matching apiRequest behavior)
-        if (!queryUrl.includes("/api/share/") && !queryUrl.includes("/api/auth/")) {
-          if (unauthorizedBehavior === "returnNull") {
-            return null;
-          }
-          throw new Error("Authentication required. Please sign in again.");
-        }
+        throw new Error("Authentication required. Please sign in again.");
       }
-    }
-    
-    // If still no auth header and URL requires auth, handle appropriately
-    if (!headers["Authorization"] && !queryUrl.includes("/api/share/") && !queryUrl.includes("/api/auth/")) {
-      if (unauthorizedBehavior === "returnNull") {
-        return null;
-      }
-      throw new Error("Authentication required. Please sign in again.");
+      // For family content requests, let the server validate the HttpOnly cookie
     }
 
     const res = await fetch(getApiUrl(queryUrl), {

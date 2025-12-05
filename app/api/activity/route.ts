@@ -6,19 +6,15 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 import { logger } from "@/lib/logger";
 import { getRecentActivity, logActivityEvent, type ActivityEventPayload } from "@/lib/activity";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+// Cookie name for HttpOnly family session
+const FAMILY_SESSION_COOKIE = 'family_session';
 
 /**
  * GET /api/activity
@@ -141,12 +137,21 @@ export async function POST(request: NextRequest) {
   if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] POST request received');
 
   try {
-    // 1. Validate session (either Supabase JWT or family session token)
+    // 1. Get tokens from HttpOnly cookie (preferred) and Authorization header
     const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
-    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] Auth token present:', !!token);
+    const headerToken = authHeader && authHeader.split(" ")[1];
 
-    if (!token) {
+    // Get family session token from HttpOnly cookie (security improvement Dec 2024)
+    const cookieStore = await cookies();
+    const cookieToken = cookieStore.get(FAMILY_SESSION_COOKIE)?.value;
+
+    // Use cookie token for family session, header token for Supabase JWT
+    const familySessionToken = cookieToken || headerToken;
+    const token = headerToken; // For Supabase JWT auth
+
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] Auth token present:', !!(token || familySessionToken));
+
+    if (!token && !familySessionToken) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -157,18 +162,22 @@ export async function POST(request: NextRequest) {
     let actorUserId: string | null = null;
 
     // Try Supabase JWT authentication first
-    const {
-      data: { user: authUser },
-      error: authError,
-    } = await supabaseAdmin.auth.getUser(token);
+    if (token) {
+      const {
+        data: { user: authUser },
+        error: authError,
+      } = await supabaseAdmin.auth.getUser(token);
 
-    if (authUser && !authError) {
-      // Authenticated as regular user
-      user = authUser;
-      actorUserId = user.id;
-      if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] Authenticated as user:', user.id);
-    } else {
-      // JWT failed - try family session token (for family members viewing)
+      if (authUser && !authError) {
+        // Authenticated as regular user
+        user = authUser;
+        actorUserId = user.id;
+        if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[Activity API] Authenticated as user:', user.id);
+      }
+    }
+
+    // If no JWT user, try family session token (from cookie or header)
+    if (!user && familySessionToken) {
       const { data: familySession, error: sessionError } = await supabaseAdmin
         .from('family_sessions')
         .select(`
@@ -183,7 +192,7 @@ export async function POST(request: NextRequest) {
             auth_user_id
           )
         `)
-        .eq('token', token)
+        .eq('token', familySessionToken)
         .single();
 
       if (sessionError || !familySession) {

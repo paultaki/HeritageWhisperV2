@@ -1,17 +1,34 @@
+/**
+ * Family Invite Verification API
+ *
+ * Validates family invite tokens and creates sessions stored as HttpOnly cookies.
+ *
+ * Security improvements (Dec 2024):
+ * - Session token is set as HttpOnly cookie, NOT returned in response body
+ * - This prevents XSS attacks from stealing the session token
+ * - Client receives session info but never sees the actual token
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { logActivityEvent } from '@/lib/activity';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+// Cookie configuration for HttpOnly family session
+const COOKIE_NAME = 'family_session';
+
+function getCookieOptions(maxAgeSeconds: number) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge: maxAgeSeconds,
+  };
+}
 
 function generateSecureToken(): string {
   return crypto.randomBytes(32).toString('hex');
@@ -193,9 +210,14 @@ export async function GET(req: NextRequest) {
       familyMemberId: familyMember.id,
     });
 
-    return NextResponse.json({
+    // Calculate cookie maxAge in seconds
+    const now = new Date();
+    const maxAgeSeconds = Math.floor((sessionExpiresAt.getTime() - now.getTime()) / 1000);
+
+    // Build response WITHOUT the session token (security: token stays server-side only)
+    const response = NextResponse.json({
       valid: true,
-      sessionToken,
+      // NOTE: sessionToken is intentionally NOT included - it's set as HttpOnly cookie
       expiresAt: sessionExpiresAt.toISOString(),
       familyMember: {
         id: familyMember.id,
@@ -208,6 +230,12 @@ export async function GET(req: NextRequest) {
         name: userInfo?.name || 'Your family member',
       },
     });
+
+    // Set HttpOnly cookie with the session token
+    // This prevents XSS attacks from stealing the token via JavaScript
+    response.cookies.set(COOKIE_NAME, sessionToken, getCookieOptions(maxAgeSeconds));
+
+    return response;
   } catch (error) {
     console.error('Error in verify token:', error);
     return NextResponse.json(

@@ -65,43 +65,46 @@ function useAccountContextInternal() {
     }
 
     if (!user) {
-      // Check for family_session (unauthenticated viewer)
-      const familySessionStr = localStorage.getItem('family_session');
+      // Check for family_session via API (HttpOnly cookie - not accessible to JS)
+      // The session info is fetched from the server, not localStorage
+      checkFamilySession();
+      return;
+    }
 
-      if (familySessionStr) {
-        try {
-          const familySession = JSON.parse(familySessionStr);
+    async function checkFamilySession() {
+      try {
+        const response = await fetch('/api/family/session', {
+          method: 'GET',
+          credentials: 'include', // Send HttpOnly cookie
+        });
 
-          // Check if session expired
-          if (new Date(familySession.expiresAt) < new Date()) {
-            localStorage.removeItem('family_session');
+        const data = await response.json();
+
+        if (!data.authenticated || !data.session) {
+          if (data.expired) {
             setError('Your viewing session has expired. Please request a new link.');
-            setActiveContext(null);
-            setIsLoading(false);
-            return;
           }
-
-          // Set viewer context
-          const viewerContext = {
-            storytellerId: familySession.storytellerId,
-            storytellerName: familySession.storytellerName,
-            type: 'viewing' as const,
-            permissionLevel: (familySession.permissionLevel || 'viewer') as 'viewer' | 'contributor' | 'owner',
-            relationship: familySession.relationship || null,
-          };
-
-          setActiveContext(viewerContext);
+          setActiveContext(null);
           setIsLoading(false);
           return;
-        } catch (e) {
-          console.error('[useAccountContext] Failed to parse family_session:', e);
-          localStorage.removeItem('family_session');
         }
-      }
 
-      setActiveContext(null);
-      setIsLoading(false);
-      return;
+        // Set viewer context from session data
+        const viewerContext = {
+          storytellerId: data.session.storytellerId,
+          storytellerName: data.session.storytellerName,
+          type: 'viewing' as const,
+          permissionLevel: (data.session.permissionLevel || 'viewer') as 'viewer' | 'contributor' | 'owner',
+          relationship: data.session.relationship || null,
+        };
+
+        setActiveContext(viewerContext);
+        setIsLoading(false);
+      } catch (e) {
+        console.error('[useAccountContext] Failed to check family session:', e);
+        setActiveContext(null);
+        setIsLoading(false);
+      }
     }
 
     // Check if there's a stored storytellerId (set during account creation for family members)

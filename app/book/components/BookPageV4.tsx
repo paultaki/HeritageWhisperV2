@@ -50,7 +50,7 @@ interface DecadePage {
 }
 
 interface BookPageV4Props {
-  story?: Story | 'intro' | 'endpaper' | 'toc-left' | 'toc-right' | 'add-story' | DecadePage;
+  story?: Story | 'intro' | 'endpaper' | 'blank-endpaper' | 'toc-left' | 'toc-right' | 'add-story' | DecadePage;
   pageNum: number;
   onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
   position: "left" | "right";
@@ -271,6 +271,47 @@ export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
                 />
               </div>
             </div>
+
+            {/* Inner gutter shadow */}
+            <GutterShadow side={position === "left" ? "right" : "left"} />
+
+            {/* Page number */}
+            <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-[11px] pointer-events-none z-20" style={{ color: 'var(--book-text-muted)', opacity: 0.8 }}>
+              {position === "left" && <span className="tracking-tight">{pageNum}</span>}
+              {position === "right" && <span className="tracking-tight ml-auto">{pageNum}</span>}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Handle blank endpaper page (paired with CTA page)
+    if (story === 'blank-endpaper') {
+      return (
+        <div ref={pageRef} className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}>
+          <div
+            className={`relative h-full w-full rounded-[var(--book-radius)] ring-1 shadow-2xl overflow-hidden [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15 endpaper-blank`}
+            style={{ backgroundColor: '#FAF8F5' }}
+          >
+            {/* Subtle aged paper gradient */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backgroundImage: `
+                  radial-gradient(ellipse at 20% 30%, rgba(139, 119, 101, 0.03) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 70%, rgba(139, 119, 101, 0.04) 0%, transparent 50%)
+                `,
+              }}
+            />
+
+            {/* Subtle noise texture */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                opacity: 0.03,
+              }}
+            />
 
             {/* Inner gutter shadow */}
             <GutterShadow side={position === "left" ? "right" : "left"} />

@@ -82,17 +82,17 @@ export function TextEntryScreen({
           </div>
 
           {/* Text Input */}
-          <div className="relative">
+          <div>
             <textarea
               value={draft.textBody || ""}
               onChange={handleTextChange}
               placeholder="Start typing your story here..."
-              className="hw-textarea"
+              className="hw-textarea hw-textarea-lg"
               style={{ minHeight: "300px" }}
               autoFocus
             />
-            {/* Word Count Overlay */}
-            <div className="absolute bottom-3 right-3 bg-white px-2 py-1 rounded hw-body-sm hw-text-muted">
+            {/* Word Count - below textarea */}
+            <div className="mt-2 text-right hw-body-sm hw-text-muted">
               {wordCount} {wordCount === 1 ? "word" : "words"}
             </div>
           </div>

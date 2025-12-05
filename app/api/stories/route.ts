@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 import { generateTier1Templates as generateTier1TemplatesV2 } from "@/lib/promptGenerationV2";
 import { performTier3Analysis, storeTier3Results } from "@/lib/tier3AnalysisV2";
 import { generateEchoPrompt, generateEchoAnchorHash } from "@/lib/echoPrompts";
@@ -11,19 +11,13 @@ import { ZodError } from "zod";
 import { hasAIConsent } from "@/lib/aiConsent";
 import { sendNewStoryNotifications } from "@/lib/notifications/send-new-story-notifications";
 import { logActivityEvent } from "@/lib/activity";
-
-// Initialize Supabase Admin client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
-
 import { getPasskeySession } from "@/lib/iron-session";
+
+// SECURITY: Use centralized admin client (enforces server-only via import)
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
+// Cookie name for HttpOnly family session
+const FAMILY_SESSION_COOKIE = 'family_session';
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,13 +26,22 @@ export async function GET(request: NextRequest) {
     let isAuthenticatedOwner = false;
 
     const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
+    const headerToken = authHeader && authHeader.split(" ")[1];
     const url = new URL(request.url);
     const storytellerId = url.searchParams.get("storyteller_id");
 
+    // Get family session token from HttpOnly cookie (preferred) or header (legacy)
+    const cookieStore = await cookies();
+    const cookieToken = cookieStore.get(FAMILY_SESSION_COOKIE)?.value;
+
+    // Use cookie token for family session, header token for Supabase JWT
+    const familySessionToken = cookieToken || headerToken;
+    const token = headerToken; // For Supabase JWT auth
+
     // PRIORITY 1: If requesting another user's stories, check family session token FIRST
     // This handles signed-in users viewing family content
-    if (storytellerId && token) {
+    // Security: Checks HttpOnly cookie first, then Authorization header for legacy support
+    if (storytellerId && familySessionToken) {
       const { data: familySession, error: sessionError } = await supabaseAdmin
         .from('family_sessions')
         .select(`
@@ -54,7 +57,7 @@ export async function GET(request: NextRequest) {
               permission_level
             )
           `)
-        .eq('token', token)
+        .eq('token', familySessionToken)
         .single();
 
       if (!sessionError && familySession) {
@@ -122,7 +125,8 @@ export async function GET(request: NextRequest) {
     }
 
     // PRIORITY 4: Fall back to Family Session Token (for unauthenticated viewers)
-    if (!targetUserId && token) {
+    // Security: Uses HttpOnly cookie first, then Authorization header for legacy support
+    if (!targetUserId && familySessionToken) {
       const { data: familySession, error: sessionError } = await supabaseAdmin
         .from('family_sessions')
         .select(`
@@ -138,7 +142,7 @@ export async function GET(request: NextRequest) {
               permission_level
             )
           `)
-        .eq('token', token)
+        .eq('token', familySessionToken)
         .single();
 
       if (sessionError || !familySession) {

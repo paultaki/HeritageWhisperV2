@@ -693,18 +693,16 @@ export default function FamilyTimelineV2Client({ userId }: FamilyTimelineV2Clien
     }
   }, [session, updateFirstAccess]);
 
-  // Fetch stories using family session token
+  // Fetch stories using family session (HttpOnly cookie sent automatically)
   const { data: storiesData, isLoading } = useQuery({
     queryKey: ['/api/family/stories', userId],
     queryFn: async () => {
-      if (!session?.sessionToken) {
-        throw new Error('No session token');
+      if (!session) {
+        throw new Error('No session');
       }
 
       const response = await fetch(`/api/family/stories/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${session.sessionToken}`,
-        },
+        credentials: 'include', // Send HttpOnly cookie
       });
 
       if (!response.ok) {
@@ -713,7 +711,7 @@ export default function FamilyTimelineV2Client({ userId }: FamilyTimelineV2Clien
 
       return response.json();
     },
-    enabled: !!session?.sessionToken,
+    enabled: !!session,
   });
 
   const allStories = storiesData?.stories || [];
@@ -795,7 +793,6 @@ export default function FamilyTimelineV2Client({ userId }: FamilyTimelineV2Clien
                 {session?.permissionLevel === 'contributor' && (
                   <SubmitQuestionDialog
                     storytellerId={userId}
-                    sessionToken={session.sessionToken}
                     storytellerName={session.storytellerName}
                   />
                 )}

@@ -910,13 +910,13 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   const storytellerId = activeContext?.storytellerId || user?.id;
   const isViewingOwnAccount = activeContext?.type === 'own';
 
-  // Dual authentication: Use JWT for owners, sessionToken for viewers
-  const authToken = session?.access_token || familySession?.sessionToken;
+  // Dual authentication: Use JWT for owners, HttpOnly cookie for family viewers
+  // Note: Family session token is now in HttpOnly cookie, sent automatically with credentials: 'include'
+  const authToken = session?.access_token || (familySession ? 'cookie' : null);
   const authHeaders: Record<string, string> = session?.access_token
     ? { Authorization: `Bearer ${session.access_token}` }
-    : familySession?.sessionToken
-      ? { Authorization: `Bearer ${familySession.sessionToken}` }
-      : {};
+    : {};
+  // Family viewers authenticate via HttpOnly cookie, not Authorization header
 
   const {
     data: storiesData,
@@ -929,6 +929,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
         ? `${getApiUrl("/api/stories")}?storyteller_id=${storytellerId}`
         : getApiUrl("/api/stories");
       const res = await fetch(url, {
+        credentials: 'include', // Send HttpOnly cookie for family viewers
         headers: authHeaders,
       });
 

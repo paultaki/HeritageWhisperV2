@@ -11,18 +11,16 @@ import { Loader2, BookOpen } from 'lucide-react';
 export default function FamilyBookClient({ userId }: { userId: string }) {
   const { session } = useFamilyAuth();
 
-  // Fetch stories using family session token
+  // Fetch stories using family session (HttpOnly cookie sent automatically)
   const { data: storiesData, isLoading } = useQuery({
     queryKey: ['/api/family/stories', userId],
     queryFn: async () => {
-      if (!session?.sessionToken) {
-        throw new Error('No session token');
+      if (!session) {
+        throw new Error('No session');
       }
 
       const response = await fetch(`/api/family/stories/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${session.sessionToken}`,
-        },
+        credentials: 'include', // Send HttpOnly cookie
       });
 
       if (!response.ok) {
@@ -31,7 +29,7 @@ export default function FamilyBookClient({ userId }: { userId: string }) {
 
       return response.json();
     },
-    enabled: !!session?.sessionToken,
+    enabled: !!session,
   });
 
   const stories = storiesData?.stories || [];
