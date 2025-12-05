@@ -82,8 +82,10 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         // Chapters feature not yet implemented - return empty data gracefully
         const errorMessage = error instanceof Error ? error.message : String(error);
+        // Catch various error formats for missing chapters table
         if (errorMessage.includes('relation "chapters" does not exist') ||
-            errorMessage.includes('does not exist in the schema cache')) {
+            errorMessage.includes('does not exist in the schema cache') ||
+            errorMessage.includes('Failed query') && errorMessage.includes('"chapters"')) {
             logger.debug("Chapters table not yet created - returning empty data");
             return NextResponse.json({ chapters: [], orphanedStories: [] });
         }

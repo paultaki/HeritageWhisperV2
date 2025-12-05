@@ -15,12 +15,13 @@ export default function IntroPage({ pageNumber }: { pageNumber?: number }) {
 
   return (
     <section
-      className="relative h-[100dvh] w-screen flex-shrink-0 snap-start flex items-center justify-center px-4"
+      className="relative h-[100dvh] w-screen flex-shrink-0 snap-start"
       style={{ scrollSnapAlign: "start", scrollSnapStop: "always" }}
+      data-nav-ink="dark"
     >
-      {/* Premium book page - cream paper with bound-page styling */}
+      {/* Premium book page - cream paper with bound-page styling - full height */}
       <div
-        className="relative w-full max-w-md h-[85vh] shadow-2xl overflow-hidden ring-1 ring-black/5"
+        className="relative w-full h-[100dvh] shadow-2xl overflow-hidden ring-1 ring-black/5"
         style={{
           backgroundColor: '#FFFDF8', // Cream paper
           borderRadius, // Asymmetric: alternates based on page position

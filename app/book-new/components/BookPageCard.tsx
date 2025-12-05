@@ -36,14 +36,14 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
 
   // Get all photos (must be before state initialization)
   // Note: Legacy photoUrl fallback needs all fields for type compatibility
-  const photos = story.photos || (story.photoUrl ? [{ 
-    url: story.photoUrl, 
+  const photos = story.photos || (story.photoUrl ? [{
+    url: story.photoUrl,
     displayUrl: undefined,
     masterUrl: undefined,
-    transform: story.photoTransform, 
-    width: undefined, 
-    height: undefined, 
-    isHero: false 
+    transform: story.photoTransform,
+    width: undefined,
+    height: undefined,
+    isHero: false
   }] : []);
 
   // Photo carousel state - initialize to hero image index to avoid flash
@@ -80,6 +80,7 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
   // Touch handlers for photo swipe (only on photo area)
   const handlePhotoTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
+    setTouchEnd(0); // Reset touch end to distinguish tap from swipe
   };
 
   const handlePhotoTouchMove = (e: React.TouchEvent) => {
@@ -92,15 +93,27 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
     setCurrentPhotoIndex(heroIndex >= 0 ? heroIndex : 0);
   }, [story.id]);
 
-  const handlePhotoTouchEnd = () => {
-    if (touchStart - touchEnd > 75) {
-      // Swiped left - next photo
-      handleNextPhoto();
+  const handlePhotoTouchEnd = (e: React.TouchEvent) => {
+    // Only process swipe if touchEnd was set (i.e., there was actual movement)
+    // touchEnd === 0 means it was just a tap
+    if (touchEnd === 0) {
+      return; // Let onClick handle taps
     }
-    if (touchStart - touchEnd < -75) {
+
+    const distance = touchStart - touchEnd;
+    if (distance > 75) {
+      // Swiped left - next photo
+      e.preventDefault(); // Prevent onClick from firing
+      handleNextPhoto();
+    } else if (distance < -75) {
       // Swiped right - prev photo
+      e.preventDefault(); // Prevent onClick from firing
       handlePrevPhoto();
     }
+
+    // Reset for next interaction
+    setTouchStart(0);
+    setTouchEnd(0);
   };
 
   // Reset photo index when story changes

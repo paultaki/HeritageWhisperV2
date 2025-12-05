@@ -15,6 +15,7 @@ export default function CoverPage({
     <section
       className="relative h-[100dvh] w-screen flex-shrink-0 snap-start flex items-center justify-center"
       style={{ scrollSnapAlign: "start", scrollSnapStop: "always" }}
+      data-nav-ink="light"
     >
       <div
         className="relative mx-auto"
