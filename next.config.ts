@@ -51,97 +51,32 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ['image/webp'], // Use WebP for better compression
   },
-  // Security Headers - Protect against common web vulnerabilities
+  // ==========================================================================
+  // Security Headers Configuration
+  // ==========================================================================
+  // NOTE: CSP with nonces is now handled in middleware.ts for dynamic nonce generation.
+  // This headers() function only handles CORS for API routes.
+  // All other security headers (X-Frame-Options, HSTS, etc.) are also in middleware.
+  // ==========================================================================
   async headers() {
-    // Content Security Policy - Prevents XSS attacks
-    // Note: Avoid "upgrade-insecure-requests" in development to prevent https upgrade on localhost
     const isProd = process.env.NODE_ENV === 'production';
 
-    // Skip security headers in development for faster reloads
+    // Skip headers in development for faster reloads
     if (!isProd) {
       return [];
     }
 
-    // ==========================================================================
-    // CSP Configuration - Strict by default, only relaxed where necessary
-    // ==========================================================================
-    // SECURITY NOTES:
-    // - script-src: 'self' only. No unsafe-inline/eval needed since:
-    //   • Next.js bundles all JS (no inline scripts)
-    //   • Sentry SDK is bundled, not loaded from CDN
-    //   • JSON-LD (<script type="application/ld+json">) is data, not executable
-    //   • Tailwind CDN removed - app uses compiled Tailwind CSS
-    //
-    // - style-src: 'unsafe-inline' kept because:
-    //   • Google Fonts may inject inline styles
-    //   • Chart component (recharts) uses dynamic styles via dangerouslySetInnerHTML
-    //   • Removing would require nonce-based CSP middleware (future enhancement)
-    //   • style-src inline is lower risk than script-src inline
-    // ==========================================================================
-
-    const cspHeader = `
-      default-src 'self';
-      script-src 'self';
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      img-src 'self' data: blob: https://*.supabase.co;
-      font-src 'self' https://fonts.gstatic.com;
-      media-src 'self' blob: https://*.supabase.co;
-      connect-src 'self' blob: https://*.supabase.co https://*.supabase.com https://api.openai.com https://ai-gateway.vercel.sh https://api.assemblyai.com https://*.sentry.io wss://*.supabase.co wss://*.supabase.com;
-      worker-src 'self' blob:;
-      object-src 'none';
-      base-uri 'self';
-      form-action 'self';
-      frame-ancestors 'none';
-      ${isProd ? 'upgrade-insecure-requests;' : ''}
-    `.replace(/\s{2,}/g, ' ').trim();
-
-    // CORS origin per environment (relaxed in development)
-    const devOrigin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002';
+    // CORS origin per environment
     const prodOrigin = process.env.NEXT_PUBLIC_APP_URL || 'https://dev.heritagewhisper.com';
-    const allowOrigin = isProd ? prodOrigin : devOrigin;
 
     return [
-      {
-        // Apply security headers to all routes
-        source: '/:path*',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: cspHeader,
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY', // Prevent clickjacking attacks
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff', // Prevent MIME type sniffing
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains', // Force HTTPS for 1 year
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block', // Legacy XSS protection (modern browsers use CSP)
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin', // Control referrer information
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(self), microphone=(self), geolocation=(), interest-cohort=()', // Restrict browser features
-          },
-        ],
-      },
       {
         // CORS configuration for API routes
         source: '/api/:path*',
         headers: [
           {
             key: 'Access-Control-Allow-Origin',
-            value: allowOrigin,
+            value: prodOrigin,
           },
           {
             key: 'Access-Control-Allow-Methods',
