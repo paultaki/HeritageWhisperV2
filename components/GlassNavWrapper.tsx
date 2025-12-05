@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Clock, BookOpen, Mic, Menu, Users, MessageSquarePlus } from "lucide-react";
 import GlassNav from "./GlassNav";
@@ -17,13 +17,30 @@ export default function GlassNavWrapper() {
   const { activeContext, isLoading: isContextLoading } = useAccountContext();
   const isOwnAccount = activeContext?.type === 'own';
 
-  // Determine default ink based on page context
-  // Most pages have light backgrounds → use dark ink
-  // Story detail pages have photo backgrounds → use light ink
+  // Track if we're on mobile (below lg breakpoint)
+  // Desktop book view has dark background → needs light ink
+  // Mobile book view has cream pages filling screen → needs dark ink
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Determine default ink based on page context and screen size
+  // - Book pages: desktop (dark bg) → light ink, mobile (cream pages) → dark ink
+  // - Story detail pages: photo backgrounds → light ink
+  // - Everything else: light backgrounds → dark ink
   const defaultInk =
-    pathname.startsWith('/story')
-      ? 'light'
-      : 'dark';
+    pathname.startsWith('/book')
+      ? (isMobile ? 'dark' : 'light')
+      : pathname.startsWith('/story')
+        ? 'light'
+        : 'dark';
 
   // Use the ink detection hook
   const ink = useNavInk({ defaultInk, navId: 'glass-nav' });

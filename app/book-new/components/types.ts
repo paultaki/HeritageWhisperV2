@@ -78,6 +78,7 @@ export interface BookTableOfContentsProps {
   isOpen: boolean;
   onClose: () => void;
   onStorySelect: (storyId: string) => void;
+  onTocPageNavigate?: () => void; // Navigate to TOC page in book
   viewMode?: 'chronological' | 'chapters';
   onViewModeChange?: (mode: 'chronological' | 'chapters') => void;
 }

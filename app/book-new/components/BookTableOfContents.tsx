@@ -74,6 +74,7 @@ export default function BookTableOfContents({
   isOpen,
   onClose,
   onStorySelect,
+  onTocPageNavigate,
   viewMode = 'chronological',
   onViewModeChange,
 }: BookTableOfContentsProps) {
@@ -106,7 +107,19 @@ export default function BookTableOfContents({
           <div className="px-4 py-4">
             {/* Title row */}
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold tracking-tight">Table of Contents</h2>
+              {onTocPageNavigate ? (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onTocPageNavigate();
+                  }}
+                  className="text-lg font-semibold tracking-tight hover:text-[#8B7355] transition-colors text-left"
+                >
+                  Table of Contents →
+                </button>
+              ) : (
+                <h2 className="text-lg font-semibold tracking-tight">Table of Contents</h2>
+              )}
               <button
                 onClick={onClose}
                 className="w-9 h-9 bg-neutral-100 rounded-full flex items-center justify-center shadow-sm hover:bg-neutral-200 transition active:scale-95"

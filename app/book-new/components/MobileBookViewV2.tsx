@@ -460,6 +460,13 @@ export default function MobileBookViewV2({
         isOpen={isTocOpen}
         onClose={() => setIsTocOpen(false)}
         onStorySelect={handleStorySelect}
+        onTocPageNavigate={() => {
+          // Find the TOC page index and navigate to it
+          const tocIndex = bookPages.findIndex(page => page.type === 'toc');
+          if (tocIndex >= 0) {
+            scrollToIndex(tocIndex);
+          }
+        }}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
       />

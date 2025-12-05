@@ -76,7 +76,10 @@ export default function TocPage({ stories, pageNumber }: { stories: BookStory[];
         />
 
         {/* Scrollable content */}
-        <div className="relative h-full overflow-y-auto p-6">
+        <div
+          className="relative h-full overflow-y-auto p-6"
+          style={{ touchAction: 'pan-y' }}
+        >
           <h1
             className="text-5xl font-serif text-center mb-8 text-gray-800 sticky top-0 pb-4"
             style={{
