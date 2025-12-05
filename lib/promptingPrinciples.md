@@ -1,5 +1,9 @@
 # Heritage Whisper Prompting Principles
 
+> **Last Updated:** December 2025
+> **Status:** Active - Developer reference for AI prompting
+> **See Also:** [AI_PROMPTING.md](../AI_PROMPTING.md) for complete production reference
+
 ## What Works (From Interview-Chat V1 Success)
 
 ### Core Principle: Focus on Emotional Depth, Not Clever Connections

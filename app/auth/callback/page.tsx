@@ -37,6 +37,13 @@ export default function AuthCallback() {
           return;
         }
 
+        // Clear any existing family_session cookie to prevent viewing mode conflict
+        // This ensures the user sees their own account after logging in, not a stale family view
+        document.cookie = "family_session=; path=/; max-age=0; SameSite=Strict";
+
+        // Also clear the localStorage context to force fresh state
+        localStorage.removeItem('hw_active_storyteller_context');
+
         // Invalidate queries to fetch fresh user data
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
 

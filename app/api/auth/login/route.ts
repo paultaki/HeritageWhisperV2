@@ -159,10 +159,17 @@ export async function POST(request: NextRequest) {
         passkeyPromptDismissed: null,
       };
 
-      return NextResponse.json({
+      // Clear any existing family_session cookie to prevent viewing mode conflict
+      const response = NextResponse.json({
         user: userData,
         session: data.session,
       });
+      response.cookies.set('family_session', '', {
+        path: '/',
+        maxAge: 0,
+        sameSite: 'strict',
+      });
+      return response;
     } catch (dbError) {
       // Log database error but still allow login
       logger.error("Database error during login:", dbError);
@@ -183,10 +190,17 @@ export async function POST(request: NextRequest) {
         passkeyPromptDismissed: null,
       };
 
-      return NextResponse.json({
+      // Clear any existing family_session cookie to prevent viewing mode conflict
+      const response = NextResponse.json({
         user: userData,
         session: data.session,
       });
+      response.cookies.set('family_session', '', {
+        path: '/',
+        maxAge: 0,
+        sameSite: 'strict',
+      });
+      return response;
     }
   } catch (error) {
     // Log error without exposing PII or credentials

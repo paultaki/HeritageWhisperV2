@@ -95,6 +95,32 @@ This archive contains implementation guides for features that have been successf
 
 ---
 
+### FAMILY_ACCESS_FLOW_VERIFICATION.md (37.4K, Nov 18, 2025)
+**Purpose:** Complete verification of family member access flow
+
+**Status:** ✅ **VERIFICATION COMPLETE**
+- Dual token system documented (invite + session)
+- All flows verified and working
+- Security model validated
+
+**Why Archived:** Verification complete, system working as designed
+
+**Related Tables:** `family_invites`, `family_sessions`, `family_members`
+
+---
+
+### MEMORY_BOX_V2_IMPLEMENTATION.md (13.8K, Nov 7, 2025)
+**Purpose:** Memory Box V2 implementation guide
+
+**Status:** ✅ **IMPLEMENTATION COMPLETE**
+- V2 features deployed
+- UI/UX improvements live
+- Performance optimizations applied
+
+**Why Archived:** Feature fully implemented and in production
+
+---
+
 ## When to Reference These Files
 
 ### Use Archive For:
@@ -144,9 +170,9 @@ cat archive/completed-implementations-2025/FILE_NAME.md
 
 ## Archive Summary
 
-**Total Files:** 7
+**Total Files:** 10
 **Status:** All implementations complete and deployed
-**Archived:** November 18, 2025
+**Last Updated:** December 5, 2025
 
 | File | Feature | Status | Date Completed |
 |------|---------|--------|----------------|
@@ -157,6 +183,9 @@ cat archive/completed-implementations-2025/FILE_NAME.md
 | MIGRATION_STEPS.md | Photo WebP migration | Migrated | Nov 8, 2025 |
 | FIX_PROMPT_SYSTEM.md | Prompt buttons | Fixed | Oct 14, 2025 |
 | COPY_THIS_SQL.md | Team training | Complete | Oct 24, 2025 |
+| FAMILY_ACCESS_FLOW_VERIFICATION.md | Family access verification | Verified | Nov 18, 2025 |
+| MEMORY_BOX_V2_IMPLEMENTATION.md | Memory Box V2 | Complete | Nov 7, 2025 |
+| MIGRATION_GUIDE.md | Phase 2 security migrations | Complete | Oct 15, 2025 |
 
 ---
 

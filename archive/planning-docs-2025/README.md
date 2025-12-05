@@ -48,6 +48,104 @@
 
 ---
 
+### HeritageWhisper North Star.md (4.5K, Nov 7, 2025)
+**Purpose:** Product vision document - "Photo Albums That Talk"
+
+**Content:**
+- Mission statement and problem definition
+- Target customer profiles
+- Core product principles and flow
+- Success metrics and positioning
+
+**Why Archived:**
+- Vision document for reference only
+- Product decisions now implemented
+- Strategic direction established
+
+**Still Useful For:**
+- Understanding product philosophy
+- Onboarding new team members
+- Reference for feature alignment with vision
+
+---
+
+### HW MVP v2 and Monitization (confidential).md (8K, Oct 13, 2025)
+**Purpose:** Confidential business strategy and monetization planning
+
+**Content:**
+- Core mission and elevator pitch
+- Competitive differentiation
+- Interview brain design
+- Monetization strategy
+
+**Why Archived:**
+- Strategic planning document (confidential)
+- Strategy now being executed
+- Reference for business decisions
+
+**Still Useful For:**
+- Business strategy reference
+- Investor discussions
+- Feature prioritization alignment
+
+---
+
+### MEMORY_BOX_COMPARISON.md (12.4K, Nov 7, 2025)
+**Purpose:** Feature comparison analysis for Memory Box implementation
+
+**Content:**
+- Comparison of implementation approaches
+- Decision criteria and trade-offs
+- Selected approach rationale
+
+**Why Archived:**
+- Decision made, feature implemented
+- Analysis complete
+
+**Still Useful For:**
+- Understanding why certain design choices were made
+- Reference for similar future decisions
+
+---
+
+### MEMORY_BOX_IMPLEMENTATION_ANALYSIS.md (18.5K, Nov 18, 2025)
+**Purpose:** Detailed implementation analysis for Memory Box feature
+
+**Content:**
+- Technical analysis
+- Implementation options
+- Architecture decisions
+
+**Why Archived:**
+- Feature implemented in production
+- Analysis served its purpose
+
+**Still Useful For:**
+- Historical context on implementation decisions
+- Reference for Memory Box maintenance
+
+---
+
+### GPT5_FEATURE_README.md (8.2K, Nov 2025)
+**Purpose:** Speculative documentation for future GPT-5 integration
+
+**Content:**
+- Model routing architecture (planned)
+- Reasoning effort mapping
+- Environment variable setup
+- Vercel AI Gateway configuration
+
+**Why Archived:**
+- GPT-5 does not exist yet
+- Current production uses GPT-4o
+- Documentation was aspirational/future-planning
+
+**Still Useful For:**
+- Reference when GPT-5 becomes available
+- Understanding planned AI architecture evolution
+
+---
+
 ## Restoration Instructions
 
 If you need to restore these documents:
