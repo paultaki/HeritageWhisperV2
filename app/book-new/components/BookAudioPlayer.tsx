@@ -53,13 +53,17 @@ export default function BookAudioPlayer({
     const dur = audioRef.current.duration;
     const cur = Math.max(0, audioRef.current.currentTime || 0);
 
-    // Only update duration from browser metadata if it's a valid, finite number
-    // This prevents overwriting the good prop value with 0, NaN, or Infinity
+    // Once browser loads valid metadata, use it (more accurate than database for WebM files)
+    // This fixes old recordings saved with duration=1 that should have real durations
     if (dur && isFinite(dur) && dur > 0) {
       setDuration(dur);
+    } else if (cur > duration) {
+      // Fallback: if currentTime exceeds our known duration, update duration
+      // This handles WebM files where duration metadata is Infinity
+      setDuration(cur);
     }
     setCurrentTime(cur);
-  }, []);
+  }, [duration]);
 
   // Calculate percentage from mouse/touch event
   const getPercentageFromEvent = useCallback(

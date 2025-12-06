@@ -130,8 +130,10 @@ async function processStory(story: {
   id: string;
   title: string;
   audio_url: string;
+  duration_seconds: number | null;
 }): Promise<boolean> {
   console.log(`  Processing: "${story.title}" (${story.id})`);
+  console.log(`    Current DB duration: ${story.duration_seconds ?? 'NULL'} seconds`);
 
   // Download the audio file
   const audioBuffer = await downloadAudio(story.audio_url);
@@ -145,8 +147,8 @@ async function processStory(story: {
   }
 
   // Calculate duration
-  const duration = await getAudioDuration(audioBuffer);
-  if (!duration) {
+  const actualDuration = await getAudioDuration(audioBuffer);
+  if (!actualDuration) {
     stats.errors.push({
       storyId: story.id,
       title: story.title,
@@ -155,17 +157,27 @@ async function processStory(story: {
     return false;
   }
 
-  console.log(`    Duration: ${duration} seconds`);
+  console.log(`    Actual duration: ${actualDuration} seconds`);
+
+  // Check if update is needed (duration is missing, or significantly different from actual)
+  const dbDuration = story.duration_seconds ?? 0;
+  const needsUpdate = dbDuration === 0 || Math.abs(dbDuration - actualDuration) > 2;
+
+  if (!needsUpdate) {
+    console.log(`    ✓ Duration already correct, skipping`);
+    stats.skipped++;
+    return true;
+  }
 
   // Update database (unless dry run)
   if (isDryRun) {
-    console.log(`    [DRY RUN] Would update duration_seconds to ${duration}`);
+    console.log(`    [DRY RUN] Would update duration_seconds from ${dbDuration} to ${actualDuration}`);
     return true;
   }
 
   const { error: updateError } = await supabase
     .from('stories')
-    .update({ duration_seconds: duration })
+    .update({ duration_seconds: actualDuration })
     .eq('id', story.id);
 
   if (updateError) {
@@ -177,7 +189,7 @@ async function processStory(story: {
     return false;
   }
 
-  console.log(`    ✓ Updated duration_seconds to ${duration}`);
+  console.log(`    ✓ Updated duration_seconds from ${dbDuration} to ${actualDuration}`);
   return true;
 }
 
@@ -196,14 +208,14 @@ async function migrate() {
     console.log('');
   }
 
-  // Fetch stories with audio but no duration
-  console.log('Fetching stories with missing audio durations...');
+  // Fetch ALL stories with audio to check if durations are correct
+  // This catches stories saved with duration=1 (the old minimum default) that should have real durations
+  console.log('Fetching all stories with audio to verify durations...');
 
   const { data: stories, error: fetchError } = await supabase
     .from('stories')
     .select('id, title, audio_url, duration_seconds')
     .not('audio_url', 'is', null)
-    .or('duration_seconds.is.null,duration_seconds.eq.0')
     .order('created_at', { ascending: true });
 
   if (fetchError) {
@@ -213,13 +225,13 @@ async function migrate() {
 
   if (!stories || stories.length === 0) {
     console.log('');
-    console.log('✅ No stories found with missing audio durations!');
+    console.log('✅ No stories with audio found!');
     console.log('');
     return;
   }
 
   stats.totalFound = stories.length;
-  console.log(`Found ${stories.length} stories with missing durations`);
+  console.log(`Found ${stories.length} stories with audio to check`);
   console.log('');
 
   // Process in batches
@@ -252,8 +264,9 @@ async function migrate() {
   console.log('  Migration Summary');
   console.log('═══════════════════════════════════════════════════════════');
   console.log('');
-  console.log(`  Total stories found:    ${stats.totalFound}`);
-  console.log(`  Successfully updated:   ${stats.updated}`);
+  console.log(`  Total stories checked:  ${stats.totalFound}`);
+  console.log(`  Already correct:        ${stats.skipped}`);
+  console.log(`  Updated:                ${stats.updated}`);
   console.log(`  Failed:                 ${stats.failed}`);
   console.log(`  Time elapsed:           ${elapsed}s`);
   console.log('');
