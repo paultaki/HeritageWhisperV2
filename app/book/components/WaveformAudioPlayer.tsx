@@ -110,8 +110,11 @@ export default function WaveformAudioPlayer({
 
   // Seek to specific percentage
   const seekToPercentage = useCallback((percentage: number) => {
-    if (!audioRef.current || !isFinite(audioRef.current.duration)) return;
-    audioRef.current.currentTime = percentage * audioRef.current.duration;
+    if (!audioRef.current) return;
+    // Use our known duration since browser may report Infinity for WebM files
+    const knownDuration = durationRef.current;
+    if (!knownDuration || knownDuration <= 0) return;
+    audioRef.current.currentTime = percentage * knownDuration;
   }, []);
 
   // Start dragging
