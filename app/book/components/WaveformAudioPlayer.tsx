@@ -48,6 +48,12 @@ export default function WaveformAudioPlayer({
   const [duration, setDuration] = useState(durationSeconds || 0);
   const [isDragging, setIsDragging] = useState(false);
 
+  // Ref to track duration without causing callback recreation
+  const durationRef = useRef(duration);
+  useEffect(() => {
+    durationRef.current = duration;
+  }, [duration]);
+
   // Sync duration state when durationSeconds prop changes (e.g., after fresh data is fetched)
   useEffect(() => {
     if (durationSeconds && durationSeconds > 0) {
@@ -77,13 +83,13 @@ export default function WaveformAudioPlayer({
     // This fixes old recordings saved with duration=1 that should have real durations
     if (dur && isFinite(dur) && dur > 0) {
       setDuration(dur);
-    } else if (cur > duration) {
+    } else if (cur > durationRef.current) {
       // Fallback: if currentTime exceeds our known duration, update duration
       // This handles WebM files where duration metadata is Infinity
       setDuration(cur);
     }
     setCurrentTime(cur);
-  }, [duration]);
+  }, []);
 
   // Calculate percentage from mouse/touch event
   const getPercentageFromEvent = useCallback(
