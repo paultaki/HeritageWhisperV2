@@ -5,6 +5,7 @@ import { Play, Pause } from "lucide-react";
 
 type WaveformAudioPlayerProps = {
   src: string;
+  durationSeconds?: number; // Pre-loaded duration from database (fixes 0:00 display for recorded audio)
   className?: string;
   onPlayStateChange?: (isPlaying: boolean) => void;
 };
@@ -34,6 +35,7 @@ function formatTime(seconds: number): string {
  */
 export default function WaveformAudioPlayer({
   src,
+  durationSeconds,
   className = "",
   onPlayStateChange
 }: WaveformAudioPlayerProps) {
@@ -42,7 +44,8 @@ export default function WaveformAudioPlayer({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  // Use durationSeconds from database as initial value (fixes 0:00 display for recorded audio)
+  const [duration, setDuration] = useState(durationSeconds || 0);
   const [isDragging, setIsDragging] = useState(false);
 
   // Toggle play/pause

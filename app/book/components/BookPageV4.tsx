@@ -25,6 +25,7 @@ interface Story {
   lifeAge?: number;
   transcription?: string;
   audioUrl?: string;
+  durationSeconds?: number | null;
   photos?: Array<{
     id: string;
     masterUrl?: string;
@@ -771,7 +772,7 @@ function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount 
       {/* Waveform Audio Player */}
       {story.audioUrl && (
         <div className="mb-3">
-          <WaveformAudioPlayer src={story.audioUrl} />
+          <WaveformAudioPlayer src={story.audioUrl} durationSeconds={story.durationSeconds ?? undefined} />
         </div>
       )}
 

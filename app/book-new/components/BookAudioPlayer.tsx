@@ -16,6 +16,7 @@ function formatTime(seconds: number): string {
 
 export default function BookAudioPlayer({
   audioUrl,
+  durationSeconds,
   onPlayStateChange,
 }: BookAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -23,7 +24,8 @@ export default function BookAudioPlayer({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  // Use durationSeconds from database as initial value (fixes 0:00 display for recorded audio)
+  const [duration, setDuration] = useState(durationSeconds || 0);
   const [isDragging, setIsDragging] = useState(false);
 
   // Toggle play/pause

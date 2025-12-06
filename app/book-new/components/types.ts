@@ -66,6 +66,7 @@ export interface BookPageCardProps {
  */
 export interface BookAudioPlayerProps {
   audioUrl: string;
+  durationSeconds?: number; // Pre-loaded duration from database (fixes 0:00 display for recorded audio)
   onPlayStateChange?: (isPlaying: boolean) => void;
 }
 

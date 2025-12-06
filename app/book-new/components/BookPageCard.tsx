@@ -368,7 +368,7 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
             {/* Audio player */}
             {story.audioUrl && (
               <div className="mt-[11px]">
-                <BookAudioPlayer audioUrl={story.audioUrl} />
+                <BookAudioPlayer audioUrl={story.audioUrl} durationSeconds={story.durationSeconds ?? undefined} />
               </div>
             )}
 
