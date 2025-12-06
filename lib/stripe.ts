@@ -10,7 +10,9 @@
 import Stripe from 'stripe';
 import { env } from '@/lib/env';
 
-if (!process.env.STRIPE_SECRET_KEY) {
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
+
+if (!isBuildPhase && !process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not defined in environment variables');
 }
 
@@ -18,7 +20,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
  * Stripe client instance
  * Configured for API version 2025-09-30 (latest stable)
  */
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder_for_build', {
   apiVersion: '2025-09-30.clover',
   typescript: true,
   appInfo: {
@@ -56,7 +58,7 @@ if (!GIFT_PRICE_ID && env.NODE_ENV !== 'test') {
  */
 export const WEBHOOK_SECRET = env.STRIPE_WEBHOOK_SECRET;
 
-if (!WEBHOOK_SECRET && env.NODE_ENV === 'production') {
+if (!isBuildPhase && !WEBHOOK_SECRET && env.NODE_ENV === 'production') {
   throw new Error('STRIPE_WEBHOOK_SECRET is required in production for webhook verification');
 }
 

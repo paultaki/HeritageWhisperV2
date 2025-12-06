@@ -22,7 +22,8 @@ export interface PasskeySessionData {
 
 // Validate password at module load (fail fast if missing in production)
 const sessionPassword = env.IRON_SESSION_PASSWORD;
-if (!sessionPassword && process.env.NODE_ENV === 'production') {
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
+if (!isBuildPhase && !sessionPassword && process.env.NODE_ENV === 'production') {
   throw new Error('IRON_SESSION_PASSWORD is required in production');
 }
 

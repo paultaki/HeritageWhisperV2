@@ -195,6 +195,32 @@ const productionEnvSchema = envSchema.superRefine((data, ctx) => {
  * This ensures the app fails fast if any required variables are missing.
  */
 function parseEnv(): z.infer<typeof envSchema> {
+  // Skip validation during build phase (environment variables will be available at runtime)
+  const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
+  
+  if (isBuildPhase) {
+    console.log('⏭️  Skipping environment validation during build phase');
+    // Return minimal defaults for build phase
+    return {
+      NODE_ENV: (process.env.NODE_ENV as any) || 'production',
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+      DATABASE_URL: process.env.DATABASE_URL || '',
+      IRON_SESSION_PASSWORD: process.env.IRON_SESSION_PASSWORD || '',
+      SESSION_SECRET: process.env.SESSION_SECRET || '',
+      SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET || '',
+      STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
+      UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL || '',
+      UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN || '',
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+      ASSEMBLYAI_API_KEY: process.env.ASSEMBLYAI_API_KEY || '',
+      RESEND_API_KEY: process.env.RESEND_API_KEY || '',
+      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || '',
+      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || '',
+    } as z.infer<typeof envSchema>;
+  }
+
   const result = productionEnvSchema.safeParse(process.env);
 
   if (!result.success) {

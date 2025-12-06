@@ -10,10 +10,11 @@ import OpenAI from "openai";
 // Gateway configuration
 const baseURL = process.env.VERCEL_AI_GATEWAY_BASE_URL || process.env.AI_GATEWAY_BASE_URL || "https://ai-gateway.vercel.sh/v1";
 const apiKey = process.env.VERCEL_AI_GATEWAY_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
 
 // In test environments, allow a dummy key so unit tests don't fail on missing secrets
 if (!apiKey) {
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === 'test' || isBuildPhase) {
     process.env.OPENAI_API_KEY = 'test-key';
   } else {
     throw new Error("Missing AI API key. Set VERCEL_AI_GATEWAY_API_KEY, AI_GATEWAY_API_KEY, or OPENAI_API_KEY");

@@ -18,13 +18,15 @@ const baseURL = process.env.AI_GATEWAY_API_KEY
   ? 'https://ai-gateway.vercel.sh/v1'
   : undefined;
 
-if (!apiKey) {
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
+
+if (!isBuildPhase && !apiKey) {
   throw new Error("AI_GATEWAY_API_KEY or OPENAI_API_KEY environment variable is required");
 }
 
 // PRODUCTION OPTIMIZATION: Added timeout (60s) and retry logic (3 attempts) to prevent hangs
 const openai = new OpenAI({
-  apiKey,
+  apiKey: apiKey || 'sk-placeholder-for-build-phase',
   baseURL,
   timeout: 60000,  // 60 seconds - prevents indefinite hangs on slow/unresponsive API
   maxRetries: 3,   // Retry up to 3 times on 500/502/503/504 errors with exponential backoff

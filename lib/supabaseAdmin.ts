@@ -31,17 +31,23 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl) {
-  throw new Error(
-    "NEXT_PUBLIC_SUPABASE_URL is required for Supabase Admin client"
-  );
-}
+// Skip validation during build phase (NEXT_PHASE === 'phase-production-build')
+// Environment variables will be validated at runtime
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
 
-if (!supabaseServiceKey) {
-  throw new Error(
-    "SUPABASE_SERVICE_ROLE_KEY is required for admin operations. " +
-      "This key should only exist in server-side environment variables."
-  );
+if (!isBuildPhase) {
+  if (!supabaseUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_SUPABASE_URL is required for Supabase Admin client"
+    );
+  }
+
+  if (!supabaseServiceKey) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY is required for admin operations. " +
+        "This key should only exist in server-side environment variables."
+    );
+  }
 }
 
 // =============================================================================
@@ -67,8 +73,8 @@ if (!supabaseServiceKey) {
  *   .eq("id", userId);
  */
 export const supabaseAdmin: SupabaseClient = createClient(
-  supabaseUrl,
-  supabaseServiceKey,
+  supabaseUrl || 'https://placeholder-build-phase-only.supabase.co',
+  supabaseServiceKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJwbGFjZWhvbGRlciIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2NDA5OTUyMDAsImV4cCI6MTk1NjU3MTIwMH0.placeholder-service-role-key-for-build',
   {
     auth: {
       // Disable session persistence - this is a server-side client
