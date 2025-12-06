@@ -401,15 +401,16 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
               </div>
             )}
           </div>
-
-          {/* Gradient fade indicator - shows when there's more content below (matches desktop behavior) */}
-          {scrollState.hasScroll && !scrollState.isAtBottom && (
-            <div
-              className="pointer-events-none absolute bottom-0 left-0 right-0 h-28 z-30"
-              style={{ background: 'linear-gradient(to top, #F5F1E8 0%, #F5F1E8 20%, transparent 100%)' }}
-            />
-          )}
         </div>
+
+        {/* Gradient fade indicator - shows when there's more content below (matches desktop behavior) */}
+        {/* Positioned outside the scroller so it stays fixed at bottom */}
+        {scrollState.hasScroll && !scrollState.isAtBottom && (
+          <div
+            className="pointer-events-none absolute bottom-0 left-0 right-0 h-28 z-30"
+            style={{ background: 'linear-gradient(to top, #F5F1E8 0%, #F5F1E8 20%, transparent 100%)' }}
+          />
+        )}
 
         {/* Page number - subtle, book-style positioning on outer edge */}
         {pageNumber && (
