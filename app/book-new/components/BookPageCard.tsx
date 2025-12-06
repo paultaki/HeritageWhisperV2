@@ -1,8 +1,6 @@
 "use client";
 
 import { useRef, useEffect, useLayoutEffect, useState, useCallback } from "react";
-import Image from "next/image";
-import { ChevronDown } from "lucide-react";
 import { BookPageCardProps } from "./types";
 import BookAudioPlayer from "./BookAudioPlayer";
 import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
@@ -27,8 +25,10 @@ function formatDate(dateString: string | undefined): string {
 
 export default function BookPageCard({ story, isActive, caveatFont, pageNumber, isPriority = false }: BookPageCardProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const [showContinueHint, setShowContinueHint] = useState(false);
-  const [showFade, setShowFade] = useState(false);
+  const [scrollState, setScrollState] = useState<{ hasScroll: boolean; isAtBottom: boolean }>({
+    hasScroll: false,
+    isAtBottom: false
+  });
 
   // Fixed padding for top bar (56px)
   // Note: Dynamic viewport detection not needed since book page has overflow:hidden on body
@@ -118,30 +118,29 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
 
 
 
-  // Check if content overflows and update hint visibility
+  // Helper to check if scrolled to bottom (matches desktop logic)
+  const checkIfAtBottom = useCallback((element: HTMLElement) => {
+    const buffer = 10; // Small buffer for rounding errors
+    return element.scrollTop + element.clientHeight >= element.scrollHeight - buffer;
+  }, []);
+
+  // Check if content overflows and update scroll state
   const checkOverflow = useCallback(() => {
     if (!scrollerRef.current) return;
 
     const hasOverflow =
       scrollerRef.current.scrollHeight - scrollerRef.current.clientHeight > 12;
-    const isAtTop = scrollerRef.current.scrollTop < 8;
+    const atBottom = checkIfAtBottom(scrollerRef.current);
 
-    setShowContinueHint(hasOverflow && isAtTop);
-    setShowFade(hasOverflow);
-  }, []);
+    setScrollState({ hasScroll: hasOverflow, isAtBottom: atBottom });
+  }, [checkIfAtBottom]);
 
-  // Handle scroll to hide continue hint and gradient
+  // Handle scroll to update gradient visibility
   const handleScroll = useCallback(() => {
     if (!scrollerRef.current) return;
-    const isAtTop = scrollerRef.current.scrollTop < 8;
-
-    if (!isAtTop) {
-      setShowContinueHint(false);
-      setShowFade(false);
-    } else {
-      checkOverflow();
-    }
-  }, [checkOverflow]);
+    const atBottom = checkIfAtBottom(scrollerRef.current);
+    setScrollState(prev => ({ ...prev, isAtBottom: atBottom }));
+  }, [checkIfAtBottom]);
 
   // Reset scroll BEFORE paint when story changes (fixes Chrome scroll carryover)
   useLayoutEffect(() => {
@@ -402,23 +401,13 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
             )}
           </div>
 
-          {/* Fade gradient - matches cream paper background */}
-          <div
-            className={`pointer-events-none absolute bottom-0 left-0 right-0 h-28 transition-opacity duration-300 ${showFade ? "opacity-100" : "opacity-0"
-              }`}
-            style={{ background: 'linear-gradient(to top, #F5F1E8, transparent)' }}
-          ></div>
-
-          {/* Continue reading hint */}
-          <div
-            className={`absolute bottom-[63px] left-0 right-0 flex justify-center transition-opacity duration-300 ${showContinueHint ? "opacity-100" : "opacity-0"
-              }`}
-          >
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-stone-900 shadow-lg backdrop-blur-md ring-1 ring-white/40">
-              <span className="text-sm font-medium">Continue reading</span>
-              <ChevronDown className="h-4 w-4" />
-            </div>
-          </div>
+          {/* Gradient fade indicator - shows when there's more content below (matches desktop behavior) */}
+          {scrollState.hasScroll && !scrollState.isAtBottom && (
+            <div
+              className="pointer-events-none absolute bottom-0 left-0 right-0 h-28 z-30"
+              style={{ background: 'linear-gradient(to top, #F5F1E8 0%, #F5F1E8 20%, transparent 100%)' }}
+            />
+          )}
         </div>
 
         {/* Page number - subtle, book-style positioning on outer edge */}

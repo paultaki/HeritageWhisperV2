@@ -46,8 +46,8 @@ CREATE POLICY "Family members can view chapters"
   USING (
     EXISTS (
       SELECT 1 FROM family_members
-      WHERE family_members.storyteller_id = chapters.user_id
-        AND family_members.member_id = (SELECT auth.uid())
+      WHERE family_members.user_id = chapters.user_id
+        AND family_members.auth_user_id = (SELECT auth.uid())
         AND family_members.status = 'active'
     )
   );

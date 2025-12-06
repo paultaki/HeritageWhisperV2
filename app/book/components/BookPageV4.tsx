@@ -334,8 +334,8 @@ export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
 
       return (
         <PageWrapper>
-          <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]" style={{ pointerEvents: 'auto' }}>
-            <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
+          <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]" style={{ zIndex: 10 }}>
+            <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
               <div
                 ref={ref}
                 onScroll={(e) => {
@@ -344,19 +344,22 @@ export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
                   const atBottom = checkIfAtBottom(element);
                   setScrollState(prev => ({ ...prev, isAtBottom: atBottom }));
                 }}
-                className="h-full w-full rounded-[8px] outline-none p-4 overflow-y-auto"
+                tabIndex={0}
+                className="js-flow h-full w-full rounded-[8px] outline-none p-4 overflow-y-auto"
                 style={{
                   scrollBehavior: 'smooth',
                   WebkitOverflowScrolling: 'touch',
                   willChange: 'scroll-position',
-                  pointerEvents: 'auto',
+                  position: 'relative',
+                  zIndex: 20,
                   color: 'var(--book-text)'
                 }}
+                aria-label="Scroll to view more table of contents"
               >
                 <h1 className="text-5xl font-semibold text-center mb-8" style={{ color: 'var(--book-text)' }}>
                   Table of Contents
                 </h1>
-                <div className="space-y-0" style={{ pointerEvents: 'auto' }}>
+                <div className="space-y-0">
                   {renderTOCItems(leftStories, 0)}
                 </div>
               </div>
@@ -389,8 +392,8 @@ export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
 
       return (
         <PageWrapper>
-          <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]" style={{ pointerEvents: 'auto' }}>
-            <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60" style={{ pointerEvents: 'auto' }}>
+          <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]" style={{ zIndex: 10 }}>
+            <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
               <div
                 ref={ref}
                 onScroll={(e) => {
@@ -399,16 +402,19 @@ export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
                   const atBottom = checkIfAtBottom(element);
                   setScrollState(prev => ({ ...prev, isAtBottom: atBottom }));
                 }}
-                className="h-full w-full rounded-[8px] outline-none p-4 overflow-y-auto"
+                tabIndex={0}
+                className="js-flow h-full w-full rounded-[8px] outline-none p-4 overflow-y-auto"
                 style={{
                   scrollBehavior: 'smooth',
                   WebkitOverflowScrolling: 'touch',
                   willChange: 'scroll-position',
-                  pointerEvents: 'auto',
+                  position: 'relative',
+                  zIndex: 20,
                   color: 'var(--book-text)'
                 }}
+                aria-label="Scroll to view more table of contents"
               >
-                <div className="space-y-0 pt-[72px]" style={{ pointerEvents: 'auto' }}>
+                <div className="space-y-0 pt-[72px]">
                   {renderTOCItems(rightStories, midpoint)}
                 </div>
               </div>
