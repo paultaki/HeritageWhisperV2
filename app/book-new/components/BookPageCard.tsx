@@ -369,8 +369,6 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
             {/* Audio player */}
             {story.audioUrl && (
               <div className="mt-[11px]">
-                {/* DEBUG: Log duration being passed */}
-                {console.log('[BookPageCard] Story:', story.title, 'durationSeconds:', story.durationSeconds)}
                 <BookAudioPlayer audioUrl={story.audioUrl} durationSeconds={story.durationSeconds ?? undefined} />
               </div>
             )}

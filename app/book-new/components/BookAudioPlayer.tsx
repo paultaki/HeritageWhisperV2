@@ -28,15 +28,9 @@ export default function BookAudioPlayer({
   const [duration, setDuration] = useState(durationSeconds || 0);
   const [isDragging, setIsDragging] = useState(false);
 
-  // DEBUG: Log prop changes
-  useEffect(() => {
-    console.log('[BookAudioPlayer] durationSeconds prop:', durationSeconds, 'current duration state:', duration);
-  }, [durationSeconds, duration]);
-
   // Sync duration state when durationSeconds prop changes (e.g., after fresh data is fetched)
   useEffect(() => {
     if (durationSeconds && durationSeconds > 0) {
-      console.log('[BookAudioPlayer] Syncing duration from prop:', durationSeconds);
       setDuration(durationSeconds);
     }
   }, [durationSeconds]);

@@ -325,21 +325,10 @@ function BookStyleReviewContent() {
 
           // Set audio duration from cache if available
           // Recording page stores as 'duration', but we also check 'audioDuration' for compatibility
-          // DEBUG: Log what's in the cache for duration
-          console.log('[Review] NavCache duration fields:', {
-            duration: cachedData.duration,
-            audioDuration: cachedData.audioDuration,
-            durationSeconds: (cachedData as any).durationSeconds,
-            allKeys: Object.keys(cachedData)
-          });
           if (cachedData.duration) {
-            console.log('[Review] Setting audioDuration from cachedData.duration:', cachedData.duration);
             setAudioDuration(cachedData.duration);
           } else if (cachedData.audioDuration) {
-            console.log('[Review] Setting audioDuration from cachedData.audioDuration:', cachedData.audioDuration);
             setAudioDuration(cachedData.audioDuration);
-          } else {
-            console.log('[Review] No duration found in cache!');
           }
 
           return; // Data loaded from cache, skip other sources
@@ -828,8 +817,6 @@ function BookStyleReviewContent() {
       const hasDate = !!storyYear;
       // Use placeholder if no text but has photos
       const storyTranscription = transcription || (finalPhotos.length > 0 ? "(Photo memory)" : "");
-      // DEBUG: Log audioDuration before building storyData
-      console.log('[Review] Save - audioDuration state value:', audioDuration);
 
       const storyData: any = {
         title: title || `Memory from ${storyYear || "the past"}`,
@@ -845,9 +832,6 @@ function BookStyleReviewContent() {
         durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 1, // Minimum 1 second (database constraint)
         sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
       };
-
-      // DEBUG: Log what's being sent to API
-      console.log('[Review] Save - durationSeconds being sent:', storyData.durationSeconds);
 
       // Only include storyDate if it's defined (not null)
       if (storyDate) {
