@@ -1,55 +1,111 @@
+/**
+ * Rate Limiting Module
+ *
+ * Behavior by environment:
+ *
+ * PRODUCTION:
+ *   - Redis is REQUIRED and validated via lib/env.ts at startup.
+ *   - Initialization failures are FATAL (fail fast at module load).
+ *   - At runtime, Redis errors are logged and requests are ALLOWED by default
+ *     to preserve availability (soft-fail).
+ *
+ * DEVELOPMENT:
+ *   - Redis is optional; if not configured, a no-op limiter is used.
+ *   - This allows local development without Upstash setup.
+ *
+ * Public API is unchanged - all exported limiters have the same signatures.
+ */
+
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { env } from "@/lib/env";
 
-// Lazy-load Redis client to avoid build-time errors
-let redis: Redis | null = null;
-let redisInitialized = false;
-let redisInitError: Error | null = null;
+// =============================================================================
+// Types
+// =============================================================================
 
-function getRedis() {
-  if (redisInitialized) {
-    return redis;
-  }
+interface RateLimitResult {
+  success: boolean;
+  limit: number;
+  reset: number;
+  remaining: number;
+}
 
-  // Use validated env vars from lib/env.ts
+// No-op result for development when Redis is not configured
+const NO_OP_RESULT: RateLimitResult = {
+  success: true,
+  limit: 999,
+  reset: Date.now() + 60000,
+  remaining: 999,
+};
+
+// Soft-fail result for runtime Redis errors (preserves availability)
+function softFailResult(): RateLimitResult {
+  return {
+    success: true,
+    limit: 999,
+    reset: Date.now() + 1000,
+    remaining: Infinity,
+  };
+}
+
+// =============================================================================
+// Redis Client Initialization (Module Scope)
+// =============================================================================
+
+const isProduction = env.NODE_ENV === "production";
+
+/**
+ * Initialize Redis client at module scope.
+ * - In production: Throws immediately if Redis cannot be created (fail fast).
+ * - In development: Returns null if credentials are missing (no-op limiter).
+ */
+function initializeRedis(): Redis | null {
   const url = env.UPSTASH_REDIS_REST_URL;
   const token = env.UPSTASH_REDIS_REST_TOKEN;
-  const nodeEnv = env.NODE_ENV;
 
+  // Check if credentials are configured
   if (!url || !token) {
-    const errorMsg = "[Rate Limit] Redis credentials not configured";
-
-    // CRITICAL CHANGE: Fail in production, warn in development
-    if (nodeEnv === 'production') {
-      redisInitError = new Error(
-        `${errorMsg} - Rate limiting is REQUIRED in production. ` +
-        `Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN environment variables.`
+    if (isProduction) {
+      // env.ts should have caught this, but double-check for safety
+      throw new Error(
+        "[RateLimit] Redis is not initialized in production. " +
+        "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required."
       );
-      console.error(redisInitError.message);
-      // Don't throw here - let individual rate limit calls handle it
-    } else {
-      console.warn(`${errorMsg} - rate limiting disabled in development`);
     }
-
-    redisInitialized = true;
+    // Development: no-op limiter is acceptable
+    console.warn(
+      "[RateLimit] Redis credentials not configured - using no-op limiter in development"
+    );
     return null;
   }
 
+  // Attempt to create Redis client
+  // If this throws synchronously, it will bubble up and fail fast
   try {
-    redis = new Redis({ url, token });
-    redisInitialized = true;
-    console.info('[Rate Limit] Redis connection initialized successfully');
-    return redis;
+    const client = new Redis({ url, token });
+    console.info("[RateLimit] Redis client initialized successfully");
+    return client;
   } catch (error) {
-    redisInitError = error as Error;
-    console.error('[Rate Limit] Failed to initialize Redis:', error);
-    redisInitialized = true;
+    if (isProduction) {
+      // Re-throw to fail fast in production
+      throw new Error(
+        `[RateLimit] Failed to initialize Redis in production: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    }
+    console.error("[RateLimit] Failed to initialize Redis:", error);
     return null;
   }
 }
 
-// Lazy-initialize rate limiters
+// Initialize Redis client at module load time
+// In production, this will throw and crash the app if Redis is misconfigured
+const redis: Redis | null = initializeRedis();
+
+// =============================================================================
+// Rate Limiters (Lazy Initialization)
+// =============================================================================
+
 let _authRatelimit: Ratelimit | null = null;
 let _uploadRatelimit: Ratelimit | null = null;
 let _apiRatelimit: Ratelimit | null = null;
@@ -58,337 +114,169 @@ let _aiIpRatelimit: Ratelimit | null = null;
 let _aiGlobalRatelimit: Ratelimit | null = null;
 let _promptSubmitRatelimit: Ratelimit | null = null;
 
-function getRateLimiter(type: "auth" | "upload" | "api" | "tier3" | "ai-ip" | "ai-global" | "prompt-submit"): Ratelimit | null {
-  const redis = getRedis();
+type LimiterType = "auth" | "upload" | "api" | "tier3" | "ai-ip" | "ai-global" | "prompt-submit";
 
-  // CRITICAL CHANGE: Fail in production if Redis not available
+function getRateLimiter(type: LimiterType): Ratelimit | null {
+  // No Redis client means no-op in development
   if (!redis) {
-    // In production, don't throw; degrade gracefully to allow traffic while logging loudly
-    if (env.NODE_ENV === 'production' || redisInitError) {
-      console.error(
-        `Rate limiting unavailable. Redis initialization failed: ${redisInitError?.message || 'No credentials'}. ` +
-        `Proceeding without enforcement until Redis is configured.`
-      );
-    }
     return null;
   }
 
-  if (type === "auth" && !_authRatelimit) {
-    _authRatelimit = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(5, "10 s"),
-      analytics: true,
-      prefix: "@hw/auth",
-    });
-  }
+  switch (type) {
+    case "auth":
+      if (!_authRatelimit) {
+        _authRatelimit = new Ratelimit({
+          redis,
+          limiter: Ratelimit.slidingWindow(5, "10 s"),
+          analytics: true,
+          prefix: "@hw/auth",
+        });
+      }
+      return _authRatelimit;
 
-  if (type === "upload" && !_uploadRatelimit) {
-    _uploadRatelimit = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(10, "60 s"),
-      analytics: true,
-      prefix: "@hw/upload",
-    });
-  }
+    case "upload":
+      if (!_uploadRatelimit) {
+        _uploadRatelimit = new Ratelimit({
+          redis,
+          limiter: Ratelimit.slidingWindow(10, "60 s"),
+          analytics: true,
+          prefix: "@hw/upload",
+        });
+      }
+      return _uploadRatelimit;
 
-  if (type === "api" && !_apiRatelimit) {
-    _apiRatelimit = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(30, "60 s"),
-      analytics: true,
-      prefix: "@hw/api",
-    });
-  }
+    case "api":
+      if (!_apiRatelimit) {
+        _apiRatelimit = new Ratelimit({
+          redis,
+          limiter: Ratelimit.slidingWindow(30, "60 s"),
+          analytics: true,
+          prefix: "@hw/api",
+        });
+      }
+      return _apiRatelimit;
 
-  if (type === "tier3" && !_tier3Ratelimit) {
-    // Tier 3: Expensive GPT-4o analysis - limit to 1 per 5 minutes per user
-    _tier3Ratelimit = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(1, "300 s"), // 1 request per 5 minutes
-      analytics: true,
-      prefix: "@hw/tier3",
-    });
-  }
+    case "tier3":
+      // Tier 3: Expensive GPT-4o analysis - limit to 1 per 5 minutes per user
+      if (!_tier3Ratelimit) {
+        _tier3Ratelimit = new Ratelimit({
+          redis,
+          limiter: Ratelimit.slidingWindow(1, "300 s"),
+          analytics: true,
+          prefix: "@hw/tier3",
+        });
+      }
+      return _tier3Ratelimit;
 
-  if (type === "ai-ip" && !_aiIpRatelimit) {
-    // AI IP-based: Prevent abuse from single IP - 10 per hour per IP
-    _aiIpRatelimit = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(10, "3600 s"), // 10 requests per hour
-      analytics: true,
-      prefix: "@hw/ai-ip",
-    });
-  }
+    case "ai-ip":
+      // AI IP-based: Prevent abuse from single IP - 10 per hour per IP
+      if (!_aiIpRatelimit) {
+        _aiIpRatelimit = new Ratelimit({
+          redis,
+          limiter: Ratelimit.slidingWindow(10, "3600 s"),
+          analytics: true,
+          prefix: "@hw/ai-ip",
+        });
+      }
+      return _aiIpRatelimit;
 
-  if (type === "ai-global" && !_aiGlobalRatelimit) {
-    // AI Global: System-wide protection - 1000 per hour total
-    _aiGlobalRatelimit = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(1000, "3600 s"), // 1000 requests per hour
-      analytics: true,
-      prefix: "@hw/ai-global",
-    });
-  }
+    case "ai-global":
+      // AI Global: System-wide protection - 1000 per hour total
+      if (!_aiGlobalRatelimit) {
+        _aiGlobalRatelimit = new Ratelimit({
+          redis,
+          limiter: Ratelimit.slidingWindow(1000, "3600 s"),
+          analytics: true,
+          prefix: "@hw/ai-global",
+        });
+      }
+      return _aiGlobalRatelimit;
 
-  if (type === "prompt-submit" && !_promptSubmitRatelimit) {
-    // Prompt Submit: Prevent spam - 5 submissions per minute per user
-    _promptSubmitRatelimit = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(5, "60 s"), // 5 submissions per minute
-      analytics: true,
-      prefix: "@hw/prompt-submit",
-    });
-  }
+    case "prompt-submit":
+      // Prompt Submit: Prevent spam - 5 submissions per minute per user
+      if (!_promptSubmitRatelimit) {
+        _promptSubmitRatelimit = new Ratelimit({
+          redis,
+          limiter: Ratelimit.slidingWindow(5, "60 s"),
+          analytics: true,
+          prefix: "@hw/prompt-submit",
+        });
+      }
+      return _promptSubmitRatelimit;
 
-  return type === "auth"
-    ? _authRatelimit
-    : type === "upload"
-      ? _uploadRatelimit
-      : type === "tier3"
-        ? _tier3Ratelimit
-        : type === "ai-ip"
-          ? _aiIpRatelimit
-          : type === "ai-global"
-            ? _aiGlobalRatelimit
-            : type === "prompt-submit"
-              ? _promptSubmitRatelimit
-              : _apiRatelimit;
+    default:
+      return null;
+  }
 }
 
-// Export getters instead of direct instances
+// =============================================================================
+// Safe Limit Wrapper
+// =============================================================================
+
+/**
+ * Wraps a rate limiter call with error handling.
+ * - If limiter is null (dev no-op), returns NO_OP_RESULT.
+ * - If Redis call fails at runtime, logs error and soft-allows the request.
+ */
+async function safeLimit(
+  limiterType: LimiterType,
+  identifier: string
+): Promise<RateLimitResult> {
+  const limiter = getRateLimiter(limiterType);
+
+  // No limiter = development no-op
+  if (!limiter) {
+    return NO_OP_RESULT;
+  }
+
+  try {
+    // Actual Redis call - may throw on network/Redis issues
+    return await limiter.limit(identifier);
+  } catch (error) {
+    // Runtime Redis error: log and soft-allow to preserve availability
+    console.error(
+      `[RateLimit] Redis error during ${limiterType} limit check, allowing request by default:`,
+      error
+    );
+    return softFailResult();
+  }
+}
+
+// =============================================================================
+// Exported Rate Limiters (Public API - Unchanged)
+// =============================================================================
+
 export const authRatelimit = {
-  limit: async (identifier: string) => {
-    try {
-      const limiter = getRateLimiter("auth");
-      if (!limiter) {
-        // Development fallback only
-        return {
-          success: true,
-          limit: 999,
-          reset: Date.now() + 10000,
-          remaining: 999,
-        };
-      }
-      return limiter.limit(identifier);
-    } catch (error) {
-      console.error('[Rate Limit] Auth rate limit check failed:', error);
-      // In production, fail closed (deny request)
-      if (env.NODE_ENV === 'production') {
-        return {
-          success: false,
-          limit: 0,
-          reset: Date.now() + 60000,
-          remaining: 0,
-        };
-      }
-      // In development, fail open (allow request but log)
-      return {
-        success: true,
-        limit: 999,
-        reset: Date.now() + 10000,
-        remaining: 999,
-      };
-    }
-  },
+  limit: (identifier: string) => safeLimit("auth", identifier),
 };
 
 export const uploadRatelimit = {
-  limit: async (identifier: string) => {
-    try {
-      const limiter = getRateLimiter("upload");
-      if (!limiter) {
-        return {
-          success: true,
-          limit: 999,
-          reset: Date.now() + 60000,
-          remaining: 999,
-        };
-      }
-      return limiter.limit(identifier);
-    } catch (error) {
-      console.error('[Rate Limit] Upload rate limit check failed:', error);
-      if (env.NODE_ENV === 'production') {
-        return {
-          success: false,
-          limit: 0,
-          reset: Date.now() + 60000,
-          remaining: 0,
-        };
-      }
-      return {
-        success: true,
-        limit: 999,
-        reset: Date.now() + 60000,
-        remaining: 999,
-      };
-    }
-  },
+  limit: (identifier: string) => safeLimit("upload", identifier),
 };
 
 export const apiRatelimit = {
-  limit: async (identifier: string) => {
-    try {
-      const limiter = getRateLimiter("api");
-      if (!limiter) {
-        return {
-          success: true,
-          limit: 999,
-          reset: Date.now() + 60000,
-          remaining: 999,
-        };
-      }
-      return limiter.limit(identifier);
-    } catch (error) {
-      console.error('[Rate Limit] API rate limit check failed:', error);
-      if (env.NODE_ENV === 'production') {
-        return {
-          success: false,
-          limit: 0,
-          reset: Date.now() + 60000,
-          remaining: 0,
-        };
-      }
-      return {
-        success: true,
-        limit: 999,
-        reset: Date.now() + 60000,
-        remaining: 999,
-      };
-    }
-  },
+  limit: (identifier: string) => safeLimit("api", identifier),
 };
 
 export const tier3Ratelimit = {
-  limit: async (identifier: string) => {
-    try {
-      const limiter = getRateLimiter("tier3");
-      if (!limiter) {
-        return {
-          success: true,
-          limit: 999,
-          reset: Date.now() + 300000,
-          remaining: 999,
-        };
-      }
-      return limiter.limit(identifier);
-    } catch (error) {
-      console.error('[Rate Limit] Tier 3 rate limit check failed:', error);
-      if (env.NODE_ENV === 'production') {
-        return {
-          success: false,
-          limit: 0,
-          reset: Date.now() + 300000,
-          remaining: 0,
-        };
-      }
-      return {
-        success: true,
-        limit: 999,
-        reset: Date.now() + 300000,
-        remaining: 999,
-      };
-    }
-  },
+  limit: (identifier: string) => safeLimit("tier3", identifier),
 };
 
 export const aiIpRatelimit = {
-  limit: async (identifier: string) => {
-    try {
-      const limiter = getRateLimiter("ai-ip");
-      if (!limiter) {
-        return {
-          success: true,
-          limit: 999,
-          reset: Date.now() + 3600000,
-          remaining: 999,
-        };
-      }
-      return limiter.limit(identifier);
-    } catch (error) {
-      console.error('[Rate Limit] AI IP rate limit check failed:', error);
-      if (env.NODE_ENV === 'production') {
-        return {
-          success: false,
-          limit: 0,
-          reset: Date.now() + 3600000,
-          remaining: 0,
-        };
-      }
-      return {
-        success: true,
-        limit: 999,
-        reset: Date.now() + 3600000,
-        remaining: 999,
-      };
-    }
-  },
+  limit: (identifier: string) => safeLimit("ai-ip", identifier),
 };
 
 export const aiGlobalRatelimit = {
-  limit: async (identifier: string) => {
-    try {
-      const limiter = getRateLimiter("ai-global");
-      if (!limiter) {
-        return {
-          success: true,
-          limit: 999,
-          reset: Date.now() + 3600000,
-          remaining: 999,
-        };
-      }
-      return limiter.limit(identifier);
-    } catch (error) {
-      console.error('[Rate Limit] AI global rate limit check failed:', error);
-      if (env.NODE_ENV === 'production') {
-        return {
-          success: false,
-          limit: 0,
-          reset: Date.now() + 3600000,
-          remaining: 0,
-        };
-      }
-      return {
-        success: true,
-        limit: 999,
-        reset: Date.now() + 3600000,
-        remaining: 999,
-      };
-    }
-  },
+  limit: (identifier: string) => safeLimit("ai-global", identifier),
 };
 
 export const promptSubmitRatelimit = {
-  limit: async (identifier: string) => {
-    try {
-      const limiter = getRateLimiter("prompt-submit");
-      if (!limiter) {
-        return {
-          success: true,
-          limit: 999,
-          reset: Date.now() + 60000,
-          remaining: 999,
-        };
-      }
-      return limiter.limit(identifier);
-    } catch (error) {
-      console.error('[Rate Limit] Prompt submit rate limit check failed:', error);
-      if (env.NODE_ENV === 'production') {
-        return {
-          success: false,
-          limit: 0,
-          reset: Date.now() + 60000,
-          remaining: 0,
-        };
-      }
-      return {
-        success: true,
-        limit: 999,
-        reset: Date.now() + 60000,
-        remaining: 999,
-      };
-    }
-  },
+  limit: (identifier: string) => safeLimit("prompt-submit", identifier),
 };
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
 
 /**
  * Helper function to get client IP from request headers
@@ -414,18 +302,10 @@ export function getClientIp(request: Request): string {
 export async function checkRateLimit(
   identifier: string,
   ratelimiter: {
-    limit: (
-      id: string,
-    ) => Promise<{
-      success: boolean;
-      limit: number;
-      reset: number;
-      remaining: number;
-    }>;
-  },
+    limit: (id: string) => Promise<RateLimitResult>;
+  }
 ): Promise<Response | null> {
-  const { success, limit, reset, remaining } =
-    await ratelimiter.limit(identifier);
+  const { success, limit, reset, remaining } = await ratelimiter.limit(identifier);
 
   if (!success) {
     return new Response(
@@ -443,7 +323,7 @@ export async function checkRateLimit(
           "X-RateLimit-Reset": reset.toString(),
           "Retry-After": Math.ceil((reset - Date.now()) / 1000).toString(),
         },
-      },
+      }
     );
   }
 
@@ -451,29 +331,28 @@ export async function checkRateLimit(
 }
 
 /**
- * Health check for rate limiting system
- * Call this on app startup to verify Redis is working
+ * Health check for rate limiting system.
+ * Call this on app startup to verify Redis is working.
  */
 export async function healthCheckRateLimit(): Promise<{
   healthy: boolean;
   error?: string;
 }> {
-  try {
-    const redis = getRedis();
-    if (!redis) {
-      return {
-        healthy: env.NODE_ENV !== 'production',
-        error: 'Redis not configured',
-      };
-    }
+  // No Redis in development is acceptable
+  if (!redis) {
+    return {
+      healthy: !isProduction,
+      error: isProduction ? "Redis not configured in production" : undefined,
+    };
+  }
 
-    // Test Redis connection with a simple ping
+  try {
     await redis.ping();
     return { healthy: true };
   } catch (error) {
     return {
       healthy: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }

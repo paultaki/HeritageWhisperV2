@@ -241,7 +241,7 @@ export default function Hero() {
             {/* Skeleton - shows when active tab is loading */}
             <div
               className={`transition-opacity duration-300 ${
-                isTabLoaded(activeTab) ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                isTabLoaded(activeTab) ? 'absolute inset-0 opacity-0 pointer-events-none' : 'opacity-100'
               }`}
             >
               <TabSkeleton />
