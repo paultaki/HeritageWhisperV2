@@ -213,6 +213,9 @@ export function AudioRecordingScreen({
       if (response.ok) {
         const data = await response.json();
 
+        // DEBUG: Log duration being captured
+        console.log('[AudioRecordingScreen] Recording finished - elapsedSeconds:', elapsedSeconds);
+
         const completeDraft = {
           ...draft,
           title: data.title || draft.title || "Untitled Story",
@@ -223,6 +226,7 @@ export function AudioRecordingScreen({
           lessonOptions: data.lessonOptions,
         };
 
+        console.log('[AudioRecordingScreen] completeDraft.durationSeconds:', completeDraft.durationSeconds);
         onFinishAndReview(completeDraft as any);
       } else {
         // If transcription fails, continue without it

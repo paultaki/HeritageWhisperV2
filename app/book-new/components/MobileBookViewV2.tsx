@@ -79,6 +79,13 @@ export default function MobileBookViewV2({
   const bookStories = useMemo<BookStory[]>(() => {
     if (!data?.stories) return [];
 
+    // DEBUG: Log raw stories from API to check durationSeconds
+    console.log('[MobileBookViewV2] Raw stories from API:', data.stories.map(s => ({
+      title: s.title,
+      durationSeconds: s.durationSeconds,
+      audioUrl: s.audioUrl ? 'yes' : 'no'
+    })));
+
     return data.stories
       .filter(
         (s): s is BookStory =>

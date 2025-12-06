@@ -56,7 +56,7 @@ interface BookStyleReviewProps {
   onTranscriptionChange: (text: string) => void;
   onPhotosChange: (photos: StoryPhoto[]) => void;
   onWisdomChange: (wisdom: string) => void;
-  onAudioChange?: (audioUrl: string | null, audioBlob?: Blob | null) => void;
+  onAudioChange?: (audioUrl: string | null, audioBlob?: Blob | null, duration?: number) => void;
   onSave: () => void;
   onCancel: () => void;
   onDelete?: () => void;
@@ -230,9 +230,9 @@ export function BookStyleReview({
     setAudioSource("original");
     setAudioProcessingStatus("complete");
 
-    // Call the parent callback with audio URL and blob
+    // Call the parent callback with audio URL, blob, and duration
     if (onAudioChange) {
-      onAudioChange(blobUrl, audioBlob);
+      onAudioChange(blobUrl, audioBlob, duration);
     }
 
     setTranscriptionStatus("complete");

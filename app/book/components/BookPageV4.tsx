@@ -328,116 +328,158 @@ export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
       );
     }
 
-    // Handle table of contents left page
+    // Handle table of contents left page - uses same structure as story pages for proper scrolling
     if (story === 'toc-left') {
       const midpoint = Math.ceil(allStories.length / 2);
       const leftStories = allStories.slice(0, midpoint);
 
       return (
-        <PageWrapper>
-          <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]" style={{ zIndex: 10 }}>
-            <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
-              <div
-                ref={ref}
-                onScroll={(e) => {
-                  onScroll(e);
-                  const element = e.currentTarget;
-                  const atBottom = checkIfAtBottom(element);
-                  setScrollState(prev => ({ ...prev, isAtBottom: atBottom }));
-                }}
-                tabIndex={0}
-                className="js-flow h-full w-full rounded-[8px] outline-none p-4 overflow-y-auto"
-                style={{
-                  scrollBehavior: 'smooth',
-                  WebkitOverflowScrolling: 'touch',
-                  willChange: 'scroll-position',
-                  position: 'relative',
-                  zIndex: 20,
-                  color: 'var(--book-text)'
-                }}
-                aria-label="Scroll to view more table of contents"
-              >
-                <h1 className="text-5xl font-semibold text-center mb-8" style={{ color: 'var(--book-text)' }}>
-                  Table of Contents
-                </h1>
-                <div className="space-y-0">
-                  {renderTOCItems(leftStories, 0)}
+        <div
+          ref={pageRef}
+          className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}
+          style={{
+            zIndex: position === "right" ? 50 : 40,
+            pointerEvents: 'none',
+            overflow: 'visible'
+          }}
+        >
+          <div
+            className={`relative h-full w-full rounded-[var(--book-radius)] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15`}
+            style={{
+              maxWidth: '100%',
+              pointerEvents: 'auto',
+              background: 'var(--book-paper)'
+            }}
+          >
+            <PaperTexture />
+            <GutterShadow side={position === "left" ? "right" : "left"} />
+            <PageStack side={position} />
+
+            <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]" style={{ zIndex: 10 }}>
+              <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
+                <div
+                  ref={ref}
+                  onScroll={(e) => {
+                    onScroll(e);
+                    const element = e.currentTarget;
+                    const atBottom = checkIfAtBottom(element);
+                    setScrollState(prev => ({ ...prev, isAtBottom: atBottom }));
+                  }}
+                  tabIndex={0}
+                  className="js-flow h-full w-full rounded-[8px] outline-none p-4 overflow-y-auto"
+                  style={{
+                    scrollBehavior: 'smooth',
+                    WebkitOverflowScrolling: 'touch',
+                    willChange: 'scroll-position',
+                    position: 'relative',
+                    zIndex: 20,
+                    color: 'var(--book-text)'
+                  }}
+                  aria-label="Scroll to view more table of contents"
+                >
+                  <h1 className="text-5xl font-semibold text-center mb-8" style={{ color: 'var(--book-text)' }}>
+                    Table of Contents
+                  </h1>
+                  <div className="space-y-0">
+                    {renderTOCItems(leftStories, 0)}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Gradient fade indicator - shows when there's more content below */}
-            {scrollState.hasScroll && !scrollState.isAtBottom && (
-              <div
-                className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none z-30"
-                style={{
-                  background: 'linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 30%, transparent 100%)',
-                  borderRadius: '0 0 10px 10px',
-                }}
-              />
-            )}
+              {/* Gradient fade indicator - shows when there's more content below */}
+              {scrollState.hasScroll && !scrollState.isAtBottom && (
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none z-30"
+                  style={{
+                    background: 'linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 30%, transparent 100%)',
+                    borderRadius: '0 0 10px 10px',
+                  }}
+                />
+              )}
 
-            <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-sm pointer-events-none z-20" style={{ color: 'var(--book-text-muted)' }}>
-              {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
-              {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
+              <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-sm pointer-events-none z-20" style={{ color: 'var(--book-text-muted)' }}>
+                {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
+                {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
+              </div>
             </div>
           </div>
-        </PageWrapper>
+        </div>
       );
     }
 
-    // Handle table of contents right page
+    // Handle table of contents right page - uses same structure as story pages for proper scrolling
     if (story === 'toc-right') {
       const midpoint = Math.ceil(allStories.length / 2);
       const rightStories = allStories.slice(midpoint);
 
       return (
-        <PageWrapper>
-          <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]" style={{ zIndex: 10 }}>
-            <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
-              <div
-                ref={ref}
-                onScroll={(e) => {
-                  onScroll(e);
-                  const element = e.currentTarget;
-                  const atBottom = checkIfAtBottom(element);
-                  setScrollState(prev => ({ ...prev, isAtBottom: atBottom }));
-                }}
-                tabIndex={0}
-                className="js-flow h-full w-full rounded-[8px] outline-none p-4 overflow-y-auto"
-                style={{
-                  scrollBehavior: 'smooth',
-                  WebkitOverflowScrolling: 'touch',
-                  willChange: 'scroll-position',
-                  position: 'relative',
-                  zIndex: 20,
-                  color: 'var(--book-text)'
-                }}
-                aria-label="Scroll to view more table of contents"
-              >
-                <div className="space-y-0 pt-[72px]">
-                  {renderTOCItems(rightStories, midpoint)}
+        <div
+          ref={pageRef}
+          className={`absolute inset-y-0 ${position === "left" ? "left-0" : "right-0"} w-1/2 [transform-style:preserve-3d]`}
+          style={{
+            zIndex: position === "right" ? 50 : 40,
+            pointerEvents: 'none',
+            overflow: 'visible'
+          }}
+        >
+          <div
+            className={`relative h-full w-full rounded-[var(--book-radius)] ring-1 shadow-2xl [transform:rotateY(${position === "left" ? "3deg" : "-3deg"})_translateZ(0.001px)] ring-black/15`}
+            style={{
+              maxWidth: '100%',
+              pointerEvents: 'auto',
+              background: 'var(--book-paper)'
+            }}
+          >
+            <PaperTexture />
+            <GutterShadow side={position === "left" ? "right" : "left"} />
+            <PageStack side={position} />
+
+            <div className="relative h-full w-full p-[19px] md:p-[21px] lg:p-[23px]" style={{ zIndex: 10 }}>
+              <div className="h-full w-full rounded-[10px] ring-1 backdrop-blur-[0.5px] ring-black/5 bg-white/60 overflow-hidden" style={{ position: 'relative', zIndex: 15 }}>
+                <div
+                  ref={ref}
+                  onScroll={(e) => {
+                    onScroll(e);
+                    const element = e.currentTarget;
+                    const atBottom = checkIfAtBottom(element);
+                    setScrollState(prev => ({ ...prev, isAtBottom: atBottom }));
+                  }}
+                  tabIndex={0}
+                  className="js-flow h-full w-full rounded-[8px] outline-none p-4 overflow-y-auto"
+                  style={{
+                    scrollBehavior: 'smooth',
+                    WebkitOverflowScrolling: 'touch',
+                    willChange: 'scroll-position',
+                    position: 'relative',
+                    zIndex: 20,
+                    color: 'var(--book-text)'
+                  }}
+                  aria-label="Scroll to view more table of contents"
+                >
+                  <div className="space-y-0 pt-[72px]">
+                    {renderTOCItems(rightStories, midpoint)}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Gradient fade indicator - shows when there's more content below */}
-            {scrollState.hasScroll && !scrollState.isAtBottom && (
-              <div
-                className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none z-30"
-                style={{
-                  background: 'linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 30%, transparent 100%)',
-                  borderRadius: '0 0 10px 10px',
-                }}
-              />
-            )}
+              {/* Gradient fade indicator - shows when there's more content below */}
+              {scrollState.hasScroll && !scrollState.isAtBottom && (
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none z-30"
+                  style={{
+                    background: 'linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 30%, transparent 100%)',
+                    borderRadius: '0 0 10px 10px',
+                  }}
+                />
+              )}
 
-            <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-sm pointer-events-none z-20" style={{ color: 'var(--book-text-muted)' }}>
-              {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
-              {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
+              <div className="absolute bottom-2 left-0 right-0 flex justify-between px-6 text-sm pointer-events-none z-20" style={{ color: 'var(--book-text-muted)' }}>
+                {position === "left" && <span className="tracking-tight font-medium">{pageNum}</span>}
+                {position === "right" && <span className="tracking-tight font-medium ml-auto">{pageNum}</span>}
+              </div>
             </div>
           </div>
-        </PageWrapper>
+        </div>
       );
     }
 

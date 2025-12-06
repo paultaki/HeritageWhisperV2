@@ -42,33 +42,33 @@ export default function VoiceSection() {
             <div className="mt-8">
               <button
                 onClick={togglePlay}
-                className="group flex items-center gap-5 px-6 py-4 bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] rounded-xl hover:border-[var(--hw-secondary)] hover:shadow-md transition-all duration-200"
+                className="group flex items-center gap-3 md:gap-5 px-4 md:px-6 py-3 md:py-4 bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] rounded-xl hover:border-[var(--hw-secondary)] hover:shadow-md transition-all duration-200"
               >
-                <div className="w-12 h-12 rounded-full bg-[var(--hw-secondary)] flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-[var(--hw-secondary)] flex items-center justify-center text-white group-hover:scale-105 transition-transform flex-shrink-0">
                   {isPlaying ? (
-                    <Pause className="w-6 h-6" />
+                    <Pause className="w-5 md:w-6 h-5 md:h-6" />
                   ) : (
-                    <Play className="w-6 h-6 ml-0.5" />
+                    <Play className="w-5 md:w-6 h-5 md:h-6 ml-0.5" />
                   )}
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-end gap-1.5 h-7">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="flex items-end gap-1 md:gap-1.5 h-6 md:h-7">
                     {[3, 5, 8, 6, 9, 4, 7, 5, 8, 6, 4, 7, 5, 3].map((height, i) => (
                       <div
                         key={i}
-                        className={`w-1.5 rounded-full transition-all duration-150 ${
+                        className={`w-1 md:w-1.5 rounded-full transition-all duration-150 ${
                           isPlaying
                             ? 'bg-[var(--hw-secondary)] animate-pulse'
                             : 'bg-[var(--hw-secondary)] opacity-60'
-                        }`}
+                        } ${i >= 10 ? 'hidden sm:block' : ''}`}
                         style={{
-                          height: `${height * 3}px`,
+                          height: `${height * 2.5}px`,
                           animationDelay: isPlaying ? `${i * 50}ms` : '0ms'
                         }}
                       />
                     ))}
                   </div>
-                  <span className="text-base font-medium text-[var(--hw-text-secondary)]">
+                  <span className="text-sm md:text-base font-medium text-[var(--hw-text-secondary)] whitespace-nowrap">
                     {isPlaying ? 'Now playing...' : 'Hear the difference'}
                   </span>
                 </div>

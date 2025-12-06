@@ -151,6 +151,10 @@ function RecordingContent() {
   const handleAudioFinish = async (completeDraft: StoryDraft) => {
     // Create NavCache entry
     const navId = `recording-${Date.now()}`;
+
+    // DEBUG: Log what we're putting in the cache
+    console.log('[Recording Page] completeDraft.durationSeconds:', completeDraft.durationSeconds);
+
     const cacheData: RecordingNavCache = {
       audioBlob: completeDraft.audioBlob,
       title: completeDraft.title,
@@ -168,6 +172,7 @@ function RecordingContent() {
       storyYear: completeDraft.storyYear,
     };
 
+    console.log('[Recording Page] cacheData.duration:', cacheData.duration);
     await navCache.set(navId, cacheData);
 
     // Navigate to book-style review

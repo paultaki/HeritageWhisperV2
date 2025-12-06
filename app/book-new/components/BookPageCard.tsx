@@ -87,10 +87,11 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
-  // Set initial photo to hero image when story changes
+  // Reset to hero photo only when story changes (photos derived from story)
   useEffect(() => {
     const heroIndex = photos.findIndex(p => p.isHero);
     setCurrentPhotoIndex(heroIndex >= 0 ? heroIndex : 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [story.id]);
 
   const handlePhotoTouchEnd = (e: React.TouchEvent) => {
@@ -368,6 +369,8 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
             {/* Audio player */}
             {story.audioUrl && (
               <div className="mt-[11px]">
+                {/* DEBUG: Log duration being passed */}
+                {console.log('[BookPageCard] Story:', story.title, 'durationSeconds:', story.durationSeconds)}
                 <BookAudioPlayer audioUrl={story.audioUrl} durationSeconds={story.durationSeconds ?? undefined} />
               </div>
             )}

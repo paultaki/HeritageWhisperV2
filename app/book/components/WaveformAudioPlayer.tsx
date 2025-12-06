@@ -48,6 +48,13 @@ export default function WaveformAudioPlayer({
   const [duration, setDuration] = useState(durationSeconds || 0);
   const [isDragging, setIsDragging] = useState(false);
 
+  // Sync duration state when durationSeconds prop changes (e.g., after fresh data is fetched)
+  useEffect(() => {
+    if (durationSeconds && durationSeconds > 0) {
+      setDuration(durationSeconds);
+    }
+  }, [durationSeconds]);
+
   // Toggle play/pause
   const togglePlay = useCallback(() => {
     if (!audioRef.current) return;
@@ -63,10 +70,14 @@ export default function WaveformAudioPlayer({
   const updateProgress = useCallback(() => {
     if (!audioRef.current) return;
 
-    const dur = audioRef.current.duration || 0;
+    const dur = audioRef.current.duration;
     const cur = Math.max(0, audioRef.current.currentTime || 0);
 
-    setDuration(dur);
+    // Only update duration from browser metadata if it's a valid, finite number
+    // This prevents overwriting the good prop value with 0, NaN, or Infinity
+    if (dur && isFinite(dur) && dur > 0) {
+      setDuration(dur);
+    }
     setCurrentTime(cur);
   }, []);
 
