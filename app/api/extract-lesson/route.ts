@@ -9,18 +9,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
-// Initialize OpenAI (via Gateway if available)
-const gatewayApiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
-const gatewayBaseURL = process.env.AI_GATEWAY_API_KEY
-  ? 'https://ai-gateway.vercel.sh/v1'
-  : undefined;
+// Lazy-initialized OpenAI client to avoid build-time errors
+let _openaiClient: OpenAI | null = null;
 
-const openai = new OpenAI({
-  apiKey: gatewayApiKey,
-  baseURL: gatewayBaseURL,
-  timeout: 30000, // 30 seconds
-  maxRetries: 2,
-});
+function getOpenAIClientWithGateway(): OpenAI {
+  if (!_openaiClient) {
+    const gatewayApiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
+    const gatewayBaseURL = process.env.AI_GATEWAY_API_KEY
+      ? 'https://ai-gateway.vercel.sh/v1'
+      : undefined;
+
+    _openaiClient = new OpenAI({
+      apiKey: gatewayApiKey,
+      baseURL: gatewayBaseURL,
+      timeout: 30000, // 30 seconds
+      maxRetries: 2,
+    });
+  }
+  return _openaiClient;
+}
 
 const LESSON_EXTRACTION_SYSTEM_PROMPT = `You are extracting life lessons from personal stories.
 
@@ -63,6 +70,7 @@ export async function POST(request: NextRequest) {
     console.log('[ExtractLesson] Extracting lesson from transcript:', transcript.substring(0, 100) + '...');
 
     // Extract lesson using GPT-4o-mini
+    const openai = getOpenAIClientWithGateway();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [

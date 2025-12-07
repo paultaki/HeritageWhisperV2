@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { QAPair } from "@/types/recording";
 
-// Initialize OpenAI client with AI Gateway if available
-const openai = new OpenAI({
-  apiKey: process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY!,
-  baseURL: process.env.AI_GATEWAY_API_KEY
-    ? "https://ai-gateway.vercel.sh/v1"
-    : undefined,
-});
+// Lazy-initialized OpenAI client to avoid build-time errors
+let _openaiClient: OpenAI | null = null;
+
+function getOpenAIClientWithGateway(): OpenAI {
+  if (!_openaiClient) {
+    _openaiClient = new OpenAI({
+      apiKey: process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY!,
+      baseURL: process.env.AI_GATEWAY_API_KEY
+        ? "https://ai-gateway.vercel.sh/v1"
+        : undefined,
+    });
+  }
+  return _openaiClient;
+}
 
 /**
  * Enhance conversation transcript to create a cohesive story
@@ -91,6 +98,7 @@ ${contextString}
 
 Create a version that reads naturally but uses the speaker's original words and expressions. Add only minimal connecting words and proper punctuation.`;
 
+  const openai = getOpenAIClientWithGateway();
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
@@ -121,6 +129,7 @@ RULES:
 
 Your only job is to make it readable by adding punctuation.`;
 
+  const openai = getOpenAIClientWithGateway();
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [

@@ -2,16 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 
-// Initialize OpenAI client
-const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
-const baseURL = process.env.AI_GATEWAY_API_KEY
-  ? 'https://ai-gateway.vercel.sh/v1'
-  : undefined;
+// Lazy-initialized OpenAI client to avoid build-time errors
+let _openaiClient: OpenAI | null = null;
 
-const openai = new OpenAI({
-  apiKey,
-  baseURL,
-});
+function getOpenAIClientWithGateway(): OpenAI {
+  if (!_openaiClient) {
+    const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
+    const baseURL = process.env.AI_GATEWAY_API_KEY
+      ? 'https://ai-gateway.vercel.sh/v1'
+      : undefined;
+
+    _openaiClient = new OpenAI({
+      apiKey,
+      baseURL,
+    });
+  }
+  return _openaiClient;
+}
 
 /**
  * Story Topic Analysis API
@@ -77,6 +84,7 @@ Should this be split into multiple stories? Respond in JSON format:
 If shouldSplit is false, return just one story in the array.`;
 
     const startTime = Date.now();
+    const openai = getOpenAIClientWithGateway();
     const response = await openai.chat.completions.create({
       model: "gpt-5",
       // @ts-ignore

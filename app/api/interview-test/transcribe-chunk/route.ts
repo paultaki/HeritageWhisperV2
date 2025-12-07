@@ -5,15 +5,20 @@ import * as fs from "fs";
 import * as path from "path";
 import { nanoid } from "nanoid";
 
-// Initialize OpenAI client for Whisper (direct API, not Gateway)
-// AI Gateway doesn't support audio endpoints
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY environment variable is required");
-}
+// Lazy-initialized OpenAI client to avoid build-time errors
+let _openaiClient: OpenAI | null = null;
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+function getOpenAIClient(): OpenAI {
+  if (!_openaiClient) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY environment variable is required");
+    }
+    _openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return _openaiClient;
+}
 
 /**
  * Incremental Audio Transcription API
@@ -112,6 +117,7 @@ export async function POST(request: NextRequest) {
       const audioReadStream = fs.createReadStream(tempFilePath);
 
       // Transcribe using OpenAI Whisper (direct API, not Gateway)
+      const openai = getOpenAIClient();
       const transcription = await openai.audio.transcriptions.create({
         file: audioReadStream as any,
         model: "whisper-1",
