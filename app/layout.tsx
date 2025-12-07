@@ -9,6 +9,7 @@ import AgreementGuard from "@/components/AgreementGuard";
 import LayoutContent from "@/components/LayoutContent";
 import DarkModeCleanup from "@/components/DarkModeCleanup";
 import { OrganizationSchema } from "@/lib/seo/components/OrganizationSchema";
+import { Analytics } from "@vercel/analytics/next";
 import {
   SEO_CONFIG,
   indexingEnabled,
@@ -105,6 +106,7 @@ export default function RootLayout({
             <LayoutContent>{children}</LayoutContent>
           </AgreementGuard>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );

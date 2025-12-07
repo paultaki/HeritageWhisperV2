@@ -46,6 +46,9 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
     isHero: false
   }] : []);
 
+  // Determine if story has images - used to conditionally render hero card on mobile
+  const hasImage = photos.length > 0;
+
   // Photo carousel state - initialize to hero image index to avoid flash
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(() => {
     const heroIdx = photos.findIndex(p => p.isHero);
@@ -239,7 +242,8 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
             paddingTop: `${fixedPadding}px`
           }}
         >
-          {/* Header image with carousel */}
+          {/* Header image with carousel - only shown when story has photos */}
+          {hasImage && (
           <div className="px-3 pt-0">
             <div
               className="relative overflow-hidden rounded-3xl bg-white cursor-pointer group"
@@ -268,26 +272,20 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
                 }
               }}
             >
-              {photoUrl ? (
-                <StoryPhotoWithBlurExtend
-                  src={photoUrl}
-                  masterUrl={masterUrl}
-                  alt={story.title}
-                  transform={photoTransform}
-                  width={photoWidth}
-                  height={photoHeight}
-                  aspectRatio={4 / 3}
-                  quality={90}
-                  priority={isPriority}
-                  useRawImg={true}
-                  sizes="100vw"
-                  className="h-full w-full transition-all duration-200 group-hover:brightness-105 group-hover:scale-[1.02]"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
-                  <span className="text-4xl text-stone-400">📖</span>
-                </div>
-              )}
+              <StoryPhotoWithBlurExtend
+                src={photoUrl!}
+                masterUrl={masterUrl}
+                alt={story.title}
+                transform={photoTransform}
+                width={photoWidth}
+                height={photoHeight}
+                aspectRatio={4 / 3}
+                quality={90}
+                priority={isPriority}
+                useRawImg={true}
+                sizes="100vw"
+                className="h-full w-full transition-all duration-200 group-hover:brightness-105 group-hover:scale-[1.02]"
+              />
 
               {/* Photo count indicator - z-20 to appear above image (which has z-10) */}
               {hasMultiplePhotos && (
@@ -328,27 +326,26 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
             </div>
 
             {/* Photo Lightbox */}
-            {photos.length > 0 && (
-              <PhotoLightbox
-                photos={photos.map(p => ({
-                  url: p.masterUrl || p.url || '', // Use masterUrl for full-screen lightbox
-                  displayUrl: p.displayUrl,
-                  masterUrl: p.masterUrl,
-                  caption: undefined,
-                  transform: p.transform,
-                  width: p.width,
-                  height: p.height,
-                })) as LightboxPhoto[]}
-                initialIndex={lightboxIndex}
-                isOpen={lightboxOpen}
-                onClose={() => setLightboxOpen(false)}
-                alt={story.title}
-              />
-            )}
+            <PhotoLightbox
+              photos={photos.map(p => ({
+                url: p.masterUrl || p.url || '', // Use masterUrl for full-screen lightbox
+                displayUrl: p.displayUrl,
+                masterUrl: p.masterUrl,
+                caption: undefined,
+                transform: p.transform,
+                width: p.width,
+                height: p.height,
+              })) as LightboxPhoto[]}
+              initialIndex={lightboxIndex}
+              isOpen={lightboxOpen}
+              onClose={() => setLightboxOpen(false)}
+              alt={story.title}
+            />
           </div>
+          )}
 
-          {/* Content */}
-          <div className="px-5 pt-5 pb-40">
+          {/* Content - tighter top spacing when no image */}
+          <div className={`px-5 pb-40 ${hasImage ? 'pt-5' : 'pt-2'}`}>
             {/* Title and metadata */}
             <h1 className="text-[26px] font-serif font-semibold tracking-tight text-stone-900 sm:text-3xl" style={{ fontFamily: "Crimson Text, serif" }}>
               {story.title}
@@ -395,7 +392,7 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
                     )`
                   }}
                 />
-                <p className={`relative text-[#2D2926] text-lg leading-relaxed ${caveatFont || ''}`}>
+                <p className={`relative text-[#2D2926] text-xl leading-relaxed ${caveatFont || ''}`}>
                   {story.wisdomClipText}
                 </p>
               </div>

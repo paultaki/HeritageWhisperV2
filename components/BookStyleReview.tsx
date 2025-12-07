@@ -423,7 +423,7 @@ export function BookStyleReview({
       />
 
       {/* Top Navigation */}
-      <div className="sticky top-0 z-50 bg-[var(--book-paper-cream,#F5F1E8)]/95 backdrop-blur-sm border-b border-[var(--book-accent-sepia,#8B7355)]/20">
+      <div className="sticky top-0 z-50 bg-[var(--book-paper-cream,#F5F1E8)] border-b border-[var(--book-accent-sepia,#8B7355)]/20">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-2xl md:text-3xl font-serif text-[var(--book-text,#2D2926)]">
             Review Memory
@@ -895,15 +895,16 @@ export function BookStyleReview({
                   onChange={(e) => onTranscriptionChange(e.target.value)}
                   className={cn(
                     "w-full min-h-[300px] resize-none bg-white/80 border-[var(--book-border,#D4C5B5)] rounded-[var(--book-radius-img,12px)] p-4 text-[var(--book-text,#2D2926)] focus:outline-none focus:ring-2 focus:ring-[var(--book-accent-sepia,#8B7355)]/30 focus:border-[var(--book-accent-sepia,#8B7355)] placeholder:text-[var(--book-text-muted,#6B5E54)]/60",
-                    // Book typography: Crimson Text with proper line height
-                    "font-[var(--book-font-serif,'Crimson_Text',Georgia,serif)] text-lg leading-[var(--book-line-height,1.85)]",
+                    // Book typography: Crimson Text with proper line height - 18px minimum per design guidelines
+                    "font-[var(--book-font-serif,'Crimson_Text',Georgia,serif)] text-[18px] leading-[1.85]",
                     (transcriptionStatus !== "complete" &&
                       transcriptionStatus !== "idle") &&
                     "opacity-60 cursor-not-allowed"
                   )}
                   style={{
                     fontFamily: "var(--book-font-serif, 'Crimson Text', Georgia, serif)",
-                    lineHeight: "var(--book-line-height, 1.85)",
+                    fontSize: "18px",
+                    lineHeight: "1.85",
                   }}
                   placeholder={
                     transcriptionStatus === "transcribing"
@@ -1038,7 +1039,7 @@ export function BookStyleReview({
                         className="text-sm mb-2 relative z-10 uppercase tracking-wider font-medium"
                         style={{
                           color: 'var(--book-accent-gold, #C5A572)',
-                          fontSize: '12px',
+                          fontSize: '14px',
                           letterSpacing: '0.1em',
                         }}
                       >
@@ -1048,9 +1049,9 @@ export function BookStyleReview({
                         className="relative z-10 italic"
                         style={{
                           fontFamily: "var(--book-font-serif, 'Crimson Text', Georgia, serif)",
-                          fontSize: '18px',
+                          fontSize: '20px',
                           color: 'var(--book-text, #2D2926)',
-                          lineHeight: 'var(--book-line-height, 1.85)',
+                          lineHeight: '1.7',
                         }}
                       >
                         {wisdomText ||

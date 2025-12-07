@@ -124,9 +124,6 @@ export async function getPasskeyByCredentialId(
 ): Promise<Passkey | null> {
   const supabase = getAdminClient();
 
-  // DEBUG: Log the exact query being made
-  console.log("[getPasskeyByCredentialId] DEBUG - Looking for credential_id:", credentialId);
-
   const { data, error } = await supabase
     .from("passkeys")
     .select("*")
@@ -135,9 +132,6 @@ export async function getPasskeyByCredentialId(
 
   if (error) {
     console.error("[getPasskeyByCredentialId] Error:", error);
-    // DEBUG: Try to find any passkeys to compare
-    const { data: allPasskeys } = await supabase.from("passkeys").select("credential_id").limit(5);
-    console.log("[getPasskeyByCredentialId] DEBUG - Sample credential_ids in DB:", allPasskeys?.map(p => p.credential_id));
     return null;
   }
 
