@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { MessageSquarePlus, X, Loader2 } from 'lucide-react';
 import { useFamilyAuth } from '@/hooks/use-family-auth';
+import confetti from 'canvas-confetti';
 
 type SubmitQuestionDialogProps = {
   isOpen: boolean;
