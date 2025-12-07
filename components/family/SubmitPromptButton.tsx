@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { MessageSquarePlus, X, Loader2 } from 'lucide-react';
 import { useFamilyAuth } from '@/hooks/use-family-auth';
+import confetti from 'canvas-confetti';
 
 type SubmitPromptButtonProps = {
   storytellerUserId: string;
@@ -17,6 +18,48 @@ export function SubmitPromptButton({ storytellerUserId, storytellerName }: Submi
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Confetti celebration function (same as family invite)
+  const celebrateSubmission = () => {
+    const button = submitButtonRef.current;
+    let origin = { x: 0.5, y: 0.5 };
+
+    if (button) {
+      const rect = button.getBoundingClientRect();
+      origin = {
+        x: (rect.left + rect.width / 2) / window.innerWidth,
+        y: (rect.top + rect.height / 2) / window.innerHeight,
+      };
+    }
+
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: origin,
+      colors: ['#203954', '#3E6A5A', '#CBA46A', '#F4E6CC', '#F7F2EC'],
+    });
+
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 60,
+        spread: 55,
+        origin: origin,
+        colors: ['#203954', '#3E6A5A', '#CBA46A', '#F4E6CC', '#F7F2EC'],
+      });
+    }, 150);
+
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 120,
+        spread: 55,
+        origin: origin,
+        colors: ['#203954', '#3E6A5A', '#CBA46A', '#F4E6CC', '#F7F2EC'],
+      });
+    }, 300);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +94,8 @@ export function SubmitPromptButton({ storytellerUserId, storytellerName }: Submi
         return;
       }
 
-      // Success!
+      // Success! Fire confetti then show success message
+      celebrateSubmission();
       setShowSuccess(true);
       setPromptText('');
       setContext('');
@@ -191,6 +235,7 @@ export function SubmitPromptButton({ storytellerUserId, storytellerName }: Submi
                   Cancel
                 </button>
                 <button
+                  ref={submitButtonRef}
                   type="submit"
                   disabled={isSubmitting || promptText.trim().length < 10}
                   className="flex-1 px-4 py-3 bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 text-white rounded-lg hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
