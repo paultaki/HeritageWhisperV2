@@ -99,12 +99,38 @@ export async function POST(request: NextRequest) {
     if (error) {
       // Log error message only, not full error object that may contain PII
       logger.error("[Registration] Supabase error:", error.message);
+
+      // Handle email already registered
       if (error.message?.includes("already registered")) {
         return NextResponse.json(
           { error: "This email is already registered. Please sign in." },
           { status: 400 },
         );
       }
+
+      // Intercept password policy errors - show friendly message instead of raw Supabase error
+      const isPasswordPolicyError =
+        error.message?.toLowerCase().includes("password") &&
+        (error.message?.includes("should contain") ||
+          error.message?.includes("must contain") ||
+          error.message?.includes("too short") ||
+          error.message?.includes("too weak"));
+
+      if (isPasswordPolicyError) {
+        // Log for monitoring - indicates possible client/server validation mismatch
+        logger.warn(
+          "[Registration] Password policy mismatch - client validation may need updating"
+        );
+        return NextResponse.json(
+          {
+            error: "Password requirements not met",
+            details:
+              "Please check that your password meets all the requirements shown.",
+          },
+          { status: 400 },
+        );
+      }
+
       return NextResponse.json(
         {
           error: "Registration failed",

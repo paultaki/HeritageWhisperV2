@@ -11,6 +11,7 @@
  */
 
 import { z } from 'zod';
+import { isPasswordValid } from './passwordValidation';
 
 /**
  * Photo validation schema
@@ -260,8 +261,11 @@ export const RegisterUserSchema = z.object({
     .max(255, 'Email too long'),
 
   password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password too long (max 128 characters)'),
+    .min(1, 'Password is required')
+    .max(128, 'Password too long (max 128 characters)')
+    .refine(isPasswordValid, {
+      message: 'Password must meet all requirements',
+    }),
 
   name: z.string()
     .min(1, 'Name is required')

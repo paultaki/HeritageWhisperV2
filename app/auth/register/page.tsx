@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithGoogle } from "@/lib/supabase";
 import { Eye, EyeOff, Mail, Lock, User, Calendar, Shield, UserPlus } from "lucide-react";
+import { PasswordRequirements } from "@/components/auth/PasswordRequirements";
 
 // Prevent static generation for this auth page
 export const dynamic = 'force-dynamic';
@@ -180,6 +181,9 @@ export default function Register() {
                     </div>
                   </div>
                 </div>
+
+                {/* Password requirements with real-time checkmarks */}
+                <PasswordRequirements password={password} />
               </div>
 
               {requireBetaCode && (
