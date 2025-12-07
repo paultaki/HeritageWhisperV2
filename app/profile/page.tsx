@@ -61,6 +61,7 @@ import { ManagePasskeys } from "@/components/auth/ManagePasskeys";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 import { useSubscription } from "@/hooks/use-subscription";
 import { Badge } from "@/components/ui/badge";
+import { NotificationsSection, PrivacySection, AISettingsSection, PasswordSection, PasskeySection } from "./sections";
 
 export default function Profile() {
   const router = useRouter();
@@ -80,9 +81,6 @@ export default function Profile() {
   const [profilePhoto, setProfilePhoto] = useState("");
 
   // Account Settings
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(true);
   const [familyComments, setFamilyComments] = useState(true);
@@ -95,10 +93,6 @@ export default function Profile() {
 
   // Delete account confirmation
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
-
-  // Passkey setup
-  const [showPasskeySetup, setShowPasskeySetup] = useState(false);
-  const [passkeyPassword, setPasskeyPassword] = useState("");
 
   // Redirect to login if not authenticated (but wait for loading to finish)
   useEffect(() => {
@@ -189,36 +183,6 @@ export default function Profile() {
     },
   });
 
-  const updatePasswordMutation = useMutation({
-    mutationFn: async (data: {
-      currentPassword: string;
-      newPassword: string;
-    }) => {
-      const response = await apiRequest(
-        "POST",
-        "/api/auth/change-password",
-        data,
-      );
-      return response.json();
-    },
-    onSuccess: () => {
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      toast({
-        title: "Password changed",
-        description: "Your password has been updated successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Password change failed",
-        description: error.message || "Could not update your password.",
-        variant: "destructive",
-      });
-    },
-  });
-
   const updatePreferencesMutation = useMutation({
     mutationFn: async (data: {
       emailNotifications?: boolean;
@@ -293,68 +257,6 @@ export default function Profile() {
       birthDate,
       bio,
     });
-  };
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all password fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "New password and confirmation must match.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 8 characters.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    await updatePasswordMutation.mutateAsync({
-      currentPassword,
-      newPassword,
-    });
-  };
-
-  const handlePasskeySetupSuccess = () => {
-    setShowPasskeySetup(false);
-    setPasskeyPassword("");
-    toast({
-      title: "Passkey added successfully",
-      description: "You can now sign in with your passkey",
-    });
-    // Refresh passkey list if the ManagePasskeys component is visible
-    queryClient.invalidateQueries({ queryKey: ["passkeys"] });
-  };
-
-  const handlePasskeySetupError = (error: string) => {
-    toast({
-      title: "Failed to set up passkey",
-      description: error,
-      variant: "destructive",
-    });
-  };
-
-  const handlePasskeyDialogClose = (open: boolean) => {
-    setShowPasskeySetup(open);
-    if (!open) {
-      setPasskeyPassword("");
-    }
   };
 
   const handlePhotoUpdate = async (photoUrl: string) => {
@@ -886,327 +788,37 @@ export default function Profile() {
           )}
 
           {/* Password Change */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                <Lock className="w-5 h-5" />
-                Change Password
-              </CardTitle>
-              <CardDescription>Update your account password</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleChangePassword} className="space-y-4">
-                <div>
-                  <Label htmlFor="currentPassword" className="text-base font-medium">
-                    Current Password
-                  </Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="mt-2 h-14 text-base"
-                    placeholder="Enter current password"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="newPassword" className="text-base font-medium">
-                    New Password
-                  </Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="mt-2 h-14 text-base"
-                    placeholder="Enter new password"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="confirmPassword" className="text-base font-medium">
-                    Confirm New Password
-                  </Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="mt-2 h-14 text-base"
-                    placeholder="Confirm new password"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full min-h-[60px] text-lg font-medium bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white"
-                  disabled={updatePasswordMutation.isPending}
-                >
-                  <Lock className="w-5 h-5 mr-2" />
-                  {updatePasswordMutation.isPending
-                    ? "Updating..."
-                    : "Update Password"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          <PasswordSection />
 
           {/* Passkey Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                <Fingerprint className="w-5 h-5" />
-                Passkeys
-              </CardTitle>
-              <CardDescription>
-                Sign in faster and more securely with your fingerprint, face, or security key
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-900">
-                  <strong>What are passkeys?</strong> Passkeys let you sign in using your device's built-in security
-                  like Touch ID, Face ID, or Windows Hello. They're more secure than passwords and you never have to remember them.
-                </p>
-              </div>
-
-              <ManagePasskeys />
-
-              <Button
-                type="button"
-                onClick={() => setShowPasskeySetup(true)}
-                className="w-full min-h-[48px] text-base font-medium"
-                variant="outline"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Add New Passkey
-              </Button>
-
-              {/* Passkey Setup Dialog */}
-              <AlertDialog open={showPasskeySetup} onOpenChange={handlePasskeyDialogClose}>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Set up a new passkey</AlertDialogTitle>
-                    <AlertDialogDescription className="text-base">
-                      To verify it's you, please enter your current password first.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <div className="py-4 space-y-4">
-                    <div>
-                      <Label htmlFor="passkey-password" className="text-base font-medium">
-                        Current Password
-                      </Label>
-                      <Input
-                        id="passkey-password"
-                        type="password"
-                        value={passkeyPassword}
-                        onChange={(e) => setPasskeyPassword(e.target.value)}
-                        className="mt-2 h-14 text-base"
-                        placeholder="Enter your password"
-                      />
-                    </div>
-
-                    {passkeyPassword && (
-                      <PasskeyAuth
-                        mode="register"
-                        email={email}
-                        password={passkeyPassword}
-                        onSuccess={handlePasskeySetupSuccess}
-                        onError={handlePasskeySetupError}
-                      />
-                    )}
-                  </div>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardContent>
-          </Card>
+          <PasskeySection email={email} />
 
           {/* Notification Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                <Bell className="w-5 h-5" />
-                Notification Preferences
-              </CardTitle>
-              <CardDescription>Manage how you receive updates</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start justify-between py-2 gap-4">
-                <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="email-notifications" className="text-base font-medium">
-                    Email Notifications
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive important updates, new story reminders, and account notifications via email
-                  </p>
-                </div>
-                <CustomToggle
-                  id="email-notifications"
-                  checked={emailNotifications}
-                  onCheckedChange={(checked) => {
-                    setEmailNotifications(checked);
-                    updatePreferencesMutation.mutate({ emailNotifications: checked });
-                  }}
-                  aria-label="Toggle email notifications"
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-start justify-between py-2 gap-4">
-                <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="weekly-digest" className="text-base font-medium">
-                    Weekly Digest
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive a weekly email with your story count, new memories, and suggested prompts
-                  </p>
-                </div>
-                <CustomToggle
-                  id="weekly-digest"
-                  checked={weeklyDigest}
-                  onCheckedChange={(checked) => {
-                    setWeeklyDigest(checked);
-                    updatePreferencesMutation.mutate({ weeklyDigest: checked });
-                  }}
-                  aria-label="Toggle weekly digest"
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-start justify-between py-2 gap-4">
-                <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="family-comments" className="text-base font-medium">
-                    Family Comments
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Get notified when family members add comments or reactions to your stories
-                  </p>
-                </div>
-                <CustomToggle
-                  id="family-comments"
-                  checked={familyComments}
-                  onCheckedChange={(checked) => {
-                    setFamilyComments(checked);
-                    updatePreferencesMutation.mutate({ familyComments: checked });
-                  }}
-                  aria-label="Toggle family comments notifications"
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-start justify-between py-2 gap-4">
-                <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="printed-books-notify" className="text-base font-medium">
-                    Printed Books Availability
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Be the first to know when professionally printed books become available for order
-                  </p>
-                </div>
-                <CustomToggle
-                  id="printed-books-notify"
-                  checked={printedBooksNotify}
-                  onCheckedChange={(checked) => {
-                    setPrintedBooksNotify(checked);
-                    updatePreferencesMutation.mutate({ printedBooksNotify: checked });
-                  }}
-                  aria-label="Toggle printed books notifications"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <NotificationsSection
+            emailNotifications={emailNotifications}
+            setEmailNotifications={setEmailNotifications}
+            weeklyDigest={weeklyDigest}
+            setWeeklyDigest={setWeeklyDigest}
+            familyComments={familyComments}
+            setFamilyComments={setFamilyComments}
+            printedBooksNotify={printedBooksNotify}
+            setPrintedBooksNotify={setPrintedBooksNotify}
+            updatePreferencesMutation={updatePreferencesMutation}
+          />
 
           {/* Privacy Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                <Eye className="w-5 h-5" />
-                Privacy Settings
-              </CardTitle>
-              <CardDescription>
-                Control who can see your stories
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-start justify-between py-2 gap-4">
-                <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="default-visibility" className="text-base font-medium">
-                    Share New Stories with Family
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    When enabled, new stories automatically appear in your family's timeline. You can change this per story.
-                  </p>
-                </div>
-                <CustomToggle
-                  id="default-visibility"
-                  checked={defaultStoryVisibility}
-                  onCheckedChange={(checked) => {
-                    setDefaultStoryVisibility(checked);
-                    updatePreferencesMutation.mutate({ defaultStoryVisibility: checked });
-                  }}
-                  aria-label="Toggle default story visibility"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <PrivacySection
+            defaultStoryVisibility={defaultStoryVisibility}
+            setDefaultStoryVisibility={setDefaultStoryVisibility}
+            updatePreferencesMutation={updatePreferencesMutation}
+          />
 
           {/* Heritage Whisper Storyteller Settings */}
-          <Card id="ai-processing">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                <Brain className="w-5 h-5" />
-                Heritage Whisper Storyteller
-              </CardTitle>
-              <CardDescription>
-                Enable Storyteller features
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-start justify-between py-2 gap-4">
-                <div className="space-y-0.5 flex-1">
-                  <Label htmlFor="ai-processing" className="text-base font-medium">
-                    Enable Storyteller Features
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    When enabled, Whisper Storyteller transcribes your recordings. When disabled, you can still type stories manually.
-                  </p>
-                  <div className="mt-3 pt-2 border-t">
-                    <p className="text-sm font-medium text-gray-700 mb-2">What happens when disabled:</p>
-                    <ul className="space-y-1 text-sm text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="text-gray-400 mt-0.5">•</span>
-                        <span>Recording features will be unavailable</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-gray-400 mt-0.5">•</span>
-                        <span>No Storyteller-generated prompts or follow-up questions</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-gray-400 mt-0.5">•</span>
-                        <span>You can still type stories and use all other features</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <CustomToggle
-                  id="ai-processing"
-                  checked={aiProcessingEnabled}
-                  onCheckedChange={(checked) => {
-                    setAiProcessingEnabled(checked);
-                    updateAIConsentMutation.mutate(checked);
-                  }}
-                  aria-label="Toggle Storyteller features"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <AISettingsSection
+            aiProcessingEnabled={aiProcessingEnabled}
+            setAiProcessingEnabled={setAiProcessingEnabled}
+            updateAIConsentMutation={updateAIConsentMutation}
+          />
 
           {/* Data & Privacy */}
           <Card>

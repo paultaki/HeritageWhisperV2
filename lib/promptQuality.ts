@@ -54,6 +54,48 @@ const BANNED_PHRASES = [
 ];
 
 /**
+ * Introspection patterns that ask for reflection on the SAME moment
+ * instead of triggering recall of a DIFFERENT moment.
+ *
+ * These patterns are the core problem we're solving:
+ * They ask "what did you feel/learn/gain" about an existing story
+ * instead of "what's another story involving the same entity"
+ */
+const INTROSPECTION_PATTERNS = [
+  // "What did you feel/learn/discover" patterns
+  /what did (?:you|that) (?:feel|mean|teach|show)/i,
+  /what did you (?:learn|discover|realize|gain|sacrifice|give up|trade)/i,
+
+  // "How did this change/affect you" patterns
+  /how did (?:this|that|it) (?:change|affect|impact|shape|influence)/i,
+  /how has (?:this|that|it) (?:shaped|influenced|changed)/i,
+
+  // "What deeper/greater meaning" patterns
+  /what (?:deeper|greater|real|true) (?:meaning|connection|insight|lesson)/i,
+
+  // "What was the cost/price" patterns
+  /what (?:was|did) (?:the|that) (?:cost|price|sacrifice)/i,
+  /what did (?:that|it) cost you/i,
+
+  // "How did that make you" patterns
+  /how did that make you/i,
+
+  // Generic reflection questions
+  /what lesson did/i,
+  /what wisdom did/i,
+  /how did you grow/i,
+  /what did that moment/i,
+];
+
+/**
+ * Check if a prompt is introspective (asks about feelings/meaning of SAME event)
+ * instead of memory-triggering (asks about DIFFERENT events)
+ */
+export function isIntrospectivePrompt(promptText: string): boolean {
+  return INTROSPECTION_PATTERNS.some((pattern) => pattern.test(promptText));
+}
+
+/**
  * Words that signal emotional depth and turning points
  * These are GOOD to have in prompts
  */
@@ -201,6 +243,13 @@ export function validatePromptQuality(promptText?: string | null): boolean {
       console.log(`[Quality Gate] REJECT: Contains banned phrase "${phrase}"`);
       return false;
     }
+  }
+
+  // Rule 3.5: No introspective questions (Memory Archaeologist principle)
+  // These ask about feelings/meaning of the SAME event instead of triggering NEW memories
+  if (isIntrospectivePrompt(trimmed)) {
+    console.log(`[Quality Gate] REJECT: Introspective prompt (asks about same moment, not different memory)`);
+    return false;
   }
   
   // Rule 4: No yes/no questions (these don't invite storytelling)
@@ -408,12 +457,20 @@ export function getQualityReport(promptText?: string | null): QualityReport {
     });
   }
 
-  // Check for emotional depth
+  // Check for introspective questions (Memory Archaeologist principle)
+  if (isIntrospectivePrompt(trimmed)) {
+    issues.push({
+      type: "introspective",
+      message: "Asks about feelings/meaning of same moment instead of triggering new memories",
+    });
+  }
+
+  // Check for emotional depth (still useful for scoring, but not as critical now)
   const hasEmotionalDepth = EMOTIONAL_DEPTH_SIGNALS.some(signal => lower.includes(signal));
   if (!hasEmotionalDepth) {
     warnings.push({
       type: "no_emotional_depth",
-      message: "No emotional depth signals",
+      message: "No emotional depth signals (not necessarily bad for memory-triggering prompts)",
     });
   }
 
@@ -437,6 +494,7 @@ export {
   GENERIC_WORDS,
   BANNED_PHRASES,
   EMOTIONAL_DEPTH_SIGNALS,
+  INTROSPECTION_PATTERNS,
 };
 
 // Legacy grouped export for backward compatibility
@@ -445,7 +503,9 @@ export const qualityGates = {
   validatePromptQuality,
   scorePromptQuality,
   getQualityReport,
+  isIntrospectivePrompt,
   GENERIC_WORDS,
   BANNED_PHRASES,
   EMOTIONAL_DEPTH_SIGNALS,
+  INTROSPECTION_PATTERNS,
 };

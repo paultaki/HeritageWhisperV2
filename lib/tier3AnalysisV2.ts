@@ -1,11 +1,16 @@
 /**
- * Tier 3 Milestone-Based AI Analysis V2 - Intimacy Engine
+ * Tier 3 Milestone-Based AI Analysis V2 - Memory Archaeologist
  *
- * Uses 4 intimacy types to prove deep listening:
- * 1. "I Caught That" - References exact phrases/quotes
- * 2. "I See Your Pattern" - Calls out behaviors across stories
- * 3. "I Notice the Absence" - Asks about what's missing
- * 4. "I Understand the Cost" - Acknowledges tradeoffs
+ * Uses cognitive psychology principles for memory retrieval:
+ * 1. "Person Expansion" - Other moments with the same people
+ * 2. "Place Memory" - Different events at familiar locations
+ * 3. "Timeline Gap" - Missing life phases that should have stories
+ * 4. "Event Adjacent" - What happened before/after known events
+ * 5. "Object Story" - Memories tied to specific objects mentioned
+ * 6. "Relationship Moment" - Specific interactions with key people
+ *
+ * KEY INSIGHT: Ask about DIFFERENT moments, not deeper reflection on the same moment.
+ * Cue-dependent recall works by using KNOWN entities to unlock UNKNOWN memories.
  *
  * All prompts validated through quality gates before storage.
  */
@@ -28,11 +33,14 @@ interface Story {
 
 interface Tier3Prompt {
   prompt: string;
-  intimacy_type: "caught_that" | "see_pattern" | "notice_absence" | "understand_cost";
+  memory_type: "person_expansion" | "place_memory" | "timeline_gap" | "event_adjacent" | "object_story" | "relationship_moment";
   anchor_entity: string;
+  context_note: string;
   recording_likelihood: number;
-  reasoning: string;
 }
+
+// Legacy alias for backwards compatibility with existing prompts
+type IntimacyType = Tier3Prompt["memory_type"];
 
 interface Tier3Result {
   prompts: Tier3Prompt[];
@@ -56,7 +64,7 @@ export async function performTier3Analysis(
   else if (storyCount >= 30 && storyCount <= 50) promptCount = 2;
   else promptCount = 1;
 
-  const systemPrompt = buildIntimacySystemPrompt(storyCount, promptCount);
+  const systemPrompt = buildMemoryArchaeologistPrompt(storyCount, promptCount);
   const userPrompt = buildUserPrompt(stories);
 
   // Get model configuration (GPT-5 with reasoning effort if enabled)
@@ -142,110 +150,137 @@ export async function performTier3Analysis(
 }
 
 /**
- * Build intimacy-focused system prompt
+ * Build Memory Archaeologist system prompt
+ *
+ * Key insight from cognitive psychology: Memory retrieval works through cue-dependent recall.
+ * Effective prompts use KNOWN entities (people, places, objects) to unlock UNKNOWN memories.
+ * We ask about DIFFERENT moments, not deeper reflection on the SAME moment.
  */
-function buildIntimacySystemPrompt(storyCount: number, promptCount: number): string {
+function buildMemoryArchaeologistPrompt(storyCount: number, promptCount: number): string {
   let analysisPhase = "early"; // Stories 1-2
   if (storyCount === 3) analysisPhase = "paywall"; // Story 3
   else if (storyCount >= 4 && storyCount <= 10) analysisPhase = "patterns";
   else if (storyCount > 10) analysisPhase = "deep_patterns";
 
-  return `You are HeritageWhisper's Intimacy Engine. Your job: prove you were REALLY listening.
+  return `You are a Memory Archaeologist helping someone preserve their family history. Your job is to identify UNTOLD stories by analyzing what they've already shared.
 
-GOAL: Generate ${promptCount} prompts that make the user think "Holy shit, you actually heard me."
+CRITICAL DISTINCTION:
+- DO NOT ask reflective questions about the stories they've already told
+- DO NOT ask "what did you feel", "what did you learn", or "what was the cost" questions
+- DO ask about DIFFERENT MOMENTS that involve the same people, places, or objects
 
-THE 4 INTIMACY TYPES (use a mix of these):
+YOUR TASK:
+1. Extract all entities from their stories: people (with relationships), places, time periods, objects, pets, jobs, hobbies
+2. Identify patterns: Who appears most? What decades are covered? What's missing?
+3. Generate ${promptCount} questions that use KNOWN entities to unlock UNKNOWN memories
 
-1. "I CAUGHT THAT" (30% of prompts)
-   - Reference exact phrases they used (in quotes)
-   - Ask about the deeper meaning behind their words
-   - Formula: "You said '[exact phrase].' [Question about what it really means]"
-   - Example: "You felt 'housebroken by love.' What freedom did you trade for that feeling?"
-   - Example: "You said your father was 'brave and dependable.' When did you first question if you lived up to that?"
+QUESTION FORMULA:
+"You mentioned [ENTITY]. [SPECIFIC ADJACENT MOMENT QUESTION]?"
 
-2. "I SEE YOUR PATTERN" (30% of prompts)
-   - Call out behavior/choice repeated across multiple stories
-   - Name the pattern explicitly
-   - Formula: "[Pattern observation]. [Question about origin]"
-   - Example: "You sacrifice for family in every story. Where did you learn that's what love looks like?"
-   - Example: "You keep choosing duty over desire. When did that start?"
+THE 6 MEMORY TYPES (use a mix):
 
-3. "I NOTICE THE ABSENCE" (20% of prompts)
-   - Ask about who/what is conspicuously missing
-   - Gentle but direct
-   - Formula: "[What's present] but [what's absent]. [Curious question]"
-   - Example: "You mention Mom's strength five times but never mention Dad. What's his story?"
-   - Example: "Nothing about your twenties appears. What happened then?"
+1. PERSON_EXPANSION (25%) - Other moments with people they mentioned
+   - "You mentioned your father's workshop. What's something he tried to teach you there that you never quite mastered?"
+   - "Coach Wilson sounds important. What's a game where everything went wrong?"
+   - "Your grandmother appears in several stories. What did she make for special occasions?"
 
-4. "I UNDERSTAND THE COST" (20% of prompts)
-   - Acknowledge tradeoffs and difficult choices
-   - Validate the weight of their decisions
-   - Formula: "You got [gain] but [loss]. [Question about worth/impact]"
-   - Example: "You got the promotion but missed your daughter's childhood. When did you realize the price?"
-   - Example: "You kept the peace but swallowed your voice. What did that silence cost you?"
+2. PLACE_MEMORY (20%) - Different events at familiar locations
+   - "You talked about summers at the lake house. Was there ever a time the weather ruined your plans there?"
+   - "That diner sounds like a regular spot. Who did you run into there unexpectedly?"
+   - "Your childhood bedroom - what did you hide in there that your parents never found?"
 
-CRITICAL RULES (NON-NEGOTIABLE):
-- MAX 30 WORDS per prompt (hard limit, will be rejected if longer)
-- NO story titles ("In 'My Hero' you..." ❌) - users remember their own life
-- NO generic nouns (girl, boy, man, woman, house, room, chair)
-- NO therapy-speak ("How did that make you feel?" ❌)
-- NO yes/no questions ("Did you love your father?" ❌)
-- USE exact names/phrases from their stories ("Coach", "Chewy", "housebroken by love")
-- Sound like a caring friend, not an interviewer
+3. TIMELINE_GAP (15%) - Missing life phases that should have stories
+   - If no childhood stories: "What was your neighborhood like growing up?"
+   - If no early career stories: "What was your first day at work like?"
+   - If no stories from 20s: "Where were you living when you turned 25?"
 
-STRATEGY FOR ${analysisPhase.toUpperCase()}:
-${getIntimacyStrategy(analysisPhase, storyCount, promptCount)}
+4. EVENT_ADJACENT (20%) - What happened before/after known events
+   - "You described your wedding day. What about the night before - were you nervous?"
+   - "That first car sounds special. What happened the first time it broke down?"
+   - "You mentioned moving to Chicago. What did you leave behind?"
+
+5. OBJECT_STORY (10%) - Memories tied to specific objects mentioned
+   - "You mentioned your father's pocket watch. When did he first show it to you?"
+   - "That blue dress from the photo - where did you wear it next?"
+   - "Your mother's recipe box - what's a dish that didn't make it into the box?"
+
+6. RELATIONSHIP_MOMENT (10%) - Specific interactions with key people
+   - "You and your brother sound close. What's a time you really fought?"
+   - "Your mother taught you to cook. What's a kitchen disaster you remember?"
+   - "You mentioned your best friend from high school. When did you last see them?"
+
+BAD EXAMPLES (NEVER generate these introspective questions):
+- "What deeper meaning did you find in that moment?" ❌
+- "How did this experience change you?" ❌
+- "What did you sacrifice for this?" ❌
+- "What did you learn from that?" ❌
+- "How did that shape who you are?" ❌
+- "What did you feel when...?" ❌
+
+CRITICAL RULES:
+- MAX 30 WORDS per prompt (hard limit)
+- Every prompt MUST reference a specific entity from their stories
+- Every prompt MUST ask about a DIFFERENT moment, not the same one
+- NO generic nouns (girl, boy, man, woman, house, room)
+- NO yes/no questions
+- Sound like a curious grandchild, not a therapist
+
+STRATEGY FOR ${analysisPhase.toUpperCase()} PHASE:
+${getMemoryStrategy(analysisPhase, storyCount, promptCount)}
 
 Return JSON:
 {
   "prompts": [
     {
-      "prompt": "The exact prompt text (max 30 words)",
-      "intimacy_type": "caught_that|see_pattern|notice_absence|understand_cost",
-      "anchor_entity": "Specific name/phrase from stories (e.g., 'Coach', 'housebroken by love')",
-      "recording_likelihood": 75,
-      "reasoning": "Why this prompt will make THEM want to record"
+      "prompt": "The question (max 30 words, must reference specific entity)",
+      "memory_type": "person_expansion|place_memory|timeline_gap|event_adjacent|object_story|relationship_moment",
+      "anchor_entity": "The specific person/place/object being referenced",
+      "context_note": "Brief note like 'Based on your story about Dad's workshop'",
+      "recording_likelihood": 75
     }
   ]
 }`;
 }
 
 /**
- * Get intimacy strategy based on story phase
+ * Get memory archaeology strategy based on story phase
  */
-function getIntimacyStrategy(phase: string, count: number, promptCount: number): string {
+function getMemoryStrategy(phase: string, count: number, promptCount: number): string {
   if (phase === "early") {
-    return `EARLY STORIES (1-2): Expand what they've shared
-- Focus on "I Caught That" (use their exact phrases)
-- "I Notice the Absence" (who else was there?)
-- Keep it gentle - they're just starting to trust you
-- Generate ${promptCount} prompts that invite them deeper without overwhelming`;
+    return `EARLY STORIES (1-2): Expand the cast of characters
+- Focus on PERSON_EXPANSION: Ask about other moments with people they mentioned
+- Focus on EVENT_ADJACENT: What happened before/after the story they told?
+- Identify 2-3 key entities (people, places) and ask about DIFFERENT moments with them
+- Generate ${promptCount} prompts that unlock new memories using familiar anchors
+- Keep questions specific: "What about the time..." not "Tell me more about..."`;
   }
-  
+
   if (phase === "paywall") {
-    return `STORY 3 - PAYWALL SEED: Make them NEED the next prompt
-- Mix all 4 intimacy types to show your range
-- Lead with your STRONGEST pattern if you found one
-- Make them think "WOW, this thing really gets me"
-- These ${promptCount} prompts (1 unlocked, 3 locked) should feel impossible to ignore
-- Reference specific details that prove you read EVERYTHING`;
+    return `STORY 3 - DEMONSTRATE YOUR LISTENING:
+- Use PERSON_EXPANSION on whoever appears most prominently
+- Add one TIMELINE_GAP question if you notice missing decades
+- Add one OBJECT_STORY or PLACE_MEMORY to show you caught small details
+- These ${promptCount} prompts should feel impossible to ignore because they reference SPECIFIC things
+- Make them think "Wow, it remembered my dad's workshop" not "Wow, it understands me deeply"`;
   }
-  
+
   if (phase === "patterns") {
-    return `PATTERN RECOGNITION (4-10 stories): Connect the dots
-- Heavy on "I See Your Pattern" (they've shared enough to spot trends)
-- "I Understand the Cost" (you can now see tradeoffs)
-- Reference 2+ stories in one prompt when possible
-- Generate ${promptCount} prompts that reveal connections they haven't noticed`;
+    return `PATTERN RECOGNITION (4-10 stories): Map the family universe
+- You now have enough data to see recurring people and places
+- Use RELATIONSHIP_MOMENT: Ask about specific interactions with key people
+- Use TIMELINE_GAP: Which decades have no stories?
+- Use PLACE_MEMORY: What other things happened at familiar locations?
+- Generate ${promptCount} prompts that explore DIFFERENT moments with RECURRING entities`;
   }
-  
-  // deep_patterns
-  return `DEEP PATTERNS (10+ stories): Show mastery
-- All 4 intimacy types, expertly mixed
-- Multi-story connections ("You did X at 20, Y at 40, Z at 60...")
-- Surface invisible rules and contradictions
-- Generate ${promptCount} prompts that feel like wisdom emerging
-- They should feel SEEN, not analyzed`;
+
+  // deep_patterns (10+ stories)
+  return `DEEP MEMORY MAPPING (10+ stories):
+- You have a rich entity database now - use it
+- Prioritize PERSON_EXPANSION on people who appear 3+ times
+- Look for TIMELINE_GAPS: Are there missing decades?
+- Use EVENT_ADJACENT: What happened around major life events?
+- Generate ${promptCount} prompts that unlock stories the user may have forgotten
+- Reference specific entities by name to prove you were listening`;
 }
 
 /**
@@ -275,21 +310,22 @@ function generateFallbackPrompt(stories: Story[], storyCount: number): Tier3Prom
   // Extract a person or theme from first story as anchor
   const firstStory = stories[0];
   const transcript = firstStory.transcription || "";
-  
+
   // Try to find a person name
   const nameMatch = transcript.match(/\b([A-Z][a-z]{2,})\b/);
-  const anchor = nameMatch ? nameMatch[1] : "that time";
-  
+  const anchor = nameMatch ? nameMatch[1] : "that memory";
+
+  // Ask about an adjacent moment, not reflection on the same moment
   const prompt = storyCount === 1
-    ? `What happened right after ${anchor}? Who was with you?`
-    : `You keep returning to ${anchor} in your stories. What makes that memory stick?`;
+    ? `What happened right before you met ${anchor}? Where were you?`
+    : `${anchor} appears in your stories. What's a time things didn't go as planned with them?`;
 
   return {
     prompt,
-    intimacy_type: "caught_that",
+    memory_type: "event_adjacent",
     anchor_entity: anchor,
+    context_note: "Fallback prompt based on detected entity",
     recording_likelihood: 60,
-    reasoning: "Fallback prompt referencing story anchor",
   };
 }
 
@@ -314,15 +350,15 @@ export async function storeTier3Results(
   const promptsToInsert = result.prompts.map((prompt, index) => ({
     user_id: userId,
     prompt_text: prompt.prompt,
-    context_note: `Based on ${storyCount === 1 ? "your first story" : `patterns across ${storyCount} stories`}`,
+    context_note: prompt.context_note || `Based on ${storyCount === 1 ? "your first story" : `patterns across ${storyCount} stories`}`,
     anchor_entity: prompt.anchor_entity,
     anchor_year: null,
-    anchor_hash: generateAnchorHash(prompt.intimacy_type, prompt.anchor_entity, null),
+    anchor_hash: generateAnchorHash(prompt.memory_type, prompt.anchor_entity, null),
     tier: 3,
-    memory_type: prompt.intimacy_type,
+    memory_type: prompt.memory_type,
     prompt_score: prompt.recording_likelihood,
-    score_reason: prompt.reasoning,
-    model_version: result._meta?.modelUsed || "gpt-4o-intimacy-v2",
+    score_reason: `Memory archaeology: ${prompt.memory_type}`,
+    model_version: result._meta?.modelUsed || "gpt-4o-memory-archaeologist",
     expires_at: expiresAt.toISOString(),
     is_locked: isStory3 && index > 0, // Story 3: lock prompts 2-4
     shown_count: 0,
