@@ -39,6 +39,15 @@ export async function POST(request: NextRequest) {
     // credential.rawId and credential.id are already base64url strings
     const credentialId = credential.rawId || credential.id;
 
+    // DEBUG: Log exactly what we're receiving and looking up
+    console.log("[auth-verify] DEBUG - Credential received from browser:", {
+      credentialId,
+      rawId: credential.rawId,
+      id: credential.id,
+      rawIdLength: credential.rawId?.length,
+      idLength: credential.id?.length,
+    });
+
     logger.info("[auth-verify] Looking up passkey:", {
       credentialId,
       rawIdLength: credential.rawId?.length,
@@ -46,6 +55,9 @@ export async function POST(request: NextRequest) {
     });
 
     const passkey = await getPasskeyByCredentialId(credentialId);
+
+    // DEBUG: Log what we found (or didn't find)
+    console.log("[auth-verify] DEBUG - Database lookup result:", passkey ? "Found passkey" : "NOT FOUND");
 
     if (!passkey) {
       logger.warn("[auth-verify] Passkey not found for credential:", credentialId);

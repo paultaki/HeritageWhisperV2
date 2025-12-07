@@ -15,7 +15,7 @@ export default function NavigationArrows({
       {canGoPrevious && (
         <button
           onClick={onPrevious}
-          aria-label="Previous"
+          aria-label="Previous page"
           style={{
             position: 'absolute',
             padding: 0,
@@ -26,14 +26,16 @@ export default function NavigationArrows({
           }}
         >
           <ChevronLeft
-            size={24}
+            size={32}
+            strokeWidth={2.5}
             style={{
               position: 'fixed',
-              left: '-2px',
+              left: '-4px',
               top: '50%',
               transform: 'translateY(-50%)',
               zIndex: 1000,
-              color: '#d6d3d1', // stone-300
+              color: '#78716c', // stone-500 - more visible
+              filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))',
             }}
           />
         </button>
@@ -43,7 +45,7 @@ export default function NavigationArrows({
       {canGoNext && (
         <button
           onClick={onNext}
-          aria-label="Next"
+          aria-label="Next page"
           style={{
             position: 'absolute',
             padding: 0,
@@ -54,14 +56,16 @@ export default function NavigationArrows({
           }}
         >
           <ChevronRight
-            size={24}
+            size={32}
+            strokeWidth={2.5}
             style={{
               position: 'fixed',
-              right: '-2px',
+              right: '-4px',
               top: '50%',
               transform: 'translateY(-50%)',
               zIndex: 1000,
-              color: '#d6d3d1', // stone-300
+              color: '#78716c', // stone-500 - more visible
+              filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))',
             }}
           />
         </button>
