@@ -399,7 +399,7 @@ export default function FamilyPage() {
 
       {/* Main content */}
       <main
-        className="w-full pb-20 md:pb-0 px-4 md:px-6 overflow-x-hidden"
+        className="w-full pb-32 md:pb-0 px-4 md:px-6 overflow-x-hidden"
         style={{ marginTop: 55 }}
       >
         <div className="max-w-2xl mx-auto py-6 md:py-8">

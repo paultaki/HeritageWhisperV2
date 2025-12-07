@@ -54,6 +54,7 @@ function softFailResult(): RateLimitResult {
 // =============================================================================
 
 const isProduction = env.NODE_ENV === "production";
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
 
 /**
  * Initialize Redis client at module scope.
@@ -66,7 +67,7 @@ function initializeRedis(): Redis | null {
 
   // Check if credentials are configured
   if (!url || !token) {
-    if (isProduction) {
+    if (isProduction && !isBuildPhase) {
       // env.ts should have caught this, but double-check for safety
       throw new Error(
         "[RateLimit] Redis is not initialized in production. " +

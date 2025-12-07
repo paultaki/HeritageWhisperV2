@@ -16,8 +16,13 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  const slugs = getAllMDXSlugs(CONTENT_DIR);
-  return slugs.map((slug) => ({ slug }));
+  try {
+    const slugs = getAllMDXSlugs(CONTENT_DIR);
+    return slugs.map((slug) => ({ slug }));
+  } catch {
+    // No content directory exists yet
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
