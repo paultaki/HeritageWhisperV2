@@ -400,9 +400,8 @@ export async function POST(request: NextRequest) {
       });
 
     // Prepare story data for Supabase
-    // Duration is now validated and constrained by CreateStorySchema (1-600 seconds)
-    // Database constraint is 1-120, so we need to clamp to database limits
-    const durationForDb = Math.min(body.durationSeconds, 120);
+    // Duration validated by CreateStorySchema (1-600 seconds)
+    const durationForDb = body.durationSeconds;
 
     const storyData = {
       user_id: userId,

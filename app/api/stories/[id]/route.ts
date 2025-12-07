@@ -353,8 +353,7 @@ export async function PUT(
       storyData.wisdom_clip_url = body.wisdomClipUrl;
     if (body.durationSeconds !== undefined) {
       // Duration validated by UpdateStorySchema (1-600 seconds)
-      // Database constraint is 1-120, so clamp to database limits
-      storyData.duration_seconds = Math.min(body.durationSeconds, 120);
+      storyData.duration_seconds = body.durationSeconds;
     }
     if (body.emotions !== undefined) storyData.emotions = body.emotions;
     if (body.photoUrl !== undefined) {

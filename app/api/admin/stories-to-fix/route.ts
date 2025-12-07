@@ -27,14 +27,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch ALL stories with 1-second duration that have audio
+    // Check if we want all stories or just broken ones
+    const { searchParams } = new URL(request.url);
+    const fetchAll = searchParams.get("all") === "true";
+
+    // Fetch stories with audio
     // Using service role key bypasses RLS - admin only endpoint
-    const { data: stories, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from("stories")
       .select("id, title, audio_url, duration_seconds, user_id, created_at")
-      .eq("duration_seconds", 1)
       .not("audio_url", "is", null)
       .order("created_at", { ascending: false });
+
+    // If not fetching all, only get 1-second duration stories
+    if (!fetchAll) {
+      query = query.eq("duration_seconds", 1);
+    }
+
+    const { data: stories, error } = await query;
 
     if (error) {
       logger.error("Error fetching stories to fix:", error);
@@ -44,7 +54,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    logger.info(`Found ${stories?.length || 0} stories with 1-second duration`);
+    logger.info(`Found ${stories?.length || 0} stories ${fetchAll ? "with audio" : "with 1-second duration"}`);
 
     // Transform to camelCase
     const transformed = (stories || []).map((story) => ({

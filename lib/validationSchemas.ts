@@ -111,7 +111,7 @@ export const CreateStorySchema = z.object({
       if (!val || val === 0) return 30;
       return val;
     },
-    z.number().int('Duration must be an integer').min(1, 'Duration must be at least 1 second').max(600, 'Duration cannot exceed 10 minutes (600 seconds)')
+    z.number().int('Duration must be an integer').min(1, 'Duration must be at least 1 second').max(1800, 'Duration cannot exceed 30 minutes (1800 seconds)')
   ).optional().default(30),
 
   // Media fields
@@ -211,7 +211,7 @@ export const UpdateStorySchema = z.object({
   storyYear: z.number().int().min(1900).max(new Date().getFullYear() + 10).nullable().optional(),
   lifeAge: z.number().int().min(-100).max(120).nullable().optional(),
   age: z.number().int().min(-100).max(120).nullable().optional(),
-  durationSeconds: z.number().int().min(1).max(600).optional(),
+  durationSeconds: z.number().int().min(1).max(1800).optional(),
 
   // Media
   audioUrl: z.union([

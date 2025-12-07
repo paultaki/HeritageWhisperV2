@@ -117,6 +117,14 @@ const ADMIN_TOOLS: AdminTool[] = [
     category: "cleanup",
     color: "text-red-600 bg-red-50",
   },
+  {
+    title: "Fix Audio Durations",
+    description: "Detect and fix incorrect audio durations across all stories",
+    href: "/admin/fix-durations",
+    icon: <Database className="w-6 h-6" />,
+    category: "cleanup",
+    color: "text-orange-600 bg-orange-50",
+  },
 ];
 
 const CATEGORIES = [

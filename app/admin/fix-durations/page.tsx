@@ -20,8 +20,8 @@ export default function FixDurationsPage() {
   const [processedCount, setProcessedCount] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Fetch stories with 1-second duration
-  const fetchStories = async () => {
+  // Fetch stories - either just broken ones (1-second) or all with audio
+  const fetchStories = async (fetchAll: boolean = false) => {
     setIsLoading(true);
     try {
       const { data: session } = await supabase.auth.getSession();
@@ -30,7 +30,11 @@ export default function FixDurationsPage() {
         return;
       }
 
-      const response = await fetch("/api/admin/stories-to-fix", {
+      const url = fetchAll
+        ? "/api/admin/stories-to-fix?all=true"
+        : "/api/admin/stories-to-fix";
+
+      const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${session.session.access_token}`,
         },
@@ -254,13 +258,21 @@ export default function FixDurationsPage() {
 
         {/* Controls */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex gap-4 items-center">
+          <div className="flex gap-4 items-center flex-wrap">
             <button
-              onClick={fetchStories}
+              onClick={() => fetchStories(false)}
               disabled={isLoading || isProcessing}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Loading..." : "Load Stories to Fix"}
+              {isLoading ? "Loading..." : "Load Broken (1s)"}
+            </button>
+
+            <button
+              onClick={() => fetchStories(true)}
+              disabled={isLoading || isProcessing}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Loading..." : "Scan All Stories"}
             </button>
 
             {stories.length > 0 && (
@@ -278,7 +290,7 @@ export default function FixDurationsPage() {
 
           {stories.length > 0 && (
             <div className="mt-4 text-sm text-gray-600">
-              Found {stories.length} stories with 1-second duration |{" "}
+              Found {stories.length} stories with audio |{" "}
               <span className="text-green-600">{fixedCount} fixed</span> |{" "}
               <span className="text-red-600">{errorCount} errors</span>
             </div>
