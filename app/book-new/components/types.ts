@@ -127,4 +127,5 @@ export interface BookPageRendererProps {
   caveatFont?: string;
   pageNumber?: number; // Page number for display
   isPriority?: boolean; // Whether images should load with priority (for first story)
+  onStorySelect?: (storyId: string) => void; // For TOC page navigation
 }

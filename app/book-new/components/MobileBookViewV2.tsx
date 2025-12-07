@@ -440,6 +440,7 @@ export default function MobileBookViewV2({
               caveatFont={caveatFont}
               pageNumber={index + 1}
               isPriority={isPriority}
+              onStorySelect={handleStorySelect}
             />
           );
         })}

@@ -6,7 +6,15 @@ import { BookStory } from "./types";
  * TocPage - Mobile table of contents page
  * Single scrollable page (desktop uses 2-page spread)
  */
-export default function TocPage({ stories, pageNumber }: { stories: BookStory[]; pageNumber?: number }) {
+export default function TocPage({
+  stories,
+  pageNumber,
+  onStorySelect,
+}: {
+  stories: BookStory[];
+  pageNumber?: number;
+  onStorySelect?: (storyId: string) => void;
+}) {
   // Determine if this is a left or right page (like in a real book)
   const isRightPage = !pageNumber || pageNumber % 2 === 1;
   const borderRadius = isRightPage ? '2px 12px 12px 2px' : '12px 2px 2px 12px';
@@ -98,9 +106,10 @@ export default function TocPage({ stories, pageNumber }: { stories: BookStory[];
                 </h3>
                 <div className="space-y-1.5">
                   {decadeGroups[decade].map((story) => (
-                    <div
+                    <button
                       key={story.id}
-                      className="flex justify-between items-baseline border-b border-gray-200/60 pb-1.5"
+                      onClick={() => onStorySelect?.(story.id)}
+                      className="flex w-full justify-between items-baseline border-b border-gray-200/60 pb-1.5 text-left active:bg-gray-100/50 transition-colors rounded-sm"
                     >
                       <span className="text-gray-600 flex-1 pr-3 text-sm">
                         {story.title}
@@ -109,7 +118,7 @@ export default function TocPage({ stories, pageNumber }: { stories: BookStory[];
                         {story.storyYear}
                         {story.lifeAge !== undefined && ` • Age ${story.lifeAge}`}
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>

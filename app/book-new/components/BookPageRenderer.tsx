@@ -16,6 +16,7 @@ export default function BookPageRenderer({
   caveatFont,
   pageNumber,
   isPriority = false,
+  onStorySelect,
 }: BookPageRendererProps) {
   switch (page.type) {
     case "cover":
@@ -25,7 +26,7 @@ export default function BookPageRenderer({
       return <IntroPage pageNumber={pageNumber} />;
 
     case "toc":
-      return <TocPage stories={page.stories} pageNumber={pageNumber} />;
+      return <TocPage stories={page.stories} pageNumber={pageNumber} onStorySelect={onStorySelect} />;
 
     case "decade": {
       // Determine if this is a left or right page (like in a real book)

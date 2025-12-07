@@ -20,14 +20,13 @@ export default function CoverPage({
       <div
         className="relative mx-auto"
         style={{
-          width: "min(85vw, calc((100dvh - 180px) * 0.647))",
+          width: "min(92vw, calc((100dvh - 140px) * 0.647))",
           aspectRatio: "5.5 / 8.5",
           maxWidth: "600px",
         }}
       >
-        {/* Ambient shadow */}
-        <div className="pointer-events-none absolute -inset-8 rounded-2xl bg-[radial-gradient(1000px_400px_at_50%_30%,rgba(139,111,71,0.15)_0%,rgba(139,111,71,0.08)_35%,transparent_70%)]"></div>
-        <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[0_40px_120px_-30px_rgba(0,0,0,0.6)]"></div>
+        {/* Ambient shadow - subtle dark shadow only, no brown tint */}
+        <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)]"></div>
 
         {/* Book cover with spine */}
         <div className="relative w-full h-full">
