@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       .select('id, status')
       .eq('user_id', userId)
       .eq('email', email.toLowerCase())
-      .single();
+      .maybeSingle();
 
     if (existing) {
       return NextResponse.json(
@@ -96,6 +96,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Valid relationship values per database CHECK constraint
+    // Default to 'other' since the column has NOT NULL constraint
+    const validRelationships = ['spouse', 'partner', 'child', 'parent', 'sibling', 'grandparent', 'grandchild', 'other'];
+    const sanitizedRelationship = relationship && validRelationships.includes(relationship) ? relationship : 'other';
+
     // Create family member record
     const { data: familyMember, error: memberError } = await supabaseAdmin
       .from('family_members')
@@ -103,7 +108,7 @@ export async function POST(req: NextRequest) {
         user_id: userId,
         email: email.toLowerCase(),
         name: name.trim(),
-        relationship: relationship || null,
+        relationship: sanitizedRelationship,
         permission_level: 'viewer', // All family members are viewers (read-only)
         status: 'pending',
       })
@@ -112,8 +117,19 @@ export async function POST(req: NextRequest) {
 
     if (memberError || !familyMember) {
       console.error('Error creating family member:', memberError);
+      console.error('Insert data was:', {
+        user_id: userId,
+        email: email.toLowerCase(),
+        name: name.trim(),
+        relationship: sanitizedRelationship,
+        permission_level: 'viewer',
+        status: 'pending',
+      });
       return NextResponse.json(
-        { error: 'Failed to create invitation' },
+        {
+          error: 'Failed to create invitation',
+          details: process.env.NODE_ENV === 'development' ? memberError?.message : undefined
+        },
         { status: 500 }
       );
     }

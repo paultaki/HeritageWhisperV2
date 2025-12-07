@@ -1350,9 +1350,11 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                 const decadeLabel = decade.replace('s', '') + 's';
                 // Skip decade banner entirely for the first decade
                 const isFirstDecade = decadeIndex === 0;
+                // ID for decade navigation (matches DecadeNav entry IDs)
+                const decadeNavId = `decade-${decade}`;
 
                 return (
-                  <div key={decade}>
+                  <div key={decade} id={decadeNavId}>
                     {/* V3: Decade labels removed per user request */}
 
                     {/* Stories in this decade */}

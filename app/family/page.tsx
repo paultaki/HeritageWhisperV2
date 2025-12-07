@@ -6,13 +6,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,15 +35,12 @@ import {
   Mail,
   Copy,
   Check,
-  Eye,
   ChevronDown,
   ChevronUp,
-  HelpCircle,
 } from "lucide-react";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
 import { useSubscription } from "@/hooks/use-subscription";
-import { FamilySummaryTile } from "@/components/family/FamilySummaryTile";
 import { FamilyMemberCard } from "@/components/family/FamilyMemberCard";
 import { PendingInviteCard } from "@/components/family/PendingInviteCard";
 import { PrivacyInfoCard } from "@/components/family/PrivacyInfoCard";
@@ -126,16 +117,15 @@ export default function FamilyPage() {
   }>({
     queryKey: ["/api/family/members"],
     enabled: !!user,
-    staleTime: 0, // Always consider stale so invalidation works immediately
+    staleTime: 0,
   });
 
   const familyMembers = familyMembersData?.members || [];
 
   // Confetti celebration function
   const celebrateInvite = () => {
-    // Get button position if available
     const button = sendButtonRef.current;
-    let origin = { x: 0.5, y: 0.5 }; // Default to center
+    let origin = { x: 0.5, y: 0.5 };
 
     if (button) {
       const rect = button.getBoundingClientRect();
@@ -145,33 +135,30 @@ export default function FamilyPage() {
       };
     }
 
-    // First burst
     confetti({
       particleCount: 100,
       spread: 70,
       origin: origin,
-      colors: ["#7C6569", "#9C7280", "#BFA9AB", "#F9E5E8", "#FAF8F6"],
+      colors: ["#203954", "#3E6A5A", "#CBA46A", "#F4E6CC", "#F7F2EC"],
     });
 
-    // Second burst (slight delay)
     setTimeout(() => {
       confetti({
         particleCount: 50,
         angle: 60,
         spread: 55,
         origin: origin,
-        colors: ["#7C6569", "#9C7280", "#BFA9AB", "#F9E5E8", "#FAF8F6"],
+        colors: ["#203954", "#3E6A5A", "#CBA46A", "#F4E6CC", "#F7F2EC"],
       });
     }, 150);
 
-    // Third burst (opposite angle)
     setTimeout(() => {
       confetti({
         particleCount: 50,
         angle: 120,
         spread: 55,
         origin: origin,
-        colors: ["#7C6569", "#9C7280", "#BFA9AB", "#F9E5E8", "#FAF8F6"],
+        colors: ["#203954", "#3E6A5A", "#CBA46A", "#F4E6CC", "#F7F2EC"],
       });
     }, 300);
   };
@@ -187,36 +174,29 @@ export default function FamilyPage() {
       return response.json();
     },
     onSuccess: async (data) => {
-      // Trigger confetti celebration!
       celebrateInvite();
 
-      // Show success toast immediately
       toast({
-        title: "Invitation sent! 🎉",
+        title: "Invitation sent!",
         description: "Your family member will receive an email invitation.",
       });
 
-      // Invalidate and refetch to ensure fresh data
       await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
       await refetchMembers();
 
-      // Wait for confetti animation to finish (500ms) before closing dialog
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Close dialog
       setInviteDialogOpen(false);
       setInviteName("");
       setInviteEmail("");
       setInviteRelationship("");
       setInviteMessage("");
 
-      // Show invite URL in development
       if (data.inviteUrl) {
         console.log("Invite URL:", data.inviteUrl);
       }
     },
     onError: (error: any) => {
-      // Better handling for duplicate invite
       if (error.message?.includes("already invited")) {
         toast({
           title: "Already invited",
@@ -241,13 +221,10 @@ export default function FamilyPage() {
       return response.json();
     },
     onMutate: async (memberId) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ["/api/family/members"] });
 
-      // Snapshot the previous value
       const previousData = queryClient.getQueryData(["/api/family/members"]);
 
-      // Optimistically update the UI
       queryClient.setQueryData(["/api/family/members"], (old: any) => {
         if (!old) return old;
         return {
@@ -257,16 +234,13 @@ export default function FamilyPage() {
         };
       });
 
-      // Return context with the snapshot
       return { previousData };
     },
     onSuccess: async () => {
-      // Invalidate and refetch to ensure fresh data
       await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
       await refetchMembers();
     },
     onError: (error: any, memberId, context) => {
-      // Rollback on error
       if (context?.previousData) {
         queryClient.setQueryData(["/api/family/members"], context.previousData);
       }
@@ -291,12 +265,11 @@ export default function FamilyPage() {
       await queryClient.invalidateQueries({ queryKey: ["/api/family/members"] });
       await refetchMembers();
 
-      // Check if it was a pending or active member
       const member = familyMembers.find((m) => m.id === memberId);
       const isActive = member?.status === "active";
 
       toast({
-        title: isActive ? "Sign-in link sent! 📧" : "Invitation resent! 📧",
+        title: isActive ? "Sign-in link sent!" : "Invitation resent!",
         description: isActive
           ? "A new magic link has been sent to their email."
           : "A new invitation email has been sent.",
@@ -323,10 +296,12 @@ export default function FamilyPage() {
       return;
     }
 
+    const dbRelationship = inviteRelationship ? getRelationshipDbValue(inviteRelationship) : null;
+
     await inviteMutation.mutateAsync({
       email: inviteEmail,
       name: inviteName,
-      ...(inviteRelationship && { relationship: inviteRelationship }),
+      ...(dbRelationship && { relationship: dbRelationship }),
     });
   };
 
@@ -347,7 +322,6 @@ export default function FamilyPage() {
   ) => {
     try {
       await removeMutation.mutateAsync(memberId);
-      // Show success message after mutation completes
       if (isPending) {
         toast({
           title: "Invitation cancelled",
@@ -368,7 +342,7 @@ export default function FamilyPage() {
   if (isAuthLoading) {
     return (
       <div className="hw-page flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#203954]"></div>
       </div>
     );
   }
@@ -381,23 +355,30 @@ export default function FamilyPage() {
   const activeMembers = familyMembers.filter((m) => m.status === "active");
   const pendingMembers = familyMembers.filter((m) => m.status === "pending");
 
-  // Calculate stats
   const totalMembers = activeMembers.length;
 
+  // Relationship options - label is shown to user, dbValue is sent to API
   const relationshipOptions = [
-    "Son",
-    "Daughter",
-    "Grandson",
-    "Granddaughter",
-    "Great-Grandson",
-    "Great-Granddaughter",
-    "Niece",
-    "Nephew",
-    "Sibling",
-    "Spouse",
-    "Friend",
-    "Other Family",
+    { label: "Son", dbValue: "child" },
+    { label: "Daughter", dbValue: "child" },
+    { label: "Grandson", dbValue: "grandchild" },
+    { label: "Granddaughter", dbValue: "grandchild" },
+    { label: "Niece", dbValue: "other" },
+    { label: "Nephew", dbValue: "other" },
+    { label: "Sibling", dbValue: "sibling" },
+    { label: "Spouse", dbValue: "spouse" },
+    { label: "Partner", dbValue: "partner" },
+    { label: "Parent", dbValue: "parent" },
+    { label: "Grandparent", dbValue: "grandparent" },
+    { label: "Friend", dbValue: "other" },
+    { label: "Other Family", dbValue: "other" },
   ];
+
+  // Helper to get database value from selected label
+  const getRelationshipDbValue = (label: string) => {
+    const option = relationshipOptions.find((opt) => opt.label === label);
+    return option?.dbValue || null;
+  };
 
   return (
     <div
@@ -416,179 +397,160 @@ export default function FamilyPage() {
         />
       </div>
 
-      {/* Main content - with header spacing, centered */}
+      {/* Main content */}
       <main
         className="w-full pb-20 md:pb-0 px-4 md:px-6 overflow-x-hidden"
         style={{ marginTop: 55 }}
       >
-        <div className="max-w-2xl mx-auto py-5 md:py-6">
+        <div className="max-w-2xl mx-auto py-6 md:py-8">
           {/* Upgrade Callout for Free Users */}
           {!isPaid && <FamilyUpgradeCallout className="mb-6 md:mb-8" />}
 
-          {/* Main Content - Single Column, Left-Aligned */}
-          <div className="space-y-5 md:space-y-6">
-            {/* Row 1: Compact Summary Chips (Desktop & Mobile) */}
-            <div className="grid grid-cols-2 gap-3 max-w-md">
-              <FamilySummaryTile
-                icon={Users}
-                label="Family Members"
-                value={totalMembers}
-              />
-              <FamilySummaryTile
-                icon={UserPlus}
-                label="Invite Family"
-                value="+"
-                variant="primary"
-                onClick={() => {
-                  if (canInviteFamily) {
-                    setInviteDialogOpen(true);
-                  } else {
-                    setUpgradeModalOpen(true);
-                  }
-                }}
-              />
-            </div>
-
-            {/* Privacy Card */}
-            <PrivacyInfoCard />
-
-              {/* Active Family Members Section */}
-              <section>
-                <div className="mb-4">
-                  <h2 className="text-3xl md:text-4xl font-bold text-heritage-text-primary mb-2 leading-tight">
-                    Family Members {activeMembers.length > 0 && `(${activeMembers.length})`}
-                  </h2>
-                  <p className="text-base md:text-lg text-heritage-text-primary/70 leading-snug">
-                    People who can view your stories
-                  </p>
-                </div>
-
-                {activeMembers.length === 0 ? (
-                  <Card className="bg-white border border-heritage-deep-slate/10 rounded-2xl overflow-hidden shadow-sm">
-                    <div className="text-center py-12 md:py-14 px-6">
-                      <div className="w-18 h-18 md:w-20 md:h-20 mx-auto mb-5 rounded-full bg-heritage-deep-slate/10 flex items-center justify-center">
-                        <Users className="w-9 h-9 md:w-10 md:h-10 text-heritage-deep-slate" />
-                      </div>
-                      <h3 className="text-2xl md:text-3xl font-semibold text-heritage-text-primary mb-3">
-                        No family members yet
-                      </h3>
-                      <p className="text-base md:text-lg text-heritage-text-primary/70 mb-6 max-w-md mx-auto leading-relaxed">
-                        Invite your loved ones to start sharing your life stories
-                      </p>
-                      <Button
-                        onClick={() => {
-                          if (canInviteFamily) {
-                            setInviteDialogOpen(true);
-                          } else {
-                            setUpgradeModalOpen(true);
-                          }
-                        }}
-                        className="min-h-[56px] px-7 py-3.5 bg-heritage-deep-slate hover:bg-heritage-deep-slate/90 text-white text-base md:text-lg font-medium rounded-xl shadow-md hover:shadow-lg active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heritage-deep-slate transition-all duration-300"
-                      >
-                        <UserPlus className="w-5 h-5 mr-2" />
-                        Invite Family Member
-                        {!canInviteFamily && (
-                          <span className="ml-2 rounded-full bg-heritage-gold px-2 py-0.5 text-xs font-semibold text-heritage-text-primary">
-                            Premium
-                          </span>
-                        )}
-                      </Button>
-                    </div>
-                  </Card>
-                ) : (
-                  <div className="space-y-3">
-                    {activeMembers.map((member) => (
-                      <FamilyMemberCard
-                        key={member.id}
-                        member={member}
-                        onSendLoginLink={() => resendMutation.mutate(member.id)}
-                        onRemove={() => handleRemoveMember(member.id, false)}
-                        isSendingLink={resendMutation.isPending}
-                        getRelativeTime={getRelativeTime}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-
-              {/* Pending Invitations Section */}
-              {pendingMembers.length > 0 && (
-                <section>
-                  <button
-                    onClick={() => setPendingExpanded(!pendingExpanded)}
-                    className="w-full mb-3 flex items-center justify-between group"
-                  >
-                    <div>
-                      <h2 className="text-3xl md:text-4xl font-bold text-heritage-text-primary mb-2 text-left leading-tight">
-                        Pending Invitations ({pendingMembers.length})
-                      </h2>
-                      <p className="text-base md:text-lg text-heritage-text-primary/70 text-left leading-snug">
-                        Waiting for acceptance
-                      </p>
-                    </div>
-                    <div className="shrink-0 ml-3">
-                      {pendingExpanded ? (
-                        <ChevronUp className="w-7 h-7 text-gray-500 group-hover:text-gray-700 transition-colors" />
-                      ) : (
-                        <ChevronDown className="w-7 h-7 text-gray-500 group-hover:text-gray-700 transition-colors" />
-                      )}
-                    </div>
-                  </button>
-
-                  {pendingExpanded && (
-                    <>
-                      <div className="space-y-3 mb-3">
-                        {pendingMembers.map((member) => (
-                          <PendingInviteCard
-                            key={member.id}
-                            member={member}
-                            onResend={() => resendMutation.mutate(member.id)}
-                            onRevoke={() => handleRemoveMember(member.id, true)}
-                            isResending={resendMutation.isPending}
-                            getRelativeTime={getRelativeTime}
-                          />
-                        ))}
-                      </div>
-                      <p className="text-xs md:text-sm text-heritage-text-primary/70 pl-3.5 border-l-4 border-heritage-deep-slate/20 py-1.5 leading-snug">
-                        They'll appear as a member as soon as they accept the invitation.
-                      </p>
-                    </>
-                  )}
-                </section>
-              )}
-          </div>
-
-          {/* Footer Help CTA */}
-          <div className="mt-8 md:mt-10 text-center py-6 md:py-7 border-t border-gray-200">
-            <p className="text-sm md:text-base text-gray-700 mb-3.5 flex items-center justify-center gap-2">
-              <HelpCircle className="w-4.5 h-4.5 text-gray-500" />
-              Need help inviting family?
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => {
-                // TODO: Link to help/guide page when available
-                toast({
-                  title: "Coming soon",
-                  description: "Step-by-step guide will be available soon.",
-                });
-              }}
-              className="min-h-[48px] px-6 py-2.5 text-sm md:text-base font-medium rounded-xl border-2 border-gray-300 hover:border-heritage-deep-slate hover:bg-heritage-deep-slate/5 hover:text-heritage-deep-slate active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heritage-deep-slate transition-all duration-300"
+          {/* Hero Section - Vertical Stack */}
+          <section className="mb-8 md:mb-10">
+            {/* Title with serif font */}
+            <h1
+              className="text-3xl md:text-4xl font-bold text-[#203954] mb-2 leading-tight"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
-              View Step-by-Step Guide
+              Family Circle
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-lg md:text-xl text-[#4A4A4A] mb-6 leading-relaxed">
+              Invite family to listen to your stories.
+            </p>
+
+            {/* Primary Action Button */}
+            <Button
+              onClick={() => {
+                if (canInviteFamily) {
+                  setInviteDialogOpen(true);
+                } else {
+                  setUpgradeModalOpen(true);
+                }
+              }}
+              className="w-full md:w-auto min-h-[60px] px-8 py-4 bg-[#203954] hover:bg-[#1B3047] text-white text-lg font-medium rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#203954] focus:ring-offset-[#F7F2EC] transition-all duration-200"
+            >
+              <UserPlus className="w-5 h-5 mr-2" />
+              Invite Family Member
+              {!canInviteFamily && (
+                <span className="ml-2 rounded-full bg-[#CBA46A] px-2.5 py-0.5 text-xs font-semibold text-[#1F1F1F]">
+                  Premium
+                </span>
+              )}
             </Button>
+          </section>
+
+          {/* Privacy Strip */}
+          <div className="mb-8 md:mb-10">
+            <PrivacyInfoCard />
           </div>
+
+          {/* Members Section */}
+          <section className="mb-8 md:mb-10">
+            <h2
+              className="text-2xl md:text-3xl font-bold text-[#203954] mb-4 leading-tight"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              Members {totalMembers > 0 && `(${totalMembers})`}
+            </h2>
+
+            {activeMembers.length === 0 ? (
+              <Card className="bg-white border border-[#D2C9BD] rounded-xl overflow-hidden">
+                <div className="text-center py-12 md:py-14 px-6">
+                  <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-5 rounded-full bg-[#F4E6CC] flex items-center justify-center">
+                    <Users className="w-8 h-8 md:w-10 md:h-10 text-[#203954]" />
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-semibold text-[#1F1F1F] mb-3">
+                    No family members yet
+                  </h3>
+                  <p className="text-base md:text-lg text-[#4A4A4A] mb-6 max-w-md mx-auto leading-relaxed">
+                    Invite your loved ones to start sharing your life stories
+                  </p>
+                  <Button
+                    onClick={() => {
+                      if (canInviteFamily) {
+                        setInviteDialogOpen(true);
+                      } else {
+                        setUpgradeModalOpen(true);
+                      }
+                    }}
+                    className="min-h-[56px] px-7 py-3.5 bg-[#203954] hover:bg-[#1B3047] text-white text-base md:text-lg font-medium rounded-xl shadow-md hover:shadow-lg active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#203954] transition-all duration-300"
+                  >
+                    <UserPlus className="w-5 h-5 mr-2" />
+                    Invite Family Member
+                  </Button>
+                </div>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {activeMembers.map((member) => (
+                  <FamilyMemberCard
+                    key={member.id}
+                    member={member}
+                    onSendLoginLink={() => resendMutation.mutate(member.id)}
+                    onRemove={() => handleRemoveMember(member.id, false)}
+                    isSendingLink={resendMutation.isPending}
+                    getRelativeTime={getRelativeTime}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Pending Invitations Section */}
+          {pendingMembers.length > 0 && (
+            <section>
+              <button
+                onClick={() => setPendingExpanded(!pendingExpanded)}
+                className="w-full mb-4 flex items-center justify-between group"
+              >
+                <h2
+                  className="text-2xl md:text-3xl font-bold text-[#203954] text-left leading-tight"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  Pending ({pendingMembers.length})
+                </h2>
+                <div className="shrink-0 ml-3 w-10 h-10 flex items-center justify-center rounded-lg text-[#8A8378] group-hover:text-[#203954] group-hover:bg-[#EFE6DA] transition-colors">
+                  {pendingExpanded ? (
+                    <ChevronUp className="w-6 h-6" />
+                  ) : (
+                    <ChevronDown className="w-6 h-6" />
+                  )}
+                </div>
+              </button>
+
+              {pendingExpanded && (
+                <div className="space-y-3">
+                  {pendingMembers.map((member) => (
+                    <PendingInviteCard
+                      key={member.id}
+                      member={member}
+                      onResend={() => resendMutation.mutate(member.id)}
+                      onRevoke={() => handleRemoveMember(member.id, true)}
+                      isResending={resendMutation.isPending}
+                      getRelativeTime={getRelativeTime}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
         </div>
       </main>
 
-      {/* Invite Dialog - only for premium users */}
+      {/* Invite Dialog */}
       <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-        <DialogContent className="sm:max-w-[540px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[540px] max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
-            <DialogTitle className="text-2xl md:text-3xl font-semibold">
+            <DialogTitle
+              className="text-2xl md:text-3xl font-semibold text-[#203954]"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
               Invite Family Member
             </DialogTitle>
-            <DialogDescription className="text-base md:text-lg text-gray-600">
+            <DialogDescription className="text-base md:text-lg text-[#4A4A4A]">
               Send an invitation to share your life stories
             </DialogDescription>
           </DialogHeader>
@@ -596,7 +558,7 @@ export default function FamilyPage() {
             <div>
               <Label
                 htmlFor="name"
-                className="text-base font-medium text-gray-900"
+                className="text-base font-medium text-[#1F1F1F]"
               >
                 Name
               </Label>
@@ -605,7 +567,7 @@ export default function FamilyPage() {
                 type="text"
                 value={inviteName}
                 onChange={(e) => setInviteName(e.target.value)}
-                className="mt-2 h-12 w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-heritage-deep-slate focus:ring-2 focus:ring-heritage-deep-slate focus:ring-offset-0"
+                className="mt-2 h-14 w-full px-4 py-3 text-base bg-white border border-[#D2C9BD] rounded-xl placeholder:text-[#8A8378] focus:border-[#203954] focus:ring-2 focus:ring-[#203954] focus:ring-offset-0"
                 placeholder="John Smith"
                 required
               />
@@ -614,7 +576,7 @@ export default function FamilyPage() {
             <div>
               <Label
                 htmlFor="email"
-                className="text-base font-medium text-gray-900"
+                className="text-base font-medium text-[#1F1F1F]"
               >
                 Email Address
               </Label>
@@ -623,7 +585,7 @@ export default function FamilyPage() {
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                className="mt-2 h-12 w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-heritage-deep-slate focus:ring-2 focus:ring-heritage-deep-slate focus:ring-offset-0"
+                className="mt-2 h-14 w-full px-4 py-3 text-base bg-white border border-[#D2C9BD] rounded-xl placeholder:text-[#8A8378] focus:border-[#203954] focus:ring-2 focus:ring-[#203954] focus:ring-offset-0"
                 placeholder="family@example.com"
                 required
               />
@@ -632,22 +594,22 @@ export default function FamilyPage() {
             <div>
               <Label
                 htmlFor="relationship"
-                className="text-base font-medium text-gray-900"
+                className="text-base font-medium text-[#1F1F1F]"
               >
                 Relationship{" "}
-                <span className="text-gray-500 font-normal">(Optional)</span>
+                <span className="text-[#8A8378] font-normal">(Optional)</span>
               </Label>
               <Select
                 value={inviteRelationship}
                 onValueChange={setInviteRelationship}
               >
-                <SelectTrigger className="mt-2 h-12 w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl focus:border-heritage-deep-slate focus:ring-2 focus:ring-heritage-deep-slate focus:ring-offset-0">
+                <SelectTrigger className="mt-2 h-14 w-full px-4 py-3 text-base bg-white border border-[#D2C9BD] rounded-xl focus:border-[#203954] focus:ring-2 focus:ring-[#203954] focus:ring-offset-0">
                   <SelectValue placeholder="Select relationship" />
                 </SelectTrigger>
                 <SelectContent>
                   {relationshipOptions.map((rel) => (
-                    <SelectItem key={rel} value={rel} className="text-base">
-                      {rel}
+                    <SelectItem key={rel.label} value={rel.label} className="text-base">
+                      {rel.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -657,41 +619,41 @@ export default function FamilyPage() {
             <div>
               <Label
                 htmlFor="message"
-                className="text-base font-medium text-gray-900"
+                className="text-base font-medium text-[#1F1F1F]"
               >
                 Personal Message{" "}
-                <span className="text-gray-500 font-normal">(Optional)</span>
+                <span className="text-[#8A8378] font-normal">(Optional)</span>
               </Label>
               <Textarea
                 id="message"
                 value={inviteMessage}
                 onChange={(e) => setInviteMessage(e.target.value)}
-                className="mt-2 min-h-[88px] w-full px-4 py-2.5 text-base bg-white border border-gray-300 rounded-xl placeholder:text-gray-400 focus:border-[#2C3E50] focus:ring-2 focus:ring-[#2C3E50] focus:ring-offset-0"
+                className="mt-2 min-h-[88px] w-full px-4 py-3 text-base bg-white border border-[#D2C9BD] rounded-xl placeholder:text-[#8A8378] focus:border-[#203954] focus:ring-2 focus:ring-[#203954] focus:ring-offset-0"
                 placeholder="Add a personal message to your invitation..."
                 rows={3}
               />
             </div>
 
-            <Separator />
+            <Separator className="bg-[#D2C9BD]" />
 
             <div className="space-y-2.5">
-              <Label className="text-xs md:text-sm font-medium text-gray-600">
+              <Label className="text-sm font-medium text-[#4A4A4A]">
                 Or share invite link:
               </Label>
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleCopyInviteLink}
-                className="w-full min-h-[48px] px-5 py-2.5 bg-white text-gray-900 text-sm md:text-base font-medium border border-gray-300 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2C3E50] transition-all duration-200 justify-start"
+                className="w-full min-h-[48px] px-5 py-2.5 bg-white text-[#1F1F1F] text-base font-medium border border-[#D2C9BD] rounded-xl hover:bg-[#EFE6DA] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#203954] transition-all duration-200 justify-start"
               >
                 {copiedLink ? (
                   <>
-                    <Check className="w-4.5 h-4.5 mr-2 text-green-700" />
+                    <Check className="w-5 h-5 mr-2 text-[#166534]" />
                     Link Copied!
                   </>
                 ) : (
                   <>
-                    <Copy className="w-4.5 h-4.5 mr-2" />
+                    <Copy className="w-5 h-5 mr-2" />
                     Copy Invite Link
                   </>
                 )}
@@ -703,7 +665,7 @@ export default function FamilyPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setInviteDialogOpen(false)}
-                className="w-full min-h-[48px] px-5 py-2.5 bg-white text-gray-900 text-sm md:text-base font-medium border border-gray-300 rounded-xl hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heritage-deep-slate transition-all duration-300"
+                className="w-full min-h-[48px] px-5 py-2.5 bg-white text-[#1F1F1F] text-base font-medium border border-[#D2C9BD] rounded-xl hover:bg-[#EFE6DA] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#203954] transition-all duration-300"
               >
                 Cancel
               </Button>
@@ -711,7 +673,7 @@ export default function FamilyPage() {
                 ref={sendButtonRef}
                 type="submit"
                 disabled={inviteMutation.isPending}
-                className="w-full min-h-[56px] px-7 py-3.5 bg-heritage-deep-slate text-white text-base md:text-lg font-medium rounded-xl shadow-md hover:shadow-lg hover:bg-heritage-deep-slate/90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heritage-deep-slate transition-all duration-300"
+                className="w-full min-h-[60px] px-7 py-4 bg-[#203954] text-white text-lg font-medium rounded-xl shadow-md hover:shadow-lg hover:bg-[#1B3047] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#203954] transition-all duration-300"
               >
                 <Mail className="w-5 h-5 mr-2" />
                 {inviteMutation.isPending ? "Sending..." : "Send Invitation"}

@@ -135,11 +135,11 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
       {isOpen && (
         <motion.div
           ref={menuRef}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 10, x: "-50%" }}
+          animate={{ opacity: 1, y: 0, x: "-50%" }}
+          exit={{ opacity: 0, y: 10, x: "-50%" }}
           transition={{ duration: 0.2 }}
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[110] w-[90%] max-w-sm max-h-[calc(100vh-12rem)] rounded-2xl shadow-2xl overflow-y-auto bg-white/95 backdrop-blur-xl border border-white/30"
+          className="fixed bottom-24 left-1/2 z-[110] w-[90%] max-w-sm max-h-[calc(100vh-12rem)] rounded-2xl shadow-2xl overflow-y-auto bg-white/95 backdrop-blur-xl border border-white/30"
         >
           {/* User Info */}
           {user && (
