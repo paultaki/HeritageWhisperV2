@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
       email: userEmail || dbUser.email,
       name: dbUser.name || (userEmail ? userEmail.split("@")[0] : "User"),
       birthYear: dbUser.birth_year || new Date().getFullYear() - 30,
+      birthDate: dbUser.birth_date || null, // Full birthday (YYYY-MM-DD)
       bio: dbUser.bio || "",
       profilePhotoUrl: dbUser.profile_photo_url || "",
       emailNotifications: dbUser.email_notifications ?? true,
@@ -133,6 +134,7 @@ export async function PATCH(request: NextRequest) {
 
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.birthYear !== undefined) dbUpdates.birth_year = updates.birthYear;
+    if (updates.birthDate !== undefined) dbUpdates.birth_date = updates.birthDate; // Full birthday (YYYY-MM-DD)
     if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
     if (updates.profilePhotoUrl !== undefined) dbUpdates.profile_photo_url = updates.profilePhotoUrl;
 
@@ -185,6 +187,7 @@ export async function PATCH(request: NextRequest) {
       email: dbUser.email, // Use DB email
       name: dbUser.name || dbUser.email?.split("@")[0] || "User",
       birthYear: dbUser.birth_year || new Date().getFullYear() - 30,
+      birthDate: dbUser.birth_date || null, // Full birthday (YYYY-MM-DD)
       bio: dbUser.bio || "",
       profilePhotoUrl: dbUser.profile_photo_url || "",
       emailNotifications: dbUser.email_notifications ?? true,

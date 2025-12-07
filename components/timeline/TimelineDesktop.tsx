@@ -1206,7 +1206,8 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
       userId: user?.id || 'ghost-user',
       title: 'When I was born',
       storyYear: birthYear,
-      storyDate: `${birthYear}-01-01`,
+      // Use noon local time to avoid timezone issues showing wrong day
+      storyDate: `${birthYear}-01-01T12:00:00`,
       photos: [], // Empty photos triggers "pill" style
       audioUrl: "",
       transcription: "The beginning of my story.",
@@ -1214,7 +1215,13 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
       createdAt: new Date().toISOString(),
       templateId: 'birth-story', // Link to birth story template
     };
-    sortedStories.unshift(virtualBirthStory);
+    // Insert in sorted position (not unshift) to maintain chronological order
+    const insertIndex = sortedStories.findIndex(s => (normalizeYear(s.storyYear) ?? 0) >= birthYear);
+    if (insertIndex === -1) {
+      sortedStories.push(virtualBirthStory);
+    } else {
+      sortedStories.splice(insertIndex, 0, virtualBirthStory);
+    }
   }
 
   // Ghost Stories Logic
@@ -1250,7 +1257,8 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           userId: 'ghost-user',
           title: template.title,
           storyYear: birthYear + yearOffset,
-          storyDate: `${birthYear + yearOffset}-01-01`,
+          // Use noon local time to avoid timezone issues showing wrong day
+          storyDate: `${birthYear + yearOffset}-01-01T12:00:00`,
           photos: [], // Empty - shows placeholder with add icon
           audioUrl: "", // No audio
           transcription: template.subtitle, // Use subtitle as snippet

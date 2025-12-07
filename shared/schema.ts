@@ -20,6 +20,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   name: text("name").notNull().default("User"),
   birthYear: integer("birth_year").notNull(),
+  birthDate: text("birth_date"), // Full birth date (YYYY-MM-DD) for month/day display
   bio: text("bio"), // User bio/about section
   profilePhotoUrl: text("profile_photo_url"), // Profile photo
   storyCount: integer("story_count").default(0),

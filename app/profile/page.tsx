@@ -74,6 +74,8 @@ export default function Profile() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [birthYear, setBirthYear] = useState("");
+  const [birthMonth, setBirthMonth] = useState("");
+  const [birthDay, setBirthDay] = useState("");
   const [bio, setBio] = useState("");
   const [profilePhoto, setProfilePhoto] = useState("");
 
@@ -115,6 +117,20 @@ export default function Profile() {
     enabled: !!user,
   });
 
+  // Populate birthday fields from profile data
+  useEffect(() => {
+    if ((profileData as any)?.user?.birthDate) {
+      // Parse birthDate (YYYY-MM-DD format)
+      const [year, month, day] = (profileData as any).user.birthDate.split("-");
+      if (year) setBirthYear(year);
+      if (month) setBirthMonth(month);
+      if (day) setBirthDay(day);
+    } else if ((profileData as any)?.user?.birthYear) {
+      // Fall back to just year if no full date
+      setBirthYear((profileData as any).user.birthYear.toString());
+    }
+  }, [profileData]);
+
   // Fetch AI consent status
   const { data: aiConsentData } = useQuery({
     queryKey: ["/api/user/ai-settings"],
@@ -147,6 +163,7 @@ export default function Profile() {
     mutationFn: async (data: {
       name: string;
       birthYear: number;
+      birthDate?: string; // Full birthday (YYYY-MM-DD)
       bio?: string;
       profilePhotoUrl?: string;
     }) => {
@@ -160,7 +177,7 @@ export default function Profile() {
       toast({
         title: "Profile updated",
         description:
-          "Your profile has been saved successfully. Timeline updated with new birth year.",
+          "Your profile has been saved successfully. Timeline updated with new birthday.",
       });
     },
     onError: (error: any) => {
@@ -261,9 +278,19 @@ export default function Profile() {
       return;
     }
 
+    // Build birthDate string if month and day are provided
+    let birthDate: string | undefined;
+    if (birthMonth && birthDay && birthYear) {
+      // Pad month and day with leading zeros
+      const paddedMonth = birthMonth.padStart(2, "0");
+      const paddedDay = birthDay.padStart(2, "0");
+      birthDate = `${birthYear}-${paddedMonth}-${paddedDay}`;
+    }
+
     await updateProfileMutation.mutateAsync({
       name,
       birthYear: parseInt(birthYear),
+      birthDate,
       bio,
     });
   };
@@ -332,9 +359,17 @@ export default function Profile() {
 
   const handlePhotoUpdate = async (photoUrl: string) => {
     setProfilePhoto(photoUrl);
+    // Build birthDate string if month and day are provided
+    let birthDate: string | undefined;
+    if (birthMonth && birthDay && birthYear) {
+      const paddedMonth = birthMonth.padStart(2, "0");
+      const paddedDay = birthDay.padStart(2, "0");
+      birthDate = `${birthYear}-${paddedMonth}-${paddedDay}`;
+    }
     await updateProfileMutation.mutateAsync({
       name,
       birthYear: parseInt(birthYear),
+      birthDate,
       bio,
       profilePhotoUrl: photoUrl,
     });
@@ -630,22 +665,72 @@ export default function Profile() {
                   </div>
 
                   <div>
-                    <Label htmlFor="birthYear" className="text-base font-medium">
-                      Birth Year
+                    <Label className="text-base font-medium">
+                      Birthday
                     </Label>
-                    <Input
-                      id="birthYear"
-                      type="number"
-                      value={birthYear}
-                      onChange={(e) => setBirthYear(e.target.value)}
-                      className="mt-2 h-14 text-base"
-                      placeholder="1952"
-                      min="1920"
-                      max="2010"
-                      required
-                    />
-                    <p className="text-base text-[var(--hw-text-secondary)] mt-1">
-                      Used to organize your timeline
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      <div>
+                        <Label htmlFor="birthMonth" className="text-sm text-[var(--hw-text-secondary)] mb-1 block">
+                          Month
+                        </Label>
+                        <select
+                          id="birthMonth"
+                          value={birthMonth}
+                          onChange={(e) => setBirthMonth(e.target.value)}
+                          className="w-full h-14 text-base rounded-md border border-input bg-background px-3 py-2"
+                        >
+                          <option value="">--</option>
+                          <option value="1">January</option>
+                          <option value="2">February</option>
+                          <option value="3">March</option>
+                          <option value="4">April</option>
+                          <option value="5">May</option>
+                          <option value="6">June</option>
+                          <option value="7">July</option>
+                          <option value="8">August</option>
+                          <option value="9">September</option>
+                          <option value="10">October</option>
+                          <option value="11">November</option>
+                          <option value="12">December</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="birthDay" className="text-sm text-[var(--hw-text-secondary)] mb-1 block">
+                          Day
+                        </Label>
+                        <select
+                          id="birthDay"
+                          value={birthDay}
+                          onChange={(e) => setBirthDay(e.target.value)}
+                          className="w-full h-14 text-base rounded-md border border-input bg-background px-3 py-2"
+                        >
+                          <option value="">--</option>
+                          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                            <option key={day} value={day.toString()}>
+                              {day}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="birthYear" className="text-sm text-[var(--hw-text-secondary)] mb-1 block">
+                          Year
+                        </Label>
+                        <Input
+                          id="birthYear"
+                          type="number"
+                          value={birthYear}
+                          onChange={(e) => setBirthYear(e.target.value)}
+                          className="h-14 text-base"
+                          placeholder="1952"
+                          min="1920"
+                          max="2010"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <p className="text-base text-[var(--hw-text-secondary)] mt-2">
+                      Your birthday is used to organize your timeline and calculate ages
                     </p>
                   </div>
 

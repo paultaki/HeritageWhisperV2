@@ -879,7 +879,15 @@ function BookV4PageContent() {
               <div className="rounded-2xl bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5">
                 <div className="px-6 py-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-semibold tracking-tight">Table of Contents</h2>
+                    <button
+                      onClick={() => {
+                        setCurrentSpreadIndex(1); // Navigate to TOC pages (spread index 1)
+                        setShowToc(false);
+                      }}
+                      className="text-lg font-semibold tracking-tight hover:text-[#8B7355] transition-colors text-left"
+                    >
+                      Table of Contents →
+                    </button>
                     <button
                       onClick={() => setShowToc(false)}
                       className="w-9 h-9 bg-neutral-100 rounded-full flex items-center justify-center shadow-sm hover:bg-neutral-200 transition active:scale-95"
