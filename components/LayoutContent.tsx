@@ -12,7 +12,7 @@ export default function LayoutContent({
   // Interview-chat and book pages handle their own bottom spacing
   // All other pages need bottom padding to prevent content from being hidden behind nav bar
   const isInterviewChat = pathname === '/interview-chat';
-  const isBookPage = pathname === '/book' || pathname.startsWith('/book/') || pathname === '/book-new' || pathname.startsWith('/book-new/');
+  const isBookPage = pathname === '/book' || pathname.startsWith('/book/');
 
   return (
     <div className={(isInterviewChat || isBookPage) ? '' : 'pb-20 md:pb-20'}>

@@ -121,8 +121,8 @@ export default function HamburgerMenu() {
     },
   ] : [];
 
-  // Don't show on auth pages, home page, or book-new page
-  const shouldShow = !["/auth/login", "/auth/register", "/", "/book-new"].includes(pathname) && !pathname.startsWith("/book-new/");
+  // Don't show on auth pages or home page
+  const shouldShow = !["/auth/login", "/auth/register", "/"].includes(pathname);
 
   if (!shouldShow) {
     return null;

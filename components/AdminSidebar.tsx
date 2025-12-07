@@ -88,6 +88,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: "Cleanup",
     items: [
       { label: "Prompt Cleanup", href: "/admin/cleanup", icon: Trash2 },
+      { label: "Fix Audio Durations", href: "/admin/fix-durations", icon: Database },
     ],
   },
   {
