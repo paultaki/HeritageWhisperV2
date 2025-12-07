@@ -59,54 +59,84 @@ export default function FixDurationsPage() {
   };
 
   // Detect duration for a single story using browser audio element
+  // Uses "seek to end" trick for webm files with incomplete headers
   const detectDuration = (story: StoryToFix): Promise<number> => {
     return new Promise((resolve, reject) => {
       const audio = new Audio();
-      audio.preload = "metadata";
+      audio.preload = "auto"; // Load more than just metadata
 
       const timeout = setTimeout(() => {
         audio.src = "";
         reject(new Error("Timeout loading audio"));
-      }, 15000);
+      }, 30000); // Longer timeout for full load
 
-      audio.onloadedmetadata = () => {
-        clearTimeout(timeout);
-        if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
-          resolve(Math.round(audio.duration));
-        } else {
-          reject(new Error("Invalid duration"));
+      const checkDuration = () => {
+        if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration) && audio.duration > 0) {
+          clearTimeout(timeout);
+          const duration = Math.round(audio.duration);
+          audio.src = "";
+          resolve(duration);
+          return true;
         }
-        audio.src = "";
+        return false;
+      };
+
+      // Try multiple approaches to get duration
+      audio.onloadedmetadata = () => {
+        if (checkDuration()) return;
+
+        // If duration not available from metadata, try seeking to end
+        // This forces the browser to calculate duration for streaming formats
+        try {
+          audio.currentTime = 1e101; // Seek to a huge time value
+        } catch (e) {
+          // Some browsers throw on seeking before ready
+        }
+      };
+
+      audio.onseeked = () => {
+        // After seeking, currentTime will be at actual end, revealing duration
+        if (checkDuration()) return;
+      };
+
+      audio.ondurationchange = () => {
+        if (checkDuration()) return;
+      };
+
+      audio.oncanplaythrough = () => {
+        if (checkDuration()) return;
       };
 
       audio.onerror = () => {
         clearTimeout(timeout);
-        reject(new Error("Failed to load audio"));
         audio.src = "";
+        reject(new Error("Failed to load audio"));
       };
 
       audio.src = story.audioUrl;
+      audio.load(); // Explicitly start loading
     });
   };
 
-  // Update a story's duration in the database
+  // Update a story's duration in the database (admin endpoint - can update any story)
   const updateDuration = async (storyId: string, duration: number) => {
     const { data: session } = await supabase.auth.getSession();
     if (!session?.session?.access_token) {
       throw new Error("Not authenticated");
     }
 
-    const response = await fetch(`/api/stories/${storyId}`, {
-      method: "PUT",
+    const response = await fetch("/api/admin/fix-duration", {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session.session.access_token}`,
       },
-      body: JSON.stringify({ durationSeconds: duration }),
+      body: JSON.stringify({ storyId, durationSeconds: duration }),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to update story");
+      const error = await response.json();
+      throw new Error(error.error || "Failed to update story");
     }
   };
 

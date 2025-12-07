@@ -9,10 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 // Check if user is admin based on email whitelist
 function isAdmin(email?: string): boolean {
   if (!email) return false;
-  
+
   const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS || process.env.ADMIN_EMAILS || "";
   const allowedEmails = adminEmails.split(",").map(e => e.trim().toLowerCase());
-  
+
   return allowedEmails.includes(email.toLowerCase());
 }
 
