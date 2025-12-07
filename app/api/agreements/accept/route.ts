@@ -70,32 +70,63 @@ export async function POST(request: NextRequest) {
     const userAgent = request.headers.get("user-agent") || "unknown";
 
     // Ensure user exists in public.users table (handles returning users who may not have a record)
-    const { data: existingUser } = await supabase
+    // First check by auth user ID
+    const { data: existingUserById } = await supabase
       .from("users")
-      .select("id")
+      .select("id, email")
       .eq("id", user.id)
       .single();
 
-    if (!existingUser) {
-      // Create user record if it doesn't exist
-      const { error: createError } = await supabase.from("users").insert({
-        id: user.id,
-        email: user.email || "",
-        name: user.user_metadata?.name || user.email?.split("@")[0] || "User",
-        birth_year: user.user_metadata?.birthYear || new Date().getFullYear() - 50,
-        story_count: 0,
-        is_paid: false,
-      });
+    if (!existingUserById) {
+      // User doesn't exist by ID - check if they exist by email (returning OAuth user scenario)
+      const { data: existingUserByEmail } = await supabase
+        .from("users")
+        .select("id, email")
+        .eq("email", user.email || "")
+        .single();
 
-      if (createError) {
-        logger.error("[Agreements] Error creating user record:", createError);
-        return NextResponse.json(
-          { error: "Failed to initialize user account" },
-          { status: 500 },
+      if (existingUserByEmail) {
+        // User exists with different ID (e.g., returning OAuth user with new auth ID)
+        // Update their ID to match the new auth ID
+        const { error: updateIdError } = await supabase
+          .from("users")
+          .update({ id: user.id })
+          .eq("email", user.email || "");
+
+        if (updateIdError) {
+          logger.error("[Agreements] Error updating user ID:", updateIdError);
+          return NextResponse.json(
+            { error: "Failed to sync user account" },
+            { status: 500 },
+          );
+        }
+
+        logger.debug(
+          `[Agreements] Updated user ID from ${existingUserByEmail.id} to ${user.id} for email ${user.email}`,
         );
-      }
+      } else {
+        // User truly doesn't exist - create new record
+        const { error: createError } = await supabase.from("users").insert({
+          id: user.id,
+          email: user.email || "",
+          name:
+            user.user_metadata?.name || user.email?.split("@")[0] || "User",
+          birth_year:
+            user.user_metadata?.birthYear || new Date().getFullYear() - 50,
+          story_count: 0,
+          is_paid: false,
+        });
 
-      logger.debug(`[Agreements] Created missing user record for ${user.id}`);
+        if (createError) {
+          logger.error("[Agreements] Error creating user record:", createError);
+          return NextResponse.json(
+            { error: "Failed to initialize user account" },
+            { status: 500 },
+          );
+        }
+
+        logger.debug(`[Agreements] Created missing user record for ${user.id}`);
+      }
     }
 
     // Record the agreement acceptance using Supabase client
