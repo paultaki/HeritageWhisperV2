@@ -69,6 +69,35 @@ export async function POST(request: NextRequest) {
       "unknown";
     const userAgent = request.headers.get("user-agent") || "unknown";
 
+    // Ensure user exists in public.users table (handles returning users who may not have a record)
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("id")
+      .eq("id", user.id)
+      .single();
+
+    if (!existingUser) {
+      // Create user record if it doesn't exist
+      const { error: createError } = await supabase.from("users").insert({
+        id: user.id,
+        email: user.email || "",
+        name: user.user_metadata?.name || user.email?.split("@")[0] || "User",
+        birth_year: user.user_metadata?.birthYear || new Date().getFullYear() - 50,
+        story_count: 0,
+        is_paid: false,
+      });
+
+      if (createError) {
+        logger.error("[Agreements] Error creating user record:", createError);
+        return NextResponse.json(
+          { error: "Failed to initialize user account" },
+          { status: 500 },
+        );
+      }
+
+      logger.debug(`[Agreements] Created missing user record for ${user.id}`);
+    }
+
     // Record the agreement acceptance using Supabase client
     const { data: agreement, error: insertError } = await supabase
       .from("user_agreements")
