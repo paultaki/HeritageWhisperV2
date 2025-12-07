@@ -39,9 +39,6 @@ export function FamilyMemberCard({
   const displayName = member.name || member.email.split("@")[0];
   const initial = (member.name || member.email)[0].toUpperCase();
 
-  // Active users have logged in at least once
-  const isActive = !!member.last_accessed_at;
-
   return (
     <Card className="bg-white border border-[#D2C9BD] rounded-xl overflow-hidden hover:shadow-sm transition-shadow">
       <div className="p-4 md:p-5 relative">
@@ -114,19 +111,17 @@ export function FamilyMemberCard({
           </div>
         </div>
 
-        {/* Send login link - only show as ghost action for active users, hidden otherwise since they know how to login */}
-        {!isActive && (
-          <div className="mt-4 pt-4 border-t border-[#D2C9BD]">
-            <button
-              onClick={onSendLoginLink}
-              disabled={isSendingLink}
-              className="inline-flex items-center gap-2 text-[#203954] hover:text-[#1B3047] text-base font-medium hover:underline focus:outline-none focus:underline disabled:opacity-50 disabled:no-underline transition-colors"
-            >
-              <LinkIcon className="w-4 h-4" />
-              {isSendingLink ? "Sending..." : "Resend sign-in link"}
-            </button>
-          </div>
-        )}
+        {/* Send login link - always available for family members */}
+        <div className="mt-4 pt-4 border-t border-[#D2C9BD]">
+          <button
+            onClick={onSendLoginLink}
+            disabled={isSendingLink}
+            className="inline-flex items-center gap-2 text-[#203954] hover:text-[#1B3047] text-base font-medium hover:underline focus:outline-none focus:underline disabled:opacity-50 disabled:no-underline transition-colors"
+          >
+            <LinkIcon className="w-4 h-4" />
+            {isSendingLink ? "Sending..." : "Send sign-in link"}
+          </button>
+        </div>
       </div>
     </Card>
   );
