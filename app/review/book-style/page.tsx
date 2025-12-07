@@ -144,6 +144,12 @@ function BookStyleReviewContent() {
         );
         setAudioUrl(story.audioUrl || null);
 
+        // CRITICAL: Preserve existing duration when editing
+        // Without this, duration gets reset to 1 second on save
+        if (story.durationSeconds) {
+          setAudioDuration(story.durationSeconds);
+        }
+
         // Handle photos
         if (story.photos && Array.isArray(story.photos)) {
           setPhotos(story.photos);
@@ -818,6 +824,43 @@ function BookStyleReviewContent() {
       // Use placeholder if no text but has photos
       const storyTranscription = transcription || (finalPhotos.length > 0 ? "(Photo memory)" : "");
 
+      // Determine the correct duration:
+      // - If editing without new audio: use existing audioDuration (loaded from story)
+      // - If uploading new audio: calculate from the new blob
+      // - Fallback: minimum 1 second (database constraint)
+      let finalDuration = audioDuration;
+
+      // If new audio was uploaded/recorded, try to calculate its duration
+      const isNewAudioUpload = mainAudioBlob && audioUrl?.startsWith("blob:");
+      if (isNewAudioUpload && (!finalDuration || finalDuration < 1)) {
+        try {
+          const audioElement = document.createElement("audio");
+          const audioObjectUrl = URL.createObjectURL(mainAudioBlob);
+          audioElement.src = audioObjectUrl;
+
+          await new Promise<void>((resolve, reject) => {
+            audioElement.onloadedmetadata = () => {
+              if (audioElement.duration && !isNaN(audioElement.duration)) {
+                finalDuration = Math.round(audioElement.duration);
+              }
+              URL.revokeObjectURL(audioObjectUrl);
+              resolve();
+            };
+            audioElement.onerror = () => {
+              URL.revokeObjectURL(audioObjectUrl);
+              reject(new Error("Failed to load audio for duration calculation"));
+            };
+            // Timeout after 5 seconds
+            setTimeout(() => {
+              URL.revokeObjectURL(audioObjectUrl);
+              resolve();
+            }, 5000);
+          });
+        } catch (err) {
+          console.error("Error calculating audio duration:", err);
+        }
+      }
+
       const storyData: any = {
         title: title || `Memory from ${storyYear || "the past"}`,
         transcription: storyTranscription,
@@ -829,7 +872,7 @@ function BookStyleReviewContent() {
         photos: finalPhotos,
         audioUrl: finalAudioUrl,
         wisdomClipText: wisdomText || "", // Ensure it's always a string
-        durationSeconds: audioDuration && audioDuration >= 1 ? Math.round(audioDuration) : 1, // Minimum 1 second (database constraint)
+        durationSeconds: finalDuration && finalDuration >= 1 ? Math.round(finalDuration) : 1, // Minimum 1 second (database constraint)
         sourcePromptId: sourcePromptId || null, // Track which prompt generated this story
       };
 
