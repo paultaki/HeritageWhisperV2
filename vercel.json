@@ -1,4 +1,12 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.heritagewhisper.com" }],
+      "destination": "https://heritagewhisper.com/:path*",
+      "permanent": true
+    }
+  ],
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "devCommand": "npm run dev",
