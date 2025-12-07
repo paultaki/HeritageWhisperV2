@@ -244,7 +244,7 @@ export default function Register() {
                     data-testid="input-name"
                   />
                 </div>
-                <p className="mt-2" style={{ fontSize: '14px', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
+                <p className="mt-2" style={{ fontSize: '16px', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
                   This will appear on your timeline
                 </p>
               </div>
@@ -276,7 +276,7 @@ export default function Register() {
                     data-testid="input-birth-year"
                   />
                 </div>
-                <p className="mt-2" style={{ fontSize: '14px', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
+                <p className="mt-2" style={{ fontSize: '16px', color: 'var(--hw-text-secondary, #4A4A4A)' }}>
                   This helps us create your timeline
                 </p>
               </div>

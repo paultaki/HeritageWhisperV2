@@ -27,7 +27,7 @@ export function PasswordRequirements({
       aria-live="polite"
       aria-label="Password requirements checklist"
     >
-      <p className="text-sm text-[#4A4A4A] mb-2 font-medium">
+      <p className="text-base text-[#4A4A4A] mb-2 font-medium">
         Password must include:
       </p>
       <ul className="space-y-1.5" aria-label="Password requirements">
