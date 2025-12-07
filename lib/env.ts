@@ -191,10 +191,58 @@ const productionEnvSchema = envSchema.superRefine((data, ctx) => {
 // =============================================================================
 
 /**
+ * Check if we're in the Next.js build phase.
+ * During build, runtime secrets aren't available, so we skip validation.
+ */
+function isBuildPhase(): boolean {
+  // NEXT_PHASE is set by Next.js during different build phases
+  // 'phase-production-build' = next build
+  // 'phase-export' = next export
+  const phase = process.env.NEXT_PHASE;
+  if (phase === 'phase-production-build' || phase === 'phase-export') {
+    return true;
+  }
+  
+  // Additional check: During Vercel build, CI is set but runtime secrets may not be
+  // If we're in CI and missing expected runtime secrets, assume it's build phase
+  if (process.env.CI === '1' || process.env.VERCEL === '1') {
+    // If we have VERCEL set but no OPENAI_API_KEY, we're likely in build phase
+    if (!process.env.OPENAI_API_KEY) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+/**
  * Parse and validate environment variables at module load time.
  * This ensures the app fails fast if any required variables are missing.
  */
 function parseEnv(): z.infer<typeof envSchema> {
+  // Skip validation during build phase - runtime secrets aren't available
+  if (isBuildPhase()) {
+    console.log('⏭️  Skipping environment validation during build phase');
+    return {
+      NODE_ENV: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+      DATABASE_URL: process.env.DATABASE_URL || '',
+      IRON_SESSION_PASSWORD: process.env.IRON_SESSION_PASSWORD || '',
+      SESSION_SECRET: process.env.SESSION_SECRET || '',
+      SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET || '',
+      STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
+      UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL || '',
+      UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN || '',
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+      ASSEMBLYAI_API_KEY: process.env.ASSEMBLYAI_API_KEY || '',
+      RESEND_API_KEY: process.env.RESEND_API_KEY || '',
+      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+    } as z.infer<typeof envSchema>;
+  }
+
   const result = productionEnvSchema.safeParse(process.env);
 
   if (!result.success) {
@@ -215,7 +263,7 @@ function parseEnv(): z.infer<typeof envSchema> {
     console.error('='.repeat(70));
     console.error('');
 
-    // In production, fail fast
+    // In production (at runtime, not build), fail fast
     if (process.env.NODE_ENV === 'production') {
       console.error('FATAL: Cannot start in production with invalid environment.');
       process.exit(1);
