@@ -281,6 +281,7 @@ export default function MemoryBoxV2Page() {
         : "/api/treasures";
 
       const response = await fetch(url, {
+        credentials: 'include', // Send HttpOnly cookie for family viewers
         headers: authHeaders,
       });
 

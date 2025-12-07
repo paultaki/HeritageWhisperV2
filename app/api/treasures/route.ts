@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 import { getPasskeySession } from "@/lib/iron-session";
 
 // SECURITY: Use centralized admin client (enforces server-only via import)
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
+// Cookie name for HttpOnly family session
+const FAMILY_SESSION_COOKIE = 'family_session';
 
 /**
  * GET /api/treasures - Fetch user's treasures
@@ -13,59 +17,28 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
  *
  * Supports dual authentication:
  * - JWT token (authenticated users)
- * - Session token (family viewers)
+ * - HttpOnly cookie session (family viewers)
  */
 export async function GET(request: NextRequest) {
   try {
-    // Validate session - get token from Authorization header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    // Get storyteller_id (for family sharing)
-    const { searchParams } = new URL(request.url);
-    const requestedStorytellerUserGuess = searchParams.get("storyteller_id");
-
-    // Try JWT authentication first (for account owners)
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseAdmin.auth.getUser(token);
-
-    let storytellerId: string;
+    let storytellerId: string | undefined;
     let isAuthenticated = false;
 
-    if (user && !authError) {
-      // JWT authentication successful (account owner)
-      const userId = user.id;
-      storytellerId = requestedStorytellerUserGuess || userId;
-      isAuthenticated = true;
+    const authHeader = request.headers.get("authorization");
+    const headerToken = authHeader && authHeader.split(" ")[1];
+    const { searchParams } = new URL(request.url);
+    const requestedStorytellerId = searchParams.get("storyteller_id");
 
-      // Check family sharing access if viewing someone else's treasures
-      if (storytellerId !== userId) {
-        const { data: hasAccess } = await supabaseAdmin.rpc(
-          "has_collaboration_access",
-          {
-            p_user_id: userId,
-            p_storyteller_id: storytellerId,
-          }
-        );
+    // Get family session token from HttpOnly cookie (preferred) or header (legacy)
+    const cookieStore = await cookies();
+    const cookieToken = cookieStore.get(FAMILY_SESSION_COOKIE)?.value;
 
-        if (!hasAccess) {
-          return NextResponse.json(
-            { error: "Access denied" },
-            { status: 403 }
-          );
-        }
-      }
-    } else {
-      // JWT failed - try family session token
+    // Use cookie token for family session, header token for Supabase JWT
+    const familySessionToken = cookieToken || headerToken;
+    const jwtToken = headerToken; // For Supabase JWT auth
+
+    // PRIORITY 1: If requesting another user's treasures with a family session token
+    if (requestedStorytellerId && familySessionToken) {
       const { data: familySession, error: sessionError } = await supabaseAdmin
         .from("family_sessions")
         .select(`
@@ -81,28 +54,121 @@ export async function GET(request: NextRequest) {
             permission_level
           )
         `)
-        .eq("token", token)
-        .single();
+        .eq("token", familySessionToken)
+        .maybeSingle();
 
-      if (sessionError || !familySession) {
-        return NextResponse.json(
-          { error: "Invalid authentication" },
-          { status: 401 }
-        );
+      if (familySession && !sessionError) {
+        // Check if session expired
+        if (new Date(familySession.expires_at) < new Date()) {
+          return NextResponse.json(
+            { error: "Session expired" },
+            { status: 401 }
+          );
+        }
+
+        // Verify the session grants access to the requested storyteller
+        const sessionStorytellerId = (familySession as any).family_members.user_id;
+        if (sessionStorytellerId === requestedStorytellerId) {
+          storytellerId = requestedStorytellerId;
+          isAuthenticated = true;
+        }
       }
+    }
 
-      // Check if session expired
-      if (new Date(familySession.expires_at) < new Date()) {
-        return NextResponse.json(
-          { error: "Session expired" },
-          { status: 401 }
-        );
+    // PRIORITY 2: Try JWT authentication (for account owners)
+    if (!isAuthenticated && jwtToken) {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabaseAdmin.auth.getUser(jwtToken);
+
+      if (user && !authError) {
+        const userId = user.id;
+        storytellerId = requestedStorytellerId || userId;
+        isAuthenticated = true;
+
+        // Check family sharing access if viewing someone else's treasures
+        if (storytellerId !== userId) {
+          const { data: hasAccess } = await supabaseAdmin.rpc(
+            "has_collaboration_access",
+            {
+              p_user_id: userId,
+              p_storyteller_id: storytellerId,
+            }
+          );
+
+          if (!hasAccess) {
+            return NextResponse.json(
+              { error: "Access denied" },
+              { status: 403 }
+            );
+          }
+        }
       }
+    }
 
-      // Family session authentication successful
-      // Extract storyteller ID from family_members.user_id
-      storytellerId = (familySession as any).family_members.user_id;
-      isAuthenticated = true;
+    // PRIORITY 3: Try passkey session
+    if (!isAuthenticated) {
+      const passkeySession = await getPasskeySession();
+      if (passkeySession?.userId) {
+        storytellerId = requestedStorytellerId || passkeySession.userId;
+        isAuthenticated = true;
+
+        // Check family sharing access if viewing someone else's treasures
+        if (storytellerId !== passkeySession.userId) {
+          const { data: hasAccess } = await supabaseAdmin.rpc(
+            "has_collaboration_access",
+            {
+              p_user_id: passkeySession.userId,
+              p_storyteller_id: storytellerId,
+            }
+          );
+
+          if (!hasAccess) {
+            return NextResponse.json(
+              { error: "Access denied" },
+              { status: 403 }
+            );
+          }
+        }
+      }
+    }
+
+    // PRIORITY 4: Fall back to family session token without storyteller_id
+    if (!isAuthenticated && familySessionToken) {
+      const { data: familySession, error: sessionError } = await supabaseAdmin
+        .from("family_sessions")
+        .select(`
+          id,
+          family_member_id,
+          expires_at,
+          family_members!inner (
+            id,
+            user_id
+          )
+        `)
+        .eq("token", familySessionToken)
+        .maybeSingle();
+
+      if (familySession && !sessionError) {
+        if (new Date(familySession.expires_at) < new Date()) {
+          return NextResponse.json(
+            { error: "Session expired" },
+            { status: 401 }
+          );
+        }
+
+        storytellerId = (familySession as any).family_members.user_id;
+        isAuthenticated = true;
+      }
+    }
+
+    // No valid authentication found
+    if (!isAuthenticated || !storytellerId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
     }
 
     // Fetch treasures
