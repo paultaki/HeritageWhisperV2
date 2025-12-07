@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { getOpenAIClient } from "@/lib/openai";
 import { logger } from "@/lib/logger";
-
-// Initialize OpenAI client with DIRECT API (bypassing Gateway for speed test)
-// Gateway was adding significant latency to follow-up generation
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  // No baseURL = direct OpenAI (faster)
-});
 
 /**
  * Follow-up Question Generator
@@ -100,6 +93,7 @@ No explanations, no extra text.`;
     const startTime = Date.now();
     let response;
     const modelUsed = "gpt-4o-mini";
+    const openai = getOpenAIClient();
 
     response = await openai.chat.completions.create({
       model: "gpt-4o-mini",

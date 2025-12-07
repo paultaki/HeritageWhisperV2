@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
-// Initialize OpenAI client with AI Gateway if available
-const openai = new OpenAI({
-  apiKey: process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY!,
-  baseURL: process.env.AI_GATEWAY_API_KEY
-    ? "https://ai-gateway.vercel.sh/v1"
-    : undefined,
-});
+// Lazy-initialized OpenAI client to avoid build-time errors
+let _openaiClient: OpenAI | null = null;
+
+function getOpenAIClientWithGateway(): OpenAI {
+  if (!_openaiClient) {
+    _openaiClient = new OpenAI({
+      apiKey: process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY!,
+      baseURL: process.env.AI_GATEWAY_API_KEY
+        ? "https://ai-gateway.vercel.sh/v1"
+        : undefined,
+    });
+  }
+  return _openaiClient;
+}
 
 /**
  * Enhanced transcript processing for quick story recordings
@@ -146,6 +153,7 @@ Remember to:
 
 The user wants it CLEAN - remove obvious stumbles and filler, but don't change their vocabulary or tone.`;
 
+  const openai = getOpenAIClientWithGateway();
   const completion = await openai.chat.completions.create({
     model: "gpt-4o", // Using GPT-4o for better understanding of context
     messages: [

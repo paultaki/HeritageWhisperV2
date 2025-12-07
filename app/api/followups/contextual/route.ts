@@ -3,9 +3,17 @@ import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 import { validatePromptQuality } from "@/lib/promptQuality";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization to avoid build-time errors when OPENAI_API_KEY is not available
+let openaiClient: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openaiClient;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,6 +33,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Generate 3 contextual follow-up questions using GPT-4o-mini
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [

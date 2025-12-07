@@ -25,31 +25,33 @@ import "server-only";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 // =============================================================================
-// Environment Variable Validation
-// =============================================================================
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl) {
-  throw new Error(
-    "NEXT_PUBLIC_SUPABASE_URL is required for Supabase Admin client"
-  );
-}
-
-if (!supabaseServiceKey) {
-  throw new Error(
-    "SUPABASE_SERVICE_ROLE_KEY is required for admin operations. " +
-      "This key should only exist in server-side environment variables."
-  );
-}
-
-// =============================================================================
-// Admin Client Instance
+// Build Phase Detection
 // =============================================================================
 
 /**
- * Supabase Admin client with full database privileges.
+ * Check if we're in the Next.js build phase.
+ * During build, runtime secrets aren't available.
+ */
+function isBuildPhase(): boolean {
+  const phase = process.env.NEXT_PHASE;
+  if (phase === 'phase-production-build' || phase === 'phase-export') {
+    return true;
+  }
+  if ((process.env.CI === '1' || process.env.VERCEL === '1') && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return true;
+  }
+  return false;
+}
+
+// =============================================================================
+// Lazy-Initialized Admin Client
+// =============================================================================
+
+let _supabaseAdmin: SupabaseClient | null = null;
+
+/**
+ * Get the Supabase Admin client with full database privileges.
+ * Uses lazy initialization to avoid build-time errors.
  *
  * SECURITY WARNINGS:
  * - This client BYPASSES all Row Level Security (RLS) policies
@@ -66,18 +68,56 @@ if (!supabaseServiceKey) {
  *   .select("*")
  *   .eq("id", userId);
  */
-export const supabaseAdmin: SupabaseClient = createClient(
-  supabaseUrl,
-  supabaseServiceKey,
-  {
+function getSupabaseAdmin(): SupabaseClient {
+  if (_supabaseAdmin) {
+    return _supabaseAdmin;
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_SUPABASE_URL is required for Supabase Admin client"
+    );
+  }
+
+  if (!supabaseServiceKey) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY is required for admin operations. " +
+        "This key should only exist in server-side environment variables."
+    );
+  }
+
+  _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       // Disable session persistence - this is a server-side client
       persistSession: false,
       // Disable auto-refresh - no browser context
       autoRefreshToken: false,
     },
-  }
-);
+  });
+
+  return _supabaseAdmin;
+}
+
+// Export a proxy that lazily initializes the client on first use
+// This maintains backward compatibility with existing code that uses supabaseAdmin directly
+export const supabaseAdmin: SupabaseClient = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    // During build phase, return a mock that won't throw
+    if (isBuildPhase()) {
+      // Return a no-op function for method calls during build
+      return () => Promise.resolve({ data: null, error: null });
+    }
+    const client = getSupabaseAdmin();
+    const value = client[prop as keyof SupabaseClient];
+    if (typeof value === 'function') {
+      return value.bind(client);
+    }
+    return value;
+  },
+});
 
 // =============================================================================
 // Type Exports for Convenience

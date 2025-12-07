@@ -11,24 +11,30 @@ import {
 // SECURITY: Use centralized admin client (enforces server-only via import)
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-// Initialize OpenAI client with Vercel AI Gateway
-// Falls back to direct OpenAI API if AI_GATEWAY_API_KEY is not set
-const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
-const baseURL = process.env.AI_GATEWAY_API_KEY
-  ? 'https://ai-gateway.vercel.sh/v1'
-  : undefined;
+// Lazy-initialized OpenAI client to avoid build-time errors
+let _openaiClient: OpenAI | null = null;
 
-if (!apiKey) {
-  throw new Error("AI_GATEWAY_API_KEY or OPENAI_API_KEY environment variable is required");
+function getOpenAIClientWithGateway(): OpenAI {
+  if (!_openaiClient) {
+    const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY;
+    const baseURL = process.env.AI_GATEWAY_API_KEY
+      ? 'https://ai-gateway.vercel.sh/v1'
+      : undefined;
+
+    if (!apiKey) {
+      throw new Error("AI_GATEWAY_API_KEY or OPENAI_API_KEY environment variable is required");
+    }
+
+    // PRODUCTION OPTIMIZATION: Added timeout (60s) and retry logic (3 attempts) to prevent hangs
+    _openaiClient = new OpenAI({
+      apiKey,
+      baseURL,
+      timeout: 60000,  // 60 seconds - prevents indefinite hangs on slow/unresponsive API
+      maxRetries: 3,   // Retry up to 3 times on 500/502/503/504 errors with exponential backoff
+    });
+  }
+  return _openaiClient;
 }
-
-// PRODUCTION OPTIMIZATION: Added timeout (60s) and retry logic (3 attempts) to prevent hangs
-const openai = new OpenAI({
-  apiKey,
-  baseURL,
-  timeout: 60000,  // 60 seconds - prevents indefinite hangs on slow/unresponsive API
-  maxRetries: 3,   // Retry up to 3 times on 500/502/503/504 errors with exponential backoff
-});
 
 // Cache system instructions at module level to avoid rebuilding on every request
 const FOLLOWUP_SYSTEM_PROMPT =
@@ -154,6 +160,7 @@ Detected themes: ${pivotalCategories.join(", ")}
 ${FOLLOWUP_RULES}`;
 
   try {
+    const openai = getOpenAIClientWithGateway();
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
