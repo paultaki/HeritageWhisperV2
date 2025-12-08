@@ -372,8 +372,11 @@ export default function MobileBookViewV2({
   }, []);
 
   // Reset navigation state when initialStoryId changes (new navigation from Timeline)
+  // IMPORTANT: Only reset if we've already navigated once (lastNavigatedStoryId !== null)
+  // Otherwise the useEffect sees stale state and resets the navigation that useLayoutEffect just did
   useEffect(() => {
-    if (initialStoryId && initialStoryId !== lastNavigatedStoryId) {
+    if (initialStoryId && lastNavigatedStoryId !== null && initialStoryId !== lastNavigatedStoryId) {
+      console.log('[MobileBookView DEBUG] Resetting navigation for new story:', { initialStoryId, lastNavigatedStoryId });
       setInitialNavigationDone(false);
       setInitialScrollDone(false);
     }
