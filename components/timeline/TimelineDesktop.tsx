@@ -479,11 +479,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         JSON.stringify(navigationContext),
       );
 
-      // Always navigate to book view - user can edit from there if needed
-      // For viewer mode with audio, add autoplay flag
-      const hasAudio = story.audioUrl && story.audioUrl.trim() !== "";
-      const autoplayParam = isViewerMode && hasAudio ? "&autoplay=1" : "";
-      router.push(`/book?storyId=${story.id}${autoplayParam}`);
+      // Always navigate to book view - let user control playback themselves
+      router.push(`/book?storyId=${story.id}`);
     }
   };
 

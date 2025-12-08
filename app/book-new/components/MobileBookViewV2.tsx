@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo, useLayoutEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useRouter } from "next/navigation";
@@ -357,57 +357,85 @@ export default function MobileBookViewV2({
   const [initialNavigationDone, setInitialNavigationDone] = useState(false);
   // Track which storyId we last navigated to
   const [lastNavigatedStoryId, setLastNavigatedStoryId] = useState<string | null>(null);
+  // Track if we've done the initial scroll to prevent re-scrolling
+  const [initialScrollDone, setInitialScrollDone] = useState(false);
 
   // Reset navigation state when initialStoryId changes (new navigation from Timeline)
   useEffect(() => {
     if (initialStoryId && initialStoryId !== lastNavigatedStoryId) {
       setInitialNavigationDone(false);
-      // Also reset autoplay state for new navigation
-      if (autoplay) {
-        setShouldAutoplay(true);
-      }
+      setInitialScrollDone(false);
     }
-  }, [initialStoryId, lastNavigatedStoryId, autoplay]);
+  }, [initialStoryId, lastNavigatedStoryId]);
 
-  // Jump to initial story if provided, OR restore saved position
+  // Compute target page index when we have initialStoryId and bookPages
+  // This runs synchronously during render, so we can use it to set the correct initial position
+  const targetPageIndex = useMemo(() => {
+    if (!initialStoryId || bookPages.length === 0) return null;
+    const pageIndex = bookPages.findIndex(
+      (page) => page.type === "story" && page.story.id === initialStoryId
+    );
+    return pageIndex >= 0 ? pageIndex : null;
+  }, [initialStoryId, bookPages]);
+
+  // When we find the target page and haven't navigated yet, set currentIndex directly
+  // This runs as a layout effect to happen before the browser paints
+  useLayoutEffect(() => {
+    if (targetPageIndex !== null && !initialNavigationDone) {
+      setCurrentIndex(targetPageIndex);
+      setInitialNavigationDone(true);
+      setLastNavigatedStoryId(initialStoryId!);
+    }
+  }, [targetPageIndex, initialNavigationDone, initialStoryId]);
+
+  // Scroll to correct position when pager mounts and currentIndex is set
+  // This must be a layout effect to run before the browser paints
+  useLayoutEffect(() => {
+    if (!pagerRef.current) return;
+    if (initialScrollDone) return;
+    if (currentIndex === 0) {
+      // If we're supposed to be at page 0, no scroll needed
+      setInitialScrollDone(true);
+      return;
+    }
+
+    const width = pagerRef.current.clientWidth;
+    if (width > 0) {
+      // Set scroll position without animation to prevent visual jump
+      pagerRef.current.style.scrollBehavior = 'auto';
+      pagerRef.current.scrollLeft = currentIndex * width;
+      // Restore smooth scrolling for future navigations
+      requestAnimationFrame(() => {
+        if (pagerRef.current) {
+          pagerRef.current.style.scrollBehavior = '';
+        }
+      });
+      setInitialScrollDone(true);
+    }
+  }, [currentIndex, initialScrollDone]);
+
+  // For non-initialStoryId cases, restore saved position
   useEffect(() => {
     if (bookPages.length === 0) return;
     if (initialNavigationDone) return;
+    if (initialStoryId) return; // Handled by useLayoutEffect above
 
-    // Priority 1: initialStoryId from URL/props
-    if (initialStoryId) {
-      const pageIndex = bookPages.findIndex(
-        (page) => page.type === "story" && page.story.id === initialStoryId
-      );
-      if (pageIndex >= 0) {
-        // Set currentIndex IMMEDIATELY to prevent showing wrong page
-        setCurrentIndex(pageIndex);
-        setInitialNavigationDone(true);
-        setLastNavigatedStoryId(initialStoryId);
-        // Then scroll to that position (immediate, no delay)
-        requestAnimationFrame(() => {
-          if (pagerRef.current) {
-            const width = pagerRef.current.clientWidth;
-            pagerRef.current.scrollLeft = pageIndex * width;
-          }
-        });
-        return;
-      }
-    }
-
-    // Priority 2: Restore saved position (with bounds check)
+    // Restore saved position (with bounds check)
     if (currentIndex > 0 && currentIndex < bookPages.length) {
       setInitialNavigationDone(true);
       setTimeout(() => scrollToIndex(currentIndex), 100);
     } else {
       setInitialNavigationDone(true);
     }
-  }, [initialStoryId, bookPages.length, initialNavigationDone]); // Only run when initialStoryId or page count changes
+  }, [bookPages.length, initialNavigationDone, initialStoryId, currentIndex, scrollToIndex]);
 
   // Loading state - wait for both context and data to load
   // On first load, isContextLoading is true while activeContext is null
   // Once context loads, the query enables and isLoading becomes true while fetching
-  if (isContextLoading || isLoading || (!data && storytellerId)) {
+  // Also wait if we have initialStoryId but haven't navigated to it yet
+  const isWaitingForNavigation = initialStoryId && !initialNavigationDone && bookPages.length > 0 && targetPageIndex !== null;
+
+  if (isContextLoading || isLoading || (!data && storytellerId) || isWaitingForNavigation) {
     return (
       <div className="flex h-[100dvh] w-screen items-center justify-center bg-neutral-950">
         <div className="text-center">

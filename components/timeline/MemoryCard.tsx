@@ -378,11 +378,8 @@ export const MemoryCard = React.memo(
           JSON.stringify(navigationContext),
         );
 
-        // Navigate to book view for all stories
-        // For viewer mode with audio, add autoplay flag
-        const hasAudio = story.audioUrl && story.audioUrl.trim() !== "";
-        const autoplayParam = isViewerMode && hasAudio ? "&autoplay=1" : "";
-        router.push(`/book?storyId=${story.id}${autoplayParam}`);
+        // Navigate to book view - let user control playback themselves
+        router.push(`/book?storyId=${story.id}`);
       }
     };
 
