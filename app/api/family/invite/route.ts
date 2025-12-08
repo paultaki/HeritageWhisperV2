@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
     // Generate secure token
     const inviteToken = generateSecureToken();
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 14); // 14 days from now
+    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days from now
 
     // Create invite record
     const { error: inviteError } = await supabaseAdmin

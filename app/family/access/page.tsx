@@ -119,7 +119,7 @@ function FamilyAccessContent() {
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
                 <Clock className="w-5 h-5 mx-auto mb-2 text-amber-600" />
                 <p className="text-sm text-amber-800">
-                  Invitation links expire after 7 days. Please contact the person who invited you to request a new invitation.
+                  Invitation links expire after 30 days. Please contact the person who invited you to request a new invitation.
                 </p>
               </div>
             )}

@@ -722,7 +722,6 @@ function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount 
               >
                 <StoryPhotoWithBlurExtend
                   src={photoUrl}
-                  masterUrl={masterUrl}
                   alt={story.title}
                   width={currentPhoto.width}
                   height={currentPhoto.height}
@@ -730,7 +729,6 @@ function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount 
                   aspectRatio={4 / 3}
                   quality={90}
                   priority={isPriority}
-                  useRawImg={true}
                   sizes="(min-width: 1024px) 680px, 100vw"
                   className="shadow-sm ring-1 ring-black/5 transition-all duration-200 group-hover:brightness-105 group-hover:scale-[1.02]"
                 />

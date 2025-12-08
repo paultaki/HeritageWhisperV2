@@ -274,7 +274,6 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
             >
               <StoryPhotoWithBlurExtend
                 src={photoUrl!}
-                masterUrl={masterUrl}
                 alt={story.title}
                 transform={photoTransform}
                 width={photoWidth}
@@ -282,8 +281,7 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
                 aspectRatio={4 / 3}
                 quality={90}
                 priority={isPriority}
-                useRawImg={true}
-                sizes="100vw"
+                sizes="(max-width: 768px) 94vw, 50vw"
                 className="h-full w-full transition-all duration-200 group-hover:brightness-105 group-hover:scale-[1.02]"
               />
 
