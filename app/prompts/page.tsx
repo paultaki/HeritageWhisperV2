@@ -35,9 +35,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useModeSelection } from "@/hooks/use-mode-selection";
-import { ModeSelectionModal } from "@/components/recording/ModeSelectionModal";
-import { QuickStoryRecorder } from "@/components/recording/QuickStoryRecorder";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { AccountSwitcher } from "@/components/AccountSwitcher";
@@ -411,7 +408,6 @@ export default function PromptsV2Page() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const modeSelection = useModeSelection();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
@@ -577,19 +573,20 @@ export default function PromptsV2Page() {
       sessionStorage.setItem("activePromptId", promptId);
     }
 
-    // For family questions, go directly to recording page (skip mode selection)
+    // Route directly to recording page with the prompt as a query parameter
+    // This matches the behavior of the Record button in the navigation bar
+    const params = new URLSearchParams();
+    params.set("prompt", promptText);
+
+    // For family questions, include additional metadata
     if (source === 'family' && familyPrompt) {
-      const params = new URLSearchParams();
-      params.set("prompt", promptText);
       params.set("familyFrom", familyPrompt.submittedBy.name);
       if (familyPrompt.submittedBy.relationship) {
         params.set("familyRelationship", familyPrompt.submittedBy.relationship);
       }
-      router.push(`/recording?${params.toString()}`);
-      return;
     }
 
-    modeSelection.openModal(promptText);
+    router.push(`/recording?${params.toString()}`);
   };
 
   const handleSave = (id: string, text: string, source: string) => {
@@ -843,26 +840,11 @@ export default function PromptsV2Page() {
             </section>
           </div>
 
-          {/* Mode Selection Modal */}
-          <ModeSelectionModal
-            isOpen={modeSelection.isOpen}
-            onClose={modeSelection.closeModal}
-            onSelectQuickStory={modeSelection.openQuickRecorder}
-            promptQuestion={modeSelection.promptQuestion}
-          />
-
-          {/* Quick Story Recorder */}
-          <QuickStoryRecorder
-            isOpen={modeSelection.quickRecorderOpen}
-            onClose={modeSelection.closeQuickRecorder}
-            promptQuestion={modeSelection.promptQuestion}
-          />
-
           {/* Category Modal */}
           <Dialog open={!!selectedCategory} onOpenChange={() => setSelectedCategory(null)}>
-            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto rounded-3xl" style={{ backgroundColor: '#FFFDF7' }}>
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto rounded-3xl border-2" style={{ backgroundColor: '#FFFDF7', borderColor: '#D2C9BD' }}>
               <DialogHeader>
-                <DialogTitle className="text-3xl">
+                <DialogTitle className="text-3xl font-bold" style={{ color: '#203954' }}>
                   {selectedCategory && CATEGORIES.find(c => c.id === selectedCategory)?.label} Questions
                 </DialogTitle>
               </DialogHeader>

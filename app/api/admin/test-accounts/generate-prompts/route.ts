@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
     // Get all visible stories for this test account
     const { data: stories, error: storiesError } = await supabaseAdmin
       .from("stories")
-      .select("id, title, transcription, year, created_at")
+      .select("id, title, transcription, story_year, created_at")
       .eq("user_id", sanitizedUserId)
-      .eq("is_private", false)
+      .eq("include_in_timeline", true)
       .order("created_at", { ascending: true });
 
     if (storiesError) {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       try {
         const tier1Prompts = generateTier1TemplatesV2(
           story.transcription || "",
-          story.year,
+          story.story_year,
         );
 
         if (tier1Prompts.length > 0) {
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
             prompt_text: prompt.text,
             context_note: prompt.context,
             anchor_entity: prompt.entity,
-            anchor_year: story.year,
+            anchor_year: story.story_year,
             anchor_hash: prompt.anchorHash,
             tier: 1,
             memory_type: prompt.memoryType,
